@@ -14419,7 +14419,7 @@ OncoHistogram.prototype.render = function (div) {
                 if (_self.rotated) {
                     return  '<div class="wrapper">'+domain.symbol + '<br/> Count: ' + domain.count + '<br/></div>';
                 } else {
-                    return '<div class="wrapper">'+domain.id + '<br/> Count: ' + domain.count + '<br/></div>';
+                    return '<div class="wrapper">'+domain.case_code + '<br/> Count: ' + domain.count + '<br/></div>';
                 }
             })
                 .style('left', (coordinates[0] + 10) + 'px')
@@ -16272,7 +16272,7 @@ OncoTrackGroup.prototype.refreshData = function () {
             var isNullSentinel = value === _self.nullSentinel;
             _self.trackData.push({
                 id: domain.id,
-                displayId: _self.rotated ? domain.symbol : domain.id,
+                displayId: _self.rotated ? domain.symbol : domain.case_code,
                 domainIndex: i,
                 value: value,
                 displayValue: isNullSentinel ? 'Not Verified' : value,

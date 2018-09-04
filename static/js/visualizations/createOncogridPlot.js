@@ -18,17 +18,33 @@
 define (['jquery', 'oncogridjs'],
     function ($, oncogridjs) {
     var grid;
-    var observation_donors;
-    var updateOncogrid = function(donors, genes, observations, donor_track_count_max, obs_donors){
-        console.log(donors);
-        console.log(genes);
-        console.log(observations);
-        observation_donors = obs_donors;
-        //console.log(observations);
+    var default_track_template = '<div class="wrapper">{{displayId}}<br>{{displayName}}: {{displayValue}}</div>';
+    var datatype_track_template = '<div class="wrapper">{{displayId}}<br>{{displayName}}: {{displayValue}} file(s)</div>';
 
-        var default_track_template = '<div class="wrapper">{{displayId}}<br>{{displayName}}: {{displayValue}}</div>';
-        var datatype_track_template = '<div class="wrapper">{{displayId}}<br>{{displayName}}: {{displayValue}} file(s)</div>';
-        var donorTracks_temp = [
+    var geneTracks = [
+            {'name': '#Cases affected', 'fieldName': 'case_score', 'type': 'int', 'group': 'GDC', 'template': default_track_template},
+        ];
+
+    var sortByString = function (field) {
+        return function (a, b) {
+            if(a[field].toLowerCase() == 'not reported')
+                return 1;
+            else if(b[field].toLowerCase() == 'not reported')
+                return -1;
+            else
+                return a[field].localeCompare(b[field]);
+        };
+    };
+
+    var sortByIntDesc = function (field) {
+        return function (a, b) {
+            var a_int = a[field] == 'Not Reported' ? -1 : a[field];
+            var b_int = b[field] == 'Not Reported' ? -1 : b[field];
+            return b_int - a_int;
+        };
+    };
+
+    var donorTracks_temp = [
             { 'name': 'Race', 'fieldName': 'race', 'type': 'race', 'group': 'Clinical', 'sort': sortByString, 'template': default_track_template },
             { 'name': 'Age at Diagnosis', 'fieldName': 'age_at_diagnosis', 'type': 'age', 'group': 'Clinical', 'sort': sortByIntDesc, 'template': default_track_template},
             { 'name': 'Vital Status', 'fieldName': 'vital_status', 'type': 'vital', 'group': 'Clinical', 'sort': sortByString, 'template': default_track_template},
@@ -42,8 +58,68 @@ define (['jquery', 'oncogridjs'],
             { 'name': 'Copy Number Variation', 'fieldName': 'cnv', 'type': 'cnv', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
             { 'name': 'Gene Expression', 'fieldName': 'gene_exp', 'type': 'gene_exp', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
         ];
-        var donorTracks =[];
 
+    var donorFill = function (d) {
+        var data_type = d.type;
+        var data_value = d.value ? d.value.toLowerCase() : 'not reported';
+        var fill_color;
+        if (data_value === 'not reported')
+            return 'white';
+        switch (data_type){
+            case 'race':
+            case 'vital':
+            case 'gender':
+            case 'ethnicity':
+                if (!data_value in data_type_legend)
+                    data_value = 'other';
+                fill_color = data_type_legend[data_type][data_value];
+                break;
+            case 'age':
+            case 'dd':
+            case 'clinical':
+            case 'biospecimen':
+            case 'rsd':
+            case 'snv':
+            case 'cnv':
+                fill_color = data_type_legend[data_type];
+                break;
+            default:
+                fill_color = 'mediumpurple';
+                break;
+        }
+        return fill_color;
+    };
+
+    var mainGrid_templates = {
+        'mainGrid':'<div class="wrapper">{{#observation}} Case: {{observation.case_code}} <br> Gene: {{observation.geneId}} <br> Consequence: {{observation.consequence}} <br> {{/observation}}</div>',
+        'mainGridCrosshair': '<div class="wrapper">{{#donor}} Donor: {{donor.case_code}} <br> {{/donor}} {{#gene}}Gene: {{gene.symbol}} <br> {{/gene}} {{#obs}}Mutations: {{obs}} <br> {{/obs}}</div>'
+    };
+
+    var geneFill = function(d){
+        return 'mediumpurple';
+    };
+
+    var params = {
+        element: '#grid-div',
+        margin: { top: 40, right: 100, bottom: 80, left: 50 },
+        height: 150,
+        width: 600,
+        heatMap: false,
+        trackHeight: 12,
+        trackLegendLabel: '<img style="width:13px;height:13px;margin-top:-7px;" src="/static/img/question.png" alt="legend">',//todo:change this to static path
+        donorFillFunc: donorFill,
+        geneTracks: geneTracks,
+        geneFillFunc: geneFill,
+        expandableGroups: ['Clinical'],
+        templates: mainGrid_templates,
+        };
+
+    var updateOncogrid = function(donors, genes, observations, donor_track_count_max){
+        params['donors'] = donors;
+        params['genes'] = genes;
+        params['observations'] = observations;
+
+        var donorTracks =[];
         //do not add donor tracks with no counts
         for (var i = 0; i< donorTracks_temp.length; i++){
             var fieldName = donorTracks_temp[i]['fieldName'];
@@ -52,17 +128,8 @@ define (['jquery', 'oncogridjs'],
                 donorTracks.push(donorTracks_temp[i]);
             }
         }
-
-        var geneTracks = [
-            {'name': '#Cases affected', 'fieldName': 'case_score', 'type': 'int', 'group': 'GDC', 'template': default_track_template},
-        ];
-
-        var mainGrid_templates = {
-            'mainGrid':'<div class="wrapper">{{#observation}} Case: {{observation.donorId}} <br> Gene: {{observation.geneId}} <br> Consequence: {{observation.consequence}} <br> {{/observation}}</div>',
-            'mainGridCrosshair': '{{#donor}} Donor: {{donor.id}} <br> {{/donor}} {{#gene}}Gene: {{gene.symbol}} <br> {{/gene}} {{#obs}}Mutations: {{obs}} <br> {{/obs}}'
-        };
-
-        var donorOpacity = function (d) {
+        params['donorTracks'] = donorTracks;
+        params['donorOpacity'] = function (d) {
             var opacity;
             switch (d.fieldName){
                 case 'age_at_diagnosis':
@@ -89,43 +156,55 @@ define (['jquery', 'oncogridjs'],
             }
             return opacity;
         };
-        var max_case_count = 0;
 
+        var max_case_count = 0;
         for (var i=0; i<genes.length; i++){
             max_case_count = Math.max(max_case_count, genes[i]['case_score']);
         }
-
-        var geneOpacity = function (d) {
+        params['geneOpacityFunc'] = function (d) {
             return d.value / max_case_count;
         };
-
-        var params = {
-            element: '#grid-div',
-            donors: donors,
-            genes: genes,
-            margin: { top: 40, right: 100, bottom: 80, left: 50 },
-            observations: observations,
-            height: 150,
-            width: 600,
-            heatMap: false,
-            trackHeight: 12,
-            trackLegendLabel: '<img style="width:13px;height:13px;margin-top:-7px;" src="/static/img/question.png" alt="legend">',
-            donorTracks: donorTracks,
-            donorOpacityFunc: donorOpacity,
-            donorFillFunc: donorFill,
-            geneTracks: geneTracks,
-            geneOpacityFunc: geneOpacity,
-            geneFillFunc: geneFill,
-            expandableGroups: ['Clinical'],
-            templates: mainGrid_templates,
-
-        };
-
+        //console.log(params['donors']);
         grid = new OncoGrid(params);
+        grid.render();
 
+
+        $('.oncogrid-toolbar').on('click', '.download', function(){grid.toggleHeatmap();});//todo
+        $('.oncogrid-toolbar').on('click', '.reload', reload);
+        $('.oncogrid-toolbar').on('click', '.cluster', function(){grid.cluster();});
+        $('.oncogrid-toolbar').on('click', '.heatmap-toggle', function(){grid.toggleHeatmap();});
+        $('.oncogrid-toolbar').on('click', '.grid-toggle', function(){grid.toggleGridLines();});
+        $('.oncogrid-toolbar').on('click', '.crosshair-toggle', function(){grid.toggleCrosshair();});//todo
+        $('.oncogrid-toolbar').on('click', '.fullscreen', function(){grid.fullscreen();});//todo
+
+        $('.oncogrid-button')
+        .on('mouseover', function (e) {
+            var tooltip_div = $('.og-tooltip-oncogrid');
+            tooltip_div.html('<div class="wrapper">' + $(this).find('.button-text').html() + '</div>');
+            tooltip_div
+                .css('left', ($(this).offset().left - $('.plot-div').offset().left +20)+"px")
+                .css('top',($(this).offset().top - $('.plot-div').offset().top -28)+"px")
+                .css('opacity',0.9);
+        })
+        .on('mouseout', function () {
+            var tooltip_div = $('.og-tooltip-oncogrid');
+            tooltip_div.html('<div class="wrapper">' + $(this).find('.button-text').html() + '</div>');
+            tooltip_div
+                .css('opacity', 0);
+        });
+    };
+
+
+    var reload = function(){
+        grid.destroy();
+        grid = new OncoGrid(params);
         grid.render();
     };
 
+    var showButtonTooltip = function(){
+        var tooltip_text = $(this).find('.button-text').html();
+
+    };
 
 
     var data_type_legend = {
@@ -167,60 +246,8 @@ define (['jquery', 'oncogridjs'],
     };
 
 
-    var geneFill =function(d){
-        return 'mediumpurple';
-    };
-    var donorFill = function (d) {
-        var data_type = d.type;
-        var data_value = d.value ? d.value.toLowerCase() : 'not reported';
-        var fill_color;
-        if (data_value === 'not reported')
-            return 'white';
-        switch (data_type){
-            case 'race':
-            case 'vital':
-            case 'gender':
-            case 'ethnicity':
-                if (!data_value in data_type_legend)
-                    data_value = 'other';
-                fill_color = data_type_legend[data_type][data_value];
-                break;
-            case 'age':
-            case 'dd':
-            case 'clinical':
-            case 'biospecimen':
-            case 'rsd':
-            case 'snv':
-            case 'cnv':
-                fill_color = data_type_legend[data_type];
-                break;
-            default:
-                fill_color = 'mediumpurple';
-                break;
-        }
-        return fill_color;
-    };
 
 
-
-    var sortByString = function (field) {
-        return function (a, b) {
-            if(a[field].toLowerCase() == 'not reported')
-                return 1;
-            else if(b[field].toLowerCase() == 'not reported')
-                return -1;
-            else
-                return a[field].localeCompare(b[field]);
-        };
-    };
-
-    var sortByIntDesc = function (field) {
-        return function (a, b) {
-            var a_int = a[field] == 'Not Reported' ? -1 : a[field];
-            var b_int = b[field] == 'Not Reported' ? -1 : b[field];
-            return b_int - a_int;
-        };
-    };
 
     /*var sortByString = function (field) {
         return function (a, b) {
@@ -248,11 +275,12 @@ define (['jquery', 'oncogridjs'],
     }
 
     return {
-        createOncogridPlot: function (donor_data, gene_data, observation_data, donor_track_count_max, obs_donors) {
+        createOncogridPlot: function (donor_data, gene_data, observation_data, donor_track_count_max){
+            //obs_donors) {
             if (donor_data.length > 0 && gene_data.length > 0 && observation_data.length) {
-                updateOncogrid(donor_data, gene_data, observation_data, donor_track_count_max, obs_donors);
+                updateOncogrid(donor_data, gene_data, observation_data, donor_track_count_max);//, obs_donors);
             }
         }
     }
-})
+});
 

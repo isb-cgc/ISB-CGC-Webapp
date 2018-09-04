@@ -300,16 +300,21 @@ define([
         var gene_data_list = view_data['gene_data_list'];
         var observation_data_list = view_data['observation_data_list'];
         var donor_track_count_max = view_data['donor_track_count_max'];
-        var obs_donors = view_data['obs_donors'];
-        console.log(obs_donors);
+        //var obs_donors = view_data['obs_donors'];
+        //console.log(obs_donors);
         if (donor_data_list && gene_data_list && observation_data_list) {
-            oncogrid_obj.createOncogridPlot(donor_data_list, gene_data_list, observation_data_list, donor_track_count_max, obs_donors);
+            oncogrid_obj.createOncogridPlot(donor_data_list, gene_data_list, observation_data_list, donor_track_count_max);//, obs_donors);
+
+            // $('.oncogrid-button').on('click','.heatmap', function () {
+            //     alert();
+            // });
         }
         else {
             var message = "The selected cohorts have no somatic mutations in the gene ";
             $(plot_selector).html('<p>'+message + '<b>' + gene_list.join(', ') + '</b></p>');
         }
     }
+
     /*
         Generate url for gathering data
      */

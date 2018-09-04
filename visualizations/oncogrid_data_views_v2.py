@@ -88,7 +88,7 @@ def oncogrid_view_data(request):
                 'donor_data_list': donor_data_list,
                 'gene_data_list': gene_data_list,
                 'observation_data_list': observation_data_list,
-                'obs_donors': obs_donors,
+                # 'obs_donors': obs_donors,
                 'bq_tables': bq_tables,
                 'donor_track_count_max': donor_track_count_max
             })
@@ -135,7 +135,7 @@ def get_donor_data_list(bq_statement):
             score = row['f'][9]['v']
             if not donors.has_key(case_barcode):
                 donors[case_barcode] = {
-                    'case_code': project_short_name + '/' + case_barcode,
+                    'case_code': project_short_name + ' / ' + case_barcode,
                     'gender': gender if gender != None else 'Not Reported',
                     'vital_status': vital_status if vital_status != None else 'Not Reported',
                     'race': race if race != None else 'Not Reported',
@@ -152,7 +152,8 @@ def get_donor_data_list(bq_statement):
     if donors and len(donors) > 0:
         for case_barcode_key in donors:
             donor_data = {
-                'id': donors[case_barcode_key]['case_code'],
+                'id': case_barcode_key,
+                'case_code': donors[case_barcode_key]['case_code'],
                 'gender': donors[case_barcode_key]['gender'],
                 'vital_status': donors[case_barcode_key]['vital_status'],
                 'race': donors[case_barcode_key]['race'],
@@ -222,7 +223,7 @@ def get_gene_data_list(bq_statement):
                 }
             if not genes_mut_data[hugo_symbol]['case_barcode'].has_key(case_barcode):
                 genes_mut_data[hugo_symbol]['case_barcode'][case_barcode] = {
-                    'case_code': project_short_name +'/'+case_barcode,
+                    'case_code': project_short_name +' / '+case_barcode,
                     'variant_classification': {},
                 }
             if not genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['variant_classification'].has_key(variant_classification):
@@ -247,7 +248,8 @@ def get_gene_data_list(bq_statement):
                     #score += int(genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['variant_classification'][vc]['score'])
                     ob_id += 1
                     observation_data['id'] = ob_id
-                    observation_data['donorId'] = genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['case_code']
+                    observation_data['donorId'] = case_barcode
+                    observation_data['case_code'] = genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['case_code']
                     observation_data['consequence'] = vc.lower()
                     #print(observation_data)
                     observation_data_list.append(observation_data.copy())

@@ -1619,6 +1619,7 @@ require([
         $('a.share-workbook').click();
     });
 
+
     // Only init the active tab
     var active_sheet = $(".worksheet.active")[0];
     get_plot_info($(".worksheet.active .plot_selection"), function(success){
