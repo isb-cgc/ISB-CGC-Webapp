@@ -284,124 +284,128 @@
             {% endif %}
         </div>
         <div id="oncogrid_div" style="display:none;">
-            <div class="oncogrid-header">
-                <div class="oncogrid-logo">
-                    <img alt="OICR Bio Logo" src="{% static 'img/oicr_bio.jpg' %}">
-                </div>
-                <div class="oncogrid-legend">
-                    <div class="oncogrid-legends">
-                        <div class="oncogrid-legends-column">
-                            <div class="oncogrid-legends-column-cell">
-                                <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-missense">
+            <div id="plot-{{ worksheet.id }}-oncogrid" class="oncogrid-screen">
+                <div class="oncogrid-wrapper">
+                    <div class="oncogrid-header">
+                        <div class="oncogrid-logo">
+                            <img alt="OICR Bio Logo" src="{% static 'img/oicr_bio.jpg' %}">
+                        </div>
+                        <div class="oncogrid-legend">
+                            <div class="oncogrid-legends">
+                                <div class="oncogrid-legends-column">
+                                    <div class="oncogrid-legends-column-cell">
+                                        <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-missense">
+                                        </div>
+                                        <span>missense</span>
+                                    </div>
+                                    <div class="oncogrid-legends-column-cell">
+                                        <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-frame-shift">
+                                        </div>
+                                        <span>frameshift</span>
+                                    </div>
                                 </div>
-                                <span>missense</span>
-                            </div>
-                            <div class="oncogrid-legends-column-cell">
-                                <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-frame-shift">
+                                <div class="oncogrid-legends-column">
+                                    <div class="oncogrid-legends-column-cell">
+                                        <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-start-lost">
+                                        </div>
+                                        <span>start lost</span>
+                                    </div>
+                                    <div class="oncogrid-legends-column-cell">
+                                        <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-stop-lost">
+                                        </div>
+                                        <span>stop lost</span>
+                                    </div>
                                 </div>
-                                <span>frameshift</span>
+                                <div class="oncogrid-legends-column">
+                                    <div class="oncogrid-legends-column-cell">
+                                        <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-initiator-codon">
+                                        </div>
+                                        <span>initiator codon</span>
+                                    </div>
+                                    <div class="oncogrid-legends-column-cell">
+                                        <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-stop-gained">
+                                        </div>
+                                        <span>stop gained</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="oncogrid-legends-column">
-                            <div class="oncogrid-legends-column-cell">
-                                <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-start-lost">
-                                </div>
-                                <span>start lost</span>
-                            </div>
-                            <div class="oncogrid-legends-column-cell">
-                                <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-stop-lost">
-                                </div>
-                                <span>stop lost</span>
-                            </div>
-                        </div>
-                        <div class="oncogrid-legends-column">
-                            <div class="oncogrid-legends-column-cell">
-                                <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-initiator-codon">
-                                </div>
-                                <span>initiator codon</span>
-                            </div>
-                            <div class="oncogrid-legends-column-cell">
-                                <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-stop-gained">
-                                </div>
-                                <span>stop gained</span>
-                            </div>
+                        <div class="oncogrid-toolbar">
+                            <span class="toolbar-item">
+                                <button class="oncogrid-button download">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-download"></i>
+                                            <div class="button-text">Download</div>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
+                            <span class="toolbar-item">
+                                <button class="oncogrid-button reload">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-undo"></i>
+                                            <div class="button-text">Reload</div>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
+                            <span class="toolbar-item">
+                                <button class="oncogrid-button cluster">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-sort-amount-desc"></i>
+                                            <div class="button-text">Cluster</div>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
+                            <span class="toolbar-item">
+                                <button class="oncogrid-button heatmap-toggle">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-fire"></i>
+                                            <div class="button-text">Heatmap</div>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
+                            <span class="toolbar-item">
+                                <button class="oncogrid-button grid-toggle">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-th"></i>
+                                            <div class="button-text">Lines</div>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
+                            <span class="toolbar-item">
+                                <button class="oncogrid-button crosshair-toggle">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-crosshairs"></i>
+                                            <div class="button-text">Crosshair</div>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
+                            <span class="toolbar-item">
+                                <button class="oncogrid-button fullscreen-toggle">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-expand"></i>
+                                            <div class="button-text">Fullscreen</div>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
                         </div>
                     </div>
-                </div>
-                <div class="oncogrid-toolbar">
-                    <span class="toolbar-item">
-                        <button class="oncogrid-button download">
-                            <div>
-                                <span>
-                                    <i class="fa fa-download"></i>
-                                    <div class="button-text">Download</div>
-                                </span>
-                            </div>
-                        </button>
-                    </span>
-                    <span class="toolbar-item">
-                        <button class="oncogrid-button reload">
-                            <div>
-                                <span>
-                                    <i class="fa fa-undo"></i>
-                                    <div class="button-text">Reload</div>
-                                </span>
-                            </div>
-                        </button>
-                    </span>
-                    <span class="toolbar-item">
-                        <button class="oncogrid-button cluster">
-                            <div>
-                                <span>
-                                    <i class="fa fa-sort-amount-desc"></i>
-                                    <div class="button-text">Cluster</div>
-                                </span>
-                            </div>
-                        </button>
-                    </span>
-                    <span class="toolbar-item">
-                        <button class="oncogrid-button heatmap-toggle">
-                            <div>
-                                <span>
-                                    <i class="fa fa-fire"></i>
-                                    <div class="button-text">Heatmap</div>
-                                </span>
-                            </div>
-                        </button>
-                    </span>
-                    <span class="toolbar-item">
-                        <button class="oncogrid-button grid-toggle">
-                            <div>
-                                <span>
-                                    <i class="fa fa-th"></i>
-                                    <div class="button-text">Lines</div>
-                                </span>
-                            </div>
-                        </button>
-                    </span>
-                    <span class="toolbar-item">
-                        <button class="oncogrid-button crosshair-toggle">
-                            <div>
-                                <span>
-                                    <i class="fa fa-crosshairs"></i>
-                                    <div class="button-text">Crosshair</div>
-                                </span>
-                            </div>
-                        </button>
-                    </span>
-                    <span class="toolbar-item fullscreen">
-                        <button class="oncogrid-button">
-                            <div>
-                                <span>
-                                    <i class="fa fa-expand"></i>
-                                    <div class="button-text">Fullscreen</div>
-                                </span>
-                            </div>
-                        </button>
-                    </span>
+                    <div id='grid-div'></div>
                 </div>
             </div>
-            <div id='grid-div'></div>
         </div>
         <div class="oncoprint_div">
             <div class="oncoprint">
@@ -435,16 +439,6 @@
                 <div class="oncoprint_body"></div>
             </div>
         </div>
-{#        <div class="oncogrid_div">#}
-{#            <div id="grid-div">#}
-{#            </div>#}
-{#            <button onclick="removeCleanDonors()">Remove Clean Donors</button>#}
-{#            <button onclick="toggleGridLines()">Grid</button>#}
-{#            <button onclick="toggleCrosshair()">Crosshair Mode</button>#}
-{#            <input type="text" size="5" id="width-resize"/>#}
-{#            <input type="text" size="5" id="height-resize"/>#}
-{#            <button onclick="resize()">Resize</button>#}
-{#        </div>#}
 
         <div class="legend" style="display: none;"></div>
         <button class="resubmit-button btn btn-primary">Submit Plot</button>

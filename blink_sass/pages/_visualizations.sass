@@ -64,6 +64,16 @@
             td
                 word-wrap: break-word
                 word-break: break-word
+    .oncogrid-screen
+      &:-webkit-full-screen
+      &:-moz-full-screen
+      &:-ms-fullscreen
+      &:fullscreen
+          background-color: white
+          width: 100% !important
+          .oncogrid-wrapper
+              margin: 50px
+
 
   .save-cohort-card
     background-color: rgba($tooltip-color, 0.8)
@@ -358,6 +368,8 @@
             border-color: rgb(204, 204, 204)
             padding: 0px 12px
             transition: 0.25s ease
+            &.active
+                background-color: rgb(230, 230, 230)
             &:hover
                 background-color: rgb(0, 138, 224)
                 color: white

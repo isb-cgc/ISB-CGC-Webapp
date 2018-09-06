@@ -300,14 +300,8 @@ define([
         var gene_data_list = view_data['gene_data_list'];
         var observation_data_list = view_data['observation_data_list'];
         var donor_track_count_max = view_data['donor_track_count_max'];
-        //var obs_donors = view_data['obs_donors'];
-        //console.log(obs_donors);
         if (donor_data_list && gene_data_list && observation_data_list) {
-            oncogrid_obj.createOncogridPlot(donor_data_list, gene_data_list, observation_data_list, donor_track_count_max);//, obs_donors);
-
-            // $('.oncogrid-button').on('click','.heatmap', function () {
-            //     alert();
-            // });
+            oncogrid_obj.createOncogridPlot(plot_selector, donor_data_list, gene_data_list, observation_data_list, donor_track_count_max);
         }
         else {
             var message = "The selected cohorts have no somatic mutations in the gene ";
@@ -361,7 +355,7 @@ define([
         return seqpeek_url;
     }
 
-    // Generate url for gathering data for a OncoPrint plot
+    // Generate url for gathering data for a OncoPrint and OncoGrid plot
     function get_onco_data_url(base_url, plot_type, cohorts, gene_list){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
@@ -377,22 +371,6 @@ define([
             + (VERSION == 'v2' ? "&genomic_build=" + $('.workbook-build-display').data('build') : '');
         return url;
     }
-
-    // Generate url for gathering data for a OncoPrint plot
-    /*function get_oncogrid_data_url(base_url, cohorts, gene_list){
-        var cohort_str = '';
-        for (var i = 0; i < cohorts.length; i++) {
-            if (i == 0) {
-                cohort_str += 'cohort_id=' + cohorts[i];
-            } else {
-                cohort_str += '&cohort_id=' + cohorts[i];
-            }
-        }
-        var oncogridUrl = base_url + '/visualizations/oncogrid_data_plot/' + VERSION + '?' + cohort_str;
-        oncogridUrl += "&gene_list=" + gene_list.join(",")
-            + (VERSION == 'v2' ? "&genomic_build=" + $('.workbook-build-display').data('build') : '');
-        return oncogridUrl;
-    }*/
 
     function configure_pairwise_display(element, data){
         if (data['pairwise_result'] && data['pairwise_result'].hasOwnProperty('result_vectors')) {
@@ -575,15 +553,8 @@ define([
             plot_data_url = get_seqpeek_data_url(BASE_URL, args.cohorts, args.gene_label, VERSION);
         }
         else if(args.type == "OncoPrint" || args.type == "OncoGrid"){
-            //plot_data_url = get_oncoprint_data_url(BASE_URL, args.cohorts, args.gene_list, VERSION);
             plot_data_url = get_onco_data_url(BASE_URL, args.type, args.cohorts, args.gene_list, VERSION);
         }
-        /*else if(args.type == "OncoGrid"){
-            plot_data_url = get_oncogrid_data_url(BASE_URL, args.cohorts, args.gene_list, VERSION);
-        }
-        else {
-            plot_data_url = get_data_url(BASE_URL, args.cohorts, args.x, args.y, args.color_by, args.logTransform, VERSION);
-        }*/
 
         $.ajax({
             type: 'GET',

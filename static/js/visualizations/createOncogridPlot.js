@@ -17,7 +17,9 @@
  */
 define (['jquery', 'oncogridjs'],
     function ($, oncogridjs) {
+    var oncogrid_plot_div;
     var grid;
+    var fullscreen = false;
     var default_track_template = '<div class="wrapper">{{displayId}}<br>{{displayName}}: {{displayValue}}</div>';
     var datatype_track_template = '<div class="wrapper">{{displayId}}<br>{{displayName}}: {{displayValue}} file(s)</div>';
 
@@ -92,7 +94,7 @@ define (['jquery', 'oncogridjs'],
 
     var mainGrid_templates = {
         'mainGrid':'<div class="wrapper">{{#observation}} Case: {{observation.case_code}} <br> Gene: {{observation.geneId}} <br> Consequence: {{observation.consequence}} <br> {{/observation}}</div>',
-        'mainGridCrosshair': '<div class="wrapper">{{#donor}} Donor: {{donor.case_code}} <br> {{/donor}} {{#gene}}Gene: {{gene.symbol}} <br> {{/gene}} {{#obs}}Mutations: {{obs}} <br> {{/obs}}</div>'
+        'mainGridCrosshair': '<div class="wrapper">{{#donor}} Case: {{donor.case_code}} <br> {{/donor}} {{#gene}}Gene: {{gene.symbol}} <br> {{/gene}}</div>'
     };
 
     var geneFill = function(d){
@@ -102,19 +104,21 @@ define (['jquery', 'oncogridjs'],
     var params = {
         element: '#grid-div',
         margin: { top: 40, right: 100, bottom: 80, left: 50 },
-        height: 150,
-        width: 600,
+        height: 200,
+        width: 700,
         heatMap: false,
         trackHeight: 12,
-        trackLegendLabel: '<img style="width:13px;height:13px;margin-top:-7px;" src="/static/img/question.png" alt="legend">',//todo:change this to static path
+        trackLegendLabel: '<img class="oncogrid-track-label" style="width:13px;height:13px;margin-top:-7px;" src="/static/img/question.png" alt="legend">',//todo:change this to static path
         donorFillFunc: donorFill,
         geneTracks: geneTracks,
         geneFillFunc: geneFill,
         expandableGroups: ['Clinical'],
-        templates: mainGrid_templates,
+        templates: mainGrid_templates
         };
 
-    var updateOncogrid = function(donors, genes, observations, donor_track_count_max){
+    var updateOncogrid = function(plot_selector, donors, genes, observations, donor_track_count_max){
+        oncogrid_plot_div = $(plot_selector).find('.oncogrid-screen')[0];
+        //console.log(oncogrid_plot_div[0].id);
         params['donors'] = donors;
         params['genes'] = genes;
         params['observations'] = observations;
@@ -164,33 +168,37 @@ define (['jquery', 'oncogridjs'],
         params['geneOpacityFunc'] = function (d) {
             return d.value / max_case_count;
         };
-        //console.log(params['donors']);
         grid = new OncoGrid(params);
         grid.render();
 
 
-        $('.oncogrid-toolbar').on('click', '.download', function(){grid.toggleHeatmap();});//todo
         $('.oncogrid-toolbar').on('click', '.reload', reload);
         $('.oncogrid-toolbar').on('click', '.cluster', function(){grid.cluster();});
-        $('.oncogrid-toolbar').on('click', '.heatmap-toggle', function(){grid.toggleHeatmap();});
-        $('.oncogrid-toolbar').on('click', '.grid-toggle', function(){grid.toggleGridLines();});
-        $('.oncogrid-toolbar').on('click', '.crosshair-toggle', function(){grid.toggleCrosshair();});//todo
-        $('.oncogrid-toolbar').on('click', '.fullscreen', function(){grid.fullscreen();});//todo
+        $('.oncogrid-toolbar').on('click', '.heatmap-toggle', toggleHeatmap);
+        $('.oncogrid-toolbar').on('click', '.grid-toggle', toggleGridLines);
+        $('.oncogrid-toolbar').on('click', '.crosshair-toggle', toggleCrosshair);
+        $('.oncogrid-toolbar').on('click', '.fullscreen-toggle', toggleFullscreen);
 
+        //events
         $('.oncogrid-button')
-        .on('mouseover', function (e) {
-            var tooltip_div = $('.og-tooltip-oncogrid');
-            tooltip_div.html('<div class="wrapper">' + $(this).find('.button-text').html() + '</div>');
-            tooltip_div
-                .css('left', ($(this).offset().left - $('.plot-div').offset().left +20)+"px")
-                .css('top',($(this).offset().top - $('.plot-div').offset().top -28)+"px")
-                .css('opacity',0.9);
-        })
-        .on('mouseout', function () {
-            var tooltip_div = $('.og-tooltip-oncogrid');
-            tooltip_div.html('<div class="wrapper">' + $(this).find('.button-text').html() + '</div>');
-            tooltip_div
-                .css('opacity', 0);
+            .on('mouseover', function (e) {
+                var tooltip_div = $('.og-tooltip-oncogrid');
+                tooltip_div.html('<div class="wrapper">' + $(this).find('.button-text').html() + '</div>');
+                tooltip_div
+                    .css('left', ($(this).offset().left - $('.plot-div').offset().left +20)+"px")
+                    .css('top', ($(this).offset().top - $('.plot-div').offset().top -28)+"px")
+                    .css('opacity',0.9);
+            })
+            .on('mouseout', function () {
+                var tooltip_div = $('.og-tooltip-oncogrid');
+                tooltip_div
+                    .css('opacity', 0);
+            });
+
+
+        $(document).bind('webkitfullscreenchange MSFullscreenChange mozfullscreenchange fullscreenchange', function(e) {
+            fullscreen = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen;
+            $('.fullscreen-toggle').toggleClass('active', fullscreen);
         });
     };
 
@@ -199,12 +207,63 @@ define (['jquery', 'oncogridjs'],
         grid.destroy();
         grid = new OncoGrid(params);
         grid.render();
+        $('.heatmap-toggle').removeClass('active');
+        $('.grid-toggle').removeClass('active');
+        $('.crosshair-toggle').removeClass('active');
     };
 
-    var showButtonTooltip = function(){
-        var tooltip_text = $(this).find('.button-text').html();
+    var toggleHeatmap = function(){
+        grid.toggleHeatmap();
+        $('.heatmap-toggle').toggleClass('active', grid.heatMapMode);
 
     };
+    var toggleGridLines = function(){
+        grid.toggleGridLines();
+        $('.grid-toggle').toggleClass('active', grid.drawGridLines);
+
+    };
+    var toggleCrosshair = function(){
+        grid.toggleCrosshair();
+        $('.crosshair-toggle').toggleClass('active', grid.crosshairMode);
+    };
+
+    var toggleFullscreen = function(){
+        if(fullscreen){
+            closeFullscreen();
+        }
+        else{
+            openFullscreen();
+        }
+    };
+
+    var openFullscreen = function() {
+        var oncogrid_div_id = oncogrid_plot_div.id;
+        var oncogrid_div = document.getElementById(oncogrid_div_id);
+        console.log(oncogrid_div);
+        if (oncogrid_div.requestFullscreen) {
+            oncogrid_div.requestFullscreen();
+        } else if (oncogrid_div.mozRequestFullScreen) { /* Firefox */
+            oncogrid_div.mozRequestFullScreen();
+        } else if (oncogrid_div.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+            oncogrid_div.webkitRequestFullscreen();
+        } else if (oncogrid_div.msRequestFullscreen) { /* IE/Edge */
+            oncogrid_div.msRequestFullscreen();
+        }
+
+    };
+
+    var closeFullscreen = function() {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) { /* Firefox */
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) { /* IE/Edge */
+            document.msExitFullscreen();
+        }
+    };
+
 
 
     var data_type_legend = {
@@ -241,44 +300,14 @@ define (['jquery', 'oncogridjs'],
         'biospecimen' : 'darkslategrey',
         'rsd' : 'cyan',
         'snv': 'darkkhaki',
-        'cnv': 'darksalmon',
-        //'gene_exp': 'mediumseagreen'
+        'cnv': 'darksalmon'
     };
 
-
-
-
-
-    /*var sortByString = function (field) {
-        return function (a, b) {
-            console.log('a:'+a[field]);
-            console.log('b:'+b[field]);
-            console.log('a-b:'+(a[field] - b[field]));
-            if (a)
-            return a[field] > b[field] ? 1 : -1;
-        }
-    };*/
-
-
-    function toggleCrosshair() {
-        grid.toggleCrosshair();
-    }
-
-    function toggleGridLines() {
-        grid.toggleGridLines();
-    }
-
-    function resize() {
-        var width = document.getElementById('width-resize').value;
-        var height = document.getElementById('height-resize').value;
-        grid.resize(width, height);
-    }
-
     return {
-        createOncogridPlot: function (donor_data, gene_data, observation_data, donor_track_count_max){
+        createOncogridPlot: function (plot_selector, donor_data, gene_data, observation_data, donor_track_count_max){
             //obs_donors) {
             if (donor_data.length > 0 && gene_data.length > 0 && observation_data.length) {
-                updateOncogrid(donor_data, gene_data, observation_data, donor_track_count_max);//, obs_donors);
+                updateOncogrid(plot_selector, donor_data, gene_data, observation_data, donor_track_count_max);//, obs_donors);
             }
         }
     }
