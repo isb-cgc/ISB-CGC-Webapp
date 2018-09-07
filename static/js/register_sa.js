@@ -84,6 +84,7 @@ require([
         var user_ver_div = $('.user-verification');
         user_ver_div.hide();
         $('.cannot-register').hide();
+        $('.dcf_messages').hide();
         $('.register-sa-div').hide();
         $('.verify-pending').show();
 
@@ -111,7 +112,10 @@ require([
                 }
 
                 /*
-                ** Moving to DCF verification, we no longer enumerate roles of each project member
+                ** Moving to DCF verification, we no longer enumerate the *Datasets* for each user,
+                ** but we still enumerate the registration & linking status:
+                */
+
                 var roles = data['roles'];
                 for (var email in roles) {
                     var member = roles[email];
@@ -129,18 +133,32 @@ require([
                     }
                     var td = $('<td></td>');
                     td.append('<span><i class="fa fa-check"></i> All Open Datasets </span><br />');
-                    for(var j=0;j<member['datasets'].length;j++){
+                    /*
+                    for (var j = 0; j < member['datasets'].length; j++) {
                         var dataset = member['datasets'][j];
                         if (dataset['valid']) {
-                            td.append('<span><i class="fa fa-check"></i> '+dataset['name']+'</span><br />');
+                            td.append('<span><i class="fa fa-check"></i> ' + dataset['name'] + '</span><br />');
                         } else {
-                            td.append('<span title="User '+email+' does not have access to this dataset."><i class="fa fa-times"></i> '+dataset['name']+'</span><br />');
+                            td.append('<span title="User ' + email + ' does not have access to this dataset."><i class="fa fa-times"></i> ' + dataset['name'] + '</span><br />');
                         }
                     }
+                    */
                     tr.append(td);
                     tbody.append(tr);
                 }
-                */
+
+                var dcf_message_div = $('.dcf_messages');
+                var dcf_messages = dcf_message_div.find('tbody');
+                var dcf_msg = data['dcf_messages'];
+                for (var key in dcf_msg) {
+                    var tr = $('<tr></tr>');
+                    var msg = dcf_msg[key]
+                    tr.append('<td>' + msg['res'] + '</td>');
+                    tr.append('<td>' + msg['id'] + '</td>');
+                    tr.append('<td>' + msg['ok'] + '</td>');
+                    tr.append('<td>' + msg['err'] + '</td>');
+                    dcf_messages.append(tr);
+                }
 
                 if($('input[name="select-datasets"][value="remove"]:checked').length > 0) {
                     var remove_all = $('input[value="remove"]').clone();
@@ -149,6 +167,7 @@ require([
                 }
 
                 user_ver_div.show();
+                dcf_message_div.show();
                 $this.find('input[type="submit"]').prop('disabled', '');
 
                 $('.register-sa-div').hide();
@@ -193,10 +212,14 @@ require([
         $('.retry-btn').attr("disabled","disabled");
         var user_ver_div = $('.user-verification');
         var table_body = user_ver_div.find('tbody');
+        var dcf_message_div = $('.dcf_messages');
+        var dcf_messages = dcf_message_div.find('tbody');
 
         $('.cannot-register').hide();
+        $('.dcf_messages').hide();
         user_ver_div.hide();
         table_body.empty();
+        dcf_messages.empty();
         $('#verify-sa').submit();
     });
 
