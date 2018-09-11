@@ -93,24 +93,57 @@
                         </form>
 
                     </li>
+                    <div class="results_summary" style="display:none;">
+                        <h3>Verification Results</h3>
+                        <div class="summary_statement"></div>
+                    </div>
                     <div class="user-verification" style="display:none;">
+                        <h4>Google Cloud Project User ISB-CGC Registration and Identity Linkages:</h4>
                         <table class="table">
                             <thead>
                             <tr>
                                 <th>User Email</th>
                                 <th>Registered</th>
                                 <th>Has NIH Identity</th>
-                                <th>Authorized Datasets</th>
                             </tr>
                             </thead>
                             <tbody></tbody>
                         </table>
                     </div>
-                    <div class="dcf_messages" style="display: none;">
+                    <div class="dcf_analysis_data" style="display: none;">
+                        <h4>Dataset Permissions Verification:</h4>
+                         <ul>
+                            <li class="data_summary_statement"></li>
+                        </ul>
                         <table class="table">
                             <thead>
                             <tr>
-                                <th>Resource</th>
+                                <th>ID</th>
+                                <th>Status</th>
+                                <th>Message</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="dcf_analysis_reg_sas" style="display:none;">
+                        <h4>Registered Service Account Verification Results:</h4>
+                        <ul>
+                            <li class="registered_sa_statement"></li>
+                        </ul>
+                    </div>
+                    <div class="dcf_analysis_project" style="display: none;">
+                        <h4>Google Cloud Project Verification Results:</h4>
+                        <ul>
+                            <li class="project_statement"></li>
+                            <li class="membership_statement"></li>
+                        </ul>
+                    </div>
+                    <div class="dcf_analysis_sas" style="display: none;">
+                        <h4>Google Cloud Project Service Account Verification Results:</h4>
+                        <table class="table">
+                            <thead>
+                            <tr>
                                 <th>ID</th>
                                 <th>Status</th>
                                 <th>Message</th>
@@ -120,14 +153,14 @@
                         </table>
                     </div>
                     <div class="cannot-register" style="display: none;">
-                        <p>Some of your users do not have access to the datasets you would like to use. Please try again when they have the proper permissions.</p>
+                        <p>You will need to fix the above issues to be able to register a service account. Please try again when these are addressed.</p>
                         <input type="button" class="retry-btn btn btn-primary" value="Retry"/>
                         <a href="{% url 'user_gcp_list' user.id %}" class="back-btn btn btn-primary" role="button">Go Back</a>
                     </div>
                     <div class="register-sa-div" style="display: none;">
                         <form id="register-sa" method="POST" action="{% url 'register_sa' user.id %}">
                             {% csrf_token %}
-                            <p>We have verified that all of the users in your Google Cloud Project have permission to access the proposed datasets.</p>
+                            <p>We have verified that your Google Cloud Project meets all requirements, and that all of the users in that project have permission to access the proposed datasets.</p>
                             <input type="hidden" name="gcp_id" value="{{ gcp_id }}"/>
                             <div class="block">
                                 <input type="submit" class="register-sa-btn btn btn-primary" value="Register"/>

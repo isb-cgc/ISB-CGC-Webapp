@@ -83,8 +83,13 @@ require([
         var fields = $this.serialize();
         var user_ver_div = $('.user-verification');
         user_ver_div.hide();
+        $('.results_summary').hide();
         $('.cannot-register').hide();
-        $('.dcf_messages').hide();
+        $('.dcf_analysis_reg_sas').hide();
+        $('.dcf_analysis_project').hide();
+        $('.dcf_analysis_sas').hide();
+        $('.dcf_analysis_data').hide();
+
         $('.register-sa-div').hide();
         $('.verify-pending').show();
 
@@ -94,6 +99,13 @@ require([
             data: fields,
             method: 'POST',
             success: function(data) {
+                $('.summary_statement').empty()
+                if (data['all_user_datasets_verified']) {
+                   $('.summary_statement').append("The project, service account, and users were verified. The registration can proceed.")
+                } else {
+                    $('.summary_statement').append("Problems were found during verification. Please review the summary below.")
+                }
+                $('.results_summary').show();
                 var tbody = user_ver_div.find('tbody');
                 tbody.empty();
                 $('.verify-pending').hide();
@@ -131,9 +143,10 @@ require([
                     } else {
                         tr.append('<td><i class="fa fa-times"></i></td>');
                     }
+                    /*
                     var td = $('<td></td>');
                     td.append('<span><i class="fa fa-check"></i> All Open Datasets </span><br />');
-                    /*
+
                     for (var j = 0; j < member['datasets'].length; j++) {
                         var dataset = member['datasets'][j];
                         if (dataset['valid']) {
@@ -142,22 +155,58 @@ require([
                             td.append('<span title="User ' + email + ' does not have access to this dataset."><i class="fa fa-times"></i> ' + dataset['name'] + '</span><br />');
                         }
                     }
-                    */
+
                     tr.append(td);
+                    */
                     tbody.append(tr);
                 }
 
-                var dcf_message_div = $('.dcf_messages');
-                var dcf_messages = dcf_message_div.find('tbody');
-                var dcf_msg = data['dcf_messages'];
+                var dcf_analysis_reg_sas_div = $('.dcf_analysis_reg_sas');
+                $('.registered_sa_statement').empty()
+                $('.registered_sa_statement').append(data['dcf_messages']['dcf_analysis_reg_sas_summary']);
+
+                var dcf_analysis_project_div = $('.dcf_analysis_project');
+                $('.project_statement').empty()
+                $('.project_statement').append(data['dcf_messages']['dcf_analysis_project_summary']);
+
+                $('.membership_statement').empty()
+                $('.membership_statement').append(data['dcf_messages']['dcf_analysis_project_members']);
+
+
+                var dcf_analysis_sas_div = $('.dcf_analysis_sas');
+                var dcf_analysis_sas = dcf_analysis_sas_div.find('tbody');
+                var dcf_msg = data['dcf_messages']['dcf_analysis_sas'];
+                dcf_analysis_sas.empty();
                 for (var key in dcf_msg) {
                     var tr = $('<tr></tr>');
                     var msg = dcf_msg[key]
-                    tr.append('<td>' + msg['res'] + '</td>');
                     tr.append('<td>' + msg['id'] + '</td>');
-                    tr.append('<td>' + msg['ok'] + '</td>');
+                    if (msg['ok']) {
+                        tr.append('<td><i class="fa fa-check"></i></td>');
+                    } else {
+                        tr.append('<td><i class="fa fa-times"></i></td>');
+                    }
                     tr.append('<td>' + msg['err'] + '</td>');
-                    dcf_messages.append(tr);
+                    dcf_analysis_sas.append(tr);
+                }
+
+                var dcf_analysis_data_div = $('.dcf_analysis_data');
+                $('.data_summary_statement').empty()
+                $('.data_summary_statement').append(data['dcf_messages']['dcf_analysis_data_summary']);
+                var dcf_analysis_data = dcf_analysis_data_div.find('tbody');
+                var dcf_msg = data['dcf_messages']['dcf_analysis_data'];
+                dcf_analysis_data.empty();
+                for (var key in dcf_msg) {
+                    var tr = $('<tr></tr>');
+                    var msg = dcf_msg[key]
+                    tr.append('<td>' + msg['id'] + '</td>');
+                    if (msg['ok']) {
+                        tr.append('<td><i class="fa fa-check"></i></td>');
+                    } else {
+                        tr.append('<td><i class="fa fa-times"></i></td>');
+                    }
+                    tr.append('<td>' + msg['err'] + '</td>');
+                    dcf_analysis_data.append(tr);
                 }
 
                 if($('input[name="select-datasets"][value="remove"]:checked').length > 0) {
@@ -167,7 +216,11 @@ require([
                 }
 
                 user_ver_div.show();
-                dcf_message_div.show();
+                dcf_analysis_reg_sas_div.show();
+                dcf_analysis_project_div.show();
+                dcf_analysis_sas_div.show();
+                dcf_analysis_data_div.show();
+
                 $this.find('input[type="submit"]').prop('disabled', '');
 
                 $('.register-sa-div').hide();
@@ -212,14 +265,27 @@ require([
         $('.retry-btn').attr("disabled","disabled");
         var user_ver_div = $('.user-verification');
         var table_body = user_ver_div.find('tbody');
-        var dcf_message_div = $('.dcf_messages');
-        var dcf_messages = dcf_message_div.find('tbody');
+
+        var dcf_analysis_project_div = $('.dcf_analysis_project');
+
+        var dcf_analysis_sas_div = $('.dcf_analysis_sas');
+        var dcf_analysis_sas = dcf_analysis_sas_div.find('tbody');
+
+        var dcf_analysis_data_div = $('.dcf_analysis_data');
+        var dcf_analysis_data = dcf_analysis_data_div.find('tbody');
+
+        dcf_analysis_project_div.hide();
+        dcf_analysis_sas_div.hide();
+        dcf_analysis_data_div.hide();
 
         $('.cannot-register').hide();
-        $('.dcf_messages').hide();
+        $('.results_summary').hide();
         user_ver_div.hide();
+
         table_body.empty();
-        dcf_messages.empty();
+        dcf_analysis_sas.empty();
+        dcf_analysis_data.empty();
+
         $('#verify-sa').submit();
     });
 
