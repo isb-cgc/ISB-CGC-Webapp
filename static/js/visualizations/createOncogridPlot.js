@@ -42,8 +42,17 @@ define (['jquery', 'oncogridjs'],
         };
     };
 
+    const sortByBool = function(field){
+        return function (a, b){
+            var a_int = a[field] ? 1 : 0;
+            var b_int = b[field] ? 1 : 0;
+            return b_int - a_int;
+        };
+    };
+
     var geneTracks = [
-            {'name': '#Cases affected', 'fieldName': 'case_score', 'type': 'int', 'group': 'GDC', 'sort':sortByIntDesc, 'template': default_track_template},
+        {'name': '#Cases affected', 'fieldName': 'case_score', 'type': 'int', 'group': 'GDC', 'sort':sortByIntDesc, 'template': default_track_template},
+        {'name': 'Cancer Gene Census', 'fieldName': 'is_cgc', 'type': 'int', 'group': 'Gene Sets', 'sort':sortByBool, 'template': default_track_template},
     ];
 
     var donorTracks_temp = [
@@ -101,7 +110,15 @@ define (['jquery', 'oncogridjs'],
     };
 
     const geneFill = function(d){
-        return 'mediumpurple';
+        switch(d.displayName){
+            case 'Cancer Gene Census':
+                fill_color = 'darkgreen';
+                break;
+            default:
+                fill_color = 'mediumpurple';
+
+        }
+        return fill_color;
     };
 
     const clinical_legend = {
@@ -147,6 +164,10 @@ define (['jquery', 'oncogridjs'],
 
     const gdc_legend = {
         '# of Cases Affected': 'mediumpurple'
+    };
+
+    const cgc_legend = {
+        'Gene belongs to Cancer Gene Census': 'darkgreen'
     };
 
     const obs_legends = {
@@ -250,13 +271,26 @@ define (['jquery', 'oncogridjs'],
         params.genes = genes;
         params.geneTracks= geneTracks;
         params.geneFillFunc = geneFill;
-        params.geneOpacityFunc = function(d){ return (gene_track_ca_max == 0 ? 0: d.value / gene_track_ca_max)};
+        params.geneOpacityFunc = function(d){
+            var opacity;
+            switch (d.fieldName){
+                case 'case_score':
+                    opacity = (gene_track_ca_max == 0 ? 0: d.value / gene_track_ca_max);
+                    break;
+                case 'is_cgc':
+                    opacity = d.value == 'true'? 1: 0;
+                    break;
+            }
+            return opacity;
+
+        };
         params.observations = observations;
         params.templates = mainGrid_templates;
         params.trackLegends ={
             'Clinical': getTrackLegends(clinical_legend, donor_track_dd_max, gene_track_ca_max),
             'Data Types': getTrackLegends(data_type_legend, donor_track_dd_max, gene_track_ca_max),
-            'GDC': getTrackLegends(gdc_legend, donor_track_dd_max, gene_track_ca_max)
+            'GDC': getTrackLegends(gdc_legend, donor_track_dd_max, gene_track_ca_max),
+            'Gene Sets': getTrackLegends(cgc_legend, donor_track_dd_max, gene_track_ca_max)
         };
 
         return params;
@@ -284,9 +318,13 @@ define (['jquery', 'oncogridjs'],
         grid.render();
 
         drawMainGridLegend('.oncogrid-legend');
-        drawTrackLegend('.svg-track-legend', clinical_legend, 'Clinical', 70,  donor_track_dd_max, gene_track_ca_max);
-        drawTrackLegend('.svg-track-legend', data_type_legend, 'Data Type', 345, donor_track_dd_max, gene_track_ca_max);
-        drawTrackLegend('.svg-track-legend', gdc_legend, 'GDC', 465, donor_track_dd_max, gene_track_ca_max);
+        //drawSVGLegend
+        drawSvgLegend('.svg-track-legend', obs_legends, 'Mutation', 20);
+        drawSvgLegend('.svg-track-legend', clinical_legend, 'Clinical', 140, donor_track_dd_max, gene_track_ca_max);
+        drawSvgLegend('.svg-track-legend', data_type_legend, 'Data Type', 415);
+        drawSvgLegend('.svg-track-legend', gdc_legend, 'GDC', 535, donor_track_dd_max, gene_track_ca_max);
+        drawSvgLegend('.svg-track-legend', cgc_legend, 'Gene Set', 575);
+
 
         $('.oncogrid-toolbar').on('click', '.download', toggleDownloadSelection);
         $('.oncogrid-toolbar').on('click', '.oncogrid-download-selection div', oncogridDownload);
@@ -356,7 +394,7 @@ define (['jquery', 'oncogridjs'],
             .style('font-size', 14);
     }
 
-    function drawTrackLegend(selector, trackLegend, track_title, y_pos, donor_track_dd_max, gene_track_ca_max){
+    function drawSvgLegend(selector, trackLegend, track_title, y_pos, donor_track_dd_max, gene_track_ca_max){
 
         var legend_rect_width = 10;
         var legend_rect_height = 10;
@@ -530,18 +568,10 @@ define (['jquery', 'oncogridjs'],
 
         svg.attr('width', parseInt(canvas.attr('width'))+legend_svg_width);
         svg.attr('height',canvas.attr('height'));
-        //svg.attr('viewBox', '0 0 '+svg.attr('width')+' '+svg.attr('height'));
         svg.removeAttr('viewBox');
         svg.find('foreignObject').remove();
         svg.prepend('<style>');
         svg.find('style').append(svg_css);
-
-
-
-        var maingrid_legend = $(active_plot_div).find('.oncogrid-legend svg').clone();
-        maingrid_legend.attr('x', canvas.attr('width'));
-        maingrid_legend.attr('y', 10);
-        svg.append(maingrid_legend[0]);
 
         var track_legends = $(active_plot_div).find('.svg-track-legend svg').clone();
         track_legends.attr('x', canvas.attr('width'));
