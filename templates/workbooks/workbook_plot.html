@@ -286,52 +286,13 @@
         <div id="oncogrid_div" style="display:none;">
             <div id="plot-{{ worksheet.id }}-oncogrid" class="oncogrid-screen">
                 <div class="oncogrid-wrapper">
-                    <div class="oncogrid-header">
+                    <div class="oncogrid-header hidden">
                         <div class="oncogrid-logo">
                             <img alt="OICR Bio Logo" src="{% static 'img/oicr_bio.jpg' %}">
                         </div>
-                        <div class="oncogrid-legend">
-                            <div class="oncogrid-legends">
-                                <div class="oncogrid-legends-column">
-                                    <div class="oncogrid-legends-column-cell">
-                                        <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-missense">
-                                        </div>
-                                        <span>missense</span>
-                                    </div>
-                                    <div class="oncogrid-legends-column-cell">
-                                        <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-frame-shift">
-                                        </div>
-                                        <span>frameshift</span>
-                                    </div>
-                                </div>
-                                <div class="oncogrid-legends-column">
-                                    <div class="oncogrid-legends-column-cell">
-                                        <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-start-lost">
-                                        </div>
-                                        <span>start lost</span>
-                                    </div>
-                                    <div class="oncogrid-legends-column-cell">
-                                        <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-stop-lost">
-                                        </div>
-                                        <span>stop lost</span>
-                                    </div>
-                                </div>
-                                <div class="oncogrid-legends-column">
-                                    <div class="oncogrid-legends-column-cell">
-                                        <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-initiator-codon">
-                                        </div>
-                                        <span>initiator codon</span>
-                                    </div>
-                                    <div class="oncogrid-legends-column-cell">
-                                        <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-stop-gained">
-                                        </div>
-                                        <span>stop gained</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="oncogrid-legend"></div>
                         <div class="oncogrid-toolbar">
-                            <span class="toolbar-item">
+                            <span class="toolbar-item dropdown">
                                 <button class="oncogrid-button download">
                                     <div>
                                         <span>
@@ -340,6 +301,11 @@
                                         </span>
                                     </div>
                                 </button>
+                                <div class="oncogrid-download-selection hidden">
+                                    <div class="download-svg">SVG</div>
+                                    <div class="download-png">PNG</div>
+                                    <div class="download-json">JSON</div>
+                                </div>
                             </span>
                             <span class="toolbar-item">
                                 <button class="oncogrid-button reload">
@@ -404,6 +370,7 @@
                         </div>
                     </div>
                     <div id='grid-div'></div>
+                    <div class="svg-track-legend"></div>
                 </div>
             </div>
         </div>
@@ -480,4 +447,3 @@
         </div>
     </div>
 </div>
-
