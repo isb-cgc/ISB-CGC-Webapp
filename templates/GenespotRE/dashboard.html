@@ -84,7 +84,7 @@
                 <a href="{% url 'workbooks' %}">Saved Workbooks ({{ workbooks.count }})</a>
             </h3>
             <div class="min-max">
-                <a data-toggle="collapse" href="#workbook-panel"><i class="show fa fa-angle-double-down"></i></a>
+                <a data-toggle="collapse" aria-label="Open/Close Workbook" href="#workbook-panel"><i class="show fa fa-angle-double-down"></i></a>
             </div>
         </div>
         <div id="workbook-panel" class="panel panel-collapse collapse in" aria-expanded="true">
@@ -131,7 +131,7 @@
                         <a href="{% url 'cohort_list' %}">Saved Cohorts ({{ cohorts.count }})</a>
                     </h3>
                     <div class="min-max">
-                        <a data-toggle="collapse" href="#cohorts-panel"><i class="show fa fa-angle-double-down"></i></a>
+                        <a data-toggle="collapse" aria-label="Open/Collapse Saved Cohorts" href="#cohorts-panel"><i class="show fa fa-angle-double-down"></i></a>
                     </div>
                 </div>
                 <div id="cohorts-panel" class="panel panel-collapse collapse in" aria-expanded="true">
@@ -181,7 +181,7 @@
                         <a href="{% url 'genes' %}">Gene & miRNA Favorites ({{ gene_fave_count }})</a>
                     </h3>
                     <div class="min-max">
-                        <a data-toggle="collapse" href="#gene-fave-panel"><i class="show fa fa-angle-double-up"></i></a>
+                        <a data-toggle="collapse" aria-label="Open/Collapse Gene & miRNA Favorites" href="#gene-fave-panel"><i class="show fa fa-angle-double-up"></i></a>
                     </div>
                 </div>
                 <div id="gene-fave-panel" class="panel panel-collapse collapse" aria-expanded="false">
@@ -219,7 +219,7 @@
                         <a href="{% url 'variables' %}">Variable Favorites ({{ varfave_count }})</a>
                     </h3>
                     <div class="min-max">
-                        <a data-toggle="collapse" href="#var-faves-panel"><i class="show fa fa-angle-double-up"></i></a>
+                        <a data-toggle="collapse" aria-label="Open/Collapse Variable Favorites" href="#var-faves-panel"><i class="show fa fa-angle-double-up"></i></a>
                     </div>
                 </div>
                 <div id="var-faves-panel" class="panel panel-collapse collapse" aria-expanded="false">
@@ -264,7 +264,7 @@
                         <a href="{% url 'programs' %}">Saved Programs ({{ program_count }})</a>
                     </h3>
                     <div class="min-max">
-                        <a data-toggle="collapse" href="#programs-panel"><i class="show fa fa-angle-double-up"></i></a>
+                        <a data-toggle="collapse" aria-label="Open/Collapse Saved Program" href="#programs-panel"><i class="show fa fa-angle-double-up"></i></a>
                     </div>
                 </div>
                 <div id="programs-panel" class="panel panel-collapse collapse" aria-expanded="false">
