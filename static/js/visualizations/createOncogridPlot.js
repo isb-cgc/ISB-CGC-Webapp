@@ -318,7 +318,7 @@ define (['jquery', 'oncogridjs'],
         grid.render();
 
         drawMainGridLegend('.oncogrid-legend');
-        //drawSVGLegend
+        //drawSVGLegend - to be used for downloads
         drawSvgLegend('.svg-track-legend', obs_legends, 'Mutation', 20);
         drawSvgLegend('.svg-track-legend', clinical_legend, 'Clinical', 140, donor_track_dd_max, gene_track_ca_max);
         drawSvgLegend('.svg-track-legend', data_type_legend, 'Data Type', 415);
@@ -551,12 +551,14 @@ define (['jquery', 'oncogridjs'],
                 download_svg();
                 break;
             case 'PNG':
+                download_png();
                 break;
             case 'JSON':
                 break;
         }
     };
-    function download_svg(){
+
+    function getOncoGridSvg(){
         var legend_svg_width = 350;
         var svg_css = 'svg { font-size: 10px; font-family: "proxima-nova", Arial, sans-serif; } ' +
             '.background { fill: #fff; stroke: black; stroke-width: 0.5; } '+
@@ -578,7 +580,82 @@ define (['jquery', 'oncogridjs'],
         for(var i=0; i <track_legends.length; i++){
             svg.append(track_legends[i]);
         }
+        return svg;
+    }
+
+    function download_svg(){
+        var svg = getOncoGridSvg();
+        /*var legend_svg_width = 350;
+        var svg_css = 'svg { font-size: 10px; font-family: "proxima-nova", Arial, sans-serif; } ' +
+            '.background { fill: #fff; stroke: black; stroke-width: 0.5; } '+
+            '.og-track-group-label { font-size: 14px; } ' +
+            'line { stroke: grey; stroke-opacity: .5; shape-rendering: crispEdges; } ';
+
+        var svg = $(active_plot_div).find('svg#og-maingrid-svg').clone();
+        var canvas = $(active_plot_div).find('canvas');
+
+        svg.attr('width', parseInt(canvas.attr('width'))+legend_svg_width);
+        svg.attr('height',canvas.attr('height'));
+        svg.removeAttr('viewBox');
+        svg.find('foreignObject').remove();
+        svg.prepend('<style>');
+        svg.find('style').append(svg_css);
+
+        var track_legends = $(active_plot_div).find('.svg-track-legend svg').clone();
+        track_legends.attr('x', canvas.attr('width'));
+        for(var i=0; i <track_legends.length; i++){
+            svg.append(track_legends[i]);
+        }*/
         cbio.download.initDownload(svg[0], {filename: 'oncogrid.svg'});
+    }
+
+    function download_png() {
+        var svg = getOncoGridSvg();
+        var svgString = svg[0].outerHTML;
+        var canvas = $(active_plot_div).find('canvas');
+        var canvas_width = canvas.attr('width') || 1145;
+        var canvas_height = canvas.attr('height') || 631;
+        //$(active_plot_div).find('.og-canvas').remove();
+        var save = function( dataBlob, filesize ) {
+            saveAs( dataBlob, 'D3 vis exported to PNG.png' ); // FileSaver.js function
+        };
+        svgString2Image( svgString, 2*canvas_width, 2*canvas_height, 'png', save ); // passes Blob and filesize String to the callback
+
+
+
+    }
+
+    function svgString2Image( svgString, width, height, format, callback ) {
+        var format = format ? format : 'png';
+
+        var imgsrc = 'data:image/svg+xml;base64,'+ btoa( unescape( encodeURIComponent( svgString ) ) ); // Convert SVG string to data URL
+
+        //var canvas = document.createElement("canvas");
+        //document.remove
+        //var old_canvas = document.getElementsByClassName('og-canvas')[0];
+
+        var canvas = document.createElement('canvas');
+        //canvas
+
+        var context = canvas.getContext("2d");
+
+        //canvas.width = width;
+        //canvas.height = height;
+
+        var image = new Image();
+        image.onload = function() {
+            context.clearRect ( 0, 0, width, height );
+            context.drawImage(image, 0, 0, width, height);
+
+            canvas.toBlob( function(blob) {
+                var filesize = Math.round( blob.length/1024 ) + ' KB';
+                if ( callback ) callback( blob, filesize );
+            });
+
+
+        };
+
+        image.src = imgsrc;
     }
 
     var reload = function(){
@@ -613,6 +690,7 @@ define (['jquery', 'oncogridjs'],
             openFullscreen();
         }
     };
+
 
     var openFullscreen = function() {
         var oncogrid_div_id = active_plot_div.id;
