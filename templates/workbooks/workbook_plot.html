@@ -101,8 +101,8 @@
                             <div style="display: none;" class="{{ type.datatype }} attr-options form-group search-field">
                                 <div class="search-term" data-field="{{ type.datatype }}">
                                     {% for field in type.fields %}
-                                        <label for="{{ field.label }}-{{ type.datatype }}" class="space-top-15">{{ field.label }} Filter</label>
-                                        <select id="{{ field.label }}-{{ type.datatype }}" class="form-control field-options {{ field.name }}-options {% if not field.static %}select2{% endif %}" data-field="{{ field.name }}">
+                                        <label for="{{ field.label }}-{{ type.datatype }}-x" class="space-top-15">{{ field.label }} Filter</label>
+                                        <select id="{{ field.label }}-{{ type.datatype }}-x" class="form-control field-options {{ field.name }}-options {% if not field.static %}select2{% endif %}" data-field="{{ field.name }}">
                                             {% if field.static %}
                                                 <option value="" disabled selected type="label">Please select an option</option>
                                                 {% for value in field.values %}
@@ -164,8 +164,8 @@
                             <div style="display:none" class="{{ type.datatype }} attr-options form-group search-field">
                                 <div class="search-term" data-field="{{ type.datatype }}">
                                     {% for field in type.fields %}
-                                        <label for="{{ field.label }}-{{ type.datatype }}" class="space-top-15">{{ field.label }} Filter</label>
-                                        <select id="{{ field.label }}-{{ type.datatype }}" class="form-control field-options {{ field.name }}-options {% if not field.static %}select2{% endif %}" data-field="{{ field.name }}">
+                                        <label for="{{ field.label }}-{{ type.datatype }}-y" class="space-top-15">{{ field.label }} Filter</label>
+                                        <select id="{{ field.label }}-{{ type.datatype }}-y" class="form-control field-options {{ field.name }}-options {% if not field.static %}select2{% endif %}" data-field="{{ field.name }}">
                                             {% if field.static %}
                                                 <option value="" disabled selected type="label">Please select an option</option>
                                                 {% for value in field.values %}
@@ -286,7 +286,7 @@
         <div class="oncoprint_div">
             <div class="oncoprint">
                 <div class="cbioportal_logo">
-                    <img src="{% static 'img/cbioportal_logo.png' %}">
+                    <img alt="cBioPortal Logo" src="{% static 'img/cbioportal_logo.png' %}">
                 </div>
                 <div class="btn-group btn-group-sm oncoprint-diagram-toolbar-buttons">
                     <button type="button" class="btn oncoprint_diagram_showmutationcolor_icon" data-hasqtip="5">

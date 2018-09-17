@@ -27,7 +27,7 @@
                              data-feature-displ-name="CASE ID">
                             <div class="search_enter">
                                 <div class="search_input">
-                                    <input class="case-barcode-search-text" type="search" placeholder="Case Barcode"
+                                    <input class="case-barcode-search-text" type="search" aria-label="Case Barcode" placeholder="Case Barcode"
                                            value="">
                                     <a class="case-barcode-search-clear-btn search_clear_btn"><i class="fa fa-times-circle"></i></a>
                                     <a class="case-barcode-search-btn search_btn"><i class="fa fa-search"></i>
@@ -124,16 +124,18 @@
                     <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
                 </div>
                 <div>
-                    <div class="dataTables_length files-per-page"><label>Show</label>
-                        <select>
+                    <div class="dataTables_length files-per-page">
+                        <label for="files-per-page-dicom-select">Show</label>
+                        <select id="files-per-page-dicom-select">
                             <option value="25">25</option>
                             <option value="50">50</option>
                             <option value="100">100</option>
                         </select>
                         <label>entries</label>
                     </div>
-                    <div class="dataTables_goto_page"><label>Page</label>
-                        <input type="number" class="goto-page-number" min="1" max="1">
+                    <div class="dataTables_goto_page">
+                        <label for="goto-page-no-dicom">Page</label>
+                        <input id="goto-page-no-dicom" type="number" class="goto-page-number" min="1" max="1">
                         <div class="goto-page-button dataTables_button">Go</div>
                     </div>
                     <div class="dataTables_paginate">
@@ -141,13 +143,6 @@
                         <span class="paginate_button_space"/>
                         <a class="next-page paginate_button dataTables_button">Next</a>
                     </div>
-{#                    <div class="dataTables_search">#}
-{#                        <div class="dataTables_search_input">#}
-{#                            <input class="case-barcode-search-text" type="search" placeholder="Case Barcode" value="">#}
-{#                            <a class="case-barcode-search-clear-btn"><i class="fa fa-times-circle"></i></a>#}
-{#                        </div>#}
-{#                        <div class="case-barcode-search-btn dataTables_button"><i class="fa fa-search"></i></div>#}
-{#                    </div>#}
                 </div>
                 <div class="column-inputs">
                     <a role="button" data-toggle="collapse" href="#column-toggle-div-dicom" aria-expanded="false" aria-controls="column-toggle-div-dicom">
