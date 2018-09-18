@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2016, Institute for Systems Biology
+ * Copyright 2018, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ define (['jquery', 'oncogridjs'],
 
     var geneTracks = [
         {'name': '#Cases affected', 'fieldName': 'case_score', 'type': 'int', 'group': 'GDC', 'sort':sortByIntDesc, 'template': default_track_template},
-        {'name': 'Cancer Gene Census', 'fieldName': 'is_cgc', 'type': 'int', 'group': 'Gene Sets', 'sort':sortByBool, 'template': default_track_template},
+        {'name': 'Cancer Gene Census', 'fieldName': 'is_cgc', 'type': 'int', 'group': 'Gene Sets', 'sort':sortByBool, 'template': default_track_template}
     ];
 
     var donorTracks_temp = [
@@ -67,7 +67,7 @@ define (['jquery', 'oncogridjs'],
             { 'name': 'Raw Sequencing Data', 'fieldName': 'rsd', 'type': 'rsd', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
             { 'name': 'Simple Nucleotide Variation', 'fieldName': 'snv', 'type': 'snv', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
             { 'name': 'Copy Number Variation', 'fieldName': 'cnv', 'type': 'cnv', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
-            { 'name': 'Gene Expression', 'fieldName': 'gene_exp', 'type': 'gene_exp', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
+            { 'name': 'Gene Expression', 'fieldName': 'gene_exp', 'type': 'gene_exp', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template}
         ];
 
     var donorFill = function (d) {
@@ -227,7 +227,7 @@ define (['jquery', 'oncogridjs'],
         }
         trackLegends += '</div>';
         return trackLegends;
-    };
+    }
 
     function initParams(donors, genes, observations, donorTracks, donor_track_dd_max, gene_track_ca_max){
         var params = {};
@@ -241,6 +241,11 @@ define (['jquery', 'oncogridjs'],
         params.donorFillFunc = donorFill;
         params.donors = donors;
         params.donorTracks = donorTracks;
+        params.grid = true;
+        params.geneHistogramClick = function(){return;};
+        params.donorHistogramClick = function(){return;};
+        params.geneClick  = function(){return;};
+        params.donorClick = function(){return;};
         params.donorOpacityFunc = function(d) {
             var opacity;
             switch (d.fieldName){
@@ -294,7 +299,7 @@ define (['jquery', 'oncogridjs'],
         };
 
         return params;
-    };
+    }
 
     var updateOncogrid = function(plot_selector, donors, genes, observations, donor_track_count_max){
 
@@ -316,15 +321,15 @@ define (['jquery', 'oncogridjs'],
         var grid_params = initParams(donors, genes, observations, donorTracks, donor_track_dd_max, gene_track_ca_max);
         grid = new OncoGrid(grid_params);
         grid.render();
+        updateToolBar();
 
         drawMainGridLegend('.oncogrid-legend');
-        //drawSVGLegend - to be used for downloads
+        //drawSVGLegend - to be used for downloaded image files
         drawSvgLegend('.svg-track-legend', obs_legends, 'Mutation', 20);
         drawSvgLegend('.svg-track-legend', clinical_legend, 'Clinical', 140, donor_track_dd_max, gene_track_ca_max);
         drawSvgLegend('.svg-track-legend', data_type_legend, 'Data Type', 415);
         drawSvgLegend('.svg-track-legend', gdc_legend, 'GDC', 535, donor_track_dd_max, gene_track_ca_max);
         drawSvgLegend('.svg-track-legend', cgc_legend, 'Gene Set', 575);
-
 
         $('.oncogrid-toolbar').on('click', '.download', toggleDownloadSelection);
         $('.oncogrid-toolbar').on('click', '.oncogrid-download-selection div', oncogridDownload);
@@ -558,12 +563,12 @@ define (['jquery', 'oncogridjs'],
         }
     };
 
-    function getOncoGridSvg(){
+    function getOncoGridSvgNode(){
         var legend_svg_width = 350;
-        var svg_css = 'svg { font-size: 10px; font-family: "proxima-nova", Arial, sans-serif; } ' +
+        var svg_css = 'svg { font-size: 10px; font-family: "proxima-nova", Arial, sans-serif; background-color: #fff; } ' +
             '.background { fill: #fff; stroke: black; stroke-width: 0.5; } '+
             '.og-track-group-label { font-size: 14px; } ' +
-            'line { stroke: grey; stroke-opacity: .5; shape-rendering: crispEdges; } ';
+            'line { stroke: grey; stroke-opacity: 0.5; shape-rendering: crispEdges; } ';
 
         var svg = $(active_plot_div).find('svg#og-maingrid-svg').clone();
         var canvas = $(active_plot_div).find('canvas');
@@ -584,77 +589,45 @@ define (['jquery', 'oncogridjs'],
     }
 
     function download_svg(){
-        var svg = getOncoGridSvg();
-        /*var legend_svg_width = 350;
-        var svg_css = 'svg { font-size: 10px; font-family: "proxima-nova", Arial, sans-serif; } ' +
-            '.background { fill: #fff; stroke: black; stroke-width: 0.5; } '+
-            '.og-track-group-label { font-size: 14px; } ' +
-            'line { stroke: grey; stroke-opacity: .5; shape-rendering: crispEdges; } ';
-
-        var svg = $(active_plot_div).find('svg#og-maingrid-svg').clone();
-        var canvas = $(active_plot_div).find('canvas');
-
-        svg.attr('width', parseInt(canvas.attr('width'))+legend_svg_width);
-        svg.attr('height',canvas.attr('height'));
-        svg.removeAttr('viewBox');
-        svg.find('foreignObject').remove();
-        svg.prepend('<style>');
-        svg.find('style').append(svg_css);
-
-        var track_legends = $(active_plot_div).find('.svg-track-legend svg').clone();
-        track_legends.attr('x', canvas.attr('width'));
-        for(var i=0; i <track_legends.length; i++){
-            svg.append(track_legends[i]);
-        }*/
-        cbio.download.initDownload(svg[0], {filename: 'oncogrid.svg'});
+        var svgNode = getOncoGridSvgNode();
+        cbio.download.initDownload(svgNode[0], {filename: 'oncogrid.svg'});
     }
 
     function download_png() {
-        var svg = getOncoGridSvg();
-        var svgString = svg[0].outerHTML;
-        var canvas = $(active_plot_div).find('canvas');
-        var canvas_width = canvas.attr('width') || 1145;
-        var canvas_height = canvas.attr('height') || 631;
-        //$(active_plot_div).find('.og-canvas').remove();
+        var svgNode = getOncoGridSvgNode();
+        svgNode.attr('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+        svgNode.attr('xmlns', 'http://www.w3.org/2000/svg');
+        var svgString = svgNode[0].outerHTML;
+        svgString = svgString.replace(/(\w+)?:?xlink=/g, 'xmlns:xlink='); // Fix root xlink without namespace
+        svgString = svgString.replace(/NS\d+:href/g, 'xlink:href'); // Safari NS namespace fix
+        var width = svgNode.attr('width') || 1495;
+        var height = svgNode.attr('height') || 650;
         var save = function( dataBlob, filesize ) {
-            saveAs( dataBlob, 'D3 vis exported to PNG.png' ); // FileSaver.js function
+            saveAs( dataBlob, 'oncogrid.png' ); // FileSaver.js function
         };
-        svgString2Image( svgString, 2*canvas_width, 2*canvas_height, 'png', save ); // passes Blob and filesize String to the callback
-
-
-
+        svgString2Image( svgString, width, height, save ); // passes Blob and filesize String to the callback
     }
 
-    function svgString2Image( svgString, width, height, format, callback ) {
-        var format = format ? format : 'png';
+    function svgString2Image( svgString, width, height, callback ) {
+        var format = 'png';
 
-        var imgsrc = 'data:image/svg+xml;base64,'+ btoa( unescape( encodeURIComponent( svgString ) ) ); // Convert SVG string to data URL
-
-        //var canvas = document.createElement("canvas");
-        //document.remove
-        //var old_canvas = document.getElementsByClassName('og-canvas')[0];
-
+        var imgsrc = 'data:image/svg+xml;base64,'+ btoa( decodeURIComponent( encodeURIComponent( svgString ) ) ); // Convert SVG string to data URL
         var canvas = document.createElement('canvas');
-        //canvas
-
         var context = canvas.getContext("2d");
 
-        //canvas.width = width;
-        //canvas.height = height;
+        canvas.width = width;
+        canvas.height = height;
 
         var image = new Image();
+
         image.onload = function() {
             context.clearRect ( 0, 0, width, height );
             context.drawImage(image, 0, 0, width, height);
-
             canvas.toBlob( function(blob) {
                 var filesize = Math.round( blob.length/1024 ) + ' KB';
                 if ( callback ) callback( blob, filesize );
             });
-
-
         };
-
         image.src = imgsrc;
     }
 
@@ -662,10 +635,19 @@ define (['jquery', 'oncogridjs'],
         grid.destroy();
         grid = new OncoGrid(grid.params);
         grid.render();
-        $('.heatmap-toggle').removeClass('active');
+        updateToolBar();
+
+        /*$('.heatmap-toggle').removeClass('active');
         $('.grid-toggle').removeClass('active');
-        $('.crosshair-toggle').removeClass('active');
+        $('.crosshair-toggle').removeClass('active');*/
     };
+
+    function updateToolBar() {
+        $(active_plot_div).find('.heatmap-toggle').toggleClass('active', grid.heatMapMode);
+        $(active_plot_div).find('.grid-toggle').toggleClass('active', grid.drawGridLines);
+        $(active_plot_div).find('.crosshair-toggle').toggleClass('active', grid.crosshairMode);
+    }
+
 
     var toggleHeatmap = function(){
         grid.toggleHeatmap();
