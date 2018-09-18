@@ -541,12 +541,12 @@ define (['jquery', 'oncogridjs'],
 
 
     var hideDownloadSelection = function(e){
-        $('.oncogrid-download-selection').addClass('hidden');
+        $(active_plot_div).find('.oncogrid-download-selection').addClass('hidden');
     };
 
     var toggleDownloadSelection = function(e){
         e.stopPropagation();
-        $('.oncogrid-download-selection').toggleClass('hidden');
+        $(active_plot_div).find('.oncogrid-download-selection').toggleClass('hidden');
     };
 
     var oncogridDownload = function(){
@@ -559,6 +559,7 @@ define (['jquery', 'oncogridjs'],
                 download_png();
                 break;
             case 'JSON':
+                download_json();
                 break;
         }
     };
@@ -608,6 +609,14 @@ define (['jquery', 'oncogridjs'],
         svgString2Image( svgString, width, height, save ); // passes Blob and filesize String to the callback
     }
 
+    function download_json(){
+
+        var obj = {a: 123, b: "4 5 6"};
+        var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj));
+        cbio.download.initDownload(data, {filename: 'oncogrid.json'});
+
+    }
+
     function svgString2Image( svgString, width, height, callback ) {
         var format = 'png';
 
@@ -636,10 +645,6 @@ define (['jquery', 'oncogridjs'],
         grid = new OncoGrid(grid.params);
         grid.render();
         updateToolBar();
-
-        /*$('.heatmap-toggle').removeClass('active');
-        $('.grid-toggle').removeClass('active');
-        $('.crosshair-toggle').removeClass('active');*/
     };
 
     function updateToolBar() {
@@ -651,17 +656,17 @@ define (['jquery', 'oncogridjs'],
 
     var toggleHeatmap = function(){
         grid.toggleHeatmap();
-        $('.heatmap-toggle').toggleClass('active', grid.heatMapMode);
+        $(active_plot_div).find('.heatmap-toggle').toggleClass('active', grid.heatMapMode);
     };
 
     var toggleGridLines = function(){
         grid.toggleGridLines();
-        $('.grid-toggle').toggleClass('active', grid.drawGridLines);
+        $(active_plot_div).find('.grid-toggle').toggleClass('active', grid.drawGridLines);
     };
 
     var toggleCrosshair = function(){
         grid.toggleCrosshair();
-        $('.crosshair-toggle').toggleClass('active', grid.crosshairMode);
+        $(active_plot_div).find('.crosshair-toggle').toggleClass('active', grid.crosshairMode);
     };
 
     var toggleFullscreen = function(){
