@@ -65,7 +65,6 @@ env_variables:
 network:
   instance_tag: isb-cgc-webapp
 
-# Disabled until we know why they're not working
 health_check:
   enable_health_check: False
 #  check_interval_sec: 15
