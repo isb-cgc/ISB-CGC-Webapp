@@ -56,12 +56,12 @@
                             What adjustments do you need to make?
                             <br />
                             <div class="radio">
-                                <label><input type="radio" name="select-datasets" value="remove" checked> Remove all controlled-access datasets</label>
+                                <label><input type="radio" name="adjust-datasets" value="remove" checked> Remove all controlled-access datasets</label>
                             </div>
                             <div class="radio">
-                                <label><input type="radio" name="select-datasets" value="alter"> Add/Remove specific datasets</label>
+                                <label><input type="radio" name="adjust-datasets" value="alter"> Add/Remove specific datasets</label>
                             </div>
-                            <div id="datasets-select-div" style="display:none;">
+                            <div id="datasets-adjust-div" style="display:none;">
                                 Which dataset(s) would you like to use?
                                 <ul class="dataset-list">
                                     {% for dataset in authorized_datasets %}

@@ -63,14 +63,8 @@
                                 <span id="verify-error-base">The Service Account ID provided (<span id="provided-sa-id"></span>) does not appear to be a valid GCP Service Account ID. Note that per Google's requirements, Google Cloud Platform Service Account IDs can only contain letters, numbers, dashes, periods, and the @ symbol.</span>
                                 <br />
                             </div>
-                            Are you going to use this service account to work with controlled-access data?
-                            <div class="radio">
-                                <label><input type="radio" name="select-datasets" value="no" checked> No</label>
-                            </div>
-                            <div class="radio">
-                                <label><input type="radio" name="select-datasets" value="yes"> Yes</label>
-                            </div>
-                            <div id="datasets-select-div" style="display:none;">
+                            Note: you do not need to register a Service Account to use open access datasets.
+                            <div id="datasets-select-div">
                                 Which dataset(s) would you like to use?
                                 <ul class="dataset-list">
                                     {% for dataset in authorized_datasets %}

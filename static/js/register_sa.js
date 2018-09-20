@@ -47,13 +47,13 @@ require([
         }
     });
 
-    $('input[name="select-datasets"]:radio').change(function() {
-        if ($('input[name="select-datasets"]:checked').val() === 'yes' || $('input[name="select-datasets"]:checked').val() === 'alter') {
-            $('#datasets-select-div').show();
-            $('#register-sa input[name="select-datasets"][value="remove"]').remove();
+    $('input[name="adjust-datasets"]:radio').change(function() {
+        if ($('input[name="adjust-datasets"]:checked').val() === 'alter') {
+            $('#datasets-adjust-div').show();
+            $('#register-sa input[name="adjust-datasets"][value="remove"]').remove();
         } else {
             $('input[name="datasets"]').attr('checked',false);
-            $('#datasets-select-div').hide();
+            $('#datasets-adjust-div').hide();
         }
     });
 
@@ -143,21 +143,6 @@ require([
                     } else {
                         tr.append('<td><i class="fa fa-times"></i></td>');
                     }
-                    /*
-                    var td = $('<td></td>');
-                    td.append('<span><i class="fa fa-check"></i> All Open Datasets </span><br />');
-
-                    for (var j = 0; j < member['datasets'].length; j++) {
-                        var dataset = member['datasets'][j];
-                        if (dataset['valid']) {
-                            td.append('<span><i class="fa fa-check"></i> ' + dataset['name'] + '</span><br />');
-                        } else {
-                            td.append('<span title="User ' + email + ' does not have access to this dataset."><i class="fa fa-times"></i> ' + dataset['name'] + '</span><br />');
-                        }
-                    }
-
-                    tr.append(td);
-                    */
                     tbody.append(tr);
                 }
 
@@ -209,7 +194,7 @@ require([
                     dcf_analysis_data.append(tr);
                 }
 
-                if($('input[name="select-datasets"][value="remove"]:checked').length > 0) {
+                if($('input[name="adjust-datasets"][value="remove"]:checked').length > 0) {
                     var remove_all = $('input[value="remove"]').clone();
                     remove_all.attr("type","hidden");
                     register_form.append(remove_all[0]);
