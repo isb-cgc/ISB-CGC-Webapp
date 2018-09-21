@@ -47,7 +47,7 @@ define([
             var table = $('<table></table>').appendTo(target_element);
             var header_row = $('<tr></tr>').appendTo($('<thead></thead>').appendTo(table));
 
-            $('<th>Cohort</th><td></td>').appendTo(header_row);
+            $('<th>Cohort</th><th></th>').appendTo(header_row);
             var locator_column = $('<th style="text-align: center;"><canvas id="seqpeek-mini-locator" width="400" height="24"></canvas></th>').appendTo(header_row);
             var locator_svg = $('<svg height="24"></svg>').appendTo(locator_column);
 
