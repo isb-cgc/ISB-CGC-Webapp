@@ -44,15 +44,15 @@ define (['jquery', 'oncogridjs'],
 
     const sortByBool = function(field){
         return function (a, b){
-            var a_int = a[field] ? 1 : 0;
-            var b_int = b[field] ? 1 : 0;
+            var a_int = a[field] == 'true' ? 1 : 0;
+            var b_int = b[field] == 'true' ? 1 : 0;
             return b_int - a_int;
         };
     };
 
     var geneTracks = [
         {'name': '#Cases affected', 'fieldName': 'case_score', 'type': 'int', 'group': 'GDC', 'sort':sortByIntDesc, 'template': default_track_template},
-        {'name': 'Cancer Gene Census', 'fieldName': 'is_cgc', 'type': 'int', 'group': 'Gene Sets', 'sort':sortByBool, 'template': default_track_template}
+        {'name': 'Cancer Gene Census', 'fieldName': 'is_cgc', 'type': 'bool', 'group': 'Gene Sets', 'sort':sortByBool, 'template': default_track_template}
     ];
 
     var donorTracks_temp = [
@@ -116,7 +116,6 @@ define (['jquery', 'oncogridjs'],
                 break;
             default:
                 fill_color = 'mediumpurple';
-
         }
         return fill_color;
     };
@@ -237,7 +236,7 @@ define (['jquery', 'oncogridjs'],
         params.width = 700;
         params.heatMap = false;
         params.trackHeight = 12;
-        params.trackLegendLabel = '<img class="oncogrid-track-label" style="width:13px;height:13px;margin-top:-7px;" src="/static/img/question.png" alt="legend">';//todo:change this to static path
+        params.trackLegendLabel = '<img class="oncogrid-track-label" style="width:13px;height:13px;margin-top:-7px;" src="'+ static_img_url+'question.png" alt="legend">';
         params.donorFillFunc = donorFill;
         params.donors = donors;
         params.donorTracks = donorTracks;
@@ -297,7 +296,6 @@ define (['jquery', 'oncogridjs'],
             'GDC': getTrackLegends(gdc_legend, donor_track_dd_max, gene_track_ca_max),
             'Gene Sets': getTrackLegends(cgc_legend, donor_track_dd_max, gene_track_ca_max)
         };
-
         return params;
     }
 
@@ -589,52 +587,55 @@ define (['jquery', 'oncogridjs'],
         return svg;
     }
 
+
+
     function download_svg(){
         var svgNode = getOncoGridSvgNode();
-        cbio.download.initDownload(svgNode[0], {filename: 'oncogrid.svg'});
+        var xmlSerializer = new XMLSerializer();
+        var content = xmlSerializer.serializeToString(svgNode[0]);
+		var blob = new Blob([content], {type: 'application/svg+xml'});
+		saveAs(blob, 'oncogrid.svg');
     }
 
     function download_png() {
         var svgNode = getOncoGridSvgNode();
-        svgNode.attr('xmlns:xlink', 'http://www.w3.org/1999/xlink');
-        svgNode.attr('xmlns', 'http://www.w3.org/2000/svg');
-        var svgString = svgNode[0].outerHTML;
-        svgString = svgString.replace(/(\w+)?:?xlink=/g, 'xmlns:xlink='); // Fix root xlink without namespace
-        svgString = svgString.replace(/NS\d+:href/g, 'xlink:href'); // Safari NS namespace fix
+        var xmlSerializer = new XMLSerializer();
+		var content = xmlSerializer.serializeToString(svgNode[0]);
         var width = svgNode.attr('width') || 1495;
         var height = svgNode.attr('height') || 650;
-        var save = function( dataBlob, filesize ) {
-            saveAs( dataBlob, 'oncogrid.png' ); // FileSaver.js function
-        };
-        svgString2Image( svgString, width, height, save ); // passes Blob and filesize String to the callback
+        svgString2Image(content, width, height, function(dataBlob){
+            saveAs( dataBlob, 'oncogrid.png' )
+        });
     }
 
     function download_json(){
-
-        var obj = {a: 123, b: "4 5 6"};
-        var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj));
-        cbio.download.initDownload(data, {filename: 'oncogrid.json'});
-
+        var donors = grid.params.donors;
+        var genes = grid.params.genes;
+        var observations = grid.params.observations;
+        var oncogrid_obj = {
+            'genes' : genes,
+            'occurence': observations,
+            'cases' : donors,
+            'totalCases': donors.length
+        };
+        var content = JSON.stringify(oncogrid_obj);
+        var blob = new Blob([content], {type: 'application/json'});
+		saveAs(blob, 'oncogrid.json');
     }
 
-    function svgString2Image( svgString, width, height, callback ) {
-        var format = 'png';
-
-        var imgsrc = 'data:image/svg+xml;base64,'+ btoa( decodeURIComponent( encodeURIComponent( svgString ) ) ); // Convert SVG string to data URL
+    function svgString2Image(svgString, width, height, callback) {
+        //convert SVG string to data URL
+        var imgsrc = 'data:image/svg+xml;base64,'+ btoa(decodeURIComponent(encodeURIComponent(svgString)));
         var canvas = document.createElement('canvas');
         var context = canvas.getContext("2d");
-
         canvas.width = width;
         canvas.height = height;
-
         var image = new Image();
-
         image.onload = function() {
-            context.clearRect ( 0, 0, width, height );
+            context.clearRect (0, 0, width, height);
             context.drawImage(image, 0, 0, width, height);
             canvas.toBlob( function(blob) {
-                var filesize = Math.round( blob.length/1024 ) + ' KB';
-                if ( callback ) callback( blob, filesize );
+                if (callback) callback(blob);
             });
         };
         image.src = imgsrc;

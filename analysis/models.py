@@ -23,11 +23,9 @@ class Analysis(models.Model):
                  {'name': 'OncoPrint',
                   'description': "Used to plot multiple genomic alteration (somatic mutation) events across a set of samples by heatmap. OncoPrint is developed and provided by cBioPortal.",
                   'image': 'img/oncoprint.png'},
-                 # TODO: update oncogrid image & description
                  {'name': 'OncoGrid',
-                  'description': "Used to plot multiple genomic alteration (somatic mutation) events across a set of samples by interactive heatmap. OncoGrid library is developed and provided by OncoJS.",
-                  'image': 'img/oncoprint.png'},
-
+                  'description': "Used to view multiple genomic alteration (somatic mutation) events, clinical data, available files across a set of cases by interactive heatmap. OncoGrid library is developed at Ontario Institute for Cancer Research (OICR).",
+                  'image': 'img/oncogrid.png'},
                  # {'name' : 'Violin Plot with axis swap',
                  #  'description' : "Used to plot a categorical feature on the y-axis versus a numerical feature on the x-axis. Points in the plot can be colored by another categorical feature.",
                  #  'image' : 'img/violinplot.png'},

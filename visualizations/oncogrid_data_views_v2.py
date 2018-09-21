@@ -148,7 +148,6 @@ def get_donor_data_list(bq_statement):
                 donors[case_barcode]['data_category'][data_category] = {
                     'score': score,
                 }
-
     if donors and len(donors) > 0:
         for case_barcode_key in donors:
             donor_data = {
@@ -181,7 +180,7 @@ def get_donor_data_list(bq_statement):
                 donor_track_count_max['days_to_death'] = max(int(donor_track_count_max['days_to_death']), int(donor_data['days_to_death']))
 
             for data_category_key in donors[case_barcode_key]['data_category']:
-                if data_category_key == 'Clinical':
+                if data_category_key.lower() == 'clinical':
                     donor_data['clinical'] = donors[case_barcode_key]['data_category'][data_category_key]['score']
                     donor_track_count_max['clinical'] = max(donor_track_count_max['clinical'], donor_data['clinical'])
                 elif data_category_key.lower() == 'biospecimen':
@@ -192,13 +191,13 @@ def get_donor_data_list(bq_statement):
                     donor_track_count_max['rsd'] = max(donor_track_count_max['rsd'], donor_data['rsd'])
                 elif data_category_key.lower() == 'simple nucleotide variation':
                     donor_data['snv'] = donors[case_barcode_key]['data_category'][data_category_key]['score']
-                    donor_track_count_max['snv'] = max(donor_track_count_max['snv'], donor_data['clinical'])
+                    donor_track_count_max['snv'] = max(donor_track_count_max['snv'], donor_data['snv'])
                 elif data_category_key.lower() == 'copy number variation':
                     donor_data['cnv'] = donors[case_barcode_key]['data_category'][data_category_key]['score']
-                    donor_track_count_max['cnv'] = max(donor_track_count_max['cnv'], donor_data['clinical'])
+                    donor_track_count_max['cnv'] = max(donor_track_count_max['cnv'], donor_data['cnv'])
                 elif data_category_key.lower() == 'gene expression':
                     donor_data['gene_exp'] = donors[case_barcode_key]['data_category'][data_category_key]['score']
-                    donor_track_count_max['gene_exp'] = max(donor_track_count_max['gene_exp'], donor_data['clinical'])
+                    donor_track_count_max['gene_exp'] = max(donor_track_count_max['gene_exp'], donor_data['gene_exp'])
             donor_data_list.append(donor_data.copy())
     return donor_data_list, donor_track_count_max
 
@@ -280,32 +279,16 @@ def create_oncogrid_bq_statement(type, genomic_build, project_set, cohort_ids, g
                 sm.project_short_name,
                   cs.case_barcode,
                     CASE
-                      WHEN sm.Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins') 
-                          OR {conseq_col} LIKE '%frameshift%' 
-                        THEN 'frameshift_variant' 
-                      WHEN sm.Variant_Classification IN ('Nonstop_Mutation', 'Nonsense_Mutation')
+                      WHEN sm.all_effects IS NOT NULL 
+                        AND ARRAY_LENGTH(SPLIT(sm.all_effects, ',')) > 1
                         THEN
-                            CASE 
-                              WHEN sm.all_effects like '%stop_gained%'
-                                THEN 'stop_gained'
-                              ELSE 'stop_lost'
-                            END
-                      WHEN sm.Variant_Classification = 'Nonstop_Mutation' 
-                        OR (Variant_Classification = 'Missense_Mutation' AND Variant_Type IN ('DEL','INS')) 
-                        OR (Variant_Classification = 'Translation_Start_Site')
-                        THEN 'missense_variant'
-                      WHEN {conseq_col} = 'start_lost'
-                        THEN
-                          CASE
-                           WHEN sm.all_effects like '%start_lost%'
-                            THEN 'start_lost'
-                          END
+                           SPLIT(sm.all_effects, ',')[OFFSET(1)]
+                      ELSE ''
                     END AS conseq,
                     CASE
                       WHEN Gene_Symbol is not null
-                        THEN 'true'
-                      ELSE 'false'
-                      
+                        THEN TRUE
+                      ELSE FALSE 
                     END AS is_cgc
             FROM  `{cohort_table}` cs,
                   `{somatic_mut_table}` sm
@@ -317,7 +300,7 @@ def create_oncogrid_bq_statement(type, genomic_build, project_set, cohort_ids, g
             {filter_clause1}
             GROUP BY sm.Hugo_Symbol, sm.project_short_name, cs.case_barcode, conseq, is_cgc            
         )
-        WHERE conseq is not null;
+        WHERE conseq IN ('stop_gained', 'missense_variant', 'frameshift_variant', 'start_lost', 'stop_lost', 'initiator_codon_variant');
     """
 
     donor_query_template = """
