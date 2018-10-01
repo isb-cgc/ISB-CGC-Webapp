@@ -196,7 +196,7 @@ def oncoprint_view_data(request):
         attempts = 0
         job_is_done = BigQuerySupport.check_job_is_done(somatic_mut_query_job)
         while attempts < settings.BQ_MAX_ATTEMPTS and not job_is_done:
-            job_is_done = BigQuerySupport.check_job_is_done(somatic_mut_query_job['jobReference'])
+            job_is_done = BigQuerySupport.check_job_is_done(somatic_mut_query_job)
             sleep(1)
             attempts += 1
 
