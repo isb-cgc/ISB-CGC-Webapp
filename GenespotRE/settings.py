@@ -493,8 +493,14 @@ MANAGED_SERVICE_ACCOUNTS_PATH            = os.environ.get('MANAGED_SERVICE_ACCOU
 # Dataset configuration file path
 DATASET_CONFIGURATION_PATH               = os.environ.get('DATASET_CONFIGURATION_PATH', '')
 
-# DCF Testing flag
+# DCF Phase I enable flag
 DCF_TEST                                 = bool(os.environ.get('DCF_TEST', 'False') == 'True')
+
+# SA via DCF
+SA_VIA_DCF                               = bool(os.environ.get('SA_VIA_DCF', 'False') == 'True')
+
+# DCF Monitoring SA
+DCF_MONITORING_SA                        = os.environ.get('DCF_MONITORING_SA', '')
 
 #################################
 #   For DCF login               #
@@ -509,6 +515,10 @@ DCF_REVOKE_URL                           = os.environ.get('DCF_REVOKE_URL', '')
 DCF_LOGOUT_URL                           = os.environ.get('DCF_LOGOUT_URL', '')
 DCF_URL_URL                              = os.environ.get('DCF_URL_URL', '')
 DCF_CLIENT_SECRETS                       = os.environ.get('DCF_CLIENT_SECRETS', '')
+DCF_GOOGLE_SA_REGISTER_URL               = os.environ.get('DCF_GOOGLE_SA_REGISTER_URL', '')
+DCF_GOOGLE_SA_VERIFY_URL                 = os.environ.get('DCF_GOOGLE_SA_VERIFY_URL', '')
+DCF_GOOGLE_SA_MONITOR_URL                = os.environ.get('DCF_GOOGLE_SA_MONITOR_URL', '')
+DCF_GOOGLE_SA_URL                        = os.environ.get('DCF_GOOGLE_SA_URL', '')
 DCF_TOKEN_REFRESH_WINDOW_SECONDS         = int(os.environ.get('DCF_TOKEN_REFRESH_WINDOW_SECONDS', 86400))
 DCF_LOGIN_EXPIRATION_SECONDS             = int(os.environ.get('DCF_LOGIN_EXPIRATION_SECONDS', 86400))
 
@@ -574,6 +584,11 @@ NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRES
 
 # Explicitly check for known items
 BLACKLIST_RE = ur'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
+
+# IndexD settings
+INDEXD_URI = os.environ.get('INDEXD_URI', None)
+INDEXD_REQ_LIMIT = int(os.environ.get('INDEXD_REQ_LIMIT', '100'))
+
 
 if DEBUG and DEBUG_TOOLBAR:
     INSTALLED_APPS += ('debug_toolbar',)
