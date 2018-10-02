@@ -499,6 +499,8 @@ DCF_TEST                                 = bool(os.environ.get('DCF_TEST', 'Fals
 # SA via DCF
 SA_VIA_DCF                               = bool(os.environ.get('SA_VIA_DCF', 'False') == 'True')
 
+# DCF Monitoring SA
+DCF_MONITORING_SA                        = os.environ.get('DCF_MONITORING_SA', '')
 
 #################################
 #   For DCF login               #
@@ -582,6 +584,11 @@ NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRES
 
 # Explicitly check for known items
 BLACKLIST_RE = ur'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
+
+# IndexD settings
+INDEXD_URI = os.environ.get('INDEXD_URI', None)
+INDEXD_REQ_LIMIT = int(os.environ.get('INDEXD_REQ_LIMIT', '100'))
+
 
 if DEBUG and DEBUG_TOOLBAR:
     INSTALLED_APPS += ('debug_toolbar',)

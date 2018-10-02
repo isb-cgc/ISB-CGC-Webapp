@@ -242,7 +242,6 @@
                 min-height: 500px
 
     .filter-label:hover
-        //background-color: $primary-color-light
         a:hover
             text-decoration: none
     #filter-list-div
@@ -255,7 +254,6 @@
             position: relative
             overflow: hidden
             height: 210px
-            //padding: 0px
         .spinner
             position: absolute
             width: 100%
@@ -624,31 +622,25 @@
         max-width: 90%
         height: 175px
         margin-top: 10px
-    button
+    div.instruction_button
         display: inline-block
-        &.instructions
-            &.instructions_show
-                margin-bottom: 15px
-                display: block
-                clear: both
-                &:before
-                    content: "\f103"
-                    float: left
-                    font-family: FontAwesome
-                &:after
-                    content: "Show Instructions"
-                    margin-left: 5px
-            &.instructions_hide
-                margin-bottom: 15px
-                display: block
-                clear: both
-                &:before
-                    content: "\f102"
-                    float: left
-                    font-family: FontAwesome
-                &:after
-                    content: "Hide Instructions"
-                    margin-left: 5px
+        margin-bottom: 15px
+        &.instructions_show
+            &:before
+                content: "\f102"
+                float: left
+                font-family: FontAwesome
+            &:after
+                content: "Show Instructions"
+                margin-left: 5px
+        &.instructions_hide
+            &:before
+                content: "\f103"
+                float: left
+                font-family: FontAwesome
+            &:after
+                content: "Hide Instructions"
+                margin-left: 5px
     h5
         margin-top: 25px
     h6
