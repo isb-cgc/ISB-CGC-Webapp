@@ -55,16 +55,16 @@
     </div>
 </div>
 
-{% for service_account in project.active_service_accounts %}
+{% for svc_act in sa_dict %}
 <!-- Delete Service Account Modal -->
-<div class="modal fade" id="delete-sa-modal-{{ service_account.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-sa-header" aria-hidden="true">
+<div class="modal fade" id="delete-sa-modal-{{ svc_act.esc_name }}" tabindex="-1" role="dialog" aria-labelledby="delete-sa-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 id="delete-sa-header" class="modal-title">Unregister this Service Account?</h4>
             </div>
-            <form id="delete-sa" method="POST" action="{% url 'delete_sa' user.id service_account.id %}">
+            <form id="delete-sa" method="POST" action="{% url 'delete_sa' user.id  svc_act.name %}">
                 <div class="modal-body">
                     {% csrf_token %}
                     <p>
@@ -81,7 +81,7 @@
 </div>
 
 <!-- Refresh Service Account Modal -->
-<div class="modal fade" id="refresh-sa-modal-{{ service_account.id }}" tabindex="-1" role="dialog" aria-labelledby="refresh-sa-header" aria-hidden="true">
+<div class="modal fade" id="refresh-sa-modal-{{ svc_act.esc_name }}" tabindex="-1" role="dialog" aria-labelledby="refresh-sa-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -92,11 +92,16 @@
                 <div class="modal-body">
                     {% csrf_token %}
                     <p>
-                        <em>Note</em>: By refreshing this Service Account, you are extending its access to the specified dataset.
+                        <b>NOTE:</b> You must now add two Service Accounts to your project in order to register with ISB-CGC: the ISB-CGC monitoring Service Account,
+                        and the new DCF monitoring Service Account. Please update all of your projects to include the new DCF monitoring Service Account,
+                        <code>{{ DCF_MONITORING_SA }}</code>, as a Project Editor.
+                    </p>
+                    <p>
+                        <em>Note</em>: By refreshing this Service Account, you are extending its access to the specified dataset(s).
                     </p>
                     <input type="hidden" name="gcp_id" value="{{ project.project_id }}" />
-                    <input type="hidden" name="user_sa" value="{{ service_account.service_account }}" />
-                    <input type="hidden" name="datasets" value="{{ service_account.get_auth_datasets|get_id_string:"," }}" />
+                    <input type="hidden" name="user_sa" value="{{ svc_act.name }}" />
+                    <input type="hidden" name="datasets" value="{{ svc_act.auth_dataset_names }}" />
                     <input type="hidden" name="is_refresh" value="true" />
                 </div>
                 <div class="modal-footer">

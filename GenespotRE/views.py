@@ -295,7 +295,7 @@ def get_image_data(request, slide_barcode):
     else:
         try:
             img_data_query = """
-                SELECT slide_barcode, level_0__width AS width, level_0__height AS height, mpp_x, mpp_y, GCSurl, sample_barcode, case_barcode
+                SELECT slide_barcode, level_0__width AS width, level_0__height AS height, mpp_x, mpp_y, file_gcs_url, sample_barcode, case_barcode
                 FROM [isb-cgc:metadata.TCGA_slide_images]
                 WHERE slide_barcode = '{}';
             """
@@ -308,7 +308,7 @@ def get_image_data(request, slide_barcode):
                     'Height': query_results[0]['f'][2]['v'],
                     'MPP-X': query_results[0]['f'][3]['v'],
                     'MPP-Y': query_results[0]['f'][4]['v'],
-                    'FileLocation': re.sub(r'isb-cgc-open/.*_image', 'imaging-west', query_results[0]['f'][5]['v']),
+                    'FileLocation': re.sub(r'isb-.*-open/gdc', 'imaging-west', query_results[0]['f'][5]['v']),
                     'TissueID': query_results[0]['f'][0]['v'],
                     'sample-barcode': query_results[0]['f'][6]['v'],
                     'case-barcode': query_results[0]['f'][7]['v'],
@@ -338,10 +338,16 @@ def get_image_data(request, slide_barcode):
 @login_required
 def dicom(request, study_uid=None):
     template = 'GenespotRE/dicom.html'
+    orth_response = requests.post(url=settings.ORTHANC_LOOKUP_URI,data=study_uid,headers={"Content-Type": "text/plain"})
+
+    if orth_response.status_code != 200:
+        logger.error("[ERROR] While trying to retrieve Orthanc UID for study instance UID {}: {}".format(study_uid, str(orth_response.content)))
+        messages.error(request,"There was an error while attempting to load this DICOM image--please contact the administrator.")
+        return redirect(reverse('cohort_list'))
 
     context = {
-        'dcm4chee_id': study_uid,
-        'dicom_viewer': settings.DCM4CHEE_VIEWER
+        'orthanc_uid': orth_response.json()[0]['ID'],
+        'dicom_viewer': settings.OSIMIS_VIEWER
     }
     return render(request, template, context)
 
