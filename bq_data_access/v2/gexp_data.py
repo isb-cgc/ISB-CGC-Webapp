@@ -54,7 +54,7 @@ class GEXPFeatureDef(object):
 
     regex = re_compile("^v2:GEXP:"
                        # gene
-                       "([a-zA-Z0-9\-.]+):"
+                       "([a-zA-Z0-9\-._]+):"
                        # genomic_build 
                        "mrna_(" + "|".join([build for build in config_instance.supported_genomic_builds]) +
                        ")$")

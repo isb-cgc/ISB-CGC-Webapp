@@ -41,7 +41,7 @@ class RPPAFeatureDef(object):
     config_instance = RPPADataSourceConfig.from_dict(BIGQUERY_CONFIG)
     regex = re_compile("^v2:RPPA:"
                        # gene
-                       "([a-zA-Z0-9.\-]+):"
+                       "([a-zA-Z0-9._\-]+):"
                        # protein name
                        "([a-zA-Z0-9._\-]+):"
                        # table ID

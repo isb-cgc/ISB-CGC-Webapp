@@ -54,7 +54,7 @@ try:
         FROM `{curr_data_table}` curr
         LEFT JOIN `{inc_data_table}` inc
         ON inc.file_gdc_id = curr.file_gdc_id
-        WHERE inc.file_gdc_id IS NULL;
+        WHERE inc.file_gdc_id IS NULL OR inc.file_gdc_id = '';
     """
 
     missing_path_check = """
@@ -63,7 +63,7 @@ try:
         FROM `{curr_data_table}` curr
         LEFT JOIN `{inc_data_table}` inc
         ON inc.file_gdc_id = curr.file_gdc_id
-        WHERE inc.file_gcs_path = '';
+        WHERE inc.file_gcs_path = '' OR inc.file_gcs_path IS NULL;
     """
 
     program_tables = Public_Data_Tables.objects.filter(program__in=Program.get_public_programs())
@@ -91,7 +91,7 @@ try:
         offset=0
         files_found = True
 
-        while files_found:
+        while files_found and offset < 100:
             cursor.execute(query_base.format(limit=LIMIT,offset=offset,metadata_data_table=table.data_table))
             files = cursor.fetchall()
             files_found = len(files) > 0
@@ -133,7 +133,6 @@ try:
         compare_count = BigQuerySupport.execute_query_and_fetch_results(count_query_base.format(
             data_table="{}.{}.{}".format(EXECUTION_PROJECT, STORAGE_DATASET, prog_build_table))
         )
-
         new_table_count = int(compare_count[0]['f'][0]['v'])
 
         if main_table_count != new_table_count:
@@ -141,6 +140,17 @@ try:
             logger.warning("[WARNING] Current table GDC file UUID count: {}".format(str(main_table_count)))
             logger.warning("[WARNING] New table GDC file UUID count: {}".format(str(new_table_count)))
 
+        check_for_uuids = BigQuerySupport.execute_query_and_fetch_results(
+            missing_uuid_check.format(curr_data_table=data_table_bq, inc_data_table=prog_build_table)
+        )
+
+        logger.info("Results for UUID check: {}".format(str(check_for_uuids)))
+
+        check_for_paths = BigQuerySupport.execute_query_and_fetch_results(
+            missing_path_check.format(curr_data_table=data_table_bq, inc_data_table=prog_build_table)
+        )
+
+        logger.info("Results for UUID check: {}".format(str(check_for_paths)))
 
 except Exception as e:
     logger.error("[ERROR] While updating GCS paths: ")
