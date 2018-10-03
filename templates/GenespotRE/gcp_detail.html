@@ -39,6 +39,7 @@
 {% block content %}
     <div class="container">
         <div class="row">
+            {% if is_linked %}
             <div class="col-sm-12 col-md-12 col-lg-12">
 
                 <section class="panel panel-default">
@@ -129,6 +130,7 @@
                     </div>
                 </section>
             </div>
+            {% endif %}
 
             <div class="col-md-6 col-lg-6">
                 <section class="panel panel-default">
