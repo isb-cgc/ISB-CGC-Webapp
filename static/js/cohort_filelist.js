@@ -858,6 +858,15 @@ require([
             self.removeAttr('disabled');
             msg.hide();
         },$('.filelist-obtain .download-token').val(),"downloadToken");
+
+        if($(this).parents('.data-tab').find('.build :selected').val() == 'HG38'
+            && _.find(programs_this_cohort, function(prog){return prog == 'CCLE';})) {
+            base.showJsMessage("warning",
+                "You have exported a file list for a cohort which contains CCLE samples, with the build set to HG38.<br/>"+
+                "Please note that there are no HG38 samples for CCLE, so that program will be absent from the export."
+                , true
+            );
+        }
     });
 
     $('.data-tab-content').on('hover enter mouseover','.study-uid, .col-filename',function(e){

@@ -39,6 +39,7 @@
 {% block content %}
     <div class="container">
         <div class="row">
+            {% if is_linked %}
             <div class="col-sm-12 col-md-12 col-lg-12">
 
                 <section class="panel panel-default">
@@ -52,9 +53,9 @@
                             <thead>
                             <tr>
                                 <th>Service Account</th>
-                                <th>Authorized Datasets</th>
-                                <th>Date Last Activated</th>
-                                <td></td>
+                                <th>Authorized Controlled-Access Datasets</th>
+                                <th>Current Access Expires</th>
+                                <th></th>
                             </tr>
                             </thead>
                             <tbody>
@@ -62,9 +63,11 @@
                                 <tr>
                                     <td>{{ svc_act.name }}</td>
                                     <td>{% if svc_act.num_auth == 0 %}None{% else %}{{ svc_act.auth_dataset_names }}{% endif %}</td>
-                                    <td>{% if svc_act.is_expired and svc_act.num_auth > 0 %} class="red" title="Service Account's authorization date has expired; refresh to extend access."{% endif %}{{ svc_act.authorized_date|date:'M d, Y, g:i a' }}</td>
+                                    <td>{% if svc_act.is_expired %}{{ svc_act.expiration_date}}{% else %}{{ svc_act.expiration_date|date:'M d, Y, g:i a' }}{% endif %}</td>
                                     <td>
-                                        <a title="Refresh this Service Account" aria-label="Refresh SA" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ svc_act.esc_name }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
+                                        {% if not svc_act.is_expired %}
+                                            <a title="Refresh this Service Account" aria-label="Refresh SA" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ svc_act.esc_name }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
+                                        {% endif %}
                                         <a title="Delete this Service Account" aria-label="Delete SA" data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ svc_act.esc_name }}"><i class="fa fa-trash"></i></a>
                                         <a title="Adjust Datasets for this Service Account" aria-label="Adjust Datasets for SA" role="button" href="{% url 'adjust_sa' user.id %}?sa_name={{ svc_act.name }}"><i class="fa fa-plus-square"></i></a>
                                     </td>
@@ -127,6 +130,7 @@
                     </div>
                 </section>
             </div>
+            {% endif %}
 
             <div class="col-md-6 col-lg-6">
                 <section class="panel panel-default">
@@ -258,7 +262,7 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 id="register-bucket" class="modal-title">Register Bucket</h4>
-                </div>f
+                </div>
                 <form id="register-bucket" method="POST" action="{% url 'register_bucket' user.id gcp.id %}">
                     <div class="modal-body">
                         {% csrf_token %}
