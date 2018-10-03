@@ -160,69 +160,61 @@ require([
                     tbody.append(tr);
                 }
 
-                var dcf_analysis_reg_sas_div = $('.dcf_analysis_reg_sas');
-                $('.registered_sa_statement').empty()
-                $('.registered_sa_statement').append(data['dcf_messages']['dcf_analysis_reg_sas_summary']);
+                if ('dcf_messages' in data) {
+                    var dcf_analysis_reg_sas_div = $('.dcf_analysis_reg_sas');
+                    $('.registered_sa_statement').empty()
+                    $('.registered_sa_statement').append(data['dcf_messages']['dcf_analysis_reg_sas_summary']);
 
-                var dcf_analysis_project_div = $('.dcf_analysis_project');
-                $('.project_statement').empty()
-                $('.project_statement').append(data['dcf_messages']['dcf_analysis_project_summary']);
+                    var dcf_analysis_project_div = $('.dcf_analysis_project');
+                    $('.project_statement').empty()
+                    $('.project_statement').append(data['dcf_messages']['dcf_analysis_project_summary']);
 
-                $('.membership_statement').empty()
-                $('.membership_statement').append(data['dcf_messages']['dcf_analysis_project_members']);
+                    $('.membership_statement').empty()
+                    $('.membership_statement').append(data['dcf_messages']['dcf_analysis_project_members']);
 
 
-                var dcf_analysis_sas_div = $('.dcf_analysis_sas');
-                var dcf_analysis_sas = dcf_analysis_sas_div.find('tbody');
-                var dcf_msg = data['dcf_messages']['dcf_analysis_sas'];
-                dcf_analysis_sas.empty();
-                for (var key in dcf_msg) {
-                    var tr = $('<tr></tr>');
-                    var msg = dcf_msg[key]
-                    tr.append('<td>' + msg['id'] + '</td>');
-                    if (msg['ok']) {
-                        tr.append('<td><i class="fa fa-check"></i></td>');
-                    } else {
-                        tr.append('<td><i class="fa fa-times"></i></td>');
+                    var dcf_analysis_sas_div = $('.dcf_analysis_sas');
+                    var dcf_analysis_sas = dcf_analysis_sas_div.find('tbody');
+                    var dcf_msg = data['dcf_messages']['dcf_analysis_sas'];
+                    dcf_analysis_sas.empty();
+                    for (var key in dcf_msg) {
+                        var tr = $('<tr></tr>');
+                        var msg = dcf_msg[key]
+                        tr.append('<td>' + msg['id'] + '</td>');
+                        if (msg['ok']) {
+                            tr.append('<td><i class="fa fa-check"></i></td>');
+                        } else {
+                            tr.append('<td><i class="fa fa-times"></i></td>');
+                        }
+                        tr.append('<td>' + msg['err'] + '</td>');
+                        dcf_analysis_sas.append(tr);
                     }
-                    tr.append('<td>' + msg['err'] + '</td>');
-                    dcf_analysis_sas.append(tr);
-                }
 
-                var dcf_analysis_data_div = $('.dcf_analysis_data');
-                $('.data_summary_statement').empty()
-                $('.data_summary_statement').append(data['dcf_messages']['dcf_analysis_data_summary']);
-                var dcf_analysis_data = dcf_analysis_data_div.find('tbody');
-                var dcf_msg = data['dcf_messages']['dcf_analysis_data'];
-                dcf_analysis_data.empty();
-                for (var key in dcf_msg) {
-                    var tr = $('<tr></tr>');
-                    var msg = dcf_msg[key]
-                    tr.append('<td>' + msg['id'] + '</td>');
-                    if (msg['ok']) {
-                        tr.append('<td><i class="fa fa-check"></i></td>');
-                    } else {
-                        tr.append('<td><i class="fa fa-times"></i></td>');
+                    var dcf_analysis_data_div = $('.dcf_analysis_data');
+                    $('.data_summary_statement').empty()
+                    $('.data_summary_statement').append(data['dcf_messages']['dcf_analysis_data_summary']);
+                    var dcf_analysis_data = dcf_analysis_data_div.find('tbody');
+                    var dcf_msg = data['dcf_messages']['dcf_analysis_data'];
+                    dcf_analysis_data.empty();
+                    for (var key in dcf_msg) {
+                        var tr = $('<tr></tr>');
+                        var msg = dcf_msg[key]
+                        tr.append('<td>' + msg['id'] + '</td>');
+                        if (msg['ok']) {
+                            tr.append('<td><i class="fa fa-check"></i></td>');
+                        } else {
+                            tr.append('<td><i class="fa fa-times"></i></td>');
+                        }
+                        tr.append('<td>' + msg['err'] + '</td>');
+                        dcf_analysis_data.append(tr);
                     }
-                    tr.append('<td>' + msg['err'] + '</td>');
-                    dcf_analysis_data.append(tr);
+
+                    dcf_analysis_reg_sas_div.show();
+                    dcf_analysis_project_div.show();
+                    dcf_analysis_sas_div.show();
+                    dcf_analysis_data_div.show();
                 }
-
-                // This was to handle full removal, which no longer uses a verification step
-                //if ($('input[name="adjust-datasets"]').length) {
-                //    if ($('input[name="adjust-datasets"][value="remove"]:checked').length > 0) {
-                //        var remove_all = $('input[value="remove"]').clone();
-                //        console.log(remove_all);
-                //        remove_all.attr("type", "hidden");
-                //        register_form.append(remove_all[0]);
-                //    }
-                //}
-
                 user_ver_div.show();
-                dcf_analysis_reg_sas_div.show();
-                dcf_analysis_project_div.show();
-                dcf_analysis_sas_div.show();
-                dcf_analysis_data_div.show();
 
                 $this.find('input[type="submit"]').prop('disabled', '');
 
