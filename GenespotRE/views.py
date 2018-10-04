@@ -271,36 +271,36 @@ def search_cohorts_viz(request):
 
 # get_image_data which allows for URI arguments, falls through to get_image_data(request, slide_barcode)
 def get_image_data_args(request):
-    slide_barcode = None
+    file_uuid = None
     if request.GET:
-        slide_barcode = request.GET.get('slide_barcode',None)
+        file_uuid = request.GET.get('file_uuid', None)
     elif request.POST:
-        slide_barcode = request.POST.get('slide_barcode',None)
+        file_uuid = request.POST.get('file_uuid', None)
 
-    if slide_barcode:
-        slide_barcode = (None if re.compile(ur'[^A-Za-z0-9\-]').search(slide_barcode) else slide_barcode)
+    if file_uuid:
+        file_uuid = (None if re.compile(ur'[^A-Za-z0-9\-]').search(file_uuid) else file_uuid)
 
-    return get_image_data(request, slide_barcode)
+    return get_image_data(request, file_uuid)
 
 # Given a slide_barcode, returns image metadata in JSON format
-def get_image_data(request, slide_barcode):
+def get_image_data(request, file_uuid):
     status=200
     result = {}
 
-    if not slide_barcode:
+    if not file_uuid:
         status=503
         result = {
-            'message': "There was an error while processing this request: a valid slide_barcode was not supplied."
+            'message': "There was an error while processing this request: a valid file UUID was not supplied."
         }
     else:
         try:
             img_data_query = """
-                SELECT slide_barcode, level_0__width AS width, level_0__height AS height, mpp_x, mpp_y, file_gcs_url, sample_barcode, case_barcode
+                SELECT slide_barcode, level_0__width AS width, level_0__height AS height, mpp_x, mpp_y, file_gcs_url, sample_barcode, case_barcode, file_gdc_id
                 FROM [isb-cgc:metadata.TCGA_slide_images]
-                WHERE slide_barcode = '{}';
+                WHERE file_gdc_id = '{}';
             """
 
-            query_results = BigQuerySupport.execute_query_and_fetch_results(img_data_query.format(slide_barcode))
+            query_results = BigQuerySupport.execute_query_and_fetch_results(img_data_query.format(file_uuid))
 
             if query_results and len(query_results) > 0:
                 result = {
@@ -312,7 +312,8 @@ def get_image_data(request, slide_barcode):
                     'TissueID': query_results[0]['f'][0]['v'],
                     'sample-barcode': query_results[0]['f'][6]['v'],
                     'case-barcode': query_results[0]['f'][7]['v'],
-                    'img-type': ('Diagnostic Image' if slide_barcode.split("-")[-1].startswith("DX") else 'Tissue Slide Image' if slide_barcode.split("-")[-1].startswith("TS") else "N/A")
+                    'file_uuid': query_results[0]['f'][8]['v'],
+                    'img-type': ('Diagnostic Image' if query_results[0]['f'][0]['v'].split("-")[-1].startswith("DX") else 'Tissue Slide Image' if query_results[0]['f'][0]['v'].split("-")[-1].startswith("TS") else "N/A")
                 }
 
                 sample_metadata = get_sample_metadata(result['sample-barcode'])
@@ -321,11 +322,11 @@ def get_image_data(request, slide_barcode):
 
             else:
                 result = {
-                    'msg': 'Slide barcode {} was not found.'.format(slide_barcode)
+                    'msg': 'File UUID {} was not found.'.format(file_uuid)
                 }
 
         except Exception as e:
-            logger.error("[ERROR] While attempting to retrieve image data for {}:".format(slide_barcode))
+            logger.error("[ERROR] While attempting to retrieve image data for {}:".format(file_uuid))
             logger.exception(e)
             status = '503'
             result = {
@@ -353,18 +354,18 @@ def dicom(request, study_uid=None):
 
 
 @login_required
-def camic(request, slide_barcode=None):
+def camic(request, file_uuid=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     context = {}
 
-    if not slide_barcode:
-        messages.error("Error while attempting to display this pathology image: a slide barcode was not provided.")
+    if not file_uuid:
+        messages.error("Error while attempting to display this pathology image: a file UUID was not provided.")
         return redirect(reverse('cohort_list'))
 
-    images = [{'barcode': slide_barcode, 'thumb': '', 'type': ''}]
+    images = [{'file_uuid': file_uuid, 'thumb': '', 'type': ''}]
     template = 'GenespotRE/camic_single.html'
 
-    context['barcodes'] = images
+    context['files'] = images
     context['camic_viewer'] = settings.CAMIC_VIEWER
     context['img_thumb_url'] = settings.IMG_THUMBS_URL
 

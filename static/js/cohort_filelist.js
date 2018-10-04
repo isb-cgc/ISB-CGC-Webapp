@@ -466,7 +466,7 @@ require([
                     '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
                 '</div></td>' : '') +
                 (active_tab === 'camic' ? '<td><div class="col-filename camic-filename">' +
-                    '<div><a href="'+CAMIC_URL+files[i]['slide_barcode']+'/" target="_blank">' + files[i]['filename'] +
+                    '<div><a href="'+CAMIC_URL+files[i]['file_gdc_id']+'/" target="_blank">' + files[i]['filename'] +
                     '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
                     '<div class="osmisis" style="display: none;"><i>Open in caMicroscope</i></div></a></div>' +
                 '</div></td>' : '') +
