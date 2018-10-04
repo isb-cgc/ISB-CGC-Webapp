@@ -451,24 +451,24 @@ require([
                     accessible = true;
                 }
 
-            if(active_tab !== 'all') {
-                if (files[i]['cloudstorage_location'] && ((files[i]['dataformat'] == 'BAM') || (files[i]['datatype'] == 'Tissue slide image') || (files[i]['datatype'] == 'Diagnostic image'))) {
-                    if(active_tab === 'igv' && files[i]['dataformat'] == 'BAM') {
-                        val = files[i]['cloudstorage_location'] + ';' + files[i]['index_name'] + ',' + files[i]['sample'];
-                        dataTypeName = "gcs_bam";
-                        label = "IGV";
-                        checkbox_inputs += '<input aria-label="IGV Checkbox" class="igv'+(accessible? ' accessible':'')+'" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
-                        if (!accessible) {
-                            checkbox_inputs += ' disabled';
+                if(active_tab !== 'all') {
+                    if (files[i]['cloudstorage_location'] && ((files[i]['dataformat'] == 'BAM') || (files[i]['datatype'] == 'Tissue slide image') || (files[i]['datatype'] == 'Diagnostic image'))) {
+                        if(active_tab === 'igv' && files[i]['dataformat'] == 'BAM') {
+                            val = files[i]['cloudstorage_location'] + ';' + files[i]['index_name'] + ',' + files[i]['sample'];
+                            dataTypeName = "gcs_bam";
+                            label = "IGV";
+                            checkbox_inputs += '<input aria-label="IGV Checkbox" class="igv'+(accessible? ' accessible':'')+'" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
+                            if (!accessible) {
+                                checkbox_inputs += ' disabled';
+                            }
+                            checkbox_inputs += '>';
+                        } else if(active_tab === 'camic' && (files[i]['datatype'] == 'Tissue slide image' || files[i]['datatype'] == 'Diagnostic image')) {
+                            files[i]['slide_barcode'] = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
+                            files[i]['thumbnail'] = files[i]['cloudstorage_location'].split('/').slice(-2)[0];
                         }
-                        checkbox_inputs += '>';
-                    } else if(active_tab === 'camic' && (files[i]['datatype'] == 'Tissue slide image' || files[i]['datatype'] == 'Diagnostic image')) {
-                        files[i]['slide_barcode'] = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
-                        files[i]['thumbnail'] = files[i]['cloudstorage_location'].split('/').slice(-2)[0];
                     }
+                    files[i]['file_viewer'] = checkbox_inputs;
                 }
-                files[i]['file_viewer'] = checkbox_inputs;
-            }
 
                 var row = '<tr>';
                 var table_row_data = '';
@@ -502,13 +502,13 @@ require([
                                     '</div></td>';
                             break;
                         case 'thumbnail':
-                            table_row_data += '<td><alt="thumb" img src="'+IMG_THUMBS_URL+files[i]['thumbnail']+'/thmb_128x64.jpeg"></td>';
+                            table_row_data += '<td><img src="'+IMG_THUMBS_URL+files[i]['thumbnail']+'/thmb_128x64.jpeg" alt="thumb"></td>';
                             break;
                         case 'platform':
                             table_row_data += '<td>' + happy_name(files[i][column_name]) + '</td>';
                             break;
                         case 'filesize':
-                            table_row_data += '<td class="col-filesize">' + (files[i]['filesize'] ? formatFileSize(files[i]['filesize'] : 'N/A')  + '</td>';
+                            table_row_data += '<td class="col-filesize">' + (files[i]['filesize'] ? formatFileSize(files[i]['filesize']) : 'N/A')  + '</td>';
                             break;
                         default:
                             table_row_data += '<td>' + (files[i][column_name] || 'N/A') + '</td>';
