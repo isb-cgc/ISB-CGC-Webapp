@@ -451,24 +451,24 @@ require([
                     accessible = true;
                 }
 
-                if(active_tab !== 'all') {
-                    if (files[i]['cloudstorage_location'] && ((files[i]['dataformat'] == 'BAM') || (files[i]['datatype'] == 'Tissue slide image') || (files[i]['datatype'] == 'Diagnostic image'))) {
-                        if(active_tab === 'igv' && files[i]['dataformat'] == 'BAM') {
-                            val = files[i]['cloudstorage_location'] + ';' + files[i]['index_name'] + ',' + files[i]['sample'];
-                            dataTypeName = "gcs_bam";
-                            label = "IGV";
-                            checkbox_inputs += '<input aria-label="IGV Checkbox" class="igv'+(accessible? ' accessible':'')+'" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
-                            if (!accessible) {
-                                checkbox_inputs += ' disabled';
-                            }
-                            checkbox_inputs += '>';
-                        } else if(active_tab === 'camic' && (files[i]['datatype'] == 'Tissue slide image' || files[i]['datatype'] == 'Diagnostic image')) {
-                            files[i]['slide_barcode'] = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
-                            files[i]['thumbnail'] = files[i]['cloudstorage_location'].split('/').slice(-2)[0];
+            if(active_tab !== 'all') {
+                if (files[i]['cloudstorage_location'] && ((files[i]['dataformat'] == 'BAM') || (files[i]['datatype'] == 'Tissue slide image') || (files[i]['datatype'] == 'Diagnostic image'))) {
+                    if(active_tab === 'igv' && files[i]['dataformat'] == 'BAM') {
+                        val = files[i]['cloudstorage_location'] + ';' + files[i]['index_name'] + ',' + files[i]['sample'];
+                        dataTypeName = "gcs_bam";
+                        label = "IGV";
+                        checkbox_inputs += '<input aria-label="IGV Checkbox" class="igv'+(accessible? ' accessible':'')+'" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
+                        if (!accessible) {
+                            checkbox_inputs += ' disabled';
                         }
+                        checkbox_inputs += '>';
+                    } else if(active_tab === 'camic' && (files[i]['datatype'] == 'Tissue slide image' || files[i]['datatype'] == 'Diagnostic image')) {
+                        files[i]['slide_barcode'] = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
+                        files[i]['thumbnail'] = files[i]['cloudstorage_location'].split('/').slice(-2)[0];
                     }
-                    files[i]['file_viewer'] = checkbox_inputs;
                 }
+                files[i]['file_viewer'] = checkbox_inputs;
+            }
 
                 var row = '<tr>';
                 var table_row_data = '';
@@ -506,6 +506,9 @@ require([
                             break;
                         case 'platform':
                             table_row_data += '<td>' + happy_name(files[i][column_name]) + '</td>';
+                            break;
+                        case 'filesize':
+                            table_row_data += '<td class="col-filesize">' + (files[i]['filesize'] ? formatFileSize(files[i]['filesize'] : 'N/A')  + '</td>';
                             break;
                         default:
                             table_row_data += '<td>' + (files[i][column_name] || 'N/A') + '</td>';
@@ -792,7 +795,10 @@ require([
         update_displays_thread = setTimeout(function(){
             var build = $('#'+active_tab+'-files').find('.build :selected').val();
             var files_per_page = tab_files_per_page[active_tab];
-            var url = ajax_update_url[active_tab] + '?files_per_page=' +files_per_page + (active_tab != 'camic' && active_tab != 'dicom'  ? '&build='+build : '');
+            var url = ajax_update_url[active_tab] +
+                '?files_per_page=' +files_per_page +
+                (active_tab != 'camic' && active_tab != 'dicom'  ? '&build='+build : '') +
+                '&sort_column='+ tab_sort_column[active_tab][0] +'&sort_order='+tab_sort_column[active_tab][1];
             if(tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab][build]).length > 0){
                 url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab][build]);
             }
@@ -935,5 +941,14 @@ require([
             );
         }
     });
+
+    function formatFileSize(bytes) {
+        if(bytes == 0) return '0 B';
+        var k = 1000,
+            dm = 1,
+            sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+            i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
 
 });

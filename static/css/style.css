@@ -2264,6 +2264,8 @@ section .min-max {
     width: 90px; }
   #cohort-filelist .filelist-panel table td {
     height: 53px; }
+    #cohort-filelist .filelist-panel table td.col-filesize {
+      text-align: right; }
     #cohort-filelist .filelist-panel table td .col-filename div {
       display: block;
       white-space: nowrap;
