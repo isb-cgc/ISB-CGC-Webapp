@@ -483,6 +483,7 @@ require([
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + happy_name(files[i]['platform']) + '</td>' : '')+
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + files[i]['datacat'] + '</td>' : '') +
                 (active_tab !== 'dicom' ? '<td>' + files[i]['datatype'] + '</td><td>' + files[i]['dataformat'] + '</td>' : '') +
+                (active_tab === 'igv' || active_tab === 'camic' || active_tab === 'all' ? (files[i]['filesize'] ? '<td class="col-filesize">' + formatFileSize(files[i]['filesize']) + '</td>' : '<td></td>') : '') +
                 (active_tab === 'igv' ? (files[i]['file_viewer'] ? '<td>' + files[i]['file_viewer'] + '</td>' : '<td></td>') : '') +
             '</tr>';
 
@@ -765,7 +766,10 @@ require([
         update_displays_thread = setTimeout(function(){
             var build = $('#'+active_tab+'-files').find('.build :selected').val();
             var files_per_page = tab_files_per_page[active_tab];
-            var url = ajax_update_url[active_tab] + '?files_per_page=' +files_per_page + (active_tab != 'camic' && active_tab != 'dicom'  ? '&build='+build : '');
+            var url = ajax_update_url[active_tab] +
+                '?files_per_page=' +files_per_page +
+                (active_tab != 'camic' && active_tab != 'dicom'  ? '&build='+build : '') +
+                '&sort_column='+ tab_sort_column[active_tab][0] +'&sort_order='+tab_sort_column[active_tab][1];
             if(tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab][build]).length > 0){
                 url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab][build]);
             }
@@ -831,6 +835,15 @@ require([
             self.removeAttr('disabled');
             msg.hide();
         },$('.filelist-obtain .download-token').val(),"downloadToken");
+
+        if($(this).parents('.data-tab').find('.build :selected').val() == 'HG38'
+            && _.find(programs_this_cohort, function(prog){return prog == 'CCLE';})) {
+            base.showJsMessage("warning",
+                "You have exported a file list for a cohort which contains CCLE samples, with the build set to HG38.<br/>"+
+                "Please note that there are no HG38 samples for CCLE, so that program will be absent from the export."
+                , true
+            );
+        }
     });
 
     $('.data-tab-content').on('hover enter mouseover','.study-uid, .col-filename',function(e){
@@ -897,5 +910,14 @@ require([
             );
         }
     });
+
+    function formatFileSize(bytes) {
+        if(bytes == 0) return '0 B';
+        var k = 1000,
+            dm = 1,
+            sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+            i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
 
 });
