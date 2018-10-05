@@ -304,6 +304,7 @@ def get_image_data(request, file_uuid):
 
             if query_results and len(query_results) > 0:
                 result = {
+                    'slide_barcode': query_results[0]['f'][0]['v'],
                     'Width': query_results[0]['f'][1]['v'],
                     'Height': query_results[0]['f'][2]['v'],
                     'MPP-X': query_results[0]['f'][3]['v'],
