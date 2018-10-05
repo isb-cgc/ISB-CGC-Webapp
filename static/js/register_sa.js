@@ -63,8 +63,6 @@ require([
     });
 
     $('#verify-sa div input').change(function() {
-       // $('.register-sa-btn').attr("disabled","disabled");
-        console.warn("hello world");
         if ($('input[name="adjust-datasets"]').length) {
             if ($('input[name="adjust-datasets"]:checked').val() === 'alter') {
                 $('.register-sa-div').hide();
