@@ -111,10 +111,12 @@ require([
             data: fields,
             method: 'POST',
             success: function(data) {
-                $('.summary_statement').empty()
+                $('.summary_statement').empty();
                 if (data['all_user_datasets_verified']) {
-                   $('.summary_statement').append("The project, service account, and users were verified. The registration can proceed.")
+                    set_to_verification_success('.summary_statement', true);
+                    $('.summary_statement').append("The project, service account, and users were verified. The registration can proceed.")
                 } else {
+                    set_to_verification_success('.summary_statement', false);
                     $('.summary_statement').append("Problems were found during verification. Please review the summary below.")
                 }
                 $('.results_summary').show();
@@ -160,15 +162,21 @@ require([
 
                 if ('dcf_messages' in data) {
                     var dcf_analysis_reg_sas_div = $('.dcf_analysis_reg_sas');
-                    $('.registered_sa_statement').empty()
+                    $('.registered_sa_statement').empty();
                     $('.registered_sa_statement').append(data['dcf_messages']['dcf_analysis_reg_sas_summary']);
+                    var dcf_analysis_reg_sas_summary_success = data['dcf_messages']['dcf_analysis_reg_sas_summary'].indexOf('meets all requirements') > -1;
+                    set_to_verification_success('.registered_sa_statement', dcf_analysis_reg_sas_summary_success);
 
                     var dcf_analysis_project_div = $('.dcf_analysis_project');
-                    $('.project_statement').empty()
+                    $('.project_statement').empty();
                     $('.project_statement').append(data['dcf_messages']['dcf_analysis_project_summary']);
+                    var dcf_analysis_project_summary_success =data['dcf_messages']['dcf_analysis_project_summary'].indexOf('meets all requirements') > -1;
+                    set_to_verification_success('.project_statement', dcf_analysis_project_summary_success);
 
-                    $('.membership_statement').empty()
+                    $('.membership_statement').empty();
                     $('.membership_statement').append(data['dcf_messages']['dcf_analysis_project_members']);
+                    var dcf_analysis_project_members_success =data['dcf_messages']['dcf_analysis_project_members'].indexOf('meet requirements') > -1;
+                    set_to_verification_success('.membership_statement', dcf_analysis_project_members_success);
 
 
                     var dcf_analysis_sas_div = $('.dcf_analysis_sas');
@@ -177,7 +185,7 @@ require([
                     dcf_analysis_sas.empty();
                     for (var key in dcf_msg) {
                         var tr = $('<tr></tr>');
-                        var msg = dcf_msg[key]
+                        var msg = dcf_msg[key];
                         tr.append('<td>' + msg['id'] + '</td>');
                         if (msg['ok']) {
                             tr.append('<td><i class="fa fa-check"></i></td>');
@@ -189,8 +197,11 @@ require([
                     }
 
                     var dcf_analysis_data_div = $('.dcf_analysis_data');
-                    $('.data_summary_statement').empty()
+                    $('.data_summary_statement').empty();
                     $('.data_summary_statement').append(data['dcf_messages']['dcf_analysis_data_summary']);
+                    var dcf_analysis_data_summary_success =data['dcf_messages']['dcf_analysis_data_summary'].indexOf('was approved') > -1;
+                    set_to_verification_success('.data_summary_statement', dcf_analysis_data_summary_success);
+
                     var dcf_analysis_data = dcf_analysis_data_div.find('tbody');
                     var dcf_msg = data['dcf_messages']['dcf_analysis_data'];
                     dcf_analysis_data.empty();
@@ -294,6 +305,10 @@ require([
         dcf_analysis_data.empty();
     }
 
+    function set_to_verification_success(selection, success){
+        $(selection).removeClass('verification-success, verification-fail');
+        $(selection).addClass('verification-'+(success? 'success':'fail'));
+    }
 
     $('.retry-btn').on('click', function(e) {
         $('.retry-btn').attr("disabled","disabled");
