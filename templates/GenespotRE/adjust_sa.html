@@ -49,50 +49,48 @@
             <div class="col-sm-12 col-md-12 col-lg-12">
                 <div id="invalid-sa-error"></div>
                 <h4>Adjust available datasets for Service Account {{ sa_name }}</h4>
-                <ul>
-                    <li class="upper">
-                        <form id="verify-sa" method="POST" action="{% url 'verify_sa' user.id %}">
-                            {% csrf_token %}
-                            {% if sa_dataset_ids %}
-                                What adjustments do you need to make?
-                                <br />
-                                <div class="radio">
-                                    <label><input type="radio" name="adjust-datasets" value="remove" checked> Remove all controlled-access datasets</label>
-                                </div>
-                                <div class="radio">
-                                    <label><input type="radio" name="adjust-datasets" value="alter"> Add/Remove specific datasets</label>
-                                </div>
-                            {% endif %}
-                            <div id="datasets-adjust-div" {% if sa_dataset_ids %} style="display:none;" {% endif %}>
-                                Which dataset(s) would you like to use?
-                                <ul class="dataset-list">
-                                    {% for dataset in authorized_datasets %}
-                                        <li class="checkbox">
-                                            <label>
-                                                <input type="checkbox" name="datasets" value="{{ dataset.whitelist_id }}"{% if dataset.whitelist_id in sa_dataset_ids %}checked="checked"{% endif %}>{{ dataset.name }}
-                                            </label>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                                <div class="block">
-                                    <input type="submit" class="verify-sa-btn btn btn-primary" value="Verify Service Account Users"/>
-                                    <div class="collapse verify-pending" style="display: none;">
-                                        <i class="fa fa-circle-o-notch fa-spin"></i>  Please wait...
-                                    </div>
-                                </div>
-                                <p>*This will allow us to verify who is allowed to use this service account.</p>
+                <div class="verify-register-sa-div">
+                    <form id="verify-sa" method="POST" action="{% url 'verify_sa' user.id %}">
+                        {% csrf_token %}
+                        {% if sa_dataset_ids %}
+                            What adjustments do you need to make?
+                            <br />
+                            <div class="radio">
+                                <label><input type="radio" name="adjust-datasets" value="remove" checked> Remove all controlled-access datasets</label>
                             </div>
-                            <input type="hidden" name="gcp_id" value="{{ gcp_id }}"/>
-                            <input type="hidden" name="user_sa" value="{{ sa_name }}"/>
-                            <input type="hidden" name="is_adjust" value="true" />
-                        </form>
-                    </li>
+                            <div class="radio">
+                                <label><input type="radio" name="adjust-datasets" value="alter"> Add/Remove specific datasets</label>
+                            </div>
+                        {% endif %}
+                        <div id="datasets-adjust-div" {% if sa_dataset_ids %} style="display:none;" {% endif %}>
+                            Which dataset(s) would you like to use?
+                            <ul class="dataset-list">
+                                {% for dataset in authorized_datasets %}
+                                    <li class="checkbox">
+                                        <label>
+                                            <input type="checkbox" name="datasets" value="{{ dataset.whitelist_id }}"{% if dataset.whitelist_id in sa_dataset_ids %}checked="checked"{% endif %}>{{ dataset.name }}
+                                        </label>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <div class="block">
+                                <input type="submit" class="verify-sa-btn btn btn-primary" value="Verify Service Account Users"/>
+                                <div class="collapse verify-pending" style="display: none;">
+                                    <i class="fa fa-circle-o-notch fa-spin"></i>  Please wait...
+                                </div>
+                            </div>
+                            <p class="text-note">*This will allow us to verify who is allowed to use this service account.</p>
+                        </div>
+                        <input type="hidden" name="gcp_id" value="{{ gcp_id }}"/>
+                        <input type="hidden" name="user_sa" value="{{ sa_name }}"/>
+                        <input type="hidden" name="is_adjust" value="true" />
+                    </form>
                     <div class="results_summary" style="display:none;">
-                        <h3>Verification Results</h3>
+                        <h5>Verification Results</h5>
                         <div class="summary_statement"></div>
                     </div>
                     <div class="user-verification" style="display:none;">
-                        <h4>Google Cloud Project User ISB-CGC Registration and Identity Linkages:</h4>
+                        <h5>Google Cloud Project User ISB-CGC Registration and Identity Linkages:</h5>
                         <table class="table">
                             <thead>
                             <tr>
@@ -107,10 +105,8 @@
                         </table>
                     </div>
                     <div class="dcf_analysis_data" style="display: none;">
-                        <h4>Dataset Permissions Verification:</h4>
-                         <ul>
-                            <li class="data_summary_statement"></li>
-                        </ul>
+                        <h5>Dataset Permissions Verification:</h5>
+                        <div class="data_summary_statement"></div>
                         <table class="table">
                             <thead>
                             <tr>
@@ -123,20 +119,16 @@
                         </table>
                     </div>
                     <div class="dcf_analysis_reg_sas" style="display:none;">
-                        <h4>Registered Service Account Verification Results:</h4>
-                        <ul>
-                            <li class="registered_sa_statement"></li>
-                        </ul>
+                        <h5>Registered Service Account Verification Results:</h5>
+                        <div class="registered_sa_statement"></div>
                     </div>
                     <div class="dcf_analysis_project" style="display: none;">
-                        <h4>Google Cloud Project Verification Results:</h4>
-                        <ul>
-                            <li class="project_statement"></li>
-                            <li class="membership_statement"></li>
-                        </ul>
+                        <h5>Google Cloud Project Verification Results:</h5>
+                        <div class="project_statement"></div>
+                        <div class="membership_statement"></div>
                     </div>
                     <div class="dcf_analysis_sas" style="display: none;">
-                        <h4>Google Cloud Project Service Account Verification Results:</h4>
+                        <h5>Google Cloud Project Service Account Verification Results:</h5>
                         <table class="table">
                             <thead>
                             <tr>
@@ -149,12 +141,12 @@
                         </table>
                     </div>
                     <div class="cannot-register" style="display: none;">
-                        <p>Some of your users do not have access to the datasets you would like to use. Please try again when they have the proper permissions.</p>
+                        <p class="register-sa-verification-fail">Some of your users do not have access to the datasets you would like to use. Please try again when they have the proper permissions.</p>
                         <input type="button" class="retry-btn btn btn-primary" value="Retry"/>
                         <a href="{% url 'user_gcp_list' user.id %}" class="back-btn btn btn-primary" role="button">Go Back</a>
                     </div>
                     <div class="have_verified_div" style="display: none;">
-                        <p>We have verified that all of the users in your Google Cloud Project have permission to access the proposed datasets.</p>
+                        <p class="register-sa-verification-success">We have verified that all of the users in your Google Cloud Project have permission to access the proposed datasets.</p>
                     </div>
                     <div class="register-sa-div" {% if not sa_dataset_ids %} style="display:none;" {% endif %}>
                         <form id="register-sa" method="POST" action="{% url 'register_sa' user.id %}">
@@ -170,7 +162,7 @@
                             <input type="hidden" name="is_adjust" value="true" />
                         </form>
                     </div>
-                </ul>
+                </div>
             </div>
         </div>
     </div>
