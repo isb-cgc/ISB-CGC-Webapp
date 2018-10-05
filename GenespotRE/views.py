@@ -304,6 +304,7 @@ def get_image_data(request, file_uuid):
 
             if query_results and len(query_results) > 0:
                 result = {
+                    'slide-barcode': query_results[0]['f'][0]['v'],
                     'Width': query_results[0]['f'][1]['v'],
                     'Height': query_results[0]['f'][2]['v'],
                     'MPP-X': query_results[0]['f'][3]['v'],
@@ -312,7 +313,7 @@ def get_image_data(request, file_uuid):
                     'TissueID': query_results[0]['f'][0]['v'],
                     'sample-barcode': query_results[0]['f'][6]['v'],
                     'case-barcode': query_results[0]['f'][7]['v'],
-                    'file_uuid': query_results[0]['f'][8]['v'],
+                    'file-uuid': query_results[0]['f'][8]['v'],
                     'img-type': ('Diagnostic Image' if query_results[0]['f'][0]['v'].split("-")[-1].startswith("DX") else 'Tissue Slide Image' if query_results[0]['f'][0]['v'].split("-")[-1].startswith("TS") else "N/A")
                 }
 
