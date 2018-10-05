@@ -16,7 +16,7 @@ $base-dark: #000;
 
 // Brand color
 $isb-primary: #2A537A;
-$isb-lighter: #58a8d6;
+$isb-lighter: #4CC2D6;
 $isb-info: #2B7388;
 $isb-success: #C9DD03;
 $isb-warning: #F7991B;
@@ -58,6 +58,9 @@ $gray-button-bg-border: #888;
 $blue-button-bg: #2a537a;
 $blue-button-bg-border: #2a537a;
 
+$token-bg-color: #d5e9fd;
+$token-bg-color-hover: #c2dbf5;
+
 // --------------------------------------------
 // Typography
 // --------------------------------------------
@@ -77,7 +80,7 @@ $bold-font-weight: 700;
 
 $heading-font-weight: $bold-font-weight;
 
-$font-color: darken($base-dark, 10%);
+$font-color: $base-dark;
 $link-color: $isb-info;
 
 // --------------------------------------------
