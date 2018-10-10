@@ -102,10 +102,44 @@
                 width: 45%
 
     .landing-content
-        margin-top: 100vh
-        padding-bottom: 50px
+        background-color: white
+        position: absolute
+        width: 100vw
+        left: 0
+        bottom: 0
+        display: none
         h2
             font-size: 25px
             color: $isb-primary
         p
             color: darken($isb-dark, 10%)
+    .firstRow
+        margin-top: 28px
+
+    .pull-tab
+        .pull-tab-button
+            width: 150px
+            height: 28px
+            color: white
+            font-weight: bold
+            text-align: center
+            font-size: 18px
+            background-color: rgba(0,0,0,0.5)
+            position: absolute
+            left: 50%
+            transform: translateX(-50%)
+            &.up
+                border-top-left-radius: 10px
+                border-top-right-radius: 10px
+                border-width: 2px 2px 0 2px
+                bottom: 0
+                border-style: solid
+                border-color: #4cc2d6
+            &.down
+                border-bottom-left-radius: 10px
+                border-bottom-right-radius: 10px
+                border-width: 0 2px 2px 2px
+                top: 0
+
+            &:hover
+                background-color: darken($isb-primary, 10%)
