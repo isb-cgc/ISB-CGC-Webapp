@@ -346,5 +346,6 @@ require([
     }
 
     // Initialize tooltips
+    console.debug($('[data-toggle="tooltip"]'));
     $('[data-toggle="tooltip"]').tooltip();
 });
