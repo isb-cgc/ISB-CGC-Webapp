@@ -344,4 +344,7 @@ require([
         });
         return Object.keys(genes_count_object);
     }
+
+    // Initialize tooltips
+    $('[data-toggle="tooltip"]').tooltip();
 });

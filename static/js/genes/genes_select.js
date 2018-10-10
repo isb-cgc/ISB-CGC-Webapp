@@ -112,6 +112,8 @@ require([
         return cookieValue;
     }
 
+    $('[data-toggle="tooltip"]').tooltip();
+
 });/**
  * Created by rossbohner on 12/30/15.
  */
