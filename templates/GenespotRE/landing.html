@@ -93,54 +93,69 @@
                 </div>
             </div>
         </div>
-    </header>
-    <div class="row landing-content">
-        <div class="col-sm-12">
-            <div class="row">
-                <div class="col-sm-10 col-sm-offset-1 lj-icon-box-heading lj-text-left">
-                    <h2 style="display:inline-block">Partners</h2>
-                    <div style="display:inline-block; padding-left:50px">
-                        <a href="https://cloud.google.com/" target = "_blank" style="text-decoration:none">
-                            <img src="{% static 'img/gcp-logo.png' %}" alt="Google Cloud Platform" style="width:130px;height:80px;"/>
-                        </a>
-                        <a href="https://gdit.com/" target = "_blank" style="text-decoration:none">
-                            <img src="{% static 'img/gdit_logo.png' %}" alt="General Dynamics Information Technology, Inc." style="padding-left:50px;width:338px;height:40px;"/>
-                        </a>
-                    </div>
-                </div>
+        <div class="pull-tab ">
+            <div class="pull-tab-button up">
+                <i class="fa fa-chevron-up"></i>
             </div>
         </div>
+    </header>
 
-        <div class="col-sm-10 col-sm-offset-1">
-            <h2>About Us</h2>
-            <p>The ISB Cancer Genomics Cloud Resource (ISB-CGC) is a platform that serves as a large-scale repository and provides the computational infrastructure necessary to carry out cancer genomics research at unprecedented scales.</p>
-            <p>Please use a <a href="https://accounts.google.com/signup/v2/webcreateaccount?hl=en&flowName=GlifWebSignIn&flowEntry=SignUp&nogm=true" target="_blank">Google registered email account</a> to log into this system.</p>
-            <p style="font-weight:bold">When using these tools in your publication, please cite <a href="http://cancerres.aacrjournals.org/content/77/21/e7.long" target = "_blank">Reynolds et al. Cancer Res 2017</a></p>
+    <div class="landing-content">
+        <div class="container">
+            <div class="row cgc-learn-more">
+                <div class="pull-tab ">
+                    <div class="pull-tab-button down">
+                        <i class="fa fa-chevron-down"></i>
+                    </div>
+                </div>
+                <div class="col-sm-12 firstRow">
+                    <div class="row">
+                        <div class="col-sm-10 col-sm-offset-1 lj-icon-box-heading lj-text-left">
+                            <h2 style="display:inline-block">Partners</h2>
+                            <div style="display:inline-block; padding-left:50px">
+                                <a href="https://cloud.google.com/" target = "_blank" style="text-decoration:none">
+                                    <img src="{% static 'img/gcp-logo.png' %}" alt="Google Cloud Platform" style="width:130px;height:80px;"/>
+                                </a>
+                                <a href="https://gdit.com/" target = "_blank" style="text-decoration:none">
+                                    <img src="{% static 'img/gdit_logo.png' %}" alt="General Dynamics Information Technology, Inc." style="padding-left:50px;width:338px;height:40px;"/>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-10 col-sm-offset-1">
+                    <h2>About Us</h2>
+                    <p>The ISB Cancer Genomics Cloud Resource (ISB-CGC) is a platform that serves as a large-scale repository and provides the computational infrastructure necessary to carry out cancer genomics research at unprecedented scales.</p>
+                    <p>Please use a <a href="https://accounts.google.com/signup/v2/webcreateaccount?hl=en&flowName=GlifWebSignIn&flowEntry=SignUp&nogm=true" target="_blank">Google registered email account</a> to log into this system.</p>
+                    <p style="font-weight:bold">When using these tools in your publication, please cite <a href="http://cancerres.aacrjournals.org/content/77/21/e7.long" target = "_blank">Reynolds et al. Cancer Res 2017</a></p>
 
 
-            {% if version %}
-            <br/>
-            Last deployed to version {{ version.version }} on {{ version.date }}
-            {% endif %}
+                    {% if version %}
+                    <br/>
+                    Last deployed to version {{ version.version }} on {{ version.date }}
+                    {% endif %}
+                </div>
+
+                <div class="col-sm-10 col-sm-offset-1">
+                    <h2>Funding</h2>
+                    <p>This project has been funded in whole with Federal funds from the National Cancer Institute, National Institutes of Health, Department of Health and Human Services, under Leidos NCI Agreement No. 17X148 TO2.</p>
+                </div>
+
+
+                <div class="col-sm-10 col-sm-offset-1">
+                    <h2>Warning Notice</h2>
+                    <p>You are accessing a U.S. Government (National Institute of Health (NIH), National Cancer Institute (NCI) and Institute for Systems Biology ISB) website / application which may contain information that must be protected under the U. S. Privacy Act or other sensitive information which is intended for authorized Scientific or Research use only. Network activity and Application usage is monitored to maintain system security, availability, and to ensure appropriate and legitimate usage, there is no right or expectation to privacy on this website / system. Unauthorized attempts to upload information, change information, or use of this website for other than its intended purpose may result in disciplinary action, civil, and/or criminal penalties. Any individual or system that accesses this website should have no expectation of privacy regarding any communications or data processed by this website. Anyone accessing this website expressly consents to monitoring of their actions and all communication or data transiting or stored on or related to this website and is advised that if such monitoring reveals possible evidence of criminal activity, NIH may provide that evidence to law enforcement officials.</p>
+                </div>
+
+            </div>
         </div>
-
-        <div class="col-sm-10 col-sm-offset-1">
-            <h2>Funding</h2>
-            <p>This project has been funded in whole with Federal funds from the National Cancer Institute, National Institutes of Health, Department of Health and Human Services, under Contract No. HHSN261201400007C.</p>
-        </div>
-
-
-        <div class="col-sm-10 col-sm-offset-1">
-            <h2>Warning Notice</h2>
-            <p>You are accessing a U.S. Government (National Institute of Health (NIH), National Cancer Institute (NCI) and Institute for Systems Biology ISB) website / application which may contain information that must be protected under the U. S. Privacy Act or other sensitive information which is intended for authorized Scientific or Research use only. Network activity and Application usage is monitored to maintain system security, availability, and to ensure appropriate and legitimate usage, there is no right or expectation to privacy on this website / system. Unauthorized attempts to upload information, change information, or use of this website for other than its intended purpose may result in disciplinary action, civil, and/or criminal penalties. Any individual or system that accesses this website should have no expectation of privacy regarding any communications or data processed by this website. Anyone accessing this website expressly consents to monitoring of their actions and all communication or data transiting or stored on or related to this website and is advised that if such monitoring reveals possible evidence of criminal activity, NIH may provide that evidence to law enforcement officials.</p>
-        </div>
-
     </div>
-    <script type="text/javascript">
+{#    <script type="text/javascript">#}
 {#        {% if tree_data %}#}
 {#            var tree_data = {{ tree_data|safe }};#}
 {#        {% endif %}#}
-    </script>
+{#    </script>#}
 {% endblock %}
 
 {% block js_file %}{% static 'js/landing.js' %}{% endblock %}
