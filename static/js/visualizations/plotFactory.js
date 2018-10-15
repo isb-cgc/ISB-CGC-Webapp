@@ -380,6 +380,11 @@ define([
     }
 
     function select_plot(args){//plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, data){
+        /*var worksheet_toggle = $(args.plot_selector).parents('.worksheet-content').find('.worksheet-nav-toggle');
+        if(!worksheet_toggle.hasClass('open')){
+            $(worksheet_toggle).trigger('click');
+        }
+        alert($('.worksheet.active .worksheet-panel-body:first').width());*/
         var width  = $('.worksheet.active .worksheet-panel-body:first').width(), //TODO should be based on size of screen
             height = 725, //TODO ditto
             // Top margin: required to keep top-most Y-axis ticks from being cut off on non-scrolled y axes
@@ -543,6 +548,13 @@ define([
             type: 'GET',
             url: plot_data_url,
             success: function(data, status, xhr) {
+                //widen the plot section by opening the plot panel
+
+                /*var worksheet_toggle = $(args.plot_selector).parents('.worksheet-content').find('.worksheet-nav-toggle');
+                if(!worksheet_toggle.hasClass('open')){
+                    $(worksheet_toggle).trigger('click');
+
+                }*/
                 select_plot({plot_selector    : args.plot_selector,
                              legend_selector  : args.legend_selector,
                              pairwise_element : args.pairwise_element,

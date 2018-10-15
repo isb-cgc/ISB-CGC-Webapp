@@ -127,7 +127,7 @@
                         <!-- worksheet data source pane -->
                         <div id="source_pane-{{ worksheet.id }}" class="worksheet-nav">
 
-                            <h5>Source Data</h5>
+                            <h4>Source Data</h4>
                             <ul class="list">
                                 <li class="list-item">
                                     <div class="list-item__heading">
@@ -149,7 +149,7 @@
                                                             <form action="{% url 'worksheet_gene_delete' workbook_id=workbook.id worksheet_id=worksheet.id gene_id=gene.id %}" method="POST">
                                                                 {% csrf_token %}
                                                                 {% if workbook.owner.id == user.id %}
-                                                                    <button type="submit" class="text-danger workbook-remove-item" aria-label="Remove Gene or miRNA"><i class="fa fa-close"></i></button>
+                                                                    <button type="submit" title="Delete" class="text-danger workbook-remove-item" aria-label="Remove Gene or miRNA"><i class="fa fa-times"></i></button>
                                                                 {% endif %}
                                                                 {{ gene.gene }}
                                                             </form>
@@ -186,7 +186,7 @@
                                                             <form action="{% url 'worksheet_variables_delete' workbook_id=workbook.id worksheet_id=worksheet.id variable_id=variable.id %}" method="POST">
                                                                 {% csrf_token %}
                                                                 {% if workbook.owner.id == user.id %}
-                                                                    <button type="submit" class="text-danger workbook-remove-item" aria-label="Remove Variable"><i class="fa fa-close"></i></button>
+                                                                    <button type="submit" title="Delete" class="text-danger workbook-remove-item" aria-label="Remove Variable"><i class="fa fa-times"></i></button>
                                                                 {% endif %}
                                                                 {{ variable.name }}
                                                             </form>
@@ -221,7 +221,7 @@
                                                         {% if workbook.owner.id == user.id %}
                                                             <form action="{% url 'remove_cohort_from_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id cohort_id=cohort.id %}" method="POST">
                                                                 {% csrf_token %}
-                                                                <button type="submit" class="text-danger workbook-remove-item" aria-label="Remove Cohort"><i class="fa fa-close"></i></button>
+                                                                <button type="submit" title="Delete" class="text-danger workbook-remove-item" aria-label="Remove Cohort"><i class="fa fa-times"></i></button>
                                                         {% endif %}
                                                         {% if cohort|get_cohort_perm:request %}
                                                             <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
@@ -263,7 +263,7 @@
                             </div>
                             {% if workbook.owner.id == user.id %}
                                 <h5>Analysis Type</h5>
-                                <div class="form-group gray-area">
+                                <div class="form-group">
                                     <select aria-label="Analysis Type" id="{{ worksheet.id }}-analysis-type" worksheet_id="{{ worksheet.id }}" class="form-control plot_selection">
                                         {% if worksheet.active_plot %}
                                             <option value="{{ worksheet.active_plot.type }}" selected >{{ worksheet.active_plot.type }}</option>

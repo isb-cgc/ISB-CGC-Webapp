@@ -114,17 +114,28 @@
         .fa-caret-left
           display: none
 
-    .list-item__heading i
-      font-size: $font-size-small
-      font-weight: $regular-font-weight
-      opacity: 0.8
-      margin-top: 5px
+    h4
+      color: $isb-primary
+
+    .list-item__heading
+      font-size: $font-size
+      font-weight: $bold-font-weight
+      i
+        font-size: $font-size-small
+        font-weight: $regular-font-weight
+        opacity: 0.8
+        margin-top: 5px
+
 
     .workbook-remove-item
       border: none
-      padding: 2px
-      margin-right: 4px
+      outline: 0
+      //color: #2A537A
+      //padding: 2px
+      padding: 0 4px 0 10px
       background: none
+      //&:hover
+        //color: #a94442
 
   &-content
     float: left
