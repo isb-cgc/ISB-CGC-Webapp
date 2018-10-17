@@ -148,12 +148,14 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 }
             }
 
+            var worksheet_id = $('.worksheet.active').attr('id');
+            var plot_area_clip_id = 'plot_area_clip_' + worksheet_id;
             var plot_area = svg.append('g')
-                .attr('clip-path', 'url(#plot_area_clip)')
+                .attr('clip-path', 'url(#'+plot_area_clip_id+')')
                 .attr('transform','translate(0,'+margin.top+')');
 
             plot_area.append('clipPath')
-                .attr('id', 'plot_area_clip')
+                .attr('id', plot_area_clip_id)
                 .append('rect')
                 .attr({ width: width - margin.left - margin.right,
                     height: height - margin.top - margin.bottom})
@@ -249,7 +251,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
 
             // append axes labels
             var xAxisXPos = (parseInt(svg.attr('width')>width ? width : svg.attr('width'))+margin.left)/2;
-            var xAxisYPos = parseInt(svg.attr('height')>height ? height : svg.attr('height'))-10;
+            var xAxisYPos = parseInt(svg.attr('height')>height ? height : svg.attr('height')-margin.bottom/2);
             svg.append('g')
                 .attr('class','x-label-container')
                 .append('text')
@@ -257,11 +259,6 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'translate(' + xAxisXPos + ',' + xAxisYPos + ')')
                 .text(xLabel);
-
-            d3.select('.x.label').call(d3textwrap.textwrap().bounds({width: (width-margin.left)*0.75, height: 80}));
-            d3.select('.x-label-container').selectAll('foreignObject').attr('style','transform: translate('+((width/2)-(((width-margin.left)*0.75)/2)) + 'px,' + (height - 80)+'px);');
-            d3.select('.x-label-container').selectAll('div').attr('class','axis-label');
-
             var yAxisXPos = (parseInt(svg.attr('height')>height ? height : svg.attr('height'))-margin.bottom)/2;
             svg.append('g')
                 .attr('class','y-label-container')

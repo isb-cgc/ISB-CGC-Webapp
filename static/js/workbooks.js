@@ -180,9 +180,7 @@ require([
     }
 
     $('.show-settings-flyout').on('click', function () {
-        if($('.toggle-selection').hasClass('active')) {
-            $('.toggle-selection').click();
-        }
+        turn_off_toggle_selector();
         show_plot_settings();
     });
 
@@ -1000,9 +998,7 @@ require([
     $(".plot_selection").on("change", function(event){
         var self = this;
         $(this).find(":disabled :selected").remove();
-        if($('.toggle-selection').hasClass('active')) {
-            $('.toggle-selection').click();
-        }
+        turn_off_toggle_selector();
         var plot_type = $(this).val();
         var flyout = $(this).closest('.worksheet-body').find('.settings-flyout');
         plot_type_selex_update();
@@ -1100,10 +1096,10 @@ require([
 
     // Because we do not have a fixed height set but won't know our ideal height (per the size of the source panel)
     // after load, we need to set it manually in JS
-    function setPlotPanelHeight(active_sheet){
-        $(active_sheet).find('.worksheet-panel-body').css('max-height',$('#source_pane-'+$(active_sheet).attr('id')).height()-
-            ($(active_sheet).find('.worksheet-content').height()-$(active_sheet).find('.worksheet-panel-body').outerHeight()) +'px');
-    };
+    //function setPlotPanelHeight(active_sheet){
+        //$(active_sheet).find('.worksheet-panel-body').css('max-height',$('#source_pane-'+$(active_sheet).attr('id')).height()-
+          //  ($(active_sheet).find('.worksheet-content').height()-$(active_sheet).find('.worksheet-panel-body').outerHeight()) +'px');
+    //};
 
     // Prep all unloaded worksheets to load on selection
     $('a[data-toggle-type="worksheet"]').on('shown.bs.tab', function (e) {
@@ -1132,7 +1128,7 @@ require([
                     }
                 }
             });
-            setPlotPanelHeight(active_sheet);
+            //setPlotPanelHeight(active_sheet);
         }
     });
 
@@ -1166,6 +1162,14 @@ require([
         return true;
     };
 
+    function turn_off_toggle_selector(){
+        var worksheet_id = $('.worksheet.active').attr('id');
+        var toggle_selection_selector = '#' + worksheet_id + ' .toggle-selection';
+        if($(toggle_selection_selector).hasClass('active')) {
+            $('#' + worksheet_id + ' .toggle-selection').click();
+        }
+    }
+
     // Generates the actual svg plots by accepting the plot settings configured in the settings area
     function generate_plot(args){
         //$('.legend').hide();
@@ -1193,11 +1197,10 @@ require([
 
         var plot_selector   = '#' + plot_element.prop('id') + ' .plot-div';
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
-        var toggle_selection_selector = '#' + plot_element.prop('id') + ' .toggle-selection';
+
+        var toggle_selection_selector = '#' + args.worksheet_id + ' .toggle-selection';
         $(legend_selector).hide();
-        if($(toggle_selection_selector).hasClass('active')) {
-            $(toggle_selection_selector).click();
-        }
+        turn_off_toggle_selector();
 
         // Set Color override
         var color_override = false;
@@ -1214,7 +1217,6 @@ require([
             $(toggle_selection_selector).hide();
         }
         else {
-            //$('.toggle-selection').show();
             $(toggle_selection_selector).show();
         }
         plotFactory.generate_plot(
@@ -1248,8 +1250,7 @@ require([
                 }
 
                 update_plot_elem_rdy();
-
-                plot_loader.fadeOut();
+                plot_loader.hide();
             }
         );
     }
@@ -1486,7 +1487,10 @@ require([
                             .addClass('alert alert-info alert-dismissible')
                             .text(data.message));
                 }
-                $('.toggle-selection').click();
+                //$('.toggle-selection').click();
+                //var toggle_selection_selector = '#' + plot_element.prop('id') + ' .toggle-selection';
+                //alert();
+                turn_off_toggle_selector();
                 $('.modal').modal('hide');
                 form.reset();
                 $(form).find('input[type="submit"]').removeAttr('disabled');
@@ -1646,7 +1650,7 @@ require([
             }
             $(active_sheet).attr("is-loaded","true");
         }
-        setPlotPanelHeight(active_sheet);
+        //setPlotPanelHeight(active_sheet);
     });
 
     update_plot_elem_rdy();

@@ -75,7 +75,7 @@ define([
         // Bar Chart
         var svg = d3.select(plot_selector)
             .append('svg')
-            .attr('width', width + 10)
+            .attr('width', width)
             .attr('height', height);
         var bar_width = 25;
         var plot = bar_graph_obj.createBarGraph(
@@ -221,18 +221,20 @@ define([
 
     function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units) {
         var margin = {top: 10, bottom: 115, left: 140, right: 0};
-        var cubby_size = 115;
+        var cubby_max_size = 150; // max cubby size
+        var cubby_min_size = 75; // min cubby size
+        var view_width = width-margin.left-margin.right;
+        var view_height = height-margin.top-margin.bottom;
         var xdomain = vizhelpers.get_domain(data, 'x');
         var ydomain = vizhelpers.get_domain(data, 'y');
-
+        var cubby_size = Math.min(cubby_max_size, Math.min(Math.floor(view_width/xdomain.length), Math.floor(view_height/ydomain.length)));
+        cubby_size = cubby_size < cubby_min_size ? cubby_min_size : cubby_size;
         var cubby_width = xdomain.length * cubby_size + margin.left + margin.right;
         var cubby_height = ydomain.length * cubby_size + margin.top + margin.bottom;
-
         var svg = d3.select(plot_selector)
             .append('svg')
-            .attr('width', cubby_width + 10)
-            .attr('height', cubby_height)
-            .style('padding-left','10px');
+            .attr('width', width)
+            .attr('height', height);
 
         var plot = cubby_plot_obj.create_cubbyplot(
             svg,
@@ -380,13 +382,8 @@ define([
     }
 
     function select_plot(args){//plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, data){
-        /*var worksheet_toggle = $(args.plot_selector).parents('.worksheet-content').find('.worksheet-nav-toggle');
-        if(!worksheet_toggle.hasClass('open')){
-            $(worksheet_toggle).trigger('click');
-        }
-        alert($('.worksheet.active .worksheet-panel-body:first').width());*/
-        var width  = $('.worksheet.active .worksheet-panel-body:first').width(), //TODO should be based on size of screen
-            height = 725, //TODO ditto
+        var width  = $('.worksheet.active .worksheet-panel-body:first').width(),
+            height = $('.worksheet.active .worksheet-panel-body:first').height(),
             // Top margin: required to keep top-most Y-axis ticks from being cut off on non-scrolled y axes
             // Bottom margin: takes into account double-wrapped x-axis title and wrapped long-text x-axis labels
             margin = {top: 15, bottom: 150, left: 80, right: 10},
