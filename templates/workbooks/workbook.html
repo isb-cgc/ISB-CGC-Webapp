@@ -63,7 +63,7 @@
         <ul class="nav nav-tabs_excel" id="worksheets-tabs">
             <!-- for each worksheet in workbook -->
             {% for worksheet in workbook.worksheets %}
-                {% if forloop.counter < 4 %}
+                {% if forloop.counter < 6 %}
                     <li class="{% if display_worksheet and display_worksheet.id == worksheet.id %} active {% elif not display_worksheet and forloop.counter == 1 %} active {% endif %}">
                          <a href="#{{ worksheet.id }}" data-toggle="tab" data-toggle-type="worksheet" data-sheet-id="{{ worksheet.id }}" is-loaded="false" title="{{ worksheet.name|wrap_text }}">{{ worksheet.name }}</a>
                          {% if workbook.owner.id == request.user.id %}
@@ -82,12 +82,12 @@
                     </li>
                 {% endif %}
             {% endfor %}
-            {% if workbook.worksheet_set.all|length > 3 %}
+            {% if workbook.worksheet_set.all|length > 5 %}
                 <li class="dropdown" id="more-tabs">
                     <button class="btn btn-symbol" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></button>
                     <ul class="dropdown-menu" id="worksheets-dropdown-menu">
                     {% for worksheet in workbook.worksheet_set.all  %}
-                        {% if forloop.counter >= 4 %}
+                        {% if forloop.counter >= 6 %}
                         <li class="{% if display_worksheet and display_worksheet.id == worksheet.id %} active {% endif %}">
                             <a href="#{{ worksheet.id }}" data-toggle="tab" data-sheet-id="{{ worksheet.id }}">{{ worksheet.name }}</a>
                             <div class="dropdown">

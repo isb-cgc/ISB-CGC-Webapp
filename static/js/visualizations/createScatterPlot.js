@@ -27,9 +27,18 @@ var Counter = {
 
 var RECALC_THROTTLE = 75;
 
-define (['jquery', 'd3', 'd3textwrap', 'vizhelpers', 'underscore'],
-function($, d3, d3textwrap, vizhelpers, _) {
-
+define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
+function($, d3, d3tip, d3textwrap, vizhelpers, _) {
+    var tip = d3tip()
+                .attr('class', 'd3-tip')
+                .direction('n')
+                .offset([0, 0])
+                .html(function(d) {
+                return 'Case: ' + d['case_id'] + '<br/>'+
+                    //'x: ' + d['x'] +'<br/>'+
+                    //'y: ' + d['y'] +'<br/>'+
+                        'Sample: ' + d['sample_id'] +'</span>'
+                });
     var helpers = Object.create(vizhelpers, {});
 
     var selex_active = false;
@@ -46,8 +55,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
     var selectedSamples = null;
 
     return {
-        create_scatterplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, colorBy, legend, width, height, cohort_set) {
-            var margin = {top: 10, bottom: 100, left: 120, right: 10};
+        create_scatterplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, margin, colorBy, legend, width, height, cohort_set) {
             // We require at least one of the axes to have valid data
             var checkXvalid = 0;
             var checkYvalid = 0;
@@ -88,7 +96,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
             var yAxis = d3.svg.axis()
                     .scale(yScale)
                     .orient("left")
-                    .tickSize(-width - margin.left - margin.right, 0, 0);
+                    .tickSize(-width + margin.left + margin.right, 0, 0);
 
             var xVal = function(d) {
                 if (helpers.isValidNumber(d[xParam])) {
@@ -99,12 +107,12 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 }
             };
 
-            var xScale = d3.scale.linear().range([margin.left, width]).domain(domain);
+            var xScale = d3.scale.linear().range([margin.left, width-margin.right]).domain(domain);
             var xMap = function(d) {if(typeof(Number(d.x)) == "number"){return xScale(xVal(d));} else { return 0;}};
             var xAxis = d3.svg.axis()
                     .scale(xScale)
                     .orient("bottom")
-                    .tickSize(-height - margin.top - margin.bottom, 0, 0);
+                    .tickSize(-height + margin.top + margin.bottom, 0, 0);
 
             var colorVal = function(d) {
                 if (colorBy == 'cohort') {
@@ -119,14 +127,16 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 .domain(name_domain)
                 .range(helpers.color_map(name_domain.length));
 
+            var worksheet_id = $('.worksheet.active').attr('id');
+            var plot_area_clip_id = 'plot_area_clip_' + worksheet_id;
             var plot_area = svg.append('g')
-                .attr('clip-path', 'url(#plot_area_clip)');
+                .attr('clip-path', 'url(#'+plot_area_clip_id+')');
 
             plot_area.append('clipPath')
-                .attr('id', 'plot_area_clip')
+                .attr('id', plot_area_clip_id)
                 .append('rect')
                 .attr('height', height-margin.top-margin.bottom)
-                .attr('width', width)
+                .attr('width', width-margin.left-margin.right)
                 .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
             // Highlight circles which are selected
@@ -224,7 +234,10 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 .style('fill', function(d) { return color(colorVal(d)); })
                 .attr('transform', transformer)
                 .attr('r', 2)
-                .attr('id', function(d) { return d['id']; });
+                .attr('id', function(d) { return d['id']; })
+                .on('mouseover.tip', tip.show)
+                .on('mouseout.tip', tip.hide);
+            plot_area.call(tip);
 
             // append axes
             svg.append('g')
@@ -243,26 +256,16 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 .append('text')
                 .attr('class', 'x label axis-label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'translate(' + ((width+margin.left)/2) + ',' + (height - 10) + ')')
+                .attr('transform', 'translate(' + (width/2) + ',' + (height - 80) + ')')
                 .text(xLabel);
-
-            d3.select('.x.label').call(d3textwrap.textwrap().bounds({width: (width-margin.left)*0.75, height: 80}));
-            d3.select('.x-label-container').selectAll('foreignObject')
-                .attr('style','transform: translate('+(((width-margin.left)/2)-(((width-margin.left)*0.75)/2)+margin.left) + 'px,' + (height - 80)+'px);');
-            d3.select('.x-label-container').selectAll('div').attr('class','axis-label');
 
             svg.append('g')
                 .attr('class','y-label-container')
                 .append('text')
                 .attr('class', 'y label axis-label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'rotate(-90) translate(' + (-1 * (height/2)) + ',15)')
+                .attr('transform', 'rotate(-90) translate(' + (-height+margin.top+margin.bottom)/2 + ', 15)')
                 .text(yLabel);
-
-            d3.select('.y.label').call(d3textwrap.textwrap().bounds({height: 60, width: (height-margin.top-margin.bottom)*0.75}));
-            d3.select('.y-label-container').selectAll('foreignObject')
-                .attr('style','transform: rotate(-90deg) translate(' + ((-1 * (height-margin.bottom)/2)-(((height-margin.top-margin.bottom)*0.75))/2) + 'px,15px);');
-            d3.select('.y-label-container').selectAll('div').attr('class','axis-label');
 
             var legend_item_height = 28;
 

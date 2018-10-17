@@ -128,7 +128,7 @@ define([
              .attr('width', 850);
          var svg = d3.select(plot_selector)
              .append('svg')
-             .attr('width', width + 10)
+             .attr('width', width)
              .attr('height', height);
          var plot = scatter_plot_obj.create_scatterplot(svg,
              data,
@@ -138,6 +138,7 @@ define([
              generate_axis_label(y_attr, logTransform.y, units.y),  // yLabel
              'x',     // xParam
              'y',     // yParam
+             margin,
              color_by,
              legend,
              width,
