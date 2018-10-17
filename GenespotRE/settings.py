@@ -59,6 +59,7 @@ CRON_MODULE             = os.environ.get('CRON_MODULE')
 
 # Log Names
 SERVICE_ACCOUNT_LOG_NAME = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev_logging')
+WEBAPP_LOGIN_LOG_NAME = os.environ.get('WEBAPP_LOGIN_LOG_NAME', 'local_dev_logging')
 
 BASE_URL                = os.environ.get('BASE_URL', 'https://mvm-dot-isb-cgc.appspot.com')
 BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://mvm-api-dot-isb-cgc.appspot.com')
@@ -384,7 +385,7 @@ LOGGING = {
 #  Start django-allauth  #
 ##########################
 
-LOGIN_REDIRECT_URL = '/dashboard/'
+LOGIN_REDIRECT_URL = '/extended_login/'
 
 INSTALLED_APPS += (
     'accounts',
