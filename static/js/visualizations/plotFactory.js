@@ -163,7 +163,6 @@ define([
 
         var svg = d3.select(plot_selector)
             .append('svg')
-            //.attr('width', width + 10)
             .attr('width', width)
             .attr('height', height);
         var plot = violin_plot_obj.createViolinPlot(svg,
@@ -176,6 +175,7 @@ define([
             generate_axis_label(y_attr, logTransform.y, units.y),
             'x',
             'y',
+            margin,
             color_by,
             legend,
             cohort_set
@@ -426,6 +426,7 @@ define([
                     visualization = generate_scatter_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by, cohort_set, data, units, args.logTransform);
                     break;
                 case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
+                    margin = {top: 15, bottom: 100, left: 110, right: 10};
                     visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units, args.logTransform);
                     break;
                 case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {

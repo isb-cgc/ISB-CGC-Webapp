@@ -60,8 +60,8 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 .nice();
 
             var line = d3.svg.line()
-                .interpolate('cardinal')
-                //.interpolate('basis')
+                //.interpolate('cardinal')
+                .interpolate('basis')
                 .x(function(d) {
                     return x(d.x);
                 })
@@ -250,8 +250,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 .style('stroke', 'green')
                 .style('fill', 'none');
         },
-        createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, colorBy, legend, cohort_set) {
-            var margin = {top: 50, bottom: 120, left: 110, right: 0};
+        createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, margin, colorBy, legend, cohort_set) {
             var domain = [min_y, max_y];
             var range = [height - margin.bottom - margin.top, 0];
             var view_width = svg.attr("width") - margin.left - margin.right;
@@ -280,11 +279,13 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 }
             }
 
+            var worksheet_id = $('.worksheet.active').attr('id');
+            var plot_area_clip_id = 'plot_area_clip_' + worksheet_id;
             var plot_area = svg.append('g')
-                .attr('clip-path', 'url(#plot_area_clip)');
+                .attr('clip-path', 'url(#'+plot_area_clip_id+')');
 
             plot_area.append('clipPath')
-                .attr('id', 'plot_area_clip')
+                .attr('id', plot_area_clip_id)
                 .append('rect')
                 .attr('height', height - margin.top - margin.bottom)
                 .attr('width', view_width)
@@ -339,7 +340,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
 
             var plotg = plot_area.append('g')
                 .attr('width', width)
-                .attr('height', height)
+                .attr('height', height - margin.top - margin.bottom)
                 .attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
             this.addPoints(plotg, raw_Data, scatter_processed_data, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_set, x_padding);
 
@@ -361,7 +362,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 .scale(x)
                 .ticks(xdomain.length)
                 .orient('bottom')
-                .tickSize(-height, 0, 0);
+                .tickSize(-height + margin.top + margin.bottom, 0, 0);
 
             // Axis used for panning
             var x2 = d3.scale.linear()
@@ -375,13 +376,14 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 .attr('transform', 'translate(' + margin.left +', '+ margin.top+')')
                 .call(yAxis);
 
+            var x_axis_area_clip_id = 'x_axis_area_clip_' + worksheet_id;
             var x_axis_area = svg.append('g')
-                .attr('clip-path', 'url(#x_axis_area_clip)');
+                .attr('clip-path', 'url(#'+x_axis_area_clip_id+')');
 
             x_axis_area.append('clipPath')
-                .attr('id', 'x_axis_area_clip')
+                .attr('id', x_axis_area_clip_id)
                 .append('rect')
-                .attr('height', height-margin.top)
+                .attr('height', height-margin.top-margin.bottom)
                 .attr('width', width)
                 .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
@@ -462,7 +464,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 .on('brushend', brushend);
 
             var zoomer = function() {
-                if(!selex_active) {
+                if(!selex_active && width > view_width) {
                     svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom) + ')').call(xAxis);
                     plot_area.selectAll('circle').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
                     violin_area.selectAll('.violin-plot').attr('transform', function (d, i) {
@@ -485,25 +487,16 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 .append('text')
                 .attr('class', 'x label axis-label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'translate(' + (view_width/2) + ',' + (height - 10) + ')')
+                .attr('transform', 'translate(' + (margin.left+ width/2) + ',' + (height - 10) + ')')
                 .text(xLabel);
-            d3.select('.x.label').call(d3textwrap.textwrap().bounds({width: (view_width-margin.left)*0.75, height: 50}));
-            d3.select('.x-label-container').selectAll('foreignObject').attr('style','transform: translate(' + ((view_width/2)-(((view_width-margin.left)*0.75)/2)+margin.left) + 'px,' + (height - 50) + 'px);');
-            d3.select('.x-label-container').selectAll('div').attr('class','axis-label');
 
             svg.append('g')
                 .attr('class', 'y-label-container')
                 .append('text')
                 .attr('class', 'y label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'rotate(-90) translate(' + (-1 * (height/2)) + ',10)')
+                .attr('transform', 'rotate(-90) translate(' + (-height+margin.top+margin.bottom)/2 + ',10)')
                 .text(yLabel);
-
-            d3.select('.y.label').call(d3textwrap.textwrap().bounds({height: 60, width: (height-margin.top-margin.bottom)*0.75}));
-            d3.select('.y-label-container').selectAll('foreignObject')
-                .attr('style','transform: rotate(-90deg) translate(' + ((-1 * (height-margin.bottom)/2)-(((height-margin.top-margin.bottom)*0.75))/2) + 'px,15px);');
-            d3.select('.y-label-container').selectAll('div').attr('class','axis-label');
-
 
             $('foreignObject div').each(function(){
                 $(this).attr('title',$(this).html())
@@ -523,7 +516,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
                         .attr('class', 'brush')
                         .call(brush)
                         .attr('width', width)
-                        .attr('height', height)
+                        .attr('height', height-margin.top-margin.bottom)
                         .attr('transform', 'translate(' + margin.left + ',0)');
                 } else {
                     // Resume zooming, restoring the zoom's last state
