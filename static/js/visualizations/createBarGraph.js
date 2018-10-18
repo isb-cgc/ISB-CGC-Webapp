@@ -243,15 +243,12 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 .attr('transform', 'translate(' + (width/2) + ',' + (height - 10) + ')')
                 .text(xLabel);
 
-            d3.select('.x.label').call(d3textwrap.textwrap().bounds({width: (width-margin.left-margin.right), height: 50}));
-            d3.select('.x-label-container').selectAll('foreignObject').attr('style','transform: translate('+((width/2)-(((width-margin.left-margin.right))/2)) + 'px,' + (height - 50)+'px);');
-            d3.select('.x-label-container').selectAll('div').attr('class','axis-label');
 
             svg.append('text')
                 .attr('class', 'y label axis-label')
                 .attr('text-anchor', 'middle')
                 .text('Number of Samples')
-                .attr('transform', 'rotate(-90) translate(' + ((-1 * (height/2))+($('.y.label.axis-label').outerWidth()/2)) + ',20)');
+                .attr('transform', 'rotate(-90) translate(' + (-height-margin.top+margin.bottom)/2 + ', 20)');
 
             var check_selection_state = function(obj) {
 
