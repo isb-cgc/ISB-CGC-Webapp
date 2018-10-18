@@ -436,7 +436,6 @@ def path_report(request, report_file=None):
     template = 'GenespotRE/path-pdf.html'
 
     context['path_report_file'] = report_file
-    context['path_report_uri'] = settings.STATIC_URL
 
     return render(request, template, context)
 
