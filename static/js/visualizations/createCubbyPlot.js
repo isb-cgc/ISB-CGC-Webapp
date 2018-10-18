@@ -355,7 +355,7 @@ function($, d3, d3tip, d3textwrap, _) {
                 .enter().append('text')
                 .attr('class', 'counts')
                 .attr('x', function(d) { return x(d['x']) + x_band_width/2; })
-                .attr('y', function(d) { return y(d['y']) + y_band_width/2; })
+                .attr('y', function(d) { return y(d['y']) + y_band_width/2+10; })
                 .attr('font-family', 'sans-serif')
                 .attr('font-size', '20px')
                 .attr('fill', 'black')
