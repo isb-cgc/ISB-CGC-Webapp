@@ -178,7 +178,7 @@ def extended_login_view(request):
         user = User.objects.get(id=request.user.id)
         st_logger.write_text_log_entry(
             log_name,
-            "User {} logged in to the web application at {}".format(user.email, datetime.datetime.utcnow())
+            "[WEBAPP LOGIN] User {} logged in to the web application at {}".format(user.email, datetime.datetime.utcnow())
         )
 
     except Exception as e:
