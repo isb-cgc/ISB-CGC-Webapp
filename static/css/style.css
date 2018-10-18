@@ -2357,14 +2357,14 @@ section .min-max {
   max-width: none !important; }
 
 .parsets-tooltip {
-  background-color: rgba(1, 48, 127, 0.8);
+  background-color: rgba(255, 255, 255, 0.8);
   border-radius: 3px;
   color: #fff;
   position: absolute;
   padding: 5px; }
 
 .d3-tip {
-  background-color: rgba(1, 48, 127, 0.8);
+  background-color: rgba(255, 255, 255, 0.8);
   border-radius: 3px;
   color: #fff;
   font-family: sans-serif;
@@ -2660,7 +2660,8 @@ span.code {
   #landing header .container {
     position: relative;
     top: 50%;
-    transform: translateY(-50%); }
+    -webkit-transform: translateY(-50%);
+            transform: translateY(-50%); }
   #landing header .lj-overlay {
     width: 100%;
     height: 100%;
@@ -2701,7 +2702,8 @@ span.code {
         height: 40px;
         position: absolute;
         top: 50%;
-        transform: translateY(-50%);
+        -webkit-transform: translateY(-50%);
+                transform: translateY(-50%);
         color: #676767; }
       #landing header .lj-header-vid .carousel .left, #landing header .lj-header-vid .carousel .right {
         background-image: none; }
@@ -2758,7 +2760,8 @@ span.code {
   background-color: rgba(0, 0, 0, 0.5);
   position: absolute;
   left: 50%;
-  transform: translateX(-50%); }
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%); }
   #landing .pull-tab .pull-tab-button.up {
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
@@ -2954,7 +2957,6 @@ span.code {
     content: "Hide Instructions";
     margin-left: 5px; }
 
-
 #datasets-select-div, #datasets-adjust-div {
   padding: 10px 0; }
 
@@ -3012,7 +3014,7 @@ span.code {
   .worksheet-panel-body .plot-div .grid path {
     stroke-width: 0; }
   .worksheet-panel-body .plot-div .expected_fill.selected {
-    stroke: #01307F;
+    stroke: #fff;
     stroke-width: 5px; }
   .worksheet-panel-body .plot-div .extent {
     fill: rgba(40, 130, 50, 0.5);
@@ -3030,7 +3032,7 @@ span.code {
     word-break: break-word; }
 
 .worksheet-panel-body .save-cohort-card {
-  background-color: rgba(1, 48, 127, 0.8);
+  background-color: rgba(255, 255, 255, 0.8);
   border-radius: 3px;
   color: #fff;
   padding: 5px;
