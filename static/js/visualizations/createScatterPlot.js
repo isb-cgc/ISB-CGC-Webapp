@@ -34,7 +34,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .direction('n')
                 .offset([0, 0])
                 .html(function(d) {
-                return 'Case: ' + d['case_id'] + '<br/>'+
+                return '<span>Case: ' + d['case_id'] + '<br/>'+
                     //'x: ' + d['x'] +'<br/>'+
                     //'y: ' + d['y'] +'<br/>'+
                         'Sample: ' + d['sample_id'] +'</span>'

@@ -27,8 +27,25 @@ var Counter = {
 
 var RECALC_THROTTLE = 75;
 
-define (['jquery', 'd3', 'd3textwrap', 'vizhelpers', 'underscore'],
-function($, d3, d3textwrap, vizhelpers, _) {
+define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
+function($, d3, d3tip, d3textwrap, vizhelpers, _) {
+    var dot_tip = d3tip()
+        .attr('class', 'd3-tip')
+        .direction('n')
+        .offset([0, 0])
+        .html(function(d) {
+            return '<span>Case: ' + d['case_id'] + '<br/>'+
+                'Sample: ' + d['sample_id'] + '<br/>'+
+                'Data: (' + d['x'] + ', '+ d['y'] + ')</span>';
+        });
+
+    var median_tip = d3tip()
+        .attr('class', 'd3-tip')
+        .direction('n')
+        .offset([0, 0])
+        .html(function(d) {
+            return '<span>Median: ' + d[0].y + '</span>';
+        });
 
     var helpers = Object.create(vizhelpers, {});
 
@@ -60,8 +77,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 .nice();
 
             var line = d3.svg.line()
-                //.interpolate('cardinal')
-                .interpolate('basis')
+                .interpolate( values_only.length > 5 ? 'basis':'cardinal')
                 .x(function(d) {
                     return x(d.x);
                 })
@@ -131,9 +147,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
                     nonNullData.push(d);
                 }
             });
-            /*var div = d3.select("body").append("div")
-                    .attr("class", "tooltip")
-                    .style("opacity", 0);*/
+
             svg.selectAll('.dot')
                 .data(nonNullData)
                 .enter().append('circle')
@@ -163,22 +177,10 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 .attr('cy', function(d) {
                     return y(d[yAttr]);
                 })
-                .attr('r', 2);
-                /*.on("mouseover", function(d) {
-                    div.transition()
-                        .duration(200)
-                        .style("opacity", .9);
-                    div	.html(
-                             "("+(typeof d[yAttr] == "number"? d[yAttr] : d3.format("s")(d[yAttr]))+")"
-                            )
-                        .style("left", (d3.event.pageX) + "px")
-                        .style("top", (d3.event.pageY - 28) + "px");
-                    })
-                .on("mouseout", function(d) {
-                    div.transition()
-                        .duration(500)
-                        .style("opacity", 0);
-                });*/
+                .attr('r', 2)
+                .on('mouseover.tip', dot_tip.show)
+                .on('mouseout.tip', dot_tip.hide)
+                .call(dot_tip);
 
             legend = legend.attr('height', 20 * color.domain().length + 30);
             legend.append('text')
@@ -248,7 +250,10 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 .attr('class', 'median-line')
                 .attr('d', line)
                 .style('stroke', 'green')
-                .style('fill', 'none');
+                .style('fill', 'none')
+                .on('mouseover.tip', median_tip.show)
+                .on('mouseout.tip', median_tip.hide)
+                .call(median_tip);
         },
         createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, margin, colorBy, legend, cohort_set) {
             var domain = [min_y, max_y];
@@ -303,8 +308,6 @@ function($, d3, d3textwrap, vizhelpers, _) {
             var merge_list = [];
             var scatter_processed_data = {};
             for (var key in processed_data) {
-                var point_count = processed_data[key].length;
-                xdomain.push(key + ':' + point_count);
                 var g = violin_area.append('g')
                     .attr('class', 'violin-plot')
                     .attr('transform', 'translate(' + (i * (violin_width+x_padding)+x_padding/2) + ')');
@@ -320,9 +323,12 @@ function($, d3, d3textwrap, vizhelpers, _) {
                         merge_list.push(temp);
                     }
                 }
+                var point_count = 0;
+
 
                 // Don't try to plot values we don't have
                 if(values_only.length > 0) {
+                    xdomain.push(key + ':' + values_only.length);
                     this.addViolin(g, processed_data[key], values_only, height, violin_width, domain, range);
                     this.addMedianLine(g, processed_data[key], values_only, height, violin_width, domain, range);
                 }
@@ -330,7 +336,6 @@ function($, d3, d3textwrap, vizhelpers, _) {
             }
 
             // Set width of overall plot in here
-            //var width = violin_width * Object.keys(processed_data).length + (violin_width / 2);
             var width = (violin_width+x_padding) * Object.keys(processed_data).length;
             violin_area.attr('width', width);
             svg.attr('width', width + margin.left + margin.right);
@@ -383,7 +388,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
             x_axis_area.append('clipPath')
                 .attr('id', x_axis_area_clip_id)
                 .append('rect')
-                .attr('height', height-margin.top-margin.bottom)
+                .attr('height', height-margin.top-30)
                 .attr('width', width)
                 .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
