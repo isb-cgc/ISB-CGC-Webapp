@@ -2394,14 +2394,14 @@ section .min-max {
   max-width: none !important; }
 
 .parsets-tooltip {
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(1, 48, 127, 0.8);
   border-radius: 3px;
   color: #fff;
   position: absolute;
   padding: 5px; }
 
 .d3-tip {
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(1, 48, 127, 0.8);
   border-radius: 3px;
   color: #fff;
   font-family: sans-serif;
