@@ -2,8 +2,8 @@ require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
         jquery: 'libs/jquery-1.11.1.min',
-        jqueryui: 'libs/jquery-ui.min',
         bootstrap: 'libs/bootstrap.min',
+        jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
         base: 'base',
@@ -12,8 +12,8 @@ require.config({
         tokenfield: 'libs/bootstrap-tokenfield.min'
     },
     shim: {
-        'jqueryui': ['jquery'],
         'bootstrap': ['jquery'],
+        'jqueryui': ['jquery'],
         'session_security': ['jquery'],
         'underscore': {exports: '_'},
         'tokenfield': ['jquery', 'jqueryui'],
@@ -34,21 +34,15 @@ require.config({
 require([
     'jquery',
     'jqueryui',
+    'bootstrap',
     'session_security',
     'bloodhound',
     'typeahead',
     'underscore',
     'base',
     'tokenfield'
-], function($, jqueryui, session_security, Bloodhound, typeahead, _, base) {
-    // Because jQueryUI and Bootstrap use the same name for their tooltip function,
-    // we need to bridge the jQueryUI function name into something else, which
-    // in turn requires a forced load order of jQuery and then bootstrap. Nest requirements
-    // to ensure this happens.
-    $.widget.bridge('uitooltip', $.ui.tooltip);
-
-    require(['bootstrap'], function(bootstrap){
-        'use strict';
+], function($, jqueryui, bootstrap, session_security, Bloodhound, typeahead, _, base) {
+    'use strict';
 
         var geneListField = $('#paste-in-genes');
         var geneFavs = (gene_fav) ? gene_fav.genes : [];
@@ -172,7 +166,7 @@ require([
             var validFileTypes = ['txt', 'csv'];
 
             $('#file-upload-btn').click(function(event){
-                event.preventDefault()
+                event.preventDefault();
                 fileUploadField.click();
             });
             fileUploadField.on('change', function(event){
@@ -351,7 +345,5 @@ require([
             return Object.keys(genes_count_object);
         }
 
-        // Initialize tooltips
-        $('[data-toggle="tooltip"]').tooltip();
-    });
+
 });
