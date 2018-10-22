@@ -121,6 +121,8 @@ require([
         }
     };
 
+    var plotFactory;
+
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function () {
         var forms = $(this).find('form');
@@ -183,6 +185,13 @@ require([
         turn_off_toggle_selector();
         show_plot_settings();
     });
+
+    $('.redraw-plot').on('click', function () {
+        if(!plotFactory)
+            plotFactory = Object.create(plot_factory, {});
+        plotFactory.redraw_plot();
+    });
+
 
     function hide_plot_settings() {
         $('.hide-settings-flyout').parents('.fly-out.settings-flyout').animate({
@@ -873,13 +882,6 @@ require([
 
     // generate plot upon user click
     $('.update-plot').on('click', function(event){
-
-
-        /*if($('.toggle-selection').hasClass('active')) {
-            $('.toggle-selection').click();
-        }*/
-
-
         if (($(this).parent())) {
             var data = get_plot_info_on_page($(this).parent());
             update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, data.selections, data.logTransform, function(result){
@@ -1182,7 +1184,7 @@ require([
         for(var i in args.cohorts){
             cohort_ids.push(args.cohorts[i].cohort_id);
         }
-        var plotFactory = Object.create(plot_factory, {});
+        plotFactory = Object.create(plot_factory, {});
 
         var plot_element = $("[worksheet_id='"+args.worksheet_id+"']").parent().parent().find(".plot");
         var plot_loader  = plot_element.find('.plot-loader');

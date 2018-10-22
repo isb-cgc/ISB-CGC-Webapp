@@ -149,7 +149,7 @@
                                                             <form action="{% url 'worksheet_gene_delete' workbook_id=workbook.id worksheet_id=worksheet.id gene_id=gene.id %}" method="POST">
                                                                 {% csrf_token %}
                                                                 {% if workbook.owner.id == user.id %}
-                                                                    <button type="submit" title="Delete" class="text-danger workbook-remove-item" aria-label="Remove Gene or miRNA"><i class="fa fa-times"></i></button>
+                                                                    <button type="submit" title="Delete" class="workbook-remove-item" aria-label="Remove Gene or miRNA"><i class="fa fa-times-circle"></i></button>
                                                                 {% endif %}
                                                                 {{ gene.gene }}
                                                             </form>
@@ -186,7 +186,7 @@
                                                             <form action="{% url 'worksheet_variables_delete' workbook_id=workbook.id worksheet_id=worksheet.id variable_id=variable.id %}" method="POST">
                                                                 {% csrf_token %}
                                                                 {% if workbook.owner.id == user.id %}
-                                                                    <button type="submit" title="Delete" class="text-danger workbook-remove-item" aria-label="Remove Variable"><i class="fa fa-times"></i></button>
+                                                                    <button type="submit" title="Delete" class="workbook-remove-item" aria-label="Remove Variable"><i class="fa fa-times-circle"></i></button>
                                                                 {% endif %}
                                                                 {{ variable.name }}
                                                             </form>
@@ -221,7 +221,7 @@
                                                         {% if workbook.owner.id == user.id %}
                                                             <form action="{% url 'remove_cohort_from_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id cohort_id=cohort.id %}" method="POST">
                                                                 {% csrf_token %}
-                                                                <button type="submit" title="Delete" class="text-danger workbook-remove-item" aria-label="Remove Cohort"><i class="fa fa-times"></i></button>
+                                                                <button type="submit" title="Delete" class="workbook-remove-item" aria-label="Remove Cohort"><i class="fa fa-times-circle"></i></button>
                                                         {% endif %}
                                                         {% if cohort|get_cohort_perm:request %}
                                                             <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>

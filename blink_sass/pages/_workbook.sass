@@ -61,7 +61,7 @@
   &-nav
     padding: 10px 15px
     float: left
-    width: 25%
+    width: 20%
     background: darken($white, 8%)
     min-height: 1200px
     position: relative
@@ -117,6 +117,18 @@
     h4
       color: $isb-primary
 
+    .list
+      width: 100%
+      .sublist-item
+        padding-left: 10px
+        padding-top: 3px
+        &:hover
+          background-color: darken($white, 20%)
+          border-width: 1px
+          border-radius: 5px
+          .workbook-remove-item
+            visibility: visible
+
     .list-item__heading
       font-size: $font-size
       font-weight: $bold-font-weight
@@ -126,20 +138,17 @@
         opacity: 0.8
         margin-top: 5px
 
-
     .workbook-remove-item
+      visibility: hidden
       border: none
-      outline: 0
-      //color: #2A537A
-      //padding: 2px
-      padding: 0 4px 0 10px
       background: none
-      //&:hover
-        //color: #a94442
+      float: right
+      &:hover
+        color: #a94442
 
   &-content
     float: left
-    width: 75%
+    width: 80%
     padding: 10px 15px
     position: relative
     transition: width 0.45s ease-in-out

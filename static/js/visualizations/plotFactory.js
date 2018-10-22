@@ -485,7 +485,7 @@ define([
             // Hide the legend
             $(args.legend_selector).hide();
         }
-    };
+    }
 
     function get_plot_settings(plot_type, as_map){
         var settings = {
@@ -547,14 +547,8 @@ define([
             type: 'GET',
             url: plot_data_url,
             success: function(data, status, xhr) {
-                //widen the plot section by opening the plot panel
 
-                /*var worksheet_toggle = $(args.plot_selector).parents('.worksheet-content').find('.worksheet-nav-toggle');
-                if(!worksheet_toggle.hasClass('open')){
-                    $(worksheet_toggle).trigger('click');
-
-                }*/
-                select_plot({plot_selector    : args.plot_selector,
+                var plot_args = {plot_selector    : args.plot_selector,
                              legend_selector  : args.legend_selector,
                              pairwise_element : args.pairwise_element,
                              type             : args.type,
@@ -564,7 +558,10 @@ define([
                              color_by         : args.cohorts,
                              cohort_override  : args.color_override,
                              color_by_sel     : args.color_by_sel,
-                             data             : data});
+                             data             : data};
+                //store plot args in jquery data for each worksheet
+                $('.worksheet.active .plot-args').data('plot-args', plot_args);
+                select_plot(plot_args);
                 callback({bq_tables: data.bq_tables});
 
             },
@@ -587,10 +584,21 @@ define([
                 callback({error : true});
             }
         });
-    };
+    }
+
+    //clears the previous plot and re-draws the plot using the stored worksheet plot args
+    function redraw_plot(){
+        var plot_loader  = $('.worksheet.active .plot-loader');
+        var plot_args = $('.worksheet.active .plot-args').data('plot-args');
+        $(plot_args.plot_selector).empty();
+        plot_loader.fadeIn();
+        select_plot(plot_args);
+        plot_loader.hide();
+    }
 
     return {
         generate_plot     : generate_plot,
+        redraw_plot : redraw_plot,
         get_plot_settings : get_plot_settings
     };
 });
