@@ -36,6 +36,8 @@ urlpatterns = [
     url(r'^camic/(?P<file_uuid>[A-Za-z0-9\-]+)/$', views.camic, name='camic_barcode'),
     url(r'^dicom/$', views.dicom, name='dicom'),
     url(r'^dicom/(?P<study_uid>[A-Za-z0-9]+)/$', views.dicom, name='dicom_study'),
+    url(r'^report/$', views.path_report, name='path_pdf'),
+    url(r'^report/(?P<report_file>[A-Za-z0-9._/-]+)/$', views.path_report, name='path_pdf_report'),
 
     url(r'^images/(?P<file_uuid>[A-Za-z0-9\-]+)/$', views.get_image_data, name='image_data'),
     url(r'^images/', views.get_image_data_args, name='image_data_args'),
@@ -59,6 +61,7 @@ urlpatterns = [
     url(r'^help/', views.help_page, name='help'),
     url(r'^about/', views.about_page, name='about_page'),
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
+    url(r'^extended_login/$', views.extended_login_view, name='extended_login'),
     url(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),
 
     url(r'^programs/', include('projects.urls')),

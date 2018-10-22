@@ -16,7 +16,7 @@ import json
 import logging
 import sys
 import re
-from time import sleep
+import datetime
 import requests
 
 from django.conf import settings
@@ -33,6 +33,7 @@ from oauth2client.client import GoogleCredentials
 
 from google_helpers.directory_service import get_directory_resource
 from google_helpers.bigquery.bq_support import BigQuerySupport
+from google_helpers.stackdriver import StackDriverLogger
 from cohorts.metadata_helpers import get_sample_metadata
 from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz
@@ -52,6 +53,8 @@ logger = logging.getLogger('main_logger')
 ERA_LOGIN_URL = settings.ERA_LOGIN_URL
 OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
+WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
+
 
 
 def convert(data):
@@ -164,6 +167,26 @@ def bucket_object_list(request):
 
         return HttpResponse(object_list)
 
+
+# Extended login view so we can track user logins
+def extended_login_view(request):
+
+    try:
+        # Write log entry
+        st_logger = StackDriverLogger.build_from_django_settings()
+        log_name = WEBAPP_LOGIN_LOG_NAME
+        user = User.objects.get(id=request.user.id)
+        st_logger.write_text_log_entry(
+            log_name,
+            "[WEBAPP LOGIN] User {} logged in to the web application at {}".format(user.email, datetime.datetime.utcnow())
+        )
+
+    except Exception as e:
+        logger.exception(e)
+
+    return redirect(reverse('dashboard'))
+
+
 '''
 Returns page users see after signing in
 '''
@@ -183,7 +206,7 @@ def user_landing(request):
             body=body
         ).execute(http=http_auth)
 
-    except HttpError, e:
+    except HttpError as e:
         logger.info(e)
 
     if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
@@ -401,6 +424,22 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     return render(request, 'GenespotRE/igv.html', context)
 
 
+@login_required
+def path_report(request, report_file=None):
+    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
+    context = {}
+
+    if not path_report:
+        messages.error("Error while attempting to display this pathology report: a report file name was not provided.")
+        return redirect(reverse('cohort_list'))
+
+    template = 'GenespotRE/path-pdf.html'
+
+    context['path_report_file'] = report_file
+
+    return render(request, template, context)
+
+
 # Because the match for vm_ is always done regardless of its presense in the URL
 # we must always provide an argument slot for it
 #
@@ -415,8 +454,10 @@ def help_page(request):
 def about_page(request):
     return render(request, 'GenespotRE/about.html')
 
+
 def vid_tutorials_page(request):
     return render(request, 'GenespotRE/video_tutorials.html')
+
 
 @login_required
 def dashboard_page(request):
