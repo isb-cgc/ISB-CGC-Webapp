@@ -157,7 +157,7 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 .call(xAxis);
 
             var x_axis_area_height = margin.bottom-55;
-            d3.select('.x.axis').selectAll('text').each(function(){
+            svg.select('.x.axis').selectAll('text').each(function(){
                 var d = d3.select(this);
                 var label = d.text();
                 var parent = d3.select(d.node().parentNode);
@@ -175,7 +175,7 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     .html(label);
             });
 
-            d3.select('.x.axis').selectAll('foreignObject').attr('style','transform: translate(-15px,'+(x_axis_area_height + 10)+'px) rotate(-90deg);');
+            svg.select('.x.axis').selectAll('foreignObject').attr('style','transform: translate(-15px,'+(x_axis_area_height + 10)+'px) rotate(-90deg);');
 
             // Highlight the selected rectangles whenever the cursor is moved
             var brushmove = function(p) {
