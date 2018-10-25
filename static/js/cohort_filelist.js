@@ -499,7 +499,7 @@ require([
                         case 'study_uid':
                             table_row_data += '<td><div class="study-uid">' +
                                     '<a href="'+DICOM_URL+files[i]['study_uid']+'/" target="_blank">'+files[i]['study_uid']+
-                                    '<div class="osmisis" style="display: none;"><i>Open in Osimis Web Viewer</i></div></a>'+
+                                    '<div class="osmisis" style="display: none;"><i>Open in OHIF Viewer</i></div></a>'+
                                     '</div></td>';
                             break;
                         case 'thumbnail':
