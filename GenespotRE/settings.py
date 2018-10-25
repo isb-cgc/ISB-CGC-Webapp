@@ -574,9 +574,7 @@ IMG_THUMBS_URL = os.environ.get('IMG_THUMBS_URL', None)
 #################################
 # DICOM Viewer settings
 #################################
-ORTHANC_LOOKUP_URI = os.environ.get('ORTHANC_LOOKUP_URI', None)
-OSIMIS_VIEWER = os.environ.get('OSIMIS_VIEWER', None)
-DCM4CHEE_VIEWER = os.environ.get('DCM4CHEE_VIEWER', None)
+DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
 
 ##############################################################
 #   MailGun Email Settings

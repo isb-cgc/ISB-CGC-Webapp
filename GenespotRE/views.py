@@ -363,16 +363,10 @@ def get_image_data(request, file_uuid):
 @login_required
 def dicom(request, study_uid=None):
     template = 'GenespotRE/dicom.html'
-    orth_response = requests.post(url=settings.ORTHANC_LOOKUP_URI,data=study_uid,headers={"Content-Type": "text/plain"})
-
-    if orth_response.status_code != 200:
-        logger.error("[ERROR] While trying to retrieve Orthanc UID for study instance UID {}: {}".format(study_uid, str(orth_response.content)))
-        messages.error(request,"There was an error while attempting to load this DICOM image--please contact the administrator.")
-        return redirect(reverse('cohort_list'))
 
     context = {
-        'orthanc_uid': orth_response.json()[0]['ID'],
-        'dicom_viewer': settings.OSIMIS_VIEWER
+        'study_uid': study_uid,
+        'dicom_viewer': settings.DICOM_VIEWER
     }
     return render(request, template, context)
 
