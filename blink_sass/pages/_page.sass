@@ -40,6 +40,43 @@
   border-right: 1px solid $isb-dark
   vertical-align: middle
 
+.tooltip-bubble
+  position: relative
+  display: inline-block
+  .tooltip-text
+    visibility: hidden
+    display: none
+    background-color: white
+    left: 100%
+    top: -60%
+    width: 150px
+    color: black
+    border-radius: 6px
+    text-align: justify
+    border: 1px solid $isb-dark
+    padding: 10px
+    z-index: 2
+    opacity: .8
+    position: absolute
+    font-size: .9em
+    &:after, &:before
+      content: ""
+      position: absolute
+      top: 50%
+      right: 100%
+      border-style: solid
+    &:after
+      margin-top: -5px
+      border-width: 5px
+      border-color: transparent white transparent transparent
+    &:before
+      margin-top: -6px
+      border-width: 6px
+      border-color: transparent black transparent transparent
+  &:hover .tooltip-text
+    visibility: visible
+    display: inline-block
+
 #genes_list, #variable_list
   .panel-body
     margin-bottom: 50px
