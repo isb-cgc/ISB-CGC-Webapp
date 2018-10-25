@@ -491,7 +491,7 @@ require([
                             break;
                         case 'camic_filename':
                             table_row_data += '<td><div class="col-filename accessible-filename">' +
-                                    '<div><a href="'+CAMIC_URL+files[i]['slide_barcode']+'/" target="_blank">' + files[i]['filename'] +
+                                    '<div><a href="'+CAMIC_URL+files[i]['file_gdc_id']+'/" target="_blank">' + files[i]['filename'] +
                                     '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
                                     '<div class="osmisis" style="display: none;"><i>Open in caMicroscope</i></div></a></div>' +
                                     '</div></td>';
