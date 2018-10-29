@@ -25,9 +25,6 @@ jobs:
       - restore_cache:
           keys:
             - isb-cgc-webapp-google-deps-{{ checksum "shell/install-deps.sh" }}
-      - restore_cache:
-          keys:
-            - isb-cgc-database-{{ checksum "shell/database-setup.sh" }}
       - run:
           name: Install Dependencies
           command: |
@@ -41,10 +38,6 @@ jobs:
           paths:
             - ./google-cloud-sdk
             - ./google_appengine
-      - save_cache:
-          key: isb-cgc-database-{{ checksum "shell/database-setup.sh" }}
-          paths:
-            - ./scripts/metadata_featdef_tables.sql
       - run:
           name: Auth, Staging, and Database testing
           command: |
