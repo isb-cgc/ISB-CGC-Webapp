@@ -71,6 +71,9 @@ require([
         },
         'dicom': {
             'HG19': {}
+        },
+        'pdf': {
+            'HG19': {}
         }
     };
         
@@ -291,6 +294,15 @@ require([
                     filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
                 }
                 break;
+            case "pdf":
+                if(!SELECTED_FILTERS[active_tab][build]["data_format"]) {
+                    SELECTED_FILTERS[active_tab][build]["data_format"] = [];
+                }
+                SELECTED_FILTERS[active_tab][build]["data_format"].indexOf("PDF") < 0 && SELECTED_FILTERS[active_tab][build]["data_format"].push("PDF");
+                if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
+                    filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
+                }
+                break;
             case "camic":
                 if(!SELECTED_FILTERS[active_tab][build]["data_type"]) {
                     SELECTED_FILTERS[active_tab][build]["data_type"] = [];
@@ -439,59 +451,78 @@ require([
                     accessible = true;
                 }
 
-            if(active_tab !== 'all') {
-                if (files[i]['cloudstorage_location'] && ((files[i]['dataformat'] == 'BAM') || (files[i]['datatype'] == 'Tissue slide image') || (files[i]['datatype'] == 'Diagnostic image'))) {
-                    if(active_tab === 'igv' && files[i]['dataformat'] == 'BAM') {
-                        val = files[i]['cloudstorage_location'] + ';' + files[i]['index_name'] + ',' + files[i]['sample'];
-                        dataTypeName = "gcs_bam";
-                        label = "IGV";
-                        checkbox_inputs += '<input aria-label="IGV Checkbox" class="igv'+(accessible? ' accessible':'')+'" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
-                        if (!accessible) {
-                            checkbox_inputs += ' disabled';
+                if(active_tab !== 'all') {
+                    if (files[i]['cloudstorage_location'] && ((files[i]['dataformat'] == 'BAM') || (files[i]['datatype'] == 'Tissue slide image') || (files[i]['datatype'] == 'Diagnostic image'))) {
+                        if(active_tab === 'igv' && files[i]['dataformat'] == 'BAM') {
+                            val = files[i]['cloudstorage_location'] + ';' + files[i]['index_name'] + ',' + files[i]['sample'];
+                            dataTypeName = "gcs_bam";
+                            label = "IGV";
+                            checkbox_inputs += '<input aria-label="IGV Checkbox" class="igv'+(accessible? ' accessible':'')+'" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
+                            if (!accessible) {
+                                checkbox_inputs += ' disabled';
+                            }
+                            checkbox_inputs += '>';
+                        } else if(active_tab === 'camic' && (files[i]['datatype'] == 'Tissue slide image' || files[i]['datatype'] == 'Diagnostic image')) {
+                            files[i]['slide_barcode'] = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
+                            files[i]['thumbnail'] = files[i]['cloudstorage_location'].split('/').slice(-2)[0];
                         }
-                        checkbox_inputs += '>';
-                    } else if(active_tab === 'camic' && (files[i]['datatype'] == 'Tissue slide image' || files[i]['datatype'] == 'Diagnostic image')) {
-                        files[i]['slide_barcode'] = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
-                        files[i]['thumbnail'] = files[i]['cloudstorage_location'].split('/').slice(-2)[0];
+                    }
+                    files[i]['file_viewer'] = checkbox_inputs;
+                }
+
+                var row = '<tr>';
+                var table_row_data = '';
+                for (var j = 0; j < tab_columns[active_tab].length; j++){
+                    column_name = tab_columns[active_tab][j];
+                    switch (column_name){
+                        case 'filename':
+                            table_row_data += '<td><div class ="col-filename">' +
+                                    '<div>' + files[i]['filename'] + '</div>' +
+                                    '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
+                                    '</div></td>';
+                            break;
+                        case 'pdf_filename':
+                            var file_loc = PATH_PDF_URL+files[i]['cloudstorage_location'].split("://")[1];
+                            table_row_data += '<td><div class ="col-filename accessible-filename">' +
+                                    '<div><a href="'+file_loc+'/" target="_blank">' + files[i]['filename'] +
+                                    '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
+                                    '<div class="osmisis" style="display: none;"><i>Click to View File in a New Tab</i></div></a></div>' +
+                                    '</div></td>';
+                            break;
+                        case 'camic_filename':
+                            table_row_data += '<td><div class="col-filename accessible-filename">' +
+                                    '<div><a href="'+CAMIC_URL+files[i]['file_gdc_id']+'/" target="_blank">' + files[i]['filename'] +
+                                    '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
+                                    '<div class="osmisis" style="display: none;"><i>Open in caMicroscope</i></div></a></div>' +
+                                    '</div></td>';
+                            break;
+                        case 'study_uid':
+                            table_row_data += '<td><div class="study-uid">' +
+                                    '<a href="'+DICOM_URL+files[i]['study_uid']+'/" target="_blank">'+files[i]['study_uid']+
+                                    '<div class="osmisis" style="display: none;"><i>Open in OHIF Viewer</i></div></a>'+
+                                    '</div></td>';
+                            break;
+                        case 'thumbnail':
+                            table_row_data += '<td><img src="'+IMG_THUMBS_URL+files[i]['thumbnail']+'/thmb_128x64.jpeg" alt="thumb"></td>';
+                            break;
+                        case 'platform':
+                            table_row_data += '<td>' + happy_name(files[i][column_name]) + '</td>';
+                            break;
+                        case 'filesize':
+                            table_row_data += '<td class="col-filesize">' + (files[i]['filesize'] ? formatFileSize(files[i]['filesize']) : 'N/A')  + '</td>';
+                            break;
+                        default:
+                            table_row_data += '<td>' + (files[i][column_name] || 'N/A') + '</td>';
                     }
                 }
-                files[i]['file_viewer'] = checkbox_inputs;
-            }
-
-            var row = '<tr>' +
-                '<td>' + files[i]['program'] + '</td>' +
-                '<td>' + files[i]['case'] + '</td>' +
-                (active_tab === 'igv' || active_tab === 'all' ? '<td><div class="col-filename">' +
-                    '<div>' + files[i]['filename'] + '</div>' +
-                    '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
-                '</div></td>' : '') +
-                (active_tab === 'camic' ? '<td><div class="col-filename camic-filename">' +
-                    '<div><a href="'+CAMIC_URL+files[i]['slide_barcode']+'/" target="_blank">' + files[i]['filename'] +
-                    '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
-                    '<div class="osmisis" style="display: none;"><i>Open in caMicroscope</i></div></a></div>' +
-                '</div></td>' : '') +
-                '<td>' + files[i]['disease_code'] + '</td>' +
-                (active_tab === 'dicom' ? '<td>'+files[i]['project_short_name']+'</td>' : '') +
-                (active_tab === 'dicom' ? '<td>'+files[i]['study_desc']+'</td>' : '') +
-                (active_tab === 'dicom' ?
-                    '<td><div class="study-uid">' +
-                    '<a href="'+DICOM_URL+files[i]['study_uid']+'/" target="_blank">'+files[i]['study_uid']+
-                        '<div class="osmisis" style="display: none;"><i>Open in Osimis Web Viewer</i></div></a>'+
-                    '</div></td>' : '') +
-                (active_tab === 'camic' ? (files[i]['thumbnail'] ? '<td><img alt="thumb" src="'+IMG_THUMBS_URL+files[i]['thumbnail']+'/thmb_128x64.jpeg"></td>' : '<td></td>') : '') +
-                (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + (files[i]['exp_strat'] || 'N/A') + '</td>' : '')+
-                (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + happy_name(files[i]['platform']) + '</td>' : '')+
-                (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + files[i]['datacat'] + '</td>' : '') +
-                (active_tab !== 'dicom' ? '<td>' + files[i]['datatype'] + '</td><td>' + files[i]['dataformat'] + '</td>' : '') +
-                (active_tab === 'igv' ? (files[i]['file_viewer'] ? '<td>' + files[i]['file_viewer'] + '</td>' : '<td></td>') : '') +
-            '</tr>';
+                row = '<tr>'+table_row_data+'</tr>';
 
                 $(tab_selector).find('.filelist-panel .file-list-table tbody').append(row);
 
-            // Remember any previous checks
-            var thisCheck = $(tab_selector).find('.filelist-panel input[value="'+val+'"]');
-            selIgvFiles[thisCheck.attr('data-type')] && selIgvFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
-        }
+                // Remember any previous checks
+                var thisCheck = $(tab_selector).find('.filelist-panel input[value="'+val+'"]');
+                selIgvFiles[thisCheck.attr('data-type')] && selIgvFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
+            }
         }
         var columns_display = tab_columns_display[active_tab];
         var column_toggle_html = "";
@@ -765,7 +796,10 @@ require([
         update_displays_thread = setTimeout(function(){
             var build = $('#'+active_tab+'-files').find('.build :selected').val();
             var files_per_page = tab_files_per_page[active_tab];
-            var url = ajax_update_url[active_tab] + '?files_per_page=' +files_per_page + (active_tab != 'camic' && active_tab != 'dicom'  ? '&build='+build : '');
+            var url = ajax_update_url[active_tab] +
+                '?files_per_page=' +files_per_page +
+                (active_tab != 'camic' && active_tab != 'dicom'  ? '&build='+build : '') +
+                '&sort_column='+ tab_sort_column[active_tab][0] +'&sort_order='+tab_sort_column[active_tab][1];
             if(tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab][build]).length > 0){
                 url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab][build]);
             }
@@ -831,6 +865,15 @@ require([
             self.removeAttr('disabled');
             msg.hide();
         },$('.filelist-obtain .download-token').val(),"downloadToken");
+
+        if($(this).parents('.data-tab').find('.build :selected').val() == 'HG38'
+            && _.find(programs_this_cohort, function(prog){return prog == 'CCLE';})) {
+            base.showJsMessage("warning",
+                "You have exported a file list for a cohort which contains CCLE samples, with the build set to HG38.<br/>"+
+                "Please note that there are no HG38 samples for CCLE, so that program will be absent from the export."
+                , true
+            );
+        }
     });
 
     $('.data-tab-content').on('hover enter mouseover','.study-uid, .col-filename',function(e){
@@ -869,6 +912,8 @@ require([
             case "camic":
                 filter_param = {"data_type": ["Diagnostic image", "Tissue slide image"]};
                 break;
+            case "pdf":
+                filter_param = {"data_format": ["PDF"]};
         }
 
         if(Object.keys(SELECTED_FILTERS[tab_type][build]).length > 0) {
@@ -897,5 +942,14 @@ require([
             );
         }
     });
+
+    function formatFileSize(bytes) {
+        if(bytes == 0) return '0 B';
+        var k = 1000,
+            dm = 1,
+            sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+            i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
 
 });

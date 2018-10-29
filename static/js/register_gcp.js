@@ -177,4 +177,8 @@ require([
         $(this).toggleClass('instructions_hide', !is_instruction_vis);
     });
 
+    $('.modal form').on('submit',function(){
+        $(this).parents('.modal').find('input[type="submit"]').attr("disabled","disabled");
+    });
+
 });

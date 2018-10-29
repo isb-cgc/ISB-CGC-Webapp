@@ -16,7 +16,7 @@ import json
 import logging
 import sys
 import re
-from time import sleep
+import datetime
 import requests
 
 from django.conf import settings
@@ -33,6 +33,7 @@ from oauth2client.client import GoogleCredentials
 
 from google_helpers.directory_service import get_directory_resource
 from google_helpers.bigquery.bq_support import BigQuerySupport
+from google_helpers.stackdriver import StackDriverLogger
 from cohorts.metadata_helpers import get_sample_metadata
 from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz
@@ -52,6 +53,8 @@ logger = logging.getLogger('main_logger')
 ERA_LOGIN_URL = settings.ERA_LOGIN_URL
 OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
+WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
+
 
 
 def convert(data):
@@ -171,6 +174,26 @@ def bucket_object_list(request):
 
         return HttpResponse(object_list)
 
+
+# Extended login view so we can track user logins
+def extended_login_view(request):
+
+    try:
+        # Write log entry
+        st_logger = StackDriverLogger.build_from_django_settings()
+        log_name = WEBAPP_LOGIN_LOG_NAME
+        user = User.objects.get(id=request.user.id)
+        st_logger.write_text_log_entry(
+            log_name,
+            "[WEBAPP LOGIN] User {} logged in to the web application at {}".format(user.email, datetime.datetime.utcnow())
+        )
+
+    except Exception as e:
+        logger.exception(e)
+
+    return redirect(reverse('dashboard'))
+
+
 '''
 Returns page users see after signing in
 '''
@@ -190,7 +213,7 @@ def user_landing(request):
             body=body
         ).execute(http=http_auth)
 
-    except HttpError, e:
+    except HttpError as e:
         logger.info(e)
 
     if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
@@ -278,39 +301,40 @@ def search_cohorts_viz(request):
 
 # get_image_data which allows for URI arguments, falls through to get_image_data(request, slide_barcode)
 def get_image_data_args(request):
-    slide_barcode = None
+    file_uuid = None
     if request.GET:
-        slide_barcode = request.GET.get('slide_barcode',None)
+        file_uuid = request.GET.get('file_uuid', None)
     elif request.POST:
-        slide_barcode = request.POST.get('slide_barcode',None)
+        file_uuid = request.POST.get('file_uuid', None)
 
-    if slide_barcode:
-        slide_barcode = (None if re.compile(ur'[^A-Za-z0-9\-]').search(slide_barcode) else slide_barcode)
+    if file_uuid:
+        file_uuid = (None if re.compile(ur'[^A-Za-z0-9\-]').search(file_uuid) else file_uuid)
 
-    return get_image_data(request, slide_barcode)
+    return get_image_data(request, file_uuid)
 
 # Given a slide_barcode, returns image metadata in JSON format
-def get_image_data(request, slide_barcode):
+def get_image_data(request, file_uuid):
     status=200
     result = {}
 
-    if not slide_barcode:
+    if not file_uuid:
         status=503
         result = {
-            'message': "There was an error while processing this request: a valid slide_barcode was not supplied."
+            'message': "There was an error while processing this request: a valid file UUID was not supplied."
         }
     else:
         try:
             img_data_query = """
-                SELECT slide_barcode, level_0__width AS width, level_0__height AS height, mpp_x, mpp_y, file_gcs_url, sample_barcode, case_barcode
+                SELECT slide_barcode, level_0__width AS width, level_0__height AS height, mpp_x, mpp_y, file_gcs_url, sample_barcode, case_barcode, file_gdc_id
                 FROM [isb-cgc:metadata.TCGA_slide_images]
-                WHERE slide_barcode = '{}';
+                WHERE file_gdc_id = '{}';
             """
 
-            query_results = BigQuerySupport.execute_query_and_fetch_results(img_data_query.format(slide_barcode))
+            query_results = BigQuerySupport.execute_query_and_fetch_results(img_data_query.format(file_uuid))
 
             if query_results and len(query_results) > 0:
                 result = {
+                    'slide-barcode': query_results[0]['f'][0]['v'],
                     'Width': query_results[0]['f'][1]['v'],
                     'Height': query_results[0]['f'][2]['v'],
                     'MPP-X': query_results[0]['f'][3]['v'],
@@ -319,7 +343,8 @@ def get_image_data(request, slide_barcode):
                     'TissueID': query_results[0]['f'][0]['v'],
                     'sample-barcode': query_results[0]['f'][6]['v'],
                     'case-barcode': query_results[0]['f'][7]['v'],
-                    'img-type': ('Diagnostic Image' if slide_barcode.split("-")[-1].startswith("DX") else 'Tissue Slide Image' if slide_barcode.split("-")[-1].startswith("TS") else "N/A")
+                    'file-uuid': query_results[0]['f'][8]['v'],
+                    'img-type': ('Diagnostic Image' if query_results[0]['f'][0]['v'].split("-")[-1].startswith("DX") else 'Tissue Slide Image' if query_results[0]['f'][0]['v'].split("-")[-1].startswith("TS") else "N/A")
                 }
 
                 sample_metadata = get_sample_metadata(result['sample-barcode'])
@@ -328,11 +353,11 @@ def get_image_data(request, slide_barcode):
 
             else:
                 result = {
-                    'msg': 'Slide barcode {} was not found.'.format(slide_barcode)
+                    'msg': 'File UUID {} was not found.'.format(file_uuid)
                 }
 
         except Exception as e:
-            logger.error("[ERROR] While attempting to retrieve image data for {}:".format(slide_barcode))
+            logger.error("[ERROR] While attempting to retrieve image data for {}:".format(file_uuid))
             logger.exception(e)
             status = '503'
             result = {
@@ -345,33 +370,27 @@ def get_image_data(request, slide_barcode):
 @login_required
 def dicom(request, study_uid=None):
     template = 'GenespotRE/dicom.html'
-    orth_response = requests.post(url=settings.ORTHANC_LOOKUP_URI,data=study_uid,headers={"Content-Type": "text/plain"})
-
-    if orth_response.status_code != 200:
-        logger.error("[ERROR] While trying to retrieve Orthanc UID for study instance UID {}: {}".format(study_uid, str(orth_response.content)))
-        messages.error(request,"There was an error while attempting to load this DICOM image--please contact the administrator.")
-        return redirect(reverse('cohort_list'))
 
     context = {
-        'orthanc_uid': orth_response.json()[0]['ID'],
-        'dicom_viewer': settings.OSIMIS_VIEWER
+        'study_uid': study_uid,
+        'dicom_viewer': settings.DICOM_VIEWER
     }
     return render(request, template, context)
 
 
 @login_required
-def camic(request, slide_barcode=None):
+def camic(request, file_uuid=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     context = {}
 
-    if not slide_barcode:
-        messages.error("Error while attempting to display this pathology image: a slide barcode was not provided.")
+    if not file_uuid:
+        messages.error("Error while attempting to display this pathology image: a file UUID was not provided.")
         return redirect(reverse('cohort_list'))
 
-    images = [{'barcode': slide_barcode, 'thumb': '', 'type': ''}]
+    images = [{'file_uuid': file_uuid, 'thumb': '', 'type': ''}]
     template = 'GenespotRE/camic_single.html'
 
-    context['barcodes'] = images
+    context['files'] = images
     context['camic_viewer'] = settings.CAMIC_VIEWER
     context['img_thumb_url'] = settings.IMG_THUMBS_URL
 
@@ -406,6 +425,22 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     return render(request, 'GenespotRE/igv.html', context)
 
 
+@login_required
+def path_report(request, report_file=None):
+    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
+    context = {}
+
+    if not path_report:
+        messages.error("Error while attempting to display this pathology report: a report file name was not provided.")
+        return redirect(reverse('cohort_list'))
+
+    template = 'GenespotRE/path-pdf.html'
+
+    context['path_report_file'] = report_file
+
+    return render(request, template, context)
+
+
 # Because the match for vm_ is always done regardless of its presense in the URL
 # we must always provide an argument slot for it
 #
@@ -420,8 +455,10 @@ def help_page(request):
 def about_page(request):
     return render(request, 'GenespotRE/about.html')
 
+
 def vid_tutorials_page(request):
     return render(request, 'GenespotRE/video_tutorials.html')
+
 
 @login_required
 def dashboard_page(request):
