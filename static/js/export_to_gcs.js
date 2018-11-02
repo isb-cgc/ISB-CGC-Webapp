@@ -41,34 +41,37 @@ require([
     // Filelist Manifest Export to GCS
 
     $('#file-name').on('keypress keyup paste', function (e) {
-        var self = $(this);
         setTimeout(function () {
-            $('#export-to-gcs-modal .modal-js-messages').empty();
-            var str = self.val();
-
-            if (str.match(/[^A-Za-z0-9_\.\-\/]/)) {
-                e.preventDefault();
-                base.showJsMessage("error", "File names are restricted to numbers, letters, periods, dashes, slashes, and underscores.", false, $('#export-to-gcs-modal .modal-js-messages'));
-                $('#export-to-gcs-form input[type="submit"]').attr('disabled', 'disabled');
-                return false;
-            } else {
-                $('#export-to-gcs-form input[type="submit"]').removeAttr('disabled');
-            }
-
-            if (str.length >= parseInt($('#file-name').attr('maxlength'))) {
-                e.preventDefault();
-                base.showJsMessage("warning", "You have reached the maximum size allowed for a file name.", false, $('#export-to-gcs-modal .modal-js-messages'));
-                return false;
-            }
+            validate_new_table_name(e);
         }, 70);
     });
 
-    $('#export-to-gcs-project-bucket').on('change', function () {
+    var validate_new_table_name = function (e) {
+        $('#export-to-gcs-modal .modal-js-messages').empty();
+        var str = $('#file-name').val();
+        if (str.match(/[^A-Za-z0-9_\.\-\/]/)) {
+            e.preventDefault();
+            base.showJsMessage("error", "File names are restricted to numbers, letters, periods, dashes, slashes, and underscores.", false, $('#export-to-gcs-modal .modal-js-messages'));
+            $('#export-to-gcs-form input[type="submit"]').attr('disabled', 'disabled');
+            return false;
+        } else {
+            $('#export-to-gcs-form input[type="submit"]').removeAttr('disabled');
+        }
+
+        if (str.length >= parseInt($('#file-name').attr('maxlength'))) {
+            e.preventDefault();
+            base.showJsMessage("warning", "You have reached the maximum size allowed for a file name.", false, $('#export-to-gcs-modal .modal-js-messages'));
+            return false;
+        }
+    };
+
+    $('#export-to-gcs-project-bucket').on('change', function (e) {
         if ($(this).find(':selected').attr('type') !== "label") {
             $('#export-to-gcs-form input[type="submit"]').removeAttr('disabled');
             $('.file-name, .file-format').removeAttr('disabled');
             $('.file-name, .file-format').removeAttr('title');
             $('.file-name').attr('title','Add slashes (/) to create subfolders.');
+            validate_new_table_name(e);
         }
     });
 
