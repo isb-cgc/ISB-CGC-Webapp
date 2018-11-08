@@ -145,6 +145,12 @@
                     <p>Users listed with a <i class="fa fa-check"></i> were found in our system and will have this Google Cloud Project registered under
                         their account as well.</p>
                     <p>Users without a <i class="fa fa-check"></i> will have to request another user perform a project refresh (accessible from the GCP Project list and details pages).</p>
+                    <div class="verify-info" style="display: none;">
+                        <div class="alert alert-info alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                            <span id="verify-info-text"></span>
+                        </div>
+                    </div>
                     <input class="btn btn-primary register-gcp-btn" type="submit" value="Register"/>
                     {% csrf_token %}
                 </form>
