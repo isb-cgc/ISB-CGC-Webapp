@@ -2,8 +2,8 @@ if [ -n "$CI" ]; then
     export HOME=/home/circleci/${CIRCLE_PROJECT_REPONAME}
     export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
 
-# Clone dependencies
-    git clone -b isb-cgc-test https://github.com/isb-cgc/ISB-CGC-Common.git
+    # Clone dependencies
+    git clone -b isb-cgc-uat https://github.com/isb-cgc/ISB-CGC-Common.git
 
     # Remove .pyc files; these can sometimes stick around and if a
     # model has changed names it will cause various load failures
@@ -41,7 +41,7 @@ else
 fi
 echo "Dependencies Installed"
 
-# If this is local development, clean out lib for a re-structuring 
+# If this is local development, clean out lib for a re-structuring
 if [ -z "${CI}" ]; then
     # Clean out lib to prevent confusion over multiple builds in local development
     # and prep for local install

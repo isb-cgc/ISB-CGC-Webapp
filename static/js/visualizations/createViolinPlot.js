@@ -311,7 +311,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 var values_only = [];
 
                 for (var j = 0; j < processed_data[key].length; j++) {
-                    if (processed_data[key][j]['value'] != "NA") {
+                    if (processed_data[key][j]['value'] != "None") {
                         values_only.push(processed_data[key][j]['value']);
                         scatter_processed_data[i].push(processed_data[key][j]['value']);
                         var temp = processed_data[key][j];

@@ -135,7 +135,9 @@
 
     {% include "projects/program_modals.html" %}
 
-    <script type="text/javascript">    var base_url                = '{{ BASE_URL|safe }}';
+    <script type="text/javascript">
+{#    var base_api_url            = '{{ BASE_API_URL|safe }}';#}
+    var base_url                = '{{ BASE_URL|safe }}';
     var program_id              = {{ program.id }};
 {#    var display_worksheet_id    = '{{ display_worksheet.id|safe }}';#}
 {#    var workbook_id             = '{{ workbook.id }}';#}

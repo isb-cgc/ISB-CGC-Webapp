@@ -11,9 +11,9 @@ STATIC_LAST_COMMIT=$(git rev-list -1 HEAD -- "static")
 
 if [ ! -f "${STATIC_COMMIT_CHECK_FILE}" ] || [ ${STATIC_LAST_COMMIT} != $(cat "${STATIC_COMMIT_CHECK_FILE}") ]; then
     echo "Beginning rsync of /static..."
-    ./google-cloud-sdk/bin/gsutil rsync -R static/ gs://${GCLOUD_STATIC_BUCKET_TEST}/static
-    git rev-list -1 HEAD -- "static" > "${STATIC_COMMIT_CHECK_FILE}"
-    ./google-cloud-sdk/bin/gsutil cp "${STATIC_COMMIT_CHECK_FILE}" gs://${GCLOUD_BUCKET_TEST}/
+    ./google-cloud-sdk/bin/gsutil rsync -R static/ gs://webapp-uat-static-files/static
+    git rev-list -1 HEAD -- "static" > ${STATIC_COMMIT_CHECK_FILE}
+    ./google-cloud-sdk/bin/gsutil cp "${STATIC_COMMIT_CHECK_FILE}" gs://${GCLOUD_BUCKET_UAT}/
 else
     echo "No changes found in /static -- skipping rsync."
 fi

@@ -109,4 +109,4 @@ workflows:
             - build_job
           filters:
             branches:
-              only: isb-cgc-test
+              only: isb-cgc-uat

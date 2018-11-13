@@ -57,7 +57,7 @@ handlers:
 #  secure: always
 
 beta_settings:
-    cloud_sql_instances: isb-cgc-test:us-central1:test-data-migration
+    cloud_sql_instances: isb-cgc-uat:us-central1:uat-main
 
 env_variables:
   DJANGO_SETTINGS_MODULE: 'GenespotRE.settings'
