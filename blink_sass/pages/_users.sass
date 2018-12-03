@@ -116,8 +116,36 @@
     margin-bottom: 30px
     i.fa-check
         color: $isb-success
+    .text-note
+        color: $isb-dark
+        font-size: .9em
+        font-style: italic
+    .verify-register-sa-div
+        >div
+            padding: 10px 0
+        .verification-success:before
+            content: "\f058"
+            color: $success-bgcolor-dark
+            float: left
+            font-family: FontAwesome
+            padding: 0 5px
+        .verification-fail:before
+            content: "\f06a"
+            color: $danger-bgcolor-dark
+            float: left
+            font-family: FontAwesome
+            padding: 0 5px
+        .register-sa-verification-success
+            border-radius: 1px
+            padding: 10px
+            border: 1px solid $success-bgcolor-dark
+        .register-sa-verification-fail
+            border-radius: 1px
+            padding: 10px
+            border: 1px solid $danger-bgcolor-dark
 
-#register-gcp, #user-register-sa
+
+#register-gcp, #user-register-sa, #user-adjust-sa
     ul
         list-style: none
         padding-left: -15px
@@ -128,8 +156,6 @@
         &.dataset-list
             list-style: none
             padding: 0px
-    input
-        margin-bottom: 5px
 
 #register-gcp
     img
@@ -175,18 +201,8 @@
                 content: "Hide Instructions"
                 margin-left: 5px
 
-#user-adjust-sa
-    h4
-        margin-bottom: 25px
-    .radio, .checkbox
-        margin-left: 10px
-    ul
-        list-style: none
-        li.upper
-            margin-bottom: 20px
-
-#datasets-select-div
-    margin-top: 15px
+#datasets-select-div, #datasets-adjust-div
+    padding: 10px 0
 
 #sa-spinner
     &.load-spinner

@@ -65,6 +65,14 @@ require([
         });
     });
 
+    $('.pull-tab-button.down').on('click', function () {
+        $('.landing-content').hide("slide", { direction: "down" }, 1000);
+    });
+
+    $('.pull-tab-button.up').on('click', function () {
+        $('.landing-content').show("slide", { direction: "down" }, 1000);
+    });
+
 
     //var treegraph_obj = Object.create(treegraph, {});
     //var total = 0;

@@ -49,6 +49,7 @@
                     <li role="presentation" class="file-browser-tab active"><a href="#all-files" role="tab" data-toggle="tab" title="Browse All Files" data-file-type="all">All Files</a></li>
                     <li role="presentation" class="file-browser-tab"><a href="#igv-files" role="tab" data-toggle="tab" title="Browse IGV Files" data-file-type="igv">IGV</a></li>
                     <li role="presentation" class="file-browser-tab"><a href="#camic-files" role="tab" data-toggle="tab" title="Browse Pathology Image Files" data-file-type="camic">Pathology Images</a></li>
+                    <li role="presentation" class="file-browser-tab"><a href="#pdf-files" role="tab" data-toggle="tab" title="Browse Pathology Report Files" data-file-type="pdf">Pathology Reports</a></li>
                     <li role="presentation" class="file-browser-tab"><a href="#dicom-files" role="tab" data-toggle="tab" title="Browse Radiology Image Files" data-file-type="dicom">Radiology Images</a></li>
                 </ul>
             </div>
@@ -82,24 +83,28 @@
         ,'igv': 1
         ,'camic': 1
         ,'dicom': 1
+        ,'pdf': 1
     };
     var tab_count={
         'all': 0,
         'igv': 0,
         'camic': 0,
-        'dicom': 0
+        'dicom': 0,
+        'pdf': 0
     };
     var tab_files_per_page={
         'all': 25,
         'igv': 25,
         'camic': 25,
-        'dicom': 25
+        'dicom': 25,
+        'pdf': 25
     };
     var tab_sort_column={   //columnId, 0: asc 1: desc
         'all': ['col-program',0],
         'igv': ['col-program',0],
         'camic': ['col-program',0],
-        'dicom': ['col-program',0]
+        'dicom': ['col-program',0],
+        'pdf': ['col-program',0]
     };
     var tab_columns_display={   //0:hide, 1:show
         'all': [
@@ -111,7 +116,8 @@
             ['Platform', 1],
             ['Data Category', 1],
             ['Data Type', 1],
-            ['Data Format', 1]
+            ['Data Format', 1],
+            ['File Size', 1]
         ],
         'igv': [
             ['Program', 1],
@@ -122,7 +128,8 @@
             ['Platform', 1],
             ['Data Category', 1],
             ['Data Type', 1],
-            ['Data Format', 1]
+            ['Data Format', 1],
+            ['File Size', 1],
         ],
         'camic': [
             ['Program', 1],
@@ -131,7 +138,8 @@
             ['Disease Code', 1],
             ['Thumbnail', 1],
             ['Data Type', 1],
-            ['Data Format', 1]
+            ['Data Format', 1],
+            ['File Size', 1],
         ],
         'dicom': [
             ['Program', 1],
@@ -140,6 +148,15 @@
             ['Project Short Name', 1],
             ['Study Description', 1],
             ['Study Instance UID', 1]
+        ],
+        'pdf': [
+            ['Program', 1],
+            ['Case Barcode', 1],
+            ['File Name', 1],
+            ['Disease Code', 1],
+            ['Data Category', 1],
+            ['Data Type', 1],
+            ['Data Format', 1]
         ]
     };
     var tab_case_barcode ={
@@ -156,17 +173,33 @@
         },
         'dicom': {
             'HG19': ''
+        },
+        'pdf': {
+            'HG19': ''
         }
     };
+
+    var tab_columns = {
+        'all': ['program', 'case', 'filename', 'disease_code', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize'],
+        'igv': ['program', 'case', 'filename', 'disease_code', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize', 'file_viewer'],
+        'camic': ['program', 'case', 'camic_filename', 'disease_code', 'thumbnail', 'datatype', 'dataformat', 'filesize'],
+        'dicom': ['program', 'case', 'disease_code', 'project_short_name', 'study_desc', 'study_uid'],
+        'pdf': ['program', 'case', 'pdf_filename', 'disease_code', 'datacat', 'datatype', 'dataformat', 'filesize']
+    };
+
     var download_url = '{{ download_url }}';
     var ajax_update_url = {
         'all': '{% url 'cohort_filelist_ajax_panel' cohort.id 'all' %}'
         ,'igv': '{% url 'cohort_filelist_ajax_panel' cohort.id 'igv' %}'
         ,'camic':'{% url 'cohort_filelist_ajax_panel' cohort.id 'camic' %}'
         ,'dicom':'{% url 'cohort_filelist_ajax_panel' cohort.id 'dicom' %}'
+        ,'pdf':'{% url 'cohort_filelist_ajax_panel' cohort.id 'pdf' %}'
     };
+
     var DICOM_URL = {% url 'dicom' %};
     var CAMIC_URL = {% url 'camic' %};
+    var PATH_PDF_URL = {% url 'path_pdf' %};
+
     var SEL_IGV_FILE_MAX = '{{  sel_file_max }}';
     var FILE_LIST_MAX = '{{  file_list_max }}';
     var IMG_THUMBS_URL = '{{ img_thumbs_url }}';

@@ -6,23 +6,21 @@
 @import url("https://fonts.googleapis.com/css?family=Montserrat:300,700&subset=latin,latin-ext")
 
 #landing
-    padding-top: 15px
-    margin-top: 80px
-
     header
         background-image: url('../img/bg.jpg')
         background-size: cover
-        width: 100%
         position: absolute
         top: 0
         left: 0
-        height: 650px
+        height: 100vh
+        width: 100vw
         a
             color: $isb-lighter
 
         .container
-            padding-top: 80px
-            padding-bottom: 40px
+            position: relative
+            top: 50%
+            transform: translateY(-50%)
 
         .lj-overlay
             width: 100%
@@ -37,13 +35,9 @@
         .lj-overlay-color
 	        background-color: rgba(0,0,0,0.5)
 
-        .lj-title
-            margin-top: 80px
-
-
         .lj-title h1
             font-family: 'Montserrat'
-            font-size: 3.5em
+            font-size: 3.8em
             font-weight: 300
             color: #fff
             margin: 0
@@ -57,14 +51,10 @@
             font-weight: 700
 
         .lj-title-paragraph
-            margin-top: 20px
-
-        .lj-title-paragraph p
-            color: #fff
-            font-size: 1.4em
-            margin: 0
-        .lj-header-vid-button-div
-            margin-top: 20px
+            padding: 30px
+            p
+                color: #fff
+                font-size: 1.5em
         .lj-header-vid
             text-align: right
             &.custom-width-55
@@ -72,12 +62,12 @@
             .carousel
                 float: right
                 width: 320px
-                height: 260px
+                height: 240px
                 .carousel-control
-                    height: 25%
+                    height: 40px
                     position: absolute
                     top: 50%
-                    margin-top: -25px
+                    transform: translateY(-50%)
                     color: $isb-dark
                 .left, .right
                     background-image: none
@@ -85,7 +75,7 @@
                     width: 320px
                     height: 240px
                 .carousel-indicators
-                    bottom: 1px
+                    bottom: -20px
 
         .lj-header-button
             text-align: left
@@ -112,29 +102,62 @@
                 width: 45%
 
     .landing-content
-        margin-top: 550px
+        background-color: white
+        position: absolute
+        width: 100vw
+        left: 0
+        bottom: 0
+        display: none
+        h2
+            font-size: 25px
+            color: $isb-primary
+        p
+            color: darken($isb-dark, 10%)
+    .footer
+        color: white
+        width: 60vw
+        bottom: 30px
+        left: 50%
+        transform: translateX(-50%)
+        position: absolute
+        text-align: center
+        font-size: 1.1em
 
-    .landing-block
-        &.about-us
-            img
-                height: 75px
-                margin: 10px 20px 20px 0px
-                width: auto
-        h3
-            text-decoration: underline
-        ul
-            list-style: disc
-            margin-left: 30px
-        img
-            width: 90%
+    .cite-text
+        background-color: lighten(grey, 40%)
+        color: darken($isb-dark, 10%)
+        font-size: 0.9em
+        border-radius: 5px
+        border-width: 1px
+        border-color: grey
+        padding: 5px
+    .firstRow
+        margin-top: 28px
 
-        &.graph-block
-            .alert
-                width: 500px
-            p
-                font-size: 20px
+    .pull-tab
+        .pull-tab-button
+            width: 150px
+            height: 28px
+            color: white
+            font-weight: bold
+            text-align: center
+            font-size: 18px
+            background-color: rgba(0,0,0,0.5)
+            position: absolute
+            left: 50%
+            transform: translateX(-50%)
+            &.up
+                border-top-left-radius: 10px
+                border-top-right-radius: 10px
+                border-width: 2px 2px 0 2px
+                bottom: 0
+                border-style: solid
+                border-color: #4cc2d6
+            &.down
+                border-bottom-left-radius: 10px
+                border-bottom-right-radius: 10px
+                border-width: 0 2px 2px 2px
+                top: 0
 
-
-    #disease-map
-        rect
-            cursor: pointer
+            &:hover
+                background-color: darken($isb-primary, 10%)
