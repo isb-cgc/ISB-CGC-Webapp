@@ -509,7 +509,7 @@ require([
                             table_row_data += '<td>' + happy_name(files[i][column_name]) + '</td>';
                             break;
                         case 'filesize':
-                            table_row_data += '<td class="col-filesize">' + (files[i]['filesize'] ? formatFileSize(files[i]['filesize']) : 'N/A')  + '</td>';
+                            table_row_data += '<td class="col-filesize">' + (files[i]['filesize'] != null && files[i]['filesize'] != 'N/A'? formatFileSize(files[i]['filesize']) : 'N/A')  + '</td>';
                             break;
                         default:
                             table_row_data += '<td>' + (files[i][column_name] || 'N/A') + '</td>';
