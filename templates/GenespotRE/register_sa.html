@@ -36,16 +36,6 @@
 {% block content %}
     <div class="container">
         <div class="row">
-            <div class="col-lg-12">
-                <div class="alert alert-warning alert-dismissible">
-                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                    Please note that you must now add two Service Accounts to your project in order to register with ISB-CGC: the ISB-CGC monitoring Service Account,
-                    and the new DCF monitoring Service Account. Please update all of your projects to include the new DCF monitoring Service Account,
-                    <code>{{ DCF_MONITORING_SA }}</code>, as a Project Editor.
-                </div>
-            </div>
-        </div>
-        <div class="row">
             <div class="col-sm-12 col-md-12 col-lg-12">
                 <div id="invalid-sa-error"></div>
                 <h4>Registering a Service Account for GCP {{ gcp_id }}</h4>
@@ -86,7 +76,7 @@
                     </form>
 
 
-                    <div class="results_summary" style="display:none;">
+                    <div class="results_summary"  style="display:none;">
                         <h5>Verification Results</h5>
                         <div class="summary_statement"></div>
                     </div>

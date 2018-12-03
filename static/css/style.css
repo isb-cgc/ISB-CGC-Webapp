@@ -165,9 +165,7 @@ nav {
     cursor: pointer; }
     .dataTable thead tr th:not(.sorting_disabled).sorting:after, .sortable_table thead tr th:not(.sorting_disabled).sorting:after {
       content: "";
-      float: right;
-      width: 12px;
-      height: 17px; }
+      float: right; }
     .dataTable thead tr th:not(.sorting_disabled).sorting_asc:after, .sortable_table thead tr th:not(.sorting_disabled).sorting_asc:after {
       content: "\f077";
       float: right;
@@ -2803,6 +2801,26 @@ span.code {
     color: #2A537A; }
   #landing .landing-content p {
     color: #4e4e4e; }
+
+#landing .footer {
+  color: white;
+  width: 60vw;
+  bottom: 30px;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+  position: absolute;
+  text-align: center;
+  font-size: 1.1em; }
+
+#landing .cite-text {
+  background-color: #e6e6e6;
+  color: #4e4e4e;
+  font-size: 0.9em;
+  border-radius: 5px;
+  border-width: 1px;
+  border-color: grey;
+  padding: 5px; }
 
 #landing .firstRow {
   margin-top: 28px; }
