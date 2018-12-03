@@ -405,7 +405,6 @@ define([
             y_type = '';
 
         var data = args.data;
-        //console.log(data['gene_data_list']);
         if (data.hasOwnProperty('pairwise_result')) {
             configure_pairwise_display(args.pairwise_element, data);
         }

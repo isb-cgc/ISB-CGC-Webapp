@@ -39,7 +39,7 @@ require([
 ], function ($, base) {
 
     // Filelist Manifest Export to BQ
-    $('.table-type').on('change', function () {
+    $('.table-type').on('change', function (e) {
         $('#export-to-bq-table').val('');
         if ($(this).find(':checked').val() == 'append') {
             $('#export-to-bq-form input[type="submit"]').attr('disabled', 'disabled');
@@ -52,6 +52,7 @@ require([
             $('.new-table-name').hide();
         } else {
             $('#export-to-bq-form input[type="submit"]').removeAttr('disabled');
+            validate_new_table_name(e);
             $('.table-list').hide();
             $('.new-table-name').show();
         }
@@ -60,25 +61,28 @@ require([
     $('#new-table-name').on('keypress keyup paste', function (e) {
         var self = $(this);
         setTimeout(function () {
-            $('#export-to-bq-modal .modal-js-messages').empty();
-            var str = self.val();
-
-            if (str.match(/[^A-Za-z0-9_]/)) {
-                e.preventDefault();
-                base.showJsMessage("error", "BigQuery table names are restricted to numbers, letters, and underscores.", false, $('#export-to-bq-modal .modal-js-messages'));
-                $('#export-to-bq-form input[type="submit"]').attr('disabled', 'disabled');
-                return false;
-            } else {
-                $('#export-to-bq-form input[type="submit"]').removeAttr('disabled');
-            }
-
-            if (str.length >= parseInt($('#new-table-name').attr('maxlength'))) {
-                e.preventDefault();
-                base.showJsMessage("warning", "You have reached the maximum size of the table name.", false, $('#export-to-bq-modal .modal-js-messages'));
-                return false;
-            }
+            validate_new_table_name(e);
         }, 70);
     });
+
+    var validate_new_table_name = function(e){
+        $('#export-to-bq-modal .modal-js-messages').empty();
+        var str = $('#new-table-name').val();
+        if (str.match(/[^A-Za-z0-9_]/)) {
+            e.preventDefault();
+            base.showJsMessage("error", "BigQuery table names are restricted to numbers, letters, and underscores.", false, $('#export-to-bq-modal .modal-js-messages'));
+            $('#export-to-bq-form input[type="submit"]').attr('disabled', 'disabled');
+            return false;
+        } else {
+            $('#export-to-bq-form input[type="submit"]').removeAttr('disabled');
+        }
+
+        if (str.length >= parseInt($('#new-table-name').attr('maxlength'))) {
+            e.preventDefault();
+            base.showJsMessage("warning", "You have reached the maximum size of the table name.", false, $('#export-to-bq-modal .modal-js-messages'));
+            return false;
+        }
+    };
 
     $('#export-to-bq-table').on('change', function () {
         if ($(this).find(':selected').attr('type') !== "label") {
@@ -86,7 +90,7 @@ require([
         }
     });
 
-    $('#export-to-bq-project-dataset').on('change', function () {
+    $('#export-to-bq-project-dataset').on('change', function (e) {
         $('.table-type, .new-table-name').removeAttr('disabled');
         $('.table-type, .new-table-name').removeAttr('title');
         $('#export-to-bq-table option:not([type="label"])').remove();
@@ -98,6 +102,7 @@ require([
             }
         } else {
             $('#export-to-bq-form input[type="submit"]').removeAttr('disabled');
+            validate_new_table_name(e);
         }
 
         var tables = $('#export-to-bq-project-dataset :selected').data('tables');

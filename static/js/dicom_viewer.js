@@ -55,7 +55,7 @@ require([
     $('.load-spinner').height($('#dicom-iframe').css('height'));
     $('.load-spinner').show();
 
-    // Set a timeout, since sometimes Osimis can take a while to load
+    // Set a timeout, since sometimes OHIF can take a while to load
     // *everything* and our spinner would be running the whole time
     setTimeout(function(){
         $('.load-spinner').hide();

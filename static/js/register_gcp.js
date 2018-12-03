@@ -74,7 +74,6 @@ require([
             data: fields,
             method: 'GET',
             success: function(data) {
-                // console.log(data);
                 $('.user-list').empty();
                 var gcp_id = data['gcp_id'];
                 var roles = data['roles']
@@ -90,6 +89,12 @@ require([
                 $('#register-gcp-form').append('<input type="hidden" name="gcp_id" value="' + gcp_id + '"/>');
                 $('#register-gcp-form').show();
                 submit_button.prop('disabled', false);
+                if(data['message']) {
+                    $('#verify-info-text').text(data['message']);
+                    $('.verify-info').show();
+                } else {
+                    $('.verify-info').hide();
+                }
             },
             error: function (xhr) {
                 var responseJSON = $.parseJSON(xhr.responseText);
@@ -175,6 +180,10 @@ require([
         is_instruction_vis ? $(this).siblings('div.instructions').hide() : $(this).siblings('div.instructions').show();
         $(this).toggleClass('instructions_show', is_instruction_vis);
         $(this).toggleClass('instructions_hide', !is_instruction_vis);
+    });
+
+    $('.modal form').on('submit',function(){
+        $(this).parents('.modal').find('input[type="submit"]').attr("disabled","disabled");
     });
 
 });

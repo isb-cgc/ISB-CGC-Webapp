@@ -73,12 +73,12 @@ require.config({
         'geneticrules': ['jquery'],
         'jqueryqtip': ['jquery'],
         'download_util': ['cbio_util'],
-        'underscore': {exports: '_'},
+        'underscore': {exports: '_'}
     },
     map: {
         d3textwrap: {
             'd3-selection': 'd3'
-        },
+        }
     }
 });
 
@@ -90,7 +90,7 @@ require([
     'underscore',
     'base',
     'geneticrules',
-    'jqueryqtip',
+    'jqueryqtip'
 ], function ($, d3, plot_factory, vizhelpers, _, base) {
 
     var savingComment = false;
@@ -1618,7 +1618,6 @@ require([
     $('button.share-modal').on('click',function(){
         $('a.share-workbook').click();
     });
-
 
     // Only init the active tab
     var active_sheet = $(".worksheet.active")[0];
