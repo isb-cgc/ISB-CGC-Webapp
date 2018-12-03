@@ -165,7 +165,9 @@ nav {
     cursor: pointer; }
     .dataTable thead tr th:not(.sorting_disabled).sorting:after, .sortable_table thead tr th:not(.sorting_disabled).sorting:after {
       content: "";
-      float: right; }
+      float: right;
+      width: 12px;
+      height: 17px; }
     .dataTable thead tr th:not(.sorting_disabled).sorting_asc:after, .sortable_table thead tr th:not(.sorting_disabled).sorting_asc:after {
       content: "\f077";
       float: right;
