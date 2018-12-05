@@ -28,21 +28,21 @@
 {% block header %}
 {% endblock %}
 
-{% block page_name %}dicom{% endblock %}
+{% block page_name %}path-pdf{% endblock %}
 
 {% block page_header %}
 {% endblock %}
 
 {% block content %}
 
-    <div id="dicom-div" class="row">
-        <div id="dicom-viewer">
+    <div id="path-report-div" class="row">
+        <div id="path-report-viewer">
             <div class="data-tab-content-panel">
                 <div class="panel panel-default">
                     <div class="panel-body">
                         <div class="iframe-container">
                             <div class="load-spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                            <iframe id="dicom-iframe" width="100%" src="https://{{ dicom_viewer }}{{ study_uid }}"></iframe>
+                            <iframe id="path-report-iframe" width="100%" src="{{ STORAGE_URI }}{{ path_report_file }}"></iframe>
                         </div>
                     </div>
                 </div>
@@ -57,4 +57,4 @@
     </script>
 {% endblock %}
 
-{% block js_file %}{% static 'js/dicom_viewer.js' %}{% endblock %}
+{% block js_file %}{% static 'js/path_pdf_viewer.js' %}{% endblock %}
