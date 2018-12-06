@@ -168,7 +168,7 @@ def oncoprint_view_data(request):
         somatic_mut_query_job = BigQuerySupport.insert_query_job(somatic_mut_query)
 
         plot_data = []
-
+        genes_with_no_cnvr = []
         # Build the CNVR features
         for gene in gene_array:
             feature = build_feature_ids(
@@ -176,6 +176,7 @@ def oncoprint_view_data(request):
             )
             if not feature or not len(feature):
                 logger.warn("[WARNING] No internal feature ID found for CNVR, gene {}, build {}.".format(gene,genomic_build))
+                genes_with_no_cnvr.append(gene)
                 continue
 
             feature = feature[0]['internal_feature_id']
@@ -195,25 +196,35 @@ def oncoprint_view_data(request):
         attempts = 0
         job_is_done = BigQuerySupport.check_job_is_done(somatic_mut_query_job)
         while attempts < settings.BQ_MAX_ATTEMPTS and not job_is_done:
-            job_is_done = BigQuerySupport.check_job_is_done(somatic_mut_query_job['jobReference'])
+            job_is_done = BigQuerySupport.check_job_is_done(somatic_mut_query_job)
             sleep(1)
             attempts += 1
 
         if job_is_done:
             results = BigQuerySupport.get_job_results(somatic_mut_query_job['jobReference'])
 
+        #Only add plot_data if gene info is not missing
         if results and len(results) > 0:
             for row in results:
-                plot_data.append("{}\t{}\t{}\t{}".format(str(row['f'][0]['v']),str(row['f'][1]['v']),str(row['f'][2]['v']),str(row['f'][3]['v'])))
+                if row['f'][1]['v']:
+                    plot_data.append("{}\t{}\t{}\t{}".format(str(row['f'][0]['v']),str(row['f'][1]['v']),str(row['f'][2]['v']),str(row['f'][3]['v'])))
 
         if len(plot_data):
+            plot_message = \
+                '' if not genes_with_no_cnvr \
+                    else "No internal feature ID found for CNVR, gene [{}], build {}."\
+                        .format(', '.join(genes_with_no_cnvr), genomic_build)
+
             return JsonResponse({
                 'plot_data': plot_data,
                 'gene_list': gene_array,
                 'bq_tables': ["{bq_data_project_id}:{dataset_name}.{table_name}".format(
                     bq_data_project_id=settings.BIGQUERY_DATA_PROJECT_NAME,
                     dataset_name=bq_table_info['dataset'],
-                    table_name=bq_table_info['table'])]})
+                    table_name=bq_table_info['table'])],
+                'plot_message': plot_message,
+            })
+
         else:
             return JsonResponse(
                 {'message': "The chosen genes and cohorts do not contain any samples with Gene Mutation data."})

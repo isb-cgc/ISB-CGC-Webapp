@@ -45,7 +45,9 @@
                                 <th></th>
                                 <th>Project Name</th>
                                 <th>Project ID</th>
-                                <th>Registered Service Accounts</th>
+                                {% if linked %}
+                                    <th>Registered Service Accounts</th>
+                                {% endif %}
                                 <th># Storage Buckets</th>
                                 <th># BigQuery Datasets</th>
                             </tr>
@@ -57,7 +59,9 @@
                                         <div class="dropdown">
                                         <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
                                         <ul class="dropdown-menu">
-                                            <li><a href="{% url 'register_sa' user.id %}?gcp_id={{ project.project_id }}">Register Service Account</a> </li>
+                                            {% if linked %}
+                                                <li><a href="{% url 'register_sa' user.id %}?gcp_id={{ project.project_id }}">Register Service Account</a> </li>
+                                            {% endif %}
                                             <li><a data-toggle="modal" role="button" data-target="#delete-project-modal-{{ project.id }}" >Unregister Project</a></li>
                                             <li><a class="refresh-project" data-toggle="modal" role="button" data-user-id="{{ request.user.id }}" data-project-gcp-id="{{ project.project_id }}" data-project-id="{{ project.id }}" data-project-name="{{ project.project_name }}" data-target="#refresh-project-modal-{{ project.id }}" >Refresh Project</a></li>
 {#                                            <li><a data-toggle="modal" role="button" data-target="#new-favorite-workbook-modal-{{ favorite.id }}" >Start New Workbook</a></li>#}
@@ -68,13 +72,15 @@
                                     <td>{{ project.project_id }}</td>
 {#                                    <td>{% if project.big_query_dataset %}{{ project.big_query_dataset }}{% else %}N/A{% endif %}</td>#}
 
-                                    <td>
-                                        {% if project.active_service_accounts|length > 0  %}
-                                        <a role="button" class="show-service-accounts" data-target="{{ project.id }}-expander"><i class="fa fa-caret-right"></i> {{ project.active_service_accounts|length }}</a>
-                                        {% else %}
-                                        {{ project.active_service_accounts|length }}
-                                        {% endif %}
-                                    </td>
+                                    {% if linked %}
+                                        <td>
+                                            {% if sa_list|length > 0  %}
+                                            <a role="button" class="show-service-accounts" data-target="{{ project.id }}-expander"><i class="fa fa-caret-right"></i> {{sa_list|length }}</a>
+                                            {% else %}
+                                            {{ sa_list|length }}
+                                            {% endif %}
+                                        </td>
+                                    {% endif %}
 
                                     <td>{{ project.bucket_set.all|length }}</td>
                                     <td>{{ project.bqdataset_set.all|length }}</td>
@@ -89,8 +95,8 @@
                                                     <thead>
                                                     <tr>
                                                         <th>Service Account</th>
-                                                        <th>Authorized Datasets</th>
-                                                        <th>Date Last Activated</th>
+                                                        <th>Authorized Controlled-Access Datasets</th>
+                                                        <th>Current Access Expires</th>
                                                         <th></th>
                                                     </tr>
                                                     </thead>
@@ -99,9 +105,11 @@
                                                         <tr>
                                                             <td>{{ svc_act.name }}</td>
                                                             <td>{% if svc_act.num_auth == 0 %}None{% else %}{{ svc_act.auth_dataset_names }}{% endif %}</td>
-                                                            <td{% if svc_act.is_expired and svc_act.num_auth > 0 %} class="red" title="Service Account's authorization date has expired; refresh to extend access."{% endif %}>{{ svc_act.authorized_date|date:'M d, Y, g:i a' }}</td>
+                                                            <td>{% if svc_act.is_expired %}{{ svc_act.expiration_date}}{% else %}{{ svc_act.expiration_date|date:'M d, Y, g:i a' }}{% endif %}</td>
                                                             <td>
-                                                                <a title="Refresh Service Account" aria-label="Refresh SA" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ svc_act.esc_name }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
+                                                                {% if not svc_act.is_expired %}
+                                                                    <a title="Refresh Service Account" aria-label="Refresh SA" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ svc_act.esc_name }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
+                                                                {% endif %}
                                                                 <a title="Delete Service Account" aria-label="Delete SA" data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ svc_act.esc_name }}"><i class="fa fa-trash"></i></a>
                                                                 <a title="Adjust Datasets for this Service Account" aria-label="Adjust Datasets for SA" role="button" href="{% url 'adjust_sa' user.id %}?sa_name={{ svc_act.name }}"><i class="fa fa-plus-square"></i></a>
                                                             </td>
