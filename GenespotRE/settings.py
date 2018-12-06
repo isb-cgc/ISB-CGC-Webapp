@@ -58,6 +58,8 @@ CRON_MODULE             = os.environ.get('CRON_MODULE')
 
 # Log Names
 SERVICE_ACCOUNT_LOG_NAME = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev_logging')
+WEBAPP_LOGIN_LOG_NAME = os.environ.get('WEBAPP_LOGIN_LOG_NAME', 'local_dev_logging')
+GCP_ACTIVITY_LOG_NAME = os.environ.get('GCP_ACTIVITY_LOG_NAME', 'local_dev_logging')
 
 BASE_URL                = os.environ.get('BASE_URL', 'https://isb-cgc-uat.appspot.com')
 BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc-uat.appspot.com')
@@ -214,6 +216,8 @@ STATIC_ROOT = ''
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = os.environ.get('STATIC_URL', '/static/')
+
+GCS_STORAGE_URI = os.environ.get('GCS_STORAGE_URI', 'https://storage.googleapis.com/')
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -381,7 +385,7 @@ LOGGING = {
 #  Start django-allauth  #
 ##########################
 
-LOGIN_REDIRECT_URL = '/dashboard/'
+LOGIN_REDIRECT_URL = '/extended_login/'
 
 INSTALLED_APPS += (
     'accounts',
@@ -569,9 +573,7 @@ IMG_THUMBS_URL = os.environ.get('IMG_THUMBS_URL', None)
 #################################
 # DICOM Viewer settings
 #################################
-ORTHANC_LOOKUP_URI = os.environ.get('ORTHANC_LOOKUP_URI', None)
-OSIMIS_VIEWER = os.environ.get('OSIMIS_VIEWER', None)
-DCM4CHEE_VIEWER = os.environ.get('DCM4CHEE_VIEWER', None)
+DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
 
 ##############################################################
 #   MailGun Email Settings
@@ -583,6 +585,11 @@ NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRES
 
 # Explicitly check for known items
 BLACKLIST_RE = ur'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
+
+# IndexD settings
+INDEXD_URI = os.environ.get('INDEXD_URI', None)
+INDEXD_REQ_LIMIT = int(os.environ.get('INDEXD_REQ_LIMIT', '100'))
+
 
 if DEBUG and DEBUG_TOOLBAR:
     INSTALLED_APPS += ('debug_toolbar',)
