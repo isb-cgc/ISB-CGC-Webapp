@@ -17,10 +17,6 @@
  */
 
 
-/*png: 'libs/png',
-jspdf: 'libs/jspdf.min',
-jspdf_plugin_addimage: 'libs/jspdf.plugin.addimage',
-png_support: 'libs/png_support',*/
 define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob', 'zlibs', 'png'], function ($, oncoprintjs, _) {
     var processData = function (array) {
         // Need to mock webservice data to be compatible with tooltip

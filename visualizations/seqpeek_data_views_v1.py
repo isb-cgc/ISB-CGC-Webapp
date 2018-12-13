@@ -17,8 +17,6 @@ limitations under the License.
 """
 
 import logging
-import traceback
-import sys
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse

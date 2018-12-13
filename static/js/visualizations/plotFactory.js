@@ -32,14 +32,17 @@ define([
     'bar_plot',
     'seqpeek_view/seqpeek_view',
     'oncoprint_plot',
+    'oncogrid_plot',
     'select2',
     'fileSaver',
     'cbio_util',
     'download_util',
 
-], function($, jqueryui, bootstrap, session_security, d3, d3tip, d3textwrap, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, seqpeek_view, oncoprint_plot, mock_histogram_data ) {
+], function($, jqueryui, bootstrap, session_security, d3, d3tip, d3textwrap, vizhelpers, scatter_plot, cubby_plot,
+            violin_plot, histogram, bar_graph, seqpeek_view, oncoprint_plot,  oncogrid_plot, mock_histogram_data ) {
 
-    var VERSION = $('#workbook-build :selected').data('plot-version') || $('.workbook-build-display').data('plot-version');
+    var VERSION = $('#workbook-build :selected').data('plot-version')
+                        || $('.workbook-build-display').data('plot-version');
 
     var scatter_plot_obj = Object.create(scatter_plot, {});
     var cubby_plot_obj   = Object.create(cubby_plot, {});
@@ -47,6 +50,7 @@ define([
     var histogram_obj    = Object.create(histogram, {});
     var bar_graph_obj    = Object.create(bar_graph, {});
     var oncoprint_obj    = Object.create(oncoprint_plot, {});
+    var oncogrid_obj     = Object.create(oncogrid_plot, {});
     var helpers          = Object.create(vizhelpers, {});
     function generate_axis_label(attr, isLogTransform, units) {
         if(isLogTransform) {
@@ -284,6 +288,23 @@ define([
         }
         return  {plot : plot};
     }
+
+    function generate_oncogrid_plot(plot_selector, view_data) {
+
+        var donor_data_list = view_data['donor_data_list'];
+        var gene_data_list = view_data['gene_data_list'];
+        var observation_data_list = view_data['observation_data_list'];
+        var donor_track_count_max = view_data['donor_track_count_max'];
+        var plot;
+        if (donor_data_list && gene_data_list && observation_data_list) {
+            plot = oncogrid_obj.createOncogridPlot(plot_selector, donor_data_list, gene_data_list, observation_data_list, donor_track_count_max);
+        }
+        else {
+            var message = "The selected cohorts have no somatic mutations in the gene ";
+            $(plot_selector).html('<p>'+message + '<b>' + gene_list.join(', ') + '</b></p>');
+        }
+        return  {plot : plot};
+    }
     /*
         Generate url for gathering data
      */
@@ -330,8 +351,8 @@ define([
         return seqpeek_url;
     }
 
-    // Generate url for gathering data for a OncoPrint plot
-    function get_oncoprint_data_url(base_url, cohorts, gene_list){
+    // Generate url for gathering data for a OncoPrint and OncoGrid plot
+    function get_onco_data_url(base_url, plot_type, cohorts, gene_list){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
             if (i == 0) {
@@ -340,10 +361,11 @@ define([
                 cohort_str += '&cohort_id=' + cohorts[i];
             }
         }
-        var oncoprintUrl = base_url + '/visualizations/oncoprint_data_plot/' + VERSION + '?' + cohort_str;
-        oncoprintUrl += "&gene_list=" + gene_list.join(",")
+        var url = base_url + '/visualizations/'
+            + (plot_type == 'OncoPrint' ? 'oncoprint_data_plot/': 'oncogrid_data_plot/')
+            + VERSION + '?' + cohort_str + '&gene_list=' + gene_list.join(",")
             + (VERSION == 'v2' ? "&genomic_build=" + $('.workbook-build-display').data('build') : '');
-        return oncoprintUrl;
+        return url;
     }
 
     function configure_pairwise_display(element, data){
@@ -464,6 +486,8 @@ define([
         } else if (args.type == "OncoPrint" && !data.message) {
             visualization =  generate_oncoprint_plot(args.plot_selector, data);
             $('.worksheet.active .plot-args').data('plot-data', visualization.plot.plot_data);
+        } else if (args.type == "OncoGrid" && !data.message) {
+            generate_oncogrid_plot(args.plot_selector, data);
         } else {
             // No data returned
             d3.select(args.plot_selector)
@@ -531,11 +555,8 @@ define([
         if (args.type == "SeqPeek") {
             plot_data_url = get_seqpeek_data_url(BASE_URL, args.cohorts, args.gene_label, VERSION);
         }
-        else if(args.type == "OncoPrint"){
-            plot_data_url = get_oncoprint_data_url(BASE_URL, args.cohorts, args.gene_list, VERSION);
-        }
-        else {
-            plot_data_url = get_data_url(BASE_URL, args.cohorts, args.x, args.y, args.color_by, args.logTransform, VERSION);
+        else if(args.type == "OncoPrint" || args.type == "OncoGrid"){
+            plot_data_url = get_onco_data_url(BASE_URL, args.type, args.cohorts, args.gene_list, VERSION);
         }
 
         $.ajax({

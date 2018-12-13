@@ -34,6 +34,8 @@ require.config({
         vizhelpers: 'helpers/vis_helpers',
         select2: 'libs/select2.min',
         oncoprintjs: 'libs/oncoprint.bundle',
+        //oncogridjs: 'libs/oncogrid-debug',
+        oncogridjs: 'libs/oncogrid.min',
         geneticrules: 'libs/geneticrules',
         canvas_toBlob: 'libs/canvas-toBlob',
         zlibs: 'libs/zlibs',
@@ -54,6 +56,7 @@ require.config({
         violin_plot : 'visualizations/createViolinPlot',
         bar_plot : 'visualizations/createBarGraph',
         oncoprint_plot: 'visualizations/createOncoprintPlot',
+        oncogrid_plot: 'visualizations/createOncogridPlot',
         seqpeek_view: 'seqpeek_view',
         seqpeek: 'seqpeek_view/seqpeek'
     },
@@ -81,13 +84,14 @@ require.config({
 
 require([
     'jquery',
+    'd3',
     'plot_factory',
     'vizhelpers',
     'underscore',
     'base',
     'geneticrules',
     'jqueryqtip'
-], function ($, plot_factory, vizhelpers, _, base) {
+], function ($, d3, plot_factory, vizhelpers, _, base) {
 
     var savingComment = false;
 
@@ -873,6 +877,7 @@ require([
                 swap.hide();
                 break;
             case 'OncoPrint':
+            case 'OncoGrid':
                 op_genes.show();
                 and_or_variables_label.hide();
                 x_widgets.hide();
@@ -881,7 +886,6 @@ require([
                 xLogCheck.hide();
                 yLogCheck.hide();
                 swap.hide();
-
                 break;
             default :
                 break;
@@ -987,7 +991,6 @@ require([
     function get_plot_info(selector, callback){
         var worksheet_id = $(selector).attr("worksheet_id");
         var plot_type = $(selector).find(":selected").val();
-
         if(plot_type !== "") {
             get_plot_model(workbook_id, worksheet_id, plot_type, function (data) {
                 if (data.error) {
@@ -1044,7 +1047,7 @@ require([
                     axisRdy = false;
                 }
             }
-            else if(plot_val == 'OncoPrint'){
+            else if(plot_val == 'OncoPrint' || plot_val == 'OncoGrid'){
                 axisRdy = false;
                 $('.worksheet.active').find('.gene-selex').each(function(){
                     if($(this).is(':checked')) {
@@ -1157,7 +1160,7 @@ require([
         if(data.attrs.type == 'SeqPeek'){
             return (data.attrs.gene_label !== undefined && data.attrs.gene_label !== null && data.attrs.gene_label !== "");
         }
-        else if(data.attrs.type == 'OncoPrint'){
+        else if(data.attrs.type == 'OncoPrint' || data.attrs.type == 'OncoGrid'){
             return (data.attrs.gene_list !== undefined && data.gene_list !== null && data.attrs.gene_list.length>0);
         }
         else{
@@ -1229,6 +1232,12 @@ require([
         else {
             $(toggle_selection_selector).show();
         }
+
+        if(args.type === 'OncoGrid'){
+            var oncogrid_template = plot_element.find('#oncogrid_div').html();
+            plot_area.html(oncogrid_template);
+        }
+
         plotFactory.generate_plot(
             {
                 plot_selector    : plot_selector,

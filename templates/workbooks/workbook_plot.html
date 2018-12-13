@@ -21,16 +21,16 @@
 
 <div class="plot panel" id="plot-{{ worksheet.id }}">
     <div class="panel-heading">
-        <div class="options-bar">
+        <div class="btn-group options-bar" role="group" aria-label="Options Bar">
             {% if workbook.owner.id == user.id %}
-            <a role="button" class="toggle-selection" aria-label="Toggle Sample Selection"><i class="fa fa-crosshairs"></i> Enable Sample Selection</a>
-            <br />
-            <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-bar-chart"></i> Edit Analysis Settings</a>
+            <a role="button" class="toggle-selection btn btn-primary" aria-label="Toggle Sample Selection"><i class="fa fa-crosshairs"></i></a>
+            <a role="button" class="show-settings-flyout btn btn-primary" data-target=".setting-flyout" aria-label="Edit Plot Settings"><i class="fa fa-bar-chart"></i></a>
             {% else %}
-            <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-tasks"></i> View Plot Settings</a>
+            <a role="button" class="show-settings-flyout btn btn-primary" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-tasks"></i></a>
             {% endif %}
-            <br/><a role="button" class="redraw-plot" aria-label="Redraw"><i class="fa fa-refresh"></i> Redraw Plot</a>
-            <br/><a role="button" class="download-csv-plot" aria-label="CsvDownload"><i class="fa fa-download"></i> Download</a>
+            <a role="button" class="redraw-plot btn btn-primary" aria-label="Redraw"><i class="fa fa-refresh"></i></a>
+            <a role="button" class="data-download btn btn-primary" aria-label="Data Download"><i class="fa fa-download"></i></a>
+            <a role="button" class="img-download btn btn-primary" aria-label="Image Download"><i class="fa fa-download"></i></a>
         </div>
         <div class="plot-args hidden"/></div>
         <div class="bq-tables" style="display: none;"><h5>BigQuery Table(s) Used</h5><ul class="bq-table-display"></ul></div>
@@ -285,7 +285,97 @@
                 </div>
             {% endif %}
         </div>
-
+        <div id="oncogrid_div" style="display:none;">
+            <div id="plot-{{ worksheet.id }}-oncogrid" class="oncogrid-screen">
+                <div class="oncogrid-wrapper">
+                    <div class="oncogrid-header hidden">
+                        <div class="oncogrid-logo">
+                            <img alt="OICR Bio Logo" src="{% static 'img/oicr_bio.jpg' %}">
+                        </div>
+                        <div class="oncogrid-legend"></div>
+                        <div class="oncogrid-toolbar">
+                            <span class="toolbar-item dropdown">
+                                <button class="oncogrid-button download">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-download"></i>
+                                            <div class="button-text">Download</div>
+                                        </span>
+                                    </div>
+                                </button>
+                                <div class="oncogrid-download-selection hidden">
+                                    <div class="download-svg">SVG</div>
+                                    <div class="download-png">PNG</div>
+                                    <div class="download-json">JSON</div>
+                                </div>
+                            </span>
+                            <span class="toolbar-item">
+                                <button class="oncogrid-button reload">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-undo"></i>
+                                            <div class="button-text">Reload</div>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
+                            <span class="toolbar-item">
+                                <button class="oncogrid-button cluster">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-sort-amount-desc"></i>
+                                            <div class="button-text">Cluster</div>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
+                            <span class="toolbar-item">
+                                <button class="oncogrid-button heatmap-toggle">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-fire"></i>
+                                            <div class="button-text">Heatmap</div>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
+                            <span class="toolbar-item">
+                                <button class="oncogrid-button grid-toggle">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-th"></i>
+                                            <div class="button-text">Lines</div>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
+                            <span class="toolbar-item">
+                                <button class="oncogrid-button crosshair-toggle">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-crosshairs"></i>
+                                            <div class="button-text">Crosshair</div>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
+                            <span class="toolbar-item">
+                                <button class="oncogrid-button fullscreen-toggle">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-expand"></i>
+                                            <div class="button-text">Fullscreen</div>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                    <div id='grid-div'></div>
+                    <div class="svg-track-legend"></div>
+                </div>
+            </div>
+        </div>
         <div class="oncoprint_div">
             <div id="plot-message-alert" class="alert alert-warning alert-dismissable" style="display: none;">
                 <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span
