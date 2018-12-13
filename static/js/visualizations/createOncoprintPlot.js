@@ -77,7 +77,7 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
             } else {
                 var ws_datum = {
                     genetic_alteration_type: 'MUTATION_EXTENDED',
-                    amino_acid_change: alteration,
+                    amino_acid_change: alteration
                 };
                 if (type === "fusion") {
                     ws_datum.oncoprint_mutation_type = "fusion";
@@ -125,11 +125,13 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
             $(plot_selector).html($(plot_selector).siblings('.oncoprint_div').html());
             var updateOncoprinter = CreateOncoprinterWithToolbar(plot_selector, '.oncoprint .oncoprint_body', '.oncoprint .oncoprint-diagram-toolbar-buttons');
             gene_order = sample_order = null;
+            var process_result = {};
             if (data.length > 0) {
-                var process_result = processData(data);
+                process_result = processData(data);
                 updateOncoprinter(process_result.data_by_gene, 'sample', process_result.altered_by_gene, sample_order, gene_order);
-            } else {
-
+            }
+            return {
+                plot_data: function(){ return process_result; }
             }
         }
     }

@@ -34,10 +34,9 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .direction('n')
                 .offset([0, 0])
                 .html(function(d) {
-                return '<span>Case: ' + d['case_id'] + '<br/>'+
-                    //'x: ' + d['x'] +'<br/>'+
-                    //'y: ' + d['y'] +'<br/>'+
-                        'Sample: ' + d['sample_id'] +'</span>'
+                    return '<span>Case: ' + d['case_id'] + '<br/>' +
+                        'Sample: ' + d['sample_id'] + '<br/>' +
+                        'Data: (' + d['x'] + ', ' + d['y'] + ')</span>'
                 });
     var helpers = Object.create(vizhelpers, {});
 
@@ -59,6 +58,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             // We require at least one of the axes to have valid data
             var checkXvalid = 0;
             var checkYvalid = 0;
+            var plot_padding_percentile = 5; // 5% of padding before and after the
 
             data.map(function(d){
                 var oneIsValid = false;
@@ -83,32 +83,35 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             }
 
             var yVal = function(d) {
-                if (helpers.isValidNumber(d[yParam])) {
-                    return d[yParam];
-                } else {
-                    d[yParam] = range[1];
-                    return range[1];
+                if(isNaN(d[yParam]))
+                    return 0;
+                else{
+                    return Number(d[yParam]);
                 }
             };
 
-            var yScale = d3.scale.linear().range([height-margin.bottom, margin.top]).domain(range);
-            var yMap = function(d) { if(typeof(Number(d.y)) == "number"){return yScale(yVal(d));} else { return 0;}};
+            var yScale = d3.scale.linear()
+                            .range([height-margin.bottom, margin.top])
+                            .domain([range[0], range[1]+(range[1]-range[0])*plot_padding_percentile/100 ]);
+            var yMap = function(d) { return yScale(yVal(d));}
             var yAxis = d3.svg.axis()
                     .scale(yScale)
                     .orient("left")
                     .tickSize(-width + margin.left + margin.right, 0, 0);
 
             var xVal = function(d) {
-                if (helpers.isValidNumber(d[xParam])) {
-                    return d[xParam];
-                } else {
-                    d[xParam] = domain[1];
-                    return domain[1];
+                if(isNaN(d[xParam])){
+                    return 0;
+                }
+                else{
+                    return Number(d[xParam]);
                 }
             };
 
-            var xScale = d3.scale.linear().range([margin.left, width-margin.right]).domain(domain);
-            var xMap = function(d) {if(typeof(Number(d.x)) == "number"){return xScale(xVal(d));} else { return 0;}};
+            var xScale = d3.scale.linear()
+                            .range([margin.left, width-margin.right])
+                            .domain([domain[0], domain[1]+(domain[1]-domain[0])*plot_padding_percentile/100 ]);
+            var xMap = function(d) { return xScale(xVal(d)); };
             var xAxis = d3.svg.axis()
                     .scale(xScale)
                     .orient("bottom")
@@ -391,7 +394,22 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 check_selection_state(bool);
             }
 
+            function get_plot_data(){
+                var p_data = [];
+                data.map(function(d){
+                    var p = {
+                        x: xVal(d),
+                        y: yVal(d),
+                        case_id: d['case_id'],
+                        sample_id: d['sample_id']
+                    };
+                    p_data.push(p);
+                });
+                return p_data;
+            }
+
             return {
+                plot_data: get_plot_data,
                 resize                : resize,
                 check_selection_state : check_selection_state_wrapper
             }

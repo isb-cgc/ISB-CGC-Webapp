@@ -192,6 +192,18 @@ require([
         plotFactory.redraw_plot();
     });
 
+    $('.download-csv-plot').on('click', function () {
+        //download csv data
+        //get data
+        // if(!plotFactory)
+        //     plotFactory = Object.create(plot_factory, {});
+        // plotFactory.download_data();
+
+        var plot_data = $('.worksheet.active .plot-args').data('plot-data');
+        console.log(plot_data());
+
+    });
+
 
     function hide_plot_settings() {
         $('.hide-settings-flyout').parents('.fly-out.settings-flyout').animate({
@@ -1162,7 +1174,7 @@ require([
             }
         }
         return true;
-    };
+    }
 
     function turn_off_toggle_selector(){
         var worksheet_id = $('.worksheet.active').attr('id');

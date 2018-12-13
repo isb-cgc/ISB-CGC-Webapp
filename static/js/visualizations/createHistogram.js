@@ -21,8 +21,6 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
 
     var svg;
     var margin;
-    var zoom_area;
-    var zoom_rect;
     var width;
     var height;
     var x;
@@ -46,7 +44,18 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
 
     // If you want to override the tip coming in from the create call,
     // do it here
-    var histoTip = null;
+    var tip = d3tip()
+            .attr('class', 'd3-tip')
+            .direction('n')
+            .offset([0, 0])
+            .html(function(d) {
+                var mean = 0;
+                for (var i = 0; i < d.length; i++) {
+                    mean += parseFloat(d[i]);
+                }
+                mean /= d.length;
+                return '<span>' +  Number(d.x).toFixed(2) + ' ('+(d.y * 100).toFixed(2) + '%)</span><br/><span>Mean: ' + mean.toFixed(2) + '</span>';
+            });
 
     var selex_active = false;
     var zoom_status = {
@@ -55,7 +64,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
     };
 
     return {
-        createHistogramPlot : function (svg_param, raw_Data, values_only, width_param, height_param, x_attr, xLabel, tip, margin_param, legend) {
+        createHistogramPlot : function (svg_param, raw_Data, values_only, width_param, height_param, x_attr, xLabel, margin_param, legend) {
 
             var nonNullData = [];
 
@@ -69,8 +78,6 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 return null;
             }
 
-            tip = histoTip || tip;
-
             svg    = svg_param;
             width  = width_param;
             height = height_param;
@@ -80,23 +87,31 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
             var hist_data = d3.layout.histogram()
                 .bins(num_bins)
                 .frequency(false)(values_only);
-            // var kde = science.stats.kde().sample(values_only);
             var tmp = helpers.get_min_max(raw_Data, x_attr);
             min_n = tmp[0];
-            max_n = tmp[1] !== tmp[0] ? tmp[1] : tmp[0]+1;
+            max_n = tmp[1];
+            var h_padding = (max_n - min_n) * .05 || 0.05;
+
+            var band_width = 50;
+            if(num_bins > 10){
+                band_width = (width-margin.left-margin.right)/num_bins;
+            }
 
             x = d3.scale.linear()
                 .range([margin.left, width - margin.right])
-                .domain([min_n, max_n]);
+                .domain([min_n-h_padding, max_n+h_padding]);
+
             xAxis = d3.svg.axis()
                 .scale(x)
                 .orient('bottom');
 
+            var y_max = d3.max(hist_data, function(d){
+                    return d.y;
+                });
+            var v_padding = y_max*.05;
             y = d3.scale.linear()
                 .range([height - margin.bottom - margin.top, 0])
-                .domain([0, d3.max(hist_data, function (d) {
-                    return d.y;
-                })]);
+                .domain([0, y_max + v_padding]);
 
             yAxis = d3.svg.axis()
                 .scale(y)
@@ -153,7 +168,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
             var plot_area = svg.append('g')
                 .attr('clip-path', 'url(#'+plot_area_clip_id+')')
                 .attr('transform','translate(0,'+margin.top+')');
-
+            var band_padding = 2;
             plot_area.append('clipPath')
                 .attr('id', plot_area_clip_id)
                 .append('rect')
@@ -166,7 +181,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 .enter().append("rect")
                 .attr("class", "plot-bar")
                 .attr("x", function (d) {
-                    return x(d.x) + 2;
+                    return x(d.x)-band_width/2+band_padding;
                 })
                 .attr("y", function (d) {
                     return y(d.y);
@@ -175,10 +190,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     return d.x;
                 })
                 .attr("width", function(d) {
-                    var w = (x(hist_data[0].dx + hist_data[0].x) - x(hist_data[0].x) - 1);
-                    // If all values are in one bin and that bin is zero, we won't get a width value
-                    // Just use a fixed width in this case.
-                    return (w > 0) ? w : 50;
+                    return band_width-band_padding*2;
                 })
                 .attr("height", function (d) {
                     return height - margin.top - margin.bottom - y(d.y);
@@ -305,7 +317,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     // Remove brush event listener plot area
                     plot_area.selectAll('.brush').remove();
                 }
-            };
+            }
 
             // Update the sample cohort bar update
             function sample_form_update(extent, reCalc){
@@ -352,7 +364,21 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 check_selection_state(button);
             }
 
+            function get_plot_data(){
+                var p_data = [];
+                hist_data.map(function(d){
+                    var p = {
+                        x: d.x,
+                        y: d.y
+                    };
+                    p_data.push(p);
+                });
+
+                return p_data;
+            }
+
             return {
+                plot_data: get_plot_data,
                 resize                : resize,
                 check_selection_state : check_selection_state_wrapper
             }

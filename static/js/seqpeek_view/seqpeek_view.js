@@ -108,11 +108,12 @@ define([
 
         render_seqpeek: function(target_table_selector, gene_element, data_bundle) {
             var plot_data = data_bundle['plot_data'];
-            var tracks = plot_data['tracks'];
-
             var target_table = $(target_table_selector)[0];
             var tableView = SeqPeekViewFactory.create(target_table, plot_data);
             tableView.render();
+            return {
+                plot_data: function(){ return plot_data; }
+            }
         }
     };
 });

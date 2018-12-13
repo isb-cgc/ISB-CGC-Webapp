@@ -467,7 +467,7 @@ function($, d3, d3tip, d3textwrap, _) {
             });
 
             function resize() {
-                width = svg.node().parentNode.offsetWidth - 10;
+                //width = svg.node().parentNode.offsetWidth - 10;
                 //TODO resize plot
             }
 
@@ -475,7 +475,12 @@ function($, d3, d3tip, d3textwrap, _) {
                 check_selection_state(bool);
             }
 
+            function get_plot_data(){
+                return data_counts;
+            }
+
             return {
+                plot_data: get_plot_data,
                 resize                : resize,
                 check_selection_state : check_selection_state_wrapper
             }

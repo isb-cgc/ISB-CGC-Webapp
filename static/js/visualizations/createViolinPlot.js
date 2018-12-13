@@ -172,7 +172,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                             .domain([0, d3.max(histogram, function(d) { return d.y; })]);
                         rand_pos = plusOrMinus * Math.floor(Math.random() * y_horizontal(histogram[histo_index]['y']) * 0.8);
                     }
-                    return x(d[xAttr]) + (violin_width+padding)/2 + rand_pos;
+                    var xpos = x(d[xAttr]) + (violin_width+padding)/2 + rand_pos;
+                    return xpos;
                 }) // Staggers points across a histogram
                 .attr('cy', function(d) {
                     return y(d[yAttr]);
@@ -492,7 +493,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .append('text')
                 .attr('class', 'x label axis-label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'translate(' + (margin.left+ width/2) + ',' + (height - 10) + ')')
+                .attr('transform', 'translate(' + (view_width/2+margin.left) + ',' + (height - 10) + ')')
                 .text(xLabel);
 
             svg.append('g')
@@ -584,7 +585,24 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 check_selection_state(bool);
             }
 
+            function get_plot_data(){
+                var p_data = [];
+                raw_Data.map(function(d){
+                    if(helpers.isValidNumber(d.y)) {
+                        var p = {
+                            x: d.x,
+                            y: d.y,
+                            case_id: d.case_id,
+                            sample_id: d.sample_id
+                        };
+                        p_data.push(p)
+                    }
+                });
+                return p_data;
+            }
+
             return {
+                plot_data: get_plot_data,
                 resize                : resize,
                 check_selection_state : check_selection_state_wrapper
             }

@@ -33,7 +33,7 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
 
     // If you want to override the tip coming in from the create call,
     // do it here
-    var barTip = d3tip()
+    var tip = d3tip()
         .attr('class', 'd3-tip')
         .direction('n')
         .offset([0, 0])
@@ -77,8 +77,7 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
 
             return results;
         },
-        createBarGraph: function(svg, raw_Data, width, height, bar_width,  x_attr, xLabel, tip, margin, legend) {
-            tip = barTip || tip;
+        createBarGraph: function(svg, raw_Data, width, height, bar_width,  x_attr, xLabel, margin, legend) {
             var data = this.dataCounts(raw_Data, x_attr);
             var plot_width = (bar_width+5) * data.length;
 
@@ -309,16 +308,16 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 $('.save-cohort-card').show()
                     .attr('style', 'position:relative; top: -' + height + 'px; left:' + leftVal + 'px;');
 
-            };
+            }
 
             function resize() {
                 width = svg.node().parentNode.offsetWidth - 10;
                 //TODO resize plot
-            };
+            }
 
             function check_selection_state_wrapper(bool){
                 check_selection_state(bool);
-            };
+            }
 
             $('.save-cohort-card').find('.btn').on('click',function(e){
                 if(Object.keys(selectedValues).length > 0){
@@ -332,7 +331,12 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 }
             });
 
+            function get_plot_data(){
+                return data;
+            }
+
             return {
+                plot_data: get_plot_data,
                 resize                : resize,
                 check_selection_state : check_selection_state_wrapper
             }

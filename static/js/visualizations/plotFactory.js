@@ -48,19 +48,6 @@ define([
     var bar_graph_obj    = Object.create(bar_graph, {});
     var oncoprint_obj    = Object.create(oncoprint_plot, {});
     var helpers          = Object.create(vizhelpers, {});
-    var cubby_tip = d3tip()
-            .attr('class', 'd3-tip')
-            .direction('n')
-            .offset([0, 0])
-            .html(function(d) {
-                var mean = 0;
-                for (var i = 0; i < d.length; i++) {
-                    mean += parseFloat(d[i]);
-                }
-                mean /= d.length;
-                return '<span>Mean: ' + mean.toFixed(2) + '</span><br /><span>' + (d.y * 100).toFixed(2) + '%</span>';
-            });
-
     function generate_axis_label(attr, isLogTransform, units) {
         if(isLogTransform) {
             return $('option[value="' + attr + '"]:first').html() + " - log("+(units && units.length > 0 ? units : 'n')+"+1)";
@@ -86,9 +73,7 @@ define([
             bar_width,
             'x',
             generate_axis_label(x_attr, false, units.x),
-            cubby_tip,
             margin);
-
         return  {plot : plot, svg : svg}
     }
 
@@ -110,7 +95,6 @@ define([
                 height,
                 'x',
                 generate_axis_label(x_attr, logTransform.x, units.x),
-                cubby_tip,
                 margin);
 
         return  {plot : plot, svg : svg}
@@ -262,7 +246,7 @@ define([
         var hugo_symbol = view_data['hugo_symbol'];
 
         var element = $(plot_selector)[0];
-
+        var plot;
         if (plot_data.hasOwnProperty('tracks')) {
             seqpeek_view.render_seqpeek_legend(legend_selector);
 
@@ -271,7 +255,7 @@ define([
             var table_selector = seqpeek_el.table;
             var gene_element = seqpeek_el.gene_element;
 
-            seqpeek_view.render_seqpeek(table_selector, gene_element, view_data);
+            plot = seqpeek_view.render_seqpeek(table_selector, gene_element, view_data);
             $(legend_selector).show();
         }
         else {
@@ -279,6 +263,7 @@ define([
             seqpeek_view.render_no_data_message(plot_selector, hugo_symbol);
             $(legend_selector).hide();
         }
+        return  {plot : plot};
     }
 
     function generate_oncoprint_plot(plot_selector, view_data) {
@@ -289,13 +274,15 @@ define([
             $('#plot-message-alert').show();
             $('#plot-message-alert p').text(plot_message);
         }
+        var plot;
         if (plot_data && oncoprint_obj.isInputValid(plot_data)) {
-            oncoprint_obj.createOncoprintPlot(plot_selector, plot_data);
+            plot = oncoprint_obj.createOncoprintPlot(plot_selector, plot_data);
         }
         else {
             var message = "The selected cohorts have no somatic mutations in the gene ";
             $(plot_selector).html('<p>'+message + '<b>' + gene_list.join(', ') + '</b></p>');
         }
+        return  {plot : plot};
     }
     /*
         Generate url for gathering data
@@ -397,6 +384,7 @@ define([
         }
         // The response form the SeqPeek data endpoint has a different schema. This is case is handled in
         // another branch below.
+        var visualization;
         if (data.hasOwnProperty('items') && data['items'].length > 0) {
 
             var cohort_set = data['cohort_set'];
@@ -414,7 +402,7 @@ define([
                 args.color_by = 'c';
             }
 
-            var visualization;
+
             switch (args.type){
                 case "Bar Chart" : //x_type == 'STRING' && y_type == 'none'
                     visualization = generate_bar_chart(margin, args.plot_selector, height, width, args.x, data, units);
@@ -461,14 +449,21 @@ define([
             });
             visualization.plot.check_selection_state($(visualization.svg[0]).parents('.plot').find('.toggle-selection').hasClass('active'));
 
+            //store data
+            if(visualization.plot.plot_data){
+                $('.worksheet.active .plot-args').data('plot-data', visualization.plot.plot_data);
+            }
+
             //establish resize call to data
             d3.select(window).on('resize', visualization.plot.resize);
             args.color_by_sel && $(args.legend_selector).show();
 
         } else if (args.type == "SeqPeek" && !data.message) {
-            generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
+            visualization = generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
+            $('.worksheet.active .plot-args').data('plot-data', visualization.plot.plot_data);
         } else if (args.type == "OncoPrint" && !data.message) {
-            generate_oncoprint_plot(args.plot_selector, data);
+            visualization =  generate_oncoprint_plot(args.plot_selector, data);
+            $('.worksheet.active .plot-args').data('plot-data', visualization.plot.plot_data);
         } else {
             // No data returned
             d3.select(args.plot_selector)
@@ -591,6 +586,7 @@ define([
         var plot_loader  = $('.worksheet.active .plot-loader');
         var plot_args = $('.worksheet.active .plot-args').data('plot-args');
         $(plot_args.plot_selector).empty();
+        $(plot_args.legend_selector).empty();
         plot_loader.fadeIn();
         select_plot(plot_args);
         plot_loader.hide();
