@@ -395,15 +395,14 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             }
 
             function get_plot_data(){
-                var p_data = [];
-                data.map(function(d){
-                    var p = {
+                var p_data = {};
+                data.map(function(d, i){
+                    p_data[i]= {
                         x: xVal(d),
                         y: yVal(d),
                         case_id: d['case_id'],
                         sample_id: d['sample_id']
                     };
-                    p_data.push(p);
                 });
                 return p_data;
             }

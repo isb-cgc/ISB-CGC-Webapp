@@ -192,16 +192,12 @@ require([
         plotFactory.redraw_plot();
     });
 
-    $('.download-csv-plot').on('click', function () {
-        //download csv data
-        //get data
-        // if(!plotFactory)
-        //     plotFactory = Object.create(plot_factory, {});
-        // plotFactory.download_data();
-
+    $('.data-download').on('click', function () {
         var plot_data = $('.worksheet.active .plot-args').data('plot-data');
-        console.log(plot_data());
-
+        var json =  JSON.stringify(plot_data());
+        var type = "text/json;charset=utf-8";
+        var blob = new Blob([json], {type: type});
+		saveAs(blob, 'plot_data.json');
     });
 
 

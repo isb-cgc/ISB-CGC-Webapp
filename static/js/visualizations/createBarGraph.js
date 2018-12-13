@@ -332,7 +332,11 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
             });
 
             function get_plot_data(){
-                return data;
+                var p_data = {};
+                data.map(function(d, i){
+                    p_data[i] = d;
+                });
+                return p_data;
             }
 
             return {

@@ -586,16 +586,15 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             }
 
             function get_plot_data(){
-                var p_data = [];
-                raw_Data.map(function(d){
+                var p_data = {};
+                raw_Data.map(function(d, i){
                     if(helpers.isValidNumber(d.y)) {
-                        var p = {
+                        p_data[i] = {
                             x: d.x,
                             y: d.y,
                             case_id: d.case_id,
                             sample_id: d.sample_id
                         };
-                        p_data.push(p)
                     }
                 });
                 return p_data;

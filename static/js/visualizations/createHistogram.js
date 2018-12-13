@@ -365,13 +365,12 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
             }
 
             function get_plot_data(){
-                var p_data = [];
-                hist_data.map(function(d){
-                    var p = {
+                var p_data = {};
+                hist_data.map(function(d, i){
+                    p_data[i] = {
                         x: d.x,
                         y: d.y
                     };
-                    p_data.push(p);
                 });
 
                 return p_data;
