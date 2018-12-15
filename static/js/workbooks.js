@@ -1226,7 +1226,7 @@ require([
         plot_element.find('.resubmit-button').hide();
 
         //hide 'Enable Sample Selection for Oncoprint and SeqPeek'
-        if (args.type === 'SeqPeek' || args.type === 'OncoPrint') {
+        if (args.type === 'SeqPeek' || args.type === 'OncoPrint' || args.type === 'OncoGrid') {
             $(toggle_selection_selector).hide();
         }
         else {
