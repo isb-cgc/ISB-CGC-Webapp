@@ -57,8 +57,6 @@ curl --silent https://bootstrap.pypa.io/get-pip.py | python
 # If we're not on CircleCI, or we are but the lib directory isn't there (cache miss), install lib
 if [ -z "${CI}" ] || [ ! -d "lib" ]; then
     echo "Installing Python Libraries..."
-    # Install PyCrypto in here so that GitHub won't constantly error about it
-    pip install pycrypto==2.6.1 -t ${HOMEROOT}/lib --upgrade --only-binary all
     pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
 else
     echo "Using restored cache for Python Libraries"
