@@ -147,7 +147,6 @@ def user_detail(request, user_id):
                       {'request': request,
                        'user': user,
                        'user_details': user_details,
-                       'NIH_AUTH_ON': settings.NIH_AUTH_ON,
                        'ERA_LOGIN_URL': settings.ERA_LOGIN_URL
                        })
     else:

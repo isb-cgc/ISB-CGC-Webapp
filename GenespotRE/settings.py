@@ -79,7 +79,6 @@ COHORT_DATASET_ID           = os.environ.get('COHORT_DATASET_ID', 'cohort_datase
 BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
 MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
-NIH_AUTH_ON             = bool(os.environ.get('NIH_AUTH_ON', False))
 USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
 
 DATABASES = {
@@ -115,13 +114,6 @@ SITE_ID = 3
 if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
     print >> sys.stdout, "[STATUS] AppEngine Flex detected."
     SITE_ID = 4
-
-# Default to no NIH Auth unless we are not on a local dev environment *and* are in AppEngine-Flex
-NIH_AUTH_ON = False
-
-if not IS_DEV and IS_APP_ENGINE_FLEX:
-    print >> sys.stdout, "[STATUS] NIH_AUTH_ON is TRUE"
-    NIH_AUTH_ON = True
 
 def get_project_identifier():
     return BQ_PROJECT_ID
