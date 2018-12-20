@@ -19,7 +19,7 @@ define (['jquery', 'oncogridjs'],
     function ($, oncogridjs) {
     var grid;
     var active_plot_div;
-    var fullscreen = false;
+    //var fullscreen = false;
 
     const default_track_template = '<div class="wrapper">{{displayId}}<br>{{displayName}}: {{displayValue}}</div>';
     const datatype_track_template = '<div class="wrapper">{{displayId}}<br>{{displayName}}: {{displayValue}} file(s)</div>';
@@ -336,7 +336,7 @@ define (['jquery', 'oncogridjs'],
         $('.oncogrid-toolbar').on('click', '.heatmap-toggle', toggleHeatmap);
         $('.oncogrid-toolbar').on('click', '.grid-toggle', toggleGridLines);
         $('.oncogrid-toolbar').on('click', '.crosshair-toggle', toggleCrosshair);
-        $('.oncogrid-toolbar').on('click', '.fullscreen-toggle', toggleFullscreen);
+        //$('.oncogrid-toolbar').on('click', '.fullscreen-toggle', toggleFullscreen);
 
         //events
         $('.oncogrid-button')
@@ -354,10 +354,10 @@ define (['jquery', 'oncogridjs'],
                     .css('opacity', 0);
             });
 
-        $(document).bind('webkitfullscreenchange MSFullscreenChange mozfullscreenchange fullscreenchange', function(e) {
-            fullscreen = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen;
-            $('.fullscreen-toggle').toggleClass('active', fullscreen);
-        });
+        // $(document).bind('webkitfullscreenchange MSFullscreenChange mozfullscreenchange fullscreenchange', function(e) {
+        //     fullscreen = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen;
+        //     $('.fullscreen-toggle').toggleClass('active', fullscreen);
+        // });
         $(document).click(hideDownloadSelection);
 
         $(active_plot_div).find('.oncogrid-header').removeClass('hidden');
@@ -584,6 +584,7 @@ define (['jquery', 'oncogridjs'],
         for(var i=0; i <track_legends.length; i++){
             svg.append(track_legends[i]);
         }
+        //console.log(svg);
         return svg;
     }
 
@@ -608,17 +609,18 @@ define (['jquery', 'oncogridjs'],
         });
     }
 
-    function download_json(){
-        var donors = grid.params.donors;
-        var genes = grid.params.genes;
-        var observations = grid.params.observations;
-        var oncogrid_obj = {
-            'genes' : genes,
-            'occurence': observations,
-            'cases' : donors,
-            'totalCases': donors.length
+    function get_plot_data() {
+        return {
+            'genes' : grid.params.genes,
+            'occurence': grid.params.observations,
+            'cases' : grid.params.donors,
+            'totalCases': grid.params.donors.length
         };
-        var content = JSON.stringify(oncogrid_obj);
+    }
+
+    function download_json(){
+
+        var content = JSON.stringify(get_plot_data());
         var blob = new Blob([content], {type: 'application/json'});
 		saveAs(blob, 'oncogrid.json');
     }
@@ -670,48 +672,54 @@ define (['jquery', 'oncogridjs'],
         $(active_plot_div).find('.crosshair-toggle').toggleClass('active', grid.crosshairMode);
     };
 
-    var toggleFullscreen = function(){
-        if(fullscreen){
-            closeFullscreen();
-        }
-        else{
-            openFullscreen();
-        }
-    };
+    // var toggleFullscreen = function(){
+    //     if(fullscreen){
+    //         closeFullscreen();
+    //     }
+    //     else{
+    //         openFullscreen();
+    //     }
+    // };
 
 
-    var openFullscreen = function() {
-        var oncogrid_div_id = active_plot_div.id;
-        var oncogrid_div = document.getElementById(oncogrid_div_id);
-        if (oncogrid_div.requestFullscreen) {
-            oncogrid_div.requestFullscreen();
-        } else if (oncogrid_div.mozRequestFullScreen) { /* Firefox */
-            oncogrid_div.mozRequestFullScreen();
-        } else if (oncogrid_div.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
-            oncogrid_div.webkitRequestFullscreen();
-        } else if (oncogrid_div.msRequestFullscreen) { /* IE/Edge */
-            oncogrid_div.msRequestFullscreen();
-        }
-
-    };
-
-    var closeFullscreen = function() {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.mozCancelFullScreen) { /* Firefox */
-            document.mozCancelFullScreen();
-        } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
-            document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) { /* IE/Edge */
-            document.msExitFullscreen();
-        }
-    };
+    // var openFullscreen = function() {
+    //     var oncogrid_div_id = active_plot_div.id;
+    //     var oncogrid_div = document.getElementById(oncogrid_div_id);
+    //     if (oncogrid_div.requestFullscreen) {
+    //         oncogrid_div.requestFullscreen();
+    //     } else if (oncogrid_div.mozRequestFullScreen) { /* Firefox */
+    //         oncogrid_div.mozRequestFullScreen();
+    //     } else if (oncogrid_div.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+    //         oncogrid_div.webkitRequestFullscreen();
+    //     } else if (oncogrid_div.msRequestFullscreen) { /* IE/Edge */
+    //         oncogrid_div.msRequestFullscreen();
+    //     }
+    //
+    // };
+    //
+    // var closeFullscreen = function() {
+    //     if (document.exitFullscreen) {
+    //         document.exitFullscreen();
+    //     } else if (document.mozCancelFullScreen) { /* Firefox */
+    //         document.mozCancelFullScreen();
+    //     } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+    //         document.webkitExitFullscreen();
+    //     } else if (document.msExitFullscreen) { /* IE/Edge */
+    //         document.msExitFullscreen();
+    //     }
+    // };
 
     return {
         createOncogridPlot: function (plot_selector, donor_data, gene_data, observation_data, donor_track_count_max){
             if (donor_data.length > 0 && gene_data.length > 0 && observation_data.length) {
                 updateOncogrid(plot_selector, donor_data, gene_data, observation_data, donor_track_count_max);
             }
+            return {
+                plot_data: get_plot_data,
+                get_svg: function(){ return getOncoGridSvgNode()[0]; },
+                //get_image: get_image,
+                redraw: reload
+            };
         }
     }
 });

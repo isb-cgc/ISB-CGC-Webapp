@@ -204,6 +204,34 @@ require([
 		saveAs(blob, 'plot_data.json');
     });
 
+    $('.svg-download').on('click', function () {
+        if(!plotFactory)
+            plotFactory = Object.create(plot_factory, {});
+        plotFactory.svg_download();
+    });
+
+    $('.png-download').on('click', function () {
+        if(!plotFactory)
+            plotFactory = Object.create(plot_factory, {});
+        plotFactory.png_download();
+    });
+
+
+    $('.plot-toolbar').on('click', '.download', function(e){
+        e.stopPropagation();
+        $(this).parents('.plot-toolbar').find('.plot-download-selection').toggleClass('hidden');
+    });
+
+    $(document).on('click', function(){
+        $('.plot-toolbar').find('.plot-download-selection').addClass('hidden');
+    });
+
+    $('.fullscreen-plot').on('click', function () {
+        if(!plotFactory)
+            plotFactory = Object.create(plot_factory, {});
+        plotFactory.openFullscreen();
+    });
+
 
     function hide_plot_settings() {
         $('.hide-settings-flyout').parents('.fly-out.settings-flyout').animate({
@@ -984,7 +1012,7 @@ require([
                 yFormula: "n+1"
             },
             color_by_sel: plot_settings.find('.color_by :selected').val() !== null && plot_settings.find('.color_by :selected').val() !== ""
-        }
+        };
         return result;
     }
 

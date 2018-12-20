@@ -402,7 +402,7 @@ var comparator_utils = {
 
 	    // If we reach this point, there's no order difference
 	    return 0;
-	}
+	};
 	var preferred = function (d1, d2) {
 	    // First, test if either is not sequenced
 	    var ns_diff = utils.sign(+(!!d1.na) - (+(!!d2.na)));
@@ -734,7 +734,7 @@ window.CreateOncoprinterWithToolbar = function (plot_selector, _ctr_selector, _t
             },
             getUnalteredIds: function () {
                 return unaltered_ids;
-            },
+            }
         };
     })();
 
@@ -1052,4 +1052,4 @@ window.CreateOncoprinterWithToolbar = function (plot_selector, _ctr_selector, _t
     return function(data_by_gene, id_key, altered_ids_by_gene, id_order, gene_order) {
 	State.setData(data_by_gene, id_key, altered_ids_by_gene, id_order, gene_order);
     };
-}
+};

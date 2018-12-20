@@ -270,22 +270,21 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .attr('transform', 'rotate(-90) translate(' + (-height+margin.top+margin.bottom)/2 + ', 15)')
                 .text(yLabel);
 
-            var legend_item_height = 28;
+            var legend_line_height = 20;
+            var legend_column_length = Math.ceil(color.domain().length/3);
+            legend = legend.attr('height', legend_line_height * legend_column_length);
 
-            legend = legend.attr('height', legend_item_height * color.domain().length + 30);
-            legend.append('text')
-                .attr('x', 0)
-                .attr('y', 20)
-                .text('Legend');
             legend = legend.selectAll('.legend')
                 .data(color.domain())
                 .enter().append('g')
                 .attr('class', 'legend')
-                .attr("transform", function(d, i) { return "translate(0," + (((i+1) * 20) + 10) + ")"; });
+                .attr("transform", function(d, i)
+                { return "translate("+(margin.left+Math.floor(i/legend_column_length)*legend.attr('width')/3)+"," + (i%legend_column_length * legend_line_height) + ")"; });
 
             legend.append('rect')
-                .attr('width', 20)
-                .attr('height', 20)
+                .attr('width', legend_line_height - 6)
+                .attr('height', legend_line_height - 6)
+                .attr("transform", function(d, i) { return "translate(3, 3)"; })
                 .attr('class', 'selected')
                 .style('stroke', color)
                 .style('stroke-width', 1)
@@ -293,8 +292,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .on('click', helpers.toggle_selection);
 
             legend.append('text')
-                .attr('x', 25)
-                .attr('y', 15)
+                .attr('x', legend_line_height + 2)
+                .attr('y', legend_line_height - 5)
                 .text(function(d) {
                     if (d != null) {
                         if (colorBy == 'cohort') {

@@ -104,7 +104,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .style('fill', 'none')
                 .attr('transform', 'rotate(90, 0, 0) scale(1, -1)');
         },
-        addPoints: function (svg, raw_data, values_only, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_set, padding) {
+        addPoints: function (svg, raw_data, values_only, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_set, padding, margin) {
             // remove counts from xdomain
             var tmp = xdomain;
             xdomain = [];
@@ -183,20 +183,23 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .on('mouseout.tip', dot_tip.hide)
                 .call(dot_tip);
 
-            legend = legend.attr('height', 20 * color.domain().length + 30);
-            legend.append('text')
-                .attr('x', 0)
-                .attr('y', 20)
-                .text('Legend');
+            var legend_line_height = 20;
+            var legend_column_length = Math.ceil(color.domain().length/3);
+
+
+            legend = legend.attr('height', legend_line_height * legend_column_length);
+
             legend = legend.selectAll('.legend')
                 .data(color.domain())
                 .enter().append('g')
                 .attr('class', 'legend')
-                .attr("transform", function(d, i) { return "translate(0," + (((i+1) * 20) + 10) + ")"; });
+                .attr("transform", function(d, i)
+                    { return "translate("+(margin.left + Math.floor(i/legend_column_length)*legend.attr('width')/3)+"," + (i%legend_column_length * legend_line_height) + ")"; });
 
             legend.append('rect')
-                .attr('width', 20)
-                .attr('height', 20)
+                .attr('width', legend_line_height - 6)
+                .attr('height', legend_line_height - 6)
+                .attr("transform", function(d, i) { return "translate(3, 3)"; })
                 .attr('class', 'selected')
                 .style('stroke', color)
                 .style('stroke-width', 1)
@@ -204,8 +207,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .on('click', helpers.toggle_selection);
 
             legend.append('text')
-                .attr('x', 25)
-                .attr('y', 15)
+                .attr('x', legend_line_height + 2)
+                .attr('y', legend_line_height - 5)
                 .text(function(d) {
                     if (d != null) {
                         if (colorBy == 'cohort') {
@@ -348,7 +351,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .attr('width', width)
                 .attr('height', height - margin.top - margin.bottom)
                 .attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
-            this.addPoints(plotg, raw_Data, scatter_processed_data, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_set, x_padding);
+            this.addPoints(plotg, raw_Data, scatter_processed_data, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_set, x_padding, margin);
 
             // create y axis
             var y = d3.scale.linear()

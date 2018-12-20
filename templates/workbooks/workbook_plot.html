@@ -21,23 +21,32 @@
 
 <div class="plot panel" id="plot-{{ worksheet.id }}">
     <div class="panel-heading">
-        <div class="btn-group options-bar" role="group" aria-label="Options Bar">
+        <div class="btn-group plot-toolbar" role="group" aria-label="Options Bar">
             {% if workbook.owner.id == user.id %}
-            <a role="button" class="toggle-selection btn btn-primary" aria-label="Toggle Sample Selection"><i class="fa fa-crosshairs"></i></a>
-            <a role="button" class="show-settings-flyout btn btn-primary" data-target=".setting-flyout" aria-label="Edit Plot Settings"><i class="fa fa-bar-chart"></i></a>
+            <a role="button" class="show-settings-flyout plot-button" data-target=".setting-flyout" aria-label="Edit Plot Settings"><i class="fa fa-bar-chart"></i></a>
+                <a role="button" class="toggle-selection plot-button" aria-label="Toggle Sample Selection"><i class="fa fa-crosshairs"></i></a>
             {% else %}
-            <a role="button" class="show-settings-flyout btn btn-primary" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-tasks"></i></a>
+            <a role="button" class="show-settings-flyout plot-button" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-tasks"></i></a>
             {% endif %}
-            <a role="button" class="redraw-plot btn btn-primary" aria-label="Redraw"><i class="fa fa-refresh"></i></a>
-            <a role="button" class="data-download btn btn-primary" aria-label="Data Download"><i class="fa fa-download"></i></a>
-            <a role="button" class="img-download btn btn-primary" aria-label="Image Download"><i class="fa fa-download"></i></a>
+            <a role="button" class="redraw-plot plot-button" aria-label="Redraw"><i class="fa fa-refresh"></i></a>
+            <span class="dropdown">
+                <a role="button" class="plot-button download">
+                    <i class="fa fa-download"></i>
+                </a>
+                <div class="plot-download-selection hidden">
+                    <div class="svg-download">SVG</div>
+                    <div class="png-download">PNG</div>
+                    <div class="data-download">JSON</div>
+                </div>
+            </span>
+            <a role="button" class="fullscreen-plot plot-button" aria-label="Full Screen"><i class="fa fa-expand"></i></a>
         </div>
         <div class="plot-args hidden"/></div>
         <div class="bq-tables" style="display: none;"><h5>BigQuery Table(s) Used</h5><ul class="bq-table-display"></ul></div>
         <div id="missing-plot-reqs-alert" class="alert alert-warning alert-dismissable" style="display: none;">
             <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
             <h5>Plot Settings Incomplete</h5>
-            Some of the settings required to produce a plot are missing.<br>You can check the current plot settings using the
+            Some of the settings required to produce a plot are missing.<br>YFou can check the current plot settings using the
             {% if workbook.owner.id == user.id %}
                 <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings">
                     <i class="fa fa-bar-chart"></i> Edit Analysis Settings

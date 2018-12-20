@@ -109,17 +109,13 @@ function($, d3, d3tip, d3textwrap, _) {
             }
             return results;
         },
-        create_cubbyplot: function(svg, margin, data, domain, range, xLabel, yLabel, xParam, yParam, colourBy, legend, width, height, cubby_size) {
-            var colorVal = function(d) { return d[colorBy]; };
-            var color = d3.scale.category20();
+        create_cubbyplot: function(svg, margin, data, domain, range, xLabel, yLabel, xParam, yParam, legend, width, height, cubby_size) {
             var view_width = width - margin.left - margin.right;
             var view_height = height - margin.top - margin.bottom;
             var x_band_width = view_width / domain.length;
             var y_band_width = view_height / range.length;
             var data_counts = this.data_totals(data, xParam, yParam, domain, range);
             var worksheet_id = $('.worksheet.active').attr('id');
-            var svg_height = svg.attr('height');
-            var svg_width = svg.attr('width');
 
             // create x axis
             var x = d3.scale.ordinal()
@@ -162,7 +158,7 @@ function($, d3, d3tip, d3textwrap, _) {
             y_axis_area.append('clipPath')
                 .attr('id', y_axis_area_clip_id)
                 .append('rect')
-                .attr('height', svg_height < view_height ? svg_height-margin.top-margin.bottom: view_height)
+                .attr('height', height < view_height ? height-margin.top-margin.bottom: view_height)
                 .attr('width', margin.left)
                 .attr('transform', 'translate(0, '+ +margin.top +')');
 
@@ -170,7 +166,7 @@ function($, d3, d3tip, d3textwrap, _) {
             var x_axis_area = svg.append('g')
                 .attr('clip-path', 'url(#'+x_axis_area_clip_id+')');
 
-            var x_axis_area_ypos = svg_height < view_height ?  (svg_height  - margin.bottom) : (margin.top + view_height);
+            var x_axis_area_ypos = height < view_height ?  (height  - margin.bottom) : (margin.top + view_height);
             x_axis_area.append('clipPath')
                 .attr('id', x_axis_area_clip_id)
                 .append('rect')
@@ -188,9 +184,6 @@ function($, d3, d3tip, d3textwrap, _) {
                 .attr('class', 'y axis')
                 .attr('transform', 'translate('+margin.left+', '+margin.top+')')
                 .call(yAxis)
-                .selectAll('text')
-                .style('text-anchor', 'middle')
-                .attr('transform', 'rotate(-90)');
 
             var plot_area_clip_id = 'plot_area_clip_' + worksheet_id;
             var plot_area = svg.append('g')
@@ -200,10 +193,10 @@ function($, d3, d3tip, d3textwrap, _) {
             plot_area.append('clipPath')
                 .attr('id', plot_area_clip_id)
                 .append('rect')
-                .attr('height', svg_height < view_height ? (svg_height-margin.bottom-margin.top) : view_height)
+                .attr('height', height < view_height ? (height-margin.bottom-margin.top) : view_height)
                 .attr('width', view_width);
 
-            var x_grid_height = svg_height < view_height ? (svg_height-margin.bottom-margin.top) : view_height;
+            var x_grid_height = height < view_height ? (height-margin.bottom-margin.top) : view_height;
 
             // append grid lines
             plot_area.append("g")
@@ -216,7 +209,7 @@ function($, d3, d3tip, d3textwrap, _) {
 
             plot_area.append("g")
                 .attr("class", "y grid")
-                .attr('transform', 'translate(0, -'+ Math.round(cubby_size/2) +')')
+                .attr('transform', 'translate(0, -'+ (Math.floor(cubby_size/2)) +')')
                 .call(make_y_axis()
                     .tickSize(-width, 0, 0)
                     .tickFormat("")
@@ -272,19 +265,19 @@ function($, d3, d3tip, d3textwrap, _) {
 
             var zoom = null;
 
-            if (svg_width < view_width && svg_height< view_height) {
+            if (width < view_width && height< view_height) {
                 zoom = d3.behavior.zoom()
                     .x(x2)
                     .scaleExtent([1,1])
                     .y(y2)
                     .scaleExtent([1,1])
                     .on('zoom', zoom_xy);
-            } else if (svg_width < view_width) {
+            } else if (width < view_width) {
                 zoom = d3.behavior.zoom()
                     .x(x2)
                     .scaleExtent([1,1])
                     .on('zoom', zoom_x);
-            } else if (svg_height < view_height) {
+            } else if (height < view_height) {
                 zoom = d3.behavior.zoom()
                     .y(y2)
                     .scaleExtent([1,1])
@@ -300,7 +293,6 @@ function($, d3, d3tip, d3textwrap, _) {
 
             svg.call(zoom);
 
-
             plot_area.selectAll('.expected_fill')
                 .data(data_counts)
                 .enter().append('rect')
@@ -308,11 +300,11 @@ function($, d3, d3tip, d3textwrap, _) {
                 .attr('value', function(d) { return d['x'] + '-' + d['y']; })
                 .attr('fill', function(d) { return d['log_ratio'] > 0 ? 'red' : 'blue'; })
                 .attr('fill-opacity', function(d) { return Math.abs(d['log_ratio']); })
-                .attr('width', cubby_size)
-                .attr('height', cubby_size)
+                .attr('width', cubby_size-1)
+                .attr('height', cubby_size-1)
                 .attr('x', function(d) { return x(d['x']) + 1; })
                 .attr('y', function(d) {
-                    return y(d['y']);
+                    return y(d['y'])+1;
                 })
                 .on('click', function() {
                     if(selex_active) {
@@ -376,18 +368,59 @@ function($, d3, d3tip, d3textwrap, _) {
                 .on('mouseover.tip', tip.show)
                 .on('mouseout.tip', tip.hide);
 
+            var legend_line_height = 20;
+            var legend_square_w = legend_line_height-6;
+            var margin_left = margin.left+220;
+            legend = legend.attr('height', legend_line_height*2);
+            var text_legend = legend.append('text')
+                .attr('x', margin.left)
+                .attr('y', legend_line_height-5)
+                .attr('font-family', 'sans-serif');
+            text_legend
+                .append('tspan')
+                .text('log')
+                .append('tspan')
+                .attr('dy', '.3em')
+                .attr('font-size', '.8em')
+                .text('2');
+            text_legend
+                .append('tspan')
+                .attr('dy', '-.3em')
+                .text('(true counts/expected counts)');
+            legend = legend.selectAll('.legend')
+                .data(d3.range(-1, 1.25, 0.25))
+                .enter().append('g')
+                .attr('class', 'legend');
+
+            legend.append('rect')
+                .attr('width', legend_square_w)
+                .attr('height', legend_square_w)
+                .attr("transform", function(d, i) { return "translate("+(margin_left+i*(legend_square_w+3))+", 3)"; })
+                .attr('class', 'selected')
+                .attr('fill', function(d) { return d > 0 ? 'red' : 'blue'; })
+                .attr('fill-opacity', function(d) { return Math.abs(d); })
+                .style('stroke', 'lightgrey')
+                .style('stroke-width', 0.5);
+            legend.append('text')
+                .attr("transform", function(d, i) { return "translate("+(margin_left+i*(legend_square_w+3))+", 3)"; })
+                .attr('dx', '.2em')
+                .attr('dy', '2em')
+                .text(function(d){ return d%1 == 0 ? d: ''})
+            ;
+
+
             plot_area.call(tip);
             // append axes labels
             var xAxisXPos = margin.left + ( parseInt(svg.attr('width')) > view_width ? view_width : parseInt(svg.attr('width')) )/2;
-            var xAxisYPos = svg_height > view_height ?
-                (margin.top + view_height + 80) : svg_height -20;
+            var xAxisYPos = height > view_height ?
+                (margin.top + view_height + 110) : height -20;
             svg.append('text')
                 .attr('class', 'axis-label')
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'translate(' + xAxisXPos + ',' + xAxisYPos + ')')
                 .text(xLabel);
 
-            var yAxisXPos = ( svg_height>view_height ? view_height : svg_height - margin.bottom )/2;
+            var yAxisXPos = ( height>view_height ? view_height : height - margin.bottom )/2;
             svg.append('text')
                 .attr('class', 'axis-label')
                 .attr('text-anchor', 'middle')
@@ -396,16 +429,17 @@ function($, d3, d3tip, d3textwrap, _) {
 
             // Wrap our value labels
             svg.select('.x.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: x.rangeBand(), height: margin.bottom*0.75}));
-            svg.select('.x.axis').selectAll('foreignObject')
-                .attr('style','transform: translate(-'+(x.rangeBand()*0.5)+'px,0px);');
+            svg.select('.x.axis')
+                .selectAll('foreignObject')
+                .attr('style','transform: rotate(30deg);');
 
             svg.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: margin.left*0.75, height: y.rangeBand()/2}));
             svg.select('.y.axis').selectAll('foreignObject')
-                .attr('style','transform: translate(-'+margin.left*0.75+'px,-'+y.rangeBand()/4+'px);');
-
+                .attr('style','transform: translate(-'+margin.left*0.75+'px, -'+y.rangeBand()/4+'px);');
             $('foreignObject div').each(function(){
                 $(this).attr('title',$(this).html());
             });
+            svg.select('.y.axis').selectAll('foreignObject div').attr('style', 'text-align: right; padding: 0 10px; line-height:'+y.rangeBand()/2+'px; height: '+ y.rangeBand()/2+'px;')
 
             var check_selection_state = function(obj) {
                 selex_active = !!obj;

@@ -209,21 +209,24 @@ define([
     }
 
     function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units) {
-        var margin = {top: 10, bottom: 115, left: 140, right: 0};
+        var margin = {top: 10, bottom: 115, left: 140, right: 5};
         var cubby_max_size = 150; // max cubby size
         var cubby_min_size = 75; // min cubby size
         var view_width = width-margin.left-margin.right;
         var view_height = height-margin.top-margin.bottom;
-        var xdomain = vizhelpers.get_domain(data, 'x');
-        var ydomain = vizhelpers.get_domain(data, 'y');
+        var xdomain = helpers.get_domain(data, 'x');
+        var ydomain = helpers.get_domain(data, 'y');
+        var legend = d3.select(legend_selector)
+            .append('svg')
+            .attr('width', 850);
         var cubby_size = Math.min(cubby_max_size, Math.min(Math.floor(view_width/xdomain.length), Math.floor(view_height/ydomain.length)));
         cubby_size = cubby_size < cubby_min_size ? cubby_min_size : cubby_size;
         var cubby_width = xdomain.length * cubby_size + margin.left + margin.right;
         var cubby_height = ydomain.length * cubby_size + margin.top + margin.bottom;
         var svg = d3.select(plot_selector)
             .append('svg')
-            .attr('width', width)
-            .attr('height', height);
+            .attr('width', cubby_width)
+            .attr('height', cubby_height);
 
         var plot = cubby_plot_obj.create_cubbyplot(
             svg,
@@ -235,13 +238,13 @@ define([
             generate_axis_label(y_attr, false, units.y),
             'x',
             'y',
-            'c',
-            legend_selector,
+            //'c',
+            legend,
             cubby_width,
             cubby_height,
             cubby_size
         );
-
+        //console.log(svg);
         return  {plot : plot, svg : svg}
     }
 
@@ -251,6 +254,7 @@ define([
 
         var element = $(plot_selector)[0];
         var plot;
+        var svg;
         if (plot_data.hasOwnProperty('tracks')) {
             seqpeek_view.render_seqpeek_legend(legend_selector);
 
@@ -260,6 +264,7 @@ define([
             var gene_element = seqpeek_el.gene_element;
 
             plot = seqpeek_view.render_seqpeek(table_selector, gene_element, view_data);
+            svg = [$(plot_selector).find('#seqpeek_row_4').children('svg')];
             $(legend_selector).show();
         }
         else {
@@ -267,7 +272,7 @@ define([
             seqpeek_view.render_no_data_message(plot_selector, hugo_symbol);
             $(legend_selector).hide();
         }
-        return  {plot : plot};
+        return  {plot : plot, svg: svg};
     }
 
     function generate_oncoprint_plot(plot_selector, view_data) {
@@ -281,6 +286,7 @@ define([
         var plot;
         if (plot_data && oncoprint_obj.isInputValid(plot_data)) {
             plot = oncoprint_obj.createOncoprintPlot(plot_selector, plot_data);
+            $('.worksheet.active .worksheet-panel-body .plot-div .oncoprint-diagram-downloads-icon').trigger('mouseover');
         }
         else {
             var message = "The selected cohorts have no somatic mutations in the gene ";
@@ -391,6 +397,38 @@ define([
         }
     }
 
+    function getPlotSvgNode(svg_node, legend_svg){
+        var svg_css = 'svg { color: #333333; font-size: 14px; font-family: "proxima-nova", Arial, sans-serif; background-color: #fff; } ' +
+            '.label { font-weight: 500; font-size: 1.1em; } ' +
+            'foreignObject div {overflow: hidden;  text-overflow: ellipsis;  padding: 5px 5px 5px 5px;  line-height: 1.25; max-height: 100%;} ' +
+            'foreignObject div.truncated-single { white-space: nowrap; text-align: end; }' +
+            'foreignObject div.centered { text-align: center; }' +
+            '.x-label-container div, .y-label-container div { text-align: center; }' +
+            '.axis path{ fill: none;  stroke: #000; }' +
+            '.grid .tick, .axis .tick line { stroke: lightgrey; stroke-opacity: 0.7; }' +
+            '.grid path { stroke-width: 0; } '+
+            '.expected_fill.selected { stroke: #01307F; stroke-width: 5px; }' +
+            '.extent { fill: rgba(40, 130, 50, 0.5); stroke: #fff; }' +
+            '.plot-bar, .plot-bar { fill: rgba(0, 0, 0, 0.5); }' +
+            '.plot-bar:hover, .plot-bar.selected { fill: rgba(0, 0, 225, 0.5); }';
+        var svg_clone = svg_node.cloneNode(true);
+        $(svg_clone).removeAttr('viewBox');
+        $(svg_clone).prepend('<style>');
+        $(svg_clone).find('style').append(svg_css);
+
+        // var legend_svg = $(args.legend_selector).find('svg');
+        if(legend_svg && legend_svg.length > 0) {
+            var legend_svg_clone = legend_svg.clone();
+            var legend_height = parseInt(legend_svg_clone.attr('height'));
+            var svg_height = parseInt($(svg_clone).attr('height'));
+            legend_svg_clone.attr('x', '0');
+            legend_svg_clone.attr('y', svg_height+50);
+            $(svg_clone).attr('height', svg_height + legend_height + 50);
+            $(svg_clone).append(legend_svg_clone);
+        }
+        return svg_clone;
+    }
+
     function select_plot(args){//plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, data){
         var width  = $('.worksheet.active .worksheet-panel-body:first').width(),
             height = $('.worksheet.active .worksheet-panel-body:first').height(),
@@ -463,31 +501,38 @@ define([
                 return;
             }
 
+            if(visualization.svg) {
+                $(visualization.svg[0]).parents('.plot').find('.toggle-selection').unbind();
+                $(visualization.svg[0]).parents('.plot').find('.toggle-selection').on('click', function () {
+                    $(this).toggleClass('active');
+                    visualization.plot.check_selection_state($(this).hasClass('active'));
+                });
+
+                // var xmlSerializer = new XMLSerializer();
+                // var img_svg = getPlotSvgNode(visualization.svg[0][0], $(args.legend_selector).find('svg'));
+                // var content = xmlSerializer.serializeToString(img_svg);
+                // var blob = new Blob([content], {type: 'application/svg+xml'});
+                //saveAs(blob, 'plot.svg');
+            }
+
             //establish marquee sample selection
-            $(visualization.svg[0]).parents('.plot').find('.toggle-selection').unbind();
-            $(visualization.svg[0]).parents('.plot').find('.toggle-selection').on('click', function () {
-                $(this).toggleClass('active');
-                visualization.plot.check_selection_state($(this).hasClass('active'));
-            });
+
             visualization.plot.check_selection_state($(visualization.svg[0]).parents('.plot').find('.toggle-selection').hasClass('active'));
 
             //store data
-            if(visualization.plot.plot_data){
-                $('.worksheet.active .plot-args').data('plot-data', visualization.plot.plot_data);
-            }
 
+            //console.log(color_by_sel);
             //establish resize call to data
             d3.select(window).on('resize', visualization.plot.resize);
-            args.color_by_sel && $(args.legend_selector).show();
+            (args.type == "Cubby Hole Plot" || args.color_by_sel) && $(args.legend_selector).show();
 
         } else if (args.type == "SeqPeek" && !data.message) {
             visualization = generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
-            $('.worksheet.active .plot-args').data('plot-data', visualization.plot.plot_data);
         } else if (args.type == "OncoPrint" && !data.message) {
             visualization =  generate_oncoprint_plot(args.plot_selector, data);
-            $('.worksheet.active .plot-args').data('plot-data', visualization.plot.plot_data);
+            //console.log(visualization.svg);
         } else if (args.type == "OncoGrid" && !data.message) {
-            generate_oncogrid_plot(args.plot_selector, data);
+            visualization = generate_oncogrid_plot(args.plot_selector, data);
         } else {
             // No data returned
             d3.select(args.plot_selector)
@@ -503,6 +548,12 @@ define([
 
             // Hide the legend
             $(args.legend_selector).hide();
+        }
+        if(visualization){
+            $('.worksheet.active .plot-args').data('plot-data', (visualization.plot && visualization.plot.plot_data) ? visualization.plot.plot_data : null);
+            $('.worksheet.active .plot-args').data('plot-svg', (visualization.svg) ? visualization.svg[0][0] : (visualization.plot && visualization.plot.get_svg) ?  visualization.plot.get_svg : null);
+            //$('.worksheet.active .plot-args').data('plot-svg', (visualization.svg) ? visualization.svg[0][0] : null);
+            $('.worksheet.active .plot-args').data('plot-redraw', (visualization.redraw) ? visualization.plot.redraw : null);
         }
     }
 
@@ -535,7 +586,7 @@ define([
                 break;
             default :
                 break;
-        };
+        }
 
         if(as_map) {
             var map_settings = {};
@@ -558,12 +609,14 @@ define([
         else if(args.type == "OncoPrint" || args.type == "OncoGrid"){
             plot_data_url = get_onco_data_url(BASE_URL, args.type, args.cohorts, args.gene_list, VERSION);
         }
+        else {
+            plot_data_url = get_data_url(BASE_URL, args.cohorts, args.x, args.y, args.color_by, args.logTransform, VERSION);
+        }
 
         $.ajax({
             type: 'GET',
             url: plot_data_url,
             success: function(data, status, xhr) {
-
                 var plot_args = {plot_selector    : args.plot_selector,
                              legend_selector  : args.legend_selector,
                              pairwise_element : args.pairwise_element,
@@ -604,18 +657,131 @@ define([
 
     //clears the previous plot and re-draws the plot using the stored worksheet plot args
     function redraw_plot(){
-        var plot_loader  = $('.worksheet.active .plot-loader');
-        var plot_args = $('.worksheet.active .plot-args').data('plot-args');
-        $(plot_args.plot_selector).empty();
-        $(plot_args.legend_selector).empty();
-        plot_loader.fadeIn();
-        select_plot(plot_args);
-        plot_loader.hide();
+
+        var redraw = $('.worksheet.active .plot-args').data('plot-redraw');
+        if (redraw != null) {
+            redraw();
+        }
+        else {
+            var plot_loader = $('.worksheet.active .plot-loader');
+            var plot_args = $('.worksheet.active .plot-args').data('plot-args');
+            $(plot_args.plot_selector).empty();
+            $(plot_args.legend_selector).empty();
+            plot_loader.fadeIn();
+            select_plot(plot_args);
+            plot_loader.hide();
+        }
+
     }
+
+    function svg_download(){
+        var plot_args = $('.worksheet.active .plot-args').data('plot-args');
+        if(plot_args.type === 'OncoPrint') {
+            $('button[type=\'svg\'].oncoprint-diagram-download').trigger('click');
+        }
+        else{
+            var plot_svg = $('.worksheet.active .plot-args').data('plot-svg');
+            var img_svg;
+            if(plot_args.type === 'OncoGrid') {
+                img_svg = plot_svg();
+            }
+            else{
+                img_svg = getPlotSvgNode(plot_svg, $(plot_args.legend_selector).find('svg'));
+            }
+            var xmlSerializer = new XMLSerializer();
+            var content = xmlSerializer.serializeToString(img_svg);
+            var blob = new Blob([content], {type: 'application/svg+xml'});
+            saveAs(blob, 'plot.svg');
+        }
+    }
+
+    function png_download(){
+        var plot_args = $('.worksheet.active .plot-args').data('plot-args');
+        if(plot_args.type === 'OncoPrint') {
+            $('button[type=\'png\'].oncoprint-diagram-download').trigger('click');
+        }
+        else{
+            var plot_svg = $('.worksheet.active .plot-args').data('plot-svg');
+            var img_svg;
+            if(plot_args.type === 'OncoGrid') {
+                img_svg = plot_svg();
+            }
+            else{
+                img_svg = getPlotSvgNode(plot_svg, $(plot_args.legend_selector).find('svg'));
+            }
+            var xmlSerializer = new XMLSerializer();
+            var content = xmlSerializer.serializeToString(img_svg);
+            var width = img_svg.getAttribute('width') || 1495;
+            var height = img_svg.getAttribute('height') || 650;
+            svgString2Image(content, width, height, function(dataBlob){saveAs( dataBlob, 'plot.png' )});
+        }
+    }
+
+    function svgString2Image(svgString, width, height, callback) {
+        //convert SVG string to data URL
+        var imgsrc = 'data:image/svg+xml;base64,'+ btoa(decodeURIComponent(encodeURIComponent(svgString)));
+        var canvas = document.createElement('canvas');
+        var context = canvas.getContext("2d");
+        canvas.width = width;
+        canvas.height = height;
+        var image = new Image();
+        image.onload = function() {
+            context.clearRect (0, 0, width, height);
+            context.drawImage(image, 0, 0, width, height);
+            canvas.toBlob( function(blob) {
+                if (callback) callback(blob);
+            });
+        };
+        image.src = imgsrc;
+    }
+
+    var openFullscreen = function() {
+        //var active_plot_div = $('.plot-div')[0];
+        //var plot_div_id = active_plot_div.id;
+
+        //var plot_div = document.getElementById(plot_div_id);
+        var plot_div = document.getElementsByClassName('plot-container')[0];
+        if (plot_div.requestFullscreen) {
+            plot_div.requestFullscreen();
+        } else if (plot_div.mozRequestFullScreen) { /* Firefox */
+            plot_div.mozRequestFullScreen();
+        } else if (plot_div.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+            plot_div.webkitRequestFullscreen();
+        } else if (plot_div.msRequestFullscreen) { /* IE/Edge */
+            plot_div.msRequestFullscreen();
+        }
+        // var oncogrid_div_id = active_plot_div.id;
+        // var oncogrid_div = document.getElementById(oncogrid_div_id);
+        // if (oncogrid_div.requestFullscreen) {
+        //     oncogrid_div.requestFullscreen();
+        // } else if (oncogrid_div.mozRequestFullScreen) { /* Firefox */
+        //     oncogrid_div.mozRequestFullScreen();
+        // } else if (oncogrid_div.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+        //     oncogrid_div.webkitRequestFullscreen();
+        // } else if (oncogrid_div.msRequestFullscreen) { /* IE/Edge */
+        //     oncogrid_div.msRequestFullscreen();
+        // }
+
+    };
+
+    // var closeFullscreen = function() {
+    //     if (document.exitFullscreen) {
+    //         document.exitFullscreen();
+    //     } else if (document.mozCancelFullScreen) { /* Firefox */
+    //         document.mozCancelFullScreen();
+    //     } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+    //         document.webkitExitFullscreen();
+    //     } else if (document.msExitFullscreen) { /* IE/Edge */
+    //         document.msExitFullscreen();
+    //     }
+    // };
 
     return {
         generate_plot     : generate_plot,
+        svg_download: svg_download,
+        png_download: png_download,
         redraw_plot : redraw_plot,
+        openFullscreen: openFullscreen,
         get_plot_settings : get_plot_settings
     };
 });
