@@ -4,7 +4,7 @@ import sys
 def additional_context(request):
 
     return {
-            'SITE_GOOGLE_TAG_MANAGER_ID': settings.SITE_GOOGLE_TAG_MANAGER_ID,
+            'SITE_GOOGLE_ANALYTICS_TRACKING_ID': settings.SITE_GOOGLE_ANALYTICS_TRACKING_ID,
             'SITE_GOOGLE_ANALYTICS': settings.SITE_GOOGLE_ANALYTICS,
             'USER_DATA_ON': settings.USER_DATA_ON,
             'BASE_URL': settings.BASE_URL,

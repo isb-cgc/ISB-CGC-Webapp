@@ -62,17 +62,6 @@ else
     echo "Using restored cache for Python Libraries"
 fi
 
-if [ -z "${CI}" ]; then
-    # Install the Endpoints library for API usage (separate directory because the WebApp doesn't need it
-    echo "Installing Google Endpoints for local API..."
-    pip install -t "${HOMEROOT}/lib/endpoints_lib/" google-endpoints==3.0.0 --only-binary --upgrade --ignore-installed
-
-    # Delete the offending collision packages (socketserver and queue) which create issues with six
-    echo "Removing colliding packages (socketserver and queue)"
-    rm -rf "${HOMEROOT}/lib/endpoints_lib/queue"
-    rm -rf "${HOMEROOT}/lib/endpoints_lib/socketserver"
-fi
-
 if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
     echo "Installing Django Debug Toolbar for local dev..."
     pip install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
