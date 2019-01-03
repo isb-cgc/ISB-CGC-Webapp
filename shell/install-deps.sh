@@ -10,7 +10,7 @@ if [ -n "$CI" ]; then
     find . -type f -name '*.pyc' -delete
 
 else
-    export $(cat /home/vagrant/www/secure_files/.env | grep -v ^# | xargs) 2> /dev/null
+    export $(cat /home/vagrant/parentDir/secure_files/.env | grep -v ^# | xargs) 2> /dev/null
     export HOME=/home/vagrant
     export HOMEROOT=/home/vagrant/www
 fi
