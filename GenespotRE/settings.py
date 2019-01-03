@@ -21,7 +21,9 @@ import sys
 import dotenv
 from socket import gethostname, gethostbyname
 
-dotenv.read_dotenv(join(dirname(__file__), '../.env'))
+env_path = os.environ.get('SECURE_LOCAL_PATH', '')
+
+dotenv.read_dotenv(join(dirname(__file__), '../'+env_path+'.env'))
 
 APP_ENGINE_FLEX = 'aef-'
 APP_ENGINE = 'Google App Engine/'

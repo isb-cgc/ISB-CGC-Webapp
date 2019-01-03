@@ -13,6 +13,7 @@ Vagrant.configure(2) do |config|
 
   # Map Common for the WebApp
   config.vm.synced_folder "../ISB-CGC-Common", "/home/vagrant/www/ISB-CGC-Common"
+  config.vm.synced_folder "../secure_files", "/home/vagrant/www/secure_files"
 
   config.vm.provision "shell", path: 'shell/install-deps.sh'
   config.vm.provision "shell", path: 'shell/create-database.sh'
