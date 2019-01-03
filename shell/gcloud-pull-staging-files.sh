@@ -14,14 +14,6 @@ mkdir ./txt
 
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/${STATIC_COMMIT_CHECK_FILE}" ./
 
-if [ -n "${DEV_NIH_AUTH_ON}" ]; then
-  ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/saml/advanced_settings.json" ./saml/advanced_settings.json
-  ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/saml/settings.json" ./saml/settings.json
-  ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/saml/certs/cert.pem" ./saml/certs/cert.pem
-  ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/saml/certs/key.pem" ./saml/certs/key.pem
-  ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/NIH_FTP.txt" ./NIH_FTP.txt
-fi
-
 # Pack staged files for caching
 echo "Packing JSON and text files for caching into deployment..."
 cp --verbose *.json ./json
