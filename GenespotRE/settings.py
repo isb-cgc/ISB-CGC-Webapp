@@ -21,7 +21,11 @@ import sys
 import dotenv
 from socket import gethostname, gethostbyname
 
-dotenv.read_dotenv(join(dirname(__file__), '../.env'))
+env_path = '../'
+if os.environ.get('SECURE_LOCAL_PATH', None):
+    env_path += os.environ.get('SECURE_LOCAL_PATH')
+
+dotenv.read_dotenv(join(dirname(__file__), env_path+'.env'))
 
 APP_ENGINE_FLEX = 'aef-'
 APP_ENGINE = 'Google App Engine/'
@@ -539,8 +543,8 @@ CONN_MAX_AGE = 60
 #   CUSTOM TEMPLATE CONTEXT
 ############################
 
-SITE_GOOGLE_ANALYTICS   = os.environ.get('SITE_GOOGLE_ANALYTICS_ID', False)
-SITE_GOOGLE_TAG_MANAGER_ID = os.environ.get('SITE_GOOGLE_TAG_MANAGER_ID', False)
+SITE_GOOGLE_ANALYTICS   = bool(os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKING_ID', None) is not None)
+SITE_GOOGLE_ANALYTICS_TRACKING_ID = os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKING_ID', '')
 
 ##############################################################
 #   MAXes to prevent size-limited events from causing errors
