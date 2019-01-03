@@ -230,7 +230,7 @@ define (['jquery', 'oncogridjs'],
 
     function initParams(donors, genes, observations, donorTracks, donor_track_dd_max, gene_track_ca_max){
         var params = {};
-        params.element = '#grid-div';
+        params.element = '.worksheet.active .grid-div';
         params.margin = { top: 40, right: 110, bottom: 150, left: 70 };
         params.height = 200;
         params.width = 700;
@@ -321,44 +321,39 @@ define (['jquery', 'oncogridjs'],
         grid.render();
         updateToolBar();
 
-        drawMainGridLegend('.oncogrid-legend');
+        drawMainGridLegend('.worksheet.active .oncogrid-legend');
         //drawSVGLegend - to be used for downloaded image files
-        drawSvgLegend('.svg-track-legend', obs_legends, 'Mutation', 20);
-        drawSvgLegend('.svg-track-legend', clinical_legend, 'Clinical', 140, donor_track_dd_max, gene_track_ca_max);
-        drawSvgLegend('.svg-track-legend', data_type_legend, 'Data Type', 415);
-        drawSvgLegend('.svg-track-legend', gdc_legend, 'GDC', 535, donor_track_dd_max, gene_track_ca_max);
-        drawSvgLegend('.svg-track-legend', cgc_legend, 'Gene Set', 575);
+        drawSvgLegend('.worksheet.active .svg-track-legend', obs_legends, 'Mutation', 20);
+        drawSvgLegend('.worksheet.active .svg-track-legend', clinical_legend, 'Clinical', 140, donor_track_dd_max, gene_track_ca_max);
+        drawSvgLegend('.worksheet.active .svg-track-legend', data_type_legend, 'Data Type', 415);
+        drawSvgLegend('.worksheet.active .svg-track-legend', gdc_legend, 'GDC', 535, donor_track_dd_max, gene_track_ca_max);
+        drawSvgLegend('.worksheet.active .svg-track-legend', cgc_legend, 'Gene Set', 575);
 
-        $('.oncogrid-toolbar').on('click', '.download', toggleDownloadSelection);
-        $('.oncogrid-toolbar').on('click', '.oncogrid-download-selection div', oncogridDownload);
-        $('.oncogrid-toolbar').on('click', '.reload', reload);
-        $('.oncogrid-toolbar').on('click', '.cluster', function(){grid.cluster();});
-        $('.oncogrid-toolbar').on('click', '.heatmap-toggle', toggleHeatmap);
-        $('.oncogrid-toolbar').on('click', '.grid-toggle', toggleGridLines);
-        $('.oncogrid-toolbar').on('click', '.crosshair-toggle', toggleCrosshair);
-        //$('.oncogrid-toolbar').on('click', '.fullscreen-toggle', toggleFullscreen);
+        // $('.oncogrid-toolbar').on('click', '.download', toggleDownloadSelection);
+        // $('.oncogrid-toolbar').on('click', '.oncogrid-download-selection div', oncogridDownload);
+        // $('.oncogrid-toolbar').on('click', '.reload', reload);
+        $('.worksheet.active .oncogrid-toolbar').on('click', '.cluster', function(){grid.cluster();});
+        $('.worksheet.active .oncogrid-toolbar').on('click', '.heatmap-toggle', toggleHeatmap);
+        $('.worksheet.active .oncogrid-toolbar').on('click', '.grid-toggle', toggleGridLines);
+        $('.worksheet.active .oncogrid-toolbar').on('click', '.crosshair-toggle', toggleCrosshair);
 
         //events
-        $('.oncogrid-button')
+        $('.worksheet.active .oncogrid-button')
             .on('mouseover', function (e) {
-                var tooltip_div = $('.og-tooltip-oncogrid');
+                var tooltip_div = $('.worksheet.active .og-tooltip-oncogrid');
                 tooltip_div.html('<div class="wrapper">' + $(this).find('.button-text').html() + '</div>');
                 tooltip_div
-                    .css('left', ($(this).offset().left - $('.plot-div').offset().left +20)+"px")
-                    .css('top', ($(this).offset().top - $('.plot-div').offset().top -28)+"px")
+                    .css('left', ($(this).offset().left - $('.worksheet.active .plot-div').offset().left +20)+"px")
+                    .css('top', ($(this).offset().top - $('.worksheet.active .plot-div').offset().top -28)+"px")
                     .css('opacity',0.9);
             })
             .on('mouseout', function () {
-                var tooltip_div = $('.og-tooltip-oncogrid');
+                var tooltip_div = $('.worksheet.active .og-tooltip-oncogrid');
                 tooltip_div
                     .css('opacity', 0);
             });
 
-        // $(document).bind('webkitfullscreenchange MSFullscreenChange mozfullscreenchange fullscreenchange', function(e) {
-        //     fullscreen = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen;
-        //     $('.fullscreen-toggle').toggleClass('active', fullscreen);
-        // });
-        $(document).click(hideDownloadSelection);
+        // $(document).click(hideDownloadSelection);
 
         $(active_plot_div).find('.oncogrid-header').removeClass('hidden');
     };
@@ -538,14 +533,14 @@ define (['jquery', 'oncogridjs'],
 
 
 
-    var hideDownloadSelection = function(e){
-        $(active_plot_div).find('.oncogrid-download-selection').addClass('hidden');
-    };
+    // var hideDownloadSelection = function(e){
+    //     $(active_plot_div).find('.oncogrid-download-selection').addClass('hidden');
+    // };
 
-    var toggleDownloadSelection = function(e){
-        e.stopPropagation();
-        $(active_plot_div).find('.oncogrid-download-selection').toggleClass('hidden');
-    };
+    // var toggleDownloadSelection = function(e){
+    //     e.stopPropagation();
+    //     $(active_plot_div).find('.oncogrid-download-selection').toggleClass('hidden');
+    // };
 
     var oncogridDownload = function(){
         var download_type = $(this).html();
@@ -672,43 +667,6 @@ define (['jquery', 'oncogridjs'],
         $(active_plot_div).find('.crosshair-toggle').toggleClass('active', grid.crosshairMode);
     };
 
-    // var toggleFullscreen = function(){
-    //     if(fullscreen){
-    //         closeFullscreen();
-    //     }
-    //     else{
-    //         openFullscreen();
-    //     }
-    // };
-
-
-    // var openFullscreen = function() {
-    //     var oncogrid_div_id = active_plot_div.id;
-    //     var oncogrid_div = document.getElementById(oncogrid_div_id);
-    //     if (oncogrid_div.requestFullscreen) {
-    //         oncogrid_div.requestFullscreen();
-    //     } else if (oncogrid_div.mozRequestFullScreen) { /* Firefox */
-    //         oncogrid_div.mozRequestFullScreen();
-    //     } else if (oncogrid_div.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
-    //         oncogrid_div.webkitRequestFullscreen();
-    //     } else if (oncogrid_div.msRequestFullscreen) { /* IE/Edge */
-    //         oncogrid_div.msRequestFullscreen();
-    //     }
-    //
-    // };
-    //
-    // var closeFullscreen = function() {
-    //     if (document.exitFullscreen) {
-    //         document.exitFullscreen();
-    //     } else if (document.mozCancelFullScreen) { /* Firefox */
-    //         document.mozCancelFullScreen();
-    //     } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
-    //         document.webkitExitFullscreen();
-    //     } else if (document.msExitFullscreen) { /* IE/Edge */
-    //         document.msExitFullscreen();
-    //     }
-    // };
-
     return {
         createOncogridPlot: function (plot_selector, donor_data, gene_data, observation_data, donor_track_count_max){
             if (donor_data.length > 0 && gene_data.length > 0 && observation_data.length) {
@@ -717,7 +675,6 @@ define (['jquery', 'oncogridjs'],
             return {
                 plot_data: get_plot_data,
                 get_svg: function(){ return getOncoGridSvgNode()[0]; },
-                //get_image: get_image,
                 redraw: reload
             };
         }

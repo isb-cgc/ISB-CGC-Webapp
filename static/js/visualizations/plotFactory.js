@@ -52,6 +52,7 @@ define([
     var oncoprint_obj    = Object.create(oncoprint_plot, {});
     var oncogrid_obj     = Object.create(oncogrid_plot, {});
     var helpers          = Object.create(vizhelpers, {});
+    var fullscreen = false;
     function generate_axis_label(attr, isLogTransform, units) {
         if(isLogTransform) {
             return $('option[value="' + attr + '"]:first').html() + " - log("+(units && units.length > 0 ? units : 'n')+"+1)";
@@ -552,8 +553,7 @@ define([
         if(visualization){
             $('.worksheet.active .plot-args').data('plot-data', (visualization.plot && visualization.plot.plot_data) ? visualization.plot.plot_data : null);
             $('.worksheet.active .plot-args').data('plot-svg', (visualization.svg) ? visualization.svg[0][0] : (visualization.plot && visualization.plot.get_svg) ?  visualization.plot.get_svg : null);
-            //$('.worksheet.active .plot-args').data('plot-svg', (visualization.svg) ? visualization.svg[0][0] : null);
-            $('.worksheet.active .plot-args').data('plot-redraw', (visualization.redraw) ? visualization.plot.redraw : null);
+            $('.worksheet.active .plot-args').data('plot-redraw', (visualization.plot && visualization.plot.redraw) ? visualization.plot.redraw : null);
         }
     }
 
@@ -735,12 +735,16 @@ define([
         image.src = imgsrc;
     }
 
-    var openFullscreen = function() {
-        //var active_plot_div = $('.plot-div')[0];
-        //var plot_div_id = active_plot_div.id;
+    var setFullscreen = function(isFullscreen){
+        fullscreen = isFullscreen;
+    };
 
-        //var plot_div = document.getElementById(plot_div_id);
-        var plot_div = document.getElementsByClassName('plot-container')[0];
+    var toggleFullscreen = function(){
+        fullscreen ? closeFullscreen(): openFullscreen();
+    };
+
+    var openFullscreen = function() {
+        var plot_div = document.querySelector('.worksheet.active .plot-container');
         if (plot_div.requestFullscreen) {
             plot_div.requestFullscreen();
         } else if (plot_div.mozRequestFullScreen) { /* Firefox */
@@ -750,38 +754,28 @@ define([
         } else if (plot_div.msRequestFullscreen) { /* IE/Edge */
             plot_div.msRequestFullscreen();
         }
-        // var oncogrid_div_id = active_plot_div.id;
-        // var oncogrid_div = document.getElementById(oncogrid_div_id);
-        // if (oncogrid_div.requestFullscreen) {
-        //     oncogrid_div.requestFullscreen();
-        // } else if (oncogrid_div.mozRequestFullScreen) { /* Firefox */
-        //     oncogrid_div.mozRequestFullScreen();
-        // } else if (oncogrid_div.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
-        //     oncogrid_div.webkitRequestFullscreen();
-        // } else if (oncogrid_div.msRequestFullscreen) { /* IE/Edge */
-        //     oncogrid_div.msRequestFullscreen();
-        // }
-
     };
 
-    // var closeFullscreen = function() {
-    //     if (document.exitFullscreen) {
-    //         document.exitFullscreen();
-    //     } else if (document.mozCancelFullScreen) { /* Firefox */
-    //         document.mozCancelFullScreen();
-    //     } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
-    //         document.webkitExitFullscreen();
-    //     } else if (document.msExitFullscreen) { /* IE/Edge */
-    //         document.msExitFullscreen();
-    //     }
-    // };
+    var closeFullscreen = function() {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) { /* Firefox */
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) { /* IE/Edge */
+            document.msExitFullscreen();
+        }
+    };
+
 
     return {
         generate_plot     : generate_plot,
         svg_download: svg_download,
         png_download: png_download,
         redraw_plot : redraw_plot,
-        openFullscreen: openFullscreen,
+        toggleFullscreen: toggleFullscreen,
+        setFullscreen: setFullscreen,
         get_plot_settings : get_plot_settings
     };
 });

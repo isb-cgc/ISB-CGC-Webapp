@@ -222,14 +222,47 @@ require([
         $(this).parents('.plot-toolbar').find('.plot-download-selection').toggleClass('hidden');
     });
 
+    $('.plot-button')
+            .on('mouseover', function (e) {
+                var tooltip_div = $('.worksheet.active .plot-tooltip');
+                var tooltip_y_pos = $(this).offset().top -$('.worksheet.active .worksheet-body').offset().top;
+                var tooltip_x_pos = $(this).offset().left -$('.worksheet.active .worksheet-content').offset().left;
+                tooltip_y_pos = tooltip_y_pos > 0 ? tooltip_y_pos +35 : 64;
+                tooltip_x_pos = tooltip_x_pos > 0 ? tooltip_x_pos + 20 : $(this).offset().left + 36;
+
+                tooltip_div.html('<div class="wrapper">' + $(this).find('.button-text').html() + '</div>');
+                tooltip_div
+                    .css('left', tooltip_x_pos+"px")
+                    //.css('left', $(this).offset().left + "px")
+                    //.css('top', "20px")
+                    .css('top', tooltip_y_pos+"px")
+                    //$('.worksheet.active .plot-container').offset().top)+"px")
+                    .css('opacity',0.9);
+
+            })
+            .on('mouseout', function () {
+                var tooltip_div = $('.worksheet.active .plot-tooltip');
+                tooltip_div
+                    .css('opacity', 0);
+            });
+
     $(document).on('click', function(){
         $('.plot-toolbar').find('.plot-download-selection').addClass('hidden');
     });
 
-    $('.fullscreen-plot').on('click', function () {
+    $('.toggle-fullscreen-plot').on('click', function () {
         if(!plotFactory)
             plotFactory = Object.create(plot_factory, {});
-        plotFactory.openFullscreen();
+        plotFactory.toggleFullscreen();
+    });
+
+    $(document).bind('webkitfullscreenchange MSFullscreenChange mozfullscreenchange fullscreenchange', function(e) {
+        if(!plotFactory)
+            plotFactory = Object.create(plot_factory, {});
+        var fullscreen = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen;
+        plotFactory.setFullscreen(fullscreen);
+        $('.toggle-fullscreen-plot i').toggleClass('fa-compress', fullscreen);
+        $('.toggle-fullscreen-plot i').toggleClass('fa-expand', !fullscreen);
     });
 
 
