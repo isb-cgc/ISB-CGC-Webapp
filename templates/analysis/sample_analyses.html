@@ -20,10 +20,10 @@
 <div class="container">
     <div class="row">
         {% for plot in types %}
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="analysis panel panel-default">
                     <div class="panel-body">
-                        <img class="img-fluid" src="{% static plot.image %}" alt="Bar Chart">
+                        <img class="img-fluid" src="{% static plot.image %}" alt="Plot Image">
                         <h5>{{ plot.name | safe }}</h5>
                         <p>{{ plot.description | safe }}</p>
                     </div>
@@ -39,6 +39,9 @@
         {% endfor %}
     </div>
 </div>
+    <script type="text/javascript">
+        var USER_SETTINGS_KEY = 'user_' + {{ request.user.id }} + '_dash_settings';
+    </script>
 {% endblock %}
 
 {% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}
