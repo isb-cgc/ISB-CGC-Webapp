@@ -61,7 +61,7 @@
   &-nav
     padding: 10px 15px
     float: left
-    width: 25%
+    width: 20%
     background: darken($white, 8%)
     min-height: 1200px
     position: relative
@@ -114,21 +114,41 @@
         .fa-caret-left
           display: none
 
-    .list-item__heading i
-      font-size: $font-size-small
-      font-weight: $regular-font-weight
-      opacity: 0.8
-      margin-top: 5px
+    h4
+      color: $isb-primary
+
+    .list
+      width: 100%
+      .sublist-item
+        padding-left: 10px
+        padding-top: 3px
+        &:hover
+          background-color: darken($white, 20%)
+          border-width: 1px
+          border-radius: 5px
+          .workbook-remove-item
+            visibility: visible
+
+    .list-item__heading
+      font-size: $font-size
+      font-weight: $bold-font-weight
+      i
+        font-size: $font-size-small
+        font-weight: $regular-font-weight
+        opacity: 0.8
+        margin-top: 5px
 
     .workbook-remove-item
+      visibility: hidden
       border: none
-      padding: 2px
-      margin-right: 4px
       background: none
+      float: right
+      &:hover
+        color: #a94442
 
   &-content
     float: left
-    width: 75%
+    width: 80%
     padding: 10px 15px
     position: relative
     transition: width 0.45s ease-in-out
