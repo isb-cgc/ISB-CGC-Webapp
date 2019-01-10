@@ -1,9 +1,6 @@
-# UI-prototyping
- ISB-CGC UI prototyping
+# ISB-CGC Web Application
 
-This project uses Google App Engine, Python 2.7, Django 1.7.1, and MySQL 5.6
-
-This app is set up to run and deploy on various Google Cloud Projects.
+The ISB-CGC Web Application provides a GUI for browsing, curating, and analyzing TCGA, TARGET, and CCLE data. It is built in Django 1.11 (Python 2.7) with MySQL 5.7, and is deployed on Google AppEngine Flex.
 
 # Installation Instructions For Local Development
 
@@ -15,8 +12,9 @@ The system uses [Vagrant](https://www.vagrantup.com/) to setup a consistent, pla
 
 From there simply perform these steps.
 
- 1. Copy the `sample.env` file to a file named `.env` in the root directory
- 2. Fill out the `.env` file with the proper values
+ 1. Once you've installed PyCharm and cloned the repositories, create a directory within the `PycharmProjects` directory (the parent directory of your repositories) called `secure_files/`.
+ 2. Copy the `sample.env` file to a file named `.env` in `secure_files/`
+ 3. Fill out the `.env` file with the proper values
    * For most development environments, `MYSQL_ROOT_PASSWORD` and `DATABASE_PASSWORD` can be the same, and `DATABASE_USER` can be `root`
    * `GCLOUD_PROJECT_ID` is available after creating a project in the [Google Cloud Dashboard](https://console.developers.google.com/)
    * `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` can also be obtained in the Google Cloud Dashboard by going to API & Auth > Credentials > Add New > OAuth 2.0 Client > Web Application
@@ -42,7 +40,12 @@ PyCharm Pro can be used to run your server through Vagrant and the Google App En
  12. Set the host to `0.0.0.0`
  13. Set the Python Interpreter to the Vagrant Machine (if it is not set to that already)
  14. Set the working directory to `/home/vagrant/www`
- 15. Click ok to save
+ 15. Click `...` next to the `Environment variables:`, box and add the following values:
+     `SECURE_LOCAL_PATH = ../parentDir/secure_files/`
+     `PYTHONPATH = /home/vagrant/www:/home/vagrant/www/lib:/home/vagrant/google_appengine`
+     `DJANGO_SETTINGS_MODULE = GenespotRE.settings`
+     `PYTHONUNBUFFERED = 1`
+ 16. Click ok to save
 
 You will also need to set the *shell/python-su.sh* file to be executable. You can do this in the vagrant machines command line with the command `chmod +x /home/vagrant/www/shell/python-su.sh`
 
@@ -51,9 +54,7 @@ You will also need to set the *shell/python-su.sh* file to be executable. You ca
 To run your server in PyCharm:
 
  1. Make sure your Vagrant machine is running by going to **Tools > Vagrant > Up**
- 2. Click on the Run or Debug icons in the toolbar
- 3. Click Run or Debug button on the configuration dialog
- 4. Click Continue Anyway to run the machine
+ 2. Click on the Run or Debug icons in the toolbar (upper-right corner of the PyCharm GUI)
 
 Your server will start and the PyCharm console should show all the logs and output from the system. If you are running in debug, you can also use breakpoints to stop the execution and examine variables and code as it runs.
 
@@ -65,7 +66,7 @@ To update your existing python dependencies because of a change or to pull down 
 
  1. Click **Tools > Start SSH session...**
  2. Select the Vagrant VM Connection you set up
- 3. Type `cd www; pip install -r requirements.txt --upgrade -t lib/`
+ 3. Type `cd www; sudo pip install -r requirements.txt --upgrade -t lib/`
 
 Or from the command line, you can do this by doing the following
 
