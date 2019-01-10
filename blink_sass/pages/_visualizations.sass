@@ -73,9 +73,10 @@
     width: 210px
 
   .legend
-      display: inline-block
-      padding: 10px 0px 10px 15px
-      border: 3px groove lighten($isb-dark, 40%)
+      //display: inline-block
+      //float: right
+      padding: 5px
+      //border: 1px groove lightgrey
       overflow-y: auto
       max-height: 150px
       vertical-align: top
@@ -266,8 +267,6 @@
     position: fixed
     top: 0px
     left: 0px
-    /*display : block;*/
-    /*visibility: hidden;*/
     z-index: 100000
     font-family: inherit !important
     font-size: 16px !important
@@ -284,6 +283,278 @@
         td
             padding: 0px 5px
 
+
+.plot-toolbar
+  flex-flow: row wrap
+  justify-content: flex-end
+  margin-right: 12px
+  margin-top: 10px
+  .toolbar-item
+    margin-left: 1rem
+  .dropdown
+    position: relative
+  .plot-button
+    -webkit-box-pack: center
+    -webkit-box-align: center
+    background-color: rgb(255, 255, 255)
+    color: rgb(51, 51, 51)
+    align-items: center
+    min-width: 55px
+    min-height: 28px
+    line-height: 28px
+    height: 0px
+    display: inline-flex
+    justify-content: center
+    position: relative
+    cursor: pointer
+    font-size: 14px
+    border-radius: 4px
+    border-width: 1px
+    border-style: solid
+    border-image: initial
+    outline: none
+    border-color: rgb(204, 204, 204)
+    padding: 0px 12px
+    transition: 0.25s ease
+    &.active
+      background-color: rgb(230, 230, 230)
+    &:hover
+      background-color: rgb(0, 138, 224)
+      color: white
+    span
+      display: flex
+      align-items: center
+      justify-content: center
+    div
+      display: flex
+      &.button-text
+        width: 0
+        height: 0
+        padding: 0
+        overflow: hidden
+  .plot-download-selection
+    display: flex
+    flex-direction: column
+    box-sizing: border-box
+    position: absolute
+    outline: none
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 2px 5px 0px, rgba(0, 0, 0, 0.12) 0px 2px 10px 0px
+    z-index: 200
+    min-width: 80px
+    background-color: white
+    text-align: left
+    right: 0px
+    cursor: pointer
+    div
+      flex-direction: row
+      box-sizing: border-box
+      position: relative
+      outline: none
+      text-align: center
+      width: 100%
+      &:hover
+        color: rgb(38, 38, 38)
+        background-color: rgb(245, 245, 245)
+
+.plot-tooltip
+  height: 0
+  position: absolute
+  top: 0
+  left: 0
+  pointer-events: none
+  z-index: 9999
+  .wrapper
+    position: relative
+    bottom: 12px
+    left: -50%
+    padding: 6px
+    color: #3d3d3d
+    background: #fff
+    font-size: 10px
+    border: 2px solid #dedede
+    border-radius: 6px
+    .onco-track-list-item
+      margin-left: 5px
+    .onco-track-item
+      display: inline-block
+      margin-left: 5px
+    .onco-track-legend
+      display: inline-block
+      width: 10px
+      height: 10px
+      margin: 0px 2px
+/*oncogrid*/
+.oncogrid-header
+    display: flex
+    flex-direction: row
+    box-sizing: border-box
+    position: relative
+    outline: none
+    margin-left: 0px
+    min-height: 70px
+    .oncogrid-logo
+        padding-right: 30px
+        img
+            height: 70px
+    .oncogrid-legend
+        margin: 10px 0
+    .oncogrid-toolbar
+        flex-flow: row wrap
+        justify-content: flex-end
+        margin-right: 12px
+        margin-top: 10px
+        .toolbar-item
+            margin-left: 1rem
+        .dropdown
+            position: relative
+        .oncogrid-button
+            -webkit-box-pack: center
+            -webkit-box-align: center
+            background-color: rgb(255, 255, 255)
+            color: rgb(51, 51, 51)
+            align-items: center
+            min-width: 40px
+            min-height: 28px
+            line-height: 28px
+            height: 0px
+            display: inline-flex
+            justify-content: center
+            position: relative
+            cursor: pointer
+            font-size: 14px
+            border-radius: 4px
+            border-width: 1px
+            border-style: solid
+            border-image: initial
+            outline: none
+            border-color: rgb(204, 204, 204)
+            padding: 0px 12px
+            transition: 0.25s ease
+            &.active
+                background-color: rgb(230, 230, 230)
+            &:hover
+                background-color: rgb(0, 138, 224)
+                color: white
+            span
+                display: flex
+                align-items: center
+                justify-content: center
+            div
+                display: flex
+                .button-text
+                    width: 0px
+                    height: 0px
+                    overflow: hidden
+        .oncogrid-download-selection
+            display: flex
+            flex-direction: column
+            box-sizing: border-box
+            position: absolute
+            outline: none
+            box-shadow: rgba(0, 0, 0, 0.16) 0px 2px 5px 0px, rgba(0, 0, 0, 0.12) 0px 2px 10px 0px
+            z-index: 200
+            min-width: 80px
+            background-color: white
+            text-align: left
+            right: 0px
+            cursor: pointer
+            div
+                flex-direction: row
+                box-sizing: border-box
+                position: relative
+                outline: none
+                text-align: center
+                width: 100%
+                &:hover
+                    color: rgb(38, 38, 38)
+                    background-color: rgb(245, 245, 245)
+
+.grid-div
+    cursor: pointer
+
+    .crosshair-mode
+        cursor: crosshair
+    .background
+        fill: #fff
+        stroke: black
+        stroke-width: 0.5
+    line
+        stroke: grey
+        stroke-opacity: .5
+        //shape-rendering: crispEdges
+        .og-vertical-cross, .og-horizontal-cross
+            stroke: black
+            stroke-opacity: 1
+            stroke-width: 2
+            shape-rendering: crispEdges
+    .og-histogram-axis
+        stroke: #000
+        stroke-opacity: 0.5
+        shape-rendering: crispEdges
+    textarea
+        padding: 2px
+        width: 714px
+        height: 360px
+    .og-gene-label
+        cursor: move
+    .og-remove-gene
+        cursor: pointer
+        font-size: 0.7rem
+        font-family: sans-serif
+        color: red
+        &:before
+            content: 'Remove'
+    .og-label-text-font
+        font-size: 1rem
+    .og-track-group-label
+        font-size: 1em
+    .og-sortable-rect:hover
+        stroke: red
+        stroke-width: 3
+    .og-highlight
+        stroke: green
+        stroke-width: 1
+    .og-tooltip-oncogrid
+        height: 0
+        position: absolute
+        top: 0
+        left: 0
+        pointer-events: none
+        z-index: 9999
+        .wrapper
+            position: relative
+            bottom: 12px
+            left: -50%
+            padding: 6px
+            color: #3d3d3d
+            background: #fff
+            font-size: 10px
+            border: 2px solid #dedede
+            border-radius: 6px
+            .onco-track-list-item
+                margin-left: 5px
+            .onco-track-item
+                display: inline-block
+                margin-left: 5px
+            .onco-track-legend
+                display: inline-block
+                width: 10px
+                height: 10px
+                margin: 0px 2px
+
+.svg-track-legend
+    visibility: hidden
+    height: 0px
+.plot-container
+    &:-webkit-full-screen
+    &:-moz-full-screen
+    &:-ms-fullscreen
+    &:fullscreen
+        background-color: white
+        width: 100% !important
+        height: 100%
+        .show-settings-flyout
+            display: none
 /********************************************
  * plot loading animation
  *********************************************/
@@ -346,7 +617,7 @@
 
 .worksheet-plot-loader
   height: 600px
-  width: 825px
+  width: 100%
   background: #d0d0d0 !important
   z-index: 100
   margin: -6px -15px 0px -15px

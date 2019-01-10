@@ -33,7 +33,7 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
 
     // If you want to override the tip coming in from the create call,
     // do it here
-    var barTip = d3tip()
+    var tip = d3tip()
         .attr('class', 'd3-tip')
         .direction('n')
         .offset([0, 0])
@@ -77,8 +77,7 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
 
             return results;
         },
-        createBarGraph: function(svg, raw_Data, width, height, bar_width,  x_attr, xLabel, tip, margin, legend) {
-            tip = barTip || tip;
+        createBarGraph: function(svg, raw_Data, width, height, bar_width,  x_attr, xLabel, margin, legend) {
             var data = this.dataCounts(raw_Data, x_attr);
             var plot_width = (bar_width+5) * data.length;
 
@@ -99,8 +98,7 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
 
             var zoomer = function() {
                 if(!selex_active) {
-                    svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom - margin.top - 40) + ')').call(xAxis);
-                    svg.selectAll('.x.axis text').style('text-anchor', 'end').attr('transform', 'translate(' + -15 + ',' + 10 + ') rotate(-90)');
+                    svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom) + ')').call(xAxis);
                     plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
                 }
             };
@@ -115,70 +113,68 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 .on('zoom', zoomer);
 
             svg.call(zoom);
-
+            var worksheet_id = $('.worksheet.active').attr('id');
+            var plot_area_clip_id = 'plot_area_clip_' + worksheet_id;
             var plot_area = svg.append('g')
-                .attr('clip-path', 'url(#plot_area_clip)')
-                .attr('transform','translate(0,'+margin.top+')');
+                .attr('clip-path', 'url(#'+plot_area_clip_id +')')
+                .attr('transform','translate('+ margin.left+', '+margin.top+')');
 
             plot_area.append('clipPath')
-                .attr('id', 'plot_area_clip')
+                .attr('id', plot_area_clip_id)
                 .append('rect')
                 .attr({ width: width-margin.left - margin.right,
-                        height: height-margin.top - margin.bottom})
-                .attr('transform', 'translate(' + margin.left + ',0)');
+                        height: height-margin.top - margin.bottom});
 
             plot_area.selectAll(".plot-bar")
                 .data(data)
                 .enter().append("rect")
                     .attr("class", "plot-bar")
-                    .attr("x", function(d) { return x(d.value) + margin.left; })
+                    .attr("x", function(d) { return x(d.value); })
                     .attr("y", function(d) {
                         return y(d.count);
                     })
                     .attr('value', function(d) { return d.value; })
                     .attr("width", x.rangeBand())
-                    .attr("height", function(d) { return height - margin.bottom - margin.top - y(d.count); })
+                    .attr("height", function(d) {
+                        return height - margin.bottom - margin.top - y(d.count); })
                 .on('mouseover.tip', tip.show)
                 .on('mouseout.tip', tip.hide);
 
+            var x_axis_area_clip_id = 'x_axis_area_clip_' + worksheet_id;
             var x_axis_area = svg.append('g')
-                .attr('clip-path', 'url(#x_axis_area_clip)');
+                .attr('clip-path', 'url(#'+x_axis_area_clip_id+')');
 
             x_axis_area.append('clipPath')
-                .attr('id', 'x_axis_area_clip')
+                .attr('id', x_axis_area_clip_id)
                 .append('rect')
-                .attr('height', margin.bottom+margin.top)
+                .attr('height', margin.bottom)
                 .attr('width', width-margin.left-margin.right)
                 .attr('transform', 'translate(' + margin.left + ',' + (height  - margin.bottom) + ')');
-
             x_axis_area.append('g')
                 .attr('class', 'x axis')
-                .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom - margin.top - 40) + ')')
-                .call(xAxis)
-                .selectAll('text')
-                .style('text-anchor', 'end')
-                .attr('transform', 'translate(' + -15 + ',' + 10 + ') rotate(-90)');
+                .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom) + ')')
+                .call(xAxis);
 
-
-            d3.select('.x.axis').selectAll('text').each(function(){
+            var x_axis_area_height = margin.bottom-55;
+            svg.select('.x.axis').selectAll('text').each(function(){
                 var d = d3.select(this);
                 var label = d.text();
                 var parent = d3.select(d.node().parentNode);
                 d.remove();
                 var fOb = parent.append('foreignObject')
                     .attr('requiredFeatures', 'http://www.w3.org/TR/SVG11/feature#Extensibility')
-                    .attr('width', margin.bottom-55)
+                    .attr('width', x_axis_area_height)
                     .attr('height', bar_width);
 
                 fOb.append('xhtml:div')
                     .style('height', bar_width)
-                    .style('width', margin.bottom-55)
+                    .style('width', x_axis_area_height)
                     .attr('class','truncated-single')
                     .attr('title',label)
                     .html(label);
             });
 
-            d3.select('.x.axis').selectAll('foreignObject').attr('style','transform: translate(-15px,'+margin.bottom+'px) rotate(-90deg);');
+            svg.select('.x.axis').selectAll('foreignObject').attr('style','transform: translate(-15px,'+(x_axis_area_height + 10)+'px) rotate(-90deg);');
 
             // Highlight the selected rectangles whenever the cursor is moved
             var brushmove = function(p) {
@@ -246,15 +242,12 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 .attr('transform', 'translate(' + (width/2) + ',' + (height - 10) + ')')
                 .text(xLabel);
 
-            d3.select('.x.label').call(d3textwrap.textwrap().bounds({width: (width-margin.left)*0.75, height: 50}));
-            d3.select('.x-label-container').selectAll('foreignObject').attr('style','transform: translate('+((width/2)-(((width-margin.left)*0.75)/2)) + 'px,' + (height - 50)+'px);');
-            d3.select('.x-label-container').selectAll('div').attr('class','axis-label');
 
             svg.append('text')
                 .attr('class', 'y label axis-label')
                 .attr('text-anchor', 'middle')
                 .text('Number of Samples')
-                .attr('transform', 'rotate(-90) translate(' + ((-1 * (height/2))+($('.y.label.axis-label').outerWidth()/2)) + ',20)');
+                .attr('transform', 'rotate(-90) translate(' + (-height-margin.top+margin.bottom)/2 + ', 20)');
 
             var check_selection_state = function(obj) {
 
@@ -315,16 +308,16 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 $('.save-cohort-card').show()
                     .attr('style', 'position:relative; top: -' + height + 'px; left:' + leftVal + 'px;');
 
-            };
+            }
 
             function resize() {
                 width = svg.node().parentNode.offsetWidth - 10;
                 //TODO resize plot
-            };
+            }
 
             function check_selection_state_wrapper(bool){
                 check_selection_state(bool);
-            };
+            }
 
             $('.save-cohort-card').find('.btn').on('click',function(e){
                 if(Object.keys(selectedValues).length > 0){
@@ -338,7 +331,16 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 }
             });
 
+            function get_plot_data(){
+                var p_data = {};
+                data.map(function(d, i){
+                    p_data[i] = d;
+                });
+                return p_data;
+            }
+
             return {
+                plot_data: get_plot_data,
                 resize                : resize,
                 check_selection_state : check_selection_state_wrapper
             }
