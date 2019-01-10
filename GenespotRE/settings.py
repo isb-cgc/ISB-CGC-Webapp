@@ -21,7 +21,11 @@ import sys
 import dotenv
 from socket import gethostname, gethostbyname
 
-dotenv.read_dotenv(join(dirname(__file__), '../.env'))
+env_path = '../'
+if os.environ.get('SECURE_LOCAL_PATH', None):
+    env_path += os.environ.get('SECURE_LOCAL_PATH')
+
+dotenv.read_dotenv(join(dirname(__file__), env_path+'.env'))
 
 APP_ENGINE_FLEX = 'aef-'
 APP_ENGINE = 'Google App Engine/'
@@ -79,7 +83,6 @@ COHORT_DATASET_ID           = os.environ.get('COHORT_DATASET_ID', 'cohort_datase
 BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
 MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
-NIH_AUTH_ON             = bool(os.environ.get('NIH_AUTH_ON', False))
 USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
 
 DATABASES = {
@@ -115,13 +118,6 @@ SITE_ID = 3
 if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
     print >> sys.stdout, "[STATUS] AppEngine detected."
     SITE_ID = 4
-
-# Default to no NIH Auth unless we are not on a local dev environment *and* are in AppEngine-Flex
-NIH_AUTH_ON = False
-
-if not IS_DEV and IS_APP_ENGINE_FLEX:
-    print >> sys.stdout, "[STATUS] NIH_AUTH_ON is TRUE"
-    NIH_AUTH_ON = True
 
 def get_project_identifier():
     return BQ_PROJECT_ID
@@ -547,8 +543,8 @@ CONN_MAX_AGE = 60
 #   CUSTOM TEMPLATE CONTEXT
 ############################
 
-SITE_GOOGLE_ANALYTICS   = os.environ.get('SITE_GOOGLE_ANALYTICS_ID', False)
-SITE_GOOGLE_TAG_MANAGER_ID = os.environ.get('SITE_GOOGLE_TAG_MANAGER_ID', False)
+SITE_GOOGLE_ANALYTICS   = bool(os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKING_ID', None) is not None)
+SITE_GOOGLE_ANALYTICS_TRACKING_ID = os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKING_ID', '')
 
 ##############################################################
 #   MAXes to prevent size-limited events from causing errors

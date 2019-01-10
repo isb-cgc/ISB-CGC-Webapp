@@ -1,8 +1,10 @@
 define([
-    'seqpeek_view/view'
+    'seqpeek_view/view',
+    'd3'
 
 ], function(
-    SeqPeekViewFactory
+    SeqPeekViewFactory,
+    d3
 ) {
     return {
         render_no_data_message: function(target_element, gene_label) {
@@ -21,26 +23,37 @@ define([
                 In_Frame_Ins: "#C1B14C",
                 In_Frame_Del: "#C1B14C"
             };
+            var color = function(key){ return MUTATION_TYPE_COLOR_MAP[key]; };
+            var color_domain = Object.keys(MUTATION_TYPE_COLOR_MAP);
+            var legend_line_height = 20;
+            var legend_column_length = Math.ceil(color_domain.length/3);
 
-            var table = $('<table>' +
-                '<thead>' +
-                '<tr><th>Key</th><th>Mutation Type</th>' +
-                '</tr>' +
-                '</thead>' +
-                '</table>');
+            var legend = d3.select(target_element)
+            .append('svg')
+            .attr('width', 850);
 
-            var tbody = $('<tbody></tbody>').appendTo(table);
+            legend = legend.attr('height', legend_line_height * legend_column_length);
 
-            $.each(MUTATION_TYPE_COLOR_MAP, function(key, color) {
-                var table_row = $('<tr>' +
-                    '<td style="background-color: ' + color + '"></td>' +
-                    '<td>' + key + '</td>' +
-                    '</tr>');
+            legend = legend.selectAll('.legend')
+                .data(color_domain)
+                .enter().append('g')
+                .attr('class', 'legend')
+                .attr("transform", function(d, i)
+                { return "translate("+(Math.floor(i/legend_column_length)*legend.attr('width')/3)+"," + (i%legend_column_length * legend_line_height) + ")"; });
 
-                table_row.appendTo(tbody);
-            });
+            legend.append('rect')
+                .attr('width', legend_line_height - 6)
+                .attr('height', legend_line_height - 6)
+                .attr("transform", function(d, i) { return "translate(3, 3)"; })
+                .attr('class', 'selected')
+                .style('stroke', function(d){ return color(d); })
+                .style('stroke-width', 1)
+                .style('fill', function(d){ return color(d); });
 
-            table.appendTo(target_element);
+            legend.append('text')
+                .attr('x', legend_line_height + 2)
+                .attr('y', legend_line_height - 5)
+                .text(function(d) { return d; });
         },
 
         render_seqpeek_template: function(target_element, gene_label, tracks) {
@@ -61,10 +74,9 @@ define([
 
             for (var i = 0; i < tracks.length; i++) {
                 track = tracks[i];
-
                 new_tr = '<tr>' +
                     '<td colspan="2">' + track['label'] + '</td>' +
-                    '<td rowspan="4" id="' + track['row_id'] + '"></td>' +
+                    '<td rowspan="4" id="' + track['render_info']['row_id'] + '"></td>' +
                     '</tr>';
                 table_body.append(new_tr);
 
@@ -108,11 +120,12 @@ define([
 
         render_seqpeek: function(target_table_selector, gene_element, data_bundle) {
             var plot_data = data_bundle['plot_data'];
-            var tracks = plot_data['tracks'];
-
             var target_table = $(target_table_selector)[0];
             var tableView = SeqPeekViewFactory.create(target_table, plot_data);
             tableView.render();
+            return {
+                plot_data: function(){ return plot_data; }
+            }
         }
     };
 });
