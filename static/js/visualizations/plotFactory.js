@@ -503,26 +503,17 @@ define([
             }
 
             if(visualization.svg) {
-                $(visualization.svg[0]).parents('.plot').find('.toggle-selection').unbind();
+                $(visualization.svg[0]).parents('.plot').find('.toggle-selection').unbind('click');
                 $(visualization.svg[0]).parents('.plot').find('.toggle-selection').on('click', function () {
                     $(this).toggleClass('active');
                     visualization.plot.check_selection_state($(this).hasClass('active'));
                 });
-
-                // var xmlSerializer = new XMLSerializer();
-                // var img_svg = getPlotSvgNode(visualization.svg[0][0], $(args.legend_selector).find('svg'));
-                // var content = xmlSerializer.serializeToString(img_svg);
-                // var blob = new Blob([content], {type: 'application/svg+xml'});
-                //saveAs(blob, 'plot.svg');
             }
 
             //establish marquee sample selection
-
             visualization.plot.check_selection_state($(visualization.svg[0]).parents('.plot').find('.toggle-selection').hasClass('active'));
 
             //store data
-
-            //console.log(color_by_sel);
             //establish resize call to data
             d3.select(window).on('resize', visualization.plot.resize);
             (args.type == "Cubby Hole Plot" || args.color_by_sel) && $(args.legend_selector).show();

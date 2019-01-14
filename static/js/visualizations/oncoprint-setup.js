@@ -1001,7 +1001,7 @@ window.CreateOncoprinterWithToolbar = function (plot_selector, _ctr_selector, _t
                 events: {
                     render: function (event) {
                         //$('.worksheet.active').on('click', '.oncoprint-diagram-download', function () {
-						if($('#qtip-'+attr_).length == 0) {
+						//if($('#qtip-'+attr_).length == 0) {
                             $('body').on('click', '.oncoprint-diagram-download', function () {
 
                                 var fileType = $(this).attr("type");
@@ -1033,7 +1033,7 @@ window.CreateOncoprinterWithToolbar = function (plot_selector, _ctr_selector, _t
                                     }, 2);
                                 }
                             });
-                        }
+                        //}
 
                         $('body').on('click', '.oncoprint-sample-download', function () {
                             var idTypeStr = (State.using_sample_data ? "Sample" : "Patient");
