@@ -287,7 +287,7 @@ define([
         var plot;
         if (plot_data && oncoprint_obj.isInputValid(plot_data)) {
             plot = oncoprint_obj.createOncoprintPlot(plot_selector, plot_data);
-            $('.worksheet.active .worksheet-panel-body .plot-div .oncoprint-diagram-downloads-icon').trigger('mouseover');
+            //$('.worksheet.active .worksheet-panel-body .plot-div .oncoprint-diagram-downloads-icon').trigger('mouseover');
         }
         else {
             var message = "The selected cohorts have no somatic mutations in the gene ";

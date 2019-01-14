@@ -47,8 +47,10 @@
                     <div class="button-text">Download</div>
                 </a>
                 <div class="plot-download-selection hidden">
+                    {% if worksheet.active_plot.type != 'OncoPrint' %}
                     <div class="svg-download">SVG</div>
                     <div class="png-download">PNG</div>
+                    {% endif %}
                     <div class="data-download">JSON</div>
                 </div>
             </span>

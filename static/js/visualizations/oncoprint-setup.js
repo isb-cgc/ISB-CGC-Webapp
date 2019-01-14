@@ -498,7 +498,7 @@ window.CreateOncoprinterWithToolbar = function (plot_selector, _ctr_selector, _t
     ctr_selector = $(plot_selector).find(_ctr_selector);
 	toolbar_selector = $(plot_selector).find(_toolbar_selector);
 
-    $(plot_selector).find('.oncoprint .oncoprint-diagram-toolbar-buttons').show();
+    //$(plot_selector).find('.oncoprint .oncoprint-diagram-toolbar-buttons').show();
 
     if (!utils.isWebGLAvailable()) {
         $(ctr_selector).append("<p>"+utils.getUnavailableMessageHTML()+"</p>");
@@ -564,13 +564,13 @@ window.CreateOncoprinterWithToolbar = function (plot_selector, _ctr_selector, _t
     var toolbar_fade_out_timeout;
     $(toolbar_selector).css({'visibility':'visible'});
     $(ctr_selector).add(toolbar_selector).on("mouseover", function(evt) {
-	$(toolbar_selector).stop().animate({opacity:1});
+        $(this).parents('.plot-div').find(_toolbar_selector).stop().animate({opacity:1});
 	clearTimeout(toolbar_fade_out_timeout);
     });
     $(ctr_selector).add(toolbar_selector).on("mouseleave", function(evt) {
 	clearTimeout(toolbar_fade_out_timeout);
 	toolbar_fade_out_timeout = setTimeout(function() {
-	    $(toolbar_selector).stop().animate({opacity:0});
+		$(this).parents('.plot-div').find(_toolbar_selector).stop().animate({opacity:0});
 	}, 700);
     });
 
@@ -982,7 +982,7 @@ window.CreateOncoprinterWithToolbar = function (plot_selector, _ctr_selector, _t
 	})();
 	(function setUpDownload() {
 	    var xml_serializer = new XMLSerializer();
-	    var attr_ = $(toolbar_selector).find('.oncoprint-diagram-downloads-icon').attr('data-hasqtip')
+	    //var attr_ = $(toolbar_selector).find('.oncoprint-diagram-downloads-icon').attr('data-hasqtip')
 		addQTipTo($(toolbar_selector).find('.oncoprint-diagram-downloads-icon'), {
                 style: {classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightwhite'},
                 show: {event: "mouseover"},

@@ -542,20 +542,20 @@ define (['jquery', 'oncogridjs'],
     //     $(active_plot_div).find('.oncogrid-download-selection').toggleClass('hidden');
     // };
 
-    var oncogridDownload = function(){
-        var download_type = $(this).html();
-        switch(download_type){
-            case 'SVG':
-                download_svg();
-                break;
-            case 'PNG':
-                download_png();
-                break;
-            case 'JSON':
-                download_json();
-                break;
-        }
-    };
+    // var oncogridDownload = function(){
+    //     var download_type = $(this).html();
+    //     switch(download_type){
+    //         case 'SVG':
+    //             download_svg();
+    //             break;
+    //         case 'PNG':
+    //             download_png();
+    //             break;
+    //         case 'JSON':
+    //             download_json();
+    //             break;
+    //     }
+    // };
 
     function getOncoGridSvgNode(){
         var legend_svg_width = 350;
