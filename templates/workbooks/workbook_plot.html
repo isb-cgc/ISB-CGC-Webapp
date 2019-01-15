@@ -37,10 +37,12 @@
                     <div class="button-text">View Plot Settings</div>
                 </a>
             {% endif %}
+            {% if worksheet.active_plot.type != 'OncoPrint' %}
             <a role="button" class="redraw-plot plot-button" aria-label="Redraw">
                 <i class="fa fa-refresh"></i>
                 <div class="button-text">Redraw</div>
             </a>
+            {%  endif %}
             <span class="dropdown">
                 <a role="button" class="plot-button download">
                     <i class="fa fa-download"></i>

@@ -1273,7 +1273,6 @@ require([
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
 
         var toggle_selection_selector = '#' + args.worksheet_id + ' .toggle-selection';
-        var redraw_selector = '#' + args.worksheet_id + ' .redraw-plot';
         $(legend_selector).hide();
         turn_off_toggle_selector();
 
@@ -1295,12 +1294,7 @@ require([
             $(toggle_selection_selector).show();
         }
 
-        if(args.type === 'OncoPrint'){
-            $(redraw_selector).hide();
-        }
-        else{
-            $(redraw_selector).show();
-        }
+
 
         if(args.type === 'OncoGrid'){
             var oncogrid_template = plot_element.find('#oncogrid_div').html();
