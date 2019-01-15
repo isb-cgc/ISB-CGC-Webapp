@@ -3142,11 +3142,6 @@ span.code {
   box-shadow: none;
   margin: 0; }
 
-.plot .panel-heading a.toggle-selection {
-  color: #676767; }
-  .plot .panel-heading a.toggle-selection.active {
-    color: #2B7388; }
-
 #seqpeek #seqpeek-form {
   margin-top: 20px; }
   #seqpeek #seqpeek-form > div {

@@ -1273,6 +1273,9 @@ require([
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
 
         var toggle_selection_selector = '#' + args.worksheet_id + ' .toggle-selection';
+        var redraw_selector = '#' + args.worksheet_id + ' .redraw-plot';
+        var svg_img_download_selector = '#' + args.worksheet_id + ' .svg-download';
+        var png_img_download_selector = '#' + args.worksheet_id + ' .png-download';
         $(legend_selector).hide();
         turn_off_toggle_selector();
 
@@ -1293,6 +1296,20 @@ require([
         else {
             $(toggle_selection_selector).show();
         }
+
+        if(args.type === 'OncoPrint'){
+            $(redraw_selector).hide();
+            $(svg_img_download_selector).hide();
+            $(png_img_download_selector).hide();
+
+        }
+        else{
+            $(redraw_selector).show();
+            $(svg_img_download_selector).show();
+            $(png_img_download_selector).show();
+        }
+
+
 
         if(args.type === 'OncoGrid'){
             var oncogrid_template = plot_element.find('#oncogrid_div').html();
