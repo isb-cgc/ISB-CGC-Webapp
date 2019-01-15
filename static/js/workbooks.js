@@ -1294,6 +1294,8 @@ require([
             $(toggle_selection_selector).show();
         }
 
+
+
         if(args.type === 'OncoGrid'){
             var oncogrid_template = plot_element.find('#oncogrid_div').html();
             plot_area.html(oncogrid_template);
