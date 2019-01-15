@@ -59,7 +59,12 @@
         </div>
         <div class="plot-tooltip "></div>
         <div class="plot-args hidden"/></div>
-        <div class="bq-tables" style="display: none;"><h5>BigQuery Table(s) Used</h5><ul class="bq-table-display"></ul></div>
+        <div class="bq-tables " style="display: none;">
+            <div class="bq-tables-header">
+                <a data-toggle="collapse" role="button" href="#bqlist-{{ worksheet.id }}" aria-expanded="false">Big Query Table(s) Used</a>
+            </div>
+            <ul id="bqlist-{{ worksheet.id }}" class="bq-table-display collapse"></ul>
+        </div>
         <div id="missing-plot-reqs-alert" class="alert alert-warning alert-dismissable" style="display: none;">
             <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
             <h5>Plot Settings Incomplete</h5>
