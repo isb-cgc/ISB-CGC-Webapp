@@ -552,7 +552,6 @@ SITE_GOOGLE_ANALYTICS_TRACKING_ID = os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKI
 METRICS_SPREADSHEET_ID = os.environ.get('METRICS_SPREADSHEET_ID', '')
 METRICS_SHEET_ID = os.environ.get('METRICS_SHEET_ID', '0')
 METRICS_BQ_DATASET = os.environ.get('METRICS_BQ_DATASET', '')
-METRICS_BQ_TABLE = os.environ.get('METRICS_BQ_TABLE', '')
 
 ##############################################################
 #   MAXes to prevent size-limited events from causing errors
