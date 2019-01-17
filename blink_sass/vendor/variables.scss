@@ -82,7 +82,7 @@ $bold-font-weight: 700;
 
 $heading-font-weight: $bold-font-weight;
 
-$font-color: $base-dark;
+$font-color: darken($base-dark, 10%);
 $link-color: $isb-info;
 
 // --------------------------------------------

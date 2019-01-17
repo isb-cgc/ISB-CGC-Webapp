@@ -60,7 +60,6 @@ jobs:
             - ./bq_data_access
             - ./etc
             - ./static
-            - ./saml
             - ./GenespotRE
             - ./offline
             - ./scripts

@@ -10,7 +10,7 @@ if [ -n "$CI" ]; then
     find . -type f -name '*.pyc' -delete
 
 else
-    export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
+    export $(cat /home/vagrant/parentDir/secure_files/.env | grep -v ^# | xargs) 2> /dev/null
     export HOME=/home/vagrant
     export HOMEROOT=/home/vagrant/www
 fi
@@ -34,10 +34,10 @@ fi
 # Install apt-get dependencies
 echo "Installing Dependencies..."
 if [ -n "$CI" ]; then
-    apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev python2.7-dev git ruby g++
+    apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev python2.7-dev git ruby g++ dos2unix
     apt-get install -y mysql-client
 else
-    apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev mysql-client-5.6 python-dev git ruby g++
+    apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev mysql-client-5.6 python-dev git ruby g++ dos2unix
 fi
 echo "Dependencies Installed"
 
@@ -57,22 +57,9 @@ curl --silent https://bootstrap.pypa.io/get-pip.py | python
 # If we're not on CircleCI, or we are but the lib directory isn't there (cache miss), install lib
 if [ -z "${CI}" ] || [ ! -d "lib" ]; then
     echo "Installing Python Libraries..."
-    # Install PyCrypto in here so that GitHub won't constantly error about it
-    pip install pycrypto==2.6.1 -t ${HOMEROOT}/lib --upgrade --only-binary all
     pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
 else
     echo "Using restored cache for Python Libraries"
-fi
-
-if [ -z "${CI}" ]; then
-    # Install the Endpoints library for API usage (separate directory because the WebApp doesn't need it
-    echo "Installing Google Endpoints for local API..."
-    pip install -t "${HOMEROOT}/lib/endpoints_lib/" google-endpoints==3.0.0 --only-binary --upgrade --ignore-installed
-
-    # Delete the offending collision packages (socketserver and queue) which create issues with six
-    echo "Removing colliding packages (socketserver and queue)"
-    rm -rf "${HOMEROOT}/lib/endpoints_lib/queue"
-    rm -rf "${HOMEROOT}/lib/endpoints_lib/socketserver"
 fi
 
 if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
