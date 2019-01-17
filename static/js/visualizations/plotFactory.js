@@ -439,6 +439,7 @@ define([
             x_type = '',
             y_type = '';
 
+        height = height < 600 ? 650 : height;
         var data = args.data;
         if (data.hasOwnProperty('pairwise_result')) {
             configure_pairwise_display(args.pairwise_element, data);
@@ -658,11 +659,8 @@ define([
             var plot_args = $('.worksheet.active .plot-args').data('plot-args');
             $(plot_args.plot_selector).empty();
             $(plot_args.legend_selector).empty();
-            plot_loader.fadeIn();
             select_plot(plot_args);
-            plot_loader.hide();
         }
-
     }
 
     function svg_download(){
