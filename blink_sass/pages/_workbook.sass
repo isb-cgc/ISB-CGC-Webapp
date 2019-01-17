@@ -63,9 +63,9 @@
     width: 20%
     background: darken($white, 8%)
     min-height: 1000px
+    max-height: 1000px
     position: relative
     transition: width 0.45s ease-in-out
-
     *
       opacity: 1
       transition: opacity 0.45s ease-in-out
@@ -73,9 +73,12 @@
     &.closed
       width: 0
       transition: width 0.45s ease-in-out
+      overflow-x: hidden
+      overflow-y: hidden
       *
         opacity: 0
         z-index: -1
+        overflow-x: hidden
         transition: opacity 0.45s ease-in-out
 
     &-toggle
