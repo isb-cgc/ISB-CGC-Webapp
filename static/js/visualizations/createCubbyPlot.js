@@ -370,10 +370,10 @@ function($, d3, d3tip, d3textwrap, _) {
 
             var legend_line_height = 20;
             var legend_square_w = legend_line_height-6;
-            var margin_left = margin.left+220;
+            var margin_left = 220;
             legend = legend.attr('height', legend_line_height*2);
             var text_legend = legend.append('text')
-                .attr('x', margin.left)
+                .attr('x', 0)
                 .attr('y', legend_line_height-5)
                 .attr('font-family', 'sans-serif');
             text_legend

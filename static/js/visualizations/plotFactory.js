@@ -114,7 +114,8 @@ define([
 
          var legend = d3.select(legend_selector)
              .append('svg')
-             .attr('width', 850);
+             .attr('width', 850)
+             .attr("transform", 'translate('+margin.left+', 0)');
          var svg = d3.select(plot_selector)
              .append('svg')
              .attr('width', width)
@@ -148,7 +149,8 @@ define([
         var max_n = tmp[1];
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', 850);
+            .attr('width', 850)
+            .attr("transform", 'translate('+margin.left+', 0)');
 
         var svg = d3.select(plot_selector)
             .append('svg')
@@ -183,11 +185,11 @@ define([
         var max_n = tmp[1];
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', 800);
+            .attr('width', 850)
+            .attr("transform", 'translate('+margin.left+', 0)');
 
         var svg = d3.select(plot_selector)
             .append('svg')
-            //.attr('width', width + 10)
             .attr('width', width)
             .attr('height', height);
 
@@ -210,7 +212,7 @@ define([
     }
 
     function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units) {
-        var margin = {top: 10, bottom: 115, left: 140, right: 5};
+        var margin = {top: 10, bottom: 115, left: 140, right: 20};
         var cubby_max_size = 150; // max cubby size
         var cubby_min_size = 75; // min cubby size
         var view_width = width-margin.left-margin.right;
@@ -219,7 +221,8 @@ define([
         var ydomain = helpers.get_domain(data, 'y');
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', 850);
+            .attr('width', 850)
+            .attr("transform", 'translate('+margin.left+', 0)');
         var cubby_size = Math.min(cubby_max_size, Math.min(Math.floor(view_width/xdomain.length), Math.floor(view_height/ydomain.length)));
         cubby_size = cubby_size < cubby_min_size ? cubby_min_size : cubby_size;
         var cubby_width = xdomain.length * cubby_size + margin.left + margin.right;

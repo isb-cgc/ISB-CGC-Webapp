@@ -1079,6 +1079,7 @@ require([
         hide_show_widgets(plot_type, flyout);
         get_plot_info(this, function(success){
             disable_invalid_variable_options($('.worksheet.active .main-settings'));
+            update_plot_elem_rdy();
             show_plot_settings();
         })
     });
@@ -1201,6 +1202,7 @@ require([
                         $('#'+sheet_id).attr("is-loaded","true");
                     }
                 }
+                update_plot_elem_rdy();
             });
             //setPlotPanelHeight(active_sheet);
         }
@@ -1397,9 +1399,6 @@ require([
                 });
             }
         }
-
-        update_plot_elem_rdy();
-
         callback(true);
     }
 
@@ -1755,6 +1754,7 @@ require([
             }
             $(active_sheet).attr("is-loaded","true");
         }
+        update_plot_elem_rdy();;
         //setPlotPanelHeight(active_sheet);
     });
 
