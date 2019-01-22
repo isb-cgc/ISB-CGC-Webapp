@@ -209,7 +209,7 @@ function (
                 seqpeek_data.push({
                     variants: track['mutations'],
                     tumor_type: track['label'],
-                    row_id: track['row_id'],
+                    row_id: track['render_info']['row_id'],
                     is_summary_track: track['type'] == 'summary',
                     track_type: track['type'] == 'summary' ? 'bar_plot' : undefined,
                     y_axis_type: this.sample_track_type_user_setting == "sample_plot" ? "lin" : "log2"

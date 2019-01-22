@@ -34,6 +34,8 @@ require.config({
         vizhelpers: 'helpers/vis_helpers',
         select2: 'libs/select2.min',
         oncoprintjs: 'libs/oncoprint.bundle',
+        //oncogridjs: 'libs/oncogrid-debug',
+        oncogridjs: 'libs/oncogrid.min',
         geneticrules: 'libs/geneticrules',
         canvas_toBlob: 'libs/canvas-toBlob',
         zlibs: 'libs/zlibs',
@@ -54,6 +56,7 @@ require.config({
         violin_plot : 'visualizations/createViolinPlot',
         bar_plot : 'visualizations/createBarGraph',
         oncoprint_plot: 'visualizations/createOncoprintPlot',
+        oncogrid_plot: 'visualizations/createOncogridPlot',
         seqpeek_view: 'seqpeek_view',
         seqpeek: 'seqpeek_view/seqpeek'
     },
@@ -81,13 +84,15 @@ require.config({
 
 require([
     'jquery',
+    'd3',
     'plot_factory',
     'vizhelpers',
     'underscore',
     'base',
     'geneticrules',
     'jqueryqtip'
-], function ($, plot_factory, vizhelpers, _, base) {
+], function ($, d3, plot_factory, vizhelpers, _, base) {
+
     var savingComment = false;
 
     var plotReady = {
@@ -119,6 +124,8 @@ require([
             };
         }
     };
+
+    var plotFactory;
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function () {
@@ -179,11 +186,85 @@ require([
     }
 
     $('.show-settings-flyout').on('click', function () {
-        if($('.toggle-selection').hasClass('active')) {
-            $('.toggle-selection').click();
-        }
+        turn_off_toggle_selector();
         show_plot_settings();
     });
+
+    $('.redraw-plot').on('click', function () {
+        if(!plotFactory)
+            plotFactory = Object.create(plot_factory, {});
+        plotFactory.redraw_plot();
+    });
+
+    $('.data-download').on('click', function () {
+        var plot_data = $('.worksheet.active .plot-args').data('plot-data');
+        var json =  JSON.stringify(plot_data());
+        var type = "text/json;charset=utf-8";
+        var blob = new Blob([json], {type: type});
+		saveAs(blob, 'plot_data.json');
+    });
+
+    $('.svg-download').on('click', function () {
+        if(!plotFactory)
+            plotFactory = Object.create(plot_factory, {});
+        plotFactory.svg_download();
+    });
+
+    $('.png-download').on('click', function () {
+        if(!plotFactory)
+            plotFactory = Object.create(plot_factory, {});
+        plotFactory.png_download();
+    });
+
+
+    $('.plot-toolbar').on('click', '.download', function(e){
+        e.stopPropagation();
+        $(this).parents('.plot-toolbar').find('.plot-download-selection').toggleClass('hidden');
+    });
+
+    $('.plot-button')
+            .on('mouseover', function (e) {
+                var tooltip_div = $('.worksheet.active .plot-tooltip');
+                var tooltip_y_pos = $(this).offset().top -$('.worksheet.active .worksheet-body').offset().top;
+                var tooltip_x_pos = $(this).offset().left -$('.worksheet.active .worksheet-content').offset().left;
+                tooltip_y_pos = tooltip_y_pos > 0 ? tooltip_y_pos +35 : 64;
+                tooltip_x_pos = tooltip_x_pos > 0 ? tooltip_x_pos + 20 : $(this).offset().left + 36;
+
+                tooltip_div.html('<div class="wrapper">' + $(this).find('.button-text').html() + '</div>');
+                tooltip_div
+                    .css('left', tooltip_x_pos+"px")
+                    //.css('left', $(this).offset().left + "px")
+                    //.css('top', "20px")
+                    .css('top', tooltip_y_pos+"px")
+                    //$('.worksheet.active .plot-container').offset().top)+"px")
+                    .css('opacity',0.9);
+
+            })
+            .on('mouseout', function () {
+                var tooltip_div = $('.worksheet.active .plot-tooltip');
+                tooltip_div
+                    .css('opacity', 0);
+            });
+
+    $(document).on('click', function(){
+        $('.plot-toolbar').find('.plot-download-selection').addClass('hidden');
+    });
+
+    $('.toggle-fullscreen-plot').on('click', function () {
+        if(!plotFactory)
+            plotFactory = Object.create(plot_factory, {});
+        plotFactory.toggleFullscreen();
+    });
+
+    $(document).bind('webkitfullscreenchange MSFullscreenChange mozfullscreenchange fullscreenchange', function(e) {
+        if(!plotFactory)
+            plotFactory = Object.create(plot_factory, {});
+        var fullscreen = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen;
+        plotFactory.setFullscreen(fullscreen);
+        $('.toggle-fullscreen-plot i').toggleClass('fa-compress', fullscreen);
+        $('.toggle-fullscreen-plot i').toggleClass('fa-expand', !fullscreen);
+    });
+
 
     function hide_plot_settings() {
         $('.hide-settings-flyout').parents('.fly-out.settings-flyout').animate({
@@ -857,6 +938,7 @@ require([
                 swap.hide();
                 break;
             case 'OncoPrint':
+            case 'OncoGrid':
                 op_genes.show();
                 and_or_variables_label.hide();
                 x_widgets.hide();
@@ -865,7 +947,6 @@ require([
                 xLogCheck.hide();
                 yLogCheck.hide();
                 swap.hide();
-
                 break;
             default :
                 break;
@@ -874,10 +955,6 @@ require([
 
     // generate plot upon user click
     $('.update-plot').on('click', function(event){
-
-        if($('.toggle-selection').hasClass('active')) {
-            $('.toggle-selection').click();
-        }
         if (($(this).parent())) {
             var data = get_plot_info_on_page($(this).parent());
             update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, data.selections, data.logTransform, function(result){
@@ -968,7 +1045,7 @@ require([
                 yFormula: "n+1"
             },
             color_by_sel: plot_settings.find('.color_by :selected').val() !== null && plot_settings.find('.color_by :selected').val() !== ""
-        }
+        };
         return result;
     }
 
@@ -995,15 +1072,14 @@ require([
     $(".plot_selection").on("change", function(event){
         var self = this;
         $(this).find(":disabled :selected").remove();
-        if($('.toggle-selection').hasClass('active')) {
-            $('.toggle-selection').click();
-        }
+        turn_off_toggle_selector();
         var plot_type = $(this).val();
         var flyout = $(this).closest('.worksheet-body').find('.settings-flyout');
         plot_type_selex_update();
         hide_show_widgets(plot_type, flyout);
         get_plot_info(this, function(success){
             disable_invalid_variable_options($('.worksheet.active .main-settings'));
+            update_plot_elem_rdy();
             show_plot_settings();
         })
     });
@@ -1033,7 +1109,7 @@ require([
                     axisRdy = false;
                 }
             }
-            else if(plot_val == 'OncoPrint'){
+            else if(plot_val == 'OncoPrint' || plot_val == 'OncoGrid'){
                 axisRdy = false;
                 $('.worksheet.active').find('.gene-selex').each(function(){
                     if($(this).is(':checked')) {
@@ -1095,10 +1171,10 @@ require([
 
     // Because we do not have a fixed height set but won't know our ideal height (per the size of the source panel)
     // after load, we need to set it manually in JS
-    function setPlotPanelHeight(active_sheet){
-        $(active_sheet).find('.worksheet-panel-body').css('max-height',$('#source_pane-'+$(active_sheet).attr('id')).height()-
-            ($(active_sheet).find('.worksheet-content').height()-$(active_sheet).find('.worksheet-panel-body').outerHeight()) +'px');
-    };
+    //function setPlotPanelHeight(active_sheet){
+        //$(active_sheet).find('.worksheet-panel-body').css('max-height',$('#source_pane-'+$(active_sheet).attr('id')).height()-
+          //  ($(active_sheet).find('.worksheet-content').height()-$(active_sheet).find('.worksheet-panel-body').outerHeight()) +'px');
+    //};
 
     // Prep all unloaded worksheets to load on selection
     $('a[data-toggle-type="worksheet"]').on('shown.bs.tab', function (e) {
@@ -1126,8 +1202,9 @@ require([
                         $('#'+sheet_id).attr("is-loaded","true");
                     }
                 }
+                update_plot_elem_rdy();
             });
-            setPlotPanelHeight(active_sheet);
+            //setPlotPanelHeight(active_sheet);
         }
     });
 
@@ -1146,7 +1223,7 @@ require([
         if(data.attrs.type == 'SeqPeek'){
             return (data.attrs.gene_label !== undefined && data.attrs.gene_label !== null && data.attrs.gene_label !== "");
         }
-        else if(data.attrs.type == 'OncoPrint'){
+        else if(data.attrs.type == 'OncoPrint' || data.attrs.type == 'OncoGrid'){
             return (data.attrs.gene_list !== undefined && data.gene_list !== null && data.attrs.gene_list.length>0);
         }
         else{
@@ -1159,17 +1236,29 @@ require([
             }
         }
         return true;
-    };
+    }
+
+    function turn_off_toggle_selector(){
+        var worksheet_id = $('.worksheet.active').attr('id');
+        var toggle_selection_selector = '#' + worksheet_id + ' .toggle-selection';
+        if($(toggle_selection_selector).hasClass('active')) {
+            $('#' + worksheet_id + ' .toggle-selection').click();
+        }
+    }
 
     // Generates the actual svg plots by accepting the plot settings configured in the settings area
     function generate_plot(args){
-        $('.legend').hide();
+        //$('.legend').hide();
+        var worksheet_toggle = $('#' + args.worksheet_id + ' .worksheet-nav-toggle');
+        if(!worksheet_toggle.hasClass('open')){
+            $(worksheet_toggle).trigger('click');
+        }
         var cohort_ids = [];
         //create list of actual cohort models
         for(var i in args.cohorts){
             cohort_ids.push(args.cohorts[i].cohort_id);
         }
-        var plotFactory = Object.create(plot_factory, {});
+        plotFactory = Object.create(plot_factory, {});
 
         var plot_element = $("[worksheet_id='"+args.worksheet_id+"']").parent().parent().find(".plot");
         var plot_loader  = plot_element.find('.plot-loader');
@@ -1177,13 +1266,22 @@ require([
         var plot_legend  = plot_element.find('.legend');
         var pair_wise    = plot_element.find('.pairwise-result');
         var bq_tables    = plot_element.find('.bq-tables');
+        var plot_button_options    = plot_element.find('.plot-button-options');
         pair_wise.empty();
         plot_area.empty();
         plot_legend.empty();
         bq_tables.hide();
+        plot_button_options.addClass('disabled');
 
         var plot_selector   = '#' + plot_element.prop('id') + ' .plot-div';
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
+
+        var toggle_selection_selector = '#' + args.worksheet_id + ' .toggle-selection';
+        var redraw_selector = '#' + args.worksheet_id + ' .redraw-plot';
+        var svg_img_download_selector = '#' + args.worksheet_id + ' .svg-download';
+        var png_img_download_selector = '#' + args.worksheet_id + ' .png-download';
+        $(legend_selector).hide();
+        turn_off_toggle_selector();
 
         // Set Color override
         var color_override = false;
@@ -1196,12 +1294,32 @@ require([
         plot_element.find('.resubmit-button').hide();
 
         //hide 'Enable Sample Selection for Oncoprint and SeqPeek'
-        if (args.type === 'SeqPeek' || args.type === 'OncoPrint') {
-            $('.toggle-selection').hide();
+        if (args.type === 'SeqPeek' || args.type === 'OncoPrint' || args.type === 'OncoGrid') {
+            $(toggle_selection_selector).hide();
         }
         else {
-            $('.toggle-selection').show();
+            $(toggle_selection_selector).show();
         }
+
+        if(args.type === 'OncoPrint'){
+            $(redraw_selector).hide();
+            $(svg_img_download_selector).hide();
+            $(png_img_download_selector).hide();
+
+        }
+        else{
+            $(redraw_selector).show();
+            $(svg_img_download_selector).show();
+            $(png_img_download_selector).show();
+        }
+
+
+
+        if(args.type === 'OncoGrid'){
+            var oncogrid_template = plot_element.find('#oncogrid_div').html();
+            plot_area.html(oncogrid_template);
+        }
+
         plotFactory.generate_plot(
             {
                 plot_selector    : plot_selector,
@@ -1220,6 +1338,12 @@ require([
             }, function(result){
                 if(result.error){
                     plot_element.find('.resubmit-button').show();
+                    plot_button_options.addClass('disabled');
+                }
+                else{
+                    plot_button_options.removeClass('disabled');
+                    //toolbar_selector.show();
+                    //toolbar_selector_0.hide();
                 }
 
                 if(result.bq_tables && result.bq_tables.length > 0) {
@@ -1233,8 +1357,7 @@ require([
                 }
 
                 update_plot_elem_rdy();
-
-                plot_loader.fadeOut();
+                plot_loader.hide();
             }
         );
     }
@@ -1276,9 +1399,6 @@ require([
                 });
             }
         }
-
-        update_plot_elem_rdy();
-
         callback(true);
     }
 
@@ -1471,7 +1591,10 @@ require([
                             .addClass('alert alert-info alert-dismissible')
                             .text(data.message));
                 }
-                $('.toggle-selection').click();
+                //$('.toggle-selection').click();
+                //var toggle_selection_selector = '#' + plot_element.prop('id') + ' .toggle-selection';
+                //alert();
+                turn_off_toggle_selector();
                 $('.modal').modal('hide');
                 form.reset();
                 $(form).find('input[type="submit"]').removeAttr('disabled');
@@ -1631,7 +1754,8 @@ require([
             }
             $(active_sheet).attr("is-loaded","true");
         }
-        setPlotPanelHeight(active_sheet);
+        update_plot_elem_rdy();;
+        //setPlotPanelHeight(active_sheet);
     });
 
     update_plot_elem_rdy();
