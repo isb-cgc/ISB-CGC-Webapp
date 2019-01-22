@@ -12,14 +12,12 @@
     overflow-y: auto
     overflow-x: hidden
 
-  .panel-heading
-    min-height: 100px
+  .panel-heading, .panel-footing
     div
       padding: 5px
     .bq-tables
-      margin-top: 10px
+      margin: 0 10px
       .bq-tables-header
-        text-align: right
       ul
         background-color: $bg-color
         border-radius: 3px
@@ -28,8 +26,6 @@
           text-overflow: ellipsis
           overflow: hidden
           white-space: nowrap
-      float: right
-      width: 40%
     .options-bar
       float: left
       width: 50%
@@ -63,9 +59,9 @@
     width: 20%
     background: darken($white, 8%)
     min-height: 1000px
+    max-height: 1000px
     position: relative
     transition: width 0.45s ease-in-out
-
     *
       opacity: 1
       transition: opacity 0.45s ease-in-out
@@ -73,9 +69,12 @@
     &.closed
       width: 0
       transition: width 0.45s ease-in-out
+      overflow-x: hidden
+      overflow-y: hidden
       *
         opacity: 0
         z-index: -1
+        overflow-x: hidden
         transition: opacity 0.45s ease-in-out
 
     &-toggle
