@@ -304,7 +304,6 @@ define(['jquery'], function($) {
                     max_len = name_list[i].length;
                 }
             }
-            console.log(Math.min(10, Math.floor(100/max_len)));
             return Math.min(7, Math.floor(80/max_len));
         }
     }

@@ -700,7 +700,8 @@ var Oncoprint = (function () {
     function Oncoprint(ctr_selector, width) {
 	var self = this;
 	this.ctr_selector = ctr_selector;
-
+	console.log(ctr_selector);
+		// console.log(width);
 	var $ctr = $('<span></span>').css({'position':'relative', 'display':'inline-block'}).appendTo(ctr_selector);
 	var $oncoprint_ctr = $('<div></div>')
 			    .css({'position':'relative', 'display':'inline-block'})
@@ -740,10 +741,12 @@ var Oncoprint = (function () {
 			.addClass("noselect");
 
 	var $cell_canvas = $('<canvas></canvas>')
-			    .attr({'width':'0px', 'height':'0px'})
+			    //.attr({'width':'0px', 'height':'0px'})
+				.attr({'width':'0px', 'height':'0px'})
 			    .css({'position':'absolute', 'top':'0px', 'left':'0px'})
 			    .addClass("noselect");
 
+// console.log($cell_canvas);
 	var $dummy_scroll_div = $('<div>')
 				.css({'position':'absolute',
 				    'overflow-x':'scroll',
@@ -786,7 +789,6 @@ var Oncoprint = (function () {
 	$legend_div.appendTo($legend_ctr);
 
 	$minimap_div.appendTo($ctr);
-
 	$cell_canvas.appendTo($cell_div);
 	$cell_overlay_canvas.appendTo($cell_div);
 	$dummy_scroll_div.appendTo($cell_div);
@@ -6229,6 +6231,7 @@ var getNewCanvas = function(view) {
 var getWebGLCanvasContext = function (view) {
     try {
 	var canvas = view.$canvas[0];
+	// console.log(canvas.width);
 	var ctx = canvas.getContext("experimental-webgl", {alpha: false, antialias: view.antialias});
 	ctx.clearColor(1.0, 1.0, 1.0, 1.0);
 	ctx.clear(ctx.COLOR_BUFFER_BIT | ctx.DEPTH_BUFFER_BIT);
@@ -6294,6 +6297,7 @@ var OncoprintWebGLCellView = (function () {
 	getWebGLContextAndSetUpMatrices(this);
 	setUpShaders(this);
 	getOverlayContextAndClear(this);
+
 	this.visible_area_width = $canvas[0].width;
 
 	var self = this;
@@ -6458,6 +6462,7 @@ var OncoprintWebGLCellView = (function () {
     };
 
     var getWebGLContextAndSetUpMatrices = function(view) {
+    	// console.log('hello');
 	view.ctx = getWebGLCanvasContext(view);
 	(function initializeMatrices(self) {
 	    var mvMatrix = gl_matrix.mat4.create();
@@ -6542,9 +6547,11 @@ var OncoprintWebGLCellView = (function () {
     };
 
     var resizeAndClear = function(view, model) {
+    	// console.log('resizeandclear');
 	var height = model.getCellViewHeight();
 	var total_width = view.getTotalWidth(model);
 	var visible_area_width = view.visible_area_width;
+	console.log('total_width = '+total_width);
 	var scrollbar_slack = 20;
 	view.$dummy_scroll_div_contents.css({'min-width':total_width, 'min-height':model.getOncoprintHeight()});
 	view.$dummy_scroll_div_contents.parent().css({'height': height + scrollbar_slack, 'width': visible_area_width + scrollbar_slack}); // add space for scrollbars
@@ -6564,6 +6571,7 @@ var OncoprintWebGLCellView = (function () {
 	getOverlayContextAndClear(view);
     };
     var renderAllTracks = function (view, model, dont_resize) {
+    	// console.log(view);
 	if (view.rendering_suppressed) {
 	    return;
 	}

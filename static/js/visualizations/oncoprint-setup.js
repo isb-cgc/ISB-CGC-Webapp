@@ -560,7 +560,6 @@ window.CreateOncoprinterWithToolbar = function (plot_selector, _ctr_selector, _t
     LoadingBar.hide();
 
     var oncoprint = new window.Oncoprint(ctr_selector, 1050);
-
     var toolbar_fade_out_timeout;
     $(toolbar_selector).css({'visibility':'visible'});
     $(ctr_selector).add(toolbar_selector).on("mouseover", function(evt) {
