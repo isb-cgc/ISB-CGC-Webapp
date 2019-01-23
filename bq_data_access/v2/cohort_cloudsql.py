@@ -190,11 +190,11 @@ def add_cohort_info_to_merged_vectors(data, x_id, y_id, c_id, cohort_id_array):
         if sample_id in cohort_set_dict:
             cohort_set = cohort_set_dict[sample_id]
 
-        if len(cohort_set) >= DATAPOINT_COHORT_THRESHOLD:
+        if len(cohort_set) >= DATAPOINT_COHORT_THRESHOLD and sample_id in project_set_dict:
             item['cohort'] = cohort_set
-
-        if sample_id in project_set_dict:
             item['project'] = project_set_dict[sample_id]
+        else:
+            continue
 
         items.append(item)
 

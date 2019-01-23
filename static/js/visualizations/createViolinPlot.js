@@ -184,7 +184,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .call(dot_tip);
 
             var legend_line_height = 20;
-            var legend_column_length = Math.ceil(color.domain().length/3);
+            var no_legend_columns = helpers.get_no_legend_columns(color.domain());
+            var legend_column_length = Math.ceil(color.domain().length/no_legend_columns);
 
 
             legend = legend.attr('height', legend_line_height * legend_column_length);
@@ -194,7 +195,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .enter().append('g')
                 .attr('class', 'legend')
                 .attr("transform", function(d, i)
-                    { return "translate("+(margin.left + Math.floor(i/legend_column_length)*legend.attr('width')/3)+"," + (i%legend_column_length * legend_line_height) + ")"; });
+                    { return "translate("+(Math.floor(i/legend_column_length)*legend.attr('width')/3)+"," + (i%legend_column_length * legend_line_height) + ")"; });
 
             legend.append('rect')
                 .attr('width', legend_line_height - 6)

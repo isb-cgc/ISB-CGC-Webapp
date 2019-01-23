@@ -1079,6 +1079,7 @@ require([
         hide_show_widgets(plot_type, flyout);
         get_plot_info(this, function(success){
             disable_invalid_variable_options($('.worksheet.active .main-settings'));
+            update_plot_elem_rdy();
             show_plot_settings();
         })
     });
@@ -1201,6 +1202,7 @@ require([
                         $('#'+sheet_id).attr("is-loaded","true");
                     }
                 }
+                update_plot_elem_rdy();
             });
             //setPlotPanelHeight(active_sheet);
         }
@@ -1264,10 +1266,12 @@ require([
         var plot_legend  = plot_element.find('.legend');
         var pair_wise    = plot_element.find('.pairwise-result');
         var bq_tables    = plot_element.find('.bq-tables');
+        var plot_button_options    = plot_element.find('.plot-button-options');
         pair_wise.empty();
         plot_area.empty();
         plot_legend.empty();
         bq_tables.hide();
+        plot_button_options.addClass('disabled');
 
         var plot_selector   = '#' + plot_element.prop('id') + ' .plot-div';
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
@@ -1334,6 +1338,12 @@ require([
             }, function(result){
                 if(result.error){
                     plot_element.find('.resubmit-button').show();
+                    plot_button_options.addClass('disabled');
+                }
+                else{
+                    plot_button_options.removeClass('disabled');
+                    //toolbar_selector.show();
+                    //toolbar_selector_0.hide();
                 }
 
                 if(result.bq_tables && result.bq_tables.length > 0) {
@@ -1389,9 +1399,6 @@ require([
                 });
             }
         }
-
-        update_plot_elem_rdy();
-
         callback(true);
     }
 
@@ -1747,6 +1754,7 @@ require([
             }
             $(active_sheet).attr("is-loaded","true");
         }
+        update_plot_elem_rdy();;
         //setPlotPanelHeight(active_sheet);
     });
 

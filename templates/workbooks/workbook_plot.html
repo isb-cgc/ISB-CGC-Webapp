@@ -27,7 +27,7 @@
                     <i class="fa fa-bar-chart"></i>
                     <div class="button-text">Edit Plot Settings</div>
                 </a>
-                <a role="button" class="plot-button toggle-selection" aria-label="Toggle Sample Selection">
+                <a role="button" class="plot-button toggle-selection plot-button-options disabled" aria-label="Toggle Sample Selection">
                     <i class="fa fa-crosshairs"></i>
                     <div class="button-text">Toggle Sample Selection</div>
                 </a>
@@ -37,34 +37,28 @@
                     <div class="button-text">View Plot Settings</div>
                 </a>
             {% endif %}
-            <a role="button" class="redraw-plot plot-button" aria-label="Redraw">
-                <i class="fa fa-refresh"></i>
-                <div class="button-text">Redraw</div>
-            </a>
+            <a role="button" class="redraw-plot plot-button plot-button-options  disabled" aria-label="Redraw">
+                        <i class="fa fa-refresh"></i>
+                        <div class="button-text">Redraw</div>
+                    </a>
             <span class="dropdown">
-                <a role="button" class="plot-button download">
-                    <i class="fa fa-download"></i>
-                    <div class="button-text">Download</div>
-                </a>
-                <div class="plot-download-selection hidden">
-                    <div class="svg-download">SVG</div>
-                    <div class="png-download">PNG</div>
-                    <div class="data-download">JSON</div>
-                </div>
-            </span>
-            <a role="button" class="toggle-fullscreen-plot plot-button" aria-label="Full Screen">
-                <i class="fa fa-expand"></i>
-                <div class="button-text">Toggle Full Screen</div>
-            </a>
+                        <a role="button" class="plot-button download plot-button-options  disabled">
+                            <i class="fa fa-download"></i>
+                            <div class="button-text">Download</div>
+                        </a>
+                        <div class="plot-download-selection hidden">
+                            <div class="svg-download">SVG</div>
+                            <div class="png-download">PNG</div>
+                            <div class="data-download">JSON</div>
+                        </div>
+                    </span>
+            <a role="button" class="toggle-fullscreen-plot plot-button plot-button-options  disabled" aria-label="Full Screen">
+                        <i class="fa fa-expand"></i>
+                        <div class="button-text">Toggle Full Screen</div>
+                    </a>
         </div>
         <div class="plot-tooltip "></div>
-        <div class="plot-args hidden"/></div>
-        <div class="bq-tables " style="display: none;">
-            <div class="bq-tables-header">
-                <a data-toggle="collapse" role="button" href="#bqlist-{{ worksheet.id }}" aria-expanded="false">Big Query Table(s) Used</a>
-            </div>
-            <ul id="bqlist-{{ worksheet.id }}" class="bq-table-display collapse"></ul>
-        </div>
+        <div class="plot-args hidden"></div>
         <div id="missing-plot-reqs-alert" class="alert alert-warning alert-dismissable" style="display: none;">
             <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
             <h5>Plot Settings Incomplete</h5>
@@ -418,6 +412,16 @@
             <button class="btn btn-primary" data-toggle="modal" data-target="#save-cohort-{{ worksheet.id }}-modal" title="Save Cohort">Save Cohort</button>
         </div>
         <input type="hidden" name="type" value="genericplot" />
+    </div>
+    <div class="panel-footing">
+        <div class="bq-tables " style="display: none;">
+            <div class="bq-tables-header">
+                <a data-toggle="collapse" role="button" href="#bqlist-{{ worksheet.id }}" aria-expanded="false">
+                    List of Big Query Table(s) Used
+                </a>
+            </div>
+            <ul id="bqlist-{{ worksheet.id }}" class="bq-table-display collapse"></ul>
+        </div>
     </div>
 
     <!-- Save Cohort Modal -->
