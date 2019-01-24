@@ -147,41 +147,51 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     nonNullData.push(d);
                 }
             });
-
-            svg.selectAll('.dot')
-                .data(nonNullData)
-                .enter().append('circle')
-                .attr('id', function(d) { return d['id']; })
-                .attr('class', function(d) { return d[colorBy]; })
-                .style('fill', function(d) { return color(colorVal(d)); })
-                .attr('cx', function(d) {
-                    var histogram = histo_dict[parseInt(x(d[xAttr])/(violin_width+padding))];
-                    var histo_index = 0;
-                    for (var j = 0; j < histogram.length; j++) {
-                        var higher = histogram[j][0];
-                        var lower = histogram[j][histogram[j].length-1];
-                        if (d[yAttr] >= lower && d[yAttr] <= higher) {
-                            histo_index = j;
+            if(nonNullData.length > 0) {
+                svg.selectAll('.dot')
+                    .data(nonNullData)
+                    .enter().append('circle')
+                    .attr('id', function (d) {
+                        return d['id'];
+                    })
+                    .attr('class', function (d) {
+                        return d[colorBy];
+                    })
+                    .style('fill', function (d) {
+                        return color(colorVal(d));
+                    })
+                    .attr('cx', function (d) {
+                        var histogram = histo_dict[parseInt(x(d[xAttr]) / (violin_width + padding))];
+                        var histo_index = 0;
+                        for (var j = 0; j < histogram.length; j++) {
+                            var higher = histogram[j][0];
+                            var lower = histogram[j][histogram[j].length - 1];
+                            if (d[yAttr] >= lower && d[yAttr] <= higher) {
+                                histo_index = j;
+                            }
                         }
-                    }
-                    var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
-                    var rand_pos = 0;
-                    if (histogram.length) {
-                        var y_horizontal = d3.scale.linear()
-                            .range([0, violin_width/2])
-                            .domain([0, d3.max(histogram, function(d) { return d.y; })]);
-                        rand_pos = plusOrMinus * Math.floor(Math.random() * y_horizontal(histogram[histo_index]['y']) * 0.8);
-                    }
-                    var xpos = x(d[xAttr]) + (violin_width+padding)/2 + rand_pos;
-                    return xpos;
-                }) // Staggers points across a histogram
-                .attr('cy', function(d) {
-                    return y(d[yAttr]);
-                })
-                .attr('r', 2)
-                .on('mouseover.tip', dot_tip.show)
-                .on('mouseout.tip', dot_tip.hide)
-                .call(dot_tip);
+                        var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
+                        var rand_pos = 0;
+                        if (histogram.length) {
+                            var y_horizontal = d3.scale.linear()
+                                .range([0, violin_width / 2])
+                                .domain([0, d3.max(histogram, function (d) {
+                                    return d.y;
+                                })]);
+                            rand_pos = plusOrMinus * Math.floor(Math.random() * y_horizontal(histogram[histo_index]['y']) * 0.8);
+                        }
+                        var xpos = x(d[xAttr]) + (violin_width + padding) / 2 + rand_pos;
+                        return xpos;
+                    }) // Staggers points across a histogram
+                    .attr('cy', function (d) {
+                        return y(d[yAttr]);
+                    })
+                    .attr('r', 2)
+                    .on('mouseover.tip', dot_tip.show)
+                    .on('mouseout.tip', dot_tip.hide)
+                    .call(dot_tip);
+            }
+
 
             var legend_line_height = 20;
             var no_legend_columns = helpers.get_no_legend_columns(color.domain());
@@ -236,7 +246,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     }
                 });
         },
-        addMedianLine: function(svg, raw_data, values_only, height, width, domain, range) {
+        addMedianLine: function(svg, values_only, height, width, domain, range) {
             var median = d3.median(values_only);
 
             var y = d3.scale.linear()
@@ -320,22 +330,23 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 var values_only = [];
 
                 for (var j = 0; j < processed_data[key].length; j++) {
-                    if (processed_data[key][j]['value'] != "NA") {
+                    if (!isNaN(processed_data[key][j]['value'])) {
                         values_only.push(processed_data[key][j]['value']);
                         scatter_processed_data[i].push(processed_data[key][j]['value']);
-                        var temp = processed_data[key][j];
-                        temp['plot_number'] = i+1;
-                        merge_list.push(temp);
                     }
+                    var temp = processed_data[key][j];
+                    temp['plot_number'] = i+1;
+                    merge_list.push(temp);
                 }
                 var point_count = 0;
 
 
                 // Don't try to plot values we don't have
+
+                xdomain.push(key + ':' + values_only.length);
                 if(values_only.length > 0) {
-                    xdomain.push(key + ':' + values_only.length);
                     this.addViolin(g, processed_data[key], values_only, height, violin_width, domain, range);
-                    this.addMedianLine(g, processed_data[key], values_only, height, violin_width, domain, range);
+                    this.addMedianLine(g, values_only, height, violin_width, domain, range);
                 }
                 i += 1;
             }
@@ -497,7 +508,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .append('text')
                 .attr('class', 'x label axis-label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'translate(' + (view_width/2+margin.left) + ',' + (height - 10) + ')')
+                .attr('transform', 'translate(' + ((view_width > width ? width : view_width)/2+margin.left) + ',' + (height - 10) + ')')
                 .text(xLabel);
 
             svg.append('g')

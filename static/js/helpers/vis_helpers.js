@@ -28,19 +28,21 @@ define(['jquery'], function($) {
         },
         get_min_max: function(data, selector) {
             var self=this;
-            return [Math.floor(d3.min(data, function(d) {
+            var min = d3.min(data, function(d) {
                 if (self.isValidNumber(d[selector])) {
                     return parseFloat(d[selector]);
                 } else {
-                    return 0
+                    return undefined;
                 }
-            })), Math.ceil(d3.max(data, function(d) {
+            });
+            var max = d3.max(data, function(d) {
                 if (self.isValidNumber(d[selector])) {
                     return parseFloat(d[selector]);
                 } else {
-                    return 0
+                    return undefined;
                 }
-            }))];
+            });
+            return [isNaN(min) ? 0 : Math.floor(min), isNaN(max) ? 0 : Math.ceil(max)];
         },
         values_only: function(data, attr) {
             var result = [];

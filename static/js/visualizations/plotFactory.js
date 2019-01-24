@@ -145,8 +145,9 @@ define([
     function generate_violin_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units, logTransform) {
         var violin_width = 200;
         var tmp = helpers.get_min_max(data, 'y');
-        var min_n = tmp[0];
-        var max_n = tmp[1];
+        var padding = (tmp[1]-tmp[0])*.05;
+        var min_n = tmp[0] - padding;
+        var max_n = tmp[1] + padding;
         var legend = d3.select(legend_selector)
             .append('svg')
             .attr('width', 850)
