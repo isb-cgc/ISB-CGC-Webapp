@@ -215,7 +215,7 @@ define([
         return  {plot : plot, svg : svg}
     }
 
-    function generate_cubby_hole_plot(plot_selector, legend_selector, legend_title, height, width, x_attr, y_attr, color_by, data, units) {
+    function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, data, units) {
         var margin = {top: 10, bottom: 115, left: 140, right: 20};
         var cubby_max_size = 150; // max cubby size
         var cubby_min_size = 75; // min cubby size
@@ -229,12 +229,12 @@ define([
             .attr("transform", 'translate('+margin.left+', 0)');
         var cubby_size = Math.min(cubby_max_size, Math.min(Math.floor(view_width/xdomain.length), Math.floor(view_height/ydomain.length)));
         cubby_size = cubby_size < cubby_min_size ? cubby_min_size : cubby_size;
-        var cubby_width = xdomain.length * cubby_size + margin.left + margin.right;
-        var cubby_height = ydomain.length * cubby_size + margin.top + margin.bottom;
+        var plot_width = xdomain.length * cubby_size + margin.left + margin.right;
+        var plot_height = ydomain.length * cubby_size + margin.top + margin.bottom;
         var svg = d3.select(plot_selector)
             .append('svg')
-            .attr('width', cubby_width)
-            .attr('height', cubby_height);
+            .attr('width', plot_width)
+            .attr('height', plot_height);
 
         var plot = cubby_plot_obj.create_cubbyplot(
             svg,
@@ -247,11 +247,12 @@ define([
             'x',
             'y',
             legend,
-            cubby_width,
-            cubby_height,
+            view_width,
+            view_height,
+            plot_width,
+            plot_height,
             cubby_size
         );
-        //console.log(svg);
         return  {plot : plot, svg : svg}
     }
 
@@ -466,6 +467,7 @@ define([
                 y: data.yUnits
             };
 
+            var legend_title='';
             data = data['items'];
             if (args.cohort_override) {
                 args.color_by = 'cohort';
@@ -498,7 +500,7 @@ define([
                     visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, legend_title, height, width, args.x, args.y, args.color_by,  cohort_map, data, units, args.logTransform);
                     break;
                 case 'Cubby Hole Plot' : //(x_type == 'STRING' && y_type == 'STRING') {
-                    visualization = generate_cubby_hole_plot(args.plot_selector, args.legend_selector, legend_title, height, width, args.x, args.y, args.color_by,  data, units);
+                    visualization = generate_cubby_hole_plot(args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  data, units);
                     break;
                 default :
                     break;

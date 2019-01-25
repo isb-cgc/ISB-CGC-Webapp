@@ -109,18 +109,18 @@ function($, d3, d3tip, d3textwrap, _) {
             }
             return results;
         },
-        create_cubbyplot: function(svg, margin, data, domain, range, xLabel, yLabel, xParam, yParam, legend, width, height, cubby_size) {
-            var view_width = width - margin.left - margin.right;
-            var view_height = height - margin.top - margin.bottom;
-            var x_band_width = view_width / domain.length;
-            var y_band_width = view_height / range.length;
+        create_cubbyplot: function(svg, margin, data, domain, range, xLabel, yLabel, xParam, yParam, legend, view_width, view_height, plot_width, plot_height, cubby_size) {
+            var plot_no_margin_width = plot_width - margin.left - margin.right;
+            var plot_no_margin_height = plot_height - margin.top - margin.bottom;
+            var x_band_width = plot_no_margin_width / domain.length;
+            var y_band_width = plot_no_margin_height / range.length;
             var data_counts = this.data_totals(data, xParam, yParam, domain, range);
             var worksheet_id = $('.worksheet.active').attr('id');
 
             // create x axis
             var x = d3.scale.ordinal()
                 .domain(domain)
-                .rangeBands([0, view_width]);
+                .rangeBands([0, plot_no_margin_width]);
             var xAxis = d3.svg.axis()
                 .scale(x)
                 .ticks(domain.length)
@@ -129,7 +129,7 @@ function($, d3, d3tip, d3textwrap, _) {
             // create y axis
             var y = d3.scale.ordinal()
                 .domain(range)
-                .rangeBands([0, view_height]);
+                .rangeBands([0, plot_no_margin_height]);
 
             var yAxis = d3.svg.axis()
                 .scale(y)
@@ -158,7 +158,7 @@ function($, d3, d3tip, d3textwrap, _) {
             y_axis_area.append('clipPath')
                 .attr('id', y_axis_area_clip_id)
                 .append('rect')
-                .attr('height', height < view_height ? height-margin.top-margin.bottom: view_height)
+                .attr('height', view_height < plot_no_margin_height ? view_height-margin.top-margin.bottom: plot_no_margin_height)
                 .attr('width', margin.left)
                 .attr('transform', 'translate(0, '+ +margin.top +')');
 
@@ -166,12 +166,12 @@ function($, d3, d3tip, d3textwrap, _) {
             var x_axis_area = svg.append('g')
                 .attr('clip-path', 'url(#'+x_axis_area_clip_id+')');
 
-            var x_axis_area_ypos = height < view_height ?  (height  - margin.bottom) : (margin.top + view_height);
+            var x_axis_area_ypos = view_height < plot_no_margin_height ?  (view_height  - margin.bottom) : (margin.top + plot_no_margin_height);
             x_axis_area.append('clipPath')
                 .attr('id', x_axis_area_clip_id)
                 .append('rect')
                 .attr('height', margin.bottom)
-                .attr('width', view_width)
+                .attr('width', plot_no_margin_width)
                 .attr('transform', 'translate(' + margin.left + ',' + x_axis_area_ypos + ')');
 
             x_axis_area.append('g')
@@ -193,10 +193,10 @@ function($, d3, d3tip, d3textwrap, _) {
             plot_area.append('clipPath')
                 .attr('id', plot_area_clip_id)
                 .append('rect')
-                .attr('height', height < view_height ? (height-margin.bottom-margin.top) : view_height)
-                .attr('width', view_width);
+                .attr('height', view_height < plot_no_margin_height ? (view_height-margin.bottom-margin.top) : plot_no_margin_height)
+                .attr('width', plot_no_margin_width);
 
-            var x_grid_height = height < view_height ? (height-margin.bottom-margin.top) : view_height;
+            var x_grid_height = view_height < plot_no_margin_height ? (view_height-margin.bottom-margin.top) : plot_no_margin_height;
 
             // append grid lines
             plot_area.append("g")
@@ -211,17 +211,17 @@ function($, d3, d3tip, d3textwrap, _) {
                 .attr("class", "y grid")
                 .attr('transform', 'translate(0, -'+ (Math.floor(cubby_size/2)) +')')
                 .call(make_y_axis()
-                    .tickSize(-width, 0, 0)
+                    .tickSize(-view_width, 0, 0)
                     .tickFormat("")
                 );
 
             // Create secondary axes used for panning
             var x2 = d3.scale.linear()
-                .range([0, width])
-                .domain([0, width]);
+                .range([0, view_width])
+                .domain([0, view_width]);
             var y2 = d3.scale.linear()
-                .range([0, height])
-                .domain([0, height]);
+                .range([0, view_height])
+                .domain([0, view_height]);
 
             var zoom_x = function() {
                 if(!selex_active) {
@@ -264,20 +264,19 @@ function($, d3, d3tip, d3textwrap, _) {
             var zoom_none = function() { return;};
 
             var zoom = null;
-
-            if (width < view_width && height< view_height) {
+            if (view_width < plot_no_margin_width && view_height < plot_no_margin_height) {
                 zoom = d3.behavior.zoom()
                     .x(x2)
                     .scaleExtent([1,1])
                     .y(y2)
                     .scaleExtent([1,1])
                     .on('zoom', zoom_xy);
-            } else if (width < view_width) {
+            } else if (view_width < plot_no_margin_width) {
                 zoom = d3.behavior.zoom()
                     .x(x2)
                     .scaleExtent([1,1])
                     .on('zoom', zoom_x);
-            } else if (height < view_height) {
+            } else if (view_height < plot_no_margin_height) {
                 zoom = d3.behavior.zoom()
                     .y(y2)
                     .scaleExtent([1,1])
@@ -411,16 +410,16 @@ function($, d3, d3tip, d3textwrap, _) {
 
             plot_area.call(tip);
             // append axes labels
-            var xAxisXPos = margin.left + ( parseInt(svg.attr('width')) > view_width ? view_width : parseInt(svg.attr('width')) )/2;
-            var xAxisYPos = height > view_height ?
-                (margin.top + view_height + 110) : height -20;
+            var xAxisXPos = margin.left + ( view_width > plot_no_margin_width ? plot_no_margin_width : view_width )/2;
+            var xAxisYPos = view_height > plot_no_margin_height ?
+                (margin.top + plot_no_margin_height + 110) : view_height -20;
             svg.append('text')
                 .attr('class', 'axis-label')
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'translate(' + xAxisXPos + ',' + xAxisYPos + ')')
                 .text(xLabel);
 
-            var yAxisXPos = ( height>view_height ? view_height : height - margin.bottom )/2;
+            var yAxisXPos = ( view_height>plot_no_margin_height ? plot_no_margin_height : view_height - margin.bottom )/2;
             svg.append('text')
                 .attr('class', 'axis-label')
                 .attr('text-anchor', 'middle')
