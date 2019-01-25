@@ -29,15 +29,6 @@ var RECALC_THROTTLE = 75;
 
 define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
 function($, d3, d3tip, d3textwrap, vizhelpers, _) {
-    var dot_tip = d3tip()
-        .attr('class', 'd3-tip')
-        .direction('n')
-        .offset([0, 0])
-        .html(function(d) {
-            return '<span>Case: ' + d['case_id'] + '<br/>'+
-                'Sample: ' + d['sample_id'] + '<br/>'+
-                'Data: (' + d['x'] + ', '+ d['y'] + ')</span>';
-        });
 
     var median_tip = d3tip()
         .attr('class', 'd3-tip')
@@ -104,7 +95,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .style('fill', 'none')
                 .attr('transform', 'rotate(90, 0, 0) scale(1, -1)');
         },
-        addPoints: function (svg, raw_data, values_only, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_set, padding, margin) {
+        addPoints: function (svg, raw_data, values_only, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, legend_title, cohort_map, padding, margin, dot_tip) {
             // remove counts from xdomain
             var tmp = xdomain;
             xdomain = [];
@@ -198,14 +189,19 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             var legend_column_length = Math.ceil(color.domain().length/no_legend_columns);
 
 
-            legend = legend.attr('height', legend_line_height * legend_column_length);
+            legend = legend.attr('height', legend_line_height * (legend_column_length+1));
+            legend.append('text')
+                .attr('x', 2)
+                .attr('y', legend_line_height - 5)
+                .style('font-weight', 'bold')
+                .text(legend_title);
 
             legend = legend.selectAll('.legend')
                 .data(color.domain())
                 .enter().append('g')
                 .attr('class', 'legend')
                 .attr("transform", function(d, i)
-                    { return "translate("+(Math.floor(i/legend_column_length)*legend.attr('width')/3)+"," + (i%legend_column_length * legend_line_height) + ")"; });
+                    { return "translate("+(Math.floor(i/legend_column_length)*legend.attr('width')/no_legend_columns)+"," + (((i%legend_column_length)+1) * legend_line_height) + ")"; });
 
             legend.append('rect')
                 .attr('width', legend_line_height - 6)
@@ -223,21 +219,15 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .text(function(d) {
                     if (d != null) {
                         if (colorBy == 'cohort') {
-
                             if (Array.isArray(d)) {
                                 var cohort_name_label = "";
                                 for (var i = 0; i < d.length; i++) {
-                                    for (var j = 0; j < cohort_set.length; j++) {
-                                        if (cohort_set[j]['id'] == d[i]) { cohort_name_label += cohort_set[j]['name'] + ','; }
-                                    }
+                                    cohort_name_label += cohort_map[d[i]]+',';
                                 }
                                 return cohort_name_label.slice(0,-1);
                             } else {
-                                for (var i = 0; i < cohort_set.length; i++) {
-                                    if (cohort_set[i]['id'] == d) { return cohort_set[i]['name']; }
-                                }
+                                return cohort_map[d];
                             }
-
                         } else {
                             return d;
                         }
@@ -270,12 +260,29 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .on('mouseout.tip', median_tip.hide)
                 .call(median_tip);
         },
-        createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, margin, colorBy, legend, cohort_set) {
+        createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, margin, colorBy, legend, legend_title, cohort_map) {
+
             var domain = [min_y, max_y];
             var range = [height - margin.bottom - margin.top, 0];
             var view_width = svg.attr("width") - margin.left - margin.right;
             var processed_data = {};
             var x_padding = 20; //x padding between plots
+            var dot_tip = d3tip()
+                .attr('class', 'd3-tip')
+                .direction('n')
+                .offset([0, 0])
+                .html(function(d) {
+                    return '<span>Case: ' + d['case_id'] + '<br/>' +
+                        'Sample: ' + d['sample_id'] + '<br/>' +
+
+                        xLabel + ': ' + d[xAttr] + '<br/>' +
+                        yLabel + ': ' + d[yAttr] + '<br/>' +
+                        legend_title + ': ' +
+                        (colorBy == 'cohort' ?
+                            cohort_map[d[colorBy]]:
+                            d[colorBy])
+                        +' </span>';
+                });
 
             // Split data into separate violins
             for (var i = 0; i < raw_Data.length; i++) {
@@ -363,7 +370,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .attr('width', width)
                 .attr('height', height - margin.top - margin.bottom)
                 .attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
-            this.addPoints(plotg, raw_Data, scatter_processed_data, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_set, x_padding, margin);
+            this.addPoints(plotg, raw_Data, scatter_processed_data, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, legend_title, cohort_map, x_padding, margin, dot_tip);
 
             // create y axis
             var y = d3.scale.linear()
@@ -603,13 +610,13 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             function get_plot_data(){
                 var p_data = {};
                 raw_Data.map(function(d, i){
-                    if(helpers.isValidNumber(d.y)) {
-                        p_data[i] = {
-                            x: d.x,
-                            y: d.y,
-                            case_id: d.case_id,
-                            sample_id: d.sample_id
-                        };
+                    if(helpers.isValidNumber(d[yAttr])) {
+                        p_data[i]= {};
+                        p_data[i]['case_id'] = d['case_id'];
+                        p_data[i]['sample_id'] = d['sample_id'];
+                        p_data[i][xAttr] = d[xAttr];
+                        p_data[i][yAttr] = Number(d[yAttr]);
+                        p_data[i][legend_title] = colorBy == 'cohort' ? cohort_map[d[colorBy]]: d[colorBy];
                     }
                 });
                 return p_data;

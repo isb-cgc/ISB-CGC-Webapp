@@ -57,7 +57,7 @@ define([
         if(isLogTransform) {
             return $('option[value="' + attr + '"]:first').html() + " - log("+(units && units.length > 0 ? units : 'n')+"+1)";
         }
-        return $('option[value="' + attr + '"]:first').html() + (units && units.length > 0 ? " - " + units : '')
+        return $('option[value="' + attr + '"]:first').html() + (units && units.length > 0 ? " (" + units +")": '')
     }
 
     /*
@@ -108,7 +108,7 @@ define([
     /*
         Generate scatter plot
     */
-    function generate_scatter_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units, logTransform) {
+    function generate_scatter_plot(margin, plot_selector, legend_selector, legend_title, height, width, x_attr, y_attr, color_by, cohort_map, data, units, logTransform) {
          var domain = helpers.get_min_max(data, 'x');
          var range = helpers.get_min_max(data, 'y');
 
@@ -131,9 +131,10 @@ define([
              margin,
              color_by,
              legend,
+             legend_title,
              width,
              height,
-             cohort_set
+             cohort_map
          );
 
          return  {plot : plot, svg : svg}
@@ -142,7 +143,7 @@ define([
     /*
         Generate violin plot
      */
-    function generate_violin_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units, logTransform) {
+    function generate_violin_plot(margin, plot_selector, legend_selector, legend_title, height, width, x_attr, y_attr, color_by, cohort_map, data, units, logTransform) {
         var violin_width = 200;
         var tmp = helpers.get_min_max(data, 'y');
         var padding = (tmp[1]-tmp[0])*.05;
@@ -170,7 +171,8 @@ define([
             margin,
             color_by,
             legend,
-            cohort_set
+            legend_title,
+            cohort_map
         );
 
         return  {plot : plot, svg : svg}
@@ -179,7 +181,7 @@ define([
     /*
         Generate violin plot with axis swap
      */
-    function generate_violin_plot_axis_swap(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units, logTransform) {
+    function generate_violin_plot_axis_swap(margin, plot_selector, legend_selector, legend_title, height, width, x_attr, y_attr, color_by, cohort_map, data, units, logTransform) {
         var violin_width = 200;
         var tmp = helpers.get_min_max(data, 'x');
         var min_n = tmp[0];
@@ -206,13 +208,14 @@ define([
             'x',
             color_by,
             legend,
-            cohort_set
+            legend_title,
+            cohort_map
         );
 
         return  {plot : plot, svg : svg}
     }
 
-    function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units) {
+    function generate_cubby_hole_plot(plot_selector, legend_selector, legend_title, height, width, x_attr, y_attr, color_by, data, units) {
         var margin = {top: 10, bottom: 115, left: 140, right: 20};
         var cubby_max_size = 150; // max cubby size
         var cubby_min_size = 75; // min cubby size
@@ -243,7 +246,6 @@ define([
             generate_axis_label(y_attr, false, units.y),
             'x',
             'y',
-            //'c',
             legend,
             cubby_width,
             cubby_height,
@@ -454,6 +456,10 @@ define([
         if (data.hasOwnProperty('items') && data['items'].length > 0) {
 
             var cohort_set = data['cohort_set'];
+            var cohort_map = {};
+            for(var i=0; i<cohort_set.length; i++){
+                 cohort_map[cohort_set[i]['id']] = cohort_set[i]['name'];
+            }
 
             var units = {
                 x: data.xUnits,
@@ -461,11 +467,16 @@ define([
             };
 
             data = data['items'];
-
             if (args.cohort_override) {
                 args.color_by = 'cohort';
+                legend_title = 'Cohort';
             } else {
                 args.color_by = 'c';
+                if(args.legend_title) {
+                    legend_title = args.legend_title.split(':')[2].replace(/_/g, ' ');
+                    firstChar = legend_title.charAt(0).toUpperCase();
+                    legend_title = firstChar + legend_title.slice(1);
+                }
             }
 
 
@@ -477,17 +488,17 @@ define([
                     visualization = generate_histogram(margin, args.plot_selector, height, width, args.x, data, units, args.logTransform);
                     break;
                 case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                    visualization = generate_scatter_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by, cohort_set, data, units, args.logTransform);
+                    visualization = generate_scatter_plot(margin, args.plot_selector, args.legend_selector, legend_title,height, width, args.x, args.y, args.color_by, cohort_map, data, units, args.logTransform);
                     break;
                 case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
                     margin = {top: 15, bottom: 100, left: 110, right: 10};
-                    visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units, args.logTransform);
+                    visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, legend_title, height, width, args.x, args.y, args.color_by,  cohort_map, data, units, args.logTransform);
                     break;
                 case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
-                    visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units, args.logTransform);
+                    visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, legend_title, height, width, args.x, args.y, args.color_by,  cohort_map, data, units, args.logTransform);
                     break;
                 case 'Cubby Hole Plot' : //(x_type == 'STRING' && y_type == 'STRING') {
-                    visualization = generate_cubby_hole_plot(args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units);
+                    visualization = generate_cubby_hole_plot(args.plot_selector, args.legend_selector, legend_title, height, width, args.x, args.y, args.color_by,  data, units);
                     break;
                 default :
                     break;
@@ -621,6 +632,7 @@ define([
                              y                : args.y,
                              logTransform     : args.logTransform,
                              color_by         : args.cohorts,
+                             legend_title     : args.color_by,
                              cohort_override  : args.color_override,
                              color_by_sel     : args.color_by_sel,
                              data             : data};
