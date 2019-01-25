@@ -22,26 +22,26 @@ from django.conf import settings
 BIGQUERY_CONFIG = {
     "tables": [
         {
-            "table_id": "{}:TARGET_bioclin_v0.Clinical".format(settings.BIGQUERY_PROJECT_NAME),
-            "biospecimen_table_id": "{}:TARGET_bioclin_v0.Biospecimen".format(settings.BIGQUERY_PROJECT_NAME),
+            "table_id": "{}:TARGET_bioclin_v0.Clinical".format(settings.BIGQUERY_DATA_PROJECT_NAME),
+            "biospecimen_table_id": "{}:TARGET_bioclin_v0.Biospecimen".format(settings.BIGQUERY_DATA_PROJECT_NAME),
             "internal_table_id": "target_clinical",
             "program": "target"
         },
         {
-            "table_id": "{}:TARGET_bioclin_v0.Biospecimen".format(settings.BIGQUERY_PROJECT_NAME),
-            "biospecimen_table_id": "{}:TARGET_bioclin_v0.Biospecimen".format(settings.BIGQUERY_PROJECT_NAME),
+            "table_id": "{}:TARGET_bioclin_v0.Biospecimen".format(settings.BIGQUERY_DATA_PROJECT_NAME),
+            "biospecimen_table_id": "{}:TARGET_bioclin_v0.Biospecimen".format(settings.BIGQUERY_DATA_PROJECT_NAME),
             "internal_table_id": "target_biospecimen",
             "program": "target"
         },
         {
-            "table_id": "{}:TCGA_bioclin_v0.Clinical".format(settings.BIGQUERY_PROJECT_NAME),
-            "biospecimen_table_id": "{}:TCGA_bioclin_v0.Biospecimen".format(settings.BIGQUERY_PROJECT_NAME),
+            "table_id": "{}:TCGA_bioclin_v0.Clinical".format(settings.BIGQUERY_DATA_PROJECT_NAME),
+            "biospecimen_table_id": "{}:TCGA_bioclin_v0.Biospecimen".format(settings.BIGQUERY_DATA_PROJECT_NAME),
             "internal_table_id": "tcga_clinical",
             "program": "tcga"
         },
         {
-            "table_id": "{}:TCGA_bioclin_v0.Biospecimen".format(settings.BIGQUERY_PROJECT_NAME),
-            "biospecimen_table_id": "{}:TCGA_bioclin_v0.Biospecimen".format(settings.BIGQUERY_PROJECT_NAME),
+            "table_id": "{}:TCGA_bioclin_v0.Biospecimen".format(settings.BIGQUERY_DATA_PROJECT_NAME),
+            "biospecimen_table_id": "{}:TCGA_bioclin_v0.Biospecimen".format(settings.BIGQUERY_DATA_PROJECT_NAME),
             "internal_table_id": "tcga_biospecimen",
             "program": "tcga"
         }
