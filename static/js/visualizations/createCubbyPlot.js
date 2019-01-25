@@ -158,7 +158,7 @@ function($, d3, d3tip, d3textwrap, _) {
             y_axis_area.append('clipPath')
                 .attr('id', y_axis_area_clip_id)
                 .append('rect')
-                .attr('height', view_height < plot_no_margin_height ? view_height-margin.top-margin.bottom: plot_no_margin_height)
+                .attr('height', plot_no_margin_height)
                 .attr('width', margin.left)
                 .attr('transform', 'translate(0, '+ +margin.top +')');
 
@@ -193,8 +193,8 @@ function($, d3, d3tip, d3textwrap, _) {
             plot_area.append('clipPath')
                 .attr('id', plot_area_clip_id)
                 .append('rect')
-                .attr('height', view_height < plot_no_margin_height ? (view_height-margin.bottom-margin.top) : plot_no_margin_height)
-                .attr('width', plot_no_margin_width);
+                .attr('width', plot_no_margin_width)
+                .attr('height', plot_no_margin_height);
 
             var x_grid_height = view_height < plot_no_margin_height ? (view_height-margin.bottom-margin.top) : plot_no_margin_height;
 
@@ -432,13 +432,11 @@ function($, d3, d3tip, d3textwrap, _) {
                 .selectAll('foreignObject')
                 .attr('style','transform: rotate(30deg);');
 
-            svg.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: margin.left*0.75, height: y.rangeBand()/2}));
-            svg.select('.y.axis').selectAll('foreignObject')
-                .attr('style','transform: translate(-'+margin.left*0.75+'px, -'+y.rangeBand()/4+'px);');
-            $('foreignObject div').each(function(){
-                $(this).attr('title',$(this).html());
-            });
-            svg.select('.y.axis').selectAll('foreignObject div').attr('style', 'text-align: right; padding: 0 10px; line-height:'+y.rangeBand()/2+'px; height: '+ y.rangeBand()/2+'px;')
+            svg.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: margin.left*0.75, height: y.rangeBand()}));
+            svg.select('.y.axis')
+                .selectAll('foreignObject')
+                .attr('style','transform: translate(-'+margin.left*0.75+'px, -'+y.rangeBand()/2+'px);')// height:'+y.rangeBand()+'px;');
+            svg.select('.y.axis').selectAll('foreignObject div').attr('style', 'display:table-cell;vertical-align:middle; text-align: right; padding: 0 10px; width: '+margin.left*.75+'px; height: '+y.rangeBand()+'px;')
 
             var check_selection_state = function(obj) {
                 selex_active = !!obj;
