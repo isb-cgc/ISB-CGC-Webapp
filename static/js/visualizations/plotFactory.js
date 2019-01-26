@@ -114,8 +114,7 @@ define([
 
          var legend = d3.select(legend_selector)
              .append('svg')
-             .attr('width', 850)
-             .attr("transform", 'translate('+margin.left+', 0)');
+             .attr('width', 850);
          var svg = d3.select(plot_selector)
              .append('svg')
              .attr('width', width)
@@ -151,9 +150,7 @@ define([
         var max_n = tmp[1] + padding;
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', 850)
-            .attr("transform", 'translate('+margin.left+', 0)');
-
+            .attr('width', 850);
         var svg = d3.select(plot_selector)
             .append('svg')
             .attr('width', width)
@@ -188,8 +185,7 @@ define([
         var max_n = tmp[1];
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', 850)
-            .attr("transform", 'translate('+margin.left+', 0)');
+            .attr('width', 850);
 
         var svg = d3.select(plot_selector)
             .append('svg')
@@ -225,8 +221,7 @@ define([
         var ydomain = helpers.get_domain(data, 'y');
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', 850)
-            .attr("transform", 'translate('+margin.left+', 0)');
+            .attr('width', 850);
         var cubby_size = Math.min(cubby_max_size, Math.min(Math.floor(view_width/xdomain.length), Math.floor(view_height/ydomain.length)));
         cubby_size = cubby_size < cubby_min_size ? cubby_min_size : cubby_size;
         var plot_width = xdomain.length * cubby_size + margin.left + margin.right;

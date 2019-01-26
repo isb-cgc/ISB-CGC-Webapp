@@ -300,13 +300,13 @@ define(['jquery'], function($) {
             this.hide_field_search_panel(obj);
         },
         get_no_legend_columns: function(name_list){
-            var max_len = 0;
+            var max_len = 1;
             for(var i=0; i<name_list.length; i++){
                 if(name_list[i].length > max_len){
                     max_len = name_list[i].length;
                 }
             }
-            return Math.min(7, Math.floor(80/max_len));
+            return Math.min(7, Math.ceil(80/max_len));
         }
     }
 });
