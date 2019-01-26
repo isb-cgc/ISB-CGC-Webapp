@@ -39,6 +39,8 @@ logging.basicConfig(level=logging.INFO)
 def run_query(project_id, provider, config):
     job_reference = provider.submit_query_and_get_job_ref(project_id)
 
+    logging.debug("Job submitted: {}".format(str(job_reference)))
+
     poll_retry_limit = provider.BQ_JOB_POLL_MAX_RETRIES
     poll_sleep_time = provider.BQ_JOB_POLL_SLEEP_TIME
     all_done = False
