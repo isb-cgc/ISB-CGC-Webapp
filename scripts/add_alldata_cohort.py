@@ -40,7 +40,7 @@ from projects.models import Program, Public_Data_Tables, Public_Metadata_Tables,
 from django.contrib.auth.models import User
 
 ALLDATA_COHORT_NAME = 'All TCGA Data'
-BQ_DATASET = settings.COHORT_DATASET_ID
+BQ_DATASET = settings.BIGQUERY_COHORT_DATASET_ID
 DEFAULT_COHORT_TABLE = settings.BIGQUERY_COHORT_TABLE_ID
 SUPERUSER_NAME = 'isb'
 
