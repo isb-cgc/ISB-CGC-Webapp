@@ -154,16 +154,16 @@ def oncoprint_view_data(request):
             table_id=settings.BIGQUERY_COHORT_TABLE_ID)
 
         bq_table_info = BQ_MOLECULAR_ATTR_TABLES['TCGA'][genomic_build]
-        somatic_mut_query = query_template.format(bq_data_project_id = settings.BIGQUERY_DATA_PROJECT_NAME,
-                                        dataset_name=bq_table_info['dataset'],
-                                        table_name=bq_table_info['table'],
-                                        conseq_col=("one_consequence" if genomic_build == "hg38" else 'consequence'),
-                                        cohort_table=cohort_table_id,
-                                        filter_clause=filter_clause,
-                                        cohort_id_list=cohort_id_list,
-                                        project_clause=project_clause)
-
-
+        somatic_mut_query = query_template.format(
+            bq_data_project_id = settings.BIGQUERY_DATA_PROJECT_NAME,
+            dataset_name=bq_table_info['dataset'],
+            table_name=bq_table_info['table'],
+            conseq_col=("one_consequence" if genomic_build == "hg38" else 'consequence'),
+            cohort_table=cohort_table_id,
+            filter_clause=filter_clause,
+            cohort_id_list=cohort_id_list,
+            project_clause=project_clause
+        )
 
         somatic_mut_query_job = BigQuerySupport.insert_query_job(somatic_mut_query)
 
