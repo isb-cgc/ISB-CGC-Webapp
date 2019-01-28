@@ -39,8 +39,6 @@ logging.basicConfig(level=logging.INFO)
 def run_query(project_id, provider, config):
     job_reference = provider.submit_query_and_get_job_ref(project_id)
 
-    logging.debug("Job submitted: {}".format(str(job_reference)))
-
     poll_retry_limit = provider.BQ_JOB_POLL_MAX_RETRIES
     poll_sleep_time = provider.BQ_JOB_POLL_SLEEP_TIME
     all_done = False
@@ -139,6 +137,8 @@ def run(project_id, data_type, csv_path, config_json, chromosome_array):
     provider = provider_class(config_instance, chromosome_array=chromosome_array)
 
     logging.info("Output CSV: {}".format(csv_path))
+    logging.info("Config: {}".format(str(config_instance)))
+
     result = run_query(project_id, provider, config_instance)
     save_csv(result, provider.get_mysql_schema(), csv_path, include_header=True)
 
