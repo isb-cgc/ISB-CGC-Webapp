@@ -303,7 +303,7 @@ class UserFeatureProvider(FeatureDataProvider):
 
         """
         queries = []
-        cohort_table_full = settings.BIGQUERY_PROJECT_NAME + ':' + cohort_dataset + '.' + cohort_table
+        cohort_table_full = settings.BIGQUERY_PROJECT_ID + ':' + cohort_dataset + '.' + cohort_table
         # TODO: this is a hack to append project_ids to the tcga project id list. project_id_array is actually empty.
         project_id_array += project_ids
         for feature_def in self.feature_defs:
@@ -434,8 +434,8 @@ class UserFeatureProvider(FeatureDataProvider):
         return queryable
 
     def get_data_job_reference(self, cohort_id_array, cohort_dataset, cohort_table, project_id_array):
-        project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_DATA_PROJECT_NAME
+        project_id = settings.BIGQUERY_PROJECT_ID
+        project_name = settings.BIGQUERY_DATA_PROJECT_ID
         dataset_name = settings.BIGQUERY_DATASET_V1
 
         result = self._submit_query_and_get_job_ref(project_id, project_name, dataset_name,

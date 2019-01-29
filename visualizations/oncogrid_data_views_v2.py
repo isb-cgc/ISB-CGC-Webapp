@@ -324,7 +324,7 @@ def create_oncogrid_bq_statement(type, genomic_build, project_set, cohort_ids, g
                 ;
             """
 
-    bq_data_project_id = settings.BIGQUERY_DATA_PROJECT_NAME
+    bq_data_project_id = settings.BIGQUERY_DATA_PROJECT_ID
 
     bq_sm_table_info = BQ_MOLECULAR_ATTR_TABLES['TCGA'][genomic_build]
     bq_md_table_info = BQ_METADATA_DATA_TABLES['TCGA'][genomic_build]
@@ -337,7 +337,7 @@ def create_oncogrid_bq_statement(type, genomic_build, project_set, cohort_ids, g
     bc_dataset_name = bq_bc_table_info['dataset']
     bc_table_name = bq_bc_table_info['table']
 
-    cohort_table = "{}.{}.{}".format(bq_data_project_id, settings.COHORT_DATASET_ID, settings.BIGQUERY_COHORT_TABLE_ID)
+    cohort_table = "{}.{}.{}".format(bq_data_project_id, settings.BIGQUERY_COHORT_DATASET_ID, settings.BIGQUERY_COHORT_TABLE_ID)
     somatic_mut_table = "{}.{}.{}".format(bq_data_project_id, sm_dataset_name, sm_table_name)
     metadata_data_table = "{}.{}.{}".format(bq_data_project_id, md_dataset_name, md_table_name)
     bioclinic_clin_table = "{}.{}.{}".format(bq_data_project_id, bc_dataset_name, bc_table_name)

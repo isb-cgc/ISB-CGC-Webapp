@@ -8,7 +8,7 @@ BIGQUERY_CONFIG = {
     "supported_genomic_builds": ['hg19', 'hg38'],
     "tables": [
         {
-            "table_id": "{}:TCGA_hg19_data_v0.RNAseq_Gene_Expression_UNC_RSEM".format(settings.BIGQUERY_DATA_PROJECT_NAME),
+            "table_id": "{}:TCGA_hg19_data_v0.RNAseq_Gene_Expression_UNC_RSEM".format(settings.BIGQUERY_DATA_PROJECT_ID),
             "genomic_build": "hg19",
             "platform": "Illumina HiSeq",
             "gene_label_field": "HGNC_gene_symbol",
@@ -19,7 +19,7 @@ BIGQUERY_CONFIG = {
             "program": "tcga"
         },
         {
-            "table_id": "{}:TCGA_hg38_data_v0.RNAseq_Gene_Expression".format(settings.BIGQUERY_DATA_PROJECT_NAME),
+            "table_id": "{}:TCGA_hg38_data_v0.RNAseq_Gene_Expression".format(settings.BIGQUERY_DATA_PROJECT_ID),
             "genomic_build": "hg38",
             "platform": "Illumina HiSeq",
             "gene_label_field": "gene_name",
@@ -30,7 +30,7 @@ BIGQUERY_CONFIG = {
             "program": "tcga"
         },
         {
-            "table_id": "{}:TARGET_hg38_data_v0.RNAseq_Gene_Expression".format(settings.BIGQUERY_DATA_PROJECT_NAME),
+            "table_id": "{}:TARGET_hg38_data_v0.RNAseq_Gene_Expression".format(settings.BIGQUERY_DATA_PROJECT_ID),
             "genomic_build": "hg38",
             "platform": "Illumina HiSeq",
             "gene_label_field": "gene_name",
