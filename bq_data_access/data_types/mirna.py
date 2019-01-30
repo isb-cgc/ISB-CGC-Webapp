@@ -11,7 +11,7 @@ BIGQUERY_CONFIG = {
             "internal_table_id": "tcga_hg19_mirna_rpm"
         },
         {
-            "table_id": "isb-cgc:TCGA_hg38_data_v0.miRNA_Expression_r11_180816",
+            "table_id": "isb-cgc:TCGA_hg38_data_v0.miRNAseq_Expression",
             "mirna_id_field": "mirna_id",
             "value_label": "RPM",
             "value_field": "reads_per_million_miRNA_mapped",
@@ -20,7 +20,7 @@ BIGQUERY_CONFIG = {
             "internal_table_id": "tcga_hg38_mirna_rpm"
         },
         {
-            "table_id": "isb-cgc:TARGET_hg38_data_v0.miRNA_Expression_r11_180816",
+            "table_id": "isb-cgc:TARGET_hg38_data_v0.miRNA_Expression",
             "mirna_id_field": "mirna_id",
             "value_label": "RPM",
             "value_field": "reads_per_million_miRNA_mapped",

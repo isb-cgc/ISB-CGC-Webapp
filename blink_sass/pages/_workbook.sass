@@ -12,25 +12,20 @@
     overflow-y: auto
     overflow-x: hidden
 
-  .panel-heading
-    min-height: 100px
+  .panel-heading, .panel-footing
     div
       padding: 5px
     .bq-tables
-      max-height: 90px
-      padding: 5px
-      border: 2px solid $isb-primary
-      h5
-        margin: 0 0 5px 0
+      margin: 0 10px
+      .bq-tables-header
       ul
-        margin-left: 5px
-      li
-        text-overflow: ellipsis
-        overflow: hidden
-        white-space: nowrap
-      float: right
-      width: 50%
-      overflow-y: scroll
+        background-color: $bg-color
+        border-radius: 3px
+        padding: 7px 10px
+        li
+          text-overflow: ellipsis
+          overflow: hidden
+          white-space: nowrap
     .options-bar
       float: left
       width: 50%
@@ -45,7 +40,7 @@
     border: none
     border-left: 1px solid darken($white, 15%)
     width: 250px
-    min-height: 600px
+    min-height: 1000px
 
     &.open
       visibility: visible
@@ -61,12 +56,12 @@
   &-nav
     padding: 10px 15px
     float: left
-    width: 25%
+    width: 20%
     background: darken($white, 8%)
-    min-height: 1200px
+    min-height: 1000px
+    max-height: 1000px
     position: relative
     transition: width 0.45s ease-in-out
-
     *
       opacity: 1
       transition: opacity 0.45s ease-in-out
@@ -74,9 +69,12 @@
     &.closed
       width: 0
       transition: width 0.45s ease-in-out
+      overflow-x: hidden
+      overflow-y: hidden
       *
         opacity: 0
         z-index: -1
+        overflow-x: hidden
         transition: opacity 0.45s ease-in-out
 
     &-toggle
@@ -114,21 +112,41 @@
         .fa-caret-left
           display: none
 
-    .list-item__heading i
-      font-size: $font-size-small
-      font-weight: $regular-font-weight
-      opacity: 0.8
-      margin-top: 5px
+    h4
+      color: $isb-primary
+
+    .list
+      width: 100%
+      .sublist-item
+        padding-left: 10px
+        padding-top: 3px
+        &:hover
+          background-color: darken($white, 20%)
+          border-width: 1px
+          border-radius: 5px
+          .workbook-remove-item
+            visibility: visible
+
+    .list-item__heading
+      font-size: $font-size
+      font-weight: $bold-font-weight
+      i
+        font-size: $font-size-small
+        font-weight: $regular-font-weight
+        opacity: 0.8
+        margin-top: 5px
 
     .workbook-remove-item
+      visibility: hidden
       border: none
-      padding: 2px
-      margin-right: 4px
       background: none
+      float: right
+      &:hover
+        color: #a94442
 
   &-content
     float: left
-    width: 75%
+    width: 80%
     padding: 10px 15px
     position: relative
     transition: width 0.45s ease-in-out
