@@ -54,7 +54,7 @@ def get_logs(service):
     try:
         jobCollection = service.jobs()
 
-        list_response = jobCollection.list(projectId=settings.BQ_PROJECT_ID,
+        list_response = jobCollection.list(projectId=settings.BIGQUERY_PROJECT_ID,
                                            allUsers=True,
                                            projection='full',
                                            maxResults=200).execute()
@@ -94,7 +94,7 @@ def main():
     f.close()
     for row in data['jobs']:
         response = stream_row_to_bigquery(service,
-                                          settings.BQ_PROJECT_ID,
+                                          settings.BIGQUERY_PROJECT_ID,
                                           'isb_cgc_logs',
                                           'bq_log_table',
                                           row,
