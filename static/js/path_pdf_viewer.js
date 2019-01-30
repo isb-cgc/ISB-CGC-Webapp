@@ -55,5 +55,5 @@ require([
         $('.load-spinner').height($('#path-report-iframe').css('height'));
     }
 
-    $('.load-spinner').show();
+    $('.load-spinner').hide();
 });

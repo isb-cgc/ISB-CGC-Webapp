@@ -402,7 +402,7 @@ var comparator_utils = {
 
 	    // If we reach this point, there's no order difference
 	    return 0;
-	}
+	};
 	var preferred = function (d1, d2) {
 	    // First, test if either is not sequenced
 	    var ns_diff = utils.sign(+(!!d1.na) - (+(!!d2.na)));
@@ -498,7 +498,7 @@ window.CreateOncoprinterWithToolbar = function (plot_selector, _ctr_selector, _t
     ctr_selector = $(plot_selector).find(_ctr_selector);
 	toolbar_selector = $(plot_selector).find(_toolbar_selector);
 
-    $(plot_selector).find('.oncoprint .oncoprint-diagram-toolbar-buttons').show();
+    //$(plot_selector).find('.oncoprint .oncoprint-diagram-toolbar-buttons').show();
 
     if (!utils.isWebGLAvailable()) {
         $(ctr_selector).append("<p>"+utils.getUnavailableMessageHTML()+"</p>");
@@ -564,13 +564,13 @@ window.CreateOncoprinterWithToolbar = function (plot_selector, _ctr_selector, _t
     var toolbar_fade_out_timeout;
     $(toolbar_selector).css({'visibility':'visible'});
     $(ctr_selector).add(toolbar_selector).on("mouseover", function(evt) {
-	$(toolbar_selector).stop().animate({opacity:1});
+        $(this).parents('.plot-div').find(_toolbar_selector).stop().animate({opacity:1});
 	clearTimeout(toolbar_fade_out_timeout);
     });
     $(ctr_selector).add(toolbar_selector).on("mouseleave", function(evt) {
 	clearTimeout(toolbar_fade_out_timeout);
 	toolbar_fade_out_timeout = setTimeout(function() {
-	    $(toolbar_selector).stop().animate({opacity:0});
+		$(this).parents('.plot-div').find(_toolbar_selector).stop().animate({opacity:0});
 	}, 700);
     });
 
@@ -734,7 +734,7 @@ window.CreateOncoprinterWithToolbar = function (plot_selector, _ctr_selector, _t
             },
             getUnalteredIds: function () {
                 return unaltered_ids;
-            },
+            }
         };
     })();
 
@@ -982,74 +982,83 @@ window.CreateOncoprinterWithToolbar = function (plot_selector, _ctr_selector, _t
 	})();
 	(function setUpDownload() {
 	    var xml_serializer = new XMLSerializer();
-	    addQTipTo($(toolbar_selector).find('.oncoprint-diagram-downloads-icon'), {
-				style: {classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightwhite'},
-				show: {event: "mouseover"},
-				hide: {fixed: true, delay: 100, event: "mouseout"},
-				position: {my: 'top center', at: 'bottom center', viewport: $(window)},
-				content: {
-					text: function() {
-						return "<button class='oncoprint-diagram-download' type='png' style='cursor:pointer;width:90px;'>PNG</button> <br/>" +
-							"<button class='oncoprint-diagram-download' type='svg' style='cursor:pointer;width:90px;'>SVG</button> <br/>" +
-							"<button class='oncoprint-sample-download'  type='txt' style='cursor:pointer;width:90px;'>"+(State.using_sample_data ? "Sample" : "Patient")+" order</button>";
-					    }
-					    //TODO: add svgToPdf conversion from server side
-					    //"<button class='oncoprint-diagram-download' type='pdf' style='cursor:pointer;width:90px;'>PDF</button> <br/>" +
+	    //var attr_ = $(toolbar_selector).find('.oncoprint-diagram-downloads-icon').attr('data-hasqtip')
+		addQTipTo($(toolbar_selector).find('.oncoprint-diagram-downloads-icon'), {
+                style: {classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightwhite'},
+                show: {event: "mouseover"},
+                hide: {fixed: true, delay: 100, event: "mouseout"},
+                position: {my: 'top center', at: 'bottom center', viewport: $(window)},
+                content: {
+                    text: function () {
+                        return "<button class='oncoprint-diagram-download' type='png' style='cursor:pointer;width:90px;'>PNG</button> <br/>" +
+                            "<button class='oncoprint-diagram-download' type='svg' style='cursor:pointer;width:90px;'>SVG</button> <br/>" +
+                            "<button class='oncoprint-sample-download'  type='txt' style='cursor:pointer;width:90px;'>" + (State.using_sample_data ? "Sample" : "Patient") + " order</button>";
+                    }
+                    //TODO: add svgToPdf conversion from server side
+                    //"<button class='oncoprint-diagram-download' type='pdf' style='cursor:pointer;width:90px;'>PDF</button> <br/>" +
 
-				},
-				events: {
-					render: function (event) {
-						$('body').on('click', '.oncoprint-diagram-download', function () {
-							var fileType = $(this).attr("type");
-							var two_megabyte_limit = 2000000;
-							if (fileType === 'pdf')
-							{
-							    var svg = oncoprint.toSVG(true);
-							    var serialized = cbio.download.serializeHtml(svg);
-							    if (serialized.length > two_megabyte_limit) {
-								alert("Oncoprint too big to download as PDF - please download as SVG");
-								return;
-							    }
-							    cbio.download.initDownload(serialized, {
-								filename: "oncoprint.pdf",
-								contentType: "application/pdf",
-								servletName: "svgtopdf.do"
-							    });
-							}
-							else if (fileType === 'svg')
-							{
-								cbio.download.initDownload(oncoprint.toSVG(), {filename: "oncoprint.svg"});
-							} else if (fileType === 'png')
-							{
-							    var img = oncoprint.toCanvas(function(canvas, truncated) {
-								canvas.toBlob(function(blob) {
-								    if (truncated) {
-									alert("Oncoprint too large - PNG truncated to "+canvas.getAttribute("width")+" by "+canvas.getAttribute("height"));
-								    }
-								    saveAs(blob, "oncoprint.png");
-								}, 'image/png');
-							    }, 2);
-							}
-						});
+                },
+                events: {
+                    render: function (event) {
+                        //$('.worksheet.active').on('click', '.oncoprint-diagram-download', function () {
+						//if($('#qtip-'+attr_).length == 0) {
+                            $('body').on('click', '.oncoprint-diagram-download', function () {
 
-						$('body').on('click', '.oncoprint-sample-download', function () {
-							var idTypeStr = (State.using_sample_data ? "Sample" : "Patient");
-							var content = idTypeStr + " order in the Oncoprint is: \n";
-							content += oncoprint.getIdOrder().join('\n');
-							var downloadOpts = {
-								filename: 'OncoPrint' + idTypeStr + 's.txt',
-								contentType: "text/plain;charset=utf-8",
-								preProcess: false};
+                                var fileType = $(this).attr("type");
+                                var two_megabyte_limit = 2000000;
+                                if (fileType === 'pdf') {
+                                    var svg = oncoprint.toSVG(true);
+                                    var serialized = cbio.download.serializeHtml(svg);
+                                    if (serialized.length > two_megabyte_limit) {
+                                        alert("Oncoprint too big to download as PDF - please download as SVG");
+                                        return;
+                                    }
+                                    cbio.download.initDownload(serialized, {
+                                        filename: "oncoprint.pdf",
+                                        contentType: "application/pdf",
+                                        servletName: "svgtopdf.do"
+                                    });
+                                }
+                                else if (fileType === 'svg') {
+                                    cbio.download.initDownload(oncoprint.toSVG(), {filename: "oncoprint.svg"});
+                                } else if (fileType === 'png') {
 
-							// send download request with filename & file content info
-							cbio.download.initDownload(content, downloadOpts);
-						});
-					}
-				}
-	    });
+                                    var img = oncoprint.toCanvas(function (canvas, truncated) {
+                                        canvas.toBlob(function (blob) {
+                                            if (truncated) {
+                                                alert("Oncoprint too large - PNG truncated to " + canvas.getAttribute("width") + " by " + canvas.getAttribute("height"));
+                                            }
+                                            saveAs(blob, "oncoprint.png");
+                                        }, 'image/png');
+                                    }, 2);
+                                }
+                            });
+                        //}
+
+                        $('body').on('click', '.oncoprint-sample-download', function () {
+                            var idTypeStr = (State.using_sample_data ? "Sample" : "Patient");
+                            var content = idTypeStr + " order in the Oncoprint is: \n";
+                            content += oncoprint.getIdOrder().join('\n');
+                            var downloadOpts = {
+                                filename: 'OncoPrint' + idTypeStr + 's.txt',
+                                contentType: "text/plain;charset=utf-8",
+                                preProcess: false
+                            };
+
+                            // send download request with filename & file content info
+                            cbio.download.initDownload(content, downloadOpts);
+                        });
+                    }
+                }
+
+        });
+
 	})();
     })();
     return function(data_by_gene, id_key, altered_ids_by_gene, id_order, gene_order) {
-	State.setData(data_by_gene, id_key, altered_ids_by_gene, id_order, gene_order);
+//    	Toolbar.destroy();
+		State.setData(data_by_gene, id_key, altered_ids_by_gene, id_order, gene_order);
+
+
     };
-}
+};

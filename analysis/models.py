@@ -20,9 +20,6 @@ class Analysis(models.Model):
                  {'name' : 'Violin Plot',
                   'description' : "Used to plot a categorical feature on the x-axis versus a numerical feature on the y-axis. Points in the plot can be colored by another categorical feature.",
                   'image' : 'img/violinplot.png'},
-                 {'name': 'OncoPrint',
-                  'description': "Used to plot multiple genomic alteration (somatic mutation) events across a set of samples by heatmap. OncoPrint is developed and provided by cBioPortal.",
-                  'image': 'img/oncoprint.png'},
                  # {'name' : 'Violin Plot with axis swap',
                  #  'description' : "Used to plot a categorical feature on the y-axis versus a numerical feature on the x-axis. Points in the plot can be colored by another categorical feature.",
                  #  'image' : 'img/violinplot.png'},
@@ -31,7 +28,14 @@ class Analysis(models.Model):
                   'image' : 'img/cubbyhole.png'},
                  {'name' : 'SeqPeek',
                   'description' : "This visualization shows where somatic mutations have been observed on a linear representation of a specific protein.  Each horizontal strip represents the protein, with data from different tumor types (aka cohorts or studies) shown stacked one on top of the other. </p>",
-                  'image': 'img/seqpeak.png'}]
+                  'image': 'img/seqpeak.png'},
+                 {'name': 'OncoPrint',
+                  'description': "Used to plot multiple genomic alteration (somatic mutation) events across a set of samples by heatmap. OncoPrint is developed and provided by cBioPortal.",
+                  'image': 'img/oncoprint.png'},
+                 # {'name': 'OncoGrid',
+                 #  'description': "Used to view multiple genomic alteration (somatic mutation) events, clinical data, available files across a set of cases by interactive heatmap. OncoGrid library is developed at Ontario Institute for Cancer Research (OICR).",
+                 #  'image': 'img/oncogrid.png'}
+                 ]
 
         return types
 

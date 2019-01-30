@@ -46,7 +46,6 @@ RUN apt-get -y install build-essential
 RUN apt-get -y install python-dev
 RUN apt-get -y install --reinstall python-m2crypto python3-crypto
 RUN apt-get -y install libxml2-dev libxmlsec1-dev swig
-RUN pip install python-saml==2.1.4
 RUN pip install pexpect
 
 RUN apt-get -y install libffi-dev libssl-dev libmysqlclient-dev python2.7-dev curl
@@ -57,7 +56,6 @@ ADD . /app
 
 # We need to recompile some of the items because of differences in compiler versions 
 RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
-RUN pip install pycrypto==2.6.1 -t /app/lib --upgrade --only-binary all
 RUN pip install gunicorn==19.6.0
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
