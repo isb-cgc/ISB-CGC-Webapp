@@ -158,7 +158,7 @@ function($, d3, d3tip, d3textwrap, _) {
             y_axis_area.append('clipPath')
                 .attr('id', y_axis_area_clip_id)
                 .append('rect')
-                .attr('height', plot_no_margin_height)
+                .attr('height', view_height < plot_no_margin_height ? view_height: plot_no_margin_height)
                 .attr('width', margin.left)
                 .attr('transform', 'translate(0, '+ +margin.top +')');
 
@@ -166,7 +166,7 @@ function($, d3, d3tip, d3textwrap, _) {
             var x_axis_area = svg.append('g')
                 .attr('clip-path', 'url(#'+x_axis_area_clip_id+')');
 
-            var x_axis_area_ypos = view_height < plot_no_margin_height ?  (view_height  - margin.bottom) : (margin.top + plot_no_margin_height);
+            var x_axis_area_ypos = view_height < plot_no_margin_height ?  (margin.top + view_height ) : (margin.top + plot_no_margin_height);
             x_axis_area.append('clipPath')
                 .attr('id', x_axis_area_clip_id)
                 .append('rect')
@@ -193,10 +193,10 @@ function($, d3, d3tip, d3textwrap, _) {
             plot_area.append('clipPath')
                 .attr('id', plot_area_clip_id)
                 .append('rect')
-                .attr('width', plot_no_margin_width)
-                .attr('height', plot_no_margin_height);
+                .attr('width', view_width < plot_no_margin_width ? view_width : plot_no_margin_width)
+                .attr('height', view_height < plot_no_margin_height ? view_height : plot_no_margin_height);
 
-            var x_grid_height = view_height < plot_no_margin_height ? (view_height-margin.bottom-margin.top) : plot_no_margin_height;
+            var x_grid_height = view_height < plot_no_margin_height ? view_height : plot_no_margin_height;
 
             // append grid lines
             plot_area.append("g")
@@ -412,14 +412,14 @@ function($, d3, d3tip, d3textwrap, _) {
             // append axes labels
             var xAxisXPos = margin.left + ( view_width > plot_no_margin_width ? plot_no_margin_width : view_width )/2;
             var xAxisYPos = view_height > plot_no_margin_height ?
-                (margin.top + plot_no_margin_height + 110) : view_height -20;
+                (margin.top + plot_no_margin_height + 110) : margin.top+view_height +100;
             svg.append('text')
                 .attr('class', 'axis-label')
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'translate(' + xAxisXPos + ',' + xAxisYPos + ')')
                 .text(xLabel);
 
-            var yAxisXPos = ( view_height>plot_no_margin_height ? plot_no_margin_height : view_height - margin.bottom )/2;
+            var yAxisXPos = margin.top+( view_height>plot_no_margin_height ? plot_no_margin_height : view_height)/2;
             svg.append('text')
                 .attr('class', 'axis-label')
                 .attr('text-anchor', 'middle')

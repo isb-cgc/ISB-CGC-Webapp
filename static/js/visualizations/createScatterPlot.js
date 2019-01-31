@@ -277,6 +277,13 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .attr('class', 'y label axis-label')
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'rotate(-90) translate(' + (-height+margin.top+margin.bottom)/2 + ', 15)')
+                .attr('style', function(d){
+                    if (yLabel.length > 65){
+                        return 'font-size: 0.9em;'
+                    }
+                    else
+                        return '';
+                })
                 .text(yLabel);
 
             var legend_line_height = 20;

@@ -228,8 +228,8 @@ define([
         var plot_height = ydomain.length * cubby_size + margin.top + margin.bottom;
         var svg = d3.select(plot_selector)
             .append('svg')
-            .attr('width', plot_width)
-            .attr('height', plot_height);
+            .attr('width', (width < plot_width ? width : plot_width))
+            .attr('height', (height < plot_height ? height : plot_height));
 
         var plot = cubby_plot_obj.create_cubbyplot(
             svg,
@@ -470,7 +470,8 @@ define([
             } else {
                 args.color_by = 'c';
                 if(args.legend_title) {
-                    legend_title = args.legend_title.split(':')[2].replace(/_/g, ' ');
+                    var args_arr = args.legend_title.split(':');
+                    legend_title = args_arr[args_arr.length-1].replace(/_/g, ' ');
                     firstChar = legend_title.charAt(0).toUpperCase();
                     legend_title = firstChar + legend_title.slice(1);
                 }
