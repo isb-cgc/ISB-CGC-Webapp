@@ -171,7 +171,7 @@ function($, d3, d3tip, d3textwrap, _) {
                 .attr('id', x_axis_area_clip_id)
                 .append('rect')
                 .attr('height', margin.bottom)
-                .attr('width', plot_no_margin_width)
+                .attr('width', view_width > plot_no_margin_width? plot_no_margin_width : view_width)
                 .attr('transform', 'translate(' + margin.left + ',' + x_axis_area_ypos + ')');
 
             x_axis_area.append('g')
