@@ -12,7 +12,7 @@ BIGQUERY_CONFIG = {
             "program": "tcga"
         },
         {
-            "gencode_reference_table_id": "isb-cgc:genome_reference.GENCODE_v22",
+            "gencode_reference_table_id": "isb-cgc:genome_reference.GENCODE_v24",
             "genomic_build": "hg38",
             "value_field": "segment_mean",
             "table_id": "{}:TCGA_hg38_data_v0.Copy_Number_Segment_Masked".format(settings.BIGQUERY_DATA_PROJECT_ID),
