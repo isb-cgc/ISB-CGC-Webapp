@@ -88,7 +88,7 @@ define([
     function generate_histogram(margin, plot_selector, height, width, x_attr, data, units, logTransform){
         var svg = d3.select(plot_selector)
                 .append('svg')
-                .attr('width', width + 10)
+                .attr('width', width)
                 .attr('height', height);
         var vals = helpers.values_only(data, 'x');
 
