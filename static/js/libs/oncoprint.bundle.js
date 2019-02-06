@@ -962,10 +962,6 @@ var Oncoprint = (function () {
 	this.minimap_close_callbacks = [];
 
 
-	$(window).resize(function() {
-	    resizeAndOrganize(self);
-	});
-
 
 	this.id_clipboard = [];
 	this.clipboard_change_callbacks = [];
