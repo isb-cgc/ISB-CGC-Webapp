@@ -529,7 +529,8 @@ define([
 
             //store data
             //establish resize call to data
-            d3.select(window).on('resize', visualization.plot.resize);
+
+            //d3.select(window).on('resize', visualization.plot.resize);
             (args.type == "Cubby Hole Plot" || args.color_by_sel) && $(args.legend_selector).show();
 
         } else if (args.type == "SeqPeek" && !data.message) {
@@ -679,45 +680,37 @@ define([
 
     function svg_download(){
         var plot_args = $('.worksheet.active .plot-args').data('plot-args');
-        if(plot_args.type === 'OncoPrint') {
-            $('button[type=\'svg\'].oncoprint-diagram-download').trigger('click');
+        var plot_svg = $('.worksheet.active .plot-args').data('plot-svg');
+        var img_svg;
+        if (plot_args.type === 'OncoGrid' || plot_args.type === 'OncoPrint') {
+            img_svg = plot_svg();
         }
-        else{
-            var plot_svg = $('.worksheet.active .plot-args').data('plot-svg');
-            var img_svg;
-            if(plot_args.type === 'OncoGrid') {
-                img_svg = plot_svg();
-            }
-            else{
-                img_svg = getPlotSvgNode(plot_svg, $(plot_args.legend_selector).find('svg'));
-            }
-            var xmlSerializer = new XMLSerializer();
-            var content = xmlSerializer.serializeToString(img_svg);
-            var blob = new Blob([content], {type: 'application/svg+xml'});
-            saveAs(blob, 'plot.svg');
+        else {
+            img_svg = getPlotSvgNode(plot_svg, $(plot_args.legend_selector).find('svg'));
         }
+        var xmlSerializer = new XMLSerializer();
+        var content = xmlSerializer.serializeToString(img_svg);
+        var blob = new Blob([content], {type: 'application/svg+xml'});
+        saveAs(blob, 'plot.svg');
     }
 
     function png_download(){
         var plot_args = $('.worksheet.active .plot-args').data('plot-args');
-        if(plot_args.type === 'OncoPrint') {
-            $('button[type=\'png\'].oncoprint-diagram-download').trigger('click');
+        var plot_svg = $('.worksheet.active .plot-args').data('plot-svg');
+        var img_svg;
+        if (plot_args.type === 'OncoGrid' || plot_args.type === 'OncoPrint') {
+            img_svg = plot_svg();
         }
-        else{
-            var plot_svg = $('.worksheet.active .plot-args').data('plot-svg');
-            var img_svg;
-            if(plot_args.type === 'OncoGrid') {
-                img_svg = plot_svg();
-            }
-            else{
-                img_svg = getPlotSvgNode(plot_svg, $(plot_args.legend_selector).find('svg'));
-            }
-            var xmlSerializer = new XMLSerializer();
-            var content = xmlSerializer.serializeToString(img_svg);
-            var width = img_svg.getAttribute('width') || 1495;
-            var height = img_svg.getAttribute('height') || 650;
-            svgString2Image(content, width, height, function(dataBlob){saveAs( dataBlob, 'plot.png' )});
+        else {
+            img_svg = getPlotSvgNode(plot_svg, $(plot_args.legend_selector).find('svg'));
         }
+        var xmlSerializer = new XMLSerializer();
+        var content = xmlSerializer.serializeToString(img_svg);
+        var width = img_svg.getAttribute('width') || 1495;
+        var height = img_svg.getAttribute('height') || 650;
+        svgString2Image(content, width, height, function (dataBlob) {
+            saveAs(dataBlob, 'plot.png')
+        });
     }
 
     function svgString2Image(svgString, width, height, callback) {
