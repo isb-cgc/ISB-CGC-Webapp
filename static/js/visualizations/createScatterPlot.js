@@ -29,15 +29,7 @@ var RECALC_THROTTLE = 75;
 
 define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
 function($, d3, d3tip, d3textwrap, vizhelpers, _) {
-    var tip = d3tip()
-                .attr('class', 'd3-tip')
-                .direction('n')
-                .offset([0, 0])
-                .html(function(d) {
-                    return '<span>Case: ' + d['case_id'] + '<br/>' +
-                        'Sample: ' + d['sample_id'] + '<br/>' +
-                        'Data: (' + d['x'] + ', ' + d['y'] + ')</span>'
-                });
+
     var helpers = Object.create(vizhelpers, {});
 
     var selex_active = false;
@@ -54,11 +46,28 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
     var selectedSamples = null;
 
     return {
-        create_scatterplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, margin, colorBy, legend, width, height, cohort_set) {
+        create_scatterplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, margin, colorBy, legend, legend_title, width, height, cohort_map) {
             // We require at least one of the axes to have valid data
             var checkXvalid = 0;
             var checkYvalid = 0;
             var plot_padding_percentile = 5; // 5% of padding before and after the
+            var tip = d3tip()
+                .attr('class', 'd3-tip')
+                .direction('n')
+                .offset([0, 0])
+                .html(function(d) {
+
+                    return '<span>Case: ' + d['case_id'] + '<br/>' +
+                        'Sample: ' + d['sample_id'] + '<br/>' +
+                        xLabel + ': ' + d[xParam] + '<br/>' +
+                        yLabel + ': ' + d[yParam] + '<br/>' +
+                        legend_title + ': ' +
+                        (colorBy == 'cohort' ?
+                            cohort_map[d[colorBy]]:
+                            d[colorBy])
+                        +' </span>';
+
+                });
 
             data.map(function(d){
                 var oneIsValid = false;
@@ -268,19 +277,31 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .attr('class', 'y label axis-label')
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'rotate(-90) translate(' + (-height+margin.top+margin.bottom)/2 + ', 15)')
+                .attr('style', function(d){
+                    if (yLabel.length > 65){
+                        return 'font-size: 0.9em;'
+                    }
+                    else
+                        return '';
+                })
                 .text(yLabel);
 
             var legend_line_height = 20;
             var no_legend_columns = helpers.get_no_legend_columns(color.domain());
             var legend_column_length = Math.ceil(color.domain().length/no_legend_columns);
-            legend = legend.attr('height', legend_line_height * legend_column_length);
+            legend = legend = legend.attr('height', legend_line_height * (legend_column_length+1));
+            legend.append('text')
+                .attr('x', 2)
+                .attr('y', legend_line_height - 5)
+                .style('font-weight', 'bold')
+                .text(legend_title);
 
             legend = legend.selectAll('.legend')
                 .data(color.domain())
                 .enter().append('g')
                 .attr('class', 'legend')
                 .attr("transform", function(d, i)
-                { return "translate("+(Math.floor(i/legend_column_length)*legend.attr('width')/no_legend_columns)+"," + (i%legend_column_length * legend_line_height) + ")"; });
+                { return "translate("+(Math.floor(i/legend_column_length)*legend.attr('width')/no_legend_columns)+"," + (((i%legend_column_length)+1) * legend_line_height) + ")"; });
             legend.append('rect')
                 .attr('width', legend_line_height - 6)
                 .attr('height', legend_line_height - 6)
@@ -300,15 +321,11 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                             if (Array.isArray(d)) {
                                 var cohort_name_label = "";
                                 for (var i = 0; i < d.length; i++) {
-                                    for (var j = 0; j < cohort_set.length; j++) {
-                                        if (cohort_set[j]['id'] == d[i]) { cohort_name_label += cohort_set[j]['name'] + ','; }
-                                    }
+                                    cohort_name_label += cohort_map[d[i]]+',';
                                 }
                                 return cohort_name_label.slice(0,-1);
                             } else {
-                                for (var i = 0; i < cohort_set.length; i++) {
-                                    if (cohort_set[i]['id'] == d) { return cohort_set[i]['name']; }
-                                }
+                                return cohort_map[d];
                             }
                         } else {
                             return d;
@@ -396,12 +413,12 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             function get_plot_data(){
                 var p_data = {};
                 data.map(function(d, i){
-                    p_data[i]= {
-                        x: xVal(d),
-                        y: yVal(d),
-                        case_id: d['case_id'],
-                        sample_id: d['sample_id']
-                    };
+                    p_data[i]= {};
+                    p_data[i]['case_id'] = d['case_id'];
+                    p_data[i]['sample_id'] = d['sample_id'];
+                    p_data[i][xParam] = xVal(d);
+                    p_data[i][yParam] = yVal(d);
+                    p_data[i][legend_title] = colorBy == 'cohort' ? cohort_map[d[colorBy]]: d[colorBy];
                 });
                 return p_data;
             }

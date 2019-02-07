@@ -57,7 +57,7 @@ define([
         if(isLogTransform) {
             return $('option[value="' + attr + '"]:first').html() + " - log("+(units && units.length > 0 ? units : 'n')+"+1)";
         }
-        return $('option[value="' + attr + '"]:first').html() + (units && units.length > 0 ? " - " + units : '')
+        return $('option[value="' + attr + '"]:first').html() + (units && units.length > 0 ? " (" + units +")": '')
     }
 
     /*
@@ -88,7 +88,7 @@ define([
     function generate_histogram(margin, plot_selector, height, width, x_attr, data, units, logTransform){
         var svg = d3.select(plot_selector)
                 .append('svg')
-                .attr('width', width + 10)
+                .attr('width', width)
                 .attr('height', height);
         var vals = helpers.values_only(data, 'x');
 
@@ -108,14 +108,13 @@ define([
     /*
         Generate scatter plot
     */
-    function generate_scatter_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units, logTransform) {
+    function generate_scatter_plot(margin, plot_selector, legend_selector, legend_title, height, width, x_attr, y_attr, color_by, cohort_map, data, units, logTransform) {
          var domain = helpers.get_min_max(data, 'x');
          var range = helpers.get_min_max(data, 'y');
 
          var legend = d3.select(legend_selector)
              .append('svg')
-             .attr('width', 850)
-             .attr("transform", 'translate('+margin.left+', 0)');
+             .attr('width', 850);
          var svg = d3.select(plot_selector)
              .append('svg')
              .attr('width', width)
@@ -131,9 +130,10 @@ define([
              margin,
              color_by,
              legend,
+             legend_title,
              width,
              height,
-             cohort_set
+             cohort_map
          );
 
          return  {plot : plot, svg : svg}
@@ -142,16 +142,15 @@ define([
     /*
         Generate violin plot
      */
-    function generate_violin_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units, logTransform) {
+    function generate_violin_plot(margin, plot_selector, legend_selector, legend_title, height, width, x_attr, y_attr, color_by, cohort_map, data, units, logTransform) {
         var violin_width = 200;
         var tmp = helpers.get_min_max(data, 'y');
-        var min_n = tmp[0];
-        var max_n = tmp[1];
+        var padding = (tmp[1]-tmp[0])*.05;
+        var min_n = tmp[0] - padding;
+        var max_n = tmp[1] + padding;
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', 850)
-            .attr("transform", 'translate('+margin.left+', 0)');
-
+            .attr('width', 850);
         var svg = d3.select(plot_selector)
             .append('svg')
             .attr('width', width)
@@ -169,7 +168,8 @@ define([
             margin,
             color_by,
             legend,
-            cohort_set
+            legend_title,
+            cohort_map
         );
 
         return  {plot : plot, svg : svg}
@@ -178,15 +178,14 @@ define([
     /*
         Generate violin plot with axis swap
      */
-    function generate_violin_plot_axis_swap(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units, logTransform) {
+    function generate_violin_plot_axis_swap(margin, plot_selector, legend_selector, legend_title, height, width, x_attr, y_attr, color_by, cohort_map, data, units, logTransform) {
         var violin_width = 200;
         var tmp = helpers.get_min_max(data, 'x');
         var min_n = tmp[0];
         var max_n = tmp[1];
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', 850)
-            .attr("transform", 'translate('+margin.left+', 0)');
+            .attr('width', 850);
 
         var svg = d3.select(plot_selector)
             .append('svg')
@@ -205,13 +204,14 @@ define([
             'x',
             color_by,
             legend,
-            cohort_set
+            legend_title,
+            cohort_map
         );
 
         return  {plot : plot, svg : svg}
     }
 
-    function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units) {
+    function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, data, units) {
         var margin = {top: 10, bottom: 115, left: 140, right: 20};
         var cubby_max_size = 150; // max cubby size
         var cubby_min_size = 75; // min cubby size
@@ -221,16 +221,15 @@ define([
         var ydomain = helpers.get_domain(data, 'y');
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', 850)
-            .attr("transform", 'translate('+margin.left+', 0)');
+            .attr('width', 850);
         var cubby_size = Math.min(cubby_max_size, Math.min(Math.floor(view_width/xdomain.length), Math.floor(view_height/ydomain.length)));
         cubby_size = cubby_size < cubby_min_size ? cubby_min_size : cubby_size;
-        var cubby_width = xdomain.length * cubby_size + margin.left + margin.right;
-        var cubby_height = ydomain.length * cubby_size + margin.top + margin.bottom;
+        var plot_width = xdomain.length * cubby_size + margin.left + margin.right;
+        var plot_height = ydomain.length * cubby_size + margin.top + margin.bottom;
         var svg = d3.select(plot_selector)
             .append('svg')
-            .attr('width', cubby_width)
-            .attr('height', cubby_height);
+            .attr('width', (width < plot_width ? width : plot_width))
+            .attr('height', (height < plot_height ? height : plot_height));
 
         var plot = cubby_plot_obj.create_cubbyplot(
             svg,
@@ -242,13 +241,13 @@ define([
             generate_axis_label(y_attr, false, units.y),
             'x',
             'y',
-            //'c',
             legend,
-            cubby_width,
-            cubby_height,
+            view_width,
+            view_height,
+            plot_width,
+            plot_height,
             cubby_size
         );
-        //console.log(svg);
         return  {plot : plot, svg : svg}
     }
 
@@ -453,18 +452,29 @@ define([
         if (data.hasOwnProperty('items') && data['items'].length > 0) {
 
             var cohort_set = data['cohort_set'];
+            var cohort_map = {};
+            for(var i=0; i<cohort_set.length; i++){
+                 cohort_map[cohort_set[i]['id']] = cohort_set[i]['name'];
+            }
 
             var units = {
                 x: data.xUnits,
                 y: data.yUnits
             };
 
+            var legend_title='';
             data = data['items'];
-
             if (args.cohort_override) {
                 args.color_by = 'cohort';
+                legend_title = 'Cohort';
             } else {
                 args.color_by = 'c';
+                if(args.legend_title) {
+                    var args_arr = args.legend_title.split(':');
+                    legend_title = args_arr[args_arr.length-1].replace(/_/g, ' ');
+                    firstChar = legend_title.charAt(0).toUpperCase();
+                    legend_title = firstChar + legend_title.slice(1);
+                }
             }
 
 
@@ -476,17 +486,17 @@ define([
                     visualization = generate_histogram(margin, args.plot_selector, height, width, args.x, data, units, args.logTransform);
                     break;
                 case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                    visualization = generate_scatter_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by, cohort_set, data, units, args.logTransform);
+                    visualization = generate_scatter_plot(margin, args.plot_selector, args.legend_selector, legend_title,height, width, args.x, args.y, args.color_by, cohort_map, data, units, args.logTransform);
                     break;
                 case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
                     margin = {top: 15, bottom: 100, left: 110, right: 10};
-                    visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units, args.logTransform);
+                    visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, legend_title, height, width, args.x, args.y, args.color_by,  cohort_map, data, units, args.logTransform);
                     break;
                 case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
-                    visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units, args.logTransform);
+                    visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, legend_title, height, width, args.x, args.y, args.color_by,  cohort_map, data, units, args.logTransform);
                     break;
                 case 'Cubby Hole Plot' : //(x_type == 'STRING' && y_type == 'STRING') {
-                    visualization = generate_cubby_hole_plot(args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units);
+                    visualization = generate_cubby_hole_plot(args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  data, units);
                     break;
                 default :
                     break;
@@ -519,7 +529,8 @@ define([
 
             //store data
             //establish resize call to data
-            d3.select(window).on('resize', visualization.plot.resize);
+
+            //d3.select(window).on('resize', visualization.plot.resize);
             (args.type == "Cubby Hole Plot" || args.color_by_sel) && $(args.legend_selector).show();
 
         } else if (args.type == "SeqPeek" && !data.message) {
@@ -620,6 +631,7 @@ define([
                              y                : args.y,
                              logTransform     : args.logTransform,
                              color_by         : args.cohorts,
+                             legend_title     : args.color_by,
                              cohort_override  : args.color_override,
                              color_by_sel     : args.color_by_sel,
                              data             : data};
@@ -668,45 +680,37 @@ define([
 
     function svg_download(){
         var plot_args = $('.worksheet.active .plot-args').data('plot-args');
-        if(plot_args.type === 'OncoPrint') {
-            $('button[type=\'svg\'].oncoprint-diagram-download').trigger('click');
+        var plot_svg = $('.worksheet.active .plot-args').data('plot-svg');
+        var img_svg;
+        if (plot_args.type === 'OncoGrid' || plot_args.type === 'OncoPrint') {
+            img_svg = plot_svg();
         }
-        else{
-            var plot_svg = $('.worksheet.active .plot-args').data('plot-svg');
-            var img_svg;
-            if(plot_args.type === 'OncoGrid') {
-                img_svg = plot_svg();
-            }
-            else{
-                img_svg = getPlotSvgNode(plot_svg, $(plot_args.legend_selector).find('svg'));
-            }
-            var xmlSerializer = new XMLSerializer();
-            var content = xmlSerializer.serializeToString(img_svg);
-            var blob = new Blob([content], {type: 'application/svg+xml'});
-            saveAs(blob, 'plot.svg');
+        else {
+            img_svg = getPlotSvgNode(plot_svg, $(plot_args.legend_selector).find('svg'));
         }
+        var xmlSerializer = new XMLSerializer();
+        var content = xmlSerializer.serializeToString(img_svg);
+        var blob = new Blob([content], {type: 'application/svg+xml'});
+        saveAs(blob, 'plot.svg');
     }
 
     function png_download(){
         var plot_args = $('.worksheet.active .plot-args').data('plot-args');
-        if(plot_args.type === 'OncoPrint') {
-            $('button[type=\'png\'].oncoprint-diagram-download').trigger('click');
+        var plot_svg = $('.worksheet.active .plot-args').data('plot-svg');
+        var img_svg;
+        if (plot_args.type === 'OncoGrid' || plot_args.type === 'OncoPrint') {
+            img_svg = plot_svg();
         }
-        else{
-            var plot_svg = $('.worksheet.active .plot-args').data('plot-svg');
-            var img_svg;
-            if(plot_args.type === 'OncoGrid') {
-                img_svg = plot_svg();
-            }
-            else{
-                img_svg = getPlotSvgNode(plot_svg, $(plot_args.legend_selector).find('svg'));
-            }
-            var xmlSerializer = new XMLSerializer();
-            var content = xmlSerializer.serializeToString(img_svg);
-            var width = img_svg.getAttribute('width') || 1495;
-            var height = img_svg.getAttribute('height') || 650;
-            svgString2Image(content, width, height, function(dataBlob){saveAs( dataBlob, 'plot.png' )});
+        else {
+            img_svg = getPlotSvgNode(plot_svg, $(plot_args.legend_selector).find('svg'));
         }
+        var xmlSerializer = new XMLSerializer();
+        var content = xmlSerializer.serializeToString(img_svg);
+        var width = img_svg.getAttribute('width') || 1495;
+        var height = img_svg.getAttribute('height') || 650;
+        svgString2Image(content, width, height, function (dataBlob) {
+            saveAs(dataBlob, 'plot.png')
+        });
     }
 
     function svgString2Image(svgString, width, height, callback) {

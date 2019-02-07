@@ -28,19 +28,21 @@ define(['jquery'], function($) {
         },
         get_min_max: function(data, selector) {
             var self=this;
-            return [Math.floor(d3.min(data, function(d) {
+            var min = d3.min(data, function(d) {
                 if (self.isValidNumber(d[selector])) {
                     return parseFloat(d[selector]);
                 } else {
-                    return 0
+                    return undefined;
                 }
-            })), Math.ceil(d3.max(data, function(d) {
+            });
+            var max = d3.max(data, function(d) {
                 if (self.isValidNumber(d[selector])) {
                     return parseFloat(d[selector]);
                 } else {
-                    return 0
+                    return undefined;
                 }
-            }))];
+            });
+            return [isNaN(min) ? 0 : Math.floor(min), isNaN(max) ? 0 : Math.ceil(max)];
         },
         values_only: function(data, attr) {
             var result = [];
@@ -298,14 +300,13 @@ define(['jquery'], function($) {
             this.hide_field_search_panel(obj);
         },
         get_no_legend_columns: function(name_list){
-            var max_len = 0;
+            var max_len = 1;
             for(var i=0; i<name_list.length; i++){
                 if(name_list[i].length > max_len){
                     max_len = name_list[i].length;
                 }
             }
-            console.log(Math.min(10, Math.floor(100/max_len)));
-            return Math.min(7, Math.floor(80/max_len));
+            return Math.min(7, Math.ceil(80/max_len));
         }
     }
 });
