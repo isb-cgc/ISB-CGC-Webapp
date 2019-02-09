@@ -306,7 +306,7 @@ define([
         var donor_track_count_max = view_data['donor_track_count_max'];
         var plot;
         if (donor_data_list && gene_data_list && observation_data_list) {
-            plot = oncogrid_obj.createOncogridPlot(plot_selector, donor_data_list, gene_data_list, observation_data_list, donor_track_count_max);
+            plot = oncogrid_obj.createOncogridPlot(donor_data_list, gene_data_list, observation_data_list, donor_track_count_max);
         }
         else {
             var message = "The selected cohorts have no somatic mutations in the gene ";

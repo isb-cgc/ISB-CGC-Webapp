@@ -17,10 +17,7 @@
  */
 define (['jquery', 'oncogridjs'],
     function ($, oncogridjs) {
-    var grid;
-    var active_plot_div;
-    //var fullscreen = false;
-
+    const active_plot_selector = '.worksheet.active .plot-div';
     const default_track_template = '<div class="wrapper">{{displayId}}<br>{{displayName}}: {{displayValue}}</div>';
     const datatype_track_template = '<div class="wrapper">{{displayId}}<br>{{displayName}}: {{displayValue}} file(s)</div>';
     const sortByString = function (field) {
@@ -230,7 +227,7 @@ define (['jquery', 'oncogridjs'],
 
     function initParams(donors, genes, observations, donorTracks, donor_track_dd_max, gene_track_ca_max){
         var params = {};
-        params.element = '.worksheet.active .grid-div';
+        params.element = active_plot_selector+' .grid-div';
         params.margin = { top: 40, right: 110, bottom: 150, left: 70 };
         params.height = 200;
         params.width = 700;
@@ -299,9 +296,7 @@ define (['jquery', 'oncogridjs'],
         return params;
     }
 
-    var updateOncogrid = function(plot_selector, donors, genes, observations, donor_track_count_max){
-
-        active_plot_div = $(plot_selector).find('.oncogrid-screen')[0];
+    var updateOncogrid = function(donors, genes, observations, donor_track_count_max){
         var donor_track_dd_max = donor_track_count_max['days_to_death'];
         var donorTracks =[];
         //do not add donor tracks with no counts
@@ -317,45 +312,38 @@ define (['jquery', 'oncogridjs'],
             gene_track_ca_max = Math.max(gene_track_ca_max, genes[i]['case_score']);
         }
         var grid_params = initParams(donors, genes, observations, donorTracks, donor_track_dd_max, gene_track_ca_max);
-        grid = new OncoGrid(grid_params);
+        var grid = new OncoGrid(grid_params);
+        $(active_plot_selector).find('#grid-data').data('grid-data', grid);
         grid.render();
-        updateToolBar();
+        updateToolBar(grid);
 
-        drawMainGridLegend('.worksheet.active .oncogrid-legend');
-        //drawSVGLegend - to be used for downloaded image files
-        drawSvgLegend('.worksheet.active .svg-track-legend', obs_legends, 'Mutation', 20);
-        drawSvgLegend('.worksheet.active .svg-track-legend', clinical_legend, 'Clinical', 140, donor_track_dd_max, gene_track_ca_max);
-        drawSvgLegend('.worksheet.active .svg-track-legend', data_type_legend, 'Data Type', 415);
-        drawSvgLegend('.worksheet.active .svg-track-legend', gdc_legend, 'GDC', 535, donor_track_dd_max, gene_track_ca_max);
-        drawSvgLegend('.worksheet.active .svg-track-legend', cgc_legend, 'Gene Set', 575);
+        drawMainGridLegend(active_plot_selector+' .oncogrid-legend');
+        drawSvgLegend(active_plot_selector+' .svg-track-legend', obs_legends, 'Mutation', 20);
+        drawSvgLegend(active_plot_selector+' .svg-track-legend', clinical_legend, 'Clinical', 140, donor_track_dd_max, gene_track_ca_max);
+        drawSvgLegend(active_plot_selector+' .svg-track-legend', data_type_legend, 'Data Type', 415);
+        drawSvgLegend(active_plot_selector+' .svg-track-legend', gdc_legend, 'GDC', 535, donor_track_dd_max, gene_track_ca_max);
+        drawSvgLegend(active_plot_selector+' .svg-track-legend', cgc_legend, 'Gene Set', 575);
 
-        // $('.oncogrid-toolbar').on('click', '.download', toggleDownloadSelection);
-        // $('.oncogrid-toolbar').on('click', '.oncogrid-download-selection div', oncogridDownload);
-        // $('.oncogrid-toolbar').on('click', '.reload', reload);
-        $('.worksheet.active .oncogrid-toolbar').on('click', '.cluster', function(){grid.cluster();});
-        $('.worksheet.active .oncogrid-toolbar').on('click', '.heatmap-toggle', toggleHeatmap);
-        $('.worksheet.active .oncogrid-toolbar').on('click', '.grid-toggle', toggleGridLines);
-        $('.worksheet.active .oncogrid-toolbar').on('click', '.crosshair-toggle', toggleCrosshair);
-
+        $(active_plot_selector).find('.oncogrid-toolbar').on('click', '.cluster', cluster);
+        $(active_plot_selector).find('.oncogrid-toolbar').on('click', '.heatmap-toggle',toggleHeatmap);
+        $(active_plot_selector).find('.oncogrid-toolbar').on('click', '.grid-toggle', toggleGridLines);
+        $(active_plot_selector).find('.oncogrid-toolbar').on('click', '.crosshair-toggle', toggleCrosshair);
         //events
-        $('.worksheet.active .oncogrid-button')
+        $(active_plot_selector).find('.oncogrid-button')
             .on('mouseover', function (e) {
-                var tooltip_div = $('.worksheet.active .og-tooltip-oncogrid');
+                var tooltip_div = $(active_plot_selector).find('.og-tooltip-oncogrid');
                 tooltip_div.html('<div class="wrapper">' + $(this).find('.button-text').html() + '</div>');
                 tooltip_div
-                    .css('left', ($(this).offset().left - $('.worksheet.active .plot-div').offset().left +20)+"px")
-                    .css('top', ($(this).offset().top - $('.worksheet.active .plot-div').offset().top -28)+"px")
+                    .css('left', ($(this).offset().left - $(active_plot_selector).offset().left +20)+"px")
+                    .css('top', ($(this).offset().top - $(active_plot_selector).offset().top -28)+"px")
                     .css('opacity',0.9);
             })
             .on('mouseout', function () {
-                var tooltip_div = $('.worksheet.active .og-tooltip-oncogrid');
+                var tooltip_div = $(active_plot_selector).find('.og-tooltip-oncogrid');
                 tooltip_div
                     .css('opacity', 0);
             });
-
-        // $(document).click(hideDownloadSelection);
-
-        $(active_plot_div).find('.oncogrid-header').removeClass('hidden');
+        $(active_plot_selector).find('.oncogrid-header').removeClass('hidden');
     };
 
 
@@ -532,31 +520,6 @@ define (['jquery', 'oncogridjs'],
     }
 
 
-
-    // var hideDownloadSelection = function(e){
-    //     $(active_plot_div).find('.oncogrid-download-selection').addClass('hidden');
-    // };
-
-    // var toggleDownloadSelection = function(e){
-    //     e.stopPropagation();
-    //     $(active_plot_div).find('.oncogrid-download-selection').toggleClass('hidden');
-    // };
-
-    // var oncogridDownload = function(){
-    //     var download_type = $(this).html();
-    //     switch(download_type){
-    //         case 'SVG':
-    //             download_svg();
-    //             break;
-    //         case 'PNG':
-    //             download_png();
-    //             break;
-    //         case 'JSON':
-    //             download_json();
-    //             break;
-    //     }
-    // };
-
     function getOncoGridSvgNode(){
         var legend_svg_width = 350;
         var svg_css = 'svg { font-size: 10px; font-family: "proxima-nova", Arial, sans-serif; background-color: #fff; } ' +
@@ -564,8 +527,8 @@ define (['jquery', 'oncogridjs'],
             '.og-track-group-label { font-size: 14px; } ' +
             'line { stroke: grey; stroke-opacity: 0.5; shape-rendering: crispEdges; } ';
 
-        var svg = $(active_plot_div).find('svg#og-maingrid-svg').clone();
-        var canvas = $(active_plot_div).find('canvas');
+        var svg = $(active_plot_selector).find('svg#og-maingrid-svg').clone();
+        var canvas = $(active_plot_selector).find('canvas');
 
         svg.attr('width', parseInt(canvas.attr('width'))+legend_svg_width);
         svg.attr('height',canvas.attr('height'));
@@ -574,12 +537,11 @@ define (['jquery', 'oncogridjs'],
         svg.prepend('<style>');
         svg.find('style').append(svg_css);
 
-        var track_legends = $(active_plot_div).find('.svg-track-legend svg').clone();
+        var track_legends = $(active_plot_selector).find('.svg-track-legend svg').clone();
         track_legends.attr('x', canvas.attr('width'));
         for(var i=0; i <track_legends.length; i++){
             svg.append(track_legends[i]);
         }
-        //console.log(svg);
         return svg;
     }
 
@@ -605,19 +567,17 @@ define (['jquery', 'oncogridjs'],
     }
 
     function get_plot_data() {
-        return {
-            'genes' : grid.params.genes,
-            'occurence': grid.params.observations,
-            'cases' : grid.params.donors,
-            'totalCases': grid.params.donors.length
-        };
-    }
-
-    function download_json(){
-
-        var content = JSON.stringify(get_plot_data());
-        var blob = new Blob([content], {type: 'application/json'});
-		saveAs(blob, 'oncogrid.json');
+        var grid = $(active_plot_selector).find('#grid-data').data('grid-data');
+        var plot_data = {}
+        if(grid){
+            plot_data = {
+                'genes' : grid.params.genes,
+                'occurence': grid.params.observations,
+                'cases' : grid.params.donors,
+                'totalCases': grid.params.donors.length
+            };
+        }
+        return plot_data;
     }
 
     function svgString2Image(svgString, width, height, callback) {
@@ -639,38 +599,51 @@ define (['jquery', 'oncogridjs'],
     }
 
     var reload = function(){
-        grid.destroy();
+        var grid = $(active_plot_selector).find('#grid-data').data('grid-data');
+        if(grid) {
+            grid.destroy();
+        }
         grid = new OncoGrid(grid.params);
+        $(active_plot_selector).find('#grid-data').data('grid-data', grid);
         grid.render();
-        updateToolBar();
+        updateToolBar(grid);
     };
 
-    function updateToolBar() {
-        $(active_plot_div).find('.heatmap-toggle').toggleClass('active', grid.heatMapMode);
-        $(active_plot_div).find('.grid-toggle').toggleClass('active', grid.drawGridLines);
-        $(active_plot_div).find('.crosshair-toggle').toggleClass('active', grid.crosshairMode);
+    function updateToolBar(grid) {
+        if(grid){
+            $(active_plot_selector).find('.heatmap-toggle').toggleClass('active', grid.heatMapMode);
+            $(active_plot_selector).find('.grid-toggle').toggleClass('active', grid.drawGridLines);
+            $(active_plot_selector).find('.crosshair-toggle').toggleClass('active', grid.crosshairMode);
+        }
     }
 
+    var cluster = function(){
+        var grid = $(active_plot_selector).find('#grid-data').data('grid-data');
+        grid.cluster();
+    };
 
     var toggleHeatmap = function(){
+        var grid = $(active_plot_selector).find('#grid-data').data('grid-data');
         grid.toggleHeatmap();
-        $(active_plot_div).find('.heatmap-toggle').toggleClass('active', grid.heatMapMode);
+        $(active_plot_selector).find('.heatmap-toggle').toggleClass('active', grid.heatMapMode);
     };
 
     var toggleGridLines = function(){
+        var grid = $(active_plot_selector).find('#grid-data').data('grid-data');
         grid.toggleGridLines();
-        $(active_plot_div).find('.grid-toggle').toggleClass('active', grid.drawGridLines);
+        $(active_plot_selector).find('.grid-toggle').toggleClass('active', grid.drawGridLines);
     };
 
     var toggleCrosshair = function(){
+        var grid = $(active_plot_selector).find('#grid-data').data('grid-data');
         grid.toggleCrosshair();
-        $(active_plot_div).find('.crosshair-toggle').toggleClass('active', grid.crosshairMode);
+        $(active_plot_selector).find('.crosshair-toggle').toggleClass('active', grid.crosshairMode);
     };
 
     return {
-        createOncogridPlot: function (plot_selector, donor_data, gene_data, observation_data, donor_track_count_max){
+        createOncogridPlot: function (donor_data, gene_data, observation_data, donor_track_count_max){
             if (donor_data.length > 0 && gene_data.length > 0 && observation_data.length) {
-                updateOncogrid(plot_selector, donor_data, gene_data, observation_data, donor_track_count_max);
+                updateOncogrid(donor_data, gene_data, observation_data, donor_track_count_max);
             }
             return {
                 plot_data: get_plot_data,

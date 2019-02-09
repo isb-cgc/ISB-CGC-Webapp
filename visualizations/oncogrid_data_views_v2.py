@@ -335,7 +335,7 @@ def create_oncogrid_bq_statement(type, genomic_build, project_set, cohort_ids, g
     sm_dataset_name = program_data_tables.bq_dataset
     sm_table_name = bq_sm_table_info['table']
     md_dataset_name = program_data_tables.bq_dataset
-    md_table_name = program_data_tables.data_table
+    md_table_name = program_data_tables.data_table.lower()
     bc_dataset_name = program_metadata_tables.bq_dataset
     bc_table_name = program_metadata_tables.clin_bq_table
 
