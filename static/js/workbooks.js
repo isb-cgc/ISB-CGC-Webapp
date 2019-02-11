@@ -34,7 +34,7 @@ require.config({
         vizhelpers: 'helpers/vis_helpers',
         select2: 'libs/select2.min',
         oncoprintjs: 'libs/oncoprint.bundle',
-        //oncogridjs: 'libs/oncogrid-debug',
+        // oncogridjs: 'libs/oncogrid-debug',
         oncogridjs: 'libs/oncogrid.min',
         geneticrules: 'libs/geneticrules',
         canvas_toBlob: 'libs/canvas-toBlob',

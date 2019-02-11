@@ -169,13 +169,13 @@
                                     <button type="submit">OncoPrint</button>
                                 </form>
                             </li>
-{#                            <li class="menu-item">#}
-{#                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">#}
-{#                                    {% csrf_token %}#}
-{#                                    <input type="hidden" name="analysis" value="OncoGrid">#}
-{#                                    <button type="submit">OncoGrid</button>#}
-{#                                </form>#}
-{#                            </li>#}
+                            <li class="menu-item">
+                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="analysis" value="OncoGrid">
+                                    <button type="submit">OncoGrid</button>
+                                </form>
+                            </li>
                         </ul>
                     </li>
                     <li class="menu-item"><a href="{% url 'sample_analyses' %}">Browse All Analyses</a></li>
