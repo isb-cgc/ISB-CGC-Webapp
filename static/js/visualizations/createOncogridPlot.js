@@ -237,7 +237,7 @@ define (['jquery', 'oncogridjs'],
         params.donorFillFunc = donorFill;
         params.donors = donors;
         params.donorTracks = donorTracks;
-        params.grid = true;
+        params.grid = false;
         params.geneHistogramClick = function(){return;};
         params.donorHistogramClick = function(){return;};
         params.geneClick  = function(){return;};
