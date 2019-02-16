@@ -677,7 +677,7 @@ span.code
     font-family: monospace
     font-weight: 600
 
-#camic, #camic-single, #dicom-viewer, #path-report-viewer
+.viewer
     .camic-tabs
         li a
             font-size: 13px
@@ -686,10 +686,18 @@ span.code
             margin-bottom: 10px
         img
             margin-top: 5px
-    iframe
-        min-height: 700px
-        margin-top: 10px
-
+    .iframe-container
+        width: 100%
+        &.fullscreen
+            .btn-float
+                right: 25px
+            iframe, .load-spinner
+                height: 100vh
+                margin-top: 0
+        iframe, .load-spinner
+            min-height: 700px
+            margin-top: 10px
+            width: 100%
     .logo
         margin-right: 10px
 
@@ -700,9 +708,6 @@ span.code
 
     .load-spinner
         position: absolute
-        width: 100%
-        height: 900px
-        margin-top: 12px
         background: rgb(130, 158, 188)
         z-index: 10
         i
@@ -711,6 +716,13 @@ span.code
             top: 40%
             margin: auto
             font-size: 100px
+
+#camic, #camic-single, #path-report-viewer
+    .fullscreen .btn-float
+        top: 60px
+#dicom-viewer
+    .fullscreen .btn-float
+        top: 40px
 
 #camic-single
     .container
