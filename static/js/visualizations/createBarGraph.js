@@ -331,7 +331,7 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 }
             });
 
-            function get_plot_data(){
+            function get_json_data(){
                 var p_data = {};
                 data.map(function(d, i){
                     p_data[i] = d;
@@ -339,8 +339,17 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 return p_data;
             }
 
+            function get_csv_data(){
+                var csv_data = "value, count\n";
+                data.map(function(d){
+                    csv_data += d['value'] +', '+ d['count'] + '\n';
+                });
+                return csv_data;
+            }
+
             return {
-                plot_data: get_plot_data,
+                get_json: get_json_data,
+                get_csv: get_csv_data,
                 resize                : resize,
                 check_selection_state : check_selection_state_wrapper
             }

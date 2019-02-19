@@ -607,7 +607,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 check_selection_state(bool);
             }
 
-            function get_plot_data(){
+            function get_json_data(){
                 var p_data = {};
                 raw_Data.map(function(d, i){
                     if(helpers.isValidNumber(d[yAttr])) {
@@ -615,17 +615,26 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                         p_data[i]['case_id'] = d['case_id'];
                         p_data[i]['sample_id'] = d['sample_id'];
                         p_data[i][xAttr] = d[xAttr];
-                        p_data[i][yAttr] = Number(d[yAttr]);
+                        p_data[i][yAttr] = isNaN(d[yAttr])? d[yAttr] : Number(d[yAttr]);
                         p_data[i][legend_title] = colorBy == 'cohort' ? cohort_map[d[colorBy]]: d[colorBy];
                     }
                 });
                 return p_data;
             }
 
+            function get_csv_data(){
+                var csv_data = 'case_id, sample_id, '+xAttr+', '+yAttr+', '+legend_title+'\n';
+                raw_Data.map(function(d){
+                    csv_data += d['case_id'] +', '+ d['sample_id'] + ', ' + d[xAttr] + ', '+ d[yAttr] +', '+ (colorBy == 'cohort' ? cohort_map[d[colorBy]]: d[colorBy])+ '\n';
+                });
+                return csv_data;
+            }
+
             return {
-                plot_data: get_plot_data,
-                resize                : resize,
-                check_selection_state : check_selection_state_wrapper
+                get_json: get_json_data,
+                get_csv: get_csv_data,
+                resize: resize,
+                check_selection_state: check_selection_state_wrapper
             }
         }
     };

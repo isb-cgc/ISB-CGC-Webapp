@@ -410,7 +410,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 check_selection_state(bool);
             }
 
-            function get_plot_data(){
+            function get_json_data(){
                 var p_data = {};
                 data.map(function(d, i){
                     p_data[i]= {};
@@ -423,10 +423,19 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 return p_data;
             }
 
+            function get_csv_data(){
+                var csv_data = 'case_id, sample_id, '+xParam+', '+yParam+', '+legend_title+'\n';
+                data.map(function(d){
+                    csv_data += d['case_id'] +', '+ d['sample_id'] + ', ' + xVal(d) + ', '+ yVal(d) +', '+ (colorBy == 'cohort' ? cohort_map[d[colorBy]]: d[colorBy])+ '\n';
+                });
+                return csv_data;
+            }
+
             return {
-                plot_data: get_plot_data,
-                resize                : resize,
-                check_selection_state : check_selection_state_wrapper
+                get_json: get_json_data,
+                get_csv: get_csv_data,
+                resize: resize,
+                check_selection_state: check_selection_state_wrapper
             }
         }
     };

@@ -196,12 +196,18 @@ require([
         plotFactory.redraw_plot();
     });
 
-    $('.data-download').on('click', function () {
-        var plot_data = $('.worksheet.active .plot-args').data('plot-data');
+    $('.json-download').on('click', function () {
+        var plot_data = $('.worksheet.active .plot-args').data('plot-json');
         var json =  JSON.stringify(plot_data());
         var type = "text/json;charset=utf-8";
         var blob = new Blob([json], {type: type});
 		saveAs(blob, 'plot_data.json');
+    });
+
+    $('.csv-download').on('click', function () {
+        var plot_data = $('.worksheet.active .plot-args').data('plot-csv');
+        var blob = new Blob(["\ufeff", plot_data()]);
+		saveAs(blob, 'plot_data.csv');
     });
 
     $('.svg-download').on('click', function () {
@@ -1277,6 +1283,7 @@ require([
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
 
         var toggle_selection_selector = '#' + args.worksheet_id + ' .toggle-selection';
+        var csv_download_selector = '#' + args.worksheet_id + ' .csv-download';
         $(legend_selector).hide();
         turn_off_toggle_selector();
 
@@ -1293,9 +1300,11 @@ require([
         //hide 'Enable Sample Selection for Oncoprint and SeqPeek'
         if (args.type === 'SeqPeek' || args.type === 'OncoPrint' || args.type === 'OncoGrid') {
             $(toggle_selection_selector).hide();
+            $(csv_download_selector).hide();
         }
         else {
             $(toggle_selection_selector).show();
+            $(csv_download_selector).show();
         }
 
         if(args.type === 'OncoGrid'){
