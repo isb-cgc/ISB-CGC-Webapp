@@ -19,6 +19,7 @@ fi
 echo "Preparing System..."
 apt-get -y --force-yes install software-properties-common
 if [ -n "$CI" ]; then
+    apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 1550412832
     wget https://dev.mysql.com/get/mysql-apt-config_0.8.9-1_all.deb
     apt-get install -y lsb-release
     dpkg -i mysql-apt-config_0.8.9-1_all.deb
