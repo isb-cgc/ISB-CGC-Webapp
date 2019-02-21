@@ -14,6 +14,9 @@ mkdir ./txt
 
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/${STATIC_COMMIT_CHECK_FILE}" ./
 
+#mysql build key file
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/mysql_build_key.txt" ./mysql_pubkey.asc
+
 # Pack staged files for caching
 echo "Packing JSON and text files for caching into deployment..."
 cp --verbose *.json ./json

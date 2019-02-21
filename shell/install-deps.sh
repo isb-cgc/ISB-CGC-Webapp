@@ -19,11 +19,7 @@ fi
 echo "Preparing System..."
 apt-get -y --force-yes install software-properties-common
 if [ -n "$CI" ]; then
-    #apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 5072E1F5
-    #echo $(apt-key list |grep 'expired') | tee -a /dev/tty | grep bar
-    echo "apt key list"
-    apt-key list
-    echo "apt key list end"
+    gpg --import mysql_pubkey.asc
     wget https://dev.mysql.com/get/mysql-apt-config_0.8.9-1_all.deb
     apt-get install -y lsb-release
     dpkg -i mysql-apt-config_0.8.9-1_all.deb
