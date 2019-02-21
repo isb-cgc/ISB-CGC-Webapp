@@ -25,6 +25,7 @@ fi
 # Install and update apt-get info
 
 echo "Preparing System..."
+apt-get update -qq
 apt-get -y --force-yes install software-properties-common
 if [ -n "$CI" ]; then
     #echo 'delete old key'
@@ -36,7 +37,7 @@ if [ -n "$CI" ]; then
     #echo 'mysql buid key import process done.'
     wget https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
     apt-get install -y lsb-release
-    apt-get install libmysqlclient20
+    apt-get install libmysqlclient-dev
     dpkg -i mysql-apt-config_0.8.12-1_all.deb
     apt-get update -qq
 
