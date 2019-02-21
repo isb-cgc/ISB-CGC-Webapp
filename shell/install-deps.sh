@@ -19,7 +19,11 @@ fi
 echo "Preparing System..."
 apt-get -y --force-yes install software-properties-common
 if [ -n "$CI" ]; then
+    echo 'download mysql public build key'
+    wget -O - -q 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x8C718D3B5072E1F5' | grep -v '>' | grep -v '<' | grep -v '{' > mysql_pubkey.asc
+    echo 'import mysql public build key'
     gpg --import mysql_pubkey.asc
+    echo 'mysql buid key import process done.'
     wget https://dev.mysql.com/get/mysql-apt-config_0.8.9-1_all.deb
     apt-get install -y lsb-release
     dpkg -i mysql-apt-config_0.8.9-1_all.deb
