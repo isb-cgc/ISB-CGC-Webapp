@@ -16,6 +16,7 @@ else
 fi
 
 # Install and update apt-get info
+
 echo "Preparing System..."
 apt-get -y --force-yes install software-properties-common
 if [ -n "$CI" ]; then
@@ -28,7 +29,7 @@ if [ -n "$CI" ]; then
     #echo 'mysql buid key import process done.'
     wget https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
     apt-get install -y lsb-release
-    dpkg -i  mysql-apt-config_0.8.12-1_all.deb
+    dpkg -L  mysql-apt-config_0.8.12-1_all.deb
     apt-get update -qq
 else
     # Add apt-get repository to update python from 2.7.6 (default) to latest 2.7.x
