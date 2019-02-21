@@ -1,8 +1,9 @@
 if [ -n "$CI" ]; then
     export HOME=/home/circleci/${CIRCLE_PROJECT_REPONAME}
     export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
-    echo $PATH
-    export PATH=$PATH
+    export LD_LIBRARY_PATH=/var/lib/mysql
+    echo 'grep mysql library path'
+    grep -r datadir /etc/mysql/
 
     # Clone dependencies
     git clone -b master https://github.com/isb-cgc/ISB-CGC-Common.git
@@ -32,7 +33,7 @@ if [ -n "$CI" ]; then
     wget https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
     apt-get install -y lsb-release
     dpkg -i mysql-apt-config_0.8.12-1_all.deb
-    dpkg --contents mysql-apt-config_0.8.12-1_all.deb
+
     apt-get update -qq
     #apt-get install python-dev default-libmysqlclient-dev
 
