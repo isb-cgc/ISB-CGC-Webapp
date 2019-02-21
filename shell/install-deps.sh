@@ -1,13 +1,6 @@
 if [ -n "$CI" ]; then
     export HOME=/home/circleci/${CIRCLE_PROJECT_REPONAME}
     export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
-    echo '$path'
-    echo $PATH
-    echo '$ld_library_path'
-    echo $LD_LIBRARY_PATH
-    #export LD_LIBRARY_PATH=/var/lib/mysql
-    #echo 'grep mysql library path'
-    #grep -r datadir /etc/mysql/
 
     # Clone dependencies
     git clone -b master https://github.com/isb-cgc/ISB-CGC-Common.git
@@ -37,10 +30,11 @@ if [ -n "$CI" ]; then
     #echo 'mysql buid key import process done.'
     wget https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
     apt-get install -y lsb-release
-    apt-get install libmysqlclient-dev
     dpkg -i mysql-apt-config_0.8.12-1_all.deb
     apt-get update -qq
-
+    pip uninstall mysql-python
+    apt-get install python-dev default-libmysqlclient-dev
+    pip install mysql-python
 else
     # Add apt-get repository to update python from 2.7.6 (default) to latest 2.7.x
     echo "Installing Python 2.7..."
