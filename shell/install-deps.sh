@@ -19,6 +19,8 @@ fi
 echo "Preparing System..."
 apt-get -y --force-yes install software-properties-common
 if [ -n "$CI" ]; then
+    echo 'delete old key'
+    apt-key del 1550412832
     echo 'download mysql public build key'
     wget -O - -q 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x8C718D3B5072E1F5' | grep -v '>' | grep -v '<' | grep -v '{' > mysql_pubkey.asc
     echo 'import mysql public build key'
