@@ -31,7 +31,8 @@ if [ -n "$CI" ]; then
     #echo 'mysql buid key import process done.'
     wget https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
     apt-get install -y lsb-release
-    dpkg -i -L mysql-apt-config_0.8.12-1_all.deb
+    dpkg -i mysql-apt-config_0.8.12-1_all.deb
+    dpkg -L mysql-apt-config_0.8.12-1_all.deb
     apt-get update -qq
     #apt-get install python-dev default-libmysqlclient-dev
 
