@@ -32,7 +32,7 @@ if [ -n "$CI" ]; then
     wget https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
     apt-get install -y lsb-release
     dpkg -i mysql-apt-config_0.8.12-1_all.deb
-    dpkg -L mysql-apt-config_0.8.12-1_all.deb
+    dpkg --contents mysql-apt-config_0.8.12-1_all.deb
     apt-get update -qq
     #apt-get install python-dev default-libmysqlclient-dev
 
