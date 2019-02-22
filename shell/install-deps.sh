@@ -32,10 +32,10 @@ if [ -n "$CI" ]; then
     apt-get install -y lsb-release
     dpkg -i mysql-apt-config_0.8.12-1_all.deb
     apt-get update -qq
-    echo 'instal mysql-python pyton-dev default-libmysqlclient-dev'
+    echo 'install mysql-python pyton-dev default-libmysqlclient-dev'
     pip uninstall mysql-python
     apt-get install python-dev
-    apt-get default-libmysqlclient-dev
+    apt-get install default-libmysqlclient-dev
     pip install mysql-python
 else
     # Add apt-get repository to update python from 2.7.6 (default) to latest 2.7.x
