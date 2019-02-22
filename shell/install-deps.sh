@@ -16,29 +16,19 @@ else
 fi
 
 # Install and update apt-get info
-
 echo "Preparing System..."
-apt-get update -qq
 apt-get -y --force-yes install software-properties-common
 if [ -n "$CI" ]; then
-    #echo 'delete old key'
-    #apt-key del 1550412832
+    # Use these next 5 lines to update mysql public build key
     echo 'download mysql public build key'
+    apt-key del 1550412832
     wget -O - -q 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x8C718D3B5072E1F5' | grep -v '>' | grep -v '<' | grep -v '{' > mysql_pubkey.asc
     apt-key add mysql_pubkey.asc || exit 1
-    #echo 'import mysql public build key'
-    #gpg --import mysql_pubkey.asc
-    echo 'mysql buid key import process done.'
+    echo 'mysql build key update done.'
     wget https://dev.mysql.com/get/mysql-apt-config_0.8.9-1_all.deb
     apt-get install -y lsb-release
     dpkg -i mysql-apt-config_0.8.9-1_all.deb
     apt-get update -qq
-    #echo 'install mysql-python pyton-dev default-libmysqlclient-dev'
-    #pip install --upgrade pip
-    #pip uninstall mysql-python
-    #apt-get install python-dev
-    #apt-get install default-libmysqlclient-dev
-    #pip install mysql-python
 else
     # Add apt-get repository to update python from 2.7.6 (default) to latest 2.7.x
     echo "Installing Python 2.7..."
