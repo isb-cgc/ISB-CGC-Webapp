@@ -530,7 +530,7 @@ define([
             //store data
             //establish resize call to data
 
-            //d3.select(window).on('resize', visualization.plot.resize);
+            // d3.select(window).on('resize', visualization.plot.resize);
             (args.type == "Cubby Hole Plot" || args.color_by_sel) && $(args.legend_selector).show();
 
         } else if (args.type == "SeqPeek" && !data.message) {
@@ -557,7 +557,8 @@ define([
             $(args.legend_selector).hide();
         }
         if(visualization){
-            $('.worksheet.active .plot-args').data('plot-data', (visualization.plot && visualization.plot.plot_data) ? visualization.plot.plot_data : null);
+            $('.worksheet.active .plot-args').data('plot-json', (visualization.plot && visualization.plot.get_json) ? visualization.plot.get_json : null);
+            $('.worksheet.active .plot-args').data('plot-csv', (visualization.plot && visualization.plot.get_csv) ? visualization.plot.get_csv : null);
             $('.worksheet.active .plot-args').data('plot-svg', (visualization.svg) ? visualization.svg[0][0] : (visualization.plot && visualization.plot.get_svg) ?  visualization.plot.get_svg : null);
             $('.worksheet.active .plot-args').data('plot-redraw', (visualization.plot && visualization.plot.redraw) ? visualization.plot.redraw : null);
         }
