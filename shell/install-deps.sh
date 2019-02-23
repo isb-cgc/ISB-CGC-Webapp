@@ -19,9 +19,8 @@ fi
 echo "Preparing System..."
 apt-get -y --force-yes install software-properties-common
 if [ -n "$CI" ]; then
-    # Use these next 5 lines to update mysql public build key
+    # Use these next 4 lines to update mysql public build key
     echo 'download mysql public build key'
-    apt-key del 1550412832
     wget -O - -q 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x8C718D3B5072E1F5' | grep -v '>' | grep -v '<' | grep -v '{' > mysql_pubkey.asc
     apt-key add mysql_pubkey.asc || exit 1
     echo 'mysql build key update done.'

@@ -113,7 +113,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 }
                 return results;
             },
-            create_cubbyplot: function (svg, margin, data, domain, range, xLabel, yLabel, xParam, yParam, legend, view_width, view_height, plot_width, plot_height, cubby_size) {
+            create_cubbyplot: function (svg, margin, data, domain, range, xLabel, yLabel, xParam, yParam, legend, plot_width, plot_height, cubby_size) {
                 var plot_no_margin_width = plot_width - margin.left - margin.right;
                 var plot_no_margin_height = plot_height - margin.top - margin.bottom;
                 var x_band_width = plot_no_margin_width / domain.length;
@@ -162,7 +162,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 y_axis_area.append('clipPath')
                     .attr('id', y_axis_area_clip_id)
                     .append('rect')
-                    .attr('height', view_height < plot_no_margin_height ? view_height : plot_no_margin_height)
+                    .attr('height', plot_no_margin_height)
                     .attr('width', margin.left)
                     .attr('transform', 'translate(0, ' + +margin.top + ')');
 
@@ -170,12 +170,12 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 var x_axis_area = svg.append('g')
                     .attr('clip-path', 'url(#' + x_axis_area_clip_id + ')');
 
-                var x_axis_area_ypos = view_height < plot_no_margin_height ? (margin.top + view_height) : (margin.top + plot_no_margin_height);
+                var x_axis_area_ypos = margin.top + plot_no_margin_height;
                 x_axis_area.append('clipPath')
                     .attr('id', x_axis_area_clip_id)
                     .append('rect')
                     .attr('height', margin.bottom)
-                    .attr('width', view_width > plot_no_margin_width ? plot_no_margin_width : view_width)
+                    .attr('width', plot_no_margin_width)
                     .attr('transform', 'translate(' + margin.left + ',' + x_axis_area_ypos + ')');
 
                 x_axis_area.append('g')
@@ -197,10 +197,10 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 plot_area.append('clipPath')
                     .attr('id', plot_area_clip_id)
                     .append('rect')
-                    .attr('width', view_width < plot_no_margin_width ? view_width : plot_no_margin_width)
-                    .attr('height', view_height < plot_no_margin_height ? view_height : plot_no_margin_height);
+                    .attr('width', plot_no_margin_width)
+                    .attr('height', plot_no_margin_height);
 
-                var x_grid_height = view_height < plot_no_margin_height ? view_height : plot_no_margin_height;
+                var x_grid_height = plot_no_margin_height;
 
                 // append grid lines
                 plot_area.append("g")
@@ -215,86 +215,77 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                     .attr("class", "y grid")
                     .attr('transform', 'translate(0, -' + (Math.floor(cubby_size / 2)) + ')')
                     .call(make_y_axis()
-                        .tickSize(-view_width, 0, 0)
+                        .tickSize(-plot_no_margin_width, 0, 0)
                         .tickFormat("")
                     );
 
                 // Create secondary axes used for panning
                 var x2 = d3.scale.linear()
-                    .range([0, view_width])
-                    .domain([0, view_width]);
+                    .range([0, plot_no_margin_width])
+                    .domain([0, plot_no_margin_width]);
                 var y2 = d3.scale.linear()
-                    .range([0, view_height])
-                    .domain([0, view_height]);
+                    .range([0, plot_no_margin_height])
+                    .domain([0, plot_no_margin_height]);
 
-                var zoom_x = function () {
+
+
+                var zoomer = function () {
                     if (!selex_active) {
-                        svg.select('.x.grid').attr('transform', 'translate(' + (d3.event.translate[0] + x_band_width / 2) + ',' + x_grid_height + ')');
-                        svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + x_axis_area_ypos + ')').call(xAxis);
-                        plot_area.selectAll('.expected_fill').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
-                        plot_area.selectAll('text').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
+                        var scaled_tick_font_size =  d3.event.scale * scale_ratio * tick_font_size;
+
+                        svg.attr('width', plot_width * (d3.event.scale > 1 ? d3.event.scale : 1))
+                            .attr('height', plot_height * (d3.event.scale > 1 ? d3.event.scale : 1));
+
+                        svg.select('.x.grid').attr('transform', 'translate(' + (d3.event.translate[0] + x_band_width * d3.event.scale / 2) + ',' + (d3.event.scale*x_grid_height+d3.event.translate[1]) + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+                        svg.select('.x.axis')
+                            .attr('transform', 'translate(' +  (margin.left + d3.event.translate[0]) + ', ' + (margin.top+plot_no_margin_height*d3.event.scale) + ')')
+                            .selectAll('foreignObject')
+                            .attr('style', 'font-size:'+(scaled_tick_font_size>tick_font_size ? tick_font_size : scaled_tick_font_size)+'px; transform: rotate(30deg);')
+                            .attr('width', x_band_width*d3.event.scale);
+                        svg.select('.x.axis').call(xAxis.scale(x.rangeBands([0, plot_no_margin_width*d3.event.scale])));
+                        x_axis_area
+                            .select('clipPath')
+                            .select('rect')
+                            .attr('transform', 'translate(' +  (margin.left) + ', ' + (margin.top+plot_no_margin_height*d3.event.scale) + ')')
+                            .attr('width', plot_no_margin_width*d3.event.scale);
+                        svg.select('.y.axis-label')
+                            .attr('transform', 'rotate(-90) translate(-' + (margin.top + plot_no_margin_height * (d3.event.scale < 1 ? d3.event.scale : 1)/ 2) + ', 15)')
+
+                        svg.select('.y.grid')
+                            .attr('transform', 'translate(' + d3.event.translate[0] + ', ' + (d3.event.translate[1] - (y_band_width * d3.event.scale) / 2) + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+                        svg.select('.y.axis')
+                            .attr('transform', 'translate('+ margin.left +', ' + (margin.top + d3.event.translate[1])+')')
+                            .selectAll('foreignObject')
+                            .attr('style', 'font-size:'+(scaled_tick_font_size>tick_font_size ? tick_font_size : scaled_tick_font_size)+'px; transform: translate(-' + margin.left * 0.75 + 'px, -'+(y.rangeBand()*d3.event.scale / 2)+'px)')//, -' + (y.rangeBand() / 2) + 'px);');
+                            .select('div')
+                            .attr('style', 'display:table-cell;vertical-align:middle; text-align: right; padding: 0 10px; width: ' + margin.left * .75 + 'px; height: ' + y.rangeBand()*d3.event.scale + 'px;');
+                        y_axis_area
+                            .select('clipPath')
+                            .select('rect')
+                            .attr('height', plot_no_margin_height*d3.event.scale);
+                        y.rangeBands([0, plot_no_margin_height*d3.event.scale]);
+
+                        svg.select('.y.axis').call(yAxis);
+
+                        svg.select('.x.axis-label')
+                            .attr('transform', 'translate(' +  (margin.left + plot_no_margin_width * (d3.event.scale < 1 ? d3.event.scale : 1) / 2 )+ ', ' + (margin.top+110+plot_no_margin_height*d3.event.scale) + ')')
+
+                        plot_area.select('clipPath')
+                            .select('rect')
+                            .attr('width', plot_no_margin_width*d3.event.scale)
+                            .attr('height', plot_no_margin_height*d3.event.scale);
+                        plot_area.selectAll('.expected_fill').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+                        plot_area.selectAll('text').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
                     }
                 };
 
-                var zoom_y = function () {
-                    if (!selex_active) {
-                        svg.select('.y.axis').attr('transform', 'translate(' + margin.left + ',' + (margin.top + d3.event.translate[1]) + ')')
-                            .call(yAxis)
-                            .selectAll('text')
-                            .style('text-anchor', 'middle');
-                        svg.select('.y.grid').attr('transform', 'translate(0, ' + (d3.event.translate[1] + (Math.round((-cubby_size) / 2))) + ')');
 
-                        plot_area.selectAll('.expected_fill').attr('transform', 'translate(' + 0 + ',' + d3.event.translate[1] + ')');
-                        plot_area.selectAll('text').attr('transform', 'translate(' + 0 + ',' + d3.event.translate[1] + ')');
-                    }
-                };
-
-                var zoom_xy = function () {
-                    if (!selex_active) {
-                        svg.select('.x.grid').attr('transform', 'translate(' + (d3.event.translate[0] + x_band_width / 2) + ',' + x_grid_height + ')');
-                        svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + x_axis_area_ypos + ')').call(xAxis);
-
-                        svg.select('.y.axis').attr('transform', 'translate(' + margin.left + ',' + (margin.top + d3.event.translate[1]) + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')')
-                            .call(yAxis)
-                            .selectAll('text')
-                            .style('text-anchor', 'middle');
-                        svg.select('.y.grid').attr('transform', 'translate(0,' + (d3.event.translate[1] + (y_band_width * d3.event.scale) / 2) + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
-
-                        plot_area.selectAll('.expected_fill').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
-                        plot_area.selectAll('text').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
-                    }
-                };
-
-                var zoom_none = function () {
-                    return;
-                };
-
-                var zoom = null;
-                if (view_width < plot_no_margin_width && view_height < plot_no_margin_height) {
-                    zoom = d3.behavior.zoom()
-                        .x(x2)
-                        .scaleExtent([1, 1])
-                        .y(y2)
-                        .scaleExtent([1, 1])
-                        .on('zoom', zoom_xy);
-                } else if (view_width < plot_no_margin_width) {
-                    zoom = d3.behavior.zoom()
-                        .x(x2)
-                        .scaleExtent([1, 1])
-                        .on('zoom', zoom_x);
-                } else if (view_height < plot_no_margin_height) {
-                    zoom = d3.behavior.zoom()
-                        .y(y2)
-                        .scaleExtent([1, 1])
-                        .on('zoom', zoom_y);
-                } else {
-                    zoom = d3.behavior.zoom()
-                        .x(x2)
-                        .scaleExtent([1, 1])
-                        .y(y2)
-                        .scaleExtent([1, 1])
-                        .on('zoom', zoom_none);
-                }
+                var min_scale = 25/x_band_width;
+                var max_scale = 150/x_band_width;
+                var zoom = d3.behavior.zoom()
+                    .x(x2).scaleExtent([min_scale, max_scale])
+                    .y(y2).scaleExtent([min_scale, max_scale])
+                    .on('zoom', zoomer);
 
                 svg.call(zoom);
 
@@ -314,10 +305,10 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                     .attr('width', cubby_size - 1)
                     .attr('height', cubby_size - 1)
                     .attr('x', function (d) {
-                        return x(d['x']) + 1;
+                        return x(d['x'])+0.5;
                     })
                     .attr('y', function (d) {
-                        return y(d['y']) + 1;
+                        return y(d['y'])+0.5;
                     })
                     .on('click', function () {
                         if (selex_active) {
@@ -355,6 +346,9 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                         }
                     });
 
+                var font_size = 20;
+                var norm_cubby_size = 75;
+                var scale_ratio = cubby_size/norm_cubby_size > 1 ? 1 : cubby_size/norm_cubby_size;
                 plot_area.selectAll('.counts')
                     .data(data_counts)
                     .enter().append('text')
@@ -363,28 +357,28 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                         return x(d['x']) + x_band_width / 2;
                     })
                     .attr('y', function (d) {
-                        return y(d['y']) + y_band_width / 2 + 10;
+                        return y(d['y']) + y_band_width / 2 + 10*scale_ratio;
                     })
                     .attr('font-family', 'sans-serif')
-                    .attr('font-size', '20px')
+                    .attr('font-size', (scale_ratio*font_size)+'px')
                     .attr('fill', 'black')
                     .attr('text-anchor', 'middle')
                     .text(function (d) {
                         return d['total'];
                     });
-
+                var expected_font_size = 14;
                 plot_area.selectAll('.expected_counts')
                     .data(data_counts)
                     .enter().append('text')
                     .attr('class', 'expected_counts')
                     .attr('x', function (d) {
-                        return x(d['x']) + 25;
+                        return x(d['x']) + 25*scale_ratio;
                     })
                     .attr('y', function (d) {
-                        return y(d['y']) + 20;
+                        return y(d['y']) + 20*scale_ratio;
                     })
                     .attr('font-family', 'sans-serif')
-                    .attr('font-size', '14px')
+                    .attr('font-size', (scale_ratio*expected_font_size)+'px')
                     .attr('fill', 'black')
                     .attr('text-anchor', 'middle')
                     .text(function (d) {
@@ -446,39 +440,45 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
 
                 plot_area.call(tip);
                 // append axes labels
-                var xAxisXPos = margin.left + (view_width > plot_no_margin_width ? plot_no_margin_width : view_width) / 2;
-                var xAxisYPos = view_height > plot_no_margin_height ?
-                    (margin.top + plot_no_margin_height + 110) : margin.top + view_height + 100;
+                var xAxisXPos = margin.left + plot_no_margin_width / 2;
+                var xAxisYPos = margin.top + plot_no_margin_height + 110;
+
                 svg.append('text')
-                    .attr('class', 'axis-label')
+                    .attr('class', 'x axis-label')
                     .attr('text-anchor', 'middle')
                     .attr('transform', 'translate(' + xAxisXPos + ',' + xAxisYPos + ')')
                     .text(xLabel);
 
-                var yAxisXPos = margin.top + (view_height > plot_no_margin_height ? plot_no_margin_height : view_height) / 2;
+                var yAxisXPos = margin.top + plot_no_margin_height / 2;
+                var tick_font_size = 16;
                 svg.append('text')
-                    .attr('class', 'axis-label')
+                    .attr('class', 'y axis-label')
                     .attr('text-anchor', 'middle')
                     .attr('transform', 'rotate(-90) translate(-' + yAxisXPos + ', 15)')
                     .text(yLabel);
 
                 // Wrap our value labels
                 svg.select('.x.axis').selectAll('text').call(d3textwrap.textwrap().bounds({
-                    width: x.rangeBand(),
+                    width: x_band_width,
                     height: margin.bottom * 0.75
                 }));
                 svg.select('.x.axis')
                     .selectAll('foreignObject')
-                    .attr('style', 'transform: rotate(30deg);');
+                    .attr('style', 'font-size:'+(scale_ratio*tick_font_size)+'px; transform: rotate(30deg);')
+                    .selectAll('div')
+                    .attr('title', function(d){ return d; });
 
                 svg.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({
                     width: margin.left * 0.75,
-                    height: y.rangeBand()
+                    height: y_band_width
                 }));
                 svg.select('.y.axis')
                     .selectAll('foreignObject')
-                    .attr('style', 'transform: translate(-' + margin.left * 0.75 + 'px, -' + y.rangeBand() / 2 + 'px);')// height:'+y.rangeBand()+'px;');
-                svg.select('.y.axis').selectAll('foreignObject div').attr('style', 'display:table-cell;vertical-align:middle; text-align: right; padding: 0 10px; width: ' + margin.left * .75 + 'px; height: ' + y.rangeBand() + 'px;')
+                    .attr('style', 'font-size:'+(scale_ratio*tick_font_size)+'px; transform: translate(-' + margin.left * 0.75 + 'px, -' + y.rangeBand() / 2 + 'px);')
+                svg.select('.y.axis')
+                    .selectAll('foreignObject div')
+                    .attr('title', function(d){ return d; })
+                    .attr('style', 'display:table-cell;vertical-align:middle; text-align: right; padding: 0 10px; width: ' + margin.left * .75 + 'px; height: ' + y.rangeBand() + 'px;')
 
                 var check_selection_state = function (obj) {
                     selex_active = !!obj;
@@ -486,6 +486,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                         // Disable zooming events and store their status
                         svg.on('.zoom', null);
                         zoom_status.translation = zoom.translate();
+                        zoom_status.scale = zoom.scale();
                         $('.save-cohort-card').attr('style', 'position: absolute; top: ' + ($('.worksheet-content').outerHeight() - $('.plot-container').outerHeight())
                             + 'px; left: 275px;');
                         $('.save-cohort-card').show();
@@ -493,8 +494,9 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                         // Resume zooming, restoring the zoom's last state
                         svg.call(zoom);
                         zoom_status.translation && zoom.translate(zoom_status.translation);
+                        zoom_status.scale && zoom.scale(zoom_status.scale);
                         zoom_status.translation = null;
-
+                        zoom_status.scale = null;
                         var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                         // Clear selections
                         $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);

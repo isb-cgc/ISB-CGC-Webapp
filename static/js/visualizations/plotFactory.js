@@ -145,9 +145,8 @@ define([
     function generate_violin_plot(margin, plot_selector, legend_selector, legend_title, height, width, x_attr, y_attr, color_by, cohort_map, data, units, logTransform) {
         var violin_width = 200;
         var tmp = helpers.get_min_max(data, 'y');
-        var padding = (tmp[1]-tmp[0])*.05;
-        var min_n = tmp[0] - padding;
-        var max_n = tmp[1] + padding;
+        var min_n = tmp[0];
+        var max_n = tmp[1];
         var legend = d3.select(legend_selector)
             .append('svg')
             .attr('width', 850);
@@ -214,7 +213,7 @@ define([
     function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, data, units) {
         var margin = {top: 10, bottom: 115, left: 140, right: 20};
         var cubby_max_size = 150; // max cubby size
-        var cubby_min_size = 75; // min cubby size
+        var cubby_min_size = 25; // min cubby size
         var view_width = width-margin.left-margin.right;
         var view_height = height-margin.top-margin.bottom;
         var xdomain = helpers.get_domain(data, 'x');
@@ -228,8 +227,8 @@ define([
         var plot_height = ydomain.length * cubby_size + margin.top + margin.bottom;
         var svg = d3.select(plot_selector)
             .append('svg')
-            .attr('width', (width < plot_width ? width : plot_width))
-            .attr('height', (height < plot_height ? height : plot_height));
+            .attr('width', plot_width)
+            .attr('height', plot_height);
 
         var plot = cubby_plot_obj.create_cubbyplot(
             svg,
@@ -242,8 +241,6 @@ define([
             'x',
             'y',
             legend,
-            view_width,
-            view_height,
             plot_width,
             plot_height,
             cubby_size
