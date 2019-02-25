@@ -37,7 +37,7 @@ else
 fi
 
 echo "Checking build image type..."
-uname -s
+uname -a
 
 # Install apt-get dependencies
 echo "Installing Dependencies..."
