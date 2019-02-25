@@ -36,13 +36,16 @@
 {% block content %}
 
     <div id="camic-div" class="row">
-        <div id="camic-viewer">
+        <div id="camic-viewer" class="viewer">
             <div class="data-tab-content-panel">
                 <div class="panel panel-default">
                     <div class="panel-body">
                         <div class="iframe-container">
+                            <div class="btn-float toggle-fullscreen" title="Toggle full screen">
+                                <i class="fa fa-expand"></i>
+                            </div>
                             <div class="load-spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                            <iframe id="camic-iframe" width="100%" src="https://{{ camic_viewer }}/camicroscope/osdCamicroscope.php?slideBarcode={{ files.0.file_uuid }}"></iframe>
+                            <iframe id="camic-iframe" frameborder="0" src="https://{{ camic_viewer }}/camicroscope/osdCamicroscope.php?slideBarcode={{ files.0.file_uuid }}"></iframe>
                         </div>
                     </div>
                 </div>

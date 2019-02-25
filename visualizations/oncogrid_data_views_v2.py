@@ -343,7 +343,7 @@ def create_oncogrid_bq_statement(type, genomic_build, project_set, cohort_ids, g
     somatic_mut_table = "{}.{}.{}".format(bq_data_project_id, sm_dataset_name, sm_table_name)
     metadata_data_table = "{}.{}.{}".format(bq_data_project_id, md_dataset_name, md_table_name)
     bioclinic_clin_table = "{}.{}.{}".format(bq_data_project_id, bc_dataset_name, bc_table_name)
-    cgc_table = "{}.{}.{}".format(bq_data_project_id, 'COSMIC_v86_grch38', 'Cancer_Gene_Census')
+    cgc_table = "{}.{}.{}".format(bq_data_project_id, settings.BIGQUERY_COSMIC_DATASET_ID, settings.BIGQUERY_CGC_TABLE_ID)
 
     gene_list_str = ''
     if gene_list is not None:

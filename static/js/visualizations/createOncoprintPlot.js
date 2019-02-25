@@ -127,7 +127,7 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
                 oncoprinterObj.updateOncoprinter(process_result.data_by_gene, 'sample', process_result.altered_by_gene, sample_order, gene_order);
             }
             return {
-                plot_data: function(){ return process_result; },
+                get_json: function(){ return process_result; },
                 get_svg: function(){ return oncoprinterObj.getOncoprinter().toSVG(true); }
             }
         }

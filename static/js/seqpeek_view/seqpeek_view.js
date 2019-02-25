@@ -124,7 +124,7 @@ define([
             var tableView = SeqPeekViewFactory.create(target_table, plot_data);
             tableView.render();
             return {
-                plot_data: function(){ return plot_data; }
+                get_json: function(){ return plot_data; }
             }
         }
     };

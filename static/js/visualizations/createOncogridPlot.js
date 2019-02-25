@@ -646,7 +646,7 @@ define (['jquery', 'oncogridjs'],
                 updateOncogrid(donor_data, gene_data, observation_data, donor_track_count_max);
             }
             return {
-                plot_data: get_plot_data,
+                get_json: get_plot_data,
                 get_svg: function(){ return getOncoGridSvgNode()[0]; },
                 redraw: reload
             };
