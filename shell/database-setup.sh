@@ -4,7 +4,7 @@ if [ -n "$CI" ]; then
     export MYSQL_ROOT_USER=root
     export MYSQL_DB_HOST=127.0.0.1
 else
-    export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
+    export $(cat /home/vagrant/parentDir/secure_files/.env | grep -v ^# | xargs) 2> /dev/null
     export HOME=/home/vagrant
     export HOMEROOT=/home/vagrant/www
     export MYSQL_ROOT_USER=root

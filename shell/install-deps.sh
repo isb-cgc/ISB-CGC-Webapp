@@ -27,8 +27,9 @@ if [ -n "$CI" ]; then
     wget https://dev.mysql.com/get/mysql-apt-config_0.8.9-1_all.deb
     apt-get install -y lsb-release
     dpkg -i mysql-apt-config_0.8.9-1_all.deb
-    apt-get update -qq
-else
+fi
+
+apt-get update -qq
 
 # Install apt-get dependencies
 echo "Installing Dependencies..."
@@ -36,7 +37,7 @@ if [ -n "$CI" ]; then
     apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev python2.7-dev git ruby g++ dos2unix
     apt-get install -y mysql-client
 else
-    apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev mysql-client-5.6 python2.7 python-dev git ruby g++ dos2unix
+    apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev mysql-client-5.7 python2.7 python-dev git ruby g++ dos2unix
 fi
 echo "Dependencies Installed"
 
