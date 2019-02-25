@@ -36,9 +36,6 @@ else
     apt-get install -qq -y --force-yes python2.7
 fi
 
-echo "Checking build image type..."
-uname -a
-
 # Install apt-get dependencies
 echo "Installing Dependencies..."
 if [ -n "$CI" ]; then
