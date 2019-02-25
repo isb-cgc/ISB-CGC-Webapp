@@ -106,7 +106,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 var yAxis = d3.svg.axis()
                     .scale(y)
                     .orient('left')
-                    .tickSize(-plot_width, 0, 0);
+                    .tickSize(plot_width < width - margin.left - margin.right ? -width + margin.left + margin.right: -plot_width , 0, 0);
 
                 var zoomer = function () {
                     if (!selex_active) {
@@ -139,7 +139,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     .attr('id', plot_area_clip_id)
                     .append('rect')
                     .attr({
-                        width: plot_width,
+                        width: plot_width < width - margin.left - margin.right ? width - margin.left - margin.right : plot_width,
                         height: height - margin.top - margin.bottom
                     });
 
@@ -171,7 +171,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     .attr('id', x_axis_area_clip_id)
                     .append('rect')
                     .attr('height', margin.bottom)
-                    .attr('width', plot_width)
+                    .attr('width', plot_width < width - margin.left - margin.right ? width - margin.left - margin.right : plot_width)
                     .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom) + ')');
                 x_axis_area.append('g')
                     .attr('class', 'x axis')

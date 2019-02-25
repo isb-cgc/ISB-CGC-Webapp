@@ -268,9 +268,7 @@ define([
             $(legend_selector).show();
         }
         else {
-            // No data was found for the gene and cohorts
-            seqpeek_view.render_no_data_message(plot_selector, hugo_symbol);
-            $(legend_selector).hide();
+            display_no_gene_mut_mssg(plot_selector, [hugo_symbol]);
         }
         return  {plot : plot, svg: svg};
     }
@@ -289,8 +287,7 @@ define([
             //$('.worksheet.active .worksheet-panel-body .plot-div .oncoprint-diagram-downloads-icon').trigger('mouseover');
         }
         else {
-            var message = "The selected cohorts have no somatic mutations in the gene ";
-            $(plot_selector).html('<p>'+message + '<b>' + gene_list.join(', ') + '</b></p>');
+            display_no_gene_mut_mssg(plot_selector, gene_list);
         }
         return  {plot : plot};
     }
@@ -306,8 +303,7 @@ define([
             plot = oncogrid_obj.createOncogridPlot(donor_data_list, gene_data_list, observation_data_list, donor_track_count_max);
         }
         else {
-            var message = "The selected cohorts have no somatic mutations in the gene ";
-            $(plot_selector).html('<p>'+message + '<b>' + gene_list.join(', ') + '</b></p>');
+            display_no_gene_mut_mssg(plot_selector, gene_list);
         }
         return  {plot : plot};
     }
@@ -762,6 +758,9 @@ define([
         }
     };
 
+    var display_no_gene_mut_mssg = function(plot_selector, hugo_symbol_list) {
+        $(plot_selector).html('<p> The selected cohorts have no somatic mutations in the gene <b>' + hugo_symbol_list.join(', ') + '</b></p>');
+    };
 
     return {
         generate_plot     : generate_plot,
