@@ -1,5 +1,5 @@
 """
-Copyright 2017, Institute for Systems Biology
+Copyright 2019, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-# Django settings for GAE_Django17 project.
 import os
 from os.path import join, dirname
 import sys
