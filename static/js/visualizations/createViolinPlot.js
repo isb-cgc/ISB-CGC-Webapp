@@ -519,11 +519,16 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
 
                     plot_area.selectAll('circle')
+                        .attr('r', 2/d3.event.scale) //maintain the same circle size regardless of the zoom scale
                         .attr('transform', 'translate(' + d3.event.translate[0] + ', '+ d3.event.translate[1] + ') scale('+d3.event.scale+', '+ d3.event.scale + ')');
 
-                    violin_area.selectAll('.violin-plot').attr('transform', function (d, i) {
-                        return 'translate(' + ((i * (violin_width+x_padding) +x_padding/2)*d3.event.scale + d3.event.translate[0]) + ', '+d3.event.translate[1]+') scale('+d3.event.scale+', ' + d3.event.scale + ')';
-                    });
+                    violin_area.selectAll('.violin-plot')
+                        .attr('transform', function (d, i) {
+                            return 'translate(' + ((i * (violin_width + x_padding) + x_padding / 2) * d3.event.scale + d3.event.translate[0]) + ', ' + d3.event.translate[1] + ') scale(' + d3.event.scale + ', ' + d3.event.scale + ')';
+                        });
+
+                    violin_area.selectAll('.violin, .median-line') //maintain same stroke-width
+                        .attr('stroke-width', 1/d3.event.scale);
 
                     plot_area.select('clipPath')
                         .select('rect')
