@@ -106,7 +106,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 var yAxis = d3.svg.axis()
                     .scale(y)
                     .orient('left')
-                    .tickSize(plot_width < width - margin.left - margin.right ? -width + margin.left + margin.right: -plot_width , 0, 0);
+                    .tickSize(plot_width < width - margin.left - margin.right ? -width + margin.left + margin.right : -plot_width, 0, 0);
 
                 var zoomer = function () {
                     if (!selex_active) {
@@ -116,10 +116,10 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                         plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',0) scale(' + d3.event.scale + ', 1)');
                     }
                 };
-
+                var x2_width = plot_width < width - margin.left - margin.right ? width - margin.left - margin.right : plot_width;
                 var x2 = d3.scale.linear()
-                    .range([0, width])
-                    .domain([0, width]);
+                    .range([0, x2_width])
+                    .domain([0, x2_width]);
 
                 var min_scale = 18 / bar_width;
                 var max_scale = 1.5;
@@ -206,8 +206,8 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     var oldSet = selectedValues;
                     selectedValues = {};
                     svg.selectAll('rect.plot-bar').classed("selected", function (d) {
-                        return e[0] - margin.left <= x($(this).attr('value')) + parseInt($(this).attr('width'))
-                            && x($(this).attr('value')) <= e[1] - margin.left;
+                        return x2(e[0]) <= x($(this).attr('value')) + $(this).attr('width') / 2
+                            && (x($(this).attr('value')) + $(this).attr('width') / 2) <= x2(e[1]);
                     });
 
                     if (Object.keys(oldSet).length !== $('rect.plot-bar.selected').length) {
@@ -242,8 +242,12 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 var brush = d3.svg.brush()
                     .x(x2)
                     .on('brushstart', function (d) {
-                        selectedValues = {};
-                        selectedSamples = null;
+                        var e = brush.extent();
+                        if(!e){
+                            selectedValues = {};
+                            selectedSamples = null;
+                            sample_form_update(e, true);
+                        }
                     })
                     .on('brush', brushmove)
                     .on('brushend', brushend);
@@ -327,9 +331,12 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                         $('.save-cohort-card').find('.btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
                     }
 
-                    var leftVal = Math.min((x2(extent[1]) + 20), (width - $('.save-cohort-card').width()));
-                    $('.save-cohort-card').show()
-                        .attr('style', 'position:relative; top: -' + height + 'px; left:' + leftVal + 'px;');
+                    if (extent) {
+                        var leftVal = Math.min((x2(extent[1]) + 20), (width - $('.save-cohort-card').width()));
+                        $('.save-cohort-card').show()
+                            .attr('style', 'position:relative; top: -' + height + 'px; left:' + leftVal + 'px;');
+
+                    }
 
                 }
 
