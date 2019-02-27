@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    ISB-CGC|Privacy Policy
+{% endblock %}
+
+{% block description %}
+    ISB-CGC {rivacy Policy
+{% endblock %}
+
+{% block page_header %}
+<div class="container">
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+    </ol>
+    <h1 class="page-header">Privacy Policy</h1>
+
+</div>
+{% endblock %}
+
+{% block content %}
+
+{% endblock %}
+
+{% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}
