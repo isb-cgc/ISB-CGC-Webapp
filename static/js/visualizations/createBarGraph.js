@@ -84,6 +84,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
             createBarGraph: function (svg, raw_Data, width, height, bar_width, x_attr, xLabel, margin, legend) {
                 var data = this.dataCounts(raw_Data, x_attr);
                 var plot_width = (bar_width + 5) * data.length;
+                var view_plot_width = plot_width < width - margin.left - margin.right ? width - margin.left - margin.right : plot_width;
 
                 if (width < plot_width + margin.left + margin.right) {
                     svg.attr('width', plot_width + margin.left + margin.right);
@@ -106,20 +107,23 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 var yAxis = d3.svg.axis()
                     .scale(y)
                     .orient('left')
-                    .tickSize(plot_width < width - margin.left - margin.right ? -width + margin.left + margin.right : -plot_width, 0, 0);
-
+                    .tickSize(-view_plot_width, 0, 0);
                 var zoomer = function () {
                     if (!selex_active) {
                         svg.select('.x.axis')
                             .attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom) + ')')
                             .call(xAxis.scale(x.rangeBands([0, plot_width * d3.event.scale], 0.1)));
                         plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',0) scale(' + d3.event.scale + ', 1)');
+                        x3.range([0, plot_width*d3.event.scale]);
                     }
                 };
-                var x2_width = plot_width < width - margin.left - margin.right ? width - margin.left - margin.right : plot_width;
+
                 var x2 = d3.scale.linear()
-                    .range([0, x2_width])
-                    .domain([0, x2_width]);
+                    .range([0, view_plot_width])
+                    .domain([0, view_plot_width]);
+                var x3 = d3.scale.linear()
+                    .range([0, plot_width])
+                    .domain([0, plot_width]);
 
                 var min_scale = 18 / bar_width;
                 var max_scale = 1.5;
@@ -139,7 +143,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     .attr('id', plot_area_clip_id)
                     .append('rect')
                     .attr({
-                        width: plot_width < width - margin.left - margin.right ? width - margin.left - margin.right : plot_width,
+                        width: view_plot_width,
                         height: height - margin.top - margin.bottom
                     });
 
@@ -171,7 +175,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     .attr('id', x_axis_area_clip_id)
                     .append('rect')
                     .attr('height', margin.bottom)
-                    .attr('width', plot_width < width - margin.left - margin.right ? width - margin.left - margin.right : plot_width)
+                    .attr('width', view_plot_width)
                     .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom) + ')');
                 x_axis_area.append('g')
                     .attr('class', 'x axis')
@@ -206,8 +210,8 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     var oldSet = selectedValues;
                     selectedValues = {};
                     svg.selectAll('rect.plot-bar').classed("selected", function (d) {
-                        return x2(e[0]) <= x($(this).attr('value')) + $(this).attr('width') / 2
-                            && (x($(this).attr('value')) + $(this).attr('width') / 2) <= x2(e[1]);
+                        return x3(e[0]) <= x($(this).attr('value')) + $(this).attr('width') / 2
+                            && (x($(this).attr('value')) + $(this).attr('width') / 2) <= x3(e[1]);
                     });
 
                     if (Object.keys(oldSet).length !== $('rect.plot-bar.selected').length) {
@@ -266,7 +270,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     .append('text')
                     .attr('class', 'x label axis-label')
                     .attr('text-anchor', 'middle')
-                    .attr('transform', 'translate(' + (width / 2) + ',' + (height - 10) + ')')
+                    .attr('transform', 'translate(' + (view_plot_width / 2) + ',' + (height - 10) + ')')
                     .text(xLabel);
 
 
@@ -332,7 +336,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     }
 
                     if (extent) {
-                        var leftVal = Math.min((x2(extent[1]) + 20), (width - $('.save-cohort-card').width()));
+                        var leftVal = Math.min((x3(extent[1]) + 20), (width - $('.save-cohort-card').width()));
                         $('.save-cohort-card').show()
                             .attr('style', 'position:relative; top: -' + height + 'px; left:' + leftVal + 'px;');
 
