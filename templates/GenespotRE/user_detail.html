@@ -63,17 +63,9 @@
                 </h5>
             </div>
             <div class="panel-body">
-                {% if DCF_TEST %}
-                    {% include 'GenespotRE/user_detail_dcf.html' %}
-                    {% block dcf_content %}
-                    {% endblock %}
-                {% elif NIH_AUTH_ON %}
-                    {% include 'GenespotRE/user_detail_saml.html' %}
-                    {% block saml_content %}
-                    {% endblock %}
-                {% else %}
-                    <p>NIH Authorization currently disabled.</p>
-                {% endif %}
+                {% include 'GenespotRE/user_detail_dcf.html' %}
+                {% block dcf_content %}
+                {% endblock %}
             </div>
         </div>
 
