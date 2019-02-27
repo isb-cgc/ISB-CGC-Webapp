@@ -396,9 +396,11 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .tickSize(-height + margin.top + margin.bottom, 0, 0);
 
             // Axis used for panning
+            var x2_width = plot_width < view_width - margin.left - margin.right ? view_width - margin.left - margin.right : plot_width;
+
             var x2 = d3.scale.linear()
-                .range([0, plot_width])
-                .domain([0, plot_width]);
+                .range([0, x2_width])
+                .domain([0, x2_width]);
 
 
             // append axes
@@ -459,7 +461,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     }
                 }
 
-                sample_form_update(e, reCalc);
+                sample_form_update(reCalc);
 
             },RECALC_THROTTLE);
 
@@ -477,7 +479,11 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .x(x2)
                 .y(y)
                 .on('brushstart',function(e){
-                    selectedSamples = {};
+                    var e = brush.extent();
+                    if(!e){
+                        selectedSamples = {};
+                        sample_form_update(true);
+                    }
                     mouseDown = null;
                 })
                 .on('brush', function(p){
@@ -487,10 +493,13 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     // ...but we don't want to throttle visual updating of the selection card, because
                     // that looks weird and isn't really necessary
                     var e = brush.extent();
-                    var topVal = Math.min((y(e[1][1]) + $('.save-cohort-card').height()+20),(height-$('.save-cohort-card').height()));
-                    var leftVal = Math.min((x2(mouseDown[0][0]) > x2(e[0][0]) ? x2(e[0][0]) : x2(e[1][0]))+margin.left+30, (plot_width+margin.left-$('.save-cohort-card').width()));
+                    var topVal = $('.plot-div').position().top
+                        + margin.top
+                        + 15
+                        + y(Math.min(e[0][1], e[1][1]));
+                    var leftVal = Math.min((x2(mouseDown[0][0]) > x2(e[0][0]) ? x2(e[0][0]) : x2(e[1][0])), (view_width-$('.save-cohort-card').width()));
                     $('.save-cohort-card').show()
-                        .attr('style', 'position:absolute; top: '+ topVal +'px; left:' +leftVal+'px;');
+                        .attr('style', 'position:absolute; top: '+ (topVal) +'px; left:' +leftVal+'px;');
                 })
                 .on('brushend', brushend);
 
@@ -582,9 +591,10 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     plot_area.append('g')
                         .attr('class', 'brush')
                         .call(brush)
-                        .attr('width', plot_width)
+                        .attr('width', x2(plot_width))
                         .attr('height', height-margin.top-margin.bottom)
-                        .attr('transform', 'translate(' + margin.left + ',0)');
+                        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
                 } else {
                     // Resume zooming, restoring the zoom's last state
                     svg.call(zoom);
@@ -611,7 +621,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             };
 
             // Recalculate the counts of selected samples if there was a change
-            function sample_form_update(extent, reCalc){
+            function sample_form_update(reCalc){
                 if(reCalc) {
                     var case_set = {};
                     _.each(Object.keys(selectedSamples),function(val) {

@@ -319,6 +319,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                             var obj_class = $(this).attr('class');
                             if (obj_class.indexOf('selected') >= 0) {
                                 obj_class = obj_class.replace(' selected', '');
+                                delete selectedCubbies[$(this).attr('value')];
                             } else {
                                 obj_class += ' selected';
                             }
@@ -342,7 +343,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                                 }
                             }
 
-                            sample_form_update({}, reCalc);
+                            sample_form_update(reCalc);
                         }
                     });
 
@@ -512,7 +513,8 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 /*
                    Update the sample cohort bar update
                 */
-                function sample_form_update(extent, reCalc) {
+                function sample_form_update(reCalc) {
+
                     if (reCalc) {
                         var case_set = {};
                         selectedSamples = {};
