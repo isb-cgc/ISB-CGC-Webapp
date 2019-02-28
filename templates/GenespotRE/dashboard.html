@@ -11,309 +11,348 @@
 {% block page_name %}dashboard{% endblock %}
 
 {% block page_header %}
-<div class="container">
-    <h1 class="page-header">Your Dashboard</h1>
-</div>
+    <div class="container">
+        <h1 class="page-header">Your Dashboard</h1>
+    </div>
 {% endblock %}
 {% block content %}
-<div class="container">
+    <div class="container">
 
-    {% if False %}
-    <section class="panel panel-default">
-        <div class="panel-heading">
-            <a role="button" data-target="#analysis-body" data-toggle="collapse" aria-expanded="true" aria-controls="analysis-body">
-                <i class="fa fa-caret-down" style="display: inline-block;"></i>
-            </a>
-            <a href="{% url 'sample_analyses' %}">Sample Analyses</a> can be customized with the specific data you want to analyze. Start a new workbook with an analysis below.
-        </div>
-        <div class="panel-body collapse in" id="analysis-body">
-            <ul>
-                <div class="clearfix">
-                    <li class="item">
-                        <img class="img-fluid" alt="Bar Chart plot Example" src="{% static 'img/barchart.png' %}">
-                        <p>Bar Chart</p>
-                    </li>
-                    <li class="item">
-                        <img class="img-fluid" alt="Histogram Plot Example" src="{% static 'img/histogram.png' %}">
-                        <p>Histogram</p>
-                    </li>
-                    <li class="item">
-                        <img class="img-fluid" alt="Scatter Plot Example" src="{% static 'img/scatterplot.png' %}">
-                        <p>Scatter Plot</p>
-                    </li>
-                    <li class="item">
-                        <img class="img-fluid" alt="Violin Plot Example" src="{% static 'img/violinplot.png' %}">
-                        <p>Violin Plot</p>
-                    </li>
-                </div>
-
-
-                <div class="collapse clearfix" id="more-analysis">
-                    <li class="item">
-                        <img class="img-fluid" alt="Alternate Violin Plot Example" src="{% static 'img/violinplot.png' %}">
-                        <p>Violin Plot 2</p>
-                    </li>
-                    <li class="item">
-                        <img class="img-fluid" alt="Cubby Hole Example" src="{% static 'img/cubbyhole.png' %}">
-                        <p>Cubby Hole</p>
-                    </li>
-                    <li class="item">
-                        <img class="img-fluid" alt="SeqPeak Example" src="{% static 'img/seqpeak.png' %}" alt="">
-                        <p>SeqPeak</p>
-                    </li>
-                </div>
-                <p class="center"><a class="btn btn-link" data-target="#more-analysis" data-toggle="collapse">Show More</a></p>
-            </ul>
-        </div>
-    </section>
-    {% endif %}
-
-    <!--
-     Use this row to embed announcements for users to see on their dashboards.
-     -->
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="alert alert-warning alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                Please note that authentication and authorization for access to controlled datasets is now managed by the <a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/Gaining-Access-To-Contolled-Access-Data.html" target="_blank">Data Commons Framework</a>.
-            </div>
-        </div>
-    </div>
-    <section class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">
-                <a href="{% url 'workbooks' %}">Saved Workbooks ({{ workbooks.count }})</a>
-            </h3>
-            <div class="min-max">
-                <a data-toggle="collapse" aria-label="Open/Close Workbook" href="#workbook-panel"><i class="show fa fa-angle-double-down"></i></a>
-            </div>
-        </div>
-        <div id="workbook-panel" class="panel panel-collapse collapse in" aria-expanded="true">
-            <div class="panel-body">
-                <p>Workbooks store the analyses you create, and their related data.</p>
-                <ul class="table-list">
-                {% if workbooks.count > 0 %}
-                    {% for workbook in workbooks|slice:':6'  %}
-                        <li>
-                            <a href="{% url 'workbook_detail' workbook.id %}" title="{{ workbook.name|title|wrap_text }}">
-                                <div class="list-main">
-                                    <h5 class="list-title">{{ workbook.name }}</h5>
-                                    <p>{{ workbook.description }}</p>
-                                </div>
-                                <div class="list-info">
-                                   {{ workbook.last_date_saved|date:'M d, Y, g:i a' }}
-                                </div>
-                            </a>
-                        </li>
-                    {% endfor %}
-                    {% if workbooks.count > 6 %}
-                    <a class="btn btn-link" href="{% url 'workbooks' %}">View All</a>
-                    {% endif %}
-                {% endif %}
-                </ul>
-            </div>
-            <div class="panel-footer">
-                <div style="height:40px">
-                    <form id="create-workbook" method="POST" action="{% url 'workbook_create' %}" class="pull-left">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-link" ><i class="fa fa-plus"></i>Create a New Workbook</button>
-                    </form>
-                    {#            <a class="btn btn-link" href="{% url 'workbook_samples' %}">Sample Workbooks</a>#}
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <div class="row">
-        <div class="col-md-6">
+        {% if False %}
             <section class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">
-                        <a href="{% url 'cohort_list' %}">Saved Cohorts ({{ cohorts.count }})</a>
-                    </h3>
-                    <div class="min-max">
-                        <a data-toggle="collapse" aria-label="Open/Collapse Saved Cohorts" href="#cohorts-panel"><i class="show fa fa-angle-double-down"></i></a>
-                    </div>
+                    <a role="button" data-target="#analysis-body" data-toggle="collapse" aria-expanded="true"
+                       aria-controls="analysis-body">
+                        <i class="fa fa-caret-down" style="display: inline-block;"></i>
+                    </a>
+                    <a href="{% url 'sample_analyses' %}">Sample Analyses</a> can be customized with the specific data
+                    you want to analyze. Start a new workbook with an analysis below.
                 </div>
-                <div id="cohorts-panel" class="panel panel-collapse collapse in" aria-expanded="true">
-                    <div class="panel-body">
-                    {% if cohorts.count > 0 %}
-                    <ul class="table-list">
-                        {% for cohort in cohorts|slice:':6' %}
-                           <li>
-                               <a href="{% url 'cohort_details' cohort.id %}">
-                                   <div class="list-main col-3">
-                                       <span class="list-title" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</span>
-                                   </div>
-                               </a>
-                               {% if not cohort.only_user_data %}
-                               <a href="{% url 'cohort_filelist' cohort.id %}">
-                                   <div class="list-link">
-                                       <span class="list-title file-browser-link" title="Browse this cohort's file manifest">File browser</span>
-                                   </div>
-                               </a>
-                               {% else %}
-                                   <div class="list-link">
-                                       <span class="list-title file-browser-link" title="File browsing is unavailable for cohorts which contain only user data.">File Browser</span>
-                                   </div>
-                               {% endif %}
-                               <div class="list-info col-3">
-                                   <span>{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</span>
-                               </div>
-                           </li>
-                        {% endfor %}
-                        {% if cohorts.count > 6 %}
-                            <a class="btn btn-link float-right" href="{% url 'cohort_list' %}">View all</a>
-                        {% endif %}
+                <div class="panel-body collapse in" id="analysis-body">
+                    <ul>
+                        <div class="clearfix">
+                            <li class="item">
+                                <img class="img-fluid" alt="Bar Chart plot Example"
+                                     src="{% static 'img/barchart.png' %}">
+                                <p>Bar Chart</p>
+                            </li>
+                            <li class="item">
+                                <img class="img-fluid" alt="Histogram Plot Example"
+                                     src="{% static 'img/histogram.png' %}">
+                                <p>Histogram</p>
+                            </li>
+                            <li class="item">
+                                <img class="img-fluid" alt="Scatter Plot Example"
+                                     src="{% static 'img/scatterplot.png' %}">
+                                <p>Scatter Plot</p>
+                            </li>
+                            <li class="item">
+                                <img class="img-fluid" alt="Violin Plot Example"
+                                     src="{% static 'img/violinplot.png' %}">
+                                <p>Violin Plot</p>
+                            </li>
+                        </div>
+
+
+                        <div class="collapse clearfix" id="more-analysis">
+                            <li class="item">
+                                <img class="img-fluid" alt="Alternate Violin Plot Example"
+                                     src="{% static 'img/violinplot.png' %}">
+                                <p>Violin Plot 2</p>
+                            </li>
+                            <li class="item">
+                                <img class="img-fluid" alt="Cubby Hole Example" src="{% static 'img/cubbyhole.png' %}">
+                                <p>Cubby Hole</p>
+                            </li>
+                            <li class="item">
+                                <img class="img-fluid" alt="SeqPeak Example" src="{% static 'img/seqpeak.png' %}"
+                                     alt="">
+                                <p>SeqPeak</p>
+                            </li>
+                        </div>
+                        <p class="center"><a class="btn btn-link" data-target="#more-analysis" data-toggle="collapse">Show
+                            More</a></p>
                     </ul>
-                    {% else %}
-                    <p>You don't have any saved Cohorts.</p>
-                    {% endif %}
-                    Create a Cohort: <a href="{% url 'cohort' %}" class="btn btn-link">Filters</a>/<a href="{% url 'cohort_barcodes' %}" class="btn btn-link">Barcodes</a>
-                </div>
                 </div>
             </section>
-        </div>
-        <div class="col-md-6">
-            {% with gene_fave_count=genefaves.count genefaves_sorted=genefaves|sort_last_save %}
-            <section class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        <a href="{% url 'genes' %}">Gene & miRNA Favorites ({{ gene_fave_count }})</a>
-                    </h3>
-                    <div class="min-max">
-                        <a data-toggle="collapse" aria-label="Open/Collapse Gene & miRNA Favorites" href="#gene-fave-panel"><i class="show fa fa-angle-double-up"></i></a>
-                    </div>
-                </div>
-                <div id="gene-fave-panel" class="panel panel-collapse collapse" aria-expanded="false">
-                    <div class="panel-body">
-                    {% if gene_fave_count > 0 %}
-                    <ul class="table-list">
-                        {% for genefavorite in genefaves_sorted|slice:':6' %}
-                        <li>
-                            <a href="{% url 'gene_fav_detail' genefavorite.id %}">
-                                <div class="list-main">
-                                    <span class="list-title" title="{{ genefavorite.name|wrap_text }}">{{ genefavorite.name }}</span>
-                                </div>
-                               <div class="list-info">
-                                   <span>{{ genefavorite.last_date_saved|date:'M d, Y, g:i a' }}</span>
-                               </div>
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                        {% if gene_fave_count > 6 %}
-                        <a href="{% url 'genes' %}" class="btn btn-link float-right">View All</a>
-                        {% endif %}
-                    {% else %}
-                    <p>You don't have any saved Gene & miRNA Favorites.</p>
-                    {% endif %}
-                    <a href="{% url 'gene_fav_create' %}" class="nocap btn btn-link">Create Gene & miRNA Favorites</a>
-                </div>
-                </div>
-            </section>
-            {% endwith %}
-            {% with varfave_count=varfaves.count %}
-            <section class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        <a href="{% url 'variables' %}">Variable Favorites ({{ varfave_count }})</a>
-                    </h3>
-                    <div class="min-max">
-                        <a data-toggle="collapse" aria-label="Open/Collapse Variable Favorites" href="#var-faves-panel"><i class="show fa fa-angle-double-up"></i></a>
-                    </div>
-                </div>
-                <div id="var-faves-panel" class="panel panel-collapse collapse" aria-expanded="false">
-                    <div class="panel-body">
-                    {% if varfave_count > 0 %}
-                    <ul class="table-list">
-                        {% for variablefavorite in varfaves|sort_last_save|slice:':6' %}
-                           <li>
-                               <a href="{% url 'variable_fav_detail' variablefavorite.id %}">
-                                   <div class="list-main">
-                                       <span class="list-title" title="{{ variablefavorite.name|wrap_text }}">{{ variablefavorite.name }}</span>
-                                   </div>
-                                   <div class="list-info">
-                                       <span>{{ variablefavorite.last_date_saved|date:'M d, Y, g:i a' }}</span>
-                                   </div>
-                               </a>
-                           </li>
-                        {% endfor %}
-                        {% if varfave_count > 6 %}
-                        <a href="{% url 'variables' %}" class="btn btn-link float-right">View All</a>
-                        {% endif %}
-                    </ul>
-                    {% else %}
-                    <p>You don't have any saved Variable Favorites.</p>
-                    {% endif %}
-                    <a href="{% url 'variable_fav_create' %}" class="btn btn-link">Create Variable Favorites</a>
-                </div>
-                </div>
-            </section>
-            {% endwith %}
-        </div>
-    </div>
+        {% endif %}
 
-    {% if USER_DATA_ON %}
-    <hr>
-    <div class="row">
-        <div class="col-md-12">
-            {% with program_count=programs.count %}
-            <section class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        <a href="{% url 'programs' %}">Saved Programs ({{ program_count }})</a>
-                    </h3>
-                    <div class="min-max">
-                        <a data-toggle="collapse" aria-label="Open/Collapse Saved Program" href="#programs-panel"><i class="show fa fa-angle-double-up"></i></a>
-                    </div>
+        <!--
+         Use this row to embed announcements for users to see on their dashboards.
+         -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="alert alert-warning alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert"><span
+                            aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    Please note that authentication and authorization for access to controlled datasets is now managed
+                    by the <a
+                        href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/Gaining-Access-To-Contolled-Access-Data.html"
+                        target="_blank">Data Commons Framework</a>.
                 </div>
-                <div id="programs-panel" class="panel panel-collapse collapse" aria-expanded="false">
-                    <div class="panel-body">
-                        <p>You can upload data from your own research programs.</p>
-                        {% if program_count > 0 %}
-                        <ul class="table-list">
-                            {% for program in programs|slice:':6' %}
-                               <li>
-                                   <a href="{% url 'program_detail' program.id %}">
-                                       <p class="list-title">{{ program.name }}</p>
-                                       {% if program.description %}
-                                        <p>{{ program.description|slice:':65' }}{% if program.description|length > 65 %}&hellip;{% endif %}</p>
-                                       {% endif %}
-                                   </a>
-                               </li>
+            </div>
+        </div>
+        <section class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    <a href="{% url 'workbooks' %}">Saved Workbooks ({{ workbooks.count }})</a>
+                </h3>
+                <div class="min-max">
+                    <a data-toggle="collapse" aria-label="Open/Close Workbook" href="#workbook-panel"><i
+                            class="show fa fa-angle-double-down"></i></a>
+                </div>
+            </div>
+            <div id="workbook-panel" class="panel panel-collapse collapse in" aria-expanded="true">
+                <div class="panel-body">
+                    <p>Workbooks store the analyses you create, and their related data.</p>
+                    <ul class="table-list">
+                        {% if workbooks.count > 0 %}
+                            {% for workbook in workbooks|slice:':6' %}
+                                <li>
+                                    <a href="{% url 'workbook_detail' workbook.id %}"
+                                       title="{{ workbook.name|title|wrap_text }}">
+                                        <div class="list-main">
+                                            <h5 class="list-title">{{ workbook.name }}</h5>
+                                            <p>{{ workbook.description }}</p>
+                                        </div>
+                                        <div class="list-info">
+                                            {{ workbook.last_date_saved|date:'M d, Y, g:i a' }}
+                                        </div>
+                                    </a>
+                                </li>
                             {% endfor %}
-                            {% if program_count > 6 %}
-                                <a class="btn btn-link" href="{% url 'programs' %}">View All</a>
+                            {% if workbooks.count > 6 %}
+                                <a class="btn btn-link" href="{% url 'workbooks' %}">View All</a>
                             {% endif %}
-                        </ul>
                         {% endif %}
-                    </div>
-                    <div class="panel-footer">
-                        <a href="{% url 'program_upload' %}" class="btn btn-link"><i class="fa fa-cloud-upload"></i>Upload Program Data</a>
+                    </ul>
+                </div>
+                <div class="panel-footer">
+                    <div style="height:40px">
+                        <form id="create-workbook" method="POST" action="{% url 'workbook_create' %}"
+                              class="pull-right">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-link"><i class="fa fa-plus"></i>Create a New Workbook</button>
+                        </form>
+                        {#            <a class="btn btn-link" href="{% url 'workbook_samples' %}">Sample Workbooks</a>#}
                     </div>
                 </div>
-            </section>
-            {% endwith %}
-        </div>
-{#      TODO: This div is hidden until we can figure out creating workbooks from programs/studies #}
-{#        <div class="col-md-6">#}
-{#            <section class="panel panel-default">#}
-{#                <div class="panel-heading">#}
-{#                    <h3 class="panel-title">#}
-{#                        <a href="{% url 'public_programs' %}">Public Data ({% public_program_count %})</a></h3>#}
-{#                </div>#}
-{#                <div class="panel-body">#}
-{#                    <p>Browse publicly-available studies and data</p>#}
-{#                </div>#}
-{#            </section>#}
-{#        </div>#}
-    </div>
-    {% endif %}
+            </div>
+        </section>
 
-</div>
+        <div class="row">
+            <div class="col-md-6">
+                <section class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <a href="{% url 'cohort_list' %}">Saved Cohorts ({{ cohorts.count }})</a>
+                        </h3>
+                        <div class="min-max">
+                            <a data-toggle="collapse" aria-label="Open/Collapse Saved Cohorts" href="#cohorts-panel"><i
+                                    class="show fa fa-angle-double-down"></i></a>
+                        </div>
+                    </div>
+                    <div id="cohorts-panel" class="panel panel-collapse collapse in" aria-expanded="true">
+                        <div class="panel-body">
+                            {% if cohorts.count > 0 %}
+                                <ul class="table-list">
+                                    {% for cohort in cohorts|slice:':6' %}
+                                        <li>
+                                            <a href="{% url 'cohort_details' cohort.id %}">
+                                                <div class="list-main col-3">
+                                                    <span class="list-title"
+                                                          title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</span>
+                                                </div>
+                                            </a>
+                                            {% if not cohort.only_user_data %}
+                                                <a href="{% url 'cohort_filelist' cohort.id %}">
+                                                    <div class="list-link">
+                                                        <span class="list-title file-browser-link"
+                                                              title="Browse this cohort's file manifest">File browser</span>
+                                                    </div>
+                                                </a>
+                                            {% else %}
+                                                <div class="list-link">
+                                                    <span class="list-title file-browser-link"
+                                                          title="File browsing is unavailable for cohorts which contain only user data.">File Browser</span>
+                                                </div>
+                                            {% endif %}
+                                            <div class="list-info col-3">
+                                                <span>{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</span>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                    {% if cohorts.count > 6 %}
+                                        <a class="btn btn-link float-right" href="{% url 'cohort_list' %}">View all</a>
+                                    {% endif %}
+                                </ul>
+                            {% else %}
+                                <p>You don't have any saved Cohorts.</p>
+                            {% endif %}
+                            <div class="pull-right dropdown">
+                                <a id="btnGroupDropCohortCreate" href="{% url 'cohort' %}" class="btn btn-link dropdown-toggle"
+                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fa fa-plus"></i>Create a Cohort</a>
+                                <ul class="dropdown-menu" aria-labelledby="btnGroupDropCohortCreate">
+                                    <li><a class="btn dropdown-item" href="{% url 'cohort' %}">Filters</a></li>
+                                    <li><a class="btn dropdown-item" href="{% url 'cohort_barcodes' %}">Barcodes</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="col-md-6">
+                {% with gene_fave_count=genefaves.count genefaves_sorted=genefaves|sort_last_save %}
+                    <section class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">
+                                <a href="{% url 'genes' %}">Gene & miRNA Favorites ({{ gene_fave_count }})</a>
+                            </h3>
+                            <div class="min-max">
+                                <a data-toggle="collapse" aria-label="Open/Collapse Gene & miRNA Favorites"
+                                   href="#gene-fave-panel"><i class="show fa fa-angle-double-up"></i></a>
+                            </div>
+                        </div>
+                        <div id="gene-fave-panel" class="panel panel-collapse collapse" aria-expanded="false">
+                            <div class="panel-body">
+                                {% if gene_fave_count > 0 %}
+                                    <ul class="table-list">
+                                        {% for genefavorite in genefaves_sorted|slice:':6' %}
+                                            <li>
+                                                <a href="{% url 'gene_fav_detail' genefavorite.id %}">
+                                                    <div class="list-main">
+                                                        <span class="list-title"
+                                                              title="{{ genefavorite.name|wrap_text }}">{{ genefavorite.name }}</span>
+                                                    </div>
+                                                    <div class="list-info">
+                                                        <span>{{ genefavorite.last_date_saved|date:'M d, Y, g:i a' }}</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% if gene_fave_count > 6 %}
+                                        <a href="{% url 'genes' %}" class="btn btn-link float-right">View All</a>
+                                    {% endif %}
+                                {% else %}
+                                    <p>You don't have any saved Gene & miRNA Favorites.</p>
+                                {% endif %}
+                                <a href="{% url 'gene_fav_create' %}" class="nocap btn btn-link pull-right"><i
+                                        class="fa fa-plus"></i>Create Gene & miRNA Favorites</a>
+                            </div>
+                        </div>
+                    </section>
+                {% endwith %}
+                {% with varfave_count=varfaves.count %}
+                    <section class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">
+                                <a href="{% url 'variables' %}">Variable Favorites ({{ varfave_count }})</a>
+                            </h3>
+                            <div class="min-max">
+                                <a data-toggle="collapse" aria-label="Open/Collapse Variable Favorites"
+                                   href="#var-faves-panel"><i class="show fa fa-angle-double-up"></i></a>
+                            </div>
+                        </div>
+                        <div id="var-faves-panel" class="panel panel-collapse collapse" aria-expanded="false">
+                            <div class="panel-body">
+                                {% if varfave_count > 0 %}
+                                    <ul class="table-list">
+                                        {% for variablefavorite in varfaves|sort_last_save|slice:':6' %}
+                                            <li>
+                                                <a href="{% url 'variable_fav_detail' variablefavorite.id %}">
+                                                    <div class="list-main">
+                                                        <span class="list-title"
+                                                              title="{{ variablefavorite.name|wrap_text }}">{{ variablefavorite.name }}</span>
+                                                    </div>
+                                                    <div class="list-info">
+                                                        <span>{{ variablefavorite.last_date_saved|date:'M d, Y, g:i a' }}</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                        {% if varfave_count > 6 %}
+                                            <a href="{% url 'variables' %}" class="btn btn-link float-right">View
+                                                All</a>
+                                        {% endif %}
+                                    </ul>
+                                {% else %}
+                                    <p>You don't have any saved Variable Favorites.</p>
+                                {% endif %}
+                                <a href="{% url 'variable_fav_create' %}" class="btn btn-link pull-right"><i
+                                        class="fa fa-plus"></i>Create Variable Favorites</a>
+                            </div>
+                        </div>
+                    </section>
+                {% endwith %}
+            </div>
+        </div>
+
+        {% if USER_DATA_ON %}
+            <hr>
+            <div class="row">
+                <div class="col-md-12">
+                    {% with program_count=programs.count %}
+                        <section class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    <a href="{% url 'programs' %}">Saved Programs ({{ program_count }})</a>
+                                </h3>
+                                <div class="min-max">
+                                    <a data-toggle="collapse" aria-label="Open/Collapse Saved Program"
+                                       href="#programs-panel"><i class="show fa fa-angle-double-up"></i></a>
+                                </div>
+                            </div>
+                            <div id="programs-panel" class="panel panel-collapse collapse" aria-expanded="false">
+                                <div class="panel-body">
+                                    <p>You can upload data from your own research programs.</p>
+                                    {% if program_count > 0 %}
+                                        <ul class="table-list">
+                                            {% for program in programs|slice:':6' %}
+                                                <li>
+                                                    <a href="{% url 'program_detail' program.id %}">
+                                                        <p class="list-title">{{ program.name }}</p>
+                                                        {% if program.description %}
+                                                            <p>{{ program.description|slice:':65' }}
+                                                                    {% if program.description|length > 65 %}
+                                                                        &hellip;{% endif %}</p>
+                                                        {% endif %}
+                                                    </a>
+                                                </li>
+                                            {% endfor %}
+                                            {% if program_count > 6 %}
+                                                <a class="btn btn-link" href="{% url 'programs' %}">View All</a>
+                                            {% endif %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                                <div class="panel-footer">
+                                    <a href="{% url 'program_upload' %}" class="btn btn-link"><i class="fa fa-cloud-upload"></i>Upload
+                                        Program Data</a>
+                                </div>
+                            </div>
+                        </section>
+                    {% endwith %}
+                </div>
+                {#      TODO: This div is hidden until we can figure out creating workbooks from programs/studies #}
+                {#        <div class="col-md-6">#}
+                {#            <section class="panel panel-default">#}
+                {#                <div class="panel-heading">#}
+                {#                    <h3 class="panel-title">#}
+                {#                        <a href="{% url 'public_programs' %}">Public Data ({% public_program_count %})</a></h3>#}
+                {#                </div>#}
+                {#                <div class="panel-body">#}
+                {#                    <p>Browse publicly-available studies and data</p>#}
+                {#                </div>#}
+                {#            </section>#}
+                {#        </div>#}
+            </div>
+        {% endif %}
+
+    </div>
     <script type="text/javascript">
-        var USER_SETTINGS_KEY = 'user_' + {{ request.user.id }} + '_dash_settings';
+        var USER_SETTINGS_KEY = 'user_' + {{ request.user.id }} +'_dash_settings';
     </script>
 {% endblock %}
 

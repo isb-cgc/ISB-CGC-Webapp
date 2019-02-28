@@ -64,7 +64,7 @@ class CNVRSearcher(object):
 
     @classmethod
     def get_table_name(cls):
-        return "feature_defs_cnvr_v2"
+        return "feature_defs_cnvr_v4"
 
     def validate_field_search_input(self, keyword, field):
         if field not in self.field_search_valid_fields:
