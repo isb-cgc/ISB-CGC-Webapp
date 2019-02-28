@@ -1,7 +1,11 @@
 import os
 from os.path import join, dirname
 import dotenv
-dotenv.read_dotenv(join(dirname(__file__), '../.env'))
+env_path = '../'
+if os.environ.get('SECURE_LOCAL_PATH', None):
+    env_path += os.environ.get('SECURE_LOCAL_PATH')
+
+dotenv.read_dotenv(join(dirname(__file__), env_path+'.env'))
 
 
 SETTINGS = {

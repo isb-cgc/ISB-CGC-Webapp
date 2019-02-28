@@ -6,108 +6,105 @@
 @import url("https://fonts.googleapis.com/css?family=Montserrat:300,700&subset=latin,latin-ext")
 
 #landing
-    header
-        background-image: url('../img/bg.jpg')
-        background-size: cover
+    .landing-content-div
         position: absolute
         top: 0
         left: 0
-        height: 100vh
         width: 100vw
-        a
-            color: $isb-lighter
-
         .container
             position: relative
-            top: 50%
-            transform: translateY(-50%)
+            .header-content-div
+                padding-top: 150px
+                height: 1000px
+                a
+                    color: $isb-lighter
+                .lj-title h1
+                    font-family: 'Montserrat'
+                    font-size: 3.8em
+                    font-weight: 300
+                    color: #fff
+                    margin: 0
+                    word-wrap: break-word
+
+                .lj-text-center
+                    text-align: center
+
+                .lj-title span
+                    color: #4cc2d6
+                    font-weight: 700
+
+                .lj-title-paragraph
+                    padding: 30px
+                    p
+                        color: #fff
+                        font-size: 1.5em
+                .lj-header-vid
+                    text-align: right
+                    &.custom-width-55
+                        width: 55%
+                    .carousel
+                        float: right
+                        width: 320px
+                        height: 240px
+                        .carousel-control
+                            height: 40px
+                            position: absolute
+                            top: 50%
+                            transform: translateY(-50%)
+                            color: $isb-dark
+                        .left, .right
+                            background-image: none
+                        .tutorial-vid
+                            width: 320px
+                            height: 240px
+                        .carousel-indicators
+                            bottom: -20px
+
+                .lj-header-button
+                    text-align: left
+                    margin-top: 2px
+                    a
+                        display: inline-block
+                        color: #fff
+                        text-align: center
+                        background-color: transparent
+                        font-family: 'Montserrat'
+                        font-weight: 700
+                        padding: 8px 10px
+                        border: 2px solid #4cc2d6
+                        -webkit-border-radius: 3px
+                        -moz-border-radius: 3px
+                        border-radius: 3px
+                        width: 200px
+                        text-decoration: none
+                        &:hover
+                            color: #fff
+                            background-color: darken($isb-primary, 10%)
+                            border: 2px solid #4cc2d6
+                    &.custom-width-45
+                        width: 45%
 
         .lj-overlay
-            width: 100%
-            height: 100%
+            width: 100vw
+            height: 1000px
             position: absolute
             top: 0
             left: 0
+        .lj-overlay-bg
+            background-image: url('../img/bg.jpg')
+            background-size: cover
         .lj-overlay-image
             background-image: url('../img/lines.png')
             background-repeat: repeat
-
         .lj-overlay-color
-	        background-color: rgba(0,0,0,0.5)
+            background-color: rgba(0,0,0,0.5)
 
-        .lj-title h1
-            font-family: 'Montserrat'
-            font-size: 3.8em
-            font-weight: 300
-            color: #fff
-            margin: 0
-            word-wrap: break-word
 
-        .lj-text-center
-            text-align: center
 
-        .lj-title span
-            color: #4cc2d6
-            font-weight: 700
-
-        .lj-title-paragraph
-            padding: 30px
-            p
-                color: #fff
-                font-size: 1.5em
-        .lj-header-vid
-            text-align: right
-            &.custom-width-55
-                width: 55%
-            .carousel
-                float: right
-                width: 320px
-                height: 240px
-                .carousel-control
-                    height: 40px
-                    position: absolute
-                    top: 50%
-                    transform: translateY(-50%)
-                    color: $isb-dark
-                .left, .right
-                    background-image: none
-                .tutorial-vid
-                    width: 320px
-                    height: 240px
-                .carousel-indicators
-                    bottom: -20px
-
-        .lj-header-button
-            text-align: left
-            margin-top: 2px
-            a
-                display: inline-block
-                color: #fff
-                text-align: center
-                background-color: transparent
-                font-family: 'Montserrat'
-                font-weight: 700
-                padding: 8px 10px
-                border: 2px solid #4cc2d6
-                -webkit-border-radius: 3px
-                -moz-border-radius: 3px
-                border-radius: 3px
-                width: 200px
-                text-decoration: none
-                &:hover
-                    color: #fff
-                    background-color: darken($isb-primary, 10%)
-                    border: 2px solid #4cc2d6
-            &.custom-width-45
-                width: 45%
-
-    .landing-content
+    .about-content-div
         background-color: white
-        position: absolute
-        width: 100vw
+        position: relative
         left: 0
-        bottom: 0
-        display: none
         h2
             font-size: 25px
             color: $isb-primary
@@ -116,10 +113,10 @@
     .footer
         color: white
         width: 60vw
-        bottom: 30px
+        top: 100px
         left: 50%
         transform: translateX(-50%)
-        position: absolute
+        position: relative
         text-align: center
         font-size: 1.1em
 
@@ -134,30 +131,36 @@
     .firstRow
         margin-top: 28px
 
-    .pull-tab
-        .pull-tab-button
-            width: 150px
-            height: 28px
+    .pull-down-button
+        position: absolute
+        i
             color: white
-            font-weight: bold
-            text-align: center
-            font-size: 18px
-            background-color: rgba(0,0,0,0.5)
-            position: absolute
-            left: 50%
-            transform: translateX(-50%)
-            &.up
-                border-top-left-radius: 10px
-                border-top-right-radius: 10px
-                border-width: 2px 2px 0 2px
-                bottom: 0
-                border-style: solid
-                border-color: #4cc2d6
-            &.down
-                border-bottom-left-radius: 10px
-                border-bottom-right-radius: 10px
-                border-width: 0 2px 2px 2px
-                top: 0
+            padding: 8px
+        margin-top: 50px
+        display: block
+        width: 50px
+        height: 50px
+        left: 50%
+        transform: translateX(-50%)
+        font-weight: bold
+        text-align: center
+        font-size: 24px
+        background-color: rgba(0,0,0,0.5)
+        border-radius: 50%
+        border: 2px solid #4cc2d6
 
-            &:hover
-                background-color: darken($isb-primary, 10%)
+        &:hover
+            background-color: darken($isb-primary, 10%)
+
+#privacy
+    h2
+        font-size: 20px
+        margin-top: 20px
+    h3
+        font-size: 18px
+    ul
+        margin-left: 20px
+        list-style: circle
+        margin-bottom: 10px
+    a
+        font-weight: bold

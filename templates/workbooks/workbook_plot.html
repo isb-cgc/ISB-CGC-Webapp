@@ -49,7 +49,8 @@
                         <div class="plot-download-selection hidden">
                             <div class="svg-download">SVG</div>
                             <div class="png-download">PNG</div>
-                            <div class="data-download">JSON</div>
+                            <div class="csv-download">CSV</div>
+                            <div class="json-download">JSON</div>
                         </div>
                     </span>
             <a role="button" class="toggle-fullscreen-plot plot-button plot-button-options  disabled" aria-label="Full Screen">
@@ -312,6 +313,7 @@
         </div>
         <div id="oncogrid_div" style="display:none;">
             <div id="plot-{{ worksheet.id }}-oncogrid" class="oncogrid-screen">
+                <div id="grid-data" hidden></div>
                 <div class="oncogrid-header hidden">
                     <div class="oncogrid-logo">
                         <img alt="OICR Bio Logo" src="{% static 'img/oicr_bio.jpg' %}">
@@ -384,9 +386,6 @@
                     </button>
                     <button type="button" class="btn oncoprint-diagram-removeWhitespace-icon" data-hasqtip="2">
                         <img class="oncoprint-diagram-removeWhitespace-icon-img" checked="0" src="{% static '/img/unremoveWhitespace.svg' %}" alt="icon">
-                    </button>
-                    <button type="button" class="btn oncoprint-diagram-downloads-icon" data-hasqtip="6">
-                        <img class="oncoprint-diagram-downloads-icon-img" src="{% static '/img/in.svg' %}" alt="icon">
                     </button>
                     <button type="button" class="btn oncoprint_zoomout" class="btn" data-hasqtip="0">
                         <img src="{% static '/img/zoom-out.svg' %}" alt="icon">

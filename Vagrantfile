@@ -1,8 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 Vagrant.configure(2) do |config|
-  config.vm.box_url = "https://app.vagrantup.com/phusion/ubuntu-14.04-amd64"
-  config.vm.box = "phusion/ubuntu-14.04-amd64"
+  config.vm.box_url = "https://app.vagrantup.com/ubuntu/boxes/xenial64"
+  config.vm.box = "ubuntu/xenial64"
 
   # WebApp ports
   config.vm.network "forwarded_port", guest: 8080, host: 8080

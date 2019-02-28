@@ -304,7 +304,7 @@ def format_query_result_for_plot(provider_instance, query_result):
 def get_feature_vectors_with_user_data(params_array, poll_retry_limit=20, skip_formatting_for_plot=False):
     provider_array = submit_jobs_with_user_data(params_array)
 
-    project_id = settings.BQ_PROJECT_ID
+    project_id = settings.BIGQUERY_PROJECT_ID
     result = get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip_formatting_for_plot)
 
     return result
@@ -321,7 +321,7 @@ def get_feature_vectors_tcga_only(params_array, poll_retry_limit=20, skip_format
         job_item = submit_tcga_job(parameter_object, bigquery_service, cohort_settings)
         provider_array.append(job_item)
 
-    project_id = settings.BQ_PROJECT_ID
+    project_id = settings.BIGQUERY_PROJECT_ID
     result = get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip_formatting_for_plot)
 
     return result
