@@ -1132,7 +1132,8 @@ a.skip-nav {
         position: absolute;
         left: 0;
         top: 50%;
-        transform: translateY(-50%); }
+        -webkit-transform: translateY(-50%);
+                transform: translateY(-50%); }
   .list-group .list-group-item__body {
     padding-bottom: 10px; }
   .list-group .list-group-item .search_enter .search_input {
@@ -1747,8 +1748,8 @@ section .min-max {
       .worksheet-nav.closed * {
         opacity: 0;
         z-index: -1;
-        -webkit-transition: opacity 0.45s ease-in-out;
         overflow-x: hidden;
+        -webkit-transition: opacity 0.45s ease-in-out;
         transition: opacity 0.45s ease-in-out; }
     .worksheet-nav-toggle {
       background-color: #fff;
@@ -2888,6 +2889,21 @@ span.code {
   #landing .pull-down-button:hover {
     background-color: #1d3954; }
 
+#privacy h2 {
+  font-size: 20px;
+  margin-top: 20px; }
+
+#privacy h3 {
+  font-size: 18px; }
+
+#privacy ul {
+  margin-left: 20px;
+  list-style: circle;
+  margin-bottom: 10px; }
+
+#privacy a {
+  font-weight: bold; }
+
 #user-landing {
   margin-top: 80px; }
   #user-landing .dropdown button {
@@ -3309,10 +3325,13 @@ span.code {
       padding: 0px 5px; }
 
 .plot-toolbar {
-  -ms-flex-flow: row wrap;
-      flex-flow: row wrap;
-  -ms-flex-pack: end;
-      justify-content: flex-end;
+  -webkit-flex-flow: row wrap;
+      -ms-flex-flow: row wrap;
+          flex-flow: row wrap;
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
   margin-right: 12px;
   margin-top: 10px; }
   .plot-toolbar .toolbar-item {
@@ -3324,16 +3343,20 @@ span.code {
     -webkit-box-align: center;
     background-color: white;
     color: #333333;
-    -ms-flex-align: center;
-        align-items: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center;
     min-width: 55px;
     min-height: 28px;
     line-height: 28px;
     height: 0px;
+    display: -webkit-inline-box;
+    display: -webkit-inline-flex;
     display: -ms-inline-flexbox;
     display: inline-flex;
-    -ms-flex-pack: center;
-        justify-content: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
     position: relative;
     cursor: pointer;
     font-size: 14px;
@@ -3345,6 +3368,7 @@ span.code {
     outline: none;
     border-color: #cccccc;
     padding: 0px 12px;
+    -webkit-transition: 0.25s ease;
     transition: 0.25s ease; }
     .plot-toolbar .plot-button.active {
       background-color: #e6e6e6; }
@@ -3352,13 +3376,21 @@ span.code {
       background-color: #008ae0;
       color: white; }
     .plot-toolbar .plot-button span {
+      display: -webkit-box;
+      display: -webkit-flex;
       display: -ms-flexbox;
       display: flex;
-      -ms-flex-align: center;
-          align-items: center;
-      -ms-flex-pack: center;
-          justify-content: center; }
+      -webkit-box-align: center;
+      -webkit-align-items: center;
+          -ms-flex-align: center;
+              align-items: center;
+      -webkit-box-pack: center;
+      -webkit-justify-content: center;
+          -ms-flex-pack: center;
+              justify-content: center; }
     .plot-toolbar .plot-button div {
+      display: -webkit-box;
+      display: -webkit-flex;
       display: -ms-flexbox;
       display: flex; }
       .plot-toolbar .plot-button div.button-text {
@@ -3367,10 +3399,15 @@ span.code {
         padding: 0;
         overflow: hidden; }
   .plot-toolbar .plot-download-selection {
+    display: -webkit-box;
+    display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
-    -ms-flex-direction: column;
-        flex-direction: column;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
     box-sizing: border-box;
     position: absolute;
     outline: none;
@@ -3382,8 +3419,11 @@ span.code {
     right: 0px;
     cursor: pointer; }
     .plot-toolbar .plot-download-selection div {
-      -ms-flex-direction: row;
-          flex-direction: row;
+      -webkit-box-orient: horizontal;
+      -webkit-box-direction: normal;
+      -webkit-flex-direction: row;
+          -ms-flex-direction: row;
+              flex-direction: row;
       box-sizing: border-box;
       position: relative;
       outline: none;
@@ -3423,10 +3463,15 @@ span.code {
 
 /*oncogrid*/
 .oncogrid-header {
+  display: -webkit-box;
+  display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -ms-flex-direction: row;
-      flex-direction: row;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+          flex-direction: row;
   box-sizing: border-box;
   position: relative;
   outline: none;
@@ -3439,10 +3484,13 @@ span.code {
   .oncogrid-header .oncogrid-legend {
     margin: 10px 0; }
   .oncogrid-header .oncogrid-toolbar {
-    -ms-flex-flow: row wrap;
-        flex-flow: row wrap;
-    -ms-flex-pack: end;
-        justify-content: flex-end;
+    -webkit-flex-flow: row wrap;
+        -ms-flex-flow: row wrap;
+            flex-flow: row wrap;
+    -webkit-box-pack: end;
+    -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
     margin-right: 12px;
     margin-top: 10px; }
     .oncogrid-header .oncogrid-toolbar .toolbar-item {
@@ -3454,16 +3502,20 @@ span.code {
       -webkit-box-align: center;
       background-color: white;
       color: #333333;
-      -ms-flex-align: center;
-          align-items: center;
+      -webkit-align-items: center;
+          -ms-flex-align: center;
+              align-items: center;
       min-width: 40px;
       min-height: 28px;
       line-height: 28px;
       height: 0px;
+      display: -webkit-inline-box;
+      display: -webkit-inline-flex;
       display: -ms-inline-flexbox;
       display: inline-flex;
-      -ms-flex-pack: center;
-          justify-content: center;
+      -webkit-justify-content: center;
+          -ms-flex-pack: center;
+              justify-content: center;
       position: relative;
       cursor: pointer;
       font-size: 14px;
@@ -3475,6 +3527,7 @@ span.code {
       outline: none;
       border-color: #cccccc;
       padding: 0px 12px;
+      -webkit-transition: 0.25s ease;
       transition: 0.25s ease; }
       .oncogrid-header .oncogrid-toolbar .oncogrid-button.active {
         background-color: #e6e6e6; }
@@ -3482,13 +3535,21 @@ span.code {
         background-color: #008ae0;
         color: white; }
       .oncogrid-header .oncogrid-toolbar .oncogrid-button span {
+        display: -webkit-box;
+        display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -ms-flex-align: center;
-            align-items: center;
-        -ms-flex-pack: center;
-            justify-content: center; }
+        -webkit-box-align: center;
+        -webkit-align-items: center;
+            -ms-flex-align: center;
+                align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+            -ms-flex-pack: center;
+                justify-content: center; }
       .oncogrid-header .oncogrid-toolbar .oncogrid-button div {
+        display: -webkit-box;
+        display: -webkit-flex;
         display: -ms-flexbox;
         display: flex; }
         .oncogrid-header .oncogrid-toolbar .oncogrid-button div .button-text {
@@ -3496,10 +3557,15 @@ span.code {
           height: 0px;
           overflow: hidden; }
     .oncogrid-header .oncogrid-toolbar .oncogrid-download-selection {
+      display: -webkit-box;
+      display: -webkit-flex;
       display: -ms-flexbox;
       display: flex;
-      -ms-flex-direction: column;
-          flex-direction: column;
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: normal;
+      -webkit-flex-direction: column;
+          -ms-flex-direction: column;
+              flex-direction: column;
       box-sizing: border-box;
       position: absolute;
       outline: none;
@@ -3511,8 +3577,11 @@ span.code {
       right: 0px;
       cursor: pointer; }
       .oncogrid-header .oncogrid-toolbar .oncogrid-download-selection div {
-        -ms-flex-direction: row;
-            flex-direction: row;
+        -webkit-box-orient: horizontal;
+        -webkit-box-direction: normal;
+        -webkit-flex-direction: row;
+            -ms-flex-direction: row;
+                flex-direction: row;
         box-sizing: border-box;
         position: relative;
         outline: none;
