@@ -27,102 +27,130 @@
 {% block page_name %}landing{% endblock %}
 {% block content %}
 
-    <header>
+    <div class="landing-content-div">
+        <div class="lj-overlay lj-overlay-bg"></div>
         <div class="lj-overlay lj-overlay-color lj-overlay-image"></div>
         <div class="container">
-            <div class="row">
-              <div class="col-xs-12 lj-title">
-                <h1 class="lj-text-center"><span>Cancer Genomics Cloud</span></h1>
-              </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-8 col-xs-offset-2 lj-title-paragraph">
-                    <p class="lj-text-center" >The ISB Cancer Genomics Cloud (ISB-CGC) is democratizing access to NCI Cancer Data (<a href = "http://cancergenome.nih.gov/" target = "_blank"><b>TCGA</b></a>, <a href="https://ocg.cancer.gov/programs/target" target="_blank"><b>TARGET</b></a>, <a href="https://portals.broadinstitute.org/ccle" target="_blank"><b>CCLE</b></a>) and coupling it with unprecedented computational power to allow researchers to explore and analyze this vast data-space.</p>
+            <div id="header-div" class="header-content-div">
+                <div class="row">
+                    <div class="col-xs-12 lj-title">
+                        <h1 class="lj-text-center"><span>Cancer Genomics Cloud</span></h1>
+                    </div>
                 </div>
-            </div>
-            <div class="row lj-header-vid-button-div">
-                <div class="col-sm-6 lj-header-vid custom-width-55">
-                    <div id="carousel-video-tutorials" class="carousel slide" data-ride="carousel" data-interval="false">
-                        <ol class="carousel-indicators">
-                            <li data-target="#carousel-video-tutorials" data-slide-to="0" class="active"></li>
-                            <li data-target="#carousel-video-tutorials" data-slide-to="1" class=""></li>
-                            <li data-target="#carousel-video-tutorials" data-slide-to="2" class=""></li>
-                            <li data-target="#carousel-video-tutorials" data-slide-to="3" class=""></li>
-                            <li data-target="#carousel-video-tutorials" data-slide-to="4" class=""></li>
-                            <li data-target="#carousel-video-tutorials" data-slide-to="5" class=""></li>
-                        </ol>
-                        <div class="carousel-inner">
-                            {% comment %}
+                <div class="row">
+                    <div class="col-xs-8 col-xs-offset-2 lj-title-paragraph">
+                        <p class="lj-text-center">The ISB Cancer Genomics Cloud (ISB-CGC) is democratizing access to NCI
+                            Cancer Data (<a href="http://cancergenome.nih.gov/" target="_blank"><b>TCGA</b></a>, <a
+                                    href="https://ocg.cancer.gov/programs/target" target="_blank"><b>TARGET</b></a>, <a
+                                    href="https://portals.broadinstitute.org/ccle" target="_blank"><b>CCLE</b></a>) and
+                            coupling it with unprecedented computational power to allow researchers to explore and
+                            analyze this vast data-space.</p>
+                    </div>
+                </div>
+                <div class="row lj-header-vid-button-div">
+                    <div class="col-sm-6 lj-header-vid custom-width-55">
+                        <div id="carousel-video-tutorials" class="carousel slide" data-ride="carousel"
+                             data-interval="false">
+                            <ol class="carousel-indicators">
+                                <li data-target="#carousel-video-tutorials" data-slide-to="0" class="active"></li>
+                                <li data-target="#carousel-video-tutorials" data-slide-to="1" class=""></li>
+                                <li data-target="#carousel-video-tutorials" data-slide-to="2" class=""></li>
+                                <li data-target="#carousel-video-tutorials" data-slide-to="3" class=""></li>
+                                <li data-target="#carousel-video-tutorials" data-slide-to="4" class=""></li>
+                                <li data-target="#carousel-video-tutorials" data-slide-to="5" class=""></li>
+                            </ol>
+                            <div class="carousel-inner">
+                                {% comment %}
                                 include 'enablejsapi=1' inside the iframe src. This will enable javascript code to control the video play & pause
                             {% endcomment %}
-                            <div class="item active">
-                                <iframe class="tutorial-vid" src="https://www.youtube-nocookie.com/embed/RQsLKDTciWk?enablejsapi=1&version=3&playerapiid=ytplayer"  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                <div class="item active">
+                                    <iframe class="tutorial-vid"
+                                            src="https://www.youtube-nocookie.com/embed/RQsLKDTciWk?enablejsapi=1&version=3&playerapiid=ytplayer"
+                                            frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                </div>
+                                <div class="item">
+                                    <iframe class="tutorial-vid"
+                                            src="https://www.youtube-nocookie.com/embed/q9q1g1-cf7M?enablejsapi=1&version=3&playerapiid=ytplayer"
+                                            frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                </div>
+                                <div class="item">
+                                    <iframe class="tutorial-vid"
+                                            src="https://www.youtube-nocookie.com/embed/2db_zxp8-8M?enablejsapi=1&version=3&playerapiid=ytplayer"
+                                            frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                </div>
+                                <div class="item">
+                                    <iframe class="tutorial-vid"
+                                            src="https://www.youtube-nocookie.com/embed/tbjfZC9wQ9o?enablejsapi=1&version=3&playerapiid=ytplayer"
+                                            frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                </div>
+                                <div class="item">
+                                    <iframe class="tutorial-vid"
+                                            src="https://www.youtube-nocookie.com/embed/HaeJo9UaJZk?enablejsapi=1&version=3&playerapiid=ytplayer"
+                                            frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                </div>
+                                <div class="item">
+                                    <iframe class="tutorial-vid"
+                                            src="https://www.youtube-nocookie.com/embed/sikbGP3WHCg?enablejsapi=1&version=3&playerapiid=ytplayer"
+                                            frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                </div>
                             </div>
-                            <div class="item">
-                                <iframe class="tutorial-vid" src="https://www.youtube-nocookie.com/embed/q9q1g1-cf7M?enablejsapi=1&version=3&playerapiid=ytplayer"  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                            </div>
-                            <div class="item">
-                                <iframe class="tutorial-vid" src="https://www.youtube-nocookie.com/embed/2db_zxp8-8M?enablejsapi=1&version=3&playerapiid=ytplayer" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                            </div>
-                            <div class="item">
-                                <iframe class="tutorial-vid" src="https://www.youtube-nocookie.com/embed/tbjfZC9wQ9o?enablejsapi=1&version=3&playerapiid=ytplayer" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                            </div>
-                            <div class="item">
-                                <iframe class="tutorial-vid" src="https://www.youtube-nocookie.com/embed/HaeJo9UaJZk?enablejsapi=1&version=3&playerapiid=ytplayer" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                            </div>
-                            <div class="item">
-                                <iframe class="tutorial-vid" src="https://www.youtube-nocookie.com/embed/sikbGP3WHCg?enablejsapi=1&version=3&playerapiid=ytplayer" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                            </div>
+                            <a class="left carousel-control" href="#carousel-video-tutorials" aria-label="Prev"
+                               data-slide="prev">
+                                <i class="fa fa-chevron-left fa-2x prev"></i>
+                            </a>
+                            <a class="right carousel-control" href="#carousel-video-tutorials" aria-label="Next"
+                               data-slide="next">
+                                <i class="fa fa-chevron-right fa-2x next"></i>
+                            </a>
                         </div>
-                        <a class="left carousel-control" href="#carousel-video-tutorials" aria-label="Prev" data-slide="prev">
-                            <i class="fa fa-chevron-left fa-2x prev"></i>
-                        </a>
-                        <a class="right carousel-control" href="#carousel-video-tutorials" aria-label="Next" data-slide="next">
-                            <i class="fa fa-chevron-right fa-2x next"></i>
-                        </a>
+                    </div>
+                    <div class="col-sm-6 lj-header-button custom-width-45"
+                         data-scroll-reveal="wait 0.5s, then enter bottom and move 20px over 0.5s">
+                        <p><a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a>
+                        </p>
+                        <p><a href="{% url 'vid_tutorials' %}" target="_blank" title="Video Tutorials"><i
+                                class="fa fa-play-circle fa-lg"></i> Video Tutorials</a></p>
+                        <p>
+                            <a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/QueryOfTheMonthClub.html"
+                               target="_blank">
+                                <i class="fa fa-search fa-large"></i> Query of the Month
+                            </a></p>
+                        <p><a href="https://github.com/isb-cgc/" target="_blank"> <i class="fa fa-github fa-lg"></i>
+                            GitHub</a></p>
+                        <p><a href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/feedback"
+                              target="_blank"><i class="fa fa-comment-o fa-lg"></i> Feedback</a></p>
                     </div>
                 </div>
-                <div class="col-sm-6 lj-header-button custom-width-45" data-scroll-reveal="wait 0.5s, then enter bottom and move 20px over 0.5s">
-                    <p><a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a></p>
-                    <p><a href="{% url 'vid_tutorials' %}" target="_blank" title="Video Tutorials"><i class="fa fa-play-circle fa-lg"></i> Video Tutorials</a></p>
-                    <p><a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/QueryOfTheMonthClub.html" target="_blank">
-                        <i class="fa fa-search fa-large"></i> Query of the Month
-                    </a></p>
-                    <p><a href="https://github.com/isb-cgc/" target="_blank"> <i class="fa fa-github fa-lg" ></i> GitHub</a></p>
-                    <p><a href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/feedback" target="_blank"><i class="fa fa-comment-o fa-lg" ></i> Feedback</a></p>
-                </div>
-            </div>
-        </div>
-        </div>
-        <div class="footer">
-            <p>ISB-CGC has been funded in whole with Federal funds from the <b>National Cancer Institute</b>, <b>National Institutes of Health</b>, under contract No. HHSN261200800001E
-            </p>
-        </div>
-        <div class="pull-tab ">
-            <div class="pull-tab-button up">
-                <i class="fa fa-chevron-up"></i>
-            </div>
-        </div>
-    </header>
+                <div class="row footer">
+                    <div class="col-xs-12">
+                        <p>ISB-CGC has been funded in whole with Federal funds from the <b>National Cancer Institute</b>,
+                            <b>National
+                                Institutes of Health</b>, under contract No. HHSN261200800001E
+                        </p>
+                        <div class="pull-down-button">
+                            <a href="#about-div" >
+                                <i class="fa fa-chevron-down"></i>
+                            </a>
+                        </div>
 
-    <div class="landing-content">
-        <div class="container">
-            <div class="row cgc-learn-more">
-                <div class="pull-tab ">
-                    <div class="pull-tab-button down">
-                        <i class="fa fa-chevron-down"></i>
                     </div>
                 </div>
+            </div>
+
+            <div id="about-div" class="about-content-div">
                 <div class="col-sm-12 firstRow">
                     <div class="row">
                         <div class="col-sm-10 col-sm-offset-1 lj-icon-box-heading lj-text-left">
                             <h2 style="display:inline-block">Partners</h2>
                             <div style="display:inline-block; padding-left:50px">
-                                <a href="https://cloud.google.com/" target = "_blank" style="text-decoration:none">
-                                    <img src="{% static 'img/gcp-logo.png' %}" alt="Google Cloud Platform" style="width:130px;height:80px;"/>
+                                <a href="https://cloud.google.com/" target="_blank" style="text-decoration:none">
+                                    <img src="{% static 'img/gcp-logo.png' %}" alt="Google Cloud Platform"
+                                         style="width:130px;height:80px;"/>
                                 </a>
-                                <a href="https://gdit.com/" target = "_blank" style="text-decoration:none">
-                                    <img src="{% static 'img/gdit_logo.png' %}" alt="General Dynamics Information Technology, Inc." style="padding-left:50px;width:338px;height:40px;"/>
+                                <a href="https://gdit.com/" target="_blank" style="text-decoration:none">
+                                    <img src="{% static 'img/gdit_logo.png' %}"
+                                         alt="General Dynamics Information Technology, Inc."
+                                         style="padding-left:50px;width:338px;height:40px;"/>
                                 </a>
                             </div>
                         </div>
@@ -131,37 +159,62 @@
 
                 <div class="col-sm-10 col-sm-offset-1">
                     <h2>About Us</h2>
-                    <p>The ISB Cancer Genomics Cloud Resource (ISB-CGC) is a platform that serves as a large-scale repository and provides the computational infrastructure necessary to carry out cancer genomics research at unprecedented scales.</p>
-                    <p>Please use a <a href="https://accounts.google.com/signup/v2/webcreateaccount?hl=en&flowName=GlifWebSignIn&flowEntry=SignUp&nogm=true" target="_blank">Google registered email account</a> to log into this system.</p>
+                    <p>The ISB Cancer Genomics Cloud Resource (ISB-CGC) is a platform that serves as a large-scale
+                        repository and provides the computational infrastructure necessary to carry out cancer genomics
+                        research at unprecedented scales.</p>
+                    <p>Please use a <a
+                            href="https://accounts.google.com/signup/v2/webcreateaccount?hl=en&flowName=GlifWebSignIn&flowEntry=SignUp&nogm=true"
+                            target="_blank">Google registered email account</a> to log into this system.</p>
                     {% if version %}
-                    <br/>
-                    Last deployed to version {{ version.version }} on {{ version.date }}
+                        <br/>
+                        Last deployed to version {{ version.version }} on {{ version.date }}
                     {% endif %}
                 </div>
 
                 <div class="col-sm-10 col-sm-offset-1">
                     <h2>How to Cite Us</h2>
                     <p>Please cite the original ISB-CGC paper when you use ISB-CGC Web App.
-                        <div class='cite-text'>
-                            Sheila M. Reynolds, Michael Miller, Phyliss Lee, et al. <br/>
-                            The ISB Cancer Genomics Cloud: A Flexible Cloud-Based Platform for Cancer Genomics Research<br/>
-                            <a href="http://cancerres.aacrjournals.org/content/77/21/e7.long" target = "_blank"><i>Cancer Res</i> 2017 Nov;77(21): e7–10.</a>
-                        </div>
+                    <div class='cite-text'>
+                        Sheila M. Reynolds, Michael Miller, Phyliss Lee, et al. <br/>
+                        The ISB Cancer Genomics Cloud: A Flexible Cloud-Based Platform for Cancer Genomics Research<br/>
+                        <a href="http://cancerres.aacrjournals.org/content/77/21/e7.long" target="_blank"><i>Cancer
+                            Res</i> 2017 Nov;77(21): e7–10.</a>
+                    </div>
                     </p>
                 </div>
 
                 <div class="col-sm-10 col-sm-offset-1">
                     <h2>Funding</h2>
-                    <p>This project has been funded in whole with Federal funds from the National Cancer Institute, National Institutes of Health, under Contract No. HHSN261200800001E. The content of this publication does not necessarily reflect the views or policies of the Department of Health and Human Services, nor does mention of trade names, commercial products, or organizations imply endorsement by the U.S. Government.</p>
+                    <p>This project has been funded in whole with Federal funds from the National Cancer Institute,
+                        National Institutes of Health, under Contract No. HHSN261200800001E. The content of this
+                        publication does not necessarily reflect the views or policies of the Department of Health and
+                        Human Services, nor does mention of trade names, commercial products, or organizations imply
+                        endorsement by the U.S. Government.</p>
                 </div>
 
 
                 <div class="col-sm-10 col-sm-offset-1">
                     <h2>Warning Notice</h2>
-                    <p>You are accessing a U.S. Government (National Institute of Health (NIH), National Cancer Institute (NCI) and Institute for Systems Biology ISB) website / application which may contain information that must be protected under the U. S. Privacy Act or other sensitive information which is intended for authorized Scientific or Research use only. Network activity and Application usage is monitored to maintain system security, availability, and to ensure appropriate and legitimate usage, there is no right or expectation to privacy on this website / system. Unauthorized attempts to upload information, change information, or use of this website for other than its intended purpose may result in disciplinary action, civil, and/or criminal penalties. Any individual or system that accesses this website should have no expectation of privacy regarding any communications or data processed by this website. Anyone accessing this website expressly consents to monitoring of their actions and all communication or data transiting or stored on or related to this website and is advised that if such monitoring reveals possible evidence of criminal activity, NIH may provide that evidence to law enforcement officials.</p>
+                    <p>You are accessing a U.S. Government (National Institute of Health (NIH), National Cancer
+                        Institute (NCI) and Institute for Systems Biology ISB) website / application which may contain
+                        information that must be protected under the U. S. Privacy Act or other sensitive information
+                        which is intended for authorized Scientific or Research use only. Network activity and
+                        Application usage is monitored to maintain system security, availability, and to ensure
+                        appropriate and legitimate usage, there is no right or expectation to privacy on this website /
+                        system. Unauthorized attempts to upload information, change information, or use of this website
+                        for other than its intended purpose may result in disciplinary action, civil, and/or criminal
+                        penalties. Any individual or system that accesses this website should have no expectation of
+                        privacy regarding any communications or data processed by this website. Anyone accessing this
+                        website expressly consents to monitoring of their actions and all communication or data
+                        transiting or stored on or related to this website and is advised that if such monitoring
+                        reveals possible evidence of criminal activity, NIH may provide that evidence to law enforcement
+                        officials.</p>
                 </div>
 
+
+                {#        </div>#}
             </div>
+
         </div>
     </div>
 {#    <script type="text/javascript">#}
