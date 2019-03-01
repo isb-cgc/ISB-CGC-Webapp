@@ -141,7 +141,9 @@
                         </table>
                     </div>
                     <div class="cannot-register" style="display: none;">
-                        <p class="register-sa-verification-fail">Some of your users do not have access to the datasets you would like to use. Please try again when they have the proper permissions.</p>
+                        <p class="register-sa-verification-fail">Some of your users do not have access to the datasets you would like to use, or other aspects of
+                            the project do not meet requirements. Please try again when these issues are addressed. You may contact feedback@isb-cgc.org
+                            if you need assistance.</p>
                         <input type="button" class="retry-btn btn btn-primary" value="Retry"/>
                         <a href="{% url 'user_gcp_list' user.id %}" class="back-btn btn btn-primary" role="button">Go Back</a>
                     </div>
