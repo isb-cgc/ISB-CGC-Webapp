@@ -2762,7 +2762,8 @@ html {
     #landing .landing-content-div .container .header-div .header-content-div {
       position: relative;
       top: 45%;
-      transform: translateY(-45%); }
+        -webkit-transform: translateY(-45%);
+                transform: translateY(-45%); }
       #landing .landing-content-div .container .header-div .header-content-div a {
         color: #4CC2D6; }
       #landing .landing-content-div .container .header-div .header-content-div .lj-title h1 {
@@ -2798,7 +2799,8 @@ html {
             top: 50%;
             border-radius: 50%;
             border: 2px solid white;
-            transform: translateY(-50%);
+            -webkit-transform: translateY(-50%);
+                    transform: translateY(-50%);
             color: white;
             background-color: rgba(0, 0, 0, 0.5); }
             #landing .landing-content-div .container .header-div .header-content-div .lj-header-vid .carousel .carousel-control-button i {
