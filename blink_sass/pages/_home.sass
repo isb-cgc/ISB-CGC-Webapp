@@ -14,59 +14,62 @@ html
         left: 0
         width: 100%
         .container
-            position: relative
-            .header-content-div
-                padding-top: 50px
-                height: 960px
-                a
-                    color: $isb-lighter
-                .lj-title h1
-                    font-family: 'Montserrat'
-                    font-size: 3.8em
-                    font-weight: 300
-                    color: #fff
-                    margin: 0
-                    word-wrap: break-word
-
-                .lj-text-center
-                    text-align: center
-
-                .lj-title span
-                    color: #4cc2d6
-                    font-weight: 700
-
-                .lj-title-paragraph
-                    padding: 30px
-                    p
+            .header-div
+                min-height: 650px
+                height: 100vh
+                .header-content-div
+                    position: relative
+                    top: 45%
+                    transform: translateY(-45%)
+                    a
+                        color: $isb-lighter
+                    .lj-title h1
+                        font-family: 'Montserrat'
+                        font-size: 3.8em
+                        font-weight: 300
                         color: #fff
-                        font-size: 1.5em
-                .lj-header-vid
-                    text-align: right
-                    &.custom-width-55
-                        width: 55%
-                    .carousel
-                        float: right
-                        width: 320px
-                        height: 240px
-                        .carousel-control-button
-                            height: 42px
-                            width: 42px
-                            position: absolute
-                            top: 50%
-                            border-radius: 50%
-                            border: 2px solid white
-                            transform: translateY(-50%)
-                            color: white
-                            background-color: rgba(0,0,0,.5)
-                            i
-                                padding: 9px 12.5px
-                        .left, .right
-                            background-image: none
-                        .tutorial-vid
+                        margin: 0
+                        word-wrap: break-word
+
+                    .lj-text-center
+                        text-align: center
+
+                    .lj-title span
+                        color: #4cc2d6
+                        font-weight: 700
+
+                    .lj-title-paragraph
+                        padding: 30px
+                        p
+                            color: #fff
+                            font-size: 1.5em
+                    .lj-header-vid
+                        text-align: right
+                        &.custom-width-55
+                            width: 55%
+                        .carousel
+                            float: right
                             width: 320px
                             height: 240px
-                        .carousel-indicators
-                            bottom: -20px
+                            .carousel-control-button
+                                height: 42px
+                                width: 42px
+                                position: absolute
+                                top: 50%
+                                border-radius: 50%
+                                border: 2px solid white
+                                transform: translateY(-50%)
+                                color: white
+                                background-color: rgba(0,0,0,.5)
+                                i
+                                    padding: 9px 12.5px
+                            .left, .right
+                                background-image: none
+                            .tutorial-vid
+                                width: 320px
+                                height: 240px
+                            .carousel-indicators
+                                bottom: -20px
 
                 .lj-header-button
                     text-align: left
@@ -91,10 +94,21 @@ html
                             border: 2px solid #4cc2d6
                     &.custom-width-45
                         width: 45%
+            .about-content-div
+                position: relative
+                padding-top: 100px
+                padding-bottom: 100px
+                left: 0
+                h2
+                    font-size: 25px
+                    color: $isb-primary
+                p
+                    color: darken($isb-dark, 10%)
 
         .lj-overlay
             width: 100%
-            height: 960px
+            height: 100vh
+            min-height: 650px
             position: absolute
             top: 0
             left: 0
@@ -108,23 +122,9 @@ html
             background-color: rgba(0,0,0,0.5)
 
 
-
-    .about-content-div
-        position: relative
-        padding-top: 100px
-        left: 0
-        h2
-            font-size: 25px
-            color: $isb-primary
-        p
-            color: darken($isb-dark, 10%)
     .footer
         color: white
-        width: 60vw
-        top: 40px
-        left: 50%
-        transform: translateX(-50%)
-        position: relative
+        margin-top: 50px
         text-align: center
         font-size: 1.1em
 
@@ -138,25 +138,23 @@ html
         padding: 5px
 
     .pull-down-button
-        position: absolute
-        i
-            color: white
-            padding: 8px
-        margin-top: 10px
+        width: 100%
+        text-align: center
+        margin-top: 20px
         display: block
-        width: 50px
-        height: 50px
-        left: 50%
-        transform: translateX(-50%)
         font-weight: bold
         text-align: center
         font-size: 24px
-        background-color: rgba(0,0,0,0.5)
-        border-radius: 50%
-        border: 2px solid #4cc2d6
-
-        &:hover
-            background-color: darken($isb-primary, 10%)
+        i
+            color: white
+            padding: 8px
+            width: 50px
+            height: 50px
+            background-color: rgba(0,0,0,0.5)
+            border-radius: 50%
+            border: 2px solid #4cc2d6
+            &:hover
+                background-color: darken($isb-primary, 10%)
 
 #privacy
     h2
