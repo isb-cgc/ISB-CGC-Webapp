@@ -48,7 +48,7 @@ define (['jquery', 'oncogridjs'],
     };
 
     var geneTracks = [
-        {'name': '#Cases affected', 'fieldName': 'case_score', 'type': 'int', 'group': 'GDC', 'sort':sortByIntDesc, 'template': default_track_template},
+        {'name': '#Cases affected', 'fieldName': 'case_score', 'type': 'int', 'group': 'ISB-CGC', 'sort':sortByIntDesc, 'template': default_track_template},
         {'name': 'Cancer Gene Census', 'fieldName': 'is_cgc', 'type': 'bool', 'group': 'Gene Sets', 'sort':sortByBool, 'template': default_track_template}
     ];
 
@@ -158,7 +158,7 @@ define (['jquery', 'oncogridjs'],
         'Gene Expression':'forestgreen'
     };
 
-    const gdc_legend = {
+    const isb_legend = {
         '# of Cases Affected': 'mediumpurple'
     };
 
@@ -290,7 +290,7 @@ define (['jquery', 'oncogridjs'],
         params.trackLegends ={
             'Clinical': getTrackLegends(clinical_legend, donor_track_dd_max, gene_track_ca_max),
             'Data Types': getTrackLegends(data_type_legend, donor_track_dd_max, gene_track_ca_max),
-            'GDC': getTrackLegends(gdc_legend, donor_track_dd_max, gene_track_ca_max),
+            'ISB-CGC': getTrackLegends(isb_legend, donor_track_dd_max, gene_track_ca_max),
             'Gene Sets': getTrackLegends(cgc_legend, donor_track_dd_max, gene_track_ca_max)
         };
         return params;
@@ -321,7 +321,7 @@ define (['jquery', 'oncogridjs'],
         drawSvgLegend(active_plot_selector+' .svg-track-legend', obs_legends, 'Mutation', 20);
         drawSvgLegend(active_plot_selector+' .svg-track-legend', clinical_legend, 'Clinical', 140, donor_track_dd_max, gene_track_ca_max);
         drawSvgLegend(active_plot_selector+' .svg-track-legend', data_type_legend, 'Data Type', 415);
-        drawSvgLegend(active_plot_selector+' .svg-track-legend', gdc_legend, 'GDC', 535, donor_track_dd_max, gene_track_ca_max);
+        drawSvgLegend(active_plot_selector+' .svg-track-legend', isb_legend, 'ISB-CGC', 535, donor_track_dd_max, gene_track_ca_max);
         drawSvgLegend(active_plot_selector+' .svg-track-legend', cgc_legend, 'Gene Set', 575);
 
         $(active_plot_selector).find('.oncogrid-toolbar').on('click', '.cluster', cluster);
