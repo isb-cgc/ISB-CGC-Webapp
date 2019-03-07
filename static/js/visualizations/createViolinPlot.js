@@ -124,9 +124,18 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
             var histo_dict = {};
             for (var key in values_only) {
+                console.log(values_only[key]);
                 histo_dict[key] = d3.layout.histogram()
                     .frequency(0)(values_only[key].sort(d3.descending));
+                //console.log('histo_dict['+key+'] = '+histo_dict[key]);
+                for (var i = 0; i< histo_dict[key].length; i++){
+
+                    console.log('high '+histo_dict[key][i][0]);
+                    console.log('low '+histo_dict[key][i][histo_dict[key][i].length-1]);
+                }
+
             }
+
 
             var nonNullData = [];
 
@@ -153,20 +162,30 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                         return color(colorVal(d));
                     })
                     .attr('cx', function (d) {
+                        // console.log(parseInt(x(d[xAttr]) / (violin_width + padding)));
                         var histogram = histo_dict[parseInt(x(d[xAttr]) / (violin_width + padding))];
+                        console.log(d[yAttr]);
                         var histo_index = 0;
                         for (var j = 0; j < histogram.length; j++) {
                             var higher = histogram[j][0];
                             var lower = histogram[j][histogram[j].length - 1];
                             if (d[yAttr] >= lower && d[yAttr] <= higher) {
+                                console.log('histo_index '+j);
                                 histo_index = j;
+                                break;
                             }
+                            // console.log(histogram.length)
                         }
+                        // console.log(histo_index);
                         var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
                         var rand_pos = 0;
                         if (histogram.length) {
+                            // console.log(d3.max(histogram, function (d) {
+                            //         return d.y;
+                            //     }));
                             var y_horizontal = d3.scale.linear()
                                 .range([0, violin_width / 2])
+
                                 .domain([0, d3.max(histogram, function (d) {
                                     return d.y;
                                 })]);
@@ -444,11 +463,11 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
                 var oldSetKeys = Object.keys(oldSet);
 
-                if(oldSetKeys.length !== $('svg circle.selected').length) {
+                if(oldSetKeys.length !== $('.worksheet.active svg circle.selected').length) {
                     reCalc = true;
                 }
 
-                $('svg circle.selected').each(function(){
+                $('.worksheet.active svg circle.selected').each(function(){
                     if(!oldSet[this.id]) {
                         reCalc = true;
                     }
@@ -471,7 +490,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 mouseDown = null;
                 if (brush.empty()) {
                     svg.selectAll(".hidden").classed("hidden", false);
-                    $('.save-cohort-card').hide();
+                    $('.worksheet.active .save-cohort-card').hide();
                 }
             };
 
@@ -493,12 +512,12 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     // ...but we don't want to throttle visual updating of the selection card, because
                     // that looks weird and isn't really necessary
                     var e = brush.extent();
-                    var topVal = $('.plot-div').position().top
+                    var topVal = $('.worksheet.active .plot-div').position().top
                         + margin.top
                         + 15
                         + y(Math.min(e[0][1], e[1][1]));
-                    var leftVal = Math.min((x2(mouseDown[0][0]) > x2(e[0][0]) ? x2(e[0][0]) : x2(e[1][0])), (view_width-$('.save-cohort-card').width()));
-                    $('.save-cohort-card').show()
+                    var leftVal = Math.min((x2(mouseDown[0][0]) > x2(e[0][0]) ? x2(e[0][0]) : x2(e[1][0])), (view_width-$('.worksheet.active .save-cohort-card').width()));
+                    $('.worksheet.active .save-cohort-card').show()
                         .attr('style', 'position:absolute; top: '+ (topVal) +'px; left:' +leftVal+'px;');
                 })
                 .on('brushend', brushend);
@@ -574,7 +593,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .attr('transform', 'rotate(-90) translate(' + (-height+margin.top+margin.bottom)/2 + ',10)')
                 .text(yLabel);
 
-            $('foreignObject div').each(function(){
+            $('.worksheet.active foreignObject div').each(function(){
                 $(this).attr('title',$(this).html())
             });
 
@@ -603,13 +622,14 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     zoom_status.translation = null;
                     zoom_status.scale = null;
 
-                    var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
+                    //var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
-                    $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
-                    $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + 0);
-                    $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', "");
+
+                    $('.worksheet.active .plot .selected-samples-count').html('Number of Samples: ' + 0);
+                    $('.worksheet.active .plot .selected-patients-count').html('Number of Participants: ' + 0);
+                    $('.worksheet.active .save-cohort-form input[name="samples"]').attr('value', "");
                     svg.selectAll('.selected').classed('selected', false);
-                    $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
+                    $('.worksheet.active .plot .save-cohort-card').hide();
                     selectedSamples = {};
 
                     // Get rid of the selection rectangle - comment out if we want to enable selection carry-over
@@ -628,22 +648,21 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                         case_set[sampleSet[val]['case']] = 1;
                     });
 
-                    $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + Object.keys(selectedSamples).length);
-                    $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Cases: ' + Object.keys(case_set).length);
-                    $('.save-cohort-card').find('.btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
+                    $('.worksheet.active .plot .selected-samples-count').html('Number of Samples: ' + Object.keys(selectedSamples).length);
+                    $('.worksheet.active .plot .selected-patients-count').html('Number of Cases: ' + Object.keys(case_set).length);
+                    $('.worksheet.active .plot .btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
                 }
             }
 
             // If we are ready to save out this cohort, JSONify the selection set and set it to the form value
-            $('.save-cohort-card').find('.btn').on('click',function(e){
+            $('.worksheet.active .save-cohort-card').find('.btn').on('click',function(e){
                 if(Object.keys(selectedSamples).length > 0){
                     var selected_sample_set = [];
                     _.each(Object.keys(selectedSamples),function(sample){
                         selected_sample_set.push(sampleSet[sample]);
                     });
 
-                    var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
-                    $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
+                    $('.worksheet.active .save-cohort-form input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
                 }
             });
 
