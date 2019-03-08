@@ -786,7 +786,6 @@ var Oncoprint = (function () {
 	$legend_div.appendTo($legend_ctr);
 
 	$minimap_div.appendTo($ctr);
-
 	$cell_canvas.appendTo($cell_div);
 	$cell_overlay_canvas.appendTo($cell_div);
 	$dummy_scroll_div.appendTo($cell_div);
@@ -959,10 +958,6 @@ var Oncoprint = (function () {
 	this.horz_zoom_callbacks = [];
 	this.minimap_close_callbacks = [];
 
-
-	$(window).resize(function() {
-	    resizeAndOrganize(self);
-	});
 
 
 	this.id_clipboard = [];
@@ -6294,6 +6289,7 @@ var OncoprintWebGLCellView = (function () {
 	getWebGLContextAndSetUpMatrices(this);
 	setUpShaders(this);
 	getOverlayContextAndClear(this);
+
 	this.visible_area_width = $canvas[0].width;
 
 	var self = this;

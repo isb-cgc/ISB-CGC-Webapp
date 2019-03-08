@@ -34,7 +34,7 @@ require.config({
         vizhelpers: 'helpers/vis_helpers',
         select2: 'libs/select2.min',
         oncoprintjs: 'libs/oncoprint.bundle',
-        //oncogridjs: 'libs/oncogrid-debug',
+        // oncogridjs: 'libs/oncogrid-debug',
         oncogridjs: 'libs/oncogrid.min',
         geneticrules: 'libs/geneticrules',
         canvas_toBlob: 'libs/canvas-toBlob',
@@ -196,12 +196,18 @@ require([
         plotFactory.redraw_plot();
     });
 
-    $('.data-download').on('click', function () {
-        var plot_data = $('.worksheet.active .plot-args').data('plot-data');
+    $('.json-download').on('click', function () {
+        var plot_data = $('.worksheet.active .plot-args').data('plot-json');
         var json =  JSON.stringify(plot_data());
         var type = "text/json;charset=utf-8";
         var blob = new Blob([json], {type: type});
 		saveAs(blob, 'plot_data.json');
+    });
+
+    $('.csv-download').on('click', function () {
+        var plot_data = $('.worksheet.active .plot-args').data('plot-csv');
+        var blob = new Blob(["\ufeff", plot_data()]);
+		saveAs(blob, 'plot_data.csv');
     });
 
     $('.svg-download').on('click', function () {
@@ -1277,9 +1283,7 @@ require([
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
 
         var toggle_selection_selector = '#' + args.worksheet_id + ' .toggle-selection';
-        var redraw_selector = '#' + args.worksheet_id + ' .redraw-plot';
-        var svg_img_download_selector = '#' + args.worksheet_id + ' .svg-download';
-        var png_img_download_selector = '#' + args.worksheet_id + ' .png-download';
+        var csv_download_selector = '#' + args.worksheet_id + ' .csv-download';
         $(legend_selector).hide();
         turn_off_toggle_selector();
 
@@ -1296,24 +1300,12 @@ require([
         //hide 'Enable Sample Selection for Oncoprint and SeqPeek'
         if (args.type === 'SeqPeek' || args.type === 'OncoPrint' || args.type === 'OncoGrid') {
             $(toggle_selection_selector).hide();
+            $(csv_download_selector).hide();
         }
         else {
             $(toggle_selection_selector).show();
+            $(csv_download_selector).show();
         }
-
-        if(args.type === 'OncoPrint'){
-            $(redraw_selector).hide();
-            $(svg_img_download_selector).hide();
-            $(png_img_download_selector).hide();
-
-        }
-        else{
-            $(redraw_selector).show();
-            $(svg_img_download_selector).show();
-            $(png_img_download_selector).show();
-        }
-
-
 
         if(args.type === 'OncoGrid'){
             var oncogrid_template = plot_element.find('#oncogrid_div').html();

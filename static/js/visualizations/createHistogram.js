@@ -92,11 +92,6 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
             max_n = tmp[1];
             var h_padding = (max_n - min_n) * .05 || 0.05;
 
-            var band_width = 50;
-            if(num_bins > 10){
-                band_width = (width-margin.left-margin.right)/num_bins;
-            }
-
             x = d3.scale.linear()
                 .range([margin.left, width - margin.right])
                 .domain([min_n-h_padding, max_n+h_padding]);
@@ -118,6 +113,10 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 .orient('left')
                 .tickFormat(d3.format(".1%"))
                 .tickSize(-width + margin.right + margin.left, 0, 0);
+
+            var band_width = x(hist_data[0].dx + hist_data[0].x) - x(hist_data[0].x);
+            var h_padding_width = (x(min_n)-x(min_n-h_padding))*2;
+            band_width = band_width > h_padding_width ? h_padding_width*.95 : band_width > 0 ? band_width : 50;
 
             var zoomer = function () {
                 if(!selex_active) {
@@ -168,7 +167,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
             var plot_area = svg.append('g')
                 .attr('clip-path', 'url(#'+plot_area_clip_id+')')
                 .attr('transform','translate(0,'+margin.top+')');
-            var band_padding = 2;
+            var band_padding = .5;
             plot_area.append('clipPath')
                 .attr('id', plot_area_clip_id)
                 .append('rect')
@@ -364,7 +363,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 check_selection_state(button);
             }
 
-            function get_plot_data(){
+            function get_json_data(){
                 var p_data = {};
                 hist_data.map(function(d, i){
                     p_data[i] = {
@@ -376,10 +375,19 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 return p_data;
             }
 
+            function get_csv_data(){
+                var csv_data = "x, y\n";
+                hist_data.map(function(d){
+                    csv_data += d.x +', '+ d.y + '\n';
+                });
+                return csv_data;
+            }
+
             return {
-                plot_data: get_plot_data,
-                resize                : resize,
-                check_selection_state : check_selection_state_wrapper
+                get_json: get_json_data,
+                get_csv: get_csv_data,
+                resize: resize,
+                check_selection_state: check_selection_state_wrapper
             }
         }
     };
