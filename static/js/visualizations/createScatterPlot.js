@@ -168,11 +168,11 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
                 var oldSetKeys = Object.keys(oldSet);
 
-                if(oldSetKeys.length !== $('svg circle.selected').length) {
+                if(oldSetKeys.length !== $('.worksheet.active svg circle.selected').length) {
                     reCalc = true;
                 }
 
-                $('svg circle.selected').each(function(){
+                $('.worksheet.active svg circle.selected').each(function(){
                     if(!oldSet[this.id]) {
                         reCalc = true;
                     }
@@ -195,7 +195,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 mouseDown = null;
                 if (brush.empty()) {
                     svg.selectAll(".hidden").classed("hidden", false);
-                    $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
+                    $('.worksheet.active .plot').find('.save-cohort-card').hide();
                 }
             };
 
@@ -213,9 +213,9 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     // ...but we don't want to throttle visual updating of the selection card, because
                     // that looks weird and isn't really necessary
                     var e = brush.extent();
-                    var topVal = Math.min((yScale(e[1][1]) + $('.save-cohort-card').height()+20),(height-$('.save-cohort-card').height()));
-                    var leftVal = Math.min(((xScale(mouseDown[0][0]) > xScale(e[0][0]) ? xScale(e[0][0]) : xScale(e[1][0]))+ 30),(width-$('.save-cohort-card').width()));
-                    $('.save-cohort-card').show()
+                    var topVal = Math.min((yScale(e[1][1]) + $('.worksheet.active .save-cohort-card').height()+20),(height-$('.worksheet.active .save-cohort-card').height()));
+                    var leftVal = Math.min(((xScale(mouseDown[0][0]) > xScale(e[0][0]) ? xScale(e[0][0]) : xScale(e[1][0]))+ 30),(width-$('.worksheet.active .save-cohort-card').width()));
+                    $('.worksheet.active .save-cohort-card').show()
                         .attr('style', 'position:absolute; top: '+ topVal +'px; left:' +leftVal+'px;');
                 })
                 .on('brushend', brushend);
@@ -357,14 +357,13 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     zoom_status.translation = null;
                     zoom_status.scale = null;
 
-                    var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
-                    $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
-                    $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Cases: ' + 0);
-                    $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', "");
+                    $('.worksheet.active .plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
+                    $('.worksheet.active .plot').find('.selected-patients-count').html('Number of Cases: ' + 0);
+                    $('.worksheet.active .save-cohort-form input[name="samples"]').attr('value', "");
                     svg.selectAll('.selected').classed('selected', false);
                     selectedSamples = {};
-                    $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
+                    $('.worksheet.active .plot').find('.save-cohort-card').hide();
 
                     // Get rid of the selection rectangle - comment out if we want to enable selection carry-over
                     brush.clear();
@@ -381,22 +380,21 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                         case_set[sampleSet[val]['case']] = 1;
                     });
 
-                    $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + Object.keys(selectedSamples).length);
-                    $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Cases: ' + Object.keys(case_set).length);
-                    $('.save-cohort-card').find('.btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
+                    $('.worksheet.active .plot').find('.selected-samples-count').html('Number of Samples: ' + Object.keys(selectedSamples).length);
+                    $('.worksheet.active .plot').find('.selected-patients-count').html('Number of Cases: ' + Object.keys(case_set).length);
+                    $('.worksheet.active .save-cohort-card').find('.btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
                 }
             }
 
             // If we are ready to save out this cohort, JSONify the selection set and set it to the form value
-            $('.save-cohort-card').find('.btn').on('click',function(e){
+            $('.worksheet.active .save-cohort-card').find('.btn').on('click',function(e){
                 if(Object.keys(selectedSamples).length > 0){
                     var selected_sample_set = [];
                     _.each(Object.keys(selectedSamples),function(sample){
                         selected_sample_set.push(sampleSet[sample]);
                     });
 
-                    var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
-                    $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
+                    $('.worksheet.active .save-cohort-form input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
                 }
 
             });

@@ -124,17 +124,10 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
             var histo_dict = {};
             for (var key in values_only) {
-                console.log(values_only[key]);
                 histo_dict[key] = d3.layout.histogram()
                     .frequency(0)(values_only[key].sort(d3.descending));
-                //console.log('histo_dict['+key+'] = '+histo_dict[key]);
-                for (var i = 0; i< histo_dict[key].length; i++){
-
-                    console.log('high '+histo_dict[key][i][0]);
-                    console.log('low '+histo_dict[key][i][histo_dict[key][i].length-1]);
-                }
-
             }
+
 
 
             var nonNullData = [];
@@ -164,13 +157,11 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     .attr('cx', function (d) {
                         // console.log(parseInt(x(d[xAttr]) / (violin_width + padding)));
                         var histogram = histo_dict[parseInt(x(d[xAttr]) / (violin_width + padding))];
-                        console.log(d[yAttr]);
                         var histo_index = 0;
                         for (var j = 0; j < histogram.length; j++) {
                             var higher = histogram[j][0];
                             var lower = histogram[j][histogram[j].length - 1];
                             if (d[yAttr] >= lower && d[yAttr] <= higher) {
-                                console.log('histo_index '+j);
                                 histo_index = j;
                                 break;
                             }
@@ -180,9 +171,6 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                         var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
                         var rand_pos = 0;
                         if (histogram.length) {
-                            // console.log(d3.max(histogram, function (d) {
-                            //         return d.y;
-                            //     }));
                             var y_horizontal = d3.scale.linear()
                                 .range([0, violin_width / 2])
 
@@ -261,7 +249,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
             var y = d3.scale.linear()
                 .range(range)
-                .domain(domain);
+                .domain(domain)
+                .nice();
 
             var line = d3.svg.line()
                 .interpolate('linear')
@@ -362,8 +351,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
                 for (var j = 0; j < processed_data[key].length; j++) {
                     if (!isNaN(processed_data[key][j]['value'])) {
-                        values_only.push(processed_data[key][j]['value']);
-                        scatter_processed_data[i].push(processed_data[key][j]['value']);
+                        values_only.push(Number(processed_data[key][j]['value']));
+                        scatter_processed_data[i].push(Number(processed_data[key][j]['value']));
                     }
                     var temp = processed_data[key][j];
                     temp['plot_number'] = i+1;
@@ -397,7 +386,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             // create y axis
             var y = d3.scale.linear()
                 .range(range)
-                .domain(domain);
+                .domain(domain)
+                .nice();
 
             var yAxis = d3.svg.axis()
                 .scale(y)
@@ -622,7 +612,6 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     zoom_status.translation = null;
                     zoom_status.scale = null;
 
-                    //var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
 
                     $('.worksheet.active .plot .selected-samples-count').html('Number of Samples: ' + 0);
