@@ -55,6 +55,17 @@ class CNVRTableConfig(object):
 
         return cls(table_id, gencode_reference_table_id, genomic_build, gene_label_field, internal_table_id, program, value_field)
 
+    def __str__(self):
+        return "Table: {}, GenCode Ref Table: {}, Build: {}, Program: {}, Value Field: {}".format(
+            self.table_id,
+            self.gencode_reference_table_id,
+            self.genomic_build,
+            self.program,
+            self.value_field
+        )
+
+    def __repr__(self):
+        return self.__str__()
 
 class CNVRDataSourceConfig(object):
     """
@@ -62,6 +73,13 @@ class CNVRDataSourceConfig(object):
     """
     def __init__(self, tables_array):
         self.data_table_list = tables_array
+
+    def __str__(self):
+        return str(self.data_table_list)
+
+    def __repr__(self):
+        return self.__str__()
+
 
     @classmethod
     def from_dict(cls, param):

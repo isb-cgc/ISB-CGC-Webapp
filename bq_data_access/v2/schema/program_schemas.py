@@ -1,5 +1,7 @@
+from django.conf import settings
+
 TABLE_TO_SCHEMA_MAP = {
-    "isb-cgc:TCGA_bioclin_v0.Clinical": [
+    "{}:TCGA_bioclin_v0.Clinical".format(settings.BIGQUERY_DATA_PROJECT_ID): [
         {
             "mode": "NULLABLE",
             "name": "program_name",
@@ -351,7 +353,7 @@ TABLE_TO_SCHEMA_MAP = {
             "type": "STRING"
         }
     ],
-    "isb-cgc:TARGET_bioclin_v0.Clinical": [
+    "{}:TARGET_bioclin_v0.Clinical".format(settings.BIGQUERY_DATA_PROJECT_ID): [
         {
             "mode": "NULLABLE",
             "name": "program_name",
@@ -988,7 +990,7 @@ TABLE_TO_SCHEMA_MAP = {
             "type": "INTEGER"
         }
     ],
-    "isb-cgc:TARGET_bioclin_v0.Biospecimen": [
+    "{}:TARGET_bioclin_v0.Biospecimen".format(settings.BIGQUERY_DATA_PROJECT_ID): [
         {
             "mode": "NULLABLE",
             "name": "sample_type",
@@ -1000,7 +1002,7 @@ TABLE_TO_SCHEMA_MAP = {
             "type": "STRING"
         },
     ],
-    "isb-cgc:TCGA_bioclin_v0.Biospecimen": [
+    "{}:TCGA_bioclin_v0.Biospecimen".format(settings.BIGQUERY_DATA_PROJECT_ID): [
         {
             "mode": "NULLABLE",
             "name": "sample_type",

@@ -36,13 +36,16 @@
 {% block content %}
 
     <div id="path-report-div" class="row">
-        <div id="path-report-viewer">
+        <div id="path-report-viewer" class="viewer">
             <div class="data-tab-content-panel">
                 <div class="panel panel-default">
                     <div class="panel-body">
                         <div class="iframe-container">
+                            <div class="btn-float toggle-fullscreen" title="Toggle full screen">
+                                <i class="fa fa-expand"></i>
+                            </div>
                             <div class="load-spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                            <iframe id="path-report-iframe" width="100%" src="{{ STORAGE_URI }}{{ path_report_file }}"></iframe>
+                            <iframe id="path-report-iframe" frameborder="0" src="{{ STORAGE_URI }}{{ path_report_file }}"></iframe>
                         </div>
                     </div>
                 </div>

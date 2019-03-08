@@ -36,13 +36,16 @@
 {% block content %}
 
     <div id="dicom-div" class="row">
-        <div id="dicom-viewer">
+        <div id="dicom-viewer" class="viewer">
             <div class="data-tab-content-panel">
                 <div class="panel panel-default">
                     <div class="panel-body">
                         <div class="iframe-container">
+                            <div class="btn-float toggle-fullscreen" title="Toggle full screen">
+                                <i class="fa fa-expand"></i>
+                            </div>
                             <div class="load-spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                            <iframe id="dicom-iframe" width="100%" src="https://{{ dicom_viewer }}{{ study_uid }}"></iframe>
+                            <iframe id="dicom-iframe" frameborder="0" src="https://{{ dicom_viewer }}{{ study_uid }}"></iframe>
                         </div>
                     </div>
                 </div>

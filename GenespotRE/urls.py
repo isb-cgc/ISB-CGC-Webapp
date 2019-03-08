@@ -63,6 +63,7 @@ urlpatterns = [
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
     url(r'^extended_login/$', views.extended_login_view, name='extended_login'),
     url(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),
+    url(r'^privacy/', views.privacy_policy, name='privacy'),
 
     url(r'^programs/', include('projects.urls')),
     url(r'^genes/', include('genes.urls')),

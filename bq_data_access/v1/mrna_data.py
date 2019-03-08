@@ -86,7 +86,7 @@ def get_table_info(table_id):
     return table_info
 
 def build_query(project_name, dataset_name, table_name, gene_symbol, value_field, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
-    cohort_project_name = settings.PROJECT_NAME
+    cohort_project_name = settings.GCLOUD_PROJECT_ID
     # Generate the 'IN' statement string: (%s, %s, ..., %s)
     cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
     project_id_stmt = ''
@@ -160,8 +160,8 @@ class MRNAFeatureProvider(object):
         return str(data_point['value'])
 
     def get_data_from_bigquery(self, cohort_id_array, cohort_dataset, cohort_table):
-        project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_DATA_PROJECT_NAME
+        project_id = settings.BIGQUERY_PROJECT_ID
+        project_name = settings.BIGQUERY_DATA_PROJECT_ID
         dataset_name = settings.BIGQUERY_DATASET_V1
         result = do_query(project_id, project_name, dataset_name, self.table_name, self.gene_label, self.value_field,
                           cohort_dataset, cohort_table, cohort_id_array)

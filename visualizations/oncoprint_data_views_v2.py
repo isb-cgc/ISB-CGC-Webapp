@@ -149,21 +149,21 @@ def oncoprint_view_data(request):
         cohort_id_list = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
 
         cohort_table_id = "{project_name}.{dataset_id}.{table_id}".format(
-            project_name=settings.BIGQUERY_PROJECT_NAME,
-            dataset_id=settings.COHORT_DATASET_ID,
+            project_name=settings.BIGQUERY_PROJECT_ID,
+            dataset_id=settings.BIGQUERY_COHORT_DATASET_ID,
             table_id=settings.BIGQUERY_COHORT_TABLE_ID)
 
         bq_table_info = BQ_MOLECULAR_ATTR_TABLES['TCGA'][genomic_build]
-        somatic_mut_query = query_template.format(bq_data_project_id = settings.BIGQUERY_DATA_PROJECT_NAME,
-                                        dataset_name=bq_table_info['dataset'],
-                                        table_name=bq_table_info['table'],
-                                        conseq_col=("one_consequence" if genomic_build == "hg38" else 'consequence'),
-                                        cohort_table=cohort_table_id,
-                                        filter_clause=filter_clause,
-                                        cohort_id_list=cohort_id_list,
-                                        project_clause=project_clause)
-
-
+        somatic_mut_query = query_template.format(
+            bq_data_project_id = settings.BIGQUERY_DATA_PROJECT_ID,
+            dataset_name=bq_table_info['dataset'],
+            table_name=bq_table_info['table'],
+            conseq_col=("one_consequence" if genomic_build == "hg38" else 'consequence'),
+            cohort_table=cohort_table_id,
+            filter_clause=filter_clause,
+            cohort_id_list=cohort_id_list,
+            project_clause=project_clause
+        )
 
         somatic_mut_query_job = BigQuerySupport.insert_query_job(somatic_mut_query)
 
@@ -219,7 +219,7 @@ def oncoprint_view_data(request):
                 'plot_data': plot_data,
                 'gene_list': gene_array,
                 'bq_tables': ["{bq_data_project_id}:{dataset_name}.{table_name}".format(
-                    bq_data_project_id=settings.BIGQUERY_DATA_PROJECT_NAME,
+                    bq_data_project_id=settings.BIGQUERY_DATA_PROJECT_ID,
                     dataset_name=bq_table_info['dataset'],
                     table_name=bq_table_info['table'])],
                 'plot_message': plot_message,

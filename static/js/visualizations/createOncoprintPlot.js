@@ -119,20 +119,16 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
         },
         createOncoprintPlot: function (plot_selector, data) {
             $(plot_selector).html($(plot_selector).siblings('.oncoprint_div').html());
-            var updateOncoprinter = CreateOncoprinterWithToolbar(plot_selector, '.oncoprint .oncoprint_body', '.oncoprint .oncoprint-diagram-toolbar-buttons');
-            //var oncoprintObj;
+            var oncoprinterObj = CreateOncoprinterWithToolbar(plot_selector, '.oncoprint .oncoprint_body', '.oncoprint .oncoprint-diagram-toolbar-buttons');
             var gene_order = sample_order = null;
             var process_result = {};
-            //var svg;
             if (data.length > 0) {
                 process_result = processData(data);
-                updateOncoprinter(process_result.data_by_gene, 'sample', process_result.altered_by_gene, sample_order, gene_order);
-                //svg = oncoprintObj.toSVG();
-                //console.log(svg);
+                oncoprinterObj.updateOncoprinter(process_result.data_by_gene, 'sample', process_result.altered_by_gene, sample_order, gene_order);
             }
             return {
-                plot_data: function(){ return process_result; }//,
-                //svg: svg
+                get_json: function(){ return process_result; },
+                get_svg: function(){ return oncoprinterObj.getOncoprinter().toSVG(true); }
             }
         }
     }
