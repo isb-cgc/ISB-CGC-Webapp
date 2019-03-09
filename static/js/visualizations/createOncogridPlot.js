@@ -59,12 +59,12 @@ define (['jquery', 'oncogridjs'],
             { 'name': 'Days to Death', 'fieldName': 'days_to_death', 'type': 'dd', 'group': 'Clinical', 'sort': sortByIntDesc, 'template': default_track_template},
             { 'name': 'Gender', 'fieldName': 'gender', 'type': 'gender', 'group': 'Clinical', 'sort': sortByString, 'template': default_track_template},
             { 'name': 'Ethnicity', 'fieldName': 'ethnicity', 'type': 'ethnicity', 'group': 'Clinical', 'sort': sortByString, 'template': default_track_template},
-            { 'name': 'Clinical', 'fieldName': 'clinical', 'type': 'clinical', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
+            // { 'name': 'Clinical', 'fieldName': 'clinical', 'type': 'clinical', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
             { 'name': 'Biospecimen', 'fieldName': 'biospecimen', 'type': 'biospecimen', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
             { 'name': 'Raw Sequencing Data', 'fieldName': 'rsd', 'type': 'rsd', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
-            { 'name': 'Simple Nucleotide Variation', 'fieldName': 'snv', 'type': 'snv', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
-            { 'name': 'Copy Number Variation', 'fieldName': 'cnv', 'type': 'cnv', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
-            { 'name': 'Gene Expression', 'fieldName': 'gene_exp', 'type': 'gene_exp', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template}
+            { 'name': 'Simple Nucleotide Variation', 'fieldName': 'snv', 'type': 'snv', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template}
+            // { 'name': 'Copy Number Variation', 'fieldName': 'cnv', 'type': 'cnv', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
+            // { 'name': 'Gene Expression', 'fieldName': 'gene_exp', 'type': 'gene_exp', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template}
         ];
 
     var donorFill = function (d) {
@@ -86,12 +86,12 @@ define (['jquery', 'oncogridjs'],
             case 'Days to Death':
                 fill_color = clinical_legend[name];
                 break;
-            case 'Clinical':
+            // case 'Clinical':
             case 'Biospecimen':
             case 'Raw Sequencing Data':
             case 'Simple Nucleotide Variation':
-            case 'Copy Number Variation':
-            case 'Gene Expression':
+            // case 'Copy Number Variation':
+            // case 'Gene Expression':
                 fill_color = data_type_legend[name];
                 break;
             default:
@@ -150,12 +150,12 @@ define (['jquery', 'oncogridjs'],
     };
 
     const data_type_legend = {
-        'Clinical' : 'darkkhaki',
+        // 'Clinical' : 'darkkhaki',
         'Biospecimen' : 'darkslategrey',
         'Raw Sequencing Data' : 'cyan',
         'Simple Nucleotide Variation': 'darkkhaki',
-        'Copy Number Variation': 'darksalmon',
-        'Gene Expression':'forestgreen'
+        // 'Copy Number Variation': 'darksalmon',
+        // 'Gene Expression':'forestgreen'
     };
 
     const isb_legend = {
@@ -228,7 +228,7 @@ define (['jquery', 'oncogridjs'],
     function initParams(donors, genes, observations, donorTracks, donor_track_dd_max, gene_track_ca_max){
         var params = {};
         params.element = active_plot_selector+' .grid-div';
-        params.margin = { top: 40, right: 110, bottom: 150, left: 70 };
+        params.margin = { top: 0, right: 110, bottom: 40, left: 70 };
         params.height = 200;
         params.width = 700;
         params.heatMap = false;
@@ -256,12 +256,12 @@ define (['jquery', 'oncogridjs'],
                 case 'ethnicity':
                     opacity = 1;
                     break;
-                case 'clinical':
+                // case 'clinical':
                 case 'biospecimen':
                 case 'rsd':
                 case 'snv':
-                case 'cnv':
-                case 'gene_exp':
+                // case 'cnv':
+                // case 'gene_exp':
                     opacity = d.value ? 1 : 0;
                     break;
                 default:
@@ -321,8 +321,8 @@ define (['jquery', 'oncogridjs'],
         drawSvgLegend(active_plot_selector+' .svg-track-legend', obs_legends, 'Mutation', 20);
         drawSvgLegend(active_plot_selector+' .svg-track-legend', clinical_legend, 'Clinical', 140, donor_track_dd_max, gene_track_ca_max);
         drawSvgLegend(active_plot_selector+' .svg-track-legend', data_type_legend, 'Data Type', 415);
-        drawSvgLegend(active_plot_selector+' .svg-track-legend', isb_legend, 'ISB-CGC', 535, donor_track_dd_max, gene_track_ca_max);
-        drawSvgLegend(active_plot_selector+' .svg-track-legend', cgc_legend, 'Gene Set', 575);
+        drawSvgLegend(active_plot_selector+' .svg-track-legend', isb_legend, 'ISB-CGC', 495, donor_track_dd_max, gene_track_ca_max);
+        drawSvgLegend(active_plot_selector+' .svg-track-legend', cgc_legend, 'Gene Set', 535);
 
         $(active_plot_selector).find('.oncogrid-toolbar').on('click', '.cluster', cluster);
         $(active_plot_selector).find('.oncogrid-toolbar').on('click', '.heatmap-toggle',toggleHeatmap);
@@ -522,6 +522,7 @@ define (['jquery', 'oncogridjs'],
 
     function getOncoGridSvgNode(){
         var legend_svg_width = 350;
+        var svg_height = 580;
         var svg_css = 'svg { font-size: 10px; font-family: "proxima-nova", Arial, sans-serif; background-color: #fff; } ' +
             '.background { fill: #fff; stroke: black; stroke-width: 0.5; } '+
             '.og-track-group-label { font-size: 14px; } ' +
@@ -531,7 +532,7 @@ define (['jquery', 'oncogridjs'],
         var canvas = $(active_plot_selector).find('canvas');
 
         svg.attr('width', parseInt(canvas.attr('width'))+legend_svg_width);
-        svg.attr('height',canvas.attr('height'));
+        svg.attr('height',svg_height);
         svg.removeAttr('viewBox');
         svg.find('foreignObject').remove();
         svg.prepend('<style>');
@@ -580,7 +581,7 @@ define (['jquery', 'oncogridjs'],
         return plot_data;
     }
 
-    function svgString2Image(svgString, width, height, callback) {
+    /*function svgString2Image(svgString, width, height, callback) {
         //convert SVG string to data URL
         var imgsrc = 'data:image/svg+xml;base64,'+ btoa(decodeURIComponent(encodeURIComponent(svgString)));
         var canvas = document.createElement('canvas');
@@ -596,7 +597,7 @@ define (['jquery', 'oncogridjs'],
             });
         };
         image.src = imgsrc;
-    }
+    }*/
 
     var reload = function(){
         var grid = $(active_plot_selector).find('#grid-data').data('grid-data');
