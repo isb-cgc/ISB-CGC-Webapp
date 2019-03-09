@@ -156,6 +156,7 @@ define (['jquery', 'oncogridjs'],
         'Simple Nucleotide Variation': 'darkkhaki',
         // 'Copy Number Variation': 'darksalmon',
         // 'Gene Expression':'forestgreen'
+        
     };
 
     const isb_legend = {
@@ -547,26 +548,6 @@ define (['jquery', 'oncogridjs'],
     }
 
 
-
-    /*function download_svg(){
-        var svgNode = getOncoGridSvgNode();
-        var xmlSerializer = new XMLSerializer();
-        var content = xmlSerializer.serializeToString(svgNode[0]);
-		var blob = new Blob([content], {type: 'application/svg+xml'});
-		saveAs(blob, 'oncogrid.svg');
-    }
-
-    function download_png() {
-        var svgNode = getOncoGridSvgNode();
-        var xmlSerializer = new XMLSerializer();
-		var content = xmlSerializer.serializeToString(svgNode[0]);
-        var width = svgNode.attr('width') || 1495;
-        var height = svgNode.attr('height') || 650;
-        svgString2Image(content, width, height, function(dataBlob){
-            saveAs( dataBlob, 'oncogrid.png' )
-        });
-    }*/
-
     function get_plot_data() {
         var grid = $(active_plot_selector).find('#grid-data').data('grid-data');
         var plot_data = {}
@@ -580,24 +561,6 @@ define (['jquery', 'oncogridjs'],
         }
         return plot_data;
     }
-
-    /*function svgString2Image(svgString, width, height, callback) {
-        //convert SVG string to data URL
-        var imgsrc = 'data:image/svg+xml;base64,'+ btoa(decodeURIComponent(encodeURIComponent(svgString)));
-        var canvas = document.createElement('canvas');
-        var context = canvas.getContext("2d");
-        canvas.width = width;
-        canvas.height = height;
-        var image = new Image();
-        image.onload = function() {
-            context.clearRect (0, 0, width, height);
-            context.drawImage(image, 0, 0, width, height);
-            canvas.toBlob( function(blob) {
-                if (callback) callback(blob);
-            });
-        };
-        image.src = imgsrc;
-    }*/
 
     var reload = function(){
         var grid = $(active_plot_selector).find('#grid-data').data('grid-data');
