@@ -156,7 +156,7 @@ define (['jquery', 'oncogridjs'],
         'Simple Nucleotide Variation': 'darkkhaki',
         // 'Copy Number Variation': 'darksalmon',
         // 'Gene Expression':'forestgreen'
-        
+
     };
 
     const isb_legend = {
