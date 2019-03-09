@@ -1566,6 +1566,12 @@ require([
 
         var form = this;
         $(this).find('input[type="submit"]').attr('disabled', 'disabled');
+
+        var dismiss_button = $('<button>').addClass('close').attr('type', 'button').attr('data-dismiss', 'alert')
+                                .append(
+                                    $('<span>').attr('aria-hidden', 'true').text('x'))
+                                .append(
+                                    $('<span>').addClass('sr-only').text('Close'));
         $.ajax({
             type: 'POST',
             url: BASE_URL + '/cohorts/save_cohort_from_plot/',
@@ -1576,16 +1582,15 @@ require([
                     $('#js-messages').append(
                         $('<p>')
                             .addClass('alert alert-danger alert-dismissible')
-                            .text(data.error));
+                            .text(data.error)
+                            .append(dismiss_button));
                 } else {
                      $('#js-messages').append(
                         $('<p>')
                             .addClass('alert alert-info alert-dismissible')
-                            .text(data.message));
+                            .text(data.message)
+                            .append(dismiss_button));
                 }
-                //$('.toggle-selection').click();
-                //var toggle_selection_selector = '#' + plot_element.prop('id') + ' .toggle-selection';
-                //alert();
                 turn_off_toggle_selector();
                 $('.modal').modal('hide');
                 form.reset();

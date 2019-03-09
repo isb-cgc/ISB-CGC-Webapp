@@ -205,15 +205,15 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 selectedValues = {};
 
                 svg.selectAll('rect.plot-bar').classed("selected", function (d) {
-                    return e[0] <= (d['x'] + d['dx']) && d['x'] <= e[1];
+                    return Math.min(e[0], e[1]) < (d['x']) && (d['x']) < Math.max(e[0],e[1]);
                 });
 
                 var oldSetKeys = Object.keys(oldSet);
-                if(oldSetKeys.length !== $('rect.plot-bar.selected').length) {
+                if(oldSetKeys.length !== $('.worksheet.active rect.plot-bar.selected').length) {
                     reCalc = true;
                 }
 
-                $('rect.plot-bar.selected').each(function () {
+                $('.worksheet.active rect.plot-bar.selected').each(function () {
                     if(!oldSet[$(this).attr('value')]) {
                         reCalc = true;
                     }
@@ -234,7 +234,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
             var brushend = function () {
                 if (brush.empty()) {
                     svg.selectAll(".hidden").classed("hidden", false);
-                    $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
+                    $('.worksheet.active .plot').find('.save-cohort-card').hide();
                 }
             };
 
@@ -302,13 +302,12 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     zoom_status.translation = null;
                     zoom_status.scale = null;
 
-                    var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
-                    $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
-                    $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Cases: ' + 0);
-                    $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', "");
+                    $('.worksheet.active .plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
+                    $('.worksheet.active .plot').find('.selected-patients-count').html('Number of Cases: ' + 0);
+                    $('.worksheet.active .save-cohort-form input[name="samples"]').attr('value', "");
                     svg.selectAll('.selected').classed('selected', false);
-                    $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
+                    $('.worksheet.active .plot').find('.save-cohort-card').hide();
                     selectedValues = {};
                     selectedSamples = null;
                     // Get rid of the selection rectangle - comment out if we want to enable selection carry-over
@@ -331,26 +330,25 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                         });
                     });
 
-                    $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + Object.keys(selectedSamples).length);
-                    $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Cases: ' + Object.keys(case_set).length);
-                    $('.save-cohort-card').find('.btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
+                    $('.worksheet.active .plot').find('.selected-samples-count').html('Number of Samples: ' + Object.keys(selectedSamples).length);
+                    $('.worksheet.active .plot').find('.selected-patients-count').html('Number of Cases: ' + Object.keys(case_set).length);
+                    $('.worksheet.active .save-cohort-card').find('.btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
                 }
 
-                var leftVal = Math.min((x(extent[1]) + 20),(width-$('.save-cohort-card').width()));
-                $(svg[0]).parents('.plot')
+                var leftVal = Math.min((x(extent[1]) + 20),(width-$('.worksheet.active .save-cohort-card').width()));
+                $('.worksheet.active .plot')
                     .find('.save-cohort-card').show()
                     .attr('style', 'position:relative; top: -600px; left:' + leftVal + 'px;');
             }
 
-            $('.save-cohort-card').find('.btn').on('click',function(e){
+            $('.worksheet.active .save-cohort-card').find('.btn').on('click',function(e){
                 if(Object.keys(selectedValues).length > 0){
                     var selected_sample_set = [];
                     _.each(Object.keys(selectedSamples),function(sample){
                         selected_sample_set.push(selectedSamples[sample]);
                     });
 
-                    var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
-                    $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
+                    $('.worksheet.active .save-cohort-form input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
                 }
 
             });
