@@ -44,9 +44,9 @@ DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
 
 print >> sys.stdout, "[STATUS] DEBUG mode is "+str(DEBUG)
 
+# Theoretically Nginx allows us to use '*' for ALLOWED_HOSTS but...
 ALLOWED_HOSTS = list(set(os.environ.get('ALLOWED_HOST', 'localhost').split(',') + ['localhost', '127.0.0.1', '[::1]', gethostname(), gethostbyname(gethostname()),]))
-# Testing health checks problem
-# ALLOWED_HOSTS = ['*']
+#ALLOWED_HOSTS = ['*']
 
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
 
