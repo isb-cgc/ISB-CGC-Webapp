@@ -6,7 +6,7 @@ jobs:
     name: Building Deployment Container
     working_directory: ~/ISB-CGC-Webapp
     docker:
-      - image: circleci/python:2.7.14
+      - image: circleci/python:2.7.15-stretch
       - image: circleci/mysql:5.7
         environment:
           MYSQL_ROOT_HOST: "%"
@@ -60,7 +60,6 @@ jobs:
             - ./bq_data_access
             - ./etc
             - ./static
-            - ./saml
             - ./GenespotRE
             - ./offline
             - ./scripts

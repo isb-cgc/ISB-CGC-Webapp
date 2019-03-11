@@ -32,6 +32,10 @@ RUN apt-get install -y lsb-release
 # the mysql config package
 RUN echo "mysql-apt-config mysql-apt-config/select-server select mysql-5.7" | debconf-set-selections
 # having 'selected' mysql-5.7 for 'server', install the mysql config package
+RUN echo 'download mysql public build key'
+RUN apt-key del 1550412832
+RUN wget -O - -q 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x8C718D3B5072E1F5' | grep -v '>' | grep -v '<' | grep -v '{' > mysql_pubkey.asc
+RUN apt-key add mysql_pubkey.asc || exit 1
 RUN dpkg --install /tmp/mysql-apt-config_0.8.9-1_all.deb
 
 # fetch the updated package metadata (in particular, mysql-server-5.7)
@@ -46,7 +50,6 @@ RUN apt-get -y install build-essential
 RUN apt-get -y install python-dev
 RUN apt-get -y install --reinstall python-m2crypto python3-crypto
 RUN apt-get -y install libxml2-dev libxmlsec1-dev swig
-RUN pip install python-saml==2.1.4
 RUN pip install pexpect
 
 RUN apt-get -y install libffi-dev libssl-dev libmysqlclient-dev python2.7-dev curl
@@ -57,7 +60,6 @@ ADD . /app
 
 # We need to recompile some of the items because of differences in compiler versions 
 RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
-RUN pip install pycrypto==2.6.1 -t /app/lib --upgrade --only-binary all
 RUN pip install gunicorn==19.6.0
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0

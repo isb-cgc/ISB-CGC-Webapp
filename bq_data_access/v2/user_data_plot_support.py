@@ -188,7 +188,7 @@ def get_feature_vector(feature_id, cohort_id_array):
 def get_feature_vectors_with_user_data(params_array, poll_retry_limit=20, skip_formatting_for_plot=False):
     provider_array = submit_jobs_with_user_data(params_array)
 
-    project_id = settings.BQ_PROJECT_ID
+    project_id = settings.BIGQUERY_PROJECT_ID
     result = get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip_formatting_for_plot)
 
     return result

@@ -32,14 +32,17 @@ define([
     'bar_plot',
     'seqpeek_view/seqpeek_view',
     'oncoprint_plot',
+    'oncogrid_plot',
     'select2',
     'fileSaver',
     'cbio_util',
     'download_util',
 
-], function($, jqueryui, bootstrap, session_security, d3, d3tip, d3textwrap, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, seqpeek_view, oncoprint_plot, mock_histogram_data ) {
+], function($, jqueryui, bootstrap, session_security, d3, d3tip, d3textwrap, vizhelpers, scatter_plot, cubby_plot,
+            violin_plot, histogram, bar_graph, seqpeek_view, oncoprint_plot,  oncogrid_plot, mock_histogram_data ) {
 
-    var VERSION = $('#workbook-build :selected').data('plot-version') || $('.workbook-build-display').data('plot-version');
+    var VERSION = $('#workbook-build :selected').data('plot-version')
+                        || $('.workbook-build-display').data('plot-version');
 
     var scatter_plot_obj = Object.create(scatter_plot, {});
     var cubby_plot_obj   = Object.create(cubby_plot, {});
@@ -47,25 +50,14 @@ define([
     var histogram_obj    = Object.create(histogram, {});
     var bar_graph_obj    = Object.create(bar_graph, {});
     var oncoprint_obj    = Object.create(oncoprint_plot, {});
+    var oncogrid_obj     = Object.create(oncogrid_plot, {});
     var helpers          = Object.create(vizhelpers, {});
-    var cubby_tip = d3tip()
-            .attr('class', 'd3-tip')
-            .direction('n')
-            .offset([0, 0])
-            .html(function(d) {
-                var mean = 0;
-                for (var i = 0; i < d.length; i++) {
-                    mean += parseFloat(d[i]);
-                }
-                mean /= d.length;
-                return '<span>Mean: ' + mean.toFixed(2) + '</span><br /><span>' + (d.y * 100).toFixed(2) + '%</span>';
-            });
-
+    var fullscreen = false;
     function generate_axis_label(attr, isLogTransform, units) {
         if(isLogTransform) {
             return $('option[value="' + attr + '"]:first').html() + " - log("+(units && units.length > 0 ? units : 'n')+"+1)";
         }
-        return $('option[value="' + attr + '"]:first').html() + (units && units.length > 0 ? " - " + units : '')
+        return $('option[value="' + attr + '"]:first').html() + (units && units.length > 0 ? " (" + units +")": '')
     }
 
     /*
@@ -75,7 +67,7 @@ define([
         // Bar Chart
         var svg = d3.select(plot_selector)
             .append('svg')
-            .attr('width', width + 10)
+            .attr('width', width)
             .attr('height', height);
         var bar_width = 25;
         var plot = bar_graph_obj.createBarGraph(
@@ -86,9 +78,7 @@ define([
             bar_width,
             'x',
             generate_axis_label(x_attr, false, units.x),
-            cubby_tip,
             margin);
-
         return  {plot : plot, svg : svg}
     }
 
@@ -98,7 +88,7 @@ define([
     function generate_histogram(margin, plot_selector, height, width, x_attr, data, units, logTransform){
         var svg = d3.select(plot_selector)
                 .append('svg')
-                .attr('width', width + 10)
+                .attr('width', width)
                 .attr('height', height);
         var vals = helpers.values_only(data, 'x');
 
@@ -110,7 +100,6 @@ define([
                 height,
                 'x',
                 generate_axis_label(x_attr, logTransform.x, units.x),
-                cubby_tip,
                 margin);
 
         return  {plot : plot, svg : svg}
@@ -119,7 +108,7 @@ define([
     /*
         Generate scatter plot
     */
-    function generate_scatter_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units, logTransform) {
+    function generate_scatter_plot(margin, plot_selector, legend_selector, legend_title, height, width, x_attr, y_attr, color_by, cohort_map, data, units, logTransform) {
          var domain = helpers.get_min_max(data, 'x');
          var range = helpers.get_min_max(data, 'y');
 
@@ -128,7 +117,7 @@ define([
              .attr('width', 850);
          var svg = d3.select(plot_selector)
              .append('svg')
-             .attr('width', width + 10)
+             .attr('width', width)
              .attr('height', height);
          var plot = scatter_plot_obj.create_scatterplot(svg,
              data,
@@ -138,11 +127,13 @@ define([
              generate_axis_label(y_attr, logTransform.y, units.y),  // yLabel
              'x',     // xParam
              'y',     // yParam
+             margin,
              color_by,
              legend,
+             legend_title,
              width,
              height,
-             cohort_set
+             cohort_map
          );
 
          return  {plot : plot, svg : svg}
@@ -151,7 +142,7 @@ define([
     /*
         Generate violin plot
      */
-    function generate_violin_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units, logTransform) {
+    function generate_violin_plot(margin, plot_selector, legend_selector, legend_title, height, width, x_attr, y_attr, color_by, cohort_map, data, units, logTransform) {
         var violin_width = 200;
         var tmp = helpers.get_min_max(data, 'y');
         var min_n = tmp[0];
@@ -159,10 +150,8 @@ define([
         var legend = d3.select(legend_selector)
             .append('svg')
             .attr('width', 850);
-
         var svg = d3.select(plot_selector)
             .append('svg')
-            //.attr('width', width + 10)
             .attr('width', width)
             .attr('height', height);
         var plot = violin_plot_obj.createViolinPlot(svg,
@@ -175,9 +164,11 @@ define([
             generate_axis_label(y_attr, logTransform.y, units.y),
             'x',
             'y',
+            margin,
             color_by,
             legend,
-            cohort_set
+            legend_title,
+            cohort_map
         );
 
         return  {plot : plot, svg : svg}
@@ -186,18 +177,17 @@ define([
     /*
         Generate violin plot with axis swap
      */
-    function generate_violin_plot_axis_swap(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units, logTransform) {
+    function generate_violin_plot_axis_swap(margin, plot_selector, legend_selector, legend_title, height, width, x_attr, y_attr, color_by, cohort_map, data, units, logTransform) {
         var violin_width = 200;
         var tmp = helpers.get_min_max(data, 'x');
         var min_n = tmp[0];
         var max_n = tmp[1];
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', 800);
+            .attr('width', 850);
 
         var svg = d3.select(plot_selector)
             .append('svg')
-            //.attr('width', width + 10)
             .attr('width', width)
             .attr('height', height);
 
@@ -213,26 +203,32 @@ define([
             'x',
             color_by,
             legend,
-            cohort_set
+            legend_title,
+            cohort_map
         );
 
         return  {plot : plot, svg : svg}
     }
 
-    function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units) {
-        var margin = {top: 10, bottom: 115, left: 140, right: 0};
-        var cubby_size = 115;
-        var xdomain = vizhelpers.get_domain(data, 'x');
-        var ydomain = vizhelpers.get_domain(data, 'y');
-
-        var cubby_width = xdomain.length * cubby_size + margin.left + margin.right;
-        var cubby_height = ydomain.length * cubby_size + margin.top + margin.bottom;
-
+    function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, data, units) {
+        var margin = {top: 10, bottom: 115, left: 140, right: 20};
+        var cubby_max_size = 150; // max cubby size
+        var cubby_min_size = 25; // min cubby size
+        var view_width = width-margin.left-margin.right;
+        var view_height = height-margin.top-margin.bottom;
+        var xdomain = helpers.get_domain(data, 'x');
+        var ydomain = helpers.get_domain(data, 'y');
+        var legend = d3.select(legend_selector)
+            .append('svg')
+            .attr('width', 850);
+        var cubby_size = Math.min(cubby_max_size, Math.min(Math.floor(view_width/xdomain.length), Math.floor(view_height/ydomain.length)));
+        cubby_size = cubby_size < cubby_min_size ? cubby_min_size : cubby_size;
+        var plot_width = xdomain.length * cubby_size + margin.left + margin.right;
+        var plot_height = ydomain.length * cubby_size + margin.top + margin.bottom;
         var svg = d3.select(plot_selector)
             .append('svg')
-            .attr('width', cubby_width + 10)
-            .attr('height', cubby_height)
-            .style('padding-left','10px');
+            .attr('width', plot_width)
+            .attr('height', plot_height);
 
         var plot = cubby_plot_obj.create_cubbyplot(
             svg,
@@ -244,13 +240,11 @@ define([
             generate_axis_label(y_attr, false, units.y),
             'x',
             'y',
-            'c',
-            legend_selector,
-            cubby_width,
-            cubby_height,
+            legend,
+            plot_width,
+            plot_height,
             cubby_size
         );
-
         return  {plot : plot, svg : svg}
     }
 
@@ -259,7 +253,8 @@ define([
         var hugo_symbol = view_data['hugo_symbol'];
 
         var element = $(plot_selector)[0];
-
+        var plot;
+        var svg;
         if (plot_data.hasOwnProperty('tracks')) {
             seqpeek_view.render_seqpeek_legend(legend_selector);
 
@@ -268,14 +263,14 @@ define([
             var table_selector = seqpeek_el.table;
             var gene_element = seqpeek_el.gene_element;
 
-            seqpeek_view.render_seqpeek(table_selector, gene_element, view_data);
+            plot = seqpeek_view.render_seqpeek(table_selector, gene_element, view_data);
+            svg = [$(plot_selector).find('#seqpeek_row_4').children('svg')];
             $(legend_selector).show();
         }
         else {
-            // No data was found for the gene and cohorts
-            seqpeek_view.render_no_data_message(plot_selector, hugo_symbol);
-            $(legend_selector).hide();
+            display_no_gene_mut_mssg(plot_selector, [hugo_symbol]);
         }
+        return  {plot : plot, svg: svg};
     }
 
     function generate_oncoprint_plot(plot_selector, view_data) {
@@ -286,13 +281,31 @@ define([
             $('#plot-message-alert').show();
             $('#plot-message-alert p').text(plot_message);
         }
+        var plot;
         if (plot_data && oncoprint_obj.isInputValid(plot_data)) {
-            oncoprint_obj.createOncoprintPlot(plot_selector, plot_data);
+            plot = oncoprint_obj.createOncoprintPlot(plot_selector, plot_data);
+            //$('.worksheet.active .worksheet-panel-body .plot-div .oncoprint-diagram-downloads-icon').trigger('mouseover');
         }
         else {
-            var message = "The selected cohorts have no somatic mutations in the gene ";
-            $(plot_selector).html('<p>'+message + '<b>' + gene_list.join(', ') + '</b></p>');
+            display_no_gene_mut_mssg(plot_selector, gene_list);
         }
+        return  {plot : plot};
+    }
+
+    function generate_oncogrid_plot(plot_selector, view_data) {
+
+        var donor_data_list = view_data['donor_data_list'];
+        var gene_data_list = view_data['gene_data_list'];
+        var observation_data_list = view_data['observation_data_list'];
+        var donor_track_count_max = view_data['donor_track_count_max'];
+        var plot;
+        if (donor_data_list && gene_data_list && observation_data_list) {
+            plot = oncogrid_obj.createOncogridPlot(donor_data_list, gene_data_list, observation_data_list, donor_track_count_max);
+        }
+        else {
+            display_no_gene_mut_mssg(plot_selector, gene_list);
+        }
+        return  {plot : plot};
     }
     /*
         Generate url for gathering data
@@ -340,8 +353,8 @@ define([
         return seqpeek_url;
     }
 
-    // Generate url for gathering data for a OncoPrint plot
-    function get_oncoprint_data_url(base_url, cohorts, gene_list){
+    // Generate url for gathering data for a OncoPrint and OncoGrid plot
+    function get_onco_data_url(base_url, plot_type, cohorts, gene_list){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
             if (i == 0) {
@@ -350,10 +363,11 @@ define([
                 cohort_str += '&cohort_id=' + cohorts[i];
             }
         }
-        var oncoprintUrl = base_url + '/visualizations/oncoprint_data_plot/' + VERSION + '?' + cohort_str;
-        oncoprintUrl += "&gene_list=" + gene_list.join(",")
+        var url = base_url + '/visualizations/'
+            + (plot_type == 'OncoPrint' ? 'oncoprint_data_plot/': 'oncogrid_data_plot/')
+            + VERSION + '?' + cohort_str + '&gene_list=' + gene_list.join(",")
             + (VERSION == 'v2' ? "&genomic_build=" + $('.workbook-build-display').data('build') : '');
-        return oncoprintUrl;
+        return url;
     }
 
     function configure_pairwise_display(element, data){
@@ -379,39 +393,84 @@ define([
         }
     }
 
+    function getPlotSvgNode(svg_node, legend_svg){
+        var svg_css = 'svg { color: #333333; font-size: 14px; font-family: "proxima-nova", Arial, sans-serif; background-color: #fff; } ' +
+            '.label { font-weight: 500; font-size: 1.1em; } ' +
+            'foreignObject div {overflow: hidden;  text-overflow: ellipsis;  padding: 5px 5px 5px 5px;  line-height: 1.25; max-height: 100%;} ' +
+            'foreignObject div.truncated-single { white-space: nowrap; text-align: end; }' +
+            'foreignObject div.centered { text-align: center; }' +
+            '.x-label-container div, .y-label-container div { text-align: center; }' +
+            '.axis path{ fill: none;  stroke: #000; }' +
+            '.grid .tick, .axis .tick line { stroke: lightgrey; stroke-opacity: 0.7; }' +
+            '.grid path { stroke-width: 0; } '+
+            '.expected_fill.selected { stroke: #01307F; stroke-width: 5px; }' +
+            '.extent { fill: rgba(40, 130, 50, 0.5); stroke: #fff; }' +
+            '.plot-bar, .plot-bar { fill: rgba(0, 0, 0, 0.5); }' +
+            '.plot-bar:hover, .plot-bar.selected { fill: rgba(0, 0, 225, 0.5); }';
+        var svg_clone = svg_node.cloneNode(true);
+        $(svg_clone).removeAttr('viewBox');
+        $(svg_clone).prepend('<style>');
+        $(svg_clone).find('style').append(svg_css);
+
+        // var legend_svg = $(args.legend_selector).find('svg');
+        if(legend_svg && legend_svg.length > 0) {
+            var legend_svg_clone = legend_svg.clone();
+            var legend_height = parseInt(legend_svg_clone.attr('height'));
+            var svg_height = parseInt($(svg_clone).attr('height'));
+            legend_svg_clone.attr('x', '0');
+            legend_svg_clone.attr('y', svg_height+50);
+            $(svg_clone).attr('height', svg_height + legend_height + 50);
+            $(svg_clone).append(legend_svg_clone);
+        }
+        return svg_clone;
+    }
+
     function select_plot(args){//plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, data){
-        var width  = $('.worksheet.active .worksheet-panel-body:first').width(), //TODO should be based on size of screen
-            height = 725, //TODO ditto
+        var width  = $('.worksheet.active .worksheet-panel-body:first').width(),
+            height = $('.worksheet.active .worksheet-panel-body:first').height(),
             // Top margin: required to keep top-most Y-axis ticks from being cut off on non-scrolled y axes
             // Bottom margin: takes into account double-wrapped x-axis title and wrapped long-text x-axis labels
             margin = {top: 15, bottom: 150, left: 80, right: 10},
             x_type = '',
             y_type = '';
 
+        height = height < 600 ? 650 : height;
         var data = args.data;
         if (data.hasOwnProperty('pairwise_result')) {
             configure_pairwise_display(args.pairwise_element, data);
         }
         // The response form the SeqPeek data endpoint has a different schema. This is case is handled in
         // another branch below.
+        var visualization;
         if (data.hasOwnProperty('items') && data['items'].length > 0) {
 
             var cohort_set = data['cohort_set'];
+            var cohort_map = {};
+            for(var i=0; i<cohort_set.length; i++){
+                 cohort_map[cohort_set[i]['id']] = cohort_set[i]['name'];
+            }
 
             var units = {
                 x: data.xUnits,
                 y: data.yUnits
             };
 
+            var legend_title='';
             data = data['items'];
-
             if (args.cohort_override) {
                 args.color_by = 'cohort';
+                legend_title = 'Cohort';
             } else {
                 args.color_by = 'c';
+                if(args.legend_title) {
+                    var args_arr = args.legend_title.split(':');
+                    legend_title = args_arr[args_arr.length-1].replace(/_/g, ' ');
+                    firstChar = legend_title.charAt(0).toUpperCase();
+                    legend_title = firstChar + legend_title.slice(1);
+                }
             }
 
-            var visualization;
+
             switch (args.type){
                 case "Bar Chart" : //x_type == 'STRING' && y_type == 'none'
                     visualization = generate_bar_chart(margin, args.plot_selector, height, width, args.x, data, units);
@@ -420,16 +479,17 @@ define([
                     visualization = generate_histogram(margin, args.plot_selector, height, width, args.x, data, units, args.logTransform);
                     break;
                 case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                    visualization = generate_scatter_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by, cohort_set, data, units, args.logTransform);
+                    visualization = generate_scatter_plot(margin, args.plot_selector, args.legend_selector, legend_title,height, width, args.x, args.y, args.color_by, cohort_map, data, units, args.logTransform);
                     break;
                 case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                    visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units, args.logTransform);
+                    margin = {top: 15, bottom: 100, left: 110, right: 10};
+                    visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, legend_title, height, width, args.x, args.y, args.color_by,  cohort_map, data, units, args.logTransform);
                     break;
                 case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
-                    visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units, args.logTransform);
+                    visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, legend_title, height, width, args.x, args.y, args.color_by,  cohort_map, data, units, args.logTransform);
                     break;
                 case 'Cubby Hole Plot' : //(x_type == 'STRING' && y_type == 'STRING') {
-                    visualization = generate_cubby_hole_plot(args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units);
+                    visualization = generate_cubby_hole_plot(args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  data, units);
                     break;
                 default :
                     break;
@@ -449,22 +509,30 @@ define([
                 return;
             }
 
+            if(visualization.svg) {
+                $(visualization.svg[0]).parents('.plot').find('.toggle-selection').unbind('click');
+                $(visualization.svg[0]).parents('.plot').find('.toggle-selection').on('click', function () {
+                    $(this).toggleClass('active');
+                    visualization.plot.check_selection_state($(this).hasClass('active'));
+                });
+            }
+
             //establish marquee sample selection
-            $(visualization.svg[0]).parents('.plot').find('.toggle-selection').unbind();
-            $(visualization.svg[0]).parents('.plot').find('.toggle-selection').on('click', function () {
-                $(this).toggleClass('active');
-                visualization.plot.check_selection_state($(this).hasClass('active'));
-            });
             visualization.plot.check_selection_state($(visualization.svg[0]).parents('.plot').find('.toggle-selection').hasClass('active'));
 
+            //store data
             //establish resize call to data
-            d3.select(window).on('resize', visualization.plot.resize);
-            args.color_by_sel && $(args.legend_selector).show();
+
+            // d3.select(window).on('resize', visualization.plot.resize);
+            (args.type == "Cubby Hole Plot" || args.color_by_sel) && $(args.legend_selector).show();
 
         } else if (args.type == "SeqPeek" && !data.message) {
-            generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
+            visualization = generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
         } else if (args.type == "OncoPrint" && !data.message) {
-            generate_oncoprint_plot(args.plot_selector, data);
+            visualization =  generate_oncoprint_plot(args.plot_selector, data);
+            //console.log(visualization.svg);
+        } else if (args.type == "OncoGrid" && !data.message) {
+            visualization = generate_oncogrid_plot(args.plot_selector, data);
         } else {
             // No data returned
             d3.select(args.plot_selector)
@@ -481,7 +549,13 @@ define([
             // Hide the legend
             $(args.legend_selector).hide();
         }
-    };
+        if(visualization){
+            $('.worksheet.active .plot-args').data('plot-json', (visualization.plot && visualization.plot.get_json) ? visualization.plot.get_json : null);
+            $('.worksheet.active .plot-args').data('plot-csv', (visualization.plot && visualization.plot.get_csv) ? visualization.plot.get_csv : null);
+            $('.worksheet.active .plot-args').data('plot-svg', (visualization.svg) ? visualization.svg[0][0] : (visualization.plot && visualization.plot.get_svg) ?  visualization.plot.get_svg : null);
+            $('.worksheet.active .plot-args').data('plot-redraw', (visualization.plot && visualization.plot.redraw) ? visualization.plot.redraw : null);
+        }
+    }
 
     function get_plot_settings(plot_type, as_map){
         var settings = {
@@ -512,7 +586,7 @@ define([
                 break;
             default :
                 break;
-        };
+        }
 
         if(as_map) {
             var map_settings = {};
@@ -532,8 +606,8 @@ define([
         if (args.type == "SeqPeek") {
             plot_data_url = get_seqpeek_data_url(BASE_URL, args.cohorts, args.gene_label, VERSION);
         }
-        else if(args.type == "OncoPrint"){
-            plot_data_url = get_oncoprint_data_url(BASE_URL, args.cohorts, args.gene_list, VERSION);
+        else if(args.type == "OncoPrint" || args.type == "OncoGrid"){
+            plot_data_url = get_onco_data_url(BASE_URL, args.type, args.cohorts, args.gene_list, VERSION);
         }
         else {
             plot_data_url = get_data_url(BASE_URL, args.cohorts, args.x, args.y, args.color_by, args.logTransform, VERSION);
@@ -543,7 +617,7 @@ define([
             type: 'GET',
             url: plot_data_url,
             success: function(data, status, xhr) {
-                select_plot({plot_selector    : args.plot_selector,
+                var plot_args = {plot_selector    : args.plot_selector,
                              legend_selector  : args.legend_selector,
                              pairwise_element : args.pairwise_element,
                              type             : args.type,
@@ -551,9 +625,13 @@ define([
                              y                : args.y,
                              logTransform     : args.logTransform,
                              color_by         : args.cohorts,
+                             legend_title     : args.color_by,
                              cohort_override  : args.color_override,
                              color_by_sel     : args.color_by_sel,
-                             data             : data});
+                             data             : data};
+                //store plot args in jquery data for each worksheet
+                $('.worksheet.active .plot-args').data('plot-args', plot_args);
+                select_plot(plot_args);
                 callback({bq_tables: data.bq_tables});
 
             },
@@ -576,10 +654,121 @@ define([
                 callback({error : true});
             }
         });
+    }
+
+    //clears the previous plot and re-draws the plot using the stored worksheet plot args
+    function redraw_plot(){
+
+        var redraw = $('.worksheet.active .plot-args').data('plot-redraw');
+        if (redraw != null) {
+            redraw();
+        }
+        else {
+            var plot_loader = $('.worksheet.active .plot-loader');
+            var plot_args = $('.worksheet.active .plot-args').data('plot-args');
+            $(plot_args.plot_selector).empty();
+            $(plot_args.legend_selector).empty();
+            select_plot(plot_args);
+        }
+    }
+
+    function svg_download(){
+        var plot_args = $('.worksheet.active .plot-args').data('plot-args');
+        var plot_svg = $('.worksheet.active .plot-args').data('plot-svg');
+        var img_svg;
+        if (plot_args.type === 'OncoGrid' || plot_args.type === 'OncoPrint') {
+            img_svg = plot_svg();
+        }
+        else {
+            img_svg = getPlotSvgNode(plot_svg, $(plot_args.legend_selector).find('svg'));
+        }
+        var xmlSerializer = new XMLSerializer();
+        var content = xmlSerializer.serializeToString(img_svg);
+        var blob = new Blob([content], {type: 'application/svg+xml'});
+        saveAs(blob, 'plot.svg');
+    }
+
+    function png_download(){
+        var plot_args = $('.worksheet.active .plot-args').data('plot-args');
+        var plot_svg = $('.worksheet.active .plot-args').data('plot-svg');
+        var img_svg;
+        if (plot_args.type === 'OncoGrid' || plot_args.type === 'OncoPrint') {
+            img_svg = plot_svg();
+        }
+        else {
+            img_svg = getPlotSvgNode(plot_svg, $(plot_args.legend_selector).find('svg'));
+        }
+        var xmlSerializer = new XMLSerializer();
+        var content = xmlSerializer.serializeToString(img_svg);
+        var width = img_svg.getAttribute('width') || 1495;
+        var height = img_svg.getAttribute('height') || 650;
+        svgString2Image(content, width, height, function (dataBlob) {
+            saveAs(dataBlob, 'plot.png')
+        });
+    }
+
+    function svgString2Image(svgString, width, height, callback) {
+        //convert SVG string to data URL
+        var imgsrc = 'data:image/svg+xml;base64,'+ btoa(decodeURIComponent(encodeURIComponent(svgString)));
+        var canvas = document.createElement('canvas');
+        var context = canvas.getContext("2d");
+        canvas.width = width;
+        canvas.height = height;
+        var image = new Image();
+        image.onload = function() {
+            context.clearRect (0, 0, width, height);
+            context.drawImage(image, 0, 0, width, height);
+            canvas.toBlob( function(blob) {
+                if (callback) callback(blob);
+            });
+        };
+        image.src = imgsrc;
+    }
+
+    var setFullscreen = function(isFullscreen){
+        fullscreen = isFullscreen;
+    };
+
+    var toggleFullscreen = function(){
+        fullscreen ? closeFullscreen(): openFullscreen();
+    };
+
+    var openFullscreen = function() {
+        var plot_div = document.querySelector('.worksheet.active .plot-container');
+        if (plot_div.requestFullscreen) {
+            plot_div.requestFullscreen();
+        } else if (plot_div.mozRequestFullScreen) { /* Firefox */
+            plot_div.mozRequestFullScreen();
+        } else if (plot_div.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+            plot_div.webkitRequestFullscreen();
+        } else if (plot_div.msRequestFullscreen) { /* IE/Edge */
+            plot_div.msRequestFullscreen();
+        }
+    };
+
+    var closeFullscreen = function() {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) { /* Firefox */
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) { /* IE/Edge */
+            document.msExitFullscreen();
+        }
+    };
+
+    var display_no_gene_mut_mssg = function(plot_selector, hugo_symbol_list) {
+        $(plot_selector).html('<p> The selected cohorts have no somatic mutations in the gene <b>' + hugo_symbol_list.join(', ') + '</b></p>');
     };
 
     return {
         generate_plot     : generate_plot,
+        svg_download: svg_download,
+        png_download: png_download,
+        redraw_plot : redraw_plot,
+        toggleFullscreen: toggleFullscreen,
+        setFullscreen: setFullscreen,
         get_plot_settings : get_plot_settings
     };
 });

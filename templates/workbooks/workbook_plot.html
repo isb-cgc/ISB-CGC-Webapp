@@ -21,23 +21,52 @@
 
 <div class="plot panel" id="plot-{{ worksheet.id }}">
     <div class="panel-heading">
-        <div class="options-bar">
+        <div class="btn-group plot-toolbar" role="group" aria-label="Options Bar">
             {% if workbook.owner.id == user.id %}
-            <a role="button" class="toggle-selection" aria-label="Toggle Sample Selection"><i class="fa fa-crosshairs"></i> Enable Sample Selection</a>
-            <br />
-            <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-bar-chart"></i> Edit Analysis Settings</a>
+                <a role="button" class="show-settings-flyout plot-button" data-target=".setting-flyout" aria-label="Edit Plot Settings">
+                    <i class="fa fa-bar-chart"></i>
+                    <div class="button-text">Edit Plot Settings</div>
+                </a>
+                <a role="button" class="plot-button toggle-selection plot-button-options disabled" aria-label="Toggle Sample Selection">
+                    <i class="fa fa-crosshairs"></i>
+                    <div class="button-text">Toggle Sample Selection</div>
+                </a>
             {% else %}
-            <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-tasks"></i> View Plot Settings</a>
+                <a role="button" class="show-settings-flyout plot-button" data-target=".setting-flyout" aria-label="View Plot Settings">
+                    <i class="fa fa-tasks"></i>
+                    <div class="button-text">View Plot Settings</div>
+                </a>
             {% endif %}
+            <a role="button" class="redraw-plot plot-button plot-button-options  disabled" aria-label="Redraw">
+                        <i class="fa fa-refresh"></i>
+                        <div class="button-text">Redraw</div>
+                    </a>
+            <span class="dropdown">
+                        <a role="button" class="plot-button download plot-button-options  disabled">
+                            <i class="fa fa-download"></i>
+                            <div class="button-text">Download</div>
+                        </a>
+                        <div class="plot-download-selection hidden">
+                            <div class="svg-download">SVG</div>
+                            <div class="png-download">PNG</div>
+                            <div class="csv-download">CSV</div>
+                            <div class="json-download">JSON</div>
+                        </div>
+                    </span>
+            <a role="button" class="toggle-fullscreen-plot plot-button plot-button-options  disabled" aria-label="Full Screen">
+                        <i class="fa fa-expand"></i>
+                        <div class="button-text">Toggle Full Screen</div>
+                    </a>
         </div>
-        <div class="bq-tables" style="display: none;"><h5>BigQuery Table(s) Used</h5><ul class="bq-table-display"></ul></div>
+        <div class="plot-tooltip "></div>
+        <div class="plot-args hidden"></div>
         <div id="missing-plot-reqs-alert" class="alert alert-warning alert-dismissable" style="display: none;">
             <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
             <h5>Plot Settings Incomplete</h5>
             Some of the settings required to produce a plot are missing.<br>You can check the current plot settings using the
             {% if workbook.owner.id == user.id %}
                 <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings">
-                    <i class="fa fa-bar-chart"></i> Edit Analysis Settings
+                    <i class="fa fa-bar-chart"></i> Edit Plot Settings
                 </a> link.<br>
             {% else %}
                 <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings">
@@ -282,7 +311,62 @@
                 </div>
             {% endif %}
         </div>
-
+        <div id="oncogrid_div" style="display:none;">
+            <div id="plot-{{ worksheet.id }}-oncogrid" class="oncogrid-screen">
+                <div id="grid-data" hidden></div>
+                <div class="oncogrid-header hidden">
+                    <div class="oncogrid-logo">
+                        <img alt="OICR Bio Logo" src="{% static 'img/oicr_bio.jpg' %}">
+                    </div>
+                    <div class="oncogrid-legend"></div>
+                    <div class="oncogrid-toolbar">
+                        <span class="toolbar-item">
+                                <button class="oncogrid-button cluster">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-sort-amount-desc"></i>
+                                            <div class="button-text">Cluster</div>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
+                        <span class="toolbar-item">
+                                <button class="oncogrid-button heatmap-toggle">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-fire"></i>
+                                            <div class="button-text">Heatmap</div>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
+                        <span class="toolbar-item">
+                                <button class="oncogrid-button grid-toggle">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-th"></i>
+                                            <div class="button-text">Lines</div>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
+                        <span class="toolbar-item">
+                                <button class="oncogrid-button crosshair-toggle">
+                                    <div>
+                                        <span>
+                                            <i class="fa fa-crosshairs"></i>
+                                            <div class="button-text">Crosshair</div>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
+                    </div>
+                </div>
+{#                <div id='grid-div'></div>#}
+                <div class='grid-div'></div>
+                <div class="svg-track-legend"></div>
+            </div>
+        </div>
         <div class="oncoprint_div">
             <div id="plot-message-alert" class="alert alert-warning alert-dismissable" style="display: none;">
                 <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span
@@ -302,9 +386,6 @@
                     </button>
                     <button type="button" class="btn oncoprint-diagram-removeWhitespace-icon" data-hasqtip="2">
                         <img class="oncoprint-diagram-removeWhitespace-icon-img" checked="0" src="{% static '/img/unremoveWhitespace.svg' %}" alt="icon">
-                    </button>
-                    <button type="button" class="btn oncoprint-diagram-downloads-icon" data-hasqtip="6">
-                        <img class="oncoprint-diagram-downloads-icon-img" src="{% static '/img/in.svg' %}" alt="icon">
                     </button>
                     <button type="button" class="btn oncoprint_zoomout" class="btn" data-hasqtip="0">
                         <img src="{% static '/img/zoom-out.svg' %}" alt="icon">
@@ -330,6 +411,16 @@
             <button class="btn btn-primary" data-toggle="modal" data-target="#save-cohort-{{ worksheet.id }}-modal" title="Save Cohort">Save Cohort</button>
         </div>
         <input type="hidden" name="type" value="genericplot" />
+    </div>
+    <div class="panel-footing">
+        <div class="bq-tables " style="display: none;">
+            <div class="bq-tables-header">
+                <a data-toggle="collapse" role="button" href="#bqlist-{{ worksheet.id }}" aria-expanded="false">
+                    List of Big Query Table(s) Used
+                </a>
+            </div>
+            <ul id="bqlist-{{ worksheet.id }}" class="bq-table-display collapse"></ul>
+        </div>
     </div>
 
     <!-- Save Cohort Modal -->

@@ -1,5 +1,5 @@
 """
-Copyright 2017, Institute for Systems Biology
+Copyright 2019, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,14 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-# Django settings for GAE_Django17 project.
 import os
 from os.path import join, dirname
 import sys
 import dotenv
 from socket import gethostname, gethostbyname
 
-dotenv.read_dotenv(join(dirname(__file__), '../.env'))
+env_path = '../'
+if os.environ.get('SECURE_LOCAL_PATH', None):
+    env_path += os.environ.get('SECURE_LOCAL_PATH')
+
+dotenv.read_dotenv(join(dirname(__file__), env_path+'.env'))
 
 APP_ENGINE_FLEX = 'aef-'
 APP_ENGINE = 'Google App Engine/'
@@ -41,17 +44,20 @@ DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
 
 print >> sys.stdout, "[STATUS] DEBUG mode is "+str(DEBUG)
 
-# Theoretically Nginx allows us to use '*' for ALLOWED_HOSTS but...
 ALLOWED_HOSTS = list(set(os.environ.get('ALLOWED_HOST', 'localhost').split(',') + ['localhost', '127.0.0.1', '[::1]', gethostname(), gethostbyname(gethostname()),]))
-#ALLOWED_HOSTS = ['*']
+# Testing health checks problem
+# ALLOWED_HOSTS = ['*']
 
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
 
 ADMINS                  = ()
 MANAGERS                = ADMINS
 
-PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
-BQ_PROJECT_ID           = os.environ.get('BIGQUERY_PROJECT_ID', PROJECT_ID) # Replace with PROJECT_ID
+GCLOUD_PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
+GCLOUD_PROJECT_NUMBER          = os.environ.get('GCLOUD_PROJECT_NUMBER', '')
+BIGQUERY_PROJECT_ID           = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PROJECT_ID)
+BIGQUERY_DATASET_V1         = os.environ.get('BIGQUERY_DATASET_V1', '')
+BIGQUERY_DATA_PROJECT_ID  = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
 
 # Deployment module
 CRON_MODULE             = os.environ.get('CRON_MODULE')
@@ -74,11 +80,12 @@ CGHUB_CONTROLLED_DATA_BUCKET = os.environ.get('CGHUB_CONTROLLED_DATA_BUCKET', ''
 GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET')
 
 # BigQuery cohort storage settings
-COHORT_DATASET_ID           = os.environ.get('COHORT_DATASET_ID', 'cohort_dataset')
+BIGQUERY_COHORT_DATASET_ID           = os.environ.get('BIGQUERY_COHORT_DATASET_ID', 'cohort_dataset')
 BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
+BIGQUERY_COSMIC_DATASET_ID    = os.environ.get('BIGQUERY_COSMIC_DATASET_ID', '')
+BIGQUERY_CGC_TABLE_ID    = os.environ.get('BIGQUERY_CGC_TABLE_ID', '')
 MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
-NIH_AUTH_ON             = bool(os.environ.get('NIH_AUTH_ON', False))
 USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
 
 DATABASES = {
@@ -115,22 +122,8 @@ if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
     print >> sys.stdout, "[STATUS] AppEngine detected."
     SITE_ID = 4
 
-# Default to no NIH Auth unless we are not on a local dev environment *and* are in AppEngine-Flex
-NIH_AUTH_ON = False
-
-if not IS_DEV and IS_APP_ENGINE_FLEX:
-    print >> sys.stdout, "[STATUS] NIH_AUTH_ON is TRUE"
-    NIH_AUTH_ON = True
-
 def get_project_identifier():
-    return BQ_PROJECT_ID
-
-BIGQUERY_DATASET            = os.environ.get('BIGQUERY_DATASET', '')
-BIGQUERY_DATASET_V1         = os.environ.get('BIGQUERY_DATASET_V1', '')
-
-PROJECT_NAME                = os.environ.get('GCLOUD_PROJECT_NAME')
-BIGQUERY_PROJECT_NAME       = os.environ.get('BIGQUERY_PROJECT_NAME', PROJECT_NAME)
-BIGQUERY_DATA_PROJECT_NAME  = os.environ.get('BIGQUERY_DATA_PROJECT_NAME', PROJECT_NAME)
+    return BIGQUERY_PROJECT_ID
 
 # Set cohort table here
 if BIGQUERY_COHORT_TABLE_ID is None:
@@ -150,7 +143,7 @@ class BigQueryCohortStorageSettings(object):
 
 
 def GET_BQ_COHORT_SETTINGS():
-    return BigQueryCohortStorageSettings(COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
+    return BigQueryCohortStorageSettings(BIGQUERY_COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
 
 USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', False)
 
@@ -546,8 +539,15 @@ CONN_MAX_AGE = 60
 #   CUSTOM TEMPLATE CONTEXT
 ############################
 
-SITE_GOOGLE_ANALYTICS   = os.environ.get('SITE_GOOGLE_ANALYTICS_ID', False)
-SITE_GOOGLE_TAG_MANAGER_ID = os.environ.get('SITE_GOOGLE_TAG_MANAGER_ID', False)
+############################
+#   METRICS SETTINGS
+############################
+
+SITE_GOOGLE_ANALYTICS   = bool(os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKING_ID', None) is not None)
+SITE_GOOGLE_ANALYTICS_TRACKING_ID = os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKING_ID', '')
+METRICS_SPREADSHEET_ID = os.environ.get('METRICS_SPREADSHEET_ID', '')
+METRICS_SHEET_ID = os.environ.get('METRICS_SHEET_ID', '0')
+METRICS_BQ_DATASET = os.environ.get('METRICS_BQ_DATASET', '')
 
 ##############################################################
 #   MAXes to prevent size-limited events from causing errors

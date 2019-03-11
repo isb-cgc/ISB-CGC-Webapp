@@ -106,6 +106,15 @@ Returns user to landing page.
 def landing_page(request):
     return render(request, 'GenespotRE/landing.html', {'request': request, })
 
+
+'''
+Displays the privacy policy
+'''
+@never_cache
+def privacy_policy(request):
+    return render(request, 'GenespotRE/privacy.html', {'request': request, })
+
+
 '''
 Returns css_test page used to test css for general ui elements
 '''
@@ -147,7 +156,6 @@ def user_detail(request, user_id):
                       {'request': request,
                        'user': user,
                        'user_details': user_details,
-                       'NIH_AUTH_ON': settings.NIH_AUTH_ON,
                        'ERA_LOGIN_URL': settings.ERA_LOGIN_URL
                        })
     else:

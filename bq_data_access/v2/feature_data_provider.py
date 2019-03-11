@@ -152,5 +152,5 @@ class FeatureDataProvider(object):
     def build_from_django_settings(cls, **kwargs):
         # TODO implement
         from django.conf import settings as django_settings
-        project_id = django_settings.BQ_PROJECT_ID
+        project_id = django_settings.BIGQUERY_PROJECT_ID
         return cls(project_id=project_id, **kwargs)

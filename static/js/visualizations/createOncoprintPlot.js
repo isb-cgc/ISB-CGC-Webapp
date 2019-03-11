@@ -17,10 +17,6 @@
  */
 
 
-/*png: 'libs/png',
-jspdf: 'libs/jspdf.min',
-jspdf_plugin_addimage: 'libs/jspdf.plugin.addimage',
-png_support: 'libs/png_support',*/
 define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob', 'zlibs', 'png'], function ($, oncoprintjs, _) {
     var processData = function (array) {
         // Need to mock webservice data to be compatible with tooltip
@@ -77,7 +73,7 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
             } else {
                 var ws_datum = {
                     genetic_alteration_type: 'MUTATION_EXTENDED',
-                    amino_acid_change: alteration,
+                    amino_acid_change: alteration
                 };
                 if (type === "fusion") {
                     ws_datum.oncoprint_mutation_type = "fusion";
@@ -123,13 +119,16 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
         },
         createOncoprintPlot: function (plot_selector, data) {
             $(plot_selector).html($(plot_selector).siblings('.oncoprint_div').html());
-            var updateOncoprinter = CreateOncoprinterWithToolbar(plot_selector, '.oncoprint .oncoprint_body', '.oncoprint .oncoprint-diagram-toolbar-buttons');
-            gene_order = sample_order = null;
+            var oncoprinterObj = CreateOncoprinterWithToolbar(plot_selector, '.oncoprint .oncoprint_body', '.oncoprint .oncoprint-diagram-toolbar-buttons');
+            var gene_order = sample_order = null;
+            var process_result = {};
             if (data.length > 0) {
-                var process_result = processData(data);
-                updateOncoprinter(process_result.data_by_gene, 'sample', process_result.altered_by_gene, sample_order, gene_order);
-            } else {
-
+                process_result = processData(data);
+                oncoprinterObj.updateOncoprinter(process_result.data_by_gene, 'sample', process_result.altered_by_gene, sample_order, gene_order);
+            }
+            return {
+                get_json: function(){ return process_result; },
+                get_svg: function(){ return oncoprinterObj.getOncoprinter().toSVG(true); }
             }
         }
     }
