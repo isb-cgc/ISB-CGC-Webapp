@@ -108,7 +108,7 @@ class ClinicalFeatureProvider(FeatureDataProvider):
         return data_point['value']
 
     def build_query(self, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
-        cohort_project_name=settings.PROJECT_NAME
+        cohort_project_name=settings.GCLOUD_PROJECT_ID
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
         cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
         project_id_stmt = ''

@@ -59,7 +59,7 @@ def get_extended_public_program_name_set_for_user_extended_projects(user_extende
     program_set = set()
     projects = Project.objects.filter(id__in=user_extended_projects)
 
-    root_projects = [];
+    root_projects = []
     tcga_projects = fetch_isbcgc_project_set()
 
     for project in projects:

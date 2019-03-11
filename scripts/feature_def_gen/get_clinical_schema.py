@@ -22,11 +22,11 @@ from json import dump as json_dump
 from apiclient.discovery import build
 from oauth2client.client import GoogleCredentials
 
-from GenespotRE.settings import BIGQUERY_DATASET as DATASET
+from projects import Public_Metadata_Tables
 
-CLINICAL_TABLE_ID = "Clinical"
+from django.conf import settings
 
-def do_query(project_id, table_name):
+def do_query():
     SCOPES = ['https://www.googleapis.com/auth/bigquery']
 
     credentials = GoogleCredentials.get_application_default().create_scoped(SCOPES)
@@ -36,17 +36,23 @@ def do_query(project_id, table_name):
     bigquery_service = build('bigquery', 'v2', http=http)
 
     tableCollection = bigquery_service.tables()
-    tableReply = tableCollection.get(projectId=project_id,
-                                    datasetId=DATASET,
-                                    tableId=table_name).execute()
-    schema = tableReply['schema']
-    return schema
+
+    schemas = []
+
+    for tableset in Public_Metadata_Tables.objects.get(program__is_public=1, program__active=1):
+
+        tableReply = tableCollection.get(projectId=settings.BIGQUERY_DATA_PROJECT_ID,
+                                        datasetId=tableset.bq_dataset,
+                                        tableId=tableset.clin_table).execute()
+
+        schemas.append(tableReply['schema'])
+
+    return schemas
 
 def main():
-    project_id = cmdline_argv[1]
-    out_file_path = cmdline_argv[2]
+    out_file_path = cmdline_argv[1]
 
-    schema = do_query(project_id, CLINICAL_TABLE_ID)
+    schema = do_query()
     with open(out_file_path, 'w') as outfile:
         json_dump(schema, outfile, sort_keys=True, indent=2)
 

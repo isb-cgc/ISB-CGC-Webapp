@@ -32,9 +32,9 @@ class Analysis(models.Model):
                  {'name': 'OncoPrint',
                   'description': "Used to plot multiple genomic alteration (somatic mutation) events across a set of samples by heatmap. OncoPrint is developed and provided by cBioPortal.",
                   'image': 'img/oncoprint.png'},
-                 # {'name': 'OncoGrid',
-                 #  'description': "Used to view multiple genomic alteration (somatic mutation) events, clinical data, available files across a set of cases by interactive heatmap. OncoGrid library is developed at Ontario Institute for Cancer Research (OICR).",
-                 #  'image': 'img/oncogrid.png'}
+                 {'name': 'OncoGrid',
+                  'description': "Used to view multiple genomic alteration (somatic mutation) events, clinical data, available files across a set of cases by interactive heatmap. OncoGrid library is developed at Ontario Institute for Cancer Research (OICR).",
+                  'image': 'img/oncogrid.png'}
                  ]
 
         return types

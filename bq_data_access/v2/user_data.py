@@ -452,7 +452,7 @@ class UserDataQueryHandler(object):
         for index, feature_def in enumerate(self.feature_defs):
             feature_def.bq_row_id = index
 
-    def _submit_query_and_get_job_ref(self, project_id, project_name, dataset_name, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
+    def _submit_query_and_get_job_ref(self, project_id, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
         project_ids = self.get_project_ids(cohort_id_array)
 
         bigquery_service = self.get_bq_service()
@@ -483,12 +483,9 @@ class UserDataQueryHandler(object):
         return queryable
 
     def get_data_job_reference(self, cohort_id_array, cohort_dataset, cohort_table, project_id_array):
-        project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_PROJECT_NAME
-        dataset_name = settings.BIGQUERY_DATASET
+        project_id = settings.BIGQUERY_PROJECT_ID
 
-        result = self._submit_query_and_get_job_ref(project_id, project_name, dataset_name,
-                                                    cohort_dataset, cohort_table, cohort_id_array, project_id_array)
+        result = self._submit_query_and_get_job_ref(project_id, cohort_dataset, cohort_table, cohort_id_array, project_id_array)
         return result
 
     @classmethod
