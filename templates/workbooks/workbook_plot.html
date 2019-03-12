@@ -57,6 +57,20 @@
                         <i class="fa fa-expand"></i>
                         <div class="button-text">Toggle Full Screen</div>
                     </a>
+
+            <span class="help-block">
+                Please select the
+                {% if workbook.owner.id == user.id %}
+                    <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Edit Plot Settings">
+                        <i class="fa fa-bar-chart"></i>Edit Plot Settings
+                    </a> option above to change the settings to produce a plot.
+                {% else %}
+                    <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings">
+                        <i class="fa fa-tasks"></i>View Plot Settings
+                    </a> option above to check the current plot settings.
+                {% endif %}
+
+            </span>
         </div>
         <div class="plot-tooltip "></div>
         <div class="plot-args hidden"></div>
@@ -66,7 +80,7 @@
             Some of the settings required to produce a plot are missing.<br>You can check the current plot settings using the
             {% if workbook.owner.id == user.id %}
                 <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings">
-                    <i class="fa fa-bar-chart"></i> Edit Plot Settings
+                    <i class="fa fa-bar-chart">Edit Plot Settings</i>
                 </a> link.<br>
             {% else %}
                 <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings">
