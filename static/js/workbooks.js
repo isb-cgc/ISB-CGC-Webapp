@@ -164,7 +164,7 @@ require([
 
     // comments interactions
     $('.show-flyout').on('click', function () {
-        var target = $(this).closest('.worksheet').find('.comment-flyout');
+        var target = $('.worksheet.active .comment-flyout');
         $(target).animate({
             right: '-1px'
         }, 800).toggleClass('open');
@@ -179,7 +179,7 @@ require([
 
     // settings flyout interactions
     function show_plot_settings() {
-        var target = $(document).find('.settings-flyout');
+        var target = $('.worksheet.active .settings-flyout');
         $(target).animate({
             right: '-1px'
         }, 800).toggleClass('open');
@@ -1756,5 +1756,6 @@ require([
     });
 
     update_plot_elem_rdy();
+    show_plot_settings();
 });
 

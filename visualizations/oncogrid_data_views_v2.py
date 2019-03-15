@@ -181,7 +181,9 @@ def get_donor_data_list(bq_statement):
                 donor_track_count_max['days_to_death'] = max(int(donor_track_count_max['days_to_death']), int(donor_data['days_to_death']))
 
             for data_category_key in donors[case_barcode_key]['data_category']:
-                if data_category_key.lower() == 'clinical':
+                if data_category_key is None:
+                    break
+                elif data_category_key.lower() == 'clinical':
                     donor_data['clinical'] = donors[case_barcode_key]['data_category'][data_category_key]['score']
                     donor_track_count_max['clinical'] = max(donor_track_count_max['clinical'], donor_data['clinical'])
                 elif data_category_key.lower() == 'biospecimen':
@@ -381,5 +383,6 @@ def create_oncogrid_bq_statement(type, genomic_build, project_set, cohort_ids, g
         filter_clause2 = filter_clause2
     )
 
+    # print(bq_statement)
     return bq_statement, [somatic_mut_table, metadata_data_table, bioclinic_clin_table]
 
