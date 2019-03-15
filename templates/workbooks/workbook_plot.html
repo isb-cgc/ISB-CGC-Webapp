@@ -62,11 +62,11 @@
                 Please select the
                 {% if workbook.owner.id == user.id %}
                     <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Edit Plot Settings">
-                        <i class="fa fa-bar-chart"></i>Edit Plot Settings
+                        <i class="fa fa-bar-chart"></i><span style="font-weight: bold; padding: 0 3px;">Edit Plot Settings</span>
                     </a> option above to change the settings to produce a plot.
                 {% else %}
                     <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings">
-                        <i class="fa fa-tasks"></i>View Plot Settings
+                        <i class="fa fa-tasks"></i><span style="font-weight: bold; padding: 0 3px;">View Plot Settings</span>
                     </a> option above to check the current plot settings.
                 {% endif %}
 
@@ -80,11 +80,11 @@
             Some of the settings required to produce a plot are missing.<br>You can check the current plot settings using the
             {% if workbook.owner.id == user.id %}
                 <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings">
-                    <i class="fa fa-bar-chart">Edit Plot Settings</i>
+                    <i class="fa fa-bar-chart"></i><span style="font-weight: bold; padding: 0 3px;">Edit Plot Settings</span>
                 </a> link.<br>
             {% else %}
                 <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings">
-                    <i class="fa fa-tasks"></i> View Plot Settings
+                    <i class="fa fa-tasks"></i><span style="font-weight: bold; padding: 0 3px;">View Plot Settings</span>
                 </a> link.<br>
             {% endif %}
             Ensure that an <b>Analysis Type</b> and any relevant <b>Axis Variables</b>
