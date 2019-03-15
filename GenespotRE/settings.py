@@ -105,16 +105,6 @@ IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
 IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
 
-# If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
-# care of that for us
-if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
-    DATABASES['default']['OPTIONS'] = {
-        'ssl': {
-            'ca': os.environ.get('DB_SSL_CA'),
-            'cert': os.environ.get('DB_SSL_CERT'),
-            'key': os.environ.get('DB_SSL_KEY')
-        }
-    }
 
 # Default to localhost for the site ID
 SITE_ID = 3
@@ -123,8 +113,10 @@ if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
     print >> sys.stdout, "[STATUS] AppEngine Flex detected."
     SITE_ID = 4
 
+
 def get_project_identifier():
     return BIGQUERY_PROJECT_ID
+
 
 # Set cohort table here
 if BIGQUERY_COHORT_TABLE_ID is None:
