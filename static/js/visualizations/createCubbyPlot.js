@@ -114,6 +114,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 return results;
             },
             create_cubbyplot: function (svg, margin, data, domain, range, xLabel, yLabel, xParam, yParam, legend, plot_width, plot_height, cubby_size) {
+
                 var plot_no_margin_width = plot_width - margin.left - margin.right;
                 var plot_no_margin_height = plot_height - margin.top - margin.bottom;
                 var x_band_width = plot_no_margin_width / domain.length;
@@ -175,7 +176,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                     .attr('id', x_axis_area_clip_id)
                     .append('rect')
                     .attr('height', margin.bottom)
-                    .attr('width', plot_no_margin_width)
+                    .attr('width', plot_no_margin_width+margin.right)
                     .attr('transform', 'translate(' + margin.left + ',' + x_axis_area_ypos + ')');
 
                 x_axis_area.append('g')
