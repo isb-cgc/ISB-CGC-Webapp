@@ -241,7 +241,10 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                         svg.select('.x.axis')
                             .attr('transform', 'translate(' +  (margin.left + d3.event.translate[0]) + ', ' + (margin.top+plot_no_margin_height*d3.event.scale) + ')')
                             .selectAll('foreignObject')
-                            .attr('style', 'font-size:'+(scaled_tick_font_size>tick_font_size ? tick_font_size : scaled_tick_font_size)+'px; transform: rotate(30deg);')
+                            .attr('style', function(d){
+                                var scale_ratio_2  = d.length > 28 ? 0.9 : 1; // Decrease font size if label text is too long (>28)
+                                return 'font-size:'+(scaled_tick_font_size>tick_font_size ? tick_font_size*scale_ratio_2 : scaled_tick_font_size*scale_ratio_2)+'px; transform: rotate(30deg);'
+                            })
                             .attr('width', x_band_width*d3.event.scale);
                         svg.select('.x.axis').call(xAxis.scale(x.rangeBands([0, plot_no_margin_width*d3.event.scale])));
                         x_axis_area
@@ -257,7 +260,11 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                         svg.select('.y.axis')
                             .attr('transform', 'translate('+ margin.left +', ' + (margin.top + d3.event.translate[1])+')')
                             .selectAll('foreignObject')
-                            .attr('style', 'font-size:'+(scaled_tick_font_size>tick_font_size ? tick_font_size : scaled_tick_font_size)+'px; transform: translate(-' + margin.left * 0.75 + 'px, -'+(y.rangeBand()*d3.event.scale / 2)+'px)')//, -' + (y.rangeBand() / 2) + 'px);');
+                            .attr('style', function(d) {
+                                var scale_ratio_2  = d.length > 28 ? 0.9 : 1; // Decrease font size if label text is too long (>28)
+                                return 'font-size:' + (scaled_tick_font_size > tick_font_size ? tick_font_size*scale_ratio_2 : scaled_tick_font_size*scale_ratio_2) + 'px; transform: translate(-' + margin.left * 0.75 + 'px, -' + (y.rangeBand() * d3.event.scale / 2) + 'px)'
+
+                            })//, -' + (y.rangeBand() / 2) + 'px);');
                             .select('div')
                             .attr('style', 'display:table-cell;vertical-align:middle; text-align: right; padding: 0 10px; width: ' + margin.left * .75 + 'px; height: ' + y.rangeBand()*d3.event.scale + 'px;');
                         y_axis_area
@@ -466,7 +473,10 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 }));
                 svg.select('.x.axis')
                     .selectAll('foreignObject')
-                    .attr('style', 'font-size:'+(scale_ratio*tick_font_size)+'px; transform: rotate(30deg);')
+                    .attr('style', function(d){
+                        var scale_ratio_2  = d.length > 28 ? 0.9 : 1; // Decrease font size if label text is too long (>28)
+                        return 'font-size:'+(scale_ratio*scale_ratio_2*tick_font_size)+'px; transform: rotate(30deg);'
+                    })
                     .selectAll('div')
                     .attr('title', function(d){ return d; });
 
@@ -476,7 +486,10 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 }));
                 svg.select('.y.axis')
                     .selectAll('foreignObject')
-                    .attr('style', 'font-size:'+(scale_ratio*tick_font_size)+'px; transform: translate(-' + margin.left * 0.75 + 'px, -' + y.rangeBand() / 2 + 'px);')
+                    .attr('style', function(d){
+                        var scale_ratio_2  = d.length > 28 ? 0.9 : 1; // Decrease font size if label text is too long (>28)
+                        return 'font-size:'+(scale_ratio*tick_font_size*scale_ratio_2)+'px; transform: translate(-' + margin.left * 0.75 + 'px, -' + y.rangeBand() / 2 + 'px);'
+                    })
                 svg.select('.y.axis')
                     .selectAll('foreignObject div')
                     .attr('title', function(d){ return d; })
