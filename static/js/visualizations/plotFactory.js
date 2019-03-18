@@ -211,7 +211,7 @@ define([
     }
 
     function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, data, units) {
-        var margin = {top: 10, bottom: 115, left: 140, right: 20};
+        var margin = {top: 10, bottom: 115, left: 140, right: 55};
         var cubby_max_size = 150; // max cubby size
         var cubby_min_size = 25; // min cubby size
         var view_width = width-margin.left-margin.right;
