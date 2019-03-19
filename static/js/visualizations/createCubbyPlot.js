@@ -176,7 +176,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                     .attr('id', x_axis_area_clip_id)
                     .append('rect')
                     .attr('height', margin.bottom)
-                    .attr('width', plot_no_margin_width+margin.right)
+                    .attr('width', plot_no_margin_width)
                     .attr('transform', 'translate(' + margin.left + ',' + x_axis_area_ypos + ')');
 
                 x_axis_area.append('g')
@@ -242,9 +242,10 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                             .attr('transform', 'translate(' +  (margin.left + d3.event.translate[0]) + ', ' + (margin.top+plot_no_margin_height*d3.event.scale) + ')')
                             .selectAll('foreignObject')
                             .attr('style', function(d){
-                                var scale_ratio_2  = 1 - Math.floor(d.length/24) * 0.1; // Decrease font size if label text is too long (>28)
-                                return 'font-size:'+(scaled_tick_font_size>tick_font_size ? tick_font_size*scale_ratio_2 : scaled_tick_font_size*scale_ratio_2)+'px; transform: rotate(30deg);'
+                                var scale_ratio_2  = 1 - Math.floor(d.length/20) * 0.1; // Decrease font size if label text is too long (>28)
+                                return 'font-size:'+(scaled_tick_font_size>tick_font_size ? tick_font_size*scale_ratio_2 : scaled_tick_font_size*scale_ratio_2)+'px;'
                             })
+                            .attr('transform', 'translate(-'+x_band_width*d3.event.scale/2+',0)')
                             .attr('width', x_band_width*d3.event.scale);
                         svg.select('.x.axis').call(xAxis.scale(x.rangeBands([0, plot_no_margin_width*d3.event.scale])));
                         x_axis_area
@@ -261,10 +262,10 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                             .attr('transform', 'translate('+ margin.left +', ' + (margin.top + d3.event.translate[1])+')')
                             .selectAll('foreignObject')
                             .attr('style', function(d) {
-                                var scale_ratio_2  = 1 - Math.floor(d.length/24) * 0.1; // Decrease font size if label text is too long (>28)
+                                var scale_ratio_2  = 1 - Math.floor(d.length/20) * 0.1; // Decrease font size if label text is too long (>28)
                                 return 'font-size:' + (scaled_tick_font_size > tick_font_size ? tick_font_size*scale_ratio_2 : scaled_tick_font_size*scale_ratio_2) + 'px; transform: translate(-' + margin.left * 0.75 + 'px, -' + (y.rangeBand() * d3.event.scale / 2) + 'px)'
 
-                            })//, -' + (y.rangeBand() / 2) + 'px);');
+                            })
                             .select('div')
                             .attr('style', 'display:table-cell;vertical-align:middle; text-align: right; padding: 0 10px; width: ' + margin.left * .75 + 'px; height: ' + y.rangeBand()*d3.event.scale + 'px;');
                         y_axis_area
@@ -474,10 +475,12 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 svg.select('.x.axis')
                     .selectAll('foreignObject')
                     .attr('style', function(d){
-                        var scale_ratio_2  = 1 - Math.floor(d.length/24) * 0.1; // Decrease font size if label text is too long (>28)
-                        return 'font-size:'+(scale_ratio*scale_ratio_2*tick_font_size)+'px; transform: rotate(30deg);'
+                        var scale_ratio_2  = 1 - Math.floor(d.length/20) * 0.1; // Decrease font size if label text is too long (>28)
+                        return 'font-size:'+(scale_ratio*scale_ratio_2*tick_font_size)+'px;'
                     })
+                    .attr('transform','translate(-'+(x_band_width/2)+',0)')
                     .selectAll('div')
+                    .attr('class', 'center')
                     .attr('title', function(d){ return d; });
 
                 svg.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({
@@ -487,7 +490,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 svg.select('.y.axis')
                     .selectAll('foreignObject')
                     .attr('style', function(d){
-                        var scale_ratio_2  = 1 - Math.floor(d.length/24) * 0.1; // Decrease font size if label text is too long (>28)
+                        var scale_ratio_2  = 1 - Math.floor(d.length/20) * 0.1; // Decrease font size if label text is too long (>28)
                         return 'font-size:'+(scale_ratio*tick_font_size*scale_ratio_2)+'px; transform: translate(-' + margin.left * 0.75 + 'px, -' + y.rangeBand() / 2 + 'px);'
                     })
                 svg.select('.y.axis')
