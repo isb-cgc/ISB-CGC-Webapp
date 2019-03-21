@@ -54,7 +54,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
     var selectedSamples = null;
 
     return {
-        addViolin: function (svg, raw_data, values_only, height, violin_width, domain, range) {
+        addViolin: function (svg, values_only, height, violin_width, domain, range) {
             var data = d3.layout.histogram()
                 .frequency(0)(values_only.sort(d3.descending));
 
@@ -70,7 +70,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             var line = d3.svg.line()
                 .interpolate( values_only.length > 5 ? 'basis':'cardinal')
                 .x(function(d) {
-                    return x(d.x);
+                    return x(d.x+d.dx/2);
                 })
                 .y(function(d) {
                     return y(d.y);
@@ -155,7 +155,6 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                         return color(colorVal(d));
                     })
                     .attr('cx', function (d) {
-                        // console.log(parseInt(x(d[xAttr]) / (violin_width + padding)));
                         var histogram = histo_dict[parseInt(x(d[xAttr]) / (violin_width + padding))];
                         var histo_index = 0;
                         for (var j = 0; j < histogram.length; j++) {
@@ -165,9 +164,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                                 histo_index = j;
                                 break;
                             }
-                            // console.log(histogram.length)
                         }
-                        // console.log(histo_index);
                         var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
                         var rand_pos = 0;
                         if (histogram.length) {
@@ -365,7 +362,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
                 xdomain.push(key + ':' + values_only.length);
                 if(values_only.length > 0) {
-                    this.addViolin(g, processed_data[key], values_only, height, violin_width, domain, range);
+                    this.addViolin(g, values_only, height, violin_width, domain, range);
                     this.addMedianLine(g, values_only, height, violin_width, domain, range);
                 }
                 i += 1;
