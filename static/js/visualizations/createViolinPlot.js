@@ -268,7 +268,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
         },
         createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, margin, colorBy, legend, legend_title, cohort_map) {
 
-            var domain = [min_y, max_y];
+            var y_padding = (max_y-min_y)*.05;
+            var domain = [min_y-y_padding, max_y+y_padding];
             var range = [height - margin.bottom - margin.top, 0];
             var view_width = svg.attr("width");
             var processed_data = {};
