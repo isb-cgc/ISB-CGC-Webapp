@@ -95,7 +95,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .style('fill', 'none')
                 .attr('transform', 'rotate(90, 0, 0) scale(1, -1)');
         },
-        addPoints: function (svg, raw_data, values_only, height, plot_width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, legend_title, cohort_map, padding, margin, dot_tip) {
+        addPoints: function (svg, raw_data, values_only, height, plot_width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, legend_title, legend_type, cohort_map, padding, margin, dot_tip) {
             // remove counts from xdomain
             var tmp = xdomain;
             xdomain = [];
@@ -115,12 +115,48 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
             var colorVal = function(d) { return d[colorBy]; };
 
-            var name_domain = $.map(raw_data, function(d) {
-                return d[colorBy];
-            });
-            var color = d3.scale.ordinal()
-                .domain(name_domain)
-                .range(helpers.color_map(name_domain.length));
+
+            var color;
+            var numeric_color;
+            var cat_color_domain;
+            var is_numeric_color_empty = true;
+            var blues = ["#E3E3FF", "blue"];
+            if(legend_type == "N") {
+                cat_color_domain = $.map(raw_data, function (d) {
+                    if(isNaN(d[colorBy])){
+                        return d[colorBy];
+                    }
+                    else{
+                        is_numeric_color_empty = false;
+                        return;
+                    }
+                });
+                if(!is_numeric_color_empty) {
+                    var color_range = helpers.get_min_max(raw_data, colorBy);
+                    if(color_range[0] == color_range[1]){
+                        if(color_range[0] == 0){
+                            color_range = [-4, 4];
+                        }
+                        else{
+                            color_range = [color_range[0] * 0.5, color_range[0] * 1.5];//so the one value would be in the center [1-4/8, 1, 1+4/8]
+                        }
+                    }
+                    numeric_color = d3.scale.linear()
+                        .domain(color_range)
+                        .range(blues);
+                }
+
+
+            } else {
+                cat_color_domain = $.map(raw_data, function (d) {
+                    return d[colorBy];
+                });
+
+            }
+            color = d3.scale.ordinal()
+                    .domain(cat_color_domain)
+                    .range(helpers.color_map(cat_color_domain.length));
+
 
             var histo_dict = {};
             for (var key in values_only) {
@@ -152,7 +188,12 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                         return d[colorBy];
                     })
                     .style('fill', function (d) {
-                        return color(colorVal(d));
+                        if(legend_type == "N" && !isNaN(colorVal(d))){
+                            return numeric_color(colorVal(d));
+                        }
+                        else{
+                            return color(colorVal(d));
+                        }
                     })
                     .attr('cx', function (d) {
                         var histogram = histo_dict[parseInt(x(d[xAttr]) / (violin_width + padding))];
@@ -189,57 +230,126 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             }
 
 
-            var legend_line_height = 20;
-            var no_legend_columns = helpers.get_no_legend_columns(color.domain());
-            var legend_column_length = Math.ceil(color.domain().length/no_legend_columns);
-
-
-            legend = legend.attr('height', legend_line_height * (legend_column_length+1));
+            var legend_line_height = 25;
+            var legend_height = legend_line_height;
+            var n_legend;
+            var c_legend;
+            var n_legend_w = 400;
+            var c_legend_margin_left = 0;
+            var legend_rect_h = 14;
             legend.append('text')
                 .attr('x', 2)
-                .attr('y', legend_line_height - 5)
+                .attr('y', legend_line_height-10)
                 .style('font-weight', 'bold')
                 .text(legend_title);
 
-            legend = legend.selectAll('.legend')
-                .data(color.domain())
-                .enter().append('g')
-                .attr('class', 'legend')
-                .attr("transform", function(d, i)
-                    { return "translate("+(Math.floor(i/legend_column_length)*legend.attr('width')/no_legend_columns)+"," + (((i%legend_column_length)+1) * legend_line_height) + ")"; });
+            if(legend_type == "N" && !is_numeric_color_empty){
+                var legend_scale_no = 9;
+                var legend_rect_w = 28;
+                var color_band = (color_range[1]-color_range[0])/(legend_scale_no-1);
 
-            legend.append('rect')
-                .attr('width', legend_line_height - 6)
-                .attr('height', legend_line_height - 6)
-                .attr("transform", function(d, i) { return "translate(3, 3)"; })
-                .attr('class', 'selected')
-                .style('stroke', color)
-                .style('stroke-width', 1)
-                .style('fill', color)
-                .on('click', helpers.toggle_selection);
+                var legend_text_w = 60;
+                c_legend_margin_left = n_legend_w;
+                legend_height += legend_line_height;
+                n_legend = legend.selectAll('.legend')
+                    .data(d3.range(legend_scale_no).map(function(d, i){
+                        return Math.round(color_range[0] + i * color_band);
+                    }))
+                    .enter().append('g')
+                    .attr('class', 'legend')
+                    .attr("transform", function (d, i) {
+                        return "translate("+(legend_text_w + (legend_rect_w+2) * i)+", "+legend_line_height+")";
+                    });
+                n_legend.append('rect')
+                    .attr('width', legend_rect_w)
+                    .attr('height', legend_rect_h)
+                    .attr('class', 'selected')
+                    .style('stroke', numeric_color)
+                    .style('stroke-width', 1)
+                    .style('fill', numeric_color);
+                    // .on('click', helpers.toggle_selection);
 
-            legend.append('text')
-                .attr('x', legend_line_height + 2)
-                .attr('y', legend_line_height - 5)
-                .text(function(d) {
-                    if (d != null) {
-                        if (colorBy == 'cohort') {
-                            if (Array.isArray(d)) {
-                                var cohort_name_label = "";
-                                for (var i = 0; i < d.length; i++) {
-                                    cohort_name_label += cohort_map[d[i]]+',';
-                                }
-                                return cohort_name_label.slice(0,-1);
-                            } else {
-                                return cohort_map[d];
-                            }
-                        } else {
+                n_legend.append('text')
+                    .attr('x', function(d, i){
+                        if(i == 0){
+                            return -3;
+                        }
+                        else if(i == legend_scale_no-1){
+                            return legend_rect_w + 3;
+                        }
+                        return;
+                    })
+                    .attr('y', function(d, i){
+                        if(i == 0 || i == legend_scale_no-1){
+                            return legend_rect_h-2;
+                        }
+                        return;
+
+                    })
+                    .text(function (d, i) {
+                        if(i == 0 || i == legend_scale_no-1){
                             return d;
                         }
-                    } else {
-                        return 'NA';
-                    }
-                });
+                        return;
+                    })
+                    .attr('text-anchor', function(d, i){
+                        if(i == 0){
+                            return 'end';
+                        }
+                        else if (i == (legend_scale_no - 1)){
+                            return 'start';
+                        }
+                        return;
+                    });
+            }
+            if(color.domain().length > 0){
+                var no_legend_columns = helpers.get_no_legend_columns(color.domain());
+                var legend_column_length = Math.ceil(color.domain().length/no_legend_columns);
+                var legend_rect_w = legend_rect_h;
+
+                c_legend = legend.selectAll('.c_legend')
+                    .data(color.domain())
+                    .enter().append('g')
+                    .attr('class', 'c_legend')
+                    .attr("transform", function (d, i) {
+                        return "translate(" + (c_legend_margin_left+Math.floor(i / legend_column_length) * legend.attr('width') / no_legend_columns) + "," + (((i % legend_column_length) + 1) * legend_line_height) + ")";
+                    });
+
+                c_legend.append('rect')
+                    .attr('width', legend_rect_w)
+                    .attr('height', legend_rect_h)
+                    .attr('class', 'selected')
+                    .style('stroke', color)
+                    .style('stroke-width', 1)
+                    .style('fill', color)
+                    .on('click', helpers.toggle_selection);
+
+                c_legend.append('text')
+                    .attr('x', legend_rect_w + 8)
+                    .attr('y', legend_rect_h - 2)
+                    .text(function (d) {
+                        if (d != null) {
+                            if (colorBy == 'cohort') {
+                                if (Array.isArray(d)) {
+                                    var cohort_name_label = "";
+                                    for (var i = 0; i < d.length; i++) {
+                                        cohort_name_label += cohort_map[d[i]] + ',';
+                                    }
+                                    return cohort_name_label.slice(0, -1);
+                                } else {
+                                    return cohort_map[d];
+                                }
+                            } else {
+                                return d;
+                            }
+                        } else {
+                            return 'NA';
+                        }
+                    });
+                legend_height = legend_height == legend_line_height ? legend_line_height * (legend_column_length + 1) : legend_height;
+            }
+            legend.attr('height', legend_height);
+
         },
         addMedianLine: function(svg, values_only, height, violin_width, domain, range) {
             var median = d3.median(values_only);
@@ -266,7 +376,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .on('mouseout.tip', median_tip.hide)
                 .call(median_tip);
         },
-        createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, margin, colorBy, legend, legend_title, cohort_map) {
+        createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, margin, colorBy, legend, legend_title, legend_type, cohort_map) {
 
             var y_padding = (max_y-min_y)*.05;
             var domain = [min_y-y_padding, max_y+y_padding];
@@ -379,7 +489,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .attr('width', plot_width)
                 .attr('height', height - margin.top - margin.bottom)
                 .attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
-            this.addPoints(plotg, raw_Data, scatter_processed_data, height, plot_width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, legend_title, cohort_map, x_padding, margin, dot_tip);
+            this.addPoints(plotg, raw_Data, scatter_processed_data, height, plot_width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, legend_title, legend_type, cohort_map, x_padding, margin, dot_tip);
 
             // create y axis
             var y = d3.scale.linear()

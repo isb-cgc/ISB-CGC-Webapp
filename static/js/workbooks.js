@@ -396,8 +396,19 @@ require([
     // gather the options and selections on a variable, used for gathering the color_by variable
     function get_simple_values(selection) {
         var result = {variable: selection.find(":selected").val(), type : "common", options: []};
-        $(selection).find("option").each(function(i,ele){
-           result.options.push({value : $(ele).val(), text : $(ele).text()});
+        if(selection.find(":selected").attr('var_type')){
+            result['var_type'] = selection.find(":selected").attr('var_type');
+        }
+        $(selection).find("option").each(function(i, ele) {
+            var option = {
+                value: $(ele).val(),
+                text : $(ele).text()
+            };
+
+            if($(ele).attr('var_type')){
+                option['var_type'] = $(ele).attr('var_type');
+            }
+            result.options.push(option);
         });
         return result;
     };
@@ -419,7 +430,8 @@ require([
             result = {
                 variable : selection.val(),
                 text : selection.text(),
-                type : "common"
+                type : "common",
+                var_type: selection.attr('var_type')
             };
 
             if(selection.attr('var_type')=='N' && !selection.parents('.variable-container').find('.log-scale').is(':disabled') &&
@@ -562,7 +574,7 @@ require([
             if(data.options){
                 for(var i in data.options){
                     if(data.options[i].type !== "label" && variable_element.find('option[value="'+data.options[i].value+'"]').length <= 0) {
-                        variable_element.append('<option var_type="' + data.options[i].type + '" value="' + data.options[i].value + '"> ' + data.options[i].text + '</option>');
+                        variable_element.append('<option var_type="' + data.options[i].var_type + '" value="' + data.options[i].value + '"> ' + data.options[i].text + '</option>');
                     }
                 }
             }
@@ -707,19 +719,19 @@ require([
             if (x.type !== "label") {
                 if(x.type == "common") {
                     parent.find('.color_by option[value="'+x.variable+'"]').length <= 0 &&
-                        parent.find(".color_by").append('<option value="' + x.variable + '">' + x.text + '</option>');
+                        parent.find(".color_by").append('<option var_type="'+x.var_type+'" value="' + x.variable + '">' + x.text + '</option>');
                 } else {
                     parent.find('.color_by option[value="'+x.selection.selected+'"]').length <= 0 &&
-                        parent.find(".color_by").append('<option value="' + x.selection.selected + '">' + x.selection.text + '</option>');
+                        parent.find(".color_by").append('<option var_type="'+x.var_type+'" value="' + x.selection.selected + '">' + x.selection.text + '</option>');
                 }
             }
             if(y.type !== "label") {
                 if (y.type == "common") {
                     parent.find('.color_by option[value="'+y.variable+'"]').length <= 0 &&
-                        parent.find(".color_by").append('<option value="' + y.variable + '">' + y.text + '</option>');
+                        parent.find(".color_by").append('<option var_type="'+y.var_type+'" value="' + y.variable + '">' + y.text + '</option>');
                 } else {
                     parent.find('.color_by option[value="'+y.selection.selected+'"]').length <= 0 &&
-                        parent.find(".color_by").append('<option value="' + y.selection.selected + '">' + y.selection.text + '</option>');
+                        parent.find(".color_by").append('<option var_type="'+y.var_type+'" value="' + y.selection.selected + '">' + y.selection.text + '</option>');
                 }
             }
 
@@ -728,7 +740,7 @@ require([
                 var x = get_values($(this));
                 // Check to see that option does not already exist
                 if (parent.find('.color_by option[value="' + x.variable + '"]').length == 0) {
-                    parent.find(".color_by").append('<option value="' + x.variable + '">' + x.text + '</option>');
+                    parent.find(".color_by").append('<option var_type="'+x.var_type+'" value="' + x.variable + '">' + x.text + '</option>');
                 }
             });
         }
@@ -968,7 +980,7 @@ require([
                                 type         : data.attrs.type,
                                 x            : data.attrs.x_axis.url_code,
                                 y            : data.attrs.y_axis.url_code,
-                                color_by     : data.attrs.color_by.url_code,
+                                color_by     : data.attrs.color_by,
                                 color_by_sel : data.color_by_sel,
                                 logTransform : data.logTransform,
                                 gene_label   : data.attrs.gene_label,
@@ -1033,7 +1045,10 @@ require([
                 type    : worksheet.find('.plot_selection :selected').val(),
                 x_axis  : variable_values('x-axis-select'),
                 y_axis  : variable_values('y-axis-select'),
-                color_by: {url_code: plot_settings.find('.color_by').find(":selected").val()},
+                color_by: {
+                    url_code: plot_settings.find('.color_by').find(":selected").val(),
+                    var_type: plot_settings.find('.color_by').find(":selected").attr('var_type')
+                },
                 cohorts: plot_settings.find('[name="cohort-checkbox"]:checked').map(function () {
                     return {id: this.value, cohort_id: $(this).attr("cohort-id")};
                 }).get(),
@@ -1202,7 +1217,8 @@ require([
                                         logTransform : data.logTransform,
                                         gene_label   : data.attrs.gene_label,
                                         gene_list    : data.attrs.gene_list,
-                                        color_by     : data.attrs.color_by.url_code,
+                                        color_by     : data.attrs.color_by,
+                                        // color_by     : data.attrs.color_by.url_code,
                                         cohorts      : data.attrs.cohorts,
                                         color_by_sel : data.color_by_sel});
                         $('#'+sheet_id).attr("is-loaded","true");
@@ -1289,8 +1305,8 @@ require([
 
         // Set Color override
         var color_override = false;
-        if (args.color_by == 'cohort') {
-            args.color_by = '';
+        if (args.color_by.url_code == 'cohort') {
+            args.color_by.url_code = '';
             color_override = true;
         }
 
@@ -1745,7 +1761,7 @@ require([
                                 logTransform : data.logTransform,
                                 gene_label   : data.attrs.gene_label,
                                 gene_list    : data.attrs.gene_list,
-                                color_by     : data.attrs.color_by.url_code,
+                                color_by     : data.attrs.color_by,
                                 cohorts      : data.attrs.cohorts,
                                 color_by_sel : data.color_by_sel});
             }

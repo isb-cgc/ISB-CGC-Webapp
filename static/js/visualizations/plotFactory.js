@@ -142,7 +142,7 @@ define([
     /*
         Generate violin plot
      */
-    function generate_violin_plot(margin, plot_selector, legend_selector, legend_title, height, width, x_attr, y_attr, color_by, cohort_map, data, units, logTransform) {
+    function generate_violin_plot(margin, plot_selector, legend_selector, legend_title, legend_type, height, width, x_attr, y_attr, color_by, cohort_map, data, units, logTransform) {
         var violin_width = 200;
         var tmp = helpers.get_min_max(data, 'y');
         var min_n = tmp[0];
@@ -168,6 +168,7 @@ define([
             color_by,
             legend,
             legend_title,
+            legend_type,
             cohort_map
         );
 
@@ -204,13 +205,14 @@ define([
             color_by,
             legend,
             legend_title,
+            legend_type,
             cohort_map
         );
 
         return  {plot : plot, svg : svg}
     }
 
-    function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, data, units) {
+    function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, data, units) {
         var margin = {top: 10, bottom: 115, left: 140, right: 20};
         var cubby_max_size = 150; // max cubby size
         var cubby_min_size = 25; // min cubby size
@@ -483,13 +485,13 @@ define([
                     break;
                 case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
                     margin = {top: 15, bottom: 100, left: 110, right: 10};
-                    visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, legend_title, height, width, args.x, args.y, args.color_by,  cohort_map, data, units, args.logTransform);
+                    visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, legend_title, args.legend_type, height, width, args.x, args.y, args.color_by,  cohort_map, data, units, args.logTransform);
                     break;
-                case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
-                    visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, legend_title, height, width, args.x, args.y, args.color_by,  cohort_map, data, units, args.logTransform);
-                    break;
+                // case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
+                //     visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, legend_title, args.legend_type, height, width, args.x, args.y, args.color_by,  cohort_map, data, units, args.logTransform);
+                //     break;
                 case 'Cubby Hole Plot' : //(x_type == 'STRING' && y_type == 'STRING') {
-                    visualization = generate_cubby_hole_plot(args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  data, units);
+                    visualization = generate_cubby_hole_plot(args.plot_selector, args.legend_selector, height, width, args.x, args.y, data, units);
                     break;
                 default :
                     break;
@@ -610,7 +612,7 @@ define([
             plot_data_url = get_onco_data_url(BASE_URL, args.type, args.cohorts, args.gene_list, VERSION);
         }
         else {
-            plot_data_url = get_data_url(BASE_URL, args.cohorts, args.x, args.y, args.color_by, args.logTransform, VERSION);
+            plot_data_url = get_data_url(BASE_URL, args.cohorts, args.x, args.y, args.color_by.url_code, args.logTransform, VERSION);
         }
 
         $.ajax({
@@ -625,7 +627,8 @@ define([
                              y                : args.y,
                              logTransform     : args.logTransform,
                              color_by         : args.cohorts,
-                             legend_title     : args.color_by,
+                             legend_title     : args.color_by.url_code,
+                             legend_type      : args.color_by.var_type,
                              cohort_override  : args.color_override,
                              color_by_sel     : args.color_by_sel,
                              data             : data};
