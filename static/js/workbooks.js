@@ -574,7 +574,7 @@ require([
             if(data.options){
                 for(var i in data.options){
                     if(data.options[i].type !== "label" && variable_element.find('option[value="'+data.options[i].value+'"]').length <= 0) {
-                        variable_element.append('<option var_type="' + data.options[i].var_type + '" value="' + data.options[i].value + '"> ' + data.options[i].text + '</option>');
+                        variable_element.append('<option var_type="' + data.options[i].var_type + '" value="' + data.options[i].value + '">' + data.options[i].text + '</option>');
                     }
                 }
             }
@@ -598,7 +598,7 @@ require([
                     if ($.inArray(ele.id, keys) != -1) {
                         if ($(ele).hasClass('select2')) {
                             $(ele).parent().find('.select2-selection__rendered').empty();
-                            $(ele).parent().find('.select2-selection__rendered').append('<option value="' + data[ele.id].options[0].value + '"> ' + data[ele.id].options[0].text + '</option>');
+                            $(ele).parent().find('.select2-selection__rendered').append('<option value="' + data[ele.id].options[0].value + '">' + data[ele.id].options[0].text + '</option>');
                         } else {
                             $(ele).empty();
                             for (var i in data[ele.id].options) {
@@ -618,7 +618,7 @@ require([
                 if(!checkBuild || checkBuild[1] === $('.workbook-build-display').data('build').toLowerCase()){
                     if (data["selection"].options[i].value == data["selection"].selected) {
                         parent.find('.'+ data.specification).find('.search-term-select').append(
-                            '<option value="' + data["selection"].options[i].value + '"> ' + data["selection"].options[i].text + '</option>'
+                            '<option value="' + data["selection"].options[i].value + '">' + data["selection"].options[i].text + '</option>'
                         );
                     }
                 } else {
@@ -981,7 +981,6 @@ require([
                                 x            : data.attrs.x_axis.url_code,
                                 y            : data.attrs.y_axis.url_code,
                                 color_by     : data.attrs.color_by,
-                                color_by_sel : data.color_by_sel,
                                 logTransform : data.logTransform,
                                 gene_label   : data.attrs.gene_label,
                                 gene_list    : data.attrs.gene_list,
@@ -1047,6 +1046,7 @@ require([
                 y_axis  : variable_values('y-axis-select'),
                 color_by: {
                     url_code: plot_settings.find('.color_by').find(":selected").val(),
+                    title: plot_settings.find('.color_by').find(":selected").text(),
                     var_type: plot_settings.find('.color_by').find(":selected").attr('var_type')
                 },
                 cohorts: plot_settings.find('[name="cohort-checkbox"]:checked').map(function () {
@@ -1064,8 +1064,7 @@ require([
                 y: (yLog.css('display')!=="none") && yLog.is(':checked'),
                 yBase: 10,
                 yFormula: "n+1"
-            },
-            color_by_sel: plot_settings.find('.color_by :selected').val() !== null && plot_settings.find('.color_by :selected').val() !== ""
+            }
         };
         return result;
     }
@@ -1219,8 +1218,8 @@ require([
                                         gene_list    : data.attrs.gene_list,
                                         color_by     : data.attrs.color_by,
                                         // color_by     : data.attrs.color_by.url_code,
-                                        cohorts      : data.attrs.cohorts,
-                                        color_by_sel : data.color_by_sel});
+                                        cohorts      : data.attrs.cohorts
+                                        });
                         $('#'+sheet_id).attr("is-loaded","true");
                     }
                 }
@@ -1304,10 +1303,8 @@ require([
         turn_off_toggle_selector();
 
         // Set Color override
-        var color_override = false;
         if (args.color_by.url_code == 'cohort') {
             args.color_by.url_code = '';
-            color_override = true;
         }
 
         plot_loader.fadeIn();
@@ -1338,11 +1335,9 @@ require([
                 y                : args.y,
                 logTransform     : args.logTransform,
                 color_by         : args.color_by,
-                color_by_sel     : args.color_by_sel,
                 gene_label       : args.gene_label,
                 gene_list        : args.gene_list,
-                cohorts          : cohort_ids,
-                color_override   : color_override
+                cohorts          : cohort_ids
             }, function(result){
                 if(result.error){
                     plot_element.find('.resubmit-button').show();
@@ -1762,8 +1757,8 @@ require([
                                 gene_label   : data.attrs.gene_label,
                                 gene_list    : data.attrs.gene_list,
                                 color_by     : data.attrs.color_by,
-                                cohorts      : data.attrs.cohorts,
-                                color_by_sel : data.color_by_sel});
+                                cohorts      : data.attrs.cohorts
+                    });
             }
             $(active_sheet).attr("is-loaded","true");
         }

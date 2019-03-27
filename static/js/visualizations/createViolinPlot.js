@@ -95,7 +95,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .style('fill', 'none')
                 .attr('transform', 'rotate(90, 0, 0) scale(1, -1)');
         },
-        addPoints: function (svg, raw_data, values_only, height, plot_width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, legend_title, legend_type, cohort_map, padding, margin, dot_tip) {
+        addPoints: function (svg, raw_data, values_only, height, plot_width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_map, padding, margin, dot_tip) {
             // remove counts from xdomain
             var tmp = xdomain;
             xdomain = [];
@@ -118,41 +118,71 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
             var color;
             var numeric_color;
-            var cat_color_domain;
-            var is_numeric_color_empty = true;
-            var blues = ["#E3E3FF", "blue"];
-            if(legend_type == "N") {
+            var cat_color_domain = [];
+            var num_color_domain = [];
+
+            var legend_scale_no = 9;
+            var color_band;
+            var use_numerical_color = false;
+            var numeric_color_quantiles;
+            var num_legend_tip = d3tip()
+                .attr('class', 'd3-tip')
+                .direction('n')
+                .offset([0, 0])
+                .html(function(d, i) {
+                    var threashold = (i >= numeric_color_quantiles.length) ? Math.floor(d+color_band) : numeric_color_quantiles[i];
+                    return '<span>'
+                        +(d)+'<= val <'
+                        +threashold
+                        +' </span>';
+
+                });
+
+            if(legend.type == "N") {
+                // var numeric_data_count = 0;
+                var blues = d3.scale.linear()
+                    .domain([0,legend_scale_no])
+                    .range(["#E3E3FF", "blue"]);
+
                 cat_color_domain = $.map(raw_data, function (d) {
                     if(isNaN(d[colorBy])){
                         return d[colorBy];
                     }
                     else{
-                        is_numeric_color_empty = false;
-                        return;
+                        num_color_domain.push(d[colorBy])
                     }
                 });
-                if(!is_numeric_color_empty) {
-                    var color_range = helpers.get_min_max(raw_data, colorBy);
-                    if(color_range[0] == color_range[1]){
-                        if(color_range[0] == 0){
-                            color_range = [-4, 4];
-                        }
-                        else{
-                            color_range = [color_range[0] * 0.5, color_range[0] * 1.5];//so the one value would be in the center [1-4/8, 1, 1+4/8]
-                        }
+
+
+                if (num_color_domain.length < 2) {
+                    use_numerical_color = false;
+                    if (num_color_domain.length > 0){
+                        cat_color_domain = cat_color_domain.concat(num_color_domain);
                     }
-                    numeric_color = d3.scale.linear()
-                        .domain(color_range)
-                        .range(blues);
                 }
-
-
+                else{
+                    use_numerical_color = true;
+                    var color_range = helpers.get_min_max(raw_data, colorBy);
+                    color_band = (color_range[1] - color_range[0]) / (legend_scale_no - 1);
+                    numeric_color = d3.scale.quantile()
+                        .domain(d3.range(legend_scale_no+1)
+                            .map(function (d, i) {
+                                return Math.floor(color_range[0] + i * color_band);
+                            })
+                        )
+                        .range(d3.range(legend_scale_no).map(function (d) {
+                            return blues(d);
+                        }));
+                    numeric_color_quantiles = numeric_color.quantiles();
+                }
             } else {
                 cat_color_domain = $.map(raw_data, function (d) {
                     return d[colorBy];
                 });
 
             }
+            cat_color_domain.sort();
+
             color = d3.scale.ordinal()
                     .domain(cat_color_domain)
                     .range(helpers.color_map(cat_color_domain.length));
@@ -184,11 +214,19 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     .attr('id', function (d) {
                         return d['id'];
                     })
-                    .attr('class', function (d) {
-                        return d[colorBy];
+                    .attr('class', function(d) {
+                        var toggle_class;
+                        if (use_numerical_color && !isNaN(colorVal(d))) {
+                            toggle_class = numeric_color(colorVal(d));
+                        }
+                        else {
+                            toggle_class = color(colorVal(d));
+                        }
+                        return toggle_class.replace('#','_');
+                        // return color(colorVal(d)).replace('#','_');
                     })
                     .style('fill', function (d) {
-                        if(legend_type == "N" && !isNaN(colorVal(d))){
+                        if(use_numerical_color && !isNaN(colorVal(d))){
                             return numeric_color(colorVal(d));
                         }
                         else{
@@ -235,39 +273,38 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             var n_legend;
             var c_legend;
             var n_legend_w = 400;
-            var c_legend_margin_left = 0;
+            var c_legend_margin_left = 1;
             var legend_rect_h = 14;
-            legend.append('text')
+            legend.svg.append('text')
                 .attr('x', 2)
                 .attr('y', legend_line_height-10)
                 .style('font-weight', 'bold')
-                .text(legend_title);
+                .text(legend.title);
 
-            if(legend_type == "N" && !is_numeric_color_empty){
-                var legend_scale_no = 9;
+            if(legend.type == "N" && use_numerical_color){
                 var legend_rect_w = 28;
-                var color_band = (color_range[1]-color_range[0])/(legend_scale_no-1);
-
                 var legend_text_w = 60;
                 c_legend_margin_left = n_legend_w;
                 legend_height += legend_line_height;
-                n_legend = legend.selectAll('.legend')
-                    .data(d3.range(legend_scale_no).map(function(d, i){
-                        return Math.round(color_range[0] + i * color_band);
-                    }))
+                n_legend = legend.svg.selectAll('.legend')
+                    .data(numeric_color.domain().slice(0,-1))
                     .enter().append('g')
                     .attr('class', 'legend')
                     .attr("transform", function (d, i) {
                         return "translate("+(legend_text_w + (legend_rect_w+2) * i)+", "+legend_line_height+")";
                     });
+                n_legend.call(num_legend_tip);
                 n_legend.append('rect')
                     .attr('width', legend_rect_w)
                     .attr('height', legend_rect_h)
                     .attr('class', 'selected')
+                    .attr('toggle-class', numeric_color)
                     .style('stroke', numeric_color)
                     .style('stroke-width', 1)
-                    .style('fill', numeric_color);
-                    // .on('click', helpers.toggle_selection);
+                    .style('fill', numeric_color)
+                    .on('mouseover.tip', num_legend_tip.show)
+                    .on('mouseout.tip', num_legend_tip.hide)
+                    .on('click', helpers.toggle_selection);
 
                 n_legend.append('text')
                     .attr('x', function(d, i){
@@ -307,17 +344,18 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 var legend_column_length = Math.ceil(color.domain().length/no_legend_columns);
                 var legend_rect_w = legend_rect_h;
 
-                c_legend = legend.selectAll('.c_legend')
+                c_legend = legend.svg.selectAll('.c_legend')
                     .data(color.domain())
                     .enter().append('g')
                     .attr('class', 'c_legend')
                     .attr("transform", function (d, i) {
-                        return "translate(" + (c_legend_margin_left+Math.floor(i / legend_column_length) * legend.attr('width') / no_legend_columns) + "," + (((i % legend_column_length) + 1) * legend_line_height) + ")";
+                        return "translate(" + (c_legend_margin_left+Math.floor(i / legend_column_length) * legend.svg.attr('width') / no_legend_columns) + "," + (((i % legend_column_length) + 1) * legend_line_height) + ")";
                     });
 
                 c_legend.append('rect')
                     .attr('width', legend_rect_w)
                     .attr('height', legend_rect_h)
+                    .attr('toggle-class', color)
                     .attr('class', 'selected')
                     .style('stroke', color)
                     .style('stroke-width', 1)
@@ -329,26 +367,14 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     .attr('y', legend_rect_h - 2)
                     .text(function (d) {
                         if (d != null) {
-                            if (colorBy == 'cohort') {
-                                if (Array.isArray(d)) {
-                                    var cohort_name_label = "";
-                                    for (var i = 0; i < d.length; i++) {
-                                        cohort_name_label += cohort_map[d[i]] + ',';
-                                    }
-                                    return cohort_name_label.slice(0, -1);
-                                } else {
-                                    return cohort_map[d];
-                                }
-                            } else {
-                                return d;
-                            }
+                            return vizhelpers.get_legend_val(cohort_map, colorBy, d, ',');
                         } else {
                             return 'NA';
                         }
                     });
                 legend_height = legend_height == legend_line_height ? legend_line_height * (legend_column_length + 1) : legend_height;
             }
-            legend.attr('height', legend_height);
+            legend.svg.attr('height', legend_height);
 
         },
         addMedianLine: function(svg, values_only, height, violin_width, domain, range) {
@@ -376,8 +402,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .on('mouseout.tip', median_tip.hide)
                 .call(median_tip);
         },
-        createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, margin, colorBy, legend, legend_title, legend_type, cohort_map) {
-
+        createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, margin, legend, cohort_map) {
+            var colorBy = legend.title.toLowerCase() == 'cohort' ? 'cohort' : 'c';
             var y_padding = (max_y-min_y)*.05;
             var domain = [min_y-y_padding, max_y+y_padding];
             var range = [height - margin.bottom - margin.top, 0];
@@ -391,14 +417,9 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .html(function(d) {
                     return '<span>Case: ' + d['case_id'] + '<br/>' +
                         'Sample: ' + d['sample_id'] + '<br/>' +
-
                         xLabel + ': ' + d[xAttr] + '<br/>' +
                         yLabel + ': ' + d[yAttr] + '<br/>' +
-                        legend_title + ': ' +
-                        (colorBy == 'cohort' ?
-                            cohort_map[d[colorBy]]:
-                            d[colorBy])
-                        +' </span>';
+                        legend.title + ': ' + vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ',') +' </span>';
                 });
 
             // Split data into separate violins
@@ -489,7 +510,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .attr('width', plot_width)
                 .attr('height', height - margin.top - margin.bottom)
                 .attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
-            this.addPoints(plotg, raw_Data, scatter_processed_data, height, plot_width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, legend_title, legend_type, cohort_map, x_padding, margin, dot_tip);
+            this.addPoints(plotg, raw_Data, scatter_processed_data, height, plot_width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_map, x_padding, margin, dot_tip);
 
             // create y axis
             var y = d3.scale.linear()
@@ -781,16 +802,18 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                         p_data[i]['sample_id'] = d['sample_id'];
                         p_data[i][xAttr] = d[xAttr];
                         p_data[i][yAttr] = isNaN(d[yAttr])? d[yAttr] : Number(d[yAttr]);
-                        p_data[i][legend_title] = colorBy == 'cohort' ? cohort_map[d[colorBy]]: d[colorBy];
+                        p_data[i][legend.title] = vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ';');
+
+                        // p_data[i][legend.title] = colorBy == 'cohort' ? cohort_map[d[colorBy]]: d[colorBy];
                     }
                 });
                 return p_data;
             }
 
             function get_csv_data(){
-                var csv_data = 'case_id, sample_id, '+xAttr+', '+yAttr+', '+legend_title+'\n';
+                var csv_data = 'case_id, sample_id, '+xAttr+', '+yAttr+', '+legend.title+'\n';
                 raw_Data.map(function(d){
-                    csv_data += d['case_id'] +', '+ d['sample_id'] + ', ' + d[xAttr] + ', '+ d[yAttr] +', '+ (colorBy == 'cohort' ? cohort_map[d[colorBy]]: d[colorBy])+ '\n';
+                    csv_data += d['case_id'] +', '+ d['sample_id'] + ', ' + d[xAttr] + ', '+ d[yAttr] +', '+ vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ';')+ '\n';
                 });
                 return csv_data;
             }

@@ -108,13 +108,12 @@ define([
     /*
         Generate scatter plot
     */
-    function generate_scatter_plot(margin, plot_selector, legend_selector, legend_title, height, width, x_attr, y_attr, color_by, cohort_map, data, units, logTransform) {
+    function generate_scatter_plot(margin, plot_selector, legend_selector, legend, height, width, x_attr, y_attr, cohort_map, data, units, logTransform) {
          var domain = helpers.get_min_max(data, 'x');
          var range = helpers.get_min_max(data, 'y');
-
-         var legend = d3.select(legend_selector)
-             .append('svg')
-             .attr('width', 850);
+         legend['svg'] = d3.select(legend_selector)
+                .append('svg')
+                .attr('width', 850);
          var svg = d3.select(plot_selector)
              .append('svg')
              .attr('width', width)
@@ -128,9 +127,7 @@ define([
              'x',     // xParam
              'y',     // yParam
              margin,
-             color_by,
              legend,
-             legend_title,
              width,
              height,
              cohort_map
@@ -142,14 +139,14 @@ define([
     /*
         Generate violin plot
      */
-    function generate_violin_plot(margin, plot_selector, legend_selector, legend_title, legend_type, height, width, x_attr, y_attr, color_by, cohort_map, data, units, logTransform) {
+    function generate_violin_plot(margin, plot_selector, legend_selector, legend, height, width, x_attr, y_attr, cohort_map, data, units, logTransform) {
         var violin_width = 200;
         var tmp = helpers.get_min_max(data, 'y');
         var min_n = tmp[0];
         var max_n = tmp[1];
-        var legend = d3.select(legend_selector)
-            .append('svg')
-            .attr('width', 850);
+        legend['svg'] = d3.select(legend_selector)
+                    .append('svg')
+                    .attr('width', 850);
         var svg = d3.select(plot_selector)
             .append('svg')
             .attr('width', width)
@@ -165,10 +162,7 @@ define([
             'x',
             'y',
             margin,
-            color_by,
             legend,
-            legend_title,
-            legend_type,
             cohort_map
         );
 
@@ -178,12 +172,12 @@ define([
     /*
         Generate violin plot with axis swap
      */
-    function generate_violin_plot_axis_swap(margin, plot_selector, legend_selector, legend_title, height, width, x_attr, y_attr, color_by, cohort_map, data, units, logTransform) {
+    function generate_violin_plot_axis_swap(margin, plot_selector, legend_selector, legend, height, width, x_attr, y_attr, cohort_map, data, units, logTransform) {
         var violin_width = 200;
         var tmp = helpers.get_min_max(data, 'x');
         var min_n = tmp[0];
         var max_n = tmp[1];
-        var legend = d3.select(legend_selector)
+        legend['svg'] = d3.select(legend_selector)
             .append('svg')
             .attr('width', 850);
 
@@ -202,10 +196,7 @@ define([
             generate_axis_label(x_attr, false, units.x),
             'y',
             'x',
-            color_by,
             legend,
-            legend_title,
-            legend_type,
             cohort_map
         );
 
@@ -312,7 +303,7 @@ define([
     /*
         Generate url for gathering data
      */
-    function get_data_url(base_url, cohorts, x_attr, y_attr, color_by, logTransform){
+    function get_data_url(base_url, cohorts, x_attr, y_attr, color_by_url_code, logTransform){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
             if (i == 0) {
@@ -324,8 +315,8 @@ define([
         var api_url = base_url + '/visualizations/feature_data_plot/'+ VERSION + '?' + cohort_str;
 
         api_url += '&x_id=' + x_attr;
-        if(color_by && color_by !== ''){
-            api_url += '&c_id=' + color_by;
+        if(color_by_url_code && color_by_url_code !== ''){
+            api_url += '&c_id=' + color_by_url_code;
         }
         if (y_attr && y_attr !== '') {
             api_url += '&y_id=' + y_attr;
@@ -340,7 +331,7 @@ define([
     function get_seqpeek_data_url(base_url, cohorts, gene_label){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
-            if (i == 0) {
+            if (i === 0) {
                 cohort_str += 'cohort_id=' + cohorts[i];
             } else {
                 cohort_str += '&cohort_id=' + cohorts[i];
@@ -349,7 +340,7 @@ define([
         var seqpeek_url = base_url + '/visualizations/seqpeek_data_plot/' + VERSION + '?' + cohort_str;
 
         seqpeek_url += "&hugo_symbol=" + gene_label
-            + (VERSION == 'v2' ? "&genomic_build=" + $('.workbook-build-display').data('build') : '');
+            + (VERSION === 'v2' ? "&genomic_build=" + $('.workbook-build-display').data('build') : '');
 
 
         return seqpeek_url;
@@ -366,9 +357,9 @@ define([
             }
         }
         var url = base_url + '/visualizations/'
-            + (plot_type == 'OncoPrint' ? 'oncoprint_data_plot/': 'oncogrid_data_plot/')
+            + (plot_type === 'OncoPrint' ? 'oncoprint_data_plot/': 'oncogrid_data_plot/')
             + VERSION + '?' + cohort_str + '&gene_list=' + gene_list.join(",")
-            + (VERSION == 'v2' ? "&genomic_build=" + $('.workbook-build-display').data('build') : '');
+            + (VERSION === 'v2' ? "&genomic_build=" + $('.workbook-build-display').data('build') : '');
         return url;
     }
 
@@ -457,21 +448,8 @@ define([
                 y: data.yUnits
             };
 
-            var legend_title='';
+            var legend_title = args.legend_title;
             data = data['items'];
-            if (args.cohort_override) {
-                args.color_by = 'cohort';
-                legend_title = 'Cohort';
-            } else {
-                args.color_by = 'c';
-                if(args.legend_title) {
-                    var args_arr = args.legend_title.split(':');
-                    legend_title = args_arr[args_arr.length-1].replace(/_/g, ' ');
-                    firstChar = legend_title.charAt(0).toUpperCase();
-                    legend_title = firstChar + legend_title.slice(1);
-                }
-            }
-
 
             switch (args.type){
                 case "Bar Chart" : //x_type == 'STRING' && y_type == 'none'
@@ -481,11 +459,11 @@ define([
                     visualization = generate_histogram(margin, args.plot_selector, height, width, args.x, data, units, args.logTransform);
                     break;
                 case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                    visualization = generate_scatter_plot(margin, args.plot_selector, args.legend_selector, legend_title,height, width, args.x, args.y, args.color_by, cohort_map, data, units, args.logTransform);
+                    visualization = generate_scatter_plot(margin, args.plot_selector, args.legend_selector, { 'title': legend_title, 'type': args.legend_type }, height, width, args.x, args.y, cohort_map, data, units, args.logTransform);
                     break;
                 case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
                     margin = {top: 15, bottom: 100, left: 110, right: 10};
-                    visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, legend_title, args.legend_type, height, width, args.x, args.y, args.color_by,  cohort_map, data, units, args.logTransform);
+                    visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, { 'title': legend_title, 'type': args.legend_type }, height, width, args.x, args.y, cohort_map, data, units, args.logTransform);
                     break;
                 // case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
                 //     visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, legend_title, args.legend_type, height, width, args.x, args.y, args.color_by,  cohort_map, data, units, args.logTransform);
@@ -526,7 +504,7 @@ define([
             //establish resize call to data
 
             // d3.select(window).on('resize', visualization.plot.resize);
-            (args.type == "Cubby Hole Plot" || args.color_by_sel) && $(args.legend_selector).show();
+            (args.type == "Cubby Hole Plot"|| args.legend_title) && $(args.legend_selector).show();
 
         } else if (args.type == "SeqPeek" && !data.message) {
             visualization = generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
@@ -626,11 +604,8 @@ define([
                              x                : args.x,
                              y                : args.y,
                              logTransform     : args.logTransform,
-                             color_by         : args.cohorts,
-                             legend_title     : args.color_by.url_code,
+                             legend_title     : args.color_by.title,
                              legend_type      : args.color_by.var_type,
-                             cohort_override  : args.color_override,
-                             color_by_sel     : args.color_by_sel,
                              data             : data};
                 //store plot args in jquery data for each worksheet
                 $('.worksheet.active .plot-args').data('plot-args', plot_args);
