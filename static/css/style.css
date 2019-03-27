@@ -2783,7 +2783,8 @@ html {
     #landing .landing-content-div .container .header-div .header-content-div {
       position: relative;
       top: 45%;
-      transform: translateY(-45%); }
+        -webkit-transform: translateY(-45%);
+                transform: translateY(-45%); }
       #landing .landing-content-div .container .header-div .header-content-div a {
         color: #4CC2D6; }
       #landing .landing-content-div .container .header-div .header-content-div .lj-title h1 {
