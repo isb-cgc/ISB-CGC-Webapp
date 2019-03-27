@@ -231,12 +231,12 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                         data_counts = results['data_counts'];
 
 
-                        $('#p-'+program_id+'-data-total-samples').html(metadata_counts['total']);
-                        $('#p-'+program_id+'-data-total-participants').html(metadata_counts['cases']);
+                        $('#p-'+program_id+'-data-total-samples').html(format_num_with_commas(metadata_counts['total']));
+                        $('#p-'+program_id+'-data-total-participants').html(format_num_with_commas(metadata_counts['cases']));
 
                         if(cohort_id){
-                            $('#c-'+cohort_id+'-data-total-samples').html(metadata_counts['cohort-total']);
-                            $('#c-'+cohort_id+'-data-total-participants').html(metadata_counts['cohort-cases']);
+                            $('#c-'+cohort_id+'-data-total-samples').html(format_num_with_commas(metadata_counts['cohort-total']));
+                            $('#c-'+cohort_id+'-data-total-participants').html(format_num_with_commas(metadata_counts['cohort-cases']));
                         }
 
                         context.update_filter_counts(case_counts, data_counts, program_id);

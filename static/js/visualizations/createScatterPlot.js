@@ -46,7 +46,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
     var selectedSamples = null;
 
     return {
-        create_scatterplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, margin, colorBy, legend, legend_title, width, height, cohort_map) {
+        create_scatterplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, margin, legend, width, height, cohort_map) {
+            var colorBy = legend.title.toLowerCase() == 'cohort' ? 'cohort' : 'c';
             // We require at least one of the axes to have valid data
             var checkXvalid = 0;
             var checkYvalid = 0;
@@ -61,10 +62,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                         'Sample: ' + d['sample_id'] + '<br/>' +
                         xLabel + ': ' + d[xParam] + '<br/>' +
                         yLabel + ': ' + d[yParam] + '<br/>' +
-                        legend_title + ': ' +
-                        (colorBy == 'cohort' ?
-                            cohort_map[d[colorBy]]:
-                            d[colorBy])
+                        legend.title + ': ' + vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ',')
                         +' </span>';
 
                 });
@@ -99,9 +97,11 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 }
             };
 
+            var y_padding = (range[1]-range[0])*plot_padding_percentile/100;
+            var x_padding = (domain[1]-domain[0])*plot_padding_percentile/100;
             var yScale = d3.scale.linear()
                             .range([height-margin.bottom, margin.top])
-                            .domain([range[0], range[1]+(range[1]-range[0])*plot_padding_percentile/100 ]);
+                            .domain([range[0]-y_padding, range[1]+ y_padding]);
             var yMap = function(d) { return yScale(yVal(d));}
             var yAxis = d3.svg.axis()
                     .scale(yScale)
@@ -119,7 +119,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
             var xScale = d3.scale.linear()
                             .range([margin.left, width-margin.right])
-                            .domain([domain[0], domain[1]+(domain[1]-domain[0])*plot_padding_percentile/100 ]);
+                            .domain([domain[0]-x_padding, domain[1]+x_padding ]);
             var xMap = function(d) { return xScale(xVal(d)); };
             var xAxis = d3.svg.axis()
                     .scale(xScale)
@@ -132,12 +132,76 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 }
                 return d[colorBy];
             };
-            var name_domain = $.map(data, function(d) {
-                return d[colorBy];
-            });
-            var color = d3.scale.ordinal()
-                .domain(name_domain)
-                .range(helpers.color_map(name_domain.length));
+
+            var color;
+            var numeric_color;
+            var cat_color_domain = [];
+            var num_color_domain = [];
+
+            var legend_scale_no = 9;
+            var use_numerical_color = false;
+            var color_band;
+            var numeric_color_quantiles;
+            var num_legend_tip = d3tip()
+                .attr('class', 'd3-tip')
+                .direction('n')
+                .offset([0, 0])
+                .html(function(d, i) {
+                    var threashold = (i >= numeric_color_quantiles.length) ? Math.floor(d+color_band) : numeric_color_quantiles[i];
+                    return '<span>'
+                        +(d)+'<= val <'
+                        +threashold
+                        +' </span>';
+
+                });
+
+            if(legend.type == "N") {
+                var blues = d3.scale.linear()
+                    .domain([0, legend_scale_no])
+                    .range(["#E3E3FF", "blue"]);
+
+                cat_color_domain = $.map(data, function (d) {
+                    if(isNaN(d[colorBy])){
+                        return d[colorBy];
+                    }
+                    else{
+                        num_color_domain.push(d[colorBy]);
+                    }
+                });
+
+                var color_range = helpers.get_min_max(data, colorBy);
+
+                if (num_color_domain.length < 2) {
+                    if(num_color_domain.length > 0){
+                        use_numerical_color = false;
+                        cat_color_domain = cat_color_domain.concat(num_color_domain);
+                    }
+                }
+                else {
+                    color_band = (color_range[1] - color_range[0]) / (legend_scale_no - 1);
+                    use_numerical_color = true;
+                    numeric_color = d3.scale.quantile()
+                        .domain(d3.range(legend_scale_no+1)
+                            .map(function (d, i) {
+                                return Math.floor(color_range[0] + i * color_band);
+                            })
+                        )
+                        .range(d3.range(legend_scale_no).map(function (d) {
+                            return blues(d);
+                        }));
+                    numeric_color_quantiles = numeric_color.quantiles();
+                }
+            } else {
+                cat_color_domain = $.map(data, function (d) {
+                    return d[colorBy];
+                });
+
+            }
+            cat_color_domain.sort();
+
+            color = d3.scale.ordinal()
+                    .domain(cat_color_domain)
+                    .range(helpers.color_map(cat_color_domain.length));
 
             var worksheet_id = $('.worksheet.active').attr('id');
             var plot_area_clip_id = 'plot_area_clip_' + worksheet_id;
@@ -242,8 +306,24 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             plot_area.selectAll('.dot')
                 .data(data)
                 .enter().append('circle')
-                .attr('class', function(d) { return d[colorBy]; })
-                .style('fill', function(d) { return color(colorVal(d)); })
+                .attr('class', function(d) {
+                    var toggle_class;
+                    if (use_numerical_color && !isNaN(colorVal(d))) {
+                        toggle_class = numeric_color(colorVal(d));
+                    }
+                    else {
+                        toggle_class = color(colorVal(d));
+                    }
+                    return toggle_class.replace('#','_');
+                })
+                .style('fill', function(d) {
+                    if (use_numerical_color && !isNaN(colorVal(d))) {
+                        return numeric_color(colorVal(d));
+                    }
+                    else {
+                        return color(colorVal(d));
+                    }
+                })
                 .attr('transform', transformer)
                 .attr('r', 2)
                 .attr('id', function(d) { return d['id']; })
@@ -286,54 +366,113 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 })
                 .text(yLabel);
 
-            var legend_line_height = 20;
-            var no_legend_columns = helpers.get_no_legend_columns(color.domain());
-            var legend_column_length = Math.ceil(color.domain().length/no_legend_columns);
-            legend = legend = legend.attr('height', legend_line_height * (legend_column_length+1));
-            legend.append('text')
+            var legend_line_height = 25;
+            var legend_height = legend_line_height;
+            var n_legend;
+            var c_legend;
+            var n_legend_w = 400;
+            var c_legend_margin_left = 1;
+            var legend_rect_h = 14;
+
+            legend.svg.append('text')
                 .attr('x', 2)
-                .attr('y', legend_line_height - 5)
+                .attr('y', legend_line_height - 10)
                 .style('font-weight', 'bold')
-                .text(legend_title);
+                .text(legend.title);
+            if(legend.type == "N" && use_numerical_color){
+                var legend_rect_w = 28;
+                var legend_text_w = 60;
+                c_legend_margin_left = n_legend_w;
+                legend_height += legend_line_height;
+                n_legend = legend.svg.selectAll('.legend')
+                    .data(numeric_color.domain().slice(0,-1))
+                    .enter().append('g')
+                    .attr('class', 'legend')
+                    .attr("transform", function (d, i) {
+                        return "translate("+(legend_text_w + (legend_rect_w+2) * i)+", "+legend_line_height+")";
+                    });
+                n_legend.call(num_legend_tip);
+                n_legend.append('rect')
+                    .attr('width', legend_rect_w)
+                    .attr('height', legend_rect_h)
+                    .attr('class', 'selected')
+                    .attr('toggle-class', numeric_color)
+                    .style('stroke', numeric_color)
+                    .style('stroke-width', 1)
+                    .style('fill', numeric_color)
+                    .on('mouseover.tip', num_legend_tip.show)
+                    .on('mouseout.tip', num_legend_tip.hide)
+                    .on('click', helpers.toggle_selection);
 
-            legend = legend.selectAll('.legend')
-                .data(color.domain())
-                .enter().append('g')
-                .attr('class', 'legend')
-                .attr("transform", function(d, i)
-                { return "translate("+(Math.floor(i/legend_column_length)*legend.attr('width')/no_legend_columns)+"," + (((i%legend_column_length)+1) * legend_line_height) + ")"; });
-            legend.append('rect')
-                .attr('width', legend_line_height - 6)
-                .attr('height', legend_line_height - 6)
-                .attr("transform", function(d, i) { return "translate(3, 3)"; })
-                .attr('class', 'selected')
-                .style('stroke', color)
-                .style('stroke-width', 1)
-                .style('fill', color)
-                .on('click', helpers.toggle_selection);
-
-            legend.append('text')
-                .attr('x', legend_line_height + 2)
-                .attr('y', legend_line_height - 5)
-                .text(function(d) {
-                    if (d != null) {
-                        if (colorBy == 'cohort') {
-                            if (Array.isArray(d)) {
-                                var cohort_name_label = "";
-                                for (var i = 0; i < d.length; i++) {
-                                    cohort_name_label += cohort_map[d[i]]+',';
-                                }
-                                return cohort_name_label.slice(0,-1);
-                            } else {
-                                return cohort_map[d];
-                            }
-                        } else {
-                            return d;
+                n_legend.append('text')
+                    .attr('x', function(d, i){
+                        if(i == 0){
+                            return -3;
                         }
-                    } else {
-                        return 'NA';
-                    }
-                });
+                        else if(i == legend_scale_no-1){
+                            return legend_rect_w + 3;
+                        }
+                        return;
+                    })
+                    .attr('y', function(d, i){
+                        if(i == 0 || i == legend_scale_no-1){
+                            return legend_rect_h-2;
+                        }
+                        return;
+
+                    })
+                    .text(function (d, i) {
+                        if(i == 0 || i == legend_scale_no-1){
+                            return Math.floor(d + (i == legend_scale_no-1)*(color_band));
+                        }
+                        return;
+                    })
+                    .attr('text-anchor', function(d, i){
+                        if(i == 0){
+                            return 'end';
+                        }
+                        else if (i == (legend_scale_no - 1)){
+                            return 'start';
+                        }
+                        return;
+                    });
+            }
+            if(color.domain().length > 0) {
+                var no_legend_columns = helpers.get_no_legend_columns(color.domain());
+                var legend_column_length = Math.ceil(color.domain().length/no_legend_columns);
+                var legend_rect_w = legend_rect_h;
+
+
+                c_legend = legend.svg.selectAll('.c_legend')
+                    .data(color.domain())
+                    .enter().append('g')
+                    .attr('class', 'c_legend')
+                    .attr("transform", function (d, i) {
+                        return "translate(" + (c_legend_margin_left + Math.floor(i / legend_column_length) * legend.svg.attr('width') / no_legend_columns) + "," + (((i % legend_column_length) + 1) * legend_line_height) + ")";
+                    });
+                c_legend.append('rect')
+                    .attr('width', legend_rect_w)
+                    .attr('height', legend_rect_h)
+                    .attr('toggle-class', color)
+                    .attr('class', 'selected')
+                    .style('stroke', color)
+                    .style('stroke-width', 1)
+                    .style('fill', color)
+                    .on('click', helpers.toggle_selection);
+
+                c_legend.append('text')
+                    .attr('x', legend_rect_w + 8)
+                    .attr('y', legend_rect_h - 2)
+                    .text(function (d) {
+                        if (d != null) {
+                            return vizhelpers.get_legend_val(cohort_map, colorBy, d, ',');
+                        } else {
+                            return 'NA';
+                        }
+                    });
+                legend_height = legend_height == legend_line_height ? legend_line_height * (legend_column_length + 1) : legend_height;
+            }
+            legend.svg.attr('height', legend_height);
 
             var check_selection_state = function(obj) {
 
@@ -416,15 +555,15 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     p_data[i]['sample_id'] = d['sample_id'];
                     p_data[i][xParam] = xVal(d);
                     p_data[i][yParam] = yVal(d);
-                    p_data[i][legend_title] = colorBy == 'cohort' ? cohort_map[d[colorBy]]: d[colorBy];
+                    p_data[i][legend.title] = (vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ';'));
                 });
                 return p_data;
             }
 
             function get_csv_data(){
-                var csv_data = 'case_id, sample_id, '+xParam+', '+yParam+', '+legend_title+'\n';
+                var csv_data = 'case_id, sample_id, '+xParam+', '+yParam+', '+legend.title+'\n';
                 data.map(function(d){
-                    csv_data += d['case_id'] +', '+ d['sample_id'] + ', ' + xVal(d) + ', '+ yVal(d) +', '+ (colorBy == 'cohort' ? cohort_map[d[colorBy]]: d[colorBy])+ '\n';
+                    csv_data += d['case_id'] +', '+ d['sample_id'] + ', ' + xVal(d) + ', '+ yVal(d) +', '+ (vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ';')) + '\n';
                 });
                 return csv_data;
             }
