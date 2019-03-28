@@ -391,7 +391,7 @@ define([
             '.label { font-weight: 500; font-size: 1.1em; } ' +
             'foreignObject div {overflow: hidden;  text-overflow: ellipsis;  padding: 5px 5px 5px 5px;  line-height: 1.25; max-height: 100%;} ' +
             'foreignObject div.truncated-single { white-space: nowrap; text-align: end; }' +
-            'foreignObject div.centered { text-align: center; }' +
+            'foreignObject div.center { text-align: center; }' +
             '.x-label-container div, .y-label-container div { text-align: center; }' +
             '.axis path{ fill: none;  stroke: #000; }' +
             '.grid .tick, .axis .tick line { stroke: lightgrey; stroke-opacity: 0.7; }' +
