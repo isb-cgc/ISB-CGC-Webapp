@@ -147,7 +147,10 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .direction('n')
                 .offset([0, 0])
                 .html(function(d, i) {
-                    var threashold = (i >= numeric_color_quantiles.length) ? Math.floor(d+color_band) : numeric_color_quantiles[i];
+                    var threashold = (i >= numeric_color_quantiles.length) ?
+                        (color_band < 1) ?
+                            parseFloat(Math.round((d+color_band) * 100) / 100).toFixed(2) :
+                                Math.floor(d+color_band) : (numeric_color_quantiles[i]);
                     return '<span>'
                         +(d)+'<= val <'
                         +threashold
@@ -171,7 +174,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
                 var color_range = helpers.get_min_max(data, colorBy);
 
-                if (num_color_domain.length < 2) {
+                if (num_color_domain.length < legend_scale_no) {
                     if(num_color_domain.length > 0){
                         use_numerical_color = false;
                         cat_color_domain = cat_color_domain.concat(num_color_domain);
@@ -179,11 +182,15 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 }
                 else {
                     color_band = (color_range[1] - color_range[0]) / (legend_scale_no - 1);
+
                     use_numerical_color = true;
                     numeric_color = d3.scale.quantile()
                         .domain(d3.range(legend_scale_no+1)
                             .map(function (d, i) {
-                                return Math.floor(color_range[0] + i * color_band);
+                                if(color_band < 1)
+                                    return (color_range[0] + i * color_band);
+                                else
+                                    return Math.floor(color_range[0] + i * color_band);
                             })
                         )
                         .range(d3.range(legend_scale_no).map(function (d) {
@@ -423,7 +430,9 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     })
                     .text(function (d, i) {
                         if(i == 0 || i == legend_scale_no-1){
-                            return Math.floor(d + (i == legend_scale_no-1)*(color_band));
+                            return color_band < 1 ?
+                                parseFloat(Math.round((d + (i == legend_scale_no-1)*(color_band)) * 100) / 100).toFixed(2) :
+                                    Math.floor(d + (i == legend_scale_no-1)*(color_band));
                         }
                         return;
                     })

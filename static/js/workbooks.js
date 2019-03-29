@@ -423,10 +423,10 @@ require([
     // gather the options and selections on a variable in the plot settings
     function get_values(selection){
         var result;
-        if(selection.attr('type') == "label") {
+        if(selection.attr('type') === "label") {
             return {variable: "", type: "label"};
         }
-        if(selection.attr("type") == "common"){
+        if(selection.attr("type") === "common"){
             result = {
                 variable : selection.val(),
                 text : selection.text(),
@@ -434,7 +434,7 @@ require([
                 var_type: selection.attr('var_type')
             };
 
-            if(selection.attr('var_type')=='N' && !selection.parents('.variable-container').find('.log-scale').is(':disabled') &&
+            if(selection.attr('var_type') ==='N' && !selection.parents('.variable-container').find('.log-scale').is(':disabled') &&
                 selection.parents('.variable-container').find('.log-scale').is(':checked')) {
                 result['logTransform'] = true;
             }
@@ -466,7 +466,8 @@ require([
             options.find('.search-term-select').find("option").each(function(i, ele){
                 result['selection'].options.push({value : $(ele).val(), text : $(ele).text()});
             });
-            if(parent.find('.spec-select').find(':selected').attr('var_type')=='N' &&
+            result['var_type'] = parent.find('.spec-select').find(':selected').attr('var_type');
+            if(parent.find('.spec-select').find(':selected').attr('var_type')==='N' &&
                 !parent.find('.log-scale').is(':disabled') &&
                 parent.find('.log-scale').is(':checked')) {
                 result.selection['logTransform'] = true;
@@ -715,7 +716,7 @@ require([
             var y = get_values(parent.find('.y-axis-select').find(":selected"));
             parent.find(".color_by").empty();
             parent.find(".color_by").append('<option value="" type="label" disabled selected>Please select an option</option>');
-            parent.find(".color_by").append('<option value="cohort" type="label">Cohort</option>');
+            parent.find(".color_by").append('<option value="cohort" var_type="C" type="label">Cohort</option>');
             if (x.type !== "label") {
                 if(x.type == "common") {
                     parent.find('.color_by option[value="'+x.variable+'"]').length <= 0 &&
@@ -736,7 +737,7 @@ require([
             }
 
             // Append common variables as well
-            var common_vars = parent.find('.x-axis-select option[type="common"]').each(function() {
+            parent.find('.x-axis-select option[type="common"]').each(function() {
                 var x = get_values($(this));
                 // Check to see that option does not already exist
                 if (parent.find('.color_by option[value="' + x.variable + '"]').length == 0) {
@@ -897,7 +898,7 @@ require([
         var c_widgets = settings_flyout.find('div.form-group.color-by-group');
         var swap = settings_flyout.find('button.swap');
         var sp_genes = settings_flyout.find('.seqpeek-genes');
-        var op_genes = settings_flyout.find('.oncoprint-genes');
+        var onco_genes = settings_flyout.find('.onco-genes');
         var and_or_variables_label = $('.worksheet.active .and_or_variables_label');
         var xLogCheck = $('#'+active_worksheet+'-x-log-transform').parent();
         var yLogCheck = $('#'+active_worksheet+'-y-log-transform').parent();
@@ -913,7 +914,7 @@ require([
         c_widgets.show();
         swap.show();
         sp_genes.hide();
-        op_genes.hide();
+        onco_genes.hide();
         and_or_variables_label.show();
         switch (plot_type){
             case "Bar Chart" : //x_type == 'STRING' && y_type == 'none'
@@ -957,7 +958,7 @@ require([
                 break;
             case 'OncoPrint':
             case 'OncoGrid':
-                op_genes.show();
+                onco_genes.show();
                 and_or_variables_label.hide();
                 x_widgets.hide();
                 y_widgets.hide();
