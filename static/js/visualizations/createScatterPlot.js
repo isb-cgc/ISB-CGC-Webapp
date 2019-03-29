@@ -174,7 +174,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
                 var color_range = helpers.get_min_max(data, colorBy);
 
-                if (num_color_domain.length < legend_scale_no) {
+                if (num_color_domain.length < 2) {
                     if(num_color_domain.length > 0){
                         use_numerical_color = false;
                         cat_color_domain = cat_color_domain.concat(num_color_domain);
