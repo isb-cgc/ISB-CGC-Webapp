@@ -42,7 +42,13 @@ define(['jquery'], function($) {
                     return undefined;
                 }
             });
-            return [isNaN(min) ? 0 : Math.floor(min), isNaN(max) ? 0 : Math.ceil(max)];
+            min = isNaN(min) ? 0 : min;
+            max = isNaN(max) ? 0 : max;
+
+            if(Math.abs(max-min) < 1)
+                return [min, max];
+            else
+                return [Math.floor(min), Math.ceil(max)];
         },
         values_only: function(data, attr) {
             var result = [];
