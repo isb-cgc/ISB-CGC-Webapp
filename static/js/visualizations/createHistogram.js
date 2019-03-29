@@ -88,6 +88,11 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 .bins(num_bins)
                 .frequency(false)(values_only);
             var tmp = helpers.get_min_max(raw_Data, x_attr);
+            if(tmp[0] === tmp[1]){
+                tmp[0]-=0.5;
+                tmp[1]+=0.5;
+            }
+
             min_n = tmp[0];
             max_n = tmp[1];
             var h_padding = (max_n - min_n) * .05 || 0.05;

@@ -110,7 +110,18 @@ define([
     */
     function generate_scatter_plot(margin, plot_selector, legend_selector, legend, height, width, x_attr, y_attr, cohort_map, data, units, logTransform) {
          var domain = helpers.get_min_max(data, 'x');
+
+         if(domain[0] === domain[1]){
+             domain[0] -= 0.5;
+             domain[1] += 0.5;
+         }
+
          var range = helpers.get_min_max(data, 'y');
+         if(range[0] === range[1]){
+             range[0] -= 0.5;
+             range[1] += 0.5;
+         }
+
          legend['svg'] = d3.select(legend_selector)
                 .append('svg')
                 .attr('width', 850);
@@ -142,6 +153,11 @@ define([
     function generate_violin_plot(margin, plot_selector, legend_selector, legend, height, width, x_attr, y_attr, cohort_map, data, units, logTransform) {
         var violin_width = 200;
         var tmp = helpers.get_min_max(data, 'y');
+        if(tmp[0] === tmp[1]){
+             tmp[0] -= 0.5;
+             tmp[1] += 0.5;
+        }
+
         var min_n = tmp[0];
         var max_n = tmp[1];
         legend['svg'] = d3.select(legend_selector)
@@ -175,6 +191,10 @@ define([
     function generate_violin_plot_axis_swap(margin, plot_selector, legend_selector, legend, height, width, x_attr, y_attr, cohort_map, data, units, logTransform) {
         var violin_width = 200;
         var tmp = helpers.get_min_max(data, 'x');
+        if(tmp[0] === tmp[1]){
+             tmp[0] -= 0.5;
+             tmp[1] += 0.5;
+        }
         var min_n = tmp[0];
         var max_n = tmp[1];
         legend['svg'] = d3.select(legend_selector)
