@@ -267,13 +267,23 @@
                     <div class="form-group onco-genes">
                         <label for="{{ worksheet.id }}-gene_label">Gene or miRNA</label>
                         <div class="gene-listing" plot="{{ worksheet.id }}">
-                        {% if genes and genes|length > 1 %}
+                        {% if genes and genes|length > 1  or default_genes and default_genes|length > 1 %}
                             <div class="checkbox" style="margin-top: 0px; margin-bottom: 15px;">
                                 <label>
                                     <input class="select-all-genes-checkbox gene-checkbox" type="checkbox">Select All
                                 </label>
                             </div>
                         {% endif %}
+
+                        {% for default_gene in default_genes %}
+                            <div class="checkbox" style="margin-top: 0px; margin-bottom: 5px;">
+                                <label>
+                                    <input class="variable-toggle-checkbox gene-selex gene-checkbox" type="checkbox" value="{{ default_gene }}"/>
+                                        {{ default_gene }}
+                                </label>
+                            </div>
+                        {% endfor %}
+
                         {% for gene_item in genes %}
                             {% if not plot or plot.gene_label != gene_item.gene %}
                             <div class="checkbox" style="margin-top: 0px; margin-bottom: 5px;">

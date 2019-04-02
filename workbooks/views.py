@@ -47,6 +47,9 @@ BLACKLIST_RE = settings.BLACKLIST_RE
 
 # These fields are handled by the workbook/worksheet UI and do not need to be determined from the SearchHelper
 SKIPPED_FIELDS = ['mirna_name', 'gene_name', 'genomic_build']
+DEFAULT_GENES = ['ASXL1', 'BCR', 'CBLB', 'DCTN1', 'ERBB2', 'FANCF', 'GOPC', 'H3F3A', 'IKZF1', 'JUN', 'KDR', 'LRIG3',
+                 'MAP2K2', 'NF2', 'OLIG2']
+
 
 @login_required
 def workbook_list(request):
@@ -278,6 +281,7 @@ def workbook(request, workbook_id=0):
                     plot_types = Analysis.get_types()
 
                     return render(request, template, {'workbook'    : workbook_model,
+                                                      'default_genes': DEFAULT_GENES,
                                                       'datatypes'   : get_gene_datatypes(workbook_model.build),
                                                       'is_shareable': is_shareable,
                                                       'shared'      : shared,
@@ -369,6 +373,7 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
     plot_types = Analysis.get_types()
     return render(request, template, {'workbook'            : workbook_model,
                                       'is_shareable'        : is_shareable,
+                                      'default_genes'       : DEFAULT_GENES,
                                       'datatypes'           : get_gene_datatypes(workbook_model.build),
                                       'display_worksheet'   : display_worksheet,
                                       'plot_types'          : plot_types})
