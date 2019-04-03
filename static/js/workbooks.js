@@ -344,6 +344,10 @@ require([
         $(this).parent().prev('.worksheet-nav').toggleClass('closed');
     });
 
+    $('.list-display-toggle-icon').on('click', function(){
+        $(this).parents('.group-list').toggleClass('collapsed-list');
+    });
+
     // tabs interaction on dropdown selected
     var tabsList = $('#worksheets-tabs a[data-toggle="tab"]');
 
@@ -992,7 +996,7 @@ require([
     });
 
     $('.select-all-genes-checkbox').on('click', function(event){
-        $('.worksheet.active').find(".gene-selex").prop("checked", $(this).prop("checked"));
+        $(this).parents('.group-list').find('.gene-selex').prop('checked', $(this).prop('checked'));
     });
 
     $('.resubmit-button').on("click", function(){
@@ -1137,7 +1141,7 @@ require([
                         axisRdy = true;
                     }
                     else{
-                        $('.worksheet.active').find('.select-all-genes-checkbox').prop('checked', false);
+                        $(this).parents('.group-list').find('.select-all-genes-checkbox').prop('checked', false);
                     }
 
                 });
