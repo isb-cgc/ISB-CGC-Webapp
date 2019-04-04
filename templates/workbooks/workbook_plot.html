@@ -248,6 +248,12 @@
                     <!-- Gene Label for SeqPeek -->
                     <div class="form-group seqpeek-genes">
                         <label for="{{ worksheet.id }}-gene_label">Gene or miRNA</label>
+                        <div class="tooltip-bubble">
+                            <i class="gene-mirna-info fa fa-info-circle"></i>
+                            <span class="tooltip-bubble-text">
+                                Genes with consensus score of 6 or higher are added to the gene list. (Ref: <a href="https://doi.org/10.1016/j.cell.2018.02.060">Bailey et al., 2018, Cell 173</a>)
+                            </span>
+                        </div>
                         <select id="{{ worksheet.id }}-gene_label" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field axis-select" style="width: 230px;">
                             {% if plot.gene_label %}
                                 <option value="{{ plot.gene_label }}" selected >{{ plot.gene_label }}</option>
@@ -270,6 +276,12 @@
                     <!-- Gene Label for OncoPrint or OncoGrid -->
                     <div class="form-group onco-genes">
                         <label for="{{ worksheet.id }}-gene_label">Gene or miRNA</label>
+                        <div class="tooltip-bubble">
+                            <i class="gene-mirna-info fa fa-info-circle"></i>
+                            <span class="tooltip-bubble-text">
+                                Genes with consensus score of 6 or higher are added to the gene list. (Ref: <a href="https://doi.org/10.1016/j.cell.2018.02.060">Bailey et al., 2018, Cell 173</a>)
+                            </span>
+                        </div>
 
                         <div class="gene-list" plot="{{ worksheet.id }}">
                             {% if genes%}
@@ -299,14 +311,12 @@
                                 <div class="group-list">
                                     <div class="header checkbox">
                                         <label>
-                                        {% if default_genes and default_genes|length > 1 %}
-                                            <input {% if workbook.owner.id != user.id %} disabled {% endif %} title="Select All" class="select-all-genes-checkbox" type="checkbox">
-                                        {% endif %}
-                                        Default Gene List
+                                            {% if default_genes and default_genes|length > 1 %}
+                                                <input {% if workbook.owner.id != user.id %} disabled {% endif %} title="Select All" class="select-all-genes-checkbox" type="checkbox">
+                                            {% endif %}
+                                            Default Gene List
                                         </label>
                                         <span class="list-display-toggle-icon float-right" title="Toggle to hide/show the gene list"></span>
-{#                                    <i class="fa fa-angle-double-down"></i>#}
-
                                     </div>
                                     <div class="checkbox-list">
                                         {% for default_gene in default_genes %}
