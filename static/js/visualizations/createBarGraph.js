@@ -22,6 +22,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
         // The samples in our data, bucketed by their corresponding
         // bar graph value
         var sampleSet = {};
+        var caseSet = {};
 
         // The currently selected values on the bar graph, corresponding to the buckets
         // in the sampleSet
@@ -49,16 +50,31 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
 
         return {
 
-            dataCounts: function (data, x_attr) {
+            dataCounts: function (data, x_attr, bySample) {
                 var counts = {};
                 var results = [];
 
                 for (var i = 0; i < data.length; i++) {
                     var val = data[i][x_attr];
-                    if (!counts[val]) {
-                        counts[val] = 0;
+                    if(bySample){
+                        if (!counts[val]) {
+                            counts[val] = 0;
+                        }
+                        counts[val] += 1;
                     }
-                    counts[val] += 1;
+                    else { // by case
+                        var case_id = data[i]['case_id'];
+                        if (!counts[val]) {
+                            counts[val] = 0;
+                        }
+                        if (!caseSet[val]) {
+                            caseSet[val] = {};
+                        }
+                        if (!caseSet[val][case_id]) {
+                            caseSet[val][case_id] = true;
+                            counts[val] += 1;
+                        }
+                    }
 
                     if (!sampleSet[val]) {
                         sampleSet[val] = {
@@ -81,8 +97,8 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
 
                 return results;
             },
-            createBarGraph: function (svg, raw_Data, width, height, bar_width, x_attr, xLabel, margin, legend) {
-                var data = this.dataCounts(raw_Data, x_attr);
+            createBarGraph: function (svg, raw_Data, width, height, bar_width, x_attr, xLabel, margin, bySample) {
+                var data = this.dataCounts(raw_Data, x_attr, bySample);
                 var plot_width = (bar_width + 5) * data.length;
                 var view_plot_width = plot_width < width - margin.left - margin.right ? width - margin.left - margin.right : plot_width;
 
@@ -277,7 +293,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 svg.append('text')
                     .attr('class', 'y label axis-label')
                     .attr('text-anchor', 'middle')
-                    .text('Number of Samples')
+                    .text('Number of '+ (bySample ? 'Samples' : 'Cases'))
                     .attr('transform', 'rotate(-90) translate(' + (-height - margin.top + margin.bottom) / 2 + ', 20)');
 
                 var check_selection_state = function (obj) {

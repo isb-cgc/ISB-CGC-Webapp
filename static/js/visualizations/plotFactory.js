@@ -70,6 +70,7 @@ define([
             .attr('width', width)
             .attr('height', height);
         var bar_width = 25;
+        var bySample = false;
         var plot = bar_graph_obj.createBarGraph(
             svg,
             data,
@@ -78,7 +79,8 @@ define([
             bar_width,
             'x',
             generate_axis_label(x_attr, false, units.x),
-            margin);
+            margin,
+            bySample);
         return  {plot : plot, svg : svg}
     }
 
@@ -90,17 +92,16 @@ define([
                 .append('svg')
                 .attr('width', width)
                 .attr('height', height);
-        var vals = helpers.values_only(data, 'x');
-
+        var bySample = true;
         var plot = histogram_obj.createHistogramPlot(
                 svg,
                 data,
-                vals,
                 width,
                 height,
                 'x',
                 generate_axis_label(x_attr, logTransform.x, units.x),
-                margin);
+                margin,
+                bySample);
 
         return  {plot : plot, svg : svg}
     }
@@ -224,7 +225,7 @@ define([
     }
 
     function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, data, units) {
-        var margin = {top: 10, bottom: 115, left: 140, right: 20};
+        var margin = {top: 50, bottom: 115, left: 140, right: 20};
         var cubby_max_size = 150; // max cubby size
         var cubby_min_size = 25; // min cubby size
         var view_width = width-margin.left-margin.right;
@@ -242,6 +243,7 @@ define([
             .append('svg')
             .attr('width', plot_width)
             .attr('height', plot_height);
+        var bySample = true;
 
         var plot = cubby_plot_obj.create_cubbyplot(
             svg,
@@ -256,7 +258,8 @@ define([
             legend,
             plot_width,
             plot_height,
-            cubby_size
+            cubby_size,
+            bySample
         );
         return  {plot : plot, svg : svg}
     }
