@@ -42,7 +42,13 @@ define(['jquery'], function($) {
                     return undefined;
                 }
             });
-            return [isNaN(min) ? 0 : Math.floor(min), isNaN(max) ? 0 : Math.ceil(max)];
+            min = isNaN(min) ? 0 : min;
+            max = isNaN(max) ? 0 : max;
+
+            if(Math.abs(max-min) < 1)
+                return [min, max];
+            else
+                return [Math.floor(min), Math.ceil(max)];
         },
         values_only: function(data, attr) {
             var result = [];
@@ -54,8 +60,7 @@ define(['jquery'], function($) {
             return result
         },
         toggle_selection: function(){
-            var toggle_class = $(this).siblings('text').html();
-
+            var toggle_class = $(this).attr('toggle-class').replace('#','_');
             var current_class = $(this).attr('class').indexOf('selected') == 0 ? 'unselected' : 'selected';
             if (current_class == 'selected') {
                 d3.selectAll('.' + toggle_class).attr('class', toggle_class + ' ');
@@ -302,11 +307,34 @@ define(['jquery'], function($) {
         get_no_legend_columns: function(name_list){
             var max_len = 1;
             for(var i=0; i<name_list.length; i++){
-                if(name_list[i].length > max_len){
+                if (Array.isArray(name_list[i]))
+                    return 2;
+                else if(name_list[i].length > max_len){
                     max_len = name_list[i].length;
                 }
             }
             return Math.min(7, Math.ceil(80/max_len));
+        },
+        get_legend_val: function (cohort_map, colorBy, d, delimiter) {
+            var legend_val = '';
+            if (colorBy == 'cohort') {
+                if (Array.isArray(d)) {
+                    for (var i = 0; i < d.length; i++) {
+                        if (i != 0) {
+                            legend_val += delimiter + ' ';
+                        }
+                        legend_val += cohort_map[d[i]];
+                    }
+                }
+                else {
+                    legend_val = cohort_map[d];
+                }
+
+            }
+            else {
+                legend_val = d;
+            }
+            return legend_val;
         }
     }
 });

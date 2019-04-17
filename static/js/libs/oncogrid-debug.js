@@ -16344,8 +16344,11 @@ OncoTrackGroup.prototype.render = function (div) {
 
             _self.div
                 .html(function () {return _self.trackLegend;})
-                .style('left', (coordinates[0] + 15) + 'px')
-                .style('top', (coordinates[1] + 30) + 'px');
+                .style('left', (coordinates[0]-15)+ 'px')
+                .style(
+                    'top',
+                    (coordinates[1]+10)+'px'
+                )
         })
         .on('mouseout', function() {
             _self.div.transition()
@@ -16567,7 +16570,7 @@ OncoTrackGroup.prototype.renderData = function() {
 
             _self.div.html(Mustache.render(d.template, d))
                 .style('left', (coordinates[0] + 15) + 'px')
-                .style('top', (coordinates[1] + 30) + 'px');
+                .style('top', (coordinates[1] + 15) + 'px');
         })
         .on('mouseout', function () {
             _self.div.transition()
