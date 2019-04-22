@@ -22,7 +22,6 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
         // The samples in our data, bucketed by their corresponding
         // bar graph value
         var sampleSet = {};
-        var caseSet = {};
 
         // The currently selected values on the bar graph, corresponding to the buckets
         // in the sampleSet
@@ -31,17 +30,6 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
         // The samples found in the selected value buckets; this is used to produce the JSON which
         // is submitted by the form
         var selectedSamples = null;
-
-        // If you want to override the tip coming in from the create call,
-        // do it here
-        var tip = d3tip()
-            .attr('class', 'd3-tip')
-            .direction('n')
-            .offset([0, 0])
-            .html(function (d) {
-                return d.value + ': ' + d.count;
-            });
-
         var selex_active = false;
         var zoom_status = {
             translation: null,
@@ -51,53 +39,50 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
         return {
 
             dataCounts: function (data, x_attr, bySample) {
-                var counts = {};
+                var val_set = {};
                 var results = [];
 
-                for (var i = 0; i < data.length; i++) {
-                    var val = data[i][x_attr];
+                data.map(function(d){
+                    var val = d[x_attr];
+                    var sample_id = d['sample_id'];
+                    var case_id = d['case_id'];
+                    if (!val_set[val]) {
+                        val_set[val] = {};
+                    }
+
                     if(bySample){
-                        if (!counts[val]) {
-                            counts[val] = 0;
-                        }
-                        counts[val] += 1;
+                        val_set[val][sample_id] = 1;
                     }
-                    else { // by case
-                        var case_id = data[i]['case_id'];
-                        if (!counts[val]) {
-                            counts[val] = 0;
-                        }
-                        if (!caseSet[val]) {
-                            caseSet[val] = {};
-                        }
-                        if (!caseSet[val][case_id]) {
-                            caseSet[val][case_id] = true;
-                            counts[val] += 1;
-                        }
+                    else if(!val_set[val][case_id]){
+                        val_set[val][case_id] = 1
                     }
-
                     if (!sampleSet[val]) {
-                        sampleSet[val] = {
-                            samples: {},
-                            cases: new Set([])
-                        };
+                        sampleSet[val] = {};
                     }
-
-                    sampleSet[val].samples['{' + data[i]['sample_id'] + '}{' + data[i]['case_id'] + '}'] = {
-                        sample: data[i]['sample_id'],
-                        case: data[i]['case_id'],
-                        project: data[i]['project']
+                    sampleSet[val]['{' + sample_id + '}{' + case_id + '}'] = {
+                        sample: sample_id,
+                        case: case_id,
+                        project: d['project']
                     };
-                    sampleSet[val].cases.add(data[i]['case_id']);
-                }
+                });
 
-                for (var key in counts) {
-                    results.push({'value': key, 'count': counts[key]});
+                for (var key in val_set) {
+                    results.push({'value': key, 'count': Object.keys(val_set[key]).length});
                 }
 
                 return results;
             },
             createBarGraph: function (svg, raw_Data, width, height, bar_width, x_attr, xLabel, margin, bySample) {
+                // If you want to override the tip coming in from the create call,
+                // do it here
+                var tip = d3tip()
+                    .attr('class', 'd3-tip')
+                    .direction('n')
+                    .offset([0, 0])
+                    .html(function (d) {
+                        return d.value + ': ' + d.count + (bySample ? ' sample' : ' case') + (d.count > 1 ? 's':'');
+                    });
+
                 var data = this.dataCounts(raw_Data, x_attr, bySample);
                 var plot_width = (bar_width + 5) * data.length;
                 var view_plot_width = plot_width < width - margin.left - margin.right ? width - margin.left - margin.right : plot_width;
@@ -339,9 +324,9 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                         var case_set = {};
                         selectedSamples = {};
                         _.each(Object.keys(selectedValues), function (val) {
-                            _.each(Object.keys(sampleSet[val]['samples']), function (sample) {
-                                selectedSamples[sample] = sampleSet[val]['samples'][sample];
-                                case_set[sampleSet[val]['samples'][sample]['case']] = 1;
+                            _.each(Object.keys(sampleSet[val]), function (sample) {
+                                selectedSamples[sample] = sampleSet[val][sample];
+                                case_set[sampleSet[val][sample]['case']] = 1;
                             });
                         });
 
@@ -354,7 +339,6 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                         var leftVal = Math.min((x3(extent[1]) + 20), (width - $('.worksheet.active .save-cohort-card').width()));
                         $('.worksheet.active .save-cohort-card').show()
                             .attr('style', 'position:relative; top: -' + height + 'px; left:' + leftVal + 'px;');
-
                     }
 
                 }

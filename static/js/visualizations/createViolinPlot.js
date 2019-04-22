@@ -46,9 +46,6 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
         scale: null
     };
 
-    // The samples in our data, keyed by their SVG element ID attributes
-    var sampleSet = {};
-
     // The samples found in the selected ID set; this is used to produce the JSON which
     // is submitted by the form
     var selectedSamples = null;
@@ -95,7 +92,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .style('fill', 'none')
                 .attr('transform', 'rotate(90, 0, 0) scale(1, -1)');
         },
-        addPoints: function (svg, raw_data, values_only, height, plot_width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_map, padding, margin, dot_tip) {
+        addPoints: function (svg, data, values_only, height, plot_width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_map, padding, margin, dot_tip) {
             // remove counts from xdomain
             var tmp = xdomain;
             xdomain = [];
@@ -151,7 +148,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     .domain([0,legend_scale_no])
                     .range(["#E3E3FF", "blue"]);
 
-                cat_color_domain = $.map(raw_data, function (d) {
+                cat_color_domain = $.map(data, function (d) {
                     if(isNaN(d[colorBy])){
                         return d[colorBy];
                     }
@@ -169,7 +166,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 }
                 else{
                     use_numerical_color = true;
-                    var color_range = helpers.get_min_max(raw_data, colorBy);
+                    var color_range = helpers.get_min_max(data, colorBy);
                     if(color_range[0] === color_range[1]){
                          color_range[0] -= 0.5;
                          color_range[1] += 0.5;
@@ -190,7 +187,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     numeric_color_quantiles = numeric_color.quantiles();
                 }
             } else {
-                cat_color_domain = $.map(raw_data, function (d) {
+                cat_color_domain = $.map(data, function (d) {
                     return d[colorBy];
                 });
 
@@ -210,20 +207,9 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
 
 
-            var nonNullData = [];
-
-            raw_data.map(function(d){
-                if(helpers.isValidNumber(d.y)) {
-                    var id = Counter.getNextSet();
-                    d['id'] = id;
-                    sampleSet[id] = {sample: d['sample_id'], case: d['case_id'], project: d['project']};
-
-                    nonNullData.push(d);
-                }
-            });
-            if(nonNullData.length > 0) {
+            if(data.length > 0) {
                 svg.selectAll('.dot')
-                    .data(nonNullData)
+                    .data(data)
                     .enter().append('circle')
                     .attr('id', function (d) {
                         return d['id'];
@@ -237,7 +223,6 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                             toggle_class = color(colorVal(d));
                         }
                         return toggle_class.replace('#','_');
-                        // return color(colorVal(d)).replace('#','_');
                     })
                     .style('fill', function (d) {
                         if(use_numerical_color && !isNaN(colorVal(d))){
@@ -418,7 +403,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .on('mouseout.tip', median_tip.hide)
                 .call(median_tip);
         },
-        createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, margin, legend, cohort_map) {
+        createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, margin, legend, cohort_map, bySample) {
+            var data = [];
             var colorBy = legend.title.toLowerCase() == 'cohort' ? 'cohort' : 'c';
             var y_padding = (max_y-min_y)*.05;
             var domain = [min_y-y_padding, max_y+y_padding];
@@ -432,32 +418,75 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .offset([0, 0])
                 .html(function(d) {
                     return '<span>Case: ' + d['case_id'] + '<br/>' +
-                        'Sample: ' + d['sample_id'] + '<br/>' +
+                        (bySample ? ('Sample: ' + d['sample_id'] + '<br/>'):'') +
                         xLabel + ': ' + d[xAttr] + '<br/>' +
                         yLabel + ': ' + d[yAttr] + '<br/>' +
-                        legend.title + ': ' + vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ',') +' </span>';
+                        (yLabel.includes(legend.title) || xLabel.includes(legend.title)? '' :
+                            (legend.title + ': ' + vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ','))) +
+                        ' </span>';
                 });
-
             // Split data into separate violins
-            for (var i = 0; i < raw_Data.length; i++) {
-                var item = raw_Data[i];
-                var key = item[xAttr];
-                var tmp = {};
-                if (colorBy && item[colorBy]) {
-                    if (colorBy == 'cohort'){
-                        tmp[colorBy] = item[colorBy][0];
-                    } else {
-                        tmp[colorBy] = item[colorBy];
+
+            var sampleSetByCase = {};
+            var sampleSetBySample = {};
+            var caseSet = {};
+            raw_Data.map(function(d){
+                if(helpers.isValidNumber(d[yAttr])) {
+                    var sample_id = d['sample_id'];
+                    var case_id = d['case_id'];
+                    var sampleItem = {sample: sample_id, case: case_id, project: d['project']};
+                    var is_dup = false;
+                    var x_item = d[xAttr];
+                    var y_item = d[yAttr];
+                    var val = x_item + '-' + y_item;
+                    if(bySample){
+                        d['id'] = sample_id;
+                        data.push(d);
+                        sampleSetBySample[sample_id] = sampleItem;
                     }
-                } else {
-                    tmp['color'] = null;
-                }
-                tmp['value'] = item[yAttr];
-                if (key in processed_data) {
+                    else{
+                        if(!caseSet[val]){
+                            caseSet[val] = {};
+                        }
+                        if(!caseSet[val][case_id]) {
+                            caseSet[val][case_id] = true;
+                            d['id'] = val;
+                            data.push(d);
+                        }
+                        else{
+                            is_dup = true;
+                        }
+                        if(!sampleSetByCase[val]){
+                            sampleSetByCase[val] = {};
+                        }
+                        sampleSetByCase[val][sample_id] = sampleItem;
+                    }
+
+                    if(is_dup)
+                        return;
+
+                    var key = d[xAttr];
+                    var tmp = {};
+                    if (colorBy && d[colorBy]) {
+                        if (colorBy == 'cohort') {
+                            tmp[colorBy] = d[colorBy][0];
+                        } else {
+                            tmp[colorBy] = d[colorBy];
+                        }
+                    } else {
+                        tmp['color'] = null;
+                    }
+                    tmp['value'] = d[yAttr];
+
+                    if (!processed_data[key]) {
+                        processed_data[key] = [];
+                    }
                     processed_data[key].push(tmp);
-                } else {
-                    processed_data[key] = [tmp];
                 }
+            });
+
+            if(data.length === 0){
+                return null;
             }
 
             var plot_width = (violin_width + x_padding) * Object.keys(processed_data).length;
@@ -508,7 +537,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
                 // Don't try to plot values we don't have
 
-                xdomain.push(key + ':' + values_only.length);
+                xdomain.push(key + ':' + values_only.length + (bySample ? ' samples': ' cases') + '');
                 if(values_only.length > 0) {
                     this.addViolin(g, values_only, height, violin_width, domain, range);
                     this.addMedianLine(g, values_only, height, violin_width, domain, range);
@@ -526,7 +555,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .attr('width', plot_width)
                 .attr('height', height - margin.top - margin.bottom)
                 .attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
-            this.addPoints(plotg, raw_Data, scatter_processed_data, height, plot_width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_map, x_padding, margin, dot_tip);
+            this.addPoints(plotg, data, scatter_processed_data, height, plot_width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_map, x_padding, margin, dot_tip);
 
             // create y axis
             var y = d3.scale.linear()
@@ -583,14 +612,16 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             d3.select('.x.axis').selectAll('foreignObject').attr('style','transform: translate(-'+(violin_width/2)+'px,0px); font-size: '+tick_font_size+'px');
             d3.select('.x.axis').selectAll('foreignObject div').attr('class','centered');
 
-            // Highlight the selected circles.
+            var plot_node = plot_area.node();
+            plot_node.parentNode.append(plot_node); //move the plot above the axis ticks to have a clear access to hover over nodes
+
             var brushmove = _.throttle(function(p) {
                 var e = brush.extent();
                 var oldSet = selectedSamples;
                 selectedSamples = {};
                 var reCalc = false;
 
-                plot_area.selectAll("circle").classed("selected", function(d) {
+                plot_area.selectAll('circle').classed('selected', function(d) {
                     return e[0][0] <= $(this).attr('cx') && $(this).attr('cx') <= e[1][0]
                         && e[0][1] <= d[yAttr] && d[yAttr] <= e[1][1]
                         && !$(this).is('.hidden');
@@ -778,11 +809,23 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             function sample_form_update(reCalc){
                 if(reCalc) {
                     var case_set = {};
+                    var sample_count = 0;
                     _.each(Object.keys(selectedSamples),function(val) {
-                        case_set[sampleSet[val]['case']] = 1;
+                        if(bySample){
+                            var case_id = sampleSetBySample[val]['case'];
+                            case_set[case_id] = 1;
+                        }
+                        else{
+                            sample_count += Object.keys(sampleSetByCase[val]).length;
+                            _.each(Object.keys(sampleSetByCase[val]), function(sample_id){
+                                var case_id = sampleSetByCase[val][sample_id]['case']
+                                case_set[case_id] = 1;
+                            })
+                        }
                     });
+                    sample_count = bySample ? Object.keys(selectedSamples).length : sample_count;
 
-                    $('.worksheet.active .plot .selected-samples-count').html('Number of Samples: ' + Object.keys(selectedSamples).length);
+                    $('.worksheet.active .plot .selected-samples-count').html('Number of Samples: ' + sample_count);
                     $('.worksheet.active .plot .selected-patients-count').html('Number of Cases: ' + Object.keys(case_set).length);
                     $('.worksheet.active .plot .btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
                 }
@@ -792,8 +835,16 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             $('.worksheet.active .save-cohort-card').find('.btn').on('click',function(e){
                 if(Object.keys(selectedSamples).length > 0){
                     var selected_sample_set = [];
-                    _.each(Object.keys(selectedSamples),function(sample){
-                        selected_sample_set.push(sampleSet[sample]);
+                    _.each(Object.keys(selectedSamples),function(id){
+                        if(bySample){
+                            selected_sample_set.push(sampleSetBySample[id]);
+                        }
+                        else{
+                            _.each(Object.keys(sampleSetByCase[id]), function(sample_id){
+                                selected_sample_set.push(sampleSetByCase[id][sample_id]);
+                            });
+                        }
+
                     });
 
                     $('.worksheet.active .save-cohort-form input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
@@ -811,25 +862,25 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
             function get_json_data(){
                 var p_data = {};
-                raw_Data.map(function(d, i){
+                data.map(function(d, i){
                     if(helpers.isValidNumber(d[yAttr])) {
                         p_data[i]= {};
                         p_data[i]['case_id'] = d['case_id'];
-                        p_data[i]['sample_id'] = d['sample_id'];
+                        if(bySample){
+                            p_data[i]['sample_id'] = d['sample_id'];
+                        }
                         p_data[i][xAttr] = d[xAttr];
                         p_data[i][yAttr] = isNaN(d[yAttr])? d[yAttr] : Number(d[yAttr]);
                         p_data[i][legend.title] = vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ';');
-
-                        // p_data[i][legend.title] = colorBy == 'cohort' ? cohort_map[d[colorBy]]: d[colorBy];
                     }
                 });
                 return p_data;
             }
 
             function get_csv_data(){
-                var csv_data = 'case_id, sample_id, '+xAttr+', '+yAttr+', '+legend.title+'\n';
-                raw_Data.map(function(d){
-                    csv_data += d['case_id'] +', '+ d['sample_id'] + ', ' + d[xAttr] + ', '+ d[yAttr] +', '+ vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ';')+ '\n';
+                var csv_data = 'case_id, '+ (bySample ? 'sample_id, ':'') +xAttr+', '+yAttr+', '+legend.title+'\n';
+                data.map(function(d){
+                    csv_data += d['case_id'] +', '+ (bySample ? (d['sample_id']+', ') : '') + d[xAttr] + ', '+ (isNaN(d[yAttr])? d[yAttr] : Number(d[yAttr])) +', '+ vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ';')+ '\n';
                 });
                 return csv_data;
             }

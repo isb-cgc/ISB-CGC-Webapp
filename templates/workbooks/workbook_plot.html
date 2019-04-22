@@ -233,10 +233,19 @@
                         </label>
                     </div>
 
+                    <!-- Plot By Cases vs Samples Selection -->
+                    <div class="form-group plot-by-group">
+                        <label for="{{ worksheet.id }}-plot-by">Plot By</label>
+                        <select id="{{ worksheet.id }}-plot-by" class="form-control plot-by">
+                            <option value="cases">Cases</option>
+                            <option value="samples">Samples</option>
+                        </select>
+                    </div>
+
                     <!-- Color By variable. only offer x and y selections-->
                     <div class="form-group color-by-group">
                         <label for="{{ worksheet.id }}-color-by">Color By Feature</label>
-                        <select id="{{ worksheet.id }}-color-by" class="color_by" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field" style="width: 230px;">
+                        <select id="{{ worksheet.id }}-color-by" class="form-control color_by search-term-field" {% if workbook.owner.id != user.id %} disabled {% endif %} style="width: 230px;">
                             {% if plot.color_by %}
                                 <option value="{{ plot.color_by.url_code }}" var_id="{{ plot.color_by.id }}" selected >{{ plot.color_by.name }}</option>
                             {% else %}
@@ -254,7 +263,7 @@
                                 Genes with consensus score of 6 or higher are added to the gene list. (Ref: <a href="https://doi.org/10.1016/j.cell.2018.02.060">Bailey et al., Cell. 2018 Apr 5;173(2):371-385.e18. doi: 10.1016/j.cell.2018.02.060</a>)
                             </span>
                         </div>
-                        <select id="{{ worksheet.id }}-gene_label" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field axis-select" style="width: 230px;">
+                        <select id="{{ worksheet.id }}-gene_label" {% if workbook.owner.id != user.id %} disabled {% endif %} class="gene_label form-control axis-select" style="width: 230px;">
                             {% if plot.gene_label %}
                                 <option value="{{ plot.gene_label }}" selected >{{ plot.gene_label }}</option>
                             {% else %}
@@ -333,6 +342,7 @@
                         </div>
                     </div>
 
+                    <!-- Cohorts Selection -->
                     <div class="form-group">
                         <label>Cohorts</label>
                         <div class="cohort-listing" plot="{{ worksheet.id }}">
@@ -346,6 +356,7 @@
                             {% endfor %}
                         </div>
                     </div>
+
                     <button {% if workbook.owner.id != user.id %} style="display:none" {% endif %} class="update-plot btn btn-primary" worksheet_id="{{ worksheet.id }}" plot_id="{{ worksheet.id }}">Update Plot</button>
                 </div>
             </div>
