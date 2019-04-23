@@ -227,6 +227,11 @@ define([
         var margin = {top: 10, bottom: 115, left: 140, right: 20};
         var cubby_max_size = 150; // max cubby size
         var cubby_min_size = 25; // min cubby size
+        var x_label = generate_axis_label(x_attr, false, units.x);
+        var y_label = generate_axis_label(y_attr, false, units.y);
+        var font_width = 7.5;
+        var min_width = x_label.length * font_width;
+        var min_height = y_label.length * font_width;
         var view_width = width-margin.left-margin.right;
         var view_height = height-margin.top-margin.bottom;
         var xdomain = helpers.get_domain(data, 'x');
@@ -236,6 +241,13 @@ define([
             .attr('width', 850);
         var cubby_size = Math.min(cubby_max_size, Math.min(Math.floor(view_width/xdomain.length), Math.floor(view_height/ydomain.length)));
         cubby_size = cubby_size < cubby_min_size ? cubby_min_size : cubby_size;
+
+        //adjust margins if axis label is longer than plot size
+        margin.right += (min_width - xdomain.length * cubby_size > 0 ? (min_width - xdomain.length * cubby_size)/2 : 0);
+        margin.left += (min_width - xdomain.length * cubby_size > 0 ? (min_width - xdomain.length * cubby_size)/2 : 0);
+        margin.top += (min_height - ydomain.length * cubby_size > 0 ? (min_height - ydomain.length * cubby_size)/2 : 0);
+        margin.bottom += (min_height - ydomain.length * cubby_size > 0 ? (min_height - ydomain.length * cubby_size)/2 : 0);
+
         var plot_width = xdomain.length * cubby_size + margin.left + margin.right;
         var plot_height = ydomain.length * cubby_size + margin.top + margin.bottom;
         var svg = d3.select(plot_selector)
@@ -249,8 +261,8 @@ define([
             data,
             xdomain,
             ydomain,
-            generate_axis_label(x_attr, false, units.x),
-            generate_axis_label(y_attr, false, units.y),
+            x_label,
+            y_label,
             'x',
             'y',
             legend,
@@ -530,7 +542,6 @@ define([
             visualization = generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
         } else if (args.type == "OncoPrint" && !data.message) {
             visualization =  generate_oncoprint_plot(args.plot_selector, data);
-            //console.log(visualization.svg);
         } else if (args.type == "OncoGrid" && !data.message) {
             visualization = generate_oncogrid_plot(args.plot_selector, data);
         } else {

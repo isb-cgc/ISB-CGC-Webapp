@@ -95,7 +95,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .style('fill', 'none')
                 .attr('transform', 'rotate(90, 0, 0) scale(1, -1)');
         },
-        addPoints: function (svg, raw_data, values_only, height, plot_width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_map, padding, margin, dot_tip) {
+        addPoints: function (svg, data, values_only, height, plot_width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_map, padding, margin, dot_tip) {
             // remove counts from xdomain
             var tmp = xdomain;
             xdomain = [];
@@ -151,7 +151,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     .domain([0,legend_scale_no])
                     .range(["#E3E3FF", "blue"]);
 
-                cat_color_domain = $.map(raw_data, function (d) {
+                cat_color_domain = $.map(data, function (d) {
                     if(isNaN(d[colorBy])){
                         return d[colorBy];
                     }
@@ -169,7 +169,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 }
                 else{
                     use_numerical_color = true;
-                    var color_range = helpers.get_min_max(raw_data, colorBy);
+                    var color_range = helpers.get_min_max(data, colorBy);
                     if(color_range[0] === color_range[1]){
                          color_range[0] -= 0.5;
                          color_range[1] += 0.5;
@@ -190,7 +190,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     numeric_color_quantiles = numeric_color.quantiles();
                 }
             } else {
-                cat_color_domain = $.map(raw_data, function (d) {
+                cat_color_domain = $.map(data, function (d) {
                     return d[colorBy];
                 });
 
@@ -210,20 +210,9 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
 
 
-            var nonNullData = [];
-
-            raw_data.map(function(d){
-                if(helpers.isValidNumber(d.y)) {
-                    var id = Counter.getNextSet();
-                    d['id'] = id;
-                    sampleSet[id] = {sample: d['sample_id'], case: d['case_id'], project: d['project']};
-
-                    nonNullData.push(d);
-                }
-            });
-            if(nonNullData.length > 0) {
+            if(data.length > 0) {
                 svg.selectAll('.dot')
-                    .data(nonNullData)
+                    .data(data)
                     .enter().append('circle')
                     .attr('id', function (d) {
                         return d['id'];
@@ -237,7 +226,6 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                             toggle_class = color(colorVal(d));
                         }
                         return toggle_class.replace('#','_');
-                        // return color(colorVal(d)).replace('#','_');
                     })
                     .style('fill', function (d) {
                         if(use_numerical_color && !isNaN(colorVal(d))){
@@ -419,6 +407,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .call(median_tip);
         },
         createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, margin, legend, cohort_map) {
+            var data = [];
             var colorBy = legend.title.toLowerCase() == 'cohort' ? 'cohort' : 'c';
             var y_padding = (max_y-min_y)*.05;
             var domain = [min_y-y_padding, max_y+y_padding];
@@ -439,25 +428,34 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 });
 
             // Split data into separate violins
-            for (var i = 0; i < raw_Data.length; i++) {
-                var item = raw_Data[i];
-                var key = item[xAttr];
-                var tmp = {};
-                if (colorBy && item[colorBy]) {
-                    if (colorBy == 'cohort'){
-                        tmp[colorBy] = item[colorBy][0];
+            raw_Data.map(function(d){
+                if(helpers.isValidNumber(d[yAttr])) {
+                    var id = Counter.getNextSet();
+                    d['id'] = id;
+                    sampleSet[id] = {sample: d['sample_id'], case: d['case_id'], project: d['project']};
+                    data.push(d);
+                    var key = d[xAttr];
+                    var tmp = {};
+                    if (colorBy && d[colorBy]) {
+                        if (colorBy == 'cohort') {
+                            tmp[colorBy] = d[colorBy][0];
+                        } else {
+                            tmp[colorBy] = d[colorBy];
+                        }
                     } else {
-                        tmp[colorBy] = item[colorBy];
+                        tmp['color'] = null;
                     }
-                } else {
-                    tmp['color'] = null;
-                }
-                tmp['value'] = item[yAttr];
-                if (key in processed_data) {
+                    tmp['value'] = d[yAttr];
+
+                    if (!processed_data[key]) {
+                        processed_data[key] = [];
+                    }
                     processed_data[key].push(tmp);
-                } else {
-                    processed_data[key] = [tmp];
                 }
+            });
+
+            if(data.length === 0){
+                return null;
             }
 
             var plot_width = (violin_width + x_padding) * Object.keys(processed_data).length;
@@ -526,7 +524,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .attr('width', plot_width)
                 .attr('height', height - margin.top - margin.bottom)
                 .attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
-            this.addPoints(plotg, raw_Data, scatter_processed_data, height, plot_width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_map, x_padding, margin, dot_tip);
+            this.addPoints(plotg, data, scatter_processed_data, height, plot_width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_map, x_padding, margin, dot_tip);
 
             // create y axis
             var y = d3.scale.linear()
@@ -811,7 +809,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
             function get_json_data(){
                 var p_data = {};
-                raw_Data.map(function(d, i){
+                data.map(function(d, i){
                     if(helpers.isValidNumber(d[yAttr])) {
                         p_data[i]= {};
                         p_data[i]['case_id'] = d['case_id'];
@@ -819,8 +817,6 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                         p_data[i][xAttr] = d[xAttr];
                         p_data[i][yAttr] = isNaN(d[yAttr])? d[yAttr] : Number(d[yAttr]);
                         p_data[i][legend.title] = vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ';');
-
-                        // p_data[i][legend.title] = colorBy == 'cohort' ? cohort_map[d[colorBy]]: d[colorBy];
                     }
                 });
                 return p_data;
@@ -828,7 +824,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
             function get_csv_data(){
                 var csv_data = 'case_id, sample_id, '+xAttr+', '+yAttr+', '+legend.title+'\n';
-                raw_Data.map(function(d){
+                data.map(function(d){
                     csv_data += d['case_id'] +', '+ d['sample_id'] + ', ' + d[xAttr] + ', '+ d[yAttr] +', '+ vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ';')+ '\n';
                 });
                 return csv_data;
