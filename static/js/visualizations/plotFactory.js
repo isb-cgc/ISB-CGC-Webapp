@@ -243,10 +243,16 @@ define([
         cubby_size = cubby_size < cubby_min_size ? cubby_min_size : cubby_size;
 
         //adjust margins if axis label is longer than plot size
-        margin.right += (min_width - xdomain.length * cubby_size > 0 ? (min_width - xdomain.length * cubby_size)/2 : 0);
-        margin.left += (min_width - xdomain.length * cubby_size > 0 ? (min_width - xdomain.length * cubby_size)/2 : 0);
-        margin.top += (min_height - ydomain.length * cubby_size > 0 ? (min_height - ydomain.length * cubby_size)/2 : 0);
-        margin.bottom += (min_height - ydomain.length * cubby_size > 0 ? (min_height - ydomain.length * cubby_size)/2 : 0);
+        var margin_w_gap = min_width - xdomain.length * cubby_size;
+        var margin_h_gap = min_height - ydomain.length * cubby_size;
+        if(margin_w_gap > 0 ){
+            margin.right += margin_w_gap/2 ;
+            margin.left += margin_w_gap/2 ;
+        }
+        if(margin_h_gap > 0 ){
+            margin.top += margin_h_gap/2 ;
+            margin.bottom += margin_h_gap/2 ;
+        }
 
         var plot_width = xdomain.length * cubby_size + margin.left + margin.right;
         var plot_height = ydomain.length * cubby_size + margin.top + margin.bottom;
