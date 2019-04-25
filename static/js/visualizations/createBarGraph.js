@@ -214,11 +214,11 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                             && (x($(this).attr('value')) + $(this).attr('width') / 2) <= x3(e[1]);
                     });
 
-                    if (Object.keys(oldSet).length !== $('rect.plot-bar.selected').length) {
+                    if (Object.keys(oldSet).length !== $('.worksheet.active rect.plot-bar.selected').length) {
                         reCalc = true;
                     }
 
-                    $('rect.plot-bar.selected').each(function () {
+                    $('.worksheet.active rect.plot-bar.selected').each(function () {
                         if (!oldSet[$(this).attr('value')]) {
                             reCalc = true;
                         }
@@ -239,7 +239,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 var brushend = function () {
                     if (brush.empty()) {
                         svg.selectAll(".hidden").classed("hidden", false);
-                        $('.save-cohort-card').hide();
+                        $('.worksheet.active .save-cohort-card').hide();
                     }
                 };
 
@@ -302,13 +302,12 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                         zoom_status.translation && zoom.translate(zoom_status.translation);
                         zoom_status.translation = null;
 
-                        var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                         // Clear selections
-                        $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
-                        $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Cases: ' + 0);
-                        $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', "");
+                        $('.worksheet.active .plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
+                        $('.worksheet.active .plot').find('.selected-patients-count').html('Number of Cases: ' + 0);
+                        $('.worksheet.active .save-cohort-form input[name="samples"]').attr('value', "");
                         svg.selectAll('.selected').classed('selected', false);
-                        $('.save-cohort-card').hide();
+                        $('.worksheet.active .save-cohort-card').hide();
                         selectedValues = {};
                         selectedSamples = null;
                         // Remove brush event listener plot area - comment out if we want to enable selection carry-over
@@ -330,14 +329,14 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                             });
                         });
 
-                        $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + Object.keys(selectedSamples).length);
-                        $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Cases: ' + Object.keys(case_set).length);
-                        $('.save-cohort-card').find('.btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
+                        $('.worksheet.active .plot').find('.selected-samples-count').html('Number of Samples: ' + Object.keys(selectedSamples).length);
+                        $('.worksheet.active .plot').find('.selected-patients-count').html('Number of Cases: ' + Object.keys(case_set).length);
+                        $('.worksheet.active .save-cohort-card').find('.btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
                     }
 
                     if (extent) {
-                        var leftVal = Math.min((x3(extent[1]) + 20), (width - $('.save-cohort-card').width()));
-                        $('.save-cohort-card').show()
+                        var leftVal = Math.min((x3(extent[1]) + 20), (width - $('.worksheet.active .save-cohort-card').width()));
+                        $('.worksheet.active .save-cohort-card').show()
                             .attr('style', 'position:relative; top: -' + height + 'px; left:' + leftVal + 'px;');
 
                     }
@@ -353,15 +352,14 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     check_selection_state(bool);
                 }
 
-                $('.save-cohort-card').find('.btn').on('click', function (e) {
+                $('.worksheet.active .save-cohort-card').find('.btn').on('click', function (e) {
                     if (Object.keys(selectedValues).length > 0) {
                         var selected_sample_set = [];
                         _.each(Object.keys(selectedSamples), function (sample) {
                             selected_sample_set.push(selectedSamples[sample]);
                         });
 
-                        var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
-                        $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
+                        $('.worksheet.active .save-cohort-form input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
                     }
                 });
 

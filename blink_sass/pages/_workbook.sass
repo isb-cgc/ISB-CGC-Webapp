@@ -41,6 +41,13 @@
     border-left: 1px solid darken($white, 15%)
     width: 250px
     min-height: 1200px
+    &.comment-flyout
+      [class*='flyout-']
+        position: relative
+      .flyout-body
+        height: 350px
+        top: 0
+        bottom: 0
     &.open
       visibility: visible
 
