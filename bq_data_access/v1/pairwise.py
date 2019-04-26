@@ -16,10 +16,13 @@ limitations under the License.
 
 """
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 import json
 import base64
 import logging
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import traceback
 import requests
 
@@ -63,14 +66,14 @@ class Pairwise(object):
         # Create merged feature vectors
         vms = VectorMergeSupport('NA', 'sample_id', row_ids=features)
 
-        for feature in feature_vector_mapping.keys():
+        for feature in list(feature_vector_mapping.keys()):
             vms.add_dict_array(feature_vector_mapping[feature][1], feature, 'value')
 
         merged = vms.get_merged_dict()
 
         rows = []
 
-        for feature in feature_vector_mapping.keys():
+        for feature in list(feature_vector_mapping.keys()):
             current_row = [feature_vector_mapping[feature][0] + ":" + feature]
 
             for item in merged:
@@ -101,14 +104,14 @@ class Pairwise(object):
 
         vms = VectorMergeSupport('NA', 'sample_id', 'case_id', row_ids=feature_ids)
 
-        for feature in feature_vector_mapping.keys():
+        for feature in list(feature_vector_mapping.keys()):
             vms.add_dict_array(feature_vector_mapping[feature][1], feature, 'value')
 
         merged = vms.get_merged_dict()
 
         rows = []
 
-        for feature in feature_vector_mapping.keys():
+        for feature in list(feature_vector_mapping.keys()):
             current_row = [feature_vector_mapping[feature][0] + ":" + feature]
 
             for item in merged:
@@ -130,7 +133,7 @@ class Pairwise(object):
             row_count += 1
 
         # Encode the data to be sent to the service
-        data = urllib.urlencode(data_dict)
+        data = urllib.parse.urlencode(data_dict)
         decoded_response = None
 
         try:

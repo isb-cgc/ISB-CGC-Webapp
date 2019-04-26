@@ -15,7 +15,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
+from __future__ import print_function
 
+from builtins import range
 import argparse
 import csv
 import re
@@ -75,7 +77,7 @@ def build_column_type_list():
         UNIPROT_MYSQL
     ]
 
-    field_names_for_table.extend(ANNOTATION_FIELDS.values())
+    field_names_for_table.extend(list(ANNOTATION_FIELDS.values()))
 
     for field in field_names_for_table:
         column_type = 'varchar(128)'
@@ -98,7 +100,7 @@ def build_table_create_sql(cursor):
 
 
 def build_insert_sql_template():
-    values_stmt = ', '.join(['%s' for x in xrange(len(FIELD_NAMES_AND_TYPES))])
+    values_stmt = ', '.join(['%s' for x in range(len(FIELD_NAMES_AND_TYPES))])
     template = 'INSERT INTO {table_name} VALUES ({values})'.format(
         table_name=TABLE_NAME,
         values=values_stmt)
@@ -125,7 +127,7 @@ def parse_row(row, tumor_type):
     }
 
     # Include annotation fields
-    for row_key, result_key in ANNOTATION_FIELDS.iteritems():
+    for row_key, result_key in ANNOTATION_FIELDS.items():
         result[result_key] = row[row_key]
 
     return result

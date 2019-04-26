@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
+from __future__ import print_function
 
 from oauth2client.client import GoogleCredentials
 from googleapiclient.discovery import build
@@ -49,7 +50,7 @@ def clusterTest(containerApiInstance, clusterName, project, zone, numNodes, mach
     while True:
         result = containerApiInstance.projects().zones().operations().get(projectId=project, zoneId=zone, operationId=snaprClusterCreateResponse['name']).execute()
         if result['status'] == 'done':
-            print "cluster created"
+            print("cluster created")
             timeoutCount = 0
             break
         elif timeoutCount >= operationTimeout:
@@ -70,7 +71,7 @@ def clusterTest(containerApiInstance, clusterName, project, zone, numNodes, mach
     while True:
         result = containerApiInstance.projects().zones().operations().get(projectId=project, zoneId=zone, operationId=snaprClusterDeleteResponse['name']).execute()
         if result['status'] == 'done':
-            print "cluster deleted"
+            print("cluster deleted")
             timeoutCount = 0
             break
         elif timeoutCount >= operationTimeout:

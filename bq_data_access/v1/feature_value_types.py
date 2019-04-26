@@ -16,6 +16,7 @@ limitations under the License.
 
 """
 
+from builtins import object
 def enum(**enums):
     return type('Enum', (), enums)
 

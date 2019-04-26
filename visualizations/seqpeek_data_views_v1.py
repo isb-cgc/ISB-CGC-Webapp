@@ -16,6 +16,7 @@ limitations under the License.
 
 """
 
+from builtins import str
 import logging
 
 from django.contrib.auth.decorators import login_required

@@ -15,13 +15,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
+from __future__ import absolute_import
 
+from builtins import str
+from builtins import object
 import logging
 import sys
 from re import compile as re_compile
 from django.conf import settings
 
-from schema.tcga_clinical import schema as clinical_schema
+from .schema.tcga_clinical import schema as clinical_schema
 
 from bq_data_access.v1.feature_data_provider import FeatureDataProvider
 from bq_data_access.v1.errors import FeatureNotFoundException

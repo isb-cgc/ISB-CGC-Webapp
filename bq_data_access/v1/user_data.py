@@ -16,6 +16,8 @@ limitations under the License.
 
 """
 
+from builtins import str
+from builtins import object
 import logging
 from re import compile as re_compile
 
@@ -214,7 +216,7 @@ class UserFeatureDef(object):
                               project_id_list=project_id_stmt)
 
         if self.filters is not None:
-            for key, val in self.filters.items():
+            for key, val in list(self.filters.items()):
                 query += ' AND t.{filter_key} = "{value}" '.format(filter_key=key, value=val)
 
                 query += " GROUP BY t.sample_barcode, t.{column_name} ".format(column_name=self.column_name) # To prevent duplicates from multiple cohorts

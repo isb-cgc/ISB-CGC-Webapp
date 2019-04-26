@@ -1,3 +1,4 @@
+from builtins import str
 from django.contrib.auth.models import User
 from django.db import models
 from projects.models import User_Feature_Definitions

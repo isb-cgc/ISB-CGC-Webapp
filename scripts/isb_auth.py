@@ -42,6 +42,7 @@ to access the API.
     storage = Storage(storage_file)
     isb_auth.get_credentials(storage=storage)
 '''
+from __future__ import print_function
 
 from argparse import ArgumentParser
 import os
@@ -63,7 +64,7 @@ DEFAULT_STORAGE_FILE = os.path.join(os.path.expanduser("~"), '.isb_credentials')
 
 def maybe_print(msg):
     if VERBOSE:
-        print msg
+        print(msg)
 
 
 def get_credentials(storage=None, oauth_flow_args=[]):

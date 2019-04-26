@@ -16,6 +16,9 @@ limitations under the License.
 
 """
 
+from builtins import str
+from builtins import range
+from builtins import object
 import logging
 import sys
 from re import compile as re_compile
@@ -205,7 +208,7 @@ class ClinicalDataQueryHandler(object):
             return "", None, False
         else:
             # Union of subqueries
-            subquery_stmt_template = ",".join(["({})" for x in xrange(len(subqueries))])
+            subquery_stmt_template = ",".join(["({})" for x in range(len(subqueries))])
             subquery_stmt = subquery_stmt_template.format(*subqueries)
 
             query_template = "SELECT case_barcode, sample_barcode, value {brk}" \
