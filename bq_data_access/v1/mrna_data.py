@@ -16,6 +16,8 @@ limitations under the License.
 
 """
 
+from builtins import str
+from builtins import object
 from google_helpers.bigquery.service import get_bigquery_service
 
 import logging

@@ -14,8 +14,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from __future__ import division
 
 # from django import template
+from builtins import str
+from past.utils import old_div
 import sys
 import string
 import json
@@ -232,7 +235,7 @@ def get_cohort_perm(cohort, request):
 @register.filter
 def get_barcodes_length(barcodes):
     codes = barcodes.replace('[','').replace(']','').split(',')
-    codes = filter(None, codes)
+    codes = [_f for _f in codes if _f]
     return len(codes)
 
 
@@ -318,7 +321,7 @@ def tojson(obj, esacpe_html=True):
 
 @register.filter
 def get_prog_col_size(programs):
-    return (12/len(programs))
+    return (old_div(12,len(programs)))
 
 
 @register.filter

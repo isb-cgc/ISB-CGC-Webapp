@@ -307,7 +307,7 @@ class Worksheet(models.Model):
         self.worksheet_cohort_set.get(cohort=cohort).destroy()
 
     def get_active_plot(self):
-        active_set_list = self.worksheet_plot_set.filter(active=True).values()
+        active_set_list = list(self.worksheet_plot_set.filter(active=True).values())
         if len(active_set_list) > 0 :
             return Worksheet_plot.get_deep_plot(id=active_set_list[0]['id'])
         return None

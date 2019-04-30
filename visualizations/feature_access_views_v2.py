@@ -16,6 +16,7 @@ limitations under the License.
 
 """
 
+from builtins import object
 import logging
 import sys
 import traceback
@@ -68,7 +69,7 @@ def build_feature_ids(datatype, params):
     searcher = FeatureDefinitionSearcherFactory.build_from_datatype(datatype)
     items = []
 
-    if params.keys():
+    if list(params.keys()):
         result = searcher.search(params)
 
         fields = ['label', 'internal_feature_id', 'feature_type']

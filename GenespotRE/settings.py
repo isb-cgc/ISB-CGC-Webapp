@@ -13,7 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from __future__ import print_function
 
+from builtins import str
+from builtins import object
 import os
 from os.path import join, dirname
 import sys
@@ -43,7 +46,7 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
 
-print >> sys.stdout, "[STATUS] DEBUG mode is "+str(DEBUG)
+print("[STATUS] DEBUG mode is "+str(DEBUG), file=sys.stdout)
 
 # Theoretically Nginx allows us to use '*' for ALLOWED_HOSTS but...
 ALLOWED_HOSTS = list(set(os.environ.get('ALLOWED_HOST', 'localhost').split(',') + ['localhost', '127.0.0.1', '[::1]', gethostname(), gethostbyname(gethostname()),]))
@@ -110,7 +113,7 @@ IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
 SITE_ID = 3
 
 if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
-    print >> sys.stdout, "[STATUS] AppEngine Flex detected."
+    print("[STATUS] AppEngine Flex detected.", file=sys.stdout)
     SITE_ID = 4
 
 
@@ -577,7 +580,7 @@ EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
 NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')
 
 # Explicitly check for known items
-BLACKLIST_RE = ur'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
+BLACKLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
 
 # IndexD settings
 INDEXD_URI = os.environ.get('INDEXD_URI', None)

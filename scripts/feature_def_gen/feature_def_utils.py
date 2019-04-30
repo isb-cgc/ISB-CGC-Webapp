@@ -16,6 +16,8 @@ limitations under the License.
 
 """
 
+from builtins import str
+from builtins import object
 from csv import DictWriter
 from json import load as load_json
 import logging

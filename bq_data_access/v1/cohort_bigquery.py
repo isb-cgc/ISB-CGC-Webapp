@@ -16,6 +16,7 @@ limitations under the License.
 
 """
 
+from builtins import object
 from copy import deepcopy
 import sys
 import logging
