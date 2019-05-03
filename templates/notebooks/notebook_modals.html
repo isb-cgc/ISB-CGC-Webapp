@@ -1,0 +1,246 @@
+{% if notebook.owner.id == user.id %}
+<!-- Edit Details Modal -->
+<div class="modal fade edit-notebook-details-modal" id="edit-notebook-details-modal-{{ notebook.id }}" tabindex="-1" role="dialog" aria-labelledby="edit-notebook-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="edit-notebook-header">Notebook Details</h4>
+            </div>
+            <form class="edit-notebook-details" method="POST" action="{% url 'notebook_edit' notebook.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="unallowed-chars-alert-book alert alert-warning alert-dismissable" style="display: none;">
+                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        Your notebook's <span class="book-unallowed"></span> invalid characters (<span class="unallowed-chars-book"></span>). Please choose another <span class="book-fields"></span>.
+                    </div>
+                    <label for="edit-notebook-name-{{ notebook.id }}">Name (required)</label>
+                    <input id="edit-notebook-name-{{ notebook.id }}" class="edit-notebook-name form-control" type="text" name="name" maxlength="2000" value="{{ notebook.name }}" required/>
+                    <br />
+                    <label for="edit-notebook-keywords-{{ notebook.id }}">Keywords (required, max length is 2000 characters)</label>
+                    <textarea id="edit-notebook-keywords-{{ notebook.id }}" class="edit-notebook-keywords form-control" name="keywords" maxlength="2000" required>{{ notebook.keywords }}</textarea>
+                    <br />
+                    <label for="edit-notebook-desc-{{ notebook.id }}">Description (required, max length is 2000 characters)</label>
+                    <textarea id="edit-notebook-desc-{{ notebook.id }}" class="edit-notebook-desc form-control" name="description" maxlength="2000" required>{{ notebook.description }}</textarea>
+                    <br />
+                    <label for="edit-notebook-filepath-{{ notebook.id }}">Notebook File Location - GitHub's Repository URL (required, max length is 250 characters)</label>
+                    <div class="input-group">
+                        <span class="input-group-addon" id="basic-addon1">https://github.com/</span>
+                        <input id="edit-notebook-filepath-{{ notebook.id }}" type="text" class="edit-notebook-filepath form-control" name="file_path" maxlength="250" required placeholder="repo_dir/file_name.ipynb" aria-describedby="basic-addon1" value="{{ notebook.file_path }}">
+                    </div>
+{#                    <textarea id="edit-notebook-filepath-{{ notebook.id }}" class="edit-notebook-filepath form-control" name="file_path" maxlength="250" required>{{ notebook.file_path }}</textarea>#}
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Update" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{#<!-- Create Worksheet modal-->#}
+{#{% if notebook.build %}#}
+{#<div class="modal fade" id="create-worksheet-modal-{{ notebook.id }}" tabindex="-1" aria-labelledby="create-worksheet-header-{{ notebook.id }}" aria-hidden="true">#}
+{#    <div class="modal-dialog">#}
+{#        <div class="modal-content">#}
+{#            <div class="modal-header">#}
+{#                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
+{#                <h4 class="modal-title" id="create-worksheet-header-{{ notebook.id }}">Create New Worksheet</h4>#}
+{#            </div>#}
+{#            <form class="create-worksheet-form" id="worksheet_create_form-{{ notebook.id }}" method="POST" action="{% url 'worksheet_create' notebook_id=notebook.id %}">#}
+{#                {% csrf_token %}#}
+{#                <div class="modal-body">#}
+{#                    <div class="unallowed-chars-alert-sheet alert alert-warning alert-dismissable" style="display: none;">#}
+{#                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>#}
+{#                        Your worksheet's <span class="sheet-unallowed"></span> invalid characters (<span class="unallowed-chars-sheet"></span>). Please choose another <span class="sheet-fields"></span>.#}
+{#                    </div>#}
+{#                    <label for="create-sheet-name-{{ notebook.id }}">Name (required)</label>#}
+{#                    <input id="create-sheet-name-{{ notebook.id }}" type="text" class="form-control create-sheet-name" name="name" value="New Worksheet"/>#}
+{#                    <br>#}
+{#                    <label for="create-sheet-desc-{{ notebook.id }}">Description (optional, max length is 2000 characters)</label>#}
+{#                    <textarea id="create-sheet-desc-{{ notebook.id }}" class="form-control create-sheet-desc" name="description" placeholder="Add a description" maxlength="2000"></textarea>#}
+{#                </div>#}
+{#                <div class="modal-footer">#}
+{#                    <input type="submit" value="Create" class="btn btn-primary" />#}
+{#                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>#}
+{#                </div>#}
+{#            </form>#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+{#{% endif %}#}
+
+<!-- Delete Notebook Modal -->
+<div class="modal fade" id="delete-notebook-modal-{{ notebook.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-notebook-body" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="delete-notebook-header-{{ notebook.id }}">Delete Notebook</h4>
+                <!--<h4 class="modal-title">Delete Notebook</h4>-->
+            </div>
+            <div class="modal-body" id="delete-notebook-body">Delete this Notebook?</div>
+            <form class="delete-notebook" id="delete-notebook-{{ notebook.id }}" method="POST" action="{% url 'notebook_delete' notebook.id %}">
+                {% csrf_token %}
+                <div class="modal-footer">
+                    <input type="submit" value="Delete" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{#{% elif shared %}#}
+{##}
+{#<!-- Remove Notebook Modal -->#}
+{#<div class="ajax-form-modal modal fade" id="remove-notebook-modal-{{ notebook.id }}" tabindex="-1" role="dialog" aria-labelledby="remove-notebook-header" aria-hidden="true">#}
+{#    <div class="modal-dialog">#}
+{#        <div class="modal-content">#}
+{#            <div class="modal-header">#}
+{#                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
+{#                <h4 class="modal-title" id="remove-notebook-header">Remove Yourself from this Notebook?</h4>#}
+{#            </div>#}
+{#            <form id="remove-notebook-{{ notebook.id }}" method="POST" action="{% url 'sharing_remove' shared.id %}" data-redirect="{% url 'notebooks' %}">#}
+{#                {% csrf_token %}#}
+{#                <div class="modal-footer">#}
+{#                    <input type="submit" value="Remove" class="btn btn-primary" />#}
+{#                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>#}
+{#                </div>#}
+{#            </form>#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+{##}
+{#{% elif notebook.shared %}#}
+{##}
+{#    {% for shared_item in notebook.shared.all %}#}
+{#        {% if shared_item.matched_user == user %}#}
+{#        <!-- Remove Notebook Modal -->#}
+{#        <div class="ajax-form-modal modal fade" id="remove-notebook-modal-{{ notebook.id }}" tabindex="-1" role="dialog" aria-labelledby="remove-notebook-header" aria-hidden="true">#}
+{#            <div class="modal-dialog">#}
+{#                <div class="modal-content">#}
+{#                    <div class="modal-header">#}
+{#                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
+{#                        <h4 class="modal-title" id="remove-notebook-header">Remove Yourself from this Notebook?</h4>#}
+{#                    </div>#}
+{#                    <form id="remove-notebook-{{ notebook.id }}" method="POST" action="{% url 'sharing_remove' shared_item.id %}" data-redirect="{% url 'notebooks' %}">#}
+{#                        {% csrf_token %}#}
+{#                        <div class="modal-footer">#}
+{#                            <input type="submit" value="Remove" class="btn btn-primary" />#}
+{#                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>#}
+{#                        </div>#}
+{#                    </form>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#        {% endif %}#}
+{#    {% endfor %}#}
+{% endif %}
+
+<!-- Duplicate Notebook Modal -->
+
+<div class="modal fade" id="copy-notebook-modal-{{ notebook.id }}" tabindex="-1" role="dialog" aria-labelledby="copy-notebook-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="copy-notebook-header">Duplicate this Notebook?</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    This will create a copy of the notebook.
+                </p>
+            </div>
+            <form id="copy-notebook-{{ notebook.id }}" method="POST" action="{% url 'notebook_copy' notebook.id %}">
+                {% csrf_token %}
+                <div class="modal-footer">
+                    <input type="submit" value="Duplicate" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Only notebook owners have access to the sharing modal -->
+{% if notebook.owner.id == request.user.id %}
+    {% if is_shareable %}
+    <!-- Share Notebook Modal -->
+    <div class="ajax-form-modal share-notebook-modal modal fade" id="share-notebook-modal-{{ notebook.id }}" tabindex="-1" role="dialog" aria-labelledby="share-notebook-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <!-- If we want to remove this header we must place this ID on another element with text which can describe the dialog to a screen reader -->
+                    <h4 class="modal-title" id="share-notebook-header">Notebook Sharing</h4>
+                    <div class="modal-js-messages" id="share-modal-js-messages">
+                    </div>
+                    <ul class="nav nav-tabs" data-tabs="tablist">
+                        <li class="active"><a class="share-notebook" href="#share-{{ notebook.id }}" data-toggle="tab">Share</a></li>
+                        <li ><a class="shared-with" href="#shared-with-{{ notebook.id }}" data-toggle="tab">Shared With</a></li>
+                    </ul>
+                </div>
+                <div class="tab-content">
+                    <form class="tab-pane share-pane fade in active share-notebook-form" role="tabpanel" data-notebook-id="{{ notebook.id }}" id="share-{{ notebook.id }}" method="" action="">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <p>
+                                This will share the web view of notebooks.
+                            </p>
+                            <label for="share-share_users">Enter email addresses separated by a comma</label>
+                            <textarea id="share-share_users" class="form-control" name="share_users"></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="submit" value="Submit" class="btn btn-primary" />
+                            <button type="button" class="btn btn-link btn-cancel" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                    <div class="tab-pane shared-with-pane fade {% if not notebook.owner == request.user %}active in{% endif %}" role="tabpanel" id="shared-with-{{ notebook.id }}">
+                        <div class="modal-body">
+                            {% if notebook.shared.count > 0 %}
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for shared in notebook.shared.all|active %}
+                                    <tr>
+                                        <td>
+                                            {% if shared.matched_user %}
+                                            {{shared.matched_user.first_name}} {{shared.matched_user.last_name}}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {{shared.email}}
+                                        </td>
+                                        <td>
+                                            {% if notebook.owner.id == request.user.id %}
+                                            <a class="remove-shared-user" role="button" data-shared-id="{{ shared.id }}"><i class="fa fa-times"></i></a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <p class="center">This list is empty.</p>
+                            {% endif %}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endif %}

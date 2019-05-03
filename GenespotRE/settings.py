@@ -269,6 +269,7 @@ INSTALLED_APPS = (
     'genes',
     'variables',
     'workbooks',
+    'notebooks',
     'data_upload',
     'analysis',
     'offline',
@@ -567,6 +568,16 @@ IMG_THUMBS_URL = os.environ.get('IMG_THUMBS_URL', None)
 # DICOM Viewer settings
 #################################
 DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
+
+#################################
+# NOTEBOOK Viewer settings
+#################################
+NOTEBOOK_VIEWER = os.environ.get('NOTEBOOK_VIEWER', None)
+
+#################################
+# SOLR settings
+#################################
+SOLR_URL = os.environ.get('SOLR_URL', None)
 
 ##############################################################
 #   MailGun Email Settings

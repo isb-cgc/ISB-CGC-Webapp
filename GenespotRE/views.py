@@ -54,6 +54,7 @@ ERA_LOGIN_URL = settings.ERA_LOGIN_URL
 OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
+SOLR_URL = settings.SOLR_URL
 
 
 
@@ -482,6 +483,10 @@ def dashboard_page(request):
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct().order_by('-last_date_saved')
 
+    # Notebook List
+    notebooks = request.user.notebook_set.filter(active=True)
+    notebooks = notebooks.distinct().order_by('-last_date_saved')
+
     # Gene & miRNA Favorites
     genefaves = request.user.genefavorite_set.filter(active=True)
 
@@ -492,7 +497,9 @@ def dashboard_page(request):
         'request'  : request,
         'cohorts'  : cohorts,
         'programs' : programs,
+        'notebooks': notebooks,
         'workbooks': workbooks,
         'genefaves': genefaves,
-        'varfaves' : varfaves
+        'varfaves' : varfaves,
+        'SOLR_URL' : SOLR_URL
     })

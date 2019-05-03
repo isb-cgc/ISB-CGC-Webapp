@@ -92,53 +92,139 @@
                 </div>
             </div>
         </div>
-        <section class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">
-                    <a href="{% url 'workbooks' %}">Saved Workbooks ({{ workbooks.count }})</a>
-                </h3>
-                <div class="min-max">
-                    <a data-toggle="collapse" aria-label="Open/Close Workbook" href="#workbook-panel"><i
-                            class="show fa fa-angle-double-down"></i></a>
-                </div>
-            </div>
-            <div id="workbook-panel" class="panel panel-collapse collapse in" aria-expanded="true">
-                <div class="panel-body">
-                    <p>Workbooks store the analyses you create, and their related data.</p>
-                    <ul class="table-list">
-                        {% if workbooks.count > 0 %}
-                            {% for workbook in workbooks|slice:':6' %}
-                                <li>
-                                    <a href="{% url 'workbook_detail' workbook.id %}"
-                                       title="{{ workbook.name|title|wrap_text }}">
-                                        <div class="list-main">
-                                            <h5 class="list-title">{{ workbook.name }}</h5>
-                                            <p>{{ workbook.description }}</p>
-                                        </div>
-                                        <div class="list-info">
-                                            {{ workbook.last_date_saved|date:'M d, Y, g:i a' }}
-                                        </div>
-                                    </a>
-                                </li>
-                            {% endfor %}
-                            {% if workbooks.count > 6 %}
-                                <a class="btn btn-link" href="{% url 'workbooks' %}">View All</a>
-                            {% endif %}
-                        {% endif %}
-                    </ul>
-                </div>
-                <div class="panel-footer">
-                    <div style="height:40px">
-                        <form id="create-workbook" method="POST" action="{% url 'workbook_create' %}"
-                              class="pull-right">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-link"><i class="fa fa-plus"></i>Create a New Workbook</button>
-                        </form>
-                        {#            <a class="btn btn-link" href="{% url 'workbook_samples' %}">Sample Workbooks</a>#}
+        <div class="row">
+            <div class="col-md-12">
+                <section class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            Jupyter Notebooks
+                        </h3>
+                        <div class="min-max">
+                            <a data-toggle="collapse" aria-label="Open/Close Notebook" href="#notebook-panel"><i
+                                    class="show fa fa-angle-double-down"></i></a>
+                        </div>
                     </div>
-                </div>
+                    <div id="notebook-panel" class="col-md-12 panel panel-collapse collapse in" aria-expanded="true">
+                        <p>Notebooks store the analyses you create, and their related data.</p>
+                        <div class="col-md-6">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><a href="{% url 'notebooks' %}">Saved Notebooks
+                                    ({{ notebooks.count }})</a>
+                                </h3>
+                            </div>
+                            <div class="panel-body">
+                                <ul class="table-list">
+                                    {% if notebooks.count > 0 %}
+                                        {% for notebook in notebooks|slice:':6' %}
+                                            <li>
+                                                <a href="{% url 'notebook_detail' notebook.id %}"
+                                                   title="{{ notebook.name|title|wrap_text }}">
+                                                    <div class="list-main">
+                                                        <h5 class="list-title">{{ notebook.name }}</h5>
+                                                        <p>{{ notebook.description }}</p>
+                                                    </div>
+                                                    <div class="list-info">
+                                                        {{ notebook.last_date_saved|date:'M d, Y, g:i a' }}
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                        {% if notebooks.count > 6 %}
+                                            <a class="btn btn-link" href="{% url 'notebooks' %}">View All</a>
+                                        {% endif %}
+                                    {% endif %}
+                                </ul>
+                            </div>
+                            <div class="panel-footer">
+                                <div style="height:40px">
+                                    <form id="create-notebook" method="POST" action="{% url 'notebook_create' %}"
+                                          class="pull-right">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-link"><i class="fa fa-plus"></i>Create a New Notebook
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><a href="{% url 'notebooks_public' %}">Search Public Notebooks</a>
+                                </h3>
+                            </div>
+                            <div class="panel-body">
+                                <form id="nb-keyword-search-form">
+                                    <div class="input-group">
+                                        <input type="text" name="nb-keywords" class="nb-keyword-field form-control"
+                                               placeholder="Keywords">
+                                        <span class="input-group-btn">
+                                            <button id="nb-keyword-search-btn" class="btn btn-default"
+                                                type="submit">Search</button>
+                                        </span>
+                                    </div>
+                                </form>
+                                <div class="nb-search-result">
+                                    <p class="nb-result-count"></p>
+                                    <ul class="table-list"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
-        </section>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <section class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <a href="{% url 'workbooks' %}">Saved Workbooks ({{ workbooks.count }})</a>
+                        </h3>
+                        <div class="min-max">
+                            <a data-toggle="collapse" aria-label="Open/Close Workbook" href="#workbook-panel"><i
+                                    class="show fa fa-angle-double-down"></i></a>
+                        </div>
+                    </div>
+                    <div id="workbook-panel" class="panel panel-collapse collapse in" aria-expanded="true">
+                        <div class="panel-body">
+                            <p>Workbooks store the analyses you create, and their related data.</p>
+                            <ul class="table-list">
+                                {% if workbooks.count > 0 %}
+                                    {% for workbook in workbooks|slice:':6' %}
+                                        <li>
+                                            <a href="{% url 'workbook_detail' workbook.id %}"
+                                               title="{{ workbook.name|title|wrap_text }}">
+                                                <div class="list-main">
+                                                    <h5 class="list-title">{{ workbook.name }}</h5>
+                                                    <p>{{ workbook.description }}</p>
+                                                </div>
+                                                <div class="list-info">
+                                                    {{ workbook.last_date_saved|date:'M d, Y, g:i a' }}
+                                                </div>
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                    {% if workbooks.count > 6 %}
+                                        <a class="btn btn-link" href="{% url 'workbooks' %}">View All</a>
+                                    {% endif %}
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div class="panel-footer">
+                            <div style="height:40px">
+                                <form id="create-workbook" method="POST" action="{% url 'workbook_create' %}"
+                                      class="pull-right">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-link"><i class="fa fa-plus"></i>Create a New
+                                        Workbook
+                                    </button>
+                                </form>
+                                {#            <a class="btn btn-link" href="{% url 'workbook_samples' %}">Sample Workbooks</a>#}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-md-6">
@@ -190,12 +276,14 @@
                                 <p>You don't have any saved Cohorts.</p>
                             {% endif %}
                             <div class="pull-right dropdown">
-                                <a id="btnGroupDropCohortCreate" href="{% url 'cohort' %}" class="btn btn-link dropdown-toggle"
+                                <a id="btnGroupDropCohortCreate" href="{% url 'cohort' %}"
+                                   class="btn btn-link dropdown-toggle"
                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i class="fa fa-plus"></i>Create a Cohort</a>
                                 <ul class="dropdown-menu" aria-labelledby="btnGroupDropCohortCreate">
                                     <li><a class="btn dropdown-item" href="{% url 'cohort' %}">Filters</a></li>
-                                    <li><a class="btn dropdown-item" href="{% url 'cohort_barcodes' %}">Barcodes</a></li>
+                                    <li><a class="btn dropdown-item" href="{% url 'cohort_barcodes' %}">Barcodes</a>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -315,8 +403,8 @@
                                                         <p class="list-title">{{ program.name }}</p>
                                                         {% if program.description %}
                                                             <p>{{ program.description|slice:':65' }}
-                                                                    {% if program.description|length > 65 %}
-                                                                        &hellip;{% endif %}</p>
+                                                                {% if program.description|length > 65 %}
+                                                                    &hellip;{% endif %}</p>
                                                         {% endif %}
                                                     </a>
                                                 </li>
@@ -328,7 +416,8 @@
                                     {% endif %}
                                 </div>
                                 <div class="panel-footer">
-                                    <a href="{% url 'program_upload' %}" class="btn btn-link"><i class="fa fa-cloud-upload"></i>Upload
+                                    <a href="{% url 'program_upload' %}" class="btn btn-link"><i
+                                            class="fa fa-cloud-upload"></i>Upload
                                         Program Data</a>
                                 </div>
                             </div>
@@ -353,6 +442,7 @@
     </div>
     <script type="text/javascript">
         var USER_SETTINGS_KEY = 'user_' + {{ request.user.id }} +'_dash_settings';
+        var SOLR_URL = '{{ SOLR_URL }}';
     </script>
 {% endblock %}
 

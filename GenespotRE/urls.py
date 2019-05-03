@@ -45,6 +45,7 @@ urlpatterns = [
 
     url(r'^analysis/', include('analysis.urls')),
     url(r'^workbooks/', include('workbooks.urls')),
+    url(r'^notebooks/', include('notebooks.urls')),
     url(r'^cohorts/', include('cohorts.urls')),
     url(r'^visualizations/', include('visualizations.urls')),
     url(r'^admin/', include(admin.site.urls)),
