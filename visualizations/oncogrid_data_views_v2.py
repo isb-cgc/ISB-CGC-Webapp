@@ -134,7 +134,7 @@ def get_donor_data_list(bq_statement):
             days_to_death = row['f'][7]['v']
             data_category = row['f'][8]['v']
             score = row['f'][9]['v']
-            if not donors.has_key(case_barcode):
+            if case_barcode not in donors:
                 donors[case_barcode] = {
                     'case_code': project_short_name + ' / ' + case_barcode,
                     'gender': gender if gender != None else 'Not Reported',
@@ -145,7 +145,7 @@ def get_donor_data_list(bq_statement):
                     'days_to_death': days_to_death if days_to_death != None else 'Not Reported',
                     'data_category': {},
                 }
-            if not donors[case_barcode]['data_category'].has_key(data_category):
+            if data_category not in donors[case_barcode]['data_category']:
                 donors[case_barcode]['data_category'][data_category] = {
                     'score': score,
                 }
@@ -181,7 +181,9 @@ def get_donor_data_list(bq_statement):
                 donor_track_count_max['days_to_death'] = max(int(donor_track_count_max['days_to_death']), int(donor_data['days_to_death']))
 
             for data_category_key in donors[case_barcode_key]['data_category']:
-                if data_category_key.lower() == 'clinical':
+                if data_category_key is None:
+                    break
+                elif data_category_key.lower() == 'clinical':
                     donor_data['clinical'] = donors[case_barcode_key]['data_category'][data_category_key]['score']
                     donor_track_count_max['clinical'] = max(donor_track_count_max['clinical'], donor_data['clinical'])
                 elif data_category_key.lower() == 'biospecimen':
@@ -217,17 +219,17 @@ def get_gene_data_list(bq_statement):
             case_barcode = row['f'][2]['v']
             variant_classification = row['f'][3]['v']
             is_cgc = str(row['f'][4]['v'])
-            if not genes_mut_data.has_key(hugo_symbol):
+            if hugo_symbol not in genes_mut_data:
                 genes_mut_data[hugo_symbol] = {
                     'case_barcode': {},
                 }
-            if not genes_mut_data[hugo_symbol]['case_barcode'].has_key(case_barcode):
+            if case_barcode not in genes_mut_data[hugo_symbol]['case_barcode']:
                 genes_mut_data[hugo_symbol]['case_barcode'][case_barcode] = {
                     'case_code': project_short_name +' / '+case_barcode,
                     'variant_classification': {},
                     'is_cgc': is_cgc
                 }
-            if not genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['variant_classification'].has_key(variant_classification):
+            if variant_classification not in genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['variant_classification']:
                 genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['variant_classification'][variant_classification] = {
                     'name': variant_classification
                 }
@@ -381,5 +383,6 @@ def create_oncogrid_bq_statement(type, genomic_build, project_set, cohort_ids, g
         filter_clause2 = filter_clause2
     )
 
+    # print(bq_statement)
     return bq_statement, [somatic_mut_table, metadata_data_table, bioclinic_clin_table]
 

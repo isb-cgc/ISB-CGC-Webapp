@@ -114,6 +114,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 return results;
             },
             create_cubbyplot: function (svg, margin, data, domain, range, xLabel, yLabel, xParam, yParam, legend, plot_width, plot_height, cubby_size) {
+
                 var plot_no_margin_width = plot_width - margin.left - margin.right;
                 var plot_no_margin_height = plot_height - margin.top - margin.bottom;
                 var x_band_width = plot_no_margin_width / domain.length;
@@ -240,7 +241,11 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                         svg.select('.x.axis')
                             .attr('transform', 'translate(' +  (margin.left + d3.event.translate[0]) + ', ' + (margin.top+plot_no_margin_height*d3.event.scale) + ')')
                             .selectAll('foreignObject')
-                            .attr('style', 'font-size:'+(scaled_tick_font_size>tick_font_size ? tick_font_size : scaled_tick_font_size)+'px; transform: rotate(30deg);')
+                            .attr('style', function(d){
+                                var scale_ratio_2  = 1 - Math.floor(d.length/20) * 0.1; // Decrease font size if label text is too long (>28)
+                                return 'font-size:'+(scaled_tick_font_size>tick_font_size ? tick_font_size*scale_ratio_2 : scaled_tick_font_size*scale_ratio_2)+'px;'
+                            })
+                            .attr('transform', 'translate(-'+x_band_width*d3.event.scale/2+',0)')
                             .attr('width', x_band_width*d3.event.scale);
                         svg.select('.x.axis').call(xAxis.scale(x.rangeBands([0, plot_no_margin_width*d3.event.scale])));
                         x_axis_area
@@ -256,7 +261,11 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                         svg.select('.y.axis')
                             .attr('transform', 'translate('+ margin.left +', ' + (margin.top + d3.event.translate[1])+')')
                             .selectAll('foreignObject')
-                            .attr('style', 'font-size:'+(scaled_tick_font_size>tick_font_size ? tick_font_size : scaled_tick_font_size)+'px; transform: translate(-' + margin.left * 0.75 + 'px, -'+(y.rangeBand()*d3.event.scale / 2)+'px)')//, -' + (y.rangeBand() / 2) + 'px);');
+                            .attr('style', function(d) {
+                                var scale_ratio_2  = 1 - Math.floor(d.length/20) * 0.1; // Decrease font size if label text is too long (>28)
+                                return 'font-size:' + (scaled_tick_font_size > tick_font_size ? tick_font_size*scale_ratio_2 : scaled_tick_font_size*scale_ratio_2) + 'px; transform: translate(-' + margin.left * 0.75 + 'px, -' + (y.rangeBand() * d3.event.scale / 2) + 'px)'
+
+                            })
                             .select('div')
                             .attr('style', 'display:table-cell;vertical-align:middle; text-align: right; padding: 0 10px; width: ' + margin.left * .75 + 'px; height: ' + y.rangeBand()*d3.event.scale + 'px;');
                         y_axis_area
@@ -288,6 +297,13 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                     .on('zoom', zoomer);
 
                 svg.call(zoom);
+                var opacity = function(d){
+                    var fill_opacity = Math.abs(d);
+                    return fill_opacity;
+                };
+                var fill_color = function(d){
+                    return d > 0 ? 'rgb(252, 86, 45)' : 'rgb(50, 111, 252)';
+                };
 
                 plot_area.selectAll('.expected_fill')
                     .data(data_counts)
@@ -297,11 +313,9 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                         return d['x'] + '-' + d['y'];
                     })
                     .attr('fill', function (d) {
-                        return d['log_ratio'] > 0 ? 'red' : 'blue';
+                        return fill_color(d['log_ratio']);
                     })
-                    .attr('fill-opacity', function (d) {
-                        return Math.abs(d['log_ratio']);
-                    })
+                    .attr('fill-opacity', function(d){ return opacity(d['log_ratio']) })
                     .attr('width', cubby_size - 1)
                     .attr('height', cubby_size - 1)
                     .attr('x', function (d) {
@@ -326,11 +340,11 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                             $(this).attr('class', obj_class);
 
                             var oldSetKeys = Object.keys(oldSet);
-                            if (oldSetKeys.length !== $('rect.expected_fill.selected').length) {
+                            if (oldSetKeys.length !== $('.worksheet.active rect.expected_fill.selected').length) {
                                 reCalc = true;
                             }
 
-                            $('rect.expected_fill.selected').each(function () {
+                            $('.worksheet.active rect.expected_fill.selected').each(function () {
                                 if (!oldSet[$(this).attr('value')]) {
                                     reCalc = true;
                                 }
@@ -420,11 +434,9 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                     })
                     .attr('class', 'selected')
                     .attr('fill', function (d) {
-                        return d > 0 ? 'red' : 'blue';
+                        return fill_color(d);
                     })
-                    .attr('fill-opacity', function (d) {
-                        return Math.abs(d);
-                    })
+                    .attr('fill-opacity', function(d){ return opacity(d);})
                     .style('stroke', 'lightgrey')
                     .style('stroke-width', 0.5);
                 legend.append('text')
@@ -465,8 +477,13 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 }));
                 svg.select('.x.axis')
                     .selectAll('foreignObject')
-                    .attr('style', 'font-size:'+(scale_ratio*tick_font_size)+'px; transform: rotate(30deg);')
+                    .attr('style', function(d){
+                        var scale_ratio_2  = 1 - Math.floor(d.length/20) * 0.1; // Decrease font size if label text is too long (>28)
+                        return 'font-size:'+(scale_ratio*scale_ratio_2*tick_font_size)+'px;'
+                    })
+                    .attr('transform','translate(-'+(x_band_width/2)+',0)')
                     .selectAll('div')
+                    .attr('class', 'center')
                     .attr('title', function(d){ return d; });
 
                 svg.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({
@@ -475,7 +492,10 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 }));
                 svg.select('.y.axis')
                     .selectAll('foreignObject')
-                    .attr('style', 'font-size:'+(scale_ratio*tick_font_size)+'px; transform: translate(-' + margin.left * 0.75 + 'px, -' + y.rangeBand() / 2 + 'px);')
+                    .attr('style', function(d){
+                        var scale_ratio_2  = 1 - Math.floor(d.length/20) * 0.1; // Decrease font size if label text is too long (>28)
+                        return 'font-size:'+(scale_ratio*tick_font_size*scale_ratio_2)+'px; transform: translate(-' + margin.left * 0.75 + 'px, -' + y.rangeBand() / 2 + 'px);'
+                    })
                 svg.select('.y.axis')
                     .selectAll('foreignObject div')
                     .attr('title', function(d){ return d; })
@@ -488,9 +508,8 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                         svg.on('.zoom', null);
                         zoom_status.translation = zoom.translate();
                         zoom_status.scale = zoom.scale();
-                        $('.save-cohort-card').attr('style', 'position: absolute; top: ' + ($('.worksheet-content').outerHeight() - $('.plot-container').outerHeight())
-                            + 'px; left: 275px;');
-                        $('.save-cohort-card').show();
+                        $('.worksheet.active .save-cohort-card').attr('style', 'position: absolute; top: '+($('.worksheet.active .plot-container').position().top)+'px; left: 275px;');
+                        $('.worksheet.active .save-cohort-card').show();
                     } else {
                         // Resume zooming, restoring the zoom's last state
                         svg.call(zoom);
@@ -498,15 +517,13 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                         zoom_status.scale && zoom.scale(zoom_status.scale);
                         zoom_status.translation = null;
                         zoom_status.scale = null;
-                        var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
-                        // Clear selections
-                        $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
-                        $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Cases: ' + 0);
-                        $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', "");
+                        $('.worksheet.active .plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
+                        $('.worksheet.active .plot').find('.selected-patients-count').html('Number of Cases: ' + 0);
+                        $('.worksheet.active .save-cohort-form input[name="samples"]').attr('value', "");
                         selectedCubbies = {};
                         selectedSamples = null;
                         svg.selectAll('.selected').classed('selected', false);
-                        $('.save-cohort-card').hide();
+                        $('.worksheet.active .save-cohort-card').hide();
                     }
                 };
 
@@ -525,21 +542,19 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                             });
                         });
 
-                        $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + Object.keys(selectedSamples).length);
-                        $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Cases: ' + Object.keys(case_set).length);
-                        $('.save-cohort-card').find('.btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
+                        $('.worksheet.active .plot .selected-samples-count').html('Number of Samples: ' + Object.keys(selectedSamples).length);
+                        $('.worksheet.active .plot .selected-patients-count').html('Number of Cases: ' + Object.keys(case_set).length);
+                        $('.worksheet.active .save-cohort-card .btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
                     }
                 }
 
-                $('.save-cohort-card').find('.btn').on('click', function (e) {
+                $('.worksheet.active .save-cohort-card .btn').on('click', function (e) {
                     if (Object.keys(selectedCubbies).length > 0) {
                         var selected_sample_set = [];
                         _.each(Object.keys(selectedSamples), function (sample) {
                             selected_sample_set.push(selectedSamples[sample]);
                         });
-
-                        var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
-                        $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
+                        $('.worksheet.active .save-cohort-form input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
                     }
                 });
 

@@ -39,7 +39,7 @@
                                                            id="{% if v.full_id %}0-{{ v.full_id }}{% endif %}"
                                                            data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}"
                                                            data-value-displ-name="{% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %}">
-                                                    {% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %} <span class="count">({{ v.count }})</span>
+                                                    {% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %} <span class="float-right sample_count count">{{ v.formatted_count }}</span>
                                                 </label>
                                             </li>
                                         {% endfor %}
@@ -79,7 +79,7 @@
                                                                id="{% if v.full_id %}0-{{ v.full_id }}{% endif %}"
                                                                data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}"
                                                                data-value-displ-name="{% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %}">
-                                                        {% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %} <span class="count">({{ v.count }})</span>
+                                                        {% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %} <span class="float-right sample_count count">{{ v.count|format_num_with_commmas }}</span>
                                                     </label>
                                                 </li>
                                             {% endfor %}
@@ -129,12 +129,12 @@
                     <div class="row col-md-12 space-bottom-10">
                         <span class="detail-label">Total Number of Cases:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="p-0-data-total-participants">{{ total_patients }}</span>
+                        <span class="total-values" id="p-0-data-total-participants">{{ total_patients|format_num_with_commmas }}</span>
                     </div>
                     <div class="row col-md-12 space-bottom-10">
                         <span class="detail-label">Total Number of Samples:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="p-0-data-total-samples">{{ total_samples }}</span>
+                        <span class="total-values" id="p-0-data-total-samples">{{ total_samples|format_num_with_commmas }}</span>
                     </div>
                     <div class="row col-md-12 space-bottom-10">
                         <span>Your Permissions: {{ cohort.perm.perm }}</span>
@@ -186,12 +186,12 @@
                     <div class="row col-md-6">
                         <span class="detail-label">Total Number of Cases:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="p-0-data-total-participants">{{ total_cases }}</span>
+                        <span class="total-values" id="p-0-data-total-participants">{{ total_cases|format_num_with_commmas }}</span>
                     </div>
                     <div class="row col-md-6">
                         <span class="detail-label">Total Number of Samples:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="p-0-data-total-samples">{{ total_samples }}</span>
+                        <span class="total-values" id="p-0-data-total-samples">{{ total_samples|format_num_with_commmas }}</span>
                     </div>
                 </div>
             </div>
