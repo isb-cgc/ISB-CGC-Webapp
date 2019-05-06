@@ -398,3 +398,10 @@ def get_sorted_items(attr_set):
             sorted_list.append(attr_set[attr])
 
     return sorted_list
+
+@register.filter
+def format_num_with_commmas(value):
+    try:
+        return "{:,}".format(int(value))
+    except ValueError:
+        return "0"
