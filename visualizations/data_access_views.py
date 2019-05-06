@@ -17,6 +17,7 @@ limitations under the License.
 
 """
 
+from builtins import str
 import json
 import logging
 import math
@@ -134,7 +135,7 @@ def get_pairwise_result(feature_array):
 
         if outputs is not None:
             results = {'result_vectors': [], 'filter_messages': []}
-            for row_label, row in outputs.items():
+            for row_label, row in list(outputs.items()):
                 if type(row) is dict:
                     results['result_vectors'].append({'feature_1':                 row['feature_A'],
                                                       'feature_2':                 row['feature_B'],
@@ -147,7 +148,7 @@ def get_pairwise_result(feature_array):
                                                       'n_B':                       int(row['n_B']),
                                                       'p_B':                       float(row['p_B']),
                                                       'exclusion_rules':           row['exclusion_rules']})
-                elif type(row) is unicode:
+                elif type(row) is str:
                     results['filter_messages'].append({'filter_message': row[0]})
     except Exception as e:
         outputs = None

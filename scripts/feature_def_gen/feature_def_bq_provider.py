@@ -16,6 +16,8 @@ limitations under the License.
 
 """
 
+from builtins import str
+from builtins import object
 import logging
 from uuid import uuid4
 from time import sleep

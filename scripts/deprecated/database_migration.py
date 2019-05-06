@@ -10,7 +10,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from __future__ import print_function
 
+from builtins import str
 import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "GenespotRE.settings")
 import django
@@ -119,14 +121,14 @@ def create_programs_and_projects(debug):
 
         for prog in programs_to_insert:
             if len(Program.objects.filter(owner=isb_userid,is_public=True,active=True,name=prog)):
-                print >> sys.stdout, "Found program "+prog+", insert skipped."
+                print("Found program "+prog+", insert skipped.", file=sys.stdout)
             else:
                 insertTime = time.strftime('%Y-%m-%d %H:%M:%S')
                 values = (prog, True, insertTime, True, isb_userid, )
 
                 if debug:
-                    print >> sys.stdout, "Executing statement: " + insert_programs
-                    print >> sys.stdout, "with values: " + str(values)
+                    print("Executing statement: " + insert_programs, file=sys.stdout)
+                    print("with values: " + str(values), file=sys.stdout)
                 else:
                     cursor.execute(insert_programs, values)
 
@@ -154,8 +156,8 @@ def create_programs_and_projects(debug):
                     param_set = ("%s," * len(values))[:-1]
 
                     if debug:
-                        print >> sys.stdout, "Executing statement: "+insert_data_tables.format(insert_data_tables_opt_fields, param_set)
-                        print >> sys.stdout, "Values: "+str(values)
+                        print("Executing statement: "+insert_data_tables.format(insert_data_tables_opt_fields, param_set), file=sys.stdout)
+                        print("Values: "+str(values), file=sys.stdout)
                         data_tables = 'data_tables_id'
                     else:
                         cursor.execute(insert_data_tables.format(insert_data_tables_opt_fields, param_set), values)
@@ -192,8 +194,8 @@ def create_programs_and_projects(debug):
                     param_set = ("%s," * len(values))[:-1]
 
                     if debug:
-                        print >> sys.stdout, "Executing statment: "+ insert_annot_tables.format(insert_annot_tables_fields, param_set)
-                        print >> sys.stdout, "Values: "+str(values)
+                        print("Executing statment: "+ insert_annot_tables.format(insert_annot_tables_fields, param_set), file=sys.stdout)
+                        print("Values: "+str(values), file=sys.stdout)
                     else:
                         cursor.execute(insert_annot_tables.format(insert_annot_tables_fields, param_set), values)
                         cursor.execute('SELECT id FROM projects_public_annotation_tables WHERE program_id = %s;', (prog_id,))
@@ -219,15 +221,15 @@ def create_programs_and_projects(debug):
 
             if is_update:
                 if debug:
-                    print >> sys.stdout, "Executing statement: "+update_metadata_tables.format(insert_metadata_tables_opt_fields)
-                    print >> sys.stdout, " with values "+ str(values)
+                    print("Executing statement: "+update_metadata_tables.format(insert_metadata_tables_opt_fields), file=sys.stdout)
+                    print(" with values "+ str(values), file=sys.stdout)
                 else:
                     cursor.execute(update_metadata_tables.format(insert_metadata_tables_opt_fields), values)
             else:
                 param_set = ("%s," * len(values))[:-1]
                 if debug:
-                    print >> sys.stdout, "Exeucting statement: "+update_metadata_tables.format(insert_metadata_tables_opt_fields,param_set)
-                    print >> sys.stdout, " with values "+ str(values)
+                    print("Exeucting statement: "+update_metadata_tables.format(insert_metadata_tables_opt_fields,param_set), file=sys.stdout)
+                    print(" with values "+ str(values), file=sys.stdout)
                 else:
                     cursor.execute(insert_metadata_tables.format(insert_metadata_tables_opt_fields,param_set), values)
 
@@ -252,14 +254,14 @@ def create_programs_and_projects(debug):
                 check = cursor.fetchall()
 
                 if len(check):
-                    print >> sys.stdout, "Project "+row[0]+" is already in the projects_project table, skipping"
+                    print("Project "+row[0]+" is already in the projects_project table, skipping", file=sys.stdout)
                 else:
-                    print >> sys.stdout, "Inserting project "+row[0]
+                    print("Inserting project "+row[0], file=sys.stdout)
                     insertTime = time.strftime('%Y-%m-%d %H:%M:%S')
                     values = (row[0][len(prog_leader):], row[1], True, insertTime, isb_userid, prog_id,)
                     if debug:
-                        print >> sys.stdout, "Executing statement: "+insert_projects
-                        print >> sys.stdout, "Values: " + str(values)
+                        print("Executing statement: "+insert_projects, file=sys.stdout)
+                        print("Values: " + str(values), file=sys.stdout)
                     else:
                         cursor.execute(insert_projects, values)
 
@@ -269,7 +271,7 @@ def create_programs_and_projects(debug):
         ccle_proj.save()
 
     except Exception as e:
-        print >> sys.stdout, traceback.format_exc()
+        print(traceback.format_exc(), file=sys.stdout)
     finally:
         if cursor: cursor.close()
         if db and db.open: db.close()
@@ -309,21 +311,21 @@ def fix_case_barcodes_in_cohorts(debug):
         db.autocommit(True)
 
         if debug:
-            print >> sys.stdout, "Executing statement: "+fix_tcga_case_barcodes
+            print("Executing statement: "+fix_tcga_case_barcodes, file=sys.stdout)
         else:
-            print >> sys.stdout, "[STATUS] Fixing TCGA case barcodes..."
+            print("[STATUS] Fixing TCGA case barcodes...", file=sys.stdout)
             cursor.execute(fix_tcga_case_barcodes)
-            print >> sys.stdout, "[STATUS] ...done."
+            print("[STATUS] ...done.", file=sys.stdout)
 
         if debug:
-            print >> sys.stdout, "Executing statement: " + fix_ccle_case_barcodes
+            print("Executing statement: " + fix_ccle_case_barcodes, file=sys.stdout)
         else:
-            print >> sys.stdout, "[STATUS] Fixing CCLE case barcodes..."
+            print("[STATUS] Fixing CCLE case barcodes...", file=sys.stdout)
             cursor.execute(fix_ccle_case_barcodes)
-            print >> sys.stdout, "[STATUS] ...done."
+            print("[STATUS] ...done.", file=sys.stdout)
 
     except Exception as e:
-        print >> sys.stdout, traceback.format_exc()
+        print(traceback.format_exc(), file=sys.stdout)
     finally:
         if cursor: cursor.close()
         if db and db.open: db.close()
@@ -375,13 +377,13 @@ def fix_cohort_projects(debug):
         values = (program_id, )
 
         if debug:
-            print >> sys.stdout, "Executing statement: "+fix_cohort_projects.format(prog)
-            print >> sys.stdout, "Values: "+str(values)
+            print("Executing statement: "+fix_cohort_projects.format(prog), file=sys.stdout)
+            print("Values: "+str(values), file=sys.stdout)
         else:
             cursor.execute(fix_cohort_projects.format(prog), values)
 
     except Exception as e:
-        print >> sys.stdout, traceback.format_exc()
+        print(traceback.format_exc(), file=sys.stdout)
     finally:
         if cursor: cursor.close()
         if db and db.open: db.close()
@@ -442,15 +444,15 @@ def update_attr_display_table(debug):
 
         for prog in progs:
             if debug:
-                print >> sys.stdout, "[STATUS] Excuting update query:" + update_attr_tbl_stmt
-                print >> sys.stdout, "With values "+str((progs[prog]['new_id'], progs[prog]['old_id'],))
+                print("[STATUS] Excuting update query:" + update_attr_tbl_stmt, file=sys.stdout)
+                print("With values "+str((progs[prog]['new_id'], progs[prog]['old_id'],)), file=sys.stdout)
             else:
                 cursor.execute(update_attr_tbl_stmt, (progs[prog]['new_id'], progs[prog]['old_id'],))
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when adding the attr_value_display table - it may not have been properly generated!"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print("[ERROR] Exception when adding the attr_value_display table - it may not have been properly generated!", file=sys.stdout)
+        print(e, file=sys.stdout)
+        print(traceback.format_exc(), file=sys.stdout)
     finally:
         if cursor: cursor.close()
         if db and db.open: db.close()
@@ -499,14 +501,14 @@ def fix_gene_symbols(debug):
             for mirna in results:
                 mirnas.append(mirna['f'][0]['v'])
         else:
-            print >> sys.stdout, "[WARNING] miRNA/gene symbol query returned no results"
+            print("[WARNING] miRNA/gene symbol query returned no results", file=sys.stdout)
 
         if debug:
-            print >> sys.stdout, "[STATUS] Executing statement: "+fix_current_genes
+            print("[STATUS] Executing statement: "+fix_current_genes, file=sys.stdout)
         else:
-            print >> sys.stdout, "[STATUS] Fixing current genes..."
+            print("[STATUS] Fixing current genes...", file=sys.stdout)
             cursor.execute(fix_current_genes)
-            print >> sys.stdout, "...done."
+            print("...done.", file=sys.stdout)
 
         mirna_gene_symbols = []
 
@@ -514,11 +516,11 @@ def fix_gene_symbols(debug):
             mirna_gene_symbols.append(GeneSymbol(symbol=mirna,type='miRNA'))
 
         if debug:
-            print >> sys.stdout, "[STATUS] Bulk create for %s miRNAs"%str(len(mirna_gene_symbols))
+            print("[STATUS] Bulk create for %s miRNAs"%str(len(mirna_gene_symbols)), file=sys.stdout)
         else:
-            print >> sys.stdout, "[STATUS] Attempting to bulk create %s miRNAs..."%str(len(mirna_gene_symbols))
+            print("[STATUS] Attempting to bulk create %s miRNAs..."%str(len(mirna_gene_symbols)), file=sys.stdout)
             GeneSymbol.objects.bulk_create(mirna_gene_symbols)
-            print >> sys.stdout, "...done."
+            print("...done.", file=sys.stdout)
 
         query = bq_query_template.format(table_name='mirna_gene_symbols', project_name='isb-cgc', dataset_name='test',
                                          type_name='gene')
@@ -542,7 +544,7 @@ def fix_gene_symbols(debug):
             for gene in results:
                 bq_genes.append(gene['f'][0]['v'])
         else:
-            print >> sys.stdout, "[WARNING] miRNA/gene symbol query returned no results"
+            print("[WARNING] miRNA/gene symbol query returned no results", file=sys.stdout)
 
         cursor.execute('SELECT * FROM genes_genesymbol WHERE type=%s;',('gene',))
 
@@ -556,15 +558,15 @@ def fix_gene_symbols(debug):
         if len(new_genes) > 0:
             genes_to_add = [GeneSymbol(symbol=x,type='gene') for x in new_genes]
             if debug:
-                print >> sys.stdout, "[STATUS] Bulk create for %s genes" % str(len(genes_to_add))
+                print("[STATUS] Bulk create for %s genes" % str(len(genes_to_add)), file=sys.stdout)
             else:
-                print >> sys.stdout, "[STATUS] Attempting to bulk create %s genes..." % str(len(genes_to_add))
+                print("[STATUS] Attempting to bulk create %s genes..." % str(len(genes_to_add)), file=sys.stdout)
                 GeneSymbol.objects.bulk_create(genes_to_add)
-                print >> sys.stdout, "[STATUS] ...done."
+                print("[STATUS] ...done.", file=sys.stdout)
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception encountered in fix_gene_symbols:"
-        print >> sys.stdout, traceback.format_exc()
+        print("[ERROR] Exception encountered in fix_gene_symbols:", file=sys.stdout)
+        print(traceback.format_exc(), file=sys.stdout)
     finally:
         if cursor: cursor.close()
         if db and db.open: db.close()
@@ -597,7 +599,7 @@ def fix_user_data_tables(debug,db_to_update = 'test'):
 
         for row in cursor.fetchall():
             if debug:
-                print >> sys.stdout, "[STATUS] Execution statement: " +update_metadata_stmt % row[0]
+                print("[STATUS] Execution statement: " +update_metadata_stmt % row[0], file=sys.stdout)
             else:
                 cursor.execute(update_metadata_stmt % row[0])
 
@@ -618,13 +620,13 @@ def fix_user_data_tables(debug,db_to_update = 'test'):
         for row in cursor.fetchall():
             cols = row[1].split(',')
             if debug:
-                print >> sys.stdout, "[STATUS] Execution statement: "+update_case_samples_stmt % (row[0], cols[len(cols)-1],)
+                print("[STATUS] Execution statement: "+update_case_samples_stmt % (row[0], cols[len(cols)-1],), file=sys.stdout)
             else:
                 cursor.execute(update_case_samples_stmt % (row[0], cols[len(cols)-1],))
 
     except Exception as e:
-        print >> sys.stderr, "[ERROR] While fixing user data tables"
-        print >> sys.stderr, traceback.format_exc()
+        print("[ERROR] While fixing user data tables", file=sys.stderr)
+        print(traceback.format_exc(), file=sys.stderr)
     finally:
         if cursor: cursor.close()
         if db and db.open: db.close()
@@ -646,13 +648,13 @@ def fix_var_faves(debug):
             WHERE version IS NULL;"""
 
         if debug:
-            print >> sys.stdout, "[STATUS] Executing update statement: "+update_vf_stmt
+            print("[STATUS] Executing update statement: "+update_vf_stmt, file=sys.stdout)
         else:
             cursor.execute(update_vf_stmt)
 
     except Exception as e:
-        print >> sys.stderr, "[ERROR] Exception while fixing variable favorites:"
-        print >> sys.stderr, traceback.format_exc()
+        print("[ERROR] Exception while fixing variable favorites:", file=sys.stderr)
+        print(traceback.format_exc(), file=sys.stderr)
     finally:
         if cursor: cursor.close()
         if db and db.open: db.close()
@@ -690,9 +692,9 @@ def fix_filters(debug):
         """
 
         if debug:
-            print >> sys.stdout, "[STATUS] Executing update statement: "+fix_filters_program
-            print >> sys.stdout, "[STATUS] Executing update statement: "+fix_filters_project
-            print >> sys.stdout, "[STATUS] Executing update statement: "+fix_filters_names
+            print("[STATUS] Executing update statement: "+fix_filters_program, file=sys.stdout)
+            print("[STATUS] Executing update statement: "+fix_filters_project, file=sys.stdout)
+            print("[STATUS] Executing update statement: "+fix_filters_names, file=sys.stdout)
         else:
             cursor.execute(fix_filters_program)
             cursor.execute(fix_filters_project)
@@ -780,15 +782,15 @@ def fix_filters(debug):
 
         # Fix CCLE-only cohort filters
         if debug:
-            print >> sys.stdout, "Executing statement: " + fix_ccle_only_filters
-            print >> sys.stdout, "Values: " + str((ccle_program_id,))
+            print("Executing statement: " + fix_ccle_only_filters, file=sys.stdout)
+            print("Values: " + str((ccle_program_id,)), file=sys.stdout)
         else:
             cursor.execute(fix_ccle_only_filters, (ccle_program_id,))
 
         # Fix TCGA-only cohort filters
         if debug:
-            print >> sys.stdout, "Executing statement: " + fix_tcga_only_filters
-            print >> sys.stdout, "Values: " + str((tcga_program_id,))
+            print("Executing statement: " + fix_tcga_only_filters, file=sys.stdout)
+            print("Values: " + str((tcga_program_id,)), file=sys.stdout)
         else:
             cursor.execute(fix_tcga_only_filters, (tcga_program_id,))
 
@@ -800,13 +802,13 @@ def fix_filters(debug):
 
             for filter_row in cursor.fetchall():
                 if debug:
-                    print >> sys.stdout, "Executing statement: " + add_filter_program
-                    print >> sys.stdout, "Values: " + str((tcga_program_id, filter_row[0],))
+                    print("Executing statement: " + add_filter_program, file=sys.stdout)
+                    print("Values: " + str((tcga_program_id, filter_row[0],)), file=sys.stdout)
 
                     if filter_row[1] in ccle_attr:
-                        print >> sys.stdout, filter_row[1] + " found in ccle_attr"
-                        print >> sys.stdout, "Executing statement: " + insert_filter
-                        print >> sys.stdout, "Values: " + str((filter_row[1], filter_row[2], row[0], ccle_program_id,))
+                        print(filter_row[1] + " found in ccle_attr", file=sys.stdout)
+                        print("Executing statement: " + insert_filter, file=sys.stdout)
+                        print("Values: " + str((filter_row[1], filter_row[2], row[0], ccle_program_id,)), file=sys.stdout)
                 else:
 
                     # First, apply TCGA as the program ID
@@ -818,7 +820,7 @@ def fix_filters(debug):
 
 
     except Exception as e:
-        print >> sys.stdout, traceback.format_exc()
+        print(traceback.format_exc(), file=sys.stdout)
     finally:
         if cursor: cursor.close()
         if db and db.open: db.close()
@@ -875,7 +877,7 @@ def main():
         args.fix_user_data and fix_user_data_tables(args.debug_mode,args.database)
 
     except Exception as e:
-        print >> sys.stdout, traceback.format_exc()
+        print(traceback.format_exc(), file=sys.stdout)
 
 if __name__ == "__main__":
     main()

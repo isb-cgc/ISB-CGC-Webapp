@@ -15,11 +15,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
+from __future__ import absolute_import
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from models import Analysis
+from .models import Analysis
 
 @login_required
 def sample_analyses(request):

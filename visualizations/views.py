@@ -15,7 +15,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
+from __future__ import absolute_import
 
+from builtins import map
+from builtins import str
+from past.builtins import basestring
 import json
 import collections
 import datetime
@@ -30,7 +34,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.utils import formats
 
-from models import SavedViz, Plot, Plot_Cohorts, Viz_Perms, Plot_Comments
+from .models import SavedViz, Plot, Plot_Cohorts, Viz_Perms, Plot_Comments
 from cohorts.models import Cohort, Cohort_Perms, Samples
 from bq_data_access.v2.feature_search.util import SearchableFieldHelper
 
@@ -38,7 +42,7 @@ from bq_data_access.v2.feature_search.util import SearchableFieldHelper
 def _decode_list(data):
     rv = []
     for item in data:
-        if isinstance(item, unicode):
+        if isinstance(item, str):
             item = item.encode('utf-8')
         elif isinstance(item, list):
             item = _decode_list(item)
@@ -49,10 +53,10 @@ def _decode_list(data):
 
 def _decode_dict(data):
     rv = {}
-    for key, value in data.iteritems():
-        if isinstance(key, unicode):
+    for key, value in data.items():
+        if isinstance(key, str):
             key = key.encode('utf-8')
-        if isinstance(value, unicode):
+        if isinstance(value, str):
             value = value.encode('utf-8')
         elif isinstance(value, list):
             value = _decode_list(value)
@@ -65,9 +69,9 @@ def convert(data):
     if isinstance(data, basestring):
         return str(data)
     elif isinstance(data, collections.Mapping):
-        return dict(map(convert, data.iteritems()))
+        return dict(list(map(convert, iter(data.items()))))
     elif isinstance(data, collections.Iterable):
-        return type(data)(map(convert, data))
+        return type(data)(list(map(convert, data)))
     else:
         return data
 
@@ -503,18 +507,18 @@ def save_viz(request):
 
         # Update or create plots associated to visualizations
         plots = {}
-        for key in params.keys():
+        for key in list(params.keys()):
             if 'plot' in key:
                 plot, index, attr = key.split('-')
                 index = int(index)
                 attr = str(attr)
-                if index in plots.keys():
+                if index in list(plots.keys()):
                     plots[index][attr] = params[key].encode('utf-8')
                 else:
                     plots[index] = {}
                     plots[index][attr] = params[key].encode('utf-8')
 
-        for key in plots.keys():
+        for key in list(plots.keys()):
             cohort_ids = plots[key]['cohort_ids'].split(',')
             cohorts = Cohort.objects.filter(id__in=cohort_ids)
             plot, created = Plot.objects.update_or_create(id=key, defaults={'visualization':viz,

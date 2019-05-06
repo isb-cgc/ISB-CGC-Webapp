@@ -16,6 +16,9 @@ limitations under the License.
 
 """
 
+from builtins import str
+from builtins import range
+from builtins import object
 import logging
 import sys
 import traceback
@@ -49,7 +52,7 @@ class CloudSQLCohortAccess(object):
     @classmethod
     def get_cohort_barcodes(cls, cohort_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
-        cohort_id_stmt = ', '.join(['%s' for x in xrange(len(cohort_id_array))])
+        cohort_id_stmt = ', '.join(['%s' for x in range(len(cohort_id_array))])
         query = 'SELECT sample_barcode AS barcode FROM {cohort_table} WHERE cohort_id IN ({cohort_id_stmt})'.format(
             cohort_table=DJANGO_COHORT_TABLE,
             cohort_id_stmt=cohort_id_stmt)
@@ -78,7 +81,7 @@ class CloudSQLCohortAccess(object):
     @classmethod
     def get_cohorts_and_projects_for_datapoints(cls, cohort_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
-        cohort_id_stmt = ', '.join(['%s' for x in xrange(len(cohort_id_array))])
+        cohort_id_stmt = ', '.join(['%s' for x in range(len(cohort_id_array))])
 
         query = 'SELECT sample_barcode, cohort_id, project_id FROM {cohort_samples_table} WHERE cohort_id IN ({cohort_id_stmt})'.format(
             cohort_samples_table=DJANGO_COHORT_SAMPLES_TABLE,
@@ -117,7 +120,7 @@ class CloudSQLCohortAccess(object):
     @classmethod
     def get_cohort_info(cls, cohort_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
-        cohort_id_stmt = ', '.join(['%s' for x in xrange(len(cohort_id_array))])
+        cohort_id_stmt = ', '.join(['%s' for x in range(len(cohort_id_array))])
 
         query_template = ("SELECT ti.id AS cohort_id, ti.name, COUNT(ts.sample_barcode) AS size "
                           "FROM {cohort_info_table} ti "

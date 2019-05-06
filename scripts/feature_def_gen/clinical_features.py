@@ -17,6 +17,7 @@ limitations under the License.
 """
 
 
+from builtins import object
 class CLINTableConfig(object):
     """
     Configuration class for a BigQuery table accessible through CLIN feature

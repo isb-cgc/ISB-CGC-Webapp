@@ -16,6 +16,9 @@ limitations under the License.
 
 """
 
+from builtins import str
+from builtins import range
+from builtins import object
 import logging
 from re import compile as re_compile
 
@@ -71,7 +74,7 @@ class CNVRFeatureDef(object):
             raise FeatureNotFoundException(feature_id)
         value_field, chromosome, start, end, internal_table_id = feature_fields[0]
 
-        valid_chr_set = frozenset([str(x) for x in xrange(1, 24)] + ['X', 'Y', 'M'])
+        valid_chr_set = frozenset([str(x) for x in range(1, 24)] + ['X', 'Y', 'M'])
         if chromosome not in valid_chr_set:
             raise FeatureNotFoundException(feature_id)
 

@@ -2,6 +2,7 @@
 adminrestrict middleware
 """
 
+from builtins import object
 __author__ = "Robert Romano (rromano@gmail.com)"
 __copyright__ = "Copyright 2014 Robert C. Romano"
 

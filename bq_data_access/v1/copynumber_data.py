@@ -16,6 +16,9 @@ limitations under the License.
 
 """
 
+from builtins import str
+from builtins import range
+from builtins import object
 import logging
 from re import compile as re_compile
 from django.conf import settings
@@ -59,7 +62,7 @@ class CNVRFeatureDef(object):
         logging.debug(feature_fields)
         value_field, chromosome, start, end = feature_fields[0]
 
-        valid_chr_set = frozenset([str(x) for x in xrange(1, 24)] + ['X', 'Y', 'M'])
+        valid_chr_set = frozenset([str(x) for x in range(1, 24)] + ['X', 'Y', 'M'])
         if chromosome not in valid_chr_set:
             raise FeatureNotFoundException(feature_id)
 

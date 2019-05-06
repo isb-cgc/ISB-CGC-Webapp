@@ -1,6 +1,7 @@
+from __future__ import absolute_import
 from django.http import HttpResponse
 from django.template import loader
-from models import Config
+from .models import Config
 
 def offline_view(request):
     offline_message = Config.objects.get(key='offline').message

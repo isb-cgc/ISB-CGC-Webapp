@@ -11,6 +11,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from builtins import str
+from builtins import map
+from past.builtins import basestring
 import collections
 import json
 import logging
@@ -63,9 +66,9 @@ def convert(data):
     if isinstance(data, basestring):
         return str(data)
     elif isinstance(data, collections.Mapping):
-        return dict(map(convert, data.iteritems()))
+        return dict(list(map(convert, iter(data.items()))))
     elif isinstance(data, collections.Iterable):
-        return type(data)(map(convert, data))
+        return type(data)(list(map(convert, data)))
     else:
         return data
 
@@ -74,7 +77,7 @@ def _decode_list(data):
     # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     rv = []
     for item in data:
-        if isinstance(item, unicode):
+        if isinstance(item, str):
             item = item.encode('utf-8')
         elif isinstance(item, list):
             item = _decode_list(item)
@@ -87,10 +90,10 @@ def _decode_list(data):
 def _decode_dict(data):
     # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     rv = {}
-    for key, value in data.iteritems():
-        if isinstance(key, unicode):
+    for key, value in data.items():
+        if isinstance(key, str):
             key = key.encode('utf-8')
-        if isinstance(value, unicode):
+        if isinstance(value, str):
             value = value.encode('utf-8')
         elif isinstance(value, list):
             value = _decode_list(value)
@@ -150,7 +153,7 @@ def user_detail(request, user_id):
 
         forced_logout = 'dcfForcedLogout' in request.session
         nih_details = get_nih_user_details(user_id, forced_logout)
-        for key in nih_details.keys():
+        for key in list(nih_details.keys()):
             user_details[key] = nih_details[key]
 
         return render(request, 'GenespotRE/user_detail.html',
@@ -310,7 +313,7 @@ def get_image_data_args(request):
         file_uuid = request.POST.get('file_uuid', None)
 
     if file_uuid:
-        file_uuid = (None if re.compile(ur'[^A-Za-z0-9\-]').search(file_uuid) else file_uuid)
+        file_uuid = (None if re.compile(r'[^A-Za-z0-9\-]').search(file_uuid) else file_uuid)
 
     return get_image_data(request, file_uuid)
 

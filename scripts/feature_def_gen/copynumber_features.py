@@ -16,6 +16,8 @@ limitations under the License.
 
 """
 
+from builtins import str
+from builtins import object
 import logging
 
 from bq_data_access.data_types.definitions import PlottableDataType
