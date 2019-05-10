@@ -96,7 +96,7 @@ require([
                 var docs = data.response.docs;
                 var html_list = "";
                 for(var i = 0 ; i < docs.length && i < list_max ; i++){
-                    html_list += '<li><a href=\"/notebooks/'+docs[i].id+'/\" title=\"'+docs[i].name +
+                    html_list += '<li><a href=\"/notebooks/'+docs[i].id+'/public\" title=\"'+docs[i].name +
                                     '\"><div class=\"list-main\"><h5 class=\"list-title\">'+docs[i].name +
                                     '</h5><p>'+(docs[i].description)+'</p></div></a></li>'
                 }

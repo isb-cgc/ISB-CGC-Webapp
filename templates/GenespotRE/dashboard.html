@@ -120,11 +120,16 @@
                                                 <a href="{% url 'notebook_detail' notebook.id %}"
                                                    title="{{ notebook.name|title|wrap_text }}">
                                                     <div class="list-main">
-                                                        <h5 class="list-title">{{ notebook.name }}</h5>
+                                                        <h5 class="list-title">{{ notebook.name }}
+                                                        </h5>
                                                         <p>{{ notebook.description }}</p>
                                                     </div>
                                                     <div class="list-info">
                                                         {{ notebook.last_date_saved|date:'M d, Y, g:i a' }}
+                                                        {% if notebook.is_public %}
+                                                            <span class="badge"
+                                                                  style="margin: 0 5px;">Public</span>
+                                                        {% endif %}
                                                     </div>
                                                 </a>
                                             </li>
@@ -140,7 +145,8 @@
                                     <form id="create-notebook" method="POST" action="{% url 'notebook_create' %}"
                                           class="pull-right">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-link"><i class="fa fa-plus"></i>Create a New Notebook
+                                        <button type="submit" class="btn btn-link"><i class="fa fa-plus"></i>Create a
+                                            New Notebook
                                         </button>
                                     </form>
                                 </div>
@@ -148,7 +154,8 @@
                         </div>
                         <div class="col-md-6">
                             <div class="panel-heading">
-                                <h3 class="panel-title"><a href="{% url 'notebooks_public' %}">Search Public Notebooks</a>
+                                <h3 class="panel-title"><a href="{% url 'notebooks_public' %}">Search Public
+                                    Notebooks</a>
                                 </h3>
                             </div>
                             <div class="panel-body">
@@ -158,7 +165,7 @@
                                                placeholder="Keywords">
                                         <span class="input-group-btn">
                                             <button id="nb-keyword-search-btn" class="btn btn-default"
-                                                type="submit">Search</button>
+                                                    type="submit">Search</button>
                                         </span>
                                     </div>
                                 </form>

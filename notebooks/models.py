@@ -40,25 +40,12 @@ class Notebook(models.Model):
     objects = NotebookManager()
 
     @classmethod
-    def deep_get(cls, id):
-        notebook_model            = cls.objects.get(id=id)
-        notebook_model.owner      = notebook_model.get_owner()
-
-        return notebook_model
-
-    @classmethod
     def create(cls, name, file_path, description, keywords, user):
 
-        notebook_model = cls.objects.create(name=name, file_path=file_path, description=description, keywords=keywords, owner=user)
+        notebook_model = cls.objects.create(name=name, file_path=file_path, description=description, keywords=keywords, owner=user, active=True, is_public=False)
         notebook_model.save()
 
         return notebook_model
-
-    # @classmethod
-    # def createDefault(cls, name, description, keywords, user):
-    #     notebook_model = cls.create(name, description, keywords, user)
-    #
-    #     return notebook_model
 
     @classmethod
     def edit(cls, id, name, description, keywords, file_path):
@@ -68,6 +55,22 @@ class Notebook(models.Model):
         notebook_model.keywords = keywords
         notebook_model.file_path = file_path
         notebook_model.save()
+        return notebook_model
+
+    @classmethod
+    def add(cls, id, user):
+        notebook_model = cls.objects.get(id=id)
+        if not notebook_model.isin_notebooklist(user=user):
+            obj = Notebook_Added.objects.create(notebook=notebook_model, user=user)
+            obj.save()
+        return notebook_model
+
+    @classmethod
+    def remove(cls, id, user):
+        notebook_model = cls.objects.get(id=id)
+        if notebook_model.isin_notebooklist(user=user):
+            obj = Notebook_Added.objects.filter(notebook=notebook_model, user=user)
+            obj.delete()
         return notebook_model
 
     @classmethod
@@ -88,17 +91,13 @@ class Notebook(models.Model):
         notebook_model = cls.objects.get(id=id)
         return notebook_model.owner
 
-    def get_owner(self):
-        return self.owner
+
+    # checks if notebook is in my notebook list
+    def isin_notebooklist(self, user):
+        return user == self.owner or Notebook_Added.objects.filter(notebook=self, user=user)
 
 
-# class Notebook_Last_View(models.Model):
-#     notebook = models.ForeignKey(Notebook, blank=False)
-#     user = models.ForeignKey(User, null=False, blank=False)
-#     test = models.DateTimeField(auto_now_add=True, null=True)
-#     last_view = models.DateTimeField(auto_now=True)
+class Notebook_Added(models.Model):
+    notebook = models.ForeignKey(Notebook, null=False, blank=False)
+    user = models.ForeignKey(User, null=False, blank=True)
 
-
-# @admin.register(Notebook)
-# class NotebookAdmin(admin.ModelAdmin):
-#     list_display = ('id','name','description','date_created','last_date_saved', 'is_public')

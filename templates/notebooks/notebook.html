@@ -1,15 +1,10 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load custom_tags %}
-{#{% load workbook_custom_tags %}#}
+{% load notebook_custom_tags %}
 
 {% block title %}Notebooks | ISB-CGC{% endblock %}
 {% block extra_css_libs %}{% endblock %}
-
-{#{% block header %}#}
-{#    {<link type="text/css" rel="stylesheet" href="{% static 'css/jquery.qtip.min.css' %}" />}#}
-{#{% endblock %}#}
-
 
 {% block link_page_name %}notebook_detail{% endblock %}
 {% block page_name %}notebook_detail{% endblock %}
@@ -19,12 +14,27 @@
         <!--Notebook header-->
         <ol class="breadcrumb">
             <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-            <li><a href="{% url 'notebooks' %}">Saved Notebooks</a></li>
+            {% if from_public_list %}
+                <li><a href="{% url 'notebooks_public' %}">Public Notebooks</a></li>
+            {% else %}
+                <li><a href="{% url 'notebooks' %}">Saved Notebooks</a></li>
+            {% endif %}
         </ol>
-        <h1 class="page-header">{{ notebook.name }}{% if notebook.is_public %}<span class="badge" style="margin: 0 5px;">Public</span>{% endif %}</h1>
+
+        <h1 class="page-header">{{ notebook.name }}{% if notebook.is_public %}
+            <span class="badge" style="margin: 0 5px;">Public</span>{% endif %}</h1>
         <p>{{ notebook.description }}</p>
+
         <label aria-label="notebook-keywords">Keywords: </label>
         <p>{{ notebook.keywords }}</p>
+
+        <label aria-label="notebook-file-path">Notebook File Location: </label>
+        <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">https://github.com/</span>
+            <input type="text" class="form-control" aria-describedby="basic-addon1" value="{{ notebook.file_path }}"
+                   readonly>
+        </div>
+
         <ul class="page-action-group" role="menubar">
             {% if notebook.owner.id == request.user.id %}
                 <li role="menuitem">
@@ -42,21 +52,26 @@
                             data-target="#delete-notebook-modal-{{ notebook.id }}">Delete
                     </button>
                 </li>
-                {#            <li class="separator"></li>#}
-                {#            <li role="menuitem" title="This workbook cannot be shared because you are not the owner of some components (cohort, variable list, gene list)."><button class="btn btn-info disabled">Share</button></li>#}
-            {% elif notebook.is_public %}
-{#                 Is a public notebook#}
-{#                <li class="separator"></li>#}
-                <li role="menuitem">
-                    <button class="btn btn-info" data-toggle="modal"
-                            data-target="#copy-notebook-modal-{{ notebook.id }}">Duplicate
-                    </button>
-                </li>
-                <li role="menuitem">
-                    <button class="btn btn-info" data-toggle="modal"
-                            data-target="#delete-notebook-modal-{{ notebook.id }}">Remove
-                    </button>
-                </li>
+            {% else %}
+                {% if notebook|isin_notebooklist:request.user %}
+                    <li role="menuitem">
+                        <button class="btn btn-info" data-toggle="modal"
+                                data-target="#remove-notebook-modal-{{ notebook.id }}">Remove from My List
+                        </button>
+                    </li>
+                    <li role="menuitem">
+                        <button class="btn btn-info" data-toggle="modal"
+                                data-target="#copy-notebook-modal-{{ notebook.id }}">Duplicate
+                        </button>
+                    </li>
+                {% else %}
+                    <li role="menuitem">
+                        <button class="btn btn-info" data-toggle="modal"
+                                data-target="#add-notebook-modal-{{ notebook.id }}">Add to My List
+                        </button>
+                    </li>
+                {% endif %}
+
             {% endif %}
         </ul>
     </div>
@@ -68,9 +83,9 @@
                 <div class="panel panel-default">
                     <div class="panel-body">
                         <div class="iframe-container">
-{#                            <div class="btn-float toggle-fullscreen" title="Toggle full screen">#}
-{#                                <i class="fa fa-expand"></i>#}
-{#                            </div>#}
+                            {#                            <div class="btn-float toggle-fullscreen" title="Toggle full screen">#}
+                            {#                                <i class="fa fa-expand"></i>#}
+                            {#                            </div>#}
                             <div class="load-spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
                             <iframe id="notebook-iframe" frameborder="0"
                                     src="{{ notebook_viewer }}/github/{{ notebook.file_path }}"></iframe>
@@ -81,18 +96,7 @@
         </div>
     </div>
 
-    {#<div class="container">#}
-    {#    <iframe src="https://nbviewer.jupyter.org"{{ notebook.file_path }}></iframe>#}
-    {##}
-    {#</div>#}
-
     {% include "notebooks/notebook_modals.html" %}
-
-{#    <script type="text/javascript">#}
-        {#    var base_url            = '{{ BASE_URL|safe }}';#}
-        {#var display_worksheet_id    = '{{ display_worksheet.id|safe }}';#}
-        {#var notebook_id             = '{{ notebook.id }}';#}
-    {#</script>#}
 
 {% endblock content %}
 {% block js_file %}{% static 'js/notebooks.js' %}{% endblock %}

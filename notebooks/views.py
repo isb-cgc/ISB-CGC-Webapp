@@ -14,32 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-# from copy import deepcopy
-# import json
-# import re
-# import sys
+import re
 import logging
-import json
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
-# from django.contrib.auth.models import User
 from django.contrib import messages
-# from django.http import StreamingHttpResponse
-# from bq_data_access.v1.feature_search.util import SearchableFieldHelper
-# from bq_data_access.v2.feature_search.util import SearchableFieldHelper as SearchableFieldHelper_v2
-from django.http import HttpResponse, JsonResponse
-from models import Notebook
-# from variables.models import VariableFavorite, Variable
-# from genes.models import GeneFavorite
-# from analysis.models import Analysis
-# from projects.models import Program
-# from sharing.service import create_share
+from .models import Notebook, Notebook_Added
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from urllib2 import *
-
-# from django.utils.html import escape
+# from urllib.request import urlopen
 
 logger = logging.getLogger('main_logger')
 
@@ -51,17 +35,23 @@ SOLR_URL = settings.SOLR_URL
 def notebook_list(request):
     template = 'notebooks/notebook_list.html'
     command = request.path.rsplit('/', 1)[1]
-    # notebooks = None
-    is_public = (command == "public")
+    notebooks = None
+    is_public_list = (command == "public")
 
-    if is_public:
-        # if request.method == "POST":
-        #     notebook_keywords = request.POST.get('nb-keywords')[0:2000]
-        #     if notebook_keywords:
-                # connection = urlopen('https://google.com')
-                # solr_nb_search_url = SOLR_URL+'notebooks/select?wt=python&q='+notebook_keywords
+    if is_public_list:
+        if request.method == "POST":
+            notebook_keywords = request.POST.get('nb-keywords')[0:2000]
+            # print(notebook_keywords)
+            if notebook_keywords:
+                result_ids = [4, 7]
+                notebooks = Notebook.objects.filter(is_public=True, active=True, pk__in=result_ids)
+
+
+                # solr_nb_search_url = SOLR_URL+'notebooks/select?wt=json&q='+notebook_keywords
                 # try:
-                #     # urlopen(solr_nb_search_url)
+                #     r = requests.post(solr_nb_search_url)
+                #     # connection = urlopen('https://google.com')
+                #     # connection = urlopen(solr_nb_search_url)
                 #     # connection = url_open(solr_nb_search_url)
                 #
                 # except Exception as e:
@@ -69,11 +59,12 @@ def notebook_list(request):
                 #     logger.exception(e)
                 #     messages.error(request, "An error was encountered while trying to view this notebook.")
                 # finally:
-                #     redirect_url = reverse('notebooks')
+                #     redirect_url = reverse('notebooks_public')
                 #     return redirect(redirect_url)
 
+
                 # response = json.load(connection)
-                # print response['response']['numFound'], "documents found."
+                # print (response['response']['numFound'], "documents found.")
 
                 # Print the name of each document.
 
@@ -81,22 +72,23 @@ def notebook_list(request):
                 #     print "  Name =", document['name']
         # sharedNotebooks = Notebook.objects.filter(shared__matched_user=request.user, shared__active=True,
         #                                           active=True)
-
-        notebooks = Notebook.objects.filter(is_public=True, active=True)
+        if not notebooks:
+            notebooks = Notebook.objects.filter(is_public=True, active=True)
     else:
-        userNotebooks = request.user.notebook_set.all()
-        notebooks = userNotebooks.distinct()
+        user_notebooks = request.user.notebook_set.filter(active=True)
+        added_public_notebook_ids = Notebook_Added.objects.filter(user=request.user).values_list('notebook', flat=True)
+        shared_notebooks = Notebook.objects.filter(is_public=True, active=True, pk__in=added_public_notebook_ids)
+        notebooks = user_notebooks | shared_notebooks
+        notebooks = notebooks.distinct()
 
-    return render(request, template, {'is_public' : is_public, 'notebooks': notebooks})
+    return render(request, template, {'is_public_list' : is_public_list, 'notebooks': notebooks})
 
 @login_required
 def notebook(request, notebook_id=0):
     template = 'notebooks/notebook.html'
     command = request.path.rsplit('/', 1)[1]
     notebook_model = None
-
     try:
-
         if request.method == "POST":
             if command == "create":
                 notebook_model = Notebook.createDefault(name="Untitled Notebook", description="", user=request.user)
@@ -106,9 +98,6 @@ def notebook(request, notebook_id=0):
                 notebook_keywords = request.POST.get('keywords')[0:2000]
                 notebook_desc = request.POST.get('description')[0:2000]
                 notebook_file_path = request.POST.get('file_path')[0:2000]
-
-
-
                 blacklist = re.compile(BLACKLIST_RE, re.UNICODE)
                 match_name = blacklist.search(unicode(notebook_name))
                 match_keywords = blacklist.search(unicode(notebook_keywords))
@@ -138,8 +127,27 @@ def notebook(request, notebook_id=0):
                 notebook_model = Notebook.copy(id=notebook_id, user=request.user)
             elif command == "delete":
                 Notebook.destroy(id=notebook_id)
+            elif command == "add":
+                notebook_model = Notebook.objects.get(id=notebook_id)
+                if not notebook_model.is_public:
+                    messages.error(request, 'Notebook <b>{}</b> is a privately listed notebook - Unable to add this notebook to your list.'.format(
+                            notebook_model.name))
+                elif notebook_model.isin_notebooklist(user=request.user):
+                    messages.error(request,
+                        'Notebook <b>{}</b> is already in your notebook list.'.format(
+                            notebook_model.name))
+                else:
+                    Notebook.add(id=notebook_id, user=request.user)
+                    messages.info(request, 'Notebook <b>{}</b> is added to your notebook list.'.format(
+                            notebook_model.name))
+            elif command == "remove":
+                notebook_model = Notebook.objects.get(id=notebook_id)
+                nb_name = notebook_model.name
+                Notebook.remove(id=notebook_id, user=request.user)
+                messages.info(request, 'Notebook <b>{}</b> is removed from your notebook list.'.format(
+                    nb_name))
 
-            if command == "delete":
+            if command == "delete" or command == "remove":
                 redirect_url = reverse('notebooks')
             else:
                 redirect_url = reverse('notebook_detail', kwargs={'notebook_id': notebook_model.id})
@@ -147,20 +155,26 @@ def notebook(request, notebook_id=0):
             return redirect(redirect_url)
 
         elif request.method == "GET":
+            redirect_view = 'notebooks' + ('_public' if command == "public" else '')
             if notebook_id:
                 try:
-                    ownedNotebooks = request.user.notebook_set.filter(active=True)
-                    # publicNotebooks = Notebook.objects.filter(is_public=True, active=True)
-                    notebooks = ownedNotebooks
-                                # | publicNotebooks
-                    notebooks = notebooks.distinct()
+                    if command == "public":
+                        notebooks = Notebook.objects.filter(is_public=True, active=True)
+                    else:
+                        user_notebooks = request.user.notebook_set.filter(active=True)
+                        added_public_notebook_ids = Notebook_Added.objects.filter(user=request.user).values_list(
+                            'notebook', flat=True)
+                        shared_notebooks = Notebook.objects.filter(is_public=True, active=True, pk__in=added_public_notebook_ids)
+                        notebooks = user_notebooks | shared_notebooks
+                        notebooks = notebooks.distinct()
+
                     notebook_model = notebooks.get(id=notebook_id)
-                    return render(request, template, {'notebook': notebook_model, 'notebook_viewer': settings.NOTEBOOK_VIEWER})
+                    return render(request, template, {'notebook': notebook_model, 'from_public_list': command == "public", 'notebook_viewer': settings.NOTEBOOK_VIEWER})
                 except ObjectDoesNotExist:
-                    redirect_url = reverse('notebooks')
+                    redirect_url = reverse(redirect_view)
                     return redirect(redirect_url)
             else:
-                redirect_url = reverse('notebooks')
+                redirect_url = reverse(redirect_view)
                 return redirect(redirect_url)
 
     except Exception as e:
@@ -171,60 +185,3 @@ def notebook(request, notebook_id=0):
         redirect_url = reverse('notebooks')
 
     return redirect(redirect_url)
-
-
-# @login_required
-# def notebook_share(request, notebook_id=0):
-#     status = None
-#     result = None
-#
-#     try:
-#         emails = re.split('\s*,\s*', request.POST['share_users'].strip())
-#         users_not_found = []
-#         # req_user = None
-#
-#         try:
-#             req_user = User.objects.get(id=request.user.id)
-#         except ObjectDoesNotExist as e:
-#             raise Exception("{} is not a user ID in this database!".format(str(request.user.id)))
-#
-#         notebook_to_share = request.user.notebook_set.get(id=notebook_id, active=True)
-#
-#         if notebook_to_share.owner.id != req_user.id:
-#             raise Exception(" {} is not the owner of this notebook!".format(req_user.email))
-#
-#         for email in emails:
-#             try:
-#                 User.objects.get(email=email)
-#             except ObjectDoesNotExist as e:
-#                 users_not_found.append(email)
-#
-#         if len(users_not_found) > 0:
-#             status = 'error'
-#             result = {
-#                 'msg': 'The following user emails could not be found; please ask them to log into the site first: ' + ", ".join(
-#                     users_not_found)
-#             }
-#         else:
-#             create_share(request, notebook_to_share, emails, 'Notebook')
-#             status = 'success'
-#
-#     except Exception as e:
-#         logger.error("[ERROR] While trying to share a notebook:")
-#         logger.exception(e)
-#         status = 'error'
-#         result = {
-#             'msg': 'There was an error while attempting to share this notebook.'
-#         }
-#     finally:
-#         if not status:
-#             status = 'error'
-#             result = {
-#                 'msg': 'An unknown error has occurred while sharing this notebook.'
-#             }
-#
-#     return JsonResponse({
-#         'status': status,
-#         'result': result
-#     })
-

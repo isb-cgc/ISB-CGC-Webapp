@@ -17,6 +17,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(serialize=False, primary_key=True)),
                 ('name', models.CharField(max_length=2024)),
+                ('file_path', models.CharField(max_length=1024, null=False)),
                 ('description', models.CharField(max_length=2024)),
                 ('keywords', models.CharField(max_length=2024)),
                 ('date_created', models.DateTimeField(auto_now_add=True)),
@@ -29,6 +30,22 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model,),
         ),
+        migrations.CreateModel(
+            name='Notebook_Added',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('notebook', models.ForeignKey(to='notebooks.Notebook')),
+                # ('perm', models.CharField(default=b'READER', max_length=10,
+                #                           choices=[(b'READER', b'Reader'), (b'OWNER', b'Owner')])),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, blank=True)),
+
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+
+
         # migrations.CreateModel(
         #     name='Notebook_Last_View',
         #     fields=[

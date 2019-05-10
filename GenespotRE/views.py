@@ -43,6 +43,7 @@ from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
 from projects.models import Program
 from workbooks.models import Workbook
+from notebooks.models import Notebook, Notebook_Added
 from accounts.models import GoogleProject
 from accounts.sa_utils import get_nih_user_details
 
@@ -487,7 +488,10 @@ def dashboard_page(request):
     workbooks = workbooks.distinct().order_by('-last_date_saved')
 
     # Notebook List
-    notebooks = request.user.notebook_set.filter(active=True)
+    user_notebooks = request.user.notebook_set.filter(active=True)
+    added_public_notebook_ids = Notebook_Added.objects.filter(user=request.user).values_list('notebook', flat=True)
+    shared_notebooks = Notebook.objects.filter(is_public=True, active=True, pk__in=added_public_notebook_ids)
+    notebooks = user_notebooks | shared_notebooks
     notebooks = notebooks.distinct().order_by('-last_date_saved')
 
     # Gene & miRNA Favorites
