@@ -74,6 +74,7 @@ require([
         }
     }
 
+
     // Solr Search
     //
     $('#nb-keyword-search-form').on('submit', function (e) {

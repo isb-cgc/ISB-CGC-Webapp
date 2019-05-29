@@ -3,8 +3,9 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    url(r'^$', views.notebook_list, name='notebooks'),
-    url(r'^public$', views.notebook_list, name='notebooks_public'),
+    url(r'^$',                              views.notebook_list, name='notebooks'),
+    url(r'^public$',                        views.notebook_list, name='notebooks_public'),
+    url(r'^startnlaunch',                   views.notebook_vm, name='notebook_startnlaunch'),
     url(r'^create$',                        views.notebook, name='notebook_create'),
     url(r'^(?P<notebook_id>\d+)/$',         views.notebook, name='notebook_detail'),
     url(r'^(?P<notebook_id>\d+)/public$',   views.notebook, name='notebook_detail_public'),
@@ -13,4 +14,5 @@ urlpatterns = [
     url(r'^(?P<notebook_id>\d+)/copy$',     views.notebook, name='notebook_copy'),
     url(r'^(?P<notebook_id>\d+)/add$',      views.notebook, name='notebook_add'),
     url(r'^(?P<notebook_id>\d+)/remove$',   views.notebook, name='notebook_remove')
+
 ]

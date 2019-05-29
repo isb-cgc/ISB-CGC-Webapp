@@ -23,7 +23,13 @@ from django.contrib import messages
 from .models import Notebook, Notebook_Added
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-# from urllib.request import urlopen
+# from google_helpers.compute_service import get_compute_resource
+# from googleapiclient.errors import HttpError
+# from pprint import pprint
+# from oauth2client.client import GoogleCredentials
+# import httplib2
+# from googleapiclient.discovery import build
+from .notebook_vm import start_n_launch
 
 logger = logging.getLogger('main_logger')
 
@@ -31,6 +37,14 @@ debug = settings.DEBUG
 BLACKLIST_RE = settings.BLACKLIST_RE
 SOLR_URL = settings.SOLR_URL
 
+# SETUP_FIREWALL = 0
+# SETUP_EXTERNAL_IP = 1
+# SETUP_MONITOR = 2
+# SETUP_INSTANCE = 3
+
+
+# NOTEBOOK_ENV_FILE_LOC = settings.NOTEBOOK_ENV_LOC
+# NOTEBOOK_SL_PATH = settings.NOTEBOOK_SL_PATH
 @login_required
 def notebook_list(request):
     template = 'notebooks/notebook_list.html'
@@ -46,7 +60,6 @@ def notebook_list(request):
                 result_ids = [4, 7]
                 notebooks = Notebook.objects.filter(is_public=True, active=True, pk__in=result_ids)
 
-
                 # solr_nb_search_url = SOLR_URL+'notebooks/select?wt=json&q='+notebook_keywords
                 # try:
                 #     r = requests.post(solr_nb_search_url)
@@ -61,7 +74,6 @@ def notebook_list(request):
                 # finally:
                 #     redirect_url = reverse('notebooks_public')
                 #     return redirect(redirect_url)
-
 
                 # response = json.load(connection)
                 # print (response['response']['numFound'], "documents found.")
@@ -81,7 +93,8 @@ def notebook_list(request):
         notebooks = user_notebooks | shared_notebooks
         notebooks = notebooks.distinct()
 
-    return render(request, template, {'is_public_list' : is_public_list, 'notebooks': notebooks})
+    return render(request, template, {'is_public_list': is_public_list, 'notebooks': notebooks})
+
 
 @login_required
 def notebook(request, notebook_id=0):
@@ -116,13 +129,16 @@ def notebook(request, notebook_id=0):
                         match_list.append('keywords field')
                     match_list_len = len(match_list)
                     for i in range(match_list_len):
-                        field_names += ('' if i == 0 else (' and ' if i == (match_list_len - 1) else ', ') + match_list[i])
-                    err_msg = "Your notebook's %s contain%s invalid characters; please revise your inputs" % (field_names, ('s' if match_list_len < 2 else ''))
+                        field_names += (
+                            '' if i == 0 else (' and ' if i == (match_list_len - 1) else ', ') + match_list[i])
+                    err_msg = "Your notebook's %s contain%s invalid characters; please revise your inputs" % (
+                    field_names, ('s' if match_list_len < 2 else ''))
                     messages.error(request, err_msg)
                     redirect_url = reverse('notebook_detail', kwargs={'notebook_id': notebook_id})
                     return redirect(redirect_url)
 
-                notebook_model = Notebook.edit(id=notebook_id, name=notebook_name, keywords=notebook_keywords, description=notebook_desc, file_path=notebook_file_path)
+                notebook_model = Notebook.edit(id=notebook_id, name=notebook_name, keywords=notebook_keywords,
+                                               description=notebook_desc, file_path=notebook_file_path)
             elif command == "copy":
                 notebook_model = Notebook.copy(id=notebook_id, user=request.user)
             elif command == "delete":
@@ -130,16 +146,17 @@ def notebook(request, notebook_id=0):
             elif command == "add":
                 notebook_model = Notebook.objects.get(id=notebook_id)
                 if not notebook_model.is_public:
-                    messages.error(request, 'Notebook <b>{}</b> is a privately listed notebook - Unable to add this notebook to your list.'.format(
-                            notebook_model.name))
+                    messages.error(request,
+                                   'Notebook <b>{}</b> is a privately listed notebook - Unable to add this notebook to your list.'.format(
+                                       notebook_model.name))
                 elif notebook_model.isin_notebooklist(user=request.user):
                     messages.error(request,
-                        'Notebook <b>{}</b> is already in your notebook list.'.format(
-                            notebook_model.name))
+                                   'Notebook <b>{}</b> is already in your notebook list.'.format(
+                                       notebook_model.name))
                 else:
                     Notebook.add(id=notebook_id, user=request.user)
                     messages.info(request, 'Notebook <b>{}</b> is added to your notebook list.'.format(
-                            notebook_model.name))
+                        notebook_model.name))
             elif command == "remove":
                 notebook_model = Notebook.objects.get(id=notebook_id)
                 nb_name = notebook_model.name
@@ -164,12 +181,15 @@ def notebook(request, notebook_id=0):
                         user_notebooks = request.user.notebook_set.filter(active=True)
                         added_public_notebook_ids = Notebook_Added.objects.filter(user=request.user).values_list(
                             'notebook', flat=True)
-                        shared_notebooks = Notebook.objects.filter(is_public=True, active=True, pk__in=added_public_notebook_ids)
+                        shared_notebooks = Notebook.objects.filter(is_public=True, active=True,
+                                                                   pk__in=added_public_notebook_ids)
                         notebooks = user_notebooks | shared_notebooks
                         notebooks = notebooks.distinct()
 
                     notebook_model = notebooks.get(id=notebook_id)
-                    return render(request, template, {'notebook': notebook_model, 'from_public_list': command == "public", 'notebook_viewer': settings.NOTEBOOK_VIEWER})
+                    return render(request, template,
+                                  {'notebook': notebook_model, 'from_public_list': command == "public",
+                                   'notebook_viewer': settings.NOTEBOOK_VIEWER})
                 except ObjectDoesNotExist:
                     redirect_url = reverse(redirect_view)
                     return redirect(redirect_url)
@@ -185,3 +205,31 @@ def notebook(request, notebook_id=0):
         redirect_url = reverse('notebooks')
 
     return redirect(redirect_url)
+
+
+# def validate_env_vars:
+@login_required
+def notebook_vm(request):
+    command = request.path.rsplit('/', 1)[1]
+    message = ''
+    template = 'notebooks/notebook_vm.html'
+    # print('ip address: {}'.format(get_client_ip(request)))
+    if command == 'startnlaunch':
+        # SETUP_INSTANCE = 3
+        DELETE_FIREWALL = 5
+        DELETE_ADDRESS= 6
+        SETUP_MONITOR =2
+        # client_ip = get_client_ip(request)
+        result = start_n_launch()
+        # result = start_n_launch(client_ip=client_ip)
+    return render(request, template, result)
+
+@login_required
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    # print('x_forwarded_for: ' + str(x_forwarded_for))
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
