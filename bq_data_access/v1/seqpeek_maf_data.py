@@ -16,6 +16,7 @@ limitations under the License.
 
 """
 
+from builtins import str
 import logging
 
 from bq_data_access.v1.gnab_data import GNABFeatureProvider

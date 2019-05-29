@@ -6,7 +6,7 @@ jobs:
     name: Building Deployment Container
     working_directory: ~/ISB-CGC-Webapp
     docker:
-      - image: circleci/python:2.7.14
+      - image: circleci/python:3.5.6
       - image: circleci/mysql:5.7
         environment:
           MYSQL_ROOT_HOST: "%"
@@ -83,7 +83,7 @@ jobs:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
     name: Deploy to AppEngine Flex
     docker:
-      - image: circleci/python:2.7.14
+      - image: circleci/python:3.5.6
     working_directory: ~/ISB-CGC-Webapp
     steps:
       - restore_cache:

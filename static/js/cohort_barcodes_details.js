@@ -155,7 +155,6 @@ require([
                     return barcode !== "";
                 }).map(function (barcode) {
                     // Split the entry into its values
-                    barcode = barcode.trim();
                     var entry_split = null;
                     if (isGdcTsv) {
                         entry_split = barcode.split(/\s*\t\s*/);

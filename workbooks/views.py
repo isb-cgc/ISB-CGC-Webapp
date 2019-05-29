@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from builtins import str
 from copy import deepcopy
 import json
 import re
@@ -28,7 +29,7 @@ from django.http import StreamingHttpResponse
 from bq_data_access.v1.feature_search.util import SearchableFieldHelper
 from bq_data_access.v2.feature_search.util import SearchableFieldHelper as SearchableFieldHelper_v2
 from django.http import HttpResponse, JsonResponse
-from models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_variable, Worksheet_gene, Worksheet_cohort, \
+from workbooks.models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_variable, Worksheet_gene, Worksheet_cohort, \
     Worksheet_plot, Worksheet_plot_cohort
 from variables.models import VariableFavorite, Variable
 from genes.models import GeneFavorite
@@ -148,7 +149,6 @@ def workbook_create_with_variables(request):
     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
     worksheet_model.save()
 
-    print workbook_model.id
     for var in var_list_model.get_variables():
         work_var = Worksheet_variable.objects.create(worksheet_id=worksheet_model.id,
                                                      name=var.name,
@@ -232,22 +232,22 @@ def workbook(request, workbook_id=0):
                 workbook_build = request.POST.get('build')
 
                 blacklist = re.compile(BLACKLIST_RE, re.UNICODE)
-                match_name = blacklist.search(unicode(workbook_name))
-                match_desc = blacklist.search(unicode(workbook_desc))
+                match_name = blacklist.search(str(workbook_name))
+                match_desc = blacklist.search(str(workbook_desc))
 
                 if match_name or match_desc:
                     # XSS risk, log and fail this cohort save
                     matches = ""
                     fields = ""
                     if match_name:
-                        match_name = blacklist.findall(unicode(workbook_name))
+                        match_name = blacklist.findall(str(workbook_name))
                         logger.error(
                             '[ERROR] While saving a workbook, saw a malformed name: ' + workbook_name + ', characters: ' + str(
                                 match_name))
                         matches = "name contains"
                         fields = "name"
                     if match_desc:
-                        match_desc = blacklist.findall(unicode(workbook_desc))
+                        match_desc = blacklist.findall(str(workbook_desc))
                         logger.error(
                             '[ERROR] While saving a workbook, saw a malformed description: ' + workbook_desc + ', characters: ' + str(
                                 match_desc))
@@ -411,22 +411,22 @@ def worksheet(request, workbook_id=0, worksheet_id=0):
             worksheet_name = request.POST.get('name')
             worksheet_desc = request.POST.get('description')
             blacklist = re.compile(BLACKLIST_RE, re.UNICODE)
-            match_name = blacklist.search(unicode(worksheet_name))
-            match_desc = blacklist.search(unicode(worksheet_desc))
+            match_name = blacklist.search(str(worksheet_name))
+            match_desc = blacklist.search(str(worksheet_desc))
 
             if match_name or match_desc:
                 # XSS risk, log and fail this cohort save
                 matches = ""
                 fields = ""
                 if match_name:
-                    match_name = blacklist.findall(unicode(worksheet_name))
+                    match_name = blacklist.findall(str(worksheet_name))
                     logger.error(
                         '[ERROR] While saving a worksheet, saw a malformed name: ' + worksheet_name + ', characters: ' + str(
                             match_name))
                     matches = "name contains"
                     fields = "name"
                 if match_desc:
-                    match_desc = blacklist.findall(unicode(worksheet_desc))
+                    match_desc = blacklist.findall(str(worksheet_desc))
                     logger.error(
                         '[ERROR] While saving a worksheet, saw a malformed description: ' + worksheet_desc + ', characters: ' + str(
                             match_desc))

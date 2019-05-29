@@ -15,9 +15,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
+from __future__ import print_function
 
 # Python example modified from https://cloud.google.com/bigquery/loading-data-into-bigquery
-from urllib2 import HTTPError
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from urllib.error import HTTPError
 import pprint
 import json
 import uuid
@@ -61,7 +65,7 @@ def get_logs(service):
         return list_response
 
     except HTTPError as err:
-        print 'Error in get_logs: ', pprint.pprint(err.resp)  # or err.reason?
+        print('Error in get_logs: ', pprint.pprint(err.resp))  # or err.reason?
         return None
 
 
@@ -99,7 +103,7 @@ def main():
                                           'bq_log_table',
                                           row,
                                           5)
-        print response
+        print(response)
 
 if __name__ == '__main__':
     main()

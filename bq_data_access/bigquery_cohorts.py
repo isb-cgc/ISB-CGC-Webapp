@@ -17,6 +17,7 @@ limitations under the License.
 """
 
 
+from builtins import object
 class BigQueryCohortStorageSettings(object):
     def __init__(self, full_table_id):
         self.table_id = full_table_id

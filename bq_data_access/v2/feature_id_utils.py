@@ -16,6 +16,8 @@ limitations under the License.
 
 """
 
+from builtins import str
+from builtins import object
 from re import compile as re_compile
 import logging as logger
 
@@ -125,7 +127,7 @@ class FeatureProviderFactory(object):
         # Build a regexp set of supported feature types, for example:
         # "CLIN|GEXP|METH".
         supported_feature_types = []
-        for data_type_key in FEATURE_ID_TO_TYPE_MAP.keys():
+        for data_type_key in list(FEATURE_ID_TO_TYPE_MAP.keys()):
             supported_feature_types.append(data_type_key.upper())
 
         types_regexp = "|".join(supported_feature_types)

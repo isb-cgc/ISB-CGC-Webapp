@@ -44,23 +44,22 @@ RUN apt-get update
 # aaaand now let's install mysql-server
 RUN apt-get install -y mysql-server
 
-RUN apt-get -y install python-mysqldb
-RUN apt-get -y install python-pip
+# Get pip3 installed
+RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python3
+
 RUN apt-get -y install build-essential
-RUN apt-get -y install python-dev
 RUN apt-get -y install --reinstall python-m2crypto python3-crypto
 RUN apt-get -y install libxml2-dev libxmlsec1-dev swig
-RUN pip install pexpect
+RUN pip3 install pexpect
 
-RUN apt-get -y install libffi-dev libssl-dev libmysqlclient-dev python2.7-dev curl
-RUN apt-get -y install git
+RUN apt-get -y install unzip libffi-dev libssl-dev libmysqlclient-dev python3-mysqldb python3-dev libpython3-dev git ruby g++ curl
 RUN easy_install -U distribute
 
 ADD . /app
 
 # We need to recompile some of the items because of differences in compiler versions 
-RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
-RUN pip install gunicorn==19.6.0
+RUN pip3 install -r /app/requirements.txt -t /app/lib/ --upgrade
+RUN pip3 install gunicorn==19.6.0
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
 
