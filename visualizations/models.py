@@ -16,6 +16,7 @@ limitations under the License.
 
 """
 
+from builtins import object
 import operator
 
 from django.db import models
@@ -23,6 +24,7 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 
 from cohorts.models import Cohort
+from functools import reduce
 
 
 class SavedVizManager(models.Manager):
@@ -66,7 +68,7 @@ class SavedViz(models.Model):
     def get_owner(self):
         return self.viz_perms_set.filter(perm=Viz_Perms.OWNER)[0].user
 
-    class Meta:
+    class Meta(object):
         verbose_name_plural = "Saved Visualizations"
 
 class Plot(models.Model):

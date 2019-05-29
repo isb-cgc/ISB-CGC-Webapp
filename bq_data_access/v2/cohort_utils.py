@@ -16,6 +16,7 @@ limitations under the License.
 
 """
 
+from builtins import object
 from bq_data_access.v2.feature_value_types import DataTypes, IdentifierTypes
 
 class BarcodeAdapter(object):

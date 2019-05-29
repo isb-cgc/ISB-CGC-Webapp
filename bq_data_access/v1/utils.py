@@ -16,6 +16,9 @@ limitations under the License.
 
 """
 
+from builtins import str
+from builtins import range
+from builtins import object
 from collections import OrderedDict
 import logging
 from time import time
@@ -82,10 +85,10 @@ class VectorMergeSupport(object):
 
     def get_merged_dict(self):
         num_samples = self.current_sample_index
-        result = [{} for _ in xrange(num_samples)]
-        sample_id_keys = self.sample_ids.keys()
+        result = [{} for _ in range(num_samples)]
+        sample_id_keys = list(self.sample_ids.keys())
 
-        for row_id, row_samples in self.data.items():
+        for row_id, row_samples in list(self.data.items()):
             row_values = [self.missing_value] * len(self.sample_ids)
 
             for sample_index, value in row_samples:

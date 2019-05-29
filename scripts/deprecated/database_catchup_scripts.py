@@ -10,7 +10,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from __future__ import print_function
 
+from builtins import str
 import os
 import traceback
 import sys
@@ -63,7 +65,7 @@ def catchup_shortlist(cursor):
                 shortlist_exists = True
 
         if not shortlist_exists:
-            print >> sys.stdout, "[STATUS] metadata_attr.shortlist not found, adding..."
+            print("[STATUS] metadata_attr.shortlist not found, adding...", file=sys.stdout)
             cursor.execute("ALTER TABLE metadata_attr ADD COLUMN shortlist TINYINT NOT NULL DEFAULT 0;")
             set_metadata_shortlist_def = """
                 UPDATE metadata_attr
@@ -76,9 +78,9 @@ def catchup_shortlist(cursor):
             """
             cursor.execute(set_metadata_shortlist_def)
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when setting the metadata shortlist in metadata_attr; it may not have been made."
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print("[ERROR] Exception when setting the metadata shortlist in metadata_attr; it may not have been made.", file=sys.stdout)
+        print(e, file=sys.stdout)
+        print(traceback.format_exc(), file=sys.stdout)
 
 # *** DEPRECATED ***
 # Create the view which lists all members of metadata_attributes with shortlist=1 (i.e. true).
@@ -92,9 +94,9 @@ def create_shortlist_view(cursor):
         """
         cursor.execute(metadata_shortlist_view_def)
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when creating the metadata shortlist view! It may not have been made."
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print("[ERROR] Exception when creating the metadata shortlist view! It may not have been made.", file=sys.stdout)
+        print(e, file=sys.stdout)
+        print(traceback.format_exc(), file=sys.stdout)
 # *** DEPRECATED ***
 
 # Create the get_metadata_values stored procedure, which retrieves all the possible values of the metadata shortlist
@@ -144,9 +146,9 @@ def create_metadata_vals_sproc(cursor):
         cursor.execute(metadata_vals_sproc_def)
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when making the metadata values sproc; it may not have been made!"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print("[ERROR] Exception when making the metadata values sproc; it may not have been made!", file=sys.stdout)
+        print(e, file=sys.stdout)
+        print(traceback.format_exc(), file=sys.stdout)
 
 # Create the get_metadata_values stored procedure, which retrieves all the possible values of the attributes found in
 # metadata_samples for the indicated program.
@@ -172,9 +174,9 @@ def create_program_attr_sproc(cursor):
         cursor.execute(program_attr_sproc_def)
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when making the metadata attr sproc; it may not have been made!"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print("[ERROR] Exception when making the metadata attr sproc; it may not have been made!", file=sys.stdout)
+        print(e, file=sys.stdout)
+        print(traceback.format_exc(), file=sys.stdout)
 
 
 def create_program_display_sproc(cursor):
@@ -190,9 +192,9 @@ def create_program_display_sproc(cursor):
         cursor.execute(prog_displ_sproc_def)
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when making the program display atring sproc; it may not have been made!"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print("[ERROR] Exception when making the program display atring sproc; it may not have been made!", file=sys.stdout)
+        print(e, file=sys.stdout)
+        print(traceback.format_exc(), file=sys.stdout)
 
 
 # Create the display-string storage table for attributes and their values which are not displayed as they're stored in the database,
@@ -317,9 +319,9 @@ def make_attr_display_table(cursor, db):
         db.commit()
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when adding the attr_value_display table - it may not have been properly generated!"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print("[ERROR] Exception when adding the attr_value_display table - it may not have been properly generated!", file=sys.stdout)
+        print(e, file=sys.stdout)
+        print(traceback.format_exc(), file=sys.stdout)
 
 
 # *** DEPRECATED ***
@@ -350,9 +352,9 @@ def create_samples_shortlist_view(cursor):
 
         cursor.execute(metadata_samples_shortlist_view_def % view_cols)
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when creating the metadata_samples shortlist view; it may not have been made"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print("[ERROR] Exception when creating the metadata_samples shortlist view; it may not have been made", file=sys.stdout)
+        print(e, file=sys.stdout)
+        print(traceback.format_exc(), file=sys.stdout)
 # *** DEPRECATED ***
 
 
@@ -398,25 +400,25 @@ def fix_cohort_projects(cursor):
                 WHERE cs.project_id IS NULL AND cc.active = 1;
             """
 
-            print >> sys.stdout,"[STATUS] Number of cohort sample entries from ISB-CGC projects with null project IDs: "+str(count_to_fix)
-            print >> sys.stdout,"[STATUS] Correcting null project IDs for ISB-CGC cohorts - this could take a while!"
+            print("[STATUS] Number of cohort sample entries from ISB-CGC projects with null project IDs: "+str(count_to_fix), file=sys.stdout)
+            print("[STATUS] Correcting null project IDs for ISB-CGC cohorts - this could take a while!", file=sys.stdout)
 
             cursor.execute(fix_project_ids_str)
 
-            print >> sys.stdout, "[STATUS] ...done. Checking for still-null project IDs..."
+            print("[STATUS] ...done. Checking for still-null project IDs...", file=sys.stdout)
 
             cursor.execute(null_project_count)
             not_fixed = cursor.fetchall()[0][0]
 
-            print >> sys.stdout, "[STATUS] Number of cohort sample entries from ISB-CGC projects with null project IDs after correction: " + str(not_fixed)
+            print("[STATUS] Number of cohort sample entries from ISB-CGC projects with null project IDs after correction: " + str(not_fixed), file=sys.stdout)
             if not_fixed > 0:
-                print >> sys.stdout, "[WARNING] Some of the samples were not corrected! You should double-check them."
+                print("[WARNING] Some of the samples were not corrected! You should double-check them.", file=sys.stdout)
         else:
-            print >> sys.stdout, "[STATUS] No cohort samples were found with missing project IDs."
+            print("[STATUS] No cohort samples were found with missing project IDs.", file=sys.stdout)
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when fixing cohort project IDs; they may not have been fiixed"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print("[ERROR] Exception when fixing cohort project IDs; they may not have been fiixed", file=sys.stdout)
+        print(e, file=sys.stdout)
+        print(traceback.format_exc(), file=sys.stdout)
 
 
 # Add the stored procedure "get_isbcgc_project_set" which fetches the list of all program/project IDs which are owned by
@@ -437,9 +439,9 @@ def add_isb_cgc_project_sproc(cursor):
         cursor.execute("DROP PROCEDURE IF EXISTS `get_isbcgc_project_set`;")
         cursor.execute(sproc_def)
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when adding the get_isbcgc_project_set sproc set; it may not have been added"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print("[ERROR] Exception when adding the get_isbcgc_project_set sproc set; it may not have been added", file=sys.stdout)
+        print(e, file=sys.stdout)
+        print(traceback.format_exc(), file=sys.stdout)
 
 
 # Query to correct CCLE samples from fix_cohort_samples, because despite having specific 'Study' values all CCLE samples are
@@ -458,13 +460,13 @@ def fix_ccle(cursor):
         results = cursor.fetchall()
 
         if len(results) <= 0:
-            print >> sys.stdout, "[STATUS] The CCLE project was not found, so cohorts containing its samples cannot be fixed."
+            print("[STATUS] The CCLE project was not found, so cohorts containing its samples cannot be fixed.", file=sys.stdout)
             return
 
         ccle_id = results[0][0]
 
         if not ccle_id:
-            print >> sys.stdout, "[WARNING] The CCLE project was not found, so the cohorts with these samples cannot be corrected."
+            print("[WARNING] The CCLE project was not found, so the cohorts with these samples cannot be corrected.", file=sys.stdout)
             return
 
         count_ccle_cohort_samples = """
@@ -488,16 +490,16 @@ def fix_ccle(cursor):
         results = cursor.fetchall()
 
         if len(results) <= 0:
-            print >> sys.stdout, "[STATUS] No samples with CCLE project IDs which need fixing - exiting."
+            print("[STATUS] No samples with CCLE project IDs which need fixing - exiting.", file=sys.stdout)
             return
 
         ccle_count = results[0][0]
 
         if ccle_count <= 0:
-            print >> sys.stdout, "[STATUS] No samples with CCLE project IDs which need fixing - exiting."
+            print("[STATUS] No samples with CCLE project IDs which need fixing - exiting.", file=sys.stdout)
             return
 
-        print >> sys.stdout, "[STATUS] There are " + str(ccle_count) + " CCLE samples in the cohorts_samples table with an incorrect project ID. Fixing..."
+        print("[STATUS] There are " + str(ccle_count) + " CCLE samples in the cohorts_samples table with an incorrect project ID. Fixing...", file=sys.stdout)
 
         cursor.execute(fix_ccle_cohorts, (ccle_id,))
 
@@ -505,16 +507,16 @@ def fix_ccle(cursor):
 
         ccle_new_count = cursor.fetchall()[0][0]
         if ccle_new_count > 0:
-            print >> sys.stdout, "[WARNING] Some CCLE samples still have the wrong project ID - double-check your database. (count: " + str(ccle_count) + ")"
+            print("[WARNING] Some CCLE samples still have the wrong project ID - double-check your database. (count: " + str(ccle_count) + ")", file=sys.stdout)
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when fixing CCLE cohorts; they may not have been updated!"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print("[ERROR] Exception when fixing CCLE cohorts; they may not have been updated!", file=sys.stdout)
+        print(e, file=sys.stdout)
+        print(traceback.format_exc(), file=sys.stdout)
 
 
 def alter_metadata_tables(cursor):
-    print >> sys.stdout, "[STATUS] Altering and updating tables."
+    print("[STATUS] Altering and updating tables.", file=sys.stdout)
 
     alter_metadata_samples_check = '''
         SELECT EXISTS (select * from INFORMATION_SCHEMA.COLUMNS where table_schema='dev' and table_name='metadata_samples' and column_name='sample_barcode');
@@ -560,15 +562,15 @@ def alter_metadata_tables(cursor):
             cursor.execute(update_metadata_attr_project)
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when updating metadata_samples, attr, and data: "
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print("[ERROR] Exception when updating metadata_samples, attr, and data: ", file=sys.stdout)
+        print(e, file=sys.stdout)
+        print(traceback.format_exc(), file=sys.stdout)
 
 
 # This function will create new metadata_tables for TCGA and CCLE. The old tables will remain while we refactor other code.
 # This should only be used on local development environments.
 def breakout_metadata_tables(cursor, db):
-    print >> sys.stdout, "[STATUS] Breaking out metadata tables."
+    print("[STATUS] Breaking out metadata tables.", file=sys.stdout)
 
     new_shortlist = ['age_at_initial_pathologic_diagnosis', 'country', 'ethnicity', 'menopause_status', 'race',
         'disease_code', 'gender', 'histological_type', 'hpv_status', 'neoplasm_histologic_grade', 'pathologic_stage',
@@ -672,7 +674,7 @@ def breakout_metadata_tables(cursor, db):
                                                                     data_tables = data_tables_id,
                                                                     program_id=prog_id))
         else:
-            print >> sys.stdout, "[WARNING] No CCLE program found."
+            print("[WARNING] No CCLE program found.", file=sys.stdout)
 
         cursor.execute(get_tcga_program_id)
         result = cursor.fetchone()
@@ -700,14 +702,14 @@ def breakout_metadata_tables(cursor, db):
                                                                     data_tables=data_tables_id,
                                                                     program_id=prog_id))
         else:
-            print >> sys.stdout, "[WARNING] No TCGA program found."
+            print("[WARNING] No TCGA program found.", file=sys.stdout)
 
         db.commit()
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception in breakout_metadata_tables!"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print("[ERROR] Exception in breakout_metadata_tables!", file=sys.stdout)
+        print(e, file=sys.stdout)
+        print(traceback.format_exc(), file=sys.stdout)
 
 
 # This only needs to be run on cloudSQL instances - Completed on MVM
@@ -723,9 +725,9 @@ def alter_user_data_tables(cursor):
 
         cursor.execute(''.join(alter_stmts))
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when altering user_metadata_tables!"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print("[ERROR] Exception when altering user_metadata_tables!", file=sys.stdout)
+        print(e, file=sys.stdout)
+        print(traceback.format_exc(), file=sys.stdout)
 
 # ALL THESE FUNCTIONS CAME FROM userdata_bootstrap.py.
 # THEY ARE BEING CONSOLIDATED INTO THIS ONE FILE DUE TO RUNTIME ORDERING.
@@ -764,18 +766,18 @@ def create_project_views(project, source_table, studies):
 
             cursor.execute("SELECT COUNT(*) FROM %s;" % view_name)
             if cursor.fetchall()[0][0] <= 0:
-                print >> sys.stdout, "Creation of view '"+view_name+"' was successful, but no entries are found in " + \
-                    "it. Double-check the "+source_table+" table for valid entries."
+                print("Creation of view '"+view_name+"' was successful, but no entries are found in " + \
+                    "it. Double-check the "+source_table+" table for valid entries.", file=sys.stdout)
             else:
-                print >> sys.stdout, "Creation of view '" + view_name + "' was successful."
+                print("Creation of view '" + view_name + "' was successful.", file=sys.stdout)
 
             study_names[study] = {"view_name": view_name, "project": project}
 
         return study_names
 
     except Exception as e:
-        print >> sys.stderr, e
-        print >> sys.stderr, traceback.format_exc()
+        print(e, file=sys.stderr)
+        print(traceback.format_exc(), file=sys.stderr)
 
     finally:
         if cursor: cursor.close()
@@ -818,9 +820,9 @@ def bootstrap_metadata_attr_mapping():
         found_map_table = (cursor.fetchall()[0][0] <= 0)
 
         if found_map_table:
-            print >> sys.stdout, "[STATUS] metadata_attr_map table found."
+            print("[STATUS] metadata_attr_map table found.", file=sys.stdout)
         else:
-            print >> sys.stdout, "Building attribute mapping table..."
+            print("Building attribute mapping table...", file=sys.stdout)
 
             cursor.execute(make_mapping_table)
             db.commit()
@@ -840,11 +842,11 @@ def bootstrap_metadata_attr_mapping():
             if entries <= 0:
                 raise Exception("metadata_attr mapping not successfully generated!")
             else:
-                print >> sys.stdout, "metadata_attr mapping table successfully generated."
+                print("metadata_attr mapping table successfully generated.", file=sys.stdout)
 
     except Exception as e:
-        print >> sys.stderr, e
-        print >> sys.stderr, traceback.format_exc()
+        print(e, file=sys.stderr)
+        print(traceback.format_exc(), file=sys.stderr)
 
     finally:
         if cursor: cursor.close()
@@ -896,8 +898,8 @@ def create_public_programs(big_query_dataset, bucket_name, bucket_permissions):
         db.commit()
 
     except Exception as e:
-        print >> sys.stderr, '[ERROR] Exception while making public program entries: '+e.message
-        print >> sys.stderr, traceback.format_exc()
+        print('[ERROR] Exception while making public program entries: '+e.message, file=sys.stderr)
+        print(traceback.format_exc(), file=sys.stderr)
     finally:
         if cursor: cursor.close
         if db and db.open: db.close
@@ -970,7 +972,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
 
         # Make the views
         for table in tables:
-            project_table_views = create_project_views("TCGA", 'TCGA_'+table, studies.keys())
+            project_table_views = create_project_views("TCGA", 'TCGA_'+table, list(studies.keys()))
             # Make CCLE and add it in manually
             ccle_view = create_project_views("CCLE", 'CCLE_'+table, ["CCLE"])
             project_table_views["CCLE"] = ccle_view["CCLE"]
@@ -1000,7 +1002,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
         # If they don't match, something might be wrong.
         project_count = 0
         project_udt_count = 0
-        metadata_samples_project_count = len(studies.keys()) + (1 if "CCLE" not in studies.keys() else 0)
+        metadata_samples_project_count = len(list(studies.keys())) + (1 if "CCLE" not in list(studies.keys()) else 0)
 
         cursor.execute("SELECT COUNT(DISTINCT id) FROM projects_project;")
         project_count = cursor.fetchall()[0][0]
@@ -1010,19 +1012,19 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
 
         if project_udt_count == project_count == metadata_samples_project_count:
             if project_udt_count <= 0:
-                print >> sys.stdout, "[ERROR] No studies found! Double-check the creation script and databse settings."
+                print("[ERROR] No studies found! Double-check the creation script and databse settings.", file=sys.stdout)
             else:
-                print >> sys.stdout, "[STATUS] Programs and studies appear to have been created successfully: " + \
-                      project_count.__str__()+" studies added."
+                print("[STATUS] Programs and studies appear to have been created successfully: " + \
+                      project_count.__str__()+" studies added.", file=sys.stdout)
         else:
-            print >> sys.stdout, "[WARNING] Unequal number of studies between metadata_samples, projects_project, and " + \
+            print("[WARNING] Unequal number of studies between metadata_samples, projects_project, and " + \
                     "projects_user_data_tables. projects_project: "+project_count.__str__()+", " + \
                     "projects_user_data_tables: " + project_udt_count.__str__()+", metadata_samples: " + \
-                  metadata_samples_project_count.__str__()
+                  metadata_samples_project_count.__str__(), file=sys.stdout)
 
     except Exception as e:
-        print >> sys.stderr, e
-        print >> sys.stderr, traceback.format_exc()
+        print(e, file=sys.stderr)
+        print(traceback.format_exc(), file=sys.stderr)
 
     finally:
         if cursor: cursor.close
@@ -1030,7 +1032,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
         if db and db.open: db.close
 
 def bootstrap_file_data():
-    print >> sys.stdout, 'Populating filelistings...'
+    print('Populating filelistings...', file=sys.stdout)
 
     DCC_BUCKET = ''
     CGHUB_BUCKET = ''
@@ -1083,7 +1085,7 @@ def bootstrap_file_data():
             db.commit()
 
     except Exception as e:
-        print >> sys.stdout, traceback.format_exc()
+        print(traceback.format_exc(), file=sys.stdout)
     finally:
         if cursor: cursor.close()
         if cursorDict: cursorDict.close()
@@ -1158,7 +1160,7 @@ def main():
     try:
 
         if args.buildmode:
-            print >> sys.stdout, "[STATUS] Database catchup running in build mode."
+            print("[STATUS] Database catchup running in build mode.", file=sys.stdout)
 
             # buildmode specifies a specfic set of methods to run in a certain order
 
@@ -1230,8 +1232,8 @@ def main():
 
 
     except Exception as e:
-        print e
-        print traceback.format_exc()
+        print(e)
+        print(traceback.format_exc())
 
     finally:
         if cursor: cursor.close()
