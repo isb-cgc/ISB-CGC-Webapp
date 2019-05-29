@@ -15,7 +15,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
+from __future__ import print_function
 
+from builtins import str
+from builtins import object
 import datetime
 import logging
 import traceback
@@ -98,12 +101,12 @@ class BigQueryCohortSupport(object):
         bigquery_service = authorize_credentials_with_Google()
         table_data = bigquery_service.tabledata()
 
-        print >> sys.stdout, self.project_id + ":" + self.dataset_id + ":" + self.table_id
+        print(self.project_id + ":" + self.dataset_id + ":" + self.table_id, file=sys.stdout)
 
         index = 0
         next = 0
 
-        while index < len(rows) and next is not None:
+        while next is not None and index < len(rows):
             next = MAX_INSERT+index
             body = None
             if next > len(rows):
@@ -138,7 +141,7 @@ class BigQueryCohortSupport(object):
 
         response = self._streaming_insert(rows)
 
-        print >> sys.stdout, response.__str__()
+        print(response.__str__(), file=sys.stdout)
 
         return response
 
@@ -245,15 +248,15 @@ def update_attr_display_table(debug):
 
         for prog in progs:
             if debug:
-                print >> sys.stdout, "[STATUS] Excuting update query:" + update_attr_tbl_stmt
-                print >> sys.stdout, "With values "+str((progs[prog]['new_id'], progs[prog]['old_id'],))
+                print("[STATUS] Excuting update query:" + update_attr_tbl_stmt, file=sys.stdout)
+                print("With values "+str((progs[prog]['new_id'], progs[prog]['old_id'],)), file=sys.stdout)
             else:
                 cursor.execute(update_attr_tbl_stmt, (progs[prog]['new_id'], progs[prog]['old_id'],))
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when adding the attr_value_display table - it may not have been properly generated!"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print("[ERROR] Exception when adding the attr_value_display table - it may not have been properly generated!", file=sys.stdout)
+        print(e, file=sys.stdout)
+        print(traceback.format_exc(), file=sys.stdout)
     finally:
         if cursor: cursor.close()
         if db and db.open: db.close()
@@ -323,14 +326,14 @@ def create_programs_and_projects(debug):
 
         for prog in programs_to_insert:
             if len(Program.objects.filter(owner=isb_userid,is_public=True,active=True,name=prog)):
-                print >> sys.stdout, "Found program "+prog+", insert skipped."
+                print("Found program "+prog+", insert skipped.", file=sys.stdout)
             else:
                 insertTime = time.strftime('%Y-%m-%d %H:%M:%S')
                 values = (prog, True, insertTime, True, isb_userid, )
 
                 if debug:
-                    print >> sys.stdout, "Executing statement: " + insert_programs
-                    print >> sys.stdout, "with values: " + str(values)
+                    print("Executing statement: " + insert_programs, file=sys.stdout)
+                    print("with values: " + str(values), file=sys.stdout)
                 else:
                     cursor.execute(insert_programs, values)
 
@@ -358,8 +361,8 @@ def create_programs_and_projects(debug):
                     param_set = ("%s," * len(values))[:-1]
 
                     if debug:
-                        print >> sys.stdout, "Executing statement: "+insert_data_tables.format(insert_data_tables_opt_fields, param_set)
-                        print >> sys.stdout, "Values: "+str(values)
+                        print("Executing statement: "+insert_data_tables.format(insert_data_tables_opt_fields, param_set), file=sys.stdout)
+                        print("Values: "+str(values), file=sys.stdout)
                         data_tables = 'data_tables_id'
                     else:
                         cursor.execute(insert_data_tables.format(insert_data_tables_opt_fields, param_set), values)
@@ -396,8 +399,8 @@ def create_programs_and_projects(debug):
                     param_set = ("%s," * len(values))[:-1]
 
                     if debug:
-                        print >> sys.stdout, "Executing statment: "+ insert_annot_tables.format(insert_annot_tables_fields, param_set)
-                        print >> sys.stdout, "Values: "+str(values)
+                        print("Executing statment: "+ insert_annot_tables.format(insert_annot_tables_fields, param_set), file=sys.stdout)
+                        print("Values: "+str(values), file=sys.stdout)
                     else:
                         cursor.execute(insert_annot_tables.format(insert_annot_tables_fields, param_set), values)
                         cursor.execute('SELECT id FROM projects_public_annotation_tables WHERE program_id = %s;', (prog_id,))
@@ -424,15 +427,15 @@ def create_programs_and_projects(debug):
 
             if is_update:
                 if debug:
-                    print >> sys.stdout, "Executing statement: "+update_metadata_tables.format(insert_metadata_tables_opt_fields)
-                    print >> sys.stdout, " with values "+ str(values)
+                    print("Executing statement: "+update_metadata_tables.format(insert_metadata_tables_opt_fields), file=sys.stdout)
+                    print(" with values "+ str(values), file=sys.stdout)
                 else:
                     cursor.execute(update_metadata_tables.format(insert_metadata_tables_opt_fields), values)
             else:
                 param_set = ("%s," * len(values))[:-1]
                 if debug:
-                    print >> sys.stdout, "Exeucting statement: "+update_metadata_tables.format(insert_metadata_tables_opt_fields,param_set)
-                    print >> sys.stdout, " with values "+ str(values)
+                    print("Exeucting statement: "+update_metadata_tables.format(insert_metadata_tables_opt_fields,param_set), file=sys.stdout)
+                    print(" with values "+ str(values), file=sys.stdout)
                 else:
                     cursor.execute(insert_metadata_tables.format(insert_metadata_tables_opt_fields,param_set), values)
 
@@ -457,14 +460,14 @@ def create_programs_and_projects(debug):
                 check = cursor.fetchall()
 
                 if len(check):
-                    print >> sys.stdout, "Project "+row[0]+" is already in the projects_project table, skipping"
+                    print("Project "+row[0]+" is already in the projects_project table, skipping", file=sys.stdout)
                 else:
-                    print >> sys.stdout, "Inserting project "+row[0]
+                    print("Inserting project "+row[0], file=sys.stdout)
                     insertTime = time.strftime('%Y-%m-%d %H:%M:%S')
                     values = (row[0][len(prog_leader):], row[1], True, insertTime, isb_userid, prog_id,)
                     if debug:
-                        print >> sys.stdout, "Executing statement: "+insert_projects
-                        print >> sys.stdout, "Values: " + str(values)
+                        print("Executing statement: "+insert_projects, file=sys.stdout)
+                        print("Values: " + str(values), file=sys.stdout)
                     else:
                         cursor.execute(insert_projects, values)
 
@@ -475,7 +478,7 @@ def create_programs_and_projects(debug):
             ccle_proj[0].save()
 
     except Exception as e:
-        print >> sys.stdout, traceback.format_exc()
+        print(traceback.format_exc(), file=sys.stdout)
     finally:
         if cursor: cursor.close()
         if db and db.open: db.close()
@@ -569,7 +572,7 @@ def create_tcga_cohorts_from_files(directory):
     for file in filelist:
         filepath = os.path.join(directory, file)
         file_barcodes = get_barcodes_from_file(filepath)
-        print filepath, len(file_barcodes['sample_barcodes']), len(file_barcodes['case_barcodes'])
+        print(filepath, len(file_barcodes['sample_barcodes']), len(file_barcodes['case_barcodes']))
 
 
 def insert_barcodes_mysql(conn, superuser_id, cohort_name, sample_barcodes):
@@ -622,7 +625,7 @@ def create_bq_cohort(project_id, dataset_id, table_id, cohort_id, sample_barcode
         else:
             err_msg = 'There was an insertion error '
 
-        print >> sys.stderr, err_msg + ' when creating your cohort in BigQuery. Creation of the BQ cohort has failed.'
+        print(err_msg + ' when creating your cohort in BigQuery. Creation of the BQ cohort has failed.', file=sys.stderr)
 
 
 def main():

@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
+from __future__ import print_function
 
 import os
 import MySQLdb
@@ -50,8 +51,8 @@ try:
     db.commit()
 
 except Exception as e:
-    print >> sys.stderr, "[ERROR] Exception in add_site_ids: " + e.message
-    print >> sys.stderr, traceback.format_exc()
+    print("[ERROR] Exception in add_site_ids: " + e.message, file=sys.stderr)
+    print(traceback.format_exc(), file=sys.stderr)
 finally:
     if cursor: cursor.close()
     if db and db.open: db.close()

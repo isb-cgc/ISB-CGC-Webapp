@@ -16,6 +16,7 @@ limitations under the License.
 
 """
 
+from builtins import object
 import logging
 import sys
 import traceback
@@ -78,7 +79,7 @@ def feature_search(request):
                     parameters[param] = value
         items = []
 
-        if parameters.keys():
+        if list(parameters.keys()):
             result = searcher.search(parameters)
 
             fields = ['label', 'internal_feature_id', 'feature_type']

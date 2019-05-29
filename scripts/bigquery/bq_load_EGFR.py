@@ -15,9 +15,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
+from __future__ import print_function
 
 # Python example modified from https://cloud.google.com/bigquery/loading-data-into-bigquery
-from urllib2 import HTTPError
+from future import standard_library
+standard_library.install_aliases()
+from urllib.error import HTTPError
 import pprint
 from googleapiclient.discovery import build
 import httplib2
@@ -234,18 +237,18 @@ def loadTable(service, projectId, datasetId, targetTableId, sourceCSV, schema):
             job = jobCollection.get(projectId=projectId,
                                      jobId=insertResponse['jobReference']['jobId']).execute()
             if 'DONE' == job['status']['state']:
-                print 'Done Loading!'
+                print('Done Loading!')
                 return
 
             if 'errorResult' in job['status']:
-                print 'Error loading table: ', pprint.pprint(job)
+                print('Error loading table: ', pprint.pprint(job))
                 return
 
-            print 'Waiting for loading to complete...'
+            print('Waiting for loading to complete...')
             time.sleep(10)
 
     except HTTPError as err:
-        print 'Error in loadTable: ', pprint.pprint(err.resp)  # or err.reason?
+        print('Error in loadTable: ', pprint.pprint(err.resp))  # or err.reason?
 
 
 def main():

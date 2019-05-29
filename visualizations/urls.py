@@ -15,15 +15,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
+from __future__ import absolute_import
 
 from django.conf.urls import url
 
-import views, feature_access_views, feature_access_views_v2, data_access_views, data_access_views_v2
+from . import views, feature_access_views, feature_access_views_v2, data_access_views, data_access_views_v2
 
-import seqpeek_data_views_v1
-import seqpeek_data_views_v2
-import oncoprint_data_views_v2
-import oncogrid_data_views_v2
+from . import seqpeek_data_views_v1
+from . import seqpeek_data_views_v2
+from . import oncoprint_data_views_v2
+from . import oncogrid_data_views_v2
 
 
 urlpatterns = [
