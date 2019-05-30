@@ -40,7 +40,7 @@ class PlotFactory(object):
     @classmethod
     def _decode_dict(cls, data):
         rv = {}
-        for key, value in data.items():
+        for key, value in list(data.items()):
             if isinstance(key, str):
                 key = key.encode('utf-8')
             if isinstance(value, str):
@@ -57,7 +57,7 @@ class PlotFactory(object):
         if isinstance(data, basestring):
             return str(data)
         elif isinstance(data, collections.Mapping):
-            return dict(list(map(cls.convert, iter(data.items()))))
+            return dict(list(map(cls.convert, iter(list(data.items())))))
         elif isinstance(data, collections.Iterable):
             return type(data)(list(map(cls.convert, data)))
         else:
