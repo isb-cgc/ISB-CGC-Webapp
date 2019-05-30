@@ -1,20 +1,18 @@
-"""
-
-Copyright 2015, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
+#
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 from __future__ import absolute_import
 
 from builtins import map
@@ -53,7 +51,7 @@ def _decode_list(data):
 
 def _decode_dict(data):
     rv = {}
-    for key, value in data.items():
+    for key, value in list(data.items()):
         if isinstance(key, str):
             key = key.encode('utf-8')
         if isinstance(value, str):
@@ -69,7 +67,7 @@ def convert(data):
     if isinstance(data, basestring):
         return str(data)
     elif isinstance(data, collections.Mapping):
-        return dict(list(map(convert, iter(data.items()))))
+        return dict(list(map(convert, iter(list(data.items())))))
     elif isinstance(data, collections.Iterable):
         return type(data)(list(map(convert, data)))
     else:
