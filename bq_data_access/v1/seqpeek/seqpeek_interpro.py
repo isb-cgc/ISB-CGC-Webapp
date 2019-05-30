@@ -16,6 +16,7 @@ limitations under the License.
 
 """
 
+from builtins import object
 import logging
 from json import loads as json_loads
 

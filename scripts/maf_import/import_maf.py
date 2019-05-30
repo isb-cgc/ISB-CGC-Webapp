@@ -127,7 +127,7 @@ def parse_row(row, tumor_type):
     }
 
     # Include annotation fields
-    for row_key, result_key in ANNOTATION_FIELDS.items():
+    for row_key, result_key in list(ANNOTATION_FIELDS.items()):
         result[result_key] = row[row_key]
 
     return result
