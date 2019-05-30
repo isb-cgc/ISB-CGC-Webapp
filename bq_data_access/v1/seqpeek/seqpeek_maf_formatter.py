@@ -16,6 +16,7 @@ limitations under the License.
 
 """
 
+from builtins import object
 from collections import defaultdict
 from copy import deepcopy
 import logging

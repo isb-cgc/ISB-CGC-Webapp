@@ -16,6 +16,7 @@ limitations under the License.
 
 """
 
+from builtins import object
 from bq_data_access.v1.feature_search.gexp_searcher import GEXPSearcher
 from bq_data_access.v1.feature_search.clinical_searcher import ClinicalSearcher
 from bq_data_access.v1.feature_search.methylation_searcher import METHSearcher

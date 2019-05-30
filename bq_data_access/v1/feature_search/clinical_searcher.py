@@ -16,6 +16,7 @@ limitations under the License.
 
 """
 
+from builtins import object
 from bq_data_access.v1.schema.tcga_clinical import schema as clinical_schema
 from bq_data_access.v1.clinical_data import CLINICAL_FEATURE_TYPE
 from bq_data_access.v1.feature_search.common import InvalidFieldException, EmptyQueryException
@@ -55,13 +56,13 @@ class ClinicalSearcher(object):
 
     def validate_feature_search_input(self, parameters):
         # Check that the input contains only allowed fields
-        for field, keyword in parameters.items():
+        for field, keyword in list(parameters.items()):
             if field not in self.feature_search_valid_fields:
                 raise InvalidFieldException(self.get_datatype_identifier(), keyword, field)
 
         # At least one field has to have a non-empty keyword
         found_field = False
-        for field, keyword in parameters.items():
+        for field, keyword in list(parameters.items()):
             if len(keyword) > 0:
                 found_field = True
                 continue

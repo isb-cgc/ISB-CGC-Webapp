@@ -16,6 +16,7 @@ limitations under the License.
 
 """
 
+from builtins import object
 from MySQLdb.cursors import DictCursor
 from _mysql_exceptions import MySQLError
 from bq_data_access.v1.feature_search.common import BackendException, InvalidFieldException

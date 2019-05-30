@@ -16,6 +16,7 @@ limitations under the License.
 
 """
 
+from builtins import object
 from enum import Enum
 
 from bq_data_access.data_types.clinical import BIGQUERY_CONFIG
