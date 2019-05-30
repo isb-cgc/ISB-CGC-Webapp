@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
+from cohorts.models import Cohort
 
 from builtins import object
 import operator
@@ -23,7 +24,6 @@ from django.db import models
 from django.db.models import Q
 from django.contrib.auth.models import User
 
-from cohorts.models import Cohort
 from functools import reduce
 
 
