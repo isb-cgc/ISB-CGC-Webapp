@@ -4,16 +4,15 @@ if [ -n "$CI" ]; then
 
     # Clone dependencies
     git clone -b master https://github.com/isb-cgc/ISB-CGC-Common.git
-
-    # Remove .pyc files; these can sometimes stick around and if a
-    # model has changed names it will cause various load failures
-    find . -type f -name '*.pyc' -delete
-
 else
     export $(cat /home/vagrant/parentDir/secure_files/.env | grep -v ^# | xargs) 2> /dev/null
     export HOME=/home/vagrant
     export HOMEROOT=/home/vagrant/www
 fi
+
+# Remove .pyc files; these can sometimes stick around and if a
+# model has changed names it will cause various load failures
+find . -type f -name '*.pyc' -delete
 
 # Install and update apt-get info
 echo "Preparing System..."
