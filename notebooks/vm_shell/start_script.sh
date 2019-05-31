@@ -14,8 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-GCLOUD_BUCKET=elee-notebook-vm
 JUPYTER_HOME=jupyter
+# if [ -d ${JUPYTER_HOME} ]; then
+#    exit 0
+# fi
+
+echo "Setting up Jupyter"
+
+GCLOUD_BUCKET=elee-notebook-vm
 mkdir -p ${JUPYTER_HOME}
 echo "Copy files ..."
 echo "passhash.txt"
@@ -41,10 +47,10 @@ gsutil cp gs://${GCLOUD_BUCKET}/idle_shutdown.py ${JUPYTER_HOME}/.
 gsutil cp gs://${GCLOUD_BUCKET}/shutdown_wrapper.sh ${JUPYTER_HOME}/.
 
 
+# cd ${JUPYTER_HOME}
 
+source ${JUPYTER_HOME}/setEnvVars.sh
 
-cd ${JUPYTER_HOME}
-source ./setEnvVars.sh
 sudo apt-get update
 
 #
@@ -99,7 +105,7 @@ mkdir .jupyter
 
 CERT_SUBJ=`cat certSubj.txt`
 rm certSubj.txt
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "${CERT_SUBJ}" -keyout ./.jupyter/mykey.key -out ./.jupyter/mycert.pem
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "${CERT_SUBJ}" -keyout ~/.jupyter/mykey.key -out ~/.jupyter/mycert.pem
 
 #
 # Get the password from the file we created on the desktop:
@@ -112,17 +118,17 @@ rm passhash.txt
 # Get config set up for remote access:
 #
 
-./.local/bin/jupyter notebook --generate-config
+~/.local/bin/jupyter notebook --generate-config
 
-cat >> ./.jupyter/jupyter_notebook_config.py <<END_OF_CONFIG
+cat >> ~/.jupyter/jupyter_notebook_config.py <<END_OF_CONFIG
 c = get_config()
 c.NotebookApp.ip = '*'
 c.NotebookApp.open_browser = False
 c.NotebookApp.port = ${SERV_PORT}
 c.NotebookApp.allow_origin = '*'
 c.NotebookApp.allow_remote_access = True
-c.NotebookApp.certfile = u"${JUPYTER_HOME}/.jupyter/mycert.pem"
-c.NotebookApp.keyfile = u"${JUPYTER_HOME}/.jupyter/mykey.key"
+c.NotebookApp.certfile = u"${HOME}/.jupyter/mycert.pem"
+c.NotebookApp.keyfile = u"${HOME}/.jupyter/mykey.key"
 c.NotebookApp.password = u"${PASSWD}"
 END_OF_CONFIG
 
@@ -130,7 +136,7 @@ END_OF_CONFIG
 # Get the virtual environment installed:
 #
 
-cd ${JUPYTER_HOME}
+cd ~
 for i in $(seq 1 5); do
   python3 -m venv virtualEnv${i}
   source virtualEnv${i}/bin/activate
@@ -143,21 +149,21 @@ done
 #
 # Build directories, move scripts into place:
 #
+echo "home directory is: ${HOME}"
+mkdir ${HOME}/log
+mkdir ${HOME}/bin
+mkdir ${HOME}/idlelogs
 
-mkdir ${JUPYTER_HOME}/log
-mkdir ${JUPYTER_HOME}/bin
-mkdir ${JUPYTER_HOME}/idlelogs
+chmod u+x /${JUPYTER_HOME}/cpuLogger.sh
+chmod u+x /${JUPYTER_HOME}/idle_log_wrapper.sh
+chmod u+x /${JUPYTER_HOME}/shutdown_wrapper.sh
 
-chmod u+x cpuLogger.sh
-chmod u+x idle_log_wrapper.sh
-chmod u+x ishutdown_wrapper.sh
-
-mv cpuLogger.sh ${JUPYTER_HOME}/bin
-mv idle_checker.py ${JUPYTER_HOME}/bin
-mv idle_log_wrapper.sh ${JUPYTER_HOME}/bin
-mv idle_shutdown.py ${JUPYTER_HOME}/bin
-mv shutdown_wrapper.sh ${JUPYTER_HOME}/bin
-mv setEnvVars.sh ${JUPYTER_HOME}/bin
+mv /${JUPYTER_HOME}/cpuLogger.sh ${HOME}/bin
+mv /${JUPYTER_HOME}/idle_checker.py ${HOME}/bin
+mv /${JUPYTER_HOME}/idle_log_wrapper.sh ${HOME}/bin
+mv /${JUPYTER_HOME}/idle_shutdown.py ${HOME}/bin
+mv /${JUPYTER_HOME}/shutdown_wrapper.sh ${HOME}/bin
+mv /${JUPYTER_HOME}/setEnvVars.sh ${HOME}/bin
 
 #
 # Supervisor. Apparently, the apt-get gets us the system init.d install, while we
@@ -170,52 +176,52 @@ sudo python3 -m pip install --upgrade supervisor
 
 # Daemon to run notebook server
 
-cat >> ${JUPYTER_HOME}/notebook.conf <<END_OF_SUPER
+cat >> ${HOME}/notebook.conf <<END_OF_SUPER
 [program:notebooks]
-directory=${JUPYTER_HOME}
-command=${JUPYTER_HOME}/.local/bin/jupyter notebook
+directory=${HOME}
+command=${HOME}/.local/bin/jupyter notebook
 autostart=true
 autorestart=true
 user=${USER}
 stopasgroup=true
-stderr_logfile=${JUPYTER_HOME}/log/notebook-err.log
-stdout_logfile=${JUPYTER_HOME}/log/notebook-out.log
+stderr_logfile=${HOME}/log/notebook-err.log
+stdout_logfile=${HOME}/log/notebook-out.log
 END_OF_SUPER
 
 # Daemon to log VM activity stats
 
-cat >> ${JUPYTER_HOME}/idlelog.conf <<END_OF_SUPER_IDLELOG
+cat >> ${HOME}/idlelog.conf <<END_OF_SUPER_IDLELOG
 [program:idlelog]
-directory=${JUPYTER_HOME}
-command=${JUPYTER_HOME}/bin/idle_log_wrapper.sh
+directory=${HOME}
+command=${HOME}/bin/idle_log_wrapper.sh
 autostart=true
 autorestart=true
 user=${USER}
 stopasgroup=true
-stderr_logfile=${JUPYTER_HOME}/log/idlelog-err.log
-stdout_logfile=${JUPYTER_HOME}/log/idlelog-out.log
+stderr_logfile=${HOME}/log/idlelog-err.log
+stdout_logfile=${HOME}/log/idlelog-out.log
 END_OF_SUPER_IDLELOG
 
 # Daemon to shutdown idle machine
 
-cat >> ${JUPYTER_HOME}/idleshut.conf <<END_OF_SUPER_SHUTDOWN
+cat >> ${HOME}/idleshut.conf <<END_OF_SUPER_SHUTDOWN
 [program:idleshut]
-directory=${JUPYTER_HOME}
-command=${JUPYTER_HOME}/bin/shutdown_wrapper.sh
+directory=${HOME}
+command=${HOME}/bin/shutdown_wrapper.sh
 autostart=true
 autorestart=true
 user=${USER}
 stopasgroup=true
-stderr_logfile=${JUPYTER_HOME}/log/shutdownlog-err.log
-stdout_logfile=${JUPYTER_HOME}/log/shutdownlog-out.log
+stderr_logfile=${HOME}/log/shutdownlog-err.log
+stdout_logfile=${HOME}/log/shutdownlog-out.log
 END_OF_SUPER_SHUTDOWN
 
 #
 # Supervisor config files:
 #
 
-sudo mv ${JUPYTER_HOME}/notebook.conf /etc/supervisor/conf.d/
-sudo mv ${JUPYTER_HOME}/idlelog.conf /etc/supervisor/conf.d/
-sudo mv ${JUPYTER_HOME}/idleshut.conf /etc/supervisor/conf.d/
+sudo mv ${HOME}/notebook.conf /etc/supervisor/conf.d/
+sudo mv ${HOME}/idlelog.conf /etc/supervisor/conf.d/
+sudo mv ${HOME}/idleshut.conf /etc/supervisor/conf.d/
 sudo supervisorctl reread
 sudo supervisorctl update

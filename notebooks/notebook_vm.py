@@ -23,6 +23,9 @@ SETUP_INSTANCE = 4
 SETUP_VM_PASSWORD = 5
 DELETE_FIREWALL = 6
 DELETE_ADDRESS = 7
+START_INSTANCE = 8
+STOP_INSTANCE = 9
+DELETE_INSTANCE = 10
 
 
 # firewall methods
@@ -41,7 +44,10 @@ ADDRESSES_DELETE = 3
 INSTANCES_LIST = 0
 INSTANCES_GET = 1
 INSTANCES_CREATE = 2
-INSTANCES_DELETE = 3
+INSTANCES_START = 3
+INSTANCES_STOP = 4
+INSTANCES_DELETE = 5
+
 
 
 ext_ip_address = None
@@ -50,7 +56,7 @@ ext_ip_address = None
 logger = logging.getLogger('main_logger')
 
 
-def start_n_launch(setup_stage = SETUP_FIREWALL, client_ip = None):
+def start_n_launch(setup_stage = SETUP_PROJECT, client_ip = None):
     # load env var
     USER_NAME = 'elee'
     MACHINE_NAME = USER_NAME + '-unique-machine-name-1'
@@ -65,15 +71,15 @@ def start_n_launch(setup_stage = SETUP_FIREWALL, client_ip = None):
     MACHINE_TYPE = 'n1-standard-1'
     SERV_PORT = '5000'
     MACHINE_DESC = 'Jupyter Notebook Server for ' + USER_NAME
-    # PROJECT_ID = 'cgc-05-0038'
-    PROJECT_ID = 'isb-cgc-test'
+    PROJECT_ID = 'cgc-05-0038'
+    # PROJECT_ID = 'isb-cgc-test'
     USER_AND_MACHINE = USER_NAME + '@' + MACHINE_NAME
     ZONE = 'us-central1-c'
     REGION = 'us-central1'
     ADDRESS_NAME = USER_NAME + '-jupyter-address'
     CERT_SUBJ = '/C=US/ST=MyState/L=MyCity/O=MyInstitution/OU=MyDepartment/CN='
     NEED_API = 'monitoring.googleapis.com'
-    setup_stage = SETUP_PROJECT
+    # setup_stage = SETUP_PROJECT
     PROJECT_NO = None
     # PROJECT_NO = '144657163696'
     # PROJECT_NO = '735690309464'
@@ -94,6 +100,13 @@ def start_n_launch(setup_stage = SETUP_FIREWALL, client_ip = None):
         if setup_stage == DELETE_ADDRESS:
             print('Deleting External IP address ...')
             response = build_addresses_request(method=ADDRESSES_DELETE, project_id=PROJECT_ID, region=REGION, name=ADDRESS_NAME).execute()
+        if setup_stage == STOP_INSTANCE:
+            print('Stopping Instance ...')
+            response = build_instances_request(method=INSTANCES_STOP, project_id=PROJECT_ID, zone=ZONE, name=MACHINE_NAME).execute()
+        if setup_stage == DELETE_INSTANCE:
+            print('Deleting Instance ...')
+            response = build_instances_request(method=INSTANCES_DELETE, project_id=PROJECT_ID, zone=ZONE,
+                                               name=MACHINE_NAME).execute()
         if setup_stage == SETUP_PROJECT:
             print('Validating Project ID ...')
             credentials = GoogleCredentials.get_application_default()
@@ -223,29 +236,18 @@ def start_n_launch(setup_stage = SETUP_FIREWALL, client_ip = None):
         if setup_stage == SETUP_INSTANCE:
             print('Setting a VM instance ...')
             response = build_instances_request(method=INSTANCES_LIST, project_id=PROJECT_ID, zone=ZONE, name=MACHINE_NAME).execute()
-            # response = service.instances().list(project=PROJECT_ID, zone=ZONE
-            #                                     , filter='name={}'.format(MACHINE_NAME)
-            #                                     ).execute()
             instance_settings = None
             if 'items' in response:
                 instance_settings = response['items'][0]
                 print('Existing VM instance {} found. STATUS: {}'.format(MACHINE_NAME, instance_settings['status']))
-
-            #     # if instance_settings['status'] == 'RUNNING':
-            #
-            #     #confirm the settings
-            #     #check
-            #     # status
-            #     #
-            #     #if stopped - rerun.
-            #     #option to stop & destroy and re-create a new instance under the same name
-            #     pprint(instance_settings)
+                if instance_settings['status'] == 'STOPPED':
+                    print('Starting a VM instance ...')
+                    response = build_instances_request(method=INSTANCES_START, project_id=PROJECT_ID, zone=ZONE,
+                                                   name=MACHINE_NAME).execute()
             else:
                 print('Create and start up a new VM instance')
                 response = build_addresses_request(method=ADDRESSES_GET, project_id=PROJECT_ID, region=REGION,
                                                                                       name=ADDRESS_NAME).execute()
-                # pprint(response)
-                # resp_code = '200'
                 ext_ip_address = response['address']
                 #create a new instance
                 instance_body = {
@@ -280,13 +282,18 @@ def start_n_launch(setup_stage = SETUP_FIREWALL, client_ip = None):
                     ],
                     'tags': {
                         'items':[FIREWALL_TAG]
+                    },
+                    'metadata': {
+                        "items": [
+                            { 'key' :'startup-script-url',
+                              'value': 'gs://elee-notebook-vm/start_script.sh'
+                            }
+                        ]
                     }
 
                 }
                 response = build_instances_request(method=INSTANCES_CREATE, project_id=PROJECT_ID, zone=ZONE,
                                                    body=instance_body).execute()
-                # response = service.instances().insert(project=PROJECT_ID, zone=ZONE, body=instance_body).execute()
-                # pprint(response)
                 if 'error' not in response:
                     instance_settings = response
             if instance_settings is not None and instance_settings['status'] != 'RUNNING':
@@ -393,8 +400,12 @@ def build_instances_request(method, project_id, zone, name=None, body=None):
     #     return instances_service.get(project=project_id, zone=zone, address=name)
     elif method == INSTANCES_CREATE:
         return instances_service.insert(project=project_id, zone=zone, body=body)
-    # elif method == INSTANCES_DELETE:
-    #     return instances_service.delete(project=project_id, zone=zone, body=name)
+    elif method == INSTANCES_START:
+        return instances_service.start(project=project_id, zone=zone, instance=name)
+    elif method == INSTANCES_STOP:
+        return instances_service.stop(project=project_id, zone=zone, instance=name)
+    elif method == INSTANCES_DELETE:
+        return instances_service.delete(project=project_id, zone=zone, instance=name)
 
 # def create_file(self, filename):
     # """Create a file.

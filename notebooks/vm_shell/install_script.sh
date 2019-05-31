@@ -122,7 +122,7 @@ mkdir ${HOME}/idlelogs
 
 chmod u+x cpuLogger.sh
 chmod u+x idle_log_wrapper.sh
-chmod u+x ishutdown_wrapper.sh
+chmod u+x shutdown_wrapper.sh
 
 mv cpuLogger.sh ${HOME}/bin
 mv idle_checker.py ${HOME}/bin

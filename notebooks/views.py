@@ -216,9 +216,11 @@ def notebook_vm(request):
     # print('ip address: {}'.format(get_client_ip(request)))
     if command == 'startnlaunch':
         # SETUP_INSTANCE = 3
-        DELETE_FIREWALL = 5
-        DELETE_ADDRESS= 6
+        DELETE_FIREWALL = 6
+        DELETE_ADDRESS= 7
         SETUP_MONITOR =2
+        STOP_INSTANCE = 9
+        DELETE_INSTANCE = 10
         # client_ip = get_client_ip(request)
         result = start_n_launch()
         # result = start_n_launch(client_ip=client_ip)
