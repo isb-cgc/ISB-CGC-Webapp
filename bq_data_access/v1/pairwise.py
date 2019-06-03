@@ -1,25 +1,26 @@
-"""
+#
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
-Copyright 2015, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
-
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 import json
 import base64
 import logging
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import traceback
 import requests
 
@@ -63,14 +64,14 @@ class Pairwise(object):
         # Create merged feature vectors
         vms = VectorMergeSupport('NA', 'sample_id', row_ids=features)
 
-        for feature in feature_vector_mapping.keys():
+        for feature in list(feature_vector_mapping.keys()):
             vms.add_dict_array(feature_vector_mapping[feature][1], feature, 'value')
 
         merged = vms.get_merged_dict()
 
         rows = []
 
-        for feature in feature_vector_mapping.keys():
+        for feature in list(feature_vector_mapping.keys()):
             current_row = [feature_vector_mapping[feature][0] + ":" + feature]
 
             for item in merged:
@@ -101,14 +102,14 @@ class Pairwise(object):
 
         vms = VectorMergeSupport('NA', 'sample_id', 'case_id', row_ids=feature_ids)
 
-        for feature in feature_vector_mapping.keys():
+        for feature in list(feature_vector_mapping.keys()):
             vms.add_dict_array(feature_vector_mapping[feature][1], feature, 'value')
 
         merged = vms.get_merged_dict()
 
         rows = []
 
-        for feature in feature_vector_mapping.keys():
+        for feature in list(feature_vector_mapping.keys()):
             current_row = [feature_vector_mapping[feature][0] + ":" + feature]
 
             for item in merged:
@@ -130,7 +131,7 @@ class Pairwise(object):
             row_count += 1
 
         # Encode the data to be sent to the service
-        data = urllib.urlencode(data_dict)
+        data = urllib.parse.urlencode(data_dict)
         decoded_response = None
 
         try:

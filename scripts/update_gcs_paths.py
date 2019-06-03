@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import str
+from past.utils import old_div
 import requests
 import os
 import logging
@@ -106,7 +109,7 @@ try:
             cursor.execute(count_query_base_cloudsql.format(data_table=table.data_table))
             uuid_count = cursor.fetchall()[0][0]
 
-            expected_iter = (uuid_count/100 + (1 if uuid_count % 100 > 0 else 0))
+            expected_iter = (old_div(uuid_count,100) + (1 if uuid_count % 100 > 0 else 0))
 
             logger.info("Expected calls: {}".format(str(expected_iter)))
 

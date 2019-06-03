@@ -68,7 +68,8 @@
                                 {% for dataset in authorized_datasets %}
                                     <li class="checkbox">
                                         <label>
-                                            <input type="checkbox" name="datasets" value="{{ dataset.whitelist_id }}"{% if dataset.whitelist_id in sa_dataset_ids %}checked="checked"{% endif %}>{{ dataset.name }}
+                                            <input type="checkbox" name="datasets" value="{{ dataset.whitelist_id }}"{% if dataset.whitelist_id in sa_dataset_ids %}checked="checked"{% endif %}>
+                                            <a href="https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id={{ dataset.whitelist_id }}" target="_BLANK">{{ dataset.name }}</a>
                                         </label>
                                     </li>
                                 {% endfor %}
