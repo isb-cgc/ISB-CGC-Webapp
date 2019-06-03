@@ -18,10 +18,11 @@
 # Wrapper for the script that determines if the VM should be shutdown for being idle
 #
 
-source ./bin/setEnvVars.sh
+source /home/${USER_NAME}/bin/setEnvVars.sh
 
 while true; do
-    DO_SHUTDOWN=`python3 idle_shutdown.py ${HOME} idlelogs 1 ${PROJECT} ${MACHINE_NAME} ${SERV_PORT}`
+    DO_SHUTDOWN=`python3 idle_shutdown.py . idlelogs 1 ${PROJECT} ${MACHINE_NAME} ${SERV_PORT}`
+    #DO_SHUTDOWN=`python3 /home/${USER_NAME}/idle_shutdown.py /home/${USER_NAME} /home/${USER_NAME}/idlelogs 1 ${PROJECT} ${MACHINE_NAME} ${SERV_PORT}`
     if [ -n "${DO_SHUTDOWN}" ]; then
         echo "Shutdown report: ${DO_SHUTDOWN}"
         echo "Shutting down"

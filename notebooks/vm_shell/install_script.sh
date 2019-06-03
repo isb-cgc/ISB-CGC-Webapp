@@ -145,7 +145,7 @@ sudo python3 -m pip install --upgrade supervisor
 cat >> ${HOME}/notebook.conf <<END_OF_SUPER
 [program:notebooks]
 directory=${HOME}
-command=${HOME}/.local/bin/jupyter notebook
+command='${HOME}/.local/bin/jupyter notebook --allow-root'
 autostart=true
 autorestart=true
 user=${USER}

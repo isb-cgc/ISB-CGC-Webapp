@@ -20,6 +20,7 @@
 # stdout to multilog, which is designed to create a fixed set of logs so old results are tossed.
 #
 
-source ./bin/setEnvVars.sh
+source /home/${USER_NAME}/bin/setEnvVars.sh
 
-python3 idle_checker.py ${PROJECT} ${MACHINE_NAME} 600 300 | multilog t s200000 n10 ${HOME}/idlelogs
+python3 idle_checker.py ${PROJECT} ${MACHINE_NAME} 600 300 | multilog t s200000 n10 /home/${USER_NAME}/idlelogs
+#python3 /home/${USER_NAME}/idle_checker.py ${PROJECT} ${MACHINE_NAME} 600 300 | multilog t s200000 n10 /home/${USER_NAME}/idlelogs

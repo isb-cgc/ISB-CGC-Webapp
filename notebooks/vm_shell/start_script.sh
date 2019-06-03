@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-JUPYTER_HOME=jupyter
 # if [ -d ${JUPYTER_HOME} ]; then
 #    exit 0
 # fi
@@ -22,104 +21,78 @@ JUPYTER_HOME=jupyter
 echo "Setting up Jupyter"
 
 GCLOUD_BUCKET=elee-notebook-vm
-mkdir -p ${JUPYTER_HOME}
-echo "Copy files ..."
-echo "passhash.txt"
-gsutil cp gs://${GCLOUD_BUCKET}/passhash.txt ${JUPYTER_HOME}/.
-echo "ssl cert"
-gsutil cp gs://${GCLOUD_BUCKET}/certSubj.txt ${JUPYTER_HOME}/.
-#and remove from gs bucket after copy
-#may be not used??
-#echo "port.txt"
-#gsutil cp gs://${GCLOUD_BUCKET}/port.txt ${JUPYTER_HOME}/.
-echo "Uploading config info to the VM"
-gsutil cp gs://${GCLOUD_BUCKET}/setEnvVars.sh ${JUPYTER_HOME}/.
-
+echo "Copy setEnvVars.sh ..."
+gsutil cp gs://${GCLOUD_BUCKET}/setEnvVars.sh .
+echo "Copy passhash.txt"
+gsutil cp gs://${GCLOUD_BUCKET}/passhash.txt .
+echo "Copy ssl certSubj.txt"
+gsutil cp gs://${GCLOUD_BUCKET}/certSubj.txt .
+source ./setEnvVars.sh
+echo "Add user"
+useradd -m ${USER_NAME}
+echo "log in as user"
+sudo -u ${USER_NAME} bash <<END_OF_BASH
+cd ~
 #
 # Get the idle monitor scripts and idle shutdown script up to the machine:
 #
-
 echo "Uploading idle monitor and shutdown scripts"
-gsutil cp gs://${GCLOUD_BUCKET}/cpuLogger.sh ${JUPYTER_HOME}/.
-gsutil cp gs://${GCLOUD_BUCKET}/idle_checker.py ${JUPYTER_HOME}/.
-gsutil cp gs://${GCLOUD_BUCKET}/idle_log_wrapper.sh ${JUPYTER_HOME}/.
-gsutil cp gs://${GCLOUD_BUCKET}/idle_shutdown.py ${JUPYTER_HOME}/.
-gsutil cp gs://${GCLOUD_BUCKET}/shutdown_wrapper.sh ${JUPYTER_HOME}/.
-
-
-# cd ${JUPYTER_HOME}
-
-source ${JUPYTER_HOME}/setEnvVars.sh
-
+gsutil cp gs://${GCLOUD_BUCKET}/cpuLogger.sh .
+gsutil cp gs://${GCLOUD_BUCKET}/idle_checker.py .
+gsutil cp gs://${GCLOUD_BUCKET}/idle_log_wrapper.sh .
+gsutil cp gs://${GCLOUD_BUCKET}/idle_shutdown.py .
+gsutil cp gs://${GCLOUD_BUCKET}/shutdown_wrapper.sh .
 sudo apt-get update
-
 #
 # Do not use pip3 to upgrade pip. Does not play well with Debian pip
 #
-
 sudo apt-get install -y python3-pip
-
 #
 # We want venv support for notebooks:
 #
-
 sudo apt-get install -y python3-venv
-
 #
 # For idle monitoring, we need tcpdump and multilog
 #
-
 sudo apt-get install -y tcpdump
-
 sudo apt-get install -y daemontools
-
 #
 # For monitoring, we use pandas:
 #
-
 python3 -m pip install pandas
-
 #
 # Get jupyter installed:
 #
-
 python3 -m pip install jupyter
-
 #
 # Was seeing issues on first install (early 2019), these fixed problems. Are they still needed?
 #
-
 python3 -m pip install --upgrade --user nbconvert
-
 python3 -m pip install --upgrade --user tornado==5.1.1
-
 #
 # Get ready for certs:
 #
-
+echo 'mkdir .jupyter'
+cd ~
 mkdir .jupyter
-
 #
 # Generate self-signed cert on the VM:
 #
-
-CERT_SUBJ=`cat certSubj.txt`
-rm certSubj.txt
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "${CERT_SUBJ}" -keyout ~/.jupyter/mykey.key -out ~/.jupyter/mycert.pem
+echo 'generate self-signed cert'
+#CERT_SUBJ=`cat certSubj.txt`
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "$(cat certSubj.txt)" -keyout ~/.jupyter/mykey.key -out ~/.jupyter/mycert.pem
+sudo rm /certSubj.txt
 
 #
 # Get the password from the file we created on the desktop:
 #
-
-PASSWD=`cat passhash.txt`
-rm passhash.txt
-
+# cd ~
+# PASSWD=`cat passhash.txt`
+#
 #
 # Get config set up for remote access:
 #
-
 ~/.local/bin/jupyter notebook --generate-config
-
 cat >> ~/.jupyter/jupyter_notebook_config.py <<END_OF_CONFIG
 c = get_config()
 c.NotebookApp.ip = '*'
@@ -127,101 +100,99 @@ c.NotebookApp.open_browser = False
 c.NotebookApp.port = ${SERV_PORT}
 c.NotebookApp.allow_origin = '*'
 c.NotebookApp.allow_remote_access = True
-c.NotebookApp.certfile = u"${HOME}/.jupyter/mycert.pem"
-c.NotebookApp.keyfile = u"${HOME}/.jupyter/mykey.key"
-c.NotebookApp.password = u"${PASSWD}"
+c.NotebookApp.certfile = u"/home/${USER_NAME}/.jupyter/mycert.pem"
+c.NotebookApp.keyfile = u"/home/${USER_NAME}/.jupyter/mykey.key"
+c.NotebookApp.password = u"$(cat passhash.txt)"
 END_OF_CONFIG
-
-#
-# Get the virtual environment installed:
-#
-
-cd ~
-for i in $(seq 1 5); do
-  python3 -m venv virtualEnv${i}
-  source virtualEnv${i}/bin/activate
-  pip install ipykernel
-  python -m ipykernel install --user --name=virtualEnv${i}
-  deactivate
-done
-
-
+sudo rm /passhash.txt
 #
 # Build directories, move scripts into place:
 #
-echo "home directory is: ${HOME}"
-mkdir ${HOME}/log
-mkdir ${HOME}/bin
-mkdir ${HOME}/idlelogs
+mkdir ~/log
+mkdir ~/bin
+mkdir ~/idlelogs
 
-chmod u+x /${JUPYTER_HOME}/cpuLogger.sh
-chmod u+x /${JUPYTER_HOME}/idle_log_wrapper.sh
-chmod u+x /${JUPYTER_HOME}/shutdown_wrapper.sh
-
-mv /${JUPYTER_HOME}/cpuLogger.sh ${HOME}/bin
-mv /${JUPYTER_HOME}/idle_checker.py ${HOME}/bin
-mv /${JUPYTER_HOME}/idle_log_wrapper.sh ${HOME}/bin
-mv /${JUPYTER_HOME}/idle_shutdown.py ${HOME}/bin
-mv /${JUPYTER_HOME}/shutdown_wrapper.sh ${HOME}/bin
-mv /${JUPYTER_HOME}/setEnvVars.sh ${HOME}/bin
+chmod u+x cpuLogger.sh
+chmod u+x idle_log_wrapper.sh
+chmod u+x shutdown_wrapper.sh
+mv ~/cpuLogger.sh ~/bin/.
+mv ~/idle_checker.py ~/bin/.
+mv ~/idle_log_wrapper.sh ~/bin/.
+mv ~/idle_shutdown.py ~/bin/.
+mv ~/shutdown_wrapper.sh ~/bin/.
+sudo mv /setEnvVars.sh ~/bin/.
 
 #
 # Supervisor. Apparently, the apt-get gets us the system init.d install, while we
 # need to do the pip upgrade to get ourselves to 3.3.1:
 #
-
 sudo apt-get install -y supervisor
 sudo python3 -m pip install --upgrade supervisor
 
-
 # Daemon to run notebook server
-
-cat >> ${HOME}/notebook.conf <<END_OF_SUPER
+cat >> ~/notebook.conf <<END_OF_SUPER
 [program:notebooks]
-directory=${HOME}
-command=${HOME}/.local/bin/jupyter notebook
+directory=/home/${USER_NAME}
+command=/home/${USER_NAME}/.local/bin/jupyter notebook
 autostart=true
 autorestart=true
-user=${USER}
+user=${USER_NAME}
 stopasgroup=true
-stderr_logfile=${HOME}/log/notebook-err.log
-stdout_logfile=${HOME}/log/notebook-out.log
+stderr_logfile=/home/${USER_NAME}/log/notebook-err.logs
+stdout_logfile=/home/${USER_NAME}/log/notebook-out.log
 END_OF_SUPER
 
 # Daemon to log VM activity stats
 
-cat >> ${HOME}/idlelog.conf <<END_OF_SUPER_IDLELOG
+cat >> ~/idlelog.conf <<END_OF_SUPER_IDLELOG
 [program:idlelog]
-directory=${HOME}
-command=${HOME}/bin/idle_log_wrapper.sh
+directory=/home/${USER_NAME}
+command=/home/${USER_NAME}/bin/idle_log_wrapper.sh
 autostart=true
 autorestart=true
-user=${USER}
+user=${USER_NAME}
 stopasgroup=true
-stderr_logfile=${HOME}/log/idlelog-err.log
-stdout_logfile=${HOME}/log/idlelog-out.log
+stderr_logfile=/home/${USER_NAME}/log/idlelog-err.log
+stdout_logfile=/home/${USER_NAME}/log/idlelog-out.log
 END_OF_SUPER_IDLELOG
 
 # Daemon to shutdown idle machine
 
-cat >> ${HOME}/idleshut.conf <<END_OF_SUPER_SHUTDOWN
+cat >> ~/idleshut.conf <<END_OF_SUPER_SHUTDOWN
 [program:idleshut]
-directory=${HOME}
-command=${HOME}/bin/shutdown_wrapper.sh
+directory=/home/${USER_NAME}
+command=/home/${USER_NAME}/bin/shutdown_wrapper.sh
 autostart=true
 autorestart=true
-user=${USER}
+user=${USER_NAME}
 stopasgroup=true
-stderr_logfile=${HOME}/log/shutdownlog-err.log
-stdout_logfile=${HOME}/log/shutdownlog-out.log
+stderr_logfile=/home/${USER_NAME}/log/shutdownlog-err.log
+stdout_logfile=/home/${USER_NAME}/log/shutdownlog-out.log
 END_OF_SUPER_SHUTDOWN
 
 #
 # Supervisor config files:
 #
 
-sudo mv ${HOME}/notebook.conf /etc/supervisor/conf.d/
-sudo mv ${HOME}/idlelog.conf /etc/supervisor/conf.d/
-sudo mv ${HOME}/idleshut.conf /etc/supervisor/conf.d/
+sudo mv ~/notebook.conf /etc/supervisor/conf.d/
+sudo mv ~/idlelog.conf /etc/supervisor/conf.d/
+sudo mv ~/idleshut.conf /etc/supervisor/conf.d/
+END_OF_BASH
+
+#
+# Get the virtual environment installed:
+#
+cd /home/${USER_NAME}
+for i in $(seq 1 5)
+do
+  python3 -m venv virtualEnv${i}
+  source virtualEnv${i}/bin/activate
+  pip install ipykernel
+  python -m ipykernel install --user --name=virtualEnv${i}
+  deactivate
+done
+sudo -u ${USER_NAME} bash <<EOM
+cd ~
 sudo supervisorctl reread
 sudo supervisorctl update
+EOM

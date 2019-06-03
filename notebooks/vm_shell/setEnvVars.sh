@@ -38,5 +38,5 @@ USER_AND_MACHINE=${USER_NAME}@${MACHINE_NAME}
 ZONE=us-central1-c
 REGION=us-central1
 ADDRESS_NAME=${USER_NAME}-jupyter-address
-CERT_SUBJ='/C=US/ST=MyState/L=MyCity/O=MyInstitution/OU=MyDepartment/CN='
-JUPYTER_HOME=jupyter
+#CERT_SUBJ="/C=US/ST=MyState/L=MyCity/O=MyInstitution/OU=MyDepartment/CN="
+#JUPYTER_HOME=jupyter
