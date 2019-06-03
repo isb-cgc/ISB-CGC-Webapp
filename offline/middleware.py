@@ -1,8 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import offline
-from views import offline_view
+from __future__ import absolute_import
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+from builtins import object
+from . import offline
+from .views import offline_view
 
 # Customized for ISB-CGC by spaquett@systemsbiology.org
 # Changes:

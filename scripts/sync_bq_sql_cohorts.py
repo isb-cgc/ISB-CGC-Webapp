@@ -1,3 +1,5 @@
+from __future__ import print_function
+from builtins import str
 from argparse import ArgumentParser
 import logging
 import os, sys
@@ -48,14 +50,14 @@ def get_active_cohorts(conn):
 
 def get_bq_active_cohorts(table):
     service = authorize_and_get_bq_service()
-    print service
+    print(service)
 
     query = 'SELECT cohort_id from {0} group by cohort_id'.format(table)
     query_body = {
         'query': query
     }
 
-    print >> sys.stderr, "RUNNING QUERY: " + str(query)
+    print("RUNNING QUERY: " + str(query), file=sys.stderr)
     table_data = service.jobs()
     query_response = table_data.query(projectId='isb-cgc', body=query_body).execute()
 
@@ -82,12 +84,12 @@ def main():
 
     bq_active_cohorts = get_bq_active_cohorts(bq_table)
     result_list = []
-    print 'Active cohorts that are not in BQ: '
+    print('Active cohorts that are not in BQ: ')
     for cohort in sql_active_cohorts:
         if cohort not in bq_active_cohorts:
             result_list.append(cohort)
 
-    print result_list
+    print(result_list)
     return 0
 
 if __name__ == "__main__":
