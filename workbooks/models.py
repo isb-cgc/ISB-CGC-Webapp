@@ -1,18 +1,18 @@
-"""
-Copyright 2017, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+###
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
 
 import ast
 
@@ -307,7 +307,7 @@ class Worksheet(models.Model):
         self.worksheet_cohort_set.get(cohort=cohort).destroy()
 
     def get_active_plot(self):
-        active_set_list = self.worksheet_plot_set.filter(active=True).values()
+        active_set_list = list(self.worksheet_plot_set.filter(active=True).values())
         if len(active_set_list) > 0 :
             return Worksheet_plot.get_deep_plot(id=active_set_list[0]['id'])
         return None

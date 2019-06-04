@@ -9,6 +9,7 @@ To install this middleware, add to your ``settings.MIDDLEWARE_CLASSES``::
 Make sure that it is placed **after** authentication middlewares.
 """
 
+from builtins import object
 import time
 from datetime import datetime, timedelta
 
