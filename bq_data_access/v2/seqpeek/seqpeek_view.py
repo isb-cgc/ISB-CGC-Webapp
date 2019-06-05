@@ -1,21 +1,22 @@
-"""
+#
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
-Copyright 2015, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
-
+from builtins import map
+from builtins import str
+from builtins import object
 from copy import deepcopy
 import logging
 
@@ -147,7 +148,7 @@ def build_track_data(track_id_list, all_tumor_mutations):
     for track_id in track_id_list:
         tracks.append({
             TRACK_ID_FIELD: track_id,
-            'mutations': filter(lambda m: int(track_id) in set(m['cohort']), all_tumor_mutations)
+            'mutations': [m for m in all_tumor_mutations if int(track_id) in set(m['cohort'])]
         })
 
     return tracks
@@ -187,12 +188,12 @@ def get_genes_tumors_lists():
 
 
 def get_track_id_list(param):
-    return map(str, param)
+    return list(map(str, param))
 
 
 def format_removed_row_statistics_to_list(stats_dict):
     result = []
-    for key, value in stats_dict.items():
+    for key, value in list(stats_dict.items()):
         result.append({
             'name': key,
             'num': value

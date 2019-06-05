@@ -3,17 +3,16 @@ if [ -n "$CI" ]; then
     export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
 
     # Clone dependencies
-    git clone -b isb-cgc-uat https://github.com/isb-cgc/ISB-CGC-Common.git
-
-    # Remove .pyc files; these can sometimes stick around and if a
-    # model has changed names it will cause various load failures
-    find . -type f -name '*.pyc' -delete
-
+    git clone -b isb-cgc-test https://github.com/isb-cgc/ISB-CGC-Common.git
 else
     export $(cat /home/vagrant/parentDir/secure_files/.env | grep -v ^# | xargs) 2> /dev/null
     export HOME=/home/vagrant
     export HOMEROOT=/home/vagrant/www
 fi
+
+# Remove .pyc files; these can sometimes stick around and if a
+# model has changed names it will cause various load failures
+find . -type f -name '*.pyc' -delete
 
 # Install and update apt-get info
 echo "Preparing System..."
@@ -33,12 +32,8 @@ apt-get update -qq
 
 # Install apt-get dependencies
 echo "Installing Dependencies..."
-if [ -n "$CI" ]; then
-    apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev python2.7-dev git ruby g++ dos2unix curl
-    apt-get install -y mysql-client
-else
-    apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev mysql-client-5.7 python2.7 python-dev git ruby g++ dos2unix curl
-fi
+apt-get install -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev python3-mysqldb python3-dev libpython3-dev git ruby g++ curl dos2unix python3.5
+apt-get install -y --force-yes mysql-client
 echo "Dependencies Installed"
 
 # If this is local development, clean out lib for a re-structuring 
@@ -50,21 +45,21 @@ if [ -z "${CI}" ]; then
 fi
 
 # Install PIP + Dependencies
-echo "Installing pip..."
-curl --silent https://bootstrap.pypa.io/get-pip.py | python
+echo "Installing pip3..."
+curl --silent https://bootstrap.pypa.io/get-pip.py | python3
 
 # Install our primary python libraries
 # If we're not on CircleCI, or we are but the lib directory isn't there (cache miss), install lib
 if [ -z "${CI}" ] || [ ! -d "lib" ]; then
     echo "Installing Python Libraries..."
-    pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
+    pip3 install -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
 else
     echo "Using restored cache for Python Libraries"
 fi
 
 if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
     echo "Installing Django Debug Toolbar for local dev..."
-    pip install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
+    pip3 install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
 fi
 
 echo "Libraries Installed"
