@@ -19,10 +19,10 @@
 # Uses netstat and top to determine if child processes of the Jupyter Notebook server have any
 # CPU activity. Note that tiny amounts of activity could still present as 0.0 CPU, so it is
 # useful to recall this for  e.g. 60 seconds.
-# Requires the configuration script to be in the ${JUPYTER_HOME}/bin directory
+# Requires the configuration script to be in the /home/${USER_NAME}/.jupyter/bin directory
 #
 
-source ./bin/setEnvVars.sh
+source /home/${USER_NAME}/bin/setEnvVars.sh
 
 SERV_PROC=`sudo netstat -tlp | grep ":${SERV_PORT}" | grep -v "^tcp6" | awk '{print $7}' | sed 's#/.*##'`
 

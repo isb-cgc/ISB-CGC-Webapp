@@ -14,18 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# if [ -d ${JUPYTER_HOME} ]; then
-#    exit 0
-# fi
+if [ -f /etc/supervisor/conf.d/notebook.conf ]; then
+    gsutil rm -r gs://${GCLOUD_BUCKET}
+    exit 0
+fi
 
-echo "Setting up Jupyter"
-
-GCLOUD_BUCKET=elee-notebook-vm
 echo "Copy setEnvVars.sh ..."
 gsutil cp gs://${GCLOUD_BUCKET}/setEnvVars.sh .
 echo "Copy passhash.txt"
 gsutil cp gs://${GCLOUD_BUCKET}/passhash.txt .
-echo "Copy ssl certSubj.txt"
+echo "Copy certSubj.txt"
 gsutil cp gs://${GCLOUD_BUCKET}/certSubj.txt .
 source ./setEnvVars.sh
 echo "Add user"
@@ -42,6 +40,8 @@ gsutil cp gs://${GCLOUD_BUCKET}/idle_checker.py .
 gsutil cp gs://${GCLOUD_BUCKET}/idle_log_wrapper.sh .
 gsutil cp gs://${GCLOUD_BUCKET}/idle_shutdown.py .
 gsutil cp gs://${GCLOUD_BUCKET}/shutdown_wrapper.sh .
+gsutil rm -r gs://${GCLOUD_BUCKET}
+
 sudo apt-get update
 #
 # Do not use pip3 to upgrade pip. Does not play well with Debian pip
@@ -196,3 +196,4 @@ cd ~
 sudo supervisorctl reread
 sudo supervisorctl update
 EOM
+

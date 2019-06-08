@@ -23,12 +23,6 @@ from django.contrib import messages
 from .models import Notebook, Notebook_Added
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-# from google_helpers.compute_service import get_compute_resource
-# from googleapiclient.errors import HttpError
-# from pprint import pprint
-# from oauth2client.client import GoogleCredentials
-# import httplib2
-# from googleapiclient.discovery import build
 from .notebook_vm import start_n_launch
 
 logger = logging.getLogger('main_logger')
@@ -215,6 +209,7 @@ def notebook_vm(request):
     template = 'notebooks/notebook_vm.html'
     # print('ip address: {}'.format(get_client_ip(request)))
     if command == 'startnlaunch':
+        SETUP_FILES = 5
         # SETUP_INSTANCE = 3
         DELETE_FIREWALL = 6
         DELETE_ADDRESS= 7
