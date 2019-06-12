@@ -502,10 +502,11 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
                 except ObjectDoesNotExist:
                     result['error'] = "variable favorite does not exist"
 
+            body_unicode = request.body.decode('utf-8')
+            body = json.loads(body_unicode)
+
             # from Select Page
-            if "var_favorites" in request.body:
-                body_unicode = request.body.decode('utf-8')
-                body = json.loads(body_unicode)
+            if "var_favorites" in body:
                 variable_fav_list = body['var_favorites']
                 json_response = True
                 for fav in variable_fav_list:
@@ -604,11 +605,12 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
                 except ObjectDoesNotExist:
                     None
 
+            body_unicode = request.body.decode('utf-8')
+            body = json.loads(body_unicode)
+
             # from Gene List Page
-            if "gene_fav_list" in request.body:
+            if "gene_fav_list" in body:
                 json_response = True
-                body_unicode = request.body.decode('utf-8')
-                body = json.loads(body_unicode)
                 gene_fav_list = body['gene_fav_list']
                 for id in gene_fav_list:
                     try:
@@ -668,10 +670,11 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
                 var = Worksheet_plot.objects.get(id=plot_id).delete()
                 result['message'] = "This plot has been deleted from workbook."
             else:
-                if "attrs" in request.body:
+                body_unicode = request.body.decode('utf-8')
+                body = json.loads(body_unicode)
+
+                if "attrs" in body:
                     json_response = True
-                    body_unicode = request.body.decode('utf-8')
-                    body = json.loads(body_unicode)
                     attrs = body['attrs']
                     settings = body['settings']
                     if plot_id:
