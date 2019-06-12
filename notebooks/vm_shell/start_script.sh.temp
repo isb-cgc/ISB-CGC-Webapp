@@ -14,18 +14,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+echo "Copy setEnvVars.sh ..."
+gsutil cp gs://${GCLOUD_BUCKET}/setEnvVars.sh .
+source ./setEnvVars.sh
+
 if [ -f /etc/supervisor/conf.d/notebook.conf ]; then
     gsutil rm -r gs://${GCLOUD_BUCKET}
+    python3 /home/${USER_NAME}/bin/cmd_server.py 2>&1 > /home/${USER_NAME}/log/cmd-server-out.log &
     exit 0
 fi
 
-echo "Copy setEnvVars.sh ..."
-gsutil cp gs://${GCLOUD_BUCKET}/setEnvVars.sh .
 echo "Copy passhash.txt"
 gsutil cp gs://${GCLOUD_BUCKET}/passhash.txt .
 echo "Copy certSubj.txt"
 gsutil cp gs://${GCLOUD_BUCKET}/certSubj.txt .
-source ./setEnvVars.sh
 echo "Add user"
 useradd -m ${USER_NAME}
 echo "log in as user"
@@ -40,6 +42,7 @@ gsutil cp gs://${GCLOUD_BUCKET}/idle_checker.py .
 gsutil cp gs://${GCLOUD_BUCKET}/idle_log_wrapper.sh .
 gsutil cp gs://${GCLOUD_BUCKET}/idle_shutdown.py .
 gsutil cp gs://${GCLOUD_BUCKET}/shutdown_wrapper.sh .
+gsutil cp gs://${GCLOUD_BUCKET}/cmd_server.py .
 gsutil rm -r gs://${GCLOUD_BUCKET}
 
 sudo apt-get update
@@ -79,16 +82,10 @@ mkdir .jupyter
 # Generate self-signed cert on the VM:
 #
 echo 'generate self-signed cert'
-#CERT_SUBJ=`cat certSubj.txt`
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "$(cat certSubj.txt)" -keyout ~/.jupyter/mykey.key -out ~/.jupyter/mycert.pem
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "$(cat /certSubj.txt)" -keyout ~/.jupyter/mykey.key -out ~/.jupyter/mycert.pem
 sudo rm /certSubj.txt
 
-#
-# Get the password from the file we created on the desktop:
-#
-# cd ~
-# PASSWD=`cat passhash.txt`
-#
+
 #
 # Get config set up for remote access:
 #
@@ -102,7 +99,7 @@ c.NotebookApp.allow_origin = '*'
 c.NotebookApp.allow_remote_access = True
 c.NotebookApp.certfile = u"/home/${USER_NAME}/.jupyter/mycert.pem"
 c.NotebookApp.keyfile = u"/home/${USER_NAME}/.jupyter/mykey.key"
-c.NotebookApp.password = u"$(cat passhash.txt)"
+c.NotebookApp.password = u"$(cat /passhash.txt)"
 END_OF_CONFIG
 sudo rm /passhash.txt
 #
@@ -115,12 +112,13 @@ mkdir ~/idlelogs
 chmod u+x cpuLogger.sh
 chmod u+x idle_log_wrapper.sh
 chmod u+x shutdown_wrapper.sh
-mv ~/cpuLogger.sh ~/bin/.
-mv ~/idle_checker.py ~/bin/.
-mv ~/idle_log_wrapper.sh ~/bin/.
-mv ~/idle_shutdown.py ~/bin/.
-mv ~/shutdown_wrapper.sh ~/bin/.
-sudo mv /setEnvVars.sh ~/bin/.
+mv /home/${USER_NAME}/cpuLogger.sh /home/${USER_NAME}/bin/.
+mv /home/${USER_NAME}/idle_checker.py /home/${USER_NAME}/bin/.
+mv /home/${USER_NAME}/idle_log_wrapper.sh /home/${USER_NAME}/bin/.
+mv /home/${USER_NAME}/idle_shutdown.py /home/${USER_NAME}/bin/.
+mv /home/${USER_NAME}/shutdown_wrapper.sh /home/${USER_NAME}/bin/.
+mv /home/${USER_NAME}/cmd_server.py /home/${USER_NAME}/bin/.
+sudo mv /setEnvVars.sh /home/${USER_NAME}/bin/.
 
 #
 # Supervisor. Apparently, the apt-get gets us the system init.d install, while we
@@ -130,7 +128,8 @@ sudo apt-get install -y supervisor
 sudo python3 -m pip install --upgrade supervisor
 
 # Daemon to run notebook server
-cat >> ~/notebook.conf <<END_OF_SUPER
+
+cat >> /home/${USER_NAME}/notebook.conf <<END_OF_SUPER
 [program:notebooks]
 directory=/home/${USER_NAME}
 command=/home/${USER_NAME}/.local/bin/jupyter notebook
@@ -138,13 +137,13 @@ autostart=true
 autorestart=true
 user=${USER_NAME}
 stopasgroup=true
-stderr_logfile=/home/${USER_NAME}/log/notebook-err.logs
+stderr_logfile=/home/${USER_NAME}/log/notebook-err.log
 stdout_logfile=/home/${USER_NAME}/log/notebook-out.log
 END_OF_SUPER
 
 # Daemon to log VM activity stats
 
-cat >> ~/idlelog.conf <<END_OF_SUPER_IDLELOG
+cat >> /home/${USER_NAME}/idlelog.conf <<END_OF_SUPER_IDLELOG
 [program:idlelog]
 directory=/home/${USER_NAME}
 command=/home/${USER_NAME}/bin/idle_log_wrapper.sh
@@ -158,7 +157,7 @@ END_OF_SUPER_IDLELOG
 
 # Daemon to shutdown idle machine
 
-cat >> ~/idleshut.conf <<END_OF_SUPER_SHUTDOWN
+cat >> /home/${USER_NAME}/idleshut.conf <<END_OF_SUPER_SHUTDOWN
 [program:idleshut]
 directory=/home/${USER_NAME}
 command=/home/${USER_NAME}/bin/shutdown_wrapper.sh
@@ -170,14 +169,29 @@ stderr_logfile=/home/${USER_NAME}/log/shutdownlog-err.log
 stdout_logfile=/home/${USER_NAME}/log/shutdownlog-out.log
 END_OF_SUPER_SHUTDOWN
 
+# Daemon to run cmd server to receive commands remotely
+
+#cat >> /home/${USER_NAME}/cmdserver.conf <<END_OF_SUPER_CMD_SERVER
+#[program:cmdserver]
+#directory=/home/${USER_NAME}
+#command=bash -c '/home/${USER_NAME}/bin/cmd_server_wrapper.sh'
+#autostart=true
+#autorestart=true
+#user=${USER_NAME}
+#stopasgroup=true
+#stderr_logfile=/home/${USER_NAME}/log/cmd-server-err.log
+#stdout_logfile=/home/${USER_NAME}/log/cmd-server-out.log
+#END_OF_SUPER_CMD_SERVER
+
 #
 # Supervisor config files:
 #
-
-sudo mv ~/notebook.conf /etc/supervisor/conf.d/
-sudo mv ~/idlelog.conf /etc/supervisor/conf.d/
-sudo mv ~/idleshut.conf /etc/supervisor/conf.d/
+sudo mv /home/${USER_NAME}/notebook.conf /etc/supervisor/conf.d/
+sudo mv /home/${USER_NAME}/idlelog.conf /etc/supervisor/conf.d/
+sudo mv /home/${USER_NAME}/idleshut.conf /etc/supervisor/conf.d/
+#sudo mv /home/${USER_NAME}/cmdserver.conf /etc/supervisor/conf.d/
 END_OF_BASH
+
 
 #
 # Get the virtual environment installed:
@@ -191,9 +205,11 @@ do
   python -m ipykernel install --user --name=virtualEnv${i}
   deactivate
 done
+
 sudo -u ${USER_NAME} bash <<EOM
 cd ~
 sudo supervisorctl reread
 sudo supervisorctl update
+python3 ./bin/cmd_server.py 2>&1 > /home/${USER_NAME}/log/cmd-server-out.log &
 EOM
 

@@ -23,7 +23,8 @@ from django.contrib import messages
 from .models import Notebook, Notebook_Added
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from .notebook_vm import start_n_launch
+# import notebooks
+from .notebook_vm import start_vm, stop_vm, delete_vm
 
 logger = logging.getLogger('main_logger')
 
@@ -203,12 +204,12 @@ def notebook(request, notebook_id=0):
 
 # def validate_env_vars:
 @login_required
-def notebook_vm(request):
+def notebook_vm_command(request):
     command = request.path.rsplit('/', 1)[1]
     message = ''
     template = 'notebooks/notebook_vm.html'
     # print('ip address: {}'.format(get_client_ip(request)))
-    if command == 'startnlaunch':
+    if command == 'start_vm':
         SETUP_FILES = 5
         # SETUP_INSTANCE = 3
         DELETE_FIREWALL = 6
@@ -217,7 +218,11 @@ def notebook_vm(request):
         STOP_INSTANCE = 9
         DELETE_INSTANCE = 10
         # client_ip = get_client_ip(request)
-        result = start_n_launch()
+        result = start_vm()
+    elif command == 'stop_vm':
+        result = stop_vm()
+    elif command == 'delete_vm':
+        result = delete_vm()
         # result = start_n_launch(client_ip=client_ip)
     return render(request, template, result)
 

@@ -5,7 +5,10 @@ from . import views
 urlpatterns = [
     url(r'^$',                              views.notebook_list, name='notebooks'),
     url(r'^public$',                        views.notebook_list, name='notebooks_public'),
-    url(r'^startnlaunch',                   views.notebook_vm, name='notebook_startnlaunch'),
+    url(r'^start_vm',                       views.notebook_vm_command, name='notebook_start_vm'),
+    url(r'^stop_vm',                        views.notebook_vm_command, name='notebook_stop_vm'),
+    url(r'^delete_vm',                      views.notebook_vm_command, name='notebook_delete_vm'),
+    url(r'^restart_vm',                      views.notebook_vm_command, name='notebook_restart_vm'),
     url(r'^create$',                        views.notebook, name='notebook_create'),
     url(r'^(?P<notebook_id>\d+)/$',         views.notebook, name='notebook_detail'),
     url(r'^(?P<notebook_id>\d+)/public$',   views.notebook, name='notebook_detail_public'),

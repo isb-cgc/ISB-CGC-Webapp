@@ -39,6 +39,7 @@ from sharing.service import create_share
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.html import escape
+from pprint import pprint
 
 logger = logging.getLogger('main_logger')
 
@@ -386,6 +387,8 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
         if str(worksheet.id) == worksheet_id:
             display_worksheet = worksheet
 
+    # print('worksheet')
+    # pprint(workbook_model.worksheets)
     plot_types = Analysis.get_types()
     return render(request, template, {'workbook': workbook_model,
                                       'is_shareable': is_shareable,

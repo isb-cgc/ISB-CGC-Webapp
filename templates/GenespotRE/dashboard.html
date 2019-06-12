@@ -105,8 +105,61 @@
                         </div>
                     </div>
                     <div id="notebook-panel" class="col-md-12 panel panel-collapse collapse in" aria-expanded="true">
-                        <p>Notebook is an open-source web application that allows you to create and share documents that contain live code, equations, visualizations and narrative text.</p>
-                        <p><a type="button" href="/notebooks/startnlaunch" id="vm_startnlaunch" class="btn btn-default">Start and Launch Notebook VM</a></p>
+                        <p>Notebook is an open-source web application that allows you to create and share documents that
+                            contain live code, equations, visualizations and narrative text.</p>
+                        <p>
+                            <a type="button" href="/notebooks/start_vm" id="start_vm_btn" class="btn btn-default">
+                            Start and Launch Notebook VM</a>
+                            <a type="button" href="/notebooks/stop_vm" id="stop_vm_btn" class="btn btn-default">
+                                Stop VM</a>
+                            <a type="button" href="/notebooks/delete_vm" id="delete_vm_btn" class="btn btn-default">
+                                Delete VM</a>
+                            <a type="button" href="/notebooks/restart_vm" id="restart_vm_btn" class="btn btn-default">Restart VM</a>
+                            <a type="button" href="/notebooks/teardown_network" id="teardown_network" class="btn btn-default">
+                                Tear Down Network</a>
+                        </p>
+                        <div>
+                            <a><i class="fa fa-cog" aria-hidden="true"></i>View Settings</a>
+                        </div>
+                        <div id="notebook-settings" class="gray-area">
+                            <form>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label for="nb_username">User Name</label>
+                                        <input type="text" class="form-control" id="nb_username">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label for="nb_project_id">Google Project ID</label>
+                                        <input type="text" class="form-control" id="nb_project_id">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label for="nb_password">Password</label>
+                                        <input type="text" class="form-control" id="nb_password">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label for="nb_firewall_ip">Firewall IP address</label>
+                                        <input type="text" class="form-control" id="nb_firewall_ip">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="gridCheck">
+                                        <label class="form-check-label" for="gridCheck">
+                                            Check me out
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Update</button>
+                                <button type="submit" class="btn btn-primary">Cancel</button>
+                            </form>
+                        </div>
+
                         <div class="col-md-6">
                             <div class="panel-heading">
                                 <h3 class="panel-title"><a href="{% url 'notebooks' %}">Saved Notebooks

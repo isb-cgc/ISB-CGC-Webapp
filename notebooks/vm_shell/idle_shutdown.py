@@ -21,7 +21,7 @@ import sys
 
 import threading
 import subprocess as sub
-import os
+# import os
 import re
 import time
 from idle_checker import log_a_point
@@ -163,7 +163,7 @@ def top_says_idle(check_secs, thresh, home_dir, answer):
 
     am_idle = True
     for i in range(0, check_secs):
-        p = sub.Popen(('{}/cpulogger2.sh'.format(home_dir)), stdout=sub.PIPE)
+        p = sub.Popen(('{}/bin/cpuLogger.sh'.format(home_dir)), stdout=sub.PIPE)
         for line in iter(p.stdout.readline, b''):
             cpu_val_str = line.rstrip().decode("utf-8").split()[8]
             try:
