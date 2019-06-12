@@ -246,6 +246,7 @@ require([
             $.ajax({
                 type: 'POST',
                 url : BASE_URL + '/variables/save',
+                contentType: "application/json",
                 data: JSON.stringify({name : name, variables : variable_list}),
                 beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success: function (data) {
@@ -313,6 +314,7 @@ require([
             $.ajax({
                 type : 'POST',
                 url  : BASE_URL + '/variables/' + variable_id + '/update',
+                contentType: "application/json",
                 data : JSON.stringify({name : name, variables : variable_list}),
                 beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success: function (data) {
@@ -353,6 +355,7 @@ require([
             $.ajax({
                 type : 'POST',
                 url  : BASE_URL + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + '/variables/edit',
+                contentType: "application/json",
                 data : JSON.stringify({name : name, variables : variable_list}),
                 beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success: function (data) {
@@ -379,6 +382,7 @@ require([
             $.ajax({
                 type: 'POST',
                 url : BASE_URL + '/variables/save',
+                contentType: "application/json",
                 data: JSON.stringify({name : name, variables : variable_list}),
                 beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success: function (data) {
