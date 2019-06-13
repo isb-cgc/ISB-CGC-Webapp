@@ -141,7 +141,7 @@
                                     <ul class="list-item__body">
                                         {% with worksheet.worksheet_gene_set.all|how_many_more:6 as num_more  %}
                                             {% for gene in worksheet.genes %}
-                                                {% if forlook.counter0 < 6 %}
+                                                {% if forloop.counter0 < 6 %}
                                                     <li class="sublist-item">
                                                         {% if shared %}
                                                             {{ gene.gene }}
@@ -178,7 +178,7 @@
                                     <ul class="list-item__body">
                                         {% with worksheet.worksheet_variable_set.all|how_many_more:6 as num_more  %}
                                             {% for variable in worksheet.variables %}
-                                                {% if forlook.counter0 < 6 %}
+                                                {% if forloop.counter0 < 6 %}
                                                     <li class="sublist-item">
                                                         {% if shared %}
                                                             {{ variable.name }}
@@ -216,7 +216,7 @@
                                         {% with worksheet.worksheet_cohort_set.all|active:'cohort'|how_many_more:6 as num_more  %}
                                             {% for wsch in worksheet.worksheet_cohort_set.all|active:'cohort' %}
                                                 {% with wsch.cohort as cohort %}
-                                                {% if forlook.counter0 < 6 %}
+                                                {% if forloop.counter0 < 6 %}
                                                     <li class="sublist-item">
                                                         {% if workbook.owner.id == user.id %}
                                                             <form action="{% url 'remove_cohort_from_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id cohort_id=cohort.id %}" method="POST">
