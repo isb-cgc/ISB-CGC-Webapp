@@ -39,7 +39,7 @@ from sharing.service import create_share
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.html import escape
-
+from json.decoder import JSONDecodeError
 logger = logging.getLogger('main_logger')
 
 debug = settings.DEBUG
@@ -604,23 +604,26 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
                             genes.append(g)
                 except ObjectDoesNotExist:
                     None
+            try:
+                body_unicode = request.body.decode('utf-8')
+                body = json.loads(body_unicode)
 
-            body_unicode = request.body.decode('utf-8')
-            body = json.loads(body_unicode)
+                # from Gene List Page
+                if "gene_fav_list" in body:
+                    json_response = True
+                    gene_fav_list = body['gene_fav_list']
+                    for id in gene_fav_list:
+                        try:
+                            fav = GeneFavorite.objects.get(id=id)
+                            names = fav.get_gene_name_list()
+                            for g in names:
+                                if g not in genes:
+                                    genes.append(g)
+                        except ObjectDoesNotExist:
+                            None
+            except JSONDecodeError:
+                pass
 
-            # from Gene List Page
-            if "gene_fav_list" in body:
-                json_response = True
-                gene_fav_list = body['gene_fav_list']
-                for id in gene_fav_list:
-                    try:
-                        fav = GeneFavorite.objects.get(id=id)
-                        names = fav.get_gene_name_list()
-                        for g in names:
-                            if g not in genes:
-                                genes.append(g)
-                    except ObjectDoesNotExist:
-                        None
             if len(genes) > 0:
                 if workbook_id is 0:
                     workbook_model = Workbook.create(name=workbook_name,
