@@ -32,6 +32,7 @@ debug = settings.DEBUG
 BLACKLIST_RE = settings.BLACKLIST_RE
 SOLR_URL = settings.SOLR_URL
 
+
 # SETUP_FIREWALL = 0
 # SETUP_EXTERNAL_IP = 1
 # SETUP_MONITOR = 2
@@ -107,9 +108,9 @@ def notebook(request, notebook_id=0):
                 notebook_desc = request.POST.get('description')[0:2000]
                 notebook_file_path = request.POST.get('file_path')[0:2000]
                 blacklist = re.compile(BLACKLIST_RE, re.UNICODE)
-                match_name = blacklist.search(unicode(notebook_name))
-                match_keywords = blacklist.search(unicode(notebook_keywords))
-                match_desc = blacklist.search(unicode(notebook_desc))
+                match_name = blacklist.search(str(notebook_name))
+                match_keywords = blacklist.search(str(notebook_keywords))
+                match_desc = blacklist.search(str(notebook_desc))
 
                 if match_name or match_desc or match_keywords:
                     # XSS risk, log and fail this cohort save
@@ -127,7 +128,7 @@ def notebook(request, notebook_id=0):
                         field_names += (
                             '' if i == 0 else (' and ' if i == (match_list_len - 1) else ', ') + match_list[i])
                     err_msg = "Your notebook's %s contain%s invalid characters; please revise your inputs" % (
-                    field_names, ('s' if match_list_len < 2 else ''))
+                        field_names, ('s' if match_list_len < 2 else ''))
                     messages.error(request, err_msg)
                     redirect_url = reverse('notebook_detail', kwargs={'notebook_id': notebook_id})
                     return redirect(redirect_url)
@@ -182,9 +183,17 @@ def notebook(request, notebook_id=0):
                         notebooks = notebooks.distinct()
 
                     notebook_model = notebooks.get(id=notebook_id)
+
+                    notebook_vm_running = True
+                    notebook_vm_ip = '35.193.231.158'
+                    notebook_vm_jp_port = 5000
+                    notebook_viewer = 'https://{ip_address}:{port}/tree/virtualEnv1'.format(ip_address=notebook_vm_ip,
+                                                                                    port=notebook_vm_jp_port) if notebook_vm_running else settings.NOTEBOOK_VIEWER+'/github/'
+                    notebook_file_path = 'Community-Notebooks/RegulomeExplorer/RegulomeExplorer_2.1.ipynb' if notebook_vm_running else notebook_model.file_path
+                    # notebook_file_path = (notebook_model.file_path).split('/')[-1] if notebook_vm_running else notebook_model.file_path
                     return render(request, template,
                                   {'notebook': notebook_model, 'from_public_list': command == "public",
-                                   'notebook_viewer': settings.NOTEBOOK_VIEWER})
+                                   'notebook_viewer': notebook_viewer, 'file_path': notebook_file_path})
                 except ObjectDoesNotExist:
                     redirect_url = reverse(redirect_view)
                     return redirect(redirect_url)
@@ -213,8 +222,8 @@ def notebook_vm_command(request):
         SETUP_FILES = 5
         # SETUP_INSTANCE = 3
         DELETE_FIREWALL = 6
-        DELETE_ADDRESS= 7
-        SETUP_MONITOR =2
+        DELETE_ADDRESS = 7
+        SETUP_MONITOR = 2
         STOP_INSTANCE = 9
         DELETE_INSTANCE = 10
         # client_ip = get_client_ip(request)
@@ -225,6 +234,7 @@ def notebook_vm_command(request):
         result = delete_vm()
         # result = start_n_launch(client_ip=client_ip)
     return render(request, template, result)
+
 
 @login_required
 def get_client_ip(request):

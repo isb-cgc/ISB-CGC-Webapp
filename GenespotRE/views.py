@@ -494,6 +494,17 @@ def dashboard_page(request):
     notebooks = user_notebooks | shared_notebooks
     notebooks = notebooks.distinct().order_by('-last_date_saved')
 
+    # # Notebook VM
+    # notebook_vm = request.user.notebook_vm.filter(active=True)
+    vm_username=request.user.email.split('@')[0]
+    notebook_vm = {
+        'user': vm_username,
+        'project_id': 'cgc-05-0038',
+        'machine_name': '{}-unique-machine-name-1'.format(vm_username),
+        'status': 'TERMINATED'
+                  # 'TERMINATED'
+    }
+
     # Gene & miRNA Favorites
     genefaves = request.user.genefavorite_set.filter(active=True)
 
@@ -508,5 +519,6 @@ def dashboard_page(request):
         'workbooks': workbooks,
         'genefaves': genefaves,
         'varfaves' : varfaves,
+        'notebook_vm': notebook_vm,
         'SOLR_URL' : SOLR_URL
     })

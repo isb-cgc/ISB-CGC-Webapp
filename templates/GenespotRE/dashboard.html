@@ -107,16 +107,30 @@
                     <div id="notebook-panel" class="col-md-12 panel panel-collapse collapse in" aria-expanded="true">
                         <p>Notebook is an open-source web application that allows you to create and share documents that
                             contain live code, equations, visualizations and narrative text.</p>
+                        <div class="gray-area"><img src="{% static '/img/gce-logo.svg' %}" alt="GCE" height="18"
+                                                    width="18" style="margin-right: 5px;">
+                            <b>{{ notebook_vm.machine_name }}</b>: {{ notebook_vm.status }}
+                            {% if notebook_vm.status == 'RUNNING' %}
+                                <a type="button" class="btn-sm btn-default" href="/notebooks/stop_vm"><i class="fa fa-stop"></i></a>
+
+{#                                <a type="button" href="/notebooks/stop_vm" id="stop_vm_btn" class="btn btn-default">#}
+{#                                Stop VM</a>#}
+                            {% else %}
+                                <a type="button" class="btn-sm btn-default" href="/notebooks/start_vm"><i class="fa fa-play" aria-hidden="true"></i></a>
+                            {% endif %}
+                            <a type="button" class="btn-sm btn-default"><i class="fa fa-refresh" aria-hidden="true"></i></a>
+                            <a type="button" class="btn-sm btn-default" href="/notebooks/delete_vm"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                        </div>
                         <p>
-                            <a type="button" href="/notebooks/start_vm" id="start_vm_btn" class="btn btn-default">
-                            Start and Launch Notebook VM</a>
-                            <a type="button" href="/notebooks/stop_vm" id="stop_vm_btn" class="btn btn-default">
+                            <a type="button" href="/notebooks/start_vm" id="start_vm_btn" class="btn-sm btn-default">
+                                Start and Launch Notebook VM</a>
+                            <a type="button" href="/notebooks/stop_vm" id="stop_vm_btn" class="btn-sm btn-default">
                                 Stop VM</a>
-                            <a type="button" href="/notebooks/delete_vm" id="delete_vm_btn" class="btn btn-default">
+                            <a type="button" href="/notebooks/delete_vm" id="delete_vm_btn" class="btn-sm btn-default">
                                 Delete VM</a>
-                            <a type="button" href="/notebooks/restart_vm" id="restart_vm_btn" class="btn btn-default">Restart VM</a>
-                            <a type="button" href="/notebooks/teardown_network" id="teardown_network" class="btn btn-default">
-                                Tear Down Network</a>
+{#                                                        <a type="button" href="/notebooks/restart_vm" id="restart_vm_btn" class="btn btn-default">Restart VM</a>#}
+{#                                                        <a type="button" href="/notebooks/teardown_network" id="teardown_network" class="btn btn-default">#}
+{#                                                            Tear Down Network</a>#}
                         </p>
                         <div>
                             <a><i class="fa fa-cog" aria-hidden="true"></i>View Settings</a>

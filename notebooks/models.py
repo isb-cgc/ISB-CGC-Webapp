@@ -54,6 +54,7 @@ class Notebook(models.Model):
         notebook_model.description = description
         notebook_model.keywords = keywords
         notebook_model.file_path = file_path
+        print('edit: file_path: '+file_path)
         notebook_model.save()
         return notebook_model
 

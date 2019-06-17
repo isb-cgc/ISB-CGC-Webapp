@@ -9,7 +9,6 @@ from oauth2client.client import GoogleCredentials
 import httplib2
 from google.cloud import storage
 import os
-# from os.path import join, dirname
 
 # from google.cloud import storage, exceptions
 # import cloudstorage
@@ -70,7 +69,9 @@ def start_vm(setup_stage=SETUP_PROJECT, client_ip=None):
     NOTEBOOK_VM_BUCKET = vm_username + '-notebook-vm'
 
     # Choose one format and change to your IP range for your desktop:
-    # FIREWALL_IP_RANGE = ['71.231.138.210']  # todo: have this value set programatically
+    #FIREWALL_IP_RANGE = ['71.231.138.210']  # todo: have this value set programatically
+
+
     FIREWALL_IP_RANGE = ['174.127.185.135', '174.127.185.130']  # todo: have this value set programatically
     DISK_SIZE = 30
     MACHINE_TYPE = 'n1-standard-1'
@@ -272,13 +273,14 @@ def start_vm(setup_stage=SETUP_PROJECT, client_ip=None):
             CERT_SUBJ_FILENAME = 'certSubj.txt'
             PASSHASH_FILENAME = 'passhash.txt'
             ENV_VARS_SH_FILE = 'setEnvVars.sh'
-            STARTUP_SH_FILE = 'start_script.sh'
+            STARTUP_SH_FILE = 'startup.sh'
             CPU_LOGGER_FILE = 'cpuLogger.sh'
             IDLE_LOG_FILE = 'idle_checker.py'
             IDLE_LOG_SH_FILE = 'idle_log_wrapper.sh'
             IDLE_SHUTDOWN_FILE = 'idle_shutdown.py'
             IDLE_SHUTDOWN_SH_FILE='shutdown_wrapper.sh'
             CMD_SERVER_FILE = 'cmd_server.py'
+            INSTALL_SH_FILE = 'install.sh'
             # CMD_SERVER_SH_FILE = 'cmd_server_wrapper.sh'
 
             upload_blob_string(bucket, CERT_SUBJ + ext_ip_address, CERT_SUBJ_FILENAME)
@@ -297,13 +299,13 @@ def start_vm(setup_stage=SETUP_PROJECT, client_ip=None):
             upload_blob_string(bucket, env_vars_sh, ENV_VARS_SH_FILE)
 
 
-            script_head = 'GCLOUD_BUCKET={}\n'.format(NOTEBOOK_VM_BUCKET)
-            script_filepath = '{base_dir}/{sub_dir}/{filename}'.format(base_dir=BASE_DIR, sub_dir=NOTEBOOK_VM_SHELL_DIR,
-                                                                filename=(STARTUP_SH_FILE + '.temp'))
-            startup_sh = append_file_to_string(script_head, script_filepath)
-            upload_blob_string(bucket, startup_sh, STARTUP_SH_FILE)
+            # script_head = 'GCLOUD_BUCKET={}\n'.format(NOTEBOOK_VM_BUCKET)
+            # script_filepath = '{base_dir}/{sub_dir}/{filename}'.format(base_dir=BASE_DIR, sub_dir=NOTEBOOK_VM_SHELL_DIR,
+            #                                                     filename=(STARTUP_SH_FILE + '.temp'))
+            # startup_sh = append_file_to_string(script_head, script_filepath)
+            # upload_blob_string(bucket, startup_sh, STARTUP_SH_FILE)
 
-            upload_filenames = [CPU_LOGGER_FILE, IDLE_LOG_FILE, IDLE_LOG_SH_FILE, IDLE_SHUTDOWN_FILE, IDLE_SHUTDOWN_SH_FILE, CMD_SERVER_FILE]
+            upload_filenames = [CPU_LOGGER_FILE, IDLE_LOG_FILE, IDLE_LOG_SH_FILE, IDLE_SHUTDOWN_FILE, IDLE_SHUTDOWN_SH_FILE, CMD_SERVER_FILE, INSTALL_SH_FILE]
             for filename in upload_filenames:
                 upload_blob_filename(bucket,
                         '{base_dir}/{sub_dir}/{filename}'.format(base_dir=BASE_DIR, sub_dir=NOTEBOOK_VM_SHELL_DIR,
@@ -325,6 +327,14 @@ def start_vm(setup_stage=SETUP_PROJECT, client_ip=None):
             else:
                 print('Create and start up a new VM instance')
                 # create a new instance
+
+                # script_head = 'GCLOUD_BUCKET={}\n'.format(NOTEBOOK_VM_BUCKET)
+                # script_filepath = '{base_dir}/{sub_dir}/{filename}'.format(base_dir=BASE_DIR, sub_dir=NOTEBOOK_VM_SHELL_DIR,
+                #                                                     filename=(STARTUP_SH_FILE + '.temp'))
+                # startup_sh = append_file_to_string('', '{base_dir}/{sub_dir}/{filename}'.format(base_dir=BASE_DIR, sub_dir=NOTEBOOK_VM_SHELL_DIR,
+                #                                                     filename=(STARTUP_SH_FILE + '.temp')))
+                # upload_blob_string(bucket, startup_sh, STARTUP_SH_FILE)
+
                 instance_body = {
                     'name': machine_name,
                     'machineType': 'zones/{zone}/machineTypes/{machine_type}'.format(zone=vm_zone,
@@ -333,6 +343,7 @@ def start_vm(setup_stage=SETUP_PROJECT, client_ip=None):
                     'disks': [
                         {
                             'boot': True,
+                            'autoDelete': True,
                             'initializeParams': {
                                 'sourceImage': 'projects/debian-cloud/global/images/family/debian-9',
                                 'diskSizeGb': DISK_SIZE
@@ -359,11 +370,17 @@ def start_vm(setup_stage=SETUP_PROJECT, client_ip=None):
                     'tags': {
                         'items': [FIREWALL_TAG]
                     },
-                    'metadata': {
+                    'metadata':{
                         "items": [
-                            {'key': 'startup-script-url',
-                             'value': 'gs://{}/start_script.sh'.format(NOTEBOOK_VM_BUCKET)
-                             }
+                            {
+                                "key" : "NOTEBOOK_VM_BUCKET",
+                                "value" : NOTEBOOK_VM_BUCKET
+                            },
+                            {
+                                "key": "startup-script",
+                                "value": append_file_to_string('', '{base_dir}/{sub_dir}/{filename}'.format(base_dir=BASE_DIR, sub_dir=NOTEBOOK_VM_SHELL_DIR,
+                                                                    filename=STARTUP_SH_FILE))
+                            }
                         ]
                     }
 
@@ -433,7 +450,7 @@ def start_vm(setup_stage=SETUP_PROJECT, client_ip=None):
         logger.error("[ERROR] "+result['message'])
         logger.exception(e)
     if resp_code == '200':
-        result = {'message': 'hello'}
+        result = {'message': 'hello', 'ext_ip_address': ext_ip_address}
 
     return result
 
@@ -504,9 +521,6 @@ def build_instances_request(method, project_id, zone, name=None, body=None):
 #     response = service.firewalls().delete(project=project_id, firewall=firewall_rule_name).execute()
 #     return response
 def append_file_to_string(head_str, filepath):
-
-    # with open('{base_dir}/{sub_dir}/{filename}'.format(base_dir=BASE_DIR, sub_dir=NOTEBOOK_VM_SHELL_DIR,
-    #                                                    filename=(ENV_VARS_SH_FILE + '.temp')), mode='r') as f:
     with open(filepath, mode='r') as f:
         read_data = f.read()
         head_str += read_data

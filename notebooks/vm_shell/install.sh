@@ -14,36 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-echo "Copy setEnvVars.sh ..."
-gsutil cp gs://${GCLOUD_BUCKET}/setEnvVars.sh .
 source ./setEnvVars.sh
 
-if [ -f /etc/supervisor/conf.d/notebook.conf ]; then
-    gsutil rm -r gs://${GCLOUD_BUCKET}
-    python3 /home/${USER_NAME}/bin/cmd_server.py 2>&1 > /home/${USER_NAME}/log/cmd-server-out.log &
-    exit 0
-fi
-
-echo "Copy passhash.txt"
-gsutil cp gs://${GCLOUD_BUCKET}/passhash.txt .
-echo "Copy certSubj.txt"
-gsutil cp gs://${GCLOUD_BUCKET}/certSubj.txt .
 echo "Add user"
 useradd -m ${USER_NAME}
 echo "log in as user"
 sudo -u ${USER_NAME} bash <<END_OF_BASH
 cd ~
-#
-# Get the idle monitor scripts and idle shutdown script up to the machine:
-#
-echo "Uploading idle monitor and shutdown scripts"
-gsutil cp gs://${GCLOUD_BUCKET}/cpuLogger.sh .
-gsutil cp gs://${GCLOUD_BUCKET}/idle_checker.py .
-gsutil cp gs://${GCLOUD_BUCKET}/idle_log_wrapper.sh .
-gsutil cp gs://${GCLOUD_BUCKET}/idle_shutdown.py .
-gsutil cp gs://${GCLOUD_BUCKET}/shutdown_wrapper.sh .
-gsutil cp gs://${GCLOUD_BUCKET}/cmd_server.py .
-gsutil rm -r gs://${GCLOUD_BUCKET}
 
 sudo apt-get update
 #
@@ -59,6 +36,10 @@ sudo apt-get install -y python3-venv
 #
 sudo apt-get install -y tcpdump
 sudo apt-get install -y daemontools
+#
+# Install GitHub to clone repositories
+#
+sudo apt-get install -y git
 #
 # For monitoring, we use pandas:
 #
@@ -97,9 +78,11 @@ c.NotebookApp.open_browser = False
 c.NotebookApp.port = ${SERV_PORT}
 c.NotebookApp.allow_origin = '*'
 c.NotebookApp.allow_remote_access = True
-c.NotebookApp.certfile = u"/home/${USER_NAME}/.jupyter/mycert.pem"
-c.NotebookApp.keyfile = u"/home/${USER_NAME}/.jupyter/mykey.key"
-c.NotebookApp.password = u"$(cat /passhash.txt)"
+c.NotebookApp.certfile = u'/home/${USER_NAME}/.jupyter/mycert.pem'
+c.NotebookApp.keyfile = u'/home/${USER_NAME}/.jupyter/mykey.key'
+c.NotebookApp.password = u'$(cat /passhash.txt)'
+c.NotebookApp.tornado_settings = { 'headers': { 'Content-Security-Policy': "frame-ancestors 'self' http://localhost:8080" } }
+
 END_OF_CONFIG
 sudo rm /passhash.txt
 #
@@ -109,16 +92,17 @@ mkdir ~/log
 mkdir ~/bin
 mkdir ~/idlelogs
 
-chmod u+x cpuLogger.sh
-chmod u+x idle_log_wrapper.sh
-chmod u+x shutdown_wrapper.sh
-mv /home/${USER_NAME}/cpuLogger.sh /home/${USER_NAME}/bin/.
-mv /home/${USER_NAME}/idle_checker.py /home/${USER_NAME}/bin/.
-mv /home/${USER_NAME}/idle_log_wrapper.sh /home/${USER_NAME}/bin/.
-mv /home/${USER_NAME}/idle_shutdown.py /home/${USER_NAME}/bin/.
-mv /home/${USER_NAME}/shutdown_wrapper.sh /home/${USER_NAME}/bin/.
-mv /home/${USER_NAME}/cmd_server.py /home/${USER_NAME}/bin/.
+sudo mv /cpuLogger.sh /home/${USER_NAME}/bin/.
+sudo mv /idle_checker.py /home/${USER_NAME}/bin/.
+sudo mv /idle_log_wrapper.sh /home/${USER_NAME}/bin/.
+sudo mv /idle_shutdown.py /home/${USER_NAME}/bin/.
+sudo mv /shutdown_wrapper.sh /home/${USER_NAME}/bin/.
+sudo mv /cmd_server.py /home/${USER_NAME}/bin/.
 sudo mv /setEnvVars.sh /home/${USER_NAME}/bin/.
+
+sudo chmod u+x ~/bin/cpuLogger.sh
+sudo chmod u+x ~/bin/idle_log_wrapper.sh
+sudo chmod u+x ~/bin/shutdown_wrapper.sh
 
 #
 # Supervisor. Apparently, the apt-get gets us the system init.d install, while we
@@ -169,29 +153,13 @@ stderr_logfile=/home/${USER_NAME}/log/shutdownlog-err.log
 stdout_logfile=/home/${USER_NAME}/log/shutdownlog-out.log
 END_OF_SUPER_SHUTDOWN
 
-# Daemon to run cmd server to receive commands remotely
-
-#cat >> /home/${USER_NAME}/cmdserver.conf <<END_OF_SUPER_CMD_SERVER
-#[program:cmdserver]
-#directory=/home/${USER_NAME}
-#command=bash -c '/home/${USER_NAME}/bin/cmd_server_wrapper.sh'
-#autostart=true
-#autorestart=true
-#user=${USER_NAME}
-#stopasgroup=true
-#stderr_logfile=/home/${USER_NAME}/log/cmd-server-err.log
-#stdout_logfile=/home/${USER_NAME}/log/cmd-server-out.log
-#END_OF_SUPER_CMD_SERVER
-
 #
 # Supervisor config files:
 #
 sudo mv /home/${USER_NAME}/notebook.conf /etc/supervisor/conf.d/
 sudo mv /home/${USER_NAME}/idlelog.conf /etc/supervisor/conf.d/
 sudo mv /home/${USER_NAME}/idleshut.conf /etc/supervisor/conf.d/
-#sudo mv /home/${USER_NAME}/cmdserver.conf /etc/supervisor/conf.d/
 END_OF_BASH
-
 
 #
 # Get the virtual environment installed:
