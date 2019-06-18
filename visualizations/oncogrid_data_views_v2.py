@@ -132,7 +132,7 @@ def get_donor_data_list(bq_statement):
             age_at_diagnosis = row['f'][6]['v']
             days_to_death = row['f'][7]['v']
             data_category = row['f'][8]['v']
-            score = row['f'][9]['v']
+            score = int(row['f'][9]['v'])
             if case_barcode not in donors:
                 donors[case_barcode] = {
                     'case_code': project_short_name + ' / ' + case_barcode,
