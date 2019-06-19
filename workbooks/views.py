@@ -39,7 +39,7 @@ from sharing.service import create_share
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.html import escape
-
+from json.decoder import JSONDecodeError
 logger = logging.getLogger('main_logger')
 
 debug = settings.DEBUG
@@ -88,7 +88,9 @@ def workbook_create_with_cohort(request):
 
 @login_required
 def workbook_create_with_cohort_list(request):
-    cohort_ids = json.loads(request.body)['cohorts']
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    cohort_ids = body['cohorts']
     if len(cohort_ids) > 0:
         workbook_model = Workbook.create(name="Untitled Workbook",
                                          description="This is a workbook created with cohorts added to the first worksheet. Click Edit Details to change your workbook title and description.",
@@ -473,12 +475,14 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
                                        user=request.user)
             result['message'] = "variables have been deleted from workbook"
         else:
+            body_unicode = request.body.decode('utf-8')
+            body = json.loads(body_unicode)
             variables = []
             # from Edit Page
-            if "variables" in request.body:
+            if "variables" in body:
                 json_response = True
-                name = json.loads(request.body)['name']
-                variable_list = json.loads(request.body)['variables']
+                name = body['name']
+                variable_list = body['variables']
                 variable_favorite_result = VariableFavorite.create(name=name,
                                                                    variables=variable_list,
                                                                    user=request.user)
@@ -498,9 +502,12 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
                 except ObjectDoesNotExist:
                     result['error'] = "variable favorite does not exist"
 
+            body_unicode = request.body.decode('utf-8')
+            body = json.loads(body_unicode)
+
             # from Select Page
-            if "var_favorites" in request.body:
-                variable_fav_list = json.loads(request.body)['var_favorites']
+            if "var_favorites" in body:
+                variable_fav_list = body['var_favorites']
                 json_response = True
                 for fav in variable_fav_list:
                     try:
@@ -597,20 +604,26 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
                             genes.append(g)
                 except ObjectDoesNotExist:
                     None
+            try:
+                body_unicode = request.body.decode('utf-8')
+                body = json.loads(body_unicode)
 
-            # from Gene List Page
-            if "gene_fav_list" in request.body:
-                json_response = True
-                gene_fav_list = json.loads(request.body)['gene_fav_list']
-                for id in gene_fav_list:
-                    try:
-                        fav = GeneFavorite.objects.get(id=id)
-                        names = fav.get_gene_name_list()
-                        for g in names:
-                            if g not in genes:
-                                genes.append(g)
-                    except ObjectDoesNotExist:
-                        None
+                # from Gene List Page
+                if "gene_fav_list" in body:
+                    json_response = True
+                    gene_fav_list = body['gene_fav_list']
+                    for id in gene_fav_list:
+                        try:
+                            fav = GeneFavorite.objects.get(id=id)
+                            names = fav.get_gene_name_list()
+                            for g in names:
+                                if g not in genes:
+                                    genes.append(g)
+                        except ObjectDoesNotExist:
+                            None
+            except JSONDecodeError:
+                pass
+
             if len(genes) > 0:
                 if workbook_id is 0:
                     workbook_model = Workbook.create(name=workbook_name,
@@ -660,10 +673,13 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
                 var = Worksheet_plot.objects.get(id=plot_id).delete()
                 result['message'] = "This plot has been deleted from workbook."
             else:
-                if "attrs" in request.body:
+                body_unicode = request.body.decode('utf-8')
+                body = json.loads(body_unicode)
+
+                if "attrs" in body:
                     json_response = True
-                    attrs = json.loads(request.body)['attrs']
-                    settings = json.loads(request.body)['settings']
+                    attrs = body['attrs']
+                    settings = body['settings']
                     if plot_id:
                         plot_model = Worksheet_plot.objects.get(id=plot_id)
                         plot_model.settings_json = settings
@@ -722,8 +738,9 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
 @login_required
 def worksheet_cohorts(request, workbook_id=0, worksheet_id=0, cohort_id=0):
     command = request.path.rsplit('/', 1)[1]
-
-    cohorts = json.loads(request.body)['cohorts']
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    cohorts = body['cohorts']
     if request.method == "POST":
         wrkbk = Workbook.objects.get(id=workbook_id)
         wrkbk.save()

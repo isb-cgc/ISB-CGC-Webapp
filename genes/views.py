@@ -23,9 +23,12 @@ logger = logging.getLogger('main_logger')
 # returns a json object keyed on each gene symbol with values of whether or not they are valid
 @login_required
 def check_gene_list_validity(request):
-    gene_list = json.loads(request.body)['genes-list']
-    response = {}
-    response['results'] = {}
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    gene_list = body['genes-list']
+    response = {
+        'results': {}
+    }
     for gene in gene_list:
         response['results'][gene] = GeneSymbol.is_gene_valid(gene)
 
