@@ -22,7 +22,7 @@
 # Requires the configuration script to be in the /home/${USER_NAME}/.jupyter/bin directory
 #
 
-source /home/${USER_NAME}/bin/setEnvVars.sh
+source ./bin/setEnvVars.sh
 
 SERV_PROC=`sudo netstat -tlp | grep ":${SERV_PORT}" | grep -v "^tcp6" | awk '{print $7}' | sed 's#/.*##'`
 
@@ -33,7 +33,6 @@ if [ -n "${CHILD_PROCS}" ]; then
 	if [ ${TOPVAL} != '%CPU' ]; then
 	  echo ${TOPVAL}
 	fi
-
   done
 fi
 

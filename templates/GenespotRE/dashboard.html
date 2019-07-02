@@ -97,153 +97,185 @@
                 <section class="panel panel-default">
                     <div class="panel-heading">
                         <h3 class="panel-title">
-                            Jupyter Notebooks
+                            Jupyter Notebook
                         </h3>
                         <div class="min-max">
                             <a data-toggle="collapse" aria-label="Open/Close Notebook" href="#notebook-panel"><i
                                     class="show fa fa-angle-double-down"></i></a>
                         </div>
                     </div>
-                    <div id="notebook-panel" class="col-md-12 panel panel-collapse collapse in" aria-expanded="true">
-                        <p>Notebook is an open-source web application that allows you to create and share documents that
+                    <div id="notebook-panel" class="panel-body col-md-12 panel panel-collapse collapse in" aria-expanded="true">
+                        <p>Jupyter Notebook is an open-source web application that allows you to create and share documents that
                             contain live code, equations, visualizations and narrative text.</p>
-                        <div class="gray-area"><img src="{% static '/img/gce-logo.svg' %}" alt="GCE" height="18"
-                                                    width="18" style="margin-right: 5px;">
-                            <b>{{ notebook_vm.machine_name }}</b>: {{ notebook_vm.status }}
-                            {% if notebook_vm.status == 'RUNNING' %}
-                                <a type="button" class="btn-sm btn-default" href="/notebooks/stop_vm"><i class="fa fa-stop"></i></a>
 
-{#                                <a type="button" href="/notebooks/stop_vm" id="stop_vm_btn" class="btn btn-default">#}
-{#                                Stop VM</a>#}
+                        <div class="row-console vm-div row">
+                            {% if notebook_vm.project_id %}
+{#                            {% if notebook_vm.status != 'NOT FOUND' %}#}
+                                <div class="col-sm-3"><img src="{% static '/img/gce-logo.svg' %}" alt="GCE">
+                                    <b>{{ notebook_vm.name }}</b>
+                                </div>
+                                <div class="col-sm-2">
+                                    <button type="button" class="btn-sm btn-jupyter vm-btn vm-create-btn"
+                                            style="{% if notebook_vm.status != 'NOT FOUND' %} display: none;{% endif %}"
+                                            title="Create VM" value="create_vm">
+                                        <i class="fa fa-plus"></i></button>
+                                    <button type="button" class="btn-sm btn-jupyter vm-btn vm-stop-btn"
+                                            style="{% if notebook_vm.status != 'RUNNING' or notebook_vm.status == 'NOT FOUND' %} display: none;{% endif %}"
+                                            title="Stop VM" value="stop_vm">
+                                        <i class="fa fa-stop"></i></button>
+                                    <button type="button" class="btn-sm btn-jupyter vm-btn vm-start-btn"
+                                            style="{% if notebook_vm.status == 'RUNNING' or notebook_vm.status == 'NOT FOUND' %} display: none;{% endif %}"
+                                            title="Start VM"
+                                            value="start_vm"><i class="fa fa-play" aria-hidden="true"></i></button>
+                                    <button type="button" class="btn-sm btn-jupyter vm-btn vm-delete-btn"
+                                            style="{% if notebook_vm.status == 'NOT FOUND' %} display: none;{% endif %}"
+                                            title="Delete VM" value="delete_vm">
+                                        <i class="fa fa-trash" aria-hidden="true"></i></button>
+                                    <button type="button" class="btn-sm btn-jupyter vm-btn vm-run-browser-btn"
+                                            style="{% if notebook_vm.status != 'RUNNING' %} display: none;{% endif %}"
+                                            title="Open Jupyter Notebook in a Browser" value="run_browser">
+                                        <i class="fa fa-external-link" aria-hidden="true"></i></button>
+                                </div>
+                                <div class="col-sm-2">
+                                    <span class="vm-spinner" style="display:none;">
+                                        <i class="fa fa-spinner fa-spin"></i></span>
+                                    <span class="vm-stat">{{ notebook_vm.status }}</span>
+                                </div>
+                                <div class="col-sm-5 vm-msg">
+                                </div>
                             {% else %}
-                                <a type="button" class="btn-sm btn-default" href="/notebooks/start_vm"><i class="fa fa-play" aria-hidden="true"></i></a>
+                                <div class="col-sm-12">
+                                    <button type="button" class="btn btn-link vm-btn vm-create-btn"
+                                            title="Create VM"
+                                            value="create_vm">
+                                        <i class="fa fa-plus"></i>Create and Run a New Jupyter Notebook VM
+                                    </button>
+                                    <span class="vm-msg"></span>
+                                    <span class="vm-stat"></span>
+                                    <span class="vm-spinner" style="display:none;"><i
+                                            class="fa fa-spinner fa-spin"></i></span>
+                                </div>
+
                             {% endif %}
-                            <a type="button" class="btn-sm btn-default"><i class="fa fa-refresh" aria-hidden="true"></i></a>
-                            <a type="button" class="btn-sm btn-default" href="/notebooks/delete_vm"><i class="fa fa-trash" aria-hidden="true"></i></a>
-                        </div>
-                        <p>
-                            <a type="button" href="/notebooks/start_vm" id="start_vm_btn" class="btn-sm btn-default">
-                                Start and Launch Notebook VM</a>
-                            <a type="button" href="/notebooks/stop_vm" id="stop_vm_btn" class="btn-sm btn-default">
-                                Stop VM</a>
-                            <a type="button" href="/notebooks/delete_vm" id="delete_vm_btn" class="btn-sm btn-default">
-                                Delete VM</a>
-{#                                                        <a type="button" href="/notebooks/restart_vm" id="restart_vm_btn" class="btn btn-default">Restart VM</a>#}
-{#                                                        <a type="button" href="/notebooks/teardown_network" id="teardown_network" class="btn btn-default">#}
-{#                                                            Tear Down Network</a>#}
-                        </p>
-                        <div>
-                            <a><i class="fa fa-cog" aria-hidden="true"></i>View Settings</a>
-                        </div>
-                        <div id="notebook-settings" class="gray-area">
-                            <form>
-                                <div class="form-row">
-                                    <div class="form-group col-md-6">
-                                        <label for="nb_username">User Name</label>
-                                        <input type="text" class="form-control" id="nb_username">
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group col-md-6">
-                                        <label for="nb_project_id">Google Project ID</label>
-                                        <input type="text" class="form-control" id="nb_project_id">
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group col-md-6">
-                                        <label for="nb_password">Password</label>
-                                        <input type="text" class="form-control" id="nb_password">
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group col-md-6">
-                                        <label for="nb_firewall_ip">Firewall IP address</label>
-                                        <input type="text" class="form-control" id="nb_firewall_ip">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="gridCheck">
-                                        <label class="form-check-label" for="gridCheck">
-                                            Check me out
-                                        </label>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Update</button>
-                                <button type="submit" class="btn btn-primary">Cancel</button>
-                            </form>
+                            <input type="hidden" name="vm_user" value="{{ notebook_vm.user }}">
+                            <input type="hidden" name="vm_project_id" value="{{ notebook_vm.project_id }}">
+                            <input type="hidden" name="vm_name" value="{{ notebook_vm.name }}">
+                            <input type="hidden" name="client_ip_range" value="{{ notebook_vm.client_ip_range }}">
+                            <input type="hidden" name="serv_port" value="5000">
+                            <input type="hidden" name="vm_zone" value="{{ notebook_vm.zone }}">
+                            <input type="hidden" name="password" value="">
                         </div>
 
-                        <div class="col-md-6">
-                            <div class="panel-heading">
-                                <h3 class="panel-title"><a href="{% url 'notebooks' %}">Saved Notebooks
-                                    ({{ notebooks.count }})</a>
-                                </h3>
-                            </div>
-                            <div class="panel-body">
-                                <ul class="table-list">
-                                    {% if notebooks.count > 0 %}
-                                        {% for notebook in notebooks|slice:':6' %}
-                                            <li>
-                                                <a href="{% url 'notebook_detail' notebook.id %}"
-                                                   title="{{ notebook.name|title|wrap_text }}">
-                                                    <div class="list-main">
-                                                        <h5 class="list-title">{{ notebook.name }}
-                                                        </h5>
-                                                        <p>{{ notebook.description }}</p>
-                                                    </div>
-                                                    <div class="list-info">
-                                                        {{ notebook.last_date_saved|date:'M d, Y, g:i a' }}
-                                                        {% if notebook.is_public %}
-                                                            <span class="badge"
-                                                                  style="margin: 0 5px;">Public</span>
-                                                        {% endif %}
-                                                    </div>
-                                                </a>
-                                            </li>
-                                        {% endfor %}
-                                        {% if notebooks.count > 6 %}
-                                            <a class="btn btn-link" href="{% url 'notebooks' %}">View All</a>
-                                        {% endif %}
-                                    {% endif %}
-                                </ul>
-                            </div>
-                            <div class="panel-footer">
-                                <div style="height:40px">
-                                    <form id="create-notebook" method="POST" action="{% url 'notebook_create' %}"
-                                          class="pull-right">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-link"><i class="fa fa-plus"></i>Create a
-                                            New Notebook
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="panel-heading">
-                                <h3 class="panel-title"><a href="{% url 'notebooks_public' %}">Search Public
-                                    Notebooks</a>
-                                </h3>
-                            </div>
-                            <div class="panel-body">
-                                <form id="nb-keyword-search-form">
-                                    <div class="input-group">
-                                        <input type="text" name="nb-keywords" class="nb-keyword-field form-control"
-                                               placeholder="Keywords">
-                                        <span class="input-group-btn">
-                                            <button id="nb-keyword-search-btn" class="btn btn-default"
-                                                    type="submit">Search</button>
-                                        </span>
-                                    </div>
-                                </form>
-                                <div class="nb-search-result">
-                                    <p class="nb-result-count"></p>
-                                    <ul class="table-list"></ul>
-                                </div>
-                            </div>
-                        </div>
+                        {#                        <div id="notebook-settings" class="gray-area">#}
+                        {#                            <form>#}
+                        {#                                <div class="form-row">#}
+                        {#                                    <div class="form-group col-md-6">#}
+                        {#                                        <label for="nb_username">User Name</label>#}
+                        {#                                        <input type="text" class="form-control" id="nb_username">#}
+                        {#                                    </div>#}
+                        {#                                </div>#}
+                        {#                                <div class="form-row">#}
+                        {#                                    <div class="form-group col-md-6">#}
+                        {#                                        <label for="nb_project_id">Google Project ID</label>#}
+                        {#                                        <input type="text" class="form-control" id="nb_project_id">#}
+                        {#                                    </div>#}
+                        {#                                </div>#}
+                        {#                                <div class="form-row">#}
+                        {#                                    <div class="form-group col-md-6">#}
+                        {#                                        <label for="nb_password">Password</label>#}
+                        {#                                        <input type="text" class="form-control" id="nb_password">#}
+                        {#                                    </div>#}
+                        {#                                </div>#}
+                        {#                                <div class="form-row">#}
+                        {#                                    <div class="form-group col-md-6">#}
+                        {#                                        <label for="nb_firewall_ip">Firewall IP address</label>#}
+                        {#                                        <input type="text" class="form-control" id="nb_firewall_ip">#}
+                        {#                                    </div>#}
+                        {#                                </div>#}
+                        {#                                <div class="form-group">#}
+                        {#                                    <div class="form-check">#}
+                        {#                                        <input class="form-check-input" type="checkbox" id="gridCheck">#}
+                        {#                                        <label class="form-check-label" for="gridCheck">#}
+                        {#                                            Check me out#}
+                        {#                                        </label>#}
+                        {#                                    </div>#}
+                        {#                                </div>#}
+                        {#                                <button type="submit" class="btn btn-primary">Update</button>#}
+                        {#                                <button type="submit" class="btn btn-primary">Cancel</button>#}
+                        {#                            </form>#}
+                        {#                        </div>#}
+
+{#                        <div class="col-md-6">#}
+{#                            <div class="panel-heading">#}
+{#                                <h3 class="panel-title"><a href="{% url 'notebooks' %}">Saved Notebooks#}
+{#                                    ({{ notebooks.count }})</a>#}
+{#                                </h3>#}
+{#                            </div>#}
+{#                            <div class="panel-body">#}
+{#                                <ul class="table-list">#}
+{#                                    {% if notebooks.count > 0 %}#}
+{#                                        {% for notebook in notebooks|slice:':6' %}#}
+{#                                            <li>#}
+{#                                                <a href="{% url 'notebook_detail' notebook.id %}"#}
+{#                                                   title="{{ notebook.name|title|wrap_text }}">#}
+{#                                                    <div class="list-main">#}
+{#                                                        <h5 class="list-title">{{ notebook.name }}#}
+{#                                                        </h5>#}
+{#                                                        <p>{{ notebook.description }}</p>#}
+{#                                                    </div>#}
+{#                                                    <div class="list-info">#}
+{#                                                        {{ notebook.last_date_saved|date:'M d, Y, g:i a' }}#}
+{#                                                        {% if notebook.is_public %}#}
+{#                                                            <span class="badge"#}
+{#                                                                  style="margin: 0 5px;">Public</span>#}
+{#                                                        {% endif %}#}
+{#                                                    </div>#}
+{#                                                </a>#}
+{#                                            </li>#}
+{#                                        {% endfor %}#}
+{#                                        {% if notebooks.count > 6 %}#}
+{#                                            <a class="btn btn-link" href="{% url 'notebooks' %}">View All</a>#}
+{#                                        {% endif %}#}
+{#                                    {% endif %}#}
+{#                                </ul>#}
+{#                            </div>#}
+{#                            <div class="panel-footer">#}
+{#                                <div style="height:40px">#}
+{#                                    <form id="create-notebook" method="POST" action="{% url 'notebook_create' %}"#}
+{#                                          class="pull-right">#}
+{#                                        {% csrf_token %}#}
+{#                                        <button type="submit" class="btn btn-link"><i class="fa fa-plus"></i>Create a#}
+{#                                            New Notebook#}
+{#                                        </button>#}
+{#                                    </form>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="col-md-6">#}
+{#                            <div class="panel-heading">#}
+{#                                <h3 class="panel-title"><a href="{% url 'notebooks_public' %}">Search Public#}
+{#                                    Notebooks</a>#}
+{#                                </h3>#}
+{#                            </div>#}
+{#                            <div class="panel-body">#}
+{#                                <form id="nb-keyword-search-form">#}
+{#                                    <div class="input-group">#}
+{#                                        <input type="text" name="nb-keywords" class="nb-keyword-field form-control"#}
+{#                                               placeholder="Keywords">#}
+{#                                        <span class="input-group-btn">#}
+{#                                            <button id="nb-keyword-search-btn" class="btn btn-default"#}
+{#                                                    type="submit">Search</button>#}
+{#                                        </span>#}
+{#                                    </div>#}
+{#                                </form>#}
+{#                                <div class="nb-search-result">#}
+{#                                    <p class="nb-result-count"></p>#}
+{#                                    <ul class="table-list"></ul>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
                     </div>
+
                 </section>
             </div>
         </div>
@@ -515,10 +547,153 @@
         {% endif %}
 
     </div>
+
+
+    <div class="modal fade" id="delete-vm-modal" tabindex="-1" role="dialog" aria-labelledby="deleteVmModal"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span></button>
+                    <h5 class="modal-title" id="deleteVmModal">Delete Notebook VM</h5>
+                </div>
+                <div class="modal-body">
+                    <form class="delete-vm-conf-form">
+                        <div class="form-group">
+                            <p>This will delete <b>{{ notebook_vm.name }}</b>, the <b>workspace</b> and its
+                                <b>notebooks</b> in it. Do you want to proceed?</p>
+                        </div>
+                        <input type="hidden" name="vm_delete_confirm" value="">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button id="delete-vm-conf-btn" type="button" class="btn btn-primary">Yes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="create-jnb-modal" tabindex="-1" role="dialog"
+         aria-labelledby="createJnbModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span></button>
+                    <h5 class="modal-title" id="createJnbModal">Create and Run a New Jupyter Notebook VM</h5>
+                </div>
+                <div class="modal-body">
+                    <form class="create-jnb-form">
+                        <div class="form-group">
+                            <label for="gcp_id_select">Google Project ID</label>
+{#                        todo: add tooltip for more info#}
+{#                        todo: add a link to register gcp#}
+                            <select class="form-control" id="gcp_id_select" value="{{ notebook_vm.project_id }}">
+                                {% for gcp in gcp_list %}
+                                    <option>{{ gcp.project_id }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="vmName">Machine Name</label>
+                            <input type="text" class="form-control" id="vmName"
+                                   required value="{{ notebook_vm.name }}">
+                        </div>
+{#                        <div class="form-group">#}
+{#                            <label for="vmZone">Zone</label>#}
+{#                            <input type="text" class="form-control" id="vmZone"#}
+{#                                   required value="{{ notebook_vm.zone }}">#}
+{#                        </div>#}
+                        <div class="form-group">
+                            <label for="client_ip_range">Your Current IP Address</label>
+{#                            todo: add tooltip for more info#}
+                            <input type="text" class="form-control" id="client_ip_range"
+                                   required value="{{ notebook_vm.client_ip_range }}">
+                        </div>
+
+                        {# passwords #}
+                        <div class="form-group">
+                            <label for="exampleInputPassword1">Password</label>
+                            <small id="passwordHelpBlock" class="form-text text-muted">
+                                Your password must be 8-20 characters long, contain only letters and numbers.
+                            </small>
+                            <input type="password" class="form-control" id="exampleInputPassword1"
+                                   placeholder="Password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputPassword2">Confirm Password</label>
+                            <input type="password" class="form-control" id="exampleInputPassword2"
+                                   placeholder="Password" required>
+                            <div>
+                                <small id="messageBlock" class="form-text text-danger">
+                                </small>
+                            </div>
+                            {#                        </div>#}
+                            {#                        <div>#}
+                            {#                            <small id="passwordHelpBlock" class="form-text text-muted">#}
+                            {#                                Your password must be 8-20 characters long, contain only letters and numbers.#}
+                            {#                            </small>#}
+                        </div>
+
+
+                        <div>
+                            <button id="create-vm-submit-btn" type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {#    <div class="modal fade" id="create-jnb-password-modal" tabindex="-1" role="dialog"#}
+    {#         aria-labelledby="createJnbPasswordModal" aria-hidden="true">#}
+    {#        <div class="modal-dialog">#}
+    {#            <div class="modal-content">#}
+    {#                <div class="modal-header">#}
+    {#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">#}
+    {#                        <span aria-hidden="true">&times;</span></button>#}
+    {#                    <h5 class="modal-title" id="createJnbPasswordModal">Create Jupyter Notebook Password</h5>#}
+    {#                </div>#}
+    {#                <div class="modal-body">#}
+    {#                    <form class="pwd-form">#}
+    {#                        <div class="form-group">#}
+    {#                            <label for="exampleInputPassword1">Password</label>#}
+    {#                            <input type="password" class="form-control" id="exampleInputPassword1"#}
+    {#                                   placeholder="Password" required>#}
+    {#                        </div>#}
+    {#                        <div class="form-group">#}
+    {#                            <label for="exampleInputPassword2">Confirm Password</label>#}
+    {#                            <input type="password" class="form-control" id="exampleInputPassword2"#}
+    {#                                   placeholder="Password" required>#}
+    {#                        </div>#}
+    {#                        <div>#}
+    {#                            <small id="passwordHelpBlock" class="form-text text-muted">#}
+    {#                                Your password must be 8-20 characters long, contain only letters and numbers.#}
+    {#                            </small>#}
+    {#                        </div>#}
+    {#                        <div>#}
+    {#                            <small id="passwordMessageBlock" class="form-text text-danger">#}
+    {#                            </small>#}
+    {#                        </div>#}
+    {##}
+    {#                        <div>#}
+    {#                            <button id="pwd-submit-btn" type="submit" class="btn btn-primary">Submit</button>#}
+    {#                        </div>#}
+    {##}
+    {#                    </form>#}
+    {##}
+    {#                </div>#}
+    {#            </div>#}
+    {#        </div>#}
+    {#    </div>#}
+
     <script type="text/javascript">
         var USER_SETTINGS_KEY = 'user_' + {{ request.user.id }} +'_dash_settings';
         var SOLR_URL = '{{ SOLR_URL }}';
     </script>
 {% endblock %}
+
 
 {% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}

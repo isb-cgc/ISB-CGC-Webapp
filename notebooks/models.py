@@ -19,7 +19,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 import logging
-
+from accounts.models import GoogleProject
 logger = logging.getLogger('main_logger')
 
 # Create your models here.
@@ -102,3 +102,29 @@ class Notebook_Added(models.Model):
     notebook = models.ForeignKey(Notebook, null=False, blank=False)
     user = models.ForeignKey(User, null=False, blank=True)
 
+class InstanceManager(models.Manager):
+    content = None
+
+class Instance(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=2024, null=False)
+    user = models.ForeignKey(User)
+    vm_username = models.CharField(max_length=20, null=False)
+    gcp = models.ForeignKey(GoogleProject)
+    zone = models.CharField(max_length=20, null=False)
+    active = models.BooleanField(default=True)
+    objects = InstanceManager()
+
+    @classmethod
+    def create(cls, name, user, vm_username, project_id, zone):
+        gcp = GoogleProject.objects.get(project_id=project_id, active=True)
+        instance_model = cls.objects.create(name=name, user=user, vm_username=vm_username, gcp=gcp, zone=zone, active=True)
+        instance_model.save()
+        return instance_model
+
+    @classmethod
+    def delete(cls, name, user, vm_username, project_id, zone):
+        instance_model = cls.objects.filter(name=name, user=user, vm_username=vm_username, zone=zone,
+                                            active=True)
+        instance_model.delete()
+        return instance_model

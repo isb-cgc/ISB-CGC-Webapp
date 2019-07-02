@@ -16,15 +16,19 @@ limitations under the License.
 
 import re
 import logging
+import json
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Notebook, Notebook_Added
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-# import notebooks
-from .notebook_vm import start_vm, stop_vm, delete_vm
+from django.http import HttpResponse, JsonResponse
+from .models import Notebook, Notebook_Added, Instance
+from .notebook_vm import start_vm, stop_vm, delete_vm, check_vm_stat, get_vm_external_ip
+from pprint import pprint
+
+
 
 logger = logging.getLogger('main_logger')
 
@@ -212,36 +216,96 @@ def notebook(request, notebook_id=0):
 
 
 # def validate_env_vars:
+# @login_required
+# def notebook_vm_command(request):
+#     command = request.path.rsplit('/', 1)[1]
+#     message = ''
+#     template = 'notebooks/notebook_vm.html'
+#     # print('ip address: {}'.format(get_client_ip(request)))
+#     if command == 'start_vm':
+#         SETUP_FILES = 5
+#         # SETUP_INSTANCE = 3
+#         DELETE_FIREWALL = 6
+#         DELETE_ADDRESS = 7
+#         SETUP_MONITOR = 2
+#         STOP_INSTANCE = 9
+#         DELETE_INSTANCE = 10
+#         # client_ip = get_client_ip(request)
+#         result = start_vm()
+#     elif command == 'stop_vm':
+#         result = stop_vm()
+#     elif command == 'delete_vm':
+#         result = delete_vm()
+#     # elif command  == 'check_vm':
+#     #     result = check_vm_stat()
+#         # result = start_n_launch(client_ip=client_ip)
+#     return render(request, template, result)
+
 @login_required
 def notebook_vm_command(request):
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    vm_user = body['user']
+    project_id = body['project_id']
+    vm_name = body['name']
+    zone = body['zone']
+    password = body['password']
+    firewall_ip_range = body['client_ip_range'].replace(' ','').split(',') # remove white spaces and place them in list
+    serv_port = body['serv_port']
+    region = '-'.join(zone.split('-')[:-1])
+    address_name = vm_user + '-jupyter-address'
+    firewall_rule_name = vm_user + '-jupyter-firewall-rule'
+    topic_name = vm_user + "-notebooks-management"
+
     command = request.path.rsplit('/', 1)[1]
-    message = ''
-    template = 'notebooks/notebook_vm.html'
-    # print('ip address: {}'.format(get_client_ip(request)))
-    if command == 'start_vm':
-        SETUP_FILES = 5
-        # SETUP_INSTANCE = 3
-        DELETE_FIREWALL = 6
-        DELETE_ADDRESS = 7
-        SETUP_MONITOR = 2
-        STOP_INSTANCE = 9
-        DELETE_INSTANCE = 10
-        # client_ip = get_client_ip(request)
-        result = start_vm()
+    if command == 'create_vm':
+        result = start_vm(project_id, zone, vm_user, vm_name, firewall_rule_name, firewall_ip_range, serv_port, region, address_name, password, topic_name)
+        # pprint(result)
+        if result['resp_code'] == 200:
+            vm_instances = Instance.objects.filter(name=vm_name, vm_username=vm_user, zone=zone)
+            if not vm_instances:
+                Instance.create(name=vm_name,
+                                    user=request.user,
+                                    vm_username=vm_user,
+                                    project_id=project_id,
+                                    zone=zone)
+                print('instance object is created')
+    elif command == 'start_vm':
+        result= start_vm(project_id, zone, vm_user, vm_name, firewall_rule_name, firewall_ip_range, serv_port, region, address_name, password)
     elif command == 'stop_vm':
-        result = stop_vm()
+        result = stop_vm(project_id, zone, vm_name)
     elif command == 'delete_vm':
-        result = delete_vm()
-        # result = start_n_launch(client_ip=client_ip)
-    return render(request, template, result)
+        result = delete_vm(project_id, zone, vm_name, firewall_rule_name, region, address_name, topic_name)
+        if result['resp_code'] == 200:
+            Instance.delete(name=vm_name,
+                                user=request.user,
+                                vm_username=vm_user,
+                                project_id=project_id,
+                                zone=zone)
+    elif command == 'check_vm':
+        result = check_vm_stat(project_id, zone, vm_name)
+    elif command == 'run_browser':
+        result = get_vm_external_ip(project_id, region, address_name)
+    return JsonResponse(result)
 
 
-@login_required
-def get_client_ip(request):
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    # print('x_forwarded_for: ' + str(x_forwarded_for))
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    return ip
+# @login_required
+# def get_client_ip(request):
+#     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+#     # print('x_forwarded_for: ' + str(x_forwarded_for))
+#     if x_forwarded_for:
+#         ip = x_forwarded_for.split(',')[0]
+#     else:
+#         ip = request.META.get('REMOTE_ADDR')
+#     return ip
+
+# @login_required
+# def create_vm_model(name, user, project_id, zone):
+#     Instance.create(name=name,
+#                                user=user,
+#                                gcp=project_id,
+#                                zone=zone,
+#                                active=1)
+#
+#     # redirect_url = reverse('workbook_detail', kwargs={'workbook_id': workbook_model.id})
+#     return redirect('dashboard')

@@ -45,6 +45,10 @@ sudo apt-get install -y git
 #
 python3 -m pip install pandas
 #
+# Install google.cloud
+#
+python3 -m pip install google-cloud-monitoring
+#
 # Get jupyter installed:
 #
 python3 -m pip install jupyter
@@ -97,7 +101,7 @@ sudo mv /idle_checker.py /home/${USER_NAME}/bin/.
 sudo mv /idle_log_wrapper.sh /home/${USER_NAME}/bin/.
 sudo mv /idle_shutdown.py /home/${USER_NAME}/bin/.
 sudo mv /shutdown_wrapper.sh /home/${USER_NAME}/bin/.
-sudo mv /cmd_server.py /home/${USER_NAME}/bin/.
+# sudo mv /cmd_server.py /home/${USER_NAME}/bin/.
 sudo mv /setEnvVars.sh /home/${USER_NAME}/bin/.
 
 sudo chmod u+x ~/bin/cpuLogger.sh
@@ -130,7 +134,7 @@ END_OF_SUPER
 cat >> /home/${USER_NAME}/idlelog.conf <<END_OF_SUPER_IDLELOG
 [program:idlelog]
 directory=/home/${USER_NAME}
-command=/home/${USER_NAME}/bin/idle_log_wrapper.sh
+command=bash /home/${USER_NAME}/bin/idle_log_wrapper.sh
 autostart=true
 autorestart=true
 user=${USER_NAME}
@@ -144,7 +148,7 @@ END_OF_SUPER_IDLELOG
 cat >> /home/${USER_NAME}/idleshut.conf <<END_OF_SUPER_SHUTDOWN
 [program:idleshut]
 directory=/home/${USER_NAME}
-command=/home/${USER_NAME}/bin/shutdown_wrapper.sh
+command=bash /home/${USER_NAME}/bin/shutdown_wrapper.sh
 autostart=true
 autorestart=true
 user=${USER_NAME}
@@ -165,19 +169,28 @@ END_OF_BASH
 # Get the virtual environment installed:
 #
 cd /home/${USER_NAME}
-for i in $(seq 1 5)
-do
-  python3 -m venv virtualEnv${i}
-  source virtualEnv${i}/bin/activate
-  pip install ipykernel
-  python -m ipykernel install --user --name=virtualEnv${i}
-  deactivate
-done
+
+python3 -m venv virtualEnv
+source virtualEnv/bin/activate
+pip install ipykernel
+python -m ipykernel install --user --name=virtualEnv
+deactivate
+
+# for i in $(seq 1 5)
+# do
+#  python3 -m venv virtualEnv${i}
+#  source virtualEnv${i}/bin/activate
+#  pip install ipykernel
+#  python -m ipykernel install --user --name=virtualEnv${i}
+#  deactivate
+# done
 
 sudo -u ${USER_NAME} bash <<EOM
 cd ~
 sudo supervisorctl reread
 sudo supervisorctl update
-python3 ./bin/cmd_server.py 2>&1 > /home/${USER_NAME}/log/cmd-server-out.log &
+
+# python3 ./bin/cmd_server.py 2>&1 > /home/${USER_NAME}/log/cmd-server-out.log &
+
 EOM
 

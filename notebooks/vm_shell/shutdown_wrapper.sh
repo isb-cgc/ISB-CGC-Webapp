@@ -18,15 +18,17 @@
 # Wrapper for the script that determines if the VM should be shutdown for being idle
 #
 
-source /home/${USER_NAME}/bin/setEnvVars.sh
+source ./bin/setEnvVars.sh
+HOME_DIR=$(pwd)
 
 while true; do
-    DO_SHUTDOWN=`python3 idle_shutdown.py . idlelogs 1 ${PROJECT} ${MACHINE_NAME} ${SERV_PORT}`
-    #DO_SHUTDOWN=`python3 /home/${USER_NAME}/idle_shutdown.py /home/${USER_NAME} /home/${USER_NAME}/idlelogs 1 ${PROJECT} ${MACHINE_NAME} ${SERV_PORT}`
-    if [ -n "${DO_SHUTDOWN}" ]; then
-        echo "Shutdown report: ${DO_SHUTDOWN}"
-        echo "Shutting down"
+    DO_SHUTDOWN=$(python3 ./bin/idle_shutdown.py ${HOME_DIR} idlelogs 1 ${PROJECT} ${MACHINE_NAME} ${SERV_PORT})
+    NOW=$(date)
+    if [ ${DO_SHUTDOWN} == 'True' ]; then
+        echo "${NOW} Shutdown [${DO_SHUTDOWN}] : Shutting Down .."
         sudo poweroff
+    else
+        echo "${NOW} VM is active ..."
     fi
     sleep 300
 done

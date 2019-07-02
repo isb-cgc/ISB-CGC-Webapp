@@ -114,7 +114,7 @@ def are_we_busy(all_types, window_hours, idle_thresh):
     start_stamp = now - (60 * 60 * window_hours)
     now_st = datetime.datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
     start_st = datetime.datetime.fromtimestamp(start_stamp).strftime('%Y-%m-%d %H:%M:%S')
-    print("now {} type {} stamp {}".format(now, type(now), now_st))
+    # print("now {} type {} stamp {}".format(now, type(now), now_st))
 
     not_idle_sb = do_a_type(all_types, 'network/sent_bytes_count', 'sent_bytes_count', 'int',
                             start_st, now_st, idle_thresh['sent_bytes_count'])
@@ -163,13 +163,13 @@ def top_says_idle(check_secs, thresh, home_dir, answer):
 
     am_idle = True
     for i in range(0, check_secs):
-        p = sub.Popen(('{}/bin/cpuLogger.sh'.format(home_dir)), stdout=sub.PIPE)
+        p = sub.Popen(['sudo', '{}/bin/cpuLogger.sh'.format(home_dir)], stdout=sub.PIPE)
         for line in iter(p.stdout.readline, b''):
             cpu_val_str = line.rstrip().decode("utf-8").split()[8]
             try:
                 cpu_val = float(cpu_val_str)
             except ValueError:
-                print("cpu not a float %s\n" % cpu_val_str)
+                # print("cpu not a float %s\n" % cpu_val_str)
                 continue
             if cpu_val > thresh:
                 am_idle = False
@@ -209,7 +209,7 @@ def shutdown_decision(home_dir, log_dir, window_hours, gcp_project_id, instance_
     #
     all_types = pull_from_logs(home_dir, log_dir)
     if are_we_busy(all_types, window_hours, idle_thresh):
-        print("last hour busy")
+        # print("last hour busy")
         return False
     #
     # If we are idle in the long term, check to see if we have been idle recently. The long-term logging
@@ -219,7 +219,7 @@ def shutdown_decision(home_dir, log_dir, window_hours, gcp_project_id, instance_
     series_list = log_a_point(gcp_project_id, instance_name, interval_sec, False)
     all_types = pull_from_list(series_list)
     if are_we_busy(all_types, window_hours, idle_thresh):
-        print("recently busy")
+        # print("recently busy")
         return False
 
     #
@@ -239,8 +239,8 @@ def shutdown_decision(home_dir, log_dir, window_hours, gcp_project_id, instance_
     t1.join()
     t2.join()
 
-    print("recent tcp %s\n" % tcp_answer[0])
-    print("recent cpu %s\n" % cpu_answer[0])
+    # print("recent tcp %s\n" % tcp_answer[0])
+    # print("recent cpu %s\n" % cpu_answer[0])
 
     return tcp_answer[0] or cpu_answer[0]
 
@@ -254,7 +254,8 @@ def main(args):
     port_num = args[6]
 
     do_shutdown = shutdown_decision(home_dir, log_dir, window_hours, gcp_project_id, instance_name, port_num)
-    return do_shutdown
+    print(do_shutdown)
+    # return do_shutdown
 
 if __name__ == "__main__":
     main(sys.argv)
