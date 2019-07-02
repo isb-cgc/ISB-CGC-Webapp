@@ -279,13 +279,14 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                         svg.select('.y.axis')
                             .attr('transform', 'translate('+ margin.left +', ' + (margin.top + d3.event.translate[1])+')')
                             .selectAll('foreignObject')
+                            .attr('height', y.rangeBand()+'px')
                             .attr('style', function(d) {
                                 var scale_ratio_2  = 1 - Math.floor(d.length/20) * 0.1; // Decrease font size if label text is too long (>28)
-                                return 'font-size:' + (scaled_tick_font_size > tick_font_size ? tick_font_size*scale_ratio_2 : scaled_tick_font_size*scale_ratio_2) + 'px; transform: translate(-' + margin.left * 0.75 + 'px, -' + (y.rangeBand() * d3.event.scale / 2) + 'px)'
+                                return 'font-size:' + (scaled_tick_font_size > tick_font_size ? tick_font_size*scale_ratio_2 : scaled_tick_font_size*scale_ratio_2) + 'px; transform: translate(-' + margin.left * 0.75 + 'px, -' + (y.rangeBand()/ 2) + 'px)'
 
                             })
                             .select('div')
-                            .attr('style', 'display:table-cell;vertical-align:middle; text-align: right; padding: 0 10px; width: ' + margin.left * .75 + 'px; height: ' + y.rangeBand()*d3.event.scale + 'px;');
+                            .attr('style', 'display:table-cell;vertical-align:middle; text-align: right; padding: 0 10px; width: ' + margin.left * .75 + 'px; height: ' + y.rangeBand() + 'px;');
                         y_axis_area
                             .select('clipPath')
                             .select('rect')

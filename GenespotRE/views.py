@@ -53,7 +53,6 @@ from django.http import HttpResponse, JsonResponse
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
 
-ERA_LOGIN_URL = settings.ERA_LOGIN_URL
 OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
@@ -65,7 +64,7 @@ def convert(data):
     if isinstance(data, basestring):
         return str(data)
     elif isinstance(data, collections.Mapping):
-        return dict(list(map(convert, iter(data.items()))))
+        return dict(list(map(convert, iter(list(data.items())))))
     elif isinstance(data, collections.Iterable):
         return type(data)(list(map(convert, data)))
     else:
@@ -89,7 +88,7 @@ def _decode_list(data):
 def _decode_dict(data):
     # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     rv = {}
-    for key, value in data.items():
+    for key, value in list(data.items()):
         if isinstance(key, str):
             key = key.encode('utf-8')
         if isinstance(value, str):
@@ -158,8 +157,7 @@ def user_detail(request, user_id):
         return render(request, 'GenespotRE/user_detail.html',
                       {'request': request,
                        'user': user,
-                       'user_details': user_details,
-                       'ERA_LOGIN_URL': settings.ERA_LOGIN_URL
+                       'user_details': user_details
                        })
     else:
         return render(request, '403.html')
