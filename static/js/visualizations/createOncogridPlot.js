@@ -69,7 +69,7 @@ define (['jquery', 'oncogridjs'],
 
     var donorFill = function (d) {
         var fieldname = d.fieldName;
-        var data_value = d.value ? d.value.toLowerCase() : 'not reported';
+        var data_value = d.value ? (isNaN(d.value) ? d.value.toLowerCase() : d.value) : 'not reported';
         if (data_value === 'not reported')
             return 'white';
         var field_legend;
