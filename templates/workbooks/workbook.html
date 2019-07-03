@@ -155,8 +155,10 @@
                                                             </form>
                                                         {% endif %}
                                                     </li>
-                                                {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                    <a class="show-more">{{num_more}} more</a>
+                                                {% elif forloop.counter0 >= 6 and num_more > 0 %}
+                                                    {% if forloop.counter0 == 6 %}
+                                                        <a class="show-more">{{num_more}} more</a>
+                                                    {% endif %}
                                                     <li class="extra-values sublist-item">
                                                         {{ gene.gene }}
                                                     </li>
@@ -192,8 +194,10 @@
                                                             </form>
                                                         {% endif %}
                                                     </li>
-                                                {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                    <a class="show-more">{{num_more}} more</a>
+                                                {% elif forloop.counter0 >= 6 and num_more > 0 %}
+                                                    {% if forloop.counter0 == 6 %}
+                                                        <a class="show-more">{{num_more}} more</a>
+                                                    {% endif %}
                                                     <li class="extra-values sublist-item">
                                                         {{ variable.name }}
                                                     </li>
@@ -232,8 +236,10 @@
                                                             </form>
                                                         {% endif %}
                                                     </li>
-                                                {% elif forloop.counter0 == 6 and num_more > 0 %}
+                                                {% elif forloop.counter0 >= 6 and num_more > 0 %}
+                                                    {% if forloop.counter0 == 6 %}
                                                     <a class="show-more">{{num_more}} more</a>
+                                                    {% endif %}
                                                     <li class="extra-values sublist-item">
                                                         {% if cohort|get_cohort_perm:request %}
                                                             <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
