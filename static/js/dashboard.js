@@ -74,14 +74,14 @@ require([
         }
     }
 
-    var get_vm_instance = function(vm_div){
-        var vm_user         = $(vm_div).find("input[name='vm_user']").val();
-        var vm_project_id   = $(vm_div).find("input[name='vm_project_id']").val();
-        var vm_name         = $(vm_div).find("input[name='vm_name']").val();
-        var vm_zone         = $(vm_div).find("input[name='vm_zone']").val();
+    var get_vm_instance = function (vm_div) {
+        var vm_user = $(vm_div).find("input[name='vm_user']").val();
+        var vm_project_id = $(vm_div).find("input[name='vm_project_id']").val();
+        var vm_name = $(vm_div).find("input[name='vm_name']").val();
+        var vm_zone = $(vm_div).find("input[name='vm_zone']").val();
         var client_ip_range = $(vm_div).find("input[name='client_ip_range']").val();
-        var serv_port        = $(vm_div).find("input[name='serv_port']").val();
-        var password         = $(vm_div).find("input[name='password']").val();
+        var serv_port = $(vm_div).find("input[name='serv_port']").val();
+        var password = $(vm_div).find("input[name='password']").val();
         var vm_instance = {
             'user': vm_user,
             'project_id': vm_project_id,
@@ -94,12 +94,12 @@ require([
         return vm_instance;
     };
 
-    var open_https_browser = function(ip_address, port){
-        var url = "https://"+ip_address+":"+port;
+    var open_https_browser = function (ip_address, port) {
+        var url = "https://" + ip_address + ":" + port;
         window.open(url);
     };
 
-    var command_vm = function(command, vm_div){
+    var command_vm = function (command, vm_div) {
         var vm_spinner = $(vm_div).find(".vm-spinner");
         var vm_stat = $(vm_div).find(".vm-stat");
         var vm_msg = $(vm_div).find(".vm-msg");
@@ -108,7 +108,7 @@ require([
         vm_spinner.show();
 
         var action;
-        switch(command){
+        switch (command) {
             case 'create_vm':
                 action = 'Creating Instance';
                 break;
@@ -136,10 +136,10 @@ require([
                 xhr.setRequestHeader("X-CSRFToken", csrftoken);
             },
             success: function (data) {
-                if(data['resp_code'] == 200 && (command == 'create_vm' || command == 'delete_vm')){
+                if (data['resp_code'] == 200 && (command == 'create_vm' || command == 'delete_vm')) {
                     window.location.reload(true);
                 }
-                else if(command == 'run_browser'){
+                else if (command == 'run_browser') {
                     var external_ip = data['external_ip'];
                     // var serv_port = data['serv_port'];
                     open_https_browser(external_ip, vm_instance['serv_port']);
@@ -147,17 +147,17 @@ require([
                     // window.open(url);
                     // update_vm_stat(vm_div);
                 }
-                else{
+                else {
                     vm_msg.html(data['message']);
                     // update_vm_stat(vm_div);
                 }
             },
             error: function (e) {
-                vm_msg.html('[Error]: '+e);
+                vm_msg.html('[Error]: ' + e);
             },
-            complete: function(){
+            complete: function () {
                 // if(command != 'create_vm' && command != 'delete_vm'){
-                    update_vm_stat(vm_div);
+                update_vm_stat(vm_div);
                 // }
                 // else{
                 //     //clear password input
@@ -167,7 +167,7 @@ require([
         });
     };
 
-    var vm_input_complete = function(){
+    var vm_input_complete = function () {
         return false;
     };
 
@@ -177,17 +177,17 @@ require([
 
         // console.log('command: '+command);
         var no_repeat = $('#delete-vm-modal').find("input[name='vm_delete_confirm']").val();
-        switch(command){
+        switch (command) {
             case 'create_vm':
                 var password = $(vm_div).find("input[name='password']").val();
-                if(!password){
+                if (!password) {
                     $('#create-jnb-modal').modal('show');
                     $('#create-jnb-modal').find('#messageBlock').html('');
                     return;
                 }
                 break;
             case 'delete_vm':
-                if (!no_repeat){
+                if (!no_repeat) {
                     $('#delete-vm-modal').modal('show');
                     return;
                 }
@@ -216,7 +216,7 @@ require([
         // }
     });
 
-    var update_vm_stat = function(vm_div){
+    var update_vm_stat = function (vm_div) {
         var vm_instance = get_vm_instance(vm_div);
         var vm_stat = $(vm_div).find(".vm-stat");
         var vm_msg = $(vm_div).find(".vm-msg");
@@ -244,24 +244,24 @@ require([
 
                 vm_stat.html(status);
                 vm_btn.hide();
-                if(status == 'RUNNING'){
+                if (status == 'RUNNING') {
                     vm_stop_btn.show();
                     vm_delete_btn.show();
                     vm_run_browser_btn.show();
                 }
-                else if(status == 'NOT FOUND'){
+                else if (status == 'NOT FOUND') {
                     vm_create_btn.show();
                 }
-                else{
+                else {
                     vm_start_btn.show();
                     vm_delete_btn.show();
                 }
             },
             error: function (e) {
-                console.log('error: '+e);
-                vm_msg.html('[Error]: '+e);
+                console.log('error: ' + e);
+                vm_msg.html('[Error]: ' + e);
             },
-            complete: function(){
+            complete: function () {
                 vm_spinner.hide();
                 vm_btn.prop("disabled", false);
             }
@@ -269,7 +269,7 @@ require([
     };
 
 
-    $('#delete-vm-conf-btn').click(function(e) {
+    $('#delete-vm-conf-btn').click(function (e) {
         e.preventDefault();
         $("#delete-vm-modal input[name='vm_delete_confirm']").val(true);
         $('#notebook-panel .vm-div .vm-delete-btn').trigger('click');
@@ -277,7 +277,7 @@ require([
     });
 
 
-    $('#create-vm-submit-btn').click(function(e) {
+    $('#create-vm-submit-btn').click(function (e) {
         var vm_div = $('#notebook-panel .vm-div');
         e.preventDefault();
         var msg = "";
@@ -289,25 +289,40 @@ require([
         var pwd1 = create_jnb_form.find('#exampleInputPassword1').val();
         var pwd2 = create_jnb_form.find('#exampleInputPassword2').val();
 
-        if(!project_id || !vm_name || !client_ip_range || !pwd1 || !pwd2){
-        // if(!project_id || !vm_name || !vmZone || !client_ip_range || !pwd1 || !pwd2){
+        if (!project_id || !vm_name || !client_ip_range || !pwd1 || !pwd2) {
             msg = "Some fields are missing. "
         }
-        else if(pwd1 != pwd2){
+        else if (vm_name.length > 30) {
+            msg = "Machine name must be less than 30 characters"
+        }
+        else if (!/^[a-z]([-a-z0-9]+[a-z0-9])$/.test(vm_name)) {
+            msg = "Machine name must start with lowercase letter, and all following characters must be a dash, lowercase letter, or digit, except the last character, which cannot be a dash"
+        }
+        else if (pwd1 != pwd2) {
             msg = "Password entries do not match."
         }
-        else if(pwd1.length>20 || pwd1.length<8){
+        else if (pwd1.length > 20 || pwd1.length < 8) {
             msg = "Password must be 8-20 characters."
         }
-        else if(!/^[a-z0-9]+$/i.test(pwd1)){
+        else if (!/^[a-z0-9]+$/i.test(pwd1)) {
             msg = "Password must contain only letters and numbers"
+        }
+
+        if (client_ip_range){
+            var ip_address_list = client_ip_range.split(',');
+            for(var i=0; i<ip_address_list.length; i++){
+                if(!/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip_address_list[i].trim())){
+                    msg = "Enter a valid IPv4 address";
+                    break;
+                }
+            }
         }
 
         //display or clear message
         create_jnb_form.find('#messageBlock').html(msg);
 
         //set inputs and trigger vm-create-btn
-        if(!msg){
+        if (!msg) {
             $(vm_div).find("input[name='vm_project_id']").val(project_id);
             $(vm_div).find("input[name='vm_name']").val(vm_name);
             // $(vm_div).find("input[name='vm_zone']").val(vmZone);
@@ -336,13 +351,13 @@ require([
                 var num_found = data.response.numFound;
                 var docs = data.response.docs;
                 var html_list = "";
-                for(var i = 0 ; i < docs.length && i < list_max ; i++){
-                    html_list += '<li><a href=\"/notebooks/'+docs[i].id+'/public\" title=\"'+docs[i].name +
-                                    '\"><div class=\"list-main\"><h5 class=\"list-title\">'+docs[i].name +
-                                    '</h5><p>'+(docs[i].description)+'</p></div></a></li>'
+                for (var i = 0; i < docs.length && i < list_max; i++) {
+                    html_list += '<li><a href=\"/notebooks/' + docs[i].id + '/public\" title=\"' + docs[i].name +
+                        '\"><div class=\"list-main\"><h5 class=\"list-title\">' + docs[i].name +
+                        '</h5><p>' + (docs[i].description) + '</p></div></a></li>'
                 }
-                var count_message = num_found+' result'+ (num_found > 0 ? 's' : '') +' found' +
-                    (num_found > list_max ? (' Showing 5 results'):'');
+                var count_message = num_found + ' result' + (num_found > 0 ? 's' : '') + ' found' +
+                    (num_found > list_max ? (' Showing 5 results') : '');
                 count_p.html(count_message);
                 table_list.html(html_list);
             },
