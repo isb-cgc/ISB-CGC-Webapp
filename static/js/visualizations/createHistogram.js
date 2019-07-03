@@ -41,22 +41,6 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
     // The samples found in the selected value buckets; this is used to produce the JSON which
     // is submitted by the form
     var selectedSamples = null;
-
-    // If you want to override the tip coming in from the create call,
-    // do it here
-    var tip = d3tip()
-            .attr('class', 'd3-tip')
-            .direction('n')
-            .offset([0, 0])
-            .html(function(d) {
-                var mean = 0;
-                for (var i = 0; i < d.length; i++) {
-                    mean += parseFloat(d[i]);
-                }
-                mean /= d.length;
-                return '<span>' +  Number(d.x).toFixed(2) + ' ('+(d.y * 100).toFixed(2) + '%)</span><br/><span>Mean: ' + mean.toFixed(2) + '</span>';
-            });
-
     var selex_active = false;
     var zoom_status = {
         translation: null,
@@ -64,30 +48,72 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
     };
 
     return {
-        createHistogramPlot : function (svg_param, raw_Data, values_only, width_param, height_param, x_attr, xLabel, margin_param, legend) {
-
+        createHistogramPlot : function (svg_param, raw_Data, width_param, height_param, x_attr, xLabel, margin_param, bySample) {
+            // If you want to override the tip coming in from the create call,
+            // do it here
+            var yLabel = 'Percentage of '+(bySample ? 'Samples' : 'Cases')+' in Grouping';
+            var tip = d3tip()
+                .attr('class', 'd3-tip')
+                .direction('n')
+                .offset([0, 0])
+                .html(function(d) {
+                    var mean = 0;
+                    for (var i = 0; i < d.length; i++) {
+                        mean += parseFloat(d[i]);
+                    }
+                    mean /= d.length;
+                    return '<span>' + xLabel +': '+ Number(d.x).toFixed(2) + '</br>' +
+                        yLabel + ': ' + ((d.y * 100).toFixed(2)) + '%<br/>Mean: ' + mean.toFixed(2) + '</span>';
+                });
             var nonNullData = [];
+            var values_only_by_sample = [];
+            var values_only_by_case = [];
+            var val_set = {};
 
             raw_Data.map(function(d){
                 if(helpers.isValidNumber(d.x)) {
                     nonNullData.push(d);
+                    var val = Number(d.x);
+                    values_only_by_sample.push(val);
+                    if(!bySample){
+                        var case_id = d.case_id;
+                        if(!val_set[val]){
+                            val_set[val] = {};
+                        }
+                        if(!val_set[val][case_id]){
+                            val_set[val][case_id] = true;
+                            values_only_by_case.push(val);
+                        }
+                    }
                 }
             });
 
             if(nonNullData.length <= 0) {
                 return null;
             }
-
             svg    = svg_param;
             width  = width_param;
             height = height_param;
             margin = margin_param;
 
-            var num_bins = Math.ceil(Math.sqrt(raw_Data.length));
-            var hist_data = d3.layout.histogram()
-                .bins(num_bins)
-                .frequency(false)(values_only);
-            var tmp = helpers.get_min_max(raw_Data, x_attr);
+            var hist_data;
+
+            var num_bins_by_sample = Math.ceil(Math.sqrt(bySample ? values_only_by_sample.length : values_only_by_case.length));
+            var hist_data_by_sample = d3.layout.histogram()
+                .bins(num_bins_by_sample)
+                .frequency(false)(values_only_by_sample);
+
+            if(bySample) {
+                hist_data = hist_data_by_sample;
+            }
+            else{
+                var num_bins_by_case = Math.ceil(Math.sqrt(values_only_by_case.length));
+                var hist_data_by_case = d3.layout.histogram()
+                    .bins(num_bins_by_case)
+                    .frequency(false)(values_only_by_case);
+                hist_data = hist_data_by_case;
+            }
+            var tmp = [d3.min(values_only_by_sample), d3.max(values_only_by_sample)];
             if(tmp[0] === tmp[1]){
                 tmp[0]-=0.5;
                 tmp[1]+=0.5;
@@ -139,7 +165,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
 
             svg.call(zoom);
 
-            var sorted = raw_Data.sort(function (a, b) {
+            var sorted = nonNullData.sort(function (a, b) {
                 if (a[x_attr] > b[x_attr]) {
                     return 1;
                 }
@@ -150,19 +176,17 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
             });
 
             var sample_index = 0;
-            for (var i = 0; i < hist_data.length; i++) {
-                var val = hist_data[i].x;
+            for (var i = 0; i < hist_data_by_sample.length; i++) {
+                var val = hist_data_by_sample[i].x;
                 if(!sampleSet[val]) {
-                    sampleSet[val] = {
-                        samples: {},
-                        cases: new Set([])
-                    };
+                    sampleSet[val] = {};
                 }
 
-                for (var j = 0; j < hist_data[i].length; j++) {
+                for (var j = 0; j < hist_data_by_sample[i].length; j++) {
                     var data = sorted[sample_index];
-                    sampleSet[val].samples['{'+data['sample_id']+'}{'+data['case_id']+'}'] = {sample: data['sample_id'], case: data['case_id'], project: data['project']};
-                    sampleSet[val].cases.add(data['case_id']);
+                    var sample_id = data['sample_id'];
+                    var case_id = data['case_id'];
+                    sampleSet[val]['{'+ sample_id +'}{'+ case_id+'}'] = {sample: sample_id, case: case_id, project: data['project']};
                     sample_index++;
                 }
             }
@@ -282,7 +306,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 .attr('class', 'axis-label')
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'rotate(-90) translate(-' + yAxisXPos + ',15)')
-                .text('Percentage of Samples in Grouping');
+                .text(yLabel);
 
             function check_selection_state(isActive) {
                 selex_active = !!isActive;
@@ -329,9 +353,9 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     var case_set = {};
                     selectedSamples = {};
                     _.each(Object.keys(selectedValues),function(val) {
-                        _.each(Object.keys(sampleSet[val]['samples']),function(sample) {
-                            selectedSamples[sample] = sampleSet[val]['samples'][sample];
-                            case_set[sampleSet[val]['samples'][sample]['case']] = 1;
+                        _.each(Object.keys(sampleSet[val]),function(sample) {
+                            selectedSamples[sample] = sampleSet[val][sample];
+                            case_set[sampleSet[val][sample]['case']] = 1;
                         });
                     });
 

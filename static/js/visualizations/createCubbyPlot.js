@@ -47,13 +47,14 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
         var selectedSamples = null;
 
         return {
-            data_totals: function (data, x_attr, y_attr, x_domain, y_domain) {
+            data_totals: function (data, x_attr, y_attr, x_domain, y_domain, bySample) {
                 var results_dict = {};
                 var results = [];
                 var x_item, y_item;
                 var x_total = {};
                 var y_total = {};
-
+                var caseSet = {};
+                var caseCount = 0;
                 for (x_item in x_domain) {
                     x_total[x_domain[x_item]] = 0;
                     for (y_item in y_domain) {
@@ -73,20 +74,37 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                     y_item = data[i][y_attr];
 
                     var val = x_item + '-' + y_item;
+                    var case_id = data[i]['case_id'];
 
-                    results_dict[val]['total']++;
-
-                    sampleSet[val].samples['{' + data[i]['sample_id'] + '}{' + data[i]['case_id'] + '}'] = {
+                    sampleSet[val].samples['{' + data[i]['sample_id'] + '}{' + case_id + '}'] = {
                         sample: data[i]['sample_id'],
-                        case: data[i]['case_id'],
+                        case: case_id,
                         project: data[i]['project']
                     };
-                    sampleSet[val].cases.add(data[i]['case_id']);
+                    sampleSet[val].cases.add(case_id);
 
-                    x_total[x_item] += 1;
-                    y_total[y_item] += 1;
+                    if (bySample) {
+                        x_total[x_item] += 1;
+                        y_total[y_item] += 1;
+                        results_dict[val]['total']++;
+                    }
+                    else{
+                        if(!caseSet[val]) {
+                            caseSet[val] = {};
+                        }
+                        if(!caseSet[val][case_id]){
+                            caseSet[val][case_id] = true;
+                            x_total[x_item]++;
+                            y_total[y_item]++;
+                            caseCount++;
+                            results_dict[val]['total']++;
+                        }
+
+                    }
+
+
                 }
-                var total = data.length;
+                var total = bySample ? data.length : caseCount;
 
                 for (var key in x_total) {
                     x_total[key] /= total;
@@ -113,13 +131,13 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 }
                 return results;
             },
-            create_cubbyplot: function (svg, margin, data, domain, range, xLabel, yLabel, xParam, yParam, legend, plot_width, plot_height, cubby_size) {
+            create_cubbyplot: function (svg, margin, data, domain, range, xLabel, yLabel, xParam, yParam, legend, plot_width, plot_height, cubby_size, bySample) {
 
                 var plot_no_margin_width = plot_width - margin.left - margin.right;
                 var plot_no_margin_height = plot_height - margin.top - margin.bottom;
                 var x_band_width = plot_no_margin_width / domain.length;
                 var y_band_width = plot_no_margin_height / range.length;
-                var data_counts = this.data_totals(data, xParam, yParam, domain, range);
+                var data_counts = this.data_totals(data, xParam, yParam, domain, range, bySample);
                 var worksheet_id = $('.worksheet.active').attr('id');
 
                 // create x axis
@@ -188,7 +206,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 y_axis_area.append('g')
                     .attr('class', 'y axis')
                     .attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')')
-                    .call(yAxis)
+                    .call(yAxis);
 
                 var plot_area_clip_id = 'plot_area_clip_' + worksheet_id;
                 var plot_area = svg.append('g')
@@ -261,13 +279,14 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                         svg.select('.y.axis')
                             .attr('transform', 'translate('+ margin.left +', ' + (margin.top + d3.event.translate[1])+')')
                             .selectAll('foreignObject')
+                            .attr('height', y.rangeBand()+'px')
                             .attr('style', function(d) {
                                 var scale_ratio_2  = 1 - Math.floor(d.length/20) * 0.1; // Decrease font size if label text is too long (>28)
-                                return 'font-size:' + (scaled_tick_font_size > tick_font_size ? tick_font_size*scale_ratio_2 : scaled_tick_font_size*scale_ratio_2) + 'px; transform: translate(-' + margin.left * 0.75 + 'px, -' + (y.rangeBand() * d3.event.scale / 2) + 'px)'
+                                return 'font-size:' + (scaled_tick_font_size > tick_font_size ? tick_font_size*scale_ratio_2 : scaled_tick_font_size*scale_ratio_2) + 'px; transform: translate(-' + margin.left * 0.75 + 'px, -' + (y.rangeBand()/ 2) + 'px)'
 
                             })
                             .select('div')
-                            .attr('style', 'display:table-cell;vertical-align:middle; text-align: right; padding: 0 10px; width: ' + margin.left * .75 + 'px; height: ' + y.rangeBand()*d3.event.scale + 'px;');
+                            .attr('style', 'display:table-cell;vertical-align:middle; text-align: right; padding: 0 10px; width: ' + margin.left * .75 + 'px; height: ' + y.rangeBand() + 'px;');
                         y_axis_area
                             .select('clipPath')
                             .select('rect')
@@ -457,6 +476,12 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 var xAxisYPos = margin.top + plot_no_margin_height + 110;
 
                 svg.append('text')
+                    .attr('class', 'axis-label')
+                    .attr('text-anchor', 'start')
+                    .attr('transform', 'translate(' + margin.left + ',' + margin.top*2/3 + ')')
+                    .text('(Count by ' + (bySample ? 'Sample' : 'Case') + ')');
+
+                svg.append('text')
                     .attr('class', 'x axis-label')
                     .attr('text-anchor', 'middle')
                     .attr('transform', 'translate(' + xAxisXPos + ',' + xAxisYPos + ')')
@@ -576,9 +601,9 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 }
 
                 function get_csv_data() {
-                    var csv_data = "x, y, expected_total, ratio, log_ratio\n";
+                    var csv_data = "x, y, total, expected_total, ratio, log_ratio\n";
                     data_counts.map(function (d) {
-                        csv_data += d['x'] + ', ' + d['y'] + ', ' + d['expected_total'] + ', ' + d['ratio'] + ', ' + d['log_ratio'] + '\n';
+                        csv_data += d['x'] + ', ' + d['y'] + ', ' + d['total'] + ', ' + d['expected_total'] + ', ' + d['ratio'] + ', ' + d['log_ratio'] + '\n';
                     });
                     return csv_data;
                 }

@@ -57,7 +57,6 @@ from django.http import HttpResponse, JsonResponse
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
 
-ERA_LOGIN_URL = settings.ERA_LOGIN_URL
 OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
@@ -163,8 +162,7 @@ def user_detail(request, user_id):
         return render(request, 'GenespotRE/user_detail.html',
                       {'request': request,
                        'user': user,
-                       'user_details': user_details,
-                       'ERA_LOGIN_URL': settings.ERA_LOGIN_URL
+                       'user_details': user_details
                        })
     else:
         return render(request, '403.html')
