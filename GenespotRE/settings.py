@@ -571,9 +571,10 @@ DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
 #################################
 # NOTEBOOK settings
 #################################
-NOTEBOOK_VIEWER = os.environ.get('NOTEBOOK_VIEWER', None)
+# NOTEBOOK_VIEWER = os.environ.get('NOTEBOOK_VIEWER', None)
+NOTEBOOK_VIEWER = ''
 # NOTEBOOK_ENV_LOC = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_ENV_PATH', None))
-NOTEBOOK_SL_PATH = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_SL_PATH', None))
+# NOTEBOOK_SL_PATH = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_SL_PATH', None))
 #################################
 # SOLR settings
 #################################

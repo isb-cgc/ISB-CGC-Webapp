@@ -284,11 +284,11 @@ require([
         var create_jnb_form = $(this).parents('.create-jnb-form');
         var project_id = create_jnb_form.find('#gcp_id_select').val();
         var vm_name = create_jnb_form.find('#vmName').val();
-        // var vmZone = create_jnb_form.find('#vmZone').val();
         var client_ip_range = create_jnb_form.find('#client_ip_range').val();
         var pwd1 = create_jnb_form.find('#exampleInputPassword1').val();
         var pwd2 = create_jnb_form.find('#exampleInputPassword2').val();
 
+        // validate input fields
         if (!project_id || !vm_name || !client_ip_range || !pwd1 || !pwd2) {
             msg = "Some fields are missing. "
         }
@@ -308,7 +308,7 @@ require([
             msg = "Password must contain only letters and numbers"
         }
 
-        if (client_ip_range){
+        if (!msg && client_ip_range){
             var ip_address_list = client_ip_range.split(',');
             for(var i=0; i<ip_address_list.length; i++){
                 if(!/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip_address_list[i].trim())){
