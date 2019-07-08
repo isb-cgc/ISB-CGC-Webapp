@@ -14,11 +14,11 @@
         <!--Notebook header-->
         <ol class="breadcrumb">
             <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-            {% if from_public_list %}
-                <li><a href="{% url 'notebooks_public' %}">Public Notebooks</a></li>
-            {% else %}
-                <li><a href="{% url 'notebooks' %}">Saved Notebooks</a></li>
-            {% endif %}
+{#            {% if from_public_list %}#}
+{#                <li><a href="{% url 'notebooks_public' %}">Public Notebooks</a></li>#}
+{#            {% else %}#}
+{#                <li><a href="{% url 'notebooks_old' %}">Saved Notebooks</a></li>#}
+{#            {% endif %}#}
         </ol>
 
         <h1 class="page-header">{{ notebook.name }}{% if notebook.is_public %}
@@ -89,8 +89,8 @@
                             <div class="load-spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
 {#                            <iframe id="notebook-iframe" frameborder="0"#}
 {#                                    src="{{ notebook_viewer }}/github/{{ notebook.file_path }}"></iframe>#}
-                            <iframe id="notebook-iframe" frameborder="0"
-                                    src="{{ notebook_viewer }}/{{ file_path }}"></iframe>
+{#                            <iframe id="notebook-iframe" frameborder="0"#}
+{#                                    src="{{ notebook_viewer }}/{{ file_path }}"></iframe>#}
                         </div>
                     </div>
                 </div>
