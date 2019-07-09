@@ -1,31 +1,34 @@
 import logging
 from django.conf import settings
 from google_helpers.compute_service import get_compute_resource
-from requests.exceptions import ConnectionError
-from google.api_core.exceptions import NotFound, GoogleAPICallError
+# from google.api_core.exceptions import NotFound, GoogleAPICallError
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 from oauth2client.client import GoogleCredentials
-from google.cloud import storage, pubsub_v1
+from google.cloud import storage
+    # , pubsub_v1
 import httplib2
 import os
 import time
-import requests
 import json
+from .utils import hash
 
+# import requests
+# from requests.exceptions import ConnectionError
 
 VM_STAT_RUNNING = 'RUNNING'
 VM_STAT_NOT_FOUND = 'NOT FOUND'
 
 # from google.cloud import storage, exceptions
 # import cloudstorage
-from pprint import pprint
+# from pprint import pprint
 
-from .utils import hash
+
 
 # from scp import SCPClient
 
-STAGE_TITLES = ['project', 'firewall', 'external IP', 'monitoring service', 'files', 'VM Instance', 'Pub/Sub']
+STAGE_TITLES = ['project', 'firewall', 'external IP', 'monitoring service', 'files', 'VM Instance']
+    # , 'Pub/Sub']
 # 'password',
 # 'firewall deletion', 'external IP address deletion', 'instance initiation']
 SETUP_PROJECT = 0
@@ -34,7 +37,8 @@ SETUP_EXTERNAL_IP = 2
 SETUP_MONITOR = 3
 SETUP_FILES = 4
 SETUP_INSTANCE = 5
-SETUP_PUBSUB = 6
+# SETUP_PUBSUB = 6
+
 # SETUP_VM_PASSWORD = 6
 # DELETE_FIREWALL = 7
 # DELETE_ADDRESS = 8
@@ -244,7 +248,7 @@ def start_vm(project_id, zone, vm_username, vm_name, firewall_rule_name, firewal
             IDLE_LOG_SH_FILE = 'idle_log_wrapper.sh'
             IDLE_SHUTDOWN_FILE = 'idle_shutdown.py'
             IDLE_SHUTDOWN_SH_FILE = 'shutdown_wrapper.sh'
-            CMD_SERVER_FILE = 'cmd_server.py'
+            # CMD_SERVER_FILE = 'cmd_server.py'
             INSTALL_SH_FILE = 'install.sh'
 
             upload_blob_string(bucket, CERT_SUBJ + ext_ip_address, CERT_SUBJ_FILENAME)
@@ -252,7 +256,8 @@ def start_vm(project_id, zone, vm_username, vm_name, firewall_rule_name, firewal
             upload_blob_string(bucket, hashpass, PASSHASH_FILENAME)
 
             BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-            NOTEBOOK_VM_SHELL_DIR = 'notebooks/vm_shell'
+            NOTEBOOK_VM_SHELL_DIR = 'shell/notebooks_vm_script'
+            # NOTEBOOK_VM_SHELL_DIR = 'notebooks/vm_shell'
             env_vars_head = 'PROJECT={project_id}\nUSER_NAME={user_name}\nfirewall_ip_range={ip_range}\n'.format(
                 project_id=project_id, user_name=vm_username, ip_range=','.join(firewall_ip_range))
             env_vars_filepath = '{base_dir}/{sub_dir}/{filename}'.format(base_dir=BASE_DIR,
@@ -262,7 +267,8 @@ def start_vm(project_id, zone, vm_username, vm_name, firewall_rule_name, firewal
             upload_blob_string(bucket, env_vars_sh, ENV_VARS_SH_FILE)
 
             upload_filenames = [CPU_LOGGER_FILE, IDLE_LOG_FILE, IDLE_LOG_SH_FILE, IDLE_SHUTDOWN_FILE,
-                                IDLE_SHUTDOWN_SH_FILE, CMD_SERVER_FILE, INSTALL_SH_FILE]
+                                IDLE_SHUTDOWN_SH_FILE, INSTALL_SH_FILE]
+                                # IDLE_SHUTDOWN_SH_FILE, CMD_SERVER_FILE, INSTALL_SH_FILE]
             for filename in upload_filenames:
                 upload_blob_filename(bucket,
                                      '{base_dir}/{sub_dir}/{filename}'.format(base_dir=BASE_DIR,
@@ -344,7 +350,7 @@ def start_vm(project_id, zone, vm_username, vm_name, firewall_rule_name, firewal
                 wait_for_operation(compute=compute, project=project_id, operation=response['name'], zone=zone)
                 if topic_name:
                     time.sleep(120)  # sleep for at least 90 seconds
-                    setup_stage = SETUP_PUBSUB
+                    # setup_stage = SETUP_PUBSUB
 
             # wait for the server to to run
             # count = 0
@@ -367,16 +373,16 @@ def start_vm(project_id, zone, vm_username, vm_name, firewall_rule_name, firewal
             #         break
             #         # pass
             #     time.sleep(1)
-        if setup_stage == SETUP_PUBSUB:
-            print('Setup Pub/Sub ...')
-            # delete topic if exists
-            publisher = pubsub_v1.PublisherClient()
-            topic_path = publisher.topic_path(project_id, topic_name)
-            try:
-                publisher.get_topic(topic_path)
-            except GoogleAPICallError:
-                print('Creating a Pub/Sub topic ...')
-                publisher.create_topic(topic_path)
+        # if setup_stage == SETUP_PUBSUB:
+        #     print('Setup Pub/Sub ...')
+        #     # delete topic if exists
+        #     publisher = pubsub_v1.PublisherClient()
+        #     topic_path = publisher.topic_path(project_id, topic_name)
+        #     try:
+        #         publisher.get_topic(topic_path)
+        #     except GoogleAPICallError:
+        #         print('Creating a Pub/Sub topic ...')
+        #         publisher.create_topic(topic_path)
 
 
             # for n in range(1, 3):
@@ -553,15 +559,15 @@ def delete_vm(project_id, zone, vm_name, firewall_rule_name, region, address_nam
                                             region=region, name=address_name).execute()
         wait_for_operation(compute=compute, project=project_id, operation=operation['name'], region=region)
 
-        print('Deleting PubSub Topic ...')
-        try:
-            publisher = pubsub_v1.PublisherClient()
-            topic_path = publisher.topic_path(project_id, topic_name)
-            # delete topic if exists
-            publisher.delete_topic(topic_path)
-            # delete_pubsub_topic(project_id=project_id, topic_name=topic_name)
-        except NotFound:
-            pass
+        # print('Deleting PubSub Topic ...')
+        # try:
+        #     publisher = pubsub_v1.PublisherClient()
+        #     topic_path = publisher.topic_path(project_id, topic_name)
+        #     # delete topic if exists
+        #     publisher.delete_topic(topic_path)
+        #     # delete_pubsub_topic(project_id=project_id, topic_name=topic_name)
+        # except NotFound:
+        #     pass
 
         result = {'message': 'Instance is deleted.'}
 
