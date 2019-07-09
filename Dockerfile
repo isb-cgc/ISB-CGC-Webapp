@@ -71,7 +71,7 @@ ADD . /app
 RUN pip3 install -r /app/requirements.txt -t /app/lib/ --upgrade
 RUN pip3 install gunicorn==19.6.0
 
-ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
+ENV PYTHONPATH=/app:/app/lib
 
 # Until we figure out a way to do it in CircleCI without whitelisting IPs this has to be done by a dev from
 # ISB
