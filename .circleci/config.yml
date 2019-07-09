@@ -8,6 +8,7 @@ jobs:
     docker:
       - image: circleci/python:3.5.6
       - image: circleci/mysql:5.7
+      - image: google/cloud-sdk
         environment:
           MYSQL_ROOT_HOST: "%"
           MYSQL_USER: ubuntu
@@ -79,6 +80,7 @@ jobs:
     name: Deploy to AppEngine Flex
     docker:
       - image: circleci/python:3.5.6
+      - image: google/cloud-sdk
     working_directory: ~/ISB-CGC-Webapp
     steps:
       - restore_cache:
