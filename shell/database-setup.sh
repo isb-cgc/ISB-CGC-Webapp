@@ -11,7 +11,9 @@ else
     export MYSQL_DB_HOST=localhost
 fi
 
-export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/:${HOME}/google_appengine/:${HOME}/google_appengine/lib/protorpc-1.0/
+
+
+export PYTHONPATH=${HOMEROOT}:${HOMEROOT}/lib:/usr/lib/google-cloud-sdk/platform/google_appengine:${HOMEROOT}/ISB-CGC-Common
 echo $PYTHONPATH
 
 echo "Increase group_concat max, for longer data type names"

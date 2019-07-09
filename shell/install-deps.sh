@@ -83,7 +83,3 @@ if [ -z "${CI}" ] || [ ! -d "google-cloud-sdk" ]; then
 else
     echo "Using restored cache for Google Cloud SDK."
 fi
-
-if [ -n "$CI" ]; then
-    export PYTHONPATH=/home/circleci/${CIRCLE_PROJECT_REPONAME}:/home/circleci/${CIRCLE_PROJECT_REPONAME}/lib:/usr/lib/google-cloud-sdk/platform/google_appengine
-fi
