@@ -84,6 +84,10 @@ jobs:
       - restore_cache:
           keys:
             - isb-cgc-webapp-
+      - run:
+          name: Install sudo
+          command: |
+            apt-get install -y sudo
       - deploy:
           command: |
             sudo -E rm -rf ./lib
