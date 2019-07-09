@@ -77,8 +77,6 @@ if [ -z "${CI}" ] || [ ! -d "/use/lib/google-cloud-sdk" ]; then
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
     apt-get update && apt-get install google-cloud-sdk
     apt-get install google-cloud-sdk-app-engine-python
-    #export PATH=$PATH:/usr/lib/google-cloud-sdk/bin
-    #echo 'export PATH=$PATH:/usr/lib/google-cloud-sdk/bin' | tee -a ${HOME}/.bash_profile
     echo "Google Cloud SDK Installed"
 else
     echo "Using restored cache for Google Cloud SDK."
