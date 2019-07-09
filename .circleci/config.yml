@@ -13,7 +13,6 @@ jobs:
           MYSQL_USER: ubuntu
           MYSQL_PASSWORD: "isb"
           MYSQL_ROOT_PASSWORD: "isb"
-      - image: google/cloud-sdk
     steps:
       - checkout
       - run:
@@ -79,7 +78,6 @@ jobs:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
     name: Deploy to AppEngine Flex
     docker:
-      - image: circleci/python:3.5.6
       - image: google/cloud-sdk
     working_directory: ~/ISB-CGC-Webapp
     steps:
@@ -90,7 +88,6 @@ jobs:
           command: |
             sudo -E rm -rf ./lib
             sudo -E /bin/bash ./shell/gcloud_authenticate.sh
-            sudo -E gcloud components update --version 251.0.0
             sudo -E /bin/bash ./shell/unpack_for_deployment.sh
             sudo -E gcloud app deploy --verbosity=debug ./app.yaml --quiet
 workflows:
