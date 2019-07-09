@@ -77,17 +77,21 @@ jobs:
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
     name: Deploy to AppEngine Flex
-    docker:
-      - image: google/cloud-sdk
     working_directory: ~/ISB-CGC-Webapp
+    docker:
+      - image: circleci/python:3.5.6
     steps:
       - restore_cache:
           keys:
             - isb-cgc-webapp-
       - run:
-          name: Install sudo
+          name: Install CloudSDK
           command: |
-            apt-get install -y sudo
+            sudo export CLOUDSDK_CORE_DISABLE_PROMPTS=1
+            sudo echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+            sudo apt-get install apt-transport-https ca-certificates
+            sudo curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+            sudo apt-get update && apt-get install google-cloud-sdk
       - deploy:
           command: |
             sudo -E rm -rf ./lib
