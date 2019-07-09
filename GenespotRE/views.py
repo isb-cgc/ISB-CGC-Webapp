@@ -1,5 +1,5 @@
 """
-Copyright 2015-2018, Institute for Systems Biology
+Copyright 2015-2019, Institute for Systems Biology
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -20,7 +20,7 @@ import logging
 import sys
 import re
 import datetime
-import requests
+# import requests
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -45,13 +45,10 @@ from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
 from projects.models import Program
 from workbooks.models import Workbook
-# from notebooks_old.models import Notebook, Notebook_Added
 from accounts.models import GoogleProject
 from accounts.sa_utils import get_nih_user_details
 from notebooks.notebook_vm import check_vm_stat
-
 from allauth.socialaccount.models import SocialAccount
-
 from django.http import HttpResponse, JsonResponse
 
 debug = settings.DEBUG
@@ -60,7 +57,7 @@ logger = logging.getLogger('main_logger')
 OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
-SOLR_URL = settings.SOLR_URL
+# SOLR_URL = settings.SOLR_URL
 
 
 
@@ -488,24 +485,15 @@ def dashboard_page(request):
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct().order_by('-last_date_saved')
 
-    # Notebook List
-    # user_notebooks = request.user.notebook_set.filter(active=True)
-    # added_public_notebook_ids = Notebook_Added.objects.filter(user=request.user).values_list('notebook', flat=True)
-    # shared_notebooks = Notebook.objects.filter(is_public=True, active=True, pk__in=added_public_notebook_ids)
-    # notebooks = user_notebooks | shared_notebooks
-    # notebooks = notebooks.distinct().order_by('-last_date_saved')
+    # Notebook VM Instance
+    user_instances = request.user.instance_set.filter(active=True)
     user = User.objects.get(id=request.user.id)
     gcp_list = GoogleProject.objects.filter(user=user, active=1)
-
-    # VM List
-    user_instances = request.user.instance_set.filter(active=True)
-
-    vm_username = request.user.email.split('@')[0] #todo: user_vm_user can be utilized
-    # client_ip_range = ','.join(['71.231.138.210'])
+    vm_username = request.user.email.split('@')[0]
     client_ip = get_ip_address_from_request(request)
-    print('client_ip '+client_ip)
+    logger.debug('client_ip: '+client_ip)
     client_ip_range = ', '.join([client_ip])
-    # client_ip_range = ', '.join(['174.127.185.130','174.127.185.135'])
+
     if user_instances:
         user_vm = user_instances[0]
         machine_name = user_vm.name
@@ -513,15 +501,12 @@ def dashboard_page(request):
         zone = user_vm.zone
         result = check_vm_stat(project_id, zone, machine_name)
         status = result['status']
-
     else:
         # default values to fill in fields in form
         project_id = ''
         machine_name = '{}-unique-machine-name-1'.format(vm_username)
         zone = 'us-central1-c'
         status = 'NOT FOUND'
-        # user = User.objects.get(id=request.user.id)
-        # gcp_list = GoogleProject.objects.filter(user=user, active=1)
 
     notebook_vm = {
         'user': vm_username,
@@ -542,11 +527,9 @@ def dashboard_page(request):
         'request'  : request,
         'cohorts'  : cohorts,
         'programs' : programs,
-        # 'notebooks': notebooks,
         'workbooks': workbooks,
         'genefaves': genefaves,
         'varfaves' : varfaves,
         'notebook_vm': notebook_vm,
         'gcp_list': gcp_list,
-        'SOLR_URL' : SOLR_URL
     })
