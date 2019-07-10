@@ -78,8 +78,6 @@ RUN apt-get -y install google-cloud-sdk-app-engine-python
 
 ENV PYTHONPATH=/app:/app/lib:/usr/lib/google-cloud-sdk/platform/google_appengine:/app/ISB-CGC-Common:${PYTHONPATH}
 
-RUN echo "PYTHONPATH: ${PYTHONPATH}"
-
 # Until we figure out a way to do it in CircleCI without whitelisting IPs this has to be done by a dev from
 # ISB
 # RUN python /app/manage.py migrate --noinput
