@@ -35,13 +35,40 @@ APP_ENGINE = 'Google App Engine/'
 BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 
 SHARED_SOURCE_DIRECTORIES = [
-    'ISB-CGC-Common',
-    'ISB-CGC-API',
+    'ISB-CGC-Common'
 ]
+
+# The Google AppEngine library and the Google Cloud APIs don't play nice. Teach them to get along.
+# This unfortunately requires
+def setup_sdk_imports():
+    """Sets up appengine SDK third-party imports."""
+    sdk_path = os.environ.get('GAE_SDK_PATH')
+
+    # Trigger loading of the Cloud APIs so they're in sys.modules
+    import google.cloud
+
+    if not sdk_path:
+        return
+
+    if os.path.exists(os.path.join(sdk_path, 'platform/google_appengine')):
+        sdk_path = os.path.join(sdk_path, 'platform/google_appengine')
+
+    if 'google' in sys.modules:
+        sys.modules['google'].__path__.append(
+            os.path.join(sdk_path, 'google'))
+
+    # This sets up libraries packaged with the SDK, but puts them last in
+    # sys.path to prevent clobbering newer versions
+    sys.path.append(sdk_path)
+
 
 # Add the shared Django application subdirectory to the Python module search path
 for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
+
+setup_sdk_imports()
+
+print("sys.path: {}".format(sys.path))
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
