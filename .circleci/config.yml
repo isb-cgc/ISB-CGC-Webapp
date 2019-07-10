@@ -18,7 +18,7 @@ jobs:
       - run:
           name: Set Python Path
           command: |
-            echo "export PYTHONPATH=/home/circleci/${CIRCLE_PROJECT_REPONAME}:/home/circleci/${CIRCLE_PROJECT_REPONAME}/lib" >> $BASH_ENV
+            echo "export PYTHONPATH=/home/circleci/${CIRCLE_PROJECT_REPONAME}:/home/circleci/${CIRCLE_PROJECT_REPONAME}/lib:/usr/lib/google-cloud-sdk/platform/google_appengine" >> $BASH_ENV
       - restore_cache:
           keys:
             - isb-cgc-webapp-lib-{{ checksum "requirements.txt" }}
@@ -33,11 +33,6 @@ jobs:
           key: isb-cgc-webapp-lib-{{ checksum "requirements.txt" }}
           paths:
             - ./lib
-      - save_cache:
-          key: isb-cgc-webapp-google-deps-{{ checksum "./shell/install-deps.sh" }}
-          paths:
-            - ./google-cloud-sdk
-            - ./google_appengine
       - run:
           name: Auth, Staging, and Database testing
           command: |
@@ -82,23 +77,26 @@ jobs:
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
     name: Deploy to AppEngine Flex
+    working_directory: ~/ISB-CGC-Webapp
     docker:
       - image: circleci/python:3.5.6
-    working_directory: ~/ISB-CGC-Webapp
     steps:
       - restore_cache:
           keys:
             - isb-cgc-webapp-
-      - restore_cache:
-          keys:
-            - isb-cgc-webapp-google-deps-
+      - run:
+          name: Install CloudSDK
+          command: |
+            echo "export CLOUDSDK_CORE_DISABLE_PROMPTS=1" >> $BASH_ENV
+            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+            sudo apt-get update && sudo apt-get install google-cloud-sdk
       - deploy:
           command: |
             sudo -E rm -rf ./lib
             sudo -E /bin/bash ./shell/gcloud_authenticate.sh
-            sudo -E ./google-cloud-sdk/bin/gcloud components update --version 251.0.0
             sudo -E /bin/bash ./shell/unpack_for_deployment.sh
-            sudo -E ./google-cloud-sdk/bin/gcloud app deploy --verbosity=debug ./app.yaml --quiet
+            sudo -E gcloud app deploy --verbosity=debug ./app.yaml --quiet
 workflows:
   version: 2
   build_and_deploy:
