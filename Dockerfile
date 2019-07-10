@@ -76,9 +76,11 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
 # Install the Python Libraries
 RUN apt-get -y install google-cloud-sdk-app-engine-python
 
-RUN export GOOGLE_CLOUD_SDK_PATH=$(sudo gcloud info --format="value(installation.sdk_root)")
+RUN gcloud info --format="value(installation.sdk_root)"
 
-ENV PYTHONPATH=${PYTHONPATH}:/app:/app/lib:${GOOGLE_CLOUD_SDK_PATH}/platform/google_appengine:${GOOGLE_CLOUD_SDK_PATH}/platform/google_appengine/google:/app/ISB-CGC-Common
+RUN export GOOGLE_CLOUD_SDK_PATH=$(gcloud info --format="value(installation.sdk_root)")
+
+ENV PYTHONPATH=/app:/app/lib:${GOOGLE_CLOUD_SDK_PATH}/platform/google_appengine:${GOOGLE_CLOUD_SDK_PATH}/platform/google_appengine/google:/app/ISB-CGC-Common:${PYTHONPATH}
 
 RUN echo $PYTHONPATH
 

@@ -14,6 +14,9 @@
 # limitations under the License.
 ###
 
+print("APPENGINE_CONFIG.PY")
+
+
 from google.appengine.ext import vendor
 
 vendor.add('lib')
