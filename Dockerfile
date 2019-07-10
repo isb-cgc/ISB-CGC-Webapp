@@ -76,7 +76,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
 # Install the Python Libraries
 RUN apt-get -y install google-cloud-sdk-app-engine-python
 
-ENV PYTHONPATH=/app:/app/lib:/usr/lib/google-cloud-sdk/platform/google_appengine:/usr/lib/google-cloud-sdk/platform/google_appengine/google:/app/ISB-CGC-Common:${PYTHONPATH}
+ENV PYTHONPATH=/app:/app/lib:/usr/lib/google-cloud-sdk/platform/google_appengine:/app/ISB-CGC-Common:${PYTHONPATH}
 
 RUN echo "PYTHONPATH: ${PYTHONPATH}"
 
