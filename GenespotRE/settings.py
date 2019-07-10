@@ -39,7 +39,8 @@ SHARED_SOURCE_DIRECTORIES = [
 ]
 
 # The Google AppEngine library and the Google Cloud APIs don't play nice. Teach them to get along.
-# This unfortunately requires
+# This unfortunately requires either hardcoding the path to the SDK, or sorting out a way to
+# provide an environment variable indicating where it is.
 def setup_sdk_imports():
     """Sets up appengine SDK third-party imports."""
     sdk_path = os.environ.get('GAE_SDK_PATH', '/usr/lib/google-cloud-sdk')
@@ -47,18 +48,16 @@ def setup_sdk_imports():
     # Trigger loading of the Cloud APIs so they're in sys.modules
     import google.cloud
 
-    if not sdk_path:
-        return
-
+    # The libraries are specifically under platform/google_appengine
     if os.path.exists(os.path.join(sdk_path, 'platform/google_appengine')):
         sdk_path = os.path.join(sdk_path, 'platform/google_appengine')
 
+    # This sets up libraries packaged with the SDK, but puts them last in
+    # sys.path to prevent clobbering newer versions
     if 'google' in sys.modules:
         sys.modules['google'].__path__.append(
             os.path.join(sdk_path, 'google'))
 
-    # This sets up libraries packaged with the SDK, but puts them last in
-    # sys.path to prevent clobbering newer versions
     sys.path.append(sdk_path)
 
 
@@ -67,8 +66,6 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
 setup_sdk_imports()
-
-print("sys.path: {}".format(sys.path))
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
