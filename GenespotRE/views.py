@@ -1,5 +1,5 @@
 """
-Copyright 2015-2018, Institute for Systems Biology
+Copyright 2015-2019, Institute for Systems Biology
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -20,7 +20,7 @@ import logging
 import sys
 import re
 import datetime
-import requests
+# import requests
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -34,6 +34,8 @@ from django.contrib import messages
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
+from adminrestrict.middleware import get_ip_address_from_request
+
 from google_helpers.directory_service import get_directory_resource
 from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
@@ -45,9 +47,8 @@ from projects.models import Program
 from workbooks.models import Workbook
 from accounts.models import GoogleProject
 from accounts.sa_utils import get_nih_user_details
-
+from notebooks.notebook_vm import check_vm_stat
 from allauth.socialaccount.models import SocialAccount
-
 from django.http import HttpResponse, JsonResponse
 
 debug = settings.DEBUG
@@ -56,6 +57,7 @@ logger = logging.getLogger('main_logger')
 OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
+# SOLR_URL = settings.SOLR_URL
 
 
 
@@ -483,6 +485,38 @@ def dashboard_page(request):
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct().order_by('-last_date_saved')
 
+    # Notebook VM Instance
+    user_instances = request.user.instance_set.filter(active=True)
+    user = User.objects.get(id=request.user.id)
+    gcp_list = GoogleProject.objects.filter(user=user, active=1)
+    vm_username = request.user.email.split('@')[0]
+    client_ip = get_ip_address_from_request(request)
+    logger.debug('client_ip: '+client_ip)
+    client_ip_range = ', '.join([client_ip])
+
+    if user_instances:
+        user_vm = user_instances[0]
+        machine_name = user_vm.name
+        project_id = user_vm.gcp.project_id
+        zone = user_vm.zone
+        result = check_vm_stat(project_id, zone, machine_name)
+        status = result['status']
+    else:
+        # default values to fill in fields in form
+        project_id = ''
+        machine_name = '{}-unique-machine-name-1'.format(vm_username)
+        zone = 'us-central1-c'
+        status = 'NOT FOUND'
+
+    notebook_vm = {
+        'user': vm_username,
+        'project_id': project_id,
+        'name': machine_name,
+        'zone': zone,
+        'client_ip_range': client_ip_range,
+        'status': status
+    }
+
     # Gene & miRNA Favorites
     genefaves = request.user.genefavorite_set.filter(active=True)
 
@@ -495,5 +529,7 @@ def dashboard_page(request):
         'programs' : programs,
         'workbooks': workbooks,
         'genefaves': genefaves,
-        'varfaves' : varfaves
+        'varfaves' : varfaves,
+        'notebook_vm': notebook_vm,
+        'gcp_list': gcp_list,
     })

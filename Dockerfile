@@ -76,9 +76,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
 # Install the Python Libraries
 RUN apt-get -y install google-cloud-sdk-app-engine-python
 
-ENV PYTHONPATH=/app:/app/lib:/usr/lib/google-cloud-sdk/platform/google_appengine:/app/ISB-CGC-Common:${PYTHONPATH}
-
-RUN echo "PYTHONPATH: ${PYTHONPATH}"
+ENV PYTHONPATH=/app:/app/lib:/app/ISB-CGC-Common:${PYTHONPATH}
 
 # Until we figure out a way to do it in CircleCI without whitelisting IPs this has to be done by a dev from
 # ISB

@@ -35,13 +35,39 @@ APP_ENGINE = 'Google App Engine/'
 BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 
 SHARED_SOURCE_DIRECTORIES = [
-    'ISB-CGC-Common',
-    'ISB-CGC-API',
+    'ISB-CGC-Common'
 ]
+
+
+# The Google AppEngine library and the Google Cloud APIs don't play nice. Teach them to get along.
+# This unfortunately requires either hardcoding the path to the SDK, or sorting out a way to
+# provide an environment variable indicating where it is.
+# From https://github.com/GoogleCloudPlatform/python-repo-tools/blob/master/gcp_devrel/testing/appengine.py#L26
+def setup_sdk_imports():
+    """Sets up appengine SDK third-party imports."""
+    sdk_path = os.environ.get('GAE_SDK_PATH', '/usr/lib/google-cloud-sdk')
+
+    # Trigger loading of the Cloud APIs so they're in sys.modules
+    import google.cloud
+
+    # The libraries are specifically under platform/google_appengine
+    if os.path.exists(os.path.join(sdk_path, 'platform/google_appengine')):
+        sdk_path = os.path.join(sdk_path, 'platform/google_appengine')
+
+    # This sets up libraries packaged with the SDK, but puts them last in
+    # sys.path to prevent clobbering newer versions
+    if 'google' in sys.modules:
+        sys.modules['google'].__path__.append(
+            os.path.join(sdk_path, 'google'))
+
+    sys.path.append(sdk_path)
+
 
 # Add the shared Django application subdirectory to the Python module search path
 for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
+
+setup_sdk_imports()
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
@@ -270,6 +296,7 @@ INSTALLED_APPS = (
     'genes',
     'variables',
     'workbooks',
+    'notebooks',
     'data_upload',
     'analysis',
     'offline',
@@ -566,6 +593,18 @@ IMG_THUMBS_URL = os.environ.get('IMG_THUMBS_URL', None)
 # DICOM Viewer settings
 #################################
 DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
+
+#################################
+# NOTEBOOK settings
+#################################
+# NOTEBOOK_VIEWER = os.environ.get('NOTEBOOK_VIEWER', None)
+NOTEBOOK_VIEWER = ''
+# NOTEBOOK_ENV_LOC = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_ENV_PATH', None))
+# NOTEBOOK_SL_PATH = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_SL_PATH', None))
+#################################
+# SOLR settings
+#################################
+SOLR_URL = os.environ.get('SOLR_URL', None)
 
 ##############################################################
 #   MailGun Email Settings
