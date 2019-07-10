@@ -38,9 +38,11 @@ SHARED_SOURCE_DIRECTORIES = [
     'ISB-CGC-Common'
 ]
 
+
 # The Google AppEngine library and the Google Cloud APIs don't play nice. Teach them to get along.
 # This unfortunately requires either hardcoding the path to the SDK, or sorting out a way to
 # provide an environment variable indicating where it is.
+# From https://github.com/GoogleCloudPlatform/python-repo-tools/blob/master/gcp_devrel/testing/appengine.py#L26
 def setup_sdk_imports():
     """Sets up appengine SDK third-party imports."""
     sdk_path = os.environ.get('GAE_SDK_PATH', '/usr/lib/google-cloud-sdk')
