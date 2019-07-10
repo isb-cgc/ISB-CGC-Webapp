@@ -10,6 +10,8 @@ from googleapiclient.discovery import build
 from oauth2client.client import GoogleCredentials
 from google.cloud import storage
 from .utils import hash
+# here = os.path.dirname(os.path.abspath(__file__))
+# print('path: {}'.format(os.path.relpath(storage.__file__, here)))
 
 VM_STAT_RUNNING = 'RUNNING'
 VM_STAT_NOT_FOUND = 'NOT FOUND'
