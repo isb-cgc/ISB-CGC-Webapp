@@ -50,6 +50,7 @@ jobs:
             - ./shell
             - ./tasks
             - ./variables
+            - ./notebooks
             - ./workbooks
             - ./analysis
             - ./bq_data_access
