@@ -9,7 +9,8 @@ from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 from oauth2client.client import GoogleCredentials
 from google.cloud import storage
-from .utils import hash
+from .hash import hash_it
+# from .utils import hash
 # here = os.path.dirname(os.path.abspath(__file__))
 # print('path: {}'.format(os.path.relpath(storage.__file__, here)))
 
@@ -212,7 +213,8 @@ def start_vm(project_id, zone, vm_username, vm_name, firewall_rule_name, firewal
             logger.debug('Upload files to bucket {bucket_name}'.format(bucket_name=notebook_gs_bucket))
 
             upload_blob_string(bucket, CERT_SUBJ + ext_ip_address, CERT_SUBJ_FILENAME)
-            hashpass = hash.hash_it(password)
+            hashpass = hash_it(password)
+            # hashpass = hash.hash_it(password)
             upload_blob_string(bucket, hashpass, PASSHASH_FILENAME)
             base_dir = os.path.dirname(os.path.dirname(__file__))
             env_vars_head = 'PROJECT={project_id}\nUSER_NAME={user_name}\nfirewall_ip_range={ip_range}\n'.format(
