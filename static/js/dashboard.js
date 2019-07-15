@@ -16,7 +16,7 @@ require.config({
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'tablesorter': ['jquery'],
-        'base': ['jquery'],
+        'base': ['jquery']
     }
 });
 
@@ -104,7 +104,6 @@ require([
         var vm_stat = $(vm_div).find(".vm-stat");
         var vm_msg = $(vm_div).find(".vm-msg");
         var vm_btn = $(vm_div).find(".vm-btn");
-
         vm_spinner.show();
 
         var action;
@@ -125,8 +124,10 @@ require([
         vm_stat.html(action);
         vm_btn.prop("disabled", true);
         vm_msg.html('');
+
         var vm_instance = get_vm_instance(vm_div);
         var csrftoken = $.getCookie('csrftoken');
+
         $.ajax({
             type: 'POST',
             dataType: 'json',
@@ -141,41 +142,26 @@ require([
                 }
                 else if (command == 'run_browser') {
                     var external_ip = data['external_ip'];
-                    // var serv_port = data['serv_port'];
                     open_https_browser(external_ip, vm_instance['serv_port']);
-                    // var url = "https://"+external_ip+":5000";
-                    // window.open(url);
-                    // update_vm_stat(vm_div);
                 }
                 else {
                     vm_msg.html(data['message']);
-                    // update_vm_stat(vm_div);
                 }
             },
             error: function (e) {
                 vm_msg.html('[Error]: ' + e);
             },
             complete: function () {
-                // if(command != 'create_vm' && command != 'delete_vm'){
                 update_vm_stat(vm_div);
-                // }
-                // else{
-                //     //clear password input
                 $(vm_div).find("input[name='password']").val('');
-                // }
             }
         });
-    };
-
-    var vm_input_complete = function () {
-        return false;
     };
 
     $('.vm-btn').on('click', function (e) {
         var command = $(this).val();
         var vm_div = $(this).parents(".vm-div");
 
-        // console.log('command: '+command);
         var no_repeat = $('#delete-vm-modal').find("input[name='vm_delete_confirm']").val();
         switch (command) {
             case 'create_vm':
@@ -192,28 +178,8 @@ require([
                     return;
                 }
                 break;
-            // case 'run_browser':
-            //     var external_ip =
-            //     if(external_ip){
-            //         open_https_browser(external_ip, port_no);
-            //         return;
-            //     }
-            //     break;
-
         }
         command_vm(command, vm_div);
-
-        // if(command == 'create_vm' && !password){
-        //     // $('#create-jnb-modal').
-        //     $('#create-jnb-modal').modal('show');
-        //     $('#create-jnb-modal').find('#messageBlock').html('');
-        // }
-        // else if(command == 'delete_vm' && !no_repeat){
-        //     $('#delete-vm-modal').modal('show');
-        // }
-        // else{
-        //     command_vm(command, vm_div);
-        // }
     });
 
     var update_vm_stat = function (vm_div) {
@@ -325,7 +291,6 @@ require([
         if (!msg) {
             $(vm_div).find("input[name='vm_project_id']").val(project_id);
             $(vm_div).find("input[name='vm_name']").val(vm_name);
-            // $(vm_div).find("input[name='vm_zone']").val(vmZone);
             $(vm_div).find("input[name='client_ip_range']").val(client_ip_range);
             $(vm_div).find("input[name='password']").val(pwd1);
             $(vm_div).find('.vm-create-btn').trigger('click');
@@ -335,36 +300,36 @@ require([
 
     // Solr Search
     //
-    $('#nb-keyword-search-form').on('submit', function (e) {
-
-        e.preventDefault();
-        var url = SOLR_URL + 'notebooks/select';
-        var keywords = $(this).find('.nb-keyword-field').val();
-        var list_max = 5;
-        var count_p = $(this).parents('.panel-body').find('.nb-result-count');
-        var table_list = $(this).parents('.panel-body').find('.table-list');
-        $.ajax({
-            'url': url,
-            crossDomain: true,
-            data: {'wt': 'json', 'q': keywords},
-            success: function (data) {
-                var num_found = data.response.numFound;
-                var docs = data.response.docs;
-                var html_list = "";
-                for (var i = 0; i < docs.length && i < list_max; i++) {
-                    html_list += '<li><a href=\"/notebooks/' + docs[i].id + '/public\" title=\"' + docs[i].name +
-                        '\"><div class=\"list-main\"><h5 class=\"list-title\">' + docs[i].name +
-                        '</h5><p>' + (docs[i].description) + '</p></div></a></li>'
-                }
-                var count_message = num_found + ' result' + (num_found > 0 ? 's' : '') + ' found' +
-                    (num_found > list_max ? (' Showing 5 results') : '');
-                count_p.html(count_message);
-                table_list.html(html_list);
-            },
-            dataType: 'jsonp',
-            jsonp: 'json.wrf'
-        });
-
-    });
+    // $('#nb-keyword-search-form').on('submit', function (e) {
+    //
+    //     e.preventDefault();
+    //     var url = SOLR_URL + 'notebooks/select';
+    //     var keywords = $(this).find('.nb-keyword-field').val();
+    //     var list_max = 5;
+    //     var count_p = $(this).parents('.panel-body').find('.nb-result-count');
+    //     var table_list = $(this).parents('.panel-body').find('.table-list');
+    //     $.ajax({
+    //         'url': url,
+    //         crossDomain: true,
+    //         data: {'wt': 'json', 'q': keywords},
+    //         success: function (data) {
+    //             var num_found = data.response.numFound;
+    //             var docs = data.response.docs;
+    //             var html_list = "";
+    //             for (var i = 0; i < docs.length && i < list_max; i++) {
+    //                 html_list += '<li><a href=\"/notebooks/' + docs[i].id + '/public\" title=\"' + docs[i].name +
+    //                     '\"><div class=\"list-main\"><h5 class=\"list-title\">' + docs[i].name +
+    //                     '</h5><p>' + (docs[i].description) + '</p></div></a></li>'
+    //             }
+    //             var count_message = num_found + ' result' + (num_found > 0 ? 's' : '') + ' found' +
+    //                 (num_found > list_max ? (' Showing 5 results') : '');
+    //             count_p.html(count_message);
+    //             table_list.html(html_list);
+    //         },
+    //         dataType: 'jsonp',
+    //         jsonp: 'json.wrf'
+    //     });
+    //
+    // });
 
 });
