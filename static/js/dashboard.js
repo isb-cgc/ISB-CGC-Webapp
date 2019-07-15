@@ -142,15 +142,10 @@ require([
                 }
                 else if (command == 'run_browser') {
                     var external_ip = data['external_ip'];
-                    // var serv_port = data['serv_port'];
                     open_https_browser(external_ip, vm_instance['serv_port']);
-                    // var url = "https://"+external_ip+":5000";
-                    // window.open(url);
-                    // update_vm_stat(vm_div);
                 }
                 else {
                     vm_msg.html(data['message']);
-                    // update_vm_stat(vm_div);
                 }
             },
             error: function (e) {
