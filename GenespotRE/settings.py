@@ -132,6 +132,16 @@ IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
 IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
 
+# If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
+# care of that for us
+if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE_FLEX:
+    DATABASES['default']['OPTIONS'] = {
+        'ssl': {
+            'ca': os.environ.get('DB_SSL_CA'),
+            'cert': os.environ.get('DB_SSL_CERT'),
+            'key': os.environ.get('DB_SSL_KEY')
+        }
+    }
 
 # Default to localhost for the site ID
 SITE_ID = 3
