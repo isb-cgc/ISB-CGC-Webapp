@@ -68,7 +68,7 @@ echo "Libraries Installed"
 gem install sass
 
 # Install Google Cloud SDK
-# If we're not on CircleCI or we are but google-cloud-sdk isn't there, install it 
+# If we're not on CircleCI or we are but google-cloud-sdk isn't there, install it
 if [ -z "${CI}" ] || [ ! -d "/usr/lib/google-cloud-sdk" ]; then
     echo "Installing Google Cloud SDK..."
     export CLOUDSDK_CORE_DISABLE_PROMPTS=1

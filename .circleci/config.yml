@@ -95,7 +95,6 @@ jobs:
       - deploy:
           command: |
             sudo -E rm -rf ./lib
-            sudo -E gcloud components update --version 251.0.0 --quiet
             sudo -E /bin/bash ./shell/gcloud_authenticate.sh
             sudo -E /bin/bash ./shell/unpack_for_deployment.sh
             sudo -E gcloud app deploy --verbosity=debug ./app.yaml --quiet
