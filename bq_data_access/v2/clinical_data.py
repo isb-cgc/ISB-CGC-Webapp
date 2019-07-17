@@ -1,21 +1,22 @@
-"""
+###
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
 
-Copyright 2017, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
-
+from builtins import str
+from builtins import range
+from builtins import object
 import logging
 import sys
 from re import compile as re_compile
@@ -133,8 +134,8 @@ class ClinicalDataQueryHandler(object):
         if project_id_array is not None:
             project_id_stmt = ', '.join([str(project_id) for project_id in project_id_array])
 
-        query_template = \
-            ("SELECT clin.case_barcode, biospec.sample_barcode, clin.{column_name} AS value {brk}"
+        query_template_clin_bsp = \
+            ("SELECT clin.case_barcode AS case_barcode, biospec.sample_barcode AS sample_barcode, clin.{column_name} AS value {brk}"
              "FROM ( {brk}"
              " SELECT case_barcode, {column_name} {brk}"
              " FROM [{table_id}] {brk}"
@@ -150,8 +151,20 @@ class ClinicalDataQueryHandler(object):
              "    WHERE cohort_id IN ({cohort_id_list}) {brk}"
              "          AND (project_id IS NULL {brk}")
 
+        query_template_bsp_only = \
+            ("SELECT biospec.case_barcode AS case_barcode, biospec.sample_barcode AS sample_barcode, biospec.{column_name} AS value {brk}"
+             " FROM [{biospecimen_table_id}] {brk}"
+             " AS biospec {brk}"
+             "WHERE sample_barcode IN ( {brk}"
+             "    SELECT sample_barcode {brk}"
+             "    FROM [{cohort_dataset_and_table}] {brk}"
+             "    WHERE cohort_id IN ({cohort_id_list}) {brk}"
+             "          AND (project_id IS NULL {brk}")
+
+        query_template = query_template_clin_bsp if feature_def.biospecimen_table_id != feature_def.table_id else query_template_bsp_only
+
         query_template += (" OR project_id IN ({project_id_list})))" if project_id_array is not None else "))")
-        query_template += " GROUP BY clin.case_barcode, biospec.sample_barcode, value"
+        query_template += " GROUP BY case_barcode, sample_barcode, value"
 
         query = query_template.format(table_id=feature_def.table_id,
                                       biospecimen_table_id=feature_def.biospecimen_table_id,
@@ -193,7 +206,7 @@ class ClinicalDataQueryHandler(object):
             return "", None, False
         else:
             # Union of subqueries
-            subquery_stmt_template = ",".join(["({})" for x in xrange(len(subqueries))])
+            subquery_stmt_template = ",".join(["({})" for x in range(len(subqueries))])
             subquery_stmt = subquery_stmt_template.format(*subqueries)
 
             query_template = "SELECT case_barcode, sample_barcode, value {brk}" \

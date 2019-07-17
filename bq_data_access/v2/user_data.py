@@ -1,21 +1,21 @@
-"""
+#
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
-Copyright 2015, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
-
+from builtins import str
+from builtins import object
 import logging
 from re import compile as re_compile
 
@@ -237,7 +237,7 @@ class UserFeatureDef(object):
                               brk='\n')
 
         if self.filters is not None:
-            for key, val in self.filters.items():
+            for key, val in list(self.filters.items()):
                 query += ' AND t.{filter_key} = "{value}" '.format(filter_key=key, value=val)
 
                 query += " GROUP BY t.sample_barcode, t.{column_name} ".format(column_name=self.column_name) # To prevent duplicates from multiple cohorts
@@ -452,7 +452,7 @@ class UserDataQueryHandler(object):
         for index, feature_def in enumerate(self.feature_defs):
             feature_def.bq_row_id = index
 
-    def _submit_query_and_get_job_ref(self, project_id, project_name, dataset_name, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
+    def _submit_query_and_get_job_ref(self, project_id, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
         project_ids = self.get_project_ids(cohort_id_array)
 
         bigquery_service = self.get_bq_service()
@@ -483,12 +483,9 @@ class UserDataQueryHandler(object):
         return queryable
 
     def get_data_job_reference(self, cohort_id_array, cohort_dataset, cohort_table, project_id_array):
-        project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_PROJECT_NAME
-        dataset_name = settings.BIGQUERY_DATASET
+        project_id = settings.BIGQUERY_PROJECT_ID
 
-        result = self._submit_query_and_get_job_ref(project_id, project_name, dataset_name,
-                                                    cohort_dataset, cohort_table, cohort_id_array, project_id_array)
+        result = self._submit_query_and_get_job_ref(project_id, cohort_dataset, cohort_table, cohort_id_array, project_id_array)
         return result
 
     @classmethod

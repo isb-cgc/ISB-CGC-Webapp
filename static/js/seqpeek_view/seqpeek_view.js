@@ -7,12 +7,6 @@ define([
     d3
 ) {
     return {
-        render_no_data_message: function(target_element, gene_label) {
-            var message = 'The selected cohorts have no somatic mutations in the gene ' + gene_label;
-
-            $('<h3>' + message + '</h3>').appendTo(target_element);
-        },
-
         render_seqpeek_legend: function(target_element) {
             var MUTATION_TYPE_COLOR_MAP = {
                 Nonsense_Mutation: "#71C560",
@@ -124,7 +118,7 @@ define([
             var tableView = SeqPeekViewFactory.create(target_table, plot_data);
             tableView.render();
             return {
-                plot_data: function(){ return plot_data; }
+                get_json: function(){ return plot_data; }
             }
         }
     };

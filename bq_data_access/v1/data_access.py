@@ -1,21 +1,21 @@
-"""
+###
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
 
-Copyright 2016, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
-
+from builtins import str
+from builtins import object
 import logging
 from re import compile as re_compile
 from time import sleep
@@ -304,7 +304,7 @@ def format_query_result_for_plot(provider_instance, query_result):
 def get_feature_vectors_with_user_data(params_array, poll_retry_limit=20, skip_formatting_for_plot=False):
     provider_array = submit_jobs_with_user_data(params_array)
 
-    project_id = settings.BQ_PROJECT_ID
+    project_id = settings.BIGQUERY_PROJECT_ID
     result = get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip_formatting_for_plot)
 
     return result
@@ -321,7 +321,7 @@ def get_feature_vectors_tcga_only(params_array, poll_retry_limit=20, skip_format
         job_item = submit_tcga_job(parameter_object, bigquery_service, cohort_settings)
         provider_array.append(job_item)
 
-    project_id = settings.BQ_PROJECT_ID
+    project_id = settings.BIGQUERY_PROJECT_ID
     result = get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip_formatting_for_plot)
 
     return result

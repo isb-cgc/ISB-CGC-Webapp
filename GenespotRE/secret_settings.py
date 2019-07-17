@@ -1,7 +1,12 @@
+from __future__ import print_function
 import os
 from os.path import join, dirname
 import dotenv
-dotenv.read_dotenv(join(dirname(__file__), '../.env'))
+env_path = '../'
+if os.environ.get('SECURE_LOCAL_PATH', None):
+    env_path += os.environ.get('SECURE_LOCAL_PATH')
+
+dotenv.read_dotenv(join(dirname(__file__), env_path+'.env'))
 
 
 SETTINGS = {
@@ -17,7 +22,7 @@ SETTINGS = {
     },
 }
 
-if os.environ.has_key('DB_SSL_CERT'):
+if 'DB_SSL_CERT' in os.environ:
     SETTINGS['DATABASE']['default']['OPTIONS'] = {
         'ssl': {
             'ca': os.environ.get('DB_SSL_CA'),
@@ -31,5 +36,5 @@ def get(setting):
     if setting in SETTINGS:
         return SETTINGS[setting]
     else:
-        print setting, ' is not a valid setting.'
+        print(setting, ' is not a valid setting.')
         return None

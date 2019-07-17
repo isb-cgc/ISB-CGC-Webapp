@@ -1,19 +1,21 @@
-"""
-Copyright 2017, Institute for Systems Biology
+###
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
+from __future__ import absolute_import
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
-
+from builtins import str
 import json
 import logging
 import re
@@ -26,7 +28,7 @@ from django.contrib.auth.decorators import login_required
 from bq_data_access.v1.feature_search.util import SearchableFieldHelper
 from bq_data_access.v2.feature_search.util import SearchableFieldHelper as SearchableFieldHelper_v2
 from bq_data_access.v2.feature_search.clinical_schema_utils import ClinicalColumnFeatureSupport
-from models import VariableFavorite
+from .models import VariableFavorite
 from workbooks.models import Workbook, Worksheet
 from projects.models import Program
 from django.core.exceptions import ObjectDoesNotExist
@@ -264,9 +266,9 @@ def initialize_variable_selection_page(request,
 
         for prog in public_programs:
             program_attrs[prog.id] = fetch_program_attr(prog.id)
-            attr_codes = ClinicalColumnFeatureSupport.get_features_ids_for_column_names(program_attrs[prog.id].keys())
+            attr_codes = ClinicalColumnFeatureSupport.get_features_ids_for_column_names(list(program_attrs[prog.id].keys()))
             if 'not_found_columns' in attr_codes:
-                new_keys = [x for x in program_attrs[prog.id].keys() if x not in attr_codes['not_found_columns']]
+                new_keys = [x for x in list(program_attrs[prog.id].keys()) if x not in attr_codes['not_found_columns']]
                 attr_codes = ClinicalColumnFeatureSupport.get_features_ids_for_column_names(new_keys)
             for attr in program_attrs[prog.id]:
                 if attr in attr_codes['clinical_feature_ids']:
@@ -346,10 +348,10 @@ def variable_fav_save(request, variable_fav_id=0):
 
         name = data['name']
         blacklist = re.compile(BLACKLIST_RE, re.UNICODE)
-        match = blacklist.search(unicode(name))
+        match = blacklist.search(str(name))
         if match:
             # XSS risk, log and fail this cohort save
-            match = blacklist.findall(unicode(name))
+            match = blacklist.findall(str(name))
             logger.error(
                 '[ERROR] While saving a variable list, saw a malformed name: ' + name + ', characters: ' + match.__str__())
             messages.error(request, "Your variable list's name contains invalid characters; please choose another name.")

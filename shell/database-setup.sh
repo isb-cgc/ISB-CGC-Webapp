@@ -6,14 +6,16 @@ if [ -n "$CI" ]; then
     export MYSQL_ROOT_USER=root
     export MYSQL_DB_HOST=127.0.0.1
 else
-    export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
+    export $(cat /home/vagrant/parentDir/secure_files/.env | grep -v ^# | xargs) 2> /dev/null
     export HOME=/home/vagrant
     export HOMEROOT=/home/vagrant/www
     export MYSQL_ROOT_USER=root
     export MYSQL_DB_HOST=localhost
 fi
 
-export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/:${HOME}/google_appengine/:${HOME}/google_appengine/lib/protorpc-1.0/
+
+
+export PYTHONPATH=${HOMEROOT}:${HOMEROOT}/lib:${HOMEROOT}/ISB-CGC-Common
 echo $PYTHONPATH
 
 echo "Increase group_concat max, for longer data type names"
@@ -29,15 +31,15 @@ echo "Creating the definer account for any routines in the table file..."
 mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DATABASE_NAME.* TO 'dev-user'@'%' IDENTIFIED BY '${DATABASE_PASSWORD}';"
 
 # If we have migrations for older, pre-migrations apps which haven't yet been or will never be added to the database dump, make them here eg.:
-# python ${HOMEROOT}/manage.py makemigrations <appname>
-python ${HOMEROOT}/manage.py makemigrations adminrestrict
+# python3 ${HOMEROOT}/manage.py makemigrations <appname>
+python3 ${HOMEROOT}/manage.py makemigrations adminrestrict
 # Now run migrations
 echo "Running Migrations..."
-python ${HOMEROOT}/manage.py migrate --noinput
+python3 ${HOMEROOT}/manage.py migrate --noinput
 
 # If the ISB superuser isn't present already, they need to be added.
 # echo "Creating isb superuser..."
-# echo "from django.contrib.auth.models import User; User.objects.create_superuser('${SUPERUSER_USERNAME}', '', '${SUPERUSER_PASSWORD}')" | python ${HOMEROOT}/manage.py shell
+# echo "from django.contrib.auth.models import User; User.objects.create_superuser('${SUPERUSER_USERNAME}', '', '${SUPERUSER_PASSWORD}')" | python3 ${HOMEROOT}/manage.py shell
 
 echo "Adding in default Django admin IP allowances for local development"
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e "INSERT INTO adminrestrict_allowedip (ip_address) VALUES('127.0.0.1'),('10.0.*.*');"
@@ -48,31 +50,31 @@ mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NA
 if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
     # Sometimes CircleCI loses its authentication, re-auth with the dev key if we're on circleCI...
     if [ -n "$CI" ]; then
-        sudo ${HOME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOMEROOT}/deployment.key.json
+        sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/deployment.key.json
     # otherwise just use privatekey.json
     else
-        sudo ${HOME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOMEROOT}/privatekey.json
-        sudo ${HOME}/google-cloud-sdk/bin/gcloud config set project "${GCLOUD_PROJECT_NAME}"
+        sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/privatekey.json
+        sudo gcloud config set project "${GCLOUD_PROJECT_NAME}"
     fi
     echo "Downloading SQL Table File..."
-    sudo ${HOME}/google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/dev_table_and_routines_file.sql" ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+    sudo gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/dev_table_and_routines_file.sql" ${HOMEROOT}/scripts/metadata_featdef_tables.sql
 fi
 echo "Applying SQL Table File... (may take a while)"
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
 
 echo "Adding Cohort/Site Data and bootstrapping Django project and program tables..."
-python ${HOMEROOT}/scripts/add_site_ids.py
+python3 ${HOMEROOT}/scripts/add_site_ids.py
 
 if [ -n "$CI" ]; then
     # We don't add the prefab cohorts to BQ if we're in CircleCI
-    python ${HOMEROOT}/scripts/add_alldata_cohort.py $GCLOUD_PROJECT_ID -o cloudsql -p True
+    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py $GCLOUD_PROJECT_ID -o cloudsql -p True
 else
     # ...but we do if we're doing a local build
-    python ${HOMEROOT}/scripts/add_alldata_cohort.py $GCLOUD_PROJECT_ID -o all -p True -a True
+    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py $GCLOUD_PROJECT_ID -o all -p True -a True
 fi
 
 echo "Running development dataset setup"
-python ${HOMEROOT}/scripts/dataset_bootstrap.py -u $MYSQL_ROOT_USER -p $MYSQL_ROOT_PASSWORD -d $DATABASE_NAME
+python3 ${HOMEROOT}/scripts/dataset_bootstrap.py -u $DATABASE_USER -p $DATABASE_PASSWORD -d $DATABASE_NAME
 
 # We have to use '' around the statement due to the need to use `` around name and key, which are MySQL keywords, so concatenation is needed to
 # preserve expansion of GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET

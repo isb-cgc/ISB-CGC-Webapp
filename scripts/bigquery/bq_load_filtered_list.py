@@ -1,23 +1,24 @@
-"""
-
-Copyright 2015, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
+#
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+from __future__ import print_function
 
 # Python example modified from https://cloud.google.com/bigquery/loading-data-into-bigquery
-from urllib2 import HTTPError
+from future import standard_library
+standard_library.install_aliases()
+from urllib.error import HTTPError
 import pprint
 from googleapiclient.discovery import build
 import httplib2
@@ -347,18 +348,18 @@ def loadTable(service, projectId, datasetId, targetTableId, sourceCSV, schema):
             job = jobCollection.get(projectId=projectId,
                                      jobId=insertResponse['jobReference']['jobId']).execute()
             if 'DONE' == job['status']['state']:
-                print 'Done Loading!'
+                print('Done Loading!')
                 return
 
             if 'errorResult' in job['status']:
-                print 'Error loading table: ', pprint.pprint(job)
+                print('Error loading table: ', pprint.pprint(job))
                 return
 
-            print 'Waiting for loading to complete...'
+            print('Waiting for loading to complete...')
             time.sleep(10)
 
     except HTTPError as err:
-        print 'Error in loadTable: ', pprint.pprint(err.resp)  # or err.reason?
+        print('Error in loadTable: ', pprint.pprint(err.resp))  # or err.reason?
 
 
 def main():

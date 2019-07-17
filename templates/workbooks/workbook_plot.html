@@ -49,13 +49,28 @@
                         <div class="plot-download-selection hidden">
                             <div class="svg-download">SVG</div>
                             <div class="png-download">PNG</div>
-                            <div class="data-download">JSON</div>
+                            <div class="csv-download">CSV</div>
+                            <div class="json-download">JSON</div>
                         </div>
                     </span>
             <a role="button" class="toggle-fullscreen-plot plot-button plot-button-options  disabled" aria-label="Full Screen">
                         <i class="fa fa-expand"></i>
                         <div class="button-text">Toggle Full Screen</div>
                     </a>
+
+            <span class="help-block">
+                Please select the
+                {% if workbook.owner.id == user.id %}
+                    <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Edit Plot Settings">
+                        <i class="fa fa-bar-chart"></i><span style="font-weight: bold; padding: 0 3px;">Edit Plot Settings</span>
+                    </a> option above to change the settings to produce a plot.
+                {% else %}
+                    <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings">
+                        <i class="fa fa-tasks"></i><span style="font-weight: bold; padding: 0 3px;">View Plot Settings</span>
+                    </a> option above to check the current plot settings.
+                {% endif %}
+
+            </span>
         </div>
         <div class="plot-tooltip "></div>
         <div class="plot-args hidden"></div>
@@ -65,11 +80,11 @@
             Some of the settings required to produce a plot are missing.<br>You can check the current plot settings using the
             {% if workbook.owner.id == user.id %}
                 <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings">
-                    <i class="fa fa-bar-chart"></i> Edit Plot Settings
+                    <i class="fa fa-bar-chart"></i><span style="font-weight: bold; padding: 0 3px;">Edit Plot Settings</span>
                 </a> link.<br>
             {% else %}
                 <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings">
-                    <i class="fa fa-tasks"></i> View Plot Settings
+                    <i class="fa fa-tasks"></i><span style="font-weight: bold; padding: 0 3px;">View Plot Settings</span>
                 </a> link.<br>
             {% endif %}
             Ensure that an <b>Analysis Type</b> and any relevant <b>Axis Variables</b>
@@ -218,11 +233,19 @@
                         </label>
                     </div>
 
+                    <!-- Plot By Cases vs Samples Selection -->
+                    <div class="form-group plot-by-group">
+                        <label for="{{ worksheet.id }}-plot-by">Plot By</label>
+                        <select id="{{ worksheet.id }}-plot-by" class="form-control plot-by">
+                            <option value="cases">Cases</option>
+                            <option value="samples">Samples</option>
+                        </select>
+                    </div>
+
                     <!-- Color By variable. only offer x and y selections-->
                     <div class="form-group color-by-group">
                         <label for="{{ worksheet.id }}-color-by">Color By Feature</label>
-{#                        <div class="color-selector filter-label label label-default" type="text" id="color-select" name="color-attr" value="{{ plot.color_by }}">{{ plot.color_by }}</div>#}
-                        <select id="{{ worksheet.id }}-color-by" class="color_by" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field" style="width: 230px;">
+                        <select id="{{ worksheet.id }}-color-by" class="form-control color_by search-term-field" {% if workbook.owner.id != user.id %} disabled {% endif %} style="width: 230px;">
                             {% if plot.color_by %}
                                 <option value="{{ plot.color_by.url_code }}" var_id="{{ plot.color_by.id }}" selected >{{ plot.color_by.name }}</option>
                             {% else %}
@@ -234,49 +257,97 @@
                     <!-- Gene Label for SeqPeek -->
                     <div class="form-group seqpeek-genes">
                         <label for="{{ worksheet.id }}-gene_label">Gene or miRNA</label>
-                        <select id="{{ worksheet.id }}-gene_label" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field axis-select" style="width: 230px;">
+                        <div class="tooltip-bubble">
+                            <i class="gene-mirna-info fa fa-info-circle"></i>
+                            <span class="tooltip-bubble-text">
+                                Genes with consensus score of 6 or higher are added to the gene list. (Ref: <a href="https://doi.org/10.1016/j.cell.2018.02.060" target="_blank">Bailey et al., Cell. 2018 Apr 5;173(2):371-385.e18. doi: 10.1016/j.cell.2018.02.060</a>)
+                            </span>
+                        </div>
+                        <select id="{{ worksheet.id }}-gene_label" {% if workbook.owner.id != user.id %} disabled {% endif %} class="gene_label form-control axis-select" style="width: 230px;">
                             {% if plot.gene_label %}
                                 <option value="{{ plot.gene_label }}" selected >{{ plot.gene_label }}</option>
                             {% else %}
                                 <option value="" type="label" disabled selected>-- select a gene --</option>
                             {% endif %}
                             {% for gene_item in genes %}
-                                {% if not plot or plot.gene_label != gene_item.gene %}
+                                {% if not plot or plot.gene_label != gene_item.gene and not gene_item.gene in default_genes%}
                                     <option value="{{ gene_item.gene }}">{{ gene_item.gene }}</option>
+                                {% endif %}
+                            {% endfor %}
+                            {% for default_gene in default_genes %}
+                                {% if not plot or plot.gene_label != default_gene %}
+                                    <option value="{{ default_gene }}">{{ default_gene }}</option>
                                 {% endif %}
                             {% endfor %}
                         </select>
                     </div>
 
-                    <!-- Gene Label for OncoPrint -->
-                    <div class="form-group oncoprint-genes">
+                    <!-- Gene Label for OncoPrint or OncoGrid -->
+                    <div class="form-group onco-genes">
                         <label for="{{ worksheet.id }}-gene_label">Gene or miRNA</label>
-                        <div class="gene-listing" plot="{{ worksheet.id }}">
-                        {% if genes and genes|length > 1 %}
-                            <div class="checkbox" style="margin-top: 0px; margin-bottom: 15px;">
-                                <label>
-                                    <input class="select-all-genes-checkbox gene-checkbox" type="checkbox">Select All
-                                </label>
-                            </div>
-                        {% endif %}
-                        {% for gene_item in genes %}
-                            {% if not plot or plot.gene_label != gene_item.gene %}
-                            <div class="checkbox" style="margin-top: 0px; margin-bottom: 5px;">
-                                <label>
-                                    <input class="variable-toggle-checkbox gene-selex gene-checkbox" type="checkbox" value="{{ gene_item.gene }}"/>
-                                        {{ gene_item.gene }}
-                                </label>
-                            </div>
+                        <div class="tooltip-bubble">
+                            <i class="gene-mirna-info fa fa-info-circle"></i>
+                            <span class="tooltip-bubble-text">
+                                Genes with consensus score of 6 or higher are added to the gene list. (Ref: <a href="https://doi.org/10.1016/j.cell.2018.02.060" target="_blank">Bailey et al., Cell. 2018 Apr 5;173(2):371-385.e18. doi: 10.1016/j.cell.2018.02.060</a>)
+                            </span>
+                        </div>
+
+                        <div class="gene-list" plot="{{ worksheet.id }}">
+                            {% if genes%}
+                                <div class="group-list">
+                                    <div class="header checkbox">
+                                        <label>
+                                        {% if genes and genes|length > 1 %}
+                                            <input {% if workbook.owner.id != user.id %} disabled {% endif %} title="Select All" class="select-all-genes-checkbox" type="checkbox">
+                                        {% endif %}
+                                        Gene List
+                                        </label>
+                                        <span class="list-display-toggle-icon float-right" title="Toggle to hide/show the gene list"></span>
+                                    </div>
+                                    <div class="checkbox-list">
+                                        {% for gene_item in genes %}
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input {% if workbook.owner.id != user.id %} disabled {% endif %} class="variable-toggle-checkbox gene-selex gene-checkbox" type="checkbox" value="{{ gene_item.gene }}"/>
+                                                        {{ gene_item.gene }}
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
                             {% endif %}
-                        {% endfor %}
+                            {% if default_genes%}
+                                <div class="group-list">
+                                    <div class="header checkbox">
+                                        <label>
+                                            {% if default_genes and default_genes|length > 1 %}
+                                                <input {% if workbook.owner.id != user.id %} disabled {% endif %} title="Select All" class="select-all-genes-checkbox" type="checkbox">
+                                            {% endif %}
+                                            Default Gene List
+                                        </label>
+                                        <span class="list-display-toggle-icon float-right" title="Toggle to hide/show the gene list"></span>
+                                    </div>
+                                    <div class="checkbox-list">
+                                        {% for default_gene in default_genes %}
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input {% if workbook.owner.id != user.id  or default_gene in genes %} disabled {% endif %} class="variable-toggle-checkbox gene-selex gene-checkbox" type="checkbox" value="{{ default_gene }}"/>
+                                                        {{ default_gene }}
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
 
+                    <!-- Cohorts Selection -->
                     <div class="form-group">
                         <label>Cohorts</label>
                         <div class="cohort-listing" plot="{{ worksheet.id }}">
                             {% for cohort in cohorts %}
-                                 <div class="checkbox" style="margin-top: 0px; margin-bottom: 5px;">
+                                 <div class="checkbox">
                                       <label>
                                         <input {% if workbook.owner.id != user.id %} disabled {% endif %} class="variable-toggle-checkbox cohort-selex" name="cohort-checkbox" aria-label="cohort-checkbox" type="checkbox" cohort-id="{{ cohort.cohort.id }}" value="{{ cohort.id }}">
                                         {{ cohort.cohort.name }}
@@ -285,6 +356,7 @@
                             {% endfor %}
                         </div>
                     </div>
+
                     <button {% if workbook.owner.id != user.id %} style="display:none" {% endif %} class="update-plot btn btn-primary" worksheet_id="{{ worksheet.id }}" plot_id="{{ worksheet.id }}">Update Plot</button>
                 </div>
             </div>
@@ -312,6 +384,7 @@
         </div>
         <div id="oncogrid_div" style="display:none;">
             <div id="plot-{{ worksheet.id }}-oncogrid" class="oncogrid-screen">
+                <div id="grid-data" hidden></div>
                 <div class="oncogrid-header hidden">
                     <div class="oncogrid-logo">
                         <img alt="OICR Bio Logo" src="{% static 'img/oicr_bio.jpg' %}">
@@ -362,10 +435,10 @@
                 </div>
 {#                <div id='grid-div'></div>#}
                 <div class='grid-div'></div>
-                <div class="svg-track-legend"></div>
+                <div class="svg-track-legend hidden"></div>
             </div>
         </div>
-        <div class="oncoprint_div">
+        <div class="oncoprint_div hidden">
             <div id="plot-message-alert" class="alert alert-warning alert-dismissable" style="display: none;">
                 <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span
                         class="sr-only">Close</span></button>
@@ -384,9 +457,6 @@
                     </button>
                     <button type="button" class="btn oncoprint-diagram-removeWhitespace-icon" data-hasqtip="2">
                         <img class="oncoprint-diagram-removeWhitespace-icon-img" checked="0" src="{% static '/img/unremoveWhitespace.svg' %}" alt="icon">
-                    </button>
-                    <button type="button" class="btn oncoprint-diagram-downloads-icon" data-hasqtip="6">
-                        <img class="oncoprint-diagram-downloads-icon-img" src="{% static '/img/in.svg' %}" alt="icon">
                     </button>
                     <button type="button" class="btn oncoprint_zoomout" class="btn" data-hasqtip="0">
                         <img src="{% static '/img/zoom-out.svg' %}" alt="icon">

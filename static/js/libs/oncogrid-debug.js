@@ -1550,7 +1550,7 @@
             return void relocate();
           }
         }
-        d3.selectAll(targets).on(zoomName, null);
+        _self.container.selectAll(targets).on(zoomName, null);
         subject.on(mousedown, mousedowned).on(touchstart, touchstarted);
         dragRestore();
         zoomended(dispatch);
@@ -15197,8 +15197,8 @@ MainGrid.prototype.sliceGenes = function(start, stop) {
     for (var i = 0; i < _self.genes.length; i++) {
         var gene = _self.genes[i];
         if (i < start || i > stop) {
-            d3.selectAll('.' + _self.prefix + gene.id + '-cell').remove();
-            d3.selectAll('.' + _self.prefix + gene.id + '-bar').remove();
+            _self.container.selectAll('.' + _self.prefix + gene.id + '-cell').remove();
+            _self.container.selectAll('.' + _self.prefix + gene.id + '-bar').remove();
             _self.genes.splice(i, 1);
             i--;start--;stop--;
         }
@@ -15216,8 +15216,8 @@ MainGrid.prototype.sliceDonors = function(start, stop) {
     for (var i = 0; i < _self.donors.length; i++) {
         var donor = _self.donors[i];
         if (i < start || i > stop) {
-            d3.selectAll('.' + _self.prefix + donor.id + '-cell').remove();
-            d3.selectAll('.' + _self.prefix + donor.id + '-bar').remove();
+            _self.container.selectAll('.' + _self.prefix + donor.id + '-cell').remove();
+            _self.container.selectAll('.' + _self.prefix + donor.id + '-bar').remove();
             _self.donors.splice(i, 1);
             i--;start--;stop--;
         }
@@ -15361,7 +15361,8 @@ MainGrid.prototype.setHeatmap = function (active) {
     if (active === _self.heatMap) return _self.heatMap;
     _self.heatMap = active;
 
-    d3.selectAll('.' + _self.prefix + 'sortable-rect')
+    _self.container
+        .selectAll('.' + _self.prefix + 'sortable-rect')
         .transition()
         .attr('y', function (d) {
             return _self.getY(d);
@@ -15422,8 +15423,8 @@ MainGrid.prototype.removeGene = function (i) {
 
     var gene = _self.genes[i];
     if (gene) {
-        d3.selectAll('.' + _self.prefix + gene.id + '-cell').remove();
-        d3.selectAll('.' + _self.prefix + gene.id + '-bar').remove();
+        _self.container.selectAll('.' + _self.prefix + gene.id + '-cell').remove();
+        _self.container.selectAll('.' + _self.prefix + gene.id + '-bar').remove();
         _self.genes.splice(i, 1);
     }
 
@@ -15503,7 +15504,7 @@ var OncoGrid = function(params) {
 
   _self.prefix = params.prefix || 'og-';
 
-  params.wrapper = '.' + _self.prefix + 'container';
+  params.wrapper = params.element+' .' + _self.prefix + 'container';
 
   _self.container = d3.select(params.element || 'body')
     .append('div')
@@ -15709,8 +15710,8 @@ OncoGrid.prototype.removeDonors = function(func) {
     var donor = _self.donors[i];
     if (func(donor)) {
       removedList.push(donor.id);
-      d3.selectAll('.' + _self.prefix + donor.id + '-cell').remove();
-      d3.selectAll('.' + _self.prefix + donor.id + '-bar').remove();
+      _self.container.selectAll('.' + _self.prefix + donor.id + '-cell').remove();
+      _self.container.selectAll('.' + _self.prefix + donor.id + '-bar').remove();
       _self.donors.splice(i, 1);
       i--;
     }
@@ -15743,8 +15744,8 @@ OncoGrid.prototype.removeGenes = function(func) {
     var gene = _self.genes[i];
     if (func(gene)) {
       removedList.push(gene.id);
-      d3.selectAll('.' + _self.prefix + gene.id + '-cell').remove();
-      d3.selectAll('.' + _self.prefix + gene.id + '-bar').remove();
+      _self.container.selectAll('.' + _self.prefix + gene.id + '-cell').remove();
+      _self.container.selectAll('.' + _self.prefix + gene.id + '-bar').remove();
       _self.genes.splice(i, 1);
       i--;
     }
@@ -16343,8 +16344,11 @@ OncoTrackGroup.prototype.render = function (div) {
 
             _self.div
                 .html(function () {return _self.trackLegend;})
-                .style('left', (coordinates[0] + 15) + 'px')
-                .style('top', (coordinates[1] + 30) + 'px');
+                .style('left', (coordinates[0]-15)+ 'px')
+                .style(
+                    'top',
+                    (coordinates[1]+10)+'px'
+                )
         })
         .on('mouseout', function() {
             _self.div.transition()
@@ -16566,7 +16570,7 @@ OncoTrackGroup.prototype.renderData = function() {
 
             _self.div.html(Mustache.render(d.template, d))
                 .style('left', (coordinates[0] + 15) + 'px')
-                .style('top', (coordinates[1] + 30) + 'px');
+                .style('top', (coordinates[1] + 15) + 'px');
         })
         .on('mouseout', function () {
             _self.div.transition()

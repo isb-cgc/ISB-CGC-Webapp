@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from builtins import str
 import json
 import logging
 import re
@@ -10,7 +12,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.utils.safestring import mark_safe
-from models import GeneFavorite, GeneSymbol
+from .models import GeneFavorite, GeneSymbol
 from workbooks.models import Workbook, Worksheet
 
 BLACKLIST_RE = settings.BLACKLIST_RE
@@ -21,9 +23,12 @@ logger = logging.getLogger('main_logger')
 # returns a json object keyed on each gene symbol with values of whether or not they are valid
 @login_required
 def check_gene_list_validity(request):
-    gene_list = json.loads(request.body)['genes-list']
-    response = {}
-    response['results'] = {}
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    gene_list = body['genes-list']
+    response = {
+        'results': {}
+    }
     for gene in gene_list:
         response['results'][gene] = GeneSymbol.is_gene_valid(gene)
 
@@ -181,10 +186,10 @@ def gene_fav_save(request, gene_fav_id=0):
     gene_list = list(set(gene_list))
 
     blacklist = re.compile(BLACKLIST_RE, re.UNICODE)
-    match = blacklist.search(unicode(name))
+    match = blacklist.search(str(name))
     if match:
         # XSS risk, log and fail this cohort save
-        match = blacklist.findall(unicode(name))
+        match = blacklist.findall(str(name))
         logger.error('[ERROR] While saving a gene list, saw a malformed name: ' + name + ', characters: ' + str(match))
         messages.error(request, "Your gene list's name contains invalid characters; please choose another name.")
         redirect_url = reverse('genes') if not gene_fav_id else reverse('gene_fav_detail', kwargs={'gene_fav_id': gene_fav_id})
