@@ -1,25 +1,28 @@
-"""
+###
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
+from __future__ import print_function
 
-Copyright 2016, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
-
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
 from csv import DictWriter
 from json import load as load_json
 import logging
-from StringIO import StringIO
+from io import StringIO
 from time import sleep
 import os
 
@@ -137,6 +140,8 @@ def run(project_id, data_type, csv_path, config_json, chromosome_array):
     provider = provider_class(config_instance, chromosome_array=chromosome_array)
 
     logging.info("Output CSV: {}".format(csv_path))
+    logging.info("Config: {}".format(str(config_instance)))
+
     result = run_query(project_id, provider, config_instance)
     save_csv(result, provider.get_mysql_schema(), csv_path, include_header=True)
 

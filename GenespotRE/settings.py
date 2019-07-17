@@ -1,20 +1,22 @@
-"""
-Copyright 2017, Institute for Systems Biology
+###
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
+from __future__ import print_function
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
-
-# Django settings for GAE_Django17 project.
+from builtins import str
+from builtins import object
 import os
 from os.path import join, dirname
 import sys
@@ -33,17 +35,44 @@ APP_ENGINE = 'Google App Engine/'
 BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 
 SHARED_SOURCE_DIRECTORIES = [
-    'ISB-CGC-Common',
+    'ISB-CGC-Common'
 ]
+
+
+# The Google AppEngine library and the Google Cloud APIs don't play nice. Teach them to get along.
+# This unfortunately requires either hardcoding the path to the SDK, or sorting out a way to
+# provide an environment variable indicating where it is.
+# From https://github.com/GoogleCloudPlatform/python-repo-tools/blob/master/gcp_devrel/testing/appengine.py#L26
+def setup_sdk_imports():
+    """Sets up appengine SDK third-party imports."""
+    sdk_path = os.environ.get('GAE_SDK_PATH', '/usr/lib/google-cloud-sdk')
+
+    # Trigger loading of the Cloud APIs so they're in sys.modules
+    import google.cloud
+
+    # The libraries are specifically under platform/google_appengine
+    if os.path.exists(os.path.join(sdk_path, 'platform/google_appengine')):
+        sdk_path = os.path.join(sdk_path, 'platform/google_appengine')
+
+    # This sets up libraries packaged with the SDK, but puts them last in
+    # sys.path to prevent clobbering newer versions
+    if 'google' in sys.modules:
+        sys.modules['google'].__path__.append(
+            os.path.join(sdk_path, 'google'))
+
+    sys.path.append(sdk_path)
+
 
 # Add the shared Django application subdirectory to the Python module search path
 for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
+setup_sdk_imports()
+
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
 
-print >> sys.stdout, "[STATUS] DEBUG mode is "+str(DEBUG)
+print("[STATUS] DEBUG mode is "+str(DEBUG), file=sys.stdout)
 
 # Theoretically Nginx allows us to use '*' for ALLOWED_HOSTS but...
 ALLOWED_HOSTS = list(set(os.environ.get('ALLOWED_HOST', 'localhost').split(',') + ['localhost', '127.0.0.1', '[::1]', gethostname(), gethostbyname(gethostname()),]))
@@ -54,8 +83,11 @@ SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
 ADMINS                  = ()
 MANAGERS                = ADMINS
 
-PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
-BQ_PROJECT_ID           = os.environ.get('BIGQUERY_PROJECT_ID', PROJECT_ID) # Replace with PROJECT_ID
+GCLOUD_PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
+GCLOUD_PROJECT_NUMBER          = os.environ.get('GCLOUD_PROJECT_NUMBER', '')
+BIGQUERY_PROJECT_ID           = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PROJECT_ID)
+BIGQUERY_DATASET_V1         = os.environ.get('BIGQUERY_DATASET_V1', '')
+BIGQUERY_DATA_PROJECT_ID  = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
 
 # Deployment module
 CRON_MODULE             = os.environ.get('CRON_MODULE')
@@ -65,21 +97,21 @@ SERVICE_ACCOUNT_LOG_NAME = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev
 WEBAPP_LOGIN_LOG_NAME = os.environ.get('WEBAPP_LOGIN_LOG_NAME', 'local_dev_logging')
 GCP_ACTIVITY_LOG_NAME = os.environ.get('GCP_ACTIVITY_LOG_NAME', 'local_dev_logging')
 
-BASE_URL                = os.environ.get('BASE_URL', 'https://isb-cgc-uat.appspot.com')
-BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc-uat.appspot.com')
+BASE_URL                = os.environ.get('BASE_URL', 'https://mvm-dot-isb-cgc.appspot.com')
+BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://mvm-api-dot-isb-cgc.appspot.com')
 
 # Compute services - Should not be necessary in webapp
 PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
 
 # Data Buckets
 OPEN_DATA_BUCKET        = os.environ.get('OPEN_DATA_BUCKET', '')
-DCC_CONTROLLED_DATA_BUCKET = os.environ.get('DCC_CONTROLLED_DATA_BUCKET', '')
-CGHUB_CONTROLLED_DATA_BUCKET = os.environ.get('CGHUB_CONTROLLED_DATA_BUCKET', '')
 GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET')
 
 # BigQuery cohort storage settings
-COHORT_DATASET_ID           = os.environ.get('COHORT_DATASET_ID', 'cohort_dataset')
+BIGQUERY_COHORT_DATASET_ID           = os.environ.get('BIGQUERY_COHORT_DATASET_ID', 'cohort_dataset')
 BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
+BIGQUERY_COSMIC_DATASET_ID    = os.environ.get('BIGQUERY_COSMIC_DATASET_ID', '')
+BIGQUERY_CGC_TABLE_ID    = os.environ.get('BIGQUERY_CGC_TABLE_ID', '')
 MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
 USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
@@ -100,9 +132,9 @@ IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
 IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
 
-# If this is a GAE deployment, we don't need to specify SSL; the proxy will take
+# If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
-if os.environ.has_key('DB_SSL_CERT') and not (IS_APP_ENGINE_FLEX or IS_APP_ENGINE):
+if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE_FLEX:
     DATABASES['default']['OPTIONS'] = {
         'ssl': {
             'ca': os.environ.get('DB_SSL_CA'),
@@ -115,18 +147,13 @@ if os.environ.has_key('DB_SSL_CERT') and not (IS_APP_ENGINE_FLEX or IS_APP_ENGIN
 SITE_ID = 3
 
 if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
-    print >> sys.stdout, "[STATUS] AppEngine detected."
+    print("[STATUS] AppEngine Flex detected.", file=sys.stdout)
     SITE_ID = 4
 
+
 def get_project_identifier():
-    return BQ_PROJECT_ID
+    return BIGQUERY_PROJECT_ID
 
-BIGQUERY_DATASET            = os.environ.get('BIGQUERY_DATASET', '')
-BIGQUERY_DATASET_V1         = os.environ.get('BIGQUERY_DATASET_V1', '')
-
-PROJECT_NAME                = os.environ.get('GCLOUD_PROJECT_NAME')
-BIGQUERY_PROJECT_NAME       = os.environ.get('BIGQUERY_PROJECT_NAME', PROJECT_NAME)
-BIGQUERY_DATA_PROJECT_NAME  = os.environ.get('BIGQUERY_DATA_PROJECT_NAME', PROJECT_NAME)
 
 # Set cohort table here
 if BIGQUERY_COHORT_TABLE_ID is None:
@@ -146,7 +173,7 @@ class BigQueryCohortStorageSettings(object):
 
 
 def GET_BQ_COHORT_SETTINGS():
-    return BigQueryCohortStorageSettings(COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
+    return BigQueryCohortStorageSettings(BIGQUERY_COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
 
 USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', False)
 
@@ -279,6 +306,7 @@ INSTALLED_APPS = (
     'genes',
     'variables',
     'workbooks',
+    'notebooks',
     'data_upload',
     'analysis',
     'offline',
@@ -461,8 +489,6 @@ LOGIN_EXPIRATION_MINUTES                = int(os.environ.get('LOGIN_EXPIRATION_M
 OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP', '')
 GOOGLE_GROUP_ADMIN                      = os.environ.get('GOOGLE_GROUP_ADMIN', '')
 SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS', '')
-ERA_LOGIN_URL                           = os.environ.get('ERA_LOGIN_URL', '')
-SAML_FOLDER                             = os.environ.get('SAML_FOLDER', '')
 
 # TaskQueue used when users go through the ERA flow
 LOGOUT_WORKER_TASKQUEUE                  = os.environ.get('LOGOUT_WORKER_TASKQUEUE', '')
@@ -578,6 +604,18 @@ IMG_THUMBS_URL = os.environ.get('IMG_THUMBS_URL', None)
 #################################
 DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
 
+#################################
+# NOTEBOOK settings
+#################################
+# NOTEBOOK_VIEWER = os.environ.get('NOTEBOOK_VIEWER', None)
+NOTEBOOK_VIEWER = ''
+# NOTEBOOK_ENV_LOC = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_ENV_PATH', None))
+# NOTEBOOK_SL_PATH = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_SL_PATH', None))
+#################################
+# SOLR settings
+#################################
+SOLR_URL = os.environ.get('SOLR_URL', None)
+
 ##############################################################
 #   MailGun Email Settings
 ##############################################################
@@ -587,7 +625,7 @@ EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
 NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')
 
 # Explicitly check for known items
-BLACKLIST_RE = ur'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
+BLACKLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
 
 # IndexD settings
 INDEXD_URI = os.environ.get('INDEXD_URI', None)

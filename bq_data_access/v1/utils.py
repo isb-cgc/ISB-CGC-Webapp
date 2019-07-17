@@ -1,21 +1,22 @@
-"""
+#
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
-Copyright 2015, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
-
+from builtins import str
+from builtins import range
+from builtins import object
 from collections import OrderedDict
 import logging
 from time import time
@@ -82,10 +83,10 @@ class VectorMergeSupport(object):
 
     def get_merged_dict(self):
         num_samples = self.current_sample_index
-        result = [{} for _ in xrange(num_samples)]
-        sample_id_keys = self.sample_ids.keys()
+        result = [{} for _ in range(num_samples)]
+        sample_id_keys = list(self.sample_ids.keys())
 
-        for row_id, row_samples in self.data.items():
+        for row_id, row_samples in list(self.data.items()):
             row_values = [self.missing_value] * len(self.sample_ids)
 
             for sample_index, value in row_samples:

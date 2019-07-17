@@ -1,21 +1,22 @@
-"""
+#
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
-Copyright 2015, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
-
+from builtins import str
+from builtins import range
+from builtins import object
 import logging
 import sys
 import traceback
@@ -47,7 +48,7 @@ class CloudSQLCohortAccess(object):
     @classmethod
     def get_cohort_barcodes(cls, cohort_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
-        cohort_id_stmt = ', '.join(['%s' for x in xrange(len(cohort_id_array))])
+        cohort_id_stmt = ', '.join(['%s' for x in range(len(cohort_id_array))])
         query = 'SELECT sample_barcode AS barcode FROM {cohort_table} WHERE cohort_id IN ({cohort_id_stmt})'.format(
             cohort_table=DJANGO_COHORT_TABLE,
             cohort_id_stmt=cohort_id_stmt)
@@ -76,7 +77,7 @@ class CloudSQLCohortAccess(object):
     @classmethod
     def get_cohorts_for_datapoints(cls, cohort_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
-        cohort_id_stmt = ', '.join(['%s' for x in xrange(len(cohort_id_array))])
+        cohort_id_stmt = ', '.join(['%s' for x in range(len(cohort_id_array))])
 
         query = 'SELECT sample_barcode, cohort_id FROM {cohort_samples_table} WHERE cohort_id IN ({cohort_id_stmt})'.format(
             cohort_samples_table=DJANGO_COHORT_SAMPLES_TABLE,
@@ -111,7 +112,7 @@ class CloudSQLCohortAccess(object):
     @classmethod
     def get_cohort_info(cls, cohort_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
-        cohort_id_stmt = ', '.join(['%s' for x in xrange(len(cohort_id_array))])
+        cohort_id_stmt = ', '.join(['%s' for x in range(len(cohort_id_array))])
 
         query_template = ("SELECT ti.id AS cohort_id, ti.name, COUNT(ts.sample_barcode) AS size "
                           "FROM {cohort_info_table} ti "

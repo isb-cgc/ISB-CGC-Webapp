@@ -40,8 +40,14 @@
     border: none
     border-left: 1px solid darken($white, 15%)
     width: 250px
-    min-height: 1000px
-
+    min-height: 1200px
+    &.comment-flyout
+      [class*='flyout-']
+        position: relative
+      .flyout-body
+        height: 350px
+        top: 0
+        bottom: 0
     &.open
       visibility: visible
 
@@ -58,8 +64,8 @@
     float: left
     width: 20%
     background: darken($white, 8%)
-    min-height: 1000px
-    max-height: 1000px
+    min-height: 1200px
+    max-height: 1200px
     position: relative
     transition: width 0.45s ease-in-out
     *

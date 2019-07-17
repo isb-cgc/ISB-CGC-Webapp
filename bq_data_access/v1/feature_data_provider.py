@@ -1,21 +1,21 @@
-"""
+#
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
-Copyright 2015, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
-
+from builtins import str
+from builtins import object
 import logging
 import sys
 from uuid import uuid4
@@ -135,8 +135,8 @@ class FeatureDataProvider(object):
         return job_description
 
     def get_data_job_reference(self, cohort_id_array, cohort_dataset, cohort_table, project_id_array):
-        project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_DATA_PROJECT_NAME
+        project_id = settings.BIGQUERY_PROJECT_ID
+        project_name = settings.BIGQUERY_DATA_PROJECT_ID
         dataset_name = settings.BIGQUERY_DATASET_V1
 
         result = self.submit_query_and_get_job_ref(project_id, project_name, dataset_name, self.table_name,

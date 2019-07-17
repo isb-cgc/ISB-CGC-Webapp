@@ -1,20 +1,20 @@
-"""
-Copyright 2017, Institute for Systems Biology
+###
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
-
-
+from builtins import str
 from copy import deepcopy
 import json
 import re
@@ -29,7 +29,8 @@ from django.http import StreamingHttpResponse
 from bq_data_access.v1.feature_search.util import SearchableFieldHelper
 from bq_data_access.v2.feature_search.util import SearchableFieldHelper as SearchableFieldHelper_v2
 from django.http import HttpResponse, JsonResponse
-from models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_variable, Worksheet_gene, Worksheet_cohort, Worksheet_plot, Worksheet_plot_cohort
+from workbooks.models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_variable, Worksheet_gene, Worksheet_cohort, \
+    Worksheet_plot, Worksheet_plot_cohort
 from variables.models import VariableFavorite, Variable
 from genes.models import GeneFavorite
 from analysis.models import Analysis
@@ -38,7 +39,7 @@ from sharing.service import create_share
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.html import escape
-
+from json.decoder import JSONDecodeError
 logger = logging.getLogger('main_logger')
 
 debug = settings.DEBUG
@@ -47,10 +48,13 @@ BLACKLIST_RE = settings.BLACKLIST_RE
 
 # These fields are handled by the workbook/worksheet UI and do not need to be determined from the SearchHelper
 SKIPPED_FIELDS = ['mirna_name', 'gene_name', 'genomic_build']
+DEFAULT_GENES = ['CIC', 'IDH1', 'BRAF', 'BAP1', 'CTNNB1', 'EGFR', 'KIT', 'KRAS', 'TP53', 'EP300', 'EPAS1', 'FBXW7', 'FOXA1',
+                 'NOTCH1', 'PIK3CA', 'SETD2']
+
 
 @login_required
 def workbook_list(request):
-    template  = 'workbooks/workbook_list.html',
+    template = 'workbooks/workbook_list.html',
 
     userWorkbooks = request.user.workbook_set.all()
     sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
@@ -58,7 +62,7 @@ def workbook_list(request):
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct()
 
-    return render(request, template, {'workbooks' : workbooks})
+    return render(request, template, {'workbooks': workbooks})
 
 def workbook_samples(request):
     template = 'workbooks/workbook_samples.html'
@@ -67,56 +71,64 @@ def workbook_samples(request):
     })
 
 
-#TODO secure this url
+# TODO secure this url
 @login_required
 def workbook_create_with_cohort(request):
-    cohort_id       = request.POST.get('cohort_id')
-    cohort          = Cohort.objects.get(id=cohort_id)
-    workbook_model  = Workbook.create(name="Untitled Workbook", description="This workbook was created with cohort \"" + cohort.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    cohort_id = request.POST.get('cohort_id')
+    cohort = Cohort.objects.get(id=cohort_id)
+    workbook_model = Workbook.create(name="Untitled Workbook",
+                                     description="This workbook was created with cohort \"" + cohort.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.",
+                                     user=request.user)
     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
     worksheet_model.add_cohort(cohort=cohort)
 
-    redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
+    redirect_url = reverse('workbook_detail', kwargs={'workbook_id': workbook_model.id})
     return redirect(redirect_url)
 
 
 @login_required
 def workbook_create_with_cohort_list(request):
-    cohort_ids = json.loads(request.body)['cohorts']
-    if len(cohort_ids) > 0 :
-        workbook_model  = Workbook.create(name="Untitled Workbook", description="This is a workbook created with cohorts added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    cohort_ids = body['cohorts']
+    if len(cohort_ids) > 0:
+        workbook_model = Workbook.create(name="Untitled Workbook",
+                                         description="This is a workbook created with cohorts added to the first worksheet. Click Edit Details to change your workbook title and description.",
+                                         user=request.user)
         worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
-        for id in cohort_ids :
+        for id in cohort_ids:
             cohort = Cohort.objects.get(id=id)
             worksheet_model.add_cohort(cohort=cohort)
 
-        result = {'workbook_id'  : workbook_model.id,
-                  'worksheet_id' : worksheet_model.id}
+        result = {'workbook_id': workbook_model.id,
+                  'worksheet_id': worksheet_model.id}
     else:
-        result = {'error' : 'parameters are not correct'}
+        result = {'error': 'parameters are not correct'}
 
     return HttpResponse(json.dumps(result), status=200)
 
 
-#TODO maybe complete
+# TODO maybe complete
 @login_required
 def workbook_create_with_program(request):
     program_id = request.POST.get('program_id')
     program_model = Program.objects.get(id=program_id)
 
-    workbook_model = Workbook.create(name="Untitled Workbook", description="this is an untitled workbook with all variables of program \"" + program_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    workbook_model = Workbook.create(name="Untitled Workbook",
+                                     description="this is an untitled workbook with all variables of program \"" + program_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.",
+                                     user=request.user)
     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
 
-    #add every variable within the model
-    for study in program_model.study_set.filter(active=True) :
+    # add every variable within the model
+    for study in program_model.study_set.filter(active=True):
         for var in study.user_feature_definitions_set.all():
-            work_var = Worksheet_variable.objects.create(worksheet_id = worksheet_model.id,
-                                              name         = var.feature_name,
-                                              url_code     = var.bq_map_id,
-                                              feature_id   = var.id)
+            work_var = Worksheet_variable.objects.create(worksheet_id=worksheet_model.id,
+                                                         name=var.feature_name,
+                                                         url_code=var.bq_map_id,
+                                                         feature_id=var.id)
             work_var.save()
 
-    redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
+    redirect_url = reverse('workbook_detail', kwargs={'workbook_id': workbook_model.id})
     return redirect(redirect_url)
 
 
@@ -128,27 +140,27 @@ def workbook_create_with_variables(request):
         # TODO: Refactor so that user can create using multiple variable lists
         var_list_id = data['variable_list_id'][0]
     else:
-        var_list_id    = request.POST.get('variable_list_id')
-
+        var_list_id = request.POST.get('variable_list_id')
 
     var_list_model = VariableFavorite.objects.get(id=var_list_id)
     name = request.POST.get('name', var_list_model.name + ' workbook')
-    workbook_model = Workbook.create(name=name, description="this is an untitled workbook with all variables of variable favorite list \"" + var_list_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    workbook_model = Workbook.create(name=name,
+                                     description="this is an untitled workbook with all variables of variable favorite list \"" + var_list_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.",
+                                     user=request.user)
     workbook_model.save()
     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
     worksheet_model.save()
 
-    print workbook_model.id
     for var in var_list_model.get_variables():
-        work_var = Worksheet_variable.objects.create(worksheet_id = worksheet_model.id,
-                                          name         = var.name,
-                                          url_code     = var.code,
-                                          type         = var.type,
-                                          feature_id   = var.feature_id)
+        work_var = Worksheet_variable.objects.create(worksheet_id=worksheet_model.id,
+                                                     name=var.name,
+                                                     url_code=var.code,
+                                                     type=var.type,
+                                                     feature_id=var.feature_id)
 
         work_var.save()
 
-    redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
+    redirect_url = reverse('workbook_detail', kwargs={'workbook_id': workbook_model.id})
     if json_data:
         return JsonResponse({'workbook_id': workbook_model.id, 'worksheet_id': worksheet_model.id})
     else:
@@ -157,31 +169,33 @@ def workbook_create_with_variables(request):
 
 @login_required
 def workbook_create_with_analysis(request):
-    analysis_type   = request.POST.get('analysis')
+    analysis_type = request.POST.get('analysis')
 
     allowed_types = Analysis.get_types()
     redirect_url = reverse('sample_analyses')
-    for type in allowed_types :
-        if analysis_type == type['name'] :
-            workbook_model  = Workbook.create(name="Untitled Workbook", description="this is an untitled workbook with a \"" + analysis_type + "\" plot added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    for type in allowed_types:
+        if analysis_type == type['name']:
+            workbook_model = Workbook.create(name="Untitled Workbook",
+                                             description="this is an untitled workbook with a \"" + analysis_type + "\" plot added to the first worksheet. Click Edit Details to change your workbook title and description.",
+                                             user=request.user)
             worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
             worksheet_model.set_plot(type=analysis_type)
-            redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
+            redirect_url = reverse('workbook_detail', kwargs={'workbook_id': workbook_model.id})
             break
 
     return redirect(redirect_url)
 
 
 def get_gene_datatypes(build=None):
+    datatype_labels = {'GEXP': 'Gene Expression',
+                       'METH': 'DNA Methylation',
+                       'CNVR': 'Copy Number',
+                       'RPPA': 'Protein',
+                       'GNAB': 'Mutation',
+                       'MIRN': 'miRNA Expression'}
 
-    datatype_labels = {'GEXP' : 'Gene Expression',
-                       'METH' : 'DNA Methylation',
-                       'CNVR' : 'Copy Number',
-                       'RPPA' : 'Protein',
-                       'GNAB' : 'Mutation',
-                       'MIRN' : 'miRNA Expression'}
-
-    datatype_list = SearchableFieldHelper.get_fields_for_all_datatypes() if build is None else SearchableFieldHelper_v2.get_fields_for_all_datatypes(build)
+    datatype_list = SearchableFieldHelper.get_fields_for_all_datatypes() if build is None else SearchableFieldHelper_v2.get_fields_for_all_datatypes(
+        build)
 
     return_list = []
     for type in datatype_list:
@@ -205,7 +219,7 @@ def get_gene_datatypes(build=None):
 @login_required
 def workbook(request, workbook_id=0):
     template = 'workbooks/workbook.html'
-    command = request.path.rsplit('/',1)[1]
+    command = request.path.rsplit('/', 1)[1]
     workbook_model = None
 
     try:
@@ -220,21 +234,25 @@ def workbook(request, workbook_id=0):
                 workbook_build = request.POST.get('build')
 
                 blacklist = re.compile(BLACKLIST_RE, re.UNICODE)
-                match_name = blacklist.search(unicode(workbook_name))
-                match_desc = blacklist.search(unicode(workbook_desc))
+                match_name = blacklist.search(str(workbook_name))
+                match_desc = blacklist.search(str(workbook_desc))
 
                 if match_name or match_desc:
                     # XSS risk, log and fail this cohort save
                     matches = ""
                     fields = ""
                     if match_name:
-                        match_name = blacklist.findall(unicode(workbook_name))
-                        logger.error('[ERROR] While saving a workbook, saw a malformed name: ' + workbook_name + ', characters: ' + str(match_name))
+                        match_name = blacklist.findall(str(workbook_name))
+                        logger.error(
+                            '[ERROR] While saving a workbook, saw a malformed name: ' + workbook_name + ', characters: ' + str(
+                                match_name))
                         matches = "name contains"
                         fields = "name"
                     if match_desc:
-                        match_desc = blacklist.findall(unicode(workbook_desc))
-                        logger.error('[ERROR] While saving a workbook, saw a malformed description: ' + workbook_desc + ', characters: ' + str(match_desc))
+                        match_desc = blacklist.findall(str(workbook_desc))
+                        logger.error(
+                            '[ERROR] While saving a workbook, saw a malformed description: ' + workbook_desc + ', characters: ' + str(
+                                match_desc))
                         matches = "name and description contain" if match_name else "description contains"
                         fields += (" and description" if match_name else "description")
 
@@ -243,7 +261,8 @@ def workbook(request, workbook_id=0):
                     redirect_url = reverse('workbook_detail', kwargs={'workbook_id': workbook_id})
                     return redirect(redirect_url)
 
-                workbook_model = Workbook.edit(id=workbook_id, name=workbook_name, description=workbook_desc, build=workbook_build)
+                workbook_model = Workbook.edit(id=workbook_id, name=workbook_name, description=workbook_desc,
+                                               build=workbook_build)
             elif command == "copy":
                 workbook_model = Workbook.copy(id=workbook_id, user=request.user)
             elif command == "delete":
@@ -258,10 +277,11 @@ def workbook(request, workbook_id=0):
 
         elif request.method == "GET":
             if workbook_id:
-                try :
+                try:
                     ownedWorkbooks = request.user.workbook_set.filter(active=True)
-                    sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-                    publicWorkbooks = Workbook.objects.filter(is_public=True,active=True)
+                    sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True,
+                                                              active=True)
+                    publicWorkbooks = Workbook.objects.filter(is_public=True, active=True)
 
                     workbooks = ownedWorkbooks | sharedWorkbooks | publicWorkbooks
                     workbooks = workbooks.distinct()
@@ -277,11 +297,12 @@ def workbook(request, workbook_id=0):
 
                     plot_types = Analysis.get_types()
 
-                    return render(request, template, {'workbook'    : workbook_model,
-                                                      'datatypes'   : get_gene_datatypes(workbook_model.build),
+                    return render(request, template, {'workbook': workbook_model,
+                                                      'default_genes': DEFAULT_GENES,
+                                                      'datatypes': get_gene_datatypes(workbook_model.build),
                                                       'is_shareable': is_shareable,
-                                                      'shared'      : shared,
-                                                      'plot_types'  : plot_types})
+                                                      'shared': shared,
+                                                      'plot_types': plot_types})
                 except ObjectDoesNotExist:
                     redirect_url = reverse('workbooks')
                     return redirect(redirect_url)
@@ -328,7 +349,8 @@ def workbook_share(request, workbook_id=0):
         if len(users_not_found) > 0:
             status = 'error'
             result = {
-                'msg': 'The following user emails could not be found; please ask them to log into the site first: '+", ".join(users_not_found)
+                'msg': 'The following user emails could not be found; please ask them to log into the site first: ' + ", ".join(
+                    users_not_found)
             }
         else:
             create_share(request, workbook_to_share, emails, 'Workbook')
@@ -355,7 +377,7 @@ def workbook_share(request, workbook_id=0):
 
 
 @login_required
-#used to display a particular worksheet on page load
+# used to display a particular worksheet on page load
 def worksheet_display(request, workbook_id=0, worksheet_id=0):
     template = 'workbooks/workbook.html'
     workbook_model = Workbook.deep_get(workbook_id)
@@ -367,42 +389,49 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
             display_worksheet = worksheet
 
     plot_types = Analysis.get_types()
-    return render(request, template, {'workbook'            : workbook_model,
-                                      'is_shareable'        : is_shareable,
-                                      'datatypes'           : get_gene_datatypes(workbook_model.build),
-                                      'display_worksheet'   : display_worksheet,
-                                      'plot_types'          : plot_types})
+    return render(request, template, {'workbook': workbook_model,
+                                      'is_shareable': is_shareable,
+                                      'default_genes': DEFAULT_GENES,
+                                      'datatypes': get_gene_datatypes(workbook_model.build),
+                                      'display_worksheet': display_worksheet,
+                                      'plot_types': plot_types})
 
 
 @login_required
 def worksheet(request, workbook_id=0, worksheet_id=0):
-    command = request.path.rsplit('/',1)[1]
+    command = request.path.rsplit('/', 1)[1]
 
     if request.method == "POST":
         this_workbook = Workbook.objects.get(id=workbook_id)
         this_workbook.save()
         if command == "create":
-            this_worksheet = Worksheet.create(workbook_id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
-            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': this_worksheet.id})
+            this_worksheet = Worksheet.create(workbook_id=workbook_id, name=request.POST.get('name'),
+                                              description=request.POST.get('description'))
+            redirect_url = reverse('worksheet_display',
+                                   kwargs={'workbook_id': workbook_id, 'worksheet_id': this_worksheet.id})
         elif command == "edit":
             worksheet_name = request.POST.get('name')
             worksheet_desc = request.POST.get('description')
             blacklist = re.compile(BLACKLIST_RE, re.UNICODE)
-            match_name = blacklist.search(unicode(worksheet_name))
-            match_desc = blacklist.search(unicode(worksheet_desc))
+            match_name = blacklist.search(str(worksheet_name))
+            match_desc = blacklist.search(str(worksheet_desc))
 
             if match_name or match_desc:
                 # XSS risk, log and fail this cohort save
                 matches = ""
                 fields = ""
                 if match_name:
-                    match_name = blacklist.findall(unicode(worksheet_name))
-                    logger.error('[ERROR] While saving a worksheet, saw a malformed name: ' + worksheet_name + ', characters: ' + str(match_name))
+                    match_name = blacklist.findall(str(worksheet_name))
+                    logger.error(
+                        '[ERROR] While saving a worksheet, saw a malformed name: ' + worksheet_name + ', characters: ' + str(
+                            match_name))
                     matches = "name contains"
                     fields = "name"
                 if match_desc:
-                    match_desc = blacklist.findall(unicode(worksheet_desc))
-                    logger.error('[ERROR] While saving a worksheet, saw a malformed description: ' + worksheet_desc + ', characters: ' + str(match_desc))
+                    match_desc = blacklist.findall(str(worksheet_desc))
+                    logger.error(
+                        '[ERROR] While saving a worksheet, saw a malformed description: ' + worksheet_desc + ', characters: ' + str(
+                            match_desc))
                     matches = "name and description contain" if match_name else "description contains"
                     fields += (" and description" if match_name else "description")
 
@@ -411,13 +440,15 @@ def worksheet(request, workbook_id=0, worksheet_id=0):
             else:
                 Worksheet.edit(id=worksheet_id, name=worksheet_name, description=worksheet_desc)
 
-            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
-        elif command == "copy" :
+            redirect_url = reverse('worksheet_display',
+                                   kwargs={'workbook_id': workbook_id, 'worksheet_id': worksheet_id})
+        elif command == "copy":
             this_worksheet = Worksheet.copy(id=worksheet_id)
-            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': this_worksheet.id})
-        elif command == "delete" :
+            redirect_url = reverse('worksheet_display',
+                                   kwargs={'workbook_id': workbook_id, 'worksheet_id': this_worksheet.id})
+        elif command == "delete":
             Worksheet.destroy(id=worksheet_id)
-            redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id})
+            redirect_url = reverse('workbook_detail', kwargs={'workbook_id': workbook_id})
 
     return redirect(redirect_url)
 
@@ -427,49 +458,56 @@ def worksheet_variable_delete(request, workbook_id=0, worksheet_id=0, variable_i
     Worksheet.objects.get(id=worksheet_id).remove_variable(variable_id);
     workbook = Workbook.objects.get(id=workbook_id)
     workbook.save()
-    redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
+    redirect_url = reverse('worksheet_display', kwargs={'workbook_id': workbook_id, 'worksheet_id': worksheet_id})
     return redirect(redirect_url)
 
 
 @login_required
 def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
-    command  = request.path.rsplit('/',1)[1];
+    command = request.path.rsplit('/', 1)[1];
     json_response = False
     workbook_name = "Untitled Workbook"
-    result        = {}
+    result = {}
 
-    if request.method == "POST" :
-        if command == "delete" :
-            Worksheet_variable.destroy(workbook_id=workbook_id, worksheet_id=worksheet_id, id=variable_id, user=request.user)
+    if request.method == "POST":
+        if command == "delete":
+            Worksheet_variable.destroy(workbook_id=workbook_id, worksheet_id=worksheet_id, id=variable_id,
+                                       user=request.user)
             result['message'] = "variables have been deleted from workbook"
         else:
+            body_unicode = request.body.decode('utf-8')
+            body = json.loads(body_unicode)
             variables = []
-            #from Edit Page
-            if "variables" in request.body:
+            # from Edit Page
+            if "variables" in body:
                 json_response = True
-                name          = json.loads(request.body)['name']
-                variable_list = json.loads(request.body)['variables']
-                variable_favorite_result = VariableFavorite.create(name       = name,
-                                                                   variables  = variable_list,
-                                                                   user       = request.user)
+                name = body['name']
+                variable_list = body['variables']
+                variable_favorite_result = VariableFavorite.create(name=name,
+                                                                   variables=variable_list,
+                                                                   user=request.user)
 
                 model = VariableFavorite.objects.get(id=variable_favorite_result['id'])
-                messages.info(request, 'The variable favorite list \"' + escape(model.name) + '\" was created and added to your worksheet')
+                messages.info(request, 'The variable favorite list \"' + escape(
+                    model.name) + '\" was created and added to your worksheet')
                 variables = model.get_variables()
 
-            #from Details Page or list page
-            if request.POST.get("variable_list_id") :
+            # from Details Page or list page
+            if request.POST.get("variable_list_id"):
                 workbook_name = request.POST.get("name")
-                variable_id   = request.POST.get("variable_list_id")
-                try :
+                variable_id = request.POST.get("variable_list_id")
+                try:
                     variable_fav = VariableFavorite.objects.get(id=variable_id)
                     variables = variable_fav.get_variables()
                 except ObjectDoesNotExist:
                     result['error'] = "variable favorite does not exist"
 
-            #from Select Page
-            if "var_favorites" in request.body :
-                variable_fav_list = json.loads(request.body)['var_favorites']
+            body_unicode = request.body.decode('utf-8')
+            body = json.loads(body_unicode)
+
+            # from Select Page
+            if "var_favorites" in body:
+                variable_fav_list = body['var_favorites']
                 json_response = True
                 for fav in variable_fav_list:
                     try:
@@ -480,14 +518,18 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
 
             if len(variables) > 0:
                 if workbook_id == 0:
-                    workbook_model  = Workbook.create(name=workbook_name, description="This workbook was created with variables added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
-                    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+                    workbook_model = Workbook.create(name=workbook_name,
+                                                     description="This workbook was created with variables added to the first worksheet. Click Edit Details to change your workbook title and description.",
+                                                     user=request.user)
+                    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="",
+                                                               workbook=workbook_model)
                 else:
-                    workbook_model  = Workbook.objects.get(id=workbook_id)
+                    workbook_model = Workbook.objects.get(id=workbook_id)
                     workbook_model.save()
                     worksheet_model = Worksheet.objects.get(id=worksheet_id)
 
-                Worksheet_variable.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id, variable_list=variables, user=request.user)
+                Worksheet_variable.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id,
+                                             variable_list=variables, user=request.user)
                 result['workbook_id'] = workbook_model.id
                 result['worksheet_id'] = worksheet_model.id
             else:
@@ -495,10 +537,11 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
     else:
         result['error'] = "method not correct"
 
-    if json_response :
+    if json_response:
         return HttpResponse(json.dumps(result), status=200)
     else:
-        redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_model.id, 'worksheet_id': worksheet_model.id})
+        redirect_url = reverse('worksheet_display',
+                               kwargs={'workbook_id': workbook_model.id, 'worksheet_id': worksheet_model.id})
         return redirect(redirect_url)
 
 
@@ -512,13 +555,13 @@ def worksheet_gene_delete(request, workbook_id=0, worksheet_id=0, gene_id=0):
     Worksheet.objects.get(id=worksheet_id).remove_gene(gene_id);
     workbook = Workbook.objects.get(id=workbook_id)
     workbook.save()
-    redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
+    redirect_url = reverse('worksheet_display', kwargs={'workbook_id': workbook_id, 'worksheet_id': worksheet_id})
     return redirect(redirect_url)
 
 
 @login_required
 def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
-    command = request.path.rsplit('/',1)[1];
+    command = request.path.rsplit('/', 1)[1];
     json_response = False
     result = {}
 
@@ -529,7 +572,7 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
         else:
             genes = []
             workbook_name = 'Untitled Workbook'
-            #from Gene Edit Page
+            # from Gene Edit Page
             if request.POST.get("genes-list"):
                 # Get workbook name
                 if request.POST.get('name'):
@@ -540,50 +583,61 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
                 gene_list = [x.strip() for x in gene_list.split(' ')]
                 gene_list = list(set(gene_list))
                 GeneFave = GeneFavorite.create(name=name, gene_list=gene_list, user=request.user)
-                messages.info(request, 'The gene favorite list \"' + name + '\" was created and added to your worksheet')
+                messages.info(request,
+                              'The gene favorite list \"' + name + '\" was created and added to your worksheet')
                 # Refetch the created gene list, because it will have the names correctly formatted
                 for g in GeneFavorite.objects.get(id=GeneFave['id']).get_genes_list():
                     genes.append(g)
 
-            #from Gene Details Page
+            # from Gene Details Page
             if request.POST.get("gene_list_id"):
                 # Get workbook name
                 if request.POST.get('name'):
                     workbook_name = request.POST.get('name')
 
                 gene_id = request.POST.get("gene_list_id")
-                try :
+                try:
                     gene_fav = GeneFavorite.objects.get(id=gene_id)
                     names = gene_fav.get_gene_name_list()
                     for g in names:
-                        if g not  in genes:
+                        if g not in genes:
                             genes.append(g)
                 except ObjectDoesNotExist:
-                        None
+                    None
+            try:
+                body_unicode = request.body.decode('utf-8')
+                body = json.loads(body_unicode)
 
-            #from Gene List Page
-            if "gene_fav_list" in request.body :
-                json_response = True
-                gene_fav_list = json.loads(request.body)['gene_fav_list']
-                for id in gene_fav_list:
-                    try:
-                        fav = GeneFavorite.objects.get(id=id)
-                        names = fav.get_gene_name_list()
-                        for g in names:
-                            if g not in genes:
-                                genes.append(g)
-                    except ObjectDoesNotExist:
-                        None
+                # from Gene List Page
+                if "gene_fav_list" in body:
+                    json_response = True
+                    gene_fav_list = body['gene_fav_list']
+                    for id in gene_fav_list:
+                        try:
+                            fav = GeneFavorite.objects.get(id=id)
+                            names = fav.get_gene_name_list()
+                            for g in names:
+                                if g not in genes:
+                                    genes.append(g)
+                        except ObjectDoesNotExist:
+                            None
+            except JSONDecodeError:
+                pass
+
             if len(genes) > 0:
                 if workbook_id is 0:
-                    workbook_model = Workbook.create(name=workbook_name, description="This workbook was created with genes added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
-                    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+                    workbook_model = Workbook.create(name=workbook_name,
+                                                     description="This workbook was created with genes added to the first worksheet. Click Edit Details to change your workbook title and description.",
+                                                     user=request.user)
+                    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="",
+                                                               workbook=workbook_model)
                 else:
                     workbook_model = Workbook.objects.get(id=workbook_id)
                     workbook_model.save()
                     worksheet_model = Worksheet.objects.get(id=worksheet_id)
 
-                Worksheet_gene.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id, gene_list=genes, user=request.user)
+                Worksheet_gene.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id,
+                                         gene_list=genes, user=request.user)
                 result['genes'] = genes
             else:
                 result['error'] = "no genes to add"
@@ -591,10 +645,11 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
     else:
         result['error'] = "method not correct"
 
-    if json_response :
+    if json_response:
         return HttpResponse(json.dumps(result), status=200)
     else:
-        redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_model.id, 'worksheet_id': worksheet_model.id})
+        redirect_url = reverse('worksheet_display',
+                               kwargs={'workbook_id': workbook_model.id, 'worksheet_id': worksheet_model.id})
         return redirect(redirect_url)
 
 
@@ -605,10 +660,10 @@ def workbook_create_with_plot(request):
 
 @login_required
 def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
-    command = request.path.rsplit('/',1)[1];
+    command = request.path.rsplit('/', 1)[1];
     json_response = False
-    default_name  = "Untitled Workbook"
-    result        = {}
+    default_name = "Untitled Workbook"
+    result = {}
     try:
         workbook_model = Workbook.objects.get(id=workbook_id) if workbook_id else None
 
@@ -618,17 +673,20 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
                 var = Worksheet_plot.objects.get(id=plot_id).delete()
                 result['message'] = "This plot has been deleted from workbook."
             else:
-                if "attrs" in request.body:
+                body_unicode = request.body.decode('utf-8')
+                body = json.loads(body_unicode)
+
+                if "attrs" in body:
                     json_response = True
-                    attrs    = json.loads(request.body)['attrs']
-                    settings = json.loads(request.body)['settings']
-                    if plot_id :
+                    attrs = body['attrs']
+                    settings = body['settings']
+                    if plot_id:
                         plot_model = Worksheet_plot.objects.get(id=plot_id)
                         plot_model.settings_json = settings
                         if attrs['cohorts']:
-                            try :
+                            try:
                                 Worksheet_plot_cohort.objects.filter(plot=plot_model).delete()
-                                for obj in attrs['cohorts'] :
+                                for obj in attrs['cohorts']:
                                     wpc = Worksheet_plot_cohort(plot=plot_model, cohort_id=obj['id'])
                                     wpc.save()
                             except ObjectDoesNotExist:
@@ -646,7 +704,7 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
 
             worksheet_model = Worksheet.objects.get(id=worksheet_id)
             plots = worksheet_model.worksheet_plot_set.all()
-            for p in plots :
+            for p in plots:
                 p.active = False
                 p.save()
 
@@ -666,7 +724,8 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
         if json_response:
             return HttpResponse(json.dumps(result), status=200)
         else:
-            redirect_url = reverse('worksheet_display', kwargs={'workbook_id': workbook_model.id, 'worksheet_id': worksheet_model.id})
+            redirect_url = reverse('worksheet_display',
+                                   kwargs={'workbook_id': workbook_model.id, 'worksheet_id': worksheet_model.id})
             return redirect(redirect_url)
 
     except Exception as e:
@@ -679,8 +738,9 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
 @login_required
 def worksheet_cohorts(request, workbook_id=0, worksheet_id=0, cohort_id=0):
     command = request.path.rsplit('/', 1)[1]
-
-    cohorts = json.loads(request.body)['cohorts']
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    cohorts = body['cohorts']
     if request.method == "POST":
         wrkbk = Workbook.objects.get(id=workbook_id)
         wrkbk.save()
@@ -703,8 +763,8 @@ def worksheet_comment(request, workbook_id=0, worksheet_id=0, comment_id=0):
         content = request.POST.get('content', '').encode('utf-8')
         if command == "create":
             return_obj = Worksheet_comment.create(worksheet_id=worksheet_id,
-                                              content=content,
-                                              user=request.user)
+                                                  content=content,
+                                                  user=request.user)
 
             return_obj['content'] = escape(return_obj['content'])
             return HttpResponse(json.dumps(return_obj), status=200)

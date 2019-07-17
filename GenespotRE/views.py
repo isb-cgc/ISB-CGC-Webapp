@@ -1,5 +1,5 @@
 """
-Copyright 2015-2018, Institute for Systems Biology
+Copyright 2015-2019, Institute for Systems Biology
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -11,13 +11,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from builtins import str
+from builtins import map
+from past.builtins import basestring
 import collections
 import json
 import logging
 import sys
 import re
 import datetime
-import requests
+# import requests
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -31,6 +34,8 @@ from django.contrib import messages
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
+from adminrestrict.middleware import get_ip_address_from_request
+
 from google_helpers.directory_service import get_directory_resource
 from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
@@ -42,18 +47,17 @@ from projects.models import Program
 from workbooks.models import Workbook
 from accounts.models import GoogleProject
 from accounts.sa_utils import get_nih_user_details
-
+from notebooks.notebook_vm import check_vm_stat
 from allauth.socialaccount.models import SocialAccount
-
 from django.http import HttpResponse, JsonResponse
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
 
-ERA_LOGIN_URL = settings.ERA_LOGIN_URL
 OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
+# SOLR_URL = settings.SOLR_URL
 
 
 
@@ -62,9 +66,9 @@ def convert(data):
     if isinstance(data, basestring):
         return str(data)
     elif isinstance(data, collections.Mapping):
-        return dict(map(convert, data.iteritems()))
+        return dict(list(map(convert, iter(list(data.items())))))
     elif isinstance(data, collections.Iterable):
-        return type(data)(map(convert, data))
+        return type(data)(list(map(convert, data)))
     else:
         return data
 
@@ -73,7 +77,7 @@ def _decode_list(data):
     # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     rv = []
     for item in data:
-        if isinstance(item, unicode):
+        if isinstance(item, str):
             item = item.encode('utf-8')
         elif isinstance(item, list):
             item = _decode_list(item)
@@ -86,10 +90,10 @@ def _decode_list(data):
 def _decode_dict(data):
     # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     rv = {}
-    for key, value in data.iteritems():
-        if isinstance(key, unicode):
+    for key, value in list(data.items()):
+        if isinstance(key, str):
             key = key.encode('utf-8')
-        if isinstance(value, unicode):
+        if isinstance(value, str):
             value = value.encode('utf-8')
         elif isinstance(value, list):
             value = _decode_list(value)
@@ -105,6 +109,15 @@ Returns user to landing page.
 @never_cache
 def landing_page(request):
     return render(request, 'GenespotRE/landing.html', {'request': request, })
+
+
+'''
+Displays the privacy policy
+'''
+@never_cache
+def privacy_policy(request):
+    return render(request, 'GenespotRE/privacy.html', {'request': request, })
+
 
 '''
 Returns css_test page used to test css for general ui elements
@@ -140,14 +153,13 @@ def user_detail(request, user_id):
 
         forced_logout = 'dcfForcedLogout' in request.session
         nih_details = get_nih_user_details(user_id, forced_logout)
-        for key in nih_details.keys():
+        for key in list(nih_details.keys()):
             user_details[key] = nih_details[key]
 
         return render(request, 'GenespotRE/user_detail.html',
                       {'request': request,
                        'user': user,
-                       'user_details': user_details,
-                       'ERA_LOGIN_URL': settings.ERA_LOGIN_URL
+                       'user_details': user_details
                        })
     else:
         return render(request, '403.html')
@@ -300,7 +312,7 @@ def get_image_data_args(request):
         file_uuid = request.POST.get('file_uuid', None)
 
     if file_uuid:
-        file_uuid = (None if re.compile(ur'[^A-Za-z0-9\-]').search(file_uuid) else file_uuid)
+        file_uuid = (None if re.compile(r'[^A-Za-z0-9\-]').search(file_uuid) else file_uuid)
 
     return get_image_data(request, file_uuid)
 
@@ -331,7 +343,7 @@ def get_image_data(request, file_uuid):
                     'Height': query_results[0]['f'][2]['v'],
                     'MPP-X': query_results[0]['f'][3]['v'],
                     'MPP-Y': query_results[0]['f'][4]['v'],
-                    'FileLocation': re.sub(r'isb-.*-open/gdc', 'imaging-west', query_results[0]['f'][5]['v']),
+                    'FileLocation': query_results[0]['f'][5]['v'],
                     'TissueID': query_results[0]['f'][0]['v'],
                     'sample-barcode': query_results[0]['f'][6]['v'],
                     'case-barcode': query_results[0]['f'][7]['v'],
@@ -473,6 +485,38 @@ def dashboard_page(request):
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct().order_by('-last_date_saved')
 
+    # Notebook VM Instance
+    user_instances = request.user.instance_set.filter(active=True)
+    user = User.objects.get(id=request.user.id)
+    gcp_list = GoogleProject.objects.filter(user=user, active=1)
+    vm_username = request.user.email.split('@')[0]
+    client_ip = get_ip_address_from_request(request)
+    logger.debug('client_ip: '+client_ip)
+    client_ip_range = ', '.join([client_ip])
+
+    if user_instances:
+        user_vm = user_instances[0]
+        machine_name = user_vm.name
+        project_id = user_vm.gcp.project_id
+        zone = user_vm.zone
+        result = check_vm_stat(project_id, zone, machine_name)
+        status = result['status']
+    else:
+        # default values to fill in fields in form
+        project_id = ''
+        machine_name = '{}-unique-machine-name-1'.format(vm_username)
+        zone = 'us-central1-c'
+        status = 'NOT FOUND'
+
+    notebook_vm = {
+        'user': vm_username,
+        'project_id': project_id,
+        'name': machine_name,
+        'zone': zone,
+        'client_ip_range': client_ip_range,
+        'status': status
+    }
+
     # Gene & miRNA Favorites
     genefaves = request.user.genefavorite_set.filter(active=True)
 
@@ -485,5 +529,7 @@ def dashboard_page(request):
         'programs' : programs,
         'workbooks': workbooks,
         'genefaves': genefaves,
-        'varfaves' : varfaves
+        'varfaves' : varfaves,
+        'notebook_vm': notebook_vm,
+        'gcp_list': gcp_list,
     })

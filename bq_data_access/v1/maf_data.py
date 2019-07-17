@@ -1,21 +1,21 @@
-"""
+#
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
-Copyright 2015, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
-
+from builtins import str
+from builtins import object
 import logging
 
 from bq_data_access.v1.errors import FeatureNotFoundException
@@ -71,7 +71,7 @@ def validate_input(query_table_id):
         raise Exception("Invalid table ID for maf")
 
 def build_query(project_name, dataset_name, table_name, gene, value_field, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
-    cohort_project_name=settings.PROJECT_NAME
+    cohort_project_name=settings.GCLOUD_PROJECT_ID
     # Generate the 'IN' statement string: (%s, %s, ..., %s)
     cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
     project_id_stmt = ''
@@ -142,7 +142,7 @@ def build_feature_query():
                        GROUP BY Hugo_Symbol")
 
     query_str = query_template.format(dataset_name=settings.BIGQUERY_DATASET_V1,
-                                      project_name=settings.BIGQUERY_DATA_PROJECT_NAME, table_name='MAF')
+                                      project_name=settings.BIGQUERY_DATA_PROJECT_ID, table_name='MAF')
 
     return [query_str]
 
@@ -204,8 +204,8 @@ class GNABFeatureProvider(object):
         return str(data_point['value'])
 
     def get_data_from_bigquery(self, cohort_id_array, cohort_dataset, cohort_table):
-        project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_DATA_PROJECT_NAME
+        project_id = settings.BIGQUERY_PROJECT_ID
+        project_name = settings.BIGQUERY_DATA_PROJECT_ID
         dataset_name = settings.BIGQUERY_DATASET_V1
         result = do_query(project_id, project_name, dataset_name,
                           self.table_name, self.gene_label, self.value_field,

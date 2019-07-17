@@ -1,21 +1,20 @@
-"""
+#
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
-Copyright 2015, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
-
+from builtins import object
 import logging
 from json import loads as json_loads
 
@@ -63,8 +62,8 @@ class InterProDataProvider(object):
         return interpro_literal
 
     def get_data_from_bigquery(self, uniprot_id):
-        project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_DATA_PROJECT_NAME
+        project_id = settings.BIGQUERY_PROJECT_ID
+        project_name = settings.BIGQUERY_DATA_PROJECT_ID
         result = self.do_query(project_id, project_name, uniprot_id)
         return result
 

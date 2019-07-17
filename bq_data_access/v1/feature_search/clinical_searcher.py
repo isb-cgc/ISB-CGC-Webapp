@@ -1,21 +1,20 @@
-"""
+#
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
-Copyright 2015, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
-
+from builtins import object
 from bq_data_access.v1.schema.tcga_clinical import schema as clinical_schema
 from bq_data_access.v1.clinical_data import CLINICAL_FEATURE_TYPE
 from bq_data_access.v1.feature_search.common import InvalidFieldException, EmptyQueryException
@@ -55,13 +54,13 @@ class ClinicalSearcher(object):
 
     def validate_feature_search_input(self, parameters):
         # Check that the input contains only allowed fields
-        for field, keyword in parameters.iteritems():
+        for field, keyword in list(parameters.items()):
             if field not in self.feature_search_valid_fields:
                 raise InvalidFieldException(self.get_datatype_identifier(), keyword, field)
 
         # At least one field has to have a non-empty keyword
         found_field = False
-        for field, keyword in parameters.iteritems():
+        for field, keyword in list(parameters.items()):
             if len(keyword) > 0:
                 found_field = True
                 continue
