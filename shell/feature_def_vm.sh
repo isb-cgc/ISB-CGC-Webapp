@@ -14,7 +14,7 @@ echo "Cloning repos..."
 git clone -b master https://github.com/isb-cgc/ISB-CGC-Common.git
 git clone -b master https://github.com/isb-cgc/ISB-CGC-WebApp.git
 
-# Remove .pyc files; these can sometimes stick around and if a 
+# Remove .pyc files; these can sometimes stick around and if a
 # model has changed names it will cause various load failures
 find . -type f -name '*.pyc' -delete
 
