@@ -26,20 +26,20 @@ define(['jquery'], function($) {
                 (val.match(/^-?\d*\.?\d+$/) !== null)
             ));
         },
-        get_min_max: function(data, selector) {
+        get_min_max: function(data, selector, include_nan) { //include_nan: true if to handle NaN data as 0
             var self=this;
             var min = d3.min(data, function(d) {
                 if (self.isValidNumber(d[selector])) {
                     return parseFloat(d[selector]);
                 } else {
-                    return undefined;
+                    return include_nan ? 0 : undefined;
                 }
             });
             var max = d3.max(data, function(d) {
                 if (self.isValidNumber(d[selector])) {
                     return parseFloat(d[selector]);
                 } else {
-                    return undefined;
+                    return include_nan ? 0 : undefined;
                 }
             });
             min = isNaN(min) ? 0 : min;
