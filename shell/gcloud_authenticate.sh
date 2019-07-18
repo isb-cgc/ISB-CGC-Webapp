@@ -1,5 +1,5 @@
-echo $DEPLOYMENT_KEY_ISB_CGC | base64 --decode --ignore-garbage > deployment.key.json
+echo $UAT_PRIVATE_KEY_FOR_V2 | base64 --decode --ignore-garbage > deployment.key.json
 
 gcloud auth activate-service-account --key-file deployment.key.json
-gcloud config set account $DEPLOYMENT_CLIENT_EMAIL_ISB_CGC
-gcloud config set project "$DEV_PROJECT_ID"
+gcloud config set account $UAT_CLIENT_EMAIL
+gcloud config set project "$UAT_PROJECT_ID"
