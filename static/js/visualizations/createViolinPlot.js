@@ -46,9 +46,6 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
         scale: null
     };
 
-    // The samples in our data, keyed by their SVG element ID attributes
-    var sampleSet = {};
-
     // The samples found in the selected ID set; this is used to produce the JSON which
     // is submitted by the form
     var selectedSamples = null;
@@ -406,7 +403,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .on('mouseout.tip', median_tip.hide)
                 .call(median_tip);
         },
-        createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, margin, legend, cohort_map) {
+        createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, margin, legend, cohort_map, bySample) {
             var data = [];
             var colorBy = legend.title.toLowerCase() == 'cohort' ? 'cohort' : 'c';
             var y_padding = (max_y-min_y)*.05;
@@ -421,19 +418,53 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .offset([0, 0])
                 .html(function(d) {
                     return '<span>Case: ' + d['case_id'] + '<br/>' +
-                        'Sample: ' + d['sample_id'] + '<br/>' +
+                        (bySample ? ('Sample: ' + d['sample_id'] + '<br/>'):'') +
                         xLabel + ': ' + d[xAttr] + '<br/>' +
                         yLabel + ': ' + d[yAttr] + '<br/>' +
-                        legend.title + ': ' + vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ',') +' </span>';
+                        (yLabel.includes(legend.title) || xLabel.includes(legend.title)? '' :
+                            (legend.title + ': ' + vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ','))) +
+                        ' </span>';
                 });
-
             // Split data into separate violins
+
+            var sampleSetByCase = {};
+            var sampleSetBySample = {};
+            var caseSet = {};
             raw_Data.map(function(d){
                 if(helpers.isValidNumber(d[yAttr])) {
-                    var id = Counter.getNextSet();
-                    d['id'] = id;
-                    sampleSet[id] = {sample: d['sample_id'], case: d['case_id'], project: d['project']};
-                    data.push(d);
+                    var sample_id = d['sample_id'];
+                    var case_id = d['case_id'];
+                    var sampleItem = {sample: sample_id, case: case_id, project: d['project']};
+                    var is_dup = false;
+                    var x_item = d[xAttr];
+                    var y_item = d[yAttr];
+                    var val = x_item + '-' + y_item;
+                    if(bySample){
+                        d['id'] = sample_id;
+                        data.push(d);
+                        sampleSetBySample[sample_id] = sampleItem;
+                    }
+                    else{
+                        if(!caseSet[val]){
+                            caseSet[val] = {};
+                        }
+                        if(!caseSet[val][case_id]) {
+                            caseSet[val][case_id] = true;
+                            d['id'] = val;
+                            data.push(d);
+                        }
+                        else{
+                            is_dup = true;
+                        }
+                        if(!sampleSetByCase[val]){
+                            sampleSetByCase[val] = {};
+                        }
+                        sampleSetByCase[val][sample_id] = sampleItem;
+                    }
+
+                    if(is_dup)
+                        return;
+
                     var key = d[xAttr];
                     var tmp = {};
                     if (colorBy && d[colorBy]) {
@@ -506,7 +537,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
                 // Don't try to plot values we don't have
 
-                xdomain.push(key + ':' + values_only.length);
+                xdomain.push(key + ':' + values_only.length + (bySample ? ' samples': ' cases') + '');
                 if(values_only.length > 0) {
                     this.addViolin(g, values_only, height, violin_width, domain, range);
                     this.addMedianLine(g, values_only, height, violin_width, domain, range);
@@ -581,14 +612,16 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             d3.select('.x.axis').selectAll('foreignObject').attr('style','transform: translate(-'+(violin_width/2)+'px,0px); font-size: '+tick_font_size+'px');
             d3.select('.x.axis').selectAll('foreignObject div').attr('class','centered');
 
-            // Highlight the selected circles.
+            var plot_node = plot_area.node();
+            plot_node.parentNode.append(plot_node); //move the plot above the axis ticks to have a clear access to hover over nodes
+
             var brushmove = _.throttle(function(p) {
                 var e = brush.extent();
                 var oldSet = selectedSamples;
                 selectedSamples = {};
                 var reCalc = false;
 
-                plot_area.selectAll("circle").classed("selected", function(d) {
+                plot_area.selectAll('circle').classed('selected', function(d) {
                     return e[0][0] <= $(this).attr('cx') && $(this).attr('cx') <= e[1][0]
                         && e[0][1] <= d[yAttr] && d[yAttr] <= e[1][1]
                         && !$(this).is('.hidden');
@@ -776,11 +809,23 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             function sample_form_update(reCalc){
                 if(reCalc) {
                     var case_set = {};
+                    var sample_count = 0;
                     _.each(Object.keys(selectedSamples),function(val) {
-                        case_set[sampleSet[val]['case']] = 1;
+                        if(bySample){
+                            var case_id = sampleSetBySample[val]['case'];
+                            case_set[case_id] = 1;
+                        }
+                        else{
+                            sample_count += Object.keys(sampleSetByCase[val]).length;
+                            _.each(Object.keys(sampleSetByCase[val]), function(sample_id){
+                                var case_id = sampleSetByCase[val][sample_id]['case']
+                                case_set[case_id] = 1;
+                            })
+                        }
                     });
+                    sample_count = bySample ? Object.keys(selectedSamples).length : sample_count;
 
-                    $('.worksheet.active .plot .selected-samples-count').html('Number of Samples: ' + Object.keys(selectedSamples).length);
+                    $('.worksheet.active .plot .selected-samples-count').html('Number of Samples: ' + sample_count);
                     $('.worksheet.active .plot .selected-patients-count').html('Number of Cases: ' + Object.keys(case_set).length);
                     $('.worksheet.active .plot .btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
                 }
@@ -790,8 +835,16 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             $('.worksheet.active .save-cohort-card').find('.btn').on('click',function(e){
                 if(Object.keys(selectedSamples).length > 0){
                     var selected_sample_set = [];
-                    _.each(Object.keys(selectedSamples),function(sample){
-                        selected_sample_set.push(sampleSet[sample]);
+                    _.each(Object.keys(selectedSamples),function(id){
+                        if(bySample){
+                            selected_sample_set.push(sampleSetBySample[id]);
+                        }
+                        else{
+                            _.each(Object.keys(sampleSetByCase[id]), function(sample_id){
+                                selected_sample_set.push(sampleSetByCase[id][sample_id]);
+                            });
+                        }
+
                     });
 
                     $('.worksheet.active .save-cohort-form input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
@@ -813,7 +866,9 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                     if(helpers.isValidNumber(d[yAttr])) {
                         p_data[i]= {};
                         p_data[i]['case_id'] = d['case_id'];
-                        p_data[i]['sample_id'] = d['sample_id'];
+                        if(bySample){
+                            p_data[i]['sample_id'] = d['sample_id'];
+                        }
                         p_data[i][xAttr] = d[xAttr];
                         p_data[i][yAttr] = isNaN(d[yAttr])? d[yAttr] : Number(d[yAttr]);
                         p_data[i][legend.title] = vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ';');
@@ -823,9 +878,9 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             }
 
             function get_csv_data(){
-                var csv_data = 'case_id, sample_id, '+xAttr+', '+yAttr+', '+legend.title+'\n';
+                var csv_data = 'case_id, '+ (bySample ? 'sample_id, ':'') +xAttr+', '+yAttr+', '+legend.title+'\n';
                 data.map(function(d){
-                    csv_data += d['case_id'] +', '+ d['sample_id'] + ', ' + d[xAttr] + ', '+ d[yAttr] +', '+ vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ';')+ '\n';
+                    csv_data += d['case_id'] +', '+ (bySample ? (d['sample_id']+', ') : '') + d[xAttr] + ', '+ (isNaN(d[yAttr])? d[yAttr] : Number(d[yAttr])) +', '+ vizhelpers.get_legend_val(cohort_map, colorBy, d[colorBy], ';')+ '\n';
                 });
                 return csv_data;
             }
