@@ -1,4 +1,38 @@
 version: 2
+commands:
+  setup_vars:
+    steps:
+      - run:
+          name: "Set the Tier"
+          command: |
+            TIER=DEV
+            if [[ ${CIRCLE_BRANCH} =~ isb-cgc-(prod|uat|test).* ]]; then
+              TIER=$(awk -F- '{print toupper($3)}' <<< ${CIRCLE_BRANCH})
+            fi
+            echo "export TIER=${TIER}" >> $BASH_ENV
+            echo "Tier was identified as ${TIER}"
+      - run:
+          name: "Assign Project-level vars"
+          command: |
+            if [[${TIER] == "PROD" ] | [ ${TIER} == "DEV" ]; then
+              echo "Found isb-cgc"
+              echo "export DEPLOYMENT_KEY=${DEPLOYMENT_KEY_ISB_CGC}" >> $BASH_ENV
+              echo "export DEPLOYMENT_CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC}" >> $BASH_ENV
+              echo "export DEPLOYMENT_PROJECT_ID=${DEV_PROJECT_ID}" >> $BASH_ENV
+            elif [[ ${TIER] == "UAT" ]]; then
+              echo "Found isb-cgc-uat"
+              echo "export DEPLOYMENT_KEY=${DEPLOYMENT_KEY_ISB_CGC_UAT}" >> $BASH_ENV
+              echo "export DEPLOYMENT_CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC_UAT}" >> $BASH_ENV
+              echo "export DEPLOYMENT_PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC_UAT}" >> $BASH_ENV
+            elif [[ ${TIER] == "TEST" ]]; then
+              echo "Found isb-cgc-test"
+              echo "export DEPLOYMENT_KEY=${DEPLOYMENT_KEY_ISB_CGC_TEST}" >> $BASH_ENV
+              echo "export DEPLOYMENT_CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC_TEST}" >> $BASH_ENV
+              echo "export DEPLOYMENT_PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC_TEST}" >> $BASH_ENV
+            else
+              echo "[ERROR] - Unrecognized tier: ${TIER}"
+            fi
+
 jobs:
   build_job:
     environment:
@@ -33,6 +67,7 @@ jobs:
           key: isb-cgc-webapp-lib-{{ checksum "requirements.txt" }}
           paths:
             - ./lib
+      - setup_vars
       - run:
           name: Auth, Staging, and Database testing
           command: |
