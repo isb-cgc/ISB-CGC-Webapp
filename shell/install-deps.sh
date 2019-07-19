@@ -3,7 +3,11 @@ if [ -n "$CI" ]; then
     export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
 
     # Clone dependencies
-    git clone -b ${CIRCLE_BRANCH} https://github.com/isb-cgc/ISB-CGC-Common.git
+    COMMON_BRANCH=master
+    if [[ ${CIRCLE_BRANCH} =~ isb-cgc-(prod|uat|test).* ]]; then
+        COMMON_BRANCH=$(awk -F- '{print $1"-"$2"-"$3}' <<< ${CIRCLE_BRANCH})
+    fi
+    git clone -b ${COMMON_BRANCH} https://github.com/isb-cgc/ISB-CGC-Common.git
 else
     export $(cat /home/vagrant/parentDir/secure_files/.env | grep -v ^# | xargs) 2> /dev/null
     export HOME=/home/vagrant
