@@ -14,8 +14,8 @@ commands:
       - run:
           name: "Assign Project-level vars"
           command: |
-            if [ ${TIER} == "PROD" ] | [ ${TIER} == "DEV" ]; then
-              echo "Found isb-cgc "
+            if [[ ${TIER} == "PROD" ]] | [[ ${TIER} == "DEV" ]]; then
+              echo "Found isb-cgc"
               echo "export DEPLOYMENT_KEY=${DEPLOYMENT_KEY_ISB_CGC}" >> $BASH_ENV
               echo "export DEPLOYMENT_CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC}" >> $BASH_ENV
               echo "export DEPLOYMENT_PROJECT_ID=${DEV_PROJECT_ID}" >> $BASH_ENV
