@@ -1,5 +1,3 @@
-echo ${DEPLOYMENT_KEY}
-
 echo ${DEPLOYMENT_KEY} | base64 --decode --ignore-garbage > deployment.key.json
 
 gcloud auth activate-service-account --key-file deployment.key.json
