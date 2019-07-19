@@ -108,4 +108,8 @@ workflows:
             - build_job
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - isb-cgc-test
+                - isb-cgc-uat
+                - isb-cgc-prod
