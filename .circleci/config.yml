@@ -37,7 +37,6 @@ jobs:
   build_job:
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
-    name: Building Deployment Container
     working_directory: ~/ISB-CGC-Webapp
     docker:
       - image: circleci/python:3.5.6
@@ -112,7 +111,6 @@ jobs:
   deploy_job:
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
-    name: Deploy to AppEngine Flex
     working_directory: ~/ISB-CGC-Webapp
     docker:
       - image: circleci/python:3.5.6
