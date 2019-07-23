@@ -83,6 +83,4 @@ if [ -z "${CI}" ] || [ ! -d "/usr/lib/google-cloud-sdk" ]; then
     apt-get update && apt-get -y --allow-downgrades install google-cloud-sdk=251.0.0-0
     apt-get -y --allow-downgrades install google-cloud-sdk-app-engine-python=251.0.0-0
     echo "Google Cloud SDK Installed"
-else
-    echo "Using restored cache for Google Cloud SDK."
 fi
