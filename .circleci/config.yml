@@ -59,7 +59,7 @@ commands:
 
             if [[ -n $CONFIG ]]; then
               echo ${CONFIG} | base64 --decode --ignore-garbage > config_file.txt
-              cat config_file.txt | sed 's/\([^=]*\)=\(.*\)/echo "export \1=${\2}" >> $BASH_ENV/g' | xargs
+              cat config_file.txt | sed 's/\([^=]*\)=\(.*\)/echo "export \1=\2" >> $BASH_ENV/g' | xargs
             else
               echo "[ERROR] Couldn't assign deployment configuration file - exiting."
               exit 1
