@@ -35,30 +35,31 @@ commands:
             echo "export DEPLOYMENT_KEY=\"${KEY}\"" >> $BASH_ENV
             echo "export DEPLOYMENT_CLIENT_EMAIL=${CLIENT_EMAIL}" >> $BASH_ENV
             echo "export DEPLOYMENT_PROJECT_ID=${PROJECT_ID}" >> $BASH_ENV
-
+  deployment_config:
+    steps:
       - run:
           name: "Set tier-specific configuration file"
           command: |
-            CONFIG_FILE=${DEPLOYMENT_CONFIG_FILE_DEV}
+            CONFIG=${DEPLOYMENT_CONFIG_DEV}
             if [[ ${TIER} == "PROD" ]]; then
               echo "Deployment configuration set for production."
-              CONFIG_FILE=${DEPLOYMENT_CONFIG_FILE_PROD}
+              CONFIG=${DEPLOYMENT_CONFIG_PROD}
             elif [[ ${TIER} == "UAT" ]]; then
               echo "Deployment configuration set for UAT."
-              CONFIG_FILE=${DEPLOYMENT_CONFIG_FILE_UAT}
+              CONFIG=${DEPLOYMENT_CONFIG_UAT}
             elif [[ ${TIER} == "TEST" ]]; then
               echo "Deployment configuration set for test."
-              CONFIG_FILE=${DEPLOYMENT_CONFIG_FILE_TEST}
+              CONFIG=${DEPLOYMENT_CONFIG_TEST}
             elif [[ ${TIER} == "DEV" ]]; then
               echo "Deployment configuration set for mvm/dev."
             else
               echo "[ERROR] - Unrecognized tier: ${TIER}"
-              CONFIG_FILE=
+              CONFIG=
             fi
 
-            if [[ -n $CONFIG_FILE ]]; then
-              # gsutil copy file over
-              cat $CONFIG_FILE | sed 's/\([^=]*\)=\(.*\)/echo "export \1=${\2}" >> $BASH_ENV/g' | xargs
+            if [[ -n $CONFIG ]]; then
+              echo ${CONFIG} | base64 --decode --ignore-garbage > config_file.txt
+              cat config_file.txt | sed 's/\([^=]*\)=\(.*\)/echo "export \1=${\2}" >> $BASH_ENV/g' | xargs
             else
               echo "[ERROR] Couldn't assign deployment configuration file - exiting."
               exit 1
@@ -99,9 +100,13 @@ jobs:
             - ./lib
       - deployment_setup
       - run:
-          name: Auth, Staging, and Database testing
+          name: Auth
           command: |
             sudo -E /bin/sh ./shell/gcloud_authenticate.sh
+      - deployment_config
+      - run:
+          name: Staging and Database testing
+          command: |
             sudo -E /bin/bash ./shell/gcloud-pull-staging-files.sh
             sudo -E /bin/bash ./shell/database-setup.sh
       - save_cache:
@@ -156,10 +161,15 @@ jobs:
             echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
             curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
             sudo apt-get update && sudo apt-get -y --allow-downgrades install google-cloud-sdk=251.0.0-0
+      - deployment_setup
+      - run:
+          name: Auth
+          command: |
+            sudo -E /bin/sh ./shell/gcloud_authenticate.sh
+      - deployment_config
       - deploy:
           command: |
             sudo -E rm -rf ./lib
-            sudo -E /bin/bash ./shell/gcloud_authenticate.sh
             sudo -E /bin/bash ./shell/unpack_for_deployment.sh
             sudo -E gcloud app deploy --verbosity=debug ./app.yaml --quiet
 workflows:
