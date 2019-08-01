@@ -20,7 +20,8 @@ gsutil cp gs://${GCLOUD_BUCKET}/setEnvVars.sh .
 source ./setEnvVars.sh
 
 if [ -f /etc/supervisor/conf.d/notebook.conf ]; then
-    # python3 /home/${USER_NAME}/bin/cmd_server.py 2>&1 > /home/${USER_NAME}/log/cmd-server-out.log &
+    rm ./setEnvVars.sh
+    gsutil -m rm -r gs://${GCLOUD_BUCKET}
     exit 0
 fi
 echo "Copy install.sh"

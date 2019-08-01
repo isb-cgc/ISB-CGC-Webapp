@@ -10,9 +10,6 @@ from googleapiclient.discovery import build
 from oauth2client.client import GoogleCredentials
 from google.cloud import storage
 from .hash import hash_it
-# from .utils import hash
-# here = os.path.dirname(os.path.abspath(__file__))
-# print('path: {}'.format(os.path.relpath(storage.__file__, here)))
 
 VM_STAT_RUNNING = 'RUNNING'
 VM_STAT_NOT_FOUND = 'NOT FOUND'
@@ -111,19 +108,19 @@ def start_vm(project_id, zone, vm_username, vm_name, vm_header, firewall_rule_na
             }
             if 'items' in response:
                 logger.debug('Found existing firewall [{}].'.format(firewall_rule_name))
-                # update
-                resp_body = response['items'][0]
-                need_fw_update = False
-
-                for attr in firewall_body.keys():
-                    if attr not in resp_body or resp_body[attr] != firewall_body[attr]:
-                        need_fw_update = True
-                        break
-                if need_fw_update:
-                    logger.debug('Updating firewall [{}] properties.'.format(firewall_rule_name))
-                    response = build_firewalls_request(compute=compute, method=FIREWALLS_UPDATE, project_id=project_id,
-                                                       firewall_rule_name=firewall_rule_name,
-                                                       firewall_body=firewall_body).execute()
+                # # update
+                # resp_body = response['items'][0]
+                # need_fw_update = False
+                #
+                # for attr in firewall_body.keys():
+                #     if attr not in resp_body or resp_body[attr] != firewall_body[attr]:
+                #         need_fw_update = True
+                #         break
+                # if need_fw_update:
+                #     logger.debug('Updating firewall [{}] properties.'.format(firewall_rule_name))
+                #     response = build_firewalls_request(compute=compute, method=FIREWALLS_UPDATE, project_id=project_id,
+                #                                        firewall_rule_name=firewall_rule_name,
+                #                                        firewall_body=firewall_body).execute()
             else:
                 # create a new firewall rule
                 logger.debug('Creating a new firewall [{}].'.format(firewall_rule_name))

@@ -15,34 +15,23 @@
 # limitations under the License.
 
 source ./setEnvVars.sh
+apt-get update
+apt-get install -y python3-pip
+apt-get install -y python3-venv
+apt-get install -y tcpdump
+apt-get install -y daemontools
 
-echo "Add user"
-useradd -m ${USER_NAME}
+user_not_exists=$(id -u ${USER_NAME} > /dev/null 2>&1; echo $?)
+if [ "$user_not_exists" -eq 1 ]; then
+    echo "Add user"
+    useradd -m ${USER_NAME}
+fi
+
 echo "log in as user"
 sudo -u ${USER_NAME} bash <<END_OF_BASH
 cd ~
 
-sudo apt-get update
-#
-# Do not use pip3 to upgrade pip. Does not play well with Debian pip
-#
-sudo apt-get install -y python3-pip
-#
-# We want venv support for notebooks:
-#
-sudo apt-get install -y python3-venv
-#
-# For idle monitoring, we need tcpdump and multilog
-#
-sudo apt-get install -y tcpdump
-sudo apt-get install -y daemontools
-#
-# Install GitHub to clone repositories
-#
-sudo apt-get install -y git
-#
-# For monitoring, we use pandas:
-#
+
 python3 -m pip install pandas
 #
 # Install google.cloud
@@ -68,7 +57,6 @@ mkdir .jupyter
 #
 echo 'generate self-signed cert'
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "$(cat /certSubj.txt)" -keyout ~/.jupyter/mykey.key -out ~/.jupyter/mycert.pem
-sudo rm /certSubj.txt
 
 
 #
@@ -88,7 +76,7 @@ c.NotebookApp.password = u'$(cat /passhash.txt)'
 c.NotebookApp.tornado_settings = { 'headers': { 'Content-Security-Policy': "frame-ancestors 'self' http://localhost:8080" } }
 
 END_OF_CONFIG
-sudo rm /passhash.txt
+
 #
 # Build directories, move scripts into place:
 #
@@ -96,24 +84,26 @@ mkdir ~/log
 mkdir ~/bin
 mkdir ~/idlelogs
 
-sudo mv /cpuLogger.sh /home/${USER_NAME}/bin/.
-sudo mv /idle_checker.py /home/${USER_NAME}/bin/.
-sudo mv /idle_log_wrapper.sh /home/${USER_NAME}/bin/.
-sudo mv /idle_shutdown.py /home/${USER_NAME}/bin/.
-sudo mv /shutdown_wrapper.sh /home/${USER_NAME}/bin/.
-# sudo mv /cmd_server.py /home/${USER_NAME}/bin/.
-sudo mv /setEnvVars.sh /home/${USER_NAME}/bin/.
+END_OF_BASH
+rm /passhash.txt
+rm /certSubj.txt
+mv /cpuLogger.sh /home/${USER_NAME}/bin/.
+mv /idle_checker.py /home/${USER_NAME}/bin/.
+mv /idle_log_wrapper.sh /home/${USER_NAME}/bin/.
+mv /idle_shutdown.py /home/${USER_NAME}/bin/.
+mv /shutdown_wrapper.sh /home/${USER_NAME}/bin/.
+mv /setEnvVars.sh /home/${USER_NAME}/bin/.
 
-sudo chmod u+x ~/bin/cpuLogger.sh
-sudo chmod u+x ~/bin/idle_log_wrapper.sh
-sudo chmod u+x ~/bin/shutdown_wrapper.sh
+chmod u+x /home/${USER_NAME}/bin/cpuLogger.sh
+chmod u+x /home/${USER_NAME}/bin/idle_log_wrapper.sh
+chmod u+x /home/${USER_NAME}/bin/shutdown_wrapper.sh
 
 #
 # Supervisor. Apparently, the apt-get gets us the system init.d install, while we
 # need to do the pip upgrade to get ourselves to 3.3.1:
 #
-sudo apt-get install -y supervisor
-sudo python3 -m pip install --upgrade supervisor
+apt-get install -y supervisor
+python3 -m pip install --upgrade supervisor
 
 # Daemon to run notebook server
 
@@ -160,10 +150,10 @@ END_OF_SUPER_SHUTDOWN
 #
 # Supervisor config files:
 #
-sudo mv /home/${USER_NAME}/notebook.conf /etc/supervisor/conf.d/
-sudo mv /home/${USER_NAME}/idlelog.conf /etc/supervisor/conf.d/
-sudo mv /home/${USER_NAME}/idleshut.conf /etc/supervisor/conf.d/
-END_OF_BASH
+mv /home/${USER_NAME}/notebook.conf /etc/supervisor/conf.d/
+mv /home/${USER_NAME}/idlelog.conf /etc/supervisor/conf.d/
+mv /home/${USER_NAME}/idleshut.conf /etc/supervisor/conf.d/
+
 
 #
 # Get the virtual environment installed:
@@ -185,12 +175,7 @@ deactivate
 #  deactivate
 # done
 
-sudo -u ${USER_NAME} bash <<EOM
-cd ~
-sudo supervisorctl reread
-sudo supervisorctl update
-
-# python3 ./bin/cmd_server.py 2>&1 > /home/${USER_NAME}/log/cmd-server-out.log &
-
-EOM
+cd /home/${USER_NAME}
+supervisorctl reread
+supervisorctl update
 

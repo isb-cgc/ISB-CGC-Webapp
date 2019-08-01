@@ -142,10 +142,9 @@ def tcp_says_idle(check_secs, port_num, thresh, answer):
     is at the keyboard; thresh should take this into account (empirical: > 100 means something is happening
     """
     am_idle = True
-    #
-    # We only get away with this as a regular user is because everybody can sudo on a Google VM:
-    #
-    p = sub.Popen(('sudo', 'timeout', str(check_secs), 'tcpdump', '-l', 'port', port_num), stdout=sub.PIPE, stderr=sub.DEVNULL)
+
+    p = sub.Popen(('timeout', str(check_secs), 'tcpdump', '-l', 'port', port_num), stdout=sub.PIPE,
+                  stderr=sub.DEVNULL)
     for line in iter(p.stdout.readline, b''):
         pack_val_str = re.sub('.*length', '', line.rstrip().decode("utf-8")).strip()
         if pack_val_str and (int(pack_val_str) > thresh):
@@ -163,7 +162,8 @@ def top_says_idle(check_secs, thresh, home_dir, answer):
 
     am_idle = True
     for i in range(0, check_secs):
-        p = sub.Popen(['sudo', '{}/bin/cpuLogger.sh'.format(home_dir)], stdout=sub.PIPE)
+        # p = sub.Popen(['sudo', '{}/bin/cpuLogger.sh'.format(home_dir)], stdout=sub.PIPE)
+        p = sub.Popen(['{}/bin/cpuLogger.sh'.format(home_dir)], stdout=sub.PIPE)
         for line in iter(p.stdout.readline, b''):
             cpu_val_str = line.rstrip().decode("utf-8").split()[8]
             try:
