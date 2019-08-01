@@ -61,7 +61,7 @@ commands:
               cat $CONFIG_FILE | sed 's/\([^=]*\)=\(.*\)/echo "export \1=${\2}" >> $BASH_ENV/g' | xargs
             else
               echo "[ERROR] Couldn't assign deployment configuration file - exiting."
-            exit 1
+              exit 1
             fi
 
 jobs:
