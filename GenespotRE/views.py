@@ -504,7 +504,9 @@ def dashboard_page(request):
     else:
         # default values to fill in fields in form
         project_id = ''
-        machine_name = '{}-unique-machine-name-1'.format(vm_username)
+        # remove special characters
+        machine_header = re.sub(r'[^A-Za-z0-9]+', '', vm_username.lower())
+        machine_name = '{}-jupyter-vm'.format(machine_header)
         zone = 'us-central1-c'
         status = 'NOT FOUND'
 
