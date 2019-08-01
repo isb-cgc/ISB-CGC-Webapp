@@ -44,23 +44,24 @@ commands:
               echo "Deployment configuration set for production."
               CONFIG_FILE=${DEPLOYMENT_CONFIG_FILE_PROD}
             elif [[ ${TIER} == "UAT" ]]; then
-              echo "Deployment configuration set for production."
+              echo "Deployment configuration set for UAT."
               CONFIG_FILE=${DEPLOYMENT_CONFIG_FILE_UAT}
             elif [[ ${TIER} == "TEST" ]]; then
-              echo "Deployment configuration set for production."
+              echo "Deployment configuration set for test."
               CONFIG_FILE=${DEPLOYMENT_CONFIG_FILE_TEST}
             elif [[ ${TIER} == "DEV" ]]; then
-              echo "Deployment configuration set for production."
+              echo "Deployment configuration set for mvm/dev."
             else
               echo "[ERROR] - Unrecognized tier: ${TIER}"
               CONFIG_FILE=
             fi
 
             if [[ -n $CONFIG_FILE ]]; then
-              echo "export DEPLOYMENT_CONFIG_FILE=${CONFIG_FILE}" >> $BASH_ENV
+              # gsutil copy file over
+              cat $CONFIG_FILE | sed 's/\([^=]*\)=\(.*\)/echo "export \1=${\2}" >> $BASH_ENV/g' | xargs
             else
               echo "[ERROR] Couldn't assign deployment configuration file - exiting."
-              exit 1
+            exit 1
             fi
 
 jobs:
