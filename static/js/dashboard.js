@@ -258,7 +258,7 @@ require([
         if (!project_id || !vm_name || !client_ip_range || !pwd1 || !pwd2) {
             msg = "Some fields are missing. "
         }
-        else if (vm_name.length > 30) {
+        else if (vm_name.length >= 30) {
             msg = "Machine name must be less than 30 characters"
         }
         else if (!/^[a-z]([-a-z0-9]+[a-z0-9])$/.test(vm_name)) {

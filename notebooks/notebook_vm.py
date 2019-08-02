@@ -10,9 +10,6 @@ from googleapiclient.discovery import build
 from oauth2client.client import GoogleCredentials
 from google.cloud import storage
 from .hash import hash_it
-# from .utils import hash
-# here = os.path.dirname(os.path.abspath(__file__))
-# print('path: {}'.format(os.path.relpath(storage.__file__, here)))
 
 VM_STAT_RUNNING = 'RUNNING'
 VM_STAT_NOT_FOUND = 'NOT FOUND'
@@ -67,11 +64,11 @@ NOTEBOOK_VM_SHELL_DIR = 'shell/notebooks_vm_script'
 logger = logging.getLogger('main_logger')
 
 
-def start_vm(project_id, zone, vm_username, vm_name, firewall_rule_name, firewall_ip_range, serv_port, region,
+def start_vm(project_id, zone, vm_username, vm_name, vm_header, firewall_rule_name, firewall_ip_range, serv_port, region,
              address_name, password, topic_name=None):
     setup_stage = SETUP_PROJECT
-    firewall_tag = vm_username + '-restricted-jupyter'
-    notebook_gs_bucket = vm_username + '-notebook-vm'
+    firewall_tag = vm_header + '-restricted-jupyter'
+    notebook_gs_bucket = vm_header + '-notebook-vm'
     machine_desc = 'Jupyter Notebook Server for ' + vm_username
     project_no = None
     ext_ip_address = None
@@ -111,19 +108,19 @@ def start_vm(project_id, zone, vm_username, vm_name, firewall_rule_name, firewal
             }
             if 'items' in response:
                 logger.debug('Found existing firewall [{}].'.format(firewall_rule_name))
-                # update
-                resp_body = response['items'][0]
-                need_fw_update = False
-
-                for attr in firewall_body.keys():
-                    if attr not in resp_body or resp_body[attr] != firewall_body[attr]:
-                        need_fw_update = True
-                        break
-                if need_fw_update:
-                    logger.debug('Updating firewall [{}] properties.'.format(firewall_rule_name))
-                    response = build_firewalls_request(compute=compute, method=FIREWALLS_UPDATE, project_id=project_id,
-                                                       firewall_rule_name=firewall_rule_name,
-                                                       firewall_body=firewall_body).execute()
+                # # update
+                # resp_body = response['items'][0]
+                # need_fw_update = False
+                #
+                # for attr in firewall_body.keys():
+                #     if attr not in resp_body or resp_body[attr] != firewall_body[attr]:
+                #         need_fw_update = True
+                #         break
+                # if need_fw_update:
+                #     logger.debug('Updating firewall [{}] properties.'.format(firewall_rule_name))
+                #     response = build_firewalls_request(compute=compute, method=FIREWALLS_UPDATE, project_id=project_id,
+                #                                        firewall_rule_name=firewall_rule_name,
+                #                                        firewall_body=firewall_body).execute()
             else:
                 # create a new firewall rule
                 logger.debug('Creating a new firewall [{}].'.format(firewall_rule_name))
@@ -214,16 +211,13 @@ def start_vm(project_id, zone, vm_username, vm_name, firewall_rule_name, firewal
 
             upload_blob_string(bucket, CERT_SUBJ + ext_ip_address, CERT_SUBJ_FILENAME)
             hashpass = hash_it(password)
-            # hashpass = hash.hash_it(password)
             upload_blob_string(bucket, hashpass, PASSHASH_FILENAME)
-            base_dir = os.path.dirname(os.path.dirname(__file__))
-            env_vars_head = 'PROJECT={project_id}\nUSER_NAME={user_name}\nfirewall_ip_range={ip_range}\n'.format(
-                project_id=project_id, user_name=vm_username, ip_range=','.join(firewall_ip_range))
-            env_vars_filepath = '{base_dir}/{sub_dir}/{filename}'.format(base_dir=base_dir,
-                                                                         sub_dir=NOTEBOOK_VM_SHELL_DIR,
-                                                                         filename=(ENV_VARS_SH_FILE + '.temp'))
-            env_vars_sh = append_file_to_string(env_vars_head, env_vars_filepath)
+            env_vars_sh = "PROJECT={project_id}\n".format(project_id=project_id)
+            env_vars_sh += "USER_NAME={vm_username}\n".format(vm_username=vm_username)
+            env_vars_sh += "MACHINE_NAME={vm_name}\n".format(vm_name=vm_name)
+            env_vars_sh += "SERV_PORT={serv_port}\n".format(serv_port=serv_port)
             upload_blob_string(bucket, env_vars_sh, ENV_VARS_SH_FILE)
+            base_dir = os.path.dirname(os.path.dirname(__file__))
             upload_filenames = [CPU_LOGGER_FILE, IDLE_LOG_FILE, IDLE_LOG_SH_FILE, IDLE_SHUTDOWN_FILE,
                                 IDLE_SHUTDOWN_SH_FILE, INSTALL_SH_FILE]
             for filename in upload_filenames:
