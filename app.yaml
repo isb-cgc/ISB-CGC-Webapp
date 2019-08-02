@@ -16,7 +16,7 @@
 
 runtime: custom
 env: flex
-service: mvm
+service: default
 api_version: 1
 threadsafe: true
 #entrypoint: gunicorn -c gunicorn.conf.py -b :$PORT GenespotRE.wsgi -w 3 -t 130
@@ -57,7 +57,7 @@ handlers:
 #  secure: always
 
 beta_settings:
-    cloud_sql_instances: isb-cgc:us-central1:dev-v3
+    cloud_sql_instances: isb-cgc-uat:us-central1:uat-main
 
 env_variables:
   DJANGO_SETTINGS_MODULE: 'GenespotRE.settings'
