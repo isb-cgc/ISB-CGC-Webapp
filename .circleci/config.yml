@@ -59,7 +59,7 @@ commands:
 
             if [[ -n $CONFIG ]]; then
               echo ${CONFIG} | base64 --decode --ignore-garbage > config_file.txt
-              <config_file.txt | xargs -I{} echo "export {}" >> $BASH_ENV
+              <config_file.txt | xargs -I{} -t echo "export {}" >> $BASH_ENV
               echo "Testing vars: env file is ${ENV_FILE}"
             else
               echo "[ERROR] Couldn't assign deployment configuration file - exiting."
