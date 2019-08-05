@@ -73,7 +73,7 @@ c.NotebookApp.allow_remote_access = True
 c.NotebookApp.certfile = u'/home/${USER_NAME}/.jupyter/mycert.pem'
 c.NotebookApp.keyfile = u'/home/${USER_NAME}/.jupyter/mykey.key'
 c.NotebookApp.password = u'$(cat /passhash.txt)'
-c.NotebookApp.tornado_settings = { 'headers': { 'Content-Security-Policy': "frame-ancestors 'self' http://localhost:8080" } }
+# c.NotebookApp.tornado_settings = { 'headers': { 'Content-Security-Policy': "frame-ancestors 'self' http://localhost:8080" } }
 
 END_OF_CONFIG
 
