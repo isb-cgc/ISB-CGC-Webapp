@@ -52,13 +52,25 @@ commands:
       - run:
           name: "Set tier-specific configuration file"
           command: |
-            gsutil cp gs://${DEPLOYMENT_BUCKET}/delpoyment_config.txt ./
-            if [ ! -f "delpoyment_config.txt" ]; then
-              echo "[ERROR] Couldn't assign deployment configuration file - exiting."
-              exit 1
-            else
-              xargs -a config_file.txt -I{} echo "export {}" >> $BASH_ENV
-            fi
+            sudo -E /bin/bash ./shell/pull_config.sh
+            xargs -a deployment_config.txt -I{} echo "export {}" >> $BASH_ENV
+
+  auth:
+    steps:
+      - run:
+          name: "Service Account Auth and Project Settings"
+          command: |
+            sudo -E /bin/bash ./shell/gcloud_authenticate.sh
+
+  install_cloud_sdk:
+    steps:
+      - run:
+          name: "Install CloudSDK"
+          command: |
+            echo "export CLOUDSDK_CORE_DISABLE_PROMPTS=1" >> $BASH_ENV
+            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+            sudo apt-get update && sudo apt-get -y --allow-downgrades install google-cloud-sdk=251.0.0-0
 
 jobs:
   build_job:
@@ -94,10 +106,7 @@ jobs:
           paths:
             - ./lib
       - deployment_setup
-      - run:
-          name: Auth
-          command: |
-            sudo -E /bin/sh ./shell/gcloud_authenticate.sh
+      - auth
       - deployment_config
       - run:
           name: Staging and Database testing
@@ -149,18 +158,9 @@ jobs:
       - restore_cache:
           keys:
             - isb-cgc-webapp-
-      - run:
-          name: Install CloudSDK
-          command: |
-            echo "export CLOUDSDK_CORE_DISABLE_PROMPTS=1" >> $BASH_ENV
-            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-            sudo apt-get update && sudo apt-get -y --allow-downgrades install google-cloud-sdk=251.0.0-0
+      - install_cloud_sdk
       - deployment_setup
-      - run:
-          name: Auth
-          command: |
-            sudo -E /bin/sh ./shell/gcloud_authenticate.sh
+      - auth
       - deployment_config
       - deploy:
           command: |
