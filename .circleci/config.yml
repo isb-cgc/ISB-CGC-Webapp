@@ -78,7 +78,7 @@ jobs:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
     working_directory: ~/ISB-CGC-Webapp
     docker:
-      - image: circleci/python:3.7.0
+      - image: circleci/python:3.7.0-stretch
       - image: circleci/mysql:5.7
         environment:
           MYSQL_ROOT_HOST: "%"
@@ -153,7 +153,7 @@ jobs:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
     working_directory: ~/ISB-CGC-Webapp
     docker:
-      - image: circleci/python:3.5.6
+      - image: circleci/python:3.7.0-stretch
     steps:
       - restore_cache:
           keys:
