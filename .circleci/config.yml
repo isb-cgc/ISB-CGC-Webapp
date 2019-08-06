@@ -14,19 +14,29 @@ commands:
       - run:
           name: "Assign Project-level vars"
           command: |
-            KEY=${DEPLOYMENT_KEY_ISB_CGC}
+            if [ ! -f deployment.key.json ]; then
+              echo "Deployment JSON keyfile not found - loading from CircleCI."
+              KEY=${DEPLOYMENT_KEY_ISB_CGC}
+            else
+              echo "Deployment JSON keyfile found."
+              KEY="NA"
+            fi
             CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC}
             PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC}
+            BUCKET=${DEPLOYMENT_BUCKET_ISB_CGC}
             if [[ ${TIER} == "PROD" ]] || [[ ${TIER} == "DEV" ]]; then
-              echo "Using default project ${PROJECT_ID} and related deployment SA."
+              BUCKET="${BUCKET}/${TIER,,}"
+              echo "Using default project ${PROJECT_ID} and related deployment SA and bucket."
             elif [[ ${TIER} == "UAT" ]]; then
               KEY=${DEPLOYMENT_KEY_ISB_CGC_UAT}
               CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC_UAT}
               PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC_UAT}
+              BUCKET=${DEPLOYMENT_BUCKET_ISB_CGC_UAT}
             elif [[ ${TIER} == "TEST" ]]; then
               KEY=${DEPLOYMENT_KEY_ISB_CGC_TEST}
               CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC_TEST}
               PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC_TEST}
+              BUCKET=${DEPLOYMENT_BUCKET_ISB_CGC_TEST}
             else
               echo "[ERROR] - Unrecognized tier: ${TIER} - exitng."
               exit 1
@@ -35,35 +45,19 @@ commands:
             echo "export DEPLOYMENT_KEY=\"${KEY}\"" >> $BASH_ENV
             echo "export DEPLOYMENT_CLIENT_EMAIL=${CLIENT_EMAIL}" >> $BASH_ENV
             echo "export DEPLOYMENT_PROJECT_ID=${PROJECT_ID}" >> $BASH_ENV
+            echo "export DEPLOYMENT_BUCKET=${BUCKET}" >> $BASH_ENV
+
   deployment_config:
     steps:
       - run:
           name: "Set tier-specific configuration file"
           command: |
-            CONFIG=${DEPLOYMENT_CONFIG_DEV}
-            if [[ ${TIER} == "PROD" ]]; then
-              echo "Deployment configuration set for production."
-              CONFIG=${DEPLOYMENT_CONFIG_PROD}
-            elif [[ ${TIER} == "UAT" ]]; then
-              echo "Deployment configuration set for UAT."
-              CONFIG=${DEPLOYMENT_CONFIG_UAT}
-            elif [[ ${TIER} == "TEST" ]]; then
-              echo "Deployment configuration set for test."
-              CONFIG=${DEPLOYMENT_CONFIG_TEST}
-            elif [[ ${TIER} == "DEV" ]]; then
-              echo "Deployment configuration set for mvm/dev."
-            else
-              echo "[ERROR] - Unrecognized tier: ${TIER}"
-              CONFIG=
-            fi
-
-            if [[ -n $CONFIG ]]; then
-              echo ${CONFIG} | base64 --decode --ignore-garbage > config_file.txt
-              xargs -a config_file.txt -I{} -t echo "export {}" >> $BASH_ENV
-              cat $BASH_ENV
-            else
+            gsutil cp gs://${DEPLOYMENT_BUCKET}/delpoyment_config.txt ./
+            if [ ! -f "delpoyment_config.txt" ]; then
               echo "[ERROR] Couldn't assign deployment configuration file - exiting."
               exit 1
+            else
+              xargs -a config_file.txt -I{} echo "export {}" >> $BASH_ENV
             fi
 
 jobs:
