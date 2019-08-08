@@ -7,7 +7,7 @@ ecdsa==0.13
 google-api-python-client==1.6.1
 httplib2==0.9.2
 python-openid==2.2.5
-pyasn1==0.4.1
+pyasn1==0.4.6
 pytz==2018.4
 requests-oauthlib==0.7.0
 rsa==3.2
