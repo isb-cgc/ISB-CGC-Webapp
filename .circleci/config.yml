@@ -120,6 +120,7 @@ jobs:
           command: |
             sudo -E /bin/bash ./shell/gcloud-pull-staging-files.sh
             sudo -E /bin/bash ./shell/database-setup.sh
+      - run_tests
       - save_cache:
           key: isb-cgc-webapp-{{ epoch }}
           paths:
