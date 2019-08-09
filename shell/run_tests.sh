@@ -1,0 +1,1 @@
+python3 ./manage_unit_test.py test
