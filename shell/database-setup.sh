@@ -1,7 +1,7 @@
 if [ -n "$CI" ]; then
     export HOME=/home/circleci/${CIRCLE_PROJECT_REPONAME}
     export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
-    export MYSQL_ROOT_USER=root
+    export MYSQL_ROOT_USER=ubuntu
     export MYSQL_DB_HOST=127.0.0.1
 else
     export $(cat /home/vagrant/parentDir/secure_files/.env | grep -v ^# | xargs) 2> /dev/null
@@ -27,6 +27,7 @@ mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL
 
 echo "Creating the definer account for any routines in the table file..."
 mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DATABASE_NAME.* TO 'dev-user'@'%' IDENTIFIED BY '${DATABASE_PASSWORD}';"
+
 
 # If we have migrations for older, pre-migrations apps which haven't yet been or will never be added to the database dump, make them here eg.:
 # python3 ${HOMEROOT}/manage.py makemigrations <appname>
