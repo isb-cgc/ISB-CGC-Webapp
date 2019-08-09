@@ -118,7 +118,7 @@ USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
 DATABASES = {
     'default': {
         'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
-        'HOST': os.environ.get('127.0.0.1'),
+        'HOST': '127.0.0.1',
         'PORT': 3306,
         'NAME': os.environ.get('DATABASE_NAME', ''),
         'USER': os.environ.get('DATABASE_USER'),
