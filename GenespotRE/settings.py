@@ -38,6 +38,7 @@ SHARED_SOURCE_DIRECTORIES = [
     'ISB-CGC-Common'
 ]
 
+print("Pythonpath: {}".format(os.environ.get("PYTHONPATH")))
 
 # The Google AppEngine library and the Google Cloud APIs don't play nice. Teach them to get along.
 # This unfortunately requires either hardcoding the path to the SDK, or sorting out a way to
