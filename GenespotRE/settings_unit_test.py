@@ -121,8 +121,8 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PORT': 3306,
         'NAME': os.environ.get('DATABASE_NAME', 'webapp'),
-        'USER': os.environ.get('DATABASE_USER'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD')
+        'USER': os.environ.get('DATABASE_USER', 'ubuntu'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD', 'isb')
     }
 }
 
