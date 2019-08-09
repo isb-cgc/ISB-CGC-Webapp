@@ -12,4 +12,4 @@ class WorkBookTestCase(TestCase):
     def test_make_workbook(self):
         Workbook.objects.create(name="TestWorkbook", description="A test workbook", owner=self.test_wb_owner)
         testwb = Workbook.objects.get(name="TestWorkbook")
-        self.assertIsEqual(testwb.name, "TestWorkbook")
+        self.assertEqual(testwb.name, "TestWorkbook")
