@@ -47,6 +47,8 @@ def setup_sdk_imports():
     """Sets up appengine SDK third-party imports."""
     sdk_path = os.environ.get('GAE_SDK_PATH', '/usr/lib/google-cloud-sdk')
 
+    print("sys.modules: {}".format(str(sys.modules)))
+
     # Trigger loading of the Cloud APIs so they're in sys.modules
     import google.cloud
 
