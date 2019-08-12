@@ -513,7 +513,7 @@ def get_sample_barcodes(conn):
       SELECT distinct ms.sample_barcode, ms.case_barcode, pp.id AS project_id
       FROM TCGA_metadata_samples ms
       JOIN projects_project pp
-      ON pp.name = SUBSTR(ms.project_short_name, LOCATE('-',ms.project_short_name)+1)
+      ON pp.name = SUBSTRING(ms.project_short_name, LOCATE('-',ms.project_short_name)+1) COLLATE utf8_unicode_ci
       JOIN projects_program pr
       ON pr.id = pp.program_id
       WHERE pr.name = 'TCGA';
