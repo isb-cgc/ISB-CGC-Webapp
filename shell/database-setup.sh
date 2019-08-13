@@ -1,9 +1,12 @@
 if [ -n "$CI" ]; then
     export HOME=/home/circleci/${CIRCLE_PROJECT_REPONAME}
     export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
+    # Set test database settings; this database will be thrown away at the end
     export MYSQL_ROOT_USER=root
     export MYSQL_ROOT_PASSWORD=isb
     export MYSQL_DB_HOST=127.0.0.1
+    export DATABASE_USER=django-user
+    export DATABASE_PASSWORD=isb
     # Give the 'ubuntu' test user access
     mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'ubuntu'@'%' IDENTIFIED BY 'isb';"
 else
@@ -18,7 +21,6 @@ fi
 
 export PYTHONPATH=${HOMEROOT}:${HOMEROOT}/lib:${HOMEROOT}/ISB-CGC-Common
 echo $PYTHONPATH
-
 
 echo "Increase group_concat max, for longer data type names"
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "SET GLOBAL group_concat_max_len=18446744073709547520;"
