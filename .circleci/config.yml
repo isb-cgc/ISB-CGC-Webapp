@@ -59,6 +59,12 @@ commands:
           command: |
             sudo -E /bin/bash ./shell/pull_config.sh
             xargs -a deployment_config.txt -I{} echo "export {}" >> $BASH_ENV
+            # Set up test/deployment database values
+            "export MYSQL_ROOT_PASSWORD_BUILD=isb" >> $BASH_ENV
+            "export DATABASE_NAME_BUILD=build_database" >> $BASH_ENV
+            "export DATABASE_PASSWORD_BUILD=isb" >> $BASH_ENV
+            "export DATABASE_USER_BUILD=django-user" >> $BASH_ENV
+            "export DATABASE_HOST_BUILD=127.0.0.1" >> $BASH_ENV
 
   auth:
     steps:
