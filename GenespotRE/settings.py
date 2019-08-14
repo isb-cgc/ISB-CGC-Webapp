@@ -134,12 +134,11 @@ if os.environ.get('CI', None) is not None:
             'HOST': os.environ.get('DATABASE_HOST_BUILD', '127.0.0.1'),
             'NAME': os.environ.get('DATABASE_NAME_BUILD', ''),
             'USER': os.environ.get('DATABASE_USER_BUILD'),
-            'PASSWORD': os.environ.get('DATABASE_PASSWORD_BUILD')
+            'PASSWORD': os.environ.get('MYSQL_ROOT_PASSWORD_BUILD')
         }
     }
 
 DATABASES = database_config
-
 DB_SOCKET = database_config['default']['HOST'] if 'cloudsql' in database_config['default']['HOST'] else None
 
 IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
