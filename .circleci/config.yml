@@ -103,6 +103,7 @@ jobs:
           MYSQL_USER: ubuntu
           MYSQL_PASSWORD: "isb"
           MYSQL_ROOT_PASSWORD: "isb"
+          MYSQL_DATABASE: "build_database"
     steps:
       - checkout
       - run:
