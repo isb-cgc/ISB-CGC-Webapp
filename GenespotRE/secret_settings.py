@@ -14,6 +14,7 @@ database_config = {
         'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
         'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
         'NAME': os.environ.get('DATABASE_NAME', ''),
+        'PORT': 3306,
         'USER': os.environ.get('DATABASE_USER'),
         'PASSWORD': os.environ.get('DATABASE_PASSWORD')
     }
@@ -27,6 +28,7 @@ if os.environ.get('CI', None) is not None:
             'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
             'HOST': os.environ.get('DATABASE_HOST_BUILD', '127.0.0.1'),
             'NAME': os.environ.get('DATABASE_NAME_BUILD', ''),
+            'PORT': 3306,
             'USER': os.environ.get('DATABASE_USER_BUILD'),
             'PASSWORD': os.environ.get('MYSQL_ROOT_PASSWORD_BUILD')
         }
