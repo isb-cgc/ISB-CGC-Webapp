@@ -629,7 +629,7 @@ def create_bq_cohort(project_id, dataset_id, table_id, cohort_id, sample_barcode
 
 def main():
     cmd_line_parser = ArgumentParser(description="Full sample set cohort utility")
-    cmd_line_parser.add_argument('PROJECT_ID', type=str, help="Google Cloud project ID")
+    cmd_line_parser.add_argument('-f', '--project-id', type=str, default='', help="Google Cloud project ID")
     cmd_line_parser.add_argument('-c', '--cohort-name', type=str, default=ALLDATA_COHORT_NAME, help="Cohort name")
     cmd_line_parser.add_argument('-d', '--dataset', type=str, default=BQ_DATASET, help="BigQuery dataset name")
     cmd_line_parser.add_argument('-t', '--table-name', type=str, default=DEFAULT_COHORT_TABLE, help="BigQuery table name")
@@ -646,7 +646,7 @@ def main():
 
     args.attr_displ_table and update_attr_display_table(False)
 
-    project_id = args.PROJECT_ID
+    project_id = args.project_id
 
     conn = get_mysql_connection()
     sample_barcodes = get_sample_barcodes(conn)
