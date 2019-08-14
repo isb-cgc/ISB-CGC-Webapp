@@ -34,9 +34,7 @@ if os.environ.get('CI', None) is not None:
 
 
 SETTINGS = {
-    'DATABASE': {
-        database_config
-    },
+    'DATABASE': database_config
 }
 
 if 'DB_SSL_CERT' in os.environ:
