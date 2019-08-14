@@ -115,7 +115,7 @@ MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
 USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
 
-DATABASES = {
+database_config = {
     'default': {
         'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
         'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
@@ -125,7 +125,22 @@ DATABASES = {
     }
 }
 
-DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
+# On the build system, we need to use build-system specific database information
+
+if os.environ.get('CI', None) is not None:
+    database_config = {
+        'default': {
+            'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
+            'HOST': os.environ.get('DATABASE_HOST_BUILD', '127.0.0.1'),
+            'NAME': os.environ.get('DATABASE_NAME_BUILD', ''),
+            'USER': os.environ.get('DATABASE_USER_BUILD'),
+            'PASSWORD': os.environ.get('DATABASE_PASSWORD_BUILD')
+        }
+    }
+
+DATABASES = database_config
+
+DB_SOCKET = database_config['default']['HOST'] if 'cloudsql' in database_config['default']['HOST'] else None
 
 IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
