@@ -74,10 +74,10 @@ python3 ${HOMEROOT}/scripts/add_site_ids.py
 
 if [ -n "$CI" ]; then
     # We don't add the prefab cohorts to BQ if we're in CircleCI
-    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py $GCLOUD_PROJECT_ID -o cloudsql -p True
+    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py -o cloudsql -p True
 else
     # ...but we do if we're doing a local build
-    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py $GCLOUD_PROJECT_ID -o all -p True -a True
+    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py -p $GCLOUD_PROJECT_ID -o all -p True -a True
 fi
 
 echo "Running development dataset setup"
