@@ -47,6 +47,11 @@ commands:
             echo "export DEPLOYMENT_PROJECT_ID=${PROJECT_ID}" >> $BASH_ENV
             echo "export DEPLOYMENT_BUCKET=${BUCKET}" >> $BASH_ENV
 
+            echo "Project settings assigned:"
+            echo "Deployment client: ${CLIENT_EMAIL}"
+            echo "Deployment project: ${PROJECT_ID}"
+            echo "Deployment bucket: gs://${BUCKET}"
+
   deployment_config:
     steps:
       - run:
@@ -54,6 +59,12 @@ commands:
           command: |
             sudo -E /bin/bash ./shell/pull_config.sh
             xargs -a deployment_config.txt -I{} echo "export {}" >> $BASH_ENV
+            # Set up test/deployment database values
+            echo "export MYSQL_ROOT_PASSWORD_BUILD=isb" >> $BASH_ENV
+            echo "export DATABASE_NAME_BUILD=build_database" >> $BASH_ENV
+            echo "export DATABASE_PASSWORD_BUILD=isb" >> $BASH_ENV
+            echo "export DATABASE_USER_BUILD=django-user" >> $BASH_ENV
+            echo "export DATABASE_HOST_BUILD=127.0.0.1" >> $BASH_ENV
 
   auth:
     steps:
@@ -92,6 +103,7 @@ jobs:
           MYSQL_USER: ubuntu
           MYSQL_PASSWORD: "isb"
           MYSQL_ROOT_PASSWORD: "isb"
+          MYSQL_DATABASE: "build_database"
     steps:
       - checkout
       - run:
