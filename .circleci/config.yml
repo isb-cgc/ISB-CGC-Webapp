@@ -198,6 +198,6 @@ workflows:
             branches:
               only:
                 - master
-                - isb-cgc-test
-                - isb-cgc-uat
-                - isb-cgc-prod
+                - test
+                - uat
+                - prod
