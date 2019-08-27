@@ -35,12 +35,38 @@ APP_ENGINE = 'Google App Engine/'
 BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 
 SHARED_SOURCE_DIRECTORIES = [
-    'ISB-CGC-Common',
+    'ISB-CGC-Common'
 ]
+
+# The Google AppEngine library and the Google Cloud APIs don't play nice. Teach them to get along.
+# This unfortunately requires either hardcoding the path to the SDK, or sorting out a way to
+# provide an environment variable indicating where it is.
+# From https://github.com/GoogleCloudPlatform/python-repo-tools/blob/master/gcp_devrel/testing/appengine.py#L26
+def setup_sdk_imports():
+    """Sets up appengine SDK third-party imports."""
+    sdk_path = os.environ.get('GAE_SDK_PATH', '/usr/lib/google-cloud-sdk')
+
+    # Trigger loading of the Cloud APIs so they're in sys.modules
+    import google.cloud
+
+    # The libraries are specifically under platform/google_appengine
+    if os.path.exists(os.path.join(sdk_path, 'platform/google_appengine')):
+        sdk_path = os.path.join(sdk_path, 'platform/google_appengine')
+
+    # This sets up libraries packaged with the SDK, but puts them last in
+    # sys.path to prevent clobbering newer versions
+    if 'google' in sys.modules:
+        sys.modules['google'].__path__.append(
+            os.path.join(sdk_path, 'google'))
+
+    sys.path.append(sdk_path)
+
 
 # Add the shared Django application subdirectory to the Python module search path
 for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
+
+setup_sdk_imports()
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
@@ -89,7 +115,7 @@ MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
 USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
 
-DATABASES = {
+database_config = {
     'default': {
         'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
         'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
@@ -99,12 +125,37 @@ DATABASES = {
     }
 }
 
-DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
+# On the build system, we need to use build-system specific database information
+
+if os.environ.get('CI', None) is not None:
+    database_config = {
+        'default': {
+            'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
+            'HOST': os.environ.get('DATABASE_HOST_BUILD', '127.0.0.1'),
+            'NAME': os.environ.get('DATABASE_NAME_BUILD', ''),
+            'PORT': 3306,
+            'USER': os.environ.get('DATABASE_USER_BUILD'),
+            'PASSWORD': os.environ.get('MYSQL_ROOT_PASSWORD_BUILD')
+        }
+    }
+
+DATABASES = database_config
+DB_SOCKET = database_config['default']['HOST'] if 'cloudsql' in database_config['default']['HOST'] else None
 
 IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
 IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
 
+# If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
+# care of that for us
+if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE_FLEX:
+    DATABASES['default']['OPTIONS'] = {
+        'ssl': {
+            'ca': os.environ.get('DB_SSL_CA'),
+            'cert': os.environ.get('DB_SSL_CERT'),
+            'key': os.environ.get('DB_SSL_KEY')
+        }
+    }
 
 # Default to localhost for the site ID
 SITE_ID = 3
@@ -477,9 +528,6 @@ GOOGLE_ORG_WHITELIST_PATH                = os.environ.get('GOOGLE_ORG_WHITELIST_
 # Managed Service Account file path
 MANAGED_SERVICE_ACCOUNTS_PATH            = os.environ.get('MANAGED_SERVICE_ACCOUNTS_PATH', '')
 
-# Dataset configuration file path
-DATASET_CONFIGURATION_PATH               = os.environ.get('DATASET_CONFIGURATION_PATH', '')
-
 # DCF Phase I enable flag
 DCF_TEST                                 = bool(os.environ.get('DCF_TEST', 'False') == 'True')
 
@@ -565,6 +613,18 @@ IMG_THUMBS_URL = os.environ.get('IMG_THUMBS_URL', None)
 # DICOM Viewer settings
 #################################
 DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
+
+#################################
+# NOTEBOOK settings
+#################################
+# NOTEBOOK_VIEWER = os.environ.get('NOTEBOOK_VIEWER', None)
+NOTEBOOK_VIEWER = ''
+# NOTEBOOK_ENV_LOC = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_ENV_PATH', None))
+# NOTEBOOK_SL_PATH = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_SL_PATH', None))
+#################################
+# SOLR settings
+#################################
+SOLR_URL = os.environ.get('SOLR_URL', None)
 
 ##############################################################
 #   MailGun Email Settings

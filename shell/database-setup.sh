@@ -1,8 +1,16 @@
 if [ -n "$CI" ]; then
     export HOME=/home/circleci/${CIRCLE_PROJECT_REPONAME}
     export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
+    # Set test database settings; this database will be thrown away at the end
     export MYSQL_ROOT_USER=root
+    export MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD_BUILD}
     export MYSQL_DB_HOST=127.0.0.1
+    export DATABASE_USER=${DATABASE_USER_BUILD}
+    export DATABASE_PASSWORD=${MYSQL_ROOT_PASSWORD_BUILD}
+    export DATABASE_NAME=${DATABASE_NAME_BUILD}
+    expirt DATABASE_HOST=${DATABASE_HOST_BUILD}
+    # Give the 'ubuntu' test user access
+    mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'ubuntu'@'%' IDENTIFIED BY 'isb';"
 else
     export $(cat /home/vagrant/parentDir/secure_files/.env | grep -v ^# | xargs) 2> /dev/null
     export HOME=/home/vagrant
@@ -11,20 +19,23 @@ else
     export MYSQL_DB_HOST=localhost
 fi
 
-export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/:${HOME}/google_appengine/:${HOME}/google_appengine/lib/protorpc-1.0/
+
+
+export PYTHONPATH=${HOMEROOT}:${HOMEROOT}/lib:${HOMEROOT}/ISB-CGC-Common
 echo $PYTHONPATH
 
 echo "Increase group_concat max, for longer data type names"
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "SET GLOBAL group_concat_max_len=18446744073709547520;"
 
 echo "Creating django-user for web application..."
-mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DATABASE_NAME.* TO '${DATABASE_USER}'@'%' IDENTIFIED BY '${DATABASE_PASSWORD}';"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO '${DATABASE_USER}'@'%' IDENTIFIED BY '${DATABASE_PASSWORD}';"
 
 echo "Creating api-user for API..."
-mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DATABASE_NAME.* TO 'api-user'@'localhost' IDENTIFIED BY '${DATABASE_PASSWORD}';"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO 'api-user'@'localhost' IDENTIFIED BY '${DATABASE_PASSWORD}';"
 
 echo "Creating the definer account for any routines in the table file..."
-mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DATABASE_NAME.* TO 'dev-user'@'%' IDENTIFIED BY '${DATABASE_PASSWORD}';"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO 'dev-user'@'%' IDENTIFIED BY '${DATABASE_PASSWORD}';"
+
 
 # If we have migrations for older, pre-migrations apps which haven't yet been or will never be added to the database dump, make them here eg.:
 # python3 ${HOMEROOT}/manage.py makemigrations <appname>
@@ -46,14 +57,14 @@ mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NA
 if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
     # Sometimes CircleCI loses its authentication, re-auth with the dev key if we're on circleCI...
     if [ -n "$CI" ]; then
-        sudo ${HOME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOMEROOT}/deployment.key.json
+        sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/deployment.key.json
     # otherwise just use privatekey.json
     else
-        sudo ${HOME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOMEROOT}/privatekey.json
-        sudo ${HOME}/google-cloud-sdk/bin/gcloud config set project "${GCLOUD_PROJECT_NAME}"
+        sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/privatekey.json
+        sudo gcloud config set project "${GCLOUD_PROJECT_NAME}"
     fi
     echo "Downloading SQL Table File..."
-    sudo ${HOME}/google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/dev_table_and_routines_file.sql" ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+    sudo gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/dev_table_and_routines_file.sql" ${HOMEROOT}/scripts/metadata_featdef_tables.sql
 fi
 echo "Applying SQL Table File... (may take a while)"
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
@@ -63,10 +74,10 @@ python3 ${HOMEROOT}/scripts/add_site_ids.py
 
 if [ -n "$CI" ]; then
     # We don't add the prefab cohorts to BQ if we're in CircleCI
-    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py $GCLOUD_PROJECT_ID -o cloudsql -p True
+    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py -o cloudsql -p True
 else
     # ...but we do if we're doing a local build
-    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py $GCLOUD_PROJECT_ID -o all -p True -a True
+    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py -p $GCLOUD_PROJECT_ID -o all -p True -a True
 fi
 
 echo "Running development dataset setup"
