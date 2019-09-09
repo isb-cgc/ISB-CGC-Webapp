@@ -6,7 +6,7 @@ commands:
           name: "Set the Tier"
           command: |
             TIER=DEV
-            if [[ ${CIRCLE_BRANCH} =~ isb-cgc-(prod|uat|test).* ]]; then
+            if [[ ${CIRCLE_BRANCH} =~ idc-(prod|uat|test).* ]]; then
               TIER=$(awk -F- '{print toupper($3)}' \<<< ${CIRCLE_BRANCH})
             fi
             echo "export TIER=${TIER}" >> $BASH_ENV
@@ -16,27 +16,27 @@ commands:
           command: |
             if [ ! -f deployment.key.json ]; then
               echo "Deployment JSON keyfile not found - loading from CircleCI."
-              KEY=${DEPLOYMENT_KEY_ISB_CGC}
+              KEY=${DEPLOYMENT_KEY_IDC}
             else
               echo "Deployment JSON keyfile found."
               KEY="NA"
             fi
-            CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC}
-            PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC}
-            BUCKET=${DEPLOYMENT_BUCKET_ISB_CGC}
+            CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_IDC}
+            PROJECT_ID=${DEPLOYMENT_PROJECT_ID_IDC}
+            BUCKET=${DEPLOYMENT_BUCKET_IDC}
             if [[ ${TIER} == "PROD" ]] || [[ ${TIER} == "DEV" ]]; then
               BUCKET="${BUCKET}/${TIER,,}"
               echo "Using default project ${PROJECT_ID} and related deployment SA and bucket."
             elif [[ ${TIER} == "UAT" ]]; then
-              KEY=${DEPLOYMENT_KEY_ISB_CGC_UAT}
-              CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC_UAT}
-              PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC_UAT}
-              BUCKET=${DEPLOYMENT_BUCKET_ISB_CGC_UAT}
+              KEY=${DEPLOYMENT_KEY_IDC_UAT}
+              CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_IDC_UAT}
+              PROJECT_ID=${DEPLOYMENT_PROJECT_ID_IDC_UAT}
+              BUCKET=${DEPLOYMENT_BUCKET_IDC_UAT}
             elif [[ ${TIER} == "TEST" ]]; then
-              KEY=${DEPLOYMENT_KEY_ISB_CGC_TEST}
-              CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC_TEST}
-              PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC_TEST}
-              BUCKET=${DEPLOYMENT_BUCKET_ISB_CGC_TEST}
+              KEY=${DEPLOYMENT_KEY_IDC_TEST}
+              CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_IDC_TEST}
+              PROJECT_ID=${DEPLOYMENT_PROJECT_ID_IDC_TEST}
+              BUCKET=${DEPLOYMENT_BUCKET_IDC_TEST}
             else
               echo "[ERROR] - Unrecognized tier: ${TIER} - exitng."
               exit 1
@@ -94,7 +94,7 @@ jobs:
   build_job:
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
-    working_directory: ~/ISB-CGC-Webapp
+    working_directory: ~/IDC-Webapp
     docker:
       - image: circleci/python:3.7.0-stretch
       - image: circleci/mysql:5.7
@@ -112,16 +112,16 @@ jobs:
             echo "export PYTHONPATH=/home/circleci/${CIRCLE_PROJECT_REPONAME}:/home/circleci/${CIRCLE_PROJECT_REPONAME}/lib:/usr/lib/google-cloud-sdk/platform/google_appengine" >> $BASH_ENV
       - restore_cache:
           keys:
-            - isb-cgc-webapp-lib-{{ checksum "requirements.txt" }}
+            - idc-webapp-lib-{{ checksum "requirements.txt" }}
       - restore_cache:
           keys:
-            - isb-cgc-webapp-google-deps-{{ checksum "shell/install-deps.sh" }}
+            - idc-webapp-google-deps-{{ checksum "shell/install-deps.sh" }}
       - run:
           name: Install Dependencies
           command: |
             sudo -E /bin/bash ./shell/install-deps.sh
       - save_cache:
-          key: isb-cgc-webapp-lib-{{ checksum "requirements.txt" }}
+          key: idc-webapp-lib-{{ checksum "requirements.txt" }}
           paths:
             - ./lib
       - deployment_setup
@@ -133,20 +133,12 @@ jobs:
             sudo -E /bin/bash ./shell/gcloud-pull-staging-files.sh
             sudo -E /bin/bash ./shell/database-setup.sh
       - save_cache:
-          key: isb-cgc-webapp-{{ epoch }}
+          key: idc-webapp-{{ epoch }}
           paths:
             - ./adminrestrict
             - ./.git
-            - ./demo
-            - ./genes
-            - ./seqpeek
             - ./shell
             - ./tasks
-            - ./variables
-            - ./notebooks
-            - ./workbooks
-            - ./analysis
-            - ./bq_data_access
             - ./etc
             - ./static
             - ./idc
@@ -154,11 +146,9 @@ jobs:
             - ./scripts
             - ./session_security
             - ./templates
-            - ./visualizations
-            - ./ISB-CGC-Common
+            - ./IDC-Common
             - ./Dockerfile
             - ./main.py
-            - ./appengine_config.py
             - ./.dockerignore
             - ./app.yaml
             - ./gunicorn.conf.py
@@ -170,13 +160,13 @@ jobs:
   deploy_job:
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
-    working_directory: ~/ISB-CGC-Webapp
+    working_directory: ~/IDC-Webapp
     docker:
       - image: circleci/python:3.7.0-stretch
     steps:
       - restore_cache:
           keys:
-            - isb-cgc-webapp-
+            - idc-webapp-
       - install_cloud_sdk
       - deployment_setup
       - auth
@@ -198,6 +188,6 @@ workflows:
             branches:
               only:
                 - master
-                - isb-cgc-test
-                - isb-cgc-uat
-                - isb-cgc-prod
+                - idc-test
+                - idc-uat
+                - idc-prod
