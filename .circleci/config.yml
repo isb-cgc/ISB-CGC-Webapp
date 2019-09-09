@@ -149,7 +149,7 @@ jobs:
             - ./bq_data_access
             - ./etc
             - ./static
-            - ./GenespotRE
+            - ./idc
             - ./offline
             - ./scripts
             - ./session_security

@@ -34,7 +34,7 @@ COHORT_TABLES = {
 from apiclient.discovery import build
 from oauth2client.client import GoogleCredentials
 
-from GenespotRE.settings import get_project_identifier
+from idc.settings import get_project_identifier
 
 def authorize_and_get_bq_service():
     credentials = GoogleCredentials.get_application_default().create_scoped(['https://www.googleapis.com/auth/bigquery'])
