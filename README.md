@@ -1,6 +1,6 @@
-# ISB-CGC Web Application
+# IDC Web Application
 
-The ISB-CGC Web Application provides a GUI for browsing, curating, and analyzing TCGA, TARGET, and CCLE data. It is built in Django 1.11 (Python 3) with MySQL 5.7, and is deployed on Google AppEngine Flex.
+The IDC Web Application is currently under development
 
 # Installation Instructions For Local Development
 
@@ -27,7 +27,7 @@ PyCharm Pro can be used to run your server through Vagrant and the Google App En
 ### Setup
 
  1. Go to your PyCharm Settings (On Mac, Go to Preferences; `CMD+,`)
- 2. Select **Project: ISB-CGC-Webapp > Project Interpreter**
+ 2. Select **Project: IDC-Webapp > Project Interpreter**
  3. Click the icon next to the Project Interpreter drop down at the top of the main area
  4. Click Add Remote
  5. Select Vagrant (if it asks to start the machine, say yes)
