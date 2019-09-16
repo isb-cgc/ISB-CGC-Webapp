@@ -51,6 +51,8 @@ from notebooks.notebook_vm import check_vm_stat
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 
+import requests
+
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
 
@@ -434,13 +436,22 @@ def path_report(request, report_file=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     context = {}
 
-    if not path_report:
-        messages.error("Error while attempting to display this pathology report: a report file name was not provided.")
-        return redirect(reverse('cohort_list'))
+    try:
+        if not path_report:
+            messages.error("Error while attempting to display this pathology report: a report file name was not provided.")
+            return redirect(reverse('cohort_list'))
 
-    template = 'GenespotRE/path-pdf.html'
+        response = requests.get("https://nci-crdc.datacommons.io/user/data/download/{}?protocol=gs".format(report_file))
 
-    context['path_report_file'] = report_file
+        anon_signed_uri = response.json()['url']
+
+        template = 'GenespotRE/path-pdf.html'
+
+        context['path_report_file'] = anon_signed_uri
+    except Exception as e:
+        logger.error("[ERROR] While trying to load Pathology report:")
+        logger.exception(e)
+        return render(request, '500.html')
 
     return render(request, template, context)
 
