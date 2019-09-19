@@ -478,7 +478,7 @@ if IS_DEV:
 GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else ''
 
 # GCP monitoring Service Account
-GCP_REG_CLIENT_EMAIL            = os.environ.get('GCP_REG_CLIENT_EMAIL','')
+MONITORING_SA_CLIENT_EMAIL            = os.environ.get('MONITORING_SA_CLIENT_EMAIL','')
 
 #################################
 #   For NIH/eRA Commons login   #
