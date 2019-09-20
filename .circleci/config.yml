@@ -40,6 +40,8 @@ commands:
               CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_IDC_TEST}
               PROJECT_ID=${DEPLOYMENT_PROJECT_ID_IDC_TEST}
               BUCKET=${DEPLOYMENT_BUCKET_IDC_TEST}
+            elif [[ ${TIER} == "DEV" ]]; then
+              # Dev is the default - pass
             else
               echo "[ERROR] - Unrecognized tier: ${TIER} - exitng."
               exit 1
