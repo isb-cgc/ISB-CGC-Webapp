@@ -101,7 +101,7 @@ jobs:
   build_job:
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
-    working_directory: ~/IDC-Webapp
+    working_directory: ~/IDC-WebApp
     docker:
       - image: circleci/python:3.7.0-stretch
       - image: circleci/mysql:5.7
@@ -167,7 +167,7 @@ jobs:
   deploy_job:
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
-    working_directory: ~/IDC-Webapp
+    working_directory: ~/IDC-WebApp
     docker:
       - image: circleci/python:3.7.0-stretch
     steps:
