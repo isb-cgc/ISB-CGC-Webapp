@@ -4,7 +4,7 @@ if [ -n "$CI" ]; then
 
     # Clone dependencies
     COMMON_BRANCH=master
-    if [[ ${CIRCLE_BRANCH} =~ isb-cgc-(prod|uat|test).* ]]; then
+    if [[ ${CIRCLE_BRANCH} =~ idc-(prod|uat|test).* ]]; then
         COMMON_BRANCH=$(awk -F- '{print $1"-"$2"-"$3}' <<< ${CIRCLE_BRANCH})
     fi
     echo "Cloning IDC-Common branch ${COMMON_BRANCH}..."

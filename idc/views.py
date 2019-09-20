@@ -170,7 +170,7 @@ def bucket_object_list(request):
     credentials = GoogleCredentials.get_application_default()
     service = discovery.build('storage', 'v1', credentials=credentials, cache_discovery=False)
 
-    req = service.objects().list(bucket='isb-cgc-dev')
+    req = service.objects().list(bucket='idc-dev')
     resp = req.execute()
     object_list = None
     if 'items' in resp:
@@ -206,19 +206,6 @@ def user_landing(request):
 
     directory_service, http_auth = get_directory_resource()
     user_email = User.objects.get(id=request.user.id).email
-    # add user to isb-cgc-open if they are not already on the group
-    try:
-        body = {
-            "email": user_email,
-            "role": "MEMBER"
-        }
-        directory_service.members().insert(
-            groupKey=OPEN_ACL_GOOGLE_GROUP,
-            body=body
-        ).execute(http=http_auth)
-
-    except HttpError as e:
-        logger.info(e)
 
     if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
     # check to see if user has read access to 'All TCGA Data' cohort

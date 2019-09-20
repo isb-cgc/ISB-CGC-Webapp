@@ -903,7 +903,7 @@ require([
             $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
                 $(this).prop('checked', false);
             });
-            if(filterType === 'isb-cgc-data') {
+            if(filterType === 'idc-data') {
                 $('#paste-in-genes').siblings('div.token').find('a.close').trigger('click');
             }
 

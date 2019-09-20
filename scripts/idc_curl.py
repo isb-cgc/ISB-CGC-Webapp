@@ -18,16 +18,16 @@ limitations under the License.
 
 idc_curl can be called by commandline or used as a library
 
-URL = https://isb-cgc.appspot.com/_ah/api/{API-NAME}/{VERSION}/{ENDPOINT}?{QUERYSTRING-PARAMS}
+URL = https://idc.appspot.com/_ah/api/{API-NAME}/{VERSION}/{ENDPOINT}?{QUERYSTRING-PARAMS}
   e.g. for the "cohorts_list" endpoint:
-  https://isb-cgc.appspot.com/_ah/api/cohort_api/v1/cohorts_list
+  https://idc.appspot.com/_ah/api/cohort_api/v1/cohorts_list
 
 
 A. Command Line:
    python idc_auth.py # saves the user's credentials to their root directory
    python idc_curl.py URL
    note: if the endpoint takes a resource in the request body, such as the save_cohort endpoint, use the following:
-   python idc_curl.py https://isb-cgc.appspot.com/_ah/api/cohort_api/v1/save_cohort?name={YOUR-COHORT-NAME} \
+   python idc_curl.py https://idc.appspot.com/_ah/api/cohort_api/v1/save_cohort?name={YOUR-COHORT-NAME} \
    -d '{"Study": "BRCA"}' -H "Content-Type: application/json"
 
 
@@ -36,7 +36,7 @@ B. Python:
     import idc_curl
     import requests
 
-    url = 'https://isb-cgc.appspot.com/_ah/api/cohort_api/v1/cohorts_list'
+    url = 'https://idc.appspot.com/_ah/api/cohort_api/v1/cohorts_list'
     token = idc_curl.get_access_token()
     head = {'Authorization': 'Bearer ' + token}
 
@@ -46,12 +46,12 @@ B. Python:
     url += '?cohort_id=1'
     resp = requests.get(url, headers=head)
     # ... or passed in with the params kwarg
-    url = 'https://isb-cgc.appspot.com/_ah/api/cohort_api/v1/cohorts_list'
+    url = 'https://idc.appspot.com/_ah/api/cohort_api/v1/cohorts_list'
     params = {'cohort_id': 1}
     resp = requests.get(url, headers=head, params=params)
 
     # if the endpoint takes a resource in the request body, such as the save_cohort endpoint...
-    url = https://isb-cgc.appspot.com/_ah/api/cohort_api/v1/save_cohort?name=my-new-cohort'
+    url = https://idc.appspot.com/_ah/api/cohort_api/v1/save_cohort?name=my-new-cohort'
     head.update({'Content-Type': 'application/json'})
     payload = {"SampleBarcode": "TCGA-02-0001-01C,TCGA-02-0001-10A,TCGA-01-0642-11A"}
     resp = requests.post(url, headers=head, json=payload)
