@@ -16,16 +16,19 @@ commands:
           command: |
             if [ ! -f deployment.key.json ]; then
               echo "Deployment JSON keyfile not found - loading from CircleCI."
-              KEY=${DEPLOYMENT_KEY_IDC}
+              KEY=${DEPLOYMENT_KEY_IDC_DEV}
             else
               echo "Deployment JSON keyfile found."
               KEY="NA"
             fi
-            CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_IDC}
-            PROJECT_ID=${DEPLOYMENT_PROJECT_ID_IDC}
-            BUCKET=${DEPLOYMENT_BUCKET_IDC}
-            if [[ ${TIER} == "PROD" ]] || [[ ${TIER} == "DEV" ]]; then
-              BUCKET="${BUCKET}/${TIER,,}"
+            CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_IDC_DEV}
+            PROJECT_ID=${DEPLOYMENT_PROJECT_ID_IDC_DEV}
+            BUCKET=${DEPLOYMENT_BUCKET_IDC_DEV}
+            if [[ ${TIER} == "PROD" ]]; then
+              KEY=${DEPLOYMENT_KEY_IDC_PROD}
+              CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_IDC_PROD}
+              PROJECT_ID=${DEPLOYMENT_PROJECT_ID_IDC_PROD}
+              BUCKET=${DEPLOYMENT_BUCKET_IDC_PROD}
               echo "Using default project ${PROJECT_ID} and related deployment SA and bucket."
             elif [[ ${TIER} == "UAT" ]]; then
               KEY=${DEPLOYMENT_KEY_IDC_UAT}

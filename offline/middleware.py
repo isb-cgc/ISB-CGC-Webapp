@@ -9,7 +9,7 @@ from builtins import object
 from . import offline
 from .views import offline_view
 
-# Customized for ISB-CGC by spaquett@systemsbiology.org
+# Customized for IDC by spaquett@systemsbiology.org
 # Changes:
 #   - Added exception for admin/ and static/ (so pages would load necessary JS and CSS, and so admin can access the
 #     admin app to turn it back off).

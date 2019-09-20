@@ -107,11 +107,11 @@ static/js/visualizations/mock_histogram_data.js
 # ignore Windows-related things
 .npmignore
 
-ISB-CGC-API
-ISB-CGC-API/
+IDC-API
+IDC-API/
 
-ISB-CGC-Common
-ISB-CGC-Common/
+IDC-Common
+IDC-Common/
 
 secure_files
 secure_files/

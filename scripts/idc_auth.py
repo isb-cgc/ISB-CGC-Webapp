@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Authenticates user for accessing the ISB-CGC Endpoint APIs.
+# Authenticates user for accessing the IDC Endpoint APIs.
 #
 # May be run from the command line or in scripts/ipython.
 #
@@ -21,26 +21,26 @@
 # to access the API.
 #
 # 1. Command Line
-#    python ./isb_auth.py          saves the user's credentials;
+#    python ./idc_auth.py          saves the user's credentials;
 #                       OPTIONAL:
 #                          -v       for verbose (returns token!)
-#                          -s FILE  sets credentials file [default: ~/.isb_credentials]
+#                          -s FILE  sets credentials file [default: ~/.idc_credentials]
 #                          -u       URL-only: for use over terminal connections;
 #                                   gives user a URL to paste into their browser,
 #                                   and asks for an auth code in return
 #
 # 2. Python
-#     import isb_auth
-#     isb_auth.get_credentials()
+#     import idc_auth
+#     idc_auth.get_credentials()
 #
 #     # optional: to store credentials in a different location
 #     from oauth2client.file import Storage
-#     import isb_auth
+#     import idc_auth
 #     import os
 #
 #     storage_file = os.path.join(os.path.expanduser("~"), "{USER_CREDENTIALS_FILE_NAME}")
 #     storage = Storage(storage_file)
-#     isb_auth.get_credentials(storage=storage)
+#     idc_auth.get_credentials(storage=storage)
 #
 from __future__ import print_function
 
@@ -53,13 +53,13 @@ from oauth2client.file import Storage
 
 VERBOSE = False
 # for native application - same as settings.INSTALLED_APP_CLIENT_ID
-CLIENT_ID = '907668440978-0ol0griu70qkeb6k3gnn2vipfa5mgl60.apps.googleusercontent.com'
+CLIENT_ID = ''
 # NOTE: this is NOT actually a 'secret' -- we're using the 'installed
 # application' OAuth pattern here
-CLIENT_SECRET = 'To_WJH7-1V-TofhNGcEqmEYi'
+CLIENT_SECRET = ''
 
 EMAIL_SCOPE = 'https://www.googleapis.com/auth/userinfo.email'
-DEFAULT_STORAGE_FILE = os.path.join(os.path.expanduser("~"), '.isb_credentials')
+DEFAULT_STORAGE_FILE = os.path.join(os.path.expanduser("~"), '.idc_credentials')
 
 
 def maybe_print(msg):

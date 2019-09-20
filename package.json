@@ -1,15 +1,15 @@
 {
   "name": "isb-cgc-webapp",
   "version": "1.0.0",
-  "description": "ISB-CGC UI prototyping",
+  "description": "IDC UI prototyping",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BlinkUX/ISB-CGC-Webapp.git"
+    "url": "git+https://github.com/BlinkUX/IDC-Webapp.git"
   },
   "bugs": {
-    "url": "https://github.com/BlinkUX/ISB-CGC-Webapp/issues"
+    "url": "https://github.com/BlinkUX/IDC-Webapp/issues"
   },
-  "homepage": "https://github.com/BlinkUX/ISB-CGC-Webapp#readme",
+  "homepage": "https://github.com/BlinkUX/IDC-Webapp#readme",
   "devDependencies": {
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^3.1.0",

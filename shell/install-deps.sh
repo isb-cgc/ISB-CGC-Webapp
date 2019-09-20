@@ -7,8 +7,8 @@ if [ -n "$CI" ]; then
     if [[ ${CIRCLE_BRANCH} =~ isb-cgc-(prod|uat|test).* ]]; then
         COMMON_BRANCH=$(awk -F- '{print $1"-"$2"-"$3}' <<< ${CIRCLE_BRANCH})
     fi
-    echo "Cloning ISB-CGC-Common branch ${COMMON_BRANCH}..."
-    git clone -b ${COMMON_BRANCH} https://github.com/isb-cgc/ISB-CGC-Common.git
+    echo "Cloning IDC-Common branch ${COMMON_BRANCH}..."
+    git clone -b ${COMMON_BRANCH} https://github.com/isb-cgc/IDC-Common.git
 else
     export $(cat /home/vagrant/parentDir/secure_files/.env | grep -v ^# | xargs) 2> /dev/null
     export HOME=/home/vagrant

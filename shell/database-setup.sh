@@ -21,7 +21,7 @@ fi
 
 
 
-export PYTHONPATH=${HOMEROOT}:${HOMEROOT}/lib:${HOMEROOT}/ISB-CGC-Common
+export PYTHONPATH=${HOMEROOT}:${HOMEROOT}/lib:${HOMEROOT}/IDC-Common
 echo $PYTHONPATH
 
 echo "Increase group_concat max, for longer data type names"

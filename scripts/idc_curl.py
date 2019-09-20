@@ -16,7 +16,7 @@ limitations under the License.
 
 
 
-isb_curl can be called by commandline or used as a library
+idc_curl can be called by commandline or used as a library
 
 URL = https://isb-cgc.appspot.com/_ah/api/{API-NAME}/{VERSION}/{ENDPOINT}?{QUERYSTRING-PARAMS}
   e.g. for the "cohorts_list" endpoint:
@@ -24,20 +24,20 @@ URL = https://isb-cgc.appspot.com/_ah/api/{API-NAME}/{VERSION}/{ENDPOINT}?{QUERY
 
 
 A. Command Line:
-   python isb_auth.py # saves the user's credentials to their root directory
-   python isb_curl.py URL
+   python idc_auth.py # saves the user's credentials to their root directory
+   python idc_curl.py URL
    note: if the endpoint takes a resource in the request body, such as the save_cohort endpoint, use the following:
-   python isb_curl.py https://isb-cgc.appspot.com/_ah/api/cohort_api/v1/save_cohort?name={YOUR-COHORT-NAME} \
+   python idc_curl.py https://isb-cgc.appspot.com/_ah/api/cohort_api/v1/save_cohort?name={YOUR-COHORT-NAME} \
    -d '{"Study": "BRCA"}' -H "Content-Type: application/json"
 
 
 B. Python:
-    import isb_auth
-    import isb_curl
+    import idc_auth
+    import idc_curl
     import requests
 
     url = 'https://isb-cgc.appspot.com/_ah/api/cohort_api/v1/cohorts_list'
-    token = isb_curl.get_access_token()
+    token = idc_curl.get_access_token()
     head = {'Authorization': 'Bearer ' + token}
 
     # for GET requests
@@ -67,8 +67,8 @@ import os
 import sys
 from oauth2client.file import Storage
 
-CREDENTIALS_LOC_ENV = 'ISB_CREDENTIALS'
-DEFAULT_CREDENTIALS_LOC = os.path.join(os.path.expanduser("~"), '.isb_credentials')
+CREDENTIALS_LOC_ENV = 'IDC_CREDENTIALS'
+DEFAULT_CREDENTIALS_LOC = os.path.join(os.path.expanduser("~"), '.idc_credentials')
 
 
 def check(assertion, msg):
@@ -81,13 +81,13 @@ def error(msg):
 
 def get_credentials_location():
     credentials_location = os.environ.get(CREDENTIALS_LOC_ENV, DEFAULT_CREDENTIALS_LOC)
-    check(credentials_location, "couldn't find ISB credentials...try running isb_auth.py")
+    check(credentials_location, "couldn't find IDC credentials...try running idc_auth.py")
     return credentials_location
 
 def load_credentials(credentials_location):
     storage = Storage(credentials_location)
     credentials = storage.get()
-    check(credentials and not credentials.invalid, 'missing/invalid credentials...try running isb_auth.py')
+    check(credentials and not credentials.invalid, 'missing/invalid credentials...try running idc_auth.py')
     return credentials
 
 def get_access_token(credentials_location=get_credentials_location()):
@@ -99,7 +99,7 @@ def get_access_token(credentials_location=get_credentials_location()):
 
 def main():
     args = sys.argv[1:]
-    check(args, 'usage: isb_curl.py <curl arguments>')
+    check(args, 'usage: idc_curl.py <curl arguments>')
     access_token = get_access_token()
     curl_args = ['curl', '-H', 'Authorization: Bearer ' + access_token] + args
     os.execvp('curl', curl_args)

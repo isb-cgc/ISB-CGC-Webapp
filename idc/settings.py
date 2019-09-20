@@ -110,7 +110,7 @@ GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET')
 BIGQUERY_COHORT_DATASET_ID           = os.environ.get('BIGQUERY_COHORT_DATASET_ID', 'cohort_dataset')
 BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
 BIGQUERY_COSMIC_DATASET_ID    = os.environ.get('BIGQUERY_COSMIC_DATASET_ID', '')
-BIGQUERY_CGC_TABLE_ID    = os.environ.get('BIGQUERY_CGC_TABLE_ID', '')
+BIGQUERY_IDC_TABLE_ID    = os.environ.get('BIGQUERY_IDC_TABLE_ID', '')
 MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
 USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
