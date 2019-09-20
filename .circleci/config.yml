@@ -29,19 +29,21 @@ commands:
               CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_IDC_PROD}
               PROJECT_ID=${DEPLOYMENT_PROJECT_ID_IDC_PROD}
               BUCKET=${DEPLOYMENT_BUCKET_IDC_PROD}
-              echo "Using default project ${PROJECT_ID} and related deployment SA and bucket."
+              echo "Using production project and related deployment SA and bucket."
             elif [[ ${TIER} == "UAT" ]]; then
               KEY=${DEPLOYMENT_KEY_IDC_UAT}
               CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_IDC_UAT}
               PROJECT_ID=${DEPLOYMENT_PROJECT_ID_IDC_UAT}
               BUCKET=${DEPLOYMENT_BUCKET_IDC_UAT}
+              echo "Using UAT project and related deployment SA and bucket."
             elif [[ ${TIER} == "TEST" ]]; then
               KEY=${DEPLOYMENT_KEY_IDC_TEST}
               CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_IDC_TEST}
               PROJECT_ID=${DEPLOYMENT_PROJECT_ID_IDC_TEST}
               BUCKET=${DEPLOYMENT_BUCKET_IDC_TEST}
+              echo "Using test project and related deployment SA and bucket."
             elif [[ ${TIER} == "DEV" ]]; then
-              # Dev is the default - pass
+              echo "Using development/default project and related deployment SA and bucket."
             else
               echo "[ERROR] - Unrecognized tier: ${TIER} - exitng."
               exit 1
