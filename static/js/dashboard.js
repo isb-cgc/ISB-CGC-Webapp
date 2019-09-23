@@ -74,6 +74,7 @@ require([
         }
     }
 
+    /*
     var get_vm_instance = function (vm_div) {
         var vm_user = $(vm_div).find("input[name='vm_user']").val();
         var vm_project_id = $(vm_div).find("input[name='vm_project_id']").val();
@@ -297,6 +298,7 @@ require([
             $(this).parents('.modal').modal('hide');
         }
     });
+    */
 
     // Solr Search
     //
