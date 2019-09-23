@@ -47,7 +47,7 @@ from projects.models import Program
 from workbooks.models import Workbook
 from accounts.models import GoogleProject
 from accounts.sa_utils import get_nih_user_details
-from notebooks.notebook_vm import check_vm_stat
+# from notebooks.notebook_vm import check_vm_stat
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 
@@ -496,39 +496,39 @@ def dashboard_page(request):
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct().order_by('-last_date_saved')
 
-    # Notebook VM Instance
-    user_instances = request.user.instance_set.filter(active=True)
-    user = User.objects.get(id=request.user.id)
-    gcp_list = GoogleProject.objects.filter(user=user, active=1)
-    vm_username = request.user.email.split('@')[0]
-    client_ip = get_ip_address_from_request(request)
-    logger.debug('client_ip: '+client_ip)
-    client_ip_range = ', '.join([client_ip])
-
-    if user_instances:
-        user_vm = user_instances[0]
-        machine_name = user_vm.name
-        project_id = user_vm.gcp.project_id
-        zone = user_vm.zone
-        result = check_vm_stat(project_id, zone, machine_name)
-        status = result['status']
-    else:
-        # default values to fill in fields in form
-        project_id = ''
-        # remove special characters
-        machine_header = re.sub(r'[^A-Za-z0-9]+', '', vm_username.lower())
-        machine_name = '{}-jupyter-vm'.format(machine_header)
-        zone = 'us-central1-c'
-        status = 'NOT FOUND'
-
-    notebook_vm = {
-        'user': vm_username,
-        'project_id': project_id,
-        'name': machine_name,
-        'zone': zone,
-        'client_ip_range': client_ip_range,
-        'status': status
-    }
+    # # Notebook VM Instance
+    # user_instances = request.user.instance_set.filter(active=True)
+    # user = User.objects.get(id=request.user.id)
+    # gcp_list = GoogleProject.objects.filter(user=user, active=1)
+    # vm_username = request.user.email.split('@')[0]
+    # client_ip = get_ip_address_from_request(request)
+    # logger.debug('client_ip: '+client_ip)
+    # client_ip_range = ', '.join([client_ip])
+    #
+    # if user_instances:
+    #     user_vm = user_instances[0]
+    #     machine_name = user_vm.name
+    #     project_id = user_vm.gcp.project_id
+    #     zone = user_vm.zone
+    #     result = check_vm_stat(project_id, zone, machine_name)
+    #     status = result['status']
+    # else:
+    #     # default values to fill in fields in form
+    #     project_id = ''
+    #     # remove special characters
+    #     machine_header = re.sub(r'[^A-Za-z0-9]+', '', vm_username.lower())
+    #     machine_name = '{}-jupyter-vm'.format(machine_header)
+    #     zone = 'us-central1-c'
+    #     status = 'NOT FOUND'
+    #
+    # notebook_vm = {
+    #     'user': vm_username,
+    #     'project_id': project_id,
+    #     'name': machine_name,
+    #     'zone': zone,
+    #     'client_ip_range': client_ip_range,
+    #     'status': status
+    # }
 
     # Gene & miRNA Favorites
     genefaves = request.user.genefavorite_set.filter(active=True)
@@ -543,6 +543,6 @@ def dashboard_page(request):
         'workbooks': workbooks,
         'genefaves': genefaves,
         'varfaves' : varfaves,
-        'notebook_vm': notebook_vm,
-        'gcp_list': gcp_list,
+        # 'notebook_vm': notebook_vm,
+        # 'gcp_list': gcp_list,
     })

@@ -549,31 +549,31 @@
     </div>
 
 
-    <div class="modal fade" id="delete-vm-modal" tabindex="-1" role="dialog" aria-labelledby="deleteVmModal"
-         aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span></button>
-                    <h5 class="modal-title" id="deleteVmModal">Delete Notebook VM</h5>
-                </div>
-                <div class="modal-body">
-                    <form class="delete-vm-conf-form">
-                        <div class="form-group">
-                            <p>This will delete <b>{{ notebook_vm.name }}</b>, the <b>workspace</b> and its
-                                <b>notebooks</b> in it. Do you want to proceed?</p>
-                        </div>
-                        <input type="hidden" name="vm_delete_confirm" value="">
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button id="delete-vm-conf-btn" type="button" class="btn btn-primary">Yes</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-                </div>
-            </div>
-        </div>
-    </div>
+{#    <div class="modal fade" id="delete-vm-modal" tabindex="-1" role="dialog" aria-labelledby="deleteVmModal"#}
+{#         aria-hidden="true">#}
+{#        <div class="modal-dialog">#}
+{#            <div class="modal-content">#}
+{#                <div class="modal-header">#}
+{#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">#}
+{#                        <span aria-hidden="true">&times;</span></button>#}
+{#                    <h5 class="modal-title" id="deleteVmModal">Delete Notebook VM</h5>#}
+{#                </div>#}
+{#                <div class="modal-body">#}
+{#                    <form class="delete-vm-conf-form">#}
+{#                        <div class="form-group">#}
+{#                            <p>This will delete <b>{{ notebook_vm.name }}</b>, the <b>workspace</b> and its#}
+{#                                <b>notebooks</b> in it. Do you want to proceed?</p>#}
+{#                        </div>#}
+{#                        <input type="hidden" name="vm_delete_confirm" value="">#}
+{#                    </form>#}
+{#                </div>#}
+{#                <div class="modal-footer">#}
+{#                    <button id="delete-vm-conf-btn" type="button" class="btn btn-primary">Yes</button>#}
+{#                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
 
     <div class="modal fade" id="create-jnb-modal" tabindex="-1" role="dialog"
          aria-labelledby="createJnbModal" aria-hidden="true">
