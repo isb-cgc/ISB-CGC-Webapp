@@ -80,6 +80,7 @@ scripts/metadata_featdef_tables.sql
 *.csv
 *.xls
 *.txt
+!requirements.txt
 
 # Vagrant Files
 .vagrant/

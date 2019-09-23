@@ -92,80 +92,80 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-12">
-                <section class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">
-                            Jupyter Notebook
-                        </h3>
-                        <div class="min-max">
-                            <a data-toggle="collapse" aria-label="Open/Close Notebook" href="#notebook-panel"><i
-                                    class="show fa fa-angle-double-down"></i></a>
-                        </div>
-                    </div>
-                    <div id="notebook-panel" class="panel-body col-md-12 panel panel-collapse collapse in" aria-expanded="true">
-                        <p>Jupyter Notebook is an open-source web application that allows you to create and share documents that
-                            contain live code, equations, visualizations and narrative text.</p>
-
-                        <div class="row-console vm-div row">
-                            {% if notebook_vm.project_id %}
+{#        <div class="row">#}
+{#            <div class="col-md-12">#}
+{#                <section class="panel panel-default">#}
+{#                    <div class="panel-heading">#}
+{#                        <h3 class="panel-title">#}
+{#                            Jupyter Notebook#}
+{#                        </h3>#}
+{#                        <div class="min-max">#}
+{#                            <a data-toggle="collapse" aria-label="Open/Close Notebook" href="#notebook-panel"><i#}
+{#                                    class="show fa fa-angle-double-down"></i></a>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div id="notebook-panel" class="panel-body col-md-12 panel panel-collapse collapse in" aria-expanded="true">#}
+{#                        <p>Jupyter Notebook is an open-source web application that allows you to create and share documents that#}
+{#                            contain live code, equations, visualizations and narrative text.</p>#}
+{##}
+{#                        <div class="row-console vm-div row">#}
+{#                            {% if notebook_vm.project_id %}#}
 {#                            {% if notebook_vm.status != 'NOT FOUND' %}#}
-                                <div class="col-sm-3"><img src="{% static '/img/gce-logo.svg' %}" alt="GCE">
-                                    <b>{{ notebook_vm.name }}</b>
-                                </div>
-                                <div class="col-sm-2">
-                                    <button type="button" class="btn-sm btn-jupyter vm-btn vm-create-btn"
-                                            style="{% if notebook_vm.status != 'NOT FOUND' %} display: none;{% endif %}"
-                                            title="Create VM" value="create_vm">
-                                        <i class="fa fa-plus"></i></button>
-                                    <button type="button" class="btn-sm btn-jupyter vm-btn vm-stop-btn"
-                                            style="{% if notebook_vm.status != 'RUNNING' or notebook_vm.status == 'NOT FOUND' %} display: none;{% endif %}"
-                                            title="Stop VM" value="stop_vm">
-                                        <i class="fa fa-stop"></i></button>
-                                    <button type="button" class="btn-sm btn-jupyter vm-btn vm-start-btn"
-                                            style="{% if notebook_vm.status == 'RUNNING' or notebook_vm.status == 'NOT FOUND' %} display: none;{% endif %}"
-                                            title="Start VM"
-                                            value="start_vm"><i class="fa fa-play" aria-hidden="true"></i></button>
-                                    <button type="button" class="btn-sm btn-jupyter vm-btn vm-delete-btn"
-                                            style="{% if notebook_vm.status == 'NOT FOUND' %} display: none;{% endif %}"
-                                            title="Delete VM" value="delete_vm">
-                                        <i class="fa fa-trash" aria-hidden="true"></i></button>
-                                    <button type="button" class="btn-sm btn-jupyter vm-btn vm-run-browser-btn"
-                                            style="{% if notebook_vm.status != 'RUNNING' %} display: none;{% endif %}"
-                                            title="Open Jupyter Notebook in a Browser" value="run_browser">
-                                        <i class="fa fa-external-link" aria-hidden="true"></i></button>
-                                </div>
-                                <div class="col-sm-2">
-                                    <span class="vm-spinner" style="display:none;">
-                                        <i class="fa fa-spinner fa-spin"></i></span>
-                                    <span class="vm-stat">{{ notebook_vm.status }}</span>
-                                </div>
-                                <div class="col-sm-5 vm-msg">
-                                </div>
-                            {% else %}
-                                <div class="col-sm-12">
-                                    <button type="button" class="btn btn-link vm-btn vm-create-btn"
-                                            title="Create VM"
-                                            value="create_vm">
-                                        <i class="fa fa-plus"></i>Create and Run a New Jupyter Notebook VM
-                                    </button>
-                                    <span class="vm-msg"></span>
-                                    <span class="vm-stat"></span>
-                                    <span class="vm-spinner" style="display:none;"><i
-                                            class="fa fa-spinner fa-spin"></i></span>
-                                </div>
-
-                            {% endif %}
-                            <input type="hidden" name="vm_user" value="{{ notebook_vm.user }}">
-                            <input type="hidden" name="vm_project_id" value="{{ notebook_vm.project_id }}">
-                            <input type="hidden" name="vm_name" value="{{ notebook_vm.name }}">
-                            <input type="hidden" name="client_ip_range" value="{{ notebook_vm.client_ip_range }}">
-                            <input type="hidden" name="serv_port" value="5000">
-                            <input type="hidden" name="vm_zone" value="{{ notebook_vm.zone }}">
-                            <input type="hidden" name="password" value="">
-                        </div>
-
+{#                                <div class="col-sm-3"><img src="{% static '/img/gce-logo.svg' %}" alt="GCE">#}
+{#                                    <b>{{ notebook_vm.name }}</b>#}
+{#                                </div>#}
+{#                                <div class="col-sm-2">#}
+{#                                    <button type="button" class="btn-sm btn-jupyter vm-btn vm-create-btn"#}
+{#                                            style="{% if notebook_vm.status != 'NOT FOUND' %} display: none;{% endif %}"#}
+{#                                            title="Create VM" value="create_vm">#}
+{#                                        <i class="fa fa-plus"></i></button>#}
+{#                                    <button type="button" class="btn-sm btn-jupyter vm-btn vm-stop-btn"#}
+{#                                            style="{% if notebook_vm.status != 'RUNNING' or notebook_vm.status == 'NOT FOUND' %} display: none;{% endif %}"#}
+{#                                            title="Stop VM" value="stop_vm">#}
+{#                                        <i class="fa fa-stop"></i></button>#}
+{#                                    <button type="button" class="btn-sm btn-jupyter vm-btn vm-start-btn"#}
+{#                                            style="{% if notebook_vm.status == 'RUNNING' or notebook_vm.status == 'NOT FOUND' %} display: none;{% endif %}"#}
+{#                                            title="Start VM"#}
+{#                                            value="start_vm"><i class="fa fa-play" aria-hidden="true"></i></button>#}
+{#                                    <button type="button" class="btn-sm btn-jupyter vm-btn vm-delete-btn"#}
+{#                                            style="{% if notebook_vm.status == 'NOT FOUND' %} display: none;{% endif %}"#}
+{#                                            title="Delete VM" value="delete_vm">#}
+{#                                        <i class="fa fa-trash" aria-hidden="true"></i></button>#}
+{#                                    <button type="button" class="btn-sm btn-jupyter vm-btn vm-run-browser-btn"#}
+{#                                            style="{% if notebook_vm.status != 'RUNNING' %} display: none;{% endif %}"#}
+{#                                            title="Open Jupyter Notebook in a Browser" value="run_browser">#}
+{#                                        <i class="fa fa-external-link" aria-hidden="true"></i></button>#}
+{#                                </div>#}
+{#                                <div class="col-sm-2">#}
+{#                                    <span class="vm-spinner" style="display:none;">#}
+{#                                        <i class="fa fa-spinner fa-spin"></i></span>#}
+{#                                    <span class="vm-stat">{{ notebook_vm.status }}</span>#}
+{#                                </div>#}
+{#                                <div class="col-sm-5 vm-msg">#}
+{#                                </div>#}
+{#                            {% else %}#}
+{#                                <div class="col-sm-12">#}
+{#                                    <button type="button" class="btn btn-link vm-btn vm-create-btn"#}
+{#                                            title="Create VM"#}
+{#                                            value="create_vm">#}
+{#                                        <i class="fa fa-plus"></i>Create and Run a New Jupyter Notebook VM#}
+{#                                    </button>#}
+{#                                    <span class="vm-msg"></span>#}
+{#                                    <span class="vm-stat"></span>#}
+{#                                    <span class="vm-spinner" style="display:none;"><i#}
+{#                                            class="fa fa-spinner fa-spin"></i></span>#}
+{#                                </div>#}
+{##}
+{#                            {% endif %}#}
+{#                            <input type="hidden" name="vm_user" value="{{ notebook_vm.user }}">#}
+{#                            <input type="hidden" name="vm_project_id" value="{{ notebook_vm.project_id }}">#}
+{#                            <input type="hidden" name="vm_name" value="{{ notebook_vm.name }}">#}
+{#                            <input type="hidden" name="client_ip_range" value="{{ notebook_vm.client_ip_range }}">#}
+{#                            <input type="hidden" name="serv_port" value="5000">#}
+{#                            <input type="hidden" name="vm_zone" value="{{ notebook_vm.zone }}">#}
+{#                            <input type="hidden" name="password" value="">#}
+{#                        </div>#}
+{##}
                         {#                        <div id="notebook-settings" class="gray-area">#}
                         {#                            <form>#}
                         {#                                <div class="form-row">#}
@@ -204,7 +204,7 @@
                         {#                                <button type="submit" class="btn btn-primary">Cancel</button>#}
                         {#                            </form>#}
                         {#                        </div>#}
-
+{##}
 {#                        <div class="col-md-6">#}
 {#                            <div class="panel-heading">#}
 {#                                <h3 class="panel-title"><a href="{% url 'notebooks' %}">Saved Notebooks#}
@@ -274,11 +274,11 @@
 {#                                </div>#}
 {#                            </div>#}
 {#                        </div>#}
-                    </div>
-
-                </section>
-            </div>
-        </div>
+{#                    </div>#}
+{##}
+{#                </section>#}
+{#            </div>#}
+{#        </div>#}
         <div class="row">
             <div class="col-md-12">
                 <section class="panel panel-default">
