@@ -306,7 +306,7 @@ INSTALLED_APPS = (
     'genes',
     'variables',
     'workbooks',
-    'notebooks',
+    # 'notebooks',
     'data_upload',
     'analysis',
     'offline',
