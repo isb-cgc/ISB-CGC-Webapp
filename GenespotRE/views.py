@@ -424,7 +424,7 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
         'readgroupset_list': readgroupset_list,
         'bam_list': bam_list,
         'base_url': settings.BASE_URL,
-        'service_account': settings.GOOGLE_CLIENT_ID,
+        'service_account': settings.OAUTH2_CLIENT_ID,
         'build': build,
     }
 
