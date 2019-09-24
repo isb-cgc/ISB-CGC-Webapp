@@ -28,14 +28,31 @@ echo "Increase group_concat max, for longer data type names"
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "SET GLOBAL group_concat_max_len=18446744073709547520;"
 
 echo "Creating django-user for web application..."
-mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO '${DATABASE_USER}'@'%' IDENTIFIED BY '${DATABASE_PASSWORD}';"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "CREATE USER '${DATABASE_USER}'@'%' IDENTIFIED BY '${DATABASE_PASSWORD}';"
 
 echo "Creating api-user for API..."
-mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO 'api-user'@'localhost' IDENTIFIED BY '${DATABASE_PASSWORD}';"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "CREATE USER 'api-user'@'%' IDENTIFIED BY '${DATABASE_PASSWORD}';"
 
 echo "Creating the definer account for any routines in the table file..."
-mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO 'dev-user'@'%' IDENTIFIED BY '${DATABASE_PASSWORD}';"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "CREATE USER 'dev-user'@'%' IDENTIFIED BY '${DATABASE_PASSWORD}';"
 
+echo "Grant django-user privs"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO '${DATABASE_USER}'@'%';"
+
+echo "Grant api-user privs"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO 'api-user'@'%';"
+
+echo "Grant dev-user privs"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO 'dev-user'@'%';"
+
+echo "Grant django-user privs"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO '${DATABASE_USER}'@'localhost';"
+
+echo "Grant api-user privs"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO 'api-user'@'localhost';"
+
+echo "Grant dev-user privs"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO 'dev-user'@'localhost';"
 
 # If we have migrations for older, pre-migrations apps which haven't yet been or will never be added to the database dump, make them here eg.:
 # python3 ${HOMEROOT}/manage.py makemigrations <appname>
@@ -67,7 +84,7 @@ if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
     sudo gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/dev_table_and_routines_file.sql" ${HOMEROOT}/scripts/metadata_featdef_tables.sql
 fi
 echo "Applying SQL Table File... (may take a while)"
-mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql.
 
 echo "Adding Cohort/Site Data and bootstrapping Django project and program tables..."
 python3 ${HOMEROOT}/scripts/add_site_ids.py
