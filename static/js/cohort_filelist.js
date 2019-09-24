@@ -482,7 +482,7 @@ require([
                                     '</div></td>';
                             break;
                         case 'pdf_filename':
-                            var file_loc = PATH_PDF_URL+files[i]['cloudstorage_location'].split("://")[1];
+                            var file_loc = PATH_PDF_URL+files[i]['file_gdc_id'];
                             table_row_data += '<td><div class ="col-filename accessible-filename">' +
                                     '<div><a href="'+file_loc+'/" target="_blank">' + files[i]['filename'] +
                                     '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
