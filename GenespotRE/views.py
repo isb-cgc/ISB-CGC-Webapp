@@ -443,6 +443,10 @@ def path_report(request, report_file=None):
 
         response = requests.get("https://nci-crdc.datacommons.io/user/data/download/{}?protocol=gs".format(report_file))
 
+        if response.status_code != 200:
+            logger.warning("[WARNING] From IndexD: {}".format(response.text))
+            raise Exception("Received a status code of {} from IndexD.".format(str(response.status_code)))
+
         anon_signed_uri = response.json()['url']
 
         template = 'GenespotRE/path-pdf.html'
