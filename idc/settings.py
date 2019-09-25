@@ -493,14 +493,6 @@ OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET', '')
 GOOGLE_GROUP_ADMIN                      = os.environ.get('GOOGLE_GROUP_ADMIN', '')
 SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS', '')
 
-# DCF Phase I enable flag
-DCF_TEST                                 = bool(os.environ.get('DCF_TEST', 'False') == 'True')
-
-# SA via DCF
-SA_VIA_DCF                               = bool(os.environ.get('SA_VIA_DCF', 'False') == 'True')
-
-# DCF Monitoring SA
-DCF_MONITORING_SA                        = os.environ.get('DCF_MONITORING_SA', '')
 
 ##############################
 #   Start django-finalware   #
@@ -566,6 +558,7 @@ SOLR_URL = os.environ.get('SOLR_URL', None)
 ##############################################################
 
 EMAIL_SERVICE_API_URL = os.environ.get('EMAIL_SERVICE_API_URL', '')
+EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
 NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')
 
 # Explicitly check for known items
