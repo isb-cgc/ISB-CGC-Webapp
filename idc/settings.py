@@ -480,46 +480,18 @@ if IS_DEV:
 #   End django-allauth   #
 ##########################
 
-GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else '' # Path to privatekey.json
-CLIENT_SECRETS                  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('CLIENT_SECRETS')) if os.environ.get('CLIENT_SECRETS') else ''
-WEB_CLIENT_ID                   = os.environ.get('WEB_CLIENT_ID', '') # Client ID from client_secrets.json
-IGV_WEB_CLIENT_ID               = os.environ.get('IGV_WEB_CLIENT_ID', WEB_CLIENT_ID)
-INSTALLED_APP_CLIENT_ID         = os.environ.get('INSTALLED_APP_CLIENT_ID', '') # Native Client ID
-GCP_REG_CLIENT_EMAIL            = os.environ.get('CLIENT_EMAIL','')
+GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else ''
+
+OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
+
+OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET', '')
 
 #################################
 #   For NIH/eRA Commons login   #
 #################################
 
-LOGIN_EXPIRATION_MINUTES                = int(os.environ.get('LOGIN_EXPIRATION_MINUTES', 24*60))
-OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP', '')
 GOOGLE_GROUP_ADMIN                      = os.environ.get('GOOGLE_GROUP_ADMIN', '')
 SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS', '')
-
-# TaskQueue used when users go through the ERA flow
-LOGOUT_WORKER_TASKQUEUE                  = os.environ.get('LOGOUT_WORKER_TASKQUEUE', '')
-CHECK_NIH_USER_LOGIN_TASK_URI            = os.environ.get('CHECK_NIH_USER_LOGIN_TASK_URI', '')
-
-# TaskQueue used by the sweep_nih_user_logins task
-LOGOUT_SWEEPER_FALLBACK_TASKQUEUE        = os.environ.get('LOGOUT_SWEEPER_FALLBACK_TASKQUEUE', '')
-
-# PubSub topic for ERA login notifications
-PUBSUB_TOPIC_ERA_LOGIN                   = os.environ.get('PUBSUB_TOPIC_ERA_LOGIN', '')
-
-# User project access key
-USER_GCP_ACCESS_CREDENTIALS              = os.environ.get('USER_GCP_ACCESS_CREDENTIALS', '')
-
-# Log name for ERA login views
-LOG_NAME_ERA_LOGIN_VIEW                  = os.environ.get('LOG_NAME_ERA_LOGIN_VIEW', '')
-
-# Service account blacklist file path
-SERVICE_ACCOUNT_BLACKLIST_PATH           = os.environ.get('SERVICE_ACCOUNT_BLACKLIST_PATH', '')
-
-# Google Org whitelist file path
-GOOGLE_ORG_WHITELIST_PATH                = os.environ.get('GOOGLE_ORG_WHITELIST_PATH', '')
-
-# Managed Service Account file path
-MANAGED_SERVICE_ACCOUNTS_PATH            = os.environ.get('MANAGED_SERVICE_ACCOUNTS_PATH', '')
 
 # DCF Phase I enable flag
 DCF_TEST                                 = bool(os.environ.get('DCF_TEST', 'False') == 'True')
@@ -529,26 +501,6 @@ SA_VIA_DCF                               = bool(os.environ.get('SA_VIA_DCF', 'Fa
 
 # DCF Monitoring SA
 DCF_MONITORING_SA                        = os.environ.get('DCF_MONITORING_SA', '')
-
-#################################
-#   For DCF login               #
-#################################
-
-DCF_AUTH_URL                             = os.environ.get('DCF_AUTH_URL', '')
-DCF_TOKEN_URL                            = os.environ.get('DCF_TOKEN_URL', '')
-DCF_USER_URL                             = os.environ.get('DCF_USER_URL', '')
-DCF_KEY_URL                              = os.environ.get('DCF_KEY_URL', '')
-DCF_GOOGLE_URL                           = os.environ.get('DCF_GOOGLE_URL', '')
-DCF_REVOKE_URL                           = os.environ.get('DCF_REVOKE_URL', '')
-DCF_LOGOUT_URL                           = os.environ.get('DCF_LOGOUT_URL', '')
-DCF_URL_URL                              = os.environ.get('DCF_URL_URL', '')
-DCF_CLIENT_SECRETS                       = os.environ.get('DCF_CLIENT_SECRETS', '')
-DCF_GOOGLE_SA_REGISTER_URL               = os.environ.get('DCF_GOOGLE_SA_REGISTER_URL', '')
-DCF_GOOGLE_SA_VERIFY_URL                 = os.environ.get('DCF_GOOGLE_SA_VERIFY_URL', '')
-DCF_GOOGLE_SA_MONITOR_URL                = os.environ.get('DCF_GOOGLE_SA_MONITOR_URL', '')
-DCF_GOOGLE_SA_URL                        = os.environ.get('DCF_GOOGLE_SA_URL', '')
-DCF_TOKEN_REFRESH_WINDOW_SECONDS         = int(os.environ.get('DCF_TOKEN_REFRESH_WINDOW_SECONDS', 86400))
-DCF_LOGIN_EXPIRATION_SECONDS             = int(os.environ.get('DCF_LOGIN_EXPIRATION_SECONDS', 86400))
 
 ##############################
 #   Start django-finalware   #
@@ -577,9 +529,6 @@ CONN_MAX_AGE = 60
 
 SITE_GOOGLE_ANALYTICS   = bool(os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKING_ID', None) is not None)
 SITE_GOOGLE_ANALYTICS_TRACKING_ID = os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKING_ID', '')
-METRICS_SPREADSHEET_ID = os.environ.get('METRICS_SPREADSHEET_ID', '')
-METRICS_SHEET_ID = os.environ.get('METRICS_SHEET_ID', '0')
-METRICS_BQ_DATASET = os.environ.get('METRICS_BQ_DATASET', '')
 
 ##############################################################
 #   MAXes to prevent size-limited events from causing errors
@@ -608,13 +557,6 @@ IMG_THUMBS_URL = os.environ.get('IMG_THUMBS_URL', None)
 DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
 
 #################################
-# NOTEBOOK settings
-#################################
-# NOTEBOOK_VIEWER = os.environ.get('NOTEBOOK_VIEWER', None)
-NOTEBOOK_VIEWER = ''
-# NOTEBOOK_ENV_LOC = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_ENV_PATH', None))
-# NOTEBOOK_SL_PATH = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_SL_PATH', None))
-#################################
 # SOLR settings
 #################################
 SOLR_URL = os.environ.get('SOLR_URL', None)
@@ -624,7 +566,6 @@ SOLR_URL = os.environ.get('SOLR_URL', None)
 ##############################################################
 
 EMAIL_SERVICE_API_URL = os.environ.get('EMAIL_SERVICE_API_URL', '')
-EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
 NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')
 
 # Explicitly check for known items
