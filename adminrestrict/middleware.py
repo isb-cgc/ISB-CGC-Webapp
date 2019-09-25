@@ -16,7 +16,7 @@ from django.http import HttpResponseForbidden
 
 from adminrestrict.models import AllowedIP
 
-# Customized for ISB-CGC by spaquett@systemsbiology.org
+# Customized for IDC by spaquett@systemsbiology.org
 # Changes:
 #   - Upgraded to Django 1.10+ Middleware support
 

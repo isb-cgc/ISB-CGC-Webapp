@@ -42,7 +42,7 @@
         <div class="page-action-group">
             <ul id="default-cohort-menu">
                 {% if cohort.perm.perm != 'OWNER' %}
-                    <li class="menu-item"><h4>Owner: {% if cohort.is_public %}ISB-CGC{% else %}{{ cohort.owner.first_name|title}} {{ cohort.owner.last_name|title }}{% endif %}</h4></li>
+                    <li class="menu-item"><h4>Owner: {% if cohort.is_public %}IDC{% else %}{{ cohort.owner.first_name|title}} {{ cohort.owner.last_name|title }}{% endif %}</h4></li>
                     <li class="separator"></li>
                 {% endif %}
                 <li class="menu-item">
@@ -135,7 +135,7 @@
                 </div>
                 <div class="panel-body details-panel">
                     <div class="row col-md-12 space-bottom-10">
-                        <span>Internal ISB-CGC Cohort ID: {{ cohort.id }}</span>
+                        <span>Internal IDC Cohort ID: {{ cohort.id }}</span>
                     </div>
                     <div class="row col-md-12 space-bottom-10">
                         <span class="detail-label">Total Number of Cases:</span>
@@ -196,7 +196,7 @@
             <div class="panel panel-default">
                 <ul class="nav nav-tabs nav-tabs-data" role="tablist">
                     {% for program in programs %}
-                         <li role="presentation" class="program-tab{% if not program|program_is_in_cohort:cohort.get_programs %} disabled{% elif program|program_is_first_in_cohort:cohort.get_programs %} active{% endif %}"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
+                         <li role="presentation" class="program-tab{% if not program|program_is_in_cohort:cohort.get_programs %} disabled{% elif program|program_is_first_in_cohort:cohort.get_programs %} active{% endif %}"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="IDC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
                     {% endfor %}
                     <li role="presentation" class="program-tab {% if cohort.only_user_data %}active{% endif %} {% if not cohort_programs|has_user_data %}disabled{% endif %}"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
                 </ul>

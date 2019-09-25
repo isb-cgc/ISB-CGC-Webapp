@@ -53,10 +53,10 @@ require([
 ], function() {
     var api_url = '';
     if (window.location.origin.indexOf('stage') != -1) {
-        api_url = 'https://stage-dot-isb-cgc.appspot.com/_ah/api/feature_type_api/v1/feature_search?keyword=';
+        api_url = 'https://stage-dot-idc.appspot.com/_ah/api/feature_type_api/v1/feature_search?keyword=';
     }
     else if (window.location.origin.indexOf('cgcdemo') != -1){
-        api_url = 'https://isb-cgc.appspot.com/_ah/api/feature_type_api/v1/feature_search?keyword=';
+        api_url = 'https://idc.appspot.com/_ah/api/feature_type_api/v1/feature_search?keyword=';
     } else {
         api_url = window.location.origin + '/_ah/api/feature_type_api/v1/feature_search?';
     }

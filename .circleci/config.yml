@@ -16,27 +16,34 @@ commands:
           command: |
             if [ ! -f deployment.key.json ]; then
               echo "Deployment JSON keyfile not found - loading from CircleCI."
-              KEY=${DEPLOYMENT_KEY_IDC}
+              KEY=${DEPLOYMENT_KEY_IDC_DEV}
             else
               echo "Deployment JSON keyfile found."
               KEY="NA"
             fi
-            CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_IDC}
-            PROJECT_ID=${DEPLOYMENT_PROJECT_ID_IDC}
-            BUCKET=${DEPLOYMENT_BUCKET_IDC}
-            if [[ ${TIER} == "PROD" ]] || [[ ${TIER} == "DEV" ]]; then
-              BUCKET="${BUCKET}/${TIER,,}"
-              echo "Using default project ${PROJECT_ID} and related deployment SA and bucket."
+            CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_IDC_DEV}
+            PROJECT_ID=${DEPLOYMENT_PROJECT_ID_IDC_DEV}
+            BUCKET=${DEPLOYMENT_BUCKET_IDC_DEV}
+            if [[ ${TIER} == "PROD" ]]; then
+              KEY=${DEPLOYMENT_KEY_IDC_PROD}
+              CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_IDC_PROD}
+              PROJECT_ID=${DEPLOYMENT_PROJECT_ID_IDC_PROD}
+              BUCKET=${DEPLOYMENT_BUCKET_IDC_PROD}
+              echo "Using production project and related deployment SA and bucket."
             elif [[ ${TIER} == "UAT" ]]; then
               KEY=${DEPLOYMENT_KEY_IDC_UAT}
               CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_IDC_UAT}
               PROJECT_ID=${DEPLOYMENT_PROJECT_ID_IDC_UAT}
               BUCKET=${DEPLOYMENT_BUCKET_IDC_UAT}
+              echo "Using UAT project and related deployment SA and bucket."
             elif [[ ${TIER} == "TEST" ]]; then
               KEY=${DEPLOYMENT_KEY_IDC_TEST}
               CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_IDC_TEST}
               PROJECT_ID=${DEPLOYMENT_PROJECT_ID_IDC_TEST}
               BUCKET=${DEPLOYMENT_BUCKET_IDC_TEST}
+              echo "Using test project and related deployment SA and bucket."
+            elif [[ ${TIER} == "DEV" ]]; then
+              echo "Using development/default project and related deployment SA and bucket."
             else
               echo "[ERROR] - Unrecognized tier: ${TIER} - exitng."
               exit 1
@@ -94,7 +101,7 @@ jobs:
   build_job:
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
-    working_directory: ~/IDC-Webapp
+    working_directory: ~/IDC-WebApp
     docker:
       - image: circleci/python:3.7.0-stretch
       - image: circleci/mysql:5.7
@@ -160,7 +167,7 @@ jobs:
   deploy_job:
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
-    working_directory: ~/IDC-Webapp
+    working_directory: ~/IDC-WebApp
     docker:
       - image: circleci/python:3.7.0-stretch
     steps:

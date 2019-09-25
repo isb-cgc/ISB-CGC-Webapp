@@ -20,7 +20,7 @@ from django.core.urlresolvers import reverse
 from .utils import get_last_activity, set_last_activity
 from .settings import EXPIRE_AFTER, PASSIVE_URLS
 
-# Customized for ISB-CGC by spaquett@systemsbiology.org
+# Customized for IDC by spaquett@systemsbiology.org
 # Changes:
 #   - Upgraded to Django 1.10+ Middleware support
 
