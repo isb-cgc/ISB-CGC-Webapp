@@ -497,8 +497,11 @@ MONITORING_SA_CLIENT_EMAIL            = os.environ.get('MONITORING_SA_CLIENT_EMA
 # GCP monitoring Service Account key
 MONITORING_SA_ACCESS_CREDENTIALS      = os.environ.get('MONITORING_SA_ACCESS_CREDENTIALS', '')
 
-# Client ID used for OAuth2 - this is for IGV
+# Client ID used for OAuth2 - this is for IGV and the test database
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
+
+# Client ID used for OAuth2 - this is for the test database
+OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET', '')
 
 #################################
 #   For NIH/eRA Commons login   #
