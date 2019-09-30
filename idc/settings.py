@@ -158,11 +158,11 @@ if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE_FLEX:
     }
 
 # Default to localhost for the site ID
-SITE_ID = 3
+SITE_ID = 2
 
 if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
     print("[STATUS] AppEngine Flex detected.", file=sys.stdout)
-    SITE_ID = 4
+    SITE_ID = 3
 
 
 def get_project_identifier():

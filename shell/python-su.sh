@@ -1,1 +1,2 @@
-sudo PYTHONPATH="$PYTHONPATH" FLASK_APP="$FLASK_APP" DJANGO_SETTINGS_MODULE="$DJANGO_SETTINGS_MODULE" SECURE_LOCAL_PATH="$SECURE_LOCAL_PATH" /usr/bin/python3 "$@"
+source .bash_profile
+sudo /usr/bin/python3 "$@"
