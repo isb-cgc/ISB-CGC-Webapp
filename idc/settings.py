@@ -119,8 +119,8 @@ database_config = {
     'default': {
         'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
         'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
-        'NAME': os.environ.get('DATABASE_NAME', ''),
-        'USER': os.environ.get('DATABASE_USER'),
+        'NAME': os.environ.get('DATABASE_NAME', 'dev'),
+        'USER': os.environ.get('DATABASE_USER', 'django-user'),
         'PASSWORD': os.environ.get('DATABASE_PASSWORD')
     }
 }
