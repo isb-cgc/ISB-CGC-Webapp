@@ -1,0 +1,97 @@
+@import url("https://cdn.datatables.net/rowgroup/1.1.0/css/rowGroup.bootstrap.min.css")
+#bq-meta-searcher
+    .label
+        display: inline-block
+        position: relative
+        font-weight: normal
+        font-size: 100%
+        color: white
+        border-radius: 3px
+        margin: 0 2px
+        padding: 3px 5px
+        background-color: grey
+        max-width: 100%
+    .dataTables_filter
+        float: right
+    .panel-body
+        padding: 20px 15px
+    //div.hover-bubble
+    //    //display: block
+    //    display: none
+    //    width: auto
+    //
+    //    //width: 300px
+    //    position: absolute
+    //    z-index: 100
+    //    color: #FFF
+    //    background-color: #2a537a
+    //    border-color: #2a537a
+    //    padding: 5px 4px
+    //    margin-left: -20px
+    //    margin-top: -5px
+    //    border-radius: 3px
+
+    //i.hover-bubble
+    //    z-index: -1
+    //    div
+    //        display: none
+    //    &:hover
+    //        div
+    //            display: block
+    //            width: 175px
+    //            position: absolute
+    //            z-index: 1
+    //            color: #FFF
+    //            background-color: #2a537a
+    //            border-color: #2a537a
+    //            padding: 5px 4px
+    //            margin: -6px -5px
+    //            border-radius: 3px
+
+    #bq-meta-form div
+        padding: 7px 5px
+        input[type=checkbox]
+            margin: 2px
+    #bqmeta tr
+        td
+            font-size: .9em
+            div.nowrap-ellipsis
+                display: block
+                white-space: nowrap
+                overflow: hidden
+                text-overflow: ellipsis
+                width: 175px
+                &:hover
+                    width: auto
+                    display: block
+                    position: absolute
+                    z-index: 1
+                    color: #FFF
+                    background-color: #2a537a
+                    border-color: #2a537a
+                    padding: 5px 4px
+                    margin: -6px -5px
+                    border-radius: 3px
+            table.detail-table tr th, td
+                vertical-align: top
+                padding: 2px 5px
+                table.schema-table th, td
+                    border-bottom: 1px solid lightgrey
+
+
+            &.td-body-right
+                text-align: right
+            &.details-control
+                &:before
+                    font-family: FontAwesome
+                    font-size: 1.1em
+                    content: "\f055"
+                    color: #3A79B8
+                    cursor: pointer
+        &.shown
+            td.details-control
+                &:before
+                    font-family: FontAwesome
+                    font-size: 1.1em
+                    content: "\f056"
+                    color: #993333

@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block extra_css_libs %}
+{% endblock %}
+
+{% block title %}
+    ISB-CGC|BigQuery Table Searcher
+{% endblock %}
+{% block description %}
+    BigQuery Table Searcher
+{% endblock %}
+{% block page_name %}bq-meta-searcher{% endblock %}
+{% block page_header %}
+    <div class="container">
+        <h1 class="page-header">BigQuery Metadata Searcher</h1>
+    </div>
+{% endblock %}
+
+{% block content %}
+
+    <div class="col-lg-3 col-md-3 col-sm-3">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <form id="bq-meta-form">
+                    <div>
+                        <label>Status</label>
+                        <select id="status" class="form-control bq-select" data-column-name="status">
+                            <option selected value="">All</option>
+                            <option value="current">Current</option>
+                            <option value="deprecated">Deprecated</option>
+                            <option value="archived">Archived</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Category</label>
+                        <br>
+                        <input type="checkbox" class="bq-checkbox" name="cat_gf" id="cat_gf_chbx" value="genome reference" data-column-name="category">
+                        <label for="cat_gf_chbx">
+                            Genome Reference
+                        </label>
+                        <br>
+                        <input type="checkbox" class="bq-checkbox" name="cat_md" id="cat_md_chbx" value="molecular data" data-column-name="category">
+                        <label for="cat_md_chbx">
+                            Molecular Data
+                        </label>
+                        <br>
+                        <input type="checkbox" class="bq-checkbox"  name="cat_cb" id="cat_cb_chbx" value="clinical biospec" data-column-name="category">
+                        <label for="cat_cb_chbx">
+                            Clinical Biospec
+                        </label>
+                        <br>
+                        <input type="checkbox" class="bq-checkbox"  name="cat_meta" id="cat_meta_chbx" value="metadata" data-column-name="category">
+                        <label for="cat_meta_chbx">
+                            Metadata
+                        </label>
+                    </div>
+
+{#                    <div>#}
+{#                        <label>Project ID</label>#}
+{#                        <input type="text" class="form-control bq-filter" data-column-name="projectId">#}
+{#                    </div>#}
+                    <div>
+                        <label>Dataset ID</label>
+                        <input type="text" class="form-control bq-filter" data-column-name="datasetId">
+                    </div>
+                    <div>
+                        <label>Table ID</label>
+                        <input type="text" class="form-control bq-filter" data-column-name="tableId">
+                    </div>
+                    <div>
+                        <label>Table Description</label>
+                        <input type="text" class="form-control bq-filter" data-column-name="description">
+                    </div>
+                    <div>
+                        <label>Labels</label>
+                        <input type="text" class="form-control bq-filter" data-column-name="labels">
+                    </div>
+                    <div>
+                        <label>Field Name</label>
+                        <input type="text" class="form-control bq-filter" data-column-name="fields">
+                    </div>
+{#                    <div class="text-right group-div">#}
+{#                        <button type="submit" class="btn btn-primary">Search</button>#}
+{#                        <button type="reset" class="btn btn-lnk">Reset</button>#}
+{#                    </div>#}
+                </form>
+            </div>
+
+        </div>
+    </div>
+    <div class="col-lg-9 col-md-9 col-sm-9">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <table id="bqmeta" class="table table-striped" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th></th>
+{#                        <th>Project ID</th>#}
+                        <th>Dataset ID</th>
+                        <th>Table ID</th>
+                        <th>Full ID</th>
+                        <th>Status</th>
+                        <th>Category</th>
+                        <th>Num Rows</th>
+                        <th>Created Date</th>
+                        <th>Description</th>
+                        <th>Labels</th>
+                        <th>Fields</th>
+{#                        <th>Link</th>#}
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+{#    </div>#}
+
+{% endblock %}
+
+{% block js_file %}{% static 'js/bq_meta_search.js' %}{% endblock %}

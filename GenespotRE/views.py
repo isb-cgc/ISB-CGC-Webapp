@@ -478,6 +478,9 @@ def about_page(request):
 def vid_tutorials_page(request):
     return render(request, 'GenespotRE/video_tutorials.html')
 
+def bq_meta_search(request):
+    return render(request, 'GenespotRE/bq_meta_search.html')
+
 
 @login_required
 def dashboard_page(request):
