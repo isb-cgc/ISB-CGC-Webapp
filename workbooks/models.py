@@ -45,7 +45,6 @@ class Workbook(models.Model):
     owner = models.ForeignKey(User)
     active = models.BooleanField(default=True)
     shared = models.ManyToManyField(Shared_Resource)
-    is_public = models.BooleanField(default=False)
     build = models.CharField(max_length=10, null=True)
 
     @classmethod
