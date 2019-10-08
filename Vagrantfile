@@ -14,6 +14,9 @@ Vagrant.configure(2) do |config|
   # Map Common for the WebApp
   config.vm.synced_folder "../IDC-Common", "/home/vagrant/www/IDC-Common"
 
+  # Map API so it can use this VM
+  config.vm.synced_folder "../IDC-API", "/home/vagrant/API"
+
   config.vm.provision "shell", path: 'shell/install-deps.sh'
   config.vm.provision "shell", path: 'shell/create-database.sh'
   config.vm.provision "shell", path: 'shell/database-setup.sh'

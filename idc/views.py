@@ -39,22 +39,15 @@ from adminrestrict.middleware import get_ip_address_from_request
 from google_helpers.directory_service import get_directory_resource
 from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
-from cohorts.metadata_helpers import get_sample_metadata
 from googleapiclient.errors import HttpError
-from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
 from projects.models import Program
-from workbooks.models import Workbook
-from accounts.models import GoogleProject
-from accounts.sa_utils import get_nih_user_details
-from notebooks.notebook_vm import check_vm_stat
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
 
-OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 # SOLR_URL = settings.SOLR_URL
@@ -149,7 +142,7 @@ def user_detail(request, user_id):
             'last_name':    user.last_name
         }
 
-        user_details['gcp_list'] = len(GoogleProject.objects.filter(user=user))
+        user_details['gcp_list'] = 0
 
         forced_logout = 'dcfForcedLogout' in request.session
         nih_details = get_nih_user_details(user_id, forced_logout)
@@ -338,7 +331,7 @@ def get_image_data(request, file_uuid):
                     'img-type': ('Diagnostic Image' if query_results[0]['f'][0]['v'].split("-")[-1].startswith("DX") else 'Tissue Slide Image' if query_results[0]['f'][0]['v'].split("-")[-1].startswith("TS") else "N/A")
                 }
 
-                sample_metadata = get_sample_metadata(result['sample-barcode'])
+                sample_metadata = {}
                 result['disease-code'] = sample_metadata['disease_code']
                 result['project'] = sample_metadata['project']
 
@@ -475,7 +468,7 @@ def dashboard_page(request):
     # Notebook VM Instance
     user_instances = request.user.instance_set.filter(active=True)
     user = User.objects.get(id=request.user.id)
-    gcp_list = GoogleProject.objects.filter(user=user, active=1)
+    gcp_list = []
     vm_username = request.user.email.split('@')[0]
     client_ip = get_ip_address_from_request(request)
     logger.debug('client_ip: '+client_ip)

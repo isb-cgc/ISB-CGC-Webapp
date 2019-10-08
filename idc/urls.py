@@ -44,14 +44,9 @@ urlpatterns = [
     url(r'^images/', views.get_image_data_args, name='image_data_args'),
     url(r'dicom/(?P<study_uid>[A-Za-z0-9\.]+)/$', views.dicom, name='dicom'),
 
-    url(r'^analysis/', include('analysis.urls')),
-    url(r'^workbooks/', include('workbooks.urls')),
-    url(r'^notebooks/', include('notebooks.urls')),
     url(r'^cohorts/', include('cohorts.urls')),
-    url(r'^visualizations/', include('visualizations.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/', include('accounts.urls')),
-    url(r'^seqpeek/', include('seqpeek.urls')),
     url(r'session_security/', include('session_security.urls')),
     url(r'^data/', include('data_upload.urls')),
     url(r'^_ah/(vm_)?health$', views.health_check),
@@ -68,8 +63,6 @@ urlpatterns = [
     url(r'^privacy/', views.privacy_policy, name='privacy'),
 
     url(r'^programs/', include('projects.urls')),
-    url(r'^genes/', include('genes.urls')),
-    url(r'^variables/', include('variables.urls')),
     url(r'^share/', include('sharing.urls')),
 ]
 

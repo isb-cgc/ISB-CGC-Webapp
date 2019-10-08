@@ -119,8 +119,8 @@ database_config = {
     'default': {
         'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
         'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
-        'NAME': os.environ.get('DATABASE_NAME', ''),
-        'USER': os.environ.get('DATABASE_USER'),
+        'NAME': os.environ.get('DATABASE_NAME', 'dev'),
+        'USER': os.environ.get('DATABASE_USER', 'django-user'),
         'PASSWORD': os.environ.get('DATABASE_PASSWORD')
     }
 }
@@ -158,11 +158,11 @@ if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE_FLEX:
     }
 
 # Default to localhost for the site ID
-SITE_ID = 3
+SITE_ID = 2
 
 if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
     print("[STATUS] AppEngine Flex detected.", file=sys.stdout)
-    SITE_ID = 4
+    SITE_ID = 3
 
 
 def get_project_identifier():
@@ -312,6 +312,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'idc',
+    'data_upload',
     'sharing',
     'cohorts',
     'projects',

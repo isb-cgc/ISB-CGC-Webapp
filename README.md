@@ -41,7 +41,7 @@ PyCharm Pro can be used to run your server through Vagrant and the Google App En
  13. Set the Python Interpreter to the Vagrant Machine (if it is not set to that already)
  14. Set the working directory to `/home/vagrant/www`
  15. Click `...` next to the `Environment variables:`, box and add the following values:
-     `SECURE_LOCAL_PATH = ../parentDir/secure_files/`
+     `SECURE_LOCAL_PATH = ../parentDir/secure_files/idc/`
      `PYTHONPATH = /home/vagrant/www:/home/vagrant/www/lib:/home/vagrant/google_appengine`
      `DJANGO_SETTINGS_MODULE = idc.settings`
      `PYTHONUNBUFFERED = 1`
