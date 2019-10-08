@@ -38,7 +38,6 @@ SHARED_SOURCE_DIRECTORIES = [
     'ISB-CGC-Common'
 ]
 
-
 # The Google AppEngine library and the Google Cloud APIs don't play nice. Teach them to get along.
 # This unfortunately requires either hardcoding the path to the SDK, or sorting out a way to
 # provide an environment variable indicating where it is.
@@ -116,7 +115,7 @@ MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
 USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
 
-DATABASES = {
+database_config = {
     'default': {
         'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
         'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
@@ -126,7 +125,22 @@ DATABASES = {
     }
 }
 
-DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
+# On the build system, we need to use build-system specific database information
+
+if os.environ.get('CI', None) is not None:
+    database_config = {
+        'default': {
+            'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
+            'HOST': os.environ.get('DATABASE_HOST_BUILD', '127.0.0.1'),
+            'NAME': os.environ.get('DATABASE_NAME_BUILD', ''),
+            'PORT': 3306,
+            'USER': os.environ.get('DATABASE_USER_BUILD'),
+            'PASSWORD': os.environ.get('MYSQL_ROOT_PASSWORD_BUILD')
+        }
+    }
+
+DATABASES = database_config
+DB_SOCKET = database_config['default']['HOST'] if 'cloudsql' in database_config['default']['HOST'] else None
 
 IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
@@ -306,7 +320,7 @@ INSTALLED_APPS = (
     'genes',
     'variables',
     'workbooks',
-    'notebooks',
+    # 'notebooks',
     'data_upload',
     'analysis',
     'offline',
@@ -474,34 +488,28 @@ if IS_DEV:
 #   End django-allauth   #
 ##########################
 
-GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else '' # Path to privatekey.json
-CLIENT_SECRETS                  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('CLIENT_SECRETS')) if os.environ.get('CLIENT_SECRETS') else ''
-WEB_CLIENT_ID                   = os.environ.get('WEB_CLIENT_ID', '') # Client ID from client_secrets.json
-IGV_WEB_CLIENT_ID               = os.environ.get('IGV_WEB_CLIENT_ID', WEB_CLIENT_ID)
-INSTALLED_APP_CLIENT_ID         = os.environ.get('INSTALLED_APP_CLIENT_ID', '') # Native Client ID
-GCP_REG_CLIENT_EMAIL            = os.environ.get('CLIENT_EMAIL','')
+# Path to application runtime JSON key
+GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else ''
+
+# GCP monitoring Service Account
+MONITORING_SA_CLIENT_EMAIL            = os.environ.get('MONITORING_SA_CLIENT_EMAIL', '')
+
+# GCP monitoring Service Account key
+MONITORING_SA_ACCESS_CREDENTIALS      = os.environ.get('MONITORING_SA_ACCESS_CREDENTIALS', '')
+
+# Client ID used for OAuth2 - this is for IGV and the test database
+OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
+
+# Client ID used for OAuth2 - this is for the test database
+OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET', '')
 
 #################################
 #   For NIH/eRA Commons login   #
 #################################
 
-LOGIN_EXPIRATION_MINUTES                = int(os.environ.get('LOGIN_EXPIRATION_MINUTES', 24*60))
 OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP', '')
 GOOGLE_GROUP_ADMIN                      = os.environ.get('GOOGLE_GROUP_ADMIN', '')
 SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS', '')
-
-# TaskQueue used when users go through the ERA flow
-LOGOUT_WORKER_TASKQUEUE                  = os.environ.get('LOGOUT_WORKER_TASKQUEUE', '')
-CHECK_NIH_USER_LOGIN_TASK_URI            = os.environ.get('CHECK_NIH_USER_LOGIN_TASK_URI', '')
-
-# TaskQueue used by the sweep_nih_user_logins task
-LOGOUT_SWEEPER_FALLBACK_TASKQUEUE        = os.environ.get('LOGOUT_SWEEPER_FALLBACK_TASKQUEUE', '')
-
-# PubSub topic for ERA login notifications
-PUBSUB_TOPIC_ERA_LOGIN                   = os.environ.get('PUBSUB_TOPIC_ERA_LOGIN', '')
-
-# User project access key
-USER_GCP_ACCESS_CREDENTIALS              = os.environ.get('USER_GCP_ACCESS_CREDENTIALS', '')
 
 # Log name for ERA login views
 LOG_NAME_ERA_LOGIN_VIEW                  = os.environ.get('LOG_NAME_ERA_LOGIN_VIEW', '')
@@ -514,9 +522,6 @@ GOOGLE_ORG_WHITELIST_PATH                = os.environ.get('GOOGLE_ORG_WHITELIST_
 
 # Managed Service Account file path
 MANAGED_SERVICE_ACCOUNTS_PATH            = os.environ.get('MANAGED_SERVICE_ACCOUNTS_PATH', '')
-
-# Dataset configuration file path
-DATASET_CONFIGURATION_PATH               = os.environ.get('DATASET_CONFIGURATION_PATH', '')
 
 # DCF Phase I enable flag
 DCF_TEST                                 = bool(os.environ.get('DCF_TEST', 'False') == 'True')
