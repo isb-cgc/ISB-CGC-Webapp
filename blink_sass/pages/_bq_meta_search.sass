@@ -1,4 +1,5 @@
 @import url("https://cdn.datatables.net/rowgroup/1.1.0/css/rowGroup.bootstrap.min.css")
+@import url("https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css")
 #bq-meta-searcher
     .label
         display: inline-block
@@ -15,6 +16,17 @@
         float: right
     .panel-body
         padding: 20px 15px
+    .bq-header-container
+        h1
+            float: left
+        ul
+            float: right
+            padding: 20px
+            li
+                padding-left: 20px
+                i
+                    padding-left: 5px
+
     //div.hover-bubble
     //    //display: block
     //    display: none
@@ -48,10 +60,24 @@
     //            margin: -6px -5px
     //            border-radius: 3px
 
-    #bq-meta-form div
-        padding: 7px 5px
+    #bq-meta-form
+        div
+            padding: 7px 5px
+            &.adv-div
+                padding: 0
         input[type=checkbox]
             margin: 2px
+        .fa-info-circle
+            color: #3A79B8
+            font-size: .9em
+        .tooltip-inner
+            color: white
+            text-align: left
+            background-color: #2A537A
+            border-radius: 3px
+        .chosen-container
+            padding: 0
+
     #bqmeta tr
         td
             font-size: .9em
@@ -60,7 +86,7 @@
                 white-space: nowrap
                 overflow: hidden
                 text-overflow: ellipsis
-                width: 175px
+                width: 150px
                 &:hover
                     width: auto
                     display: block
@@ -72,15 +98,28 @@
                     padding: 5px 4px
                     margin: -6px -5px
                     border-radius: 3px
-            table.detail-table tr th, td
-                vertical-align: top
-                padding: 2px 5px
-                table.schema-table th, td
-                    border-bottom: 1px solid lightgrey
-
+            table
+                &.detail-table
+                    th, td
+                        vertical-align: top
+                        padding: 2px 5px
+                        table.schema-table th, td
+                            border-bottom: 1px solid lightgrey
+                &.preview-table
+                    th, td
+                        padding: 2px 5px
+                        border: 1px solid #eeeeee
 
             &.td-body-right
                 text-align: right
+            &.tbl-preview
+                &:before
+                    font-family: FontAwesome
+                    font-size: 1.1em
+                    content: "\f0ce"
+                    color: #3A79B8
+                    cursor: pointer
+
             &.details-control
                 &:before
                     font-family: FontAwesome
@@ -88,10 +127,67 @@
                     content: "\f055"
                     color: #3A79B8
                     cursor: pointer
-        &.shown
+        &.details-shown
             td.details-control
                 &:before
                     font-family: FontAwesome
                     font-size: 1.1em
                     content: "\f056"
                     color: #993333
+        &.preview-shown
+            td.tbl-preview
+                &:before
+                    font-family: FontAwesome
+                    font-size: 1.1em
+                    content: "\f0ce"
+                    color: $isb-warning
+        //&.preview-loading
+        //    td.tbl-preview
+        //        &:after
+        //            font-family: FontAwesome
+        //            font-size: 1.1em
+        //            content: "\f110"
+    .switch
+        position: relative
+        display: inline-block
+        width: 30px
+        height: 18px
+        margin: 0
+        input
+            opacity: 0
+            width: 0
+            height: 0
+
+    .slider
+        position: absolute
+        cursor: pointer
+        top: 0
+        left: 0
+        right: 0
+        bottom: 0
+        background-color: #ccc
+        &:before
+            position: absolute
+            content: ""
+            height: 14px
+            width: 14px
+            left: 2px
+            bottom: 2px
+            background-color: white
+
+    input
+        &:checked + .slider
+            background-color: #3A79B8
+        &:focus + .slider
+            box-shadow: 0 0 1px #3A79B8
+        &:checked + .slider:before
+            -webkit-transform: translateX(12px)
+            -ms-transform: translateX(12px)
+            transform: translateX(12px)
+
+    /* Rounded sliders */
+    .slider
+        &.round
+            border-radius: 12px
+            &:before
+                border-radius: 50%

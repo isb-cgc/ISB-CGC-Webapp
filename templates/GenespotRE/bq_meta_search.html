@@ -4,15 +4,37 @@
 {% endblock %}
 
 {% block title %}
-    ISB-CGC|BigQuery Table Searcher
+    ISB-CGC|BigQuery Table Searche
 {% endblock %}
 {% block description %}
-    BigQuery Table Searcher
+    BigQuery Table Search
 {% endblock %}
 {% block page_name %}bq-meta-searcher{% endblock %}
 {% block page_header %}
-    <div class="container">
-        <h1 class="page-header">BigQuery Metadata Searcher</h1>
+    <div class="bq-header-container container">
+        <h1 class="page-header">BigQuery Table Search</h1>
+        <ul class="nav">
+            <li class="navbar-item">
+                <a class="nav-link"
+                   href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/BigQuery.html"
+                   target="_blank">ISB-CGC BigQuery Documentation<i class="fa fa-external-link" aria-hidden="true"></i></a>
+            </li>
+            <li class="navbar-item">
+                <a class="nav-link"
+                   href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html"
+                   target="_blank">ISB-CGC Notebooks<i class="fa fa-external-link" aria-hidden="true"></i></a>
+            </li>
+            <li class="navbar-item">
+                <a class="nav-link"
+                   href="https://bigquery.cloud.google.com"
+                   target="_blank">Google BigQuery Console<i class="fa fa-external-link" aria-hidden="true"></i></a>
+            </li>
+            <li class="navbar-item">
+                <a class="nav-link"
+                   href="https://cloud.google.com/bigquery/what-is-bigquery"
+                   target="_blank">About BigQuery<i class="fa fa-external-link" aria-hidden="true"></i></a>
+            </li>
+        </ul>
     </div>
 {% endblock %}
 
@@ -23,66 +45,81 @@
             <div class="panel-body">
                 <form id="bq-meta-form">
                     <div>
+                        <label style="padding-right: 5px;" for="advSearch">Advanced Search</label>
+                            Off
+                            <label class="switch" for="advSearchToggler" data-toggle="collapse" data-target="#advSearch0">
+                                <input type="checkbox"
+                                       aria-expanded="false"
+                                       aria-controls="advSearch0 advSearch1 advSearch2"
+                                       name="advSearch" id="advSearchToggler">
+                                <span class="slider round"></span>
+                            </label>
+                            On
+                    </div>
+                    <div>
                         <label>Status</label>
                         <select id="status" class="form-control bq-select" data-column-name="status">
-                            <option selected value="">All</option>
-                            <option value="current">Current</option>
-                            <option value="deprecated">Deprecated</option>
-                            <option value="archived">Archived</option>
+                            {% for option in Status.options %}
+                                <option selected value="{{ option.value }}">{{ option.label }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div>
                         <label>Category</label>
-                        <br>
-                        <input type="checkbox" class="bq-checkbox" name="cat_gf" id="cat_gf_chbx" value="genome reference" data-column-name="category">
-                        <label for="cat_gf_chbx">
-                            Genome Reference
-                        </label>
-                        <br>
-                        <input type="checkbox" class="bq-checkbox" name="cat_md" id="cat_md_chbx" value="molecular data" data-column-name="category">
-                        <label for="cat_md_chbx">
-                            Molecular Data
-                        </label>
-                        <br>
-                        <input type="checkbox" class="bq-checkbox"  name="cat_cb" id="cat_cb_chbx" value="clinical biospec" data-column-name="category">
-                        <label for="cat_cb_chbx">
-                            Clinical Biospec
-                        </label>
-                        <br>
-                        <input type="checkbox" class="bq-checkbox"  name="cat_meta" id="cat_meta_chbx" value="metadata" data-column-name="category">
-                        <label for="cat_meta_chbx">
-                            Metadata
-                        </label>
-                    </div>
-
-{#                    <div>#}
-{#                        <label>Project ID</label>#}
-{#                        <input type="text" class="form-control bq-filter" data-column-name="projectId">#}
-{#                    </div>#}
-                    <div>
-                        <label>Dataset ID</label>
-                        <input type="text" class="form-control bq-filter" data-column-name="datasetId">
+                        {% for option in Category.options %}
+                            <br>
+                            <input type="checkbox" class="bq-checkbox" name="cat_{{ forloop.counter0 }}" id="cat_chbx_{{ forloop.counter0 }}"
+                                   value="{{ option.value }}" data-column-name="category">
+                            <label for="cat_chbx_{{ forloop.counter0 }}">{{ option.label }}</label>
+                            <i class="fa fa-info-circle" data-placement="bottom" title="{{ option.description }}"></i>
+                        {% endfor %}
                     </div>
                     <div>
-                        <label>Table ID</label>
-                        <input type="text" class="form-control bq-filter" data-column-name="tableId">
+                        <label>Reference Genome</label>
+                        <select class="form-control bq-select" data-column-name="referenceGenome">reference_genome
+                            {% for option in Reference_Genome.options %}
+                                <option value="{{ option.value }}">{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div>
-                        <label>Table Description</label>
-                        <input type="text" class="form-control bq-filter" data-column-name="description">
+                        <label>Source</label>
+                        <select class="autocomplete_select_box form-control bq-select" data-column-name="source">
+                            {% for option in Source.options %}
+                                <option value="{{ option.value }}">{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div>
-                        <label>Labels</label>
-                        <input type="text" class="form-control bq-filter" data-column-name="labels">
+                        <label>Data Type</label>
+                        <select class="form-control bq-select" data-column-name="dataType">
+                            {% for option in Data_Type.options %}
+                                <option value="{{ option.value }}">{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <div>
-                        <label>Field Name</label>
-                        <input type="text" class="form-control bq-filter" data-column-name="fields">
+                    <div id="advSearch0" class="adv-div collapse">
+                        <div>
+                            <label>Dataset ID</label>
+                            <input type="text" class="form-control bq-filter" data-column-name="datasetId">
+                        </div>
+                        <div>
+                            <label>Table ID</label>
+                            <input type="text" class="form-control bq-filter" data-column-name="tableId">
+                        </div>
+                        <div>
+                            <label>Table Description</label>
+                            <input type="text" class="form-control bq-filter" data-column-name="description">
+                        </div>
+                        <div>
+                            <label>Labels</label>
+                            <input type="text" class="form-control bq-filter" data-column-name="labels">
+                        </div>
+                        <div>
+                            <label>Field Name</label>
+                            <input type="text" class="form-control bq-filter" data-column-name="fields">
+                        </div>
                     </div>
-{#                    <div class="text-right group-div">#}
-{#                        <button type="submit" class="btn btn-primary">Search</button>#}
-{#                        <button type="reset" class="btn btn-lnk">Reset</button>#}
-{#                    </div>#}
                 </form>
             </div>
 
@@ -94,19 +131,26 @@
                 <table id="bqmeta" class="table table-striped" style="width:100%">
                     <thead>
                     <tr>
-                        <th></th>
-{#                        <th>Project ID</th>#}
-                        <th>Dataset ID</th>
-                        <th>Table ID</th>
-                        <th>Full ID</th>
-                        <th>Status</th>
-                        <th>Category</th>
-                        <th>Num Rows</th>
-                        <th>Created Date</th>
-                        <th>Description</th>
+                        <th style="width:3%;"></th>
+                        {#                        <th>Project ID</th>#}
+                        <th style="width:20%;">Dataset ID</th>
+{#                        <th>Table ID</th>#}
+{#                        <th>Full ID</th>#}
+                        <th style="width:19%;">Table ID</th>
+                        <th style="width:19%;">Full ID</th>
+                        <th style="width:9%;">Status</th>
+                        <th style="width:8%;">Category</th>
+                        <th>Reference Genome</th>
+                        <th>Source</th>
+                        <th>Data Type</th>
+                        <th style="width:8%;">Num Rows</th>
+                        <th style="width:8%;">Created Date</th>
+                        <th style="width:7%;">Preview</th>
+                        <th style="width:7%;">Description</th>
                         <th>Labels</th>
                         <th>Fields</th>
-{#                        <th>Link</th>#}
+
+                        {#                        <th>Link</th>#}
                     </tr>
                     </thead>
                     <tbody></tbody>
@@ -115,7 +159,7 @@
 
         </div>
     </div>
-{#    </div>#}
+    {#    </div>#}
 
 {% endblock %}
 
