@@ -637,7 +637,11 @@ BLACKLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<if
 INDEXD_URI = os.environ.get('INDEXD_URI', None)
 INDEXD_REQ_LIMIT = int(os.environ.get('INDEXD_REQ_LIMIT', '100'))
 
+# Apache Solr settings
 SOLR_URI = os.environ.get('SOLR_URI', '')
+SOLR_LOGIN = os.environ.get('SOLR_LOGIN', '')
+SOLR_PASSWORD = os.environ.get('SOLR_PASSWORD', '')
+
 
 if DEBUG and DEBUG_TOOLBAR:
     INSTALLED_APPS += ('debug_toolbar',)
