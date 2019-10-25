@@ -616,6 +616,7 @@ DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
 NOTEBOOK_VIEWER = ''
 # NOTEBOOK_ENV_LOC = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_ENV_PATH', None))
 # NOTEBOOK_SL_PATH = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_SL_PATH', None))
+
 #################################
 # SOLR settings
 #################################
@@ -636,6 +637,7 @@ BLACKLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<if
 INDEXD_URI = os.environ.get('INDEXD_URI', None)
 INDEXD_REQ_LIMIT = int(os.environ.get('INDEXD_REQ_LIMIT', '100'))
 
+SOLR_URI = os.environ.get('SOLR_URI', '')
 
 if DEBUG and DEBUG_TOOLBAR:
     INSTALLED_APPS += ('debug_toolbar',)
