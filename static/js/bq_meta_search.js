@@ -46,7 +46,7 @@ require([
         var table = $('#bqmeta').DataTable({
             dom: 'lfBrtip',
             ajax: {
-                url: '/bq_meta_data',
+                url: BASE_URL+'/bq_meta_data',
                 dataSrc: ''
             },
             buttons: [
@@ -189,13 +189,11 @@ require([
                     'visible': false
                 }
             ],
-            // Only use this for a paginated api.
             serverSide: false,
             order: [[1, 'asc']],
-            initComplete: function(){
+            drawCallback: function( ) {
                 //remove th style attr to delete width
                 $('#bqmeta').find('th').attr('style','');
-
             }
         });
 
