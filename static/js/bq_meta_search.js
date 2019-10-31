@@ -191,7 +191,7 @@ require([
             ],
             serverSide: false,
             order: [[1, 'asc']],
-            drawCallback: function( ) {
+            drawCallback: function() {
                 //remove th style attr to delete width
                 $('#bqmeta').find('th').attr('style','');
             }
