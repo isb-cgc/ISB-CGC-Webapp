@@ -20,67 +20,48 @@ require.config({
     paths: {
         'bootstrap': ['https://stackpath.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min', 'libs/bootstrap.min'],
         'jquery': ['//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min', 'libs/jquery-1.11.1.min'],
-        'dataTables': ['//cdn.datatables.net/1.10.18/js/dataTables.bootstrap.min'],
-        'dataTables.net': ['//cdn.datatables.net/1.10.19/js/jquery.dataTables.min', 'libs/jquery.dataTables.min'],
-        'dataTables.rowGroup': ['//cdn.datatables.net/rowgroup/1.0.3/js/dataTables.rowGroup.min', 'libs/dataTables.rowGroup.min'],
+        'datatables.net': ['//cdn.datatables.net/1.10.19/js/jquery.dataTables.min', 'libs/jquery.dataTables.min'],
+        'datatables.bootstrap': 'https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap.min',
+        'datatables.net-buttons': 'https://cdn.datatables.net/buttons/1.6.0/js/dataTables.buttons.min',
+        'datatables.net-html5': 'https://cdn.datatables.net/buttons/1.6.0/js/buttons.html5.min',
         'chosen': 'https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min'
     },
     shim: {
         'bootstrap': ['jquery'],
-        'dataTables.net': ['jquery'],
-        'dataTables.rowGroup': ['jquery', 'dataTables.net'],
+        'datatables.net': ['jquery'],
         'chosen':['jquery']
-    },
-    map: {
-        '*': {
-            'datatables.net': 'dataTables'
-        }
     }
 });
 
 require([
     'jquery',
     'bootstrap',
-    'dataTables.net',
-    'dataTables.rowGroup',
+    'datatables.net',
+    'datatables.bootstrap',
+    'datatables.net-buttons',
+    'datatables.net-html5',
     'chosen'
 ], function ($) {
     $(document).ready(function () {
         var table = $('#bqmeta').DataTable({
+            dom: 'lfBrtip',
             ajax: {
-                //Change to the location of your json file.
-                url:'/static/data/bq_meta_datasets.json', //todo: change this to fetch url programmically
+                url: '/bq_meta_data',
                 dataSrc: ''
             },
+            buttons: [
+                {
+                    extend: 'csvHtml5',
+                    text: '<i class="fa fa-download" style="margin-right: 5px;"></i>CSV Download'
+                }
+            ],
             columns: [
-
-                // Change to reflect the columns in the json file that you want.
-                // Remember to add appropriate headers in the table's
-                // thead element or it won't render.
-
                 {
                     "className": 'details-control',
                     "orderable": false,
                     "data": null,
                     "defaultContent": ''
                 },
-
-                // {
-                //     'name': 'description',
-                //     'data': 'description',
-                //     'render': function (data, type) {
-                //         return type === 'display' ?
-                //             (data ? '<i class="fa fa-info-circle hover-bubble"></i><div class="hover-bubble">' + data + '</div>' : '') :
-                //             data;
-                //     }
-                // },
-
-                // {
-                //     'name': 'projectId',
-                //     'data': 'projectId',
-                //     'visible': false
-                // },
-
                 {
                     'name': 'datasetId',
                     'data': 'tableReference.datasetId'
@@ -93,84 +74,63 @@ require([
                             '<div class="nowrap-ellipsis">' + data + '</div>' :
                             data;
                     },
-                    'width':'19%'
-                    // 'className': 'custom-width-150'
+                    'width': '250px',
+                    'className': 'custom-width-250'
                 },
                 {
                     'name': 'fullId',
                     'data': 'id',
-                    'render': function (data, type) {
-                        return type === 'display' ?
-                            '<div class="nowrap-ellipsis">' + data + '</div>' :
-                            data;
-                    },
-                    'width':'19%'
-                    // 'className': 'custom-width-150'
+                    'width': '250px',
+                    'visible': false
                 },
                 {
                     'name': 'status',
                     'data': function (data) {
-                        if(data.labels && data.labels.Status){
-                            return data.labels.Status;
-                        }
-                        else
-                            return null;
+                        return (data.labels && data.labels.status) ? data.labels.status: null;
                     },
                     'render': function(data, type){
-                        return (type === 'display' && data) ?
-                            data.replace().replace(/_/g,' ') : data;
-                    }
+                        return format_label_display(data, type);
+                    },
+                    'className': 'label-filter'
+
                 },
                 {
                     'name': 'category',
                     'data': function (data) {
-                        if(data.labels && data.labels.Category){
-                            return data.labels.Category;
-                        }
-                        else
-                            return null;
+                        return filtered_label_data(data.labels, 'category');
                     },
-                    // 'render': format_label_display(data, type),
                     'render': function(data, type){
                         return format_label_display(data, type);
-                        // return (type === 'display' && data) ?
-                        //     data.replace(/_/g,' ') : data;
-                    }
+                    },
+                    'className': 'label-filter'
                 },
                 {
                     'name': 'referenceGenome',
                     'data': function (data) {
-                        return filtered_label_data(data.labels, 'Reference_Genome');
+                        return filtered_label_data(data.labels, 'reference_genome');
 
                     },
-                    // 'render': function(data, type){
-                    //     return format_label_display(data, type);
-                    // },
                     'visible': false
                 },
                 {
                     'name': 'source',
                     'data': function (data) {
-                        if(data.labels && data.labels.Source){
-                            return data.labels.Source;
-                        }
-                        else
-                            return null;
+                        return filtered_label_data(data.labels, 'source');
                     },
-                    // 'render': function(data, type){
-                    //     return format_label_display(data, type);
-                    // },
-                    'visible': false
+                    'render': function(data, type){
+                        return format_label_display(data, type);
+                    },
+                    'className': 'label-filter'
                 },
                 {
                     'name': 'dataType',
                     'data': function (data) {
-                        return filtered_label_data(data.labels, 'Data_Type');
+                        return filtered_label_data(data.labels, 'data_type');
                     },
-                    // 'render': function(data, type) {
-                    //     return format_label_display(data, type);
-                    // },
-                    'visible': false
+                    'render': function(data, type) {
+                        return format_label_display(data, type);
+                    },
+                    'className': 'label-filter'
                 },
                 {
                     'name': 'numRows',
@@ -191,48 +151,32 @@ require([
                 },
                 {
                     'name': 'preview',
-                    "className": 'tbl-preview',
                     'data': function (row){
                         return row.id.split(/[.:]/).join('/');
                     },
                     'render': function (data, type) {
                         return type === 'display' ?
-                            '' : data;
+                            '<i class="preview-loading fa fa-circle-o-notch fa-spin" style="display: none; color:#19424e;" aria-hidden="true"></i>' : data;
                     },
+                    "className": 'tbl-preview',
                     'searchable': false,
                     'orderable': false
                 },
                 {
                     'name': 'description',
-                    'data': function(row){
-                        if(row.description)
-                            return 'description';
-                        else
-                            return null;
-                    },
+                    'data': 'description',
                     'visible': false
                 },
                 {
                     'name': 'labels',
                     'data': function(row){
-                        if(row.labels){
-                            return row.labels;
-                        }
-                        else
-                            return null;
+                        return row.labels ? row.labels: null;
                     },
                     'render': function(data){
-                        var labels_str = '';
-                        for(var k in data){
-                            if(data[k]){
-                                labels_str += data[k];
-                            }
-                            else{
-                                labels_str += k;
-                            }
-                            labels_str += ' ';
-                        }
-                        return labels_str;
+                        var labels_arr = $.map(data, function(v, k){
+                            return v ? v : k;
+                        });
+                        return labels_arr.join(' ');
                     },
                     'visible': false
                 },
@@ -243,57 +187,17 @@ require([
                         return fields_to_str(data);
                     },
                     'visible': false
-                },
-
-                // {
-                //     'name': 'selfLink',
-                //     'data': 'selfLink',
-                //     'render': function (data, type) {
-                //         return type === 'display' ?
-                //             '<div class="nowrap-ellipsis">' + data + '</div>' :
-                //             data;
-                //     }
-                // }
+                }
             ],
             // Only use this for a paginated api.
             serverSide: false,
             order: [[1, 'asc']],
-            // buttons: ['copy', 'excel', 'pdf']
-            // rowGroup: {
-            //     dataSrc: 'datasetId'
-            // }
-            drawCallback: function() {
-                // $('.tbl-preview').click(function (e) {
-                //     var tbl_path = $(this).attr('data-tbl-id');
-                //     // alert(BASE_URL+"/get_tbl_preview/"+tbl_path+"/");
-                //     $.ajax({
-                //         type: "GET",
-                //         url: BASE_URL+"/get_tbl_preview/"+tbl_path+"/",
-                //         // data: {
-                //         //     id: $(this).val(), // < note use of 'this' here
-                //         //     access_token: $("#access_token").val()
-                //         // },
-                //         success: function (data) {
-                //             alert('ok');
-                //         },
-                //         error: function (result) {
-                //             alert('error');
-                //         }
-                //     });
-                // });
-                // $('#status').val('current');
-                //
-                // $('i.hover-bubble')
-                //     .mouseenter(function () {
-                //     $(this).parent('td').find('div.hover-bubble').show();
-                //     }).mouseout(function () {
-                //         $(this).parent('td').find('div.hover-bubble').hide();
-                //     });
+            initComplete: function(){
+                //remove th style attr to delete width
+                $('#bqmeta').find('th').attr('style','');
+
             }
-
         });
-
-
 
         $('.bq-filter').on('keyup', function () {
             var column_name = $(this).attr('data-column-name');
@@ -311,12 +215,20 @@ require([
 
         $('.bq-select').on('change', function () {
             var column_name = $(this).attr('data-column-name');
-            var select_vals = $(this).val();
-            // console.log(column_name +", "+select_vals);
-            columnSearch(column_name, select_vals);
+            if($(this).prop('multiple')){
+                var regex_term = '';
+                $.each($(this).val(),function(index, value){
+                    regex_term += (index > 0 ? '|' : '') + '\\b' + value + '\\b(?!-)';
+                    // regex_term += (index > 0 ? '|' : '') + '(?<!-)\\b' + value + '\\b(?!-)';
+                });
+                columnSearch(column_name, regex_term, true, false);
+            }
+            else{
+                columnSearch(column_name, $(this).val(), false, false);
+            }
         });
 
-        $('#bqmeta tbody').on('click', 'td.tbl-preview', function () {
+        $('#bqmeta').find('tbody').on('click', 'td.tbl-preview', function () {
 
             var td = $(this).closest('td');
             var tbl_path = table.cell(td).data();
@@ -327,36 +239,39 @@ require([
                 row.child.hide();
                 tr.removeClass('shown preview-shown');
             } else {
-                $.ajax({
-                    type: "GET",
-                    url: BASE_URL + "/get_tbl_preview/" + tbl_path + "/",
-                    // beforeSend: function() {
-                    //     tr.addClass('preview-loading');
-                    // },
-                    error: function (result) {
-                        alert('error');
-                    },
-                    success: function (data) {
-                        var schema_fields = row.data().schema.fields;
-                        row.child(format_tbl_preview(schema_fields, data.rows)).show();
-                        tr.removeClass('details-shown');
-                        // tr.removeClass('preview-loading');
-                        tr.addClass('shown preview-shown');
-                    }
-                });
+                if(!td.data('preview-data')) {
+                    //check if the preview data is stored
+                    //if not get the data and store it
+                    $.ajax({
+                        type: "GET",
+                        url: BASE_URL + "/get_tbl_preview/" + tbl_path + "/",
+                        beforeSend: function () {
+                            td.find('.preview-loading').show();
+                        },
+                        error: function (result) {
+                            show_tbl_preview(row, tr, td, 'There has been an error retrieving the preview table.');
+                        },
+                        success: function (data) {
+                            td.data('preview-data', data.rows);
+                            show_tbl_preview(row, tr, td);
+                        }
+                    });
+                }
+                else{ // use the stored data to display
+                    show_tbl_preview(row, tr, td);
+                }
             }
         });
 
-        var columnSearch = function(column_name, term, regex_search, smart_search) {
+        var columnSearch = function(column_name, term, regex_search, smart_search){
             table
                 .columns(column_name+':name')
                 .search(term, regex_search, smart_search)
                 .draw();
         };
 
-
         // Add event listener for opening and closing details
-        $('#bqmeta tbody').on('click', 'td.details-control', function () {
+        $('#bqmeta').find('tbody').on('click', 'td.details-control', function () {
             var tr = $(this).closest('tr');
             var row = table.row(tr);
             if (row.child.isShown() && tr.hasClass('details-shown')) {
@@ -366,26 +281,44 @@ require([
             }
             else {
                 // Open this row
-                row.child(format(row.data())).show();
+                row.child(format_tbl_details(row.data())).show();
                 tr.addClass('shown details-shown');
                 tr.removeClass('preview-shown');
             }
         });
-        $('#bq-meta-form i.fa-info-circle').tooltip();
+        $('#bq-meta-form').find('i.fa-info-circle').tooltip();
+        $('#status').val('current');
+        $('#status').trigger('change');
         $(".autocomplete_select_box").chosen({
             // disable_search_threshold: 10,
             no_results_text: "Oops, nothing found!",
             width: "100%"
         });
-        $('#status').val('Current');
-        $('#status').trigger('change');
 
     });
 
-    function format(d) {
+    var show_tbl_preview = function(row, tr, td, err_mssg){
+        if(err_mssg) {
+            row.child('<div class="float-right"><i class="fa fa-exclamation-triangle" style="margin-right: 5px;"></i>'+err_mssg+'</div>').show();
+        } else {
+            var schema_fields = row.data().schema.fields;
+            var tbl_data = td.data('preview-data');
+            row.child(format_tbl_preview(schema_fields, tbl_data)).show();
+        }
+        tr.removeClass('details-shown');
+        td.find('.preview-loading').hide();
+        tr.addClass('shown preview-shown');
+    };
+
+
+
+    var format_tbl_details = function(d) {
         // `d` is the original data object for the row
         return '<table class="detail-table">' +
             '<tr>' +
+            '<td style="vertical-align: top;"><strong>ID</strong></td>' +
+            '<td>' + (d.id == null? 'N/A' : d.id)+ '</td>' +
+            '</tr><tr>' +
             '<td style="vertical-align: top;"><strong>Description</strong></td>' +
             '<td>' + (d.description == null? 'N/A' : d.description)+ '</td>' +
             '</tr><tr>' +
@@ -395,10 +328,10 @@ require([
             '<td><strong>Labels</strong></td>' +
             '<td>'+tokenize_labels(d.labels)+'</td>' +
             '</tr></table>';
-    }
+    };
 
-    function format_tbl_preview(schema_fields, rows){
-        var html_tbl = '<div style="overflow-x: scroll;max-width: 900px;"><table class="preview-table" style="width:90%;">';
+    var format_tbl_preview = function(schema_fields, rows){
+        var html_tbl = '<div class="preview-table-container"><table class="preview-table">';
         html_tbl += '<tr>';
         for(var f=0; f<schema_fields.length; f++){
             html_tbl += '<th>' +schema_fields[f]['name'] + '</th>';
@@ -413,22 +346,21 @@ require([
         }
         html_tbl += '</table></div>';
         return html_tbl;
-    }
+    };
 
     var tokenize_labels = function(labels_obj){
         var tokenized_str = '';
-        for(var k in labels_obj){
-            tokenized_str += '<span class="label">'+k+(labels_obj[k] ? ' : '+labels_obj[k] : '')+'</span>';
-        }
+        $.each(labels_obj, function(key, value){
+            tokenized_str += '<span class="label">'+ key + (value ? ' : ' + value : '') + '</span>';
+        });
         return tokenized_str;
     };
 
     var fields_to_str = function (data) {
-        var fields_str = '';
-        $.each(data, function (i, d) {
-            fields_str += (i > 0 ? ' ' : '') + d.name;
+        var field_names = $.map(data, function(d){
+            return d.name;
         });
-        return fields_str;
+        return field_names.join(' ');
     };
 
     var form_schema_table = function (data) {
@@ -447,17 +379,12 @@ require([
         var filtered_val_arr = $.map(data_labels, function (val, key) {
             return key.startsWith(filter_key_term) ? val : null;
         });
-        return (filtered_val_arr.length > 0 ? filtered_val_arr.join(' ') : null);
+        return (filtered_val_arr.length > 0 ? filtered_val_arr.join(', ') : null);
     };
-
 
     var format_label_display = function(data, type){
         return (type === 'display' && data) ?
-            data.replace(/_/g, ' ') : data;
+            data.toUpperCase().replace(/_/g, ' ') : data;
     };
-
-
-
-
 
 });

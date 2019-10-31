@@ -45,55 +45,43 @@
             <div class="panel-body">
                 <form id="bq-meta-form">
                     <div>
-                        <label style="padding-right: 5px;" for="advSearch">Advanced Search</label>
-                            Off
-                            <label class="switch" for="advSearchToggler" data-toggle="collapse" data-target="#advSearch0">
-                                <input type="checkbox"
-                                       aria-expanded="false"
-                                       aria-controls="advSearch0 advSearch1 advSearch2"
-                                       name="advSearch" id="advSearchToggler">
-                                <span class="slider round"></span>
-                            </label>
-                            On
-                    </div>
-                    <div>
                         <label>Status</label>
                         <select id="status" class="form-control bq-select" data-column-name="status">
-                            {% for option in Status.options %}
+                            {% for option in status.options %}
                                 <option selected value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div>
                         <label>Category</label>
-                        {% for option in Category.options %}
+                        {% for option in category.options %}
                             <br>
                             <input type="checkbox" class="bq-checkbox" name="cat_{{ forloop.counter0 }}" id="cat_chbx_{{ forloop.counter0 }}"
                                    value="{{ option.value }}" data-column-name="category">
-                            <label for="cat_chbx_{{ forloop.counter0 }}">{{ option.label }}</label>
-                            <i class="fa fa-info-circle" data-placement="bottom" title="{{ option.description }}"></i>
+                            <label class="label-filter" for="cat_chbx_{{ forloop.counter0 }}">{{ option.label }}</label>
+                            <i class="fa fa-info-circle" data-placement="right" title="{{ option.description }}"></i>
                         {% endfor %}
                     </div>
                     <div>
                         <label>Reference Genome</label>
                         <select class="form-control bq-select" data-column-name="referenceGenome">reference_genome
-                            {% for option in Reference_Genome.options %}
+                            {% for option in reference_genome.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div>
                         <label>Source</label>
-                        <select class="autocomplete_select_box form-control bq-select" data-column-name="source">
-                            {% for option in Source.options %}
+                        <select multiple data-placeholder="Choose a Source..." class="autocomplete_select_box form-control bq-select" data-column-name="source">
+                            {% for option in source.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div>
                         <label>Data Type</label>
-                        <select class="form-control bq-select" data-column-name="dataType">
-                            {% for option in Data_Type.options %}
+                        <select multiple data-placeholder="Choose a Data Type..." class="autocomplete_select_box form-control bq-select" data-column-name="dataType">
+                            {% for option in data_type.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
                         </select>
@@ -119,6 +107,9 @@
                             <label>Field Name</label>
                             <input type="text" class="form-control bq-filter" data-column-name="fields">
                         </div>
+                    </div>
+                    <div>
+                        <button  type="button" data-target=".adv-div" data-toggle="collapse" class="btn collapsed adv-toggle-btn">Show</button>
                     </div>
                 </form>
             </div>

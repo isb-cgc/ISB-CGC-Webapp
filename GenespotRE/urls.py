@@ -66,6 +66,7 @@ urlpatterns = [
     url(r'^extended_login/$', views.extended_login_view, name='extended_login'),
     url(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),
     url(r'^bq_meta_search/', views.bq_meta_search, name='bq_meta_search'),
+    url(r'^bq_meta_data/', views.bq_meta_data, name='bq_meta_data'),
     url(r'^get_tbl_preview/(?P<proj_id>[A-Za-z0-9._/-]+)/(?P<dataset_id>[A-Za-z0-9._/-]+)/(?P<table_id>[A-Za-z0-9._/-]+)/$', views.get_tbl_preview, name='get_tbl_preview'),
 
     url(r'^privacy/', views.privacy_policy, name='privacy'),

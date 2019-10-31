@@ -21,8 +21,6 @@ import sys
 import re
 import datetime
 import os
-# from os.path import join, dirname
-# import requests
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -35,8 +33,6 @@ from django.utils import formats
 from django.contrib import messages
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
-
-from adminrestrict.middleware import get_ip_address_from_request
 
 from google_helpers.directory_service import get_directory_resource
 from google_helpers.bigquery.bq_support import BigQuerySupport
@@ -53,10 +49,8 @@ from accounts.sa_utils import get_nih_user_details
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 from google_helpers.bigquery.service import get_bigquery_service
-# from google_helpers.bigquery.service_v2 import BigQueryServiceSupport
 
 import requests
-import pprint
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
@@ -64,7 +58,7 @@ logger = logging.getLogger('main_logger')
 OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
-
+BQ_ECOSYS_BUCKET = settings.BQ_ECOSYS_STATIC_URL
 
 # SOLR_URL = settings.SOLR_URL
 
@@ -409,41 +403,26 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
     else:
         try:
             bq_service = get_bigquery_service()
-            # response = BigQueryServiceSupport.get_client().list_rows()
-            response = bq_service.tabledata().list(projectId=proj_id, datasetId=dataset_id, tableId=table_id, maxResults=MAX_ROW).execute()
+            response = bq_service.tabledata().list(projectId=proj_id, datasetId=dataset_id, tableId=table_id,
+                                                   maxResults=MAX_ROW).execute()
             if response and int(response['totalRows']) > 0:
                 result = {
                     'rows': response['rows']
                 }
             else:
                 result = {
-                    'msg': 'No record has been found for table { proj_id }{ dataset_id }{ table_id }.'.format(proj_id=proj_id,
-                                                                                                       dataset_id=dataset_id,
-                                                                                                       table_id=table_id)
+                    'msg': 'No record has been found for table { proj_id }{ dataset_id }{ table_id }.'.format(
+                        proj_id=proj_id,
+                        dataset_id=dataset_id,
+                        table_id=table_id)
                 }
-        #     tbl_preview_query = """
-        #             SELECT *
-        #             FROM [{proj_id}:{dataset_id}.{table_id}]
-        #             LIMIT {max_row};
-        #         """
-        #     print(tbl_preview_query.format(proj_id=proj_id, dataset_id=dataset_id, table_id=table_id, max_row=MAX_ROW))
-        #     query_results = BigQuerySupport.execute_query_and_fetch_results(
-        #         tbl_preview_query.format(proj_id=proj_id, dataset_id=dataset_id, table_id=table_id, max_row=MAX_ROW))
-        #
-        #     if query_results and len(query_results) > 0:
-        #         print(query_results)
-        #         result = {}
-        #     else:
-        #         result = {
-        #             'msg': 'Table { proj_id }{ dataset_id }{ table_id } was not found.'.format(proj_id=proj_id,
-        #                                                                                        dataset_id=dataset_id,
-        #                                                                                        table_id=table_id)
-        #         }
 
         except Exception as e:
-            logger.error("[ERROR] While attempting to retrieve preview data for { proj_id }{ dataset_id }{ table_id } table.".format(proj_id=proj_id,
-                                                                                               dataset_id=dataset_id,
-                                                                                               table_id=table_id))
+            logger.error(
+                "[ERROR] While attempting to retrieve preview data for { proj_id }{ dataset_id }{ table_id } table.".format(
+                    proj_id=proj_id,
+                    dataset_id=dataset_id,
+                    table_id=table_id))
             logger.exception(e)
             status = '503'
             result = {
@@ -561,14 +540,16 @@ def vid_tutorials_page(request):
 
 
 def bq_meta_search(request):
-    base_dir = os.path.abspath(os.path.dirname(__name__))
-    file_name = 'bq_meta_filters.json'
-    file_path = os.path.join(base_dir, 'static', 'data', file_name)
+    bq_filter_file_name = 'bq_meta_filters.json'
+    bq_filter_file_path = BQ_ECOSYS_BUCKET + bq_filter_file_name
+    bq_filters = requests.get(bq_filter_file_path).json()
+    return render(request, 'GenespotRE/bq_meta_search.html', bq_filters)
 
-    # file_path=path+file_name
-    # print(file_path)
-    data=json.loads(open(file_path, 'r').read())
-    return render(request, 'GenespotRE/bq_meta_search.html', data)
+def bq_meta_data(request):
+    bq_meta_data_file_name = 'bq_meta_data.json'
+    bq_meta_data_file_path = BQ_ECOSYS_BUCKET + bq_meta_data_file_name
+    bq_meta_data = requests.get(bq_meta_data_file_path).json()
+    return JsonResponse(bq_meta_data, safe=False)
 
 
 @login_required
