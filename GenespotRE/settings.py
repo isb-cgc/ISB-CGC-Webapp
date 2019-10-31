@@ -499,8 +499,11 @@ MONITORING_SA_CLIENT_EMAIL            = os.environ.get('MONITORING_SA_CLIENT_EMA
 # GCP monitoring Service Account key
 MONITORING_SA_ACCESS_CREDENTIALS      = os.environ.get('MONITORING_SA_ACCESS_CREDENTIALS', '')
 
-# Client ID used for OAuth2 - this is for IGV
+# Client ID used for OAuth2 - this is for IGV and the test database
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
+
+# Client ID used for OAuth2 - this is for the test database
+OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET', '')
 
 #################################
 #   For NIH/eRA Commons login   #
@@ -615,6 +618,7 @@ DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
 NOTEBOOK_VIEWER = ''
 # NOTEBOOK_ENV_LOC = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_ENV_PATH', None))
 # NOTEBOOK_SL_PATH = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_SL_PATH', None))
+
 #################################
 # SOLR settings
 #################################
@@ -634,6 +638,11 @@ BLACKLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<if
 # IndexD settings
 INDEXD_URI = os.environ.get('INDEXD_URI', None)
 INDEXD_REQ_LIMIT = int(os.environ.get('INDEXD_REQ_LIMIT', '100'))
+
+# Apache Solr settings
+SOLR_URI = os.environ.get('SOLR_URI', '')
+SOLR_LOGIN = os.environ.get('SOLR_LOGIN', '')
+SOLR_PASSWORD = os.environ.get('SOLR_PASSWORD', '')
 
 
 if DEBUG and DEBUG_TOOLBAR:
