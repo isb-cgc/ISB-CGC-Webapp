@@ -52,12 +52,16 @@ require([
             buttons: [
                 {
                     extend: 'csvHtml5',
-                    text: '<i class="fa fa-download" style="margin-right: 5px;"></i>CSV Download'
+                    text: '<i class="fa fa-download" style="margin-right: 5px;"></i>CSV Download',
+                    title: 'bq-metadata',
+                    exportOptions: {
+                        columns: ':not(".no-export")'
+                    }
                 }
             ],
             columns: [
                 {
-                    "className": 'details-control',
+                    "className": 'details-control no-export',
                     "orderable": false,
                     "data": null,
                     "defaultContent": ''
@@ -142,10 +146,15 @@ require([
                     'name': 'createdDate',
                     'data': 'creationTime',
                     'className': 'td-body-right',
-                    'render': function (data) {
-                        var date = new Date(parseInt(data));
-                        var month = date.getMonth() + 1;
-                        return month + "/" + date.getDate() + "/" + date.getFullYear();
+                    'render': function (data, type) {
+                        if (type === 'display') {
+                            var date = new Date(parseInt(data));
+                            var month = date.getMonth() + 1;
+                            return month + "/" + date.getDate() + "/" + date.getFullYear();
+                        }
+                        else {
+                            return data;
+                        }
                     },
                     'searchable': false
                 },
@@ -158,7 +167,7 @@ require([
                         return type === 'display' ?
                             '<i class="preview-loading fa fa-circle-o-notch fa-spin" style="display: none; color:#19424e;" aria-hidden="true"></i>' : data;
                     },
-                    "className": 'tbl-preview',
+                    "className": 'tbl-preview no-export',
                     'searchable': false,
                     'orderable': false
                 },
@@ -176,7 +185,7 @@ require([
                         var labels_arr = $.map(data, function(v, k){
                             return v ? v : k;
                         });
-                        return labels_arr.join(' ');
+                        return labels_arr.join(', ');
                     },
                     'visible': false
                 },
@@ -184,14 +193,21 @@ require([
                     'name': 'fields',
                     'data': 'schema.fields',
                     'render': function (data){
-                        return fields_to_str(data);
+                        var field_names = $.map(data, function(d){
+                            return d.name;
+                        });
+                        return field_names.join(', ');
+                        // return fields_to_str(data);
                     },
                     'visible': false
                 }
             ],
             serverSide: false,
             order: [[1, 'asc']],
-            drawCallback: function() {
+            initComplete: function (settings, json) {
+                $('.spinner').remove();
+            },
+            drawCallback: function (settings) {
                 //remove th style attr to delete width
                 $('#bqmeta').find('th').attr('style','');
             }
@@ -354,12 +370,6 @@ require([
         return tokenized_str;
     };
 
-    var fields_to_str = function (data) {
-        var field_names = $.map(data, function(d){
-            return d.name;
-        });
-        return field_names.join(' ');
-    };
 
     var form_schema_table = function (data) {
         var schema_table = '<table class="schema-table">';

@@ -4,7 +4,7 @@
 {% endblock %}
 
 {% block title %}
-    ISB-CGC|BigQuery Table Searche
+    ISB-CGC|BigQuery Table Searcher
 {% endblock %}
 {% block description %}
     BigQuery Table Search
@@ -56,10 +56,11 @@
                         <label>Category</label>
                         {% for option in category.options %}
                             <br>
-                            <input type="checkbox" class="bq-checkbox" name="cat_{{ forloop.counter0 }}" id="cat_chbx_{{ forloop.counter0 }}"
+                            <input type="checkbox" class="bq-checkbox" name="cat_{{ forloop.counter0 }}"
+                                   id="cat_chbx_{{ forloop.counter0 }}"
                                    value="{{ option.value }}" data-column-name="category">
                             <label class="label-filter" for="cat_chbx_{{ forloop.counter0 }}">{{ option.label }}</label>
-                            <i class="fa fa-info-circle" data-placement="right" title="{{ option.description }}"></i>
+                            <i class="fa fa-info-circle" data-placement="bottom" title="{{ option.description }}"></i>
                         {% endfor %}
                     </div>
                     <div>
@@ -72,7 +73,8 @@
                     </div>
                     <div>
                         <label>Source</label>
-                        <select multiple data-placeholder="Choose a Source..." class="autocomplete_select_box form-control bq-select" data-column-name="source">
+                        <select multiple data-placeholder="Choose Sources..."
+                                class="autocomplete_select_box form-control bq-select" data-column-name="source">
                             {% for option in source.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
@@ -80,7 +82,8 @@
                     </div>
                     <div>
                         <label>Data Type</label>
-                        <select multiple data-placeholder="Choose a Data Type..." class="autocomplete_select_box form-control bq-select" data-column-name="dataType">
+                        <select multiple data-placeholder="Choose Data Types..."
+                                class="autocomplete_select_box form-control bq-select" data-column-name="dataType">
                             {% for option in data_type.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
@@ -109,7 +112,9 @@
                         </div>
                     </div>
                     <div>
-                        <button  type="button" data-target=".adv-div" data-toggle="collapse" class="btn collapsed adv-toggle-btn">Show</button>
+                        <button type="button" data-target=".adv-div" data-toggle="collapse"
+                                class="btn collapsed adv-toggle-btn">Show
+                        </button>
                     </div>
                 </form>
             </div>
@@ -118,6 +123,9 @@
     </div>
     <div class="col-lg-9 col-md-9 col-sm-9">
         <div class="panel panel-default">
+            <div class="spinner">
+                <i class="fa fa-spinner fa-spin"></i>
+            </div>
             <div class="panel-body">
                 <table id="bqmeta" class="table table-striped" style="width:100%">
                     <thead>
@@ -125,8 +133,8 @@
                         <th style="width:3%;"></th>
                         {#                        <th>Project ID</th>#}
                         <th style="width:20%;">Dataset ID</th>
-{#                        <th>Table ID</th>#}
-{#                        <th>Full ID</th>#}
+                        {#                        <th>Table ID</th>#}
+                        {#                        <th>Full ID</th>#}
                         <th style="width:19%;">Table ID</th>
                         <th style="width:19%;">Full ID</th>
                         <th style="width:9%;">Status</th>
