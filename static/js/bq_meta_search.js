@@ -18,13 +18,13 @@
 
 require.config({
     paths: {
-        'bootstrap': ['https://stackpath.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min', 'libs/bootstrap.min'],
+        'bootstrap': ['//stackpath.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min', 'libs/bootstrap.min'],
         'jquery': ['//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min', 'libs/jquery-1.11.1.min'],
         'datatables.net': ['//cdn.datatables.net/1.10.19/js/jquery.dataTables.min', 'libs/jquery.dataTables.min'],
-        'datatables.bootstrap': 'https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap.min',
-        'datatables.net-buttons': 'https://cdn.datatables.net/buttons/1.6.0/js/dataTables.buttons.min',
-        'datatables.net-html5': 'https://cdn.datatables.net/buttons/1.6.0/js/buttons.html5.min',
-        'chosen': 'https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min'
+        'datatables.bootstrap': ['https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap.min'],
+        'datatables.net-buttons': ['//cdn.datatables.net/buttons/1.6.0/js/dataTables.buttons.min'],
+        'datatables.net-html5': ['//cdn.datatables.net/buttons/1.6.0/js/buttons.html5.min'],
+        'chosen': ['//cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min']
     },
     shim: {
         'bootstrap': ['jquery'],
