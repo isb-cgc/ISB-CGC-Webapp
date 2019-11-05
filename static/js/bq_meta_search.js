@@ -242,6 +242,17 @@ require([
             }
         });
 
+        $(".reset-btn").on('click', function () {
+
+            $(".autocomplete_select_box").val('').trigger("chosen:updated");
+            $('.bq-filter, .bq-select').val('');
+            $('#status').val('current');
+            $('.bq-checkbox').prop('checked', false);
+            $('.bq-select, .bq-checkbox').trigger('change');
+            $('.bq-filter').trigger('keyup');
+
+        });
+
         $('#bqmeta').find('tbody').on('click', 'td.tbl-preview', function () {
 
             var td = $(this).closest('td');

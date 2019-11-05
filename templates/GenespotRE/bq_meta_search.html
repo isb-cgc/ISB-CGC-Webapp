@@ -55,7 +55,7 @@
                         <label>Status</label>
                         <select id="status" class="form-control bq-select" data-column-name="status">
                             {% for option in status.options %}
-                                <option selected value="{{ option.value }}">{{ option.label }}</option>
+                                <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -117,6 +117,12 @@
                             <label>Field Name</label>
                             <input type="text" class="form-control bq-filter" data-column-name="fields">
                         </div>
+                    </div>
+                    <br>
+                    <div>
+                        <button type="button"
+                                class="btn reset-btn">Reset All Filters
+                        </button>
                     </div>
                     <div>
                         <button type="button" data-target=".adv-div" data-toggle="collapse"
