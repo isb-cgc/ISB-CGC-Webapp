@@ -124,21 +124,22 @@
                 border-radius: 3px
         .chosen-container
             padding: 0
-        button.adv-toggle-btn
+        button
             width: 100%
-            &.collapsed
+            &.adv-toggle-btn
+                &.collapsed
+                    &:after
+                        content: ' More Filters'
+                    &:before
+                        content: '\f067'
+                        font-family: FontAwesome
+                        margin-right: 5px
                 &:after
-                    content: ' More Filters'
+                    content: ' Less Filters'
                 &:before
-                    content: '\f067'
+                    content: '\f068'
                     font-family: FontAwesome
                     margin-right: 5px
-            &:after
-                content: ' Less Filters'
-            &:before
-                content: '\f068'
-                font-family: FontAwesome
-                margin-right: 5px
 
 
     #bqmeta tr
