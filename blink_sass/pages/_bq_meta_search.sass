@@ -1,6 +1,14 @@
 @import url("https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css")
 @import url("https://cdn.datatables.net/buttons/1.6.0/css/buttons.dataTables.min.css")
 #bq-meta-searcher
+    .custom-width-20
+        padding: 0 5px
+        float: left
+        width: 20%
+    .custom-width-80
+        padding: 0 5px
+        float: left
+        width: 80%
     .container
         width: 90%
         min-width: 1400px
@@ -147,15 +155,15 @@
             font-size: .9em
             &.label-filter
                 font-size: .8em
-            &.custom-width-250
-                width: 250px
+            &.custom-width-200
+                width: 200px
             div
                 &.nowrap-ellipsis
                     display: block
                     white-space: nowrap
                     overflow: hidden
                     text-overflow: ellipsis
-                    width: 234px
+                    width: 184px
                     &:hover
                         width: auto
                         display: block
