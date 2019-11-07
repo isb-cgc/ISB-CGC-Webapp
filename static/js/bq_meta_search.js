@@ -406,6 +406,14 @@ require([
 
     var reset_table_style = function (settings) {
         $('#bqmeta').find('th').attr('style','');
+        var api = new $.fn.dataTable.Api( settings );
+        var csv_button = api.buttons('.buttons-csv');
+        if (api.rows({ filter: 'applied' }).data().length === 0) {
+            csv_button.disable();
+        }
+        else {
+            csv_button.enable();
+        }
     };
 
 });
