@@ -4,7 +4,7 @@
 {% endblock %}
 
 {% block title %}
-    ISB-CGC|BigQuery Table Searche
+    ISB-CGC|BigQuery Table Searcher
 {% endblock %}
 {% block description %}
     BigQuery Table Search
@@ -26,7 +26,7 @@
             </li>
             <li class="navbar-item">
                 <a class="nav-link"
-                   href="https://bigquery.cloud.google.com"
+                   href="https://console.cloud.google.com/bigquery"
                    target="_blank">Google BigQuery Console<i class="fa fa-external-link" aria-hidden="true"></i></a>
             </li>
             <li class="navbar-item">
@@ -35,12 +35,20 @@
                    target="_blank">About BigQuery<i class="fa fa-external-link" aria-hidden="true"></i></a>
             </li>
         </ul>
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <p>
+                <strong>Explore and learn more about available ISB-CGC BigQuery tables with this search feature.</strong> Find
+                tables of interest based on category, reference genome build, data type and wild card search.
+            </p>
+        </div>
     </div>
+
 {% endblock %}
 
 {% block content %}
 
-    <div class="col-lg-3 col-md-3 col-sm-3">
+    <div class="custom-width-20">
+{#    <div class="col-lg-3 col-md-3 col-sm-3">#}
         <div class="panel panel-default">
             <div class="panel-body">
                 <form id="bq-meta-form">
@@ -48,18 +56,24 @@
                         <label>Status</label>
                         <select id="status" class="form-control bq-select" data-column-name="status">
                             {% for option in status.options %}
-                                <option selected value="{{ option.value }}">{{ option.label }}</option>
+                                <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div>
+                    <div class="checkbox-div">
                         <label>Category</label>
                         {% for option in category.options %}
-                            <br>
-                            <input type="checkbox" class="bq-checkbox" name="cat_{{ forloop.counter0 }}" id="cat_chbx_{{ forloop.counter0 }}"
-                                   value="{{ option.value }}" data-column-name="category">
-                            <label class="label-filter" for="cat_chbx_{{ forloop.counter0 }}">{{ option.label }}</label>
-                            <i class="fa fa-info-circle" data-placement="right" title="{{ option.description }}"></i>
+                            <div class="row">
+                                <div class="col-sm-1">
+                                    <input type="checkbox" class="bq-checkbox" name="cat_{{ forloop.counter0 }}"
+                                       id="cat_chbx_{{ forloop.counter0 }}"
+                                       value="{{ option.value }}" data-column-name="category">
+                                </div>
+                                <div class="col-sm-11">
+                                    <label class="label-filter" for="cat_chbx_{{ forloop.counter0 }}">{{ option.label }}</label>
+                                    <i class="fa fa-info-circle" data-placement="bottom" title="{{ option.description }}"></i>
+                                </div>
+                            </div>
                         {% endfor %}
                     </div>
                     <div>
@@ -72,7 +86,8 @@
                     </div>
                     <div>
                         <label>Source</label>
-                        <select multiple data-placeholder="Choose a Source..." class="autocomplete_select_box form-control bq-select" data-column-name="source">
+                        <select multiple data-placeholder="Choose Sources..."
+                                class="autocomplete_select_box form-control bq-select" data-column-name="source">
                             {% for option in source.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
@@ -80,7 +95,8 @@
                     </div>
                     <div>
                         <label>Data Type</label>
-                        <select multiple data-placeholder="Choose a Data Type..." class="autocomplete_select_box form-control bq-select" data-column-name="dataType">
+                        <select multiple data-placeholder="Choose Data Types..."
+                                class="autocomplete_select_box form-control bq-select" data-column-name="dataType">
                             {% for option in data_type.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
@@ -108,16 +124,29 @@
                             <input type="text" class="form-control bq-filter" data-column-name="fields">
                         </div>
                     </div>
+                    <br>
                     <div>
-                        <button  type="button" data-target=".adv-div" data-toggle="collapse" class="btn collapsed adv-toggle-btn">Show</button>
+                        <button type="button"
+                                class="btn reset-btn">Reset All Filters
+                        </button>
+                    </div>
+                    <div>
+                        <button type="button" data-target=".adv-div" data-toggle="collapse"
+                                class="btn collapsed adv-toggle-btn">Show
+                        </button>
                     </div>
                 </form>
             </div>
 
         </div>
     </div>
-    <div class="col-lg-9 col-md-9 col-sm-9">
+
+    <div class="custom-width-80">
+{#    <div class="col-lg-9 col-md-9 col-sm-9">#}
         <div class="panel panel-default">
+            <div class="spinner">
+                <i class="fa fa-spinner fa-spin"></i>
+            </div>
             <div class="panel-body">
                 <table id="bqmeta" class="table table-striped" style="width:100%">
                     <thead>
@@ -125,8 +154,8 @@
                         <th style="width:3%;"></th>
                         {#                        <th>Project ID</th>#}
                         <th style="width:20%;">Dataset ID</th>
-{#                        <th>Table ID</th>#}
-{#                        <th>Full ID</th>#}
+                        {#                        <th>Table ID</th>#}
+                        {#                        <th>Full ID</th>#}
                         <th style="width:19%;">Table ID</th>
                         <th style="width:19%;">Full ID</th>
                         <th style="width:9%;">Status</th>

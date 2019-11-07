@@ -18,13 +18,13 @@
 
 require.config({
     paths: {
-        'bootstrap': ['https://stackpath.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min', 'libs/bootstrap.min'],
+        'bootstrap': ['//stackpath.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min', 'libs/bootstrap.min'],
         'jquery': ['//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min', 'libs/jquery-1.11.1.min'],
         'datatables.net': ['//cdn.datatables.net/1.10.19/js/jquery.dataTables.min', 'libs/jquery.dataTables.min'],
-        'datatables.bootstrap': 'https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap.min',
-        'datatables.net-buttons': 'https://cdn.datatables.net/buttons/1.6.0/js/dataTables.buttons.min',
-        'datatables.net-html5': 'https://cdn.datatables.net/buttons/1.6.0/js/buttons.html5.min',
-        'chosen': 'https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min'
+        'datatables.bootstrap': ['https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap.min'],
+        'datatables.net-buttons': ['//cdn.datatables.net/buttons/1.6.0/js/dataTables.buttons.min'],
+        'datatables.net-html5': ['//cdn.datatables.net/buttons/1.6.0/js/buttons.html5.min'],
+        'chosen': ['//cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min']
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -52,12 +52,16 @@ require([
             buttons: [
                 {
                     extend: 'csvHtml5',
-                    text: '<i class="fa fa-download" style="margin-right: 5px;"></i>CSV Download'
+                    text: '<i class="fa fa-download" style="margin-right: 5px;"></i>CSV Download',
+                    title: 'bq-metadata',
+                    exportOptions: {
+                        columns: ':not(".no-export")'
+                    }
                 }
             ],
             columns: [
                 {
-                    "className": 'details-control',
+                    "className": 'details-control no-export',
                     "orderable": false,
                     "data": null,
                     "defaultContent": ''
@@ -74,13 +78,12 @@ require([
                             '<div class="nowrap-ellipsis">' + data + '</div>' :
                             data;
                     },
-                    'width': '250px',
-                    'className': 'custom-width-250'
+                    'width': '200px',
+                    'className': 'custom-width-200'
                 },
                 {
                     'name': 'fullId',
                     'data': 'id',
-                    'width': '250px',
                     'visible': false
                 },
                 {
@@ -142,10 +145,15 @@ require([
                     'name': 'createdDate',
                     'data': 'creationTime',
                     'className': 'td-body-right',
-                    'render': function (data) {
-                        var date = new Date(parseInt(data));
-                        var month = date.getMonth() + 1;
-                        return month + "/" + date.getDate() + "/" + date.getFullYear();
+                    'render': function (data, type) {
+                        if (type === 'display') {
+                            var date = new Date(parseInt(data));
+                            var month = date.getMonth() + 1;
+                            return month + "/" + date.getDate() + "/" + date.getFullYear();
+                        }
+                        else {
+                            return data;
+                        }
                     },
                     'searchable': false
                 },
@@ -158,7 +166,7 @@ require([
                         return type === 'display' ?
                             '<i class="preview-loading fa fa-circle-o-notch fa-spin" style="display: none; color:#19424e;" aria-hidden="true"></i>' : data;
                     },
-                    "className": 'tbl-preview',
+                    "className": 'tbl-preview no-export',
                     'searchable': false,
                     'orderable': false
                 },
@@ -176,7 +184,7 @@ require([
                         var labels_arr = $.map(data, function(v, k){
                             return v ? v : k;
                         });
-                        return labels_arr.join(' ');
+                        return labels_arr.join(', ');
                     },
                     'visible': false
                 },
@@ -184,16 +192,22 @@ require([
                     'name': 'fields',
                     'data': 'schema.fields',
                     'render': function (data){
-                        return fields_to_str(data);
+                        var field_names = $.map(data, function(d){
+                            return d.name;
+                        });
+                        return field_names.join(', ');
                     },
                     'visible': false
                 }
             ],
             serverSide: false,
             order: [[1, 'asc']],
-            drawCallback: function() {
-                //remove th style attr to delete width
-                $('#bqmeta').find('th').attr('style','');
+            initComplete: function (settings, json) {
+                $('.spinner').remove();
+                reset_table_style(settings);
+            },
+            drawCallback: function (settings) {
+                reset_table_style(settings);
             }
         });
 
@@ -224,6 +238,17 @@ require([
             else{
                 columnSearch(column_name, $(this).val(), false, false);
             }
+        });
+
+        $(".reset-btn").on('click', function () {
+
+            $(".autocomplete_select_box").val('').trigger("chosen:updated");
+            $('.bq-filter, .bq-select').val('');
+            $('#status').val('current');
+            $('.bq-checkbox').prop('checked', false);
+            $('.bq-select, .bq-checkbox').trigger('change');
+            $('.bq-filter').trigger('keyup');
+
         });
 
         $('#bqmeta').find('tbody').on('click', 'td.tbl-preview', function () {
@@ -354,12 +379,6 @@ require([
         return tokenized_str;
     };
 
-    var fields_to_str = function (data) {
-        var field_names = $.map(data, function(d){
-            return d.name;
-        });
-        return field_names.join(' ');
-    };
 
     var form_schema_table = function (data) {
         var schema_table = '<table class="schema-table">';
@@ -383,6 +402,18 @@ require([
     var format_label_display = function(data, type){
         return (type === 'display' && data) ?
             data.toUpperCase().replace(/_/g, ' ') : data;
+    };
+
+    var reset_table_style = function (settings) {
+        $('#bqmeta').find('th').attr('style','');
+        var api = new $.fn.dataTable.Api( settings );
+        var csv_button = api.buttons('.buttons-csv');
+        if (api.rows({ filter: 'applied' }).data().length === 0) {
+            csv_button.disable();
+        }
+        else {
+            csv_button.enable();
+        }
     };
 
 });
