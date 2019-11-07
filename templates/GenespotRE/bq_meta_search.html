@@ -60,15 +60,20 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div>
+                    <div class="checkbox-div">
                         <label>Category</label>
                         {% for option in category.options %}
-                            <br>
-                            <input type="checkbox" class="bq-checkbox" name="cat_{{ forloop.counter0 }}"
-                                   id="cat_chbx_{{ forloop.counter0 }}"
-                                   value="{{ option.value }}" data-column-name="category">
-                            <label class="label-filter" for="cat_chbx_{{ forloop.counter0 }}">{{ option.label }}</label>
-                            <i class="fa fa-info-circle" data-placement="bottom" title="{{ option.description }}"></i>
+                            <div class="row">
+                                <div class="col-sm-1">
+                                    <input type="checkbox" class="bq-checkbox" name="cat_{{ forloop.counter0 }}"
+                                       id="cat_chbx_{{ forloop.counter0 }}"
+                                       value="{{ option.value }}" data-column-name="category">
+                                </div>
+                                <div class="col-sm-11">
+                                    <label class="label-filter" for="cat_chbx_{{ forloop.counter0 }}">{{ option.label }}</label>
+                                    <i class="fa fa-info-circle" data-placement="bottom" title="{{ option.description }}"></i>
+                                </div>
+                            </div>
                         {% endfor %}
                     </div>
                     <div>
