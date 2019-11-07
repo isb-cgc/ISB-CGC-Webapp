@@ -816,8 +816,10 @@ require([
                         var this_attr = data.metadata_data_attr[i];
                         for(var j=0; j < this_attr.values.length; j++) {
                             var this_val = this_attr.values[j];
-                            $('#'+active_tab+'-'+data.build+'-'+this_attr.name+'-'+this_val.value).siblings('span.count').html('('+this_val.count+')');
-                            $('#'+active_tab+'-'+data.build+'-'+this_attr.name+'-'+this_val.value).attr('data-count',this_val.count);
+                            if(this_val.count || this_val.count == 0) {
+                                $('#' + active_tab + '-' + data.build + '-' + this_attr.name + '-' + this_val.value).siblings('span.count').html('(' + this_val.count + ')');
+                                $('#' + active_tab + '-' + data.build + '-' + this_attr.name + '-' + this_val.value).attr('data-count', this_val.count);
+                            }
                         }
                     }
                     update_download_link(active_tab, data.total_file_count);
