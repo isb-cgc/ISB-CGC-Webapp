@@ -180,9 +180,13 @@ require([
                     'data': function(row){
                         return row.labels ? row.labels: null;
                     },
-                    'render': function(data){
+                    'render': function(data, type){
                         var labels_arr = $.map(data, function(v, k){
-                            return v ? v : k;
+                            if (type === 'display') {
+                                return v ? k+':'+v : k;
+                            }else{
+                                return v ? v : k;
+                            }
                         });
                         return labels_arr.join(', ');
                     },
