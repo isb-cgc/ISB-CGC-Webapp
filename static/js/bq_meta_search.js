@@ -357,22 +357,108 @@ require([
             '</tr></table>';
     };
 
+
+    var format_tbl_preview_header = function(schema_fields){
+        var table_header_str = '';
+        for(var col=0; col < schema_fields.length; col++){
+            if(schema_fields[col]['type']==='RECORD'){
+                var nested_fields = schema_fields[col]['fields'];
+                for(var n_col=0; n_col < nested_fields.length; n_col++){
+                    if(nested_fields[n_col]['type'] === 'RECORD'){
+                        var double_nested_fields = nested_fields[n_col]['fields'];
+                        for(var nn_col=0; nn_col < double_nested_fields.length; nn_col++){
+                            table_header_str += '<th>' + schema_fields[col]['name'] +'.'
+                                + nested_fields[n_col]['name'] + '.'
+                                + double_nested_fields[nn_col]['name']
+                                + '</th>';
+                        }
+                    }
+                    else{
+                        table_header_str += '<th>' + schema_fields[col]['name'] +'.' + nested_fields[n_col]['name'] + '</th>';
+                    }
+
+                }
+            }
+            else{
+                table_header_str += '<th>' + schema_fields[col]['name'] + '</th>';
+            }
+        }
+        return table_header_str;
+    };
+
+    var format_tbl_preview_body = function(schema_fields, rows){
+        var tbody_str = '';
+        for(var row = 0; row < rows.length; row++){
+            tbody_str += '<tr>';
+            for(var col = 0; col < schema_fields.length; col++){
+                var cell = rows[row]['f'][col]['v'];
+                if(schema_fields[col]['type']==='RECORD' || schema_fields[col]['mode']==='REPEATED'){
+                    var nested_fields_len;
+                    if(schema_fields[col]['type']==='RECORD'){
+                        nested_fields_len =  schema_fields[col]['fields'].length;
+                    }else{
+                        nested_fields_len = 1;
+                    }
+                    for(var n_col=0; n_col < nested_fields_len; n_col++){
+                        if('fields' in schema_fields[col] && schema_fields[col]['fields'][n_col]['type']==='RECORD'){
+                            var n_nested_fields_len = schema_fields[col]['fields'][n_col]['fields'].length;
+                            for(var nn_col = 0; nn_col < n_nested_fields_len; nn_col++){
+                                tbody_str += nest_table_cell(cell, n_col, nn_col);
+                            }
+                        }
+                        else{
+                            tbody_str += nest_table_cell(cell, n_col);
+                        }
+                    }
+                }
+                else{
+                    tbody_str += '<td nowrap="">'+cell+'</td>';
+                }
+            }
+            tbody_str += '</tr>';
+        }
+        return tbody_str;
+
+    };
+
     var format_tbl_preview = function(schema_fields, rows){
         var html_tbl = '<div class="preview-table-container"><table class="preview-table">';
         html_tbl += '<tr>';
-        for(var f=0; f<schema_fields.length; f++){
-            html_tbl += '<th>' +schema_fields[f]['name'] + '</th>';
-        }
+        html_tbl += format_tbl_preview_header(schema_fields);
         html_tbl += '</tr>';
-        for (var i=0; i<rows.length; i++){
-            html_tbl += '<tr>';
-            for(var j=0; j< rows[i]['f'].length; j++){
-                html_tbl += '<td nowrap>'+rows[i]['f'][j]['v']+'</td>';
-            }
-            html_tbl += '</tr>';
-        }
+        html_tbl += format_tbl_preview_body(schema_fields, rows);
         html_tbl += '</table></div>';
         return html_tbl;
+    };
+
+    var nest_table_cell = function(cell, n_col, nn_col){
+        var td_str = '<td><table>';
+        if (cell) {
+            for (var n_row = 0; n_row < cell.length; n_row++) {
+                td_str += '<tr><td>';
+                if (typeof cell[n_row]['v']['f'] === 'object') {
+                    if(nn_col != null){
+                        if(cell[n_row]['v']['f'][n_col]['v'].length > 0 ){
+                            td_str += (cell[n_row]['v']['f'][n_col]['v'][0]['v']['f'][nn_col]['v'] ? cell[n_row]['v']['f'][n_col]['v'][0]['v']['f'][nn_col]['v']: '&nbsp;');
+                        }else{
+                            td_str += '&nbsp;';
+                        }
+                    }
+                    else {
+                        td_str += cell[n_row]['v']['f'][n_col]['v'];
+                    }
+                } else {
+                    td_str += cell[n_row]['v'];
+                }
+                td_str += '</td></tr>';
+            }
+        }
+        else {
+            td_str += '<tr><td></td></td>';
+        }
+        td_str += '</table></td>';
+        return td_str;
+
     };
 
     var tokenize_labels = function(labels_obj){
@@ -391,6 +477,17 @@ require([
         }
         $.each(data, function (i, d) {
             schema_table += '<tr><td>'+ d.name + '</td><td>' + d.type + '</td><td>' + d.mode +'</td><td>' + d.description +'</td></tr>';
+            if(d.type === 'RECORD'){
+                $.each(d.fields, function(ii, dd){
+                    schema_table += '<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;.'+ dd.name + '</td><td>' + dd.type + '</td><td>' + dd.mode +'</td><td>' + dd.description +'</td></tr>';
+                    if(dd.type === 'RECORD'){
+                        $.each(dd.fields, function(iii, ddd) {
+                            schema_table += '<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.'+ ddd.name + '</td><td>' + ddd.type + '</td><td>' + ddd.mode +'</td><td>' + ddd.description +'</td></tr>';
+                        });
+                    }
+                });
+            }
+
         });
         schema_table += '</table>';
         return schema_table;
