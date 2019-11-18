@@ -172,7 +172,9 @@ require([
                 },
                 {
                     'name': 'description',
-                    'data': 'description',
+                    'data': function(row){
+                        return row.description ? row.description: '';
+                    },
                     'visible': false
                 },
                 {
