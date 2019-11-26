@@ -196,12 +196,8 @@ require([
                 },
                 {
                     'name': 'fields',
-                    'data': 'schema.fields',
-                    'render': function (data){
-                        var field_names = $.map(data, function(d){
-                            return d.name;
-                        });
-                        return field_names.join(', ');
+                    'data': function(row){
+                        return format_schema_field_names(row.schema.fields, false);
                     },
                     'visible': false
                 }
@@ -237,7 +233,6 @@ require([
                 var regex_term = '';
                 $.each($(this).val(),function(index, value){
                     regex_term += (index > 0 ? '|' : '') + '\\b' + value + '\\b(?!-)';
-                    // regex_term += (index > 0 ? '|' : '') + '(?<!-)\\b' + value + '\\b(?!-)';
                 });
                 columnSearch(column_name, regex_term, true, false);
             }
@@ -360,8 +355,8 @@ require([
     };
 
 
-    var format_tbl_preview_header = function(schema_fields){
-        var table_header_str = '';
+    var format_schema_field_names = function(schema_fields, in_html){
+        var schema_field_names_str = '';
         for(var col=0; col < schema_fields.length; col++){
             if(schema_fields[col]['type']==='RECORD'){
                 var nested_fields = schema_fields[col]['fields'];
@@ -369,23 +364,23 @@ require([
                     if(nested_fields[n_col]['type'] === 'RECORD'){
                         var double_nested_fields = nested_fields[n_col]['fields'];
                         for(var nn_col=0; nn_col < double_nested_fields.length; nn_col++){
-                            table_header_str += '<th>' + schema_fields[col]['name'] +'.'
+                            schema_field_names_str += (in_html ? '<th>': '') + schema_fields[col]['name'] +'.'
                                 + nested_fields[n_col]['name'] + '.'
                                 + double_nested_fields[nn_col]['name']
-                                + '</th>';
+                                + (in_html ? '</th>':' ');
                         }
                     }
                     else{
-                        table_header_str += '<th>' + schema_fields[col]['name'] +'.' + nested_fields[n_col]['name'] + '</th>';
+                        schema_field_names_str += (in_html? '<th>':'') + schema_fields[col]['name'] +'.' + nested_fields[n_col]['name'] + (in_html? '</th>': ' ');
                     }
 
                 }
             }
             else{
-                table_header_str += '<th>' + schema_fields[col]['name'] + '</th>';
+                schema_field_names_str += (in_html ? '<th>':'') + schema_fields[col]['name'] + (in_html ? '</th>': ' ');
             }
         }
-        return table_header_str;
+        return schema_field_names_str;
     };
 
     var format_tbl_preview_body = function(schema_fields, rows){
@@ -422,7 +417,7 @@ require([
     var format_tbl_preview = function(schema_fields, rows){
         var html_tbl = '<div class="preview-table-container"><table class="preview-table">';
         html_tbl += '<tr>';
-        html_tbl += format_tbl_preview_header(schema_fields);
+        html_tbl += format_schema_field_names(schema_fields, true);
         html_tbl += '</tr>';
         html_tbl += format_tbl_preview_body(schema_fields, rows);
         html_tbl += '</table></div>';
@@ -432,30 +427,20 @@ require([
     var nest_table_cell = function(cell, n_col, nn_col){
         var MAX_NESTED_ROW = 5;
         var truncate_rows = cell.length > MAX_NESTED_ROW;
-        // var truncate_rows = false;
         var td_str = '<td><table>';
         if (cell) {
             for (var n_row = 0; n_row < (truncate_rows ? MAX_NESTED_ROW : cell.length); n_row++) {
 
                 td_str += '<tr><td>';
-                // var has_nn_row = false;
-                // if (typeof cell[n_row]['v']['f'][n_col]['v'] === 'object') {
-                //     has_nn_row = true;
-                // }
                 if(truncate_rows && n_row == MAX_NESTED_ROW-1){
                     cell[n_row]['v'] = '<i class="fa fa-ellipsis-v" aria-hidden="true" style="margin-left: 5px;" title="'+(cell.length-MAX_NESTED_ROW+1)+' rows are truncated for preview."></i>';
                 }
                 if (typeof cell[n_row]['v']['f'] === 'object') {
                     if(nn_col != null){
                         if(cell[n_row]['v']['f'][n_col]['v'].length > 0 ){
-                            // console.log(cell[n_row]['v']['f'][n_col]['v'][0]['v']['f'][nn_col]['v']);
-                            // td_str += '<tr><td>';
                             td_str += (cell[n_row]['v']['f'][n_col]['v'][0]['v']['f'][nn_col]['v'] ? cell[n_row]['v']['f'][n_col]['v'][0]['v']['f'][nn_col]['v']: '&nbsp;');
-                            // td_str += '</td></tr>';
                         }else{
-                            // td_str += '<tr><td>';
                             td_str += '&nbsp;';
-                            // td_str += '</td></tr>';
                         }
                     }
                     else {
@@ -463,27 +448,16 @@ require([
                         if(typeof n_cell === 'object' &&  n_cell){
                             td_str += '['+ ($.map(n_cell, function(nn_row){
                                 return nn_row['v'];
-                                // td_str += nn_row['v'].join(', ');
                             }).join(', ')) + ']';
-                            // td_str += cell[n_row]['v']['f'][n_col]['v'].join(',');
-                            // for(var nn_row=0;nn_row< cell[n_row]['v']['f'][n_col]['v'].length; nn_row++){
-                                // td_str += '<tr><td>';
-                                // td_str += cell[n_row]['v']['f'][n_col]['v'][nn_row]['v'];
-                                // td_str += '</td></tr>';
-                            // }
                         }
                         else{
-                            // td_str += '<tr><td>';
                             td_str += n_cell;
-                            // td_str += '</td></tr>';
                         }
 
                     }
                 } else {
 
-                    // td_str += '<tr><td>';
                     td_str += cell[n_row]['v'];
-                    // td_str += '</td></tr>';
                 }
                 td_str += '</td></tr>';
 
