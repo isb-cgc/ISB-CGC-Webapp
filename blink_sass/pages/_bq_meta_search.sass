@@ -61,6 +61,8 @@
                 padding-left: 20px
                 i
                     padding-left: 5px
+        p
+            margin: 0
     .spinner
         position: absolute
         width: 100%
@@ -184,7 +186,7 @@
                         border-radius: 3px
                 &.preview-table-container
                     overflow-x: scroll
-                    max-width: 990px
+                    max-width: 1070px
             table
                 &.detail-table
                     th, td
@@ -193,9 +195,16 @@
                         table.schema-table th, td
                             border-bottom: 1px solid lightgrey
                 &.preview-table
+                    table
+                        border-style: hidden
+                        width: calc(100% + 12px)
+                        margin: -3px -6px
                     th, td
+                        vertical-align: top
                         padding: 2px 5px
-                        border: 1px solid #eeeeee
+                        border: 1px solid #dddddd
+                        table td
+                            border: 1px solid #efefef
 
             &.td-body-right
                 text-align: right

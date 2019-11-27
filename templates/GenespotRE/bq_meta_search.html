@@ -21,6 +21,11 @@
             </li>
             <li class="navbar-item">
                 <a class="nav-link"
+                   href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/progapi/bigqueryGUI/LinkingBigQueryToIsb-cgcProject.html"
+                   target="_blank">ISB-CGC BigQuery Access Info<i class="fa fa-external-link" aria-hidden="true"></i></a>
+            </li>
+            <li class="navbar-item">
+                <a class="nav-link"
                    href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html"
                    target="_blank">ISB-CGC Notebooks<i class="fa fa-external-link" aria-hidden="true"></i></a>
             </li>
@@ -36,10 +41,9 @@
             </li>
         </ul>
         <div class="col-lg-12 col-md-12 col-sm-12">
-            <p>
-                <strong>Explore and learn more about available ISB-CGC BigQuery tables with this search feature.</strong> Find
-                tables of interest based on category, reference genome build, data type and wild card search.
+            <p><strong>Explore and learn more about available ISB-CGC BigQuery tables with this search feature.</strong>
             </p>
+            <p>Find tables of interest based on category, reference genome build, data type and free-form text search.</p>
         </div>
     </div>
 
@@ -48,7 +52,7 @@
 {% block content %}
 
     <div class="custom-width-20">
-{#    <div class="col-lg-3 col-md-3 col-sm-3">#}
+
         <div class="panel panel-default">
             <div class="panel-body">
                 <form id="bq-meta-form">
@@ -66,12 +70,14 @@
                             <div class="row">
                                 <div class="col-sm-1">
                                     <input type="checkbox" class="bq-checkbox" name="cat_{{ forloop.counter0 }}"
-                                       id="cat_chbx_{{ forloop.counter0 }}"
-                                       value="{{ option.value }}" data-column-name="category">
+                                           id="cat_chbx_{{ forloop.counter0 }}"
+                                           value="{{ option.value }}" data-column-name="category">
                                 </div>
                                 <div class="col-sm-11">
-                                    <label class="label-filter" for="cat_chbx_{{ forloop.counter0 }}">{{ option.label }}</label>
-                                    <i class="fa fa-info-circle" data-placement="bottom" title="{{ option.description }}"></i>
+                                    <label class="label-filter"
+                                           for="cat_chbx_{{ forloop.counter0 }}">{{ option.label }}</label>
+                                    <i class="fa fa-info-circle" data-placement="bottom"
+                                       title="{{ option.description }}"></i>
                                 </div>
                             </div>
                         {% endfor %}
@@ -142,7 +148,6 @@
     </div>
 
     <div class="custom-width-80">
-{#    <div class="col-lg-9 col-md-9 col-sm-9">#}
         <div class="panel panel-default">
             <div class="spinner">
                 <i class="fa fa-spinner fa-spin"></i>
@@ -152,10 +157,7 @@
                     <thead>
                     <tr>
                         <th style="width:3%;"></th>
-                        {#                        <th>Project ID</th>#}
                         <th style="width:20%;">Dataset ID</th>
-                        {#                        <th>Table ID</th>#}
-                        {#                        <th>Full ID</th>#}
                         <th style="width:19%;">Table ID</th>
                         <th style="width:19%;">Full ID</th>
                         <th style="width:9%;">Status</th>
@@ -169,17 +171,19 @@
                         <th style="width:7%;">Description</th>
                         <th>Labels</th>
                         <th>Fields</th>
-
-                        {#                        <th>Link</th>#}
                     </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
             </div>
+            <div class="panel-footer">
+                <strong>Have feedback or corrections? Please email us at
+                    <a target="_blank" href="mailto:feedback%40isb-cgc.org">feedback<span>@</span>isb-cgc<span>.</span>org</a>.
+                </strong>
+            </div>
 
         </div>
     </div>
-    {#    </div>#}
 
 {% endblock %}
 
