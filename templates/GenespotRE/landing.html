@@ -40,10 +40,13 @@
                     </div>
                     <div class="row">
                         <div class="col-xs-8 col-xs-offset-2 lj-title-paragraph">
-                            <p class="lj-text-center">The ISB Cancer Genomics Cloud (ISB-CGC) is democratizing access to NCI
+                            <p class="lj-text-center">The ISB Cancer Genomics Cloud (ISB-CGC) is democratizing access to
+                                NCI
                                 Cancer Data (<a href="http://cancergenome.nih.gov/" target="_blank"><b>TCGA</b></a>, <a
-                                        href="https://ocg.cancer.gov/programs/target" target="_blank"><b>TARGET</b></a>, <a
-                                        href="https://portals.broadinstitute.org/ccle" target="_blank"><b>CCLE</b></a>) and
+                                        href="https://ocg.cancer.gov/programs/target" target="_blank"><b>TARGET</b></a>,
+                                <a
+                                        href="https://portals.broadinstitute.org/ccle" target="_blank"><b>CCLE</b></a>)
+                                and
                                 coupling it with unprecedented computational power to allow researchers to explore and
                                 analyze this vast data-space.</p>
                         </div>
@@ -67,65 +70,87 @@
                                     <div class="item active">
                                         <iframe class="tutorial-vid"
                                                 src="https://www.youtube-nocookie.com/embed/RQsLKDTciWk?enablejsapi=1&version=3&playerapiid=ytplayer"
-                                                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                                frameborder="0" allow="autoplay; encrypted-media"
+                                                allowfullscreen></iframe>
                                     </div>
                                     <div class="item">
                                         <iframe class="tutorial-vid"
                                                 src="https://www.youtube-nocookie.com/embed/q9q1g1-cf7M?enablejsapi=1&version=3&playerapiid=ytplayer"
-                                                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                                frameborder="0" allow="autoplay; encrypted-media"
+                                                allowfullscreen></iframe>
                                     </div>
                                     <div class="item">
                                         <iframe class="tutorial-vid"
                                                 src="https://www.youtube-nocookie.com/embed/2db_zxp8-8M?enablejsapi=1&version=3&playerapiid=ytplayer"
-                                                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                                frameborder="0" allow="autoplay; encrypted-media"
+                                                allowfullscreen></iframe>
                                     </div>
                                     <div class="item">
                                         <iframe class="tutorial-vid"
                                                 src="https://www.youtube-nocookie.com/embed/tbjfZC9wQ9o?enablejsapi=1&version=3&playerapiid=ytplayer"
-                                                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                                frameborder="0" allow="autoplay; encrypted-media"
+                                                allowfullscreen></iframe>
                                     </div>
                                     <div class="item">
                                         <iframe class="tutorial-vid"
                                                 src="https://www.youtube-nocookie.com/embed/HaeJo9UaJZk?enablejsapi=1&version=3&playerapiid=ytplayer"
-                                                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                                frameborder="0" allow="autoplay; encrypted-media"
+                                                allowfullscreen></iframe>
                                     </div>
                                     <div class="item">
                                         <iframe class="tutorial-vid"
                                                 src="https://www.youtube-nocookie.com/embed/sikbGP3WHCg?enablejsapi=1&version=3&playerapiid=ytplayer"
-                                                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                                frameborder="0" allow="autoplay; encrypted-media"
+                                                allowfullscreen></iframe>
                                     </div>
                                 </div>
-                                <a class="left carousel-control carousel-control-button" href="#carousel-video-tutorials" aria-label="Prev"
+                                <a class="left carousel-control carousel-control-button"
+                                   href="#carousel-video-tutorials" aria-label="Prev"
                                    data-slide="prev">
                                     <i class="fa fa-chevron-left prev"></i>
                                 </a>
-                                <a class="right carousel-control carousel-control-button" href="#carousel-video-tutorials" aria-label="Next"
+                                <a class="right carousel-control carousel-control-button"
+                                   href="#carousel-video-tutorials" aria-label="Next"
                                    data-slide="next">
                                     <i class="fa fa-chevron-right next"></i>
                                 </a>
                             </div>
                         </div>
-                        <div class="col-sm-6 lj-header-button custom-width-45"
-                             data-scroll-reveal="wait 0.5s, then enter bottom and move 20px over 0.5s">
-                            <p><a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a>
+                        <div class="col-sm-6 lj-header-button custom-width-45">
+                            <p><a href="{% url 'bq_meta_search' %}">BigQuery Table Search</a>
+                                <span class="badge"
+                                      style="font-size:14px;height:20px;width:50px;margin-left:-25px;padding-top:3px;padding-left:8px;margin-top:-25px;background-color:#4cc2d6;">New</span>
                             </p>
-                            <p><a href="{% url 'vid_tutorials' %}" target="_blank" title="Video Tutorials"><i
-                                    class="fa fa-play-circle fa-lg"></i> Video Tutorials</a></p>
-                            <p>
-                                <a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/QueryOfTheMonthClub.html"
-                                   target="_blank">
-                                    <i class="fa fa-search fa-large"></i> Query of the Month
-                                </a></p>
                             <p><a href="https://mitelmandatabase.isb-cgc.org"
-                                  target="_blank"><img src="{% static 'img/mitelman.png' %}" style="margin-top:-3px;height:16px;"> Mitelman Database</a><span class="badge" style="font-size:18px;height:24px;width:48px;margin-left:-25px;margin-top:-25px;">New</span></p>
-                            <p><a href="https://github.com/isb-cgc/" target="_blank"> <i class="fa fa-github fa-lg"></i>
-                                GitHub</a></p>
+                                  target="_blank">Mitelman Database</a>
+                                <span class="badge"
+                                      style="font-size:14px;height:20px;width:50px;margin-left:-25px;padding-top:3px;padding-left:8px;margin-top:-25px;background-color:#4cc2d6;">New</span>
+                            </p>
+                            <p>
+                                <a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html#community-notebooks"
+                                   target="_blank">Community Notebooks
+                                </a><span class="badge"
+                                      style="font-size:14px;height:20px;width:50px;margin-left:-25px;padding-top:3px;padding-left:8px;margin-top:-25px;background-color:#4cc2d6;">New</span>
+                            </p>
+                            <p><a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a></p>
+                            <p><a href="{% url 'vid_tutorials' %}" target="_blank" title="Video Tutorials">Video Tutorials</a></p>
+
+
+{#                                <a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/QueryOfTheMonthClub.html"#}
+{#                                   target="_blank">#}
+{#                                    <i class="fa fa-search fa-large"></i> Query of the Month#}
+{#                                </a></p>#}
+
+
+{#                            <p><a href="https://github.com/isb-cgc/" target="_blank"> <i class="fa fa-github fa-lg"></i>#}
+{#                                GitHub</a></p>#}
 
                         </div>
                     </div>
                     <div class="row footer">
                         <div class="col-xs-8 col-xs-offset-2">
-                            <p>ISB-CGC has been funded in whole with Federal funds from the <b>National Cancer Institute</b>,
+                            <p>ISB-CGC has been funded in whole with Federal funds from the <b>National Cancer
+                                Institute</b>,
                                 <b>National
                                     Institutes of Health</b>, under contract No. HHSN261200800001E
                             </p>
@@ -134,6 +159,10 @@
                                     <i class="fa fa-chevron-down"></i>
                                 </a>
                             </div>
+                        </div>
+                        <div class="follow-us col-xs-2">
+                            <a href="https://github.com/isb-cgc/" target="_blank"> <i class="fa fa-github fa-lg"></i></a>
+                            <a href="https://twitter.com/isb_cgc" target="_blank"> <i class="fa fa-twitter fa-lg"></i></a>
                         </div>
                     </div>
                 </div>
