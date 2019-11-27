@@ -350,7 +350,7 @@ def create_programs_and_projects(debug):
                 data_tables = check[0].id
             else:
                 for build in prog_tables['data']:
-                    values = (prog+'_metadata_data_'+build, prog.upper()+'_'+build.lower()+'_data_v0')
+                    values = (prog+'_metadata_data_'+build+'_r14', prog.upper()+'_'+build.lower()+'_data_v0')
                     insert_data_tables_opt_fields = ''
                     if prog_tables['data'][build]:
                         values += (prog+'_metadata_annotation2data_'+build,)
