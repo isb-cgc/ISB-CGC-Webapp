@@ -26,18 +26,13 @@
 # middleware here, or combine a Django application with an application of another
 # framework.
 
-
-# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "GenespotRE.prod_settings")
-
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
+
+import os
 from django.core.wsgi import get_wsgi_application
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'GenespotRE.settings')
+
 application = get_wsgi_application()
-
-# Apply WSGI middleware here.
-# from helloworld.wsgi import HelloWorldApplication
-# application = HelloWorldApplication(application)
-
-forwarded_allow_ips = '*'
-secure_scheme_headers = {'X-APPENGINE-HTTPS': 'on'}
