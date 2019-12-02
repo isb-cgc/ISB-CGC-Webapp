@@ -266,11 +266,6 @@ SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS','3600'))
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    # For using NDB with Django
-    # documentation: https://cloud.google.com/appengine/docs/python/ndb/#integration
-    # WE DON'T SEEM TO BE USING NDB SO I'M COMMENTING THIS OUT - PL
-    # 'google.appengine.ext.ndb.django_middleware.NdbDjangoMiddleware',
-    # 'google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'GenespotRE.checkreqsize_middleware.CheckReqSize',
