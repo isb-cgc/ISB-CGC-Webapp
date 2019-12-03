@@ -19,7 +19,7 @@ import os
 import sys
 
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "GenespotRE.settings_unit_test")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "isb_cgc.settings_unit_test")
     # stubBuilder = None
     #
     # # Migration will trigger system checks, which will in turn load the views.py files. Some of these import
