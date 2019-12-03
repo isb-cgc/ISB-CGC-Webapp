@@ -41,7 +41,7 @@ from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
 from googleapiclient.errors import HttpError
 from cohorts.models import Cohort, Cohort_Perms
-from projects.models import Program
+from collections.models import Program
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 
@@ -490,28 +490,8 @@ def dashboard_page(request):
         zone = 'us-central1-c'
         status = 'NOT FOUND'
 
-    notebook_vm = {
-        'user': vm_username,
-        'project_id': project_id,
-        'name': machine_name,
-        'zone': zone,
-        'client_ip_range': client_ip_range,
-        'status': status
-    }
-
-    # Gene & miRNA Favorites
-    genefaves = request.user.genefavorite_set.filter(active=True)
-
-    # Variable Favorites
-    varfaves = request.user.variablefavorite_set.filter(active=True)
-
     return render(request, 'idc/dashboard.html', {
         'request'  : request,
         'cohorts'  : cohorts,
-        'programs' : programs,
-        'workbooks': workbooks,
-        'genefaves': genefaves,
-        'varfaves' : varfaves,
-        'notebook_vm': notebook_vm,
-        'gcp_list': gcp_list,
+        'programs' : programs
     })

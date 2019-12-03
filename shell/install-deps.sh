@@ -84,3 +84,7 @@ if [ -z "${CI}" ] || [ ! -d "/usr/lib/google-cloud-sdk" ]; then
     apt-get -y --allow-downgrades install google-cloud-sdk-app-engine-python=251.0.0-0
     echo "Google Cloud SDK Installed"
 fi
+
+# Run dos2unix on the files in shell/ because of line terminator shenanigans with Windows
+echo "Running dos2unix on shell/*.sh..."
+dos2unix ${HOMEROOT}/shell/*.sh
