@@ -27,7 +27,7 @@
 # framework.
 
 
-# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "idc.prod_settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "idc.settings")
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION

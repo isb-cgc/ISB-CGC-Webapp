@@ -62,7 +62,7 @@ urlpatterns = [
     url(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),
     url(r'^privacy/', views.privacy_policy, name='privacy'),
 
-    url(r'^programs/', include('projects.urls')),
+    url(r'^programs/', include('collections.urls')),
     url(r'^share/', include('sharing.urls')),
 ]
 
