@@ -20,7 +20,7 @@ import MySQLdb
 import logging
 import traceback
 import sys
-from GenespotRE import secret_settings
+from isb_cgc import secret_settings
 
 logging.basicConfig(level=logging.INFO)
 

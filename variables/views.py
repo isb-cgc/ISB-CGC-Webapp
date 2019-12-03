@@ -38,7 +38,7 @@ from django.contrib.auth.models import User as Django_User
 from django.http import HttpResponse, JsonResponse
 
 from cohorts.metadata_helpers import fetch_program_attr
-from GenespotRE.templatetags.custom_tags import get_readable_name
+from isb_cgc.templatetags.custom_tags import get_readable_name
 
 debug = settings.DEBUG
 

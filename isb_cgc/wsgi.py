@@ -33,6 +33,6 @@
 import os
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'GenespotRE.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'isb_cgc.settings')
 
 application = get_wsgi_application()

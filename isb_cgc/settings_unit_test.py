@@ -268,7 +268,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'GenespotRE.checkreqsize_middleware.CheckReqSize',
+    'isb_cgc.checkreqsize_middleware.CheckReqSize',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'adminrestrict.middleware.AdminPagesRestrictMiddleware',
@@ -278,10 +278,10 @@ MIDDLEWARE = [
     'offline.middleware.OfflineMiddleware',
 ]
 
-ROOT_URLCONF = 'GenespotRE.urls'
+ROOT_URLCONF = 'isb_cgc.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'GenespotRE.wsgi.application'
+WSGI_APPLICATION = 'isb_cgc.wsgi.application'
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -293,7 +293,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'cohorts',
-    'GenespotRE',
+    'isb_cgc',
     'visualizations',
     'seqpeek',
     'sharing',
@@ -431,7 +431,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.tz',
                 'finalware.context_processors.contextify',
-                'GenespotRE.context_processor.additional_context',
+                'isb_cgc.context_processor.additional_context',
             ),
             # add any loaders here; if using the defaults, we can comment it out
             # 'loaders': (

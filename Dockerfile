@@ -77,6 +77,6 @@ ENV PYTHONPATH=/app:/app/lib:/app/ISB-CGC-Common:${PYTHONPATH}
 # ISB
 # RUN python /app/manage.py migrate --noinput
 
-#CMD gunicorn -c gunicorn.conf.py -b :$PORT GenespotRE.wsgi -w 3 -t 130
-CMD gunicorn -c gunicorn.conf.py -b :$PORT GenespotRE.wsgi -w 3 -t 300
+#CMD gunicorn -c gunicorn.conf.py -b :$PORT isb_cgc.wsgi -w 3 -t 130
+CMD gunicorn -c gunicorn.conf.py -b :$PORT isb_cgc.wsgi -w 3 -t 300
 # increasing timeout to 5 mins

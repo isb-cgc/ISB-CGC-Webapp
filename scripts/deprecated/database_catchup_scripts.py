@@ -22,7 +22,7 @@ import traceback
 import sys
 import time
 from MySQLdb import connect, cursors
-from GenespotRE import secret_settings, settings
+from isb_cgc import secret_settings, settings
 from argparse import ArgumentParser
 
 SUPERUSER_NAME = 'isb'
