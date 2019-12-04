@@ -459,37 +459,6 @@ def dashboard_page(request):
     programs = ownedPrograms | sharedPrograms
     programs = programs.distinct().order_by('-last_date_saved')
 
-    # Workbook List
-    userWorkbooks = request.user.workbook_set.filter(active=True)
-    sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-    workbooks = userWorkbooks | sharedWorkbooks
-    workbooks = workbooks.distinct().order_by('-last_date_saved')
-
-    # Notebook VM Instance
-    user_instances = request.user.instance_set.filter(active=True)
-    user = User.objects.get(id=request.user.id)
-    gcp_list = []
-    vm_username = request.user.email.split('@')[0]
-    client_ip = get_ip_address_from_request(request)
-    logger.debug('client_ip: '+client_ip)
-    client_ip_range = ', '.join([client_ip])
-
-    if user_instances:
-        user_vm = user_instances[0]
-        machine_name = user_vm.name
-        project_id = user_vm.gcp.project_id
-        zone = user_vm.zone
-        result = check_vm_stat(project_id, zone, machine_name)
-        status = result['status']
-    else:
-        # default values to fill in fields in form
-        project_id = ''
-        # remove special characters
-        machine_header = re.sub(r'[^A-Za-z0-9]+', '', vm_username.lower())
-        machine_name = '{}-jupyter-vm'.format(machine_header)
-        zone = 'us-central1-c'
-        status = 'NOT FOUND'
-
     return render(request, 'idc/dashboard.html', {
         'request'  : request,
         'cohorts'  : cohorts,

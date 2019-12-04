@@ -278,12 +278,6 @@ def active_and_v2(list, key=None):
 
 
 @register.filter
-def workbook_matches_varfave(workbook, var_fave):
-    return (((workbook.build is None or workbook.build == 'Legacy') and var_fave.version == 'v1')
-        or ((workbook.build is not None and workbook.build != 'Legacy') and var_fave.version == 'v2'))
-
-
-@register.filter
 def is_public(list, key=None):
     if not key:
         return list.filter(is_public=True)
