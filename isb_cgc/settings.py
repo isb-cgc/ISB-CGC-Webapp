@@ -463,7 +463,7 @@ if IS_DEV:
 # Path to application runtime JSON key
 GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else ''
 
-# GCP monitoring Service Account
+# GCP monitoring Service Account, needed for template display
 MONITORING_SA_CLIENT_EMAIL            = os.environ.get('MONITORING_SA_CLIENT_EMAIL', '')
 
 # GCP monitoring Service Account key
