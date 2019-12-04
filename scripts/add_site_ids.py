@@ -36,12 +36,11 @@ try:
     db = MySQLdb.connect(host=db_settings['HOST'], port=db_settings['PORT'], db=db_settings['NAME'], user=db_settings['USER'], passwd=db_settings['PASSWORD'], ssl=ssl)
 
     delete_str = 'DELETE FROM django_site WHERE id in (2, 3, 4, 5);'
-    insert_str = 'INSERT INTO django_site (id, domain, name) VALUES (%s, %s, %s), (%s, %s, %s), (%s, %s, %s), (%s, %s, %s);'
+    insert_str = 'INSERT INTO django_site (id, domain, name) VALUES (%s, %s, %s), (%s, %s, %s), (%s, %s, %s);'
 
     insert_tuple = ('2', 'localhost:8000', 'localhost:8000')
     insert_tuple += ('3', 'localhost:8080', 'localhost:8080')
     insert_tuple += ('4', 'mvm-dot-isb-cgc.appspot.com', 'mvm-dot-isb-cgc.appspot.com')
-    insert_tuple += ('5', 'mvm-dot-isb-cgc.appspot-preview.com', 'mvm-dot-isb-cgc.appspot-preview.com')
 
     cursor = db.cursor()
     cursor.execute(delete_str)
