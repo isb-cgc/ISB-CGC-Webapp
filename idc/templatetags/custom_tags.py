@@ -28,7 +28,7 @@ from django.template.defaulttags import register
 from cohorts.models import Cohort, Cohort_Perms
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
-from collections.models import Program
+from idc_collections.models import Program
 import logging
 
 logger = logging.getLogger('main_logger')
