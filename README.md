@@ -17,12 +17,12 @@ From there perform the following steps...
  3. Fill out the `.env` file with the proper values
    * For most **development** environments, `MYSQL_ROOT_PASSWORD` and `DATABASE_PASSWORD` can be the same, and `DATABASE_USER` can be `root`
    * `GCLOUD_PROJECT_ID` is available after creating a project in the [Google Cloud Dashboard](https://console.developers.google.com/)
-   * `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` can also be obtained in the Google Cloud Dashboard by going to API & Auth > Credentials > Add New > OAuth 2.0 Client > Web Application
+   * `OAUTH2_CLIENT_ID` and `OAUTH2_CLIENT_SECRET` can also be obtained in the Google Cloud Dashboard by going to API & Auth > Credentials > Add New > OAuth 2.0 Client > Web Application
    * Be sure when developing locally that you have 127.0.0.1 in the list of allowed domains for the OAuth 2.0 key
 
 ## Configuring PyCharm
 
-PyCharm Pro can be used to run your server through Vagrant and the Google App Engine.
+PyCharm Pro can be used to run your Web Application as a native Django application.
 
 ### Setup
 
@@ -32,9 +32,7 @@ PyCharm Pro can be used to run your server through Vagrant and the Google App En
  4. Click Add Remote
  5. Select Vagrant (if it asks to start the machine, say yes)
  6. Set the Python interpreter path to `/home/vagrant/www/shell/python-su.sh` and click Ok
- 7. Select **Languages & Frameworks > Google App Engine**
- 8. Change the SDK directory to `/home/vagrant/google_appengine/`
- 9. Click Ok to save
+ 7. Click Ok to save
  10. Go to **Run > Edit Configurations**
  11. If there is not a Django Configuration, add one
  12. Set the host to `0.0.0.0`
@@ -42,7 +40,7 @@ PyCharm Pro can be used to run your server through Vagrant and the Google App En
  14. Set the working directory to `/home/vagrant/www`
  15. Click `...` next to the `Environment variables:`, box and add the following values:
      `SECURE_LOCAL_PATH = ../parentDir/secure_files/idc/`
-     `PYTHONPATH = /home/vagrant/www:/home/vagrant/www/lib:/home/vagrant/google_appengine`
+     `PYTHONPATH = /home/vagrant/www:/home/vagrant/www/lib:/home/vagrant/www/IDC-Common`
      `DJANGO_SETTINGS_MODULE = idc.settings`
      `PYTHONUNBUFFERED = 1`
  16. Click ok to save
@@ -55,7 +53,7 @@ To run your server in PyCharm:
 
  1. Make sure your Vagrant machine is running by going to **Tools > Vagrant > Up**
   * If this is the first time you've built the VM, it can be time consuming.
-  * Our VMs are currently running Ubuntu 16 LTS, which is what the app deploys under as well.
+  * Our VMs are currently running Ubuntu 16.0.4 LTS, which is what the app deploys under as well.
  2. Once the VM has built, click on the Run or Debug icons in the toolbar (upper-right corner of the PyCharm GUI)
   * Your server will start and the PyCharm console should show all the logs and output from the system. 
   * If you are running in debug, you can also use breakpoints to stop the execution and examine variables and code as it runs.
