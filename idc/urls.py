@@ -51,10 +51,6 @@ urlpatterns = [
     url(r'^data/', include('data_upload.urls')),
     url(r'^_ah/(vm_)?health$', views.health_check),
 
-    # ------------------------------------------
-    # Blink views
-    # ------------------------------------------
-
     url(r'^help/', views.help_page, name='help'),
     url(r'^about/', views.about_page, name='about_page'),
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
@@ -62,7 +58,7 @@ urlpatterns = [
     url(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),
     url(r'^privacy/', views.privacy_policy, name='privacy'),
 
-    url(r'^programs/', include('collections.urls')),
+    url(r'^collections/', include('idc_collections.urls')),
     url(r'^share/', include('sharing.urls')),
 ]
 

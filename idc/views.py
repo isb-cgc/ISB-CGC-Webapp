@@ -41,7 +41,7 @@ from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
 from googleapiclient.errors import HttpError
 from cohorts.models import Cohort, Cohort_Perms
-from collections.models import Program
+from idc_collections.models import Program
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 
@@ -202,8 +202,8 @@ def user_landing(request):
 
     if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
     # check to see if user has read access to 'All TCGA Data' cohort
-    isb_superuser = User.objects.get(username='isb')
-    superuser_perm = Cohort_Perms.objects.get(user=isb_superuser)
+    idc_superuser = User.objects.get(username='idc')
+    superuser_perm = Cohort_Perms.objects.get(user=idc_superuser)
     user_all_data_perm = Cohort_Perms.objects.filter(user=request.user, cohort=superuser_perm.cohort)
     if not user_all_data_perm:
         Cohort_Perms.objects.create(user=request.user, cohort=superuser_perm.cohort, perm=Cohort_Perms.READER)
@@ -448,8 +448,8 @@ def vid_tutorials_page(request):
 def dashboard_page(request):
 
     # Cohort List
-    isb_superuser = User.objects.get(username='isb')
-    public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
+    idc_superuser = User.objects.get(username='idc')
+    public_cohorts = Cohort_Perms.objects.filter(user=idc_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
     cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
     cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
 
@@ -458,37 +458,6 @@ def dashboard_page(request):
     sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
     programs = ownedPrograms | sharedPrograms
     programs = programs.distinct().order_by('-last_date_saved')
-
-    # Workbook List
-    userWorkbooks = request.user.workbook_set.filter(active=True)
-    sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-    workbooks = userWorkbooks | sharedWorkbooks
-    workbooks = workbooks.distinct().order_by('-last_date_saved')
-
-    # Notebook VM Instance
-    user_instances = request.user.instance_set.filter(active=True)
-    user = User.objects.get(id=request.user.id)
-    gcp_list = []
-    vm_username = request.user.email.split('@')[0]
-    client_ip = get_ip_address_from_request(request)
-    logger.debug('client_ip: '+client_ip)
-    client_ip_range = ', '.join([client_ip])
-
-    if user_instances:
-        user_vm = user_instances[0]
-        machine_name = user_vm.name
-        project_id = user_vm.gcp.project_id
-        zone = user_vm.zone
-        result = check_vm_stat(project_id, zone, machine_name)
-        status = result['status']
-    else:
-        # default values to fill in fields in form
-        project_id = ''
-        # remove special characters
-        machine_header = re.sub(r'[^A-Za-z0-9]+', '', vm_username.lower())
-        machine_name = '{}-jupyter-vm'.format(machine_header)
-        zone = 'us-central1-c'
-        status = 'NOT FOUND'
 
     return render(request, 'idc/dashboard.html', {
         'request'  : request,

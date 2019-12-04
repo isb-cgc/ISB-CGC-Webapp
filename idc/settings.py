@@ -284,7 +284,7 @@ INSTALLED_APPS = (
     'data_upload',
     'sharing',
     'cohorts',
-    'collections',
+    'idc_collections',
     'offline',
     'adminrestrict',
 )
