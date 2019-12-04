@@ -202,7 +202,7 @@ def user_landing(request):
 
     if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
     # check to see if user has read access to 'All TCGA Data' cohort
-    isb_superuser = User.objects.get(username='isb')
+    isb_superuser = User.objects.get(username='idc')
     superuser_perm = Cohort_Perms.objects.get(user=isb_superuser)
     user_all_data_perm = Cohort_Perms.objects.filter(user=request.user, cohort=superuser_perm.cohort)
     if not user_all_data_perm:
@@ -448,7 +448,7 @@ def vid_tutorials_page(request):
 def dashboard_page(request):
 
     # Cohort List
-    isb_superuser = User.objects.get(username='isb')
+    idc_superuser = User.objects.get(username='idc')
     public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
     cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
     cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')

@@ -10,7 +10,7 @@ if [ -n "$CI" ]; then
     export DATABASE_NAME=${DATABASE_NAME_BUILD}
     expirt DATABASE_HOST=${DATABASE_HOST_BUILD}
     # Give the 'ubuntu' test user access
-    mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'ubuntu'@'%' IDENTIFIED BY 'isb';"
+    mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'ubuntu'@'%' IDENTIFIED BY 'idc';"
 else
     export $(cat /home/vagrant/parentDir/secure_files/idc/.env | grep -v ^# | xargs) 2> /dev/null
     export HOME=/home/vagrant
@@ -49,7 +49,7 @@ echo "Running Migrations..."
 python3 ${HOMEROOT}/manage.py migrate --noinput
 
 # If the ISB superuser isn't present already, they need to be added.
-# echo "Creating isb superuser..."
+# echo "Creating idc Django superuser..."
 # echo "from django.contrib.auth.models import User; User.objects.create_superuser('${SUPERUSER_USERNAME}', '', '${SUPERUSER_PASSWORD}')" | python3 ${HOMEROOT}/manage.py shell
 
 echo "Adding in default Django admin IP allowances for local development"
