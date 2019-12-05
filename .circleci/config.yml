@@ -120,9 +120,6 @@ jobs:
       - restore_cache:
           keys:
             - idc-webapp-lib-{{ checksum "requirements.txt" }}
-      - restore_cache:
-          keys:
-            - idc-webapp-google-deps-{{ checksum "shell/install-deps.sh" }}
       - run:
           name: Install Dependencies
           command: |
