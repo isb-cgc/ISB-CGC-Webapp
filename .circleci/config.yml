@@ -52,12 +52,12 @@ commands:
             echo "export DEPLOYMENT_KEY=\"${KEY}\"" >> $BASH_ENV
             echo "export DEPLOYMENT_CLIENT_EMAIL=${CLIENT_EMAIL}" >> $BASH_ENV
             echo "export DEPLOYMENT_PROJECT_ID=${PROJECT_ID}" >> $BASH_ENV
-            echo "export DEPLOYMENT_BUCKET=${DEPLOYMENT_BUCKET}" >> $BASH_ENV
+            echo "export DEPLOYMENT_BUCKET=${BUCKET}" >> $BASH_ENV
 
             echo "Project settings assigned:"
             echo "Deployment client: ${CLIENT_EMAIL}"
             echo "Deployment project: ${PROJECT_ID}"
-            echo "Deployment bucket: gs://${DEPLOYMENT_BUCKET}"
+            echo "Deployment bucket: gs://${BUCKET}"
 
   deployment_config:
     steps:
