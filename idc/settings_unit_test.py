@@ -38,35 +38,10 @@ SHARED_SOURCE_DIRECTORIES = [
     'IDC-Common'
 ]
 
-# The Google AppEngine library and the Google Cloud APIs don't play nice. Teach them to get along.
-# This unfortunately requires either hardcoding the path to the SDK, or sorting out a way to
-# provide an environment variable indicating where it is.
-# From https://github.com/GoogleCloudPlatform/python-repo-tools/blob/master/gcp_devrel/testing/appengine.py#L26
-def setup_sdk_imports():
-    """Sets up appengine SDK third-party imports."""
-    sdk_path = os.environ.get('GAE_SDK_PATH', '/usr/lib/google-cloud-sdk')
-
-    # Trigger loading of the Cloud APIs so they're in sys.modules
-    import google.cloud
-
-    # The libraries are specifically under platform/google_appengine
-    if os.path.exists(os.path.join(sdk_path, 'platform/google_appengine')):
-        sdk_path = os.path.join(sdk_path, 'platform/google_appengine')
-
-    # This sets up libraries packaged with the SDK, but puts them last in
-    # sys.path to prevent clobbering newer versions
-    if 'google' in sys.modules:
-        sys.modules['google'].__path__.append(
-            os.path.join(sdk_path, 'google'))
-
-    sys.path.append(sdk_path)
-
 
 # Add the shared Django application subdirectory to the Python module search path
 for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
-
-setup_sdk_imports()
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
@@ -507,31 +482,14 @@ SITE_GOOGLE_ANALYTICS_TRACKING_ID = os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKI
 # number should be adjusted
 MAX_FILE_LIST_REQUEST = 65000
 
-# IGV limit to prevent users from trying ot open dozens of files
-MAX_FILES_IGV = 5
-
 # Rough max file size to allow for eg. barcode list upload, to revent triggering RequestDataTooBig
 FILE_SIZE_UPLOAD_MAX = 1950000
-
-#################################
-# caMicroscope Viewer settings
-#################################
-CAMIC_VIEWER = os.environ.get('CAMIC_VIEWER', None)
-IMG_THUMBS_URL = os.environ.get('IMG_THUMBS_URL', None)
 
 #################################
 # DICOM Viewer settings
 #################################
 DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
 
-#################################
-# NOTEBOOK settings
-#################################
-# NOTEBOOK_VIEWER = os.environ.get('NOTEBOOK_VIEWER', None)
-NOTEBOOK_VIEWER = ''
-# NOTEBOOK_ENV_LOC = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_ENV_PATH', None))
-# NOTEBOOK_SL_PATH = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_SL_PATH', None))
-#################################
 # SOLR settings
 #################################
 SOLR_URL = os.environ.get('SOLR_URL', None)
@@ -547,9 +505,7 @@ NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRES
 # Explicitly check for known items
 BLACKLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
 
-# IndexD settings
-INDEXD_URI = os.environ.get('INDEXD_URI', None)
-INDEXD_REQ_LIMIT = int(os.environ.get('INDEXD_REQ_LIMIT', '100'))
+
 
 
 if DEBUG and DEBUG_TOOLBAR:

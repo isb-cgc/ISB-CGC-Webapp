@@ -501,17 +501,8 @@ SITE_GOOGLE_ANALYTICS_TRACKING_ID = os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKI
 # number should be adjusted
 MAX_FILE_LIST_REQUEST = 65000
 
-# IGV limit to prevent users from trying ot open dozens of files
-MAX_FILES_IGV = 5
-
 # Rough max file size to allow for eg. barcode list upload, to revent triggering RequestDataTooBig
 FILE_SIZE_UPLOAD_MAX = 1950000
-
-#################################
-# caMicroscope Viewer settings
-#################################
-CAMIC_VIEWER = os.environ.get('CAMIC_VIEWER', None)
-IMG_THUMBS_URL = os.environ.get('IMG_THUMBS_URL', None)
 
 #################################
 # DICOM Viewer settings

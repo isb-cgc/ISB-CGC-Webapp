@@ -67,9 +67,9 @@ commands:
             sudo -E /bin/bash ./shell/pull_config.sh
             xargs -a deployment_config.txt -I{} echo "export {}" >> $BASH_ENV
             # Set up test/deployment database values
-            echo "export MYSQL_ROOT_PASSWORD_BUILD=isb" >> $BASH_ENV
+            echo "export MYSQL_ROOT_PASSWORD_BUILD=idc" >> $BASH_ENV
             echo "export DATABASE_NAME_BUILD=build_database" >> $BASH_ENV
-            echo "export DATABASE_PASSWORD_BUILD=isb" >> $BASH_ENV
+            echo "export DATABASE_PASSWORD_BUILD=idc" >> $BASH_ENV
             echo "export DATABASE_USER_BUILD=django-user" >> $BASH_ENV
             echo "export DATABASE_HOST_BUILD=127.0.0.1" >> $BASH_ENV
 
@@ -108,8 +108,8 @@ jobs:
         environment:
           MYSQL_ROOT_HOST: "%"
           MYSQL_USER: ubuntu
-          MYSQL_PASSWORD: "isb"
-          MYSQL_ROOT_PASSWORD: "isb"
+          MYSQL_PASSWORD: "idc"
+          MYSQL_ROOT_PASSWORD: "idc"
           MYSQL_DATABASE: "build_database"
     steps:
       - checkout
