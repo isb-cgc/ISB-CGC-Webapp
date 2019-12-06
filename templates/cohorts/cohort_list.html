@@ -16,28 +16,8 @@
 <div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-        {% if workbook %}
-            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
-            <li><a href="{% url 'workbook_detail' workbook_id=workbook.id %}">{{ workbook.name|title }}</a></li>
-        {% endif %}
     </ol>
     <h1 class="page-header pull-left">{% if from_workbook %}Data Source | {% endif %}Cohorts</h1>
-    {% if from_workbook %}
-        <div class="pull-right new-cohort">
-            <li class="separator"></li>
-            <h5>New Cohort:</h5>
-            <a href="{% if workbook %}{% url 'cohort_create_for_existing_workbook' workbook_id=workbook.id worksheet_id=worksheet.id %}{% else %}{% url 'cohort_create_for_new_workbook' %}{% endif %}" class="btn btn-primary"><i class="fa fa-plus"></i> Filters</a>
-            <a href="{% if workbook %}{% url 'cohort_create_for_existing_workbook_barcodes' workbook_id=workbook.id worksheet_id=worksheet.id %}{% else %}{% url 'cohort_create_for_new_workbook_barcodes' %}{% endif %}" class="btn btn-primary"><i class="fa fa-plus"></i> Barcodes</a>
-        </div>
-        <div class="pull-right">
-            <form id="cohort-apply-to-workbook" action="{% url 'add_cohorts_to_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id %}" method="POST">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary" disabled="disabled">{% if create_workbook %}Create Workbook{% else %}Apply to Worksheet{% endif %}</button>
-            </form>
-        </div>
-    {% else %}
-        <div class="pull-right new-cohort"><h5>New Cohort:</h5> <a href="{% url 'cohort' %}" class="btn btn-primary"><i class="fa fa-plus"></i> Filters</a> <a href="{% url 'cohort_barcodes' %}" class="btn btn-primary"><i class="fa fa-plus"></i> Barcodes</a></div>
-    {% endif %}
 </div>
 {% endblock %}
 {% block content %}
