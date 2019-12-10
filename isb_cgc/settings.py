@@ -24,11 +24,10 @@ import sys
 import dotenv
 from socket import gethostname, gethostbyname
 
-env_path = '../'
-if os.environ.get('SECURE_LOCAL_PATH', None):
-    env_path += os.environ.get('SECURE_LOCAL_PATH')
 
-dotenv.read_dotenv(join(dirname(__file__), env_path+'.env'))
+SECURE_LOCAL_PATH = os.environ.get('SECURE_LOCAL_PATH', '')
+
+dotenv.read_dotenv(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
 
 APP_ENGINE_FLEX = 'aef-'
 APP_ENGINE = 'Google App Engine/'
@@ -461,13 +460,13 @@ if IS_DEV:
 ##########################
 
 # Path to application runtime JSON key
-GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else ''
+GOOGLE_APPLICATION_CREDENTIALS        = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
 
 # GCP monitoring Service Account, needed for template display
 MONITORING_SA_CLIENT_EMAIL            = os.environ.get('MONITORING_SA_CLIENT_EMAIL', '')
 
 # GCP monitoring Service Account key
-MONITORING_SA_ACCESS_CREDENTIALS      = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('MONITORING_SA_ACCESS_CREDENTIALS')) if os.environ.get('MONITORING_SA_ACCESS_CREDENTIALS') else ''
+MONITORING_SA_ACCESS_CREDENTIALS      = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('MONITORING_SA_ACCESS_CREDENTIALS', '')))
 
 # Client ID used for OAuth2 - this is for IGV and the test database
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
@@ -595,6 +594,7 @@ NOTEBOOK_VIEWER = ''
 SOLR_URI = os.environ.get('SOLR_URI', '')
 SOLR_LOGIN = os.environ.get('SOLR_LOGIN', '')
 SOLR_PASSWORD = os.environ.get('SOLR_PASSWORD', '')
+SOLR_CERT = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCAL_PATH, os.environ.get('SOLR_CERT', '')))
 
 ##############################################################
 #   MailGun Email Settings
