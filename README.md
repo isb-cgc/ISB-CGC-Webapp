@@ -42,7 +42,7 @@ PyCharm Pro can be used to run your server through Vagrant and the Google App En
  14. Set the working directory to `/home/vagrant/www`
  15. Click `...` next to the `Environment variables:`, box and add the following values:
      `SECURE_LOCAL_PATH = ../parentDir/secure_files/`
-     `PYTHONPATH = /home/vagrant/www:/home/vagrant/www/lib:/home/vagrant/google_appengine`
+     `PYTHONPATH = /home/vagrant/www:/home/vagrant/www/lib:/home/vagrant/www/ISB-CGC-Common`
      `DJANGO_SETTINGS_MODULE = isb_cgc.settings`
      `PYTHONUNBUFFERED = 1`
  16. Click ok to save
