@@ -137,7 +137,6 @@ jobs:
           paths:
             - ./adminrestrict
             - ./.git
-            - ./demo
             - ./genes
             - ./seqpeek
             - ./shell
