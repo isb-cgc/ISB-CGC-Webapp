@@ -20,7 +20,6 @@ import logging
 import sys
 import re
 import datetime
-# import requests
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -33,8 +32,6 @@ from django.utils import formats
 from django.contrib import messages
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
-
-from adminrestrict.middleware import get_ip_address_from_request
 
 from google_helpers.directory_service import get_directory_resource
 from google_helpers.bigquery.bq_support import BigQuerySupport
@@ -50,6 +47,7 @@ from accounts.sa_utils import get_nih_user_details
 # from notebooks.notebook_vm import check_vm_stat
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
+from google_helpers.bigquery.service import get_bigquery_service
 
 import requests
 
@@ -59,8 +57,7 @@ logger = logging.getLogger('main_logger')
 OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
-# SOLR_URL = settings.SOLR_URL
-
+BQ_ECOSYS_BUCKET = settings.BQ_ECOSYS_STATIC_URL
 
 
 def convert(data):
@@ -104,10 +101,13 @@ def _decode_dict(data):
         rv[key] = value
     return rv
 
+
 '''
 Handles login and user creation for new users.
 Returns user to landing page.
 '''
+
+
 @never_cache
 def landing_page(request):
     return render(request, 'GenespotRE/landing.html', {'request': request, })
@@ -116,6 +116,8 @@ def landing_page(request):
 '''
 Displays the privacy policy
 '''
+
+
 @never_cache
 def privacy_policy(request):
     return render(request, 'GenespotRE/privacy.html', {'request': request, })
@@ -124,6 +126,8 @@ def privacy_policy(request):
 '''
 Returns css_test page used to test css for general ui elements
 '''
+
+
 def css_test(request):
     # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     return render(request, 'GenespotRE/css_test.html', {'request': request})
@@ -132,9 +136,11 @@ def css_test(request):
 '''
 Returns page that has user details
 '''
+
+
 @login_required
 def user_detail(request, user_id):
-    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
+    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
 
     if int(request.user.id) == int(user_id):
 
@@ -142,13 +148,13 @@ def user_detail(request, user_id):
         social_account = SocialAccount.objects.get(user_id=user_id, provider='google')
 
         user_details = {
-            'date_joined':  user.date_joined,
-            'email':        user.email,
-            'extra_data':   social_account.extra_data,
-            'first_name':   user.first_name,
-            'id':           user.id,
-            'last_login':   user.last_login,
-            'last_name':    user.last_name
+            'date_joined': user.date_joined,
+            'email': user.email,
+            'extra_data': social_account.extra_data,
+            'first_name': user.first_name,
+            'id': user.id,
+            'last_login': user.last_login,
+            'last_name': user.last_name
         }
 
         user_details['gcp_list'] = len(GoogleProject.objects.filter(user=user))
@@ -166,9 +172,10 @@ def user_detail(request, user_id):
     else:
         return render(request, '403.html')
 
+
 @login_required
 def bucket_object_list(request):
-    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
+    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     credentials = GoogleCredentials.get_application_default()
     service = discovery.build('storage', 'v1', credentials=credentials, cache_discovery=False)
 
@@ -183,7 +190,6 @@ def bucket_object_list(request):
 
 # Extended login view so we can track user logins
 def extended_login_view(request):
-
     try:
         # Write log entry
         st_logger = StackDriverLogger.build_from_django_settings()
@@ -191,7 +197,8 @@ def extended_login_view(request):
         user = User.objects.get(id=request.user.id)
         st_logger.write_text_log_entry(
             log_name,
-            "[WEBAPP LOGIN] User {} logged in to the web application at {}".format(user.email, datetime.datetime.utcnow())
+            "[WEBAPP LOGIN] User {} logged in to the web application at {}".format(user.email,
+                                                                                   datetime.datetime.utcnow())
         )
 
     except Exception as e:
@@ -203,9 +210,10 @@ def extended_login_view(request):
 '''
 Returns page users see after signing in
 '''
+
+
 @login_required
 def user_landing(request):
-
     directory_service, http_auth = get_directory_resource()
     user_email = User.objects.get(id=request.user.id).email
     # add user to isb-cgc-open if they are not already on the group
@@ -222,7 +230,7 @@ def user_landing(request):
     except HttpError as e:
         logger.info(e)
 
-    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
+    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     # check to see if user has read access to 'All TCGA Data' cohort
     isb_superuser = User.objects.get(username='isb')
     superuser_perm = Cohort_Perms.objects.get(user=isb_superuser)
@@ -234,7 +242,8 @@ def user_landing(request):
 
     users = User.objects.filter(is_superuser=0)
     cohort_perms = Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True)
-    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved').annotate(num_cases=Count('samples__case_barcode'))
+    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved').annotate(
+        num_cases=Count('samples__case_barcode'))
 
     for item in cohorts:
         item.perm = item.get_perm(request).get_perm_display()
@@ -270,12 +279,15 @@ def user_landing(request):
                                                             'base_api_url': settings.BASE_API_URL
                                                             })
 
+
 '''
 DEPRECATED - Returns Results from text search
 '''
+
+
 @login_required
 def search_cohorts_viz(request):
-    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
+    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     q = request.GET.get('q', None)
     result_obj = {
         'q': q
@@ -305,6 +317,7 @@ def search_cohorts_viz(request):
         result_obj['visualizations'] = list
     return HttpResponse(json.dumps(result_obj), status=200)
 
+
 # get_image_data which allows for URI arguments, falls through to get_image_data(request, slide_barcode)
 def get_image_data_args(request):
     file_uuid = None
@@ -318,13 +331,14 @@ def get_image_data_args(request):
 
     return get_image_data(request, file_uuid)
 
+
 # Given a slide_barcode, returns image metadata in JSON format
 def get_image_data(request, file_uuid):
-    status=200
+    status = 200
     result = {}
 
     if not file_uuid:
-        status=503
+        status = 503
         result = {
             'message': "There was an error while processing this request: a valid file UUID was not supplied."
         }
@@ -350,7 +364,9 @@ def get_image_data(request, file_uuid):
                     'sample-barcode': query_results[0]['f'][6]['v'],
                     'case-barcode': query_results[0]['f'][7]['v'],
                     'file-uuid': query_results[0]['f'][8]['v'],
-                    'img-type': ('Diagnostic Image' if query_results[0]['f'][0]['v'].split("-")[-1].startswith("DX") else 'Tissue Slide Image' if query_results[0]['f'][0]['v'].split("-")[-1].startswith("TS") else "N/A")
+                    'img-type': ('Diagnostic Image' if query_results[0]['f'][0]['v'].split("-")[-1].startswith(
+                        "DX") else 'Tissue Slide Image' if query_results[0]['f'][0]['v'].split("-")[-1].startswith(
+                        "TS") else "N/A")
                 }
 
                 sample_metadata = get_sample_metadata(result['sample-barcode'])
@@ -364,6 +380,46 @@ def get_image_data(request, file_uuid):
 
         except Exception as e:
             logger.error("[ERROR] While attempting to retrieve image data for {}:".format(file_uuid))
+            logger.exception(e)
+            status = '503'
+            result = {
+                'message': "There was an error while processing this request."
+            }
+
+    return JsonResponse(result, status=status)
+
+
+def get_tbl_preview(request, proj_id, dataset_id, table_id):
+    status = 200
+    MAX_ROW = 8
+    if not proj_id or not dataset_id or not table_id:
+        status = 503
+        result = {
+            'message': "There was an error while processing this request: one or more required parameters (project id, dataset_id or table_id) were not supplied."
+        }
+    else:
+        try:
+            bq_service = get_bigquery_service()
+            response = bq_service.tabledata().list(projectId=proj_id, datasetId=dataset_id, tableId=table_id,
+                                                   maxResults=MAX_ROW).execute()
+            if response and int(response['totalRows']) > 0:
+                result = {
+                    'rows': response['rows']
+                }
+            else:
+                result = {
+                    'msg': 'No record has been found for table { proj_id }{ dataset_id }{ table_id }.'.format(
+                        proj_id=proj_id,
+                        dataset_id=dataset_id,
+                        table_id=table_id)
+                }
+
+        except Exception as e:
+            logger.error(
+                "[ERROR] While attempting to retrieve preview data for { proj_id }{ dataset_id }{ table_id } table.".format(
+                    proj_id=proj_id,
+                    dataset_id=dataset_id,
+                    table_id=table_id))
             logger.exception(e)
             status = '503'
             result = {
@@ -405,7 +461,7 @@ def camic(request, file_uuid=None):
 
 @login_required
 def igv(request, sample_barcode=None, readgroupset_id=None):
-    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
+    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
 
     readgroupset_list = []
     bam_list = []
@@ -438,7 +494,8 @@ def path_report(request, report_file=None):
 
     try:
         if not path_report:
-            messages.error("Error while attempting to display this pathology report: a report file name was not provided.")
+            messages.error(
+                "Error while attempting to display this pathology report: a report file name was not provided.")
             return redirect(reverse('cohort_list'))
 
         response = requests.get("https://nci-crdc.datacommons.io/user/data/download/{}?protocol=gs".format(report_file))
@@ -479,13 +536,27 @@ def vid_tutorials_page(request):
     return render(request, 'GenespotRE/video_tutorials.html')
 
 
+def bq_meta_search(request):
+    bq_filter_file_name = 'bq_meta_filters.json'
+    bq_filter_file_path = BQ_ECOSYS_BUCKET + bq_filter_file_name
+    bq_filters = requests.get(bq_filter_file_path).json()
+    return render(request, 'GenespotRE/bq_meta_search.html', bq_filters)
+
+def bq_meta_data(request):
+    bq_meta_data_file_name = 'bq_meta_data.json'
+    bq_meta_data_file_path = BQ_ECOSYS_BUCKET + bq_meta_data_file_name
+    bq_meta_data = requests.get(bq_meta_data_file_path).json()
+    return JsonResponse(bq_meta_data, safe=False)
+
+
 @login_required
 def dashboard_page(request):
-
     # Cohort List
     isb_superuser = User.objects.get(username='isb')
-    public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
-    cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
+    public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser, perm=Cohort_Perms.OWNER).values_list('cohort',
+                                                                                                          flat=True)
+    cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(
+        cohort__id__in=public_cohorts)))
     cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
 
     # Program List
@@ -541,12 +612,12 @@ def dashboard_page(request):
     varfaves = request.user.variablefavorite_set.filter(active=True)
 
     return render(request, 'GenespotRE/dashboard.html', {
-        'request'  : request,
-        'cohorts'  : cohorts,
-        'programs' : programs,
+        'request': request,
+        'cohorts': cohorts,
+        'programs': programs,
         'workbooks': workbooks,
         'genefaves': genefaves,
-        'varfaves' : varfaves,
+        'varfaves': varfaves,
         # 'notebook_vm': notebook_vm,
         # 'gcp_list': gcp_list,
     })
