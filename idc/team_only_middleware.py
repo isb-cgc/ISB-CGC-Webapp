@@ -23,6 +23,9 @@ from functools import reduce
 import re
 
 
+# Requires:
+# RESTRICT_ACCESS: boolean, toggles checking of access privs; note that the default of RESTRICT_ACCESS is **True**
+# RESTRICTED_ACCESS_GROUPS: string list, names of user groups to allow access; access is OR'd (only one required)
 class TeamOnly(object):
 
     def __init__(self, get_response):
