@@ -48,7 +48,7 @@ mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL
 echo "Running Migrations..."
 python3 ${HOMEROOT}/manage.py migrate --noinput
 
-# If the ISB superuser isn't present already, they need to be added.
+# If the IDC superuser isn't present already, they need to be added.
 # echo "Creating idc Django superuser..."
 # echo "from django.contrib.auth.models import User; User.objects.create_superuser('${SUPERUSER_USERNAME}', '', '${SUPERUSER_PASSWORD}')" | python3 ${HOMEROOT}/manage.py shell
 

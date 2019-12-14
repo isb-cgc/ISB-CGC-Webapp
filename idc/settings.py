@@ -45,7 +45,15 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
 
-print("[STATUS] DEBUG mode is "+str(DEBUG), file=sys.stdout)
+print("[STATUS] DEBUG mode is {}".format(str(DEBUG)), file=sys.stdout)
+
+RESTRICT_ACCESS = (os.environ.get('RESTRICT_ACCESS', 'True') == 'True')
+RESTRICTED_ACCESS_GROUPS = os.environ.get('RESTRICTED_ACCESS_GROUPS', '').split(',')
+
+if RESTRICT_ACCESS:
+    print("[STATUS] Access to the site is restricted to members of the {} group(s).".format(", ".join(RESTRICTED_ACCESS_GROUPS)), file=sys.stdout)
+else:
+    print("[STATUS] Access to the site is NOT restricted!", file=sys.stdout)
 
 # Theoretically Nginx allows us to use '*' for ALLOWED_HOSTS but...
 ALLOWED_HOSTS = list(set(os.environ.get('ALLOWED_HOST', 'localhost').split(',') + ['localhost', '127.0.0.1', '[::1]', gethostname(), gethostbyname(gethostname()),]))
@@ -261,6 +269,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'adminrestrict.middleware.AdminPagesRestrictMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'idc.team_only_middleware.TeamOnly',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'offline.middleware.OfflineMiddleware',
@@ -501,17 +510,8 @@ SITE_GOOGLE_ANALYTICS_TRACKING_ID = os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKI
 # number should be adjusted
 MAX_FILE_LIST_REQUEST = 65000
 
-# IGV limit to prevent users from trying ot open dozens of files
-MAX_FILES_IGV = 5
-
 # Rough max file size to allow for eg. barcode list upload, to revent triggering RequestDataTooBig
 FILE_SIZE_UPLOAD_MAX = 1950000
-
-#################################
-# caMicroscope Viewer settings
-#################################
-CAMIC_VIEWER = os.environ.get('CAMIC_VIEWER', None)
-IMG_THUMBS_URL = os.environ.get('IMG_THUMBS_URL', None)
 
 #################################
 # DICOM Viewer settings

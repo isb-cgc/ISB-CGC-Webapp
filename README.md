@@ -12,7 +12,7 @@ The system uses [Vagrant](https://www.vagrantup.com/) to setup a consistent, pla
 
 From there perform the following steps...
 
- 1. Once you've installed PyCharm and cloned the repositories, create a directory within the `PycharmProjects` directory (the parent directory of your repositories) called `secure_files/`.
+ 1. Once you've installed PyCharm and cloned the repositories, create a directory within the `PycharmProjects` directory (the parent directory of your repositories) called `secure_files/`. (Note: if you are developing on more than one project, you may wish to further divide secure_files into `secure_files/idc`.)
  2. Copy the `sample.env` file to a file named `.env` in `secure_files/`
  3. Fill out the `.env` file with the proper values
    * For most **development** environments, `MYSQL_ROOT_PASSWORD` and `DATABASE_PASSWORD` can be the same, and `DATABASE_USER` can be `root`
@@ -35,11 +35,11 @@ PyCharm Pro can be used to run your Web Application as a native Django applicati
  7. Click Ok to save
  10. Go to **Run > Edit Configurations**
  11. If there is not a Django Configuration, add one
- 12. Set the host to `0.0.0.0`
+ 12. Set the host to `0.0.0.0` and the port to `8085`.
  13. Set the Python Interpreter to the Vagrant Machine (if it is not set to that already)
  14. Set the working directory to `/home/vagrant/www`
  15. Click `...` next to the `Environment variables:`, box and add the following values:
-     `SECURE_LOCAL_PATH = ../parentDir/secure_files/idc/`
+     `SECURE_LOCAL_PATH = ../parentDir/secure_files`
      `PYTHONPATH = /home/vagrant/www:/home/vagrant/www/lib:/home/vagrant/www/IDC-Common`
      `DJANGO_SETTINGS_MODULE = idc.settings`
      `PYTHONUNBUFFERED = 1`

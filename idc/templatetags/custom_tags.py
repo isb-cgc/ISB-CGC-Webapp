@@ -24,12 +24,16 @@ import json
 import re
 import textwrap
 
-from django.template.defaulttags import register
+from django import template
 from cohorts.models import Cohort, Cohort_Perms
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from idc_collections.models import Program
+from django.db.models import Q
+from functools import reduce
 import logging
+
+register = template.Library()
 
 logger = logging.getLogger('main_logger')
 
@@ -196,6 +200,16 @@ def has_user_data(programs):
 def is_superuser(this_user):
     idc_superuser = User.objects.get(username='idc')
     return this_user.id == idc_superuser.id
+
+
+@register.simple_tag(takes_context=True)
+def is_allowed(context, this_user):
+    return (
+        not context['RESTRICTED_ACCESS'] or (
+            context['RESTRICTED_ACCESS'] and this_user.is_authenticated() and this_user.groups.filter(
+                reduce(lambda q, g: q | Q(name__icontains=g), context['RESTRICTED_ACCESS_GROUPS'], Q())
+            ).exists()
+    ))
 
 
 @register.filter

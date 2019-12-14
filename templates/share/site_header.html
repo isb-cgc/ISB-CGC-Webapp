@@ -4,13 +4,14 @@
 {% load idc_collections_custom_tags %}
 
 <header class="navbar navbar-fixed-top site-header" role="menubar">
+    {% is_allowed user as has_access %}
     <nav class="container">
         <div class="row">
             <div class="col-lg-12">
             <div class="nav navbar-left">
                 <ul class="">
                     <li class="navbar-item">
-                        {% if user.is_authenticated %}
+                        {% if user.is_authenticated and has_access %}
                              <a href="{% url 'dashboard' %}" title="Dashboard" >
                         {%  else %}
                             <a href="{% url 'landing_page' %}" title="Home Page" >
@@ -51,17 +52,19 @@
                                 {{ user.first_name }} <i class="fa fa-caret-down"></i>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-label="user-dropdown">
-                                <li role="menuitem"><a href="{% url 'user_detail' user.id %}">Account Details <i class="fa fa-cog"></i></a></li>
+                                {% if has_access %}<li role="menuitem"><a href="{% url 'user_detail' user.id %}">Account Details <i class="fa fa-cog"></i></a></li>{% endif %}
                                 <li role="menuitem"><a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out">Sign Out <i class="fa fa-sign-out"></i></a></li>
                             </ul>
                         </div>
                     </div>
+                    {% if has_access %}
                     <div class="navbar-item">
                         <a type="button" class="navbar-item__text lines-button x collapsed" data-toggle="collapse" data-target="#subnav" aria-expanded="false" aria-controls="subnav">
                             <span class="lines"></span>
                             Menu
                         </a>
                     </div>
+                    {% endif %}
                 {% else %}
                     <div id="user-login" class="navbar-form inline-block">
                         <!-- same thing as /accounts/login-->
@@ -101,7 +104,6 @@
                             <li class="menu-item"><a href="{% url 'cohort_barcodes' %}">Barcodes</a></li>
                         </ul>
                     </li>
-                    <li class="menu-item"><a href="{% url 'cohort_select_for_new_workbook' %}">Select Cohort for a New Workbook</a></li>
                 </ul>
             </li>
         </ul>
