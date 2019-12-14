@@ -142,12 +142,7 @@ def user_detail(request, user_id):
             'last_name':    user.last_name
         }
 
-        user_details['gcp_list'] = 0
-
         forced_logout = 'dcfForcedLogout' in request.session
-        nih_details = get_nih_user_details(user_id, forced_logout)
-        for key in list(nih_details.keys()):
-            user_details[key] = nih_details[key]
 
         return render(request, 'idc/user_detail.html',
                       {'request': request,
