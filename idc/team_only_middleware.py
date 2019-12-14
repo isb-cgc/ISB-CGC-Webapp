@@ -16,9 +16,12 @@
 
 from builtins import object
 from django.contrib import messages
+from django.db.models import Q
 from django.shortcuts import redirect
 from django.conf import settings
+from functools import reduce
 import re
+
 
 class TeamOnly(object):
 
@@ -26,11 +29,18 @@ class TeamOnly(object):
         self.get_response = get_response
 
     def __call__(self, request):
-
         if settings.RESTRICT_ACCESS:
-            if request.path != '/' and not re.match('/?accounts(/google)?/logout/?.*', request.path, re.I):
-                if request.user and not request.user.groups.filter(name="idc_team").exists():
-                    messages.error(request, "Only IDC Team members may access the development server.")
+            # Allow access to the landing page, and Google logins, because otherwise we'll have no idea who
+            # this even is.
+            if request.path != '/' and not re.match('/?accounts(/google)?/log(out|in)/?.*', request.path, re.I):
+                if request.user.is_authenticated() and not request.user.groups.filter(
+                        reduce(lambda q, g: q | Q(name__icontains=g), settings.RESTRICTED_ACCESS_GROUPS, Q())
+                ).exists():
+                    messages.warning(
+                        request, "Only members of the {} group{} may access the development server.".format(
+                            ", ".join(settings.RESTRICTED_ACCESS_GROUPS),
+                            "s" if len(settings.RESTRICTED_ACCESS_GROUPS) > 1 else '')
+                    )
                     return redirect('landing_page')
 
         response = self.get_response(request)

@@ -48,9 +48,10 @@ DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
 print("[STATUS] DEBUG mode is {}".format(str(DEBUG)), file=sys.stdout)
 
 RESTRICT_ACCESS = (os.environ.get('RESTRICT_ACCESS', 'True') == 'True')
+RESTRICTED_ACCESS_GROUPS = os.environ.get('RESTRICTED_ACCESS_GROUPS', '').split(',')
 
 if RESTRICT_ACCESS:
-    print("[STATUS] Access to the site is restricted to team members!", file=sys.stdout)
+    print("[STATUS] Access to the site is restricted to members of the {} group(s).".format(", ".join(RESTRICTED_ACCESS_GROUPS)), file=sys.stdout)
 else:
     print("[STATUS] Access to the site is NOT restricted!", file=sys.stdout)
 
