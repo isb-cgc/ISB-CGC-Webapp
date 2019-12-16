@@ -520,7 +520,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                     .attr('style', function(d){
                         var scale_ratio_2  = 1 - Math.floor(d.length/20) * 0.1; // Decrease font size if label text is too long (>28)
                         return 'font-size:'+(scale_ratio*tick_font_size*scale_ratio_2)+'px; transform: translate(-' + margin.left * 0.75 + 'px, -' + y.rangeBand() / 2 + 'px);'
-                    })
+                    });
                 svg.select('.y.axis')
                     .selectAll('foreignObject div')
                     .attr('title', function(d){ return d; })
@@ -547,6 +547,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                         $('.worksheet.active .save-cohort-form input[name="samples"]').attr('value', "");
                         selectedCubbies = {};
                         selectedSamples = null;
+                        sample_form_update(true);
                         svg.selectAll('.selected').classed('selected', false);
                         $('.worksheet.active .save-cohort-card').hide();
                     }

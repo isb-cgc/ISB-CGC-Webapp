@@ -248,7 +248,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     .x(x2)
                     .on('brushstart', function (d) {
                         var e = brush.extent();
-                        if(!e){
+                        if(e){
                             selectedValues = {};
                             selectedSamples = null;
                             sample_form_update(e, true);
