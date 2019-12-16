@@ -74,7 +74,7 @@ if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
         sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/deployment.key.json
     # otherwise just use privatekey.json
     else
-        sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/privatekey.json
+        sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/../parentDir/secure_files/oskt_privatekey.json
         sudo gcloud config set project "${GCLOUD_PROJECT_NAME}"
     fi
     echo "Downloading SQL Table File..."
