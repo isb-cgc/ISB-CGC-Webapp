@@ -421,9 +421,9 @@ def data_access_for_plot(request):
         valid_features = get_feature_id_validity_for_array(feature_ids_to_check)
 
         for feature_id, is_valid in valid_features:
-            logging.info((feature_id, is_valid))
+            logger.info((feature_id, is_valid))
             if not is_valid:
-                logging.error("Invalid internal feature ID '{}'".format(feature_id))
+                logger.error("Invalid internal feature ID '{}'".format(feature_id))
                 raise Exception('Feature Not Found')
 
         # Get the project IDs these cohorts' samples come from

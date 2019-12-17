@@ -125,7 +125,7 @@ class GEXPDataQueryHandler(object):
                                       cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt,
                                       brk='\n')
 
-        logging.debug("BQ_QUERY_GEXP: " + query)
+        logger.debug("BQ_QUERY_GEXP: " + query)
         return query
 
     def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):

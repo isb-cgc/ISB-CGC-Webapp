@@ -143,7 +143,7 @@ class CNVRDataQueryHandler(object):
                                       cohort_id_list=cohort_id_stmt,
                                       brk='\n')
 
-        logging.debug("BQ_QUERY_CNVR: " + query)
+        logger.debug("BQ_QUERY_CNVR: " + query)
         return query, [table_config.table_id.split(":")[-1]], True
 
     def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):

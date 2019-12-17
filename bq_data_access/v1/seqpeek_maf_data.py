@@ -62,7 +62,7 @@ class SeqPeekDataProvider(GNABFeatureProvider):
                                       cohort_dataset=cohort_dataset, cohort_table=cohort_table,
                                       cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
 
-        logging.debug("BQ_QUERY_SEQPEEK: " + query)
+        logger.debug("BQ_QUERY_SEQPEEK: " + query)
         return query
 
     @DurationLogged('SEQPEEK_GNAB', 'UNPACK')
@@ -81,7 +81,7 @@ class SeqPeekDataProvider(GNABFeatureProvider):
                 'uniprot_id': row['f'][6]['v'],
             })
 
-        logging.debug("Query result is {qrows} rows, skipped {skipped} rows".format(qrows=len(query_result_array),
+        logger.debug("Query result is {qrows} rows, skipped {skipped} rows".format(qrows=len(query_result_array),
                                                                                     skipped=skip_count))
         return result
 

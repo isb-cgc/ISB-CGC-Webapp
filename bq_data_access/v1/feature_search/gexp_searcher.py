@@ -74,7 +74,7 @@ class GEXPSearcher(object):
         # Format the keyword for MySQL string matching
         sql_keyword = '%' + keyword + '%'
         query_args = [sql_keyword, FOUND_FEATURE_LIMIT]
-        logging.debug("CLOUDSQL_QUERY_GEXP_FIELDS: {}".format(query))
+        logger.debug("CLOUDSQL_QUERY_GEXP_FIELDS: {}".format(query))
 
         try:
             db = get_sql_connection()
@@ -122,7 +122,7 @@ class GEXPSearcher(object):
                 ' AND generating_center LIKE %s'\
                 ' LIMIT %s'.format(table_name=self.get_table_name()
         )
-        logging.debug("CLOUDSQL_QUERY_GEXP_SEARCH: {}".format(query))
+        logger.debug("CLOUDSQL_QUERY_GEXP_SEARCH: {}".format(query))
 
         # Fills in '' for fields that were not specified in the parameters
         input = defaultdict(lambda: '', parameters)

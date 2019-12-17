@@ -49,7 +49,7 @@ class InvalidUserFeatureIDException(Exception):
 
 class UserFeatureDef(object):
     def __init__(self, bq_table, column_name, project_id, is_numeric, filters):
-        logging.debug(str([bq_table, column_name, project_id, is_numeric, filters]))
+        logger.debug(str([bq_table, column_name, project_id, is_numeric, filters]))
         self.bq_table = bq_table
         self.column_name = column_name
         self.project_id = project_id
@@ -80,7 +80,7 @@ class UserFeatureDef(object):
 
     @classmethod
     def from_user_feature_id(cls, feature_id):
-        logging.debug("UserFeatureDef.from_user_feature_id {0}".format(str([feature_id])))
+        logger.debug("UserFeatureDef.from_user_feature_id {0}".format(str([feature_id])))
         # ID breakdown: project ID:Feature ID
         # Example ID: USER:1:6
         regex = re_compile("^USER:"
@@ -131,7 +131,7 @@ class UserFeatureDef(object):
         if bq_table is None or column_name is None:
             raise FeatureNotFoundException(feature_id)
 
-        logging.debug("{0} {1} {2}".format(bq_table, column_name, symbol))
+        logger.debug("{0} {1} {2}".format(bq_table, column_name, symbol))
 
         filters = None
         if symbol is not None:
@@ -143,7 +143,7 @@ class UserFeatureDef(object):
 
     @classmethod
     def from_feature_id(cls, feature_id, project_id=None):
-        logging.debug("UserFeatureDef.from_feature_id: {0}".format(str([feature_id, project_id])))
+        logger.debug("UserFeatureDef.from_feature_id: {0}".format(str([feature_id, project_id])))
         if feature_id is None:
             raise FeatureNotFoundException(feature_id)
         # ID breakdown: project ID:Feature ID
@@ -251,7 +251,7 @@ class UserFeatureProvider(FeatureDataProvider):
             cursor.close()
             db.close()
 
-            logging.debug("UserFeatureProvider.convert_user_feature_id {0} -> {1}".format(feature_id, bq_id))
+            logger.debug("UserFeatureProvider.convert_user_feature_id {0} -> {1}".format(feature_id, bq_id))
             return bq_id
 
         except Exception as e:
@@ -323,7 +323,7 @@ class UserFeatureProvider(FeatureDataProvider):
         # (query n)
         #
         query = ' , '.join(['(' + query + ')' for query in queries])
-        logging.info("BQ_QUERY_USER: " + query)
+        logger.info("BQ_QUERY_USER: " + query)
         return query
 
     def unpack_value_from_row_with_feature_def(self, row):
@@ -395,10 +395,10 @@ class UserFeatureProvider(FeatureDataProvider):
 
     def parse_internal_feature_id(self, feature_id, user_feature_id=None):
         if user_feature_id is None or user_feature_id is '':
-            logging.debug("UserFeatureProvider.parse_internal_feature_id - feature_id: {0}".format(feature_id))
+            logger.debug("UserFeatureProvider.parse_internal_feature_id - feature_id: {0}".format(feature_id))
             self.feature_defs = UserFeatureDef.from_feature_id(feature_id)
         else:
-            logging.debug("UserFeatureProvider.parse_internal_feature_id - user_feature_id: {0}".format(user_feature_id))
+            logger.debug("UserFeatureProvider.parse_internal_feature_id - user_feature_id: {0}".format(user_feature_id))
             self.feature_defs = UserFeatureDef.from_user_feature_id(user_feature_id)
 
         # Assign a unique identifier to all feature defs.

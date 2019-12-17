@@ -57,7 +57,7 @@ def run_query(project_id, provider, config):
         all_done = is_finished
         sleep(poll_sleep_time)
 
-    logging.debug("Done: {done}    retry: {retry}".format(done=str(all_done), retry=total_retries))
+    logger.debug("Done: {done}    retry: {retry}".format(done=str(all_done), retry=total_retries))
     query_result = provider.download_and_unpack_query_result()
 
     return query_result
@@ -91,7 +91,7 @@ def save_csv(data_rows, schema, csv_path, include_header=False):
 def print_query(data_type, config_json, chromosome_array):
 
     feature_type = FeatureDataTypeHelper.get_type(data_type)
-    logging.info("Feature type: {}".format(str(feature_type)))
+    logger.info("Feature type: {}".format(str(feature_type)))
     config_class = FeatureDataTypeHelper.get_feature_def_config_from_data_type(feature_type)
     provider_class = FeatureDataTypeHelper.get_feature_def_provider_from_data_type(feature_type)
 
@@ -121,7 +121,7 @@ def print_query(data_type, config_json, chromosome_array):
 @click.option('-chr', "chromosome_array", type=str, multiple=True, help="Chromosome (required for methylation)")
 def run(project_id, data_type, csv_path, config_json, chromosome_array):
     feature_type = FeatureDataTypeHelper.get_type(data_type)
-    logging.info("Feature type: {}".format(str(feature_type)))
+    logger.info("Feature type: {}".format(str(feature_type)))
     config_class = FeatureDataTypeHelper.get_feature_def_config_from_data_type(feature_type)
     provider_class = FeatureDataTypeHelper.get_feature_def_provider_from_data_type(feature_type)
 
@@ -139,8 +139,8 @@ def run(project_id, data_type, csv_path, config_json, chromosome_array):
 
     provider = provider_class(config_instance, chromosome_array=chromosome_array)
 
-    logging.info("Output CSV: {}".format(csv_path))
-    logging.info("Config: {}".format(str(config_instance)))
+    logger.info("Output CSV: {}".format(csv_path))
+    logger.info("Config: {}".format(str(config_instance)))
 
     result = run_query(project_id, provider, config_instance)
     save_csv(result, provider.get_mysql_schema(), csv_path, include_header=True)

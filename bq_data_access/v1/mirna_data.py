@@ -173,7 +173,7 @@ class MIRNFeatureProvider(FeatureDataProvider):
                                       cohort_dataset=cohort_dataset, cohort_table=cohort_table,
                                       cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
 
-        logging.debug("BQ_QUERY_MIRN: " + query)
+        logger.debug("BQ_QUERY_MIRN: " + query)
         return query
 
     @DurationLogged('MIRN', 'UNPACK')

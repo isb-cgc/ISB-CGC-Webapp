@@ -85,7 +85,7 @@ def submit_jobs_with_user_data(params_array):
         if len(user_data['user_studies']) > 0:
             converted_feature_id = user_data['converted_feature_id']
             user_feature_id = user_data['user_feature_id']
-            logging.debug("user_feature_id: {0}".format(user_feature_id))
+            logger.debug("user_feature_id: {0}".format(user_feature_id))
             provider = UserDataQueryHandler(converted_feature_id, user_feature_id=user_feature_id)
 
             # The UserDataQueryHandler instance might not generate a BigQuery query and job at all given the combination
@@ -94,7 +94,7 @@ def submit_jobs_with_user_data(params_array):
             if provider.is_queryable(cohort_id_array):
                 job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
 
-                logging.info("Submitted USER {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
+                logger.info("Submitted USER {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
                                                                                  cohorts=str(cohort_id_array)))
                 provider_array.append({
                     'feature_id': feature_id,
@@ -104,7 +104,7 @@ def submit_jobs_with_user_data(params_array):
                     'tables_used': job_reference['tables_queried']
                 })
             else:
-                logging.debug("No UserFeatureDefs for '{0}'".format(converted_feature_id))
+                logger.debug("No UserFeatureDefs for '{0}'".format(converted_feature_id))
 
     return provider_array
 

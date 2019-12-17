@@ -63,7 +63,7 @@ class FeatureProviderFactory(object):
         """
         feature_type = cls.get_feature_type_string(feature_id)
         if feature_type is None:
-            logging.debug("FeatureProviderFactory.from_feature_id: invalid feature ID: " + str(feature_id))
+            logger.debug("FeatureProviderFactory.from_feature_id: invalid feature ID: " + str(feature_id))
             raise FeatureNotFoundException(feature_id)
 
         if feature_type == CLINICAL_FEATURE_TYPE:
@@ -177,7 +177,7 @@ def submit_tcga_job(param_obj, bigquery_service, cohort_settings):
     project_id_array = param_obj.project_id_array
     job_description = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id, project_id_array)
 
-    logging.info("Submitted TCGA {job_id}: {fid} - {cohorts}".format(job_id=job_description['job_reference']['jobId'], fid=feature_id,
+    logger.info("Submitted TCGA {job_id}: {fid} - {cohorts}".format(job_id=job_description['job_reference']['jobId'], fid=feature_id,
                                                                              cohorts=str(cohort_id_array)))
     job_item = {
         'feature_id': feature_id,
@@ -210,7 +210,7 @@ def submit_jobs_with_user_data(params_array):
         if len(user_data['user_studies']) > 0:
             converted_feature_id = user_data['converted_feature_id']
             user_feature_id = user_data['user_feature_id']
-            logging.debug("user_feature_id: {0}".format(user_feature_id))
+            logger.debug("user_feature_id: {0}".format(user_feature_id))
             provider = UserFeatureProvider(converted_feature_id, user_feature_id=user_feature_id)
 
             # The UserFeatureProvider instance might not generate a BigQuery query and job at all given the combination
@@ -219,7 +219,7 @@ def submit_jobs_with_user_data(params_array):
             if provider.is_queryable(cohort_id_array):
                 job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
 
-                logging.info("Submitted USER {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
+                logger.info("Submitted USER {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
                                                                                  cohorts=str(cohort_id_array)))
                 provider_array.append({
                     'feature_id': feature_id,
@@ -228,7 +228,7 @@ def submit_jobs_with_user_data(params_array):
                     'job_reference': job_reference
                 })
             else:
-                logging.debug("No UserFeatureDefs for '{0}'".format(converted_feature_id))
+                logger.debug("No UserFeatureDefs for '{0}'".format(converted_feature_id))
 
     return provider_array
 
@@ -251,7 +251,7 @@ def get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip
             provider = item['provider']
             feature_id = item['feature_id']
             is_finished = provider.is_bigquery_job_finished(project_id)
-            logging.info("Status {job_id}: {status}".format(job_id=item['job_reference']['jobId'],
+            logger.info("Status {job_id}: {status}".format(job_id=item['job_reference']['jobId'],
                                                             status=str(is_finished)))
 
             if item['ready'] is False and is_finished:
@@ -281,7 +281,7 @@ def get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip
             sleep(1)
 
         all_done = all([j['ready'] for j in provider_array])
-        logging.debug("Done: {done}    retry: {retry}".format(done=str(all_done), retry=total_retries))
+        logger.debug("Done: {done}    retry: {retry}".format(done=str(all_done), retry=total_retries))
 
     return result
 

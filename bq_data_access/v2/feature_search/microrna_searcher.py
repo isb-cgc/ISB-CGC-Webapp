@@ -16,7 +16,8 @@
 
 from builtins import str
 from builtins import object
-import logging as logger
+import logging
+logger = logging.getLogger('main_log')
 from collections import defaultdict
 from copy import deepcopy
 

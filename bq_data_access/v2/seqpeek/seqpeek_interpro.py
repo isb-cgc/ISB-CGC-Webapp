@@ -41,7 +41,7 @@ class InterProDataProvider(object):
             table_id=self.data_source_config.interpro_reference_table_id,
             ensg_id=ensg_id
         )
-        logging.debug("INTERPRO SQL: " + query)
+        logger.debug("INTERPRO SQL: " + query)
         return query
 
     def do_query(self, project_id, ensg_id):

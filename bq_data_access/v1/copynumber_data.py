@@ -57,7 +57,7 @@ class CNVRFeatureDef(object):
         feature_fields = cls.regex.findall(feature_id)
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
-        logging.debug(feature_fields)
+        logger.debug(feature_fields)
         value_field, chromosome, start, end = feature_fields[0]
 
         valid_chr_set = frozenset([str(x) for x in range(1, 24)] + ['X', 'Y', 'M'])
@@ -129,7 +129,7 @@ class CNVRFeatureProvider(FeatureDataProvider):
                                       cohort_dataset=cohort_dataset, cohort_table=cohort_table,
                                       cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
 
-        logging.debug("BQ_QUERY_CNVR: " + query)
+        logger.debug("BQ_QUERY_CNVR: " + query)
         return query
 
     @DurationLogged('CNVR', 'UNPACK')

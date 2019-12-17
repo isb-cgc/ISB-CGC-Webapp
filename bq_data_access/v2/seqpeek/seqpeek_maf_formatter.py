@@ -108,7 +108,7 @@ class SeqPeekMAFDataFormatter(object):
             else:
                 removed_stats[row[TYPE_FIELD_NAME]] += 1
 
-        logging.debug("SeqPeek MAF filtered rows: {0}, total: {1}".format(len(result), len(data)))
+        logger.debug("SeqPeek MAF filtered rows: {0}, total: {1}".format(len(result), len(data)))
         return result, removed_stats
 
     def get_cohort_information(self, cohort_id_array):

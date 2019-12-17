@@ -122,7 +122,7 @@ class GNABFeatureProvider(FeatureDataProvider):
                                       cohort_dataset=cohort_dataset, cohort_table=cohort_table,
                                       cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
 
-        logging.debug("BQ_QUERY_GNAB: " + query)
+        logger.debug("BQ_QUERY_GNAB: " + query)
         return query
 
     @DurationLogged('GNAB', 'UNPACK')
