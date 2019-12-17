@@ -17,8 +17,7 @@
 from builtins import str
 from builtins import object
 from re import compile as re_compile
-import logging
-logger = logging.getLogger('main_log')
+import logging as logger
 
 from bq_data_access.v2.errors import FeatureNotFoundException
 

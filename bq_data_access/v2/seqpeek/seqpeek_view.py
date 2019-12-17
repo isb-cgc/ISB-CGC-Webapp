@@ -213,7 +213,7 @@ class SeqPeekViewDataBuilder(object):
         # it will be sanity-checked in the SeqPeekMAFDataAccess instance.
         uniprot_id = find_uniprot_id(filtered_maf_vector)
 
-        logger.info("UniProt ID: " + str(uniprot_id))
+        logging.info("UniProt ID: " + str(uniprot_id))
         protein_data = get_protein_domains(uniprot_id)
         track_data = build_track_data(track_id_list, filtered_maf_vector)
 

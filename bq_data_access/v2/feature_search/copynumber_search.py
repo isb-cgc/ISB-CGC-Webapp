@@ -16,8 +16,8 @@
 
 from builtins import str
 from builtins import object
-import logging
-logger = logging.getLogger('main_log')
+import logging as logger
+
 from MySQLdb.cursors import DictCursor
 from _mysql_exceptions import MySQLError
 

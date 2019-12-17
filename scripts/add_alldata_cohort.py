@@ -495,7 +495,7 @@ def get_existing_alldata_cohort_mysql(conn, cohort_name):
 WARNING: MAKE SURE TO RUN manage.py createsuperuser FIRST WITH USERNAME=isb AND AN EMAIL ADDRESS
 '''
 def get_superuser_id(conn, superuser_name):
-    logger.info("Querying superuser ID for \'{name}\'".format(name=superuser_name))
+    logging.info("Querying superuser ID for \'{name}\'".format(name=superuser_name))
     cursor = conn.cursor(DictCursor)
     cursor.execute('select id from auth_user where username=%s', [superuser_name])
     result = cursor.fetchone()
@@ -507,7 +507,7 @@ def get_superuser_id(conn, superuser_name):
 
 
 def get_sample_barcodes(conn):
-    logger.info("Getting list of sample barcodes from MySQL")
+    logging.info("Getting list of sample barcodes from MySQL")
     cursor = conn.cursor(DictCursor)
     select_samples_str = """
       SELECT distinct ms.sample_barcode, ms.case_barcode, pp.id AS project_id
@@ -586,22 +586,22 @@ def insert_barcodes_mysql(conn, superuser_id, cohort_name, sample_barcodes):
         message = "Cohort \'{cohort_name}\', ID {cohort_id} already exists in MySQL. Quitting.".format(
             cohort_name=cohort_name, cohort_id=cohort_id['id']
         )
-        logger.error(message)
+        logging.error(message)
         exit(1)
 
-    logger.info("inserting new cohort")
+    logging.info("inserting new cohort")
 
     cursor = conn.cursor()
     cursor.execute(insert_cohort_str, insert_cohort_tuple)
     conn.commit()
 
     cohort_id = cursor.lastrowid
-    logger.info("MySQL cohort ID is " + str(cohort_id))
+    logging.info("MySQL cohort ID is " + str(cohort_id))
 
     sample_tuples = []
     for row in sample_barcodes:
         sample_tuples.append((row['sample_barcode'], str(cohort_id), row['case_barcode'], row['project_id']))
-    logger.info('Number of sample barcodes: {num_samples}'.format(num_samples=len(sample_tuples)))
+    logging.info('Number of sample barcodes: {num_samples}'.format(num_samples=len(sample_tuples)))
 
     cursor.executemany(insert_samples_str, sample_tuples)
 
@@ -658,7 +658,7 @@ def main():
 
     # create_tcga_cohorts_from_files('./tcga/')
     if args.cohort_id is None and not do_cloudsql:
-        logger.error("Cohort ID must be provided if 'cloudsql' operation is not performed.")
+        logging.error("Cohort ID must be provided if 'cloudsql' operation is not performed.")
         exit(1)
 
     if do_cloudsql:
@@ -666,10 +666,10 @@ def main():
 
         if not superuser_id:
             message = "Superuser \'{name}\' does not exist in MySQL. Quitting.".format(name=SUPERUSER_NAME)
-            logger.error(message)
+            logging.error(message)
             exit(1)
 
-        logger.info("Superuser ID: {sid}".format(sid=superuser_id))
+        logging.info("Superuser ID: {sid}".format(sid=superuser_id))
         cohort_id = insert_barcodes_mysql(conn, superuser_id, args.cohort_name, sample_barcodes)
 
     else:

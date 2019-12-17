@@ -98,7 +98,7 @@ def build_data_uri(hugo_symbol, cohort_id_array):
                '{cohort_id_params}'
 
     data_uri = template.format(hugo_symbol=hugo_symbol, cohort_id_params=cohort_id_params)
-    logger.debug("SeqPeek view data URI: " + data_uri)
+    logging.debug("SeqPeek view data URI: " + data_uri)
 
     return data_uri
 

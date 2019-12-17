@@ -117,7 +117,7 @@ class MIRNSearcher(object):
                 'AND value_field LIKE %s ' \
                 'LIMIT %s'.format(table_name=self.get_table_name()
         )
-        logger.debug(query)
+        logging.debug(query)
         # Fills in '' for fields that were not specified in the parameters
         input = defaultdict(lambda: '', parameters)
 

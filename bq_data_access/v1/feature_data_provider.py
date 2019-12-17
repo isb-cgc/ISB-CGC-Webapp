@@ -130,7 +130,7 @@ class FeatureDataProvider(object):
             'job_reference': self.job_reference,
             "tables_used": [table_name]
         }
-        logger.debug("JOBID {id}".format(id=query_job['jobReference']['jobId']))
+        logging.debug("JOBID {id}".format(id=query_job['jobReference']['jobId']))
 
         return job_description
 

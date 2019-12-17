@@ -135,7 +135,7 @@ class GEXPFeatureProvider(FeatureDataProvider):
                                       cohort_dataset=cohort_dataset, cohort_table=cohort_table,
                                       cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
 
-        logger.debug("BQ_QUERY_GEXP: " + query)
+        logging.debug("BQ_QUERY_GEXP: " + query)
         return query
 
     @DurationLogged('GEXP', 'UNPACK')

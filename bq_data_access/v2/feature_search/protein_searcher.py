@@ -18,8 +18,7 @@ from builtins import str
 from builtins import object
 from collections import defaultdict
 from copy import deepcopy
-import logging
-logger = logging.getLogger('main_log')
+import logging as logger
 
 from MySQLdb.cursors import DictCursor
 from _mysql_exceptions import MySQLError

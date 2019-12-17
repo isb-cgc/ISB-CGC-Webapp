@@ -110,7 +110,7 @@ def build_query(project_name, dataset_name, table_name, gene_symbol, value_field
                                   cohort_dataset=cohort_dataset, cohort_table=cohort_table,
                                   cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
 
-    logger.debug("BQ_QUERY_GEXP: " + query)
+    logging.debug("BQ_QUERY_GEXP: " + query)
     return query
 
 def do_query(project_id, project_name, dataset_name, table_name, gene_symbol, value_field,

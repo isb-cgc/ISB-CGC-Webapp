@@ -123,12 +123,12 @@ class FeatureDefBigqueryProvider(object):
         query_body = self.build_query(self.config)
         query_job = self.submit_bigquery_job(bigquery_service, project_id, query_body)
 
-        logger.info("query job: {}".format(str(query_job)))
+        logging.info("query job: {}".format(str(query_job)))
 
         # Poll for completion of the query
         self.job_reference = query_job['jobReference']
         job_id = query_job['jobReference']['jobId']
-        logger.info("JOBID {id}".format(id=job_id))
+        logging.info("JOBID {id}".format(id=job_id))
 
         return self.job_reference
 

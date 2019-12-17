@@ -141,7 +141,7 @@ class ClinicalFeatureProvider(FeatureDataProvider):
                                       cohort_dataset=cohort_dataset, cohort_table=cohort_table, cohort_project_name=cohort_project_name,
                                       cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
 
-        logger.debug("BQ_QUERY_CLIN: " + query)
+        logging.debug("BQ_QUERY_CLIN: " + query)
         return query
 
     @DurationLogged('CLIN', 'UNPACK')

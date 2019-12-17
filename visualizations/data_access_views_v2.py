@@ -220,7 +220,7 @@ def data_access_for_plot(request):
 
         for feature_id, is_valid in valid_features:
             if not is_valid:
-                logger.error("Invalid internal feature ID '{}'".format(feature_id))
+                logging.error("Invalid internal feature ID '{}'".format(feature_id))
                 raise Exception('Feature Not Found')
 
         # Gives the user data handler a chance to map e.g. "v2:USER:343:58901" to "v2:CLIN:case_barcode"

@@ -124,7 +124,7 @@ class DurationLogged(object):
         self.operation = operation
 
     def log(self, msg):
-        logger.info(msg)
+        logging.info(msg)
 
     def __call__(self, f):
         def wrapped_function(*args, **kwargs):

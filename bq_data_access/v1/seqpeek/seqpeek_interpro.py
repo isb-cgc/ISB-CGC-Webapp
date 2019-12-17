@@ -30,13 +30,13 @@ class SeqPeekMAFWithCohorts(object):
 
 class InterProDataProvider(object):
     def __init__(self):
-        logger.debug(__name__ + ".__init__")
+        logging.debug(__name__ + ".__init__")
 
     def build_query(self, project_name, uniprot_id):
         query_template = "SELECT * FROM [{project_name}:test.interpro_filtered] WHERE uniprot_id=\'{uniprot_id}\'"
 
         query = query_template.format(project_name=project_name, uniprot_id=uniprot_id)
-        logger.debug("INTERPRO SQL: " + query)
+        logging.debug("INTERPRO SQL: " + query)
         return query
 
     def do_query(self, project_id, project_name, uniprot_id):

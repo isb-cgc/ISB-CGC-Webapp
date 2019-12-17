@@ -48,7 +48,7 @@ class InvalidUserFeatureIDException(Exception):
 
 class UserFeatureDef(object):
     def __init__(self, bq_table, column_name, project_id, is_numeric, filters):
-        logger.debug(str([bq_table, column_name, project_id, is_numeric, filters]))
+        logging.debug(str([bq_table, column_name, project_id, is_numeric, filters]))
         self.bq_table = bq_table
         self.column_name = column_name
         self.project_id = project_id
@@ -83,7 +83,7 @@ class UserFeatureDef(object):
            This returns a *LIST* of one UserFeatureDef, unless it maps to a standard project ID. Then
            the list may have multiple entries.
          """
-        logger.debug("UserFeatureDef.from_user_feature_id {0}".format(str([feature_id])))
+        logging.debug("UserFeatureDef.from_user_feature_id {0}".format(str([feature_id])))
         # ID breakdown: project ID:Feature ID
         # Example ID: USER:1:6
         regex = re_compile(
@@ -137,7 +137,7 @@ class UserFeatureDef(object):
         if bq_table is None or column_name is None:
             raise FeatureNotFoundException(feature_id)
 
-        logger.debug("{0} {1} {2}".format(bq_table, column_name, symbol))
+        logging.debug("{0} {1} {2}".format(bq_table, column_name, symbol))
 
         filters = None
         if symbol is not None:
@@ -155,7 +155,7 @@ class UserFeatureDef(object):
            shared_id in the projects_user_feature_definitions entry).
            It returns a *LIST* of UserFeatureDefs
          """
-        logger.debug("UserFeatureDef.from_feature_id: {0}".format(str([feature_id, project_id])))
+        logging.debug("UserFeatureDef.from_feature_id: {0}".format(str([feature_id, project_id])))
         if feature_id is None:
             raise FeatureNotFoundException(feature_id)
         # ID breakdown: project ID:Feature ID
@@ -282,7 +282,7 @@ class UserDataQueryHandler(object):
             cursor.close()
             db.close()
 
-            logger.debug("UserFeatureDef.convert_user_feature_id {0} -> {1}".format(feature_id, bq_id))
+            logging.debug("UserFeatureDef.convert_user_feature_id {0} -> {1}".format(feature_id, bq_id))
             return bq_id
 
         except Exception as e:
@@ -359,7 +359,7 @@ class UserDataQueryHandler(object):
         # (query n)
         #
         query = ' , '.join(['(' + query + ')' for query in queries])
-        logger.info("BQ_QUERY_USER: " + query)
+        logging.info("BQ_QUERY_USER: " + query)
         return query, tables_queried, query  # Third arg resolves to True if a query got built. Will be empty if above loop appends nothing!
 
     def unpack_value_from_row_with_feature_def(self, row):
@@ -440,11 +440,11 @@ class UserDataQueryHandler(object):
         # it detects that the User feature ID extends a public project feature ID!
         #
         if user_feature_id is None or user_feature_id is '':
-            logger.debug("UserFeatureDef.parse_internal_feature_id -      feature_id: {0}".format(feature_id))
+            logging.debug("UserFeatureDef.parse_internal_feature_id -      feature_id: {0}".format(feature_id))
             self.feature_defs = UserFeatureDef.from_feature_id(feature_id)
         else:
             # This actually calls from_feature_id() if we find a variable extends a project.
-            logger.debug("UserFeatureDef.parse_internal_feature_id - user_feature_id: {0}".format(user_feature_id))
+            logging.debug("UserFeatureDef.parse_internal_feature_id - user_feature_id: {0}".format(user_feature_id))
             self.feature_defs = UserFeatureDef.from_user_feature_id(user_feature_id)
 
         # Assign a unique identifier to all feature defs.
