@@ -206,7 +206,7 @@ def is_superuser(this_user):
 def is_allowed(context, this_user):
     return (
         not context['RESTRICTED_ACCESS'] or (
-            context['RESTRICTED_ACCESS'] and this_user.is_authenticated() and this_user.groups.filter(
+            context['RESTRICTED_ACCESS'] and this_user.is_authenticated and this_user.groups.filter(
                 reduce(lambda q, g: q | Q(name__icontains=g), context['RESTRICTED_ACCESS_GROUPS'], Q())
             ).exists()
     ))

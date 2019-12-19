@@ -4,14 +4,12 @@ require.config({
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
         underscore: 'libs/underscore-min',
         base: 'base'
     },
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
         'underscore': {exports: '_'}
     }
 });
@@ -20,10 +18,9 @@ require([
     'jquery',
     'jqueryui',
     'bootstrap',
-    'session_security',
     'underscore',
     'base'
-], function($, jqueryui, bootstrap, session_security, _, base) {
+], function($, jqueryui, bootstrap, _, base) {
 
     $('form.new-workbook input[type="submit"]').on('click',function(e){
         var form = $(this).parents('.new-workbook');

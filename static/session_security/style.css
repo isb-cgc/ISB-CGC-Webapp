@@ -7,9 +7,9 @@
     height: 100%;
     background: #000;
     z-index:1001;
-    opacity:1;
-    -moz-opacity: 1;
-    filter: alpha(opacity=100);
+    opacity:.75;
+    -moz-opacity: 0.75;
+    filter: alpha(opacity=75);
 }
 
 .session_security_modal {

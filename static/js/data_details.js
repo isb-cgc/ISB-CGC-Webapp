@@ -22,7 +22,6 @@ require.config({
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
         underscore: 'libs/underscore-min',
         d3: 'libs/d3.min',
         d3tip: 'libs/d3-tip',
@@ -42,7 +41,6 @@ require.config({
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
         'tokenfield': ['jquery', 'jqueryui'],
         'typeahead':{
             deps: ['jquery'],
@@ -54,7 +52,7 @@ require.config({
            deps: ['jquery'],
            exports: 'Bloodhound'
         },
-        'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
+        'base': ['jquery', 'jqueryui', 'bootstrap', 'underscore']
     }
 });
 
@@ -62,7 +60,6 @@ require([
     'jquery',
     'jqueryui',
     'bootstrap',
-    'session_security',
     'd3',
     'd3tip',
     'search_helpers',
@@ -76,7 +73,7 @@ require([
     'stack_bar_chart',
     'bq_export',
     'gcs_export'
-], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, _, base) {
+], function ($, jqueryui, bootstrap, d3, d3tip, search_helpers, Bloodhound, _, base) {
 
     var SELECTED_FILTERS = {};
 

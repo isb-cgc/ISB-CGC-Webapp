@@ -22,7 +22,7 @@ require.config({
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
+        session_security: 'ession_security',
         underscore: 'libs/underscore-min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
@@ -54,6 +54,14 @@ require([
     'use strict';
 
     A11y.Core();
+
+    var sessionSecurity = new yourlabs.SessionSecurity({
+        pingUrl: pingUrl,
+        warnAfter: warnAfter,
+        expireAfter: expireAfter,
+        confirmFormDiscard: confirmFormDiscard,
+        returnToUrl: BASE_URL
+    });
 
     // Menu toggle
 
