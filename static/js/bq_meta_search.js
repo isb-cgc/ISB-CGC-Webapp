@@ -67,35 +67,32 @@ require([
                     "defaultContent": ''
                 },
                 {
+                    'name': 'friendlyName',
+                    'data': function(data, type){
+                        return data.friendlyName ? data.friendlyName : (data.tableReference.datasetId+'.'+data.tableReference.tableId);
+                    }
+                },
+                {
                     'name': 'datasetId',
-                    'data': 'tableReference.datasetId'
+                    'data': 'tableReference.datasetId',
+                    'visible': false
                 },
                 {
                     'name': 'tableId',
                     'data': 'tableReference.tableId',
-                    'render': function (data, type) {
-                        return type === 'display' ?
-                            '<div class="nowrap-ellipsis">' + data + '</div>' :
-                            data;
-                    },
-                    'width': '200px',
-                    'className': 'custom-width-200'
-                },
-                {
-                    'name': 'fullId',
-                    'data': 'id',
+                    // 'render': function (data, type) {
+                    //     return type === 'display' ?
+                    //         '<div class="nowrap-ellipsis">' + data + '</div>' :
+                    //         data;
+                    // },
+                    // 'width': '200px',
+                    // 'className': 'custom-width-200',
                     'visible': false
                 },
                 {
-                    'name': 'status',
-                    'data': function (data) {
-                        return (data.labels && data.labels.status) ? data.labels.status: null;
-                    },
-                    'render': function(data, type){
-                        return format_label_display(data, type);
-                    },
-                    'className': 'label-filter'
-
+                    'name': 'Id',
+                    'data': 'id',
+                    'visible': false
                 },
                 {
                     'name': 'category',
@@ -134,6 +131,17 @@ require([
                         return format_label_display(data, type);
                     },
                     'className': 'label-filter'
+                },
+                {
+                    'name': 'status',
+                    'data': function (data) {
+                        return (data.labels && data.labels.status) ? data.labels.status: null;
+                    },
+                    'render': function(data, type){
+                        return format_label_display(data, type);
+                    },
+                    'className': 'label-filter'
+
                 },
                 {
                     'name': 'numRows',
@@ -306,6 +314,9 @@ require([
             else {
                 // Open this row
                 row.child(format_tbl_details(row.data())).show();
+                $(".copy-btn").on('click', function () {
+                    copy_to_clipboard($(this).siblings('.full_id_txt'));
+                });
                 tr.addClass('shown details-shown');
                 tr.removeClass('preview-shown');
             }
@@ -340,10 +351,26 @@ require([
         // `d` is the original data object for the row
         return '<table class="detail-table">' +
             '<tr>' +
-            '<td style="vertical-align: top;"><strong>ID</strong></td>' +
-            '<td>' + (d.id == null? 'N/A' : d.id)+ '</td>' +
+            // '<td style="vertical-align:top;"><strong>Name</strong></td>' +
+            // '<td>' + (d.friendlyName == null? d.tableReference.datasetId+'.'+d.tableReference.tableId : d.friendlyName)+ '</td>' +
+            // '</tr><tr>' +
+            '<td style="vertical-align:top;"><strong>Full ID</strong></td>' +
+            '<td>'+
+            '<span class="full_id_txt">' + d.tableReference.projectId + '.' + d.tableReference.datasetId+'.'+d.tableReference.tableId+
+            '</span>'+
+            '<button class="copy-btn" title="Copy to Clipboard">' +
+            '<i class="fa fa-clipboard" aria-hidden="true"></i>'+
+            'Copy' +
+            '</button>' +
+            '</td>'+
             '</tr><tr>' +
-            '<td style="vertical-align: top;"><strong>Description</strong></td>' +
+            '<td style="vertical-align:top;"><strong>Dataset ID</strong></td>' +
+            '<td>' + d.tableReference.datasetId+ '</td>' +
+            '</tr><tr>' +
+            '<td style="vertical-align:top;"><strong>Table ID</strong></td>' +
+            '<td>' + d.tableReference.tableId + '</td>' +
+            '</tr><tr>' +
+            '<td style="vertical-align:top;"><strong>Description</strong></td>' +
             '<td>' + (d.description == null? 'N/A' : d.description)+ '</td>' +
             '</tr><tr>' +
             '<td><strong>Schema</strong></td>' +
@@ -354,6 +381,13 @@ require([
             '</tr></table>';
     };
 
+    var copy_to_clipboard = function(el) {
+        var $temp = $("<input>");
+        $("body").append($temp);
+        $temp.val($(el).text()).select();
+        document.execCommand("copy");
+        $temp.remove();
+    };
 
     var format_schema_field_names = function(schema_fields, in_html){
         var schema_field_names_str = '';
