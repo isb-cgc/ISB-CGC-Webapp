@@ -16,6 +16,7 @@
 from __future__ import absolute_import
 
 from django.conf.urls import include, url
+from django.urls import path
 from django.contrib import admin
 from django.conf import settings
 
@@ -45,7 +46,7 @@ urlpatterns = [
     url(r'dicom/(?P<study_uid>[A-Za-z0-9\.]+)/$', views.dicom, name='dicom'),
 
     url(r'^cohorts/', include('cohorts.urls')),
-    url(r'^admin/', include(admin.site.urls)),
+    path('admin/', admin.site.urls),
     url(r'^accounts/', include('accounts.urls')),
     url(r'session_security/', include('session_security.urls')),
     url(r'^data/', include('data_upload.urls')),

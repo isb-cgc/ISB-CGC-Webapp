@@ -20,7 +20,7 @@ else
 fi
 
 export PYTHONPATH=${HOMEROOT}:${HOMEROOT}/lib:${HOMEROOT}/IDC-Common
-echo $PYTHONPATH
+echo "PYTHONPATH is ${PYTHONPATH}"
 
 echo "Increase group_concat max, for longer data type names"
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "SET GLOBAL group_concat_max_len=18446744073709547520;"
