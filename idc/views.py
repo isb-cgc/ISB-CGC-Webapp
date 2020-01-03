@@ -430,6 +430,9 @@ def health_check(request, match):
 def help_page(request):
     return render(request, 'idc/help.html')
 
+def search_page(request):
+    return render(request, 'idc/search.html')
+
 
 def about_page(request):
     return render(request, 'idc/about.html')

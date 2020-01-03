@@ -52,6 +52,8 @@ urlpatterns = [
     url(r'^_ah/(vm_)?health$', views.health_check),
 
     url(r'^help/', views.help_page, name='help'),
+    url(r'^search/', views.search_page, name='search'),
+
     url(r'^about/', views.about_page, name='about_page'),
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
     url(r'^extended_login/$', views.extended_login_view, name='extended_login'),
