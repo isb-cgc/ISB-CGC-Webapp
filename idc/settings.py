@@ -171,13 +171,8 @@ class BigQueryCohortStorageSettings(object):
 def GET_BQ_COHORT_SETTINGS():
     return BigQueryCohortStorageSettings(BIGQUERY_COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
 
-USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', False)
 
-PROCESSING_ENABLED          = os.environ.get('PROCESSING_ENABLED', False)
-PROCESSING_JENKINS_URL      = os.environ.get('PROCESSING_JENKINS_URL', 'http://localhost/jenkins')
-PROCESSING_JENKINS_PROJECT  = os.environ.get('PROCESSING_JENKINS_PROJECT', 'cgc-processing')
-PROCESSING_JENKINS_USER     = os.environ.get('PROCESSING_JENKINS_USER', 'user')
-PROCESSING_JENKINS_PASSWORD = os.environ.get('PROCESSING_JENKINS_PASSWORD', '')
+USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', False)
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -230,7 +225,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = 'static_collex'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -476,13 +471,17 @@ SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS
 ##############################
 #   Start django-finalware   #
 ##############################
+#
+# This should only be done on a local system. Production systems will already have a site superuser
+# so this would simply overwrite that user. Don't enable this in production!
 
-INSTALLED_APPS += (
-    'finalware',)
+if IS_DEV:
+    INSTALLED_APPS += (
+        'finalware',)
 
-SITE_SUPERUSER_USERNAME = os.environ.get('SUPERUSER_USERNAME', '')
-SITE_SUPERUSER_EMAIL = ''
-SITE_SUPERUSER_PASSWORD = os.environ.get('SUPERUSER_PASSWORD', '')
+    SITE_SUPERUSER_USERNAME = os.environ.get('SUPERUSER_USERNAME', '')
+    SITE_SUPERUSER_EMAIL = ''
+    SITE_SUPERUSER_PASSWORD = os.environ.get('SUPERUSER_PASSWORD', '')
 
 ############################
 #   End django-finalware   #

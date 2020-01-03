@@ -99,13 +99,12 @@
                                 <p>You don't have any saved Cohorts.</p>
                             {% endif %}
                             <div class="pull-right dropdown">
-                                <a id="btnGroupDropCohortCreate" href="{% url 'cohort' %}"
+                                <a id="btnGroupDropCohortCreate" href="{% url 'explore_data' %}"
                                    class="btn btn-link dropdown-toggle"
                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i class="fa fa-plus"></i>Create a Cohort</a>
                                 <ul class="dropdown-menu" aria-labelledby="btnGroupDropCohortCreate">
-                                    <li><a class="btn dropdown-item" href="{% url 'cohort' %}">Filters</a></li>
-                                    <li><a class="btn dropdown-item" href="{% url 'cohort_barcodes' %}">Barcodes</a>
+                                    <li><a class="btn dropdown-item" href="{% url 'explore_data' %}">Filters</a></li>
                                     </li>
                                 </ul>
                             </div>

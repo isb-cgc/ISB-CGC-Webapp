@@ -22,7 +22,6 @@ require.config({
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
         underscore: 'libs/underscore-min',
         ajv: 'libs/ajv.bundle',
         base: 'base',
@@ -31,8 +30,7 @@ require.config({
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
-        'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore'],
+        'base': ['jquery', 'jqueryui', 'bootstrap', 'underscore'],
         'dataTables':['jquery']
     }
 });
@@ -41,12 +39,11 @@ require([
     'jquery',
     'jqueryui',
     'bootstrap',
-    'session_security',
     'underscore',
     'base',
     'ajv',
     'dataTables'
-], function ($, jqueryui, bootstrap, session_security, _, base, ajv) {
+], function ($, jqueryui, bootstrap, _, base, ajv) {
 
     var BARCODE_LENGTH_MAX = 45;
     var savingChanges = false;

@@ -55,6 +55,14 @@ require([
 
     A11y.Core();
 
+    var sessionSecurity = new yourlabs.SessionSecurity({
+        pingUrl: pingUrl,
+        warnAfter: warnAfter,
+        expireAfter: expireAfter,
+        confirmFormDiscard: confirmFormDiscard,
+        returnToUrl: BASE_URL
+    });
+
     // Menu toggle
 
     $('#subnav').on('hide.bs.collapse', function () {

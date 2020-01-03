@@ -22,7 +22,6 @@ require.config({
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
         underscore: 'libs/underscore-min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
@@ -35,7 +34,6 @@ require.config({
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
         'autocomplete': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui']
@@ -45,7 +43,6 @@ require.config({
 require([
     'jquery',
     'jqueryui',
-    'session_security',
     'bootstrap',
     'assetscore',
     'assetsresponsive'

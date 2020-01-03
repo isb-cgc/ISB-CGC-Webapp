@@ -2938,13 +2938,12 @@ html {
     top: 0;
     left: 0; }
   #landing .landing-content-div .lj-overlay-bg {
-    background-image: url("../img/bg.jpg");
     background-size: cover; }
   #landing .landing-content-div .lj-overlay-image {
     background-image: url("../img/lines.png");
     background-repeat: repeat; }
   #landing .landing-content-div .lj-overlay-color {
-    background-color: rgba(0, 0, 0, 0.5); }
+    background-color: rgb(60, 55, 55); }
 
 #landing .footer {
   color: white;

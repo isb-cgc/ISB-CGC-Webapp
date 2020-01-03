@@ -50,7 +50,7 @@ class OfflineMiddleware(MiddlewareMixin):
             return
 
         # Offline is enabled; double-check for staff users
-        if not (hasattr(request, 'user')) or not request.user.is_authenticated() or not (request.user.is_staff and request.user.is_superuser):
+        if not (hasattr(request, 'user')) or not request.user.is_authenticated or not (request.user.is_staff and request.user.is_superuser):
             return offline_view(request)
 
         return
