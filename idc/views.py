@@ -115,6 +115,7 @@ def css_test(request):
 
 
 # Returns the data exploration and filtering page, which also allows for cohort creation
+@login_required
 def explore_data(request):
     return render(request, 'idc/explore.html', {'request': request})
 
