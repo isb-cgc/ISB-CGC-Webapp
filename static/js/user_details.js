@@ -22,13 +22,11 @@ require.config({
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
         underscore: 'libs/underscore-min',
         base: 'base'
     },
     shim: {
-        'bootstrap': ['jquery'],
-        'session_security': ['jquery'],
+        'bootstrap': ['jquery']
     }
 });
 
@@ -36,9 +34,8 @@ require([
     'jquery',
     'jqueryui',
     'bootstrap',
-    'session_security',
     'base'
-], function($, jqueryui, bootstrap, session_security, base) {
+], function($, jqueryui, bootstrap, base) {
 
     $('.show-service-accounts').on('click', function () {
         var $this = $(this);

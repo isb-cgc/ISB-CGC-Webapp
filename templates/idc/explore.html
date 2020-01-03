@@ -4,7 +4,7 @@
 
 {% comment %}
 
-   Copyright 2016, Institute for Systems Biology
+   Copyright 2019, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -22,18 +22,14 @@
 
 {% block header %}
 {% endblock %}
-{% block link_page_name %}cohort-details{% endblock %}
-{% block page_name %}cohort-details{% endblock %}
+{% block link_page_name %}explore-details{% endblock %}
+{% block page_name %}explore-details{% endblock %}
 
 {% block page_header %}
 <link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}" />
 
 <div class="container">
-        <ol class="breadcrumb">
-            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-            <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
-        </ol>
-    <h1 class="page-header pull-left">Create Cohort - Filters</h1>
+    <h1 class="page-header pull-left">Data Exploration</h1>
     <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal" title="Please select at least one filter." disabled>Save As New Cohort</button>
 </div>
 

@@ -36,7 +36,7 @@ class TeamOnly(object):
             # Allow access to the landing page, and Google logins, because otherwise we'll have no idea who
             # this even is.
             if request.path != '/' and not re.match('/?accounts(/google)?/log(out|in)/?.*', request.path, re.I):
-                if request.user.is_authenticated() and not request.user.groups.filter(
+                if request.user.is_authenticated and not request.user.groups.filter(
                         reduce(lambda q, g: q | Q(name__icontains=g), settings.RESTRICTED_ACCESS_GROUPS, Q())
                 ).exists():
                     messages.warning(

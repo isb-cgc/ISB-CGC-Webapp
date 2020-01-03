@@ -22,7 +22,6 @@ require.config({
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
         underscore: 'libs/underscore-min',
         tokenfield: 'libs/bootstrap-tokenfield.min',
         base: 'base',
@@ -32,10 +31,9 @@ require.config({
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
         'tokenfield': ['jquery', 'jqueryui'],
         'underscore': {exports: '_'},
-        'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
+        'base': ['jquery', 'jqueryui', 'bootstrap', 'underscore']
     }
 });
 
@@ -45,7 +43,6 @@ require([
     'underscore',
     'jqueryui',
     'bootstrap',
-    'session_security',
     'tokenfield',
     'bq_export',
     'gcs_export'

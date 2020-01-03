@@ -4,7 +4,6 @@ require.config({
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
         underscore: 'libs/underscore-min',
         tablesorter: 'libs/jquery.tablesorter.min',
         base: 'base'
@@ -12,7 +11,6 @@ require.config({
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'tablesorter': ['jquery'],
@@ -25,7 +23,6 @@ require([
     'base',
     'jqueryui',
     'bootstrap',
-    'session_security',
     'tablesorter'
 ], function ($, base) {
 

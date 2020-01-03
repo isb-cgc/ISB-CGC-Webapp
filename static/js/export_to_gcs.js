@@ -27,7 +27,7 @@ require.config({
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
-        'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
+        'base': ['jquery', 'jqueryui', 'bootstrap', 'underscore']
     }
 });
 

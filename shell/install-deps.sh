@@ -47,6 +47,8 @@ if [ -z "${CI}" ]; then
     # and prep for local install
     echo "Emptying out ${HOMEROOT}/lib/ ..."
     rm -rf "${HOMEROOT}/lib/"
+    echo "Confirming clearance of lib:"
+    ls ${HOMEROOT}/lib/
 fi
 
 # Install PIP + Dependencies
