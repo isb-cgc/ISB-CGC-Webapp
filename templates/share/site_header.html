@@ -24,6 +24,9 @@
                         </li>
                     {% endif %}
                     <li class="navbar-link navbar-item">
+                        <a href="{% url 'explore_data' %}">Data Exploration</a>
+                    </li>
+                    <li class="navbar-link navbar-item">
                         <a href="http://imaging-data-commons.readthedocs.org/en/latest/" target="_blank">Documentation</a>
                     </li>
                     <li class="navbar-link navbar-item">
@@ -97,10 +100,7 @@
                 <a>COHORTS <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
                     <li class="menu-item"><a href="{% url 'cohort_list' %}">Manage Saved Cohorts ( {{ user.cohort_perms_set.all|active:'cohort'|cohort_owner_permission|count }} )</a></li>
-                    <li class="menu-item has-drop-down__more"> Create a New Cohort
-                        <ul class="drop">
-                            <li class="menu-item"><a href="{% url 'cohort' %}">Filters</a></li>
-                        </ul>
+                    <li class="menu-item"><a href="{% url 'explore_data' %}">Create a New Cohort</a></li>
                     </li>
                 </ul>
             </li>

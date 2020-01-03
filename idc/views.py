@@ -103,21 +103,20 @@ Returns user to landing page.
 def landing_page(request):
     return render(request, 'idc/landing.html', {'request': request, })
 
-
-'''
-Displays the privacy policy
-'''
+# Displays the privacy policy
 @never_cache
 def privacy_policy(request):
     return render(request, 'idc/privacy.html', {'request': request, })
 
 
-'''
-Returns css_test page used to test css for general ui elements
-'''
+# Returns css_test page used to test css for general ui elements
 def css_test(request):
-    # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     return render(request, 'idc/css_test.html', {'request': request})
+
+
+# Returns the data exploration and filtering page, which also allows for cohort creation
+def explore_data(request):
+    return render(request, 'idc/explore.html', {'request': request})
 
 
 '''
@@ -151,6 +150,7 @@ def user_detail(request, user_id):
                        })
     else:
         return render(request, '403.html')
+
 
 @login_required
 def bucket_object_list(request):
@@ -243,40 +243,11 @@ def user_landing(request):
                                                             'base_api_url': settings.BASE_API_URL
                                                             })
 
-'''
-DEPRECATED - Returns Results from text search
-'''
-@login_required
-def search_cohorts_viz(request):
-    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
-    q = request.GET.get('q', None)
-    result_obj = {
-        'q': q
-    }
-    if q:
-        cohort_results = Cohort.objects.search(q)
-        list = []
-        for cohort in cohort_results:
-            list.append({
-                'id': cohort.id,
-                'name': cohort.name,
-                'last_date_saved': formats.date_format(cohort.last_date_saved, 'DATETIME_FORMAT'),
-                'owner': cohort.get_owner().email,
-                'samples': len(cohort.samples_set.all())
-            })
-        result_obj['cohorts'] = list
-        list = []
-        viz_results = SavedViz.objects.search(q)
-        for viz in viz_results:
-            list.append({
-                'id': viz.id,
-                'name': viz.name,
-                'last_date_saved': formats.date_format(viz.last_date_saved, 'DATETIME_FORMAT'),
-                'plots': len(viz.plot_set.all()),
-                'owner': viz.get_owner().email
-            })
-        result_obj['visualizations'] = list
-    return HttpResponse(json.dumps(result_obj), status=200)
+
+
+
+
+
 
 # get_image_data which allows for URI arguments, falls through to get_image_data(request, slide_barcode)
 def get_image_data_args(request):

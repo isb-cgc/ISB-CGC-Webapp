@@ -27,19 +27,14 @@ admin.autodiscover()
 urlpatterns = [
 
     url(r'^$', views.landing_page, name='landing_page'),
+    url(r'^explore/', views.explore_data, name='explore_data'),
     url(r'^user_landing/$', views.user_landing, name='user_landing'),
-    url(r'^search_cohorts_viz/$', views.search_cohorts_viz, name='search_cohorts_viz'),
     url(r'^style_guide/', views.css_test),
     url(r'^users/(?P<user_id>\d+)/$', views.user_detail, name='user_detail'),
 
     url(r'^bucket_object_list/$', views.bucket_object_list, name='bucket_object_list'),
-    url(r'^igv/$', views.igv, name='igv'),
-    url(r'^camic/$', views.camic, name='camic'),
-    url(r'^camic/(?P<file_uuid>[A-Za-z0-9\-]+)/$', views.camic, name='camic_barcode'),
     url(r'^dicom/$', views.dicom, name='dicom'),
     url(r'^dicom/(?P<study_uid>[A-Za-z0-9]+)/$', views.dicom, name='dicom_study'),
-    url(r'^report/$', views.path_report, name='path_pdf'),
-    url(r'^report/(?P<report_file>[A-Za-z0-9._/-]+)/$', views.path_report, name='path_pdf_report'),
 
     url(r'^images/(?P<file_uuid>[A-Za-z0-9\-]+)/$', views.get_image_data, name='image_data'),
     url(r'^images/', views.get_image_data_args, name='image_data_args'),
