@@ -36,15 +36,17 @@ class TeamOnly(object):
             # Allow access to the landing page, and Google logins, because otherwise we'll have no idea who
             # this even is.
             if request.path != '/' and not re.match('/?accounts(/google)?/log(out|in)/?.*', request.path, re.I):
-                if request.user.is_authenticated and not request.user.groups.filter(
-                        reduce(lambda q, g: q | Q(name__icontains=g), settings.RESTRICTED_ACCESS_GROUPS, Q())
-                ).exists():
-                    messages.warning(
-                        request, "Only members of the {} group{} may access the development server.".format(
-                            ", ".join(settings.RESTRICTED_ACCESS_GROUPS),
-                            "s" if len(settings.RESTRICTED_ACCESS_GROUPS) > 1 else '')
-                    )
-                    return redirect('landing_page')
+                if request.user.is_authenticated:
+                    if not (request.user.is_superuser and re.match('/admin/?.*', request.path, re.I)) and not request.user.groups.filter(
+                                reduce(lambda q, g: q | Q(name__icontains=g), settings.RESTRICTED_ACCESS_GROUPS, Q())
+                        ).exists():
+
+                            messages.warning(
+                                request, "Only members of the {} group{} may access the development server.".format(
+                                    ", ".join(settings.RESTRICTED_ACCESS_GROUPS),
+                                    "s" if len(settings.RESTRICTED_ACCESS_GROUPS) > 1 else '')
+                            )
+                            return redirect('landing_page')
 
         response = self.get_response(request)
         return response
