@@ -70,7 +70,8 @@ require([
                     'name': 'friendlyName',
                     'data': function(data, type){
                         return (data.friendlyName ? data.friendlyName : (data.tableReference.datasetId+'.'+data.tableReference.tableId)).toUpperCase();
-                    }
+                    },
+                    'className': 'label-filter'
                 },
                 {
                     'name': 'datasetId',
