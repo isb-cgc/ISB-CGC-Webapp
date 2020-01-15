@@ -24,7 +24,8 @@ require.config({
         'datatables.bootstrap': ['https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap.min'],
         'datatables.net-buttons': ['//cdn.datatables.net/buttons/1.6.0/js/dataTables.buttons.min'],
         'datatables.net-html5': ['//cdn.datatables.net/buttons/1.6.0/js/buttons.html5.min'],
-        'chosen': ['//cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min']
+        'chosen': ['//cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min'],
+        'buttons-colvis': ['//cdn.datatables.net/buttons/1.6.0/js/buttons.colVis.min']
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -40,6 +41,7 @@ require([
     'datatables.bootstrap',
     'datatables.net-buttons',
     'datatables.net-html5',
+    'buttons-colvis',
     'chosen'
 ], function ($) {
     $(document).ready(function () {
@@ -50,6 +52,18 @@ require([
                 dataSrc: ''
             },
             buttons: [
+                {
+                    collectionTitle: 'Toggle Column Display',
+                    extend: 'colvis',
+                    text: '<i class="fa fa-cog" style="margin-right: 5px;"></i>Columns<span class="caret"></span>',
+                    columns: '.colvis-toggle',
+                    postfixButtons: [
+                        {
+                            extend: 'colvisRestore',
+                            text: '<i class="fa fa-undo" style="margin-right: 5px;"></i> Restore'
+                        }
+                    ]
+                },
                 {
                     extend: 'csvHtml5',
                     text: '<i class="fa fa-download" style="margin-right: 5px;"></i>CSV Download',
@@ -69,26 +83,28 @@ require([
                 {
                     'name': 'friendlyName',
                     'data': function(data, type){
-                        return (data.friendlyName ? data.friendlyName : (data.tableReference.datasetId+'.'+data.tableReference.tableId)).toUpperCase();
+                        return (data.friendlyName ? data.friendlyName : (data.tableReference.datasetId+'-'+data.tableReference.tableId)).toUpperCase();
                     },
-                    'className': 'label-filter'
+                    'className': 'label-filter colvis-toggle'
                 },
                 {
                     'name': 'datasetId',
                     'data': 'tableReference.datasetId',
-                    'visible': false
+                    'visible': false,
+                    'className': 'colvis-toggle'
                 },
                 {
                     'name': 'tableId',
                     'data': 'tableReference.tableId',
-                    // 'render': function (data, type) {
-                    //     return type === 'display' ?
-                    //         '<div class="nowrap-ellipsis">' + data + '</div>' :
-                    //         data;
-                    // },
-                    // 'width': '200px',
-                    // 'className': 'custom-width-200',
-                    'visible': false
+                    'render': function (data, type) {
+                        return type === 'display' ?
+                            '<div class="nowrap-ellipsis">' + data + '</div>' :
+                            data;
+                    },
+                    'width': '100px',
+                    'className': 'custom-width-100',
+                    'visible': false,
+                    'className': 'colvis-toggle'
                 },
                 {
                     'name': 'Id',
@@ -103,7 +119,7 @@ require([
                     'render': function(data, type){
                         return format_label_display(data, type);
                     },
-                    'className': 'label-filter'
+                    'className': 'label-filter colvis-toggle'
                 },
                 {
                     'name': 'referenceGenome',
@@ -121,7 +137,7 @@ require([
                     'render': function(data, type){
                         return format_label_display(data, type);
                     },
-                    'className': 'label-filter'
+                    'className': 'label-filter colvis-toggle'
                 },
                 {
                     'name': 'dataType',
@@ -131,7 +147,7 @@ require([
                     'render': function(data, type) {
                         return format_label_display(data, type);
                     },
-                    'className': 'label-filter'
+                    'className': 'label-filter colvis-toggle'
                 },
                 {
                     'name': 'status',
@@ -141,19 +157,19 @@ require([
                     'render': function(data, type){
                         return format_label_display(data, type);
                     },
-                    'className': 'label-filter'
+                    'className': 'label-filter colvis-toggle'
 
                 },
                 {
                     'name': 'numRows',
                     'data': 'numRows',
-                    'className': 'td-body-right',
+                    'className': 'td-body-right colvis-toggle',
                     'render': $.fn.dataTable.render.number( ',', '.')
                 },
                 {
                     'name': 'createdDate',
                     'data': 'creationTime',
-                    'className': 'td-body-right',
+                    'className': 'td-body-right colvis-toggle',
                     'render': function (data, type) {
                         if (type === 'display') {
                             var date = new Date(parseInt(data));
