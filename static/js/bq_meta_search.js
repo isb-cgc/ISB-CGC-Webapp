@@ -53,14 +53,14 @@ require([
             },
             buttons: [
                 {
-                    collectionTitle: 'Toggle Column Display',
+                    collectionTitle: '<i class="fa fa-sliders" style="margin-right: 5px;"></i>Toggle Columns',
                     extend: 'colvis',
                     text: '<i class="fa fa-cog" style="margin-right: 5px;"></i>Columns<span class="caret"></span>',
                     columns: '.colvis-toggle',
                     postfixButtons: [
                         {
                             extend: 'colvisRestore',
-                            text: '<i class="fa fa-undo" style="margin-right: 5px;"></i> Restore'
+                            text: '<i class="fa fa-undo" style="margin-right: 5px;"></i>Restore'
                         }
                     ]
                 },
@@ -102,9 +102,8 @@ require([
                             data;
                     },
                     'width': '100px',
-                    'className': 'custom-width-100',
-                    'visible': false,
-                    'className': 'colvis-toggle'
+                    'className': 'custom-width-100 colvis-toggle',
+                    'visible': false
                 },
                 {
                     'name': 'Id',
