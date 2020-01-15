@@ -405,6 +405,12 @@ def help_page(request):
 def search_page(request):
     return render(request, 'idc/search.html')
 
+def test_page(request):
+    return render(request, 'idc/test.html')
+
+def viewer_page(request):
+    return render(request, 'idc/test.html')
+
 
 def about_page(request):
     return render(request, 'idc/about.html')

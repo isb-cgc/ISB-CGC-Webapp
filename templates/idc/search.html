@@ -19,10 +19,50 @@
 
 {% endcomment %}
 
-{% block head %}
-    <script>
-    cohortObj=new Object()
+{% block header %}
+    <!-- <script type="text/javascript" src="https://requirejs.org/docs/release/2.3.6/comments/require.js"></script> -->
+    <!-- <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+    <script type="text/javascript" src="/static/js/sample_cohort.js"></script>
+    <script type="text/javascript" src="/static/js/image_search.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <style>
+        .iframe-container {
+       overflow: hidden;
+       // Calculated from the aspect ration of the content (in case of 16:9 it is 9/16= 0.5625)
+       padding-top: 56.25%;
+       position: relative;
+       }
 
+      .iframe-container iframe {
+       border: 0;
+       height: 100px;
+        left: 0;
+        position: absolute;
+        top: 0;
+         width: 100%;
+      }
+
+    </style>
+    <script>
+    cohortObj=new Object();
+
+
+    window.onload = function(){
+
+        constructProjects();
+        updateSelections(-1,[]);
+        resolveOriginalDataPlots("modality","modality_chart","Modality");
+        resolveOriginalDataPlots("body_part","body_part_examined_chart", "BodyPartExamined");
+        //$('#viewId').load('http://localhost:8085/viewer/1.3.6.1.4.1.14519.5.2.1.6279.6001.265704884949271879044145982159');
+
+        //window.alert("some text");
+        //await new Promise(r => setTimeout(r, 5000));
+        document.getElementById("srcU").scrollTo(200,200);
+        //window.alert(len.toString());
+        window.scrollTo(200,200);
+
+    }
     </script>
 
 {% endblock %}
@@ -33,34 +73,243 @@
 {% block content %}
 
     <div class="col-lg-12" style="float:left;width:50%">
-        <div id = "search_orig" style="display:inline-block;width:30%;border: thin solid black;background-color:dodgerblue" ><h3>Original</h3></div>
-        <div id = "search_derived" style="display:inline-block;width:30%;border: thin solid black"><h3>Derived</h3></div>
-        <div id = "search_related" style="display:inline-block;width:30%;border: thin solid black"><h3>Related</h3></div>
+
+
+        <div style="width:100%"><p>Search Configuration</p></div>
+        <div id = "search_orig" style="display:inline-block;width:30%;border: thin solid black;background-color:dodgerblue" onclick="toggleSearch(0,'search')"><h3>Original</h3></div>
+        <div id = "search_derived" style="display:inline-block;width:30%;border: thin solid black" onclick="toggleSearch(1,'search')"><h3>Derived</h3></div>
+        <div id = "search_related" style="display:inline-block;width:30%;border: thin solid black" onclick="toggleSearch(2,'search')"><h3>Related</h3></div>
 
         <div align="left"; style="width:100%;display:inline-block;border: thin solid black;float:none">
-            <div id = "search_derived" align="left" style="display:inline-block;"><p style="border: thin solid red;text-align:center">search derived data
-            sdwewed</p></div>
+            <div id = "search_orig_set" align="left" style="display:inline-block;"><p>search orig data</p>
+                <div id="modality_heading">
+                    <a role="button" data-toggle="collapse"  href="#modality" aria-expanded="false" aria-controls="modality">
+                   <i class="fa fa-caret-right"></i> Modality</a>
+                </div>
+               <div id="modality" class="collapse">
+                <ul style="list-style: none;">
+                <li><input type="checkbox" checked value="ct">Computed Tomography(CT)</li>
+                    <li><input type="checkbox" checked value="ctpt">??(CTPT)</li>
+                    <li><input type="checkbox" checked value="cr">Computed Radiology(CR)</li>
+                <li><input type="checkbox" checked value="mr">Magnetic Resonance(MR)</li>
+                    <li><input type="checkbox" checked value="mg">Mamography(MG)</li>
+                    <li><input type="checkbox" checked value="nm">Nuclear Medicine(NM)</li>
+                    <li><input type="checkbox" checked value="rtplan">Radiotherapy Plan(RTPLAN)</li>
+                    <li><input type="checkbox" checked value="rtstruct">Radiotheraoy Structure Set(RTSTRUCT)</li>
+
+                 </ul>
+                </div>
+
+                <div id="body_heading">
+                    <a role="button" data-toggle="collapse"  href="#body_part" aria-expanded="true" aria-controls="body_part" class="">
+                   <i class="fa fa-caret-right"></i> Body Part Examined
+                    </a>
+                </div>
+
+                <div id="body_part" class="collapse">
+                    <ul style="list-style: none;">
+                    <li><input type="checkbox" checked value="bladder">Bladder</li>
+                    <li><input type="checkbox" checked value="brain">Brain</li>
+                    <li><input type="checkbox" checked value="colon">Colon</li>
+                    <li><input type="checkbox" checked value="headneck">Head/Neck</li>
+                        <li><input type="checkbox" checked value="kidney">Kidney</li>
+                    <li><input type="checkbox" checked value="prostate">Prostate</li>
+                    <li><input type="checkbox" checked value="thyroid">Thyroid</li>
+                    <li><input type="checkbox" checked value="none">Not Available/Other</li>
+
+
+                   </ul>
+                </div>
+            </div>
+
+
+
+            <div id = "search_derived_set" align="left" style="display:none;"><p>search derived data</p>
+               <div id="segmentation_heading">
+                    <a role="button" data-toggle="collapse"  href="#segmentation" aria-expanded="false" aria-controls="segmentation" class="">
+                   <i class="fa fa-caret-right"></i> Segmentation</a>
+                </div>
+                <div id="segmentation" class="collapse">
+                    <ul style="list-style: none;">
+                        <li><input type="checkbox" checked value="yes">Segmentation Available</li>
+                        <li><input type="checkbox" checked value="no">Segmentation Not Available</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div id = "search_related_set" align="left" style="display:none;"><p>search related data</p>
+                <div id="disease_heading" class="list-group-item__heading">
+                    <a role="button" data-toggle="collapse"  href="#disease" aria-expanded="false" aria-controls="disease">
+                        <i class="fa fa-caret-right"></i> Disease Code</a>
+                </div>
+
+                <div id="disease" class="collapse">
+                    <ul id="disease_list" style="list-style: none;">
+
+
+                    </ul>
+                </div>
+
+
+                <div id="vital_heading" class="list-group-item__heading">
+                    <a role="button" data-toggle="collapse"  href="#vital" aria-expanded="false" aria-controls="vital">
+                        <i class="fa fa-caret-right"></i> Vital Statistics</a>
+                </div>
+
+                <div id="vital" class="collapse">
+                    <ul id="vital_list" style="list-style: none;">
+                         <li><input type="checkbox" checked value="yes">Alive</li>
+                        <li><input type="checkbox" checked value="yes">Dead</li>
+                        <li><input type="checkbox" checked value="yes">NA</li>
+                    </ul>
+                </div>
+
+                <div id="gender_heading" class="list-group-item__heading">
+                    <a role="button" data-toggle="collapse"  href="#gender" aria-expanded="false" aria-controls="vital">
+                        <i class="fa fa-caret-right"></i>Gender</a>
+                </div>
+
+                <div id="gender" class="collapse">
+                    <ul id="gender_list" style="list-style: none;">
+                         <li><input type="checkbox" checked value="yes">Male</li>
+                        <li><input type="checkbox" checked value="yes">Female</li>
+                        <li><input type="checkbox" checked value="yes">NA</li>
+                    </ul>
+                </div>
+
+               <div id="age_heading" class="list-group-item__heading">
+                    <a role="button" data-toggle="collapse"  href="#age" aria-expanded="false" aria-controls="age">
+                        <i class="fa fa-caret-right"></i>Age</a>
+                </div>
+
+                <div id="age" class="collapse">
+                    <ul id="age_list" style="list-style: none;">
+                         <li><input type="checkbox" checked value="0,19">0-19</li>
+                        <li><input type="checkbox" checked value="20,29">20-29</li>
+                        <li><input type="checkbox" checked value="30,39">30-39</li>
+                        <li><input type="checkbox" checked value="40,49">40-49</li>
+                        <li><input type="checkbox" checked value="50,59">50-59</li>
+                        <li><input type="checkbox" checked value="50,59">60-69</li>
+                        <li><input type="checkbox" checked value="50,59">70-79</li>
+                        <li><input type="checkbox" checked value="80">Over 80</li>
+                        <li><input type="checkbox" checked value="None">NA</li>
+                    </ul>
+                </div>
+
+                <div id="bmi_heading" class="list-group-item__heading">
+                    <a role="button" data-toggle="collapse"  href="#bmi" aria-expanded="false" aria-controls="bmi">
+                        <i class="fa fa-caret-right"></i>BMI</a>
+                </div>
+
+                <div id="bmi" class="collapse">
+                    <ul id="bmi_list" style="list-style: none;">
+                         <li><input type="checkbox" checked value="0,18.5">Underweight: BMI less than 18.5</li>
+                        <li><input type="checkbox" checked value="18.5,25">Normal weight: BMI greater than or equal to 18.5 and less than 25</li>
+                        <li><input type="checkbox" checked value="25,30">Overweight: BMI greater than 25 and less than 30</li>
+                        <li><input type="checkbox" checked value="30">Obese: BMI greater than 30</li>
+
+                        <li><input type="checkbox" checked value="na">NA</li>
+                    </ul>
+                </div>
+
+                <div id="race_heading" class="list-group-item__heading">
+                    <a role="button" data-toggle="collapse"  href="#race" aria-expanded="false" aria-controls="race">
+                        <i class="fa fa-caret-right"></i>Race</a>
+                </div>
+
+                <div id="race" class="collapse">
+                    <ul id="race_list" style="list-style: none;">
+                    </ul>
+                </div>
+
+               <div id="ethnicity_heading" class="list-group-item__heading">
+                    <a role="button" data-toggle="collapse"  href="#ethnicity" aria-expanded="false" aria-controls="ethnicity">
+                        <i class="fa fa-caret-right"></i>Ethnicity</a>
+                </div>
+
+                <div id="ethnicity" class="collapse">
+                    <ul id="ethnicity_list" style="list-style: none;">
+
+                    </ul>
+                </div>
+
+
+
+            </div>
 
         </div>
 
 
     </div>
     <div class="col-lg-12" style="float:left;width:50%">
+    <div style="width:100%"><p>Search Results Summaries</p></div>
+        <div id = "results_orig" style="display:inline-block;width:30%;border: thin solid black;background-color:dodgerblue" onclick="toggleSearch(0,'results')"><h3>Original</h3></div>
+        <div id = "results_derived" style="display:inline-block;width:30%;border: thin solid black" onclick="toggleSearch(1,'results')"><h3>Derived</h3></div>
+        <div id = "results_related" style="display:inline-block;width:30%;border: thin solid black" onclick="toggleSearch(2,'results')"><h3>Related</h3></div>
+
+        <div align="left"; style="width:100%;height:450px;display:inline-block;border: thin solid black;float:none">
+            <div id = "results_orig_set" align="left" style="display:inline-block;height:600px"><p>cohort plot orig data</p>
+            <div style="float:left;float:top display:inline-block;width:300px;height:200px" >
+                <canvas id="modality_chart"   ></canvas>
+            </div>
+                <div style="float:left;float:top display:inline-block;width:300px;height:300px" >
+                <canvas id="body_part_examined_chart"  ></canvas>
+                </div>
+
+
+            </div>
+            <div id = "results_derived_set" align="left" style="display:none;"><p>cohort plot derived data</p></div>
+            <div id = "results_related_set" align="left" style="display:none;"><p>cohort plot related data</p>
+                <div style="float:left;float:top display:inline-block;width:300px;height:200px" >
+                <canvas id="disease_code_chart"   ></canvas>
+            </div>
+                <div style="float:left;float:top display:inline-block;width:300px;height:200px" >
+                <canvas id="vital_statistics_chart"  ></canvas>
+                </div>
+                <div style="float:left;float:top display:inline-block;width:300px;height:200px" >
+                <canvas id="gender_chart"  ></canvas>
+                </div>
+                    <!-- <div id="disease_code_plot" style="display-inline" ></div>
+                <div id="vital_statistics_plot"></div> -->
+               <!-- //style="width:A100%;display:inline-block;overflow-y:auto;overflow-x:auto" -->
+
+            </div>
+
+        </div>
+
         <div class="col-lg-12">
             <h3>Viewer</h3>
-            <select id="collection_select">
 
-            </select><br>
-            <select id="patient_select">
+            <p>Collection<select id="collection_select" onchange="updateSelections(0,[])">
+            </select><br></p>
 
-            </select><br>
-            <select id="study_select">
+            <p>Patient<select id="patient_select" onchange="updateSelections(1,[])">
+            </select><br></p>
 
-            </select><br>
-            <select id="series_select">
-            </select><br>
+            <p>Study<select id="study_select" onchange="updateSelections(2,[])"></select><br></p>
+
+            <p>Series<select id="series_select">
+            </select><br></p>
+
+            <div id="viewId" style="position:relative;overflow:hidden;height:600px">
+            <iframe id="srcU" src="http://localhost:8085/viewer/1.3.6.1.4.1.14519.5.2.1.6279.6001.265704884949271879044145982159"  style="object-position: 20% 20%"></iframe>
+            </div>
+            <div>
+                <canvas id="dest" width="500";height="500"></canvas>
+            </div>
         </div>
+
+
+
     </div>
+
+    <div id="viewId" style="position:absolute;height:600px">
+            <iframe id="srcU" src="http://localhost:8085/viewer/1.3.6.1.4.1.14519.5.2.1.6279.6001.265704884949271879044145982159" style="height:600px;width:800px" onload="this.contentWindow.scrollTo(100,100)"></iframe>
+    </div>
+
+
+
 {% endblock %}
 
 {% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}
