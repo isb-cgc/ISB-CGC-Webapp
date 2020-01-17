@@ -107,7 +107,8 @@ def add_attributes(attr_set):
         try:
             obj, created = Attribute.objects.update_or_create(
                 name=attr['name'], display_name=attr['display_name'], data_type=attr['type'],
-                preformatted_values=True if 'preformatted_values' in attr else False
+                preformatted_values=True if 'preformatted_values' in attr else False,
+                is_cross_collex=True if 'cross_collex' in attr else False
             )
             if 'collex' in attr:
                 for collex in attr['collex']:
@@ -193,6 +194,20 @@ def main():
             attr_set.append(attr)
 
         attr_file.close()
+
+        attr_file = open("tcia_attr.csv", "r")
+        line_reader = attr_file.readlines()
+
+        for line in line_reader:
+            line = line.strip()
+            line_split = line.split(",")
+
+            attr_set.append({
+                'name': line_split[0],
+                "display_name": line_split[1].replace("_", " ").title() if re.match(r'_', line_split[1]) else line_split[1],
+                "type": Attribute.CATEGORICAL if line_split[1] == 'STRING' else Attribute.CONTINUOUS_NUMERIC,
+                'cross_collex': True
+            })
 
         add_attributes(attr_set)
 
