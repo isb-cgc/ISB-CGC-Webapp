@@ -58,21 +58,21 @@ mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NA
 # Load your SQL table file
 # Looks for metadata_featdef_tables.sql, if this isn't found, it downloads a file from GCS and saves it as
 # metadata_tables.sql for future use
-#if [ ! -f ${HOMEROOT}/scripts/metadata_tables.sql ]; then
+if [ ! -f ${HOMEROOT}/scripts/${METADATA_SQL_FILE} ]; then
     # Sometimes CircleCI loses its authentication, re-auth with the dev key if we're on circleCI...
-#    if [ -n "$CI" ]; then
-#        sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/deployment.key.json
+    if [ -n "$CI" ]; then
+        sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/deployment.key.json
     # otherwise just use privatekey.json
-#    else
-#        sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/privatekey.json
-#        sudo gcloud config set project "${GCLOUD_PROJECT_NAME}"
-#    fi
-#    echo "Downloading SQL Table File..."
-#    sudo gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/dev_table_and_routines_file.sql" ${HOMEROOT}/scripts/metadata_tables.sql
-#fi
+    else
+        sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/privatekey.json
+        sudo gcloud config set project "${GCLOUD_PROJECT_NAME}"
+    fi
+    echo "Downloading SQL Table File..."
+    sudo gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/${METADATA_SQL_FILE}" ${HOMEROOT}/scripts/${METADATA_SQL_FILE}
+fi
 
 echo "Applying SQL Table File... (may take a while)"
-#mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_tables.sql
+mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/${METADATA_SQL_FILE}
 
 echo "Adding Django site IDs..."
 python3 ${HOMEROOT}/scripts/add_site_ids.py

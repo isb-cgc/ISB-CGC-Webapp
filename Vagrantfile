@@ -10,6 +10,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.synced_folder ".", "/home/vagrant/www"
   config.vm.synced_folder "../", "/home/vagrant/parentDir"
+  config.vm.synced_folder "../secure_files", "/home/vagrant/secure_files"
 
   # Map Common for the WebApp
   config.vm.synced_folder "../IDC-Common", "/home/vagrant/www/IDC-Common"

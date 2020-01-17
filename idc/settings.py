@@ -18,6 +18,7 @@ from __future__ import print_function
 from builtins import str
 from builtins import object
 import os
+import re
 from os.path import join, dirname
 import sys
 import dotenv
@@ -26,6 +27,10 @@ from socket import gethostname, gethostbyname
 env_path = '../'
 if os.environ.get('SECURE_LOCAL_PATH', None):
     env_path += os.environ.get('SECURE_LOCAL_PATH')
+    if re.match('^/home/vagrant/.+$', os.environ.get('SECURE_LOCAL_PATH'), re.I):
+        env_path = os.environ.get('SECURE_LOCAL_PATH')
+
+print("[STATUS] Using .env file at {}".format(join(dirname(__file__), env_path+'.env')))
 
 dotenv.read_dotenv(join(dirname(__file__), env_path+'.env'))
 
@@ -67,7 +72,6 @@ MANAGERS                = ADMINS
 GCLOUD_PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
 GCLOUD_PROJECT_NUMBER          = os.environ.get('GCLOUD_PROJECT_NUMBER', '')
 BIGQUERY_PROJECT_ID           = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PROJECT_ID)
-BIGQUERY_DATASET_V1         = os.environ.get('BIGQUERY_DATASET_V1', '')
 BIGQUERY_DATA_PROJECT_ID  = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
 
 # Deployment module
@@ -85,13 +89,11 @@ BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://mvm-api-dot-id
 PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
 
 # Data Buckets
-OPEN_DATA_BUCKET        = os.environ.get('OPEN_DATA_BUCKET', '')
 GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET')
 
 # BigQuery cohort storage settings
 BIGQUERY_COHORT_DATASET_ID           = os.environ.get('BIGQUERY_COHORT_DATASET_ID', 'cohort_dataset')
 BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
-BIGQUERY_COSMIC_DATASET_ID    = os.environ.get('BIGQUERY_COSMIC_DATASET_ID', '')
 BIGQUERY_IDC_TABLE_ID    = os.environ.get('BIGQUERY_IDC_TABLE_ID', '')
 MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 

@@ -14,7 +14,7 @@
     </colgroup>
     <tbody>
         {% for this_case in cases %}
-            {% include "cohorts/gcs_export_modal.html" with case=this_case %}
+            {% include "file-table-row.html" with case=this_case %}
         {% endfor %}
     </tbody>
 </table>
