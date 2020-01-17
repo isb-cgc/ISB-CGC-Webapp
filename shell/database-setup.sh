@@ -68,7 +68,7 @@ if [ ! -f ${HOMEROOT}/scripts/${METADATA_SQL_FILE} ]; then
         sudo gcloud config set project "${GCLOUD_PROJECT_NAME}"
     fi
     echo "Downloading SQL Table File..."
-    sudo gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/idc_dev_collex_metadata.sql" ${HOMEROOT}/scripts/${METADATA_SQL_FILE}
+    sudo gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/${METADATA_SQL_FILE}" ${HOMEROOT}/scripts/${METADATA_SQL_FILE}
 fi
 
 echo "Applying SQL Table File... (may take a while)"
