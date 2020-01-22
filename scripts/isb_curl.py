@@ -65,6 +65,7 @@ B. Python:
 import httplib2
 import os
 import sys
+import json
 from oauth2client.file import Storage
 
 CREDENTIALS_LOC_ENV = 'ISB_CREDENTIALS'
@@ -90,17 +91,23 @@ def load_credentials(credentials_location):
     check(credentials and not credentials.invalid, 'missing/invalid credentials...try running isb_auth.py')
     return credentials
 
-def get_access_token(credentials_location=get_credentials_location()):
+# Although we can use load_credentials to check the expiration (and re-up if needed), we need the
+# encrypted ID token, NOT the access_token, to do a request via the ESP. To this end we load the
+# file as JSON and pull the provided encrypted token there (it can also be reconstituted).
+def get_id_token(credentials_location=get_credentials_location()):
     credentials = load_credentials(credentials_location)
     if credentials.access_token_expired:
         credentials.refresh(httplib2.Http())
-    return credentials.access_token
+    creds_json = open(credentials_location, "r")
+    token = json.loads(creds_json.read())
+    return token['token_response']['id_token']
 
 
 def main():
     args = sys.argv[1:]
     check(args, 'usage: isb_curl.py <curl arguments>')
-    access_token = get_access_token()
+    access_token = get_id_token()
+    print(access_token)
     curl_args = ['curl', '-H', 'Authorization: Bearer ' + access_token] + args
     os.execvp('curl', curl_args)
 
