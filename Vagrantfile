@@ -18,6 +18,7 @@ Vagrant.configure(2) do |config|
   # Map API so it can use this VM
   config.vm.synced_folder "../IDC-API", "/home/vagrant/API"
 
+  config.vm.provision :shell, inline: "echo 'source /home/vagrant/www/shell/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
   config.vm.provision "shell", path: 'shell/install-deps.sh'
   config.vm.provision "shell", path: 'shell/create-database.sh'
   config.vm.provision "shell", path: 'shell/database-setup.sh'
