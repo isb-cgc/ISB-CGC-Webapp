@@ -29,7 +29,7 @@ function updateAllFilterSelections(){
 
 
 function updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, isStudyAttr,isRangeAttr){
-    newText=header+": ";
+    newText="&emsp;&emsp;"+header+": ";
     checkBoxElem=document.getElementById(checkBoxDiv);
 
     listItems=checkBoxElem.getElementsByTagName('li');
@@ -46,7 +46,7 @@ function updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, i
         }
     }
     if (numChecked === listItems.length){
-        newText=header+": All";
+        newText="&emsp;&emsp;"+header+": All";
     }
     document.getElementById(displaySet).innerHTML=newText;
     if ((!isStudyAttr) && (!isRangeAttr)){
@@ -124,13 +124,24 @@ function toggleSearch(n,set){
          elemNm[2]=set+"_related";
         for (var i=0;i<3;i++){
             if (n ==i){
-                document.getElementById(elemNm[i]).style="display:inline-block;width:30%;border: thin solid black;background-color:dodgerblue";
-                document.getElementById(elemNm[i]+"_set").style="display:inline-block;height:700px";
+                if (set==="search") {
+                    document.getElementById(elemNm[i]).style = "display:inline-block;width:32%;border: thin solid black;background-color:dodgerblue";
+                    document.getElementById(elemNm[i] + "_set").style = "display:inline-block;";
+                }
+                else{
+                    document.getElementById(elemNm[i]).style = "display:inline-block;width:32.8%;border: thin solid black;background-color:dodgerblue";
+                    document.getElementById(elemNm[i] + "_set").style = "display:inline-block;height:700px";
+                }
             }
             else{
-                document.getElementById(elemNm[i]).style="display:inline-block;width:30%;border: thin solid black";
-                document.getElementById(elemNm[i]+"_set").style="display:none;height:700px";
-
+                if (set==="search") {
+                    document.getElementById(elemNm[i]).style = "display:inline-block;width:32%;border: thin solid black";
+                    document.getElementById(elemNm[i] + "_set").style = "display:none;";
+                }
+                else{
+                    document.getElementById(elemNm[i]).style = "display:inline-block;width:32.8%;border: thin solid black";
+                    document.getElementById(elemNm[i] + "_set").style = "display:none;height:700px";
+                }
             }
         }
 
@@ -253,13 +264,13 @@ function constructProjects(){
         diseaseCode=diseaseCodeA[i];
         if (diseaseCode !=="none") {
             var opt = document.createElement("LI");
-            opt.innerHTML = '<input type="checkbox" checked value="' + diseaseCode + '" onclick="updateFilterSelection(\'disease_list\', \'disease_code_set\',\'Disease Code\', \'disease_code\',false,false)">' + diseaseCode;
+            opt.innerHTML = '&emsp;<input type="checkbox" checked value="' + diseaseCode + '" onclick="updateFilterSelection(\'disease_list\', \'disease_code_set\',\'Disease Code\', \'disease_code\',false,false)">' + diseaseCode;
             diseaseElem.appendChild(opt);
         }
     }
     //<li><input type="checkbox" checked value="na">NA</li>
     opt = document.createElement("LI");
-    opt.innerHTML = '<input type="checkbox" checked value="None" onclick="updateFilterSelection(\'disease_list\', \'disease_code_set\',\'Disease Code\', \'disease_code\',false,false)">NA';
+    opt.innerHTML = '&emsp;<input type="checkbox" checked value="None" onclick="updateFilterSelection(\'disease_list\', \'disease_code_set\',\'Disease Code\', \'disease_code\',false,false)">NA';
     diseaseElem.appendChild(opt);
 
     raceA=Object.keys(raceH).sort();
@@ -268,12 +279,12 @@ function constructProjects(){
         race=raceA[i];
         if (race !=="none") {
             var opt = document.createElement("LI");
-            opt.innerHTML = '<input type="checkbox" checked value="' + race + '"  onclick="updateFilterSelection(\'race_list\', \'race_set\',\'Race\', \'race\',\'false\',\'false\')">' + race;
+            opt.innerHTML = '&emsp;<input type="checkbox" checked value="' + race + '"  onclick="updateFilterSelection(\'race_list\', \'race_set\',\'Race\', \'race\',\'false\',\'false\')">' + race;
             raceElem.appendChild(opt);
         }
     }
     opt = document.createElement("LI");
-    opt.innerHTML = '<input id="race_list_none" type="checkbox" checked value="None" onclick="updateFilterSelection(0,\'race_list\', \'race_set\',\'Race\', \'race\',\'false\',\'false\')">NA';
+    opt.innerHTML = '&emsp;<input id="race_list_none" type="checkbox" checked value="None" onclick="updateFilterSelection(0,\'race_list\', \'race_set\',\'Race\', \'race\',\'false\',\'false\')">NA';
     raceElem.appendChild(opt);
 
     ethnicityA=Object.keys(ethnicityH).sort();
@@ -283,12 +294,12 @@ function constructProjects(){
         ethnicity=ethnicityA[i];
         if (ethnicity !=="none") {
             var opt = document.createElement("LI");
-            opt.innerHTML = '<input type="checkbox" checked value="' + ethnicity + '" onclick="updateFilterSelection(\'ethnicity_list\', \'ethnicity_set\',\'Ethnicity\',\'ethnicity\',\'false\',\'false\')">' + ethnicity;
+            opt.innerHTML = '&emsp;<input type="checkbox" checked value="' + ethnicity + '" onclick="updateFilterSelection(\'ethnicity_list\', \'ethnicity_set\',\'Ethnicity\',\'ethnicity\',\'false\',\'false\')">' + ethnicity;
             ethnicityElem.appendChild(opt);
         }
     }
     opt = document.createElement("LI");
-    opt.innerHTML = '<input id="ethnicity_list_none" type="checkbox" checked value="none" onclick="updateFilterSelection(0,\'ethnicity_list\', \'ethnicity_set\',\'Ethnicity\',\'ethnicity\',\'false\',\'false\')">NA';
+    opt.innerHTML = '&emsp;<input id="ethnicity_list_none" type="checkbox" checked value="none" onclick="updateFilterSelection(0,\'ethnicity_list\', \'ethnicity_set\',\'Ethnicity\',\'ethnicity\',\'false\',\'false\')">NA';
     ethnicityElem.appendChild(opt);
 
 
