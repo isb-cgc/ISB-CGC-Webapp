@@ -24,15 +24,9 @@ import sys
 import dotenv
 from socket import gethostname, gethostbyname
 
-env_path = '../'
-if os.environ.get('SECURE_LOCAL_PATH', None):
-    env_path += os.environ.get('SECURE_LOCAL_PATH')
-    if re.match('^/home/vagrant/.+$', os.environ.get('SECURE_LOCAL_PATH'), re.I):
-        env_path = os.environ.get('SECURE_LOCAL_PATH')
+SECURE_LOCAL_PATH = os.environ.get('SECURE_LOCAL_PATH', '')
 
-print("[STATUS] Using .env file at {}".format(join(dirname(__file__), env_path+'.env')))
-
-dotenv.read_dotenv(join(dirname(__file__), env_path+'.env'))
+dotenv.read_dotenv(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
 
 APP_ENGINE_FLEX = 'aef-'
 APP_ENGINE = 'Google App Engine/'
@@ -456,7 +450,7 @@ if IS_DEV:
 #   End django-allauth   #
 ##########################
 
-GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else ''
+GOOGLE_APPLICATION_CREDENTIALS  = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
 
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
 
@@ -522,7 +516,10 @@ DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
 #################################
 # SOLR settings
 #################################
-SOLR_URL = os.environ.get('SOLR_URL', None)
+SOLR_URI = os.environ.get('SOLR_URI', '')
+SOLR_LOGIN = os.environ.get('SOLR_LOGIN', '')
+SOLR_PASSWORD = os.environ.get('SOLR_PASSWORD', '')
+SOLR_CERT = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCAL_PATH, os.environ.get('SOLR_CERT', '')))
 
 ##############################################################
 #   MailGun Email Settings
