@@ -12,4 +12,3 @@ gsutil cp "gs://${DEPLOYMENT_BUCKET}/${STATIC_COMMIT_CHECK_FILE}" ./
 echo "Packing JSON and text files for caching into deployment..."
 cp --verbose *.json ./json
 cp --verbose *.txt ./txt
-
