@@ -411,6 +411,16 @@ def test_page(request):
 def viewer_page(request):
     return render(request, 'idc/test.html')
 
+def callback_page(request):
+    return render(request, 'idc/test.html')
+
+def projects_page(request):
+    return render(request, 'idc/test.html')
+
+
+def ohif_page(request):
+    return render(request, 'idc/ohif.html')
+
 
 def about_page(request):
     return render(request, 'idc/about.html')

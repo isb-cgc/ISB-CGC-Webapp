@@ -52,6 +52,9 @@ urlpatterns = [
 
    url(r'^test/', views.test_page, name='test'),
    url(r'^viewer/', views.viewer_page, name='view'),
+   url(r'^callback/', views.callback_page, name='callback'),
+    url(r'^projects/', views.projects_page, name='projects'),
+  url(r'^ohif/', views.ohif_page, name='ohif'),
 
     url(r'^about/', views.about_page, name='about_page'),
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),

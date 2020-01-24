@@ -25,6 +25,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
     <script type="text/javascript" src="/static/js/sample_cohort.js"></script>
     <script type="text/javascript" src="/static/js/image_search.js"></script>
+    <script type="text/javascript" src="/static/js/plotly-latest.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <style>
         .iframe-container {
@@ -52,15 +53,17 @@
 
         constructProjects();
         updateSelections(-1,[]);
-        resolveOriginalDataPlots("modality","modality_chart","Modality");
-        resolveOriginalDataPlots("body_part","body_part_examined_chart", "BodyPartExamined");
+        //resolveRelateDataPlotsCat("disease", "disease_code_chart","disease_code");
+resolveAllPlots()
+      //  updateAllFilterSelections();
         //$('#viewId').load('http://localhost:8085/viewer/1.3.6.1.4.1.14519.5.2.1.6279.6001.265704884949271879044145982159');
 
         //window.alert("some text");
         //await new Promise(r => setTimeout(r, 5000));
-        document.getElementById("srcU").scrollTo(200,200);
+        //document.getElementById("srcU").scrollTo(200,200);
+       // document.getElementById('srcU').contentWindow.scrollTo(2000,400);
         //window.alert(len.toString());
-        window.scrollTo(200,200);
+        //window.scrollTo(200,200);
 
     }
     </script>
@@ -73,6 +76,45 @@
 {% block content %}
 
     <div class="col-lg-12" style="float:left;width:50%">
+
+        <p>Search Scope:
+        <select id="data_scope">
+        <option value="all">All data</option>
+        </select>
+    </p>
+
+    </div>
+
+    <div class="col-lg-12" style="float:left;width:50%">
+
+        <p>Search Definition:
+            <ul>
+           <li id="qproj">Project:</li>
+           <li>Original:</li>
+                <ul>
+                    <li id="modality_set">Modality: All</li>
+                    <li id="body_part_examined_set">Body Part Examined: All</li>
+                </ul>
+           <li>Derived:</li>
+           <li>Related:</li>
+                <ul>
+                    <li id="disease_code_set">Disease Code: All</li>
+                    <li id="vital_status_set">Vital Status: All</li>
+                    <li id="gender_set">Gender: All</li>
+                    <li id="age_set">Age: All</li>
+                    <li id="bmi_set">BMI: All</li>
+                    <li id="race_set">Race: All</li>
+                    <li id="ethnicity_set">Ethnicity: All</li>
+                </ul>
+           </ul>
+
+    </p>
+
+    </div>
+
+
+    <div class="col-lg-12" style="float:left;width:50%">
+
 
 
         <div style="width:100%"><p>Search Configuration</p></div>
@@ -88,14 +130,14 @@
                 </div>
                <div id="modality" class="collapse">
                 <ul style="list-style: none;">
-                <li><input type="checkbox" checked value="ct">Computed Tomography(CT)</li>
-                    <li><input type="checkbox" checked value="ctpt">??(CTPT)</li>
-                    <li><input type="checkbox" checked value="cr">Computed Radiology(CR)</li>
-                <li><input type="checkbox" checked value="mr">Magnetic Resonance(MR)</li>
-                    <li><input type="checkbox" checked value="mg">Mamography(MG)</li>
-                    <li><input type="checkbox" checked value="nm">Nuclear Medicine(NM)</li>
-                    <li><input type="checkbox" checked value="rtplan">Radiotherapy Plan(RTPLAN)</li>
-                    <li><input type="checkbox" checked value="rtstruct">Radiotheraoy Structure Set(RTSTRUCT)</li>
+                <li><input type="checkbox" checked value="ct" onclick="updateFilterSelection('modality', 'modality_set','Modality','Modality',0,false)">Computed Tomography(CT)</li>
+                    <li><input type="checkbox" checked value="ctpt" onclick="updateFilterSelection('modality', 'modality_set','Modality',0,false)">??(CTPT)</li>
+                    <li><input type="checkbox" checked value="cr" onclick="updateFilterSelection('modality', 'modality_set','Modality',0,false)">Computed Radiology(CR)</li>
+                <li><input type="checkbox" checked value="mr" onclick="updateFilterSelection('modality', 'modality_set','Modality',0,false)">Magnetic Resonance(MR)</li>
+                    <li><input type="checkbox" checked value="mg" onclick="updateFilterSelection('modality', 'modality_set','Modality',0,false)">Mamography(MG)</li>
+                    <li><input type="checkbox" checked value="nm" onclick="updateFilterSelection('modality', 'modality_set','Modality',0,false)">Nuclear Medicine(NM)</li>
+                    <li><input type="checkbox" checked value="rtplan" onclick="updateFilterSelection('modality', 'modality_set','Modality',0,false)">Radiotherapy Plan(RTPLAN)</li>
+                    <li><input type="checkbox" checked value="rtstruct" onclick="updateFilterSelection('modality', 'modality_set','Modality',0,false)">Radiotheraoy Structure Set(RTSTRUCT)</li>
 
                  </ul>
                 </div>
@@ -108,14 +150,14 @@
 
                 <div id="body_part" class="collapse">
                     <ul style="list-style: none;">
-                    <li><input type="checkbox" checked value="bladder">Bladder</li>
-                    <li><input type="checkbox" checked value="brain">Brain</li>
-                    <li><input type="checkbox" checked value="colon">Colon</li>
-                    <li><input type="checkbox" checked value="headneck">Head/Neck</li>
-                        <li><input type="checkbox" checked value="kidney">Kidney</li>
-                    <li><input type="checkbox" checked value="prostate">Prostate</li>
-                    <li><input type="checkbox" checked value="thyroid">Thyroid</li>
-                    <li><input type="checkbox" checked value="none">Not Available/Other</li>
+                    <li><input type="checkbox" checked value="bladder" onclick="updateFilterSelection('body_part', 'body_part_examined_set','Body Part Examined','BodyPartExamined',true,false)">Bladder</li>
+                    <li><input type="checkbox" checked value="brain" onclick="updateFilterSelection('body_part', 'body_part_examined_set','Body Part Examined','BodyPartExamined',true,false)">Brain </li>
+                    <li><input type="checkbox" checked value="colon" onclick="updateFilterSelection('body_part', 'body_part_examined_set','Body Part Examined','BodyPartExamined',true,false)">Colon</li>
+                    <li><input type="checkbox" checked value="headneck" onclick="updateFilterSelection('body_part', 'body_part_examined_set','Body Part Examined','BodyPartExamined',true,false)">Head/Neck</li>
+                        <li><input type="checkbox" checked value="kidney" onclick="updateFilterSelection('body_part', 'body_part_examined_set','Body Part Examined','BodyPartExamined',true,false)">Kidney</li>
+                    <li><input type="checkbox" checked value="prostate" onclick="updateFilterSelection('body_part', 'body_part_examined_set','Body Part Examined','BodyPartExamined',true,false)">Prostate</li>
+                    <li><input type="checkbox" checked value="thyroid" onclick="updateFilterSelection('body_part', 'body_part_examined_set','Body Part Examined','BodyPartExamined',true,false)">Thyroid</li>
+                    <li><input type="checkbox" checked value="none" onclick="updateFilterSelection('body_part', 'body_part_examined_set','Body Part Examined','BodyPartExamined',true,false)">Not Available/Other</li>
 
 
                    </ul>
@@ -159,9 +201,9 @@
 
                 <div id="vital" class="collapse">
                     <ul id="vital_list" style="list-style: none;">
-                         <li><input type="checkbox" checked value="yes">Alive</li>
-                        <li><input type="checkbox" checked value="yes">Dead</li>
-                        <li><input type="checkbox" checked value="yes">NA</li>
+                         <li><input type="checkbox" checked value="alive" onclick="updateFilterSelection('vital_list', 'vital_status_set','Vital Status','vital_status',false,false)">Alive</li>
+                        <li><input type="checkbox" checked value="dead" onclick="updateFilterSelection('vital_list', 'vital_status_set','Vital Status','vital_status',false,false)">Dead</li>
+                        <li><input type="checkbox" checked value="none" onclick="updateFilterSelection('vital_list', 'vital_status_set','Vital Status','vital_status',false,false)">NA</li>
                     </ul>
                 </div>
 
@@ -172,9 +214,9 @@
 
                 <div id="gender" class="collapse">
                     <ul id="gender_list" style="list-style: none;">
-                         <li><input type="checkbox" checked value="yes">Male</li>
-                        <li><input type="checkbox" checked value="yes">Female</li>
-                        <li><input type="checkbox" checked value="yes">NA</li>
+                         <li><input type="checkbox" checked value="male" onclick="updateFilterSelection('gender_list', 'gender_set','Gender','gender',false,false)">Male</li>
+                        <li><input type="checkbox" checked value="female" onclick="updateFilterSelection('gender_list', 'gender_set','Gender','gender',false,false)">Female</li>
+                        <li><input type="checkbox" checked value="none" onclick="updateFilterSelection('gender_list', 'gender_set','Gender','gender',false,false)">NA</li>
                     </ul>
                 </div>
 
@@ -185,15 +227,15 @@
 
                 <div id="age" class="collapse">
                     <ul id="age_list" style="list-style: none;">
-                         <li><input type="checkbox" checked value="0,19">0-19</li>
-                        <li><input type="checkbox" checked value="20,29">20-29</li>
-                        <li><input type="checkbox" checked value="30,39">30-39</li>
-                        <li><input type="checkbox" checked value="40,49">40-49</li>
-                        <li><input type="checkbox" checked value="50,59">50-59</li>
-                        <li><input type="checkbox" checked value="50,59">60-69</li>
-                        <li><input type="checkbox" checked value="50,59">70-79</li>
-                        <li><input type="checkbox" checked value="80">Over 80</li>
-                        <li><input type="checkbox" checked value="None">NA</li>
+                         <li><input type="checkbox" checked value="0,20" onclick="updateFilterSelection('age_list', 'age_set','Age','age',false,true)">0-19</li>
+                        <li><input type="checkbox" checked value="20,30" onclick="updateFilterSelection('age_list', 'age_set','Age','age',false,true)">20-29</li>
+                        <li><input type="checkbox" checked value="30,40" onclick="updateFilterSelection('age_list', 'age_set','Age','age',false,true)">30-39</li>
+                        <li><input type="checkbox" checked value="40,50" onclick="updateFilterSelection('age_list', 'age_set','Age','age',false,true)">40-49</li>
+                        <li><input type="checkbox" checked value="50,60" onclick="updateFilterSelection('age_list', 'age_set','Age','age',false,true)">50-59</li>
+                        <li><input type="checkbox" checked value="60,70" onclick="updateFilterSelection('age_list', 'age_set','Age','age',false,true)">60-69</li>
+                        <li><input type="checkbox" checked value="70,80" onclick="updateFilterSelection('age_list', 'age_set','Age','age',false,true)">70-79</li>
+                        <li><input type="checkbox" checked value="80" onclick="updateFilterSelection('age_list', 'age_set','Age','age',false,true)">80 or Over</li>
+                        <li><input type="checkbox" checked value="none" onclick="updateFilterSelection('age_list', 'age_set','Age','age',false,true)">NA</li>
                     </ul>
                 </div>
 
@@ -204,12 +246,12 @@
 
                 <div id="bmi" class="collapse">
                     <ul id="bmi_list" style="list-style: none;">
-                         <li><input type="checkbox" checked value="0,18.5">Underweight: BMI less than 18.5</li>
-                        <li><input type="checkbox" checked value="18.5,25">Normal weight: BMI greater than or equal to 18.5 and less than 25</li>
-                        <li><input type="checkbox" checked value="25,30">Overweight: BMI greater than 25 and less than 30</li>
-                        <li><input type="checkbox" checked value="30">Obese: BMI greater than 30</li>
+                         <li><input type="checkbox" checked value="0,18.5" onclick="updateFilterSelection('bmi_list', 'bmi_set','BMI','bmi',false,true)">Underweight: BMI less than 18.5</li>
+                        <li><input type="checkbox" checked value="18.5,25" onclick="updateFilterSelection('bmi_list', 'bmi_set','BMI','bmi',false,true)">Normal weight: BMI greater than or equal to 18.5 and less than 25</li>
+                        <li><input type="checkbox" checked value="25,30" onclick="updateFilterSelection('bmi_list', 'bmi_set','BMI','bmi',false,true)">Overweight: BMI greater than 25 and less than 30</li>
+                        <li><input type="checkbox" checked value="30" onclick="updateFilterSelection('bmi_list', 'bmi_set','BMI','bmi',false,true)">Obese: BMI greater than 30</li>
 
-                        <li><input type="checkbox" checked value="na">NA</li>
+                        <li><input type="checkbox" checked value="none">NA</li>
                     </ul>
                 </div>
 
@@ -248,28 +290,41 @@
         <div id = "results_derived" style="display:inline-block;width:30%;border: thin solid black" onclick="toggleSearch(1,'results')"><h3>Derived</h3></div>
         <div id = "results_related" style="display:inline-block;width:30%;border: thin solid black" onclick="toggleSearch(2,'results')"><h3>Related</h3></div>
 
-        <div align="left"; style="width:100%;height:450px;display:inline-block;border: thin solid black;float:none">
+        <div align="left"; style="width:100%;height:700px;display:inline-block;border: thin solid black;float:none">
             <div id = "results_orig_set" align="left" style="display:inline-block;height:600px"><p>cohort plot orig data</p>
-            <div style="float:left;float:top display:inline-block;width:300px;height:200px" >
-                <canvas id="modality_chart"   ></canvas>
+            <div id="modality_chart" style="float:left;float:top display:inline-block;width:300px;height:200px" >
+                <!-- <canvas id="modality_chart"   ></canvas> -->
             </div>
-                <div style="float:left;float:top display:inline-block;width:300px;height:300px" >
-                <canvas id="body_part_examined_chart"  ></canvas>
+                <div id="body_part_examined_chart" style="float:left;float:top display:inline-block;width:300px;height:300px" >
+                <!-- <canvas id="body_part_examined_chart"  ></canvas> -->
                 </div>
 
 
             </div>
             <div id = "results_derived_set" align="left" style="display:none;"><p>cohort plot derived data</p></div>
             <div id = "results_related_set" align="left" style="display:none;"><p>cohort plot related data</p>
-                <div style="float:left;float:top display:inline-block;width:300px;height:200px" >
-                <canvas id="disease_code_chart"   ></canvas>
+
+                 <div id="disease_code_chart" style="float:left;float:top display:inline-block;width:300px;height:200px" >
+                <!-- <canvas id="disease_code_chart"   ></canvas> -->
             </div>
-                <div style="float:left;float:top display:inline-block;width:300px;height:200px" >
-                <canvas id="vital_statistics_chart"  ></canvas>
+                <div id="vital_statistics_chart" style="float:left;float:top display:inline-block;width:300px;height:200px" >
+                <!-- <canvas id="vital_statistics_chart"  ></canvas> -->
                 </div>
-                <div style="float:left;float:top display:inline-block;width:300px;height:200px" >
-                <canvas id="gender_chart"  ></canvas>
+                <div id="gender_chart" style="float:left;float:top display:inline-block;width:300px;height:200px" >
+                <!-- <canvas id="gender_chart"  ></canvas> -->
                 </div>
+                <div id="age_chart" style="float:left;float:top display:inline-block;width:300px;height:200px" >
+                <!-- <canvas id="gender_chart"  ></canvas> -->
+                </div>
+
+                <div id="race_chart" style="float:left;float:top display:inline-block;width:300px;height:200px" >
+                <!-- <canvas id="race_chart"  ></canvas> -->
+                </div>
+
+                <div id="ethnicity_chart" style="float:left;float:top display:inline-block;width:300px;height:200px" >
+                <!-- <canvas id="ethnicity_chart"  ></canvas> -->
+                </div>
+
                     <!-- <div id="disease_code_plot" style="display-inline" ></div>
                 <div id="vital_statistics_plot"></div> -->
                <!-- //style="width:A100%;display:inline-block;overflow-y:auto;overflow-x:auto" -->
@@ -292,21 +347,27 @@
             <p>Series<select id="series_select">
             </select><br></p>
 
-            <div id="viewId" style="position:relative;overflow:hidden;height:600px">
-            <iframe id="srcU" src="http://localhost:8085/viewer/1.3.6.1.4.1.14519.5.2.1.6279.6001.265704884949271879044145982159"  style="object-position: 20% 20%"></iframe>
+            <!-- <div id="viewId" style="position:relative;height:600px;width:500px">
+                <h3><a target="_blank" href="localhost:8085/projects/chc-tcia/locations/us-central1/datasets/4d-lung/dicomStores/4d-lung/study/1.3.6.1.4.1.14519.5.2.1.6834.5010.173152375040663266298918385412">Open series in separate viewer</a></h3>
+            -->
+            <!-- <iframe id="srcU" style="height:500px;width:500px" src="http://localhost:8085/viewer/1.3.6.1.4.1.14519.5.2.1.6279.6001.265704884949271879044145982159"  loading="eager" onload="(function(){document.getElementById('srcU').contentWindow.scrollTo(2000,4000)})" ></iframe> -->
+
+            <!--    <iframe id="srcU" style="height:500px;width:500px" src="http://localhost:8085/projects/chc-tcia/locations/us-central1/datasets/4d-lung/dicomStores/4d-lung/study/1.3.6.1.4.1.14519.5.2.1.6834.5010.173152375040663266298918385412"  loading="eager" onload="(function(){document.getElementById('srcU').contentWindow.scrollTo(2000,4000)})" ></iframe> -->
+
+                <!-- <iframe> -->
+
+
+              <!-- </iframe> -->
+
             </div>
-            <div>
-                <canvas id="dest" width="500";height="500"></canvas>
-            </div>
+
         </div>
 
 
 
     </div>
 
-    <div id="viewId" style="position:absolute;height:600px">
-            <iframe id="srcU" src="http://localhost:8085/viewer/1.3.6.1.4.1.14519.5.2.1.6279.6001.265704884949271879044145982159" style="height:600px;width:800px" onload="this.contentWindow.scrollTo(100,100)"></iframe>
-    </div>
+
 
 
 
