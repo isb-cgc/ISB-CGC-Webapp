@@ -421,6 +421,9 @@ def projects_page(request):
 def ohif_page(request):
     return render(request, 'idc/ohif.html')
 
+def warn_page(request):
+    return render(request, 'idc/warn.html')
+
 
 def about_page(request):
     return render(request, 'idc/about.html')
