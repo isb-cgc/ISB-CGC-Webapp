@@ -18,16 +18,15 @@ from __future__ import print_function
 from builtins import str
 from builtins import object
 import os
+import re
 from os.path import join, dirname
 import sys
 import dotenv
 from socket import gethostname, gethostbyname
 
-env_path = '../'
-if os.environ.get('SECURE_LOCAL_PATH', None):
-    env_path += os.environ.get('SECURE_LOCAL_PATH')
+SECURE_LOCAL_PATH = os.environ.get('SECURE_LOCAL_PATH', '')
 
-dotenv.read_dotenv(join(dirname(__file__), env_path+'.env'))
+dotenv.read_dotenv(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
 
 APP_ENGINE_FLEX = 'aef-'
 APP_ENGINE = 'Google App Engine/'
@@ -68,7 +67,6 @@ MANAGERS                = ADMINS
 GCLOUD_PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
 GCLOUD_PROJECT_NUMBER          = os.environ.get('GCLOUD_PROJECT_NUMBER', '')
 BIGQUERY_PROJECT_ID           = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PROJECT_ID)
-BIGQUERY_DATASET_V1         = os.environ.get('BIGQUERY_DATASET_V1', '')
 BIGQUERY_DATA_PROJECT_ID  = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
 
 # Deployment module
@@ -86,13 +84,11 @@ BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://mvm-api-dot-id
 PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
 
 # Data Buckets
-OPEN_DATA_BUCKET        = os.environ.get('OPEN_DATA_BUCKET', '')
 GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET')
 
 # BigQuery cohort storage settings
 BIGQUERY_COHORT_DATASET_ID           = os.environ.get('BIGQUERY_COHORT_DATASET_ID', 'cohort_dataset')
 BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
-BIGQUERY_COSMIC_DATASET_ID    = os.environ.get('BIGQUERY_COSMIC_DATASET_ID', '')
 BIGQUERY_IDC_TABLE_ID    = os.environ.get('BIGQUERY_IDC_TABLE_ID', '')
 MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
@@ -455,7 +451,7 @@ if IS_DEV:
 #   End django-allauth   #
 ##########################
 
-GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else ''
+GOOGLE_APPLICATION_CREDENTIALS  = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
 
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
 
@@ -521,7 +517,10 @@ DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
 #################################
 # SOLR settings
 #################################
-SOLR_URL = os.environ.get('SOLR_URL', None)
+SOLR_URI = os.environ.get('SOLR_URI', '')
+SOLR_LOGIN = os.environ.get('SOLR_LOGIN', '')
+SOLR_PASSWORD = os.environ.get('SOLR_PASSWORD', '')
+SOLR_CERT = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCAL_PATH, os.environ.get('SOLR_CERT', '')))
 
 ##############################################################
 #   MailGun Email Settings

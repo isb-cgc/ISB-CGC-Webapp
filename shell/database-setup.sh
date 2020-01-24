@@ -12,7 +12,7 @@ if [ -n "$CI" ]; then
     # Give the 'ubuntu' test user access
     mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'ubuntu'@'%' IDENTIFIED BY 'idc';"
 else
-    export $(cat /home/vagrant/parentDir/secure_files/idc/.env | grep -v ^# | xargs) 2> /dev/null
+    export $(cat ${ENV_FILE_PATH} | grep -v ^# | xargs) 2> /dev/null
     export HOME=/home/vagrant
     export HOMEROOT=/home/vagrant/www
     export MYSQL_ROOT_USER=root
@@ -34,12 +34,12 @@ mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "CREATE US
 mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "CREATE USER 'dev-user'@'localhost' IDENTIFIED BY '${DATABASE_PASSWORD}';"
 
 echo "Granting permissions to database users..."
-mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO '${DATABASE_USER}'@'%';"
-mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO '${DATABASE_USER}'@'localhost';"
-mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO 'api-user'@'%';"
-mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO 'api-user'@'localhost';"
-mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO 'dev-user'@'%';"
-mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO 'dev-user'@'localhost';"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO '${DATABASE_USER}'@'%';"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO '${DATABASE_USER}'@'localhost';"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'api-user'@'%';"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'api-user'@'localhost';"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'dev-user'@'%';"
+mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'dev-user'@'localhost';"
 
 
 # If we have migrations for older, pre-migrations apps which haven't yet been or will never be added to the database dump, make them here eg.:
@@ -58,21 +58,21 @@ mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NA
 # Load your SQL table file
 # Looks for metadata_featdef_tables.sql, if this isn't found, it downloads a file from GCS and saves it as
 # metadata_tables.sql for future use
-#if [ ! -f ${HOMEROOT}/scripts/metadata_tables.sql ]; then
+if [ ! -f ${HOMEROOT}/scripts/${METADATA_SQL_FILE} ]; then
     # Sometimes CircleCI loses its authentication, re-auth with the dev key if we're on circleCI...
-#    if [ -n "$CI" ]; then
-#        sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/deployment.key.json
+    if [ -n "$CI" ]; then
+        sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/deployment.key.json
     # otherwise just use privatekey.json
-#    else
-#        sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/privatekey.json
-#        sudo gcloud config set project "${GCLOUD_PROJECT_NAME}"
-#    fi
-#    echo "Downloading SQL Table File..."
-#    sudo gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/dev_table_and_routines_file.sql" ${HOMEROOT}/scripts/metadata_tables.sql
-#fi
+    else
+        sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/${SECURE_LOCAL_PATH}/privatekey.json
+        sudo gcloud config set project "${GCLOUD_PROJECT_ID}"
+    fi
+    echo "Downloading SQL Table File..."
+    sudo gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/${METADATA_SQL_FILE}" ${HOMEROOT}/scripts/${METADATA_SQL_FILE}
+fi
 
 echo "Applying SQL Table File... (may take a while)"
-#mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_tables.sql
+mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/${METADATA_SQL_FILE}
 
 echo "Adding Django site IDs..."
 python3 ${HOMEROOT}/scripts/add_site_ids.py

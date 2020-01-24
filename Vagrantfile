@@ -10,6 +10,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.synced_folder ".", "/home/vagrant/www"
   config.vm.synced_folder "../", "/home/vagrant/parentDir"
+  config.vm.synced_folder "../secure_files", "/home/vagrant/secure_files"
 
   # Map Common for the WebApp
   config.vm.synced_folder "../IDC-Common", "/home/vagrant/www/IDC-Common"
@@ -17,6 +18,7 @@ Vagrant.configure(2) do |config|
   # Map API so it can use this VM
   config.vm.synced_folder "../IDC-API", "/home/vagrant/API"
 
+  config.vm.provision :shell, inline: "echo 'source /home/vagrant/www/shell/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
   config.vm.provision "shell", path: 'shell/install-deps.sh'
   config.vm.provision "shell", path: 'shell/create-database.sh'
   config.vm.provision "shell", path: 'shell/database-setup.sh'

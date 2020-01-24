@@ -12,13 +12,14 @@ The system uses [Vagrant](https://www.vagrantup.com/) to setup a consistent, pla
 
 From there perform the following steps...
 
- 1. Once you've installed PyCharm and cloned the repositories, create a directory within the `PycharmProjects` directory (the parent directory of your repositories) called `secure_files/`. (Note: if you are developing on more than one project, you may wish to further divide secure_files into `secure_files/idc`.)
- 2. Copy the `sample.env` file to a file named `.env` in `secure_files/`
+ 1. Once you've installed PyCharm and cloned the repositories, create a directory within the `PycharmProjects` directory (the parent directory of your repositories) called `secure_files/idc`.
+ 2. Copy the `sample.env` file to a file named `.env` in `secure_files/idc`. The setup process **requires** this name and this path.
  3. Fill out the `.env` file with the proper values
    * For most **development** environments, `MYSQL_ROOT_PASSWORD` and `DATABASE_PASSWORD` can be the same, and `DATABASE_USER` can be `root`
    * `GCLOUD_PROJECT_ID` is available after creating a project in the [Google Cloud Dashboard](https://console.developers.google.com/)
    * `OAUTH2_CLIENT_ID` and `OAUTH2_CLIENT_SECRET` can also be obtained in the Google Cloud Dashboard by going to API & Auth > Credentials > Add New > OAuth 2.0 Client > Web Application
    * Be sure when developing locally that you have 127.0.0.1 in the list of allowed domains for the OAuth 2.0 key
+   * You must set `GOOGLE_APPLICATION_CREDENTIALS` to some existing file, e.g. `GOOGLE_APPLICATION_CREDENTIALS=../parentDir/secure_files/idc/my-service-account-key.json`. If not, Django will not start up cleanly.
 
 ## Configuring PyCharm
 
@@ -39,13 +40,15 @@ PyCharm Pro can be used to run your Web Application as a native Django applicati
  13. Set the Python Interpreter to the Vagrant Machine (if it is not set to that already)
  14. Set the working directory to `/home/vagrant/www`
  15. Click `...` next to the `Environment variables:`, box and add the following values:
-     `SECURE_LOCAL_PATH = ../parentDir/secure_files`
+     `SECURE_LOCAL_PATH = ../parentDir/secure_files/idc/` (you **MUST** have the trailing `/`)
      `PYTHONPATH = /home/vagrant/www:/home/vagrant/www/lib:/home/vagrant/www/IDC-Common`
      `DJANGO_SETTINGS_MODULE = idc.settings`
      `PYTHONUNBUFFERED = 1`
  16. Click ok to save
 
-You will also need to set the *shell/python-su.sh* file to be executable. You can do this in the vagrant machines command line with the command `chmod +x /home/vagrant/www/shell/python-su.sh`
+You will also need to set the *shell/python-su.sh* file to be executable.
+You can do this in the vagrant machines command line with the command `chmod +x /home/vagrant/www/shell/python-su.sh`
+(This step is done for you by `vagrant-set-env.sh` when the VM image is first built.)
 
 ### Running
 
