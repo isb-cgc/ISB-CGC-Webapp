@@ -400,7 +400,7 @@ require([
     var copy_to_clipboard = function(el) {
         var $temp = $("<input>");
         $("body").append($temp);
-        $temp.val($(el).text()).select();
+        $temp.val( '`' + $(el).text() + '`' ).select();
         document.execCommand("copy");
         $temp.remove();
     };
