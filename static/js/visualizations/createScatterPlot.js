@@ -329,7 +329,11 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .x(xScale)
                 .y(yScale)
                 .on('brushstart',function(e){
-                    selectedSamples = {};
+                    var e = brush.extent();
+                    if(e){
+                        selectedSamples = {};
+                        sample_form_update(e, true);
+                    }
                     mouseDown = null;
                 })
                 .on('brush', function(p){

@@ -23,11 +23,9 @@ import sys
 import dotenv
 from socket import gethostname, gethostbyname
 
-env_path = '../'
-if os.environ.get('SECURE_LOCAL_PATH', None):
-    env_path += os.environ.get('SECURE_LOCAL_PATH')
+SECURE_LOCAL_PATH = os.environ.get('SECURE_LOCAL_PATH', '')
 
-dotenv.read_dotenv(join(dirname(__file__), env_path+'.env'))
+dotenv.read_dotenv(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
 
 APP_ENGINE_FLEX = 'aef-'
 APP_ENGINE = 'Google App Engine/'
@@ -266,14 +264,9 @@ SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS','3600'))
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    # For using NDB with Django
-    # documentation: https://cloud.google.com/appengine/docs/python/ndb/#integration
-    # WE DON'T SEEM TO BE USING NDB SO I'M COMMENTING THIS OUT - PL
-    # 'google.appengine.ext.ndb.django_middleware.NdbDjangoMiddleware',
-    # 'google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'GenespotRE.checkreqsize_middleware.CheckReqSize',
+    'isb_cgc.checkreqsize_middleware.CheckReqSize',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'adminrestrict.middleware.AdminPagesRestrictMiddleware',
@@ -283,10 +276,10 @@ MIDDLEWARE = [
     'offline.middleware.OfflineMiddleware',
 ]
 
-ROOT_URLCONF = 'GenespotRE.urls'
+ROOT_URLCONF = 'isb_cgc.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'GenespotRE.wsgi.application'
+WSGI_APPLICATION = 'isb_cgc.wsgi.application'
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -298,7 +291,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'cohorts',
-    'GenespotRE',
+    'isb_cgc',
     'visualizations',
     'seqpeek',
     'sharing',
@@ -436,7 +429,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.tz',
                 'finalware.context_processors.contextify',
-                'GenespotRE.context_processor.additional_context',
+                'isb_cgc.context_processor.additional_context',
             ),
             # add any loaders here; if using the defaults, we can comment it out
             # 'loaders': (
@@ -475,10 +468,12 @@ if IS_DEV:
 ##########################
 
 # Path to application runtime JSON key
-GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else ''
+GOOGLE_APPLICATION_CREDENTIALS        = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
 
 # GCP monitoring Service Account
 MONITORING_SA_CLIENT_EMAIL            = os.environ.get('MONITORING_SA_CLIENT_EMAIL','')
+
+MONITORING_SA_ACCESS_CREDENTIALS      = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('MONITORING_SA_ACCESS_CREDENTIALS', '')))
 
 #################################
 #   For NIH/eRA Commons login   #
@@ -487,9 +482,6 @@ MONITORING_SA_CLIENT_EMAIL            = os.environ.get('MONITORING_SA_CLIENT_EMA
 OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP', '')
 GOOGLE_GROUP_ADMIN                      = os.environ.get('GOOGLE_GROUP_ADMIN', '')
 SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS', '')
-
-# JSON key file for GCP monitoring SA
-MONITORING_SA_ACCESS_CREDENTIALS              = os.environ.get('MONITORING_SA_ACCESS_CREDENTIALS', '')
 
 # Log name for ERA login views
 LOG_NAME_ERA_LOGIN_VIEW                  = os.environ.get('LOG_NAME_ERA_LOGIN_VIEW', '')
@@ -596,10 +588,14 @@ DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
 NOTEBOOK_VIEWER = ''
 # NOTEBOOK_ENV_LOC = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_ENV_PATH', None))
 # NOTEBOOK_SL_PATH = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_SL_PATH', None))
+
 #################################
 # SOLR settings
 #################################
-SOLR_URL = os.environ.get('SOLR_URL', None)
+SOLR_URI = os.environ.get('SOLR_URI', '')
+SOLR_LOGIN = os.environ.get('SOLR_LOGIN', '')
+SOLR_PASSWORD = os.environ.get('SOLR_PASSWORD', '')
+SOLR_CERT = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCAL_PATH, os.environ.get('SOLR_CERT', '')))
 
 ##############################################################
 #   MailGun Email Settings
@@ -611,11 +607,6 @@ NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRES
 
 # Explicitly check for known items
 BLACKLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
-
-# IndexD settings
-INDEXD_URI = os.environ.get('INDEXD_URI', None)
-INDEXD_REQ_LIMIT = int(os.environ.get('INDEXD_REQ_LIMIT', '100'))
-
 
 if DEBUG and DEBUG_TOOLBAR:
     INSTALLED_APPS += ('debug_toolbar',)

@@ -26,7 +26,7 @@ from io import StringIO
 from time import sleep
 import os
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "GenespotRE.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "isb_cgc.settings")
 
 import django
 django.setup()
