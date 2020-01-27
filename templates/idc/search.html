@@ -74,13 +74,16 @@ resolveAllPlots()
 {% block page_name %}help{% endblock %}
 
 {% block content %}
-
+    tmp
+{{ request.session.name }}
+    tmp
     <div class="col-lg-12" style="float:left;width:51%">
 
         <p><h3>Search Scope:</h3>
         <select id="data_scope">
         <option value="all">All data</option>
         </select>
+        tmp {{ request.session.TEST_COOKIE_NAME }}
     </p>
 
     </div>
