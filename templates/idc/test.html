@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+	<div id="root"></div>
+
+  <script src="https://unpkg.com/@ohif/viewer@1.0.3/dist/index.umd.js" crossorigin></script>
+  <script>
+    var containerId = "root";
+    var componentRenderedOrUpdatedCallback = function(){
+      console.log('OHIF Viewer rendered/updated');
+    }
+    window.OHIFViewer.installViewer(
+      {
+      // routerBasename: '/',
+      servers: {
+        dicomWeb: [
+          {
+            name: 'DCM4CHEE',
+            wadoUriRoot: 'https://server.dcmjs.org/dcm4chee-arc/aets/DCM4CHEE/wado',
+            qidoRoot: 'https://server.dcmjs.org/dcm4chee-arc/aets/DCM4CHEE/rs',
+            wadoRoot: 'https://server.dcmjs.org/dcm4chee-arc/aets/DCM4CHEE/rs',
+            qidoSupportsIncludeField: true,
+            imageRendering: 'wadors',
+            thumbnailRendering: 'wadors',
+          },
+        ],
+      },
+    }, containerId, componentRenderedOrUpdatedCallback);
+	</script>
+
+</body>
+</html>
