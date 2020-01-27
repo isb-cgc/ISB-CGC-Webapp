@@ -38,7 +38,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "idc.settings")
 import django
 django.setup()
 
-from idc_collections.models import Program, Collection, Attribute, Attribute_Display_Values
+from idc_collections.models import Program, Collection, Attribute, Attribute_Display_Values, SolrCollection
 
 from django.contrib.auth.models import User
 idc_superuser = User.objects.get(username="idc")
@@ -57,6 +57,16 @@ def add_programs(program_set):
             print(obj)
         except Exception as e:
             logger.error("[ERROR] Program {} may not have been added!".format(prog['short_name']))
+            logger.exception(e)
+
+
+def add_solr_collex(solr_set):
+    for collex in solr_set:
+        try:
+            obj, created = SolrCollection.objects.update_or_create(name=collex, version="0")
+            print("Solr Collection created: {}".format(collex))
+        except Exception as e:
+            logger.error("[ERROR] Program {} may not have been added!".format(collex))
             logger.exception(e)
 
 
@@ -122,6 +132,10 @@ def add_attributes(attr_set):
                     Attribute_Display_Values.objects.update_or_create(
                         raw_value=dv['raw_value'], display_value=dv['display_value'], attribute=obj
                     )
+
+            if 'solr_collex' in attr:
+                for solr in attr['solr_collex']:
+                    obj.solr_collections.add(SolrCollection.objects.get(name=solr))
         except Exception as e:
             logger.error("[ERROR] Attribute {} may not have been added!".format(attr['name']))
             logger.exception(e)
@@ -135,6 +149,8 @@ def main():
             "short_name": "TCGA",
             "public": True
         }])
+
+        add_solr_collex(['tcia_images', 'tcga_clin_bios'])
 
         collection_file = open("tcia_collex.csv", "r")
         line_reader = collection_file.readlines()
@@ -180,9 +196,12 @@ def main():
 
             attr = {
                 'name': line_split[0],
-                "display_name": line_split[1].replace("_", " ").title() if re.match(r'_', line_split[1]) else line_split[1],
-                "type": Attribute.CATEGORICAL if line_split[1] == 'STRING' else Attribute.CONTINUOUS_NUMERIC,
-                "collex": Collection.objects.values_list('short_name', flat=True)
+                "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
+                line_split[1],
+                "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
+                line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                "collex": Collection.objects.values_list('short_name', flat=True),
+                'solr_collex': ['tcga_clin_bios']
             }
 
             if attr['name'] in display_vals:
@@ -204,9 +223,10 @@ def main():
 
             attr_set.append({
                 'name': line_split[0],
-                "display_name": line_split[1].replace("_", " ").title() if re.match(r'_', line_split[1]) else line_split[1],
-                "type": Attribute.CATEGORICAL if line_split[1] == 'STRING' else Attribute.CONTINUOUS_NUMERIC,
-                'cross_collex': True
+                "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else line_split[1],
+                "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                'cross_collex': True,
+                'solr_collex': ['tcia_images']
             })
 
         add_attributes(attr_set)

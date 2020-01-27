@@ -44,14 +44,14 @@ from cohorts.models import Cohort, Cohort_Perms
 from idc_collections.models import Program
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
+from solr_helpers import query_solr_and_format_result, build_solr_facets, build_solr_query
+from idc_collections.models import Attribute, SolrCollection
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
 
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
-# SOLR_URL = settings.SOLR_URL
-
 
 
 def convert(data):
@@ -117,6 +117,44 @@ def css_test(request):
 # Returns the data exploration and filtering page, which also allows for cohort creation
 @login_required
 def explore_data(request):
+    filters = {"disease_code": ["BRCA","LUAD"]}
+    tcia_attrs = SolrCollection.objects.get(name="tcia_images").get_collection_attr().values_list('name', flat=True)
+    tcia_fields = SolrCollection.objects.get(name="tcia_images").get_collection_attr(False).values_list('name', flat=True)
+    tcga_attrs = SolrCollection.objects.get(name="tcga_clin_bios").get_collection_attr().values_list('name', flat=True)
+
+    solr_query_str = build_solr_query(filters)
+    solr_facets = build_solr_facets(list(tcia_attrs), filters)
+
+    print("TCIA ATTRs: {}".format(tcia_attrs))
+    print("TCIA facets: {}".format(solr_facets))
+
+    solr_result = query_solr_and_format_result({
+        'collection': 'tcia_images',
+        'fields': list(tcia_fields),
+        'fq_string': '{!join from=case_barcode fromIndex=tcga_clin_bios to=case_barcode}' + solr_query_str,
+        'query_string': "*:*",
+        'facets': solr_facets,
+        'limit': 5,
+        'collapse_on': 'case_barcode',
+        'counts_only': False
+    })
+
+    print("Solr result: {}".format(solr_result))
+
+    solr_facets = build_solr_facets(list(tcga_attrs), filters)
+
+    solr_result = query_solr_and_format_result({
+        'collection': 'tcga_clin_bios',
+        'fields': None,
+        'fq_string': '{!join from=case_barcode fromIndex=tcia_images to=case_barcode}' + solr_query_str,
+        'query_string': "*:*",
+        'facets': solr_facets,
+        'limit': 0,
+        'collapse_on': 'case_barcode'
+    })
+
+    print("Solr result: {}".format(solr_result))
+
     return render(request, 'idc/explore.html', {'request': request})
 
 
