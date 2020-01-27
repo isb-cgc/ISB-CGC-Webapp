@@ -110,7 +110,7 @@ Returns user to landing page.
 
 @never_cache
 def landing_page(request):
-    return render(request, 'GenespotRE/landing.html', {'request': request, })
+    return render(request, 'isb_cgc/landing.html', {'request': request, })
 
 
 '''
@@ -120,7 +120,7 @@ Displays the privacy policy
 
 @never_cache
 def privacy_policy(request):
-    return render(request, 'GenespotRE/privacy.html', {'request': request, })
+    return render(request, 'isb_cgc/privacy.html', {'request': request, })
 
 
 '''
@@ -130,7 +130,7 @@ Returns css_test page used to test css for general ui elements
 
 def css_test(request):
     # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    return render(request, 'GenespotRE/css_test.html', {'request': request})
+    return render(request, 'isb_cgc/css_test.html', {'request': request})
 
 
 '''
@@ -164,7 +164,7 @@ def user_detail(request, user_id):
         for key in list(nih_details.keys()):
             user_details[key] = nih_details[key]
 
-        return render(request, 'GenespotRE/user_detail.html',
+        return render(request, 'isb_cgc/user_detail.html',
                       {'request': request,
                        'user': user,
                        'user_details': user_details
@@ -269,7 +269,7 @@ def user_landing(request):
         del cohort['id']
         del cohort['name']
 
-    return render(request, 'GenespotRE/user_landing.html', {'request': request,
+    return render(request, 'isb_cgc/user_landing.html', {'request': request,
                                                             'cohorts': cohorts,
                                                             'user_list': users,
                                                             'cohorts_listing': cohort_listing,
@@ -431,7 +431,7 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
 
 @login_required
 def dicom(request, study_uid=None):
-    template = 'GenespotRE/dicom.html'
+    template = 'isb_cgc/dicom.html'
 
     context = {
         'study_uid': study_uid,
@@ -450,7 +450,7 @@ def camic(request, file_uuid=None):
         return redirect(reverse('cohort_list'))
 
     images = [{'file_uuid': file_uuid, 'thumb': '', 'type': ''}]
-    template = 'GenespotRE/camic_single.html'
+    template = 'isb_cgc/camic_single.html'
 
     context['files'] = images
     context['camic_viewer'] = settings.CAMIC_VIEWER
@@ -484,7 +484,7 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
         'build': build,
     }
 
-    return render(request, 'GenespotRE/igv.html', context)
+    return render(request, 'isb_cgc/igv.html', context)
 
 
 @login_required
@@ -506,7 +506,7 @@ def path_report(request, report_file=None):
 
         anon_signed_uri = response.json()['url']
 
-        template = 'GenespotRE/path-pdf.html'
+        template = 'isb_cgc/path-pdf.html'
 
         context['path_report_file'] = anon_signed_uri
     except Exception as e:
@@ -525,22 +525,22 @@ def health_check(request, match):
 
 
 def help_page(request):
-    return render(request, 'GenespotRE/help.html')
+    return render(request, 'isb_cgc/help.html')
 
 
 def about_page(request):
-    return render(request, 'GenespotRE/about.html')
+    return render(request, 'isb_cgc/about.html')
 
 
 def vid_tutorials_page(request):
-    return render(request, 'GenespotRE/video_tutorials.html')
+    return render(request, 'isb_cgc/video_tutorials.html')
 
 
 def bq_meta_search(request):
     bq_filter_file_name = 'bq_meta_filters.json'
     bq_filter_file_path = BQ_ECOSYS_BUCKET + bq_filter_file_name
     bq_filters = requests.get(bq_filter_file_path).json()
-    return render(request, 'GenespotRE/bq_meta_search.html', bq_filters)
+    return render(request, 'isb_cgc/bq_meta_search.html', bq_filters)
 
 def bq_meta_data(request):
     bq_meta_data_file_name = 'bq_meta_data.json'
@@ -611,7 +611,7 @@ def dashboard_page(request):
     # Variable Favorites
     varfaves = request.user.variablefavorite_set.filter(active=True)
 
-    return render(request, 'GenespotRE/dashboard.html', {
+    return render(request, 'isb_cgc/dashboard.html', {
         'request': request,
         'cohorts': cohorts,
         'programs': programs,
