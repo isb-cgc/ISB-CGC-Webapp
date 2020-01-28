@@ -33,8 +33,8 @@
 <script>
     var componentRenderedOrUpdatedCallback = function(){
         alert("headed back "+window.location);
-        if (window.location.pathname==="/callback/"){
-
+        if (window.location.pathname.match(/callback/)){
+            alert("trying redirect");
              window.location.href = "localhost:8085/projects/chc-tcia/locations/us-central1/datasets/4d-lung/dicomStores/4d-lung/study/1.3.6.1.4.1.14519.5.2.1.6834.5010.173152375040663266298918385412";
         }
     }
@@ -68,7 +68,7 @@
     },
   ],
   studyListFunctionsEnabled: true,
-},"root",componentRenderedOrUpdatedCallback);
+},"root");
 
 
 </script>

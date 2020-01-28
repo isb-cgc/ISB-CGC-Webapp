@@ -1,3 +1,6 @@
+
+
+
 function resolveAllPlots(){
     resolveOriginalDataPlots("modality","modality_chart","Modality");
         resolveOriginalDataPlots("body_part","body_part_examined_chart", "BodyPartExamined");
@@ -27,7 +30,11 @@ function updateAllFilterSelections(){
 
 }
 
+function updateSearchScope(searchElem){
+    var project_scope=searchElem.selectedOptions[0].value;
+    document.getElementById('selected_project').innerHTML=project_scope;
 
+}
 function updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, isStudyAttr,isRangeAttr){
     newText="&emsp;&emsp;"+header+": ";
     checkBoxElem=document.getElementById(checkBoxDiv);
@@ -245,7 +252,7 @@ function constructProjects(){
     }
 
     projectA=projectA.sort();
-    projectElem=document.getElementById("data_scope");
+    projectElem=document.getElementById("project_scope");
     for (i=0;i<projectA.length;i++){
         nm=projectA[i]
 
@@ -306,6 +313,19 @@ function constructProjects(){
 
 }
 
+var plotLayout = {
+     title:'',
+    autosize:true,
+    margin: {
+    l: 30,
+    r: 30,
+    b: 60,
+    t: 30,
+    pad: 0
+  },
+    xaxis:{type:'category', dtick:1}
+};
+
 
 function resolveOriginalDataPlots(elem, plotId,lbl) {
 
@@ -359,30 +379,6 @@ function resolveOriginalDataPlots(elem, plotId,lbl) {
         }
     }
 
-/*
-var ctx = document.getElementById(plotId);
-var myChart = new Chart(ctx, {
-  type: 'bar',
-    title:lbl,
-    options:{
-      legend:{
-          display:false
-      },
-        title:{
-          display:true,
-            text:lbl
-        }
-    },
-
-  data: {
-    labels: dataValues,
-    datasets: [
-      {
-        data:dataCount
-      }
-    ]
-  }
-}); */
 
 var pdata =[
     {
@@ -392,13 +388,9 @@ var pdata =[
     }
 ];
 
- var layout = {
-            autosize:true,
-            margin:40
-
-        };
-Plotly.newPlot(plotId,pdata,layout);
-
+plotLayout.title=lbl;
+Plotly.newPlot(plotId,pdata,plotLayout);
+plotLayout.title='';
 
 }
 
@@ -441,29 +433,6 @@ for(i=0;i<projects.length;i++){
     }
 }
 
-/* var ctx = document.getElementById(plotId);
-var myChart = new Chart(ctx, {
-  type: 'bar',
-    title:lbl,
-    options:{
-      legend:{
-          display:true
-      },
-        title:{
-          display:true,
-            text:lbl
-        }
-    },
-
-  data: {
-    labels: dataValues,
-    datasets: [
-      {
-        data:dataCount
-      }
-    ]
-  }
-}); */
 
 var pdata =[
     {
@@ -473,18 +442,8 @@ var pdata =[
     }
 ];
 
- var layout = {
-            autosize:true,
-             margin: {
-    l: 30,
-    r: 30,
-    b: 60,
-    t: 30,
-    pad: 0
-  },
-
-        };
-Plotly.newPlot(plotId,pdata,layout);
+plotLayout.title=lbl
+Plotly.newPlot(plotId,pdata,plotLayout);
 
 }
 
@@ -559,29 +518,6 @@ for(i=0;i<projects.length;i++){
 
 }
 
-/* var ctx = document.getElementById(plotId);
-var myChart = new Chart(ctx, {
-  type: 'bar',
-    title:lbl,
-    options:{
-      legend:{
-          display:true
-      },
-        title:{
-          display:true,
-            text:lbl
-        }
-    },
-
-  data: {
-    labels: dataValues,
-    datasets: [
-      {
-        data:dataCount
-      }
-    ]
-  }
-}); */
 
 var pdata =[
     {
@@ -591,18 +527,8 @@ var pdata =[
     }
 ];
 
- var layout = {
-            autosize:true,
-            margin: {
-    l: 30,
-    r: 30,
-    b: 60,
-    t: 30,
-    pad: 0
-  },
-
-        };
-Plotly.newPlot(plotId,pdata,layout);
+plotLayout.title=lbl;
+Plotly.newPlot(plotId,pdata,plotLayout);
 
 }
 
