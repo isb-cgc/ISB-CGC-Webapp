@@ -438,24 +438,56 @@ def health_check(request, match):
 
 
 def help_page(request):
-    return render(request, 'idc/help.html')
+    return render(request, 'idc/help.html',{'request': request})
 
 def search_page(request):
-    return render(request, 'idc/search.html')
+    #del request.session['seenWarning']
+    #request.session['seenWarning']=False;
+    return render(request, 'idc/search.html', {'request':request})
 
-def test_page(request):
-    return render(request, 'idc/test.html')
+def ohif_test_page(request):
+    request.session['last_path']=request.get_full_path()
+    return render(request, 'idc/ohif.html',{'request': request})
 
-def viewer_page(request):
-    return render(request, 'idc/test.html')
+def ohif_viewer_page(request):
+    request.session['last_path'] = request.get_full_path()
+    return render(request, 'idc/ohif.html',{'request': request})
+
+def ohif_callback_page(request):
+    #if (request.session.has_key('last_ohif_path')):
+        #request.GET['qLast']= request.session['last_ohif_path'];
+
+        #request.path=request.session['last_ohif_path']
+        #request.info_path = request.session['last_ohif_path']
+        #request.resolver_match.route='^projects/'
+        #request.resolver_match.view_name = 'ohif_projects'
+        #request.resolver_match.view_name = 'ohif_projects'
+
+
+
+    return render(request,'idc/ohif.html',{'request': request})
+
+
+def ohif_projects_page(request):
+    request.session['last_ohif_path'] = request.get_full_path()
+    return render(request, 'idc/ohif.html',{'request': request})
+
+
+def ohif_page(request):
+    request.session['last_path'] = request.get_full_path()
+    return render(request, 'idc/ohif.html',{'request': request})
+
+def warn_page(request):
+    request.session['seenWarning']=True;
+    return render(request, 'idc/warn.html')
 
 
 def about_page(request):
-    return render(request, 'idc/about.html')
+    return render(request, 'idc/about.html',{'request': request})
 
 
 def vid_tutorials_page(request):
-    return render(request, 'idc/video_tutorials.html')
+    return render(request, 'idc/video_tutorials.html',{'request': request})
 
 
 @login_required

@@ -28,6 +28,7 @@ urlpatterns = [
 
     url(r'^$', views.landing_page, name='landing_page'),
     url(r'^explore/', views.explore_data, name='explore_data'),
+    #url(r'^explore/', views.search_page, name='search'),
     url(r'^user_landing/$', views.user_landing, name='user_landing'),
     url(r'^style_guide/', views.css_test),
     url(r'^users/(?P<user_id>\d+)/$', views.user_detail, name='user_detail'),
@@ -50,17 +51,25 @@ urlpatterns = [
     url(r'^help/', views.help_page, name='help'),
     url(r'^search/', views.search_page, name='search'),
 
-   url(r'^test/', views.test_page, name='test'),
-   url(r'^viewer/', views.viewer_page, name='view'),
+    url(r'^test/', views.ohif_test_page, name='ohif_test'),
+    url(r'^viewer/', views.ohif_viewer_page, name='ohif_view'),
+    url(r'^callback/', views.ohif_callback_page, name='ohif_callback'),
+    url(r'^ocallback/', views.ohif_callback_page, name='ohif_callback'),
+    url(r'^projects/', views.ohif_projects_page, name='ohif_projects'),
+    url(r'^ohif/', views.ohif_page, name='ohif'),
 
-    url(r'^about/', views.about_page, name='about_page'),
-    url(r'^dashboard/', views.dashboard_page, name='dashboard'),
-    url(r'^extended_login/$', views.extended_login_view, name='extended_login'),
-    url(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),
-    url(r'^privacy/', views.privacy_policy, name='privacy'),
 
-    url(r'^collections/', include('idc_collections.urls')),
-    url(r'^share/', include('sharing.urls')),
+     url(r'^warning/', views.warn_page, name='warn'),
+
+
+      url(r'^about/', views.about_page, name='about_page'),
+      url(r'^dashboard/', views.dashboard_page, name='dashboard'),
+      url(r'^extended_login/$', views.extended_login_view, name='extended_login'),
+      url(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),
+      url(r'^privacy/', views.privacy_policy, name='privacy'),
+
+      url(r'^collections/', include('idc_collections.urls')),
+      url(r'^share/', include('sharing.urls')),
 ]
 
 if settings.IS_DEV:
