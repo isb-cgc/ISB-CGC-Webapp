@@ -10,6 +10,10 @@ if [ -n "$CI" ]; then
     echo "Cloning IDC-Common branch ${COMMON_BRANCH}..."
     git clone -b ${COMMON_BRANCH} https://github.com/ImagingDataCommons/IDC-Common.git
 else
+    if [ ! -f "${ENV_FILE_PATH}" ]; then
+        echo "Environment variables file wasn't found - doublecheck secure_files.env and make sure it is a valid, VM-relative path!"
+        exit 1
+    fi
     export $(cat ${ENV_FILE_PATH} | grep -v ^# | xargs) 2> /dev/null
     export HOME=/home/vagrant
     export HOMEROOT=/home/vagrant/www
