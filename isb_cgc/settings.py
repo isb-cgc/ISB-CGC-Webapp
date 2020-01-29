@@ -27,7 +27,14 @@ from socket import gethostname, gethostbyname
 
 SECURE_LOCAL_PATH = os.environ.get('SECURE_LOCAL_PATH', '')
 
-dotenv.read_dotenv(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
+try:
+    dotenv.read_dotenv(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
+except Exception as e:
+    print("[ERROR] Couldn't open .env file expected at {}!".format(
+        join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
+    )
+    print("[ERROR] Exiting settings.py load - check your Pycharm and secure_path.env files.")
+    exit(1)
 
 APP_ENGINE_FLEX = 'aef-'
 APP_ENGINE = 'Google App Engine/'
