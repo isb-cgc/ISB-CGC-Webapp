@@ -12,11 +12,11 @@ if [ -n "$CI" ]; then
     # Give the 'ubuntu' test user access
     mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'ubuntu'@'%' IDENTIFIED BY 'idc';"
 else
-    if [ ! -f "${ENV_FILE_PATH}" ]; then
-        echo "Environment variables file wasn't found - doublecheck secure_files.env and make sure it is a valid, VM-relative path!"
+    if ( "/home/vagrant/www/shell/get_env.sh" ) ; then
+        export $(cat ${ENV_FILE_PATH} | grep -v ^# | xargs) 2> /dev/null
+    else
         exit 1
     fi
-    export $(cat ${ENV_FILE_PATH} | grep -v ^# | xargs) 2> /dev/null
     export HOME=/home/vagrant
     export HOMEROOT=/home/vagrant/www
     export MYSQL_ROOT_USER=root
