@@ -106,8 +106,10 @@ require([
                     'visible': false
                 },
                 {
-                    'name': 'Id',
-                    'data': 'id',
+                    'name': 'FullId',
+                    'data': function (data){
+                        return formatFullId(data.tableReference, true);
+                    },
                     'visible': false
                 },
                 {
@@ -367,12 +369,9 @@ require([
         // `d` is the original data object for the row
         return '<table class="detail-table">' +
             '<tr>' +
-            // '<td style="vertical-align:top;"><strong>Name</strong></td>' +
-            // '<td>' + (d.friendlyName == null? d.tableReference.datasetId+'.'+d.tableReference.tableId : d.friendlyName)+ '</td>' +
-            // '</tr><tr>' +
             '<td style="vertical-align:top;"><strong>Full ID</strong></td>' +
             '<td>'+
-            '<span class="full_id_txt">' + d.tableReference.projectId + '.' + d.tableReference.datasetId+'.'+d.tableReference.tableId+
+            '<span class="full_id_txt">' + formatFullId(d.tableReference, false) +
             '</span>'+
             '<button class="copy-btn" title="Copy to Clipboard">' +
             '<i class="fa fa-clipboard" aria-hidden="true"></i>'+
@@ -397,6 +396,10 @@ require([
             '</tr></table>';
     };
 
+    var formatFullId = function(tblRef, wrapText){
+        return (wrapText? '`':'') +tblRef.projectId + '.' + tblRef.datasetId+'.'+ tblRef.tableId + (wrapText? '`':'');
+    };
+
     var copy_to_clipboard = function(el) {
         var $temp = $("<input>");
         $("body").append($temp);
@@ -417,19 +420,24 @@ require([
                             schema_field_names_str += (in_html ? '<th>': '') + schema_fields[col]['name'] +'.'
                                 + nested_fields[n_col]['name'] + '.'
                                 + double_nested_fields[nn_col]['name']
-                                + (in_html ? '</th>':' ');
+                                + (in_html ? '</th>':', ');
                         }
                     }
                     else{
-                        schema_field_names_str += (in_html? '<th>':'') + schema_fields[col]['name'] +'.' + nested_fields[n_col]['name'] + (in_html? '</th>': ' ');
+                        schema_field_names_str += (in_html? '<th>':'') + schema_fields[col]['name'] +'.' + nested_fields[n_col]['name'] + (in_html? '</th>': ', ');
                     }
 
                 }
             }
             else{
-                schema_field_names_str += (in_html ? '<th>':'') + schema_fields[col]['name'] + (in_html ? '</th>': ' ');
+                schema_field_names_str += (in_html ? '<th>':'') + schema_fields[col]['name'] + (in_html ? '</th>': ', ');
             }
         }
+
+        if (schema_field_names_str.substr(-2) === ', '){ // remove the last comma
+            schema_field_names_str = schema_field_names_str.slice(0,-2);
+        }
+
         return schema_field_names_str;
     };
 
