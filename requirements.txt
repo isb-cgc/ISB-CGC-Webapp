@@ -25,3 +25,4 @@ cryptography==2.4.2
 future==0.17.1
 google-cloud-storage==1.18.0
 django-session-security==2.6.5
+django-debug-toolbar

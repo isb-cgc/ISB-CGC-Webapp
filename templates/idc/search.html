@@ -20,12 +20,10 @@
 {% endcomment %}
 
 {% block header %}
-    <!-- <script type="text/javascript" src="https://requirejs.org/docs/release/2.3.6/comments/require.js"></script> -->
-    <!-- <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-    <script type="text/javascript" src="/static/js/sample_cohort.js"></script>
-    <script type="text/javascript" src="/static/js/image_search.js"></script>
-    <script type="text/javascript" src="/static/js/plotly-latest.min.js"></script>
+
+    <script type="text/javascript"  src="{% static 'js/sample_cohort.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/image_search.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/libs/plotly-latest.min.js' %}"></script>
 
     <style>
         .iframe-container {
@@ -53,18 +51,7 @@
 
         constructProjects();
         updateSelections(-1,[]);
-        //resolveRelateDataPlotsCat("disease", "disease_code_chart","disease_code");
-resolveAllPlots()
-      //  updateAllFilterSelections();
-        //$('#viewId').load('http://localhost:8085/viewer/1.3.6.1.4.1.14519.5.2.1.6279.6001.265704884949271879044145982159');
-
-        //window.alert("some text");
-        //await new Promise(r => setTimeout(r, 5000));
-        //document.getElementById("srcU").scrollTo(200,200);
-       // document.getElementById('srcU').contentWindow.scrollTo(2000,400);
-        //window.alert(len.toString());
-        //window.scrollTo(200,200);
-
+        resolveAllPlots()
     }
     </script>
 
