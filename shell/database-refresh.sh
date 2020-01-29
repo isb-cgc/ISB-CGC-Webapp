@@ -1,6 +1,10 @@
 if [ -n "$CI" ]; then
     export "[ERROR] Never refresh databases on deployments!"
 else
+    if [ ! -f "${ENV_FILE_PATH}" ]; then
+        echo "Environment variables file wasn't found - doublecheck secure_files.env and make sure it is a valid, VM-relative path!"
+        exit 1
+    fi
     export $(cat ${ENV_FILE_PATH} | grep -v ^# | xargs) 2> /dev/null
     export MYSQL_ROOT_USER=root
     echo "Dropping database $DATABASE_NAME in prepatation for reload..."
