@@ -19,12 +19,19 @@ from builtins import str
 from builtins import object
 import os
 import re
-from os.path import join, dirname
+from os.path import join, dirname, exists
 import sys
 import dotenv
 from socket import gethostname, gethostbyname
 
 SECURE_LOCAL_PATH = os.environ.get('SECURE_LOCAL_PATH', '')
+
+if not exists(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH))):
+    print("[ERROR] Couldn't open .env file expected at {}!".format(
+        join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
+    )
+    print("[ERROR] Exiting settings.py load - check your Pycharm settings and secure_path.env file.")
+    exit(1)
 
 dotenv.read_dotenv(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
 
@@ -47,7 +54,6 @@ DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
 print("[STATUS] DEBUG mode is {}".format(str(DEBUG)), file=sys.stdout)
 
 RESTRICT_ACCESS = (os.environ.get('RESTRICT_ACCESS', 'True') == 'True')
-#RESTRICT_ACCESS = False
 RESTRICTED_ACCESS_GROUPS = os.environ.get('RESTRICTED_ACCESS_GROUPS', '').split(',')
 
 if RESTRICT_ACCESS:
@@ -452,6 +458,10 @@ if IS_DEV:
 ##########################
 
 GOOGLE_APPLICATION_CREDENTIALS  = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
+
+if not exists(GOOGLE_APPLICATION_CREDENTIALS):
+    print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
+    exit(1)
 
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
 
