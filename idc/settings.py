@@ -459,6 +459,10 @@ if IS_DEV:
 
 GOOGLE_APPLICATION_CREDENTIALS  = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
 
+if not exists(GOOGLE_APPLICATION_CREDENTIALS):
+    print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
+    exit(1)
+
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
 
 OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET', '')
