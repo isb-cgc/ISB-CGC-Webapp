@@ -31,7 +31,16 @@
     <link type="text/css" rel="stylesheet" href="{% static 'css/select2.min.css' %}" />
     <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}" />
     <link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/jquery-ui.min.css' %}">
+
     <script type="text/javascript" src="{% static 'js/libs/modernizr.js' %}"></script>
+    <script type="text/javascript" src="{%  static '/js/libs/jquery-1.11.1.min.js' %}"></script>
+    <script type="text/javascript" src="{%  static '/js/libs/jquery-ui.min.js' %}"></script>
+
+
+
+
+
     {% block header %}{% endblock %}
 
     {% if SITE_GOOGLE_ANALYTICS %}
@@ -49,7 +58,29 @@
         var STATIC_FILES_URL = '{{ STATIC_FILES_URL }}';
         var BASE_URL = '{{ BASE_URL }}' || "";
         var STORAGE_URI = '{{ STORAGE_URI }}';
+
     </script>
+
+
+<script>
+
+    function confirmWarning(){
+        $.ajax({
+            async: true,
+            type: "GET",
+            url: "/warning/",
+            contentType: "charset=utf-8",
+            success: function (response) {
+                 theGovWarnDiv.dialog( "close" );
+            }
+        });
+
+    };
+
+</script>
+
+
+
 </head>
 <body id="body">
 <!--Include site main header-->
@@ -86,6 +117,26 @@
 
     <!-- Logout Modal -->
 </main>
+
+<div id="gov_warning" >
+  <p> {% include "idc/warn.html" %} </p>
+  <button onclick="confirmWarning()">OK</button>
+</div>
+
+<script>
+
+   var theGovWarnDiv= $( "#gov_warning" ).dialog({autoOpen:false, title:"Warning"});
+
+if ('{{ request.session.seenWarning }}'  !== "True")  {
+        theGovWarnDiv.dialog( "open" );
+
+    }
+    else{
+        theGovWarnDiv.dialog( "close" );
+    }
+</script>
+
+tmp {{ request.session.seenWarning}} tmp
 <div class="modal fade" id="logout-modal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
