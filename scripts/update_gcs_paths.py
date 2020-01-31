@@ -8,7 +8,7 @@ import datetime
 
 logger = logging.getLogger('main_logger')
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "GenespotRE.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "isb_cgc.settings")
 
 import django
 django.setup()
@@ -17,7 +17,7 @@ from cohorts.metadata_helpers import get_sql_connection
 from projects.models import Public_Data_Tables, Program
 from google_helpers.bigquery.gcs_path_support import BigQueryGcsPathSupport, BigQuerySupport
 
-from GenespotRE import settings
+from isb_cgc import settings
 
 db = None
 cursor = None

@@ -270,8 +270,12 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
             var brush = d3.svg.brush()
                 .x(x)
                 .on('brushstart',function(e){
-                    selectedValues = {};
-                    selectedSamples = null;
+                    var e = brush.extent();
+                    if(e) {
+                        selectedValues = {};
+                        selectedSamples = null;
+                        sample_form_update(e, true);
+                    }
                 })
                 .on('brush', brushmove)
                 .on('brushend', brushend);

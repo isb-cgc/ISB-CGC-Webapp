@@ -24,11 +24,11 @@
                    href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/progapi/bigqueryGUI/LinkingBigQueryToIsb-cgcProject.html"
                    target="_blank">ISB-CGC BigQuery Access Info<i class="fa fa-external-link" aria-hidden="true"></i></a>
             </li>
-            <li class="navbar-item">
-                <a class="nav-link"
-                   href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html"
-                   target="_blank">ISB-CGC Notebooks<i class="fa fa-external-link" aria-hidden="true"></i></a>
-            </li>
+{#            <li class="navbar-item">#}
+{#                <a class="nav-link"#}
+{#                   href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html"#}
+{#                   target="_blank">ISB-CGC Notebooks<i class="fa fa-external-link" aria-hidden="true"></i></a>#}
+{#            </li>#}
             <li class="navbar-item">
                 <a class="nav-link"
                    href="https://console.cloud.google.com/bigquery"
@@ -38,6 +38,11 @@
                 <a class="nav-link"
                    href="https://cloud.google.com/bigquery/what-is-bigquery"
                    target="_blank">About BigQuery<i class="fa fa-external-link" aria-hidden="true"></i></a>
+            </li>
+            <li class="navbar-item">
+                <a class="nav-link"
+                   href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/ReleaseNotes/BigQueryTableSearchReleaseNotes.html"
+                   target="_blank">Release Notes<i class="fa fa-external-link" aria-hidden="true"></i></a>
             </li>
         </ul>
         <div class="col-lg-12 col-md-12 col-sm-12">
@@ -63,6 +68,10 @@
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
                         </select>
+                    </div>
+                    <div>
+                        <label>Name</label>
+                        <input type="text" class="form-control bq-filter" data-column-name="friendlyName">
                     </div>
                     <div class="checkbox-div">
                         <label>Category</label>
@@ -157,16 +166,17 @@
                     <thead>
                     <tr>
                         <th style="width:3%;"></th>
-                        <th style="width:20%;">Dataset ID</th>
-                        <th style="width:19%;">Table ID</th>
-                        <th style="width:19%;">Full ID</th>
-                        <th style="width:9%;">Status</th>
+                        <th style="width:20%;">Name</th>
+                        <th style="width:15%;">Dataset ID</th>
+                        <th style="width:15%;">Table ID</th>
+                        <th>Full ID</th>
                         <th style="width:8%;">Category</th>
                         <th>Reference Genome</th>
                         <th>Source</th>
                         <th>Data Type</th>
-                        <th style="width:8%;">Num Rows</th>
-                        <th style="width:8%;">Created Date</th>
+                        <th style="width:9%;">Status</th>
+                        <th style="width:8%;">Rows</th>
+                        <th style="width:8%;">Created</th>
                         <th style="width:7%;">Preview</th>
                         <th style="width:7%;">Description</th>
                         <th>Labels</th>

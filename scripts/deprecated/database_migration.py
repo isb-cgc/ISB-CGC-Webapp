@@ -18,7 +18,7 @@ from __future__ import print_function
 
 from builtins import str
 import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "GenespotRE.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "isb_cgc.settings")
 import django
 django.setup()
 
@@ -27,7 +27,7 @@ import sys
 import time
 
 from MySQLdb import connect, cursors
-from GenespotRE import secret_settings, settings
+from isb_cgc import secret_settings, settings
 from argparse import ArgumentParser
 from cohorts.metadata_helpers import submit_bigquery_job, is_bigquery_job_finished, get_bq_job_results, fetch_metadata_value_set
 from projects.models import Program, Public_Data_Tables, Public_Metadata_Tables, Public_Annotation_Tables, Project

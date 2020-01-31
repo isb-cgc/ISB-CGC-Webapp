@@ -210,12 +210,13 @@ require([
         var users = [];
         var user_map = {};
         var that = this;
-        $('#cohorts-list tr:not(:first) input:checked').each(function(){
+
+        $('#cohorts-list tr:not(:first) input:checked').each(function() {
             var cohort = $(this).val();
             var tempt = shared_users[$(this).val()];
-            if(tempt){
-                JSON.parse(tempt).forEach(function(user){
-                    if(!user_map[user.pk]){
+            if (tempt) {
+                JSON.parse(tempt).forEach(function (user) {
+                    if (!user_map[user.pk]) {
                         user_map[user.pk] = user.fields;
                         user.fields.shared_cohorts = [cohort];
                         user.fields.id = user.pk;
@@ -226,6 +227,7 @@ require([
                 })
             }
         });
+
         var table = $(that).find('table');
         if(users.length){
             table.append('<thead><th>Name</th><th>Email</th><th></th></thead>')

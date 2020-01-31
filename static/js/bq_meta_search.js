@@ -24,7 +24,8 @@ require.config({
         'datatables.bootstrap': ['https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap.min'],
         'datatables.net-buttons': ['//cdn.datatables.net/buttons/1.6.0/js/dataTables.buttons.min'],
         'datatables.net-html5': ['//cdn.datatables.net/buttons/1.6.0/js/buttons.html5.min'],
-        'chosen': ['//cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min']
+        'chosen': ['//cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min'],
+        'buttons-colvis': ['//cdn.datatables.net/buttons/1.6.0/js/buttons.colVis.min']
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -40,6 +41,7 @@ require([
     'datatables.bootstrap',
     'datatables.net-buttons',
     'datatables.net-html5',
+    'buttons-colvis',
     'chosen'
 ], function ($) {
     $(document).ready(function () {
@@ -50,6 +52,18 @@ require([
                 dataSrc: ''
             },
             buttons: [
+                {
+                    collectionTitle: '<i class="fa fa-sliders" style="margin-right: 5px;"></i>Toggle Columns',
+                    extend: 'colvis',
+                    text: '<i class="fa fa-cog" style="margin-right: 5px;"></i>Columns<span class="caret"></span>',
+                    columns: '.colvis-toggle',
+                    postfixButtons: [
+                        {
+                            extend: 'colvisRestore',
+                            text: '<i class="fa fa-undo" style="margin-right: 5px;"></i>Restore'
+                        }
+                    ]
+                },
                 {
                     extend: 'csvHtml5',
                     text: '<i class="fa fa-download" style="margin-right: 5px;"></i>CSV Download',
@@ -67,8 +81,17 @@ require([
                     "defaultContent": ''
                 },
                 {
+                    'name': 'friendlyName',
+                    'data': function(data, type){
+                        return (data.friendlyName ? data.friendlyName : (data.tableReference.datasetId+'-'+data.tableReference.tableId)).toUpperCase();
+                    },
+                    'className': 'label-filter colvis-toggle'
+                },
+                {
                     'name': 'datasetId',
-                    'data': 'tableReference.datasetId'
+                    'data': 'tableReference.datasetId',
+                    'visible': false,
+                    'className': 'colvis-toggle'
                 },
                 {
                     'name': 'tableId',
@@ -78,24 +101,16 @@ require([
                             '<div class="nowrap-ellipsis">' + data + '</div>' :
                             data;
                     },
-                    'width': '200px',
-                    'className': 'custom-width-200'
-                },
-                {
-                    'name': 'fullId',
-                    'data': 'id',
+                    'width': '100px',
+                    'className': 'custom-width-100 colvis-toggle',
                     'visible': false
                 },
                 {
-                    'name': 'status',
-                    'data': function (data) {
-                        return (data.labels && data.labels.status) ? data.labels.status: null;
+                    'name': 'FullId',
+                    'data': function (data){
+                        return formatFullId(data.tableReference, true);
                     },
-                    'render': function(data, type){
-                        return format_label_display(data, type);
-                    },
-                    'className': 'label-filter'
-
+                    'visible': false
                 },
                 {
                     'name': 'category',
@@ -105,7 +120,7 @@ require([
                     'render': function(data, type){
                         return format_label_display(data, type);
                     },
-                    'className': 'label-filter'
+                    'className': 'label-filter colvis-toggle'
                 },
                 {
                     'name': 'referenceGenome',
@@ -123,7 +138,7 @@ require([
                     'render': function(data, type){
                         return format_label_display(data, type);
                     },
-                    'className': 'label-filter'
+                    'className': 'label-filter colvis-toggle'
                 },
                 {
                     'name': 'dataType',
@@ -133,18 +148,29 @@ require([
                     'render': function(data, type) {
                         return format_label_display(data, type);
                     },
-                    'className': 'label-filter'
+                    'className': 'label-filter colvis-toggle'
+                },
+                {
+                    'name': 'status',
+                    'data': function (data) {
+                        return (data.labels && data.labels.status) ? data.labels.status: null;
+                    },
+                    'render': function(data, type){
+                        return format_label_display(data, type);
+                    },
+                    'className': 'label-filter colvis-toggle'
+
                 },
                 {
                     'name': 'numRows',
                     'data': 'numRows',
-                    'className': 'td-body-right',
+                    'className': 'td-body-right colvis-toggle',
                     'render': $.fn.dataTable.render.number( ',', '.')
                 },
                 {
                     'name': 'createdDate',
                     'data': 'creationTime',
-                    'className': 'td-body-right',
+                    'className': 'td-body-right colvis-toggle',
                     'render': function (data, type) {
                         if (type === 'display') {
                             var date = new Date(parseInt(data));
@@ -306,6 +332,9 @@ require([
             else {
                 // Open this row
                 row.child(format_tbl_details(row.data())).show();
+                $(".copy-btn").on('click', function () {
+                    copy_to_clipboard($(this).siblings('.full_id_txt'));
+                });
                 tr.addClass('shown details-shown');
                 tr.removeClass('preview-shown');
             }
@@ -340,10 +369,23 @@ require([
         // `d` is the original data object for the row
         return '<table class="detail-table">' +
             '<tr>' +
-            '<td style="vertical-align: top;"><strong>ID</strong></td>' +
-            '<td>' + (d.id == null? 'N/A' : d.id)+ '</td>' +
+            '<td style="vertical-align:top;"><strong>Full ID</strong></td>' +
+            '<td>'+
+            '<span class="full_id_txt">' + formatFullId(d.tableReference, false) +
+            '</span>'+
+            '<button class="copy-btn" title="Copy to Clipboard">' +
+            '<i class="fa fa-clipboard" aria-hidden="true"></i>'+
+            'Copy' +
+            '</button>' +
+            '</td>'+
             '</tr><tr>' +
-            '<td style="vertical-align: top;"><strong>Description</strong></td>' +
+            '<td style="vertical-align:top;"><strong>Dataset ID</strong></td>' +
+            '<td>' + d.tableReference.datasetId+ '</td>' +
+            '</tr><tr>' +
+            '<td style="vertical-align:top;"><strong>Table ID</strong></td>' +
+            '<td>' + d.tableReference.tableId + '</td>' +
+            '</tr><tr>' +
+            '<td style="vertical-align:top;"><strong>Description</strong></td>' +
             '<td>' + (d.description == null? 'N/A' : d.description)+ '</td>' +
             '</tr><tr>' +
             '<td><strong>Schema</strong></td>' +
@@ -354,6 +396,17 @@ require([
             '</tr></table>';
     };
 
+    var formatFullId = function(tblRef, wrapText){
+        return (wrapText? '`':'') +tblRef.projectId + '.' + tblRef.datasetId+'.'+ tblRef.tableId + (wrapText? '`':'');
+    };
+
+    var copy_to_clipboard = function(el) {
+        var $temp = $("<input>");
+        $("body").append($temp);
+        $temp.val( '`' + $(el).text() + '`' ).select();
+        document.execCommand("copy");
+        $temp.remove();
+    };
 
     var format_schema_field_names = function(schema_fields, in_html){
         var schema_field_names_str = '';
@@ -367,19 +420,24 @@ require([
                             schema_field_names_str += (in_html ? '<th>': '') + schema_fields[col]['name'] +'.'
                                 + nested_fields[n_col]['name'] + '.'
                                 + double_nested_fields[nn_col]['name']
-                                + (in_html ? '</th>':' ');
+                                + (in_html ? '</th>':', ');
                         }
                     }
                     else{
-                        schema_field_names_str += (in_html? '<th>':'') + schema_fields[col]['name'] +'.' + nested_fields[n_col]['name'] + (in_html? '</th>': ' ');
+                        schema_field_names_str += (in_html? '<th>':'') + schema_fields[col]['name'] +'.' + nested_fields[n_col]['name'] + (in_html? '</th>': ', ');
                     }
 
                 }
             }
             else{
-                schema_field_names_str += (in_html ? '<th>':'') + schema_fields[col]['name'] + (in_html ? '</th>': ' ');
+                schema_field_names_str += (in_html ? '<th>':'') + schema_fields[col]['name'] + (in_html ? '</th>': ', ');
             }
         }
+
+        if (schema_field_names_str.substr(-2) === ', '){ // remove the last comma
+            schema_field_names_str = schema_field_names_str.slice(0,-2);
+        }
+
         return schema_field_names_str;
     };
 
