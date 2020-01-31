@@ -4,6 +4,8 @@ if [ ! -f "/home/circleci/${CIRCLE_PROJECT_REPONAME}/deployment_config.txt" ]; t
     if [ ! -f "/home/circleci/${CIRCLE_PROJECT_REPONAME}/deployment_config.txt" ]; then
       echo "[ERROR] Couldn't assign deployment configuration file - exiting."
       exit 1
+    else
+      echo "Downloaded deployment configuration file."
     fi
 else
     echo "Found deployment configuration file."

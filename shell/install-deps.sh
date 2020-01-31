@@ -10,7 +10,11 @@ if [ -n "$CI" ]; then
     echo "Cloning ISB-CGC-Common branch ${COMMON_BRANCH}..."
     git clone -b ${COMMON_BRANCH} https://github.com/isb-cgc/ISB-CGC-Common.git
 else
-    export $(cat /home/vagrant/parentDir/secure_files/.env | grep -v ^# | xargs) 2> /dev/null
+    if ( "/home/vagrant/www/shell/get_env.sh" ) ; then
+        export $(cat ${ENV_FILE_PATH} | grep -v ^# | xargs) 2> /dev/null
+    else
+        exit 1
+    fi
     export HOME=/home/vagrant
     export HOMEROOT=/home/vagrant/www
 fi
