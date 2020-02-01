@@ -532,6 +532,7 @@ SOLR_URI = os.environ.get('SOLR_URI', '')
 SOLR_LOGIN = os.environ.get('SOLR_LOGIN', '')
 SOLR_PASSWORD = os.environ.get('SOLR_PASSWORD', '')
 SOLR_CERT = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCAL_PATH, os.environ.get('SOLR_CERT', '')))
+DEFAULT_FETCH_COUNT = os.environ.get('DEFAULT_FETCH_COUNT', 10)
 
 ##############################################################
 #   MailGun Email Settings
