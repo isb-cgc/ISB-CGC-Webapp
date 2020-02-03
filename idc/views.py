@@ -116,20 +116,29 @@ def css_test(request):
 # Returns the data exploration and filtering page, which also allows for cohort creation
 @login_required
 def explore_data(request):
-    filters = {"vital_status": ["Alive"]}
-    fields = ["BodyPartExamined", "Modality", "StudyDescription", "StudyInstanceUID", "SeriesInstanceUID"]
+    context = {}
+    try:
+        # These are example filters; typically they will be reconstituted from the request
+        filters = {"vital_status": ["Alive"]}
+        # These are the actual data fields to display in the expanding table; again this is just an example
+        # set that should be properly supplied in the reuqest
+        fields = ["BodyPartExamined", "Modality", "StudyDescription", "StudyInstanceUID", "SeriesInstanceUID"]
 
-    facets_and_lists = get_collex_metadata(filters, fields)
+        # get_collex_metadata will eventually branch into 'from BQ' and 'from Solr' depending on if there's a request
+        # for a version which isn't current, or for a user cohort
+        facets_and_lists = get_collex_metadata(filters, fields)
 
-    if facets_and_lists:
+        if facets_and_lists:
+            context = {
+                'collex_attr_counts': facets_and_lists['facets']['collex'],
+                'cross_collex_attr_counts': facets_and_lists['facets']['cross_collex'],
+                'listings': facets_and_lists['docs']
+            }
+    except Exception as e:
+        logger.error("[ERROR] In explore_data:")
+        logger.exception(e)
 
-        return render(request, 'idc/explore.html', {'request': request, 'context': {
-            'collex_attr_counts': facets_and_lists['facets']['collex'],
-            'cross_collex_attr_counts': facets_and_lists['facets']['cross_collex'],
-            'listings': facets_and_lists['docs']
-        }})
-    else:
-        return render(request, 'idc/explore.html', {'request': request})
+    return render(request, 'idc/explore.html', {'request': request, 'context': context})
 
 
 '''
