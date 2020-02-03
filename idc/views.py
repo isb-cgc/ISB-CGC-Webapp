@@ -120,10 +120,12 @@ def explore_data(request):
     try:
         # These are example filters; typically they will be reconstituted from the request
         filters = {"vital_status": ["Alive"]}
+        # These are the actual data fields to display in the expanding table; again this is just an example
+        # set that should be properly supplied in the reuqest
         fields = ["BodyPartExamined", "Modality", "StudyDescription", "StudyInstanceUID", "SeriesInstanceUID"]
 
-        # get_collex_metadata will eventually branch into 'from BQ' and 'from Solr' depending on if there's a request for
-        # a version which isn't current, or for a user cohort
+        # get_collex_metadata will eventually branch into 'from BQ' and 'from Solr' depending on if there's a request
+        # for a version which isn't current, or for a user cohort
         facets_and_lists = get_collex_metadata(filters, fields)
 
         if facets_and_lists:
