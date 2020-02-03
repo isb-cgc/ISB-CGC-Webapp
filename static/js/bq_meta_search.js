@@ -113,6 +113,16 @@ require([
                     'visible': false
                 },
                 {
+                    'name': 'program',
+                    'data': function (data) {
+                        return filtered_label_data(data.labels, 'program');
+                    },
+                    'render': function(data, type){
+                        return format_label_display(data, type);
+                    },
+                    'className': 'label-filter colvis-toggle'
+                },
+                {
                     'name': 'category',
                     'data': function (data) {
                         return filtered_label_data(data.labels, 'category');
@@ -149,6 +159,17 @@ require([
                         return format_label_display(data, type);
                     },
                     'className': 'label-filter colvis-toggle'
+                },
+                {
+                    'name': 'expStrat',
+                    'data': function (data) {
+                        return filtered_label_data(data.labels, 'experimental_strategy');
+                    },
+                    'render': function(data, type) {
+                        return format_label_display(data, type);
+                    },
+                    'className': 'label-filter colvis-toggle',
+                    'visible': false
                 },
                 {
                     'name': 'status',
