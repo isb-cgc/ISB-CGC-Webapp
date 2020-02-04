@@ -57,7 +57,6 @@ WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 
 
 def convert(data):
-    # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     if isinstance(data, basestring):
         return str(data)
     elif isinstance(data, collections.Mapping):
