@@ -1,15 +1,47 @@
 
+function getLastIdString(inp){
+    var strA=inp.split('.');
+    return strA[strA.length-1];
+
+}
+function toggleViewer(elemRId){
+    var elemR=document.getElementById(elemRId);
+    var newStyle='display:inline';
+        if (elemR.getAttribute('style')==="display:inline"){
+            newStyle='display:none';
+
+        }
+        elemR.setAttribute("style",newStyle);
+
+   if (newStyle==='display:none') {
+       var subElemA = elemR.getElementsByTagName('span');
+       for (var i = 0; i < subElemA.length; i++) {
+           subElemA[i].setAttribute('style', newStyle);
+       }
+   }
+
+}
+
+function fetchImage(){
+    var project =document.getElementById('collection_select').selectedOptions[0].value.toLowerCase();
+    var study =document.getElementById('study_select').selectedOptions[0].value.toLowerCase();
+    //var series =document.getElementById('series_select').selectedOptions[0].value.toLowerCase();
+
+    var fetchUrl='/projects/chc-tcia/locations/us-central1/datasets/'+project+'/dicomStores/'+project+'/study/'+study;
+    window.open(fetchUrl,'_blank');
+}
+
 
 
 function resolveAllPlots(){
     resolveOriginalDataPlots("modality","modality_chart","Modality");
-        resolveOriginalDataPlots("body_part","body_part_examined_chart", "BodyPartExamined");
-        resolveRelateDataPlotsCat("disease", "disease_code_chart","disease_code");
-        resolveRelateDataPlotsCat("vital", "vital_statistics_chart","vital_status");
-        resolveRelateDataPlotsCat("gender", "gender_chart","gender");
-        resolveRelateDataPlotsRange("age", "age_chart","age");
-        resolveRelateDataPlotsCat("race", "race_chart","race");
-        resolveRelateDataPlotsCat("ethnicity", "ethnicity_chart","ethnicity");
+    resolveOriginalDataPlots("body_part","body_part_examined_chart", "BodyPartExamined");
+    resolveRelateDataPlotsCat("disease", "disease_code_chart","disease_code");
+    resolveRelateDataPlotsCat("vital", "vital_statistics_chart","vital_status");
+    resolveRelateDataPlotsCat("gender", "gender_chart","gender");
+    resolveRelateDataPlotsRange("age", "age_chart","age");
+    resolveRelateDataPlotsCat("race", "race_chart","race");
+    resolveRelateDataPlotsCat("ethnicity", "ethnicity_chart","ethnicity");
 
 }
 
@@ -595,7 +627,7 @@ function removeChildren(elem){
             if (thisStudy.isActive ){
                 var opt = document.createElement("OPTION");
                 opt.value = thisStudy.id;
-                opt.innerHTML = thisStudy.id;
+                opt.innerHTML = getLastIdString(thisStudy.id);
                 selectElem.appendChild(opt);
             }
         }
@@ -606,7 +638,7 @@ function removeChildren(elem){
      var patientId=studyPatient[studyId];
      var projectId=patientProject[patientId];
      curStudy=projects[projectIndex[projectId]].patients[patientIndex[patientId]].studies[studyIndex[studyId]];
-     var selectElem = document.getElementById("series_select");
+     /* var selectElem = document.getElementById("series_select");
      removeChildren(selectElem);
      for (i=0;i<curStudy.series.length;i++){
          var thisSeries=curStudy.series[i];
@@ -615,5 +647,5 @@ function removeChildren(elem){
          opt.innerHTML = thisSeries;
          selectElem.appendChild(opt);
      }
-
+     */
 }

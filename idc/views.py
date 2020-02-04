@@ -445,29 +445,21 @@ def search_page(request):
     #request.session['seenWarning']=False;
     return render(request, 'idc/search.html', {'request':request})
 
+@login_required
 def ohif_test_page(request):
     request.session['last_path']=request.get_full_path()
     return render(request, 'idc/ohif.html',{'request': request})
 
+@login_required
 def ohif_viewer_page(request):
     request.session['last_path'] = request.get_full_path()
     return render(request, 'idc/ohif.html',{'request': request})
 
+@login_required
 def ohif_callback_page(request):
-    #if (request.session.has_key('last_ohif_path')):
-        #request.GET['qLast']= request.session['last_ohif_path'];
-
-        #request.path=request.session['last_ohif_path']
-        #request.info_path = request.session['last_ohif_path']
-        #request.resolver_match.route='^projects/'
-        #request.resolver_match.view_name = 'ohif_projects'
-        #request.resolver_match.view_name = 'ohif_projects'
-
-
-
     return render(request,'idc/ohif.html',{'request': request})
 
-
+@login_required
 def ohif_projects_page(request):
     request.session['last_ohif_path'] = request.get_full_path()
     return render(request, 'idc/ohif.html',{'request': request})
