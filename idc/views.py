@@ -44,8 +44,7 @@ from cohorts.models import Cohort, Cohort_Perms
 from idc_collections.models import Program
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
-from solr_helpers import query_solr_and_format_result, build_solr_facets, build_solr_query
-from idc_collections.models import Attribute, SolrCollection
+from .metadata_utils import get_collex_metadata
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
@@ -117,45 +116,29 @@ def css_test(request):
 # Returns the data exploration and filtering page, which also allows for cohort creation
 @login_required
 def explore_data(request):
-    filters = {"disease_code": ["BRCA","LUAD"]}
-    tcia_attrs = SolrCollection.objects.get(name="tcia_images").get_collection_attr().values_list('name', flat=True)
-    tcia_fields = SolrCollection.objects.get(name="tcia_images").get_collection_attr(False).values_list('name', flat=True)
-    tcga_attrs = SolrCollection.objects.get(name="tcga_clin_bios").get_collection_attr().values_list('name', flat=True)
+    context = {}
+    try:
+        # These are example filters; typically they will be reconstituted from the request
+        filters = {"vital_status": ["Alive"]}
+        # These are the actual data fields to display in the expanding table; again this is just an example
+        # set that should be properly supplied in the reuqest
+        fields = ["BodyPartExamined", "Modality", "StudyDescription", "StudyInstanceUID", "SeriesInstanceUID"]
 
-    solr_query_str = build_solr_query(filters)
-    solr_facets = build_solr_facets(list(tcia_attrs), filters)
+        # get_collex_metadata will eventually branch into 'from BQ' and 'from Solr' depending on if there's a request
+        # for a version which isn't current, or for a user cohort
+        facets_and_lists = get_collex_metadata(filters, fields)
 
-    print("TCIA ATTRs: {}".format(tcia_attrs))
-    print("TCIA facets: {}".format(solr_facets))
+        if facets_and_lists:
+            context = {
+                'collex_attr_counts': facets_and_lists['facets']['collex'],
+                'cross_collex_attr_counts': facets_and_lists['facets']['cross_collex'],
+                'listings': facets_and_lists['docs']
+            }
+    except Exception as e:
+        logger.error("[ERROR] In explore_data:")
+        logger.exception(e)
 
-    solr_result = query_solr_and_format_result({
-        'collection': 'tcia_images',
-        'fields': list(tcia_fields),
-        'fq_string': '{!join from=case_barcode fromIndex=tcga_clin_bios to=case_barcode}' + solr_query_str,
-        'query_string': "*:*",
-        'facets': solr_facets,
-        'limit': 5,
-        'collapse_on': 'case_barcode',
-        'counts_only': False
-    })
-
-    print("Solr result: {}".format(solr_result))
-
-    solr_facets = build_solr_facets(list(tcga_attrs), filters)
-
-    solr_result = query_solr_and_format_result({
-        'collection': 'tcga_clin_bios',
-        'fields': None,
-        'fq_string': '{!join from=case_barcode fromIndex=tcia_images to=case_barcode}' + solr_query_str,
-        'query_string': "*:*",
-        'facets': solr_facets,
-        'limit': 0,
-        'collapse_on': 'case_barcode'
-    })
-
-    print("Solr result: {}".format(solr_result))
-
-    return render(request, 'idc/explore.html', {'request': request})
+    return render(request, 'idc/explore.html', {'request': request, 'context': context})
 
 
 '''
@@ -366,68 +349,6 @@ def dicom(request, study_uid=None):
     }
     return render(request, template, context)
 
-
-@login_required
-def camic(request, file_uuid=None):
-    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
-    context = {}
-
-    if not file_uuid:
-        messages.error("Error while attempting to display this pathology image: a file UUID was not provided.")
-        return redirect(reverse('cohort_list'))
-
-    images = [{'file_uuid': file_uuid, 'thumb': '', 'type': ''}]
-    template = 'idc/camic_single.html'
-
-    context['files'] = images
-    context['camic_viewer'] = settings.CAMIC_VIEWER
-    context['img_thumb_url'] = settings.IMG_THUMBS_URL
-
-    return render(request, template, context)
-
-
-@login_required
-def igv(request, sample_barcode=None, readgroupset_id=None):
-    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
-
-    readgroupset_list = []
-    bam_list = []
-
-    checked_list = json.loads(request.POST.__getitem__('checked_list'))
-    build = request.POST.__getitem__('build')
-
-    for item in checked_list['gcs_bam']:
-        bam_item = checked_list['gcs_bam'][item]
-        id_barcode = item.split(',')
-        bam_list.append({
-            'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': build, 'program': bam_item['program']
-        })
-
-    context = {
-        'readgroupset_list': readgroupset_list,
-        'bam_list': bam_list,
-        'base_url': settings.BASE_URL,
-        'service_account': settings.WEB_CLIENT_ID,
-        'build': build,
-    }
-
-    return render(request, 'idc/igv.html', context)
-
-
-@login_required
-def path_report(request, report_file=None):
-    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
-    context = {}
-
-    if not path_report:
-        messages.error("Error while attempting to display this pathology report: a report file name was not provided.")
-        return redirect(reverse('cohort_list'))
-
-    template = 'idc/path-pdf.html'
-
-    context['path_report_file'] = report_file
-
-    return render(request, template, context)
 
 
 # Because the match for vm_ is always done regardless of its presense in the URL
