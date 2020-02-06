@@ -564,3 +564,7 @@ if DEBUG and DEBUG_TOOLBAR:
     ]
     SHOW_TOOLBAR_CALLBACK = True
     INTERNAL_IPS = (os.environ.get('INTERNAL_IP', ''),)
+#OHIF_SETTINGS
+
+APPEND_SLASH = False
+# default is to add trailing '/' to urls ie /callback becomes /callback/. Ohif does not like /callback/ !

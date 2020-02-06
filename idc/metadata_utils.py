@@ -22,8 +22,15 @@ from django.conf import settings
 
 logger = logging.getLogger('main_logger')
 
+def getWithNullGuard(curDic, curKey, nullRet):
+    if curKey in curDic:
+        ret = curDic[curKey]
+    else:
+        ret = nullRet
+    return ret
 
-def get_collex_metadata(filters, fields, with_docs=True):
+
+def get_collex_metadata(filters, fields,with_docs=True, record_limit=10):
     results = {'docs': None, 'facets': {}}
 
     tcga_facet_attrs = SolrCollection.objects.get(name="tcga_clin_bios").get_collection_attr().values_list('name', flat=True)
@@ -31,6 +38,7 @@ def get_collex_metadata(filters, fields, with_docs=True):
 
     solr_query = build_solr_query(filters, with_tags_for_ex=True)
     query_set = []
+
     for attr in solr_query['queries']:
         if attr in tcga_facet_attrs:
             query_set.append("{!join from=case_barcode fromIndex=tcga_clin_bios to=case_barcode}" + solr_query['queries'][attr])
@@ -45,7 +53,7 @@ def get_collex_metadata(filters, fields, with_docs=True):
         'fqs': query_set,
         'query_string': "*:*",
         'facets': solr_facets,
-        'limit': 10,
+        'limit': record_limit,
         'collapse_on': 'case_barcode',
         'counts_only': False
     })
@@ -53,6 +61,8 @@ def get_collex_metadata(filters, fields, with_docs=True):
     results['docs'] = solr_result['docs']
     results['facets']['cross_collex'] = solr_result['facets']
     results['total'] = solr_result['numFound']
+
+
 
     solr_facets = build_solr_facets(list(["vital_status","sample_type"]), solr_query['filter_tags'])
 
@@ -66,15 +76,16 @@ def get_collex_metadata(filters, fields, with_docs=True):
 
     solr_result = query_solr_and_format_result({
         'collection': 'tcga_clin_bios',
-        'fields': None,
+        'fields': fields,
         'fqs': query_set,
         'query_string': "*:*",
         'facets': solr_facets,
-        'limit': 0,
+        'limit': record_limit,
         'collapse_on': 'case_barcode',
-        'counts_only': True
+        'counts_only': False
     })
 
-    results['facets']['collex'] = solr_result['facets']
+
+    results['clinical'] = solr_result
 
     return results

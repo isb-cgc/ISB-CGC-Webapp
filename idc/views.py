@@ -45,6 +45,7 @@ from idc_collections.models import Program
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 from .metadata_utils import get_collex_metadata
+from .metadata_utils import getWithNullGuard
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
@@ -361,9 +362,136 @@ def health_check(request, match):
 def help_page(request):
     return render(request, 'idc/help.html',{'request': request})
 
+def get_filtered_idc_cohort(request):
+    fields = ["project_short_name", "case_barcode", "BodyPartExamined", "Modality", "StudyDescription",
+              "StudyInstanceUID", "race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis", "gender","disease_code"]
+    filters = {"vital_status": ["Alive"]}
+
+    try:
+        # for a version which isn't current, or for a user cohort
+        facets_and_lists = get_collex_metadata(filters, fields, record_limit=5000)
+
+
+    except Exception as e:
+        logger.error("[ERROR] In get_filtered_idc_cohort_data:")
+        logger.exception(e)
+
+    imageDataA=facets_and_lists['docs']
+
+    ret={}
+    ret['projects'] = []
+    ret['projectIndex'] = {}
+    ret['projectA'] = []
+    ret['patientIndex'] = {}
+    ret['patientProject'] = {}
+    ret['studyIndex'] = {}
+    ret['studyPatient'] = {}
+    ret['diseaseCodeH'] = {}
+    ret['raceH'] = {}
+    ret['ethnicityH'] = {}
+
+    for i in range(len(imageDataA)):
+        curRow=imageDataA[i]
+        projectId= curRow['project_short_name'];
+        patientId = curRow['case_barcode']
+        studyId = curRow['StudyInstanceUID'];
+
+        curProject={}
+        if not (projectId in ret['projectIndex']):
+            ret['projectIndex'][projectId]=len(ret['projects'])
+            ret['projectA'].append(projectId)
+            curProject['id']=projectId
+            curProject['patients'] = []
+            curProject['isActive']=True
+            curProject['numActivePatients']=0
+            curProject['reasonsInActive']={}
+            ret['projects'].append(curProject)
+
+        else:
+            curProject = ret['projects'][ret['projectIndex'][projectId]]
+
+        curPatient = {}
+        if not (patientId in ret['patientIndex']):
+            curProject['numActivePatients'] = curProject['numActivePatients']+1
+            ret['patientIndex'][patientId] = len(curProject['patients'])
+            ret['patientProject'][patientId] = curProject['id']
+            curPatient['id'] = patientId
+            curPatient['isActive'] = True
+            curPatient['numActiveStudies'] = 0
+            curPatient['reasonsInActive'] = {}
+            curPatient['studies'] = []
+            curProject['patients'].append(curPatient)
+
+
+        else:
+            curPatient = curProject['patients'][ret['patientIndex'][patientId]]
+
+        curStudy = {}
+
+        if not(studyId in ret['studyIndex']):
+            curPatient['numActiveStudies'] = curPatient['numActiveStudies'] + 1
+            ret['studyIndex'][studyId] = len(curPatient['studies'])
+            ret['studyPatient'][studyId] = curPatient['id']
+            curStudy['id'] = studyId
+            curStudy['isActive'] = True
+            curStudy['reasonsInActive'] = {}
+            curStudy['seg'] = False
+            curStudy['Modality'] = getWithNullGuard(curRow, 'Modality', 'none')
+            curStudy['BodyPartExamined'] = getWithNullGuard(curRow, 'BodyPartExamined', 'none')
+            curPatient['studies'].append(curStudy)
+
+
+    clinicalDataA = facets_and_lists['clinical']['docs']
+
+    for i in range(len(clinicalDataA)):
+        curRow = clinicalDataA[i]
+        projectId = curRow['project_short_name']
+        patientId = curRow['case_barcode']
+        if patientId in ret['patientIndex']:
+            curProjectIndex = ret['projectIndex'][projectId]
+            curProject=ret['projects'][curProjectIndex]
+            curPatientIndex=ret['patientIndex'][patientId]
+            curPatient=curProject['patients'][curPatientIndex]
+            curPatient['disease_code'] = getWithNullGuard(curRow, 'disease_code','none')
+            ret['diseaseCodeH'][curPatient['disease_code'].lower()] = 1
+            curPatient['vital_status'] = getWithNullGuard(curRow, 'vital_status', 'none')
+            curPatient['gender'] = getWithNullGuard(curRow, 'gender', 'none')
+            curPatient['race'] = getWithNullGuard(curRow, 'race', 'none')
+            ret['raceH'][curPatient['race'].lower()] = 1
+            curPatient['ethnicity'] = getWithNullGuard(curRow, 'ethnicity', 'none')
+            ret['ethnicityH'][curPatient['ethnicity'].lower()] = 1
+            curPatient['bmi'] = getWithNullGuard(curRow, 'bmi', 'none')
+            curPatient['age'] = getWithNullGuard(curRow, 'age', 'none')
+
+    return JsonResponse(ret)
+    #return HttpResponse('tmp')
+
+
+
+
+
 def search_page(request):
-    #del request.session['seenWarning']
-    #request.session['seenWarning']=False;
+
+    context = {}
+
+    try:
+        # These are example filters; typically they will be reconstituted from the request
+        filters = {}
+        filters = {"vital_status": ["Alive"]}
+        # These are the actual data fields to display in the expanding table; again this is just an example
+        # set that should be properly supplied in the reuqest
+        fields = ["project_short_name","case_barcode","BodyPartExamined", "Modality", "StudyDescription", "StudyInstanceUID","race","vital_status","ethnicity","bmi","age_at_diagnosis","gender"]
+
+        # get_collex_metadata will eventually branch into 'from BQ' and 'from Solr' depending on if there's a request
+        # for a version which isn't current, or for a user cohort
+        #facets_and_lists = get_collex_metadata(filters, fields, record_limit=10)
+
+
+    except Exception as e:
+        logger.error("[ERROR] In search_data:")
+        logger.exception(e)
+
+
     return render(request, 'idc/search.html', {'request':request})
 
 @login_required

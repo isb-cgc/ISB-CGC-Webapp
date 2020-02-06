@@ -25,6 +25,8 @@
     <script type="text/javascript" src="{% static 'js/image_search.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/libs/plotly-latest.min.js' %}"></script>
 
+
+
     <style>
         .iframe-container {
        overflow: hidden;
@@ -44,14 +46,10 @@
 
     </style>
     <script>
-    cohortObj=new Object();
-
 
     window.onload = function(){
+        fetchData();
 
-        constructProjects();
-        updateSelections(-1,[]);
-        resolveAllPlots()
     }
     </script>
 

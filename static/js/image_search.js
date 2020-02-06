@@ -186,22 +186,90 @@ function toggleSearch(n,set){
 
     }
 
-function constructProjects(){
+function fetchData(){
+
+    projects = new Array();
+    projectIndex = new Object();
+    projectA = new Array();
+    patientIndex = new Object();
+    patientProject = new Object();
+    studyIndex = new Object();
+    studyPatient = new Object();
+    seriesIndex = new Object();
+    seriesStudy = new Object();
+    diseaseCodeH = new Object();
+    raceH = new Object();
+    ethnicityH=new Object();
 
 
-     projects = new Array();
-     projectIndex = new Object();
-     projectA = new Array();
-     patientIndex = new Object();
-     patientProject = new Object();
-     studyIndex = new Object();
-     studyPatient = new Object();
-     seriesIndex = new Object();
-     seriesStudy = new Object();
+    /* pullDataFromFile();
+    constructProjects();
+    updateSelections(-1,[]);
+    resolveAllPlots(); */
 
-     diseaseCodeH = new Object();
-     raceH = new Object();
-     ethnicityH=new Object()
+
+    $.ajax({
+                url: '/idc/filtered/',
+                dataType: 'json',
+                type: 'get',
+                contentType: 'application/x-www-form-urlencoded',
+                success: function(data){
+                    projects = data.projects;
+                    projectIndex = data.projectIndex;
+                    projectA = data.projectA;
+                    patientIndex = data.patientIndex;
+                    patientProject = data.patientProject;
+                    studyIndex = data.studyIndex;
+                    studyPatient = data.studyPatient;
+                    diseaseCodeH = data.diseaseCodeH;
+                    raceH = data.raceH;
+                    ethnicityH= data.ethnicityH;
+
+                    fillInMissing();
+                    constructProjects();
+                    updateSelections(-1,[]);
+                    resolveAllPlots();
+                },
+                error: function(  ){
+                    console.log( "problem getting data" );
+                }
+            });
+
+
+}
+function fillInMissing(){
+    for (i=0;i<projects.length;i++){
+        curProject=projects[i];
+        for (j=0;j<curProject.patients.length;j++){
+            curPatient=curProject.patients[j];
+            if (!(curPatient.hasOwnProperty('gender'))){
+                curPatient.gender='none';
+            }
+
+            if (!(curPatient.hasOwnProperty('age'))){
+                curPatient.age='none';
+            }
+
+            if (!(curPatient.hasOwnProperty('bmi'))){
+                curPatient.bmi='none';
+            }
+            if (!(curPatient.hasOwnProperty('disease_code'))){
+                curPatient.disease_code='none';
+            }
+            if (!(curPatient.hasOwnProperty('vital_status'))){
+                curPatient.vital_status='none';
+            }
+            if (!(curPatient.hasOwnProperty('race'))){
+                curPatient.race='none';
+            }
+            if (!(curPatient.hasOwnProperty('ethnicity'))){
+                curPatient.ethnicty='none';
+            }
+        }
+    }
+
+}
+function pullDataFromFile(){
 
 
 
@@ -279,9 +347,11 @@ function constructProjects(){
 
         curStudy.series.push(seriesId);
 
-
-
     }
+
+}
+
+function constructProjects(){
 
     projectA=projectA.sort();
     projectElem=document.getElementById("project_scope");
