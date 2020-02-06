@@ -38,7 +38,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "idc.settings")
 import django
 django.setup()
 
-from idc_collections.models import Program, Collection, Attribute, Attribute_Display_Values, SolrCollection
+from idc_collections.models import Program, Collection, Attribute, Attribute_Display_Values, SolrCollection, BigQueryTable
 
 from django.contrib.auth.models import User
 idc_superuser = User.objects.get(username="idc")
@@ -60,10 +60,20 @@ def add_programs(program_set):
             logger.exception(e)
 
 
-def add_solr_collex(solr_set):
+def add_solr_collex(solr_set, version="0"):
     for collex in solr_set:
         try:
-            obj, created = SolrCollection.objects.update_or_create(name=collex, version="0")
+            obj, created = SolrCollection.objects.update_or_create(name=collex, version=version)
+            print("Solr Collection created: {}".format(collex))
+        except Exception as e:
+            logger.error("[ERROR] Program {} may not have been added!".format(collex))
+            logger.exception(e)
+
+
+def add_bq_tables(tables, version='r9'):
+    for table in tables:
+        try:
+            obj, created = BigQueryTable.objects.update_or_create(name=table, version=version)
             print("Solr Collection created: {}".format(collex))
         except Exception as e:
             logger.error("[ERROR] Program {} may not have been added!".format(collex))
@@ -150,7 +160,17 @@ def main():
             "public": True
         }])
 
-        add_solr_collex(['tcia_images', 'tcga_clin_bios'])
+        add_solr_collex(['tcia_images'])
+        add_solr_collex(['tcga_clin_bios'], 'r9')
+        add_bq_tables(['isb-cgc.TCGA_bioclin_v0.Biospecimen', 'isb-cgc.TCGA_bioclin_v0.Clinical'])
+        tcia_tables_file = open("tcia_collex_tables.csv", "r")
+        line_reader = tcia_tables_file.readlines()
+        table_set = []
+        for line in line_reader:
+            table_set.append(line.strip())
+
+        add_bq_tables(table_set)
+        tcia_tables_file.close()
 
         collection_file = open("tcia_collex.csv", "r")
         line_reader = collection_file.readlines()

@@ -57,6 +57,8 @@ def get_collex_metadata(filters, fields, with_docs=True):
     results['facets']['cross_collex'] = solr_result['facets']
     results['total'] = solr_result['numFound']
 
+    # The attributes being faceted against here would be whatever list of facet counts we want to display in the
+    # UI (probably not ALL of them).
     solr_facets = build_solr_facets(list(["vital_status","sample_type"]), solr_query['filter_tags'])
 
     query_set = []
