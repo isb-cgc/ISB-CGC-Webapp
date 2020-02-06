@@ -33,6 +33,9 @@ def getWithNullGuard(curDic, curKey, nullRet):
 def get_collex_metadata(filters, fields,with_docs=True, record_limit=10):
     results = {'docs': None, 'facets': {}}
 
+    # TODO: This needs to be altered to accept settings on *which* image program/collection set and corresponding ancillary data it's querying
+    # That will take the place of the current name=<foo> search being used here; instead, it'll be id=<etc>
+    # Presumably this will come in from the request, based on the tab a user is looking at, or where they clicked the filter, etc.
     tcga_facet_attrs = SolrCollection.objects.get(name="tcga_clin_bios").get_collection_attr().values_list('name', flat=True)
     tcia_facet_attrs = SolrCollection.objects.get(name="tcia_images").get_collection_attr().values_list('name', flat=True)
 
@@ -54,6 +57,7 @@ def get_collex_metadata(filters, fields,with_docs=True, record_limit=10):
         'query_string': "*:*",
         'facets': solr_facets,
         'limit': record_limit,
+        # what is with_docs supposed to do?? 'limit': 10 if with_docs else 0,
         'collapse_on': 'case_barcode',
         'counts_only': False
     })
