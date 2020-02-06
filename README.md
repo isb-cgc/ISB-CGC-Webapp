@@ -12,7 +12,7 @@ The system uses [Vagrant](https://www.vagrantup.com/) to setup a consistent, pla
 
 From there perform the following steps...
 
- 1. Once you've installed PyCharm and cloned the repositories, create a directory within the `PycharmProjects` directory (the parent directory of your repositories) called `secure_files/`.
+ 1. Once you've installed PyCharm and cloned the repositories (this repository and [ISB-CGC-Common](https://github.com/isb-cgc/ISB-CGC-Common), create a directory within the `PycharmProjects` directory (the parent directory of your repositories) called `secure_files/`.
  2. Copy the `sample.env` file to a file named `.env` in `secure_files/`
  3. Fill out the `.env` file with the proper values
    * For most **development** environments, `MYSQL_ROOT_PASSWORD` and `DATABASE_PASSWORD` can be the same, and `DATABASE_USER` can be `root`
