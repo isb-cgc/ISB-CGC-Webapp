@@ -16,13 +16,15 @@
 
 import logging
 
-from idc_collections.models import SolrCollection
+from idc_collections.models import SolrCollection, BigQueryTable, Attribute
 from solr_helpers import *
+from google_helpers.bigquery.bq_support import BigQuerySupport
 from django.conf import settings
 
 logger = logging.getLogger('main_logger')
 
 
+# Fetch metadata from Solr
 def get_collex_metadata(filters, fields, with_docs=True):
     results = {'docs': None, 'facets': {}}
 
@@ -81,5 +83,45 @@ def get_collex_metadata(filters, fields, with_docs=True):
     })
 
     results['facets']['collex'] = solr_result['facets']
+
+    print(get_bq_metadata(filters,fields))
+
+    return results
+
+
+# Fetch meta from BigQuery
+def get_bq_metadata(filters, fields):
+    results = {}
+
+    attr_by_bq = {}
+
+    query_base = """
+        SELECT {}
+        FROM {}
+        {}
+    """
+
+    attrs = Attribute.objects.filter(active=True, name__in=list(filter.keys()))
+
+    for attr in attrs:
+        tables = attr.get_solr_bq()['bq']
+
+        for table in tables:
+            if table not in attr_by_bq:
+                attr_by_bq[table] = [attr]
+            else:
+                attr_by_bq[table].append(attr)
+
+    print(attr_by_bq)
+
+    for bqtable in attr_by_bq:
+        filter_set = {x: filters[x] for x in filters if x in attr_by_bq[bqtable]}
+        prefix = bqtable.split("\.")[-1][0:2].lower()
+        where_clause = BigQuerySupport.build_bq_where_clause(filter_set, field_prefix=prefix) if filters else None
+        field_clause = ",".join(["{}.{}".format(prefix, x) for x in fields])
+
+        query = query_base.format(field_clause, bqtable, "WHERE {}".format(where_clause) if filters else "")
+
+        print(query)
 
     return results

@@ -64,7 +64,7 @@ def add_solr_collex(solr_set, version="0"):
     for collex in solr_set:
         try:
             obj, created = SolrCollection.objects.update_or_create(name=collex, version=version)
-            print("Solr Collection created: {}".format(collex))
+            print("Solr Collection entryentry created: {}".format(collex))
         except Exception as e:
             logger.error("[ERROR] Program {} may not have been added!".format(collex))
             logger.exception(e)
@@ -74,9 +74,9 @@ def add_bq_tables(tables, version='r9'):
     for table in tables:
         try:
             obj, created = BigQueryTable.objects.update_or_create(name=table, version=version)
-            print("Solr Collection created: {}".format(collex))
+            print("BQ Table created: {}".format(table))
         except Exception as e:
-            logger.error("[ERROR] Program {} may not have been added!".format(collex))
+            logger.error("[ERROR] Program {} may not have been added!".format(table))
             logger.exception(e)
 
 
@@ -146,6 +146,11 @@ def add_attributes(attr_set):
             if 'solr_collex' in attr:
                 for solr in attr['solr_collex']:
                     obj.solr_collections.add(SolrCollection.objects.get(name=solr))
+
+            if 'bq_tables' in attr:
+                for table in attr['bq_tables']:
+                    obj.bq_tables.add(BigQueryTable.objects.get(name=table))
+
         except Exception as e:
             logger.error("[ERROR] Attribute {} may not have been added!".format(attr['name']))
             logger.exception(e)
@@ -165,11 +170,11 @@ def main():
         add_bq_tables(['isb-cgc.TCGA_bioclin_v0.Biospecimen', 'isb-cgc.TCGA_bioclin_v0.Clinical'])
         tcia_tables_file = open("tcia_collex_tables.csv", "r")
         line_reader = tcia_tables_file.readlines()
-        table_set = []
+        tcia_bq_table_set = []
         for line in line_reader:
-            table_set.append(line.strip())
+            tcia_bq_table_set.append(line.strip())
 
-        add_bq_tables(table_set)
+        add_bq_tables(tcia_bq_table_set, "0")
         tcia_tables_file.close()
 
         collection_file = open("tcia_collex.csv", "r")
@@ -206,6 +211,24 @@ def main():
 
         attr_vals_file.close()
 
+        attr_file = open("clin.csv", "r")
+        line_reader = attr_file.readlines()
+        clin_table_attr = []
+        for line in line_reader:
+            line = line.strip()
+            clin_table_attr.append(line)
+
+        attr_file.close()
+
+        attr_file = open("bios.csv", "r")
+        line_reader = attr_file.readlines()
+        bios_table_attr = []
+        for line in line_reader:
+            line = line.strip()
+            bios_table_attr.append(line)
+
+        attr_file.close()
+
         attr_file = open("clin_attributes.csv", "r")
         line_reader = attr_file.readlines()
         attr_set = []
@@ -221,8 +244,15 @@ def main():
                 "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
                 line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
                 "collex": Collection.objects.values_list('short_name', flat=True),
-                'solr_collex': ['tcga_clin_bios']
+                'solr_collex': ['tcga_clin_bios'],
+                'bq_tables': []
             }
+
+            if attr in clin_table_attr:
+                attr['bq_tables'].append('isb-cgc.TCGA_bioclin_v0.Clinical')
+
+            if attr in bios_table_attr:
+                attr['bq_tables'].append('isb-cgc.TCGA_bioclin_v0.Biospecimen')
 
             if attr['name'] in display_vals:
                 if 'preformatted_values' in display_vals[attr['name']]:
@@ -246,7 +276,8 @@ def main():
                 "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else line_split[1],
                 "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
                 'cross_collex': True,
-                'solr_collex': ['tcia_images']
+                'solr_collex': ['tcia_images'],
+                'bq_tables': tcia_bq_table_set
             })
 
         add_attributes(attr_set)
