@@ -16,7 +16,7 @@
 
 import logging
 
-from idc_collections.models import SolrCollection, BigQueryTable, Attribute
+from idc_collections.models import SolrCollection, Attribute, Program
 from solr_helpers import *
 from google_helpers.bigquery.bq_support import BigQuerySupport
 from django.conf import settings
@@ -84,44 +84,91 @@ def get_collex_metadata(filters, fields, with_docs=True):
 
     results['facets']['collex'] = solr_result['facets']
 
-    print(get_bq_metadata(filters,fields))
+    get_bq_metadata(filters, fields)
 
     return results
 
 
 # Fetch meta from BigQuery
-def get_bq_metadata(filters, fields):
+def get_bq_metadata(filters, fields, programs=None):
     results = {}
-
-    attr_by_bq = {}
+    filter_attr_by_bq = {}
+    field_attr_by_bq = {}
 
     query_base = """
-        SELECT {}
-        FROM {}
-        {}
+        SELECT {field_clause}
+        FROM {table_clause} 
+        {join_clause}
+        {where_clause}
     """
 
-    attrs = Attribute.objects.filter(active=True, name__in=list(filter.keys()))
+    join_clause_base = """
+        JOIN {filter_table} {filter_alias}
+        ON {field_alias}.{field_join_id} = {filter_alias}.{filter_join_id}
+    """
 
-    for attr in attrs:
-        tables = attr.get_solr_bq()['bq']
+    filter_attrs = Attribute.objects.filter(active=True, name__in=list(filters.keys()))
+    field_attrs = Attribute.objects.filter(active=True, name__in=fields)
 
-        for table in tables:
-            if table not in attr_by_bq:
-                attr_by_bq[table] = [attr]
+    table_info = {}
+
+    for attr in filter_attrs:
+        bqtables = attr.bq_tables.all().filter(version__active=True).distinct()
+        for bqtable in bqtables:
+            if bqtable.name not in filter_attr_by_bq:
+                filter_attr_by_bq[bqtable.name] = {}
+                table_info[bqtable.name] = {
+                    'id_col': bqtable.shared_id_col
+                }
+                alias = bqtable.name.split(".")[-1].lower().replace("-", "_")
+                table_info[bqtable.name]['alias'] = alias
+                filter_attr_by_bq[bqtable.name]['attrs'] = [attr.name]
             else:
-                attr_by_bq[table].append(attr)
+                filter_attr_by_bq[bqtable.name]['attrs'].append(attr.name)
 
-    print(attr_by_bq)
+    for attr in field_attrs:
+        bqtables = attr.bq_tables.all().filter(version__active=True, ).distinct()
+        for bqtable in bqtables:
+            if bqtable.name not in field_attr_by_bq:
+                field_attr_by_bq[bqtable.name] = {}
+                field_attr_by_bq[bqtable.name]['attrs'] = [attr.name]
+                table_info[bqtable.name] = {
+                    'id_col': bqtable.shared_id_col
+                }
+                alias = bqtable.name.split(".")[-1].lower().replace("-", "_")
+                table_info[bqtable.name]['alias'] = alias
+            else:
+                field_attr_by_bq[bqtable.name]['attrs'].append(attr.name)
 
-    for bqtable in attr_by_bq:
-        filter_set = {x: filters[x] for x in filters if x in attr_by_bq[bqtable]}
-        prefix = bqtable.split("\.")[-1][0:2].lower()
-        where_clause = BigQuerySupport.build_bq_where_clause(filter_set, field_prefix=prefix) if filters else None
-        field_clause = ",".join(["{}.{}".format(prefix, x) for x in fields])
+    filter_clauses = {}
+    field_clauses = {}
 
-        query = query_base.format(field_clause, bqtable, "WHERE {}".format(where_clause) if filters else "")
+    for bqtable in filter_attr_by_bq:
+        filter_set = {x: filters[x] for x in filters if x in filter_attr_by_bq[bqtable]['attrs']}
+        filter_clauses[bqtable] = BigQuerySupport.build_bq_where_clause(filter_set, field_prefix=table_info[bqtable]['alias'])
 
-        print(query)
+    for bqtable in field_attr_by_bq:
+        alias = table_info[bqtable]['alias']
+        field_clauses[bqtable] = ",".join(["{}.{}".format(alias, x) for x in field_attr_by_bq[bqtable]['attrs']])
+
+    for_union = []
+
+    for field_bqtable in field_attr_by_bq:
+        for filter_bqtable in filter_attr_by_bq:
+            join_clause = join_clause_base.format(
+                field_alias=table_info[field_bqtable]['alias'],
+                field_join_id=table_info[field_bqtable]['id_col'],
+                filter_alias=table_info[filter_bqtable]['alias'],
+                filter_table=filter_bqtable,
+                filter_join_id=table_info[filter_bqtable]['id_col']
+            )
+            for_union.append(query_base.format(
+                field_clause=field_clauses[field_bqtable],
+                table_clause="{} {}".format(field_bqtable, table_info[field_bqtable]['alias']),
+                join_clause=join_clause,
+                where_clause="WHERE {}".format(filter_clauses[filter_bqtable]) if filters else "")
+            )
+
+    print("""UNION ALL""".join(for_union))
 
     return results
