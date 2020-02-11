@@ -1,4 +1,114 @@
 
+
+function populateProjectsTable(tableId){
+    tableElem=document.getElementById(tableId);
+     var newInnerHTML='<tr><th>Project Name</th><th>Description</th><th>Total # of Patients</th><th># of Patients(this cohort)</th></tr>';
+     for (i=0;i< projectA.length;i++){
+         var index=projectIndex[projectA[i]]
+         var curProject = projects[index]
+
+         if (curProject.isActive){
+             var idStr=curProject.id.toString();
+             var numPatientsStr=curProject.patients.length.toString();
+             var numPatientsActiveStr=curProject.numActivePatients.toString();
+             var description='NA';
+
+             var newProjectRow='<tr id="project_row_'+idStr+'" class="text_head" onclick="(toggleProj(this, \''+idStr+'\'))"><td>'+idStr+'</td><td>'+ description + '</td><td>'+numPatientsStr+'</td><td>'+numPatientsActiveStr+'</td> </tr>';
+             newInnerHTML+=newProjectRow;
+         }
+     }
+     tableElem.innerHTML=newInnerHTML;
+}
+
+function toggleProj(projRow,projectId){
+    if (projRow.classList.contains("selected_grey")){
+        $(projRow).removeClass("selected_grey");
+         removeStudiesAndSeries(projectId, "studies_table")
+    }
+    else{
+        $(projRow).addClass("selected_grey");
+        addStudies(projectId, "studies_table");
+    }
+}
+
+function toggleStudy(studyRow,studyId){
+    if (studyRow.classList.contains("selected_grey")){
+        $(studyRow).removeClass("selected_grey");
+         removeSeries(studyRow.id, "series_table");
+    }
+    else{
+        $(studyRow).addClass("selected_grey");
+        addSeries(studyId,studyRow.id, "series_table");
+    }
+}
+
+
+
+function removeStudiesAndSeries(projectId,studyTableId,seriesTableId){
+    var pclass= "project_"+projectId;
+    var studiesTable=document.getElementById(studyTableId);
+    $('#'+studyTableId).find('.project_'+projectId).remove();
+    removeSeries(pclass, 'series_table');
+}
+
+function removeSeries(selClass,seriesTableId){
+    $('#'+seriesTableId).find('.'+selClass).remove();
+}
+function addStudies(projectId,studyTableId){
+     var index=projectIndex[projectId]
+     var curProject = projects[index]
+     //var tableElem=document.getElementById(studyTableId);
+
+     curProject.patients.forEach(function(curPatient,index){
+         patientId=curPatient.id;
+         curPatient.studies.forEach(function(curStudy,sIndex){
+
+
+             studyId=curStudy.id
+             studyDescription=curStudy.StudyDescription;
+             studyDate=curStudy.StudyDate;
+             var rowId='study_'+projectId+'_'+patientIndex[patientId].toString()+"_"+studyIndex[studyId].toString();
+             var pclass='project_'+projectId;
+
+              var fetchUrl='/projects/chc-tcia/locations/us-central1/datasets/'+projectId.toLowerCase()+'/dicomStores/'+projectId.toLowerCase()+'/study/'+studyId;
+              var hrefTxt='<a href="'+fetchUrl+'">'+studyId+'</a>';
+
+             var newHtml='<tr id="'+rowId+'" class="'+pclass+' text_head" onclick="(toggleStudy(this,\''+studyId+'\'))"><td>'+projectId+'</td><td>'+patientId+'</td><td>'+hrefTxt+'</td><td>'+studyDescription+'</td><td>'+studyDate+'</td></tr>'
+             $('#'+studyTableId+' tr:last').after(newHtml);
+         });
+
+     });
+
+
+}
+
+function addSeries(studyId, studyClass,seriesTableId){
+    var sIndex = studyIndex[studyId]
+    var patientId=studyPatient[studyId]
+    var ptIndex =  patientIndex[patientId]
+
+    var projectId=patientProject[patientId]
+    var pindex=projectIndex[projectId]
+
+    var curStudy=projects[pindex].patients[ptIndex].studies[sIndex]
+    curStudy.series.forEach(function(curSeries, seriesIndex){
+        var seriesId=curSeries.id;
+        var bodypart=curSeries.BodyPartExamined;
+        var modality=curSeries.Modality;
+        var seriesNumber=curSeries.SeriesNumber;
+        var rowId='series_'+projectId+'_'+patientIndex[patientId].toString()+"_"+studyIndex[studyId].toString()+'_'+seriesNumber.toString();
+        var pclass='project_'+projectId;
+        var fetchUrl='/projects/chc-tcia/locations/us-central1/datasets/'+projectId.toLowerCase()+'/dicomStores/'+projectId.toLowerCase()+'/study/'+studyId;
+              var hrefTxt='<a href="'+fetchUrl+'">'+studyId+'</a>';
+
+        //var sclass='study_'+projectId+'_'+patientIndex[patientId].toString()+"_"+studyIndex[studyId].toString();
+        var newHtml='<tr id="'+rowId+'" class="'+pclass+' '+studyClass+' text_head"><td>'+hrefTxt+'</td><td>'+seriesId+'</td><td>'+seriesNumber+'</td><td>'+modality+'</td><td>'+bodypart+'</td></tr>'
+             $('#'+seriesTableId+' tr:last').after(newHtml);
+    });
+
+
+}
+
 function getLastIdString(inp){
     var strA=inp.split('.');
     return strA[strA.length-1];
@@ -36,12 +146,22 @@ function fetchImage(){
 function resolveAllPlots(){
     resolveOriginalDataPlots("modality","modality_chart","Modality");
     resolveOriginalDataPlots("body_part","body_part_examined_chart", "BodyPartExamined");
-    resolveRelateDataPlotsCat("disease", "disease_code_chart","disease_code");
-    resolveRelateDataPlotsCat("vital", "vital_statistics_chart","vital_status");
-    resolveRelateDataPlotsCat("gender", "gender_chart","gender");
-    resolveRelateDataPlotsRange("age", "age_chart","age");
-    resolveRelateDataPlotsCat("race", "race_chart","race");
-    resolveRelateDataPlotsCat("ethnicity", "ethnicity_chart","ethnicity");
+
+    resolveRelatedPlotsCatWCounts( clinicalData['disease_code'],"disease_code_chart","Disease Code");
+    resolveRelatedPlotsCatWCounts( clinicalData['vital_status'],"vital_statistics_chart","Vital Status");
+    resolveRelatedPlotsCatWCounts( clinicalData['gender'],"gender_chart","Gender");
+    resolveRelatedPlotsCatWCountsRng( clinicalData['age'],"age_chart","Age");
+    //resolveRelatedPlotsCatWCountsRng( clinicalData['bmi'],"bmi_chart","Body Mass Index");
+    resolveRelatedPlotsCatWCounts( clinicalData['race'],"race_chart","Race");
+    resolveRelatedPlotsCatWCounts( clinicalData['ethnicity'],"ethnicity_chart","Ethnicity");
+
+    //resolveRelateDataPlotsCat("disease", "disease_code_chart","disease_code");
+    //resolveRelateDataPlotsCat("vital", "vital_statistics_chart","vital_status");
+    //resolveRelateDataPlotsCat("gender", "gender_chart","gender");
+
+    //resolveRelateDataPlotsRange("age", "age_chart","age");
+    //resolveRelateDataPlotsCat("race", "race_chart","race");
+    //resolveRelateDataPlotsCat("ethnicity", "ethnicity_chart","ethnicity");
 
 }
 
@@ -216,19 +336,36 @@ function fetchData(){
                 success: function(data){
                     projects = data.projects;
                     projectIndex = data.projectIndex;
-                    projectA = data.projectA;
+                    projectA = data.projectA.sort();
                     patientIndex = data.patientIndex;
                     patientProject = data.patientProject;
                     studyIndex = data.studyIndex;
                     studyPatient = data.studyPatient;
-                    diseaseCodeH = data.diseaseCodeH;
-                    raceH = data.raceH;
-                    ethnicityH= data.ethnicityH;
+                    clinicalData=data['clinical']
+                    diseaseCodeH = Object.keys(data['clinical']['disease_code']).sort();
 
-                    fillInMissing();
-                    constructProjects();
-                    updateSelections(-1,[]);
+                    nonePos = diseaseCodeH.indexOf('None');
+                    diseaseCodeH.splice(nonePos,1);
+                    diseaseCodeH.push('None');
+
+                    seriesIndex = data.seriesIndex;
+                    seriesStudy = data.seriesStudy;
+                    raceH = Object.keys(data['clinical']['race']).sort();
+
+                    nonePos = raceH.indexOf('None');
+                    raceH.splice(nonePos,1);
+                    raceH.push('None');
+                    ethnicityH = Object.keys(data['clinical']['ethnicity']).sort();
+
+                    nonePos = ethnicityH.indexOf('None');
+                    ethnicityH.splice(nonePos,1);
+                    ethnicityH.push('None');
+
+                    //fillInMissing();
+                    constructClinicalFilterOptions();
+                    //updateSelections(-1,[]);
                     resolveAllPlots();
+                    populateProjectsTable("projects_table");
                 },
                 error: function(  ){
                     console.log( "problem getting data" );
@@ -263,7 +400,7 @@ function fillInMissing(){
                 curPatient.race='none';
             }
             if (!(curPatient.hasOwnProperty('ethnicity'))){
-                curPatient.ethnicty='none';
+                curPatient.ethnicity='none';
             }
         }
     }
@@ -351,9 +488,9 @@ function pullDataFromFile(){
 
 }
 
-function constructProjects(){
+function constructClinicalFilterOptions(){
 
-    projectA=projectA.sort();
+    //projectA=projectA.sort();
     projectElem=document.getElementById("project_scope");
     for (i=0;i<projectA.length;i++){
         nm=projectA[i]
@@ -364,14 +501,14 @@ function constructProjects(){
         projectElem.appendChild(opt);
     }
 
-    diseaseCodeA=Object.keys(diseaseCodeH).sort();
+    //diseaseCodeA=Object.keys(diseaseCodeH).sort();
 
     //ethnicityA=diseaseCodeH.keys().sort();
     diseaseElem=document.getElementById("disease_list");
     removeChildren(diseaseElem);
-    for (i=0;i<diseaseCodeA.length;i++){
-        diseaseCode=diseaseCodeA[i];
-        if (diseaseCode !=="none") {
+    for (i=0;i<diseaseCodeH.length;i++){
+        diseaseCode=diseaseCodeH[i];
+        if (diseaseCode !=="None") {
             var opt = document.createElement("LI");
             opt.innerHTML = '&emsp;<input type="checkbox" checked value="' + diseaseCode + '" onclick="updateFilterSelection(\'disease_list\', \'disease_code_set\',\'Disease Code\', \'disease_code\',false,false)">' + diseaseCode;
             diseaseElem.appendChild(opt);
@@ -382,11 +519,11 @@ function constructProjects(){
     opt.innerHTML = '&emsp;<input type="checkbox" checked value="None" onclick="updateFilterSelection(\'disease_list\', \'disease_code_set\',\'Disease Code\', \'disease_code\',false,false)">NA';
     diseaseElem.appendChild(opt);
 
-    raceA=Object.keys(raceH).sort();
+    //raceA=Object.keys(raceH).sort();
     raceElem=document.getElementById("race_list");
-    for (i=0;i<raceA.length;i++){
-        race=raceA[i];
-        if (race !=="none") {
+    for (i=0;i<raceH.length;i++){
+        race=raceH[i];
+        if (race !=="None") {
             var opt = document.createElement("LI");
             opt.innerHTML = '&emsp;<input type="checkbox" checked value="' + race + '"  onclick="updateFilterSelection(\'race_list\', \'race_set\',\'Race\', \'race\',\'false\',\'false\')">' + race;
             raceElem.appendChild(opt);
@@ -396,12 +533,12 @@ function constructProjects(){
     opt.innerHTML = '&emsp;<input id="race_list_none" type="checkbox" checked value="None" onclick="updateFilterSelection(0,\'race_list\', \'race_set\',\'Race\', \'race\',\'false\',\'false\')">NA';
     raceElem.appendChild(opt);
 
-    ethnicityA=Object.keys(ethnicityH).sort();
+    //ethnicityA=Object.keys(ethnicityH).sort();
     ethnicityElem=document.getElementById("ethnicity_list");
 
-    for (i=0;i<ethnicityA.length;i++){
-        ethnicity=ethnicityA[i];
-        if (ethnicity !=="none") {
+    for (i=0;i<ethnicityH.length;i++){
+        ethnicity=ethnicityH[i];
+        if (ethnicity !=="None") {
             var opt = document.createElement("LI");
             opt.innerHTML = '&emsp;<input type="checkbox" checked value="' + ethnicity + '" onclick="updateFilterSelection(\'ethnicity_list\', \'ethnicity_set\',\'Ethnicity\',\'ethnicity\',\'false\',\'false\')">' + ethnicity;
             ethnicityElem.appendChild(opt);
@@ -462,8 +599,13 @@ function resolveOriginalDataPlots(elem, plotId,lbl) {
                     var dataFound = new Object();
                     for (k = 0; k < curPatient.studies.length; k++) {
                         curStudy = curPatient.studies[k];
-                        if (curStudy.isActive) {
-                            dataFound[curStudy[lbl].toLowerCase()] = 1
+                        if ( (curStudy.isActive) && (curStudy.numActiveSeries>0) ) {
+                            for (l = 0; l < curStudy.series.length; l++) {
+                                curSeries = curStudy.series[l];
+                                if (curSeries.isActive) {
+                                    dataFound[curSeries[lbl].toLowerCase()] = 1;
+                                }
+                            }
                         }
                     }
                     dataFoundList = Object.keys(dataFound);
@@ -496,7 +638,53 @@ plotLayout.title='';
 
 }
 
+function resolveRelatedPlotsCatWCountsRng(plotDataA, plotId,lbl){
+    pHeader = plotDataA.map(function(val,index){return val[0]});
+    pCounts = plotDataA.map(function(val,index){return val[1]});
 
+     var pdata =[
+    {
+        x:pHeader,
+        y: pCounts,
+        type: 'bar'
+    }
+];
+
+plotLayout.title=lbl
+Plotly.newPlot(plotId,pdata,plotLayout);
+
+
+}
+
+function resolveRelatedPlotsCatWCounts(plotDataFacetCountDic, plotId,lbl){
+
+    pHeader = Object.keys(plotDataFacetCountDic).sort();
+    nonePos = pHeader.indexOf('None');
+    if (nonePos>-1) {
+        pHeader.splice(nonePos, 1);
+        pHeader.push('None');
+    }
+
+    pCounts = new Array();
+    for (i=0;i<pHeader.length;i++){
+        lbl=pHeader[i];
+        cnt=plotDataFacetCountDic[lbl]
+        pCounts.push(cnt)
+
+    }
+    var pdata =[
+    {
+        x:pHeader,
+        y: pCounts,
+        type: 'bar'
+    }
+];
+
+plotLayout.title=lbl
+Plotly.newPlot(plotId,pdata,plotLayout);
+
+
+}
 
 function resolveRelateDataPlotsCat(elem, plotId,lbl){
 

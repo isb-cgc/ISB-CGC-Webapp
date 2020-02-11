@@ -23,8 +23,10 @@ import logging
 import sys
 import re
 import datetime
+
 # import requests
 
+from bisect import bisect_left
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
@@ -365,13 +367,17 @@ def help_page(request):
     return render(request, 'idc/help.html',{'request': request})
 
 def get_filtered_idc_cohort(request):
-    fields = ["project_short_name", "case_barcode", "BodyPartExamined", "Modality", "StudyDescription",
-              "StudyInstanceUID", "race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis", "gender","disease_code"]
-    filters = {"vital_status": ["Alive"]}
 
+    ageRng = [0,20,30,40,50,60,70,80]
+    bmiRng = [18.5,25,30]
+
+    fields = ["project_short_name", "case_barcode", "race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis", "gender", "disease_code",
+               "StudyInstanceUID", "StudyDescription", "StudyDate", "SeriesInstanceUID", "SeriesDescription", "SeriesNumber", "BodyPartExamined", "Modality"]
+    filters = {"vital_status": ["Alive","Dead","None"]}
+    #filters = {}
     try:
         # for a version which isn't current, or for a user cohort
-        facets_and_lists = get_collex_metadata(filters, fields, record_limit=5000)
+        facets_and_lists = get_collex_metadata(filters, fields, record_limit=50000, counts_only=False)
 
 
     except Exception as e:
@@ -388,6 +394,8 @@ def get_filtered_idc_cohort(request):
     ret['patientProject'] = {}
     ret['studyIndex'] = {}
     ret['studyPatient'] = {}
+    ret['seriesIndex'] = {}
+    ret['seriesStudy'] = {}
     ret['diseaseCodeH'] = {}
     ret['raceH'] = {}
     ret['ethnicityH'] = {}
@@ -397,6 +405,7 @@ def get_filtered_idc_cohort(request):
         projectId= curRow['project_short_name'];
         patientId = curRow['case_barcode']
         studyId = curRow['StudyInstanceUID'];
+        seriesId = curRow['SeriesInstanceUID'];
 
         curProject={}
         if not (projectId in ret['projectIndex']):
@@ -437,63 +446,75 @@ def get_filtered_idc_cohort(request):
             curStudy['id'] = studyId
             curStudy['isActive'] = True
             curStudy['reasonsInActive'] = {}
+            curStudy['numActiveSeries'] = 0
             curStudy['seg'] = False
-            curStudy['Modality'] = getWithNullGuard(curRow, 'Modality', 'none')
-            curStudy['BodyPartExamined'] = getWithNullGuard(curRow, 'BodyPartExamined', 'none')
+            curStudy['StudyDescription'] = getWithNullGuard(curRow,'StudyDescription','none')
+            curStudy['StudyDate'] = getWithNullGuard(curRow, 'StudyDate', 'none')
+            curStudy['series'] = []
             curPatient['studies'].append(curStudy)
 
+        else:
+            curStudy = curPatient['studies'][ret['studyIndex'][studyId]]
 
-    clinicalDataA = facets_and_lists['clinical']['docs']
+        curSeries = {}
+        if not(seriesId in ret['seriesIndex']):
+            ret['seriesIndex'][seriesId] = len(curStudy['series'])
+            ret['seriesStudy'][seriesId] = curStudy['id']
+            curStudy['numActiveSeries'] = curStudy['numActiveSeries'] +1;
+            curSeries['id'] = seriesId
+            curSeries['isActive'] =  True
+            curSeries['reasonsInActive'] = {}
+            curSeries['Modality'] = getWithNullGuard(curRow, 'Modality', 'none')
+            curSeries['BodyPartExamined'] = getWithNullGuard(curRow, 'BodyPartExamined', 'none')
+            curSeries['SeriesNumber'] = getWithNullGuard(curRow, 'SeriesNumber', 'none')
+            curStudy['series'].append(curSeries)
 
-    for i in range(len(clinicalDataA)):
-        curRow = clinicalDataA[i]
-        projectId = curRow['project_short_name']
-        patientId = curRow['case_barcode']
-        if patientId in ret['patientIndex']:
-            curProjectIndex = ret['projectIndex'][projectId]
-            curProject=ret['projects'][curProjectIndex]
-            curPatientIndex=ret['patientIndex'][patientId]
-            curPatient=curProject['patients'][curPatientIndex]
-            curPatient['disease_code'] = getWithNullGuard(curRow, 'disease_code','none')
-            ret['diseaseCodeH'][curPatient['disease_code'].lower()] = 1
-            curPatient['vital_status'] = getWithNullGuard(curRow, 'vital_status', 'none')
-            curPatient['gender'] = getWithNullGuard(curRow, 'gender', 'none')
-            curPatient['race'] = getWithNullGuard(curRow, 'race', 'none')
-            ret['raceH'][curPatient['race'].lower()] = 1
-            curPatient['ethnicity'] = getWithNullGuard(curRow, 'ethnicity', 'none')
-            ret['ethnicityH'][curPatient['ethnicity'].lower()] = 1
-            curPatient['bmi'] = getWithNullGuard(curRow, 'bmi', 'none')
-            curPatient['age'] = getWithNullGuard(curRow, 'age', 'none')
+
+    ret['clinical'] =  {}
+    ret['clinical']['vital_status'] = facets_and_lists['clinical']['facets']['vital_status']
+    ret['clinical']['disease_code'] = facets_and_lists['clinical']['facets']['disease_code']
+    ret['clinical']['race'] = facets_and_lists['clinical']['facets']['race']
+    ret['clinical']['gender'] = facets_and_lists['clinical']['facets']['gender']
+    ret['clinical']['ethnicity']  = facets_and_lists['clinical']['facets']['ethnicity']
+
+    ret['clinical']['age'] = []
+    for i in range(len(ageRng)-1):
+        rng = str(ageRng[i])+"-"+str(ageRng[i+1]-1)
+        ret['clinical']['age'].append([rng,0])
+    rng = "over "+str(ageRng[len(ageRng)-1])
+    ret['clinical']['age'].append([rng,0])
+    ret['clinical']['age'].append(['None',0])
+    for ageSet in facets_and_lists['clinical']['facets']['age_at_diagnosis']:
+        if not(ageSet == 'None'):
+            pos = bisect_left(ageRng, ageSet)
+            ret['clinical']['age'][pos][1] = ret['clinical']['age'][pos][1] + facets_and_lists['clinical']['facets']['age_at_diagnosis'][ageSet]
+
+    ret['clinical']['age'][len(ret['clinical']['age'])-1][1] = facets_and_lists['clinical']['facets']['age_at_diagnosis']['None']
+
+    ret['clinical']['bmi'] = []
+    ret['clinical']['bmi'].append(["Underweight: BMI less than "+str(bmiRng[0]), 0])
+    ret['clinical']['bmi'].append(["Normal weight: BMI greater than or equal to " + str(bmiRng[0])+ " and less than "+str(bmiRng[1]),0])
+    ret['clinical']['bmi'].append(["Overweight: BMI greater than or equal to " + str(bmiRng[1]) + " and less than " + str(bmiRng[2]), 0])
+    ret['clinical']['bmi'].append(["Obese: BMI greater than " + str(bmiRng[2]), 0])
+    ret['clinical']['bmi'].append(["None", 0])
+
+    for bmiSet in facets_and_lists['clinical']['facets']['bmi']:
+        if not (bmiSet == 'None'):
+            pos = bisect_left(bmiRng, bmiSet)
+            ret['clinical']['bmi'][pos][1] = ret['clinical']['bmi'][pos][1] + facets_and_lists['clinical']['facets']['bmi'][bmiSet]
+
+    ret['clinical']['bmi'][len(ret['clinical']['bmi']) - 1][1] = facets_and_lists['clinical']['facets']['bmi']['None']
+
+
 
     return JsonResponse(ret)
-    #return HttpResponse('tmp')
+
 
 
 
 
 
 def search_page(request):
-
-    context = {}
-
-    try:
-        # These are example filters; typically they will be reconstituted from the request
-        filters = {}
-        filters = {"vital_status": ["Alive"]}
-        # These are the actual data fields to display in the expanding table; again this is just an example
-        # set that should be properly supplied in the reuqest
-        fields = ["project_short_name","case_barcode","BodyPartExamined", "Modality", "StudyDescription", "StudyInstanceUID","race","vital_status","ethnicity","bmi","age_at_diagnosis","gender"]
-
-        # get_collex_metadata will eventually branch into 'from BQ' and 'from Solr' depending on if there's a request
-        # for a version which isn't current, or for a user cohort
-        #facets_and_lists = get_collex_metadata(filters, fields, record_limit=10)
-
-
-    except Exception as e:
-        logger.error("[ERROR] In search_data:")
-        logger.exception(e)
-
-
     return render(request, 'idc/search.html', {'request':request})
 
 @login_required
