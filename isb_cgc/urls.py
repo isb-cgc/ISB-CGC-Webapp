@@ -75,6 +75,7 @@ urlpatterns = [
     url(r'^genes/', include('genes.urls')),
     url(r'^variables/', include('variables.urls')),
     url(r'^share/', include('sharing.urls')),
+    url(r'^opt_in/check_show', views.opt_in_check_show, name='opt_in')
 ]
 
 if settings.IS_DEV:

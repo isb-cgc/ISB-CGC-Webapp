@@ -279,6 +279,84 @@
 {#                </section>#}
 {#            </div>#}
 {#        </div>#}
+    <div class="row">
+        <div class="ajax-form-modal modal fade" id="opt-in-pop-up-modal" tabindex="-1" role="dialog" aria-labelledby="share-workbook-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <!-- If we want to remove this header we must place this ID on another element with text which can describe the dialog to a screen reader -->
+                    <h4 class="modal-title" id="share-workbook-header">Feedback Opt-In</h4>
+                    <br>
+                    <p class="modal-title" id="share-workbook-header">
+                        ISB-CGC is funded by the National Cancer Institute (NCI) to provide cloud-based tools and data to the cancer research community. Your feedback is important to the NCI and us.
+                        Please help us help you by considering "Opting In" to our user feedback mailing list and allowing us to contact you in the future regarding ISB-CGC!</p>
+                    <br>
+                    <p> Would you like to opt-in our user feedback mailing list? </p>
+                    <input type="radio" name="opt-in-radio" value="opt-in-fill-now" checked> Yes, take me to the opt-in form now.  <br>
+                    <input type="radio" name="opt-in-radio" value="opt-in-email" data-toggle="collapse" data-target="#fill-email"> Yes, email me a link to the opt-in form. <br>
+
+                     <div class="collapse" id="fill-email">
+                            <label>A link to the opt-in form will be sent to your account email.</label>
+                    </div>
+
+                    <input type="radio" name="opt-in-radio" value="opt-in-no"> No, I don't want to be contacted for feedback. <br>
+
+                    <br>
+                    <input type="submit" value="Submit" class="btn btn-primary" />
+                </div>
+
+
+                <div  class="tab-content">
+                    <form class="tab-pane share-pane fade in active share-workbook-form" role="tabpanel" data-workbook-id="{{ workbook.id }}" id="share-{{ workbook.id }}" method="" action="">
+                        {% csrf_token %}
+                    </form>
+                    <!--
+                    <div class="tab-pane shared-with-pane fade {% if not workbook.owner == request.user %}active in{% endif %}" role="tabpanel" id="shared-with-{{ workbook.id }}">
+                        <div class="modal-body">
+                            {% if workbook.shared.count > 0 %}
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for shared in workbook.shared.all|active %}
+                                    <tr>
+                                        <td>
+                                            {% if shared.matched_user %}
+                                            {{shared.matched_user.first_name}} {{shared.matched_user.last_name}}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {{shared.email}}
+                                        </td>
+                                        <td>
+                                            {% if workbook.owner.id == request.user.id %}
+                                            <a class="remove-shared-user" role="button" data-shared-id="{{ shared.id }}"><i class="fa fa-times"></i></a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <p class="center">This list is empty.</p>
+                            {% endif %}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
+                        </div>
+                    </div>
+                    -->
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
         <div class="row">
             <div class="col-md-12">
                 <section class="panel panel-default">

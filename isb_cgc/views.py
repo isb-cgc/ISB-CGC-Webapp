@@ -621,3 +621,13 @@ def dashboard_page(request):
         # 'notebook_vm': notebook_vm,
         # 'gcp_list': gcp_list,
     })
+
+
+@login_required
+def opt_in_check_show(request):
+    result = True
+
+    return JsonResponse({
+        'result': result
+    })
+

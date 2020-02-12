@@ -49,6 +49,23 @@ require([
         $(this).find('i').toggleClass('fa-angle-double-down');
     });
 
+    // Ajax call to get opt_in_show value
+    $.ajax({
+            type: 'GET',
+            url: BASE_URL + '/opt_in/check_show/',
+            dataType  :'json',
+            data: $(this).serialize(),
+            success: function(data) {
+                //console.log(data.message);
+                if (data['result'])
+                {
+                    $('#opt-in-pop-up-modal').modal('show');
+                }
+            },
+            error: function(data) {
+            }
+        });
+
     $(window).on('beforeunload', function () {
         var settingsObj = {};
         $('.panel-collapse').each(function (index, elem) {
