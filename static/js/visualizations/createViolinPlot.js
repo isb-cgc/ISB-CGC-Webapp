@@ -664,11 +664,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                 .x(x2)
                 .y(y)
                 .on('brushstart',function(e){
-                    var e = brush.extent();
-                    if(!e){
-                        selectedSamples = {};
-                        sample_form_update(true);
-                    }
+                    selectedSamples = {};
+                    sample_form_update(true);
                     mouseDown = null;
                 })
                 .on('brush', function(p){

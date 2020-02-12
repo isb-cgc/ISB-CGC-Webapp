@@ -28,12 +28,12 @@ import sys
 import time
 from copy import deepcopy
 
-from GenespotRE import secret_settings, settings
+from isb_cgc import secret_settings, settings
 from MySQLdb import connect
 from MySQLdb.cursors import DictCursor
 from google_helpers.bigquery.service import authorize_credentials_with_Google
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "GenespotRE.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "isb_cgc.settings")
 
 import django
 django.setup()

@@ -13,21 +13,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
+
 from __future__ import print_function
 
 from builtins import str
 from builtins import object
 import os
-from os.path import join, dirname
+from os.path import join, dirname, exists
 import sys
 import dotenv
 from socket import gethostname, gethostbyname
 
-env_path = '../'
-if os.environ.get('SECURE_LOCAL_PATH', None):
-    env_path += os.environ.get('SECURE_LOCAL_PATH')
 
-dotenv.read_dotenv(join(dirname(__file__), env_path+'.env'))
+SECURE_LOCAL_PATH = os.environ.get('SECURE_LOCAL_PATH', '')
+
+if not exists(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH))):
+    print("[ERROR] Couldn't open .env file expected at {}!".format(
+        join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
+    )
+    print("[ERROR] Exiting settings.py load - check your Pycharm settings and secure_path.env file.")
+    exit(1)
+
+dotenv.read_dotenv(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
 
 APP_ENGINE_FLEX = 'aef-'
 APP_ENGINE = 'Google App Engine/'
@@ -38,35 +45,9 @@ SHARED_SOURCE_DIRECTORIES = [
     'ISB-CGC-Common'
 ]
 
-# The Google AppEngine library and the Google Cloud APIs don't play nice. Teach them to get along.
-# This unfortunately requires either hardcoding the path to the SDK, or sorting out a way to
-# provide an environment variable indicating where it is.
-# From https://github.com/GoogleCloudPlatform/python-repo-tools/blob/master/gcp_devrel/testing/appengine.py#L26
-def setup_sdk_imports():
-    """Sets up appengine SDK third-party imports."""
-    sdk_path = os.environ.get('GAE_SDK_PATH', '/usr/lib/google-cloud-sdk')
-
-    # Trigger loading of the Cloud APIs so they're in sys.modules
-    import google.cloud
-
-    # The libraries are specifically under platform/google_appengine
-    if os.path.exists(os.path.join(sdk_path, 'platform/google_appengine')):
-        sdk_path = os.path.join(sdk_path, 'platform/google_appengine')
-
-    # This sets up libraries packaged with the SDK, but puts them last in
-    # sys.path to prevent clobbering newer versions
-    if 'google' in sys.modules:
-        sys.modules['google'].__path__.append(
-            os.path.join(sdk_path, 'google'))
-
-    sys.path.append(sdk_path)
-
-
 # Add the shared Django application subdirectory to the Python module search path
 for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
-
-setup_sdk_imports()
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
@@ -115,18 +96,32 @@ MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
 USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
 
-DATABASES = {
+database_config = {
     'default': {
         'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
-        'HOST': '127.0.0.1',
-        'PORT': 3306,
-        'NAME': os.environ.get('DATABASE_NAME', 'webapp'),
-        'USER': os.environ.get('DATABASE_USER', 'ubuntu'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD', 'isb')
+        'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
+        'NAME': os.environ.get('DATABASE_NAME', ''),
+        'USER': os.environ.get('DATABASE_USER'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD')
     }
 }
 
-DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
+# On the build system, we need to use build-system specific database information
+
+if os.environ.get('CI', None) is not None:
+    database_config = {
+        'default': {
+            'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
+            'HOST': os.environ.get('DATABASE_HOST_BUILD', '127.0.0.1'),
+            'NAME': os.environ.get('DATABASE_NAME_BUILD', ''),
+            'PORT': 3306,
+            'USER': os.environ.get('DATABASE_USER_BUILD'),
+            'PASSWORD': os.environ.get('MYSQL_ROOT_PASSWORD_BUILD')
+        }
+    }
+
+DATABASES = database_config
+DB_SOCKET = database_config['default']['HOST'] if 'cloudsql' in database_config['default']['HOST'] else None
 
 IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
@@ -240,6 +235,8 @@ STATIC_ROOT = ''
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = os.environ.get('STATIC_URL', '/static/')
 
+BQ_ECOSYS_STATIC_URL = os.environ.get('BQ_ECOSYS_STATIC_URL', 'https://storage.googleapis.com/webapp-dev-static-files/bq_ecosys/')
+
 GCS_STORAGE_URI = os.environ.get('GCS_STORAGE_URI', 'https://storage.googleapis.com/')
 
 # Additional locations of static files
@@ -266,14 +263,9 @@ SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS','3600'))
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    # For using NDB with Django
-    # documentation: https://cloud.google.com/appengine/docs/python/ndb/#integration
-    # WE DON'T SEEM TO BE USING NDB SO I'M COMMENTING THIS OUT - PL
-    # 'google.appengine.ext.ndb.django_middleware.NdbDjangoMiddleware',
-    # 'google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'GenespotRE.checkreqsize_middleware.CheckReqSize',
+    'isb_cgc.checkreqsize_middleware.CheckReqSize',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'adminrestrict.middleware.AdminPagesRestrictMiddleware',
@@ -283,10 +275,10 @@ MIDDLEWARE = [
     'offline.middleware.OfflineMiddleware',
 ]
 
-ROOT_URLCONF = 'GenespotRE.urls'
+ROOT_URLCONF = 'isb_cgc.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'GenespotRE.wsgi.application'
+WSGI_APPLICATION = 'isb_cgc.wsgi.application'
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -297,11 +289,11 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
-    'cohorts',
-    'GenespotRE',
+    'isb_cgc',
     'visualizations',
     'seqpeek',
     'sharing',
+    'cohorts',
     'projects',
     'genes',
     'variables',
@@ -436,7 +428,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.tz',
                 'finalware.context_processors.contextify',
-                'GenespotRE.context_processor.additional_context',
+                'isb_cgc.context_processor.additional_context',
             ),
             # add any loaders here; if using the defaults, we can comment it out
             # 'loaders': (
@@ -475,10 +467,27 @@ if IS_DEV:
 ##########################
 
 # Path to application runtime JSON key
-GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else ''
+GOOGLE_APPLICATION_CREDENTIALS        = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
 
-# GCP monitoring Service Account
-MONITORING_SA_CLIENT_EMAIL            = os.environ.get('MONITORING_SA_CLIENT_EMAIL','')
+if not exists(GOOGLE_APPLICATION_CREDENTIALS):
+    print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
+    exit(1)
+
+# GCP monitoring Service Account, needed for template display
+MONITORING_SA_CLIENT_EMAIL            = os.environ.get('MONITORING_SA_CLIENT_EMAIL', '')
+
+# GCP monitoring Service Account key
+MONITORING_SA_ACCESS_CREDENTIALS      = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('MONITORING_SA_ACCESS_CREDENTIALS', '')))
+
+if not exists(MONITORING_SA_ACCESS_CREDENTIALS):
+    print("[ERROR] Monitoring service account credentials file wasn't found! Provided path: {}".format(MONITORING_SA_ACCESS_CREDENTIALS))
+    exit(1)
+
+# Client ID used for OAuth2 - this is for IGV and the test database
+OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
+
+# Client ID used for OAuth2 - this is for the test database
+OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET', '')
 
 #################################
 #   For NIH/eRA Commons login   #
@@ -487,9 +496,6 @@ MONITORING_SA_CLIENT_EMAIL            = os.environ.get('MONITORING_SA_CLIENT_EMA
 OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP', '')
 GOOGLE_GROUP_ADMIN                      = os.environ.get('GOOGLE_GROUP_ADMIN', '')
 SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS', '')
-
-# JSON key file for GCP monitoring SA
-MONITORING_SA_ACCESS_CREDENTIALS              = os.environ.get('MONITORING_SA_ACCESS_CREDENTIALS', '')
 
 # Log name for ERA login views
 LOG_NAME_ERA_LOGIN_VIEW                  = os.environ.get('LOG_NAME_ERA_LOGIN_VIEW', '')
@@ -596,10 +602,14 @@ DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
 NOTEBOOK_VIEWER = ''
 # NOTEBOOK_ENV_LOC = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_ENV_PATH', None))
 # NOTEBOOK_SL_PATH = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_SL_PATH', None))
+
 #################################
 # SOLR settings
 #################################
-SOLR_URL = os.environ.get('SOLR_URL', None)
+SOLR_URI = os.environ.get('SOLR_URI', '')
+SOLR_LOGIN = os.environ.get('SOLR_LOGIN', '')
+SOLR_PASSWORD = os.environ.get('SOLR_PASSWORD', '')
+SOLR_CERT = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCAL_PATH, os.environ.get('SOLR_CERT', '')))
 
 ##############################################################
 #   MailGun Email Settings
@@ -611,11 +621,6 @@ NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRES
 
 # Explicitly check for known items
 BLACKLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
-
-# IndexD settings
-INDEXD_URI = os.environ.get('INDEXD_URI', None)
-INDEXD_REQ_LIMIT = int(os.environ.get('INDEXD_REQ_LIMIT', '100'))
-
 
 if DEBUG and DEBUG_TOOLBAR:
     INSTALLED_APPS += ('debug_toolbar',)

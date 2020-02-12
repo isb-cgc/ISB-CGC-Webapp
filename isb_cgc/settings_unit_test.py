@@ -18,16 +18,21 @@ from __future__ import print_function
 from builtins import str
 from builtins import object
 import os
-from os.path import join, dirname
+from os.path import join, dirname, exists
 import sys
 import dotenv
 from socket import gethostname, gethostbyname
 
-env_path = '../'
-if os.environ.get('SECURE_LOCAL_PATH', None):
-    env_path += os.environ.get('SECURE_LOCAL_PATH')
+SECURE_LOCAL_PATH = os.environ.get('SECURE_LOCAL_PATH', '')
 
-dotenv.read_dotenv(join(dirname(__file__), env_path+'.env'))
+if not exists(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH))):
+    print("[ERROR] Couldn't open .env file expected at {}!".format(
+        join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
+    )
+    print("[ERROR] Exiting settings.py load - check your Pycharm settings and secure_path.env file.")
+    exit(1)
+
+dotenv.read_dotenv(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
 
 APP_ENGINE_FLEX = 'aef-'
 APP_ENGINE = 'Google App Engine/'
@@ -115,32 +120,18 @@ MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
 USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
 
-database_config = {
+DATABASES = {
     'default': {
         'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
-        'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
-        'NAME': os.environ.get('DATABASE_NAME', ''),
-        'USER': os.environ.get('DATABASE_USER'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD')
+        'HOST': '127.0.0.1',
+        'PORT': 3306,
+        'NAME': os.environ.get('DATABASE_NAME', 'webapp'),
+        'USER': os.environ.get('DATABASE_USER', 'ubuntu'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD', 'isb')
     }
 }
 
-# On the build system, we need to use build-system specific database information
-
-if os.environ.get('CI', None) is not None:
-    database_config = {
-        'default': {
-            'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
-            'HOST': os.environ.get('DATABASE_HOST_BUILD', '127.0.0.1'),
-            'NAME': os.environ.get('DATABASE_NAME_BUILD', ''),
-            'PORT': 3306,
-            'USER': os.environ.get('DATABASE_USER_BUILD'),
-            'PASSWORD': os.environ.get('MYSQL_ROOT_PASSWORD_BUILD')
-        }
-    }
-
-DATABASES = database_config
-DB_SOCKET = database_config['default']['HOST'] if 'cloudsql' in database_config['default']['HOST'] else None
+DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
 
 IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
@@ -254,8 +245,6 @@ STATIC_ROOT = ''
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = os.environ.get('STATIC_URL', '/static/')
 
-BQ_ECOSYS_STATIC_URL = os.environ.get('BQ_ECOSYS_STATIC_URL', 'https://storage.googleapis.com/webapp-dev-static-files/bq_ecosys/')
-
 GCS_STORAGE_URI = os.environ.get('GCS_STORAGE_URI', 'https://storage.googleapis.com/')
 
 # Additional locations of static files
@@ -282,14 +271,9 @@ SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS','3600'))
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    # For using NDB with Django
-    # documentation: https://cloud.google.com/appengine/docs/python/ndb/#integration
-    # WE DON'T SEEM TO BE USING NDB SO I'M COMMENTING THIS OUT - PL
-    # 'google.appengine.ext.ndb.django_middleware.NdbDjangoMiddleware',
-    # 'google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'GenespotRE.checkreqsize_middleware.CheckReqSize',
+    'isb_cgc.checkreqsize_middleware.CheckReqSize',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'adminrestrict.middleware.AdminPagesRestrictMiddleware',
@@ -299,10 +283,10 @@ MIDDLEWARE = [
     'offline.middleware.OfflineMiddleware',
 ]
 
-ROOT_URLCONF = 'GenespotRE.urls'
+ROOT_URLCONF = 'isb_cgc.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'GenespotRE.wsgi.application'
+WSGI_APPLICATION = 'isb_cgc.wsgi.application'
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -313,11 +297,11 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
-    'GenespotRE',
+    'cohorts',
+    'isb_cgc',
     'visualizations',
     'seqpeek',
     'sharing',
-    'cohorts',
     'projects',
     'genes',
     'variables',
@@ -452,7 +436,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.tz',
                 'finalware.context_processors.contextify',
-                'GenespotRE.context_processor.additional_context',
+                'isb_cgc.context_processor.additional_context',
             ),
             # add any loaders here; if using the defaults, we can comment it out
             # 'loaders': (
@@ -491,19 +475,12 @@ if IS_DEV:
 ##########################
 
 # Path to application runtime JSON key
-GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else ''
+GOOGLE_APPLICATION_CREDENTIALS        = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
 
 # GCP monitoring Service Account
-MONITORING_SA_CLIENT_EMAIL            = os.environ.get('MONITORING_SA_CLIENT_EMAIL', '')
+MONITORING_SA_CLIENT_EMAIL            = os.environ.get('MONITORING_SA_CLIENT_EMAIL','')
 
-# GCP monitoring Service Account key
-MONITORING_SA_ACCESS_CREDENTIALS      = os.environ.get('MONITORING_SA_ACCESS_CREDENTIALS', '')
-
-# Client ID used for OAuth2 - this is for IGV and the test database
-OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
-
-# Client ID used for OAuth2 - this is for the test database
-OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET', '')
+MONITORING_SA_ACCESS_CREDENTIALS      = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('MONITORING_SA_ACCESS_CREDENTIALS', '')))
 
 #################################
 #   For NIH/eRA Commons login   #
@@ -622,7 +599,10 @@ NOTEBOOK_VIEWER = ''
 #################################
 # SOLR settings
 #################################
-SOLR_URL = os.environ.get('SOLR_URL', None)
+SOLR_URI = os.environ.get('SOLR_URI', '')
+SOLR_LOGIN = os.environ.get('SOLR_LOGIN', '')
+SOLR_PASSWORD = os.environ.get('SOLR_PASSWORD', '')
+SOLR_CERT = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCAL_PATH, os.environ.get('SOLR_CERT', '')))
 
 ##############################################################
 #   MailGun Email Settings
@@ -634,16 +614,6 @@ NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRES
 
 # Explicitly check for known items
 BLACKLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
-
-# IndexD settings
-INDEXD_URI = os.environ.get('INDEXD_URI', None)
-INDEXD_REQ_LIMIT = int(os.environ.get('INDEXD_REQ_LIMIT', '100'))
-
-# Apache Solr settings
-SOLR_URI = os.environ.get('SOLR_URI', '')
-SOLR_LOGIN = os.environ.get('SOLR_LOGIN', '')
-SOLR_PASSWORD = os.environ.get('SOLR_PASSWORD', '')
-
 
 if DEBUG and DEBUG_TOOLBAR:
     INSTALLED_APPS += ('debug_toolbar',)
