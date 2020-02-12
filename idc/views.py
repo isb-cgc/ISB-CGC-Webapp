@@ -23,8 +23,10 @@ import logging
 import sys
 import re
 import datetime
+
 # import requests
 
+from bisect import bisect_left
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
@@ -48,6 +50,7 @@ from idc_collections.models import Program
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 from .metadata_utils import get_collex_metadata
+from .metadata_utils import getWithNullGuard
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
@@ -363,34 +366,172 @@ def health_check(request, match):
 def help_page(request):
     return render(request, 'idc/help.html',{'request': request})
 
+def get_filtered_idc_cohort(request):
+
+    ageRng = [0,20,30,40,50,60,70,80]
+    bmiRng = [18.5,25,30]
+
+    fields = ["project_short_name", "case_barcode", "race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis", "gender", "disease_code",
+               "StudyInstanceUID", "StudyDescription", "StudyDate", "SeriesInstanceUID", "SeriesDescription", "SeriesNumber", "BodyPartExamined", "Modality"]
+    filters = {"vital_status": ["Alive","Dead","None"]}
+    #filters = {}
+    try:
+        # for a version which isn't current, or for a user cohort
+        facets_and_lists = get_collex_metadata(filters, fields, record_limit=50000, counts_only=False)
+
+
+    except Exception as e:
+        logger.error("[ERROR] In get_filtered_idc_cohort_data:")
+        logger.exception(e)
+
+    imageDataA=facets_and_lists['docs']
+
+    ret={}
+    ret['projects'] = []
+    ret['projectIndex'] = {}
+    ret['projectA'] = []
+    ret['patientIndex'] = {}
+    ret['patientProject'] = {}
+    ret['studyIndex'] = {}
+    ret['studyPatient'] = {}
+    ret['seriesIndex'] = {}
+    ret['seriesStudy'] = {}
+    ret['diseaseCodeH'] = {}
+    ret['raceH'] = {}
+    ret['ethnicityH'] = {}
+
+    for i in range(len(imageDataA)):
+        curRow=imageDataA[i]
+        projectId= curRow['project_short_name'];
+        patientId = curRow['case_barcode']
+        studyId = curRow['StudyInstanceUID'];
+        seriesId = curRow['SeriesInstanceUID'];
+
+        curProject={}
+        if not (projectId in ret['projectIndex']):
+            ret['projectIndex'][projectId]=len(ret['projects'])
+            ret['projectA'].append(projectId)
+            curProject['id']=projectId
+            curProject['patients'] = []
+            curProject['isActive']=True
+            curProject['numActivePatients']=0
+            curProject['reasonsInActive']={}
+            ret['projects'].append(curProject)
+
+        else:
+            curProject = ret['projects'][ret['projectIndex'][projectId]]
+
+        curPatient = {}
+        if not (patientId in ret['patientIndex']):
+            curProject['numActivePatients'] = curProject['numActivePatients']+1
+            ret['patientIndex'][patientId] = len(curProject['patients'])
+            ret['patientProject'][patientId] = curProject['id']
+            curPatient['id'] = patientId
+            curPatient['isActive'] = True
+            curPatient['numActiveStudies'] = 0
+            curPatient['reasonsInActive'] = {}
+            curPatient['studies'] = []
+            curProject['patients'].append(curPatient)
+
+
+        else:
+            curPatient = curProject['patients'][ret['patientIndex'][patientId]]
+
+        curStudy = {}
+
+        if not(studyId in ret['studyIndex']):
+            curPatient['numActiveStudies'] = curPatient['numActiveStudies'] + 1
+            ret['studyIndex'][studyId] = len(curPatient['studies'])
+            ret['studyPatient'][studyId] = curPatient['id']
+            curStudy['id'] = studyId
+            curStudy['isActive'] = True
+            curStudy['reasonsInActive'] = {}
+            curStudy['numActiveSeries'] = 0
+            curStudy['seg'] = False
+            curStudy['StudyDescription'] = getWithNullGuard(curRow,'StudyDescription','none')
+            curStudy['StudyDate'] = getWithNullGuard(curRow, 'StudyDate', 'none')
+            curStudy['series'] = []
+            curPatient['studies'].append(curStudy)
+
+        else:
+            curStudy = curPatient['studies'][ret['studyIndex'][studyId]]
+
+        curSeries = {}
+        if not(seriesId in ret['seriesIndex']):
+            ret['seriesIndex'][seriesId] = len(curStudy['series'])
+            ret['seriesStudy'][seriesId] = curStudy['id']
+            curStudy['numActiveSeries'] = curStudy['numActiveSeries'] +1;
+            curSeries['id'] = seriesId
+            curSeries['isActive'] =  True
+            curSeries['reasonsInActive'] = {}
+            curSeries['Modality'] = getWithNullGuard(curRow, 'Modality', 'none')
+            curSeries['BodyPartExamined'] = getWithNullGuard(curRow, 'BodyPartExamined', 'none')
+            curSeries['SeriesNumber'] = getWithNullGuard(curRow, 'SeriesNumber', 'none')
+            curStudy['series'].append(curSeries)
+
+
+    ret['clinical'] =  {}
+    ret['clinical']['vital_status'] = facets_and_lists['clinical']['facets']['vital_status']
+    ret['clinical']['disease_code'] = facets_and_lists['clinical']['facets']['disease_code']
+    ret['clinical']['race'] = facets_and_lists['clinical']['facets']['race']
+    ret['clinical']['gender'] = facets_and_lists['clinical']['facets']['gender']
+    ret['clinical']['ethnicity']  = facets_and_lists['clinical']['facets']['ethnicity']
+
+    ret['clinical']['age'] = []
+    for i in range(len(ageRng)-1):
+        rng = str(ageRng[i])+"-"+str(ageRng[i+1]-1)
+        ret['clinical']['age'].append([rng,0])
+    rng = "over "+str(ageRng[len(ageRng)-1])
+    ret['clinical']['age'].append([rng,0])
+    ret['clinical']['age'].append(['None',0])
+    for ageSet in facets_and_lists['clinical']['facets']['age_at_diagnosis']:
+        if not(ageSet == 'None'):
+            pos = bisect_left(ageRng, ageSet)
+            ret['clinical']['age'][pos][1] = ret['clinical']['age'][pos][1] + facets_and_lists['clinical']['facets']['age_at_diagnosis'][ageSet]
+
+    ret['clinical']['age'][len(ret['clinical']['age'])-1][1] = facets_and_lists['clinical']['facets']['age_at_diagnosis']['None']
+
+    ret['clinical']['bmi'] = []
+    ret['clinical']['bmi'].append(["Underweight: BMI less than "+str(bmiRng[0]), 0])
+    ret['clinical']['bmi'].append(["Normal weight: BMI greater than or equal to " + str(bmiRng[0])+ " and less than "+str(bmiRng[1]),0])
+    ret['clinical']['bmi'].append(["Overweight: BMI greater than or equal to " + str(bmiRng[1]) + " and less than " + str(bmiRng[2]), 0])
+    ret['clinical']['bmi'].append(["Obese: BMI greater than " + str(bmiRng[2]), 0])
+    ret['clinical']['bmi'].append(["None", 0])
+
+    for bmiSet in facets_and_lists['clinical']['facets']['bmi']:
+        if not (bmiSet == 'None'):
+            pos = bisect_left(bmiRng, bmiSet)
+            ret['clinical']['bmi'][pos][1] = ret['clinical']['bmi'][pos][1] + facets_and_lists['clinical']['facets']['bmi'][bmiSet]
+
+    ret['clinical']['bmi'][len(ret['clinical']['bmi']) - 1][1] = facets_and_lists['clinical']['facets']['bmi']['None']
+
+
+
+    return JsonResponse(ret)
+
+
+
+
+
+
 def search_page(request):
-    #del request.session['seenWarning']
-    #request.session['seenWarning']=False;
     return render(request, 'idc/search.html', {'request':request})
 
+@login_required
 def ohif_test_page(request):
     request.session['last_path']=request.get_full_path()
     return render(request, 'idc/ohif.html',{'request': request})
 
+@login_required
 def ohif_viewer_page(request):
     request.session['last_path'] = request.get_full_path()
     return render(request, 'idc/ohif.html',{'request': request})
 
+@login_required
 def ohif_callback_page(request):
-    #if (request.session.has_key('last_ohif_path')):
-        #request.GET['qLast']= request.session['last_ohif_path'];
-
-        #request.path=request.session['last_ohif_path']
-        #request.info_path = request.session['last_ohif_path']
-        #request.resolver_match.route='^projects/'
-        #request.resolver_match.view_name = 'ohif_projects'
-        #request.resolver_match.view_name = 'ohif_projects'
-
-
-
     return render(request,'idc/ohif.html',{'request': request})
 
-
+@login_required
 def ohif_projects_page(request):
     request.session['last_ohif_path'] = request.get_full_path()
     return render(request, 'idc/ohif.html',{'request': request})

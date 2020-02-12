@@ -23,6 +23,12 @@ from django.conf import settings
 
 logger = logging.getLogger('main_logger')
 
+def getWithNullGuard(curDic, curKey, nullRet):
+    if curKey in curDic:
+        ret = curDic[curKey]
+    else:
+        ret = nullRet
+    return ret
 
 # Fetch metadata from Solr
 def get_collex_metadata(filters, fields, with_docs=True):
@@ -36,11 +42,13 @@ def get_collex_metadata(filters, fields, with_docs=True):
 
     solr_query = build_solr_query(filters, with_tags_for_ex=True)
     query_set = []
-    for attr in solr_query['queries']:
-        if attr in tcga_facet_attrs:
-            query_set.append("{!join from=case_barcode fromIndex=tcga_clin_bios to=case_barcode}" + solr_query['queries'][attr])
-        else:
-            query_set.append(solr_query['queries'][attr])
+
+    if solr_query['queries'] is not None:
+        for attr in solr_query['queries']:
+            if attr in tcga_facet_attrs:
+                query_set.append("{!join from=case_barcode fromIndex=tcga_clin_bios to=case_barcode}" + solr_query['queries'][attr])
+            else:
+                query_set.append(solr_query['queries'][attr])
 
     solr_facets = build_solr_facets(list(tcia_facet_attrs), solr_query['filter_tags'])
 
@@ -50,12 +58,13 @@ def get_collex_metadata(filters, fields, with_docs=True):
         'fqs': query_set,
         'query_string': "*:*",
         'facets': solr_facets,
-        'limit': 10 if with_docs else 0,
-        'collapse_on': 'case_barcode',
-        'counts_only': False
+        'limit': record_limit if with_docs else 0,
+        # what is with_docs supposed to do?? 'limit': 10 if with_docs else 0,
+        'collapse_on': 'SeriesInstanceUID',
+        'counts_only': counts_only
     })
-
-    results['docs'] = solr_result['docs']
+    if (not(counts_only)):
+        results['docs'] = solr_result['docs']
     results['facets']['cross_collex'] = solr_result['facets']
     results['total'] = solr_result['numFound']
 
@@ -63,26 +72,31 @@ def get_collex_metadata(filters, fields, with_docs=True):
     # UI (probably not ALL of them).
     solr_facets = build_solr_facets(list(["vital_status","sample_type"]), solr_query['filter_tags'])
 
+
+    solr_facets = build_solr_facets(list(["vital_status","race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis","gender", "disease_code"]), solr_query['filter_tags'])
+    #solr_facets = build_solr_facets(list(tcia_facet_attrs), solr_query['filter_tags'])
     query_set = []
-    for attr in solr_query['queries']:
-        if attr in tcia_facet_attrs:
-            query_set.append(
-                "{!join from=case_barcode fromIndex=tcia_images to=case_barcode}" + solr_query['queries'][attr])
-        else:
-            query_set.append(solr_query['queries'][attr])
+    if solr_query['queries'] is not None:
+        for attr in solr_query['queries']:
+            if attr in tcia_facet_attrs:
+                query_set.append("{!join from=case_barcode fromIndex=tcia_images to=case_barcode}" + solr_query['queries'][attr])
+            else:
+                query_set.append(solr_query['queries'][attr])
+
 
     solr_result = query_solr_and_format_result({
         'collection': 'tcga_clin_bios',
-        'fields': None,
+        'fields': fields,
         'fqs': query_set,
         'query_string': "*:*",
         'facets': solr_facets,
-        'limit': 0,
+        'limit': record_limit,
         'collapse_on': 'case_barcode',
         'counts_only': True
     })
 
-    results['facets']['collex'] = solr_result['facets']
+
+    results['clinical'] = solr_result
 
     get_bq_metadata(filters, fields)
 

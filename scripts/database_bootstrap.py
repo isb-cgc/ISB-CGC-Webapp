@@ -87,7 +87,7 @@ def add_bq_tables(tables, version="r9"):
         try:
             obj, created = BigQueryTable.objects.update_or_create(
                 name=table, version=DataVersion.objects.get(version=version),
-                shared_id_col="case_barcde" if "isb-cgc" in table else "PatientID"
+                shared_id_col="case_barcode" if "isb-cgc" in table else "PatientID"
             )
             print("BQ Table created: {}".format(table))
         except Exception as e:
@@ -309,6 +309,15 @@ def main():
                 'solr_collex': ['tcia_images'],
                 'bq_tables': tcia_bq_table_set
             })
+
+        attr_set.append({
+            'name': 'collection',
+            'display_name': "Collection",
+            "type": 'CATEGORICAL STRING',
+            "cross_collex": True,
+            'solr_collex': ['tcia_images'],
+            'bq_tables': tcia_bq_table_set
+        })
 
         add_attributes(attr_set)
 

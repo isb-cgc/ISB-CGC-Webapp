@@ -25,6 +25,25 @@
     <script type="text/javascript" src="{% static 'js/image_search.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/libs/plotly-latest.min.js' %}"></script>
 
+  <style>
+       table, th, td {border: 1px solid black;}
+       tr.selected_grey td {background-color: #333; color: #fff;}
+    </style>
+    <script>
+         $(".text_head").on("click", function() {
+        /*var tr = $(this).parent();
+        if(tr.hasClass("selected_grey")) {
+            tr.removeClass("selected_grey");
+        } else {
+          tr.addClass("selected_grey");
+       } */
+        //alert('tmp');
+
+});
+
+
+    </script>
+
     <style>
         .iframe-container {
        overflow: hidden;
@@ -44,14 +63,10 @@
 
     </style>
     <script>
-    cohortObj=new Object();
-
 
     window.onload = function(){
+        fetchData();
 
-        constructProjects();
-        updateSelections(-1,[]);
-        resolveAllPlots()
     }
     </script>
 
@@ -62,7 +77,8 @@
 
 {% block content %}
 
-    <div class="col-lg-12" style="float:left;width:51%">
+    <div class="row">
+    <div class="col-lg-3">
 
         <p><h3>Search Scope:</h3>
         <select id="project_scope" onchange="updateSearchScope(this)">
@@ -73,7 +89,7 @@
 
     </div>
 
-    <div class="col-lg-12" style="float:left;width:49%;border: thin solid black;">
+    <div class="col-lg-9">
 
         <p><h3>Search Definition:</h3>
             <ul>
@@ -99,16 +115,17 @@
     </p>
 
     </div>
+    </div>
+
+    <div class ="row">
+    <div class="col-lg-3">
 
 
-    <div class="col-lg-12" style="float:left;width:50%">
 
-
-
-        <div style="width:100%"><h3>Search Configuration</h3></div>
-        <div id = "search_orig" style="display:inline-block;width:32%;border: thin solid black;background-color:dodgerblue" onclick="toggleSearch(0,'search')"><h3>Original</h3></div>
-        <div id = "search_derived" style="display:inline-block;width:32%;border: thin solid black" onclick="toggleSearch(1,'search')"><h3>Derived</h3></div>
-        <div id = "search_related" style="display:inline-block;width:32%;border: thin solid black" onclick="toggleSearch(2,'search')"><h3>Related</h3></div>
+        <div><h3>Search Configuration</h3></div>
+        <div id = "search_orig" class="col-lg-1" onclick="toggleSearch(0,'search')" style="display:inline-block;width:32%;border: thin solid black;background-color:dodgerblue"><h3>Original</h3></div>
+        <div id = "search_derived" class="col-lg-1" onclick="toggleSearch(1,'search')" style="display:inline-block;width:32%;border: thin solid black;"><h3>Derived</h3></div>
+        <div id = "search_related" class="col-lg-1" onclick="toggleSearch(2,'search')" style="display:inline-block;width:32%;border: thin solid black;"><h3>Related</h3></div>
 
         <div align="left"; style="width:97%;display:inline-block;border: thin solid black;float:none">
             <div id = "search_orig_set" align="left" style="display:inline-block;">
@@ -269,46 +286,16 @@
             </div>
 
         </div>
-       <div class="col-lg-12">
-            <h3>Image Series Selection</h3>
 
-            <p>Collection<select id="collection_select" onchange="updateSelections(0,[])">
-            </select><br></p>
-
-            <p>Patient<select id="patient_select" onchange="updateSelections(1,[])">
-            </select><br></p>
-
-            <p>Study<select id="study_select" onchange="updateSelections(2,[])"></select><br></p>
-
-            <p>Series<select id="series_select">
-            </select><br></p>
-
-           <img ><br>
-           <button onclick="window.open('/projects/chc-tcia/locations/us-central1/datasets/4d-lung/dicomStores/4d-lung/study/1.3.6.1.4.1.14519.5.2.1.6834.5010.173152375040663266298918385412','_blank')">Open Series in OHIF Viewer</button>
-
-
-            <!-- <div id="viewId" style="position:relative;height:600px;width:500px">
-                <h3><a target="_blank" href="localhost:8085/projects/chc-tcia/locations/us-central1/datasets/4d-lung/dicomStores/4d-lung/study/1.3.6.1.4.1.14519.5.2.1.6834.5010.173152375040663266298918385412">Open series in separate viewer</a></h3>
-            -->
-            <!-- <iframe id="srcU" style="height:500px;width:500px" src="http://localhost:8085/viewer/1.3.6.1.4.1.14519.5.2.1.6279.6001.265704884949271879044145982159"  loading="eager" onload="(function(){document.getElementById('srcU').contentWindow.scrollTo(2000,4000)})" ></iframe> -->
-
-            <!--    <iframe id="srcU" style="height:500px;width:500px" src="http://localhost:8085/projects/chc-tcia/locations/us-central1/datasets/4d-lung/dicomStores/4d-lung/study/1.3.6.1.4.1.14519.5.2.1.6834.5010.173152375040663266298918385412"  loading="eager" onload="(function(){document.getElementById('srcU').contentWindow.scrollTo(2000,4000)})" ></iframe> -->
-
-                <!-- <iframe> -->
-
-
-              <!-- </iframe> -->
-
-            </div>
 
     </div>
-    <div class="col-lg-12" style="float:left;width:50%">
+    <div class="col-lg-9" style="float:left;width:50%">
     <div style="width:100%"><h3>Search Results Summaries</h3></div>
         <div id = "results_orig" style="display:inline-block;width:32.8%;border: thin solid black;background-color:dodgerblue" onclick="toggleSearch(0,'results')"><h3>Original</h3></div>
         <div id = "results_derived" style="display:inline-block;width:32.8%;border: thin solid black" onclick="toggleSearch(1,'results')"><h3>Derived</h3></div>
         <div id = "results_related" style="display:inline-block;width:32.8%;border: thin solid black" onclick="toggleSearch(2,'results')"><h3>Related</h3></div>
 
-        <div align="left"; style="width:100%;height:700px;display:inline-block;border: thin solid black;float:none">
+        <div align="left"; style="width:100%height:700px;display:inline-block;border: thin solid black;float:none">
             <div id = "results_orig_set" align="left" style="display:inline-block;height:600px">
             <div id="modality_chart" style="float:left;float:top display:inline-block;width:300px;height:200px" >
                 <!-- <canvas id="modality_chart"   ></canvas> -->
@@ -334,6 +321,10 @@
                 <div id="age_chart" style="float:left;float:top display:inline-block;width:300px;height:200px" >
                 <!-- <canvas id="gender_chart"  ></canvas> -->
                 </div>
+                <!--
+                <div id="bmi_chart" style="float:left;float:top display:inline-block;width:300px;height:200px" >
+
+                </div> -->
 
                 <div id="race_chart" style="float:left;float:top display:inline-block;width:300px;height:200px" >
                 <!-- <canvas id="race_chart"  ></canvas> -->
@@ -353,11 +344,37 @@
 
 
 
-        </div>
+    </div>
 
+    </div>
+    <div>
+
+    <!-- fields = ["project_short_name", "case_barcode", "race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis", "gender", "disease_code",
+               "StudyInstanceUID", "StudyDescription", "StudyDate", "SeriesInstanceUID", "SeriesDescription", "SeriesNumber", "BodyPartExamined", "Modality"] -->
+    <table id="projects_table">
+        <tr>
+        <th><th>Project Name</th><th>Description</th><th>Total # of Patients</th><th># of Patients(this cohort)</th>
+
+        </tr>
+    </table>
+       <br><br>
+    <table id="studies_table">
+        <tr>
+        <th>Project Name</th><th>Patient Id</th><th>Study Id</th><th>Study Description</th><th>Study Date</th>
+
+        </tr>
+    </table>
+     <br><br>
+    <table id="series_table">
+        <tr>
+        <th>Study Id</th><th>Series Id</th><th>Series Number</th><th>Modality</th><th>Body Part Examined</th>
+
+        </tr>
+    </table>
 
 
     </div>
+
 
 
 
