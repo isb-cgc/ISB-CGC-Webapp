@@ -38,12 +38,24 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "idc.settings")
 import django
 django.setup()
 
-from idc_collections.models import Program, Collection, Attribute, Attribute_Display_Values, SolrCollection
+from idc_collections.models import Program, Collection, Attribute, Attribute_Display_Values, SolrCollection, BigQueryTable, DataVersion
 
 from django.contrib.auth.models import User
 idc_superuser = User.objects.get(username="idc")
 
 logger = logging.getLogger('main_logger')
+
+
+def add_data_versions(dv_set):
+    for dv in dv_set:
+        try:
+            obj, created = DataVersion.objects.update_or_create(name=dv['name'], data_type=dv['type'], version=dv['ver'])
+
+            print("Data Version created:")
+            print(obj)
+        except Exception as e:
+            logger.error("[ERROR] Data Version {} may not have been added!".format(dv['name']))
+            logger.exception(e)
 
 
 def add_programs(program_set):
@@ -60,13 +72,26 @@ def add_programs(program_set):
             logger.exception(e)
 
 
-def add_solr_collex(solr_set):
+def add_solr_collex(solr_set, version="0"):
     for collex in solr_set:
         try:
-            obj, created = SolrCollection.objects.update_or_create(name=collex, version="0")
-            print("Solr Collection created: {}".format(collex))
+            obj, created = SolrCollection.objects.update_or_create(name=collex, version=DataVersion.objects.get(version=version))
+            print("Solr Collection entry created: {}".format(collex))
         except Exception as e:
             logger.error("[ERROR] Program {} may not have been added!".format(collex))
+            logger.exception(e)
+
+
+def add_bq_tables(tables, version="r9"):
+    for table in tables:
+        try:
+            obj, created = BigQueryTable.objects.update_or_create(
+                name=table, version=DataVersion.objects.get(version=version),
+                shared_id_col="case_barcode" if "isb-cgc" in table else "PatientID"
+            )
+            print("BQ Table created: {}".format(table))
+        except Exception as e:
+            logger.error("[ERROR] BigQuery Table {} may not have been added!".format(table))
             logger.exception(e)
 
 
@@ -107,6 +132,22 @@ def add_collections(collection_set):
                         active=True
                     ))
 
+            if 'data_versions' in collex:
+                obj = Collection.objects.get(
+                    short_name=collex['short_name'], name=collex['full_name'], is_public=collex['public'],
+                    owner=User.objects.get(email=collex['owner']) if 'owner' in collex else idc_superuser
+                )
+
+                if len(collex['data_versions']) > 1:
+                    collex_to_dv = []
+                    for dv in collex['data_versions']:
+                        dv_obj = DataVersion.objects.get(active=True, version=dv['ver'], data_type=dv['type'])
+                        collex_to_dv.append(Collection.data_versions.through(collection_id=obj.id, dataversion_id=dv_obj.id))
+
+                    Collection.data_versions.through.objects.bulk_create(collex_to_dv)
+                else:
+                    obj.data_versions.add(DataVersion.objects.get(active=True, version=dv['ver'], data_type=dv['type']))
+
     except Exception as e:
         logger.error("[ERROR] Collection {} may not have been added!".format(collex['short_name']))
         logger.exception(e)
@@ -120,22 +161,20 @@ def add_attributes(attr_set):
                 preformatted_values=True if 'preformatted_values' in attr else False,
                 is_cross_collex=True if 'cross_collex' in attr else False
             )
-            if 'collex' in attr:
-                for collex in attr['collex']:
-                    obj.collections.add(Collection.objects.get(
-                        short_name=collex,
-                        active=True)
-                    )
-
             if 'display_vals' in attr:
                 for dv in attr['display_vals']:
                     Attribute_Display_Values.objects.update_or_create(
                         raw_value=dv['raw_value'], display_value=dv['display_value'], attribute=obj
                     )
-
             if 'solr_collex' in attr:
                 for solr in attr['solr_collex']:
-                    obj.solr_collections.add(SolrCollection.objects.get(name=solr))
+                    for sc in SolrCollection.objects.filter(name=solr):
+                        obj.solr_collections.add(sc)
+            if 'bq_tables' in attr:
+                for table in attr['bq_tables']:
+                    for bqt in BigQueryTable.objects.filter(name=table):
+                        obj.bq_tables.add(bqt)
+
         except Exception as e:
             logger.error("[ERROR] Attribute {} may not have been added!".format(attr['name']))
             logger.exception(e)
@@ -150,7 +189,22 @@ def main():
             "public": True
         }])
 
-        add_solr_collex(['tcia_images', 'tcga_clin_bios'])
+        add_data_versions([
+            {"name": "TCGA Clinical and Biospecimen Data", "ver": "r9", "type": "A"},
+            {"name": "TCIA Image Data", "ver": "0", "type": "I"}]
+        )
+
+        add_solr_collex(['tcia_images'])
+        add_solr_collex(['tcga_clin_bios'], 'r9')
+        add_bq_tables(['isb-cgc.TCGA_bioclin_v0.Biospecimen', 'isb-cgc.TCGA_bioclin_v0.Clinical'])
+        tcia_tables_file = open("tcia_collex_tables.csv", "r")
+        line_reader = tcia_tables_file.readlines()
+        tcia_bq_table_set = []
+        for line in line_reader:
+            tcia_bq_table_set.append(line.strip())
+
+        add_bq_tables(tcia_bq_table_set, "0")
+        tcia_tables_file.close()
 
         collection_file = open("tcia_collex.csv", "r")
         line_reader = collection_file.readlines()
@@ -161,8 +215,9 @@ def main():
             line_split = line.split(",")
             collection_set.append({
                 "short_name": line_split[0], "full_name": line_split[1], "public": True,
-                "description": line_split[2], "prog": ["TCGA"]}
-            )
+                "description": line_split[2], "prog": ["TCGA"],
+                "data_versions": [{"ver": "r9", "type": "A"},{"ver": "0", "type": "I"}]
+            })
 
         add_collections(collection_set)
 
@@ -186,6 +241,24 @@ def main():
 
         attr_vals_file.close()
 
+        attr_file = open("clin.csv", "r")
+        line_reader = attr_file.readlines()
+        clin_table_attr = []
+        for line in line_reader:
+            line = line.strip()
+            clin_table_attr.append(line)
+
+        attr_file.close()
+
+        attr_file = open("bios.csv", "r")
+        line_reader = attr_file.readlines()
+        bios_table_attr = []
+        for line in line_reader:
+            line = line.strip()
+            bios_table_attr.append(line)
+
+        attr_file.close()
+
         attr_file = open("clin_attributes.csv", "r")
         line_reader = attr_file.readlines()
         attr_set = []
@@ -201,8 +274,15 @@ def main():
                 "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
                 line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
                 "collex": Collection.objects.values_list('short_name', flat=True),
-                'solr_collex': ['tcga_clin_bios']
+                'solr_collex': ['tcga_clin_bios'],
+                'bq_tables': []
             }
+
+            if attr['name'] in clin_table_attr:
+                attr['bq_tables'].append('isb-cgc.TCGA_bioclin_v0.Clinical')
+
+            if attr['name'] in bios_table_attr:
+                attr['bq_tables'].append('isb-cgc.TCGA_bioclin_v0.Biospecimen')
 
             if attr['name'] in display_vals:
                 if 'preformatted_values' in display_vals[attr['name']]:
@@ -226,8 +306,18 @@ def main():
                 "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else line_split[1],
                 "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
                 'cross_collex': True,
-                'solr_collex': ['tcia_images']
+                'solr_collex': ['tcia_images'],
+                'bq_tables': tcia_bq_table_set
             })
+
+        attr_set.append({
+            'name': 'collection',
+            'display_name': "Collection",
+            "type": Attribute.CATEGORICAL,
+            "cross_collex": True,
+            'solr_collex': ['tcia_images'],
+            'bq_tables': tcia_bq_table_set
+        })
 
         add_attributes(attr_set)
 

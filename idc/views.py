@@ -135,7 +135,7 @@ def explore_data(request):
 
         if facets_and_lists:
             context = {
-                'collex_attr_counts': facets_and_lists['facets']['collex'],
+                'collex_attr_counts': facets_and_lists['clinical'],
                 'cross_collex_attr_counts': facets_and_lists['facets']['cross_collex'],
                 'listings': facets_and_lists['docs']
             }
