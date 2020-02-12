@@ -554,19 +554,6 @@ def bq_meta_data(request):
     bq_meta_data = requests.get(bq_meta_data_file_path).json()
     return JsonResponse(bq_meta_data, safe=False)
 
-
-@login_required
-def opt_in_check_show(request):
-    # result = True
-    obj, created = UserOptInStatus.objects.get_or_create(user=request.user)
-
-    result = (obj.opt_in_status == UserOptInStatus.NOT_SEEN)
-
-    return JsonResponse({
-        'result': result
-    })
-
-
 @login_required
 def dashboard_page(request):
     # Cohort List
@@ -654,9 +641,39 @@ def dashboard_page(request):
 
 @login_required
 def opt_in_check_show(request):
-    result = True
+
+    try:
+        obj, created = UserOptInStatus.objects.get_or_create(user=request.user)
+        result = (obj.opt_in_status == UserOptInStatus.NOT_SEEN)
+    except Exception as e:
+        result = UserOptInStatus.NOT_SEEN
 
     return JsonResponse({
         'result': result
+    })
+
+@login_required
+def opt_in_update(request):
+    # If user logs in for the second time, opt-in status changes to NOT_SEEN
+    error_msg = ''
+
+    if request.POST:
+        opt_in_choice = request.POST.get('opt-in-radio').encode('utf8')
+        opt_in_status_code = UserOptInStatus.YES if opt_in_choice.startswith('opt-in-') else UserOptInStatus.NO
+
+    try:
+        user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=request.user).first()
+        if user_opt_in_stat_obj:
+            user_opt_in_stat_obj.opt_in_status = opt_in_status_code
+            user_opt_in_stat_obj.save()
+            # if opt_in_choice == 'opt-in-email':
+            #     send_feedback_form()
+
+    except Exception as e:
+        error_msg = '[Error] There has been an error while updating your subscription status.'
+
+
+    return JsonResponse({
+        'error_msg': error_msg
     })
 
