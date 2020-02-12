@@ -14,7 +14,7 @@ window.config = {
       // Authorization Server URL
       authority: 'https://accounts.google.com',
       //client_id: '500129912605-nqrs0edn1ckk45vsde24r6jdo45kmv17.apps.googleusercontent.com',
-       client_id: '500129912605-nqrs0edn1ckk45vsde24r6jdo45kmv17.apps.googleusercontent.com',
+      client_id: '940486172223-rsn9381dlmgmakilalfmki0963gvcasc.apps.googleusercontent.com',
       redirect_uri: '/callback', // `OHIFStandaloneViewer.js`
       response_type: 'id_token token',
       scope:

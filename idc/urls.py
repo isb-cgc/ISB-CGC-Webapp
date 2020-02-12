@@ -52,9 +52,12 @@ urlpatterns = [
     url(r'^help/', views.help_page, name='help'),
     url(r'^search/', views.search_page, name='search'),
 
-    url(r'^test/', views.ohif_test_page, name='ohif_test'),
+    url(r'^idc/filtered/', views.get_filtered_idc_cohort, name='idc_filtered'),
+
+
+
     url(r'^viewer/', views.ohif_viewer_page, name='ohif_view'),
-    url(r'^callback/', views.ohif_callback_page, name='ohif_callback'),
+    url(r'^callback', views.ohif_callback_page, name='ohif_callback'),
     url(r'^ocallback/', views.ohif_callback_page, name='ohif_callback'),
     url(r'^projects/', views.ohif_projects_page, name='ohif_projects'),
     url(r'^ohif/', views.ohif_page, name='ohif'),
