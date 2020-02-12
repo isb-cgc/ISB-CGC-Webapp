@@ -313,7 +313,7 @@ def main():
         attr_set.append({
             'name': 'collection',
             'display_name': "Collection",
-            "type": 'CATEGORICAL STRING',
+            "type": Attribute.CATEGORICAL,
             "cross_collex": True,
             'solr_collex': ['tcia_images'],
             'bq_tables': tcia_bq_table_set
