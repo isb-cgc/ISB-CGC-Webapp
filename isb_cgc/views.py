@@ -42,7 +42,7 @@ from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
 from projects.models import Program
 from workbooks.models import Workbook
-from accounts.models import GoogleProject
+from accounts.models import GoogleProject, UserOptInStatus
 from accounts.sa_utils import get_nih_user_details
 # from notebooks.notebook_vm import check_vm_stat
 from allauth.socialaccount.models import SocialAccount
@@ -200,6 +200,12 @@ def extended_login_view(request):
             "[WEBAPP LOGIN] User {} logged in to the web application at {}".format(user.email,
                                                                                    datetime.datetime.utcnow())
         )
+
+        # If user logs in for the second time, opt-in status changes to NOT_SEEN
+        user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=user).first()
+        if user_opt_in_stat_obj and user_opt_in_stat_obj.opt_in_status == UserOptInStatus.NEW:
+            user_opt_in_stat_obj.opt_in_status = UserOptInStatus.NOT_SEEN
+            user_opt_in_stat_obj.save()
 
     except Exception as e:
         logger.exception(e)
@@ -550,6 +556,18 @@ def bq_meta_data(request):
 
 
 @login_required
+def opt_in_check_show(request):
+    # result = True
+    obj, created = UserOptInStatus.objects.get_or_create(user=request.user)
+
+    result = (obj.opt_in_status == UserOptInStatus.NOT_SEEN)
+
+    return JsonResponse({
+        'result': result
+    })
+
+
+@login_required
 def dashboard_page(request):
     # Cohort List
     isb_superuser = User.objects.get(username='isb')
@@ -611,6 +629,16 @@ def dashboard_page(request):
     # Variable Favorites
     varfaves = request.user.variablefavorite_set.filter(active=True)
 
+    # Opt-In Status
+    # obj, created = UserOptInStatus.objects.get_or_create(user=request.user)
+    #
+    #                                                      # , default={'opt_in_status': UserOptInStatus.NEW})
+    #
+    # opt_in_status = obj.opt_in_status
+    # if opt_in_status == UserOptInStatus.NEW and not created
+    #     #and is coming from the login
+    #     :
+    # user's second log in
     return render(request, 'isb_cgc/dashboard.html', {
         'request': request,
         'cohorts': cohorts,
@@ -618,6 +646,7 @@ def dashboard_page(request):
         'workbooks': workbooks,
         'genefaves': genefaves,
         'varfaves': varfaves,
+        # 'optinstatus': opt_in_status
         # 'notebook_vm': notebook_vm,
         # 'gcp_list': gcp_list,
     })

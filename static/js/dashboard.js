@@ -74,6 +74,10 @@ require([
         }
     }
 
+    // if (USER_OPTIN_STATUS == 1){ // NOT_SEEN
+    //     $('#test-modal').modal('show');
+    // }
+
     /*
     var get_vm_instance = function (vm_div) {
         var vm_user = $(vm_div).find("input[name='vm_user']").val();

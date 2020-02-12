@@ -647,6 +647,35 @@
         </div>
     </div>
 
+    <div class="modal fade" id="test-modal" tabindex="-1" role="dialog"
+             aria-labelledby="test-modal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span></button>
+                        <h5 class="modal-title" id="test Opt In">Test Opt In</h5>
+                    </div>
+                    <div class="modal-body">
+                        <form class="optin-form">
+
+
+                            <div>
+                                <button id="optin-btn" type="button" class="btn btn-primary">Opt In</button>
+                            </div>
+                            <div>
+                                <button id="optin-email-btn" type="button" class="btn btn-primary">Opt In - Email</button>
+                            </div>
+                            <div>
+                                <button id="optout-btn" type="button" class="btn btn-primary">Opt Out</button>
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
     {#    <div class="modal fade" id="create-jnb-password-modal" tabindex="-1" role="dialog"#}
     {#         aria-labelledby="createJnbPasswordModal" aria-hidden="true">#}
     {#        <div class="modal-dialog">#}
@@ -692,6 +721,7 @@
     <script type="text/javascript">
         var USER_SETTINGS_KEY = 'user_' + {{ request.user.id }} +'_dash_settings';
         var SOLR_URL = '{{ SOLR_URL }}';
+        {#var USER_OPTIN_STATUS = '{{ optinstatus }}';#}
     </script>
 {% endblock %}
 
