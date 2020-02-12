@@ -10,7 +10,7 @@ from MySQLdb.cursors import DictCursor
 import datetime
 import httplib2
 
-from GenespotRE import secret_settings
+from isb_cgc import secret_settings
 from apiclient.discovery import build
 from oauth2client.client import GoogleCredentials
 

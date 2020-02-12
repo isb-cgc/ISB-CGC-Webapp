@@ -137,7 +137,6 @@ jobs:
           paths:
             - ./adminrestrict
             - ./.git
-            - ./demo
             - ./genes
             - ./seqpeek
             - ./shell
@@ -149,7 +148,7 @@ jobs:
             - ./bq_data_access
             - ./etc
             - ./static
-            - ./GenespotRE
+            - ./isb_cgc
             - ./offline
             - ./scripts
             - ./session_security
@@ -157,8 +156,6 @@ jobs:
             - ./visualizations
             - ./ISB-CGC-Common
             - ./Dockerfile
-            - ./main.py
-            - ./appengine_config.py
             - ./.dockerignore
             - ./app.yaml
             - ./gunicorn.conf.py
@@ -166,6 +163,7 @@ jobs:
             - ./txt
             - ./json
             - ./.env
+            - ./solr-ssl.pem
 
   deploy_job:
     environment:

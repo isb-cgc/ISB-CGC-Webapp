@@ -639,6 +639,8 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
                 Worksheet_gene.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id,
                                          gene_list=genes, user=request.user)
                 result['genes'] = genes
+                result['workbook_id'] = workbook_model.id;
+                result['worksheet_id'] = worksheet_model.id;
             else:
                 result['error'] = "no genes to add"
 

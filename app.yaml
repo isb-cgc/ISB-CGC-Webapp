@@ -28,7 +28,7 @@ beta_settings:
     cloud_sql_instances: isb-cgc-uat:us-central1:uat-main
 
 env_variables:
-  DJANGO_SETTINGS_MODULE: 'GenespotRE.settings'
+  DJANGO_SETTINGS_MODULE: 'isb_cgc.settings'
 
 network:
   name: solr

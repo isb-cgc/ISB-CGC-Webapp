@@ -3,7 +3,11 @@ if [ -n "$CI" ]; then
     export MYSQL_ROOT_USER=ubuntu
     export MYSQL_DB_HOST=127.0.0.1
 else
-    export $(cat /home/vagrant/parentDir/secure_files/.env | grep -v ^# | xargs) 2> /dev/null
+    if ( "/home/vagrant/www/shell/get_env.sh" ) ; then
+        export $(cat ${ENV_FILE_PATH} | grep -v ^# | xargs) 2> /dev/null
+    else
+        exit 1
+    fi
     export HOME=/home/vagrant
     export MYSQL_ROOT_USER=root
     export MYSQL_DB_HOST=localhost
