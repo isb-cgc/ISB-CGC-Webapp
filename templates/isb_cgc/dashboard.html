@@ -647,6 +647,43 @@
         </div>
     </div>
 
+    <div class="ajax-form-modal modal fade" id="opt-in-pop-up-modal" tabindex="-1" role="dialog"
+         aria-labelledby="opt-in-modal-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">x</span></button>
+                    <h4 class="modal-title" id="opt-in-modal-header">Feedback Opt-In</h4>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-title" id="opt-in-modal-header">
+                        ISB-CGC is funded by the National Cancer Institute (NCI) to provide cloud-based tools and data
+                        to the cancer research community. Your feedback is important to the NCI and us.
+                        Please help us help you by considering "Opting In" to our user feedback mailing list and
+                        allowing us to contact you in the future regarding ISB-CGC!</p>
+                    <br>
+                    <p> Would you like to opt-in our user feedback mailing list? </p>
+                    <input type="radio" name="opt-in-radio" value="opt-in-now" checked> Yes, take me to the opt-in
+                    form now.
+                    <br>
+                    <input type="radio" name="opt-in-radio" value="opt-in-email" data-toggle="collapse"
+                           data-target="#fill-email"> Yes, email me a link to the opt-in form.
+                    <br>
+                    <div class="collapse" id="fill-email">
+                        <label>A link to the opt-in form will be sent to your account email.</label>
+                    </div>
+                    <input type="radio" name="opt-in-radio" value="opt-out"> No, I don't want to be contacted for
+                    feedback.
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Submit" data-dismiss="modal" class="btn btn-primary"/>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     {#    <div class="modal fade" id="create-jnb-password-modal" tabindex="-1" role="dialog"#}
     {#         aria-labelledby="createJnbPasswordModal" aria-hidden="true">#}
     {#        <div class="modal-dialog">#}
