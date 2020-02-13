@@ -513,6 +513,8 @@ require([
         var activeDataTab = $('.data-tab.active').attr('id');
         var prog_id = $('.data-tab.active .filter-panel').data('prog-id');
         var filterType = $(this).attr('id').split('-clear-filters')[0];
+        var createFormFilterSet = $('p#'+activeDataTab+'-filters');
+
         $(this).parents('.selected-filters').find('.panel-body').empty();
         $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
             $(this).prop('checked', false);
@@ -520,7 +522,8 @@ require([
 
         delete SELECTED_FILTERS[prog_id];
 
-        $('p#'+activeDataTab+'-filters span.'+filterType+'-token').remove();
+        $(createFormFilterSet+' span.'+filterType+'-token').remove();
+
         update_displays();
     });
 
@@ -899,7 +902,14 @@ require([
 
         $(program_data_selector + ' .clear-filters').on('click', function() {
             var filterType = $(this).attr('id').split('-clear-filters')[0];
+            var creationFormFilterSet = $('p#'+filterType+'-filters');
+
+
             $(this).parents('.selected-filters').find('.panel-body').empty();
+
+            // bug fix #2722
+            creationFormFilterSet.hide();
+
             $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
                 $(this).prop('checked', false);
             });
@@ -1059,6 +1069,7 @@ require([
 
 
     $('.tab-content, #selected-filters').on('click', 'a.delete-x', function(e,data) {
+        console.log("DELETE-X");
         var activeDataTab = $(this).parents('span').data('prog-id')+'-data';
         var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
         var createFormFilterSet = $('p#'+activeDataTab+'-filters');
