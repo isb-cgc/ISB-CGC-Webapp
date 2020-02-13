@@ -1069,7 +1069,6 @@ require([
 
 
     $('.tab-content, #selected-filters').on('click', 'a.delete-x', function(e,data) {
-        console.log("DELETE-X");
         var activeDataTab = $(this).parents('span').data('prog-id')+'-data';
         var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
         var createFormFilterSet = $('p#'+activeDataTab+'-filters');
