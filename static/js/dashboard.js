@@ -52,20 +52,33 @@ require([
 
     // Ajax call to get opt_in_show value
     $.ajax({
-            type: 'GET',
-            url: BASE_URL + '/opt_in/check_show/',
+        type: 'GET',
+        url: BASE_URL + '/opt_in/check_show/',
+        dataType  :'json',
+        data: $(this).serialize(),
+        success: function(data) {
+            //console.log(data.message);
+            if (data['result'])
+            {
+                $('#opt-in-pop-up-modal').modal('show');
+            }
+        },
+        error: function(data) {
+        }
+    });
+
+    $('#close-opt-in-btn').on('click', function() {
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + '/opt_in/update/',
             dataType  :'json',
-            data: $(this).serialize(),
+            data: {'opt-in-radio': 'opt-out'},
             success: function(data) {
-                //console.log(data.message);
-                if (data['result'])
-                {
-                    $('#opt-in-pop-up-modal').modal('show');
-                }
             },
             error: function(data) {
             }
         });
+    });
 
     $(window).on('beforeunload', function () {
         var settingsObj = {};
@@ -91,6 +104,22 @@ require([
             }
         }
     }
+
+    $('#submit-opt-in-btn').on('click', function() {
+        var opt_in_radio_value = $('input[name="opt-in-radio"]:checked').val();
+
+        // Ajax call to update the backend of the user's selection
+        $.ajax({
+                type: 'POST',
+                url: BASE_URL + '/opt_in/update/',
+                dataType  :'json',
+                data: {'opt-in-radio': opt_in_radio_value},
+                success: function(data) {
+                },
+                error: function(data) {
+                }
+            });
+    });
 
     // if (USER_OPTIN_STATUS == 1){ // NOT_SEEN
     //     $('#test-modal').modal('show');
