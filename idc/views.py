@@ -49,8 +49,7 @@ from cohorts.models import Cohort, Cohort_Perms
 from idc_collections.models import Program
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
-from .metadata_utils import get_collex_metadata
-from .metadata_utils import getWithNullGuard
+from .metadata_utils import get_collex_metadata,  translateCollectionData
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
@@ -371,9 +370,14 @@ def get_filtered_idc_cohort(request):
     ageRng = [0,20,30,40,50,60,70,80]
     bmiRng = [18.5,25,30]
 
-    fields = ["project_short_name", "case_barcode", "race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis", "gender", "disease_code",
+    counts_only = request.GET.get('counts_only',False)
+    filterstr = request.GET.get('filters', "{}")
+    filters = eval(filterstr)
+
+    fields = ["collection_id", "case_barcode", "race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis", "gender", "disease_code",
                "StudyInstanceUID", "StudyDescription", "StudyDate", "SeriesInstanceUID", "SeriesDescription", "SeriesNumber", "BodyPartExamined", "Modality"]
-    filters = {"vital_status": ["Alive","Dead","None"]}
+    #filters = { "BodyPartExamined": ["CHEST"], ""}
+    #filters = {"age_at_diagnosis": ["0 to 50"]}
     #filters = {}
     try:
         # for a version which isn't current, or for a user cohort
@@ -384,90 +388,10 @@ def get_filtered_idc_cohort(request):
         logger.error("[ERROR] In get_filtered_idc_cohort_data:")
         logger.exception(e)
 
-    imageDataA=facets_and_lists['docs']
-
     ret={}
-    ret['projects'] = []
-    ret['projectIndex'] = {}
-    ret['projectA'] = []
-    ret['patientIndex'] = {}
-    ret['patientProject'] = {}
-    ret['studyIndex'] = {}
-    ret['studyPatient'] = {}
-    ret['seriesIndex'] = {}
-    ret['seriesStudy'] = {}
-    ret['diseaseCodeH'] = {}
-    ret['raceH'] = {}
-    ret['ethnicityH'] = {}
-
-    for i in range(len(imageDataA)):
-        curRow=imageDataA[i]
-        projectId= curRow['project_short_name'];
-        patientId = curRow['case_barcode']
-        studyId = curRow['StudyInstanceUID'];
-        seriesId = curRow['SeriesInstanceUID'];
-
-        curProject={}
-        if not (projectId in ret['projectIndex']):
-            ret['projectIndex'][projectId]=len(ret['projects'])
-            ret['projectA'].append(projectId)
-            curProject['id']=projectId
-            curProject['patients'] = []
-            curProject['isActive']=True
-            curProject['numActivePatients']=0
-            curProject['reasonsInActive']={}
-            ret['projects'].append(curProject)
-
-        else:
-            curProject = ret['projects'][ret['projectIndex'][projectId]]
-
-        curPatient = {}
-        if not (patientId in ret['patientIndex']):
-            curProject['numActivePatients'] = curProject['numActivePatients']+1
-            ret['patientIndex'][patientId] = len(curProject['patients'])
-            ret['patientProject'][patientId] = curProject['id']
-            curPatient['id'] = patientId
-            curPatient['isActive'] = True
-            curPatient['numActiveStudies'] = 0
-            curPatient['reasonsInActive'] = {}
-            curPatient['studies'] = []
-            curProject['patients'].append(curPatient)
-
-
-        else:
-            curPatient = curProject['patients'][ret['patientIndex'][patientId]]
-
-        curStudy = {}
-
-        if not(studyId in ret['studyIndex']):
-            curPatient['numActiveStudies'] = curPatient['numActiveStudies'] + 1
-            ret['studyIndex'][studyId] = len(curPatient['studies'])
-            ret['studyPatient'][studyId] = curPatient['id']
-            curStudy['id'] = studyId
-            curStudy['isActive'] = True
-            curStudy['reasonsInActive'] = {}
-            curStudy['numActiveSeries'] = 0
-            curStudy['seg'] = False
-            curStudy['StudyDescription'] = getWithNullGuard(curRow,'StudyDescription','none')
-            curStudy['StudyDate'] = getWithNullGuard(curRow, 'StudyDate', 'none')
-            curStudy['series'] = []
-            curPatient['studies'].append(curStudy)
-
-        else:
-            curStudy = curPatient['studies'][ret['studyIndex'][studyId]]
-
-        curSeries = {}
-        if not(seriesId in ret['seriesIndex']):
-            ret['seriesIndex'][seriesId] = len(curStudy['series'])
-            ret['seriesStudy'][seriesId] = curStudy['id']
-            curStudy['numActiveSeries'] = curStudy['numActiveSeries'] +1;
-            curSeries['id'] = seriesId
-            curSeries['isActive'] =  True
-            curSeries['reasonsInActive'] = {}
-            curSeries['Modality'] = getWithNullGuard(curRow, 'Modality', 'none')
-            curSeries['BodyPartExamined'] = getWithNullGuard(curRow, 'BodyPartExamined', 'none')
-            curSeries['SeriesNumber'] = getWithNullGuard(curRow, 'SeriesNumber', 'none')
-            curStudy['series'].append(curSeries)
+    ret['facets'] = facets_and_lists['facets']['cross_collex']
+    if not counts_only:
+        translateCollectionData(facets_and_lists['docs'], ret)
 
 
     ret['clinical'] =  {}
