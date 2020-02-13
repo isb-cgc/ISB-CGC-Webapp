@@ -638,7 +638,7 @@ def opt_in_check_show(request):
         obj, created = UserOptInStatus.objects.get_or_create(user=request.user)
         result = (obj.opt_in_status == UserOptInStatus.NOT_SEEN)
     except Exception as e:
-        result = UserOptInStatus.NOT_SEEN
+        result = False
 
     return JsonResponse({
         'result': result
