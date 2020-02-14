@@ -60,6 +60,7 @@ OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 BQ_ECOSYS_BUCKET = settings.BQ_ECOSYS_STATIC_URL
+FEEDBACK_FORM_LINK = 'https://forms.gle/7i8Ua8TtgSvNbpat6'
 
 
 def convert(data):
@@ -658,7 +659,7 @@ def opt_in_update(request):
             user_opt_in_stat_obj.opt_in_status = opt_in_status_code
             user_opt_in_stat_obj.save()
             if opt_in_choice == 'opt-in-email':
-                resp = send_feedback_form(request.user.email)
+                resp = send_feedback_form(request.user.email, request.user.first_name, request.user.last_name, FEEDBACK_FORM_LINK)
                 if resp.status == 'error':
                     error_msg = resp.message
 
@@ -670,7 +671,7 @@ def opt_in_update(request):
     })
 
 
-def send_feedback_form(user_email):
+def send_feedback_form(user_email, firstName, lastName, formLink):
     status = None
     message = None
     try:
@@ -678,7 +679,12 @@ def send_feedback_form(user_email):
             'from': settings.NOTIFICATION_EMAIL_FROM_ADDRESS,
             'to': user_email,
             'subject': 'Join the ISB-CGC community!',
-            'text': 'hello',
+            'text': '''Dear {firstName} {lastName},
+            ISB-CGC is funded by the National Cancer Institute (NCI) to provide cloud-based tools and data to the cancer research community.
+            Your feedback is important to the NCI and us. Please help us help you by filling out this Google Form:
+            {link}
+            
+            Thank you.'''.format(firstName=firstName, lastName=lastName, formLink=formLink),
             # 'html': email_template.render(ctx)
         }
         send_email_message(message_data)
