@@ -75,7 +75,11 @@ def add_programs(program_set):
 def add_solr_collex(solr_set, version="0"):
     for collex in solr_set:
         try:
-            obj, created = SolrCollection.objects.update_or_create(name=collex, version=DataVersion.objects.get(version=version))
+            obj, created = SolrCollection.objects.update_or_create(
+                name=collex,
+                version=DataVersion.objects.get(version=version),
+                shared_id_col="case_barcode" if "tcga" in collex else "PatientID"
+            )
             print("Solr Collection entry created: {}".format(collex))
         except Exception as e:
             logger.error("[ERROR] Program {} may not have been added!".format(collex))
@@ -223,7 +227,7 @@ def main():
 
         collection_file.close()
 
-        attr_vals_file = open("tcga_clin_display.csv", "r")
+        attr_vals_file = open("display_vals.csv", "r")
         line_reader = attr_vals_file.readlines()
         display_vals = {}
 
@@ -311,7 +315,7 @@ def main():
             })
 
         attr_set.append({
-            'name': 'collection',
+            'name': 'collection_id',
             'display_name': "Collection",
             "type": Attribute.CATEGORICAL,
             "cross_collex": True,
