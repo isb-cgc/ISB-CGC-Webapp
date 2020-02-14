@@ -33,16 +33,17 @@ def getWithNullGuard(curDic, curKey, nullRet):
 
 
 # Fetch metadata from Solr
-def get_collex_metadata(filters, fields,with_docs=True, record_limit=10, counts_only=False):
+def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts_only=False):
     try:
         results = {'docs': None, 'facets': {}}
 
+        # TODO: This needs to be altered to accept settings on *which* image program/collection set and corresponding
+        #  ancillary data it's querying, presumably as a list. That will take the place of the current name=<foo>
+        #  search being used here; instead, it'll be id=<etc> Presumably this will come in from the request, based
+        #  on the tab a user is looking at, or where they clicked the filter, etc.
         tcga_solr = SolrCollection.objects.get(name="tcga_clin_bios")
         tcia_solr = SolrCollection.objects.get(name="tcia_images")
 
-        # TODO: This needs to be altered to accept settings on *which* image program/collection set and corresponding ancillary data it's querying
-        # That will take the place of the current name=<foo> search being used here; instead, it'll be id=<etc>
-        # Presumably this will come in from the request, based on the tab a user is looking at, or where they clicked the filter, etc.
         tcga_facet_attrs = tcga_solr.get_collection_attr().values_list('name', flat=True)
         tcga_filter_attrs = tcga_solr.get_collection_attr(for_faceting=False).values_list('name', flat=True)
         tcia_facet_attrs = tcia_solr.get_collection_attr().values_list('name', flat=True)
@@ -51,10 +52,13 @@ def get_collex_metadata(filters, fields,with_docs=True, record_limit=10, counts_
 
         query_set = []
 
+        # Image Data query
         if solr_query['queries'] is not None:
             for attr in solr_query['queries']:
                 if attr in tcga_filter_attrs:
-                    query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(tcga_solr.shared_id_col, tcga_solr.name, tcia_solr.shared_id_col)) + solr_query['queries'][attr])
+                    query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
+                        tcga_solr.shared_id_col, tcga_solr.name, tcia_solr.shared_id_col
+                    )) + solr_query['queries'][attr])
                 else:
                     query_set.append(solr_query['queries'][attr])
 
@@ -81,10 +85,14 @@ def get_collex_metadata(filters, fields,with_docs=True, record_limit=10, counts_
         solr_facets = build_solr_facets(list(tcga_facet_attrs), solr_query['filter_tags'])
 
         query_set = []
+
+        # Ancilary data faceting and querying
         if solr_query['queries'] is not None:
             for attr in solr_query['queries']:
                 if attr in tcia_facet_attrs:
-                    query_set.append("{!join from={} fromIndex={} to={}}".format(tcia_solr.shared_id_col, tcia_solr.name, tcga_solr.shared_id_col) + solr_query['queries'][attr])
+                    query_set.append("{!join from={} fromIndex={} to={}}".format(
+                        tcia_solr.shared_id_col, tcia_solr.name, tcga_solr.shared_id_col
+                    ) + solr_query['queries'][attr])
                 else:
                     query_set.append(solr_query['queries'][attr])
 
