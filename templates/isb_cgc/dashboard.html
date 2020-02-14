@@ -171,6 +171,7 @@
                         {#                                <div class="form-row">#}
                         {#                                    <div class="form-group col-md-6">#}
                         {#                                        <label for="nb_username">User Name</label>#}
+
                         {#                                        <input type="text" class="form-control" id="nb_username">#}
                         {#                                    </div>#}
                         {#                                </div>#}
@@ -654,7 +655,7 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close" id = "close-opt-in-btn">
                         <span aria-hidden="true">x</span></button>
-                    <h4 class="modal-title" id="opt-in-modal-header">Feedback Opt-In</h4>
+                    <h4 class="modal-title" id="opt-in-modal-header">Join Our Community</h4>
                 </div>
                 <div class="modal-body">
                     <p class="modal-title" id="opt-in-modal-header">
@@ -667,17 +668,17 @@
                     <input type="radio" name="opt-in-radio" value="opt-in-now" checked> Yes, take me to the opt-in
                     form now.
                     <br>
-                    <input type="radio" name="opt-in-radio" value="opt-in-email" data-toggle="collapse"
-                           data-target="#fill-email"> Yes, email me a link to the opt-in form.
+                    <input type="radio" name="opt-in-radio" value="opt-in-email"> Yes, email me a link to the opt-in form.
                     <br>
-                    <div class="collapse" id="fill-email">
-                        <label>A link to the opt-in form will be sent to your account email.</label>
+                    <div class="collapse" id="will-email-message">
+                        <div style="margin-left: 15px"> <label> A link to the opt-in form will be sent to your account email.</label> </div>
                     </div>
                     <input type="radio" name="opt-in-radio" value="opt-out"> No, I don't want to be contacted for
                     feedback.
                 </div>
                 <div class="modal-footer">
                     <input type="submit" value="Submit" data-dismiss="modal" class="btn btn-primary" id="submit-opt-in-btn"/>
+                    <button type="button" class="btn btn-link btn-cancel" data-dismiss="modal" id="cancel-opt-in-btn">Cancel</button>
                 </div>
             </div>
         </div>
