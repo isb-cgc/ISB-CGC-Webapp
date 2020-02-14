@@ -29,6 +29,8 @@ from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.utils import formats
+# from django.core.mail import send_mail
+from sharing.service import send_email_message
 from django.contrib import messages
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
@@ -616,16 +618,6 @@ def dashboard_page(request):
     # Variable Favorites
     varfaves = request.user.variablefavorite_set.filter(active=True)
 
-    # Opt-In Status
-    # obj, created = UserOptInStatus.objects.get_or_create(user=request.user)
-    #
-    #                                                      # , default={'opt_in_status': UserOptInStatus.NEW})
-    #
-    # opt_in_status = obj.opt_in_status
-    # if opt_in_status == UserOptInStatus.NEW and not created
-    #     #and is coming from the login
-    #     :
-    # user's second log in
     return render(request, 'isb_cgc/dashboard.html', {
         'request': request,
         'cohorts': cohorts,
@@ -656,7 +648,6 @@ def opt_in_check_show(request):
 def opt_in_update(request):
     # If user logs in for the second time, opt-in status changes to NOT_SEEN
     error_msg = ''
-
     if request.POST:
         opt_in_choice = request.POST.get('opt-in-radio').encode('utf8')
         opt_in_status_code = UserOptInStatus.NO if opt_in_choice == 'opt-out' else UserOptInStatus.YES
@@ -666,14 +657,36 @@ def opt_in_update(request):
         if user_opt_in_stat_obj:
             user_opt_in_stat_obj.opt_in_status = opt_in_status_code
             user_opt_in_stat_obj.save()
-            # if opt_in_choice == 'opt-in-email':
-            #     send_feedback_form()
+            if opt_in_choice == 'opt-in-email':
+                send_feedback_form(request.user.email)
 
     except Exception as e:
         error_msg = '[Error] There has been an error while updating your subscription status.'
 
-
     return JsonResponse({
         'error_msg': error_msg
     })
+
+def send_feedback_form(user_email):
+    status = None
+    message = None
+    try:
+        message_data = {
+            'from': settings.NOTIFICATION_EMAIL_FROM_ADDRESS,
+            'to': user_email,
+            'subject': 'Join the ISB-CGC community!',
+            'text': 'hello',
+            # 'html': email_template.render(ctx)
+        }
+        send_email_message(message_data)
+    except Exception as e:
+        status = 'error'
+        message = '[Error] There has been an error while trying to send an email to {}.'.format(user_email)
+    return JsonResponse({
+        'status': status,
+        'message': message
+    })
+
+
+
 
