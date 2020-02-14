@@ -644,7 +644,7 @@ def opt_in_check_show(request):
         'result': result
     })
 
-@login_required
+
 def opt_in_update(request):
     # If user logs in for the second time, opt-in status changes to NOT_SEEN
     error_msg = ''
@@ -657,7 +657,9 @@ def opt_in_update(request):
             user_opt_in_stat_obj.opt_in_status = opt_in_status_code
             user_opt_in_stat_obj.save()
             if opt_in_choice == 'opt-in-email':
-                send_feedback_form(request.user.email)
+                resp = send_feedback_form(request.user.email)
+                if resp.status == 'error':
+                    error_msg = resp.message
 
     except Exception as e:
         error_msg = '[Error] There has been an error while updating your subscription status.'
@@ -665,6 +667,7 @@ def opt_in_update(request):
     return JsonResponse({
         'error_msg': error_msg
     })
+
 
 def send_feedback_form(user_email):
     status = None
