@@ -52,20 +52,20 @@ require([
 
     // Ajax call to get opt_in_show value
     $.ajax({
-            type: 'GET',
-            url: BASE_URL + '/opt_in/check_show/',
-            dataType  :'json',
-            data: $(this).serialize(),
-            success: function(data) {
-                //console.log(data.message);
-                if (data['result'])
-                {
-                    $('#opt-in-pop-up-modal').modal('show');
-                }
-            },
-            error: function(data) {
+        type: 'GET',
+        url: BASE_URL + '/opt_in/check_show/',
+        dataType  :'json',
+        data: $(this).serialize(),
+        success: function(data) {
+            //console.log(data.message);
+            if (data['result'])
+            {
+                $('#opt-in-pop-up-modal').modal('show');
             }
-        });
+        },
+        error: function(data) {
+        }
+    });
 
     $(window).on('beforeunload', function () {
         var settingsObj = {};
@@ -91,6 +91,27 @@ require([
             }
         }
     }
+
+    $('#submit-opt-in-btn').on('click', function() {
+        var opt_in_radio_value = $('input[name="opt-in-radio"]:checked').val();
+        send_opt_in_update(opt_in_radio_value);
+    });
+
+    $('#cancel-opt-in-btn').on('click', function() {
+        send_opt_in_update('opt-out');
+    });
+
+    $('#close-opt-in-btn').on('click', function() {
+        send_opt_in_update('opt-out');
+    });
+
+    $('[name="opt-in-radio"]').on('change', function() {
+      if($(this).val() === "opt-in-email") {
+        $('#will-email-message').collapse('show');
+      } else {
+        $('#will-email-message').collapse('hide');
+      }
+    });
 
     // if (USER_OPTIN_STATUS == 1){ // NOT_SEEN
     //     $('#test-modal').modal('show');
@@ -355,5 +376,18 @@ require([
     //     });
     //
     // });
-
 });
+
+function send_opt_in_update(opt_in_selection) {
+    // Ajax call to update the backend of the user's selection
+    $.ajax({
+            type: 'POST',
+            url: BASE_URL + '/opt_in/update/',
+            dataType  :'json',
+            data: {'opt-in-radio': opt_in_selection},
+            success: function(data) {
+            },
+            error: function(data) {
+            }
+        });
+}
