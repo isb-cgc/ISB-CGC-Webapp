@@ -679,12 +679,20 @@ def send_feedback_form(user_email, firstName, lastName, formLink):
             'from': settings.NOTIFICATION_EMAIL_FROM_ADDRESS,
             'to': user_email,
             'subject': 'Join the ISB-CGC community!',
-            'text': '''Dear {firstName} {lastName},
-            ISB-CGC is funded by the National Cancer Institute (NCI) to provide cloud-based tools and data to the cancer research community.
-            Your feedback is important to the NCI and us. Please help us help you by filling out this Google Form:
-            {link}
+            'text': '''
+            Dear {firstName} {lastName},
             
-            Thank you.'''.format(firstName=firstName, lastName=lastName, formLink=formLink),
+            ISB-CGC is funded by the National Cancer Institute (NCI) to provide cloud-based tools and data to the cancer research community.
+            Your feedback is important to the NCI and us.
+            
+            Please help us by filling out this Google Form:
+            {formLink}
+
+            Thank you.
+            
+            
+            ISB-CGC team
+            '''.format(firstName=firstName, lastName=lastName, formLink=formLink)
             # 'html': email_template.render(ctx)
         }
         send_email_message(message_data)
