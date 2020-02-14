@@ -374,7 +374,7 @@ def get_filtered_idc_cohort(request):
     filterstr = request.GET.get('filters', "{}")
     filters = eval(filterstr)
 
-    fields = ["collection_id", "case_barcode", "race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis", "gender", "disease_code",
+    fields = ["collection_id", "case_barcode", "patientId","race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis", "gender", "disease_code",
                "StudyInstanceUID", "StudyDescription", "StudyDate", "SeriesInstanceUID", "SeriesDescription", "SeriesNumber", "BodyPartExamined", "Modality"]
     #filters = { "BodyPartExamined": ["CHEST"], ""}
     #filters = {"age_at_diagnosis": ["0 to 50"]}
