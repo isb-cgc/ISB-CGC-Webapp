@@ -649,7 +649,7 @@ def opt_in_update(request):
     # If user logs in for the second time, opt-in status changes to NOT_SEEN
     error_msg = ''
     if request.POST:
-        opt_in_choice = request.POST.get('opt-in-radio').encode('utf8')
+        opt_in_choice = request.POST.get('opt-in-radio')
         opt_in_status_code = UserOptInStatus.NO if opt_in_choice == 'opt-out' else UserOptInStatus.YES
 
     try:
