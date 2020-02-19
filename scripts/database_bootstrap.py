@@ -314,7 +314,7 @@ def main():
             "type": Attribute.CATEGORICAL,
             "cross_collex": True,
             'solr_collex': ['tcia_images'],
-            'bq_tables': tcia_bq_table_set
+            'bq_tables': ["idc-dev-etl.tcia.dicom_metadata"]
         })
 
         add_attributes(attr_set)
