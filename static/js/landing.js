@@ -25,8 +25,6 @@ require.config({
         underscore: 'libs/underscore-min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
-        d3: 'libs/d3.min',
-        d3tip: 'libs/d3-tip',
         base: 'base'
     },
     shim: {
@@ -38,29 +36,13 @@ require.config({
 });
 
 require([
-    /*
     'jquery',
     'jqueryui',
     'bootstrap',
-    'd3',
-    'd3tip',
-    'visualizations/createTreeGraph',
-    'helpers/vis_helpers',
-    */
     'assetscore'
-    /*
     ,'assetsresponsive',
     'base'
-    */
-], function(/* $, jqueryui, bootstrap, d3, d3tip, treegraph, vis_helpers */) {
+], function($, jqueryui, bootstrap) {
     A11y.Core();
-
-    //pause video when scrolling to other videos
-    $(".carousel-control, .carousel-indicators li:not(.active)").click(function () {
-        $('.tutorial-vid').each(function() {
-            this.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-        });
-    });
-
 
 });

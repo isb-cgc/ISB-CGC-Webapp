@@ -123,7 +123,7 @@ def explore_data(request):
     context = {}
     try:
         # These are example filters; typically they will be reconstituted from the request
-        filters = {"vital_status": ["Alive"], "age_at_diagnosis": [[15,40], ["22", "60"]], "bmi": "underweight"}
+        filters = {"vital_status": ["Alive", "Dead"], "age_at_diagnosis_btw": [15,40], "bmi": "underweight"}
         # These are the actual data fields to display in the expanding table; again this is just an example
         # set that should be properly supplied in the reuqest
         fields = ["BodyPartExamined", "Modality", "StudyDescription", "StudyInstanceUID", "SeriesInstanceUID"]

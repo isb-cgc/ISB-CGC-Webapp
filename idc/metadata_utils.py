@@ -15,7 +15,7 @@
 #
 
 import logging
-
+import re
 from idc_collections.models import SolrCollection, Attribute, Attribute_Display_Values, Program, DataVersion
 from solr_helpers import *
 from idc_collections.collex_metadata_utils import get_bq_metadata, get_bq_string
@@ -140,8 +140,8 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
         # Image Data query
         if solr_query['queries'] is not None:
             for attr in solr_query['queries']:
-                if attr in tcga_filter_attrs:
-                    #query_set.append("{!join from=case_barcode fromIndex=tcga_clin_bios to=PatientID}" + solr_query['queries'][attr])
+                attr_name = re.sub("(_btw|_lt|_lte|_gt|_gte)", "", attr)
+                if attr_name in tcga_filter_attrs:
                     query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
                         tcga_solr.shared_id_col, tcga_solr.name, tcia_solr.shared_id_col
                     )) + solr_query['queries'][attr])
@@ -172,22 +172,23 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
         results['facets']['cross_collex'] = solr_result['facets']
         results['total'] = solr_result['numFound']
 
-        # The attributes being faceted against here would be whatever list of facet counts we want to display in the
-        # UI (probably not ALL of them).
-        #solr_facets = build_solr_facets(list(tcga_facet_attrs), solr_query['filter_tags'])
-        #solr_facets = ["race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis", "gender", "disease_code"]
-        solr_facets= {"race": {"field": "race", "missing": True, "type": "terms", "limit": -1},"vital_status": {"field": "vital_status", "missing": True, "type": "terms", "limit": -1}, \
-                     "ethnicity": {"field": "ethnicity", "missing": True, "type": "terms", "limit": -1}, \
+        if with_clinical:
+            # The attributes being faceted against here would be whatever list of facet counts we want to display in the
+            # UI (probably not ALL of them).
+            #solr_facets = build_solr_facets(list(tcga_facet_attrs), solr_query['filter_tags'])
+            #solr_facets = ["race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis", "gender", "disease_code"]
+            solr_facets= {"race": {"field": "race", "missing": True, "type": "terms", "limit": -1},"vital_status": {"field": "vital_status", "missing": True, "type": "terms", "limit": -1}, \
+                    "ethnicity": {"field": "ethnicity", "missing": True, "type": "terms", "limit": -1}, \
                  "bmi": {"field": "bmi", "missing": True, "type": "terms", "limit": -1}, "age_at_diagnosis": {"field": "age_at_diagnosis", "missing": True, "type": "terms", "limit": -1}, \
                  "gender": {"field": "gender", "missing": True, "type": "terms", "limit": -1}, \
                  "disease_code": {"field": "disease_code", "missing": True, "type": "terms", "limit": -1} }
-        query_set = []
+            query_set = []
 
-        if with_clinical:
             # Ancilary data faceting and querying
             if solr_query['queries'] is not None:
                 for attr in solr_query['queries']:
-                    if attr in tcia_facet_attrs:
+                    attr_name = re.sub("(_btw|_lt|_lte|_gt|_gte)", "", attr)
+                    if attr_name in tcia_facet_attrs:
                         query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
                             tcia_solr.shared_id_col, tcia_solr.name, tcga_solr.shared_id_col
                         )) + solr_query['queries'][attr])
@@ -208,8 +209,8 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
             })
 
             results['clinical'] = solr_result
-        else:
-            results['clinical'] = {}
+
+
     except Exception as e:
         logger.error("[ERROR] While fetching solr metadata:")
         logger.exception(e)
