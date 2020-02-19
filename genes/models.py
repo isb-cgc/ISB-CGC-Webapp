@@ -16,7 +16,7 @@ class GeneFavorite(models.Model):
     id      = models.AutoField(primary_key=True)
     name    = models.TextField(null=True)
     active  = models.BooleanField(default=True)
-    user    = models.ForeignKey(User, null=False, blank=False)
+    user    = models.ForeignKey(User, null=False, blank=False,on_delete=models.CASCADE)
     last_date_saved = models.DateTimeField(auto_now=True)
     objects = GeneFavoriteManager()
 
@@ -109,15 +109,15 @@ class GeneFavorite(models.Model):
 
 
 class GeneFavorite_Last_View(models.Model):
-    genefavorite = models.ForeignKey(GeneFavorite, blank=False)
-    user = models.ForeignKey(User, null=False, blank=False)
+    genefavorite = models.ForeignKey(GeneFavorite, blank=False, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
     last_view = models.DateTimeField(auto_now=True)
 
 
 class Gene(models.Model):
     id            = models.AutoField(primary_key=True)
     name          = models.TextField(null=False, blank=False)
-    gene_favorite = models.ForeignKey(GeneFavorite, null=False, blank=False)
+    gene_favorite = models.ForeignKey(GeneFavorite, null=False, blank=False, on_delete=models.CASCADE)
 
 
 class GeneSymbol_Manager(models.Manager):

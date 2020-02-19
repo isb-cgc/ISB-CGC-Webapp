@@ -49,7 +49,7 @@ urlpatterns = [
     # url(r'^notebooks/', include('notebooks.urls')),
     url(r'^cohorts/', include('cohorts.urls')),
     url(r'^visualizations/', include('visualizations.urls')),
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
     url(r'^accounts/', include('accounts.urls')),
     url(r'^seqpeek/', include('seqpeek.urls')),
     url(r'session_security/', include('session_security.urls')),
