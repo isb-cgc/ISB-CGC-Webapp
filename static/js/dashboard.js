@@ -94,10 +94,6 @@ require([
 
     $('#submit-opt-in-btn').on('click', function() {
         var opt_in_radio_value = $('input[name="opt-in-radio"]:checked').val();
-        if(opt_in_radio_value == 'opt-in-now')
-        {
-            window.open('https://docs.google.com/forms/d/e/1FAIpQLSeGQiOcJJfe4q3wRM-g7sP_LpJj-pNDp7ZjOqsWIM381W28EQ/viewform', '_blank')
-        }
         send_opt_in_update(opt_in_radio_value);
     });
 
@@ -387,6 +383,11 @@ function send_opt_in_update(opt_in_selection) {
             dataType  :'json',
             data: {'opt-in-radio': opt_in_selection},
             success: function(data) {
+                let redirect_url = data['redirect-url'];
+                if (redirect_url != "")
+                {
+                    window.open(redirect_url, '_blank')
+                }
             },
             error: function(data) {
             }

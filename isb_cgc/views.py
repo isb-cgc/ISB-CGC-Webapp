@@ -681,10 +681,17 @@ def opt_in_update(request):
                 if resp.status == 'error':
                     error_msg = resp.message
 
+        redirect_url = ""
+        if opt_in_choice == 'opt-in-now':
+            opt_in_form_url = 'https://docs.google.com/forms/d/e/1FAIpQLSeGQiOcJJfe4q3wRM-g7sP_LpJj-pNDp7ZjOqsWIM381W28EQ/viewform?entry.474148858='
+            user_email = User.objects.get(id=request.user.id).email
+            redirect_url = opt_in_form_url + user_email
+
     except Exception as e:
         error_msg = '[Error] There has been an error while updating your subscription status.'
 
     return JsonResponse({
+        'redirect-url': redirect_url,
         'error_msg': error_msg
     })
 
