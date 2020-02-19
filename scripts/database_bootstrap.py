@@ -201,14 +201,8 @@ def main():
         add_solr_collex(['tcia_images'])
         add_solr_collex(['tcga_clin_bios'], 'r9')
         add_bq_tables(['isb-cgc.TCGA_bioclin_v0.Biospecimen', 'isb-cgc.TCGA_bioclin_v0.Clinical'])
-        tcia_tables_file = open("tcia_collex_tables.csv", "r")
-        line_reader = tcia_tables_file.readlines()
-        tcia_bq_table_set = []
-        for line in line_reader:
-            tcia_bq_table_set.append(line.strip())
 
-        add_bq_tables(tcia_bq_table_set, "0")
-        tcia_tables_file.close()
+        add_bq_tables(["idc-dev-etl.tcia.dicom_metadata"], "0")
 
         collection_file = open("tcia_collex.csv", "r")
         line_reader = collection_file.readlines()
@@ -311,7 +305,7 @@ def main():
                 "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
                 'cross_collex': True,
                 'solr_collex': ['tcia_images'],
-                'bq_tables': tcia_bq_table_set
+                'bq_tables': ["idc-dev-etl.tcia.dicom_metadata"]
             })
 
         attr_set.append({
