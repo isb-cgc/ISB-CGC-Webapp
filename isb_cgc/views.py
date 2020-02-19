@@ -638,7 +638,6 @@ def opt_in_check_show(request):
     try:
         obj, created = UserOptInStatus.objects.get_or_create(user=request.user)
         result = (obj.opt_in_status == UserOptInStatus.NOT_SEEN)
-        result = True
     except Exception as e:
         result = False
 
