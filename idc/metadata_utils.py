@@ -130,6 +130,7 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
 
         tcga_facet_attrs = tcga_solr.get_collection_attr().values_list('name', flat=True)
         tcga_filter_attrs = tcga_solr.get_collection_attr(for_faceting=False).values_list('name', flat=True)
+
         tcia_facet_attrs = tcia_solr.get_collection_attr().values_list('name', flat=True)
 
         solr_query = build_solr_query(filters, with_tags_for_ex=True)
@@ -140,10 +141,10 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
         if solr_query['queries'] is not None:
             for attr in solr_query['queries']:
                 if attr in tcga_filter_attrs:
-                    query_set.append("{!join from=case_barcode fromIndex=tcga_clin_bios to=PatientID}" + solr_query['queries'][attr])
-                    #query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
-                    #    tcga_solr.shared_id_col, tcga_solr.name, tcia_solr.shared_id_col
-                    #)) + solr_query['queries'][attr])
+                    #query_set.append("{!join from=case_barcode fromIndex=tcga_clin_bios to=PatientID}" + solr_query['queries'][attr])
+                    query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
+                        tcga_solr.shared_id_col, tcga_solr.name, tcia_solr.shared_id_col
+                    )) + solr_query['queries'][attr])
                 else:
                     query_set.append(solr_query['queries'][attr])
 
@@ -175,8 +176,8 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
         # UI (probably not ALL of them).
         #solr_facets = build_solr_facets(list(tcga_facet_attrs), solr_query['filter_tags'])
         #solr_facets = ["race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis", "gender", "disease_code"]
-        solr_facets= { "race": {"field": "race", "missing": True, "type": "terms", "limit": -1},"vital_status": {"field": "vital_status", "missing": True, "type": "terms", "limit": -1}, \
-                      "ethnicity": {"field": "ethnicity", "missing": True, "type": "terms", "limit": -1}, \
+        solr_facets= {"race": {"field": "race", "missing": True, "type": "terms", "limit": -1},"vital_status": {"field": "vital_status", "missing": True, "type": "terms", "limit": -1}, \
+                     "ethnicity": {"field": "ethnicity", "missing": True, "type": "terms", "limit": -1}, \
                  "bmi": {"field": "bmi", "missing": True, "type": "terms", "limit": -1}, "age_at_diagnosis": {"field": "age_at_diagnosis", "missing": True, "type": "terms", "limit": -1}, \
                  "gender": {"field": "gender", "missing": True, "type": "terms", "limit": -1}, \
                  "disease_code": {"field": "disease_code", "missing": True, "type": "terms", "limit": -1} }
@@ -187,12 +188,13 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
             if solr_query['queries'] is not None:
                 for attr in solr_query['queries']:
                     if attr in tcia_facet_attrs:
-                        query_set.append("{!join from=PatientID fromIndex=tcia_images to=case_barcode}" + solr_query['queries'][attr])
-                        #query_set.append("{!join from={} fromIndex={} to={}}".format(
-                        #    tcia_solr.shared_id_col, tcia_solr.name, tcga_solr.shared_id_col
-                        #) + solr_query['queries'][attr])
+                        query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
+                            tcia_solr.shared_id_col, tcia_solr.name, tcga_solr.shared_id_col
+                        )) + solr_query['queries'][attr])
                     else:
                         query_set.append(solr_query['queries'][attr])
+
+
 
             solr_result = query_solr_and_format_result({
                 'collection': tcga_solr.name,
