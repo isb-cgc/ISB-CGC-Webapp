@@ -15,7 +15,6 @@
                     </ul>
                 </div>
                 <div class="tab-content">
-                    <div role="tabpanel" class="tab-pane active" id="share-cohort-pane">
                         <form id="share-cohort-form" data-cohort-id="{{ cohort.id }}" method="" action="">
                             <div class="modal-body">
                                 <label for="share-share_users">Enter email addresses separated by a comma</label>
@@ -24,6 +23,7 @@
                             <div class="modal-footer">
                                 {% csrf_token %}
                                 <input type="submit" value="Share Cohort" class="btn btn-primary owner-only" />
+                                <button type="button" class="btn btn-link btn-cancel" data-dismiss="modal" id="cancel-opt-in-btn">Cancel</button>
                             </div>
                         </form>
                     </div>
