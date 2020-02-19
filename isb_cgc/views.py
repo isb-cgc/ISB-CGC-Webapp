@@ -214,9 +214,8 @@ def extended_login_view(request):
 
         # if not already recorded in UserOptInStatus, change opt_in_status based on google sheet response (if any)
         try:
-            if user_opt_in_stat_obj and user_opt_in_stat_obj.opt_in_status == UserOptInStatus.SEEN or \
-                    user_opt_in_stat_obj.opt_in_status != UserOptInStatus.NOT_SEEN:
-
+            if user_opt_in_stat_obj and user_opt_in_stat_obj.opt_in_status != UserOptInStatus.YES and \
+                    user_opt_in_stat_obj.opt_in_status != UserOptInStatus.NO:
                 opt_in_response = get_opt_in_response(request.user.email)
 
                 if not opt_in_response:
@@ -225,6 +224,7 @@ def extended_login_view(request):
                     user_opt_in_stat_obj.opt_in_status = UserOptInStatus.YES
                 elif opt_in_response == 'No':
                     user_opt_in_stat_obj.opt_in_status = UserOptInStatus.NO
+                user_opt_in_stat_obj.save()
         except ObjectDoesNotExist:
             logger.error("[ERROR] Unable to retrieve UserOptInStatus object on log in.")
     except Exception as e:
