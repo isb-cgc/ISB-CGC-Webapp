@@ -17,8 +17,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(serialize=False, primary_key=True)),
                 ('date_created', models.DateTimeField(auto_now_add=True)),
                 ('modified_date', models.DateTimeField(auto_now=True)),
-                ('cohort', models.ForeignKey(related_name='worksheet_plot.cohort', blank=True, to='workbooks.Worksheet_cohort', null=True)),
-                ('plot', models.ForeignKey(related_name='worksheet_plot', blank=True, to='workbooks.Worksheet_plot', null=True)),
+                ('cohort', models.ForeignKey(on_delete=models.CASCADE, related_name='worksheet_plot.cohort', blank=True, to='workbooks.Worksheet_cohort', null=True)),
+                ('plot', models.ForeignKey(on_delete=models.CASCADE, related_name='worksheet_plot', blank=True, to='workbooks.Worksheet_plot', null=True)),
             ],
             options={
             },

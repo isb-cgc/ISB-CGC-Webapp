@@ -27,7 +27,7 @@ from django.views.decorators.cache import never_cache
 from django.contrib.auth.models import User
 from django.db.models import Count
 from django.shortcuts import render, redirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils import formats
 # from django.core.mail import send_mail
 from sharing.service import send_email_message

@@ -54,7 +54,7 @@ class SavedViz(models.Model):
     name = models.TextField(null=True)
     last_date_saved = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=True)
-    parent = models.ForeignKey('self', null=True, blank=True, default=None)
+    parent = models.ForeignKey('self', null=True, blank=True, default=None, on_delete=models.CASCADE)
     objects = SavedVizManager()
 
     def get_perm(self, request):
@@ -71,7 +71,7 @@ class SavedViz(models.Model):
         verbose_name_plural = "Saved Visualizations"
 
 class Plot(models.Model):
-    visualization = models.ForeignKey(SavedViz, blank=False)
+    visualization = models.ForeignKey(SavedViz, blank=False, on_delete=models.CASCADE)
     title = models.TextField(null=True)
     x_axis = models.TextField()
     y_axis = models.TextField()
@@ -82,8 +82,8 @@ class Plot(models.Model):
     # notes = models.CharField(max_length=1024, null=True)
 
 class Plot_Cohorts(models.Model):
-    plot = models.ForeignKey(Plot, blank=False)
-    cohort = models.ForeignKey(Cohort, blank=False)
+    plot = models.ForeignKey(Plot, blank=False, on_delete=models.CASCADE)
+    cohort = models.ForeignKey(Cohort, blank=False, on_delete=models.CASCADE)
 
 class Viz_Perms(models.Model):
     READER = 'READER'
@@ -93,12 +93,12 @@ class Viz_Perms(models.Model):
         (OWNER, 'Owner')
     )
 
-    visualization = models.ForeignKey(SavedViz, null=False, blank=False)
-    user = models.ForeignKey(User, null=False, blank=False)
+    visualization = models.ForeignKey(SavedViz, null=False, blank=False, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
     perm = models.CharField(max_length=10, choices=PERMISSIONS, default=READER)
 
 class Plot_Comments(models.Model):
-    plot = models.ForeignKey(Plot, blank=False, related_name='plot_comment')
-    user = models.ForeignKey(User, null=False, blank=False)
+    plot = models.ForeignKey(Plot, blank=False, related_name='plot_comment', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     content = models.CharField(max_length=1024, null=False)
