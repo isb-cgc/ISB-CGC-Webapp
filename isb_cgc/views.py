@@ -29,6 +29,8 @@ from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import formats
+# from django.core.mail import send_mail
+from sharing.service import send_email_message
 from django.contrib import messages
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
@@ -42,7 +44,7 @@ from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
 from projects.models import Program
 from workbooks.models import Workbook
-from accounts.models import GoogleProject
+from accounts.models import GoogleProject, UserOptInStatus
 from accounts.sa_utils import get_nih_user_details
 # from notebooks.notebook_vm import check_vm_stat
 from allauth.socialaccount.models import SocialAccount
@@ -58,6 +60,7 @@ OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 BQ_ECOSYS_BUCKET = settings.BQ_ECOSYS_STATIC_URL
+FEEDBACK_FORM_LINK = 'https://forms.gle/7i8Ua8TtgSvNbpat6'
 
 
 def convert(data):
@@ -200,6 +203,12 @@ def extended_login_view(request):
             "[WEBAPP LOGIN] User {} logged in to the web application at {}".format(user.email,
                                                                                    datetime.datetime.utcnow())
         )
+
+        # If user logs in for the second time, opt-in status changes to NOT_SEEN
+        user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=user).first()
+        if user_opt_in_stat_obj and user_opt_in_stat_obj.opt_in_status == UserOptInStatus.NEW:
+            user_opt_in_stat_obj.opt_in_status = UserOptInStatus.NOT_SEEN
+            user_opt_in_stat_obj.save()
 
     except Exception as e:
         logger.exception(e)
@@ -548,7 +557,6 @@ def bq_meta_data(request):
     bq_meta_data = requests.get(bq_meta_data_file_path).json()
     return JsonResponse(bq_meta_data, safe=False)
 
-
 @login_required
 def dashboard_page(request):
     # Cohort List
@@ -618,6 +626,84 @@ def dashboard_page(request):
         'workbooks': workbooks,
         'genefaves': genefaves,
         'varfaves': varfaves,
+        # 'optinstatus': opt_in_status
         # 'notebook_vm': notebook_vm,
         # 'gcp_list': gcp_list,
     })
+
+
+@login_required
+def opt_in_check_show(request):
+
+    try:
+        obj, created = UserOptInStatus.objects.get_or_create(user=request.user)
+        result = (obj.opt_in_status == UserOptInStatus.NOT_SEEN)
+    except Exception as e:
+        result = False
+
+    return JsonResponse({
+        'result': result
+    })
+
+
+def opt_in_update(request):
+    # If user logs in for the second time, opt-in status changes to NOT_SEEN
+    error_msg = ''
+    if request.POST:
+        opt_in_choice = request.POST.get('opt-in-radio')
+        opt_in_status_code = UserOptInStatus.NO if opt_in_choice == 'opt-out' else UserOptInStatus.YES
+
+    try:
+        user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=request.user).first()
+        if user_opt_in_stat_obj:
+            user_opt_in_stat_obj.opt_in_status = opt_in_status_code
+            user_opt_in_stat_obj.save()
+            if opt_in_choice == 'opt-in-email':
+                resp = send_feedback_form(request.user.email, request.user.first_name, request.user.last_name, FEEDBACK_FORM_LINK)
+                if resp.status == 'error':
+                    error_msg = resp.message
+
+    except Exception as e:
+        error_msg = '[Error] There has been an error while updating your subscription status.'
+
+    return JsonResponse({
+        'error_msg': error_msg
+    })
+
+
+def send_feedback_form(user_email, firstName, lastName, formLink):
+    status = None
+    message = None
+    try:
+        message_data = {
+            'from': settings.NOTIFICATION_EMAIL_FROM_ADDRESS,
+            'to': user_email,
+            'subject': 'Join the ISB-CGC community!',
+            'text': '''
+            Dear {firstName} {lastName},
+            
+            ISB-CGC is funded by the National Cancer Institute (NCI) to provide cloud-based tools and data to the cancer research community.
+            Your feedback is important to the NCI and us.
+            
+            Please help us by filling out this Google Form:
+            {formLink}
+
+            Thank you.
+            
+            
+            ISB-CGC team
+            '''.format(firstName=firstName, lastName=lastName, formLink=formLink)
+            # 'html': email_template.render(ctx)
+        }
+        send_email_message(message_data)
+    except Exception as e:
+        status = 'error'
+        message = '[Error] There has been an error while trying to send an email to {}.'.format(user_email)
+    return JsonResponse({
+        'status': status,
+        'message': message
+    })
+
+
+
+

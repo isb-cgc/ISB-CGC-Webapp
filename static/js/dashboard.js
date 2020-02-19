@@ -31,7 +31,8 @@ require([
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function () {
-        $(this).find('form')[0].reset();
+        var modal_form = $(this).find('form')[0];
+        if (modal_form) modal_form.reset();
     });
 
     $('#more-analysis').on('show.bs.collapse', function () {
@@ -47,6 +48,23 @@ require([
     $('.min-max a').on('click', function () {
         $(this).find('i').toggleClass('fa-angle-double-up');
         $(this).find('i').toggleClass('fa-angle-double-down');
+    });
+
+    // Ajax call to get opt_in_show value
+    $.ajax({
+        type: 'GET',
+        url: BASE_URL + '/opt_in/check_show/',
+        dataType  :'json',
+        data: $(this).serialize(),
+        success: function(data) {
+            //console.log(data.message);
+            if (data['result'])
+            {
+                $('#opt-in-pop-up-modal').modal('show');
+            }
+        },
+        error: function(data) {
+        }
     });
 
     $(window).on('beforeunload', function () {
@@ -73,6 +91,32 @@ require([
             }
         }
     }
+
+    $('#submit-opt-in-btn').on('click', function() {
+        var opt_in_radio_value = $('input[name="opt-in-radio"]:checked').val();
+        if(opt_in_radio_value == 'opt-in-now')
+        {
+            window.open('https://docs.google.com/forms/d/e/1FAIpQLSeGQiOcJJfe4q3wRM-g7sP_LpJj-pNDp7ZjOqsWIM381W28EQ/viewform', '_blank')
+        }
+        send_opt_in_update(opt_in_radio_value);
+    });
+
+    $('#cancel-opt-in-btn').on('click', function() {
+        send_opt_in_update('opt-out');
+    });
+
+    $('#close-opt-in-btn').on('click', function() {
+        send_opt_in_update('opt-out');
+    });
+
+    $('#will-email-message').collapse({toggle: false});
+    $('[name="opt-in-radio"]').on('change', function() {
+        if ($(this).val() === "opt-in-email") {
+            $('#will-email-message').collapse('show');
+        } else {
+            $('#will-email-message').collapse('hide');
+        }
+    });
 
     /*
     var get_vm_instance = function (vm_div) {
@@ -333,5 +377,18 @@ require([
     //     });
     //
     // });
-
 });
+
+function send_opt_in_update(opt_in_selection) {
+    // Ajax call to update the backend of the user's selection
+    $.ajax({
+            type: 'POST',
+            url: BASE_URL + '/opt_in/update/',
+            dataType  :'json',
+            data: {'opt-in-radio': opt_in_selection},
+            success: function(data) {
+            },
+            error: function(data) {
+            }
+        });
+}
