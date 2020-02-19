@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2017, Insqtitute for Systems Biology
+ * Copyright 2020, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ require.config({
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
+        session_security: 'session_security/script',
         underscore: 'libs/underscore-min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
@@ -54,14 +54,6 @@ require([
     'use strict';
 
     A11y.Core();
-
-    var sessionSecurity = new yourlabs.SessionSecurity({
-        pingUrl: pingUrl,
-        warnAfter: warnAfter,
-        expireAfter: expireAfter,
-        confirmFormDiscard: confirmFormDiscard,
-        returnToUrl: BASE_URL
-    });
 
     // Menu toggle
 
@@ -149,44 +141,12 @@ require([
         type: 'numeric'
     });
 
-    $('#gene-list-table').tablesorter({
-        headers: {
-            0: {sorter:false},
-            3: {sorter: 'fullDate'}
-        },
-        sortList: [[3,1]]
-    });
-
-    $('#var-list-table').tablesorter({
-        headers: {
-            0: {sorter:false},
-            4: {sorter: 'fullDate'}
-        },
-        sortList: [[4,1]]
-    });
-
-    $('#workbook-table').tablesorter({
-        headers: {
-            0: {sorter:false},
-            5: {sorter: 'fullDate'}
-        },
-        sortList: [[5,1]]
-    });
-
     $('#cohort-table').tablesorter({
         headers: {
             0: {sorter:false},
             7: {sorter: 'fullDate'}
         },
         sortList: [[7,1]]
-    });
-
-    $('#public-cohort-table').tablesorter({
-        headers: {
-            0: {sorter:false},
-            4: {sorter: 'fullDate'}
-        },
-        sortList: [[4,1]]
     });
 
     $(document).ready(function(){
@@ -201,6 +161,14 @@ require([
     // Set up our own data-hide type to 'hide' our alerts instead of popping them off the DOM entirely
     $("[data-hide]").on("click", function(){
         $(this).closest("." + $(this).attr("data-hide")).hide();
+    });
+
+    var sessionSecurity = new yourlabs.SessionSecurity({
+        pingUrl: pingUrl,
+        warnAfter: warnAfter,
+        expireAfter: expireAfter,
+        confirmFormDiscard: confirmFormDiscard,
+        returnToUrl: BASE_URL
     });
 });
 

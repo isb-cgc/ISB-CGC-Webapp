@@ -55,7 +55,8 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
         # Image Data query
         if solr_query['queries'] is not None:
             for attr in solr_query['queries']:
-                if attr in tcga_filter_attrs:
+                attr_name = re.sub("(_btw|_lt|_lte|_gt|_gte)", "", attr)
+                if attr_name in tcga_filter_attrs:
                     query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
                         tcga_solr.shared_id_col, tcga_solr.name, tcia_solr.shared_id_col
                     )) + solr_query['queries'][attr])
@@ -89,7 +90,8 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
         # Ancilary data faceting and querying
         if solr_query['queries'] is not None:
             for attr in solr_query['queries']:
-                if attr in tcia_facet_attrs:
+                attr_name = re.sub("(_btw|_lt|_lte|_gt|_gte)", "", attr)
+                if attr_name in tcia_facet_attrs:
                     query_set.append("{!join from={} fromIndex={} to={}}".format(
                         tcia_solr.shared_id_col, tcia_solr.name, tcga_solr.shared_id_col
                     ) + solr_query['queries'][attr])
