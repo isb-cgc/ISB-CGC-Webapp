@@ -1,44 +1,108 @@
+filterObj = {};
+projIdSel = [];
+studyIdSel = [];
 
 
-function populateProjectsTable(tableId){
+
+
+
+function editProjectsTable(tableId,scopeId){
+    var project_scope=document.getElementById(scopeId).selectedOptions[0].value;
+
+    tableElem = document.getElementById(tableId);
+    countElems = $(tableElem).find('.projects_table_num_cohort');
+    //countElems.forEach( function(element) { element.innerHTML='0'});
+    for (i=0;i<countElems.length;i++){
+        countElems[i].innerHTML='0';
+    }
+
+    projKeys = Object.keys(originalDataCounts.collection_id);
+    for (i=0;i<projKeys.length;i++){
+        idStr = projKeys[i]
+        countStr = originalDataCounts.collection_id[idStr].toString();
+        patientElemId = 'patient_col_'+idStr;
+        if (document.getElementById(patientElemId)){
+            if ( (project_scope ==='All') || (project_scope===idStr))
+            {
+                document.getElementById(patientElemId).innerHTML = countStr
+            }
+        }
+
+    }
+
+}
+
+
+function createProjectsTable(tableId){
     tableElem=document.getElementById(tableId);
-     var newInnerHTML='<tr><th>Project Name</th><th>Description</th><th>Total # of Patients</th><th># of Patients(this cohort)</th></tr>';
-     for (i=0;i< projectA.length;i++){
-         var index=projectIndex[projectA[i]]
-         var curProject = projects[index]
+     var newInnerHTML='<tr><th>Project Name</th><th>Total # of Patients</th><th># of Patients(this cohort)</th></tr>';
+     projectH = Object.keys(originalDataCounts.collection_id).sort();
+     nonePos = projectH.indexOf('None');
+     if (nonePos > -1) {
+         projectH.splice(nonePos, 1);
+     }
 
-         if (curProject.isActive){
-             var idStr=curProject.id.toString();
-             var numPatientsStr=curProject.patients.length.toString();
-             var numPatientsActiveStr=curProject.numActivePatients.toString();
-             var description='NA';
+     for (i=0;i< projectH.length;i++){
+         var idStr=projectH[i];
+         var patientIdStr = 'patient_col_'+idStr;
+         var numPatientsStr = originalDataCounts.collection_id[idStr].toString();
+         var description='NA';
+         var newProjectRow='<tr id="project_row_'+idStr+'" class="text_head" onclick="(toggleProj(this, \''+idStr+'\'))"><td>'+idStr+'</td><td>'+numPatientsStr+'</td><td id="'+patientIdStr+'" class="projects_table_num_cohort">'+numPatientsStr+'</td> </tr>';
+         newInnerHTML+=newProjectRow;
 
-             var newProjectRow='<tr id="project_row_'+idStr+'" class="text_head" onclick="(toggleProj(this, \''+idStr+'\'))"><td>'+idStr+'</td><td>'+ description + '</td><td>'+numPatientsStr+'</td><td>'+numPatientsActiveStr+'</td> </tr>';
-             newInnerHTML+=newProjectRow;
-         }
      }
      tableElem.innerHTML=newInnerHTML;
 }
 
+function resetTables(projectId,studyId, seriesId){
+
+    projRows=$('#'+projectId).find(".selected_grey");
+    for (i=0;i<projRows.length;i++){
+        projRow = projRows[i];
+        $(projRow).removeClass("selected_grey");
+    }
+    tableElem = document.getElementById(studyId);
+    var newInnerHTML = '<tr><th>Project Name</th><th>Patient Id</th><th>Study Id</th><th>Study Description</th></tr>';
+    tableElem.innerHTML = newInnerHTML;
+
+    tableElem= document.getElementById(seriesId);
+    var newInnerHTML = '<tr> <th>Study Id</th><th>Series Id</th><th>Modality</th><th>Body Part Examined</th> </tr>';
+    tableElem.innerHTML = newInnerHTML;
+}
+
+
+
 function toggleProj(projRow,projectId){
+    num_cohort= parseInt($(projRow).find(".projects_table_num_cohort")[0].innerHTML)
+    if (num_cohort ===0){
+        alert('no patients for this project in the selected cohort')
+        return;
+    }
     if (projRow.classList.contains("selected_grey")){
         $(projRow).removeClass("selected_grey");
-         removeStudiesAndSeries(projectId, "studies_table")
+        projPos = projIdSel.indexOf(projectId)
+        if (projPos>-1){
+            projIdSel.splice(projPos,1);
+        }
+        removeStudiesAndSeries(projectId, "studies_table")
+
     }
     else{
         $(projRow).addClass("selected_grey");
-        addStudies(projectId, "studies_table");
+        projIdSel.push(projectId);
+        addStudyOrSeries([projectId],[], "studies_table");
     }
 }
 
-function toggleStudy(studyRow,studyId){
+
+function toggleStudy(studyRow,studyId,projectId){
     if (studyRow.classList.contains("selected_grey")){
         $(studyRow).removeClass("selected_grey");
          removeSeries(studyRow.id, "series_table");
     }
     else{
         $(studyRow).addClass("selected_grey");
-        addSeries(studyId,studyRow.id, "series_table");
+        addStudyOrSeries([projectId],[studyId], "series_table", false);
     }
 }
 
@@ -54,30 +118,72 @@ function removeStudiesAndSeries(projectId,studyTableId,seriesTableId){
 function removeSeries(selClass,seriesTableId){
     $('#'+seriesTableId).find('.'+selClass).remove();
 }
-function addStudies(projectId,studyTableId){
-     var index=projectIndex[projectId]
-     var curProject = projects[index]
-     //var tableElem=document.getElementById(studyTableId);
-
-     curProject.patients.forEach(function(curPatient,index){
-         patientId=curPatient.id;
-         curPatient.studies.forEach(function(curStudy,sIndex){
 
 
-             studyId=curStudy.id
-             studyDescription=curStudy.StudyDescription;
-             studyDate=curStudy.StudyDate;
-             var rowId='study_'+projectId+'_'+patientIndex[patientId].toString()+"_"+studyIndex[studyId].toString();
-             var pclass='project_'+projectId;
+function addStudyOrSeries(projectIdArr,studyIdArr,tableId,refresh){
 
-              var fetchUrl='/projects/chc-tcia/locations/us-central1/datasets/'+projectId.toLowerCase()+'/dicomStores/'+projectId.toLowerCase()+'/study/'+studyId;
-              var hrefTxt='<a href="'+fetchUrl+'">'+studyId+'</a>';
+    curFilterObj = JSON.parse(JSON.stringify(filterObj));
+    curFilterObj.collection_id = projectIdArr;
+    var isSeries = false;
+    if (studyIdArr.length>0){
+        curFilterObj.StudyInstanceUID= studyIdArr;
+        isSeries = true;
+    }
 
-             var newHtml='<tr id="'+rowId+'" class="'+pclass+' text_head" onclick="(toggleStudy(this,\''+studyId+'\'))"><td>'+projectId+'</td><td>'+patientId+'</td><td>'+hrefTxt+'</td><td>'+studyDescription+'</td><td>'+studyDate+'</td></tr>'
-             $('#'+studyTableId+' tr:last').after(newHtml);
-         });
+    filterStr = JSON.stringify(curFilterObj);
+    fields = ["collection_id", "PatientID","StudyInstanceUID", "StudyDescription", "StudyDate"];
+    collapse_on='StudyInstanceUID'
+    if (isSeries){
+        fields = ["collection_id", "PatientID","StudyInstanceUID","SeriesInstanceUID","Modality","BodyPartExamined", "SeriesNumber"];
+        collapse_on='SeriesInstanceUID'
+    }
+    fieldStr = JSON.stringify(fields);
+    let url = '/idc/filtered/?counts_only=False&collapse_on='+collapse_on+'&with_clinical=False&filters=' + filterStr+'&fields='+fieldStr;
+    url=encodeURI(url);
 
-     });
+    $.ajax({
+                url: url,
+                dataType: 'json',
+                type: 'get',
+                contentType: 'application/x-www-form-urlencoded',
+                success: function(data){
+                    for (i=0;i<data['docs'].length;i++){
+                        curData=data['docs'][i]
+                        var projectId = curData.collection_id;
+                        var patientId = curData.PatientID;
+                        var studyId = curData.StudyInstanceUID;
+                        var fetchUrl='/projects/chc-tcia/locations/us-central1/datasets/'+projectId.replace('_','-')+'/dicomStores/'+projectId.replace('_','-')+'/study/'+studyId;
+                        var hrefTxt='<a href="'+fetchUrl+'">'+studyId+'</a>';
+                        var pclass='project_'+projectId;
+                        if (isSeries){
+                            var seriesId = curData.SeriesInstanceUID;
+                            var bodyPartExamined = curData.BodyPartExamined;
+                            var modality = curData.Modality;
+                            var rowId='series_'+seriesId.replace(/\./g,'-')
+                            var studyClass = 'study_'+studyId.replace(/\./g,'-');
+                            var newHtml='<tr id="'+rowId+'" class="'+pclass+' '+studyClass+' text_head"><td>'+hrefTxt+'</td><td>'+seriesId+'</td><td>'+modality+'</td><td>'+bodyPartExamined+'</td></tr>'
+
+                        }
+                        else {
+
+                            var studyDescription = curData.StudyDescription;
+                            //var studyDate = curData.StudyDate;
+                            var rowId='study_'+studyId.replace(/\./g,'-');
+                            var newHtml='<tr id="'+rowId+'" class="'+pclass+' text_head" onclick="(toggleStudy(this,\''+studyId+'\',\''+projectId+'\'))"><td>'+projectId+'</td><td>'+patientId+'</td><td>'+hrefTxt+'</td><td>'+studyDescription+'</td></tr>'
+
+                        }
+                        //var rowId='study_'+projectId+'_'+patientIndex[patientId].toString()+"_"+studyIndex[studyId].toString();
+
+
+                        $('#'+tableId+' tr:last').after(newHtml);
+                    }
+
+                },
+                error: function(  ){
+                    console.log( "problem getting data" );
+                }
+            });
+
 
 
 }
@@ -119,24 +225,18 @@ function getLastIdString(inp){
 
 
 function resolveAllPlots(){
-    resolveOriginalDataPlots("modality","modality_chart","Modality");
-    resolveOriginalDataPlots("body_part","body_part_examined_chart", "BodyPartExamined");
+    plotCategoricalData('modality','modality_chart','Modality',originalDataCounts['Modality'],'Modality');
+    plotCategoricalData('body_part','body_part_examined_chart', 'BodyPartExamined', originalDataCounts['BodyPartExamined'],'BodyPartExamined');
 
-    resolveRelatedPlotsCatWCounts( clinicalDataCounts['disease_code'],"disease_code_chart","Disease Code");
-    resolveRelatedPlotsCatWCounts( clinicalDataCounts['vital_status'],"vital_statistics_chart","Vital Status");
-    resolveRelatedPlotsCatWCounts( clinicalDataCounts['gender'],"gender_chart","Gender");
+    plotCategoricalData( 'disease','disease_code_chart','Disease Code',clinicalDataCounts['disease_code'],'disease_code');
+    plotCategoricalData( 'vital_status','vital_status_chart','Vital Status',clinicalDataCounts['vital_status'],'vital_status');
+    plotCategoricalData('gender' ,'gender_chart','Gender',clinicalDataCounts['gender'],'gender');
     resolveRelatedPlotsCatWCountsRng( clinicalDataCounts['age'],"age_chart","Age");
     //resolveRelatedPlotsCatWCountsRng( clinicalDataCounts['bmi'],"bmi_chart","Body Mass Index");
-    resolveRelatedPlotsCatWCounts( clinicalDataCounts['race'],"race_chart","Race");
-    resolveRelatedPlotsCatWCounts( clinicalDataCounts['ethnicity'],"ethnicity_chart","Ethnicity");
+    plotCategoricalData( 'race','race_chart','Race',clinicalDataCounts['race'],'race');
+    plotCategoricalData( 'ethnicity',"ethnicity_chart","Ethnicity",clinicalDataCounts['ethnicity'],"ethnicity");
 
-    //resolveRelateDataPlotsCat("disease", "disease_code_chart","disease_code");
-    //resolveRelateDataPlotsCat("vital", "vital_statistics_chart","vital_status");
-    //resolveRelateDataPlotsCat("gender", "gender_chart","gender");
 
-    //resolveRelateDataPlotsRange("age", "age_chart","age");
-    //resolveRelateDataPlotsCat("race", "race_chart","race");
-    //resolveRelateDataPlotsCat("ethnicity", "ethnicity_chart","ethnicity");
 
 }
 
@@ -160,9 +260,21 @@ function updateAllFilterSelections(){
 function updateSearchScope(searchElem){
     var project_scope=searchElem.selectedOptions[0].value;
     document.getElementById('selected_project').innerHTML=project_scope;
+    if (project_scope ==='All'){
+        if (filterObj.hasOwnProperty('collection_id')){
+            delete filterObj['collection_id']
+        }
+    }
+    else{
+        filterObj['collection_id']=[project_scope];
+
+    }
+    fetchCountData(false);
 
 }
-function updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, isStudyAttr,isRangeAttr){
+
+
+function updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, isImageAttr,isRangeAttr){
     var newText="&emsp;&emsp;"+header+": ";
     var checkBoxElem=document.getElementById(checkBoxDiv);
 
@@ -182,43 +294,37 @@ function updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, i
     }
     if (numChecked === listItems.length){
         newText="&emsp;&emsp;"+header+": All";
-
+        delete filterObj[attributeName];
     }
     else {
-        filter[attributeName] = attributeVals;
+        filterObj[attributeName] = attributeVals;
     }
     document.getElementById(displaySet).innerHTML=newText;
-
+    fetchCountData(false);
 
 }
 
 
-
-
-function fetchData(refresh,counts_only){
-
+function fetchCountData(refresh){
+    var url='';
+    if (Object.keys(filterObj).length===0){
+        url = '/idc/filtered/?counts_only="true"';
+    }
+    else {
+        url = '/idc/filtered/?counts_only="true"&filters=' + JSON.stringify(filterObj);
+    }
+    url=encodeURI(url);
 
     $.ajax({
-                url: '/idc/filtered/',
+                url: url,
                 dataType: 'json',
                 type: 'get',
                 contentType: 'application/x-www-form-urlencoded',
                 success: function(data){
-                    clinicalDataCounts=data['clinical']
-                    originalDataCounts=data['facets']
-                    if (!counts_only) {
-                        projects = data.projects;
-                        projectIndex = data.projectIndex;
-                        projectA = data.projectA.sort();
-                        patientIndex = data.patientIndex;
-                        patientProject = data.patientProject;
-                        studyIndex = data.studyIndex;
-                        studyPatient = data.studyPatient;
-                        seriesIndex = data.seriesIndex;
-                        seriesStudy = data.seriesStudy;
-                    }
+                    clinicalDataCounts=data['clinical'];
+                    originalDataCounts=data['facets'];
 
-
+                    var isEdit = true;
                     if (refresh) {
                         filter = new Object();
 
@@ -237,12 +343,17 @@ function fetchData(refresh,counts_only){
                         nonePos = ethnicityH.indexOf('None');
                         ethnicityH.splice(nonePos, 1);
                         ethnicityH.push('None');
-
+                        isEdit = false;
                         constructClinicalFilterOptions();
+                        createProjectsTable("projects_table");
                     }
-                    //updateSelections(-1,[]);
+                    else{
+                       editProjectsTable('projects_table','project_scope');
+                       resetTables('projects_table','studies_table','series_table');
+                    }
                     resolveAllPlots();
-                    populateProjectsTable("projects_table");
+
+
                 },
                 error: function(  ){
                     console.log( "problem getting data" );
@@ -255,13 +366,17 @@ function constructClinicalFilterOptions(){
 
     //projectA=projectA.sort();
     projectElem=document.getElementById("project_scope");
-    for (i=0;i<projectA.length;i++){
-        nm=projectA[i]
+    projList= Object.keys(originalDataCounts["collection_id"]).sort()
+    for (i=0;i<projList.length;i++){
+        nm=projList[i]
+        if (nm !=='None') {
 
-        opt=document.createElement("option");
-        opt.value=nm;
-        opt.innerHTML=nm;
-        projectElem.appendChild(opt);
+            opt = document.createElement("option");
+            opt.value = nm;
+            opt.innerHTML = nm;
+
+            projectElem.appendChild(opt);
+        }
     }
 
     //diseaseCodeA=Object.keys(diseaseCodeH).sort();
@@ -329,7 +444,7 @@ var plotLayout = {
 };
 
 
-function resolveOriginalDataPlots(elem, plotId,lbl) {
+function plotCategoricalData(elem, plotId,lbl, dataDic,filterA) {
 
     var dataList = document.getElementById(elem).getElementsByTagName("ul")[0].getElementsByTagName("input");
 
@@ -340,52 +455,17 @@ function resolveOriginalDataPlots(elem, plotId,lbl) {
 
 
     for (i = 0; i < dataList.length; i++) {
-
         var input = dataList[i];
         var dataHeader = input.innerHTML;
         dataHeaders.push(dataHeader);
         dataCount[i] = 0;
-
         var dataVal = input.value;
         dataValueMp[dataVal] = i;
         dataValues.push(dataVal);
-    }
-    for (i = 0; i < projects.length; i++) {
-        curProject = projects[i]
-        if (curProject.isActive) {
-
-            for (j = 0; j < curProject.patients.length; j++) {
-                curPatient = curProject.patients[j];
-
-
-                if ((curPatient.isActive) && (curPatient.numActiveStudies > 0)) {
-                    var dataFound = new Object();
-                    for (k = 0; k < curPatient.studies.length; k++) {
-                        curStudy = curPatient.studies[k];
-                        if ( (curStudy.isActive) && (curStudy.numActiveSeries>0) ) {
-                            for (l = 0; l < curStudy.series.length; l++) {
-                                curSeries = curStudy.series[l];
-                                if (curSeries.isActive) {
-                                    dataFound[curSeries[lbl].toLowerCase()] = 1;
-                                }
-                            }
-                        }
-                    }
-                    dataFoundList = Object.keys(dataFound);
-                    for (k = 0; k < dataFoundList.length; k++) {
-                        dataVal = dataFoundList[k]
-                        if (dataValueMp.hasOwnProperty(dataVal)) {
-                            dataCount[dataValueMp[dataVal]]++;
-                        }
-                    }
-                }
-
-
-            }
-
+        if ( dataDic.hasOwnProperty(dataVal) && (!filterObj.hasOwnProperty(filterA) || filterObj[filterA].indexOf(dataVal)>-1)){
+            dataCount[i] = dataDic[dataVal];
         }
     }
-
 
 var pdata =[
     {
@@ -419,7 +499,7 @@ Plotly.newPlot(plotId,pdata,plotLayout);
 
 }
 
-function resolveRelatedPlotsCatWCounts(plotDataFacetCountDic, plotId,lbl){
+function resolveRelatedPlotsCatWCounts(plotDataFacetCountDic, plotId,lbl, filterLbl){
 
     pHeader = Object.keys(plotDataFacetCountDic).sort();
     nonePos = pHeader.indexOf('None');
@@ -430,8 +510,13 @@ function resolveRelatedPlotsCatWCounts(plotDataFacetCountDic, plotId,lbl){
 
     pCounts = new Array();
     for (i=0;i<pHeader.length;i++){
-        lbl=pHeader[i];
-        cnt=plotDataFacetCountDic[lbl]
+        src=pHeader[i];
+        if ( (plotDataFacetCountDic.hasOwnProperty(src) && (!filterObj.hasOwnProperty(filterLbl) || filterObj[filterLbl].indexOf(src)>0))  ){
+           cnt=plotDataFacetCountDic[src];
+        }
+        else{
+            cnt=0;
+        }
         pCounts.push(cnt)
 
     }

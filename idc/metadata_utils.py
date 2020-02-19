@@ -117,7 +117,7 @@ def translateCollectionData(solrArr, idcRetDic):
 
 
 # Fetch metadata from Solr
-def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts_only=False):
+def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts_only=False, with_clinical = True, collapse_on = 'PatientID' ):
     try:
         results = {'docs': None, 'facets': {}}
 
@@ -140,9 +140,10 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
         if solr_query['queries'] is not None:
             for attr in solr_query['queries']:
                 if attr in tcga_filter_attrs:
-                    query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
-                        tcga_solr.shared_id_col, tcga_solr.name, tcia_solr.shared_id_col
-                    )) + solr_query['queries'][attr])
+                    query_set.append("{!join from=case_barcode fromIndex=tcga_clin_bios to=PatientID}" + solr_query['queries'][attr])
+                    #query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
+                    #    tcga_solr.shared_id_col, tcga_solr.name, tcia_solr.shared_id_col
+                    #)) + solr_query['queries'][attr])
                 else:
                     query_set.append(solr_query['queries'][attr])
 
@@ -154,45 +155,59 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
             'fqs': query_set,
             'query_string': "*:*",
             'facets': solr_facets,
-            'limit': 500, #record_limit if with_docs else 0,
+            'limit': record_limit, #record_limit if with_docs else 0,
             # what is with_docs supposed to do?? 'limit': 10 if with_docs else 0,
-            'collapse_on': 'SeriesInstanceUID',
+            'collapse_on': collapse_on,
             'counts_only': counts_only
         })
         if not counts_only:
-            results['docs'] = solr_result['docs']
+            if ('SeriesInstanceUID' in fields):
+                results['docs'] = sorted(solr_result['docs'], key=lambda row: (row['collection_id'], row['PatientID'], row['StudyInstanceUID'], row['SeriesInstanceUID']))
+            elif ('StudyInstanceUID' in fields):
+                results['docs'] = sorted(solr_result['docs'], key=lambda row: (row['collection_id'], row['PatientID'], row['StudyInstanceUID']))
+            else:
+                results['docs'] = solr_result['docs']
+
         results['facets']['cross_collex'] = solr_result['facets']
         results['total'] = solr_result['numFound']
 
         # The attributes being faceted against here would be whatever list of facet counts we want to display in the
         # UI (probably not ALL of them).
-        solr_facets = build_solr_facets(list(tcga_facet_attrs), solr_query['filter_tags'])
-
+        #solr_facets = build_solr_facets(list(tcga_facet_attrs), solr_query['filter_tags'])
+        #solr_facets = ["race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis", "gender", "disease_code"]
+        solr_facets= { "race": {"field": "race", "missing": True, "type": "terms", "limit": -1},"vital_status": {"field": "vital_status", "missing": True, "type": "terms", "limit": -1}, \
+                      "ethnicity": {"field": "ethnicity", "missing": True, "type": "terms", "limit": -1}, \
+                 "bmi": {"field": "bmi", "missing": True, "type": "terms", "limit": -1}, "age_at_diagnosis": {"field": "age_at_diagnosis", "missing": True, "type": "terms", "limit": -1}, \
+                 "gender": {"field": "gender", "missing": True, "type": "terms", "limit": -1}, \
+                 "disease_code": {"field": "disease_code", "missing": True, "type": "terms", "limit": -1} }
         query_set = []
 
-        # Ancilary data faceting and querying
-        if solr_query['queries'] is not None:
-            for attr in solr_query['queries']:
-                if attr in tcia_facet_attrs:
-                    query_set.append("{!join from={} fromIndex={} to={}}".format(
-                        tcia_solr.shared_id_col, tcia_solr.name, tcga_solr.shared_id_col
-                    ) + solr_query['queries'][attr])
-                else:
-                    query_set.append(solr_query['queries'][attr])
+        if with_clinical:
+            # Ancilary data faceting and querying
+            if solr_query['queries'] is not None:
+                for attr in solr_query['queries']:
+                    if attr in tcia_facet_attrs:
+                        query_set.append("{!join from=PatientID fromIndex=tcia_images to=case_barcode}" + solr_query['queries'][attr])
+                        #query_set.append("{!join from={} fromIndex={} to={}}".format(
+                        #    tcia_solr.shared_id_col, tcia_solr.name, tcga_solr.shared_id_col
+                        #) + solr_query['queries'][attr])
+                    else:
+                        query_set.append(solr_query['queries'][attr])
 
-        solr_result = query_solr_and_format_result({
-            'collection': tcga_solr.name,
-            'fields': fields,
-            'fqs': query_set,
-            'query_string': "*:*",
-            'facets': solr_facets,
-            'limit': 0,
-            'collapse_on': 'case_barcode',
-            'counts_only': counts_only
-        })
+            solr_result = query_solr_and_format_result({
+                'collection': tcga_solr.name,
+                'fields': fields,
+                'fqs': query_set,
+                'query_string': "*:*",
+                'facets': solr_facets,
+                'limit': 0,
+                'collapse_on': 'case_barcode',
+                'counts_only': True
+            })
 
-        results['clinical'] = solr_result
-
+            results['clinical'] = solr_result
+        else:
+            results['clinical'] = {}
     except Exception as e:
         logger.error("[ERROR] While fetching solr metadata:")
         logger.exception(e)
