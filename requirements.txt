@@ -25,6 +25,7 @@ cryptography==2.4.2
 future==0.17.1
 google-cloud-storage==1.18.0
 django-session-security==2.6.5
+django-rest-framework==3.11.0
 # If you are seeing an error about django-debug-toolbar not being installed,
 # the problem is almost certainly that your developer .env wasn't found
 # django-debug-toolbar should **only** be installed on local develpoer builds, so do
