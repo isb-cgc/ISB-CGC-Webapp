@@ -651,7 +651,7 @@ def opt_in_update(request):
     error_msg = ''
     if request.POST:
         opt_in_choice = request.POST.get('opt-in-radio')
-        opt_in_status_code = UserOptInStatus.NO if opt_in_choice == 'opt-out' else UserOptInStatus.YES
+        opt_in_status_code = UserOptInStatus.NO if opt_in_choice == 'opt-out' else UserOptInStatus.SEEN
 
     try:
         user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=request.user).first()
