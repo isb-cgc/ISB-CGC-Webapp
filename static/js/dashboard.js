@@ -4,7 +4,7 @@ require.config({
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
+        session_security: 'session_security/script',
         underscore: 'libs/underscore-min',
         tablesorter: 'libs/jquery.tablesorter.min',
         base: 'base'
@@ -105,17 +105,14 @@ require([
         send_opt_in_update('opt-out');
     });
 
+    $('#will-email-message').collapse({toggle: false});
     $('[name="opt-in-radio"]').on('change', function() {
-      if($(this).val() === "opt-in-email") {
-        $('#will-email-message').collapse('show');
-      } else {
-        $('#will-email-message').collapse('hide');
-      }
+        if ($(this).val() === "opt-in-email") {
+            $('#will-email-message').collapse('show');
+        } else {
+            $('#will-email-message').collapse('hide');
+        }
     });
-
-    // if (USER_OPTIN_STATUS == 1){ // NOT_SEEN
-    //     $('#test-modal').modal('show');
-    // }
 
     /*
     var get_vm_instance = function (vm_div) {
@@ -386,6 +383,11 @@ function send_opt_in_update(opt_in_selection) {
             dataType  :'json',
             data: {'opt-in-radio': opt_in_selection},
             success: function(data) {
+                let redirect_url = data['redirect-url'];
+                if (redirect_url != "")
+                {
+                    window.open(redirect_url, '_blank')
+                }
             },
             error: function(data) {
             }

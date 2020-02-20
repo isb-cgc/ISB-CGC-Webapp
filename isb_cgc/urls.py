@@ -16,6 +16,7 @@
 from __future__ import absolute_import
 
 from django.conf.urls import include, url
+from django.urls import path
 from django.contrib import admin
 from django.conf import settings
 
@@ -49,7 +50,7 @@ urlpatterns = [
     # url(r'^notebooks/', include('notebooks.urls')),
     url(r'^cohorts/', include('cohorts.urls')),
     url(r'^visualizations/', include('visualizations.urls')),
-    url(r'^admin/', include(admin.site.urls)),
+    path('admin/', admin.site.urls),
     url(r'^accounts/', include('accounts.urls')),
     url(r'^seqpeek/', include('seqpeek.urls')),
     url(r'session_security/', include('session_security.urls')),

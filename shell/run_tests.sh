@@ -12,7 +12,7 @@ echo "PYTHONPATH IS ${PYTHONPATH}"
 
 echo "Running Django unit tests..."
 
-# python3 ./manage_unit_test.py test --noinput
+python3 ./manage_unit_test.py test --noinput
 
 echo "Running module unit tests with unittest..."
 

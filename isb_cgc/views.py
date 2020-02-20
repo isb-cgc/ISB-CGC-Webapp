@@ -27,7 +27,7 @@ from django.views.decorators.cache import never_cache
 from django.contrib.auth.models import User
 from django.db.models import Count
 from django.shortcuts import render, redirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils import formats
 # from django.core.mail import send_mail
 from sharing.service import send_email_message
@@ -651,7 +651,7 @@ def opt_in_update(request):
     error_msg = ''
     if request.POST:
         opt_in_choice = request.POST.get('opt-in-radio')
-        opt_in_status_code = UserOptInStatus.NO if opt_in_choice == 'opt-out' else UserOptInStatus.YES
+        opt_in_status_code = UserOptInStatus.NO if opt_in_choice == 'opt-out' else UserOptInStatus.SEEN
 
     try:
         user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=request.user).first()
@@ -663,10 +663,20 @@ def opt_in_update(request):
                 if resp.status == 'error':
                     error_msg = resp.message
 
+        # Prefill email and user name
+        redirect_url = ""
+        if opt_in_choice == 'opt-in-now':
+            opt_in_form_url = 'https://docs.google.com/forms/d/e/1FAIpQLSeGQiOcJJfe4q3wRM-g7sP_LpJj-pNDp7ZjOqsWIM381W28EQ/viewform?entry.474148858={email}&entry.991749890={firstName}+{lastName}'
+            user_email = User.objects.get(id=request.user.id).email
+            first_name = User.objects.get(id=request.user.id).first_name
+            last_name = User.objects.get(id=request.user.id).last_name
+            redirect_url = opt_in_form_url.format(email=user_email, firstName=first_name, lastName=last_name)
+
     except Exception as e:
         error_msg = '[Error] There has been an error while updating your subscription status.'
 
     return JsonResponse({
+        'redirect-url': redirect_url,
         'error_msg': error_msg
     })
 
