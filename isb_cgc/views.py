@@ -29,6 +29,7 @@ from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import formats
+from django.core.exceptions import ObjectDoesNotExist
 # from django.core.mail import send_mail
 from sharing.service import send_email_message
 from django.contrib import messages
@@ -46,6 +47,7 @@ from projects.models import Program
 from workbooks.models import Workbook
 from accounts.models import GoogleProject, UserOptInStatus
 from accounts.sa_utils import get_nih_user_details
+from accounts.utils import get_opt_in_response
 # from notebooks.notebook_vm import check_vm_stat
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
@@ -210,6 +212,21 @@ def extended_login_view(request):
             user_opt_in_stat_obj.opt_in_status = UserOptInStatus.NOT_SEEN
             user_opt_in_stat_obj.save()
 
+        # if not already recorded in UserOptInStatus, change opt_in_status based on google sheet response (if any)
+        try:
+            if user_opt_in_stat_obj and user_opt_in_stat_obj.opt_in_status != UserOptInStatus.YES and \
+                    user_opt_in_stat_obj.opt_in_status != UserOptInStatus.NO:
+                opt_in_response = get_opt_in_response(request.user.email)
+
+                if not opt_in_response:
+                    user_opt_in_stat_obj.opt_in_status = UserOptInStatus.NOT_SEEN
+                elif opt_in_response["can_contact"] == 'Yes':
+                    user_opt_in_stat_obj.opt_in_status = UserOptInStatus.YES
+                elif opt_in_response["can_contact"] == 'No':
+                    user_opt_in_stat_obj.opt_in_status = UserOptInStatus.NO
+                user_opt_in_stat_obj.save()
+        except ObjectDoesNotExist:
+            logger.error("[ERROR] Unable to retrieve UserOptInStatus object on log in.")
     except Exception as e:
         logger.exception(e)
 
@@ -651,6 +668,8 @@ def opt_in_update(request):
     error_msg = ''
     if request.POST:
         opt_in_choice = request.POST.get('opt-in-radio')
+        # TODO: Should this be UserOptInStatus.UNSEEN instead of .YES?
+        opt_in_status_code = UserOptInStatus.NO if opt_in_choice == 'opt-out' else UserOptInStatus.YES
         opt_in_status_code = UserOptInStatus.NO if opt_in_choice == 'opt-out' else UserOptInStatus.SEEN
 
     try:
