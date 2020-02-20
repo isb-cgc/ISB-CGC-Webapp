@@ -220,9 +220,9 @@ def extended_login_view(request):
 
                 if not opt_in_response:
                     user_opt_in_stat_obj.opt_in_status = UserOptInStatus.NOT_SEEN
-                elif opt_in_response == 'Yes':
+                elif opt_in_response["can_contact"] == 'Yes':
                     user_opt_in_stat_obj.opt_in_status = UserOptInStatus.YES
-                elif opt_in_response == 'No':
+                elif opt_in_response["can_contact"] == 'No':
                     user_opt_in_stat_obj.opt_in_status = UserOptInStatus.NO
                 user_opt_in_stat_obj.save()
         except ObjectDoesNotExist:
@@ -670,6 +670,7 @@ def opt_in_update(request):
         opt_in_choice = request.POST.get('opt-in-radio')
         # TODO: Should this be UserOptInStatus.UNSEEN instead of .YES?
         opt_in_status_code = UserOptInStatus.NO if opt_in_choice == 'opt-out' else UserOptInStatus.YES
+        opt_in_status_code = UserOptInStatus.NO if opt_in_choice == 'opt-out' else UserOptInStatus.SEEN
 
     try:
         user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=request.user).first()
