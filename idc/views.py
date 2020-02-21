@@ -234,23 +234,13 @@ def user_landing(request):
 
     users = User.objects.filter(is_superuser=0)
     cohort_perms = Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True)
-    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved').annotate(num_cases=Count('samples__case_barcode'))
+    # TODO: Make date_created column and sort on that
+    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-name').annotate(num_cases=Count('samples__case_barcode'))
 
     for item in cohorts:
         item.perm = item.get_perm(request).get_perm_display()
         item.owner = item.get_owner()
         # print local_zone.localize(item.last_date_saved)
-
-    # viz_perms = Viz_Perms.objects.filter(user=request.user).values_list('visualization', flat=True)
-    visualizations = SavedViz.objects.generic_viz_only(request).order_by('-last_date_saved')
-    for item in visualizations:
-        item.perm = item.get_perm(request).get_perm_display()
-        item.owner = item.get_owner()
-
-    seqpeek_viz = SavedViz.objects.seqpeek_only(request).order_by('-last_date_saved')
-    for item in seqpeek_viz:
-        item.perm = item.get_perm(request).get_perm_display()
-        item.owner = item.get_owner()
 
     # Used for autocomplete listing
     cohort_listing = Cohort.objects.filter(id__in=cohort_perms, active=True).values('id', 'name')
@@ -493,7 +483,8 @@ def dashboard_page(request):
     idc_superuser = User.objects.get(username='idc')
     public_cohorts = Cohort_Perms.objects.filter(user=idc_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
     cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
-    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
+    # TODO: Add in 'date created' and sort on that
+    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-name')
 
     # Program List
     ownedPrograms = request.user.program_set.filter(active=True)
