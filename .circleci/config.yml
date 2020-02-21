@@ -160,6 +160,7 @@ jobs:
             - ./txt
             - ./json
             - ./.env
+            - ./solr-ssl.pem
 
   deploy_job:
     environment:
