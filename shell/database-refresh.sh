@@ -8,7 +8,7 @@ else
         exit 1
     fi
     # Doublecheck where we're running this...
-    if [ $DATABASE_HOST != "localhost" ]; then
+    if [ "${DATABASE_HOST}" != "localhost" ]; then
         echo "[ERROR] Possible remote database detected! This script IS ONLY intended for use on local developer builds!"
         echo "[ERROR] Host seen: ${DATABASE_HOST}"
         exit 1

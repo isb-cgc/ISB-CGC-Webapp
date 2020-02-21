@@ -156,8 +156,7 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
             'fqs': query_set,
             'query_string': "*:*",
             'facets': solr_facets,
-            'limit': record_limit, #record_limit if with_docs else 0,
-            # what is with_docs supposed to do?? 'limit': 10 if with_docs else 0,
+            'limit': record_limit, #record_limit if with_docs else 0
             'collapse_on': collapse_on,
             'counts_only': counts_only
         })
