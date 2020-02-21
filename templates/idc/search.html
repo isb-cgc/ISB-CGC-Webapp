@@ -28,17 +28,83 @@
     <link type="text/css" rel="stylesheet" href="{% static 'css/vendor.css' %}">
     <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
 
+    <script>
+    function mkSlider(divName,inpName, field) {
+        $("#" + divName).slider({
+            values: [0, 120],
+            step: 1,
+            min: 0,
+            max: 120,
+            slide: function (event, ui) {
+                $("#" + inpName).val(ui.values[0] + "-" + ui.values[1]);
+            },
+            stop: function (event, ui) {
+                   filterObj[field]=[parseFloat(ui.values[0]),parseFloat(ui.values[0])]
+            }
+        });
+    }
+    </script>
+
+
   <style>
-       table, th, td {border: 1px solid black;}
+       th, tb,tr,td {border: 1px solid black;}
        tr.selected_grey td {background-color: #333; color: #fff;}
+       /* thead, tbody { display: block; } */
+
+    tbody.set_height {
+          max-height: 200px;       /* Just for the demo          */
+          overflow-y: scroll;    /* Trigger vertical scroll    */
+         overflow-x: hidden;  /* Hide the horizontal scroll */
+        width:100%;
+        display:inline-block;
+
+        table-layout: fixed;
+
+
+
+
+        }
+  thead {
+
+display: table;
+      width: calc( 100% - 1em )
+}
+
+      th{
+          width:25%;
+          word-wrap: break-word;
+      }
+
+      td{
+          width:25%;
+           word-break: break-word;
+
+      }
+
+
+  table{
+      table-layout:fixed;
+
+      width: 100%;
+
+
+
+  }
+
     </style>
 
     <script>
 
     window.onload = function(){
         fetchCountData(true);
+       // mkSlider("age_slide", "inp_age_slide", "inp_age_stop", 0, 120, 120)
+
+        //mkSlider("slider-1","slider-inp");
     }
     </script>
+
+
+
 
 {% endblock %}
 
@@ -46,6 +112,8 @@
 {% block page_name %}help{% endblock %}
 
 {% block content %}
+
+
 
 <div class="container" style="display:block">
     <div class ="row">
@@ -57,7 +125,8 @@
                          <select id="project_scope" onchange="updateSearchScope(this)">
                              <option value="All" >All data</option>
                           </select>
-
+                       <!--   <div id = "slider-1"></div>
+                         <input id="slider-inp" type="text" value="120"> -->
                      </div>
 
 
@@ -178,6 +247,13 @@
                 </div>
 
                 <div id="age" class="collapse">
+
+                    <div id="age_slide"></div>
+                        <input id="inp_age_slide">0-120</input>
+                      <input id="inp_age_stop">0-120</input>
+
+
+
                     <ul id="age_list" style="list-style: none;">
                          <li>&emsp;<input type="checkbox" checked value="0 to 20" onclick="updateFilterSelection('age_list', 'age_set','Age','age',false,true)">0-19</li>
                         <li>&emsp;<input type="checkbox" checked value="20 to 30" onclick="updateFilterSelection('age_list', 'age_set','Age','age',false,true)">20-29</li>
@@ -300,16 +376,30 @@
                              </tr>
                           </table>
                           <br><br>
-                          <table id="studies_table">
+                          <table >
+                              <thead>
                              <tr>
-                                 <th>Project Name</th><th>Patient Id</th><th>Study Id</th><th>Study Description</th>
+                                 <th >Project Name </th><th >Patient Id</th><th>Study Id</th><th>Study Description</th>
                              </tr>
-                          </table>
+                              </thead>
+
+
+                             <tbody  id="studies_table" class="set_height">
+
+                              </tbody>
+
+                          </table >
                           <br><br>
-                          <table id="series_table">
+                          <table>
+                             <thead>
                               <tr>
                                 <th>Study Id</th><th>Series Id</th><th>Modality</th><th>Body Part Examined</th>
                               </tr>
+                              </thead>
+
+                              <tbody id="series_table" class="set_height">
+
+                              </tbody>
                           </table>
                      </div>
             </div>

@@ -6,6 +6,29 @@ studyIdSel = [];
 
 
 
+  /* function mkSlider(divId, slideVal, stopVal, lowVal, highVal,max) {
+            $( divId ).slider({
+               range:true,
+               min: 0,
+               max: max,
+               values: [ lowVal, highVal ],
+
+               stop: function( event, ui ) {
+                  $( "#stopVal" )
+                     .val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
+               },
+
+               slide: function( event, ui ) {
+                  $( "#slideVal" )
+                     .val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
+               }
+           });
+         } */
+
+
+
+
+
 function editProjectsTable(tableId,scopeId){
     var project_scope=document.getElementById(scopeId).selectedOptions[0].value;
 
@@ -62,12 +85,12 @@ function resetTables(projectId,studyId, seriesId){
         $(projRow).removeClass("selected_grey");
     }
     tableElem = document.getElementById(studyId);
-    var newInnerHTML = '<tr><th>Project Name</th><th>Patient Id</th><th>Study Id</th><th>Study Description</th></tr>';
-    tableElem.innerHTML = newInnerHTML;
+    //var newInnerHTML = '<tr><th>Project Name</th><th>Patient Id</th><th>Study Id</th><th>Study Description</th></tr>';
+    tableElem.innerHTML = '';
 
     tableElem= document.getElementById(seriesId);
-    var newInnerHTML = '<tr> <th>Study Id</th><th>Series Id</th><th>Modality</th><th>Body Part Examined</th> </tr>';
-    tableElem.innerHTML = newInnerHTML;
+    //var newInnerHTML = '<tr> <th>Study Id</th><th>Series Id</th><th>Modality</th><th>Body Part Examined</th> </tr>';
+    tableElem.innerHTML = '';
 }
 
 
@@ -161,7 +184,7 @@ function addStudyOrSeries(projectIdArr,studyIdArr,tableId,refresh){
                             var modality = curData.Modality;
                             var rowId='series_'+seriesId.replace(/\./g,'-')
                             var studyClass = 'study_'+studyId.replace(/\./g,'-');
-                            var newHtml='<tr id="'+rowId+'" class="'+pclass+' '+studyClass+' text_head"><td>'+hrefTxt+'</td><td>'+seriesId+'</td><td>'+modality+'</td><td>'+bodyPartExamined+'</td></tr>'
+                            var newHtml='<tr id="'+rowId+'" class="'+pclass+' '+studyClass+' text_head"><td class="col1">'+hrefTxt+'</td><td class="col2">'+seriesId+'</td><td class="col1">'+modality+'</td><td class="col1">'+bodyPartExamined+'</td></tr>'
 
                         }
                         else {
@@ -169,13 +192,13 @@ function addStudyOrSeries(projectIdArr,studyIdArr,tableId,refresh){
                             var studyDescription = curData.StudyDescription;
                             //var studyDate = curData.StudyDate;
                             var rowId='study_'+studyId.replace(/\./g,'-');
-                            var newHtml='<tr id="'+rowId+'" class="'+pclass+' text_head" onclick="(toggleStudy(this,\''+studyId+'\',\''+projectId+'\'))"><td>'+projectId+'</td><td>'+patientId+'</td><td>'+hrefTxt+'</td><td>'+studyDescription+'</td></tr>'
+                            var newHtml='<tr id="'+rowId+'" class="'+pclass+' text_head" onclick="(toggleStudy(this,\''+studyId+'\',\''+projectId+'\'))"><td class="col1">'+projectId+'</td><td class="col1">'+patientId+'</td><td class="col2">'+hrefTxt+'</td><td class="col1">'+studyDescription+'</td></tr>'
 
                         }
                         //var rowId='study_'+projectId+'_'+patientIndex[patientId].toString()+"_"+studyIndex[studyId].toString();
 
 
-                        $('#'+tableId+' tr:last').after(newHtml);
+                        document.getElementById(tableId).innerHTML+=newHtml;
                     }
 
                 },

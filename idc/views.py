@@ -385,7 +385,7 @@ def get_filtered_idc_cohort(request):
     collapse_on = request.GET.get('collapse_on', 'PatientID')
 
     #filters = {"BodyPartExamined": ["CHEST"]}
-    #filters = {"age_at_diagnosis": ["0 to 50"]}
+    #filters = {"age_at_diagnosis_btw": [0,50]}
     #filters = {}
     try:
         # for a version which isn't current, or for a user cohort
