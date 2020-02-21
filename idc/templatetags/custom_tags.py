@@ -205,10 +205,12 @@ def is_superuser(this_user):
 @register.simple_tag(takes_context=True)
 def is_allowed(context, this_user):
     return (
+        'RESTRICTED_ACCESS' not in context or (
         not context['RESTRICTED_ACCESS'] or (
             context['RESTRICTED_ACCESS'] and this_user.is_authenticated and this_user.groups.filter(
                 reduce(lambda q, g: q | Q(name__icontains=g), context['RESTRICTED_ACCESS_GROUPS'], Q())
             ).exists()
+        )
     ))
 
 
@@ -217,7 +219,8 @@ def get_cohorts_this_user(this_user, is_active=True):
     idc_superuser = User.objects.get(username='idc')
     public_cohorts = Cohort_Perms.objects.filter(user=idc_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
     cohort_perms = list(set(Cohort_Perms.objects.filter(user=this_user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
-    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=is_active).order_by('-last_date_saved')
+    # TODO: Make date_created column and sort on that
+    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=is_active).order_by('-name')
     return cohorts
 
 
@@ -307,6 +310,10 @@ def sort_last_view(list, key=''):
 def sort_last_save(list):
     return list.order_by('-last_date_saved')
 
+
+@register.filter
+def sort_created(list):
+    return list.order_by('-date_created')
 
 @register.filter
 def tojson(obj, esacpe_html=True):
