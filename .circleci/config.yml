@@ -148,7 +148,6 @@ jobs:
             - ./idc
             - ./offline
             - ./scripts
-            - ./session_security
             - ./templates
             - ./IDC-Common
             - ./Dockerfile
