@@ -205,10 +205,12 @@ def is_superuser(this_user):
 @register.simple_tag(takes_context=True)
 def is_allowed(context, this_user):
     return (
+        'RESTRICTED_ACCESS' not in context or (
         not context['RESTRICTED_ACCESS'] or (
             context['RESTRICTED_ACCESS'] and this_user.is_authenticated and this_user.groups.filter(
                 reduce(lambda q, g: q | Q(name__icontains=g), context['RESTRICTED_ACCESS_GROUPS'], Q())
             ).exists()
+        )
     ))
 
 
