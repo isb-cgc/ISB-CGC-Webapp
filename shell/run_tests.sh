@@ -9,4 +9,6 @@ fi
 export PYTHONPATH=${HOMEROOT}:${HOMEROOT}/lib:${HOMEROOT}/IDC-Common
 echo "PYTHONPATH IS ${PYTHONPATH}"
 
-python3 ./manage_unit_test.py test --noinput
+#python3 ./manage_unit_test.py test --noinput
+
+python3 ./manage_unit_test.py test google_helpers.bigquery --noinput
