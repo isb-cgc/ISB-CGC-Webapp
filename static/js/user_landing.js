@@ -331,7 +331,8 @@ require([
                             + '<td class="name-col"><a href="/cohorts/' + cohorts[i]['id'] + '/">' + cohorts[i]['name'] + '</a></td>'
                             + '<td class="sample-col">' + cohorts[i]['samples'] + '</td>'
                             + '<td class="owner-col">' + cohorts[i]['owner'] + '</td>'
-                            + '<td class="date-col">' + cohorts[i]['last_date_saved'] + '</td>'
+                            // TODO: Make date_created column and sort on that
+                            + '<td class="date-col">' + 'N/A' + '</td>'
                             + '</tr>';
                         $('#search-cohort-table tbody').append(item);
                     }
@@ -340,23 +341,8 @@ require([
                     no_cohorts = true;
                 }
 
-                if (data.hasOwnProperty('visualizations') && data['visualizations'].length) {
-                    var visualizations = data['visualizations'];
-                    $('#search-viz-table').show();
-                    for (var i = 0; i < visualizations.length; i++) {
-                        var item = '<tr>'
-                            + '<td class="checkbox-col"><i class="fa fa-area-chart"></i></td>'
-                            + '<td class="name-col"><a href="/visualizations/genericplot/' + visualizations[i]['id'] + '">' + visualizations[i]['name'] + '</a></td>'
-                            + '<td class="sample-col">' + visualizations[i]['plots'] + '</td>'
-                            + '<td class="owner-col">' + visualizations[i]['owner'] + '</td>'
-                            + '<td class="date-col">' + visualizations[i]['last_date_saved'] + '</td>'
-                            + '</tr>'
-                        $('#search-viz-table tbody').append(item);
-                    }
-                } else {
-                    $('#search-viz-table').hide();
-                    no_viz = true;
-                }
+                $('#search-viz-table').hide();
+                no_viz = true;
 
                 if (no_cohorts && no_viz) {
                     $('#results-list .no-results').html('Sorry, there are no search results for ' + data['q'] + '.').show();

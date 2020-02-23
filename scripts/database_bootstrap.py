@@ -166,9 +166,16 @@ def add_attributes(attr_set):
                 is_cross_collex=True if 'cross_collex' in attr else False
             )
             if 'range' in attr:
-                Attribute_Ranges.objects.update_or_create(
-                    attribute=obj
-                )
+                if len(attr['range']) > 0:
+                    for attr_range in attr['range']:
+                        Attribute_Ranges.objects.update_or_create(
+                            **attr_range, attribute=obj
+                        )
+
+                else:
+                    Attribute_Ranges.objects.update_or_create(
+                        attribute=obj
+                    )
             if 'display_vals' in attr:
                 for dv in attr['display_vals']:
                     Attribute_Display_Values.objects.update_or_create(
@@ -293,7 +300,18 @@ def main():
                     attr['display_vals'] = display_vals[attr['name']]['vals']
 
             if attr['name'] == "age_at_diagnosis":
-                attr['range'] = True
+                attr['range'] = []
+
+            if attr['name'] == 'bmi':
+                attr['range'] = [
+                    {'label': 'underweight', 'first': "*", "last": "18.5", "gap": "0", "include_lower": True, "include_upper": False, 'type': 'F'},
+                    {'label': 'obese', 'first': "30", "last": "*", "gap": "0", "include_lower": True,
+                     "include_upper": True, 'type': 'F'},
+                    {'label': 'normal', 'first': "18.5", "last": "25", "gap": "0", "include_lower": True,
+                     "include_upper": False, 'type': 'F'},
+                    {'label': 'overweight', 'first': "25", "last": "30", "gap": "0", "include_lower": True,
+                     "include_upper": False, 'type': 'F'}
+                ]
 
             attr_set.append(attr)
 
