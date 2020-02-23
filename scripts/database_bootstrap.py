@@ -38,7 +38,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "idc.settings")
 import django
 django.setup()
 
-from idc_collections.models import Program, Collection, Attribute, Attribute_Display_Values, SolrCollection, BigQueryTable, DataVersion
+from idc_collections.models import Program, Collection, Attribute, Attribute_Ranges, Attribute_Display_Values, SolrCollection, BigQueryTable, DataVersion
 
 from django.contrib.auth.models import User
 idc_superuser = User.objects.get(username="idc")
@@ -165,6 +165,10 @@ def add_attributes(attr_set):
                 preformatted_values=True if 'preformatted_values' in attr else False,
                 is_cross_collex=True if 'cross_collex' in attr else False
             )
+            if 'range' in attr:
+                Attribute_Ranges.objects.update_or_create(
+                    attribute=obj
+                )
             if 'display_vals' in attr:
                 for dv in attr['display_vals']:
                     Attribute_Display_Values.objects.update_or_create(
@@ -288,6 +292,9 @@ def main():
                 else:
                     attr['display_vals'] = display_vals[attr['name']]['vals']
 
+            if attr['name'] == "age_at_diagnosis":
+                attr['range'] = True
+
             attr_set.append(attr)
 
         attr_file.close()
@@ -299,23 +306,16 @@ def main():
             line = line.strip()
             line_split = line.split(",")
 
-            attr_set.append({
+            attr = {
                 'name': line_split[0],
                 "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else line_split[1],
                 "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
                 'cross_collex': True,
                 'solr_collex': ['tcia_images'],
                 'bq_tables': ["idc-dev-etl.tcia.dicom_metadata"]
-            })
+            }
 
-        attr_set.append({
-            'name': 'collection_id',
-            'display_name': "Collection",
-            "type": Attribute.CATEGORICAL,
-            "cross_collex": True,
-            'solr_collex': ['tcia_images'],
-            'bq_tables': ["idc-dev-etl.tcia.dicom_metadata"]
-        })
+            attr_set.append(attr)
 
         add_attributes(attr_set)
 

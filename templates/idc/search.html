@@ -29,20 +29,26 @@
     <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
 
     <script>
-    function mkSlider(divName,inpName, field) {
-        $("#" + divName).slider({
-            values: [0, 120],
-            step: 1,
-            min: 0,
-            max: 120,
-            slide: function (event, ui) {
-                $("#" + inpName).val(ui.values[0] + "-" + ui.values[1]);
+/* function mkSlider(divName,inpDiv,displaySet,header,attributeName,isInt) {
+    $("#" + divName).slider({
+        values: [0, 120],
+        step: 1,
+        min: 0,
+        max: 120,
+        range: true,
+        slide: function (event, ui) {
+            $("#" + inpDiv).val(ui.values[0] + "-" + ui.values[1]);
             },
-            stop: function (event, ui) {
-                   filterObj[field]=[parseFloat(ui.values[0]),parseFloat(ui.values[0])]
-            }
-        });
-    }
+        stop: function (event, ui) {
+            updateSliderSelection(inpDiv,displaySet,header,attributeName,isInt);
+        }
+    });
+}
+
+*/
+
+
+
     </script>
 
 
@@ -53,42 +59,47 @@
 
     tbody.set_height {
           max-height: 200px;       /* Just for the demo          */
-          overflow-y: scroll;    /* Trigger vertical scroll    */
+          overflow-y: scroll;
+        /* Trigger vertical scroll    */
          overflow-x: hidden;  /* Hide the horizontal scroll */
         width:100%;
         display:inline-block;
-
+        /* display:table; */
         table-layout: fixed;
-
-
-
-
         }
-  thead {
 
-display: table;
-      width: calc( 100% - 1em )
-}
+       thead {
+           display: table;
+          width: 100%;
+     }
 
-      th{
-          width:25%;
+      /*  tbody {
+           display: table;
+          width: 100%;
+     } */
+        tr{
+            display:table;
+            width:100%;
+        }
+
+        #projects_table td, #projects_table_head th {
+            width:33.33%;
+            word-wrap: break-word;
+        }
+       #studies_table_head th, #series_table_head th {
+           width:25%;
           word-wrap: break-word;
       }
 
-      td{
-          width:25%;
+       #studies_table td, #series_table td{
+           width:25%;
            word-break: break-word;
-
       }
 
 
   table{
       table-layout:fixed;
-
       width: 100%;
-
-
-
   }
 
     </style>
@@ -97,7 +108,6 @@ display: table;
 
     window.onload = function(){
         fetchCountData(true);
-       // mkSlider("age_slide", "inp_age_slide", "inp_age_stop", 0, 120, 120)
 
         //mkSlider("slider-1","slider-inp");
     }
@@ -125,8 +135,7 @@ display: table;
                          <select id="project_scope" onchange="updateSearchScope(this)">
                              <option value="All" >All data</option>
                           </select>
-                       <!--   <div id = "slider-1"></div>
-                         <input id="slider-inp" type="text" value="120"> -->
+
                      </div>
 
 
@@ -249,11 +258,10 @@ display: table;
                 <div id="age" class="collapse">
 
                     <div id="age_slide"></div>
-                        <input id="inp_age_slide">0-120</input>
-                      <input id="inp_age_stop">0-120</input>
+                        <input id="inp_age_slide" type="text" value="0-120">
 
 
-
+                    <!--
                     <ul id="age_list" style="list-style: none;">
                          <li>&emsp;<input type="checkbox" checked value="0 to 20" onclick="updateFilterSelection('age_list', 'age_set','Age','age',false,true)">0-19</li>
                         <li>&emsp;<input type="checkbox" checked value="20 to 30" onclick="updateFilterSelection('age_list', 'age_set','Age','age',false,true)">20-29</li>
@@ -264,9 +272,10 @@ display: table;
                         <li>&emsp;<input type="checkbox" checked value="70 to 80" onclick="updateFilterSelection('age_list', 'age_set','Age','age',false,true)">70-79</li>
                         <li>&emsp;<input type="checkbox" checked value="80 to 200" onclick="updateFilterSelection('age_list', 'age_set','Age','age',false,true)">80 or Over</li>
                         <li>&emsp;<input type="checkbox" checked value="None" onclick="updateFilterSelection('age_list', 'age_set','Age','age',false,true)">NA</li>
-                    </ul>
+                    </ul> -->
                 </div>
 
+                <!--
                 <div id="bmi_heading" class="list-group-item__heading">
                     <a role="button" data-toggle="collapse"  href="#bmi" aria-expanded="false" aria-controls="bmi">
                         <i class="fa fa-caret-right"></i>BMI</a>
@@ -282,7 +291,7 @@ display: table;
                         <li>&emsp;<input type="checkbox" checked value="None">NA</li>
                     </ul>
                 </div>
-
+              -->
                 <div id="race_heading" class="list-group-item__heading">
                     <a role="button" data-toggle="collapse"  href="#race" aria-expanded="false" aria-controls="race">
                         <i class="fa fa-caret-right"></i>Race</a>
@@ -316,7 +325,8 @@ display: table;
                  <div class="col-lg-8 filter-panel" role="tabpanel">
                      <div class="row">
                      <h3>Search Definition:</h3>
-                      <ul>
+                         <div id ="search_def">All</div>
+                      <!-- <ul>
                          <li id="qproj"><h4>Project: <text id="selected_project">All</text></h4></li>
                          <li>Original:</li>
                               <ul>
@@ -334,7 +344,7 @@ display: table;
                                    <li id="race_set">&emsp;&emsp;Race: All</li>
                                   <li id="ethnicity_set">&emsp;&emsp;Ethnicity: All</li>
                                 </ul>
-                       </ul>
+                       </ul> -->
                        </div>
                      <div class="row">
                        <h3>Search Results:</h3>
@@ -353,45 +363,60 @@ display: table;
                            </div>
                              <div id = "results_derived_set" role="tabpanel" class="tab-pane">
                            </div>
-                             <div id = "results_related_set" role="tabpanel" class="tab-pane">
-                                 <div id="disease_code_chart" style="float:left;float:top display:inline-block;width:300px;height:200px"></div>
-                                 <div id="vital_status_chart" style="float:left;float:top display:inline-block;width:300px;height:200px" ></div>
-                                 <div id="gender_chart" style="float:left;float:top display:inline-block;width:300px;height:200px"></div>
-                                <div id="age_chart" style="float:left;float:top display:inline-block;width:300px;height:200px"></div>
-                           <!-- <div id="bmi_chart" style="float:left;float:top display:inline-block;width:300px;height:200px"></div> -->
 
-                                <div id="race_chart" style="float:left;float:top display:inline-block;width:300px;height:200px"></div>
-                                 <div id="ethnicity_chart" style="float:left;float:top display:inline-block;width:300px;height:200px"></div>
+                             <div id = "results_related_set" role="tabpanel" class="tab-pane" style="display-block;">
+                                 <div class="panel-body related-graphs" style="display-block;width:100%;height:210px;overflow:hidden">
+                                     <div id="disease_code_chart" style="float:left;float:top display:inline-block;width:300px;height:200px"></div>
+                                     <div id="vital_status_chart" style="float:left;float:top display:inline-block;width:300px;height:200px" ></div>
+                                     <div id="gender_chart" style="float:left;float:top display:inline-block;width:300px;height:200px"></div>
+                                     <div id="age_chart" style="float:left;float:top display:inline-block;width:300px;height:200px"></div>
+                                    <!-- <div id="bmi_chart" style="float:left;float:top display:inline-block;width:300px;height:200px"></div> -->
 
-
+                                     <div id="race_chart" style="float:left;float:top display:inline-block;width:300px;height:200px"></div>
+                                    <div id="ethnicity_chart" style="float:left;float:top display:inline-block;width:300px;height:200px"></div>
 
 
                                  </div>
+                                   <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="showMoreGraphs()">Show More</button></div>
+                                     <div class="less-graphs" style="display: none; width:100%"><button class="btn btn-link" role="button" onclick="showLessGraphs()">Show Less</button></div>
+                             </div>
+
+
+
                          </div>
                   </div>
                      <div class="row">
-                         <table id="projects_table">
+                         <h3>Collections:</h3>
+                         <table >
+                             <thead id="projects_table_head">
                              <tr>
-                                <th><th>Project Name</th><th>Total # of Patients</th><th># of Patients(this cohort)</th>
+                                <th>Collection Name</th><th>Total # of Patients</th><th># of Patients(this cohort)</th>
                              </tr>
+                             </thead>
+                             <tbody id="projects_table" class="set_height">
+
+                             </tbody>
                           </table>
+
+
+
                           <br><br>
+                         <h3>Selected Studies:</h3>
                           <table >
-                              <thead>
+                              <thead id="studies_table_head">
                              <tr>
                                  <th >Project Name </th><th >Patient Id</th><th>Study Id</th><th>Study Description</th>
                              </tr>
                               </thead>
 
-
                              <tbody  id="studies_table" class="set_height">
-
                               </tbody>
 
                           </table >
                           <br><br>
+                         <h3>Selected Series:</h3>
                           <table>
-                             <thead>
+                             <thead id="series_table_head">
                               <tr>
                                 <th>Study Id</th><th>Series Id</th><th>Modality</th><th>Body Part Examined</th>
                               </tr>

@@ -26,7 +26,7 @@ import datetime
 
 # import requests
 
-from bisect import bisect_left
+from bisect import bisect_left, bisect_right
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
@@ -123,7 +123,7 @@ def explore_data(request):
     context = {}
     try:
         # These are example filters; typically they will be reconstituted from the request
-        filters = {"vital_status": ["Alive", "Dead"], "age_at_diagnosis_btw": [15,40], "bmi": "underweight"}
+        filters = {"vital_status": ["Alive", "Dead"], "age_at_diagnosis_btw": [15,40], "bmi": "underweight", "race": "BLACK OR AFRICAN AMERICAN"}
         # These are the actual data fields to display in the expanding table; again this is just an example
         # set that should be properly supplied in the reuqest
         fields = ["BodyPartExamined", "Modality", "StudyDescription", "StudyInstanceUID", "SeriesInstanceUID"]
@@ -138,6 +138,7 @@ def explore_data(request):
                 'cross_collex_attr_counts': facets_and_lists['facets']['cross_collex'],
                 'listings': facets_and_lists['docs']
             }
+
     except Exception as e:
         logger.error("[ERROR] In explore_data:")
         logger.exception(e)
@@ -384,8 +385,11 @@ def get_filtered_idc_cohort(request):
     with_clinical = eval(with_clinical_str)
     collapse_on = request.GET.get('collapse_on', 'PatientID')
 
+    #filters = {"vital_status": ["Alive", "Dead"], "age_at_diagnosis_btw": [15, 70], "race": ["BLACK OR AFRICAN AMERICAN","WHITE"]}
     #filters = {"BodyPartExamined": ["CHEST"]}
     #filters = {"age_at_diagnosis_btw": [0,50]}
+    #filters={"race":['ASIAN', 'BLACK OR AFRICAN AMERICAN','WHITE']}
+    #filters = {"race": ['AMERICAN INDIAN OR ALASKA NATIVE', 'ASIAN', 'BLACK OR AFRICAN AMERICAN', 'NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER', 'None']}
     #filters = {}
     try:
         # for a version which isn't current, or for a user cohort
@@ -419,7 +423,7 @@ def get_filtered_idc_cohort(request):
         ret['clinical']['age'].append(['None',0])
         for ageSet in facets_and_lists['clinical']['facets']['age_at_diagnosis']:
             if not(ageSet == 'None'):
-                pos = bisect_left(ageRng, ageSet)
+                pos = bisect_right(ageRng, ageSet)-1
                 ret['clinical']['age'][pos][1] = ret['clinical']['age'][pos][1] + facets_and_lists['clinical']['facets']['age_at_diagnosis'][ageSet]
         ret['clinical']['age'][len(ret['clinical']['age'])-1][1] = facets_and_lists['clinical']['facets']['age_at_diagnosis']['None']
 
