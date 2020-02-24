@@ -411,10 +411,10 @@ function updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, i
 function fetchCountData(refresh){
     var url='';
     if (Object.keys(filterObj).length===0){
-        url = '/idc/filtered/?counts_only="true"';
+        url = '/idc/filtered/?counts_only=True';
     }
     else {
-        url = '/idc/filtered/?counts_only="true"&filters=' + JSON.stringify(filterObj);
+        url = '/idc/filtered/?counts_only=True&filters=' + JSON.stringify(filterObj);
     }
     url=encodeURI(url);
 
