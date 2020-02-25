@@ -668,8 +668,6 @@ def opt_in_update(request):
     error_msg = ''
     if request.POST:
         opt_in_choice = request.POST.get('opt-in-radio')
-        # TODO: Should this be UserOptInStatus.UNSEEN instead of .YES?
-        opt_in_status_code = UserOptInStatus.NO if opt_in_choice == 'opt-out' else UserOptInStatus.YES
         opt_in_status_code = UserOptInStatus.NO if opt_in_choice == 'opt-out' else UserOptInStatus.SEEN
 
     try:
