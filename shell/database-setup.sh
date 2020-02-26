@@ -76,7 +76,7 @@ if [ ! -f ${HOMEROOT}/scripts/${METADATA_SQL_FILE} ]; then
 fi
 
 echo "Applying SQL Table File... (may take a while)"
-mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/${METADATA_SQL_FILE}
+#mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/${METADATA_SQL_FILE}
 
 echo "Adding Django site IDs..."
 python3 ${HOMEROOT}/scripts/add_site_ids.py
