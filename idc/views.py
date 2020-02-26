@@ -118,7 +118,7 @@ def css_test(request):
 
 # Returns the data exploration and filtering page, which also allows for cohort creation
 @login_required
-def explore_data(request):
+def explore_legacy_data(request):
     context = {}
     try:
         # These are example filters; typically they will be reconstituted from the request
@@ -426,8 +426,8 @@ def get_filtered_idc_cohort(request):
 
 
 @login_required
-def search_page(request):
-    return render(request, 'idc/search.html', {'request':request})
+def explore_data_page(request):
+    return render(request, 'idc/explore.html', {'request':request})
 
 @login_required
 def ohif_test_page(request):
