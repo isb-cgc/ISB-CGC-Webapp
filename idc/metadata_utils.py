@@ -16,7 +16,7 @@
 
 import logging
 import re
-from idc_collections.models import SolrCollection, Attribute, Attribute_Display_Values, Program, DataVersion
+from idc_collections.models import DataSource, Attribute, Attribute_Display_Values, Program, DataVersion
 from solr_helpers import *
 from idc_collections.collex_metadata_utils import get_bq_metadata, get_bq_string
 from django.conf import settings
@@ -125,8 +125,8 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
         #  ancillary data it's querying, presumably as a list. That will take the place of the current name=<foo>
         #  search being used here; instead, it'll be id=<etc> Presumably this will come in from the request, based
         #  on the tab a user is looking at, or where they clicked the filter, etc.
-        tcga_solr = SolrCollection.objects.get(name="tcga_clin_bios")
-        tcia_solr = SolrCollection.objects.get(name="tcia_images")
+        tcga_solr = DataSource.objects.get(name="tcga_clin_bios")
+        tcia_solr = DataSource.objects.get(name="tcia_images")
 
         tcga_facet_attrs = tcga_solr.get_collection_attr().values_list('name', flat=True)
         tcga_filter_attrs = tcga_solr.get_collection_attr(for_faceting=False).values_list('name', flat=True)
@@ -161,12 +161,7 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
             'counts_only': counts_only
         })
         if not counts_only:
-            if ('SeriesInstanceUID' in fields):
-                results['docs'] = sorted(solr_result['docs'], key=lambda row: (row['collection_id'], row['PatientID'], row['StudyInstanceUID'], row['SeriesInstanceUID']))
-            elif ('StudyInstanceUID' in fields):
-                results['docs'] = sorted(solr_result['docs'], key=lambda row: (row['collection_id'], row['PatientID'], row['StudyInstanceUID']))
-            else:
-                results['docs'] = solr_result['docs']
+            results['docs'] = solr_result['docs']
 
         results['facets']['cross_collex'] = solr_result['facets']
         results['total'] = solr_result['numFound']
@@ -174,13 +169,8 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
         if with_clinical:
             # The attributes being faceted against here would be whatever list of facet counts we want to display in the
             # UI (probably not ALL of them).
-            #solr_facets = build_solr_facets(list(tcga_facet_attrs), solr_query['filter_tags'])
-            #solr_facets = ["race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis", "gender", "disease_code"]
-            solr_facets= {"race": {"field": "race", "missing": True, "type": "terms", "limit": -1},"vital_status": {"field": "vital_status", "missing": True, "type": "terms", "limit": -1}, \
-                    "ethnicity": {"field": "ethnicity", "missing": True, "type": "terms", "limit": -1}, \
-                 "bmi": {"field": "bmi", "missing": True, "type": "terms", "limit": -1}, "age_at_diagnosis": {"field": "age_at_diagnosis", "missing": True, "type": "terms", "limit": -1}, \
-                 "gender": {"field": "gender", "missing": True, "type": "terms", "limit": -1}, \
-                 "disease_code": {"field": "disease_code", "missing": True, "type": "terms", "limit": -1} }
+            solr_facets = build_solr_facets(list(tcga_facet_attrs), solr_query['filter_tags'])
+
             query_set = []
 
             # Ancilary data faceting and querying
@@ -193,8 +183,6 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
                         )) + solr_query['queries'][attr])
                     else:
                         query_set.append(solr_query['queries'][attr])
-
-
 
             solr_result = query_solr_and_format_result({
                 'collection': tcga_solr.name,
@@ -209,6 +197,7 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
 
             results['clinical'] = solr_result
 
+            print(get_bq_metadata(filters, fields, DataVersion.objects.filter(active=True)))
 
     except Exception as e:
         logger.error("[ERROR] While fetching solr metadata:")

@@ -123,10 +123,10 @@ def explore_data(request):
     context = {}
     try:
         # These are example filters; typically they will be reconstituted from the request
-        filters = {"vital_status": ["Alive", "Dead"], "age_at_diagnosis_btw": [15,40], "bmi": "underweight", "race": ["BLACK OR AFRICAN AMERICAN", "AMERICAN INDIAN OR ALASKA NATIVE", "None"]}
+        filters = {"vital_status": ["Alive"], "age_at_diagnosis_btw": [15,40], "disease_code": ["READ", "BRCA"]}
         # These are the actual data fields to display in the expanding table; again this is just an example
         # set that should be properly supplied in the reuqest
-        fields = ["BodyPartExamined", "Modality", "StudyDescription", "StudyInstanceUID", "SeriesInstanceUID"]
+        fields = ["BodyPartExamined", "Modality", "StudyDescription", "StudyInstanceUID", "SeriesInstanceUID", "case_barcode", "disease_code", "sample_type"]
 
         # get_collex_metadata will eventually branch into 'from BQ' and 'from Solr' depending on if there's a request
         # for a version which isn't current, or for a user cohort
@@ -446,8 +446,6 @@ def get_filtered_idc_cohort(request):
 
 
     return JsonResponse(ret)
-
-
 
 
 

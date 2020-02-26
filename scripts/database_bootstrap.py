@@ -38,7 +38,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "idc.settings")
 import django
 django.setup()
 
-from idc_collections.models import Program, Collection, Attribute, Attribute_Ranges, Attribute_Display_Values, SolrCollection, BigQueryTable, DataVersion
+from idc_collections.models import Program, Collection, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataVersion
 
 from django.contrib.auth.models import User
 idc_superuser = User.objects.get(username="idc")
@@ -75,23 +75,25 @@ def add_programs(program_set):
 def add_solr_collex(solr_set, version="0"):
     for collex in solr_set:
         try:
-            obj, created = SolrCollection.objects.update_or_create(
+            obj, created = DataSource.objects.update_or_create(
                 name=collex,
                 version=DataVersion.objects.get(version=version),
-                shared_id_col="case_barcode" if "tcga" in collex else "PatientID"
+                shared_id_col="case_barcode" if "tcga" in collex else "PatientID",
+                source_type='S'
             )
             print("Solr Collection entry created: {}".format(collex))
         except Exception as e:
-            logger.error("[ERROR] Program {} may not have been added!".format(collex))
+            logger.error("[ERROR] Solr Collection {} may not have been added!".format(collex))
             logger.exception(e)
 
 
 def add_bq_tables(tables, version="r9"):
     for table in tables:
         try:
-            obj, created = BigQueryTable.objects.update_or_create(
+            obj, created = DataSource.objects.update_or_create(
                 name=table, version=DataVersion.objects.get(version=version),
-                shared_id_col="case_barcode" if "isb-cgc" in table else "PatientID"
+                shared_id_col="case_barcode" if "isb-cgc" in table else "PatientID",
+                source_type='B'
             )
             print("BQ Table created: {}".format(table))
         except Exception as e:
@@ -183,12 +185,12 @@ def add_attributes(attr_set):
                     )
             if 'solr_collex' in attr:
                 for solr in attr['solr_collex']:
-                    for sc in SolrCollection.objects.filter(name=solr):
-                        obj.solr_collections.add(sc)
+                    for sc in DataSource.objects.filter(name=solr):
+                        obj.data_sources.add(sc)
             if 'bq_tables' in attr:
                 for table in attr['bq_tables']:
-                    for bqt in BigQueryTable.objects.filter(name=table):
-                        obj.bq_tables.add(bqt)
+                    for bqt in DataSource.objects.filter(name=table):
+                        obj.data_sources.add(bqt)
 
         except Exception as e:
             logger.error("[ERROR] Attribute {} may not have been added!".format(attr['name']))
