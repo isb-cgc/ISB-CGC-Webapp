@@ -29,7 +29,7 @@ th, tb,tr,td {border: 1px solid black;}
 
        thead {
            display: table;
-          width: 100%;
+          width: calc( 100% - 1em );
      }
 
       /*  tbody {

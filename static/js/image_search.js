@@ -309,7 +309,8 @@ function resolveAllPlots(){
     plotCategoricalData( 'disease','disease_code_chart','Disease Code',clinicalDataCounts['disease_code'],'disease_code');
     plotCategoricalData( 'vital_status','vital_status_chart','Vital Status',clinicalDataCounts['vital_status'],'vital_status');
     plotCategoricalData('gender' ,'gender_chart','Gender',clinicalDataCounts['gender'],'gender');
-    resolveRelatedPlotsCatWCountsRng( clinicalDataCounts['age'],"age_chart","Age");
+    aHeader=[['* to 10','0 to 10'],['10 to 20','11 to 20'],['20 to 30','21 to 30'],['30 to 40','31 to 40'],['40 to 50','41 to 50'],['50 to 60','51 to 60'],['60 to 70','61 to 70'],['70 to 80','71 to 80'],['80 to *','81+'],['None','None']]
+    resolveRelatedPlotsCatWCountsRng( clinicalDataCounts['age'],"age_chart","Age", aHeader);
     //resolveRelatedPlotsCatWCountsRng( clinicalDataCounts['bmi'],"bmi_chart","Body Mass Index");
     plotCategoricalData( 'race','race_chart','Race',clinicalDataCounts['race'],'race');
     plotCategoricalData( 'ethnicity',"ethnicity_chart","Ethnicity",clinicalDataCounts['ethnicity'],"ethnicity");
@@ -592,14 +593,29 @@ document.getElementById(plotId).on('plotly_click',function(data){
 
 }
 
-function resolveRelatedPlotsCatWCountsRng(plotDataA, plotId,lbl){
-    pHeader = plotDataA.map(function(val,index){return val[0]});
-    pCounts = plotDataA.map(function(val,index){return val[1]});
+function resolveRelatedPlotsCatWCountsRng(plotData, plotId,lbl,pHeader){
+
+    //pHeader=[[],[],[],[],[]]
+    //pHeader = plotDataA.map(function(val,index){return val[0]});
+    //pCounts = plotDataA.map(function(val,index){return val[1]});
+    phA = new Array();
+    ctA = new Array();
+
+    for (i=0;i<pHeader.length;i++){
+        var key = pHeader[i][0];
+        var nm = pHeader[i][1];
+        var ct = 0;
+        if (plotData.hasOwnProperty(key)){
+            ct = plotData[key];
+        }
+        phA.push(nm)
+        ctA.push(ct)
+    }
 
      var pdata =[
     {
-        x:pHeader,
-        y: pCounts,
+        x:phA,
+        y: ctA,
         type: 'bar'
     }
 ];

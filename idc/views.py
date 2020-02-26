@@ -26,7 +26,6 @@ import datetime
 
 # import requests
 
-from bisect import bisect_left, bisect_right
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
@@ -49,7 +48,7 @@ from cohorts.models import Cohort, Cohort_Perms
 from idc_collections.models import Program
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
-from .metadata_utils import get_collex_metadata,  translateCollectionData
+from .metadata_utils import get_collex_metadata
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
@@ -415,33 +414,10 @@ def get_filtered_idc_cohort(request):
         ret['clinical']['disease_code'] = facets_and_lists['clinical']['facets']['disease_code']
         ret['clinical']['race'] = facets_and_lists['clinical']['facets']['race']
         ret['clinical']['gender'] = facets_and_lists['clinical']['facets']['gender']
-        ret['clinical']['ethnicity']  = facets_and_lists['clinical']['facets']['ethnicity']
+        ret['clinical']['ethnicity'] = facets_and_lists['clinical']['facets']['ethnicity']
+        ret['clinical']['age'] = facets_and_lists['clinical']['facets']['age_at_diagnosis']
+        ret['clinical']['bmi'] = facets_and_lists['clinical']['facets']['bmi']
 
-        ret['clinical']['age'] = []
-        for i in range(len(ageRng)-1):
-            rng = str(ageRng[i])+"-"+str(ageRng[i+1]-1)
-            ret['clinical']['age'].append([rng,0])
-        rng = "over "+str(ageRng[len(ageRng)-1])
-        ret['clinical']['age'].append([rng,0])
-        ret['clinical']['age'].append(['None',0])
-        for ageSet in facets_and_lists['clinical']['facets']['age_at_diagnosis']:
-            if not(ageSet == 'None'):
-                pos = bisect_right(ageRng, ageSet)-1
-                ret['clinical']['age'][pos][1] = ret['clinical']['age'][pos][1] + facets_and_lists['clinical']['facets']['age_at_diagnosis'][ageSet]
-        ret['clinical']['age'][len(ret['clinical']['age'])-1][1] = facets_and_lists['clinical']['facets']['age_at_diagnosis']['None']
-
-        ret['clinical']['bmi'] = []
-        ret['clinical']['bmi'].append(["Underweight: BMI less than "+str(bmiRng[0]), 0])
-        ret['clinical']['bmi'].append(["Normal weight: BMI greater than or equal to " + str(bmiRng[0])+ " and less than "+str(bmiRng[1]),0])
-        ret['clinical']['bmi'].append(["Overweight: BMI greater than or equal to " + str(bmiRng[1]) + " and less than " + str(bmiRng[2]), 0])
-        ret['clinical']['bmi'].append(["Obese: BMI greater than " + str(bmiRng[2]), 0])
-        ret['clinical']['bmi'].append(["None", 0])
-
-        for bmiSet in facets_and_lists['clinical']['facets']['bmi']:
-            if not (bmiSet == 'None'):
-                pos = bisect_left(bmiRng, bmiSet)
-                ret['clinical']['bmi'][pos][1] = ret['clinical']['bmi'][pos][1] + facets_and_lists['clinical']['facets']['bmi'][bmiSet]
-        ret['clinical']['bmi'][len(ret['clinical']['bmi']) - 1][1] = facets_and_lists['clinical']['facets']['bmi']['None']
 
 
 
