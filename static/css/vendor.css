@@ -4539,7 +4539,7 @@ a.thumbnail.active {
   list-style: none; }
 
 .list-group {
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
   padding-left: 0; }
 
 .list-group-item {

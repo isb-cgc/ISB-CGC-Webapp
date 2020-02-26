@@ -40,7 +40,7 @@ filterObj.collection_id=tcgaColls;
      function showMoreGraphs() {
          $('.more-graphs').hide();
          $('.less-graphs').show();
-         $('.related-graphs').animate({height: '630px'}, 800);
+         $('.related-graphs').animate({height: '400px'}, 800);
             // alert('here');
 
 
@@ -49,7 +49,7 @@ filterObj.collection_id=tcgaColls;
      function showLessGraphs() {
          $('.less-graphs').hide();
          $('.more-graphs').show();
-         $('.related-graphs').animate({height: '210px'}, 800);
+         $('.related-graphs').animate({height: '200px'}, 800);
 
 
      }
@@ -583,8 +583,12 @@ var pdata =[
 ];
 
 plotLayout.title=lbl;
-Plotly.newPlot(plotId,pdata,plotLayout);
-plotLayout.title='';
+Plotly.newPlot(plotId,pdata,plotLayout,{displayModeBar: false});
+
+document.getElementById(plotId).on('plotly_click',function(data){
+    alert('here');
+    });
+
 
 }
 
@@ -601,7 +605,11 @@ function resolveRelatedPlotsCatWCountsRng(plotDataA, plotId,lbl){
 ];
 
 plotLayout.title=lbl
-Plotly.newPlot(plotId,pdata,plotLayout);
+Plotly.newPlot(plotId,pdata,plotLayout,{displayModeBar: false});
+
+document.getElementById(plotId).on('plotly_click',function(data){
+    alert('here');
+    });
 
 
 }
@@ -636,7 +644,10 @@ function resolveRelatedPlotsCatWCounts(plotDataFacetCountDic, plotId,lbl, filter
 ];
 
 plotLayout.title=lbl
-Plotly.newPlot(plotId,pdata,plotLayout);
+Plotly.newPlot(plotId,pdata,plotLayout,{displayModeBar: false});
+document.getElementById(plotId).on('plotly_click',function(data){
+    alert('here');
+    });
 
 
 }
