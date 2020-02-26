@@ -171,6 +171,7 @@
                         {#                                <div class="form-row">#}
                         {#                                    <div class="form-group col-md-6">#}
                         {#                                        <label for="nb_username">User Name</label>#}
+
                         {#                                        <input type="text" class="form-control" id="nb_username">#}
                         {#                                    </div>#}
                         {#                                </div>#}
@@ -646,6 +647,43 @@
             </div>
         </div>
     </div>
+
+    <div class="ajax-form-modal modal fade" id="opt-in-pop-up-modal" tabindex="-1" role="dialog"
+         aria-labelledby="opt-in-modal-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" id = "close-opt-in-btn">
+                        <span aria-hidden="true">x</span></button>
+                    <h4 class="modal-title" id="opt-in-modal-header">Join Our Community</h4>
+                </div>
+                <div class="modal-body">
+                    <p  align="justify" class="modal-title" id="opt-in-modal-header">
+                        ISB-CGC is funded by the National Cancer Institute (NCI) to provide cloud-based tools and data
+                        to the cancer research community. Your feedback is important to the NCI and us.
+                        Please help us help you by considering "Opting-In" to our user feedback mailing list and
+                        allowing us to contact you in the future regarding ISB-CGC!</p>
+                    <br>
+                    <p> Would you like to opt-in to our user feedback mailing list? </p>
+                    <input type="radio" name="opt-in-radio" value="opt-in-now" checked> Yes, take me to the opt-in
+                    form now.
+                    <br>
+                    <input type="radio" name="opt-in-radio" value="opt-in-email"> Yes, email me a link to the opt-in form.
+                    <br>
+                    <div class="collapse" id="will-email-message" style="margin-left: 15px">
+                        <label> A link to the opt-in form will be sent to your account email.</label>
+                    </div>
+                    <input type="radio" name="opt-in-radio" value="opt-out"> No, I don't want to be contacted for
+                    feedback.
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Submit" data-dismiss="modal" class="btn btn-primary" id="submit-opt-in-btn"/>
+                    <button type="button" class="btn btn-link btn-cancel" data-dismiss="modal" id="cancel-opt-in-btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     {#    <div class="modal fade" id="create-jnb-password-modal" tabindex="-1" role="dialog"#}
     {#         aria-labelledby="createJnbPasswordModal" aria-hidden="true">#}
