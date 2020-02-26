@@ -1,6 +1,77 @@
 filterObj = {};
 projIdSel = [];
 studyIdSel = [];
+tcgaColls = ["tcga_blca","tcga_brca","tcga_cesc","tcga_coad","tcga_esca","tcga_gbm","tcga_hnsc","tcga_kich","tcga_kirc","tcga_kirp","tcga_lgg","tcga_lihc","tcga_luad","tcga_lusc","tcga_ov","tcga_prad","tcga_read","tcga_sarc","tcga_stad","tcga_thca","tcga_ucec"];
+
+filterObj.collection_id=tcgaColls;
+
+
+     function mkFiltText(){
+         var curKeys=Object.keys(filterObj).sort();
+         oStringA = new Array();
+         for (i=0;i<curKeys.length;i++){
+             var curKey = curKeys[i];
+             if ((curKey === 'collection_id') && (filterObj[curKey]===tcgaColls)){
+                 continue;
+             }
+             if (curKey === 'age_at_diagnosis_btw'){
+                 var nstr = 'age: '+filterObj[curKey][0].toString()+"-"+filterObj[curKey][1].toString();
+
+             }
+             else{
+                 var disp= curKey;
+                 var oArray= filterObj[curKey].sort().map(item => item.toString());
+             var nstr=disp+": "
+             nstr += oArray.join(", &ensp; ");
+
+             }
+              oStringA.push(nstr);
+         }
+         if (oStringA.length>0){
+            var oString=oStringA.join("; &nbsp; ");
+            document.getElementById("search_def").innerHTML=oString;
+         }
+         else{
+             document.getElementById("search_def").innerHTML="All";
+         }
+         //alert(oString);
+     }
+
+     function showMoreGraphs() {
+         $('.more-graphs').hide();
+         $('.less-graphs').show();
+         $('.related-graphs').animate({height: '630px'}, 800);
+            // alert('here');
+
+
+     }
+
+     function showLessGraphs() {
+         $('.less-graphs').hide();
+         $('.more-graphs').show();
+         $('.related-graphs').animate({height: '210px'}, 800);
+
+
+     }
+
+function mkSlider(divName,inpDiv,displaySet,header,attributeName,isInt) {
+    $("#" + divName).slider({
+        values: [0, 120],
+        step: 1,
+        min: 0,
+        max: 120,
+        range: true,
+        slide: function (event, ui) {
+            $("#" + inpDiv).val(ui.values[0] + "-" + ui.values[1]);
+            },
+        stop: function (event, ui) {
+            updateSliderSelection(inpDiv,displaySet,header,attributeName,isInt);
+        }
+    });
+}
+
+
+
 
 
 
@@ -35,17 +106,24 @@ function editProjectsTable(tableId,scopeId){
 
 function createProjectsTable(tableId){
     tableElem=document.getElementById(tableId);
-     var newInnerHTML='<tr><th>Project Name</th><th>Total # of Patients</th><th># of Patients(this cohort)</th></tr>';
-     projectH = Object.keys(originalDataCounts.collection_id).sort();
+     //var newInnerHTML='<tr><th>Project Name</th><th>Total # of Patients</th><th># of Patients(this cohort)</th></tr>';
+    var newInnerHTML='';
+     //projectH = Object.keys(originalDataCounts.collection_id).sort();
+    projectH = tcgaColls;
      nonePos = projectH.indexOf('None');
-     if (nonePos > -1) {
+     /* if (nonePos > -1) {
          projectH.splice(nonePos, 1);
-     }
+     }*/
 
      for (i=0;i< projectH.length;i++){
          var idStr=projectH[i];
          var patientIdStr = 'patient_col_'+idStr;
-         var numPatientsStr = originalDataCounts.collection_id[idStr].toString();
+         if (originalDataCounts.collection_id.hasOwnProperty(idStr)) {
+             var numPatientsStr = originalDataCounts.collection_id[idStr].toString();
+         }
+         else{
+             var numPatientsStr = "0";
+         }
          var description='NA';
          var newProjectRow='<tr id="project_row_'+idStr+'" class="text_head" onclick="(toggleProj(this, \''+idStr+'\'))"><td>'+idStr+'</td><td>'+numPatientsStr+'</td><td id="'+patientIdStr+'" class="projects_table_num_cohort">'+numPatientsStr+'</td> </tr>';
          newInnerHTML+=newProjectRow;
@@ -62,12 +140,12 @@ function resetTables(projectId,studyId, seriesId){
         $(projRow).removeClass("selected_grey");
     }
     tableElem = document.getElementById(studyId);
-    var newInnerHTML = '<tr><th>Project Name</th><th>Patient Id</th><th>Study Id</th><th>Study Description</th></tr>';
-    tableElem.innerHTML = newInnerHTML;
+    //var newInnerHTML = '<tr><th>Project Name</th><th>Patient Id</th><th>Study Id</th><th>Study Description</th></tr>';
+    tableElem.innerHTML = '';
 
     tableElem= document.getElementById(seriesId);
-    var newInnerHTML = '<tr> <th>Study Id</th><th>Series Id</th><th>Modality</th><th>Body Part Examined</th> </tr>';
-    tableElem.innerHTML = newInnerHTML;
+    //var newInnerHTML = '<tr> <th>Study Id</th><th>Series Id</th><th>Modality</th><th>Body Part Examined</th> </tr>';
+    tableElem.innerHTML = '';
 }
 
 
@@ -153,7 +231,7 @@ function addStudyOrSeries(projectIdArr,studyIdArr,tableId,refresh){
                         var patientId = curData.PatientID;
                         var studyId = curData.StudyInstanceUID;
                         var fetchUrl='/projects/chc-tcia/locations/us-central1/datasets/'+projectId.replace('_','-')+'/dicomStores/'+projectId.replace('_','-')+'/study/'+studyId;
-                        var hrefTxt='<a href="'+fetchUrl+'">'+studyId+'</a>';
+                        var hrefTxt='<a href="'+fetchUrl+'" target="_blank">'+studyId+'</a>';
                         var pclass='project_'+projectId;
                         if (isSeries){
                             var seriesId = curData.SeriesInstanceUID;
@@ -161,7 +239,7 @@ function addStudyOrSeries(projectIdArr,studyIdArr,tableId,refresh){
                             var modality = curData.Modality;
                             var rowId='series_'+seriesId.replace(/\./g,'-')
                             var studyClass = 'study_'+studyId.replace(/\./g,'-');
-                            var newHtml='<tr id="'+rowId+'" class="'+pclass+' '+studyClass+' text_head"><td>'+hrefTxt+'</td><td>'+seriesId+'</td><td>'+modality+'</td><td>'+bodyPartExamined+'</td></tr>'
+                            var newHtml='<tr id="'+rowId+'" class="'+pclass+' '+studyClass+' text_head"><td class="col1">'+hrefTxt+'</td><td class="col2">'+seriesId+'</td><td class="col1">'+modality+'</td><td class="col1">'+bodyPartExamined+'</td></tr>'
 
                         }
                         else {
@@ -169,13 +247,13 @@ function addStudyOrSeries(projectIdArr,studyIdArr,tableId,refresh){
                             var studyDescription = curData.StudyDescription;
                             //var studyDate = curData.StudyDate;
                             var rowId='study_'+studyId.replace(/\./g,'-');
-                            var newHtml='<tr id="'+rowId+'" class="'+pclass+' text_head" onclick="(toggleStudy(this,\''+studyId+'\',\''+projectId+'\'))"><td>'+projectId+'</td><td>'+patientId+'</td><td>'+hrefTxt+'</td><td>'+studyDescription+'</td></tr>'
+                            var newHtml='<tr id="'+rowId+'" class="'+pclass+' text_head" onclick="(toggleStudy(this,\''+studyId+'\',\''+projectId+'\'))"><td class="col1">'+projectId+'</td><td class="col1">'+patientId+'</td><td class="col2">'+hrefTxt+'</td><td class="col1">'+studyDescription+'</td></tr>'
 
                         }
                         //var rowId='study_'+projectId+'_'+patientIndex[patientId].toString()+"_"+studyIndex[studyId].toString();
 
 
-                        $('#'+tableId+' tr:last').after(newHtml);
+                        document.getElementById(tableId).innerHTML+=newHtml;
                     }
 
                 },
@@ -259,20 +337,44 @@ function updateAllFilterSelections(){
 
 function updateSearchScope(searchElem){
     var project_scope=searchElem.selectedOptions[0].value;
-    document.getElementById('selected_project').innerHTML=project_scope;
+    //document.getElementById('selected_project').innerHTML=project_scope;
     if (project_scope ==='All'){
-        if (filterObj.hasOwnProperty('collection_id')){
+        /*if (filterObj.hasOwnProperty('collection_id')){
             delete filterObj['collection_id']
-        }
+        }*/
+        filterObj['collection_id']=tcgaColls;
     }
     else{
         filterObj['collection_id']=[project_scope];
 
     }
+    mkFiltText();
     fetchCountData(false);
 
 }
 
+
+
+
+
+
+function updateSliderSelection(inpDiv,displaySet,header,attributeName,isInt){
+    var val = document.getElementById(inpDiv).value;
+    var newText="&emsp;&emsp;"+header+": " + val;
+    var attributeVals = new Array();
+    valArr=val.split("-")
+    if (isInt) {
+        attributeVals = [parseInt(valArr[0]),parseInt(valArr[1])];
+    }
+    else {
+        attributeVals = [parseInt(valArr[0]),parseInt(valArr[1])];
+    }
+    filterObj[attributeName] = attributeVals;
+    //document.getElementById(displaySet).innerHTML=newText;
+    mkFiltText();
+    fetchCountData(false);
+
+}
 
 function updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, isImageAttr,isRangeAttr){
     var newText="&emsp;&emsp;"+header+": ";
@@ -299,7 +401,8 @@ function updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, i
     else {
         filterObj[attributeName] = attributeVals;
     }
-    document.getElementById(displaySet).innerHTML=newText;
+    //document.getElementById(displaySet).innerHTML=newText;
+    mkFiltText();
     fetchCountData(false);
 
 }
@@ -308,10 +411,10 @@ function updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, i
 function fetchCountData(refresh){
     var url='';
     if (Object.keys(filterObj).length===0){
-        url = '/idc/filtered/?counts_only="true"';
+        url = '/idc/filtered/?counts_only=True';
     }
     else {
-        url = '/idc/filtered/?counts_only="true"&filters=' + JSON.stringify(filterObj);
+        url = '/idc/filtered/?counts_only=True&filters=' + JSON.stringify(filterObj);
     }
     url=encodeURI(url);
 
@@ -326,6 +429,8 @@ function fetchCountData(refresh){
 
                     var isEdit = true;
                     if (refresh) {
+
+
                         filter = new Object();
 
                         diseaseCodeH = Object.keys(data['clinical']['disease_code']).sort();
@@ -346,6 +451,7 @@ function fetchCountData(refresh){
                         isEdit = false;
                         constructClinicalFilterOptions();
                         createProjectsTable("projects_table");
+                         mkSlider('age_slide', 'inp_age_slide','age_set','Age','age_at_diagnosis_btw', true);
                     }
                     else{
                        editProjectsTable('projects_table','project_scope');
@@ -366,7 +472,8 @@ function constructClinicalFilterOptions(){
 
     //projectA=projectA.sort();
     projectElem=document.getElementById("project_scope");
-    projList= Object.keys(originalDataCounts["collection_id"]).sort()
+    //projList= Object.keys(originalDataCounts["collection_id"]).sort()
+    projList = tcgaColls;
     for (i=0;i<projList.length;i++){
         nm=projList[i]
         if (nm !=='None') {

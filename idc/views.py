@@ -26,7 +26,7 @@ import datetime
 
 # import requests
 
-from bisect import bisect_left
+from bisect import bisect_left, bisect_right
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
@@ -356,28 +356,44 @@ def health_check(request, match):
 def help_page(request):
     return render(request, 'idc/help.html',{'request': request})
 
+@login_required
 def get_filtered_idc_cohort(request):
     print("url "+request.build_absolute_uri())
     ageRng = [0,20,30,40,50,60,70,80]
     bmiRng = [18.5,25,30]
 
-    counts_only_str = request.GET.get('counts_only',"False")
-    counts_only = eval(counts_only_str)
-    filterstr = request.GET.get('filters', "{}")
-    filters = eval(filterstr)
+    counts_only = (request.GET.get('counts_only',"False").lower() == "true")
+    with_clinical = (request.GET.get('with_clinical', "True").lower() == "true")
+    collapse_on = request.GET.get('collapse_on', 'PatientID')
+
+    # filters = {"vital_status": ["Alive", "Dead"], "age_at_diagnosis_btw": [15, 70], "race": ["BLACK OR AFRICAN AMERICAN","WHITE"]}
+    # filters = {"BodyPartExamined": ["CHEST"]}
+    # filters = {"age_at_diagnosis_btw": [0,50]}
+    # filters={"race":['ASIAN', 'BLACK OR AFRICAN AMERICAN','WHITE']}
+    # filters = {"race": ['AMERICAN INDIAN OR ALASKA NATIVE', 'ASIAN', 'BLACK OR AFRICAN AMERICAN', 'NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER', 'None']}
+    # filters = {}
+
+    try:
+        filters = json.loads(request.GET.get('filters', "{}"))
+
+    except Exception as e:
+        logger.error("[ERROR] In get_filtered_idc_cohort_data parsing filters")
+        logger.exception(e)
+        return render(request, '404.html')
+
 
     defFieldStr = '["collection_id", "case_barcode", "PatientID","race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis", "gender", "disease_code", \
                "StudyInstanceUID", "StudyDescription", "StudyDate", "SeriesInstanceUID", "SeriesDescription", "SeriesNumber", "BodyPartExamined", "Modality"]'
 
-    fieldStr = request.GET.get('fields', defFieldStr)
-    fields = eval(fieldStr)
-    with_clinical_str = request.GET.get('with_clinical', "True")
-    with_clinical = eval(with_clinical_str)
-    collapse_on = request.GET.get('collapse_on', 'PatientID')
+    try:
+        fields = json.loads(request.GET.get('fields', defFieldStr))
 
-    #filters = {"BodyPartExamined": ["CHEST"]}
-    #filters = {"age_at_diagnosis": ["0 to 50"]}
-    #filters = {}
+    except Exception as e:
+        logger.error("[ERROR] In get_filtered_idc_cohort_data parsing fields")
+        logger.exception(e)
+        return render(request, '404.html')
+
+
     try:
         # for a version which isn't current, or for a user cohort
         facets_and_lists = get_collex_metadata(filters, fields, record_limit=50000, counts_only=counts_only, with_clinical = with_clinical, collapse_on = collapse_on )
@@ -410,7 +426,7 @@ def get_filtered_idc_cohort(request):
         ret['clinical']['age'].append(['None',0])
         for ageSet in facets_and_lists['clinical']['facets']['age_at_diagnosis']:
             if not(ageSet == 'None'):
-                pos = bisect_left(ageRng, ageSet)
+                pos = bisect_right(ageRng, ageSet)-1
                 ret['clinical']['age'][pos][1] = ret['clinical']['age'][pos][1] + facets_and_lists['clinical']['facets']['age_at_diagnosis'][ageSet]
         ret['clinical']['age'][len(ret['clinical']['age'])-1][1] = facets_and_lists['clinical']['facets']['age_at_diagnosis']['None']
 
@@ -433,6 +449,7 @@ def get_filtered_idc_cohort(request):
 
 
 
+@login_required
 def search_page(request):
     return render(request, 'idc/search.html', {'request':request})
 
