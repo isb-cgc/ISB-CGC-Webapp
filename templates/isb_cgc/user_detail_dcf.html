@@ -55,7 +55,7 @@
             <p>Congratulations, {{ user_details.NIH_username }}! You now have access to the following ISB-CGC controlled dataset{% if user_datasets_count > 1 %}s{% endif %}:</p>
             <ul>
                 {% for dataset in user_auth_datasets %}
-                    <li><a href="https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id={{ dataset.whitelist_id }}" target="_BLANK">{{ dataset.name }}</a>{% if dataset.duca_id %} - <a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc={{ dataset.duca_id }}" target="_BLANK">DUCA</a>{% endif %}</li>
+                    <li><a href="https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id={{ dataset.whitelist_id }}" target="_BLANK">{{ dataset.name }}{% if not dataset.public %} [{{ dataset.whitelist_id }}]{% endif %}</a>{% if dataset.duca_id %} - <a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc={{ dataset.duca_id }}" target="_BLANK">DUCA</a>{% endif %}</li>
                 {% endfor %}
             </ul>
             <p>Your access is valid until:</p>
