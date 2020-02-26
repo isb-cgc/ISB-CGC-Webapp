@@ -51,6 +51,7 @@ from accounts.utils import get_opt_in_response
 # from notebooks.notebook_vm import check_vm_stat
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
+from django.template.loader import get_template
 from google_helpers.bigquery.service import get_bigquery_service
 
 import requests
@@ -62,7 +63,7 @@ OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 BQ_ECOSYS_BUCKET = settings.BQ_ECOSYS_STATIC_URL
-FEEDBACK_FORM_LINK = 'https://forms.gle/7i8Ua8TtgSvNbpat6'
+FEEDBACK_FORM_LINK_TEMPLATE = 'https://docs.google.com/forms/d/e/1FAIpQLSeGQiOcJJfe4q3wRM-g7sP_LpJj-pNDp7ZjOqsWIM381W28EQ/viewform?entry.474148858={email}&entry.991749890={firstName}+{lastName}'
 
 
 def convert(data):
@@ -666,6 +667,8 @@ def opt_in_check_show(request):
 def opt_in_update(request):
     # If user logs in for the second time, opt-in status changes to NOT_SEEN
     error_msg = ''
+    opt_in_choice = ''
+    redirect_url = ''
     if request.POST:
         opt_in_choice = request.POST.get('opt-in-radio')
         opt_in_status_code = UserOptInStatus.NO if opt_in_choice == 'opt-out' else UserOptInStatus.SEEN
@@ -675,19 +678,18 @@ def opt_in_update(request):
         if user_opt_in_stat_obj:
             user_opt_in_stat_obj.opt_in_status = opt_in_status_code
             user_opt_in_stat_obj.save()
+        if opt_in_choice.startswith('opt-in-'):
+            user_email = request.user.email
+            first_name = request.user.first_name
+            last_name = request.user.last_name
+            feedback_form_link = FEEDBACK_FORM_LINK_TEMPLATE.format(email=user_email, firstName=first_name, lastName=last_name)
+
             if opt_in_choice == 'opt-in-email':
-                resp = send_feedback_form(request.user.email, request.user.first_name, request.user.last_name, FEEDBACK_FORM_LINK)
+                resp = send_feedback_form(user_email, first_name, last_name, feedback_form_link)
                 if resp.status == 'error':
                     error_msg = resp.message
-
-        # Prefill email and user name
-        redirect_url = ""
-        if opt_in_choice == 'opt-in-now':
-            opt_in_form_url = 'https://docs.google.com/forms/d/e/1FAIpQLSeGQiOcJJfe4q3wRM-g7sP_LpJj-pNDp7ZjOqsWIM381W28EQ/viewform?entry.474148858={email}&entry.991749890={firstName}+{lastName}'
-            user_email = User.objects.get(id=request.user.id).email
-            first_name = User.objects.get(id=request.user.id).first_name
-            last_name = User.objects.get(id=request.user.id).last_name
-            redirect_url = opt_in_form_url.format(email=user_email, firstName=first_name, lastName=last_name)
+            else: # opt-in-now
+                redirect_url = feedback_form_link
 
     except Exception as e:
         error_msg = '[Error] There has been an error while updating your subscription status.'
@@ -701,26 +703,27 @@ def opt_in_update(request):
 def send_feedback_form(user_email, firstName, lastName, formLink):
     status = None
     message = None
+
     try:
+        email_template = get_template('sharing/email_opt_in_form.html')
+        ctx = {
+            'firstName': firstName,
+            'lastName': lastName,
+            'formLink': formLink
+        }
         message_data = {
             'from': settings.NOTIFICATION_EMAIL_FROM_ADDRESS,
             'to': user_email,
             'subject': 'Join the ISB-CGC community!',
-            'text': '''
-            Dear {firstName} {lastName},
-            
-            ISB-CGC is funded by the National Cancer Institute (NCI) to provide cloud-based tools and data to the cancer research community.
-            Your feedback is important to the NCI and us.
-            
-            Please help us by filling out this Google Form:
-            {formLink}
-
-            Thank you.
-            
-            
-            ISB-CGC team
-            '''.format(firstName=firstName, lastName=lastName, formLink=formLink)
-            # 'html': email_template.render(ctx)
+            'text':
+                ('Dear {firstName} {lastName},\n\n' +
+                'ISB-CGC is funded by the National Cancer Institute (NCI) to provide cloud-based tools and data to the cancer research community.\n'+
+                'Your feedback is important to the NCI and us.\n'+
+                'Please help us by filling out this Google Form:\n'+
+                '{formLink}\n'+
+                'Thank you.\n\n'+
+                'ISB-CGC team').format(firstName=firstName, lastName=lastName, formLink=formLink),
+                'html': email_template.render(ctx)
         }
         send_email_message(message_data)
     except Exception as e:
