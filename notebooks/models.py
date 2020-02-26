@@ -21,7 +21,7 @@ logger = logging.getLogger('main_logger')
 #     last_date_saved = models.DateTimeField(auto_now=True)
 #     active = models.BooleanField(default=True)
 #     is_public = models.BooleanField(default=False)
-#     owner = models.ForeignKey(User)
+#     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 #     objects = NotebookManager()
 #
 #     @classmethod
@@ -84,8 +84,8 @@ logger = logging.getLogger('main_logger')
 #
 #
 # class Notebook_Added(models.Model):
-#     notebook = models.ForeignKey(Notebook, null=False, blank=False)
-#     user = models.ForeignKey(User, null=False, blank=True)
+#     notebook = models.ForeignKey(Notebook, null=False, blank=False, on_delete=models.CASCADE)
+#     user = models.ForeignKey(User, null=False, blank=True, on_delete=models.CASCADE)
 
 class InstanceManager(models.Manager):
     content = None
@@ -93,9 +93,9 @@ class InstanceManager(models.Manager):
 class Instance(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=2024, null=False)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     vm_username = models.CharField(max_length=20, null=False)
-    gcp = models.ForeignKey(GoogleProject)
+    gcp = models.ForeignKey(GoogleProject, on_delete=models.CASCADE)
     zone = models.CharField(max_length=20, null=False)
     active = models.BooleanField(default=True)
     objects = InstanceManager()

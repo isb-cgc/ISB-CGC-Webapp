@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                 ('name', models.TextField(null=True)),
                 ('active', models.BooleanField(default=True)),
                 ('last_date_saved', models.DateTimeField(auto_now_add=True)),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(on_delete=models.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
             },
@@ -40,8 +40,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('last_view', models.DateTimeField(auto_now=True, auto_now_add=True)),
-                ('genefavorite', models.ForeignKey(to='genes.GeneFavorite')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('genefavorite', models.ForeignKey(on_delete=models.CASCADE, to='genes.GeneFavorite')),
+                ('user', models.ForeignKey(on_delete=models.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
             },
@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='gene',
             name='gene_favorite',
-            field=models.ForeignKey(to='genes.GeneFavorite'),
+            field=models.ForeignKey(on_delete=models.CASCADE, to='genes.GeneFavorite'),
             preserve_default=True,
         ),
     ]

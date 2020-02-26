@@ -16,6 +16,7 @@
 from __future__ import absolute_import
 
 from django.conf.urls import include, url
+from django.urls import path
 from django.contrib import admin
 from django.conf import settings
 
@@ -49,7 +50,7 @@ urlpatterns = [
     # url(r'^notebooks/', include('notebooks.urls')),
     url(r'^cohorts/', include('cohorts.urls')),
     url(r'^visualizations/', include('visualizations.urls')),
-    url(r'^admin/', include(admin.site.urls)),
+    path('admin/', admin.site.urls),
     url(r'^accounts/', include('accounts.urls')),
     url(r'^seqpeek/', include('seqpeek.urls')),
     url(r'session_security/', include('session_security.urls')),
@@ -75,6 +76,8 @@ urlpatterns = [
     url(r'^genes/', include('genes.urls')),
     url(r'^variables/', include('variables.urls')),
     url(r'^share/', include('sharing.urls')),
+    url(r'^opt_in/check_show', views.opt_in_check_show, name='opt_in'),
+    url(r'^opt_in/update', views.opt_in_update, name='opt_in_update')
 ]
 
 if settings.IS_DEV:

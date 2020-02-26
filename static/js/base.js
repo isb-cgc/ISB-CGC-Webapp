@@ -22,7 +22,7 @@ require.config({
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
+        session_security: 'session_security/script',
         underscore: 'libs/underscore-min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
@@ -193,6 +193,14 @@ require([
     // Set up our own data-hide type to 'hide' our alerts instead of popping them off the DOM entirely
     $("[data-hide]").on("click", function(){
         $(this).closest("." + $(this).attr("data-hide")).hide();
+    });
+
+    var sessionSecurity = new yourlabs.SessionSecurity({
+        pingUrl: pingUrl,
+        warnAfter: warnAfter,
+        expireAfter: expireAfter,
+        confirmFormDiscard: confirmFormDiscard,
+        returnToUrl: BASE_URL
     });
 });
 

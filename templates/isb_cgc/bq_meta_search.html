@@ -73,6 +73,15 @@
                         <label>Name</label>
                         <input type="text" class="form-control bq-filter" data-column-name="friendlyName">
                     </div>
+                    <div>
+                        <label>Program</label>
+                        <select multiple data-placeholder="Choose Programs..."
+                                class="autocomplete_select_box form-control bq-select" data-column-name="program">
+                            {% for option in program.options %}
+                                <option value="{{ option.value }}">{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     <div class="checkbox-div">
                         <label>Category</label>
                         {% for option in category.options %}
@@ -113,6 +122,15 @@
                         <select multiple data-placeholder="Choose Data Types..."
                                 class="autocomplete_select_box form-control bq-select" data-column-name="dataType">
                             {% for option in data_type.options %}
+                                <option value="{{ option.value }}">{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label>Experimental Strategy</label>
+                        <select multiple data-placeholder="Choose Experimental Strategy..."
+                                class="autocomplete_select_box form-control bq-select" data-column-name="expStrat">
+                            {% for option in expStrat.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
                         </select>
@@ -166,14 +184,16 @@
                     <thead>
                     <tr>
                         <th style="width:3%;"></th>
-                        <th style="width:20%;">Name</th>
+                        <th style="width:17%;">Name</th>
                         <th style="width:15%;">Dataset ID</th>
                         <th style="width:15%;">Table ID</th>
                         <th>Full ID</th>
+                        <th style="width:8%;">Program</th>
                         <th style="width:8%;">Category</th>
                         <th>Reference Genome</th>
                         <th>Source</th>
                         <th>Data Type</th>
+                        <th>Experimental Strategy</th>
                         <th style="width:9%;">Status</th>
                         <th style="width:8%;">Rows</th>
                         <th style="width:8%;">Created</th>
@@ -181,6 +201,7 @@
                         <th style="width:7%;">Description</th>
                         <th>Labels</th>
                         <th>Fields</th>
+                        <th style="width:3%;">Open</th>
                     </tr>
                     </thead>
                     <tbody></tbody>
