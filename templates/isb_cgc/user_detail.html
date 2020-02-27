@@ -54,8 +54,8 @@
                     </tr>
                     <tr>
                         <td>Subscription</td>
-                        <td>You {% if user_details.is_opted_in %}have {% else %}have <i>not</i> {% endif %}opted-in to our feedback mailing list
-                        <div onclick="show_opt_in_dialog()"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></div>
+                        <td> {{ user_details.user_opt_in_status }}
+                            <a style="margin-left: 15px" data-toggle="modal" data-target="#opt-in-pop-up-modal"> Edit<i class="fa fa-pencil" aria-hidden="true"></i></a>
                         </td>
                     </tr>
                 </table>
