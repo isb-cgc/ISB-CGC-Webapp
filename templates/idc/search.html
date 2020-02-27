@@ -3,7 +3,7 @@
 
 {% comment %}
 
-   Copyright 2015, Institute for Systems Biology
+   Copyright 2020, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -131,8 +131,27 @@
                 </div>
 
             </div>
-
             <div id = "search_related_set" role="tabpanel" class="tab-pane">
+                <!-- TODO: We need to make this request the list of attributes from the server -->
+                <!-- TODO: example here: -->
+{#                {% for attr in related_data %}#}
+{#                    <div id="{{ attr.name }}_heading" class="list-group-item__heading">#}
+{#                        <a role="button" data-toggle="collapse"  href="#disease" aria-expanded="false" aria-controls="{{ attr.name }}">#}
+{#                            <i class="fa fa-caret-right"></i> {{ attr.display_name }}</a>#}
+{#                    </div>#}
+{##}
+{#                    <div id="{{ attr.name }}" class="collapse">#}
+{#                        <ul id="{{ attr.name }}_list" style="list-style: none;">#}
+{#                            {% for val in attr.values %}#}
+{#                                <li>&emsp;<input type="checkbox" checked value="{{ val.value }}" #}
+{#                                             onclick="updateFilterSelection('{{ attr.name }}_list', '{{ attr.name }}_set','{{ attr.display_name }}','{{ attr.name }}',false,false)">#}
+{#                                    {{ val.display }}</li>#}
+{#                            {% endfor %}#}
+{##}
+{#                        </ul>#}
+{#                    </div>#}
+{##}
+{#                {%  endfor %}#}
                 <div id="disease_heading" class="list-group-item__heading">
                     <a role="button" data-toggle="collapse"  href="#disease" aria-expanded="false" aria-controls="disease">
                         <i class="fa fa-caret-right"></i> Disease Code</a>
@@ -231,8 +250,6 @@
 
 
             </div>
-
-
            </div>
          </div>
         </div>

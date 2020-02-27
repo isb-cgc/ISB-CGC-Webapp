@@ -46,7 +46,7 @@ from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
 from googleapiclient.errors import HttpError
 from cohorts.models import Cohort, Cohort_Perms
-from idc_collections.models import Program
+from idc_collections.models import Program, Attribute, Attribute_Display_Values, DataSource
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 from .metadata_utils import get_collex_metadata,  translateCollectionData
@@ -434,7 +434,27 @@ def get_filtered_idc_cohort(request):
 
 
 def search_page(request):
-    return render(request, 'idc/search.html', {'request':request})
+    attr_by_source = {}
+    try:
+        if request.GET:
+            source = request.GET.get('source','B')
+            versions = request.GET.get('versions',[])
+        if request.POST:
+            source = request.POST.get('source', 'B')
+            versions = request.POST.get('versions', [])
+
+        sources = DataSource.objects.filter(version__in=versions, source_type=source)
+
+        for source in sources:
+            if source.name not in attr_by_source:
+                attr_by_source[source.name] = {}
+            attr_by_source[source.name] = source.get_collection_attr()
+    except Exception as e:
+        logger.error("[ERROR] While attempting to load the search page:")
+        logger.exception(e)
+        messages.error(request, "Encountered an error when attempting to load the page - please contact the administrator.")
+
+    return render(request, 'idc/search.html', {'request':request, 'attributes': attr_by_source})
 
 @login_required
 def ohif_test_page(request):
