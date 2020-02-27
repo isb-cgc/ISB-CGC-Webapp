@@ -1,3 +1,29 @@
+.filter-type{
+    background-color:#a66206;
+    color:#F8F8F8;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 2px;
+    padding-right: 2px;
+    margin-left:5px;
+    margin-right:5px;
+    text-transform: uppercase;
+}
+
+.filter-att{
+    background-color:#2A537A;
+    color:#F8F8F8;
+    padding: 2px;
+    margin-left:5px;
+    margin-right:5px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+
+
 .bar-charts-div {
     display-block;
     width:100%;
