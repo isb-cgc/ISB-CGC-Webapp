@@ -45,7 +45,7 @@ from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
 from googleapiclient.errors import HttpError
 from cohorts.models import Cohort, Cohort_Perms
-from idc_collections.models import Program
+from idc_collections.models import Program, Attribute, Attribute_Display_Values, DataSource, DataVersion
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 from .metadata_utils import get_collex_metadata
@@ -418,15 +418,43 @@ def get_filtered_idc_cohort(request):
         ret['clinical']['age'] = facets_and_lists['clinical']['facets']['age_at_diagnosis']
         ret['clinical']['bmi'] = facets_and_lists['clinical']['facets']['bmi']
 
-
-
-
     return JsonResponse(ret)
-
-
 
 @login_required
 def explore_data_page(request):
+    attr_by_source = {}
+    context = {'request': request}
+    source = 'S'
+    versions = []
+    try:
+        if request.GET:
+            source = request.GET.get('source','S')
+            versions = json.loads(request.GET.get('versions','[]'))
+        if request.POST:
+            source = request.POST.get('source', 'S')
+            versions = request.loads(request.POST.get('versions', '[]'))
+
+        if not len(versions):
+            versions = DataVersion.objects.filter(active=True)
+        else:
+            versions = DataVersion.objects.filter(name__in=versions)
+
+        sources = DataSource.objects.filter(version__in=versions, source_type=source)
+
+        tcga_in_tcia = Program.objects.get(short_name="TCGA").collection_set.all()
+
+        for source in sources:
+            if source.name not in attr_by_source:
+                attr_by_source[source.name] = {}
+            attr_by_source[source.name] = source.get_collection_attr()
+
+            context['attributes'] = attr_by_source
+            context['tcga_collections'] = tcga_in_tcia
+    except Exception as e:
+        logger.error("[ERROR] While attempting to load the search page:")
+        logger.exception(e)
+        messages.error(request, "Encountered an error when attempting to load the page - please contact the administrator.")
+
     return render(request, 'idc/explore.html', {'request':request})
 
 @login_required
