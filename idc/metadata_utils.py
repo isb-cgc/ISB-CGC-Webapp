@@ -24,97 +24,6 @@ from django.conf import settings
 logger = logging.getLogger('main_logger')
 
 
-def getWithNullGuard(curDic, curKey, nullRet):
-    if curKey in curDic:
-        ret = curDic[curKey]
-    else:
-        ret = nullRet
-    return ret
-
-def translateCollectionData(solrArr, idcRetDic):
-
-    idcRetDic['projects'] = []
-    idcRetDic['projectIndex'] = {}
-    idcRetDic['projectA'] = []
-    idcRetDic['patientIndex'] = {}
-    idcRetDic['patientProject'] = {}
-    idcRetDic['studyIndex'] = {}
-    idcRetDic['studyPatient'] = {}
-    idcRetDic['seriesIndex'] = {}
-    idcRetDic['seriesStudy'] = {}
-
-
-    for i in range(len(solrArr)):
-        curRow=solrArr[i]
-        if (not 'collection_id' in curRow) or (not 'case_barcode' in curRow):
-            continue
-        projectId= curRow['collection_id'];
-        patientId = curRow['case_barcode']
-        studyId = curRow['StudyInstanceUID'];
-        seriesId = curRow['SeriesInstanceUID'];
-
-        curProject={}
-        if not (projectId in idcRetDic['projectIndex']):
-            idcRetDic['projectIndex'][projectId]=len(idcRetDic['projects'])
-            idcRetDic['projectA'].append(projectId)
-            curProject['id']=projectId
-            curProject['patients'] = []
-            curProject['isActive']=True
-            curProject['numActivePatients']=0
-            curProject['reasonsInActive']={}
-            idcRetDic['projects'].append(curProject)
-
-        else:
-            curProject = idcRetDic['projects'][idcRetDic['projectIndex'][projectId]]
-
-        curPatient = {}
-        if not (patientId in idcRetDic['patientIndex']):
-            curProject['numActivePatients'] = curProject['numActivePatients']+1
-            idcRetDic['patientIndex'][patientId] = len(curProject['patients'])
-            idcRetDic['patientProject'][patientId] = curProject['id']
-            curPatient['id'] = patientId
-            curPatient['isActive'] = True
-            curPatient['numActiveStudies'] = 0
-            curPatient['reasonsInActive'] = {}
-            curPatient['studies'] = []
-            curProject['patients'].append(curPatient)
-
-
-        else:
-            curPatient = curProject['patients'][idcRetDic['patientIndex'][patientId]]
-
-        curStudy = {}
-
-        if not(studyId in idcRetDic['studyIndex']):
-            curPatient['numActiveStudies'] = curPatient['numActiveStudies'] + 1
-            idcRetDic['studyIndex'][studyId] = len(curPatient['studies'])
-            idcRetDic['studyPatient'][studyId] = curPatient['id']
-            curStudy['id'] = studyId
-            curStudy['isActive'] = True
-            curStudy['reasonsInActive'] = {}
-            curStudy['numActiveSeries'] = 0
-            curStudy['seg'] = False
-            curStudy['StudyDescription'] = getWithNullGuard(curRow,'StudyDescription','none')
-            curStudy['StudyDate'] = getWithNullGuard(curRow, 'StudyDate', 'none')
-            curStudy['series'] = []
-            curPatient['studies'].append(curStudy)
-
-        else:
-            curStudy = curPatient['studies'][idcRetDic['studyIndex'][studyId]]
-
-        curSeries = {}
-        if not(seriesId in idcRetDic['seriesIndex']):
-            idcRetDic['seriesIndex'][seriesId] = len(curStudy['series'])
-            idcRetDic['seriesStudy'][seriesId] = curStudy['id']
-            curStudy['numActiveSeries'] = curStudy['numActiveSeries'] +1;
-            curSeries['id'] = seriesId
-            curSeries['isActive'] = True
-            curSeries['reasonsInActive'] = {}
-            curSeries['Modality'] = getWithNullGuard(curRow, 'Modality', 'none')
-            curSeries['BodyPartExamined'] = getWithNullGuard(curRow, 'BodyPartExamined', 'none')
-            curSeries['SeriesNumber'] = getWithNullGuard(curRow, 'SeriesNumber', 'none')
-            curStudy['series'].append(curSeries)
-
 
 # Fetch metadata from Solr
 def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts_only=False, with_clinical = True, collapse_on = 'PatientID' ):
@@ -196,8 +105,8 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
             })
 
             results['clinical'] = solr_result
-
-            print(get_bq_metadata(filters, fields, DataVersion.objects.filter(active=True)))
+            # getting an error so commented this out
+            #print(get_bq_metadata(filters, fields, DataVersion.objects.filter(active=True)))
 
     except Exception as e:
         logger.error("[ERROR] While fetching solr metadata:")
