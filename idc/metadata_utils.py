@@ -26,7 +26,7 @@ logger = logging.getLogger('main_logger')
 
 
 # Fetch metadata from Solr
-def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts_only=False, with_clinical = True, collapse_on = 'PatientID' ):
+def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, with_clinical = True, collapse_on = 'PatientID' ):
     try:
         results = {'docs': None, 'facets': {}}
 
@@ -37,17 +37,20 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
         tcga_solr = DataSource.objects.get(name="tcga_clin_bios")
         tcia_solr = DataSource.objects.get(name="tcia_images")
 
-        tcga_facet_attrs = tcga_solr.get_collection_attr().values_list('name', flat=True)
+        tcga_facet_attrs = tcga_solr.get_collection_attr(for_ui=True).values_list('name', flat=True)
         tcga_filter_attrs = tcga_solr.get_collection_attr(for_faceting=False).values_list('name', flat=True)
 
-        tcia_facet_attrs = tcia_solr.get_collection_attr().values_list('name', flat=True)
+        tcia_facet_attrs = tcia_solr.get_collection_attr(for_ui=True).values_list('name', flat=True)
+        tcia_filter_attrs = tcia_solr.get_collection_attr(for_faceting=False).values_list('name', flat=True)
 
-        solr_query = build_solr_query(filters, with_tags_for_ex=True)
+        solr_query = None
+        if len(filters):
+            solr_query = build_solr_query(filters, with_tags_for_ex=True)
 
         query_set = []
 
         # Image Data query
-        if solr_query['queries'] is not None:
+        if solr_query and solr_query['queries'] is not None:
             for attr in solr_query['queries']:
                 attr_name = re.sub("(_btw|_lt|_lte|_gt|_gte)", "", attr)
                 if attr_name in tcga_filter_attrs:
@@ -56,8 +59,12 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
                     )) + solr_query['queries'][attr])
                 else:
                     query_set.append(solr_query['queries'][attr])
+        else:
+            query_set.append("{!join %s}" % "from={} fromIndex={} to={}".format(
+                tcga_solr.shared_id_col, tcga_solr.name, tcia_solr.shared_id_col
+            ))
 
-        solr_facets = build_solr_facets(list(tcia_facet_attrs), solr_query['filter_tags'])
+        solr_facets = build_solr_facets(list(tcia_facet_attrs), solr_query['filter_tags'] if solr_query else None)
 
         solr_result = query_solr_and_format_result({
             'collection': tcia_solr.name,
@@ -66,7 +73,7 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
             'query_string': "*:*",
             'facets': solr_facets,
             'limit': record_limit,
-            'collapse_on':collapse_on,
+            'collapse_on': collapse_on,
             'counts_only': counts_only
         })
         if not counts_only:
@@ -86,27 +93,27 @@ def get_collex_metadata(filters, fields, with_docs=True, record_limit=10, counts
             if solr_query['queries'] is not None:
                 for attr in solr_query['queries']:
                     attr_name = re.sub("(_btw|_lt|_lte|_gt|_gte)", "", attr)
-                    if attr_name in tcia_facet_attrs:
+                    if attr_name in tcia_filter_attrs:
                         query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
                             tcia_solr.shared_id_col, tcia_solr.name, tcga_solr.shared_id_col
                         )) + solr_query['queries'][attr])
                     else:
                         query_set.append(solr_query['queries'][attr])
 
+            # Fields is hardlocked to None for all Ancillary data because we don't display them,
+            # we only faceted count
             solr_result = query_solr_and_format_result({
                 'collection': tcga_solr.name,
-                'fields': fields,
+                'fields': None,
                 'fqs': query_set,
                 'query_string': "*:*",
                 'facets': solr_facets,
                 'limit': 0,
-                'collapse_on': 'case_barcode',
+                'collapse_on': tcga_solr.shared_id_col,
                 'counts_only': True
             })
 
             results['clinical'] = solr_result
-            # getting an error so commented this out
-            #print(get_bq_metadata(filters, fields, DataVersion.objects.filter(active=True)))
 
     except Exception as e:
         logger.error("[ERROR] While fetching solr metadata:")

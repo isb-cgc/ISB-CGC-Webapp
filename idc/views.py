@@ -209,7 +209,7 @@ def extended_login_view(request):
     except Exception as e:
         logger.exception(e)
 
-    return redirect(reverse('dashboard'))
+    return redirect(reverse('explore_data'))
 
 
 '''
@@ -424,15 +424,18 @@ def get_filtered_idc_cohort(request):
 def explore_data_page(request):
     attr_by_source = {}
     context = {'request': request}
-    source = 'S'
+    source = DataSource.SOLR
     versions = []
+    filters = {}
     try:
         if request.GET:
-            source = request.GET.get('source','S')
+            source = request.GET.get('source',DataSource.SOLR)
             versions = json.loads(request.GET.get('versions','[]'))
+            filters = json.loads(request.GET.get('filters', '{}'))
         if request.POST:
-            source = request.POST.get('source', 'S')
+            source = request.POST.get('source', DataSource.SOLR)
             versions = request.loads(request.POST.get('versions', '[]'))
+            filters = json.loads(request.GET.get('filters', '{}'))
 
         if not len(versions):
             versions = DataVersion.objects.filter(active=True)
@@ -443,13 +446,25 @@ def explore_data_page(request):
 
         tcga_in_tcia = Program.objects.get(short_name="TCGA").collection_set.all()
 
+        if 'collection_id' not in filters:
+            filters['collection_id'] = [x.lower().replace("-","_") for x in list(tcga_in_tcia.values_list('name', flat=True))]
+
+        faceted_counts_by_source = {}
+
         for source in sources:
             if source.name not in attr_by_source:
                 attr_by_source[source.name] = {}
-            attr_by_source[source.name] = source.get_collection_attr()
+            attr_by_source[source.name] = source.get_collection_attr(for_ui=True)
+            print(attr_by_source)
+            faceted_counts_by_source[source.name] = get_collex_metadata(
+                filters, list(attr_by_source[source.name].values_list('name', flat=True)),
+                counts_only=True, record_limit=0
+            )
 
-            context['attributes'] = attr_by_source
-            context['tcga_collections'] = tcga_in_tcia
+        context['attributes'] = attr_by_source
+        context['tcga_collections'] = tcga_in_tcia
+        context['counts'] = faceted_counts_by_source
+
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
         logger.exception(e)
