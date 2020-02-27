@@ -46,7 +46,7 @@ from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
 from googleapiclient.errors import HttpError
 from cohorts.models import Cohort, Cohort_Perms
-from idc_collections.models import Program, Attribute, Attribute_Display_Values, DataSource
+from idc_collections.models import Program, Attribute, Attribute_Display_Values, DataSource, DataVersion
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 from .metadata_utils import get_collex_metadata,  translateCollectionData
@@ -452,28 +452,39 @@ def get_filtered_idc_cohort(request):
 @login_required
 def search_page(request):
     attr_by_source = {}
+    context = {'request': request}
+    source = 'S'
+    versions = []
     try:
         if request.GET:
-            source = request.GET.get('source','B')
-            versions = request.GET.get('versions',[])
+            source = request.GET.get('source','S')
+            versions = json.loads(request.GET.get('versions','[]'))
         if request.POST:
-            source = request.POST.get('source', 'B')
-            versions = request.POST.get('versions', [])
+            source = request.POST.get('source', 'S')
+            versions = request.loads(request.POST.get('versions', '[]'))
+
+        if not len(versions):
+            versions = DataVersion.objects.filter(active=True)
+        else:
+            versions = DataVersion.objects.filter(name__in=versions)
 
         sources = DataSource.objects.filter(version__in=versions, source_type=source)
 
-        tcga_in_tcia = Program.objects.get(shortname="TCGA").collection_set.all()
+        tcga_in_tcia = Program.objects.get(short_name="TCGA").collection_set.all()
 
         for source in sources:
             if source.name not in attr_by_source:
                 attr_by_source[source.name] = {}
             attr_by_source[source.name] = source.get_collection_attr()
+
+            context['attributes'] = attr_by_source
+            context['tcga_collections'] = tcga_in_tcia
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
         logger.exception(e)
         messages.error(request, "Encountered an error when attempting to load the page - please contact the administrator.")
 
-    return render(request, 'idc/search.html', {'request':request, 'attributes': attr_by_source, 'tcga_collections': tcga_in_tcia})
+    return render(request, 'idc/search.html', context)
 
 @login_required
 def ohif_test_page(request):
