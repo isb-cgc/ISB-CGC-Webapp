@@ -1,0 +1,88 @@
+.filter-type{
+    background-color:#a66206;
+    color:#F8F8F8;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 2px;
+    padding-right: 2px;
+    margin-left:5px;
+    margin-right:5px;
+    text-transform: uppercase;
+}
+
+.filter-att{
+    background-color:#2A537A;
+    color:#F8F8F8;
+    padding: 2px;
+    margin-left:5px;
+    margin-right:5px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+
+
+.bar-charts-div {
+    display-block;
+    width:100%;
+    height:200px;
+    overflow:hidden
+}
+
+.bar-chart {
+   display:inline-block;
+    width:200px;
+    height:200px
+}
+
+
+th, tb,tr,td {border: 1px solid black;}
+       tr.selected_grey td {background-color: #333; color: #fff;}
+       /* thead, tbody { display: block; } */
+
+    tbody.set_height {
+          max-height: 200px;       /* Just for the demo          */
+          overflow-y: scroll;
+        /* Trigger vertical scroll    */
+         overflow-x: hidden;  /* Hide the horizontal scroll */
+        width:100%;
+        display:inline-block;
+        /* display:table; */
+        table-layout: fixed;
+        }
+
+       thead {
+           display: table;
+          width: calc( 100% - 1em );
+     }
+
+      /*  tbody {
+           display: table;
+          width: 100%;
+     } */
+        tr{
+            display:table;
+            width:100%;
+        }
+
+        #projects_table td, #projects_table_head th {
+            width:33.33%;
+            word-wrap: break-word;
+        }
+       #studies_table_head th, #series_table_head th {
+           width:25%;
+          word-wrap: break-word;
+      }
+
+       #studies_table td, #series_table td{
+           width:25%;
+           word-break: break-word;
+      }
+
+
+  table{
+      table-layout:fixed;
+      width: 100%;
+  }

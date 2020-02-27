@@ -6,6 +6,83 @@ tcgaColls = ["tcga_blca","tcga_brca","tcga_cesc","tcga_coad","tcga_esca","tcga_g
 filterObj.collection_id=tcgaColls;
 
 
+function refreshAge(){
+    $("#age_slide").slider("values","0",0);
+    $("#age_slide").slider("values","1",120);
+    // $("#inp_age_slide").value="0-120";
+    document.getElementById("inp_age_slide").value="0-120";
+    if (filterObj.hasOwnProperty("age_at_diagnosis_btw")){
+        delete filterObj["age_at_diagnosis_btw"];
+    }
+
+    mkFiltText();
+    fetchCountData(false);
+
+}
+
+// Show more/less links on categories with >6 fiilters
+
+filterItemBindings = function(filterId,checkBoxDiv, displaySet, header, attributeName, isImageAttr,isRangeAttr){
+    $('#'+filterId).find('.checkbox').find(':input').on('click', function(){
+        updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, isImageAttr,isRangeAttr);
+    });
+
+        $('#'+filterId).find('.show-more').on('click', function () {
+                $('#'+filterId).find('.extra-values').show();
+                $('#'+filterId).find('.less-checks').show();
+                $('#'+filterId).find('.more-checks').hide();
+            });
+
+
+              $('#'+filterId).find('.show-less').on('click', function () {
+                $('#'+filterId).find('.extra-values').hide();
+                $('#'+filterId).find('.more-checks').show();
+                $('#'+filterId).find('.less-checks').hide();
+            });
+
+            $('#'+filterId).find('.check-all').on('click',function(){
+            $('#'+filterId).find('.checkbox').find('input').prop('checked',true);
+            updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, isImageAttr,isRangeAttr);
+            //$('#'+filterId).find('.checkbox').find('input').each(function(){
+              //  $(this).triggerHandler('change');
+            //});
+            });
+
+            $('#'+filterId).find('.uncheck-all').on('click',function(){
+            $('#'+filterId).find('.checkbox').find('input').prop('checked',false);
+            updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, isImageAttr,isRangeAttr);
+            //$('#'+filterId).find('.checkbox').find('input').each(function(){
+              //  $(this).triggerHandler('change');
+            //});
+            });
+
+
+
+
+}
+$(document).ready(function() {
+
+        filterItemBindings('modality','modality', 'modality_set','Modality','Modality',true,false);
+        filterItemBindings('body_part','body_part', 'body_part_examined_set','Body Part Examined','BodyPartExamined',true,false);
+
+        filterItemBindings('vital_status','vital_list', 'vital_status_set','Vital Status','vital_status',false,false);
+        filterItemBindings('gender','gender_list', 'gender_set','Gender','gender',false,false);
+
+
+        // Click events for 'Check All/Uncheck All' in filter categories
+       /* $('.check-all').on('click',function(){
+            $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',true);
+            $(this).parent().parent().siblings('.checkbox').find('input').each(function(){
+                $(this).triggerHandler('change');
+            });
+        }); */
+
+
+}
+);
+
+
+
      function mkFiltText(){
          var curKeys=Object.keys(filterObj).sort();
          oStringA = new Array();
@@ -15,24 +92,26 @@ filterObj.collection_id=tcgaColls;
                  continue;
              }
              if (curKey === 'age_at_diagnosis_btw'){
-                 var nstr = 'age: '+filterObj[curKey][0].toString()+"-"+filterObj[curKey][1].toString();
+                 var nstr = '<span class="filter-type">AGE</span> IN (<span class="filter-att">'+filterObj[curKey][0].toString()+'-'+filterObj[curKey][1].toString()+')</span>';
 
              }
              else{
                  var disp= curKey;
-                 var oArray= filterObj[curKey].sort().map(item => item.toString());
-             var nstr=disp+": "
-             nstr += oArray.join(", &ensp; ");
+                 var oArray= filterObj[curKey].sort().map(item => '<span class="filter-att">'+item.toString()+'</span>');
+             //var nstr=disp+": "
+             //nstr += oArray.join(", &ensp; ");
+                 nstr='<span class="filter-type">'+disp+'</span>';
+                 nstr+='IN ('+oArray.join("")+')';
 
              }
               oStringA.push(nstr);
          }
          if (oStringA.length>0){
-            var oString=oStringA.join("; &nbsp; ");
+            var oString=oStringA.join(" AND");
             document.getElementById("search_def").innerHTML=oString;
          }
          else{
-             document.getElementById("search_def").innerHTML="All";
+             document.getElementById("search_def").innerHTML="";
          }
          //alert(oString);
      }
@@ -40,7 +119,7 @@ filterObj.collection_id=tcgaColls;
      function showMoreGraphs() {
          $('.more-graphs').hide();
          $('.less-graphs').show();
-         $('.related-graphs').animate({height: '630px'}, 800);
+         $('.related-graphs').animate({height: '400px'}, 800);
             // alert('here');
 
 
@@ -49,7 +128,7 @@ filterObj.collection_id=tcgaColls;
      function showLessGraphs() {
          $('.less-graphs').hide();
          $('.more-graphs').show();
-         $('.related-graphs').animate({height: '210px'}, 800);
+         $('.related-graphs').animate({height: '200px'}, 800);
 
 
      }
@@ -309,7 +388,8 @@ function resolveAllPlots(){
     plotCategoricalData( 'disease','disease_code_chart','Disease Code',clinicalDataCounts['disease_code'],'disease_code');
     plotCategoricalData( 'vital_status','vital_status_chart','Vital Status',clinicalDataCounts['vital_status'],'vital_status');
     plotCategoricalData('gender' ,'gender_chart','Gender',clinicalDataCounts['gender'],'gender');
-    resolveRelatedPlotsCatWCountsRng( clinicalDataCounts['age'],"age_chart","Age");
+    aHeader=[['* to 10','0 to 10'],['10 to 20','11 to 20'],['20 to 30','21 to 30'],['30 to 40','31 to 40'],['40 to 50','41 to 50'],['50 to 60','51 to 60'],['60 to 70','61 to 70'],['70 to 80','71 to 80'],['80 to *','81+'],['None','None']]
+    resolveRelatedPlotsCatWCountsRng( clinicalDataCounts['age'],"age_chart","Age", aHeader);
     //resolveRelatedPlotsCatWCountsRng( clinicalDataCounts['bmi'],"bmi_chart","Body Mass Index");
     plotCategoricalData( 'race','race_chart','Race',clinicalDataCounts['race'],'race');
     plotCategoricalData( 'ethnicity',"ethnicity_chart","Ethnicity",clinicalDataCounts['ethnicity'],"ethnicity");
@@ -394,10 +474,11 @@ function updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, i
             numChecked++;
         }
     }
-    if (numChecked === listItems.length){
-        newText="&emsp;&emsp;"+header+": All";
+    if (numChecked === 0){
+        //newText="&emsp;&emsp;"+header+": All";
         delete filterObj[attributeName];
     }
+
     else {
         filterObj[attributeName] = attributeVals;
     }
@@ -489,20 +570,32 @@ function constructClinicalFilterOptions(){
     //diseaseCodeA=Object.keys(diseaseCodeH).sort();
 
     //ethnicityA=diseaseCodeH.keys().sort();
+
     diseaseElem=document.getElementById("disease_list");
     removeChildren(diseaseElem);
     for (i=0;i<diseaseCodeH.length;i++){
         diseaseCode=diseaseCodeH[i];
         if (diseaseCode !=="None") {
             var opt = document.createElement("LI");
-            opt.innerHTML = '&emsp;<input type="checkbox" checked value="' + diseaseCode + '" onclick="updateFilterSelection(\'disease_list\', \'disease_code_set\',\'Disease Code\', \'disease_code\',false,false)">' + diseaseCode;
+            opt.classList.add("checkbox")
+            if (i>5){
+                opt.classList.add("extra-values");
+            }
+            opt.innerHTML = '&emsp;<input type="checkbox" value="' + diseaseCode + '">' + diseaseCode;
             diseaseElem.appendChild(opt);
         }
     }
     //<li><input type="checkbox" checked value="na">NA</li>
     opt = document.createElement("LI");
-    opt.innerHTML = '&emsp;<input type="checkbox" checked value="None" onclick="updateFilterSelection(\'disease_list\', \'disease_code_set\',\'Disease Code\', \'disease_code\',false,false)">NA';
+    opt.classList.add("checkbox");
+    opt.classList.add("extra-values");
+    opt.innerHTML = '&emsp;<input type="checkbox" value="None">NA';
     diseaseElem.appendChild(opt);
+
+
+     filterItemBindings('disease','disease_list', 'disease_code_set','Disease Code', 'disease_code',false,false);
+     //filterItemBindings('disease_list','disease_list', 'disease_code_set','Disease Code', 'disease_code',false,false);
+
 
     //raceA=Object.keys(raceH).sort();
     raceElem=document.getElementById("race_list");
@@ -510,13 +603,22 @@ function constructClinicalFilterOptions(){
         race=raceH[i];
         if (race !=="None") {
             var opt = document.createElement("LI");
-            opt.innerHTML = '&emsp;<input type="checkbox" checked value="' + race + '"  onclick="updateFilterSelection(\'race_list\', \'race_set\',\'Race\', \'race\',\'false\',\'false\')">' + race;
+            opt.classList.add("checkbox");
+            if (i>5){
+                opt.classList.add("extra-values");
+            }
+            opt.innerHTML = '&emsp;<input type="checkbox" value="' + race + '">' + race;
             raceElem.appendChild(opt);
         }
     }
     opt = document.createElement("LI");
-    opt.innerHTML = '&emsp;<input id="race_list_none" type="checkbox" checked value="None" onclick="updateFilterSelection(0,\'race_list\', \'race_set\',\'Race\', \'race\',\'false\',\'false\')">NA';
+    opt.classList.add("checkbox");
+    opt.classList.add("extra-values");
+    opt.innerHTML = '&emsp;<input id="race_list_none" type="checkbox" value="None" >NA';
     raceElem.appendChild(opt);
+
+    filterItemBindings('race','race_list', 'race_set','Race', 'race','false','false');
+
 
     //ethnicityA=Object.keys(ethnicityH).sort();
     ethnicityElem=document.getElementById("ethnicity_list");
@@ -525,14 +627,17 @@ function constructClinicalFilterOptions(){
         ethnicity=ethnicityH[i];
         if (ethnicity !=="None") {
             var opt = document.createElement("LI");
-            opt.innerHTML = '&emsp;<input type="checkbox" checked value="' + ethnicity + '" onclick="updateFilterSelection(\'ethnicity_list\', \'ethnicity_set\',\'Ethnicity\',\'ethnicity\',\'false\',\'false\')">' + ethnicity;
+             opt.classList.add("checkbox");
+            opt.innerHTML = '&emsp;<input type="checkbox" value="' + ethnicity + '" >' + ethnicity;
             ethnicityElem.appendChild(opt);
         }
     }
     opt = document.createElement("LI");
-    opt.innerHTML = '&emsp;<input id="ethnicity_list_none" type="checkbox" checked value="none" onclick="updateFilterSelection(0,\'ethnicity_list\', \'ethnicity_set\',\'Ethnicity\',\'ethnicity\',\'false\',\'false\')">NA';
+     opt.classList.add("checkbox");
+    opt.innerHTML = '&emsp;<input id="ethnicity_list_none" type="checkbox" value="none" >NA';
     ethnicityElem.appendChild(opt);
 
+    filterItemBindings('ethnicity','ethnicity_list', 'ethnicity_set','Ethnicity','ethnicity','false','false');
 
 
 }
@@ -583,25 +688,48 @@ var pdata =[
 ];
 
 plotLayout.title=lbl;
-Plotly.newPlot(plotId,pdata,plotLayout);
-plotLayout.title='';
+Plotly.newPlot(plotId,pdata,plotLayout,{displayModeBar: false});
+
+document.getElementById(plotId).on('plotly_click',function(data){
+    alert('here');
+    });
+
 
 }
 
-function resolveRelatedPlotsCatWCountsRng(plotDataA, plotId,lbl){
-    pHeader = plotDataA.map(function(val,index){return val[0]});
-    pCounts = plotDataA.map(function(val,index){return val[1]});
+function resolveRelatedPlotsCatWCountsRng(plotData, plotId,lbl,pHeader){
+
+    //pHeader=[[],[],[],[],[]]
+    //pHeader = plotDataA.map(function(val,index){return val[0]});
+    //pCounts = plotDataA.map(function(val,index){return val[1]});
+    phA = new Array();
+    ctA = new Array();
+
+    for (i=0;i<pHeader.length;i++){
+        var key = pHeader[i][0];
+        var nm = pHeader[i][1];
+        var ct = 0;
+        if (plotData.hasOwnProperty(key)){
+            ct = plotData[key];
+        }
+        phA.push(nm)
+        ctA.push(ct)
+    }
 
      var pdata =[
     {
-        x:pHeader,
-        y: pCounts,
+        x:phA,
+        y: ctA,
         type: 'bar'
     }
 ];
 
 plotLayout.title=lbl
-Plotly.newPlot(plotId,pdata,plotLayout);
+Plotly.newPlot(plotId,pdata,plotLayout,{displayModeBar: false});
+
+document.getElementById(plotId).on('plotly_click',function(data){
+    alert('here');
+    });
 
 
 }
@@ -636,7 +764,10 @@ function resolveRelatedPlotsCatWCounts(plotDataFacetCountDic, plotId,lbl, filter
 ];
 
 plotLayout.title=lbl
-Plotly.newPlot(plotId,pdata,plotLayout);
+Plotly.newPlot(plotId,pdata,plotLayout,{displayModeBar: false});
+document.getElementById(plotId).on('plotly_click',function(data){
+    alert('here');
+    });
 
 
 }
