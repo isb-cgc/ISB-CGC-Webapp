@@ -462,6 +462,8 @@ def search_page(request):
 
         sources = DataSource.objects.filter(version__in=versions, source_type=source)
 
+        tcga_in_tcia = Program.objects.get(shortname="TCGA").collection_set.all()
+
         for source in sources:
             if source.name not in attr_by_source:
                 attr_by_source[source.name] = {}
@@ -471,7 +473,7 @@ def search_page(request):
         logger.exception(e)
         messages.error(request, "Encountered an error when attempting to load the page - please contact the administrator.")
 
-    return render(request, 'idc/search.html', {'request':request, 'attributes': attr_by_source})
+    return render(request, 'idc/search.html', {'request':request, 'attributes': attr_by_source, 'tcga_collections': tcga_in_tcia})
 
 @login_required
 def ohif_test_page(request):
