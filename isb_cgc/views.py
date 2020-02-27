@@ -153,6 +153,30 @@ def user_detail(request, user_id):
         user = User.objects.get(id=user_id)
         social_account = SocialAccount.objects.get(user_id=user_id, provider='google')
 
+        user_status_obj = UserOptInStatus.objects.filter(user=user).first()
+        if user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.NEW:
+            user_status_obj.opt_in_status = UserOptInStatus.NOT_SEEN
+            user_status_obj.save()
+
+        # if not already recorded in UserOptInStatus, change opt_in_status based on google sheet response (if any)
+        try:
+            if user_status_obj and user_status_obj.opt_in_status != UserOptInStatus.YES and \
+                    user_status_obj.opt_in_status != UserOptInStatus.NO:
+                opt_in_response = get_opt_in_response(request.user.email)
+
+                if not opt_in_response:
+                    user_status_obj.opt_in_status = UserOptInStatus.NOT_SEEN
+                elif opt_in_response["can_contact"] == 'Yes':
+                    user_status_obj.opt_in_status = UserOptInStatus.YES
+                elif opt_in_response["can_contact"] == 'No':
+                    user_status_obj.opt_in_status = UserOptInStatus.NO
+                user_status_obj.save()
+        except ObjectDoesNotExist:
+            logger.error("[ERROR] Unable to retrieve UserOptInStatus object on log in.")
+
+
+        is_opted_in = user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.YES
+
         user_details = {
             'date_joined': user.date_joined,
             'email': user.email,
@@ -160,7 +184,8 @@ def user_detail(request, user_id):
             'first_name': user.first_name,
             'id': user.id,
             'last_login': user.last_login,
-            'last_name': user.last_name
+            'last_name': user.last_name,
+            'is_opted_in': is_opted_in
         }
 
         user_details['gcp_list'] = len(GoogleProject.objects.filter(user=user))

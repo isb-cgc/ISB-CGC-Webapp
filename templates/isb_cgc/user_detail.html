@@ -52,6 +52,12 @@
                         <td>Last Login</td>
                         <td id="last_login">{{ user_details.last_login }}</td>
                     </tr>
+                    <tr>
+                        <td>Subscription</td>
+                        <td>You {% if user_details.is_opted_in %}have {% else %}have <i>not</i> {% endif %}opted-in to our feedback mailing list
+                        <div onclick="show_opt_in_dialog()"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></div>
+                        </td>
+                    </tr>
                 </table>
             </div>
         </div>

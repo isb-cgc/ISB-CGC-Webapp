@@ -114,5 +114,9 @@ require([
     $('.modal form').on('submit',function(){
         $(this).find('input[type="submit"]').attr("disabled","disabled");
     });
-
 });
+
+function show_opt_in_dialog()
+{
+    $('#opt-in-pop-up-modal').modal('show');
+}
