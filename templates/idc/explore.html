@@ -22,20 +22,19 @@
 
 {% block header %}
 
-    <script type="text/javascript"  src="{% static 'js/sample_cohort.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/image_search.js' %}"></script>
+
+    <!-- <script type="text/javascript" src="{% static 'js/libs/require.js' %}"></script> -->
+    <!-- <script type="text/javascript" src="{% static 'js/image_search.js' %}"></script> -->
     <script type="text/javascript" src="{% static 'js/libs/plotly-latest.min.js' %}"></script>
+
+    <script data-main="{% static 'js/image_search.js' %}" src="{% static 'js/libs/require.js' %}"></script>
+
 
     <link type="text/css" rel="stylesheet" href="{% static 'css/search.css' %}">
     <!-- <link type="text/css" rel="stylesheet" href="{% static 'css/vendor.css' %}">
     <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.css' %}"> -->
 
 
-    <script>
-    window.onload = function(){
-        fetchCountData(true);
-    }
-    </script>
 
 
 {% endblock %}
@@ -253,7 +252,7 @@
                           <div id="age" class="collapse list-group-item__body">
                             <div id="age_slide"></div>
                              <input id="inp_age_slide" type="text" value="0-120">
-                              <button onclick='refreshAge()'>Refresh</button>
+                              <button onclick='resetAge()'>Reset</button>
                          </div>
                         </li>
 
