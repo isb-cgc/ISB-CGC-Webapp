@@ -163,13 +163,31 @@ require([
         $(this).closest("." + $(this).attr("data-hide")).hide();
     });
 
-    var sessionSecurity = new yourlabs.SessionSecurity({
-        pingUrl: pingUrl,
-        warnAfter: warnAfter,
-        expireAfter: expireAfter,
-        confirmFormDiscard: confirmFormDiscard,
-        returnToUrl: BASE_URL
+    if(user_is_auth) {
+        var sessionSecurity = new yourlabs.SessionSecurity({
+            pingUrl: pingUrl,
+            warnAfter: warnAfter,
+            expireAfter: expireAfter,
+            confirmFormDiscard: confirmFormDiscard,
+            returnToUrl: BASE_URL
+        });
+    }
+
+    $('#gov_warning button').on('click', function(){
+        $.ajax({
+            async: true,
+            type: "GET",
+            url: "/warning/",
+            contentType: "charset=utf-8",
+            success: function (response) {
+                 $('#gov_warning').modal('hide');
+            }
+        });
     });
+
+    if(!warningSeen) {
+        $('#gov_warning').modal('show');
+    }
 });
 
 // Return an object for consts/methods used by most views
