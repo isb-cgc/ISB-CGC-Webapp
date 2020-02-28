@@ -165,7 +165,8 @@ def add_attributes(attr_set):
             obj, created = Attribute.objects.update_or_create(
                 name=attr['name'], display_name=attr['display_name'], data_type=attr['type'],
                 preformatted_values=True if 'preformatted_values' in attr else False,
-                is_cross_collex=True if 'cross_collex' in attr else False
+                is_cross_collex=True if 'cross_collex' in attr else False,
+                default_ui_display=attr['display']
             )
             if 'range' in attr:
                 if len(attr['range']) > 0:
@@ -286,7 +287,8 @@ def main():
                 line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
                 "collex": Collection.objects.values_list('short_name', flat=True),
                 'solr_collex': ['tcga_clin_bios'],
-                'bq_tables': []
+                'bq_tables': [],
+                'display': True if line_split[-1] == 'True' else False
             }
 
             if attr['name'] in clin_table_attr:
@@ -332,8 +334,15 @@ def main():
                 "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
                 'cross_collex': True,
                 'solr_collex': ['tcia_images'],
-                'bq_tables': ["idc-dev-etl.tcia.dicom_metadata"]
+                'bq_tables': ["idc-dev-etl.tcia.dicom_metadata"],
+                'display': True if line_split[-1] == 'True' else False
             }
+
+            if attr['name'] in display_vals:
+                if 'preformatted_values' in display_vals[attr['name']]:
+                    attr['preformatted_values'] = True
+                else:
+                    attr['display_vals'] = display_vals[attr['name']]['vals']
 
             attr_set.append(attr)
 
