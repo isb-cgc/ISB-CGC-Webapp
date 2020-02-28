@@ -47,7 +47,7 @@ from projects.models import Program
 from workbooks.models import Workbook
 from accounts.models import GoogleProject, UserOptInStatus
 from accounts.sa_utils import get_nih_user_details
-from accounts.utils import get_opt_in_response
+from accounts.utils import retrieve_opt_in_status
 # from notebooks.notebook_vm import check_vm_stat
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
@@ -153,6 +153,24 @@ def user_detail(request, user_id):
         user = User.objects.get(id=user_id)
         social_account = SocialAccount.objects.get(user_id=user_id, provider='google')
 
+        user_status_obj = UserOptInStatus.objects.filter(user=user).first()
+        if user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.NEW:
+            user_status_obj.opt_in_status = UserOptInStatus.NOT_SEEN
+            user_status_obj.save()
+
+        # if not already recorded in UserOptInStatus, change opt_in_status based on google sheet response (if any)
+        try:
+            retrieve_opt_in_status(request, user_status_obj)
+        except ObjectDoesNotExist:
+            logger.error("[ERROR] Unable to retrieve UserOptInStatus object for user details.")
+
+        if user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.YES:
+            user_opt_in_status = "Opted-In"
+        elif user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.NO:
+            user_opt_in_status = "Opted-Out"
+        else:
+            user_opt_in_status = "N/A"
+
         user_details = {
             'date_joined': user.date_joined,
             'email': user.email,
@@ -160,7 +178,8 @@ def user_detail(request, user_id):
             'first_name': user.first_name,
             'id': user.id,
             'last_login': user.last_login,
-            'last_name': user.last_name
+            'last_name': user.last_name,
+            'user_opt_in_status': user_opt_in_status
         }
 
         user_details['gcp_list'] = len(GoogleProject.objects.filter(user=user))
@@ -215,17 +234,7 @@ def extended_login_view(request):
 
         # if not already recorded in UserOptInStatus, change opt_in_status based on google sheet response (if any)
         try:
-            if user_opt_in_stat_obj and user_opt_in_stat_obj.opt_in_status != UserOptInStatus.YES and \
-                    user_opt_in_stat_obj.opt_in_status != UserOptInStatus.NO:
-                opt_in_response = get_opt_in_response(request.user.email)
-
-                if not opt_in_response:
-                    user_opt_in_stat_obj.opt_in_status = UserOptInStatus.NOT_SEEN
-                elif opt_in_response["can_contact"] == 'Yes':
-                    user_opt_in_stat_obj.opt_in_status = UserOptInStatus.YES
-                elif opt_in_response["can_contact"] == 'No':
-                    user_opt_in_stat_obj.opt_in_status = UserOptInStatus.NO
-                user_opt_in_stat_obj.save()
+            retrieve_opt_in_status(request, user_opt_in_stat_obj)
         except ObjectDoesNotExist:
             logger.error("[ERROR] Unable to retrieve UserOptInStatus object on log in.")
     except Exception as e:
@@ -297,14 +306,14 @@ def user_landing(request):
         del cohort['name']
 
     return render(request, 'isb_cgc/user_landing.html', {'request': request,
-                                                            'cohorts': cohorts,
-                                                            'user_list': users,
-                                                            'cohorts_listing': cohort_listing,
-                                                            'visualizations': visualizations,
-                                                            'seqpeek_list': seqpeek_viz,
-                                                            'base_url': settings.BASE_URL,
-                                                            'base_api_url': settings.BASE_API_URL
-                                                            })
+                                                         'cohorts': cohorts,
+                                                         'user_list': users,
+                                                         'cohorts_listing': cohort_listing,
+                                                         'visualizations': visualizations,
+                                                         'seqpeek_list': seqpeek_viz,
+                                                         'base_url': settings.BASE_URL,
+                                                         'base_api_url': settings.BASE_API_URL
+                                                         })
 
 
 '''
@@ -569,11 +578,13 @@ def bq_meta_search(request):
     bq_filters = requests.get(bq_filter_file_path).json()
     return render(request, 'isb_cgc/bq_meta_search.html', bq_filters)
 
+
 def bq_meta_data(request):
     bq_meta_data_file_name = 'bq_meta_data.json'
     bq_meta_data_file_path = BQ_ECOSYS_BUCKET + bq_meta_data_file_name
     bq_meta_data = requests.get(bq_meta_data_file_path).json()
     return JsonResponse(bq_meta_data, safe=False)
+
 
 @login_required
 def dashboard_page(request):
@@ -652,7 +663,6 @@ def dashboard_page(request):
 
 @login_required
 def opt_in_check_show(request):
-
     try:
         obj, created = UserOptInStatus.objects.get_or_create(user=request.user)
         result = (obj.opt_in_status == UserOptInStatus.NOT_SEEN)
@@ -682,13 +692,14 @@ def opt_in_update(request):
             user_email = request.user.email
             first_name = request.user.first_name
             last_name = request.user.last_name
-            feedback_form_link = FEEDBACK_FORM_LINK_TEMPLATE.format(email=user_email, firstName=first_name, lastName=last_name)
+            feedback_form_link = FEEDBACK_FORM_LINK_TEMPLATE.format(email=user_email, firstName=first_name,
+                                                                    lastName=last_name)
 
             if opt_in_choice == 'opt-in-email':
                 resp = send_feedback_form(user_email, first_name, last_name, feedback_form_link)
                 if resp.status == 'error':
                     error_msg = resp.message
-            else: # opt-in-now
+            else:  # opt-in-now
                 redirect_url = feedback_form_link
 
     except Exception as e:
@@ -717,13 +728,13 @@ def send_feedback_form(user_email, firstName, lastName, formLink):
             'subject': 'Join the ISB-CGC community!',
             'text':
                 ('Dear {firstName} {lastName},\n\n' +
-                'ISB-CGC is funded by the National Cancer Institute (NCI) to provide cloud-based tools and data to the cancer research community.\n'+
-                'Your feedback is important to the NCI and us.\n'+
-                'Please help us by filling out this Google Form:\n'+
-                '{formLink}\n'+
-                'Thank you.\n\n'+
-                'ISB-CGC team').format(firstName=firstName, lastName=lastName, formLink=formLink),
-                'html': email_template.render(ctx)
+                 'ISB-CGC is funded by the National Cancer Institute (NCI) to provide cloud-based tools and data to the cancer research community.\n' +
+                 'Your feedback is important to the NCI and us.\n' +
+                 'Please help us by filling out this Google Form:\n' +
+                 '{formLink}\n' +
+                 'Thank you.\n\n' +
+                 'ISB-CGC team').format(firstName=firstName, lastName=lastName, formLink=formLink),
+            'html': email_template.render(ctx)
         }
         send_email_message(message_data)
     except Exception as e:
@@ -733,7 +744,3 @@ def send_feedback_form(user_email, firstName, lastName, formLink):
         'status': status,
         'message': message
     })
-
-
-
-
