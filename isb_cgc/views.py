@@ -47,7 +47,7 @@ from projects.models import Program
 from workbooks.models import Workbook
 from accounts.models import GoogleProject, UserOptInStatus
 from accounts.sa_utils import get_nih_user_details
-from accounts.utils import get_opt_in_response
+from accounts.utils import retrieve_opt_in_status
 # from notebooks.notebook_vm import check_vm_stat
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
@@ -160,21 +160,10 @@ def user_detail(request, user_id):
 
         # if not already recorded in UserOptInStatus, change opt_in_status based on google sheet response (if any)
         try:
-            if user_status_obj and user_status_obj.opt_in_status != UserOptInStatus.YES and \
-                    user_status_obj.opt_in_status != UserOptInStatus.NO:
-                opt_in_response = get_opt_in_response(request.user.email)
-
-                if not opt_in_response:
-                    user_status_obj.opt_in_status = UserOptInStatus.NOT_SEEN
-                elif opt_in_response["can_contact"] == 'Yes':
-                    user_status_obj.opt_in_status = UserOptInStatus.YES
-                elif opt_in_response["can_contact"] == 'No':
-                    user_status_obj.opt_in_status = UserOptInStatus.NO
-                user_status_obj.save()
+            retrieve_opt_in_status(request, user_status_obj)
         except ObjectDoesNotExist:
-            logger.error("[ERROR] Unable to retrieve UserOptInStatus object on log in.")
+            logger.error("[ERROR] Unable to retrieve UserOptInStatus object for user details.")
 
-        # is_opted_in = user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.YES
         if user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.YES:
             user_opt_in_status = "Opted-In"
         elif user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.NO:
@@ -245,17 +234,7 @@ def extended_login_view(request):
 
         # if not already recorded in UserOptInStatus, change opt_in_status based on google sheet response (if any)
         try:
-            if user_opt_in_stat_obj and user_opt_in_stat_obj.opt_in_status != UserOptInStatus.YES and \
-                    user_opt_in_stat_obj.opt_in_status != UserOptInStatus.NO:
-                opt_in_response = get_opt_in_response(request.user.email)
-
-                if not opt_in_response:
-                    user_opt_in_stat_obj.opt_in_status = UserOptInStatus.NOT_SEEN
-                elif opt_in_response["can_contact"] == 'Yes':
-                    user_opt_in_stat_obj.opt_in_status = UserOptInStatus.YES
-                elif opt_in_response["can_contact"] == 'No':
-                    user_opt_in_stat_obj.opt_in_status = UserOptInStatus.NO
-                user_opt_in_stat_obj.save()
+            retrieve_opt_in_status(request, user_opt_in_stat_obj)
         except ObjectDoesNotExist:
             logger.error("[ERROR] Unable to retrieve UserOptInStatus object on log in.")
     except Exception as e:
