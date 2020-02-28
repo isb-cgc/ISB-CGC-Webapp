@@ -92,28 +92,6 @@ require([
         }
     }
 
-    $('#submit-opt-in-btn').on('click', function() {
-        var opt_in_radio_value = $('input[name="opt-in-radio"]:checked').val();
-        send_opt_in_update(opt_in_radio_value);
-    });
-
-    $('#cancel-opt-in-btn').on('click', function() {
-        send_opt_in_update('opt-out');
-    });
-
-    $('#close-opt-in-btn').on('click', function() {
-        send_opt_in_update('opt-out');
-    });
-
-    $('#will-email-message').collapse({toggle: false});
-    $('[name="opt-in-radio"]').on('change', function() {
-        if ($(this).val() === "opt-in-email") {
-            $('#will-email-message').collapse('show');
-        } else {
-            $('#will-email-message').collapse('hide');
-        }
-    });
-
     /*
     var get_vm_instance = function (vm_div) {
         var vm_user = $(vm_div).find("input[name='vm_user']").val();
@@ -374,22 +352,3 @@ require([
     //
     // });
 });
-
-function send_opt_in_update(opt_in_selection) {
-    // Ajax call to update the backend of the user's selection
-    $.ajax({
-            type: 'POST',
-            url: BASE_URL + '/opt_in/update/',
-            dataType  :'json',
-            data: {'opt-in-radio': opt_in_selection},
-            success: function(data) {
-                let redirect_url = data['redirect-url'];
-                if (redirect_url != "")
-                {
-                    window.open(redirect_url, '_blank')
-                }
-            },
-            error: function(data) {
-            }
-        });
-}
