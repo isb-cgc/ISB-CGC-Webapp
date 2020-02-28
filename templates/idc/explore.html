@@ -89,8 +89,7 @@
                                   <li id = "search_related" role="presentation" class="filter-tab"><a href="#search_related_set" role="tab" data-toggle="tab" title="related" aria-expanded="false">Related</a></li>
                              </ul>
                         <div class="tab-content">
-
-                         <div id = "search_orig_set" role="tabpanel" class="tab-pane active">
+                            <div id = "search_orig_set" role="tabpanel" class="tab-pane active">
 {#                            <!-- TODO: We need to make this request the list of attributes from the server -->#}
 {#                            <!-- TODO: example here: -->#}
 {#                            {% for attr in set_attributes.origin_set.attributes %}#}
@@ -165,130 +164,123 @@
                                        <li class="checkbox extra-values">&emsp;<input type="checkbox"  value="THYROID" >Thyroid</li>
                                        <li class="checkbox extra-values">&emsp;<input type="checkbox" value="None" >Not Available/Other</li>
                                       </ul>
-                     </div>
+                                    </div>
                                  </li>
                          </ul>
                    </div>
+                            <div id = "search_derived_set" role="tabpanel" class="tab-pane">
+                                <ul class="list-group" role="tablist", aria-multiselectable="true">
+                                    <li class="list-group-item">
+                                         <div id="segmentation_heading" class="list-group-item__heading">
+                                         <a role="button" data-toggle="collapse"  href="#segmentation" aria-expanded="false" aria-controls="segmentation" class="">
+                                         <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>Segmentation</a>
+                                          </div>
+                                         <div id="segmentation" class="collapse list-group-item__body">
+                                      <ul style="list-style: none;">
+                                         <li>&emsp;<input type="checkbox" checked value="yes">&emsp;Segmentation Available</li>
+                                        <li>&emsp;<input type="checkbox" checked value="no">&emsp;Segmentation Not Available</li>
+                                      </ul>
+                                  </div>
+                                    </li>
+                                </ul>
+                        </div>
+                            <div id = "search_related_set" role="tabpanel" class="tab-pane">
+                                   <ul class="list-group" role="tablist" aria-multiselectable="true">
+        {#                            <!-- TODO: Same as above here but for relateds-->#}
 
 
+                                   <li class="list-group-item">
+                                       <div id="disease_heading" class="list-group-item__heading">
+                                           <a role="button" data-toggle="collapse"  href="#disease" aria-expanded="false" aria-controls="disease">
+                                               <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> Disease Code</a>
+                                      </div>
 
-                    <div id = "search_derived_set" role="tabpanel" class="tab-pane">
-                        <ul class="list-group" role="tablist", aria-multiselectable="true">
-                            <li class="list-group-item">
-                             <div id="segmentation_heading" class="list-group-item__heading">
-                             <a role="button" data-toggle="collapse"  href="#segmentation" aria-expanded="false" aria-controls="segmentation" class="">
-                             <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>Segmentation</a>
-                              </div>
-                             <div id="segmentation" class="collapse list-group-item__body">
-                          <ul style="list-style: none;">
-                             <li>&emsp;<input type="checkbox" checked value="yes">&emsp;Segmentation Available</li>
-                            <li>&emsp;<input type="checkbox" checked value="no">&emsp;Segmentation Not Available</li>
-                          </ul>
-                      </div>
-                            </li>
-                        </ul>
-                    </div>
+                                       <div id="disease" class="collapse list-group-item__body">
+                                           <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                           <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                        <ul id="disease_list" style="list-style: none;">
+                                             <!-- <li class="checkbox"> <input type="checkbox" value="BLCA">BLCA</li> -->
+                                        </ul>
+                                      </div>
+                                   </li>
 
+                                    <li class="list-group-item">
+                                      <div id="vital_heading" class="list-group-item__heading">
+                                      <a role="button" data-toggle="collapse"  href="#vital_status" aria-expanded="false" aria-controls="vital_status">
+                                          <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> Vital Status</a>
+                                     </div>
 
-                   <div id = "search_related_set" role="tabpanel" class="tab-pane">
-                           <ul class="list-group" role="tablist", aria-multiselectable="true">
-{#                            <!-- TODO: Same as above here but for relateds-->#}
+                                    <div id="vital_status" class="collapse list-group-item__body">
+                                         <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                           <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                       <ul id="vital_list" style="list-style: none;">
+                                          <li class="checkbox">&emsp;<input type="checkbox"  value="Alive" >Alive</li>
+                                         <li class="checkbox">&emsp;<input type="checkbox" value="Dead" >Dead</li>
+                                         <li class="checkbox">&emsp;<input type="checkbox" value="None">NA</li>
+                                        </ul>
+                                     </div>
+                                    </li>
 
+                                    <li class="list-group-item">
+                                      <div id="gender_heading" class="list-group-item__heading">
+                                           <a role="button" data-toggle="collapse"  href="#gender" aria-expanded="false" aria-controls="vital">
+                                          <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i>Gender</a>
+                                      </div>
 
-                           <li class="list-group-item">
-                               <div id="disease_heading" class="list-group-item__heading">
-                                   <a role="button" data-toggle="collapse"  href="#disease" aria-expanded="false" aria-controls="disease">
-                                       <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> Disease Code</a>
-                              </div>
+                                     <div id="gender" class="collapse list-group-item__body">
+                                          <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                           <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                      <ul id="gender_list" style="list-style: none;">
+                                            <li class="checkbox">&emsp;<input type="checkbox" value="MALE" >Male</li>
+                                          <li class="checkbox">&emsp;<input type="checkbox" value="FEMALE" >Female</li>
+                                         <li class="checkbox">&emsp;<input type="checkbox" value="None" >NA</li>
+                                      </ul>
+                                      </div>
+                                   </li>
 
-                               <div id="disease" class="collapse list-group-item__body">
+                                   <li class="list-group-item">
+                                    <div id="age_heading" class="list-group-item__heading">
+                                     <a role="button" data-toggle="collapse"  href="#age" aria-expanded="false" aria-controls="age">
+                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i>Age</a>
+                                   </div>
+
+                                  <div id="age" class="collapse list-group-item__body">
+                                    <div id="age_slide"></div>
+                                     <input id="inp_age_slide" type="text" value="0-120">
+                                      <button onclick='refreshAge()'>Refresh</button>
+                                 </div>
+                                </li>
+
+                                 <li class="list-group-item">
+                                    <div id="race_heading" class="list-group-item__heading">
+                                     <a role="button" data-toggle="collapse"  href="#race" aria-expanded="false" aria-controls="race">
+                                      <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i>Race</a>
+                                  </div>
+
+                                 <div id="race" class="collapse list-group-item__body">
                                    <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                   <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                <ul id="disease_list" style="list-style: none;">
-                                     <!-- <li class="checkbox"> <input type="checkbox" value="BLCA">BLCA</li> -->
-                                </ul>
-                              </div>
-                           </li>
+                                     <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                    <ul id="race_list" style="list-style: none;">
 
-                            <li class="list-group-item">
-                              <div id="vital_heading" class="list-group-item__heading">
-                              <a role="button" data-toggle="collapse"  href="#vital_status" aria-expanded="false" aria-controls="vital_status">
-                                  <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> Vital Status</a>
-                             </div>
+                                    </ul>
+                                  </div>
+                                  </li>
 
-                            <div id="vital_status" class="collapse list-group-item__body">
-                                 <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                   <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                               <ul id="vital_list" style="list-style: none;">
-                                  <li class="checkbox">&emsp;<input type="checkbox"  value="Alive" >Alive</li>
-                                 <li class="checkbox">&emsp;<input type="checkbox" value="Dead" >Dead</li>
-                                 <li class="checkbox">&emsp;<input type="checkbox" value="None">NA</li>
-                                </ul>
-                             </div>
-                            </li>
+                                  <li class="list-group-item">
+                                   <div id="ethnicity_heading" class="list-group-item__heading">
+                                   <a role="button" data-toggle="collapse"  href="#ethnicity" aria-expanded="false" aria-controls="ethnicity">
+                                   <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i>Ethnicity</a>
+                                    </div>
 
-                            <li class="list-group-item">
-                              <div id="gender_heading" class="list-group-item__heading">
-                                   <a role="button" data-toggle="collapse"  href="#gender" aria-expanded="false" aria-controls="vital">
-                                  <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i>Gender</a>
-                              </div>
+                                   <div id="ethnicity" class="collapse list-group-item__body">
+                                        <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                     <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                   <ul id="ethnicity_list" style="list-style: none;"></ul>
+                                   </div>
+                                  </li>
+                               </ul>
 
-                             <div id="gender" class="collapse list-group-item__body">
-                                  <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                   <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                              <ul id="gender_list" style="list-style: none;">
-                                    <li class="checkbox">&emsp;<input type="checkbox" value="MALE" >Male</li>
-                                  <li class="checkbox">&emsp;<input type="checkbox" value="FEMALE" >Female</li>
-                                 <li class="checkbox">&emsp;<input type="checkbox" value="None" >NA</li>
-                              </ul>
-                              </div>
-                           </li>
-
-                           <li class="list-group-item">
-                            <div id="age_heading" class="list-group-item__heading">
-                             <a role="button" data-toggle="collapse"  href="#age" aria-expanded="false" aria-controls="age">
-                                <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i>Age</a>
-                           </div>
-
-                          <div id="age" class="collapse list-group-item__body">
-                            <div id="age_slide"></div>
-                             <input id="inp_age_slide" type="text" value="0-120">
-                              <button onclick='refreshAge()'>Refresh</button>
-                         </div>
-                        </li>
-
-                         <li class="list-group-item">
-                            <div id="race_heading" class="list-group-item__heading">
-                             <a role="button" data-toggle="collapse"  href="#race" aria-expanded="false" aria-controls="race">
-                              <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i>Race</a>
-                          </div>
-
-                         <div id="race" class="collapse list-group-item__body">
-                           <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                             <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                            <ul id="race_list" style="list-style: none;">
-
-                            </ul>
-                          </div>
-                          </li>
-
-                          <li class="list-group-item">
-                           <div id="ethnicity_heading" class="list-group-item__heading">
-                           <a role="button" data-toggle="collapse"  href="#ethnicity" aria-expanded="false" aria-controls="ethnicity">
-                           <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i>Ethnicity</a>
-                            </div>
-
-                           <div id="ethnicity" class="collapse list-group-item__body">
-                                <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                             <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                           <ul id="ethnicity_list" style="list-style: none;"></ul>
-                           </div>
-                          </li>
-                       </ul>
-
-            </div>
-
-
+                    </div>
                         </div>
                          </div>
                       </div>
@@ -322,7 +314,7 @@
                                  <div class="panel-body bar-charts-div"></div>
                              </div>
 
-                             <div id = "results_related_set" role="tabpanel" class="tab-pane panel" style="display: block;">
+                             <div id = "results_related_set" role="tabpanel" class="tab-pane panel">
                                  <div class="panel-body bar-charts-div related-graphs">
                                      <div id="disease_code_chart" class="bar-chart"></div>
                                      <div id="vital_status_chart" class="bar-chart"></div>
