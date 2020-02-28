@@ -8,7 +8,7 @@ require.config({
         tablesorter: 'libs/jquery.tablesorter.min',
         base: 'base',
         imagesearch: 'image_search',
-        ploty: 'libs/plotly-latest.min'
+        plotly: 'libs/plotly-latest.min'
     },
     shim: {
         'bootstrap': ['jquery'],
