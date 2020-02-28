@@ -468,9 +468,11 @@ def explore_data_page(request):
             counts_only=True, record_limit=0
         )
 
+        print(attr_by_source['related_set']['attributes'])
+
         for attr in faceted_counts['clinical']['facets']:
             this_attr_vals = attr_by_source['related_set']['attributes'][attr]['vals']
-            this_attr = attr_by_source['origin_set']['attributes'][attr]['obj']
+            this_attr = attr_by_source['related_set']['attributes'][attr]['obj']
             values = []
             if len(this_attr_vals):
                 for val in this_attr_vals:
