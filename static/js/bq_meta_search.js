@@ -653,7 +653,6 @@ require([
 
     var set_gcp_open_btn = function (selection){
         $(selection).find(".open-gcp-btn").on('click', function () {
-            console.log('hello');
             $('#gcp-open-btn').attr('href',$(this).data('gcpurl'));
             if (typeof(Storage) !== "undefined") {
                 gcp_modal_disabled |= sessionStorage.getItem("gcp_modal_disabled") == "true";
