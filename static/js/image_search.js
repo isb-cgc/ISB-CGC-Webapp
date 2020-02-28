@@ -159,27 +159,32 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
     window.editProjectsTable = function(tableId, scopeId) {
         var project_scope = document.getElementById(scopeId).selectedOptions[0].value;
 
-        tableElem = document.getElementById(tableId);
-        countElems = $(tableElem).find('.projects_table_num_cohort');
+        var tableElem = document.getElementById(tableId);
+        var countElems = $(tableElem).find('.projects_table_num_cohort');
         //countElems.forEach( function(element) { element.innerHTML='0'});
         for (i = 0; i < countElems.length; i++) {
             countElems[i].innerHTML = '0';
         }
 
-        projKeys = Object.keys(originalDataCounts.collection_id);
+        var projKeys = Object.keys(originalDataCounts.collection_id);
         for (i = 0; i < projKeys.length; i++) {
-            idStr = projKeys[i]
-            countStr = originalDataCounts.collection_id[idStr].toString();
-            patientElemId = 'patient_col_' + idStr;
+            var idStr = projKeys[i]
+            var countStr = originalDataCounts.collection_id[idStr].toString();
+            var patientElemId = 'patient_col_' + idStr;
             if (document.getElementById(patientElemId)) {
                 if ((project_scope === 'All') || (project_scope === idStr)) {
                     document.getElementById(patientElemId).innerHTML = countStr
                 }
             }
-            projectElemId = 'project_row_' + idStr;
+            var projectElemId = 'project_row_' + idStr;
             if (document.getElementById(projectElemId)) {
                 if ((project_scope === 'All') || (project_scope === idStr)) {
                     document.getElementById(projectElemId).classList.remove('hide');
+                    if (project_scope === idStr){
+                        document.getElementById(projectElemId).classList.add("selected_grey");
+                        window.projIdSel = [idStr];
+                        addStudyOrSeries([idStr], [], "studies_table");
+                     }
                 } else {
                     document.getElementById(projectElemId).classList.add('hide');
                 }
@@ -234,14 +239,14 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
     }
 
     window.toggleProj = function(projRow, projectId) {
-        num_cohort = parseInt($(projRow).find(".projects_table_num_cohort")[0].innerHTML)
+        var num_cohort = parseInt($(projRow).find(".projects_table_num_cohort")[0].innerHTML)
         if (num_cohort === 0) {
             alert('no patients for this project in the selected cohort')
             return;
         }
         if (projRow.classList.contains("selected_grey")) {
             $(projRow).removeClass("selected_grey");
-            projPos = projIdSel.indexOf(projectId)
+            projPos = window.projIdSel.indexOf(projectId)
             if (projPos > -1) {
                 projIdSel.splice(projPos, 1);
             }
@@ -249,7 +254,7 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
 
         } else {
             $(projRow).addClass("selected_grey");
-            projIdSel.push(projectId);
+            window.projIdSel.push(projectId);
             addStudyOrSeries([projectId], [], "studies_table");
         }
     }
@@ -570,8 +575,8 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
                     createProjectsTable("projects_table");
                     mkSlider('age_slide', 'inp_age_slide', 'age_set', 'Age', 'age_at_diagnosis_btw', true);
                 } else {
-                    editProjectsTable('projects_table', 'project_scope');
                     resetTables('projects_table', 'studies_table', 'series_table');
+                    editProjectsTable('projects_table', 'project_scope');
                 }
                 resolveAllPlots();
 
