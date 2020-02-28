@@ -68,12 +68,10 @@
     <div class ="row">
         <div class="tab-content data-tab-content">
             <div class="tab-pane data-tab active" role="tabpanel">
-
-                 <div class="col-lg-4">
-
+                 <div class="col-lg-3">
                      <div class="tabpanel data-tab-content-panel">
                          <div class="panel panel-default">
-                         <div class="panel-heading clearfix"><h4 class="panel-title">Search Scope:</h4></div>
+                         <div class="panel-heading clearfix"><h4 class="panel-title">Search Scope</h4></div>
                          <div class="panel-body">
                              <select id="project_scope" onchange="updateSearchScope(this)">
                              <option value="All" >All data</option>
@@ -84,19 +82,15 @@
 
                       <div class="filter-panel" role="tabpanel">
                          <div class="tabpanel panel-default" role="tabpanel">
-                             <div class="panel-heading clearfix"><h4 class="panel-title">Configuration:</h4></div>
-
+                             <div class="panel-heading clearfix"><h4 class="panel-title">Configuration</h4></div>
                               <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
-                              <li id = "search_orig" role="presentation" class="filter-tab active"><a href="#search_orig_set" role="tab" data-toggle="tab" title="orig" aria-expanded="true">Original</a></li>
-                              <li id = "search_derived" role="presentation" class="filter-tab"><a href="#search_derived_set" role="tab" data-toggle="tab" title="derived" aria-expanded="false"">Derived</a></li>
-                              <li id = "search_related" role="presentation" class="filter-tab"><a href="#search_related_set" role="tab" data-toggle="tab" title="related" aria-expanded="false">Related</a></li>
+                                  <li id = "search_orig" role="presentation" class="filter-tab active"><a href="#search_orig_set" role="tab" data-toggle="tab" title="orig" aria-expanded="true">Original</a></li>
+                                  <li id = "search_derived" role="presentation" class="filter-tab"><a href="#search_derived_set" role="tab" data-toggle="tab" title="derived" aria-expanded="false"">Derived</a></li>
+                                  <li id = "search_related" role="presentation" class="filter-tab"><a href="#search_related_set" role="tab" data-toggle="tab" title="related" aria-expanded="false">Related</a></li>
                              </ul>
-
-
                         <div class="tab-content">
 
                          <div id = "search_orig_set" role="tabpanel" class="tab-pane active">
-
 {#                            <!-- TODO: We need to make this request the list of attributes from the server -->#}
 {#                            <!-- TODO: example here: -->#}
 {#                            {% for attr in set_attributes.origin_set.attributes %}#}
@@ -108,19 +102,21 @@
 {#                                    </div>#}
 {##}
 {#                                    <div id="{{ attr.name }}" class="collapse">#}
-{#                                        <ul id="{{ attr.name }}_list" style="list-style: none;">#}
+{#                                        <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">#}
 {#                                            {% for val in attr.values %}#}
-{#                                                <li class="checkbox{% if attr.values|length > 5 and forloop.counter >= 6 %} extra-values{% endif %}">&emsp;<input type="checkbox" checked value="{{ val.value }}"#}
+{#                                                <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">#}
+{#                                                    <label>#}
+{#                                                        <input type="checkbox" checked value="{{ val.value }}"#}
 {#                                                             onclick="updateFilterSelection('{{ attr.name }}_list', '{{ attr.name }}_set','{{ attr.display_name }}','{{ attr.name }}',false,false)">#}
-{#                                                <span></span>#}
-{#                                                    {% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %} <span class="count">({{ val.count }})</span></li>#}
-
+{#                                                        {% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %} <span class="float-right case_count count">{{ val.count }}</span>#}
+{#                                                    </label>#}
+{#                                                </li>#}
 {#                                            {% endfor %}#}
 {#                                        </ul>#}
-{#                                        {% if attr.values|length > 5 %} #}
-{#                                          <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>#}
-{#                                          <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>#}
-{#                                        {% endif %} #}
+{#                                        <p style="display: block; clear: both;" >#}
+{#                                            {% if attr.values|length > 5 %}<a class="show-more">show more</a><a class="show-less" style="display: none;">show less</a>{% else %}<span>&nbsp;</span>{% endif %}#}
+{#                                            <span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span>#}
+{#                                        </p>#}
 {#                                    </div>#}
 {#                                 </li>#}
 {#                             </ul>#}
@@ -196,33 +192,8 @@
 
                    <div id = "search_related_set" role="tabpanel" class="tab-pane">
                            <ul class="list-group" role="tablist", aria-multiselectable="true">
-{#                            <!-- TODO: Same as above -->#}
-{#                            {% for attr in set_attributes.related_set.attributes %}#}
-{#                             <ul class="list-group" role="tablist" aria-multiselectable="true">#}
-{#                                 <li class="list-group-item">#}
-{#                                    <div id="{{ attr.name }}_heading" class="list-group-item__heading">#}
-{#                                        <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">#}
-{#                                            <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}</a>#}
-{#                                    </div>#}
-{##}
-{#                                    <div id="{{ attr.name }}" class="collapse">#}
-{#                                        <ul id="{{ attr.name }}_list" style="list-style: none;">#}
-{#                                            {% for val in attr.values %}#}
-{#                                                <li class="checkbox{% if attr.values|length > 5 and forloop.counter >= 6 %} extra-values{% endif %}">&emsp;<input type="checkbox" checked value="{{ val.value }}"#}
-{#                                                             onclick="updateFilterSelection('{{ attr.name }}_list', '{{ attr.name }}_set','{{ attr.display_name }}','{{ attr.name }}',false,false)">#}
-{#                                                <span></span>#}
-{#                                                    {% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %} <span class="count">({{ val.count }})</span></li>#}
+{#                            <!-- TODO: Same as above here but for relateds-->#}
 
-{#                                            {% endfor %}#}
-{#                                        </ul>#}
-{#                                        {% if attr.values|length > 5 %} #}
-{#                                          <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>#}
-{#                                          <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>#}
-{#                                        {% endif %} #}
-{#                                    </div>#}
-{#                                 </li>#}
-{#                             </ul>#}
-{#                            {%  endfor %}#}
 
                            <li class="list-group-item">
                                <div id="disease_heading" class="list-group-item__heading">
@@ -238,7 +209,6 @@
                                 </ul>
                               </div>
                            </li>
-
 
                             <li class="list-group-item">
                               <div id="vital_heading" class="list-group-item__heading">
@@ -322,76 +292,54 @@
                         </div>
                          </div>
                       </div>
-
-
                  </div>
 
-                 <div class="col-lg-8 col-md-8">
-
+                 <div class="col-lg-9 col-md-9">
                      <div class="tabpanel data-tab-content-panel">
                          <div class="panel panel-default">
-                         <div class="panel-heading clearfix"><h4 class="panel-title">Filter Definition:</h4></div>
+                         <div class="panel-heading clearfix"><h4 class="panel-title">Filter Definition</h4></div>
                          <div class="panel-body">
                                 <div id ="search_def"></div>
                          </div>
                          </div>
                      </div>
-
-
-
                      <div class="filter-panel panel" role="tabpanel">
                           <div class="tabpanel panel-default" role="tabpanel">
-                              <div class="panel-heading clearfix"><h4 class="panel-title">Search Results:</h4></div>
-                                 <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
-                                     <li id = "results_orig" role="presentation" class="filter-tab active"><a href="#results_orig_set" role="tab" data-toggle="tab" title="orig" aria-expanded="true">Original</a></li>
-                                     <li id = "results_derived" role="presentation" class="filter-tab"><a href="#results_derived_set" role="tab" data-toggle="tab" title="derived" aria-expanded="false"">Derived</a></li>
-                                    <li id = "results_related" role="presentation" class="filter-tab"><a href="#results_related_set" role="tab" data-toggle="tab" title="related" aria-expanded="false">Related</a></li>
+                              <div class="panel-heading clearfix"><h4 class="panel-title">Search Results</h4></div>
+                              <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
+                                 <li id = "results_orig" role="presentation" class="filter-tab active"><a href="#results_orig_set" role="tab" data-toggle="tab" title="orig" aria-expanded="true">Original</a></li>
+                                 <li id = "results_derived" role="presentation" class="filter-tab"><a href="#results_derived_set" role="tab" data-toggle="tab" title="derived" aria-expanded="false">Derived</a></li>
+                                 <li id = "results_related" role="presentation" class="filter-tab"><a href="#results_related_set" role="tab" data-toggle="tab" title="related" aria-expanded="false">Related</a></li>
                               </ul>
-
-                         <div class="tab-content">
-                           <div id = "results_orig_set" role="tabpanel" class="tab-pane active panel">
-                                <div class="panel-body bar-charts-div">
-                                  <div id="modality_chart" class="bar-chart"></div>
-                                  <div id="body_part_examined_chart" class="bar-chart"></div>
-                                </div>
-                           </div>
+                             <div class="tab-content">
+                               <div id = "results_orig_set" role="tabpanel" class="tab-pane active panel">
+                                    <div class="panel-body bar-charts-div">
+                                      <div id="modality_chart" class="bar-chart"></div>
+                                      <div id="body_part_examined_chart" class="bar-chart"></div>
+                                    </div>
+                               </div>
                              <div id = "results_derived_set" role="tabpanel" class="tab-pane panel">
                                  <div class="panel-body bar-charts-div"></div>
                              </div>
 
-                             <div id = "results_related_set" role="tabpanel" class="tab-pane panel" style="display-block;">
-
-
+                             <div id = "results_related_set" role="tabpanel" class="tab-pane panel" style="display: block;">
                                  <div class="panel-body bar-charts-div related-graphs">
                                      <div id="disease_code_chart" class="bar-chart"></div>
                                      <div id="vital_status_chart" class="bar-chart"></div>
                                      <div id="gender_chart" class="bar-chart"></div>
                                      <div id="age_chart" class="bar-chart"></div>
-
-
                                      <div id="race_chart" class="bar-chart"></div>
                                     <div id="ethnicity_chart" class="bar-chart"></div>
-
-
                                  </div>
-                                   <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="showMoreGraphs()">Show More</button></div>
-                                     <div class="less-graphs" style="display: none; width:100%"><button class="btn btn-link" role="button" onclick="showLessGraphs()">Show Less</button></div>
-
-
+                                 <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="showMoreGraphs()">Show More</button></div>
+                                 <div class="less-graphs" style="display: none; width:100%"><button class="btn btn-link" role="button" onclick="showLessGraphs()">Show Less</button></div>
                              </div>
-
-
-
-                         </div>
+                            </div>
                           </div>
-
-
-                     </div>
-
-
+                    </div>
                     <div class="tabpanel data-tab-content-panel">
                          <div class="panel panel-default">
-                         <div class="panel-heading clearfix"><h4 class="panel-title">Collections:</h4></div>
+                         <div class="panel-heading clearfix"><h4 class="panel-title">Collections</h4></div>
                          <div class="panel-body">
                                 <table >
                              <thead id="projects_table_head">
@@ -400,56 +348,48 @@
                              </tr>
                              </thead>
                              <tbody id="projects_table" class="set_height">
-
                              </tbody>
                           </table>
                          </div>
                          </div>
                      </div>
 
-
                       <div class="tabpanel data-tab-content-panel">
                          <div class="panel panel-default">
-                         <div class="panel-heading clearfix"><h4 class="panel-title">Selected Studies:</h4></div>
-                         <div class="panel-body">
-                               <table >
-                              <thead id="studies_table_head">
-                             <tr>
-                                 <th >Project Name </th><th >Patient Id</th><th>Study Id</th><th>Study Description</th>
-                             </tr>
-                              </thead>
+                             <div class="panel-heading clearfix"><h4 class="panel-title">Selected Studies</h4></div>
+                             <div class="panel-body">
+                                   <table >
+                                  <thead id="studies_table_head">
+                                 <tr>
+                                     <th >Project Name </th><th >Patient Id</th><th>Study Id</th><th>Study Description</th>
+                                 </tr>
+                                  </thead>
 
-                             <tbody  id="studies_table" class="set_height">
-                              </tbody>
-
-                          </table >
-
-                         </div>
+                                 <tbody  id="studies_table" class="set_height">
+                                  </tbody>
+                              </table >
+                             </div>
                          </div>
                      </div>
-
 
                      <div class="tabpanel data-tab-content-panel">
                          <div class="panel panel-default">
-                         <div class="panel-heading clearfix"><h4 class="panel-title">Selected Series:</h4></div>
-                         <div class="panel-body">
-                                <table>
-                             <thead id="series_table_head">
-                              <tr>
-                                <th>Study Id</th><th>Series Id</th><th>Modality</th><th>Body Part Examined</th>
-                              </tr>
-                              </thead>
+                             <div class="panel-heading clearfix"><h4 class="panel-title">Selected Series</h4></div>
+                             <div class="panel-body">
+                                    <table>
+                                 <thead id="series_table_head">
+                                  <tr>
+                                    <th>Study Id</th><th>Series Id</th><th>Modality</th><th>Body Part Examined</th>
+                                  </tr>
+                                  </thead>
 
-                              <tbody id="series_table" class="set_height">
+                                  <tbody id="series_table" class="set_height">
 
-                              </tbody>
-                          </table>
-
-                         </div>
+                                  </tbody>
+                              </table>
+                             </div>
                          </div>
                      </div>
-
-
                  </div>
             </div>
              </div>
