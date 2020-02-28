@@ -449,27 +449,80 @@ def explore_data_page(request):
         if 'collection_id' not in filters:
             filters['collection_id'] = [x.lower().replace("-","_") for x in list(tcga_in_tcia.values_list('name', flat=True))]
 
-        faceted_counts_by_source = {}
-
         for source in sources:
-            if source.name not in attr_by_source:
-                attr_by_source[source.name] = {}
-            attr_by_source[source.name] = source.get_collection_attr(for_ui=True)
-            faceted_counts_by_source[source.name] = get_collex_metadata(
-                filters, list(attr_by_source[source.name].values_list('name', flat=True)),
-                counts_only=True, record_limit=0
-            )
+            set_type = None
+            if source.version.data_type == DataVersion.IMAGE_DATA:
+                set_type = 'origin_set'
+            else:
+                set_type = 'related_set'
+            if set_type not in attr_by_source:
+                attr_by_source[set_type] = {}
 
-        context['attributes'] = attr_by_source
+            attrs = source.get_collection_attr(for_ui=True)
+            attr_by_source[set_type]['attributes'] = {attr.name: {'obj': attr, 'vals':None} for attr in attrs}
+            for attr in attr_by_source[set_type]['attributes']:
+                attr_by_source[set_type]['attributes'][attr]['vals'] = attr_by_source[set_type]['attributes'][attr]['obj'].get_display_values()
+
+        faceted_counts = get_collex_metadata(
+            filters, list(attrs.values_list('name', flat=True)),
+            counts_only=True, record_limit=0
+        )
+
+        for attr in faceted_counts['clinical']['facets']:
+            this_attr_vals = attr_by_source['related_set']['attributes'][attr]['vals']
+            this_attr = attr_by_source['origin_set']['attributes'][attr]['obj']
+            values = []
+            if len(this_attr_vals):
+                for val in this_attr_vals:
+                    values.append({
+                        'value': val,
+                        'display_value': this_attr_vals[val],
+                        'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
+                    })
+            else:
+                for val in faceted_counts['clinical']['facets'][attr]:
+                    values.append({
+                        'value': val,
+                        'display_value': val if this_attr.preformatted_values else None,
+                        'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
+                    })
+            attr_by_source['related_set']['attributes'][attr]['vals'] = values
+
+        for attr in faceted_counts['facets']['cross_collex']:
+            this_attr_vals = attr_by_source['origin_set']['attributes'][attr]['vals']
+            this_attr = attr_by_source['origin_set']['attributes'][attr]['obj']
+            values = []
+            if len(this_attr_vals):
+                for val in this_attr_vals:
+                    values.append({
+                        'value': val,
+                        'display_value': this_attr_vals[val],
+                        'count': faceted_counts['facets']['cross_collex'][attr][val] if val in faceted_counts['facets']['cross_collex'][attr] else 0
+                    })
+            else:
+                for val in faceted_counts['facets']['cross_collex'][attr]:
+                    values.append({
+                        'value': val,
+                        'display_value': val if this_attr.preformatted_values else None,
+                        'count': faceted_counts['facets']['cross_collex'][attr][val] if val in faceted_counts['facets']['cross_collex'][attr] else 0
+                    })
+            attr_by_source['origin_set']['attributes'][attr]['vals'] = values
+
+        for set in attr_by_source:
+            attr_by_source[set]['attributes'] = [{'name': x,
+                 'display_name': attr_by_source[set]['attributes'][x]['obj'].display_name,
+                 'values': attr_by_source[set]['attributes'][x]['vals']
+                 } for x in attr_by_source[set]['attributes']]
+
+        context['set_attributes'] = attr_by_source
         context['tcga_collections'] = tcga_in_tcia
-        context['counts'] = faceted_counts_by_source
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
         logger.exception(e)
         messages.error(request, "Encountered an error when attempting to load the page - please contact the administrator.")
 
-    return render(request, 'idc/explore.html', {'request':request})
+    return render(request, 'idc/explore.html', context)
 
 @login_required
 def ohif_test_page(request):
