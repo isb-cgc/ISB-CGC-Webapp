@@ -46,28 +46,22 @@
 {% block link_page_name %}help{% endblock %}
 {% block page_name %}cohort-details{% endblock %}
 
-{% block content %}
-
+{% block page_header %}
     <div class="page-heading">
+        <div class="container" style="display: block;">
+                <ol class="breadcrumb">
+                    <li><a href="/dashboard/">Your Dashboard</a></li>
+                    <li><a href="/explore/">Explore</a></li>
+                </ol>
 
-
-
-<div class="container" style="display: block;">
-
-        <ol class="breadcrumb">
-            <li><a href="/dashboard/">Your Dashboard</a></li>
-            <li><a href="/explore/">Explore</a></li>
-        </ol>
-
-   <!-- <h1 class="page-header pull-left" role="heading" aria-level="1">Explore</h1> -->
-
-        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal" title="Please select at least one filter." disabled="disabled">Save As New Cohort</button>
-
-</div>
-
-
+                <h1 class="page-header pull-left" role="heading" aria-level="1">Explore Image Data</h1>
+                <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal" title="Please select at least one filter." disabled="disabled">Save As New Cohort</button>
+        </div>
     </div>
+{% endblock %}
 
+
+{% block content %}
 
 <div class="container" style="display:block">
     <div class ="row">
