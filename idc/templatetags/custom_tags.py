@@ -37,7 +37,6 @@ register = template.Library()
 
 logger = logging.getLogger('main_logger')
 
-
 # If an attribute's values should be alphanumerically sorted, list them here
 ALPHANUM_SORT = [
 
@@ -100,11 +99,9 @@ def quick_js_bracket_replace(matchobj):
     else:
         return '\u003E'
 
-
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
-
 
 @register.filter
 def check_for_order(items, attr):
@@ -124,69 +121,22 @@ def check_for_order(items, attr):
         # Otherwise, sort them by count, descending
         return sorted(items, key=lambda k: k['count'], reverse=True)
 
-
-# A specific filter for producing readable token names in cohort filter displays
 @register.filter
-def get_feat_displ_name(name):
-    return get_readable_name(name)
-
-
-@register.filter
-def get_readable_name(csv_name, attr=None):
-
-    is_mutation = False
-    is_data_type = False
-    is_user_data = False
-
-    if 'MUT:' in csv_name or (attr and 'MUT:' in attr):
-        is_mutation = True
-
-    if 'user_' in csv_name:
-        is_user_data = True
-
-    csv_name = csv_name.replace('CLIN:', '').replace('MUT:', '').replace('SAMP:', '')
-
-    if attr:
-        attr = attr.replace('CLIN:', '').replace('MUT:', '').replace('SAMP:', '')
-
-    # Mutation Filter case
-    if is_mutation:
-        if not attr:
-            gene = csv_name.split(':')[0].upper()
-            type = string.capwords(csv_name.split(':')[1])
-            return gene + ' [' + type
-        else:
-            return string.capwords(csv_name) + ']'
-    # Data type filters
-    elif is_data_type and attr:
-        if csv_name == '1':
-            return 'True'
-        elif csv_name == '0':
-            return 'False'
-        else:
-            return 'None'
-    # Clinical filters
-    elif attr == 'Project' or attr == 'Program Name':
-        return csv_name.upper()
-    else:
-        return csv_name
-
+def format_val(this_val):
+    return string.capwords(this_val)
 
 @register.filter
 def remove_whitespace(str):
     return str.replace(' ', '')
-
 
 @register.filter
 def replace_whitespace(str, chr):
     result = re.sub(re.compile(r'\s+'), chr, str)
     return result
 
-
 @register.filter
 def get_data_attr_id(value, attr):
     return attr + '-' + value
-
 
 @register.filter
 def has_user_data(programs):

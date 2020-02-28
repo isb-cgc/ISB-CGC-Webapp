@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load custom_tags %}
 {% load staticfiles %}
 
 {% comment %}
@@ -95,27 +96,34 @@
                         <div class="tab-content">
 
                          <div id = "search_orig_set" role="tabpanel" class="tab-pane active">
-                             <ul class="list-group" role="tablist", aria-multiselectable="true">
-                            <!-- TODO: We need to make this request the list of attributes from the server -->
-                            <!-- TODO: example here: -->
-            {#                {% for attr in related_data %}#}
-            {#                    <div id="{{ attr.name }}_heading" class="list-group-item__heading">#}
-            {#                        <a role="button" data-toggle="collapse"  href="#disease" aria-expanded="false" aria-controls="{{ attr.name }}">#}
-            {#                            <i class="fa fa-caret-right"></i> {{ attr.display_name }}</a>#}
-            {#                    </div>#}
-            {##}
-            {#                    <div id="{{ attr.name }}" class="collapse">#}
-            {#                        <ul id="{{ attr.name }}_list" style="list-style: none;">#}
-            {#                            {% for val in attr.values %}#}
-            {#                                <li>&emsp;<input type="checkbox" checked value="{{ val.value }}" #}
-            {#                                             onclick="updateFilterSelection('{{ attr.name }}_list', '{{ attr.name }}_set','{{ attr.display_name }}','{{ attr.name }}',false,false)">#}
-            {#                                    {{ val.display }}</li>#}
-            {#                            {% endfor %}#}
-            {##}
-            {#                        </ul>#}
-            {#                    </div>#}
-            {##}
-            {#                {%  endfor %}#}
+
+{#                            <!-- TODO: We need to make this request the list of attributes from the server -->#}
+{#                            <!-- TODO: example here: -->#}
+{#                            {% for attr in set_attributes.origin_set.attributes %}#}
+{#                             <ul class="list-group" role="tablist" aria-multiselectable="true">#}
+{#                                 <li class="list-group-item">#}
+{#                                    <div id="{{ attr.name }}_heading" class="list-group-item__heading">#}
+{#                                        <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">#}
+{#                                            <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}</a>#}
+{#                                    </div>#}
+{##}
+{#                                    <div id="{{ attr.name }}" class="collapse">#}
+{#                                        <ul id="{{ attr.name }}_list" style="list-style: none;">#}
+{#                                            {% for val in attr.values %}#}
+{#                                                <li>&emsp;<input type="checkbox" checked value="{{ val.value }}"#}
+{#                                                             onclick="updateFilterSelection('{{ attr.name }}_list', '{{ attr.name }}_set','{{ attr.display_name }}','{{ attr.name }}',false,false)">#}
+{#                                                <span></span>#}
+{#                                                    {% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %} <span class="count">({{ val.count }})</span></li>#}
+{#                                            {% endfor %}#}
+{#                                        </ul>#}
+{#                                        <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>#}
+{#                                        <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>#}
+{#                                    </div>#}
+{#                                 </li>#}
+{#                             </ul>#}
+{#                            {%  endfor %}#}
+
+                             <ul class="list-group" role="tablist" aria-multiselectable="true">
                                  <li class="list-group-item">
                                      <div id="modality_heading" class="list-group-item__heading">
                                      <a role="button" data-toggle="collapse"  href="#modality" aria-expanded="false" aria-controls="modality">

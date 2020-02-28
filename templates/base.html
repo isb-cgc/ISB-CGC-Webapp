@@ -163,6 +163,7 @@ if ('{{ request.session.seenWarning }}'  !== "True")  {
 {% load i18n l10n %}
 {% load static from staticfiles %}
 
+
 {# If the user is not authenticated then there is no session to secure ! #}
 {% if request.user.is_authenticated %}
     <link rel="stylesheet" type="text/css" href="{% static 'session_security/style.css' %}"></link>
