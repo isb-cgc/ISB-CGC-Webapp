@@ -110,14 +110,17 @@
 {#                                    <div id="{{ attr.name }}" class="collapse">#}
 {#                                        <ul id="{{ attr.name }}_list" style="list-style: none;">#}
 {#                                            {% for val in attr.values %}#}
-{#                                                <li>&emsp;<input type="checkbox" checked value="{{ val.value }}"#}
+{#                                                <li class="checkbox{% if attr.values|length > 5 and forloop.counter >= 6 %} extra-values{% endif %}">&emsp;<input type="checkbox" checked value="{{ val.value }}"#}
 {#                                                             onclick="updateFilterSelection('{{ attr.name }}_list', '{{ attr.name }}_set','{{ attr.display_name }}','{{ attr.name }}',false,false)">#}
 {#                                                <span></span>#}
 {#                                                    {% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %} <span class="count">({{ val.count }})</span></li>#}
+
 {#                                            {% endfor %}#}
 {#                                        </ul>#}
-{#                                        <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>#}
-{#                                        <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>#}
+{#                                        {% if attr.values|length > 5 %} #}
+{#                                          <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>#}
+{#                                          <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>#}
+{#                                        {% endif %} #}
 {#                                    </div>#}
 {#                                 </li>#}
 {#                             </ul>#}
@@ -193,6 +196,33 @@
 
                    <div id = "search_related_set" role="tabpanel" class="tab-pane">
                            <ul class="list-group" role="tablist", aria-multiselectable="true">
+{#                            <!-- TODO: Same as above -->#}
+{#                            {% for attr in set_attributes.related_set.attributes %}#}
+{#                             <ul class="list-group" role="tablist" aria-multiselectable="true">#}
+{#                                 <li class="list-group-item">#}
+{#                                    <div id="{{ attr.name }}_heading" class="list-group-item__heading">#}
+{#                                        <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">#}
+{#                                            <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}</a>#}
+{#                                    </div>#}
+{##}
+{#                                    <div id="{{ attr.name }}" class="collapse">#}
+{#                                        <ul id="{{ attr.name }}_list" style="list-style: none;">#}
+{#                                            {% for val in attr.values %}#}
+{#                                                <li class="checkbox{% if attr.values|length > 5 and forloop.counter >= 6 %} extra-values{% endif %}">&emsp;<input type="checkbox" checked value="{{ val.value }}"#}
+{#                                                             onclick="updateFilterSelection('{{ attr.name }}_list', '{{ attr.name }}_set','{{ attr.display_name }}','{{ attr.name }}',false,false)">#}
+{#                                                <span></span>#}
+{#                                                    {% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %} <span class="count">({{ val.count }})</span></li>#}
+
+{#                                            {% endfor %}#}
+{#                                        </ul>#}
+{#                                        {% if attr.values|length > 5 %} #}
+{#                                          <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>#}
+{#                                          <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>#}
+{#                                        {% endif %} #}
+{#                                    </div>#}
+{#                                 </li>#}
+{#                             </ul>#}
+{#                            {%  endfor %}#}
 
                            <li class="list-group-item">
                                <div id="disease_heading" class="list-group-item__heading">
