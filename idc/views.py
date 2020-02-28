@@ -552,16 +552,13 @@ def ohif_page(request):
 
 def warn_page(request):
     request.session['seenWarning']=True;
-    return render(request, 'idc/warn.html')
-
+    return JsonResponse({'warning_status': 'SEEN'}, status=200)
 
 def about_page(request):
     return render(request, 'idc/about.html',{'request': request})
 
-
 def vid_tutorials_page(request):
     return render(request, 'idc/video_tutorials.html',{'request': request})
-
 
 @login_required
 def dashboard_page(request):
