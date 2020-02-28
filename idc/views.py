@@ -455,7 +455,6 @@ def explore_data_page(request):
             if source.name not in attr_by_source:
                 attr_by_source[source.name] = {}
             attr_by_source[source.name] = source.get_collection_attr(for_ui=True)
-            print(attr_by_source)
             faceted_counts_by_source[source.name] = get_collex_metadata(
                 filters, list(attr_by_source[source.name].values_list('name', flat=True)),
                 counts_only=True, record_limit=0
