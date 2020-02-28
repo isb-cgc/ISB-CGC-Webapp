@@ -193,6 +193,7 @@ require([
     $('#submit-opt-in-btn').on('click', function() {
         var opt_in_radio_value = $('input[name="opt-in-radio"]:checked').val();
         send_opt_in_update(opt_in_radio_value);
+        location.reload(true);
     });
 
     $('#cancel-opt-in-btn').on('click', function() {
