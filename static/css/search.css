@@ -1,13 +1,11 @@
 .filter-type{
     background-color:#a66206;
     color:#F8F8F8;
-    padding-top: 1px;
-    padding-bottom: 1px;
-    padding-left: 2px;
-    padding-right: 2px;
     margin-left:5px;
     margin-right:5px;
     text-transform: uppercase;
+    border-radius: 3px;
+    padding: 4px;
 }
 
 .filter-att{
@@ -16,16 +14,14 @@
     padding: 2px;
     margin-left:5px;
     margin-right:5px;
-    padding-top: 1px;
-    padding-bottom: 1px;
-    padding-left: 2px;
-    padding-right: 2px;
+    padding: 3px;
+    border-radius: 5px;
 }
 
 
 
 .bar-charts-div {
-    display-block;
+    display: block;
     width:100%;
     height:200px;
     overflow:hidden
