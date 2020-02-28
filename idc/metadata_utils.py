@@ -47,6 +47,14 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
         if len(filters):
             solr_query = build_solr_query(filters, with_tags_for_ex=True)
 
+        # For now we're query filtering on TCGA only
+        # TODO: REMOVE THIS ONCE WE'RE ALLOWING MORE
+        tcga_in_tcia = Program.objects.get(short_name="TCGA").collection_set.all()
+        query_filter = {
+            'collection_id': [x.lower().replace("-","_") for x in list(tcga_in_tcia.values_list('name', flat=True))]
+        }
+        tcga_query_filter = build_solr_query(query_filter)
+
         query_set = []
 
         # Image Data query
@@ -70,7 +78,7 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
             'collection': tcia_solr.name,
             'fields': fields,
             'fqs': query_set,
-            'query_string': "*:*",
+            'query_string': tcga_query_filter['full_query_str'],
             'facets': solr_facets,
             'limit': record_limit,
             'collapse_on': collapse_on,

@@ -444,8 +444,9 @@ def explore_data_page(request):
 
         sources = DataSource.objects.filter(version__in=versions, source_type=source)
 
+        # For now we're only allowing TCGA
+        # TODO: REMOVE THIS ONCE WE'RE ALLOWING MORE
         tcga_in_tcia = Program.objects.get(short_name="TCGA").collection_set.all()
-
         if 'collection_id' not in filters:
             filters['collection_id'] = [x.lower().replace("-","_") for x in list(tcga_in_tcia.values_list('name', flat=True))]
 
@@ -467,8 +468,6 @@ def explore_data_page(request):
             filters, list(attrs.values_list('name', flat=True)),
             counts_only=True, record_limit=0
         )
-
-        print(attr_by_source['related_set']['attributes'])
 
         for attr in faceted_counts['clinical']['facets']:
             this_attr_vals = attr_by_source['related_set']['attributes'][attr]['vals']
@@ -545,7 +544,6 @@ def ohif_projects_page(request):
     request.session['last_ohif_path'] = request.get_full_path()
     return render(request, 'idc/ohif.html',{'request': request})
 
-
 def ohif_page(request):
     request.session['last_path'] = request.get_full_path()
     return render(request, 'idc/ohif.html',{'request': request})
@@ -563,21 +561,24 @@ def vid_tutorials_page(request):
 @login_required
 def dashboard_page(request):
 
-    # Cohort List
-    idc_superuser = User.objects.get(username='idc')
-    public_cohorts = Cohort_Perms.objects.filter(user=idc_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
-    cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
-    # TODO: Add in 'date created' and sort on that
-    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-name')
+    context = {'request'  : request}
 
-    # Program List
-    ownedPrograms = request.user.program_set.filter(active=True)
-    sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-    programs = ownedPrograms | sharedPrograms
-    programs = programs.distinct().order_by('-last_date_saved')
+    try:
+        # Cohort List
+        idc_superuser = User.objects.get(username='idc')
+        public_cohorts = Cohort_Perms.objects.filter(user=idc_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
+        cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
+        # TODO: Add in 'date created' and sort on that
+        context['cohorts'] = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-name')
 
-    return render(request, 'idc/dashboard.html', {
-        'request'  : request,
-        'cohorts'  : cohorts,
-        'programs' : programs
-    })
+        # Program List
+        ownedPrograms = request.user.program_set.filter(active=True)
+        sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+        programs = ownedPrograms | sharedPrograms
+        context['programs'] = programs.distinct().order_by('-last_date_saved')
+
+    except Exception as e:
+        logger.error("[ERROR] While attempting to load the dashboard:")
+        logger.exception(e)
+
+    return render(request, 'idc/dashboard.html', context)
