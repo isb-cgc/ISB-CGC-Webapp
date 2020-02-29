@@ -11,6 +11,7 @@
 {% endblock %}
 {% block page_name %}bq-meta-searcher{% endblock %}
 {% block page_header %}
+
     <div class="bq-header-container container">
         <h1 class="page-header">BigQuery Table Search</h1>
         <ul class="nav">
@@ -216,6 +217,7 @@
         </div>
     </div>
 
+
     <!-- Modal -->
     <div class="modal fade" id="gcp-open-modal" tabindex="-1" role="dialog" aria-labelledby="gcp-open-modal-title" aria-hidden="true">
         <div class="modal-dialog">
@@ -253,7 +255,6 @@
                     </div>
                     <div>
                         <a id="gcp-open-btn" class="btn submit-btn" href="" target="_blank" class="btn btn-primary"
-{#                           data-dismiss="modal"#}
                         ><span>OK</span></a>
                         <button type="button" class="btn" data-dismiss="modal">Cancel</button>
                     </div>
@@ -261,6 +262,9 @@
             </div>
         </div>
     </div>
+    <script type="text/javascript">
+        var gcp_modal_disabled = ('{{ user.is_authenticated}}' === 'True');
+    </script>
 {% endblock %}
 
 {% block js_file %}{% static 'js/bq_meta_search.js' %}{% endblock %}
