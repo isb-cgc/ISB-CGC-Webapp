@@ -18,16 +18,21 @@ from __future__ import print_function
 from builtins import str
 from builtins import object
 import os
-from os.path import join, dirname
+from os.path import join, dirname, exists
 import sys
 import dotenv
 from socket import gethostname, gethostbyname
 
-env_path = '../'
-if os.environ.get('SECURE_LOCAL_PATH', None):
-    env_path += os.environ.get('SECURE_LOCAL_PATH')
+SECURE_LOCAL_PATH = os.environ.get('SECURE_LOCAL_PATH', '')
 
-dotenv.read_dotenv(join(dirname(__file__), env_path+'.env'))
+if not exists(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH))):
+    print("[ERROR] Couldn't open .env file expected at {}!".format(
+        join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
+    )
+    print("[ERROR] Exiting settings.py load - check your Pycharm settings and secure_path.env file.")
+    exit(1)
+
+dotenv.read_dotenv(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
 
 APP_ENGINE_FLEX = 'aef-'
 APP_ENGINE = 'Google App Engine/'

@@ -13,18 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
+
 from __future__ import print_function
 
 from builtins import str
 from builtins import object
 import os
 import re
-from os.path import join, dirname
+from os.path import join, dirname, exists
 import sys
 import dotenv
 from socket import gethostname, gethostbyname
 
 SECURE_LOCAL_PATH = os.environ.get('SECURE_LOCAL_PATH', '')
+
+if not exists(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH))):
+    print("[ERROR] Couldn't open .env file expected at {}!".format(
+        join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
+    )
+    print("[ERROR] Exiting settings.py load - check your Pycharm settings and secure_path.env file.")
+    exit(1)
 
 dotenv.read_dotenv(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH)))
 
@@ -76,8 +84,9 @@ SERVICE_ACCOUNT_LOG_NAME = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev
 WEBAPP_LOGIN_LOG_NAME = os.environ.get('WEBAPP_LOGIN_LOG_NAME', 'local_dev_logging')
 GCP_ACTIVITY_LOG_NAME = os.environ.get('GCP_ACTIVITY_LOG_NAME', 'local_dev_logging')
 
-BASE_URL                = os.environ.get('BASE_URL', 'https://mvm-dot-idc.appspot.com')
-BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://mvm-api-dot-idc.appspot.com')
+BASE_URL                = os.environ.get('BASE_URL', 'https://idc-dev.appspot.com')
+BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-idc-dev.appspot.com')
+API_HOST                = os.environ.get('API_HOST', 'api-dot-idc-dev.appspot.com')
 
 # Compute services - Should not be necessary in webapp
 PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
@@ -295,8 +304,8 @@ INSTALLED_APPS = (
 
 # testing "session security works at the moment" commit
 INSTALLED_APPS += ('session_security',)
-SESSION_SECURITY_WARN_AFTER = 540
-SESSION_SECURITY_EXPIRE_AFTER = 600
+SESSION_SECURITY_WARN_AFTER = int(os.environ.get('SESSION_SECURITY_WARN_AFTER','540'))
+SESSION_SECURITY_EXPIRE_AFTER = int(os.environ.get('SESSION_SECURITY_EXPIRE_AFTER','600'))
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 MIDDLEWARE.append(
     # for django-session-security -- must go *after* AuthenticationMiddleware
@@ -452,6 +461,10 @@ if IS_DEV:
 
 GOOGLE_APPLICATION_CREDENTIALS  = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
 
+if not exists(GOOGLE_APPLICATION_CREDENTIALS):
+    print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
+    exit(1)
+
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
 
 OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET', '')
@@ -520,6 +533,7 @@ SOLR_URI = os.environ.get('SOLR_URI', '')
 SOLR_LOGIN = os.environ.get('SOLR_LOGIN', '')
 SOLR_PASSWORD = os.environ.get('SOLR_PASSWORD', '')
 SOLR_CERT = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCAL_PATH, os.environ.get('SOLR_CERT', '')))
+DEFAULT_FETCH_COUNT = os.environ.get('DEFAULT_FETCH_COUNT', 10)
 
 ##############################################################
 #   MailGun Email Settings
@@ -551,3 +565,7 @@ if DEBUG and DEBUG_TOOLBAR:
     ]
     SHOW_TOOLBAR_CALLBACK = True
     INTERNAL_IPS = (os.environ.get('INTERNAL_IP', ''),)
+#OHIF_SETTINGS
+
+APPEND_SLASH = False
+# default is to add trailing '/' to urls ie /callback becomes /callback/. Ohif does not like /callback/ !

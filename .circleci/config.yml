@@ -148,7 +148,6 @@ jobs:
             - ./idc
             - ./offline
             - ./scripts
-            - ./session_security
             - ./templates
             - ./IDC-Common
             - ./Dockerfile
@@ -160,6 +159,7 @@ jobs:
             - ./txt
             - ./json
             - ./.env
+            - ./solr-ssl.pem
 
   deploy_job:
     environment:

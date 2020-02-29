@@ -1,15 +1,18 @@
-"""
-Copyright 2015-2019, Institute for Systems Biology
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-   http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+###
+# Copyright 2015-2020, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
 
 from builtins import str
 from builtins import map
@@ -20,6 +23,7 @@ import logging
 import sys
 import re
 import datetime
+
 # import requests
 
 from django.conf import settings
@@ -41,11 +45,10 @@ from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
 from googleapiclient.errors import HttpError
 from cohorts.models import Cohort, Cohort_Perms
-from idc_collections.models import Program
+from idc_collections.models import Program, Attribute, Attribute_Display_Values, DataSource, DataVersion
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
-from solr_helpers import query_solr_and_format_result, build_solr_facets, build_solr_query
-from idc_collections.models import Attribute, SolrCollection
+from .metadata_utils import get_collex_metadata
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
@@ -55,7 +58,6 @@ WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 
 
 def convert(data):
-    # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     if isinstance(data, basestring):
         return str(data)
     elif isinstance(data, collections.Mapping):
@@ -116,46 +118,31 @@ def css_test(request):
 
 # Returns the data exploration and filtering page, which also allows for cohort creation
 @login_required
-def explore_data(request):
-    filters = {"disease_code": ["BRCA","LUAD"]}
-    tcia_attrs = SolrCollection.objects.get(name="tcia_images").get_collection_attr().values_list('name', flat=True)
-    tcia_fields = SolrCollection.objects.get(name="tcia_images").get_collection_attr(False).values_list('name', flat=True)
-    tcga_attrs = SolrCollection.objects.get(name="tcga_clin_bios").get_collection_attr().values_list('name', flat=True)
+def explore_legacy_data(request):
+    context = {}
+    try:
+        # These are example filters; typically they will be reconstituted from the request
+        filters = {"vital_status": ["Alive"], "age_at_diagnosis_btw": [15,40], "disease_code": ["READ", "BRCA"]}
+        # These are the actual data fields to display in the expanding table; again this is just an example
+        # set that should be properly supplied in the reuqest
+        fields = ["BodyPartExamined", "Modality", "StudyDescription", "StudyInstanceUID", "SeriesInstanceUID", "case_barcode", "disease_code", "sample_type"]
 
-    solr_query_str = build_solr_query(filters)
-    solr_facets = build_solr_facets(list(tcia_attrs), filters)
+        # get_collex_metadata will eventually branch into 'from BQ' and 'from Solr' depending on if there's a request
+        # for a version which isn't current, or for a user cohort
+        facets_and_lists = get_collex_metadata(filters, fields)
 
-    print("TCIA ATTRs: {}".format(tcia_attrs))
-    print("TCIA facets: {}".format(solr_facets))
+        if facets_and_lists:
+            context = {
+                'collex_attr_counts': facets_and_lists['clinical'],
+                'cross_collex_attr_counts': facets_and_lists['facets']['cross_collex'],
+                'listings': facets_and_lists['docs']
+            }
 
-    solr_result = query_solr_and_format_result({
-        'collection': 'tcia_images',
-        'fields': list(tcia_fields),
-        'fq_string': '{!join from=case_barcode fromIndex=tcga_clin_bios to=case_barcode}' + solr_query_str,
-        'query_string': "*:*",
-        'facets': solr_facets,
-        'limit': 5,
-        'collapse_on': 'case_barcode',
-        'counts_only': False
-    })
+    except Exception as e:
+        logger.error("[ERROR] In explore_data:")
+        logger.exception(e)
 
-    print("Solr result: {}".format(solr_result))
-
-    solr_facets = build_solr_facets(list(tcga_attrs), filters)
-
-    solr_result = query_solr_and_format_result({
-        'collection': 'tcga_clin_bios',
-        'fields': None,
-        'fq_string': '{!join from=case_barcode fromIndex=tcia_images to=case_barcode}' + solr_query_str,
-        'query_string': "*:*",
-        'facets': solr_facets,
-        'limit': 0,
-        'collapse_on': 'case_barcode'
-    })
-
-    print("Solr result: {}".format(solr_result))
-
-    return render(request, 'idc/explore.html', {'request': request})
+    return render(request, 'idc/explore.html', {'request': request, 'context': context})
 
 
 '''
@@ -222,7 +209,7 @@ def extended_login_view(request):
     except Exception as e:
         logger.exception(e)
 
-    return redirect(reverse('dashboard'))
+    return redirect(reverse('explore_data'))
 
 
 '''
@@ -246,23 +233,13 @@ def user_landing(request):
 
     users = User.objects.filter(is_superuser=0)
     cohort_perms = Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True)
-    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved').annotate(num_cases=Count('samples__case_barcode'))
+    # TODO: Make date_created column and sort on that
+    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-name').annotate(num_cases=Count('samples__case_barcode'))
 
     for item in cohorts:
         item.perm = item.get_perm(request).get_perm_display()
         item.owner = item.get_owner()
         # print local_zone.localize(item.last_date_saved)
-
-    # viz_perms = Viz_Perms.objects.filter(user=request.user).values_list('visualization', flat=True)
-    visualizations = SavedViz.objects.generic_viz_only(request).order_by('-last_date_saved')
-    for item in visualizations:
-        item.perm = item.get_perm(request).get_perm_display()
-        item.owner = item.get_owner()
-
-    seqpeek_viz = SavedViz.objects.seqpeek_only(request).order_by('-last_date_saved')
-    for item in seqpeek_viz:
-        item.perm = item.get_perm(request).get_perm_display()
-        item.owner = item.get_owner()
 
     # Used for autocomplete listing
     cohort_listing = Cohort.objects.filter(id__in=cohort_perms, active=True).values('id', 'name')
@@ -367,68 +344,6 @@ def dicom(request, study_uid=None):
     return render(request, template, context)
 
 
-@login_required
-def camic(request, file_uuid=None):
-    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
-    context = {}
-
-    if not file_uuid:
-        messages.error("Error while attempting to display this pathology image: a file UUID was not provided.")
-        return redirect(reverse('cohort_list'))
-
-    images = [{'file_uuid': file_uuid, 'thumb': '', 'type': ''}]
-    template = 'idc/camic_single.html'
-
-    context['files'] = images
-    context['camic_viewer'] = settings.CAMIC_VIEWER
-    context['img_thumb_url'] = settings.IMG_THUMBS_URL
-
-    return render(request, template, context)
-
-
-@login_required
-def igv(request, sample_barcode=None, readgroupset_id=None):
-    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
-
-    readgroupset_list = []
-    bam_list = []
-
-    checked_list = json.loads(request.POST.__getitem__('checked_list'))
-    build = request.POST.__getitem__('build')
-
-    for item in checked_list['gcs_bam']:
-        bam_item = checked_list['gcs_bam'][item]
-        id_barcode = item.split(',')
-        bam_list.append({
-            'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': build, 'program': bam_item['program']
-        })
-
-    context = {
-        'readgroupset_list': readgroupset_list,
-        'bam_list': bam_list,
-        'base_url': settings.BASE_URL,
-        'service_account': settings.WEB_CLIENT_ID,
-        'build': build,
-    }
-
-    return render(request, 'idc/igv.html', context)
-
-
-@login_required
-def path_report(request, report_file=None):
-    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
-    context = {}
-
-    if not path_report:
-        messages.error("Error while attempting to display this pathology report: a report file name was not provided.")
-        return redirect(reverse('cohort_list'))
-
-    template = 'idc/path-pdf.html'
-
-    context['path_report_file'] = report_file
-
-    return render(request, template, context)
-
 
 # Because the match for vm_ is always done regardless of its presense in the URL
 # we must always provide an argument slot for it
@@ -438,34 +353,232 @@ def health_check(request, match):
 
 
 def help_page(request):
-    return render(request, 'idc/help.html')
+    return render(request, 'idc/help.html',{'request': request})
 
+@login_required
+def get_filtered_idc_cohort(request):
+    print("url "+request.build_absolute_uri())
+    ageRng = [0,20,30,40,50,60,70,80]
+    bmiRng = [18.5,25,30]
+
+    counts_only = (request.GET.get('counts_only',"False").lower() == "true")
+    with_clinical = (request.GET.get('with_clinical', "True").lower() == "true")
+    collapse_on = request.GET.get('collapse_on', 'PatientID')
+
+    # filters = {"vital_status": ["Alive", "Dead"], "age_at_diagnosis_btw": [15, 70], "race": ["BLACK OR AFRICAN AMERICAN","WHITE"]}
+    # filters = {"BodyPartExamined": ["CHEST"]}
+    # filters = {"age_at_diagnosis_btw": [0,50]}
+    # filters={"race":['ASIAN', 'BLACK OR AFRICAN AMERICAN','WHITE']}
+    # filters = {"race": ['AMERICAN INDIAN OR ALASKA NATIVE', 'ASIAN', 'BLACK OR AFRICAN AMERICAN', 'NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER', 'None']}
+    # filters = {}
+
+    try:
+        filters = json.loads(request.GET.get('filters', "{}"))
+
+    except Exception as e:
+        logger.error("[ERROR] In get_filtered_idc_cohort_data parsing filters")
+        logger.exception(e)
+        return render(request, '404.html')
+
+
+    defFieldStr = '["collection_id", "case_barcode", "PatientID","race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis", "gender", "disease_code", \
+               "StudyInstanceUID", "StudyDescription", "StudyDate", "SeriesInstanceUID", "SeriesDescription", "SeriesNumber", "BodyPartExamined", "Modality"]'
+
+    try:
+        fields = json.loads(request.GET.get('fields', defFieldStr))
+
+    except Exception as e:
+        logger.error("[ERROR] In get_filtered_idc_cohort_data parsing fields")
+        logger.exception(e)
+        return render(request, '404.html')
+
+
+    try:
+        # for a version which isn't current, or for a user cohort
+        facets_and_lists = get_collex_metadata(filters, fields, record_limit=50000, counts_only=counts_only, with_clinical = with_clinical, collapse_on = collapse_on )
+
+
+    except Exception as e:
+        logger.error("[ERROR] In get_filtered_idc_cohort_data:")
+        logger.exception(e)
+
+    ret={}
+    ret['facets'] = facets_and_lists['facets']['cross_collex']
+    if not counts_only:
+         ret['docs'] = facets_and_lists['docs']
+    #    translateCollectionData(facets_and_lists['docs'], ret)
+
+    if with_clinical:
+        ret['clinical'] =  {}
+        ret['clinical']['vital_status'] = facets_and_lists['clinical']['facets']['vital_status']
+        ret['clinical']['disease_code'] = facets_and_lists['clinical']['facets']['disease_code']
+        ret['clinical']['race'] = facets_and_lists['clinical']['facets']['race']
+        ret['clinical']['gender'] = facets_and_lists['clinical']['facets']['gender']
+        ret['clinical']['ethnicity'] = facets_and_lists['clinical']['facets']['ethnicity']
+        ret['clinical']['age'] = facets_and_lists['clinical']['facets']['age_at_diagnosis']
+        ret['clinical']['bmi'] = facets_and_lists['clinical']['facets']['bmi']
+
+    return JsonResponse(ret)
+
+@login_required
+def explore_data_page(request):
+    attr_by_source = {}
+    context = {'request': request}
+    source = DataSource.SOLR
+    versions = []
+    filters = {}
+    try:
+        if request.GET:
+            source = request.GET.get('source',DataSource.SOLR)
+            versions = json.loads(request.GET.get('versions','[]'))
+            filters = json.loads(request.GET.get('filters', '{}'))
+        if request.POST:
+            source = request.POST.get('source', DataSource.SOLR)
+            versions = request.loads(request.POST.get('versions', '[]'))
+            filters = json.loads(request.GET.get('filters', '{}'))
+
+        if not len(versions):
+            versions = DataVersion.objects.filter(active=True)
+        else:
+            versions = DataVersion.objects.filter(name__in=versions)
+
+        sources = DataSource.objects.filter(version__in=versions, source_type=source)
+
+        # For now we're only allowing TCGA
+        # TODO: REMOVE THIS ONCE WE'RE ALLOWING MORE
+        tcga_in_tcia = Program.objects.get(short_name="TCGA").collection_set.all()
+        if 'collection_id' not in filters:
+            filters['collection_id'] = [x.lower().replace("-","_") for x in list(tcga_in_tcia.values_list('name', flat=True))]
+
+        for source in sources:
+            set_type = None
+            if source.version.data_type == DataVersion.IMAGE_DATA:
+                set_type = 'origin_set'
+            else:
+                set_type = 'related_set'
+            if set_type not in attr_by_source:
+                attr_by_source[set_type] = {}
+
+            attrs = source.get_collection_attr(for_ui=True)
+            attr_by_source[set_type]['attributes'] = {attr.name: {'obj': attr, 'vals':None} for attr in attrs}
+            for attr in attr_by_source[set_type]['attributes']:
+                attr_by_source[set_type]['attributes'][attr]['vals'] = attr_by_source[set_type]['attributes'][attr]['obj'].get_display_values()
+
+        faceted_counts = get_collex_metadata(
+            filters, list(attrs.values_list('name', flat=True)),
+            counts_only=True, record_limit=0
+        )
+
+        for attr in faceted_counts['clinical']['facets']:
+            this_attr_vals = attr_by_source['related_set']['attributes'][attr]['vals']
+            this_attr = attr_by_source['related_set']['attributes'][attr]['obj']
+            values = []
+            if len(this_attr_vals):
+                for val in this_attr_vals:
+                    values.append({
+                        'value': val,
+                        'display_value': this_attr_vals[val],
+                        'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
+                    })
+            else:
+                for val in faceted_counts['clinical']['facets'][attr]:
+                    values.append({
+                        'value': val,
+                        'display_value': val if this_attr.preformatted_values else None,
+                        'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
+                    })
+            attr_by_source['related_set']['attributes'][attr]['vals'] = values
+
+        for attr in faceted_counts['facets']['cross_collex']:
+            this_attr_vals = attr_by_source['origin_set']['attributes'][attr]['vals']
+            this_attr = attr_by_source['origin_set']['attributes'][attr]['obj']
+            values = []
+            if len(this_attr_vals):
+                for val in this_attr_vals:
+                    values.append({
+                        'value': val,
+                        'display_value': this_attr_vals[val],
+                        'count': faceted_counts['facets']['cross_collex'][attr][val] if val in faceted_counts['facets']['cross_collex'][attr] else 0
+                    })
+            else:
+                for val in faceted_counts['facets']['cross_collex'][attr]:
+                    values.append({
+                        'value': val,
+                        'display_value': val if this_attr.preformatted_values else None,
+                        'count': faceted_counts['facets']['cross_collex'][attr][val] if val in faceted_counts['facets']['cross_collex'][attr] else 0
+                    })
+            attr_by_source['origin_set']['attributes'][attr]['vals'] = values
+
+        for set in attr_by_source:
+            attr_by_source[set]['attributes'] = [{'name': x,
+                 'display_name': attr_by_source[set]['attributes'][x]['obj'].display_name,
+                 'values': attr_by_source[set]['attributes'][x]['vals']
+                 } for x in attr_by_source[set]['attributes']]
+
+        context['set_attributes'] = attr_by_source
+        context['tcga_collections'] = tcga_in_tcia
+
+    except Exception as e:
+        logger.error("[ERROR] While attempting to load the search page:")
+        logger.exception(e)
+        messages.error(request, "Encountered an error when attempting to load the page - please contact the administrator.")
+
+    return render(request, 'idc/explore.html', context)
+
+@login_required
+def ohif_test_page(request):
+    request.session['last_path']=request.get_full_path()
+    return render(request, 'idc/ohif.html',{'request': request})
+
+@login_required
+def ohif_viewer_page(request):
+    request.session['last_path'] = request.get_full_path()
+    return render(request, 'idc/ohif.html',{'request': request})
+
+@login_required
+def ohif_callback_page(request):
+    return render(request,'idc/ohif.html',{'request': request})
+
+@login_required
+def ohif_projects_page(request):
+    request.session['last_ohif_path'] = request.get_full_path()
+    return render(request, 'idc/ohif.html',{'request': request})
+
+def ohif_page(request):
+    request.session['last_path'] = request.get_full_path()
+    return render(request, 'idc/ohif.html',{'request': request})
+
+def warn_page(request):
+    request.session['seenWarning']=True;
+    return JsonResponse({'warning_status': 'SEEN'}, status=200)
 
 def about_page(request):
-    return render(request, 'idc/about.html')
-
+    return render(request, 'idc/about.html',{'request': request})
 
 def vid_tutorials_page(request):
-    return render(request, 'idc/video_tutorials.html')
-
+    return render(request, 'idc/video_tutorials.html',{'request': request})
 
 @login_required
 def dashboard_page(request):
 
-    # Cohort List
-    idc_superuser = User.objects.get(username='idc')
-    public_cohorts = Cohort_Perms.objects.filter(user=idc_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
-    cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
-    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
+    context = {'request'  : request}
 
-    # Program List
-    ownedPrograms = request.user.program_set.filter(active=True)
-    sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-    programs = ownedPrograms | sharedPrograms
-    programs = programs.distinct().order_by('-last_date_saved')
+    try:
+        # Cohort List
+        idc_superuser = User.objects.get(username='idc')
+        public_cohorts = Cohort_Perms.objects.filter(user=idc_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
+        cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
+        # TODO: Add in 'date created' and sort on that
+        context['cohorts'] = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-name')
 
-    return render(request, 'idc/dashboard.html', {
-        'request'  : request,
-        'cohorts'  : cohorts,
-        'programs' : programs
-    })
+        # Program List
+        ownedPrograms = request.user.program_set.filter(active=True)
+        sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+        programs = ownedPrograms | sharedPrograms
+        context['programs'] = programs.distinct().order_by('-last_date_saved')
+
+    except Exception as e:
+        logger.error("[ERROR] While attempting to load the dashboard:")
+        logger.exception(e)
+
+    return render(request, 'idc/dashboard.html', context)

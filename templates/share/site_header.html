@@ -4,6 +4,8 @@
 {% load idc_collections_custom_tags %}
 
 <header class="navbar navbar-fixed-top site-header" role="menubar">
+
+
     {% is_allowed user as has_access %}
     <nav class="container">
         <div class="row">
@@ -11,21 +13,13 @@
             <div class="nav navbar-left">
                 <ul class="">
                     <li class="navbar-item">
-                        {% if user.is_authenticated and has_access %}
-                             <a href="{% url 'dashboard' %}" title="Dashboard" >
-                        {%  else %}
-                            <a href="{% url 'landing_page' %}" title="Home Page" >
-                        {%  endif %}
+                        <a href="{% url 'landing_page' %}" title="Home Page" >
                         <img class="navbar-brand" src="{% static 'img/idclogo.png' %}" alt="ISB Logo"/><span class="navbar-item">IDC</span></a>
                     </li>
-                    {% if request.path != '/' %}
-                        <li class="navbar-link navbar-item">
-                            <a href="{% url 'landing_page' %}">Home Page</a>
-                        </li>
-                    {% endif %}
                     <li class="navbar-link navbar-item">
                         <a href="{% url 'explore_data' %}">Data Exploration</a>
                     </li>
+                    <!--
                     <li class="navbar-link navbar-item">
                         <a href="http://imaging-data-commons.readthedocs.org/en/latest/" target="_blank">Documentation</a>
                     </li>
@@ -40,6 +34,7 @@
                             </ul>
                         </div>
                     </li>
+                    -->
                 </ul>
             </div>
 
@@ -86,6 +81,7 @@
                 <a href="{% url 'dashboard' %}">DASHBOARD</a>
             </li>
             {%  endif %}
+            <!--
             {% if USER_DATA_ON %}
             <li class="menu-item has-drop-down">
                 <a>PROGRAMS <i class="fa fa-caret-down"></i></a>
@@ -96,6 +92,7 @@
                 </ul>
             </li>
             {% endif %}
+            -->
             <li class="menu-item has-drop-down">
                 <a>COHORTS <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
