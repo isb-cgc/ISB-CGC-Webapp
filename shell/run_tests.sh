@@ -11,8 +11,8 @@ echo "PYTHONPATH IS ${PYTHONPATH}"
 
 #python3 ./manage_unit_test.py test --noinput
 
-python3 ./manage_unit_test.py test solr_helpers --noinput
-python3 ./manage_unit_test.py test google_helpers.bigquery --noinput
+python3 ./manage_unit_test.py test solr_helpers google_helpers.bigquery --noinput
+#python3 ./manage_unit_test.py test  --noinput
 
 echo "Running module unit tests with unittest..."
 
