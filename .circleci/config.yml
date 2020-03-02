@@ -133,7 +133,7 @@ jobs:
             sudo -E /bin/bash ./shell/gcloud-pull-staging-files.sh
             sudo -E /bin/bash ./shell/database-setup.sh
       - save_cache:
-          key: isb-cgc-webapp-{{ epoch }}
+          key: isb-cgc-webapp-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
           paths:
             - ./adminrestrict
             - ./.git
