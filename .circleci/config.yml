@@ -174,7 +174,7 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - isb-cgc-webapp-
+            - isb-cgc-webapp-{{ .Branch }}-{{ .Revision }}-
       - install_cloud_sdk
       - deployment_setup
       - auth
