@@ -44,8 +44,9 @@ require([
     'buttons-colvis',
     'chosen'
 ], function ($) {
-    var gcp_modal_disabled = false;
+
     $(document).ready(function () {
+
         var table = $('#bqmeta').DataTable({
             dom: 'lfBrtip',
             ajax: {
@@ -322,8 +323,8 @@ require([
             var do_not_show_again = ($('#do-not-show-cb:checked').length > 0);
             if (typeof(Storage) !== "undefined") {
                 // Store
-                gcp_modal_disabled = do_not_show_again;
-                sessionStorage.setItem("gcp_modal_disabled", do_not_show_again);
+                gcp_modal_disabled |= do_not_show_again;
+                sessionStorage.setItem("gcp_modal_disabled", gcp_modal_disabled);
             }
             $('#gcp-open-modal').modal('hide');
         });
