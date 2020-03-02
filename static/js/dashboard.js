@@ -92,32 +92,6 @@ require([
         }
     }
 
-    $('#submit-opt-in-btn').on('click', function() {
-        var opt_in_radio_value = $('input[name="opt-in-radio"]:checked').val();
-        if(opt_in_radio_value == 'opt-in-now')
-        {
-            window.open('https://docs.google.com/forms/d/e/1FAIpQLSeGQiOcJJfe4q3wRM-g7sP_LpJj-pNDp7ZjOqsWIM381W28EQ/viewform', '_blank')
-        }
-        send_opt_in_update(opt_in_radio_value);
-    });
-
-    $('#cancel-opt-in-btn').on('click', function() {
-        send_opt_in_update('opt-out');
-    });
-
-    $('#close-opt-in-btn').on('click', function() {
-        send_opt_in_update('opt-out');
-    });
-
-    $('#will-email-message').collapse({toggle: false});
-    $('[name="opt-in-radio"]').on('change', function() {
-        if ($(this).val() === "opt-in-email") {
-            $('#will-email-message').collapse('show');
-        } else {
-            $('#will-email-message').collapse('hide');
-        }
-    });
-
     /*
     var get_vm_instance = function (vm_div) {
         var vm_user = $(vm_div).find("input[name='vm_user']").val();
@@ -378,17 +352,3 @@ require([
     //
     // });
 });
-
-function send_opt_in_update(opt_in_selection) {
-    // Ajax call to update the backend of the user's selection
-    $.ajax({
-            type: 'POST',
-            url: BASE_URL + '/opt_in/update/',
-            dataType  :'json',
-            data: {'opt-in-radio': opt_in_selection},
-            success: function(data) {
-            },
-            error: function(data) {
-            }
-        });
-}
