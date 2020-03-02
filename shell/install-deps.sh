@@ -70,7 +70,7 @@ fi
 
 if [ -z "${CI}" ]; then
     echo "Installing responses library for unit tests, but not for deployment..."
-    pip3 install -q reponses -t ${HOMEROOT}/lib --only-binary all
+    pip3 install -q responses -t ${HOMEROOT}/lib --only-binary all
 fi
 
 if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
