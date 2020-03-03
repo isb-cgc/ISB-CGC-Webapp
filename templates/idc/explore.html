@@ -89,37 +89,41 @@
                              </ul>
                         <div class="tab-content">
                             <div id = "search_orig_set" role="tabpanel" class="tab-pane active">
-{#                            <!-- TODO: We need to make this request the list of attributes from the server -->#}
-{#                            <!-- TODO: example here: -->#}
-{#                            {% for attr in set_attributes.origin_set.attributes %}#}
-{#                             <ul class="list-group" role="tablist" aria-multiselectable="true">#}
-{#                                 <li class="list-group-item">#}
-{#                                    <div id="{{ attr.name }}_heading" class="list-group-item__heading">#}
-{#                                        <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">#}
-{#                                            <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}</a>#}
-{#                                    </div>#}
-{##}
-{#                                    <div id="{{ attr.name }}" class="collapse">#}
-{#                                        <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">#}
-{#                                            {% for val in attr.values %}#}
-{#                                                <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">#}
-{#                                                    <label>#}
-{#                                                        <input type="checkbox" checked value="{{ val.value }}"#}
-{#                                                             onclick="updateFilterSelection('{{ attr.name }}_list', '{{ attr.name }}_set','{{ attr.display_name }}','{{ attr.name }}',false,false)">#}
-{#                                                        {% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %} <span class="float-right case_count count">{{ val.count }}</span>#}
-{#                                                    </label>#}
-{#                                                </li>#}
-{#                                            {% endfor %}#}
-{#                                        </ul>#}
-{#                                        <p style="display: block;" >#}
-{#                                            {% if attr.values|length > 5 %}<a class="show-more">show more</a><a class="show-less" style="display: none;">show less</a>{% else %}<span>&nbsp;</span>{% endif %}#}
-{#                                            <span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span>#}
-{#                                        </p>#}
-{#                                    </div>#}
-{#                                 </li>#}
-{#                             </ul>#}
-{#                            {%  endfor %}#}
+                           <!-- TODO: We need to make this request the list of attributes from the server -->
+                           <!-- TODO: example here: -->
+                            {% for attr in set_attributes.origin_set.attributes %}
+                             <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                 <li class="list-group-item">
+                                   <div id="{{ attr.name }}_heading" class="list-group-item__heading">
+                                       <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
+                                           <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}</a>
+                                  </div>
 
+                                    <div id="{{ attr.name }}" class="collapse list-group-item__body collapse in">
+                                        <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
+                                           {% for val in attr.values %}
+                                            <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
+                                                   <label>
+                                                       <input type="checkbox" checked value="{{ val.value }}"
+                                                             onclick="updateFilterSelection('{{ attr.name }}_list', '{{ attr.name }}_set','{{ attr.display_name }}','{{ attr.name }}',false,false)">
+                                                        {% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %} <span class="float-right case_count count">{{ val.count }}</span>
+                                                    </label>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                       <p style="display: block;" >
+                                           {% if attr.values|length > 5 %}
+                                                <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+
+                                           {% endif %}
+
+                                        </p>
+                                   </div>
+                                </li>
+                             </ul>
+                            {%  endfor %}
+                                <!--
                              <ul class="list-group" role="tablist" aria-multiselectable="true">
                                  <li class="list-group-item">
                                      <div id="modality_heading" class="list-group-item__heading">
@@ -127,11 +131,12 @@
                                     <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>Modality</a>
                                     </div>
                                      <div id="modality" class="collapse list-group-item__body">
+
                                          <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                          <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                         <ul style="list-style: none;">
                                         <li class="checkbox">&emsp;<input type="checkbox" value="CT" >Computed Tomography(CT)</li>
-                                       <li class="checkbox">&emsp;<input type="checkbox" value="CTPT">??(CTPT)</li>
+                                       <li class="checkbox">&emsp;<input type="checkbox" value="CTPT">Computed Tomography/Position Emisson Tomography(CTPT)</li>
                                        <li class="checkbox">&emsp;<input type="checkbox" value="CR" >Computed Radiology(CR)</li>
                                        <li class="checkbox">&emsp;<input type="checkbox" value="MR" >Magnetic Resonance(MR)</li>
                                          <li class="checkbox">&emsp;<input type="checkbox" value="MG" >Mamography(MG)</li>
@@ -165,7 +170,7 @@
                                       </ul>
                                     </div>
                                  </li>
-                         </ul>
+                         </ul> -->
                    </div>
                             <div id = "search_derived_set" role="tabpanel" class="tab-pane">
                                 <ul class="list-group" role="tablist", aria-multiselectable="true">

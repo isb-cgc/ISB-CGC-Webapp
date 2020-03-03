@@ -675,12 +675,12 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
 
      $(document).ready(function () {
             filterObj.collection_id = tcgaColls;
-            filterItemBindings('modality', 'modality', 'modality_set', 'Modality', 'Modality', true, false);
-            filterItemBindings('body_part', 'body_part', 'body_part_examined_set', 'Body Part Examined', 'BodyPartExamined', true, false);
+            filterItemBindings('Modality', 'Modality', 'modality_set', 'Modality', 'Modality', true, false);
+            filterItemBindings('BodyPartExamined', 'BodyPartExamined', 'body_part_examined_set', 'Body Part Examined', 'BodyPartExamined', true, false);
 
             filterItemBindings('vital_status', 'vital_list', 'vital_status_set', 'Vital Status', 'vital_status', false, false);
             filterItemBindings('gender', 'gender_list', 'gender_set', 'Gender', 'gender', false, false)
-            fetchCountData(true);
+            //fetchCountData(true);
 
         }
     );

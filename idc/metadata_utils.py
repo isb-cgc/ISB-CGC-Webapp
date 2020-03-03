@@ -88,6 +88,12 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
             results['docs'] = solr_result['docs']
 
         results['facets']['cross_collex'] = solr_result['facets']
+        if 'Kidney' in results['facets']['cross_collex'] and 'KIDNEY' in results['facets']['cross_collex']:
+            solr_result['facets']['KIDNEY'] = solr_result['facets']['KIDNEY'] + solr_result['facets']['Kidney']
+        elif 'Kidney' in results['facets']['cross_collex']:
+            solr_result['facets']['KIDNEY'] = solr_result['facets']['Kidney']
+
+
         results['total'] = solr_result['numFound']
 
         if with_clinical:

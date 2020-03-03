@@ -487,7 +487,7 @@ def explore_data_page(request):
                         'display_value': val if this_attr.preformatted_values else None,
                         'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
                     })
-            attr_by_source['related_set']['attributes'][attr]['vals'] = values
+            attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
         for attr in faceted_counts['facets']['cross_collex']:
             this_attr_vals = attr_by_source['origin_set']['attributes'][attr]['vals']
@@ -507,7 +507,7 @@ def explore_data_page(request):
                         'display_value': val if this_attr.preformatted_values else None,
                         'count': faceted_counts['facets']['cross_collex'][attr][val] if val in faceted_counts['facets']['cross_collex'][attr] else 0
                     })
-            attr_by_source['origin_set']['attributes'][attr]['vals'] = values
+            attr_by_source['origin_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x.value)
 
         for set in attr_by_source:
             attr_by_source[set]['attributes'] = [{'name': x,
