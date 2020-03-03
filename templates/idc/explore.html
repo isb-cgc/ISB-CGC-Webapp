@@ -22,20 +22,19 @@
 
 {% block header %}
 
-    <script type="text/javascript"  src="{% static 'js/sample_cohort.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/image_search.js' %}"></script>
+
+    <!-- <script type="text/javascript" src="{% static 'js/libs/require.js' %}"></script> -->
+    <!-- <script type="text/javascript" src="{% static 'js/image_search.js' %}"></script> -->
     <script type="text/javascript" src="{% static 'js/libs/plotly-latest.min.js' %}"></script>
+
+    <script data-main="{% static 'js/image_search.js' %}" src="{% static 'js/libs/require.js' %}"></script>
+
 
     <link type="text/css" rel="stylesheet" href="{% static 'css/search.css' %}">
     <!-- <link type="text/css" rel="stylesheet" href="{% static 'css/vendor.css' %}">
     <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.css' %}"> -->
 
 
-    <script>
-    window.onload = function(){
-        fetchCountData(true);
-    }
-    </script>
 
 
 {% endblock %}
@@ -210,33 +209,46 @@
                                           <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> Vital Status</a>
                                      </div>
 
-                                    <div id="vital_status" class="collapse list-group-item__body">
-                                         <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                           <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                       <ul id="vital_list" style="list-style: none;">
-                                          <li class="checkbox">&emsp;<input type="checkbox"  value="Alive" >Alive</li>
-                                         <li class="checkbox">&emsp;<input type="checkbox" value="Dead" >Dead</li>
-                                         <li class="checkbox">&emsp;<input type="checkbox" value="None">NA</li>
-                                        </ul>
-                                     </div>
-                                    </li>
+                            <div id="vital_status" class="collapse list-group-item__body">
+                                 <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                   <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                               <ul id="vital_list" style="list-style: none;">
+                                  <li class="checkbox">&emsp;<input type="checkbox"  value="Alive" >Alive</li>
+                                 <li class="checkbox">&emsp;<input type="checkbox" value="Dead" >Dead</li>
+                                 <li class="checkbox">&emsp;<input type="checkbox" value="None">NA</li>
+                                </ul>
+                             </div>
+                            </li>
 
-                                    <li class="list-group-item">
-                                      <div id="gender_heading" class="list-group-item__heading">
-                                           <a role="button" data-toggle="collapse"  href="#gender" aria-expanded="false" aria-controls="vital">
-                                          <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i>Gender</a>
-                                      </div>
+                            <li class="list-group-item">
+                              <div id="gender_heading" class="list-group-item__heading">
+                                   <a role="button" data-toggle="collapse"  href="#gender" aria-expanded="false" aria-controls="vital">
+                                  <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i>Gender</a>
+                              </div>
 
-                                     <div id="gender" class="collapse list-group-item__body">
-                                          <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                           <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                      <ul id="gender_list" style="list-style: none;">
-                                            <li class="checkbox">&emsp;<input type="checkbox" value="MALE" >Male</li>
-                                          <li class="checkbox">&emsp;<input type="checkbox" value="FEMALE" >Female</li>
-                                         <li class="checkbox">&emsp;<input type="checkbox" value="None" >NA</li>
-                                      </ul>
-                                      </div>
-                                   </li>
+                             <div id="gender" class="collapse list-group-item__body">
+                                  <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                   <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                              <ul id="gender_list" style="list-style: none;">
+                                    <li class="checkbox">&emsp;<input type="checkbox" value="MALE" >Male</li>
+                                  <li class="checkbox">&emsp;<input type="checkbox" value="FEMALE" >Female</li>
+                                 <li class="checkbox">&emsp;<input type="checkbox" value="None" >NA</li>
+                              </ul>
+                              </div>
+                           </li>
+
+                           <li class="list-group-item">
+                            <div id="age_heading" class="list-group-item__heading">
+                             <a role="button" data-toggle="collapse"  href="#age" aria-expanded="false" aria-controls="age">
+                                <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i>Age</a>
+                           </div>
+
+                          <div id="age" class="collapse list-group-item__body">
+                            <div id="age_slide"></div>
+                             <input id="inp_age_slide" type="text" value="0-120">
+                              <button onclick='resetAge()'>Reset</button>
+                         </div>
+                        </li>
 
                                    <li class="list-group-item">
                                     <div id="age_heading" class="list-group-item__heading">
