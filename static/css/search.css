@@ -58,6 +58,11 @@ th, tb,tr,td {border: 1px solid black;}
            display: table;
           width: 100%;
      } */
+
+        tr.hide{
+            display:none;
+            width:100%;
+        }
         tr{
             display:table;
             width:100%;
