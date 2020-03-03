@@ -532,6 +532,9 @@ require([
         $('#unallowed-chars-alert').hide();
     });
 
+    $('#log-in-to-save-btn').on('click', function(e) {
+        window.location.href = '/accounts/login/';
+    });
 
     $('button[data-target="#create-cohort-modal"]').on('click',function(e){
 
@@ -716,6 +719,7 @@ require([
     var save_changes_btn_modal = $('#apply-edits-form input[type="submit"]');
     var save_changes_btn = $('button[data-target="#apply-filters-modal"]');
     var save_new_cohort_btn = $('button[data-target="#create-cohort-modal"]');
+    var log_in__to_save_btn = $('#log-in-to-save-btn');
     var check_for_changes = function() {
         var totalCases = 0;
         $('.total-cases').each(function(){
@@ -736,11 +740,23 @@ require([
                     save_new_cohort_btn.attr('disabled','disabled');
                 }
             }
+            if(log_in__to_save_btn.length > 0)
+            {
+                if (totalCases > 0) {
+                    log_in__to_save_btn.removeAttr('disabled');
+                    log_in__to_save_btn.removeAttr('title');
+                } else {
+                    log_in__to_save_btn.attr("title", "Please adjust your filters to include at least one case in the cohort.");
+                    log_in__to_save_btn.attr('disabled','disabled');
+                }
+            }
         } else {
             save_changes_btn.prop('disabled', true)
             save_changes_btn_modal.prop('disabled',true);
             save_new_cohort_btn.attr('disabled','disabled');
             save_new_cohort_btn.attr("title","Please select at least one filter.");
+            log_in__to_save_btn.attr('disabled','disabled');
+            log_in__to_save_btn.attr("title","Please select at least one filter.");
         }
     };
 
