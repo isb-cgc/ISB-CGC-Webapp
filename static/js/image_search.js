@@ -19,9 +19,6 @@ require.config({
 
 require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], function($, jquery, jqueryui, bootstrap, session_security, plotly,  _)
 {
-
-
-
     window.filterObj = {};
     window.projIdSel = [];
     window.studyIdSel = [];
