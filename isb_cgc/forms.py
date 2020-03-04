@@ -9,28 +9,24 @@ BOOL_CHOICES = (
 class OptInForm(forms.Form):
     user_email = forms.EmailField(
         label='Email',
-        strip=True,
         max_length=10000,
         required=True
     )
 
     first_name = forms.CharField(
         label='First name',
-        strip=True,
         max_length=10000,
         required=True
     )
 
     last_name = forms.CharField(
         label='Last name',
-        strip=True,
         max_length=10000,
         required=True
     )
 
     affiliation = forms.CharField(
         label='Affiliation',
-        strip=True,
         max_length=10000,
         required=True
     )
@@ -47,6 +43,5 @@ class OptInForm(forms.Form):
         widget=forms.Textarea,
         label="Do you have questions about ISB-CGC? Suggestions about what it \
          should or should not do? Ideas for collaboration? We'd love to hear from you!",
-        strip=True,
         max_length=10000
     )
