@@ -50,9 +50,10 @@ from accounts.sa_utils import get_nih_user_details
 from accounts.utils import retrieve_opt_in_status
 # from notebooks.notebook_vm import check_vm_stat
 from allauth.socialaccount.models import SocialAccount
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.template.loader import get_template
 from google_helpers.bigquery.service import get_bigquery_service
+from isb_cgc.forms import OptInForm
 
 import requests
 
@@ -744,3 +745,17 @@ def send_feedback_form(user_email, firstName, lastName, formLink):
         'status': status,
         'message': message
     })
+
+
+def process_opt_in_form(request):
+    if request.method == 'POST':
+        form = OptInForm(request.POST)
+
+        if form.is_valid():
+            # TODO: POST logic--insert into or update BQ table row
+            # TODO: create confirmation page
+            return HttpResponseRedirect('/opt-in-form-submitted/')
+    else:
+        form = OptInForm()
+
+    return render(request, 'opt_in_form.html', {'form': form})

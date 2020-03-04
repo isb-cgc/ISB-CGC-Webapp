@@ -1,0 +1,21 @@
+<!--
+<h1>Join the ISB-CGC community!</h1>
+<p>The ISB Cancer Genomics Cloud (ISB-CGC) project is in the process of establishing a communication platform to support its current and future users.</p>
+<p>Please leave your contact information, along with any questions or comments, if you want to join the community.</p>
+<p>We will use the information you supply to:</p>
+
+<ul>
+<li>contact you about details of the ISB-CGC communication platform</li>
+<li>send you occasional updates about ISB-CGC status (if you agree)</li>
+<li>ask for your input about the system</li>
+<li>respond to your questions, where appropriate</li>
+<ul>
+
+<p>You can learn more about ISB-CGC at isb-cgc.org.</p>
+-->
+
+<form action="/opt-in-submit/" method="post">
+    <!-- We probably don't need CSRF for this, right? Not a login form or the like -->
+    {{ form.as_p }}
+    <input type="submit" value="Submit">
+</form>
