@@ -68,10 +68,17 @@ else
     echo "Using restored cache for Python Libraries"
 fi
 
+if [ -z "${CI}" ]; then
+    echo "Installing responses library for unit tests, but not for deployment..."
+    pip3 install -q responses -t ${HOMEROOT}/lib --only-binary all
+fi
+
 if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
     echo "Installing Django Debug Toolbar for local dev..."
     pip3 install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
 fi
+
+
 
 echo "Libraries Installed"
 
