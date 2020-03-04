@@ -48,7 +48,7 @@ from cohorts.models import Cohort, Cohort_Perms
 from idc_collections.models import Program, Attribute, Attribute_Display_Values, DataSource, DataVersion
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
-from .metadata_utils import get_collex_metadata
+from .metadata_utils import get_collex_metadata, get_bq_metadata
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
@@ -118,7 +118,7 @@ def css_test(request):
 
 # Returns the data exploration and filtering page, which also allows for cohort creation
 @login_required
-def explore_legacy_data(request):
+def test_methods(request):
     context = {}
     try:
         # These are example filters; typically they will be reconstituted from the request
@@ -137,6 +137,8 @@ def explore_legacy_data(request):
                 'cross_collex_attr_counts': facets_and_lists['facets']['cross_collex'],
                 'listings': facets_and_lists['docs']
             }
+
+        print(get_bq_metadata(filters, fields, DataVersion.objects.filter(active=True)))
 
     except Exception as e:
         logger.error("[ERROR] In explore_data:")

@@ -28,7 +28,7 @@ admin.autodiscover()
 urlpatterns = [
 
     url(r'^$', views.landing_page, name='landing_page'),
-    #url(r'^explore_legacy/', views.explore_legacy_data, name='explore_legacy_data'),
+    url(r'^test_methods/', views.test_methods, name='test_methods'),
     #url(r'^explore/', views.search_page, name='search'),
     url(r'^user_landing/$', views.user_landing, name='user_landing'),
     url(r'^style_guide/', views.css_test),
