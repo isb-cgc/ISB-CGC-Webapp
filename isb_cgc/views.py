@@ -754,8 +754,13 @@ def process_opt_in_form(request):
         if form.is_valid():
             # TODO: POST logic--insert into or update BQ table row
             # TODO: create confirmation page
-            return HttpResponseRedirect('/opt-in-form-submitted/')
+            print(form)
+            return HttpResponseRedirect('/opt_in/thanks/')
     else:
         form = OptInForm()
 
-    return render(request, 'opt_in_form.html', {'form': form})
+    return render(request, 'accounts/account/opt_in_form.html', {'form': form})
+
+
+def confirm_opt_in_submit(request):
+    return render(request, 'accounts/account/opt_in_form_submitted.html', {'request': request})
