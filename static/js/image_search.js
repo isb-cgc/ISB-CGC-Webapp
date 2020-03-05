@@ -54,44 +54,6 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
 
 // Show more/less links on categories with >6 fiilters
 
-    var filterItemBindings = function (filterId, checkBoxDiv, displaySet, header, attributeName, isImageAttr, isRangeAttr) {
-        $('#' + filterId).find('.checkbox').find(':input').on('click', function () {
-            updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, isImageAttr, isRangeAttr);
-        });
-
-        $('#' + filterId).find('.show-more').on('click', function () {
-            $('#' + filterId).find('.extra-values').show();
-            $('#' + filterId).find('.less-checks').show();
-            $('#' + filterId).find('.more-checks').hide();
-        });
-
-
-        $('#' + filterId).find('.show-less').on('click', function () {
-            $('#' + filterId).find('.extra-values').hide();
-            $('#' + filterId).find('.more-checks').show();
-            $('#' + filterId).find('.less-checks').hide();
-        });
-
-        $('#' + filterId).find('.check-all').on('click', function () {
-            $('#' + filterId).find('.checkbox').find('input').prop('checked', true);
-            updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, isImageAttr, isRangeAttr);
-            //$('#'+filterId).find('.checkbox').find('input').each(function(){
-            //  $(this).triggerHandler('change');
-            //});
-        });
-
-        $('#' + filterId).find('.uncheck-all').on('click', function () {
-            $('#' + filterId).find('.checkbox').find('input').prop('checked', false);
-            updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, isImageAttr, isRangeAttr);
-            //$('#'+filterId).find('.checkbox').find('input').each(function(){
-            //  $(this).triggerHandler('change');
-            //});
-        });
-
-
-    }
-
-
 
     var mkFiltText = function() {
         var curKeys = Object.keys(filterObj).sort();
@@ -376,57 +338,7 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
     }
 
 
-    var resolveAllPlots = function() {
-        plotCategoricalData('modality', 'modality_chart', 'Modality', originalDataCounts['Modality'], 'Modality');
-        plotCategoricalData('body_part', 'body_part_examined_chart', 'BodyPartExamined', originalDataCounts['BodyPartExamined'], 'BodyPartExamined');
 
-        plotCategoricalData('disease', 'disease_code_chart', 'Disease Code', clinicalDataCounts['disease_code'], 'disease_code');
-        plotCategoricalData('vital_status', 'vital_status_chart', 'Vital Status', clinicalDataCounts['vital_status'], 'vital_status');
-        plotCategoricalData('gender', 'gender_chart', 'Gender', clinicalDataCounts['gender'], 'gender');
-        var aHeader = [['* to 10', '0 to 10'], ['10 to 20', '11 to 20'], ['20 to 30', '21 to 30'], ['30 to 40', '31 to 40'], ['40 to 50', '41 to 50'], ['50 to 60', '51 to 60'], ['60 to 70', '61 to 70'], ['70 to 80', '71 to 80'], ['80 to *', '81+'], ['None', 'None']]
-        resolveRelatedPlotsCatWCountsRng(clinicalDataCounts['age'], "age_chart", "Age", aHeader);
-
-        plotCategoricalData('race', 'race_chart', 'Race', clinicalDataCounts['race'], 'race');
-        plotCategoricalData('ethnicity', "ethnicity_chart", "Ethnicity", clinicalDataCounts['ethnicity'], "ethnicity");
-
-    }
-
-     var plotCategoricalData=function(elem, plotId, lbl, dataDic, filterA) {
-        var dataList = document.getElementById(elem).getElementsByTagName("ul")[0].getElementsByTagName("input");
-        var dataHeaders = new Array();
-        var dataValues = new Array();
-        var dataValueMp = new Object();
-        var dataCount = new Array();
-
-        for (i = 0; i < dataList.length; i++) {
-            var input = dataList[i];
-            var dataHeader = input.innerHTML;
-            dataHeaders.push(dataHeader);
-            dataCount[i] = 0;
-            var dataVal = input.value;
-            dataValueMp[dataVal] = i;
-            dataValues.push(dataVal);
-            if (dataDic.hasOwnProperty(dataVal) && (!filterObj.hasOwnProperty(filterA) || filterObj[filterA].indexOf(dataVal) > -1)) {
-                dataCount[i] = dataDic[dataVal];
-            }
-        }
-
-        var pdata = [
-            {
-                x: dataValues,
-                y: dataCount,
-                type: 'bar'
-            }
-        ];
-
-        plotLayout.title = lbl;
-        Plotly.newPlot(plotId, pdata, plotLayout, {displayModeBar: false});
-
-        document.getElementById(plotId).on('plotly_click', function (data) {
-            alert('here');
-        });
-
-    };
 
     var resolveRelatedPlotsCatWCountsRng=function(plotData, plotId, lbl, pHeader) {
         phA = new Array();
@@ -670,17 +582,150 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         }
     }
 
+
+     var plotCategoricalData=function(plotId, lbl, plotData) {
+
+        var pdata = [
+            {
+                x: plotData.dataLabel,
+                y: plotData.dataCnt,
+                type: 'bar'
+            }
+        ];
+
+        plotLayout.title = lbl;
+        Plotly.newPlot(plotId, pdata, plotLayout, {displayModeBar: false});
+
+        document.getElementById(plotId).on('plotly_click', function (data) {
+            alert('here');
+        });
+
+    };
+
+     var findFilterCats = function(id){
+        filterCats = new Array();
+        listElems  = $('#' + id).find('.list-group-item__body');
+         for (i=0;i<listElems.length;i++) {
+             elem = listElems.get(i);
+             nm = elem.id;
+             filterCats.push(nm);
+         }
+         return filterCats
+    }
+
+
+
+    var parseFilterForCounts = function(id) {
+        var dataLabel = new Array();
+        var dataCnt = new Array();
+
+        listElems = $('#' + id).find('.checkbox')
+        for (var i=0;i<listElems.length;i++) {
+            elem=listElems.get(i);
+            spans = $(elem).find('span')
+            lbl = spans.get(0).innerHTML;
+            cnt = parseInt(spans.get(1).innerHTML);
+            dataLabel.push(lbl);
+            dataCnt.push(cnt);
+        }
+        return {'dataLabel': dataLabel, 'dataCnt': dataCnt}
+    }
+
+    var createPlots = function(id){
+        var filterCats = findFilterCats(id);
+        for (var i=0;i<filterCats.length;i++){
+             filterCat = filterCats[i];
+             filterData = parseFilterForCounts(filterCat);
+             plotId = filterCat+"_chart";
+             plotCategoricalData(plotId, filterCat, filterData);
+        }
+
+     }
+
+     var updateFilterSelection = function(filterCat) {
+        var numFilters = $('#'+filterCat).find('input').length;
+        var checkedFilters = $('#'+filterCat).find('input:checked');
+
+        var attributeVals = new Array();
+        checkedFilters.each(function() {
+            attributeVals.push( $(this)[0].value );
+         });
+
+         if (attributeVals.length>0){
+             filterObj[filterCat] = attributeVals;
+         }
+         else if(filterObj.hasOwnProperty(filterCat)){
+             delete filterObj[filterCat];
+         }
+
+        mkFiltText();
+        //fetchCountData(false);
+
+    }
+
+    var filterItemBindings = function (filterId) {
+        $('#' + filterId).find('.checkbox').find(':input').on('click', function () {
+            updateFilterSelection(filterId);
+        });
+
+        $('#' + filterId).find('.show-more').on('click', function () {
+            $('#' + filterId).find('.extra-values').show();
+            $('#' + filterId).find('.less-checks').show();
+            $('#' + filterId).find('.more-checks').hide();
+        });
+
+
+        $('#' + filterId).find('.show-less').on('click', function () {
+            $('#' + filterId).find('.extra-values').hide();
+            $('#' + filterId).find('.more-checks').show();
+            $('#' + filterId).find('.less-checks').hide();
+        });
+
+        $('#' + filterId).find('.check-all').on('click', function () {
+            $('#' + filterId).find('.checkbox').find('input').prop('checked', true);
+            updateFilterSelection(filterId);
+            //$('#'+filterId).find('.checkbox').find('input').each(function(){
+            //  $(this).triggerHandler('change');
+            //});
+        });
+
+        $('#' + filterId).find('.uncheck-all').on('click', function () {
+            $('#' + filterId).find('.checkbox').find('input').prop('checked', false);
+            updateFilterSelection(filterId);
+            //$('#'+filterId).find('.checkbox').find('input').each(function(){
+            //  $(this).triggerHandler('change');
+            //});
+        });
+
+
+    }
+
+
+     var addFilterBindings = function(id){
+         var filterCats = findFilterCats(id);
+         for (var i=0;i<filterCats.length;i++){
+             filterItemBindings(filterCats[i]);
+        }
+     }
+
      $(document).ready(function () {
             filterObj.collection_id = tcgaColls;
-            filterItemBindings('Modality', 'Modality', 'modality_set', 'Modality', 'Modality', true, false);
-            filterItemBindings('BodyPartExamined', 'BodyPartExamined', 'body_part_examined_set', 'Body Part Examined', 'BodyPartExamined', true, false);
+            createPlots('search_orig_set');
+            createPlots('search_related_set');
+            addFilterBindings('search_orig_set');
+            addFilterBindings('search_related_set');
+            createProjectsTable("projects_table");
+            //parseFilterForCounts('Modality');
+            //filterItemBindings('Modality', 'Modality', 'modality_set', 'Modality', 'Modality', true, false);
+            //filterItemBindings('BodyPartExamined', 'BodyPartExamined', 'body_part_examined_set', 'Body Part Examined', 'BodyPartExamined', true, false);
 
-            filterItemBindings('vital_status', 'vital_list', 'vital_status_set', 'Vital Status', 'vital_status', false, false);
-            filterItemBindings('gender', 'gender_list', 'gender_set', 'Gender', 'gender', false, false)
+            //filterItemBindings('vital_status', 'vital_list', 'vital_status_set', 'Vital Status', 'vital_status', false, false);
+            //filterItemBindings('gender', 'gender_list', 'gender_set', 'Gender', 'gender', false, false)
             //fetchCountData(true);
 
         }
     );
+
 
 
 });

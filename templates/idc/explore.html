@@ -63,6 +63,7 @@
 
 {% block content %}
 
+
 <div class="container" style="display:block">
     <div class ="row">
         <div class="tab-content data-tab-content">
@@ -73,7 +74,16 @@
                          <div class="panel-heading clearfix"><h4 class="panel-title">Search Scope</h4></div>
                          <div class="panel-body">
                              <select id="project_scope" onchange="updateSearchScope(this)">
-                             <option value="All" >All data</option>
+                             <option  selected value="All" >All data</option>
+                                  {% for attr in set_attributes.origin_set.attributes %}
+                                      {% if attr.name == "collection_id" %}
+                                          {% for val in attr.values %}
+                                              {% if val.value != "None" %}
+                                                   <option value="{{ val.value }}">{{ val.value }}</option>
+                                              {% endif %}
+                                          {% endfor %}
+                                      {% endif %}
+                                 {% endfor %}
                           </select>
                          </div>
                          </div>
@@ -91,7 +101,10 @@
                             <div id = "search_orig_set" role="tabpanel" class="tab-pane active">
                            <!-- TODO: We need to make this request the list of attributes from the server -->
                            <!-- TODO: example here: -->
+
+
                             {% for attr in set_attributes.origin_set.attributes %}
+                            {% if attr.name != "collection_id" %}
                              <ul class="list-group" role="tablist" aria-multiselectable="true">
                                  <li class="list-group-item">
                                    <div id="{{ attr.name }}_heading" class="list-group-item__heading">
@@ -99,14 +112,13 @@
                                            <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}</a>
                                   </div>
 
-                                    <div id="{{ attr.name }}" class="collapse list-group-item__body collapse in">
+                                    <div id="{{ attr.name }}" class="collapse list-group-item__body collapse">
                                         <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                            {% for val in attr.values %}
                                             <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
                                                    <label>
-                                                       <input type="checkbox" checked value="{{ val.value }}"
-                                                             onclick="updateFilterSelection('{{ attr.name }}_list', '{{ attr.name }}_set','{{ attr.display_name }}','{{ attr.name }}',false,false)">
-                                                        {% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %} <span class="float-right case_count count">{{ val.count }}</span>
+                                                       <input type="checkbox" value="{{ val.value }}">
+                                                        <span>{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count">{{ val.count }}</span>
                                                     </label>
                                                 </li>
                                             {% endfor %}
@@ -116,61 +128,15 @@
                                                 <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                 <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
 
-                                           {% endif %}
+                                          {% endif %}
 
                                         </p>
                                    </div>
                                 </li>
                              </ul>
+                            {% endif %}
                             {%  endfor %}
-                                <!--
-                             <ul class="list-group" role="tablist" aria-multiselectable="true">
-                                 <li class="list-group-item">
-                                     <div id="modality_heading" class="list-group-item__heading">
-                                     <a role="button" data-toggle="collapse"  href="#modality" aria-expanded="false" aria-controls="modality">
-                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>Modality</a>
-                                    </div>
-                                     <div id="modality" class="collapse list-group-item__body">
 
-                                         <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                         <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                        <ul style="list-style: none;">
-                                        <li class="checkbox">&emsp;<input type="checkbox" value="CT" >Computed Tomography(CT)</li>
-                                       <li class="checkbox">&emsp;<input type="checkbox" value="CTPT">Computed Tomography/Position Emisson Tomography(CTPT)</li>
-                                       <li class="checkbox">&emsp;<input type="checkbox" value="CR" >Computed Radiology(CR)</li>
-                                       <li class="checkbox">&emsp;<input type="checkbox" value="MR" >Magnetic Resonance(MR)</li>
-                                         <li class="checkbox">&emsp;<input type="checkbox" value="MG" >Mamography(MG)</li>
-                                       <li class="checkbox extra-values">&emsp;<input type="checkbox" value="NM" >Nuclear Medicine(NM)</li>
-                                       <li class="checkbox extra-values">&emsp;<input type="checkbox" value="RTPLAN" >Radiotherapy Plan(RTPLAN)</li>
-                                       <li class="checkbox extra-values">&emsp;<input type="checkbox" value="RTSTRUCT" >Radiotheraoy Structure Set(RTSTRUCT)</li>
-                                       </ul>
-
-                                   </div>
-                                 </li>
-
-                                 <li class="list-group-item">
-                                     <div id="body_heading" class="list-group-item__heading">
-                                      <a role="button" data-toggle="collapse"  href="#body_part" aria-expanded="false" aria-controls="body_part">
-                                       <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>Body Part Examined</a>
-                                     </div>
-                                     <div id="body_part" class="collapse list-group-item__body">
-                                         <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                         <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                        <ul style="list-style: none;">
-                                           <li class="checkbox">&emsp;<input type="checkbox" value="BLADDER">Bladder</li>
-                                          <li class="checkbox">&emsp;<input type="checkbox" value="BRAIN">Brain </li>
-                                          <li class="checkbox">&emsp;<input type="checkbox" value="CHEST" >Chest</li>
-                                         <li class="checkbox">&emsp;<input type="checkbox"  value="COLON" >Colon</li>
-                                         <li class="checkbox">&emsp;<input type="checkbox"  value="HEADNECK" >Head/Neck</li>
-                                        <li class="checkbox extra-values">&emsp;<input type="checkbox"  value="KIDNEY" >Kidney</li>
-                                       <li class="checkbox extra-values">&emsp;<input type="checkbox"  value="PROSTATE" >Prostate</li>
-                                         <li class="checkbox extra-values">&emsp;<input type="checkbox"  value="STOMACH" >Stomach</li>
-                                       <li class="checkbox extra-values">&emsp;<input type="checkbox"  value="THYROID" >Thyroid</li>
-                                       <li class="checkbox extra-values">&emsp;<input type="checkbox" value="None" >Not Available/Other</li>
-                                      </ul>
-                                    </div>
-                                 </li>
-                         </ul> -->
                    </div>
                             <div id = "search_derived_set" role="tabpanel" class="tab-pane">
                                 <ul class="list-group" role="tablist", aria-multiselectable="true">
@@ -181,68 +147,57 @@
                                           </div>
                                          <div id="segmentation" class="collapse list-group-item__body">
                                       <ul style="list-style: none;">
-                                         <li>&emsp;<input type="checkbox" checked value="yes">&emsp;Segmentation Available</li>
-                                        <li>&emsp;<input type="checkbox" checked value="no">&emsp;Segmentation Not Available</li>
+                                         <li>&emsp;<input type="checkbox" value="yes">&emsp;Segmentation Available</li>
+                                        <li>&emsp;<input type="checkbox" value="no">&emsp;Segmentation Not Available</li>
                                       </ul>
                                   </div>
                                     </li>
                                 </ul>
                         </div>
                             <div id = "search_related_set" role="tabpanel" class="tab-pane">
-                                   <ul class="list-group" role="tablist" aria-multiselectable="true">
-        {#                            <!-- TODO: Same as above here but for relateds-->#}
 
+                            {% for attr in set_attributes.related_set.attributes %}
 
-                                   <li class="list-group-item">
-                                       <div id="disease_heading" class="list-group-item__heading">
-                                           <a role="button" data-toggle="collapse"  href="#disease" aria-expanded="false" aria-controls="disease">
-                                               <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> Disease Code</a>
-                                      </div>
+                             <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                 <li class="list-group-item">
+                                   <div id="{{ attr.name }}_heading" class="list-group-item__heading">
+                                       <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
+                                           <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}</a>
+                                  </div>
 
-                                       <div id="disease" class="collapse list-group-item__body">
-                                           <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                           <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                        <ul id="disease_list" style="list-style: none;">
-                                             <!-- <li class="checkbox"> <input type="checkbox" value="BLCA">BLCA</li> -->
+                                    <div id="{{ attr.name }}" class="collapse list-group-item__body collapse">
+                                        <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
+                                           {% for val in attr.values %}
+                                            <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
+                                                   <label>
+                                                       <input type="checkbox" value="{{ val.value }}">
+                                                        <span>{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count">{{ val.count }}</span>
+                                                    </label>
+                                                </li>
+                                            {% endfor %}
                                         </ul>
-                                      </div>
-                                   </li>
+                                       <p style="display: block;" >
+                                           {% if attr.values|length > 5 %}
+                                                <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
 
-                                    <li class="list-group-item">
-                                      <div id="vital_heading" class="list-group-item__heading">
-                                      <a role="button" data-toggle="collapse"  href="#vital_status" aria-expanded="false" aria-controls="vital_status">
-                                          <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> Vital Status</a>
-                                     </div>
+                                          {% endif %}
 
-                            <div id="vital_status" class="collapse list-group-item__body">
-                                 <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                   <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                               <ul id="vital_list" style="list-style: none;">
-                                  <li class="checkbox">&emsp;<input type="checkbox"  value="Alive" >Alive</li>
-                                 <li class="checkbox">&emsp;<input type="checkbox" value="Dead" >Dead</li>
-                                 <li class="checkbox">&emsp;<input type="checkbox" value="None">NA</li>
-                                </ul>
-                             </div>
-                            </li>
+                                        </p>
+                                   </div>
+                                </li>
+                             </ul>
 
-                            <li class="list-group-item">
-                              <div id="gender_heading" class="list-group-item__heading">
-                                   <a role="button" data-toggle="collapse"  href="#gender" aria-expanded="false" aria-controls="vital">
-                                  <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i>Gender</a>
-                              </div>
+                            {%  endfor %}
 
-                             <div id="gender" class="collapse list-group-item__body">
-                                  <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                   <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                              <ul id="gender_list" style="list-style: none;">
-                                    <li class="checkbox">&emsp;<input type="checkbox" value="MALE" >Male</li>
-                                  <li class="checkbox">&emsp;<input type="checkbox" value="FEMALE" >Female</li>
-                                 <li class="checkbox">&emsp;<input type="checkbox" value="None" >NA</li>
-                              </ul>
-                              </div>
-                           </li>
 
-                           <li class="list-group-item">
+                    </div>
+                        </div>
+                         </div>
+                      </div>
+                 </div>
+
+            <!-- <li class="list-group-item">
                             <div id="age_heading" class="list-group-item__heading">
                              <a role="button" data-toggle="collapse"  href="#age" aria-expanded="false" aria-controls="age">
                                 <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i>Age</a>
@@ -253,55 +208,7 @@
                              <input id="inp_age_slide" type="text" value="0-120">
                               <button onclick='resetAge()'>Reset</button>
                          </div>
-                        </li>
-
-                                   <li class="list-group-item">
-                                    <div id="age_heading" class="list-group-item__heading">
-                                     <a role="button" data-toggle="collapse"  href="#age" aria-expanded="false" aria-controls="age">
-                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i>Age</a>
-                                   </div>
-
-                                  <div id="age" class="collapse list-group-item__body">
-                                    <div id="age_slide"></div>
-                                     <input id="inp_age_slide" type="text" value="0-120">
-                                      <button onclick='refreshAge()'>Refresh</button>
-                                 </div>
-                                </li>
-
-                                 <li class="list-group-item">
-                                    <div id="race_heading" class="list-group-item__heading">
-                                     <a role="button" data-toggle="collapse"  href="#race" aria-expanded="false" aria-controls="race">
-                                      <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i>Race</a>
-                                  </div>
-
-                                 <div id="race" class="collapse list-group-item__body">
-                                   <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                     <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                    <ul id="race_list" style="list-style: none;">
-
-                                    </ul>
-                                  </div>
-                                  </li>
-
-                                  <li class="list-group-item">
-                                   <div id="ethnicity_heading" class="list-group-item__heading">
-                                   <a role="button" data-toggle="collapse"  href="#ethnicity" aria-expanded="false" aria-controls="ethnicity">
-                                   <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i>Ethnicity</a>
-                                    </div>
-
-                                   <div id="ethnicity" class="collapse list-group-item__body">
-                                        <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                     <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                   <ul id="ethnicity_list" style="list-style: none;"></ul>
-                                   </div>
-                                  </li>
-                               </ul>
-
-                    </div>
-                        </div>
-                         </div>
-                      </div>
-                 </div>
+                        </li> -->
 
                  <div class="col-lg-9 col-md-9">
                      <div class="tabpanel data-tab-content-panel">
@@ -323,8 +230,10 @@
                              <div class="tab-content">
                                <div id = "results_orig_set" role="tabpanel" class="tab-pane active panel">
                                     <div class="panel-body bar-charts-div">
-                                      <div id="modality_chart" class="bar-chart"></div>
-                                      <div id="body_part_examined_chart" class="bar-chart"></div>
+                                         {% for attr in set_attributes.origin_set.attributes %}
+                                             <div id="{{ attr.name  }}_chart" class="bar-chart"></div>
+                                        {%  endfor %}
+
                                     </div>
                                </div>
                              <div id = "results_derived_set" role="tabpanel" class="tab-pane panel">
@@ -333,12 +242,10 @@
 
                              <div id = "results_related_set" role="tabpanel" class="tab-pane panel">
                                  <div class="panel-body bar-charts-div related-graphs">
-                                     <div id="disease_code_chart" class="bar-chart"></div>
-                                     <div id="vital_status_chart" class="bar-chart"></div>
-                                     <div id="gender_chart" class="bar-chart"></div>
-                                     <div id="age_chart" class="bar-chart"></div>
-                                     <div id="race_chart" class="bar-chart"></div>
-                                    <div id="ethnicity_chart" class="bar-chart"></div>
+                                     {% for attr in set_attributes.related_set.attributes %}
+                                             <div id="{{ attr.name  }}_chart" class="bar-chart"></div>
+                                        {%  endfor %}
+
                                  </div>
                                  <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="showMoreGraphs()">Show More</button></div>
                                  <div class="less-graphs" style="display: none; width:100%"><button class="btn btn-link" role="button" onclick="showLessGraphs()">Show Less</button></div>
@@ -357,6 +264,16 @@
                              </tr>
                              </thead>
                              <tbody id="projects_table" class="set_height">
+                             {% for attr in set_attributes.origin_set.attributes %}
+                                      {% if attr.name == "collection_id" %}
+                                          {% for val in attr.values %}
+                                              {% if val.value != "None" %}
+                                                  <tr id="project_row_{{ val.value }}" class="text_head" onclick="(toggleProj(this,'{{ val.value }}'))"><td>{{ val.value }}</td><td>{{ val.count }}</td><td id="patient_col_{{ val.count }}" class="projects_table_num_cohort">{{ val.count }}</td> </tr>
+                                              {% endif %}
+                                          {% endfor %}
+                                      {% endif %}
+                             {% endfor %}
+
                              </tbody>
                           </table>
                          </div>

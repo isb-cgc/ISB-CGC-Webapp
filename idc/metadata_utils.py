@@ -24,7 +24,6 @@ from django.conf import settings
 logger = logging.getLogger('main_logger')
 
 
-
 # Fetch metadata from Solr
 def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, with_clinical = True, collapse_on = 'PatientID' ):
     try:
@@ -88,10 +87,12 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
             results['docs'] = solr_result['docs']
 
         results['facets']['cross_collex'] = solr_result['facets']
-        if 'Kidney' in results['facets']['cross_collex'] and 'KIDNEY' in results['facets']['cross_collex']:
-            solr_result['facets']['KIDNEY'] = solr_result['facets']['KIDNEY'] + solr_result['facets']['Kidney']
-        elif 'Kidney' in results['facets']['cross_collex']:
-            solr_result['facets']['KIDNEY'] = solr_result['facets']['Kidney']
+        if 'Kidney' in results['facets']['cross_collex']['BodyPartExamined'] and 'KIDNEY' in results['facets']['cross_collex']['BodyPartExamined']:
+            results['facets']['cross_collex']['BodyPartExamined']['KIDNEY'] = results['facets']['cross_collex']['BodyPartExamined']['KIDNEY'] + results['facets']['cross_collex']['BodyPartExamined']['Kidney']
+            del results['facets']['cross_collex']['BodyPartExamined']['Kidney']
+        elif 'Kidney' in results['facets']['cross_collex']['BodyPartExamined']:
+            results['facets']['cross_collex']['BodyPartExamined']['KIDNEY'] = results['facets']['cross_collex']['BodyPartExamined']['Kidney']
+            del results['facets']['cross_collex']['BodyPartExamined']['Kidney']
 
 
         results['total'] = solr_result['numFound']
