@@ -18,7 +18,7 @@ import logging
 import re
 from idc_collections.models import DataSource, Attribute, Attribute_Display_Values, Program, DataVersion
 from solr_helpers import *
-from idc_collections.collex_metadata_utils import get_bq_metadata, get_bq_string
+from idc_collections.collex_metadata_utils import get_bq_metadata, get_bq_facet_counts
 from django.conf import settings
 
 logger = logging.getLogger('main_logger')
@@ -96,7 +96,7 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
             solr_facets = build_solr_facets(list(tcga_facet_attrs), solr_query['filter_tags'])
 
             query_set = []
-
+            joined = False
             # Ancilary data faceting and querying
             if solr_query['queries'] is not None:
                 for attr in solr_query['queries']:
@@ -105,9 +105,16 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
                         query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
                             tcia_solr.shared_id_col, tcia_solr.name, tcga_solr.shared_id_col
                         )) + solr_query['queries'][attr])
+                        joined = True
                     else:
                         query_set.append(solr_query['queries'][attr])
 
+            if not joined:
+                query_set.append("{!join %s}*:*" % "from={} fromIndex={} to={}".format(
+                    tcia_solr.shared_id_col, tcia_solr.name, tcga_solr.shared_id_col
+                ))
+
+            print(query_set)
             # Fields is hardlocked to None for all Ancillary data because we don't display them,
             # we only faceted count
             solr_result = query_solr_and_format_result({

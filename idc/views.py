@@ -48,7 +48,8 @@ from cohorts.models import Cohort, Cohort_Perms
 from idc_collections.models import Program, Attribute, Attribute_Display_Values, DataSource, DataVersion
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
-from .metadata_utils import get_collex_metadata, get_bq_metadata
+from .metadata_utils import get_collex_metadata
+from idc_collections.collex_metadata_utils import get_bq_metadata, get_bq_string, get_bq_facet_counts
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
@@ -122,7 +123,7 @@ def test_methods(request):
     context = {}
     try:
         # These are example filters; typically they will be reconstituted from the request
-        filters = {"vital_status": ["Alive"], "age_at_diagnosis_btw": [15,40], "disease_code": ["READ", "BRCA"]}
+        filters = {"vital_status": ["Alive"], "disease_code": ["READ", "BRCA"]}
         # These are the actual data fields to display in the expanding table; again this is just an example
         # set that should be properly supplied in the reuqest
         fields = ["BodyPartExamined", "Modality", "StudyDescription", "StudyInstanceUID", "SeriesInstanceUID", "case_barcode", "disease_code", "sample_type"]
@@ -138,7 +139,8 @@ def test_methods(request):
                 'listings': facets_and_lists['docs']
             }
 
-        print(get_bq_metadata(filters, fields, DataVersion.objects.filter(active=True)))
+        #print(get_bq_facet_counts(filters, ["gender","vital_status","Modality","BodyPartExamined"], DataVersion.objects.filter(active=True)))
+        print(facets_and_lists)
 
     except Exception as e:
         logger.error("[ERROR] In explore_data:")
