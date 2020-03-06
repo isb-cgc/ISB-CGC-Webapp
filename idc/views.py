@@ -140,7 +140,7 @@ def test_methods(request):
             }
 
         #print(get_bq_facet_counts(filters, ["gender","vital_status","Modality","BodyPartExamined"], DataVersion.objects.filter(active=True)))
-        print(facets_and_lists)
+        #print(facets_and_lists)
 
     except Exception as e:
         logger.error("[ERROR] In explore_data:")
