@@ -78,8 +78,8 @@ urlpatterns = [
     url(r'^share/', include('sharing.urls')),
     url(r'^opt_in/check_show', views.opt_in_check_show, name='opt_in'),
     url(r'^opt_in/update', views.opt_in_update, name='opt_in_update'),
-    url(r'^opt_in/form/$', views.process_opt_in_form, name='opt_in_form'),
-    url(r'^opt_in/thanks/$', views.confirm_opt_in_submit, name='opt_in_form_submitted')
+    url(r'^opt_in/form/$', views.opt_in_form, name='opt_in_form'),
+    url(r'^opt_in/form_submit', views.opt_in_form_submitted, name='opt_in_form_submitted'),
 ]
 
 if settings.IS_DEV:

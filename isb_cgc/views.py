@@ -47,13 +47,12 @@ from projects.models import Program
 from workbooks.models import Workbook
 from accounts.models import GoogleProject, UserOptInStatus
 from accounts.sa_utils import get_nih_user_details
-from accounts.utils import retrieve_opt_in_status
 # from notebooks.notebook_vm import check_vm_stat
 from allauth.socialaccount.models import SocialAccount
-from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
+from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
 from google_helpers.bigquery.service import get_bigquery_service
-from isb_cgc.forms import OptInForm
+from google_helpers.bigquery.feedback_support import BigQueryFeedbackSupport
 
 import requests
 
@@ -64,7 +63,6 @@ OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 BQ_ECOSYS_BUCKET = settings.BQ_ECOSYS_STATIC_URL
-FEEDBACK_FORM_LINK_TEMPLATE = 'https://docs.google.com/forms/d/e/1FAIpQLSeGQiOcJJfe4q3wRM-g7sP_LpJj-pNDp7ZjOqsWIM381W28EQ/viewform?entry.474148858={email}&entry.991749890={firstName}+{lastName}'
 
 
 def convert(data):
@@ -158,13 +156,6 @@ def user_detail(request, user_id):
         if user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.NEW:
             user_status_obj.opt_in_status = UserOptInStatus.NOT_SEEN
             user_status_obj.save()
-
-        # if not already recorded in UserOptInStatus, change opt_in_status based on google sheet response (if any)
-        try:
-            retrieve_opt_in_status(request, user_status_obj)
-        except ObjectDoesNotExist:
-            logger.error("[ERROR] Unable to retrieve UserOptInStatus object for user details.")
-
         if user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.YES:
             user_opt_in_status = "Opted-In"
         elif user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.NO:
@@ -227,17 +218,13 @@ def extended_login_view(request):
                                                                                    datetime.datetime.utcnow())
         )
 
-        # If user logs in for the second time, opt-in status changes to NOT_SEEN
+        # If user logs in for the second time, or user has not completed the survey, opt-in status changes to NOT_SEEN
         user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=user).first()
-        if user_opt_in_stat_obj and user_opt_in_stat_obj.opt_in_status == UserOptInStatus.NEW:
+        if user_opt_in_stat_obj and \
+                (user_opt_in_stat_obj.opt_in_status == UserOptInStatus.NEW or user_opt_in_stat_obj.opt_in_status == UserOptInStatus.SEEN):
             user_opt_in_stat_obj.opt_in_status = UserOptInStatus.NOT_SEEN
             user_opt_in_stat_obj.save()
 
-        # if not already recorded in UserOptInStatus, change opt_in_status based on google sheet response (if any)
-        try:
-            retrieve_opt_in_status(request, user_opt_in_stat_obj)
-        except ObjectDoesNotExist:
-            logger.error("[ERROR] Unable to retrieve UserOptInStatus object on log in.")
     except Exception as e:
         logger.exception(e)
 
@@ -675,6 +662,7 @@ def opt_in_check_show(request):
     })
 
 
+@login_required
 def opt_in_update(request):
     # If user logs in for the second time, opt-in status changes to NOT_SEEN
     error_msg = ''
@@ -682,22 +670,32 @@ def opt_in_update(request):
     redirect_url = ''
     if request.POST:
         opt_in_choice = request.POST.get('opt-in-radio')
-        opt_in_status_code = UserOptInStatus.NO if opt_in_choice == 'opt-out' else UserOptInStatus.SEEN
 
     try:
         user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=request.user).first()
+        feedback_form_link = request.build_absolute_uri('/opt_in/form')
+
         if user_opt_in_stat_obj:
-            user_opt_in_stat_obj.opt_in_status = opt_in_status_code
-            user_opt_in_stat_obj.save()
+            if opt_in_choice == 'opt-out':
+                opt_in_status_code = UserOptInStatus.NO
+                user_opt_in_stat_obj.opt_in_status = opt_in_status_code
+                user_opt_in_stat_obj.save()
+            elif user_opt_in_stat_obj.opt_in_status == UserOptInStatus.NOT_SEEN:
+                #chose YES and not seen
+                opt_in_status_code = UserOptInStatus.SEEN
+                user_opt_in_stat_obj.opt_in_status = opt_in_status_code
+                user_opt_in_stat_obj.save()
+
         if opt_in_choice.startswith('opt-in-'):
             user_email = request.user.email
             first_name = request.user.first_name
             last_name = request.user.last_name
-            feedback_form_link = FEEDBACK_FORM_LINK_TEMPLATE.format(email=user_email, firstName=first_name,
-                                                                    lastName=last_name)
 
             if opt_in_choice == 'opt-in-email':
-                resp = send_feedback_form(user_email, first_name, last_name, feedback_form_link)
+                feedback_form_link_template = feedback_form_link + '?email={email}&first_name={firstName}&last_name={lastName}'
+                feedback_form_link_params = feedback_form_link_template.format(email=user_email, firstName=first_name,
+                                                                        lastName=last_name)
+                resp = send_feedback_form(user_email, first_name, last_name, feedback_form_link_params)
                 if resp.status == 'error':
                     error_msg = resp.message
             else:  # opt-in-now
@@ -747,19 +745,74 @@ def send_feedback_form(user_email, firstName, lastName, formLink):
     })
 
 
-def process_opt_in_form(request):
-    if request.method == 'POST':
-        form = OptInForm(request.POST)
+def opt_in_form(request):
+    template = 'isb_cgc/opt_in_form.html'
+    opt_in_status = 'opt-in'
 
-        if form.is_valid():
-            # TODO: POST logic--insert into or update BQ table row
-            # TODO: create confirmation page
-            print(form)
-            return HttpResponseRedirect('/opt_in/thanks/')
+    if request.user.is_authenticated:
+        user = request.user
+        first_name = user.first_name
+        last_name = user.last_name
+        email = user.email
+        opt_in_status_obj = UserOptInStatus.objects.filter(user=user).first()
+        if opt_in_status_obj and opt_in_status_obj.opt_in_status == UserOptInStatus.NO:
+            opt_in_status = 'opt-out'
     else:
-        form = OptInForm()
+        email = request.GET.get('email') if request.GET.get('email') else ''
+        first_name = request.GET.get('first_name') if request.GET.get('first_name') else ''
+        last_name = request.GET.get('last_name') if request.GET.get('last_name') else ''
 
-    return render(request, 'accounts/account/opt_in_form.html', {'form': form})
+    form = {'first_name': first_name,
+            'last_name': last_name,
+            'email': email,
+            'opt_in_status': opt_in_status
+            }
+
+    return render(request, template, form)
+
+def opt_in_form_submitted(request):
+    msg = ''
+    error_msg = ''
+    template = 'isb_cgc/opt_in_form_submitted.html'
+
+    # get values and update optin status
+    first_name= request.POST.get('first-name')
+    last_name= request.POST.get('last-name')
+    email= request.POST.get('email')
+    affiliation= request.POST.get('affiliation')
+    feedback= request.POST.get('feedback')
+    subscribed = (request.POST.get('subscribed') == 'opt-in')
+
+    try:
+        users = User.objects.filter(email__iexact=email)
+        if len(users) > 0:
+            user = users.first()
+            user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=user).first()
+            if user_opt_in_stat_obj:
+                user_opt_in_stat_obj.opt_in_status = UserOptInStatus.YES if subscribed else UserOptInStatus.NO
+                user_opt_in_stat_obj.save()
+                # record to store in bq table
+                feedback_row = {
+                    "email": email,
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "affiliation": affiliation,
+                    "subscribed": subscribed,
+                    "feedback": feedback,
+                    "submitted_time": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                }
+                BigQueryFeedbackSupport.add_rows_to_table([feedback_row])
+                msg = 'We thank you for your time and suggestions.'
+        else:
+            error_msg = 'We were not able to find a user with the given email. Please check with us again later.'
+    except Exception as e:
+        logger.exception(e)
+        error_msg = 'We were not able to submit your feedback due to some errors. Please check with us again later.'
+    message = {
+        'msg': msg,
+        'error_msg': error_msg
+    }
+    return render(request, template, message)
 
 
 def confirm_opt_in_submit(request):
