@@ -24,7 +24,6 @@ from django.conf import settings
 logger = logging.getLogger('main_logger')
 
 
-
 # Fetch metadata from Solr
 def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, with_clinical = True, collapse_on = 'PatientID' ):
     try:
@@ -114,7 +113,6 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
                     tcia_solr.shared_id_col, tcia_solr.name, tcga_solr.shared_id_col
                 ))
 
-            print(query_set)
             # Fields is hardlocked to None for all Ancillary data because we don't display them,
             # we only faceted count
             solr_result = query_solr_and_format_result({
