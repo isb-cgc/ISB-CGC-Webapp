@@ -196,13 +196,6 @@ require([
         location.reload(true);
     });
 
-    $('#cancel-opt-in-btn').on('click', function() {
-        send_opt_in_update('opt-out');
-    });
-
-    $('#close-opt-in-btn').on('click', function() {
-        send_opt_in_update('opt-out');
-    });
 
     $('#will-email-message').collapse({toggle: false});
     $('[name="opt-in-radio"]').on('change', function() {
