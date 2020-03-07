@@ -124,18 +124,34 @@
                         to the cancer research community. Your feedback is important to the NCI and us.
                         Please help us help you by considering "Opting-In" to our user feedback mailing list and
                         allowing us to contact you in the future regarding ISB-CGC!</p>
-                    <br>
-                    <p> Would you like to opt-in to our user feedback mailing list? </p>
-                    <input type="radio" name="opt-in-radio" value="opt-in-now" checked> Yes, take me to the opt-in
-                    form now.
-                    <br>
-                    <input type="radio" name="opt-in-radio" value="opt-in-email"> Yes, email me a link to the opt-in form.
-                    <br>
-                    <div class="collapse" id="will-email-message" style="margin-left: 15px">
-                        <label> A link to the opt-in form will be sent to your account email.</label>
+
+                    <div style="margin-top: 20px;"><label> Would you like to opt-in to our user feedback mailing list? </label>
                     </div>
-                    <input type="radio" name="opt-in-radio" value="opt-out"> No, I don't want to be contacted for
-                    feedback.
+                    <div style="margin-left: 20px;">
+                        <div>
+                            <input id="opt-in-now-radio" type="radio" name="opt-in-radio"
+                                   value="opt-in-now" checked>
+                            <label for="opt-in-now-radio">Yes, take me to the opt-in form
+                                now</label>
+                        </div>
+                        <div>
+                            <input id="opt-in-email-radio" type="radio" name="opt-in-radio"
+                                   value="opt-in-email" checked>
+                            <label for="opt-in-email-radio">Yes, email me a link to the opt-in
+                                form</label>
+                        </div>
+                        <div>
+                        <label style="margin-left: 15px; color:#5e5e5e;" class="collapse" id="will-email-message">
+                            <i>A link to the opt-in form will be sent to your account email.</i>
+                        </label>
+                            </div>
+                        <div>
+                            <input id="opt-out-radio" type="radio" name="opt-in-radio"
+                                   value="opt-out" checked>
+                            <label for="opt-out-radio">No, I don't want to be contacted
+                                for feedback</label>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <input type="submit" value="Submit" data-dismiss="modal" class="btn btn-primary" id="submit-opt-in-btn"/>
