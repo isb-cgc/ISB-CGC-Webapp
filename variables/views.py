@@ -343,7 +343,8 @@ def variable_fav_copy(request, variable_fav_id):
 @login_required
 def variable_fav_save(request, variable_fav_id=0):
     try:
-        data   = json.loads(request.body)
+        body_unicode = request.body.decode('utf-8')
+        data = json.loads(body_unicode)
         result = {}
 
         name = data['name']

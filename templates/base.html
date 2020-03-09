@@ -161,7 +161,9 @@
         </div>
     </div>
 
-
+<script>
+    var user_is_auth = {% if request.user.is_authenticated %}true{% else %}false{% endif %};
+</script>
 
 {% load session_security_tags %}
 {% load i18n l10n %}

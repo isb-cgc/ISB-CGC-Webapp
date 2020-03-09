@@ -5,7 +5,6 @@ if [ -n "$CI" ]; then
 else
     if ( "/home/vagrant/www/shell/get_env.sh" ) ; then
         export $(cat ${ENV_FILE_PATH} | grep -v ^# | xargs) 2> /dev/null
-        cat ${ENV_FILE_PATH}
         if [ -z "${SECURE_LOCAL_PATH}" ] || [ "${SECURE_LOCAL_PATH}" == "" ] ; then
             echo "[ERROR] SECURE_LOCAL_PATH not found, but this is a VM build! Something might be wrong with your .env file"
             echo "or your secure_files directory."
