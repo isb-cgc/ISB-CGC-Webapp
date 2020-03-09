@@ -90,27 +90,15 @@ require([
         })
     };
 
-    // Adapted from https://docs.djangoproject.com/en/1.9/ref/csrf/
-    $.getCookie = function getCookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie != '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    };
+    $.getCookie = utils.getCookie;
+    $.setCookie = utils.setCookie;
+    $.removeCookie = utils.removeCookie;
 
     function csrfSafeMethod(method) {
         // these HTTP methods do not require CSRF protection
         return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
     };
+
     $.ajaxSetup({
         beforeSend: function(xhr, settings) {
             var csrftoken = $.getCookie('csrftoken');
@@ -189,6 +177,25 @@ require([
         sessionStorage.removeItem("reloadMsg");
     });
 
+    function send_opt_in_update(opt_in_selection) {
+        // Ajax call to update the backend of the user's selection
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + '/opt_in/update/',
+            dataType  :'json',
+            data: {'opt-in-radio': opt_in_selection},
+            success: function(data) {
+                var redirect_url = data['redirect-url'];
+                if (redirect_url != "")
+                {
+                    window.open(redirect_url, '_blank')
+                }
+            },
+            error: function(data) {
+            }
+        });
+    }
+
     // Code to handle opt-in dialog interaction
     $('#submit-opt-in-btn').on('click', function() {
         var opt_in_radio_value = $('input[name="opt-in-radio"]:checked').val();
@@ -196,13 +203,6 @@ require([
         location.reload(true);
     });
 
-    $('#cancel-opt-in-btn').on('click', function() {
-        send_opt_in_update('opt-out');
-    });
-
-    $('#close-opt-in-btn').on('click', function() {
-        send_opt_in_update('opt-out');
-    });
 
     $('#will-email-message').collapse({toggle: false});
     $('[name="opt-in-radio"]').on('change', function() {
@@ -218,13 +218,15 @@ require([
         $(this).closest("." + $(this).attr("data-hide")).hide();
     });
 
-    var sessionSecurity = new yourlabs.SessionSecurity({
-        pingUrl: pingUrl,
-        warnAfter: warnAfter,
-        expireAfter: expireAfter,
-        confirmFormDiscard: confirmFormDiscard,
-        returnToUrl: BASE_URL
-    });
+    if(user_is_auth) {
+        var sessionSecurity = new yourlabs.SessionSecurity({
+            pingUrl: pingUrl,
+            warnAfter: warnAfter,
+            expireAfter: expireAfter,
+            confirmFormDiscard: confirmFormDiscard,
+            returnToUrl: BASE_URL
+        });
+    }
 });
 
 // Return an object for consts/methods used by most views
@@ -240,6 +242,12 @@ define(['jquery', 'utils'], function($, utils) {
         // at document load time
         setReloadMsg: function(type,text) {
             sessionStorage.setItem("reloadMsg",JSON.stringify({type: type, text: text}));
+        },
+        setCookie: function(name,val,expires_in,path) {
+            utils.setCookie(name,val,expires_in,path);
+        },
+        removeCookie: function(name, path) {
+            utils.removeCookie(name, path);
         },
         gdcSchema: {
             "type": "array",
@@ -292,21 +300,3 @@ define(['jquery', 'utils'], function($, utils) {
     };
 });
 
-function send_opt_in_update(opt_in_selection) {
-    // Ajax call to update the backend of the user's selection
-    $.ajax({
-            type: 'POST',
-            url: BASE_URL + '/opt_in/update/',
-            dataType  :'json',
-            data: {'opt-in-radio': opt_in_selection},
-            success: function(data) {
-                var redirect_url = data['redirect-url'];
-                if (redirect_url != "")
-                {
-                    window.open(redirect_url, '_blank')
-                }
-            },
-            error: function(data) {
-            }
-        });
-}

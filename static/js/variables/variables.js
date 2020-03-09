@@ -242,7 +242,7 @@ require([
             $.createMessage('Please check that your variable list name is not empty, and that you have selected at least one variable.', 'warning');
         } else {
             $(this).attr('disabled', 'disabled');
-            var csrftoken = get_cookie('csrftoken');
+            var csrftoken = $.getCookie('csrftoken');
             $.ajax({
                 type: 'POST',
                 url : BASE_URL + '/variables/save',
@@ -310,7 +310,7 @@ require([
         var variable_list = get_variable_list();
         var variable_id = this.getAttribute("variable_id");
         if(name && variable_list.length>0){
-            var csrftoken = get_cookie('csrftoken');
+            var csrftoken = $.getCookie('csrftoken');
             $.ajax({
                 type : 'POST',
                 url  : BASE_URL + '/variables/' + variable_id + '/update',
@@ -351,7 +351,7 @@ require([
         var worksheet_id = this.getAttribute("worksheet_id");
         var variable_list = get_variable_list();
         if(name && variable_list.length>0){
-            var csrftoken = get_cookie('csrftoken');
+            var csrftoken = $.getCookie('csrftoken');
             $.ajax({
                 type : 'POST',
                 url  : BASE_URL + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + '/variables/edit',
@@ -378,7 +378,7 @@ require([
             $.createMessage('Please check that your variable list name is not empty, and that you have selected at least one variable.', 'warning')
         } else {
             $(this).attr('disabled', 'disabled');
-            var csrftoken = get_cookie('csrftoken');
+            var csrftoken = $.getCookie('csrftoken');
             $.ajax({
                 type: 'POST',
                 url : BASE_URL + '/variables/save',
@@ -412,24 +412,6 @@ require([
         $(this).hide();
     });
 
-
-    // Used for getting the CORS token for submitting data
-    function get_cookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie != '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
     // Checks for previously-selected variables (i.e. editing an extent list) and checks them off
     function check_for_selections() {
         if ($('.selected-filters span').length > 0) {
@@ -440,7 +422,7 @@ require([
                 })
             }
         }
-    }
+    };
 
     $('.user-vars-tab').on('click',function(){
         $.ajax({
