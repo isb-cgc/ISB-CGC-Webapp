@@ -533,7 +533,7 @@ require([
     });
 
     $('#log-in-to-save-btn').on('click', function(e) {
-        window.location.href = '/accounts/login/';
+        window.location.href = '/accounts/login/?next=/';
     });
 
     $('button[data-target="#create-cohort-modal"]').on('click',function(e){

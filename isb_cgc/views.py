@@ -228,7 +228,7 @@ def extended_login_view(request):
     except Exception as e:
         logger.exception(e)
 
-    return redirect(reverse('cohort'))
+    return redirect(reverse('dashboard'))
 
 
 '''
