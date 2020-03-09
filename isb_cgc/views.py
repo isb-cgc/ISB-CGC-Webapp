@@ -207,6 +207,9 @@ def bucket_object_list(request):
 
 # Extended login view so we can track user logins
 def extended_login_view(request):
+    redirect_to = 'dashboard'
+    if request.COOKIES and request.COOKIES.get('login_from', '') == 'new_cohort':
+        redirect_to = 'new_cohort'
     try:
         # Write log entry
         st_logger = StackDriverLogger.build_from_django_settings()
@@ -228,7 +231,7 @@ def extended_login_view(request):
     except Exception as e:
         logger.exception(e)
 
-    return redirect(reverse('dashboard'))
+    return redirect(reverse(redirect_to))
 
 
 '''
@@ -490,7 +493,7 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     readgroupset_list = []
     bam_list = []
 
-    checked_list = json.loads(request.POST.__getitem__('checked_list'))
+    checked_list = json.loads(request.POST.get('checked_list','{}'))
     build = request.POST.__getitem__('build')
 
     for item in checked_list['gcs_bam']:
@@ -802,6 +805,8 @@ def opt_in_form_submitted(request):
                     "submitted_time": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
                 }
                 BigQueryFeedbackSupport.add_rows_to_table([feedback_row])
+                # send a notification to feedback@isb-cgc.org about the entry
+                send_feedback_notification(feedback_row)
                 msg = 'We thank you for your time and suggestions.'
         else:
             error_msg = 'We were not able to find a user with the given email. Please check with us again later.'
@@ -814,6 +819,31 @@ def opt_in_form_submitted(request):
     }
     return render(request, template, message)
 
-
-def confirm_opt_in_submit(request):
-    return render(request, 'accounts/account/opt_in_form_submitted.html', {'request': request})
+def send_feedback_notification(feedback_dict):
+    try:
+        message_data = {
+            'from': settings.NOTIFICATION_EMAIL_FROM_ADDRESS,
+            'to': settings.NOTIFICATION_EMAIL_TO_ADDRESS,
+            'subject': '[ISB-CGC] A user feedback has been submitted.',
+            'text':
+                ('We have just received a user feedback from ISB-CGC WebApp at {timestamp} (UTC).\n\n' +
+                 'Here is what has been received:\n\n---------------------------------------\n' +
+                 'First Name: {firstName}\n' +
+                 'Last Name: {lastName}\n' +
+                 'E-mail: {email}\n' +
+                 'Affiliation: {affiliation}\n' +
+                 'Subscribed: {subscribed}\n' +
+                 'Feedback: {feedback}\n\n---------------------------------------\n' +
+                 'Thank you.\n\n' +
+                 'ISB-CGC team').format(
+                    timestamp=feedback_dict['submitted_time'],
+                                        firstName=feedback_dict['first_name'],
+                                        lastName=feedback_dict['last_name'],
+                                        email=feedback_dict['email'],
+                                        affiliation=feedback_dict['affiliation'],
+                                        subscribed=('Yes' if feedback_dict['subscribed'] else 'No'),
+                                        feedback=feedback_dict['feedback'])}
+        send_email_message(message_data)
+    except Exception as e:
+        logger.error('[Error] Error has occured while sending out feedback notifications to {}.'.format(settings.NOTIFICATION_EMAIL_TO_ADDRESS))
+        logger.exception(e)
