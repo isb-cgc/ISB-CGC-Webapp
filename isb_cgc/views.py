@@ -207,6 +207,9 @@ def bucket_object_list(request):
 
 # Extended login view so we can track user logins
 def extended_login_view(request):
+    redirect_to = 'dashboard'
+    if request.COOKIES and request.COOKIES.get('login_from', '') == 'new_cohort':
+        redirect_to = 'new_cohort'
     try:
         # Write log entry
         st_logger = StackDriverLogger.build_from_django_settings()
@@ -228,7 +231,7 @@ def extended_login_view(request):
     except Exception as e:
         logger.exception(e)
 
-    return redirect(reverse('dashboard'))
+    return redirect(reverse(redirect_to))
 
 
 '''
@@ -490,7 +493,7 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     readgroupset_list = []
     bam_list = []
 
-    checked_list = json.loads(request.POST.__getitem__('checked_list'))
+    checked_list = json.loads(request.POST.get('checked_list','{}'))
     build = request.POST.__getitem__('build')
 
     for item in checked_list['gcs_bam']:
