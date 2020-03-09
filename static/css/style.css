@@ -545,6 +545,10 @@ nav {
   border-radius: 1px;
   padding: 5px 10px; }
 
+.form-group.required label:after {
+  content: "*";
+  color: #a94442; }
+
 .group-list {
   border-radius: 5px;
   border: solid 1px lightgrey;
@@ -1761,8 +1765,6 @@ a.skip-nav {
     border: 1px solid #dddddd; }
     #bq-meta-searcher #bqmeta tr td table.preview-table th table td, #bq-meta-searcher #bqmeta tr td table.preview-table td table td {
       border: 1px solid #efefef; }
-  #bq-meta-searcher #bqmeta tr td.td-body-right {
-    text-align: right; }
   #bq-meta-searcher #bqmeta tr td.tbl-preview:before {
     font-family: FontAwesome;
     content: "\f0ce";
