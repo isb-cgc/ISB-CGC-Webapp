@@ -196,13 +196,6 @@ require([
         location.reload(true);
     });
 
-    $('#cancel-opt-in-btn').on('click', function() {
-        send_opt_in_update('opt-out');
-    });
-
-    $('#close-opt-in-btn').on('click', function() {
-        send_opt_in_update('opt-out');
-    });
 
     $('#will-email-message').collapse({toggle: false});
     $('[name="opt-in-radio"]').on('change', function() {
@@ -300,7 +293,7 @@ function send_opt_in_update(opt_in_selection) {
             dataType  :'json',
             data: {'opt-in-radio': opt_in_selection},
             success: function(data) {
-                let redirect_url = data['redirect-url'];
+                var redirect_url = data['redirect-url'];
                 if (redirect_url != "")
                 {
                     window.open(redirect_url, '_blank')

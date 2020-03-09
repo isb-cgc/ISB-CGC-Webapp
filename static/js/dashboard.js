@@ -57,7 +57,6 @@ require([
         dataType  :'json',
         data: $(this).serialize(),
         success: function(data) {
-            //console.log(data.message);
             if (data['result'])
             {
                 $('#opt-in-pop-up-modal').modal('show');
