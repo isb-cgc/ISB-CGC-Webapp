@@ -1192,6 +1192,15 @@ require([
         }
     });
 
+    $('.login-link').on("click",function(){
+        var now = new Date();
+        var time = now.getTime();
+        // Expire this cookie in 5m
+        var expireTime = time + (300*1000);
+        now.setTime(expireTime);
+        document.cookie="login_from=new_cohort; expires="+now.toUTCString()+"; path=/new_cohort/\";";
+    });
+
     filter_panel_load(cohort_id);
     
 });

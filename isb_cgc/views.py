@@ -216,9 +216,8 @@ def bucket_object_list(request):
 # Extended login view so we can track user logins
 def extended_login_view(request):
     redirect_to = 'dashboard'
-    if request.GET:
-        redirect_to = request.GET.get('redirect', 'dashboard')
-
+    if request.COOKIES and request.COOKIES.get('login_from', '') == 'new_cohort':
+        redirect_to = 'new_cohort'
     try:
         # Write log entry
         st_logger = StackDriverLogger.build_from_django_settings()
