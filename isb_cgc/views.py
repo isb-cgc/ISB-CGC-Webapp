@@ -215,6 +215,10 @@ def bucket_object_list(request):
 
 # Extended login view so we can track user logins
 def extended_login_view(request):
+    redirect_to = 'dashboard'
+    if request.GET:
+        redirect_to = request.GET.get('redirect', 'dashboard')
+
     try:
         # Write log entry
         st_logger = StackDriverLogger.build_from_django_settings()
@@ -240,7 +244,7 @@ def extended_login_view(request):
     except Exception as e:
         logger.exception(e)
 
-    return redirect(reverse('dashboard'))
+    return redirect(reverse(redirect_to))
 
 
 '''
