@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    ISB-CGC|Opt-In Form
+{% endblock %}
+
+{% block description %}
+    Opt-In Form of ISB-CGC
+{% endblock %}
+{% block page_name %}opt-in-form{% endblock %}
+{% block page_header %}
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-sm-3"></div>
+                    <div class="col-sm-6">
+                        <h4>
+                            <a href="/" target="_blank">
+                                <img height="42" width="42" style="margin-right: 5px;" src="{% static 'img/isblogo.png' %}"
+                                     alt="ISB Logo">
+                            </a>
+                            Join the ISB-CGC Community
+                        </h4>
+                    </div>
+                    <div class="col-sm-3"></div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-sm-3"></div>
+                    <div class="col-sm-6">
+                        <p>The ISB Cancer Genomics Cloud (ISB-CGC) project is in the process of establishing a
+                            communication
+                            platform to
+                            support its current and future users.</p>
+                        <p>Please leave your contact information, along with any questions or comments, if you want to
+                            join
+                            the
+                            community.</p>
+                        <p>We will use the information you supply to:</p>
+
+                        <ul style="list-style: inherit; margin: 10px 25px;">
+                            <li>contact you about details of the ISB-CGC communication platform</li>
+                            <li>send you occasional updates about ISB-CGC status (if you agree)</li>
+                            <li>ask for your input about the system</li>
+                            <li>respond to your questions, where appropriate</li>
+                        </ul>
+
+                        <p>You can learn more about ISB-CGC at <a href="/" target="_blank">isb-cgc.org</a>.</p>
+                        <br>
+                        <div class="text-right">
+                            <small class="text-danger">* Required</small>
+                        </div>
+
+                        <form id="opt-in-form" method="POST" action="{% url 'opt_in_form_submitted' %}">
+                            {% csrf_token %}
+                            {% if user.is_authenticated %}
+                                <input type="hidden" name="first-name" id="first-name" required value="{{ first_name }}">
+                                <input type="hidden" name="last-name" id="last-name" required value="{{ last_name }}">
+                                <input type="hidden" name="email" id="email" required value="{{ email }}">
+                            {% else %}
+                            <div class="form-group required">
+                                <label for="first-name">First Name</label>
+                                <input type="text" class="form-control" name="first-name" id="first-name" required value="{{ first_name }}" readonly>
+                            </div>
+                            <div class="form-group required">
+                                <label for="last-name" >Last Name</label>
+                                <input type="text" class="form-control" name="last-name" id="last-name" required value="{{ last_name }}" readonly>
+                            </div>
+                            <div class="form-group required">
+                                <label for="email" >Email</label>
+                                <input type="email" class="form-control" name="email" id="email" required value="{{ email }}" readonly>
+                            </div>
+                            {% endif %}
+                            <div class="form-group required">
+                                <label for="affiliation" >Affiliation</label>
+                                <input type="text" class="form-control" name="affiliation" id="affiliation" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="subscribed">
+                                    Is it OK to contact me with occasional communication about ISB-CGC updates?
+                                </label>
+                                <select id="subscribed" name="subscribed" class="form-control">
+                                    <option value="opt-in" {% if opt_in_status == 'opt-in'%} selected {% endif %}>Yes</option>
+                                    <option value="opt-out" {% if opt_in_status == 'opt-out'%} selected {% endif %}>No</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="feedback">
+                                    Do you have questions about ISB-CGC? Suggestions about what it should or should not
+                                    do? Ideas for collaboration? We'd love to hear from you!
+                                </label>
+                                <textarea rows="4" cols="50" type="text" id="feedback" name="feedback" class="form-control"></textarea>
+                            </div>
+                            <button class="btn btn-primary" type="submit">Submit</button>
+                        </form>
+                    </div>
+                    <div class="col-sm-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block js_file %}{% static 'js/landing.js' %}{% endblock %}
