@@ -493,7 +493,7 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     readgroupset_list = []
     bam_list = []
 
-    checked_list = json.loads(request.POST.__getitem__('checked_list'))
+    checked_list = json.loads(request.POST.get('checked_list','{}'))
     build = request.POST.__getitem__('build')
 
     for item in checked_list['gcs_bam']:
