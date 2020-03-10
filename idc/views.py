@@ -438,7 +438,7 @@ def explore_data_page(request):
             source = request.GET.get('source',DataSource.SOLR)
             versions = json.loads(request.GET.get('versions','[]'))
             filters = json.loads(request.GET.get('filters', '{}'))
-            fields = json.loads(request.POST.get('fields', '[]'))
+            fields = json.loads(request.GET.get('fields', '[]'))
             counts_only = (request.GET.get('counts_only', "False").lower() == "true")
             with_clinical = (request.GET.get('with_clinical', "True").lower() == "true")
             collapse_on = request.GET.get('collapse_on', 'PatientID')
@@ -474,6 +474,8 @@ def explore_data_page(request):
                 set_type = 'origin_set'
             else:
                 set_type = 'related_set'
+                if not with_clinical:
+                    continue
             if set_type not in attr_by_source:
                 attr_by_source[set_type] = {}
 
@@ -489,28 +491,26 @@ def explore_data_page(request):
              record_limit=50000, counts_only=counts_only, with_clinical = with_clinical, collapse_on = collapse_on
         )
 
-
-        for attr in faceted_counts['clinical']['facets']:
-            this_attr_vals = attr_by_source['related_set']['attributes'][attr]['vals']
-            this_attr = attr_by_source['related_set']['attributes'][attr]['obj']
-            values = []
-            if len(this_attr_vals):
-                for val in this_attr_vals:
-                    values.append({
-                        'value': val,
-                        'display_value': this_attr_vals[val],
-                        'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
-                    })
-            else:
-                for val in faceted_counts['clinical']['facets'][attr]:
-                    values.append({
-                        'value': val,
-                        'display_value': val if this_attr.preformatted_values else None,
-                        'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
-                    })
-            attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
-        #attr_by_source['related_set']['attributes_rng'] = {'age_at_diagnosis'}
-
+        if with_clinical:
+            for attr in faceted_counts['clinical']['facets']:
+                this_attr_vals = attr_by_source['related_set']['attributes'][attr]['vals']
+                this_attr = attr_by_source['related_set']['attributes'][attr]['obj']
+                values = []
+                if len(this_attr_vals):
+                    for val in this_attr_vals:
+                        values.append({
+                            'value': val,
+                            'display_value': this_attr_vals[val],
+                            'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
+                        })
+                else:
+                    for val in faceted_counts['clinical']['facets'][attr]:
+                        values.append({
+                            'value': val,
+                            'display_value': val if this_attr.preformatted_values else None,
+                            'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
+                        })
+                attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
         for attr in faceted_counts['facets']['cross_collex']:
             this_attr_vals = attr_by_source['origin_set']['attributes'][attr]['vals']
@@ -535,10 +535,10 @@ def explore_data_page(request):
 
         attr_filter={}
         attr_filter['origin_set'] =['Modality', 'BodyPartExamined','collection_id']
-        attr_filter['related_set'] = ['disease_code', 'vital_status','gender','age_at_diagnosis', 'race','ethnicity']
+        if with_clinical:
+            attr_filter['related_set'] = ['disease_code', 'vital_status','gender','age_at_diagnosis', 'race','ethnicity']
         for set in attr_by_source:
             if is_dicofdic:
-                pass
                 attr_by_source[set]['attributes'] ={x: {y['value']: {'display_value': y['display_value'], 'count': y['count']} for y in attr_by_source[set]['attributes'][x]['vals']} for x in attr_filter[set]}
 
             else:
@@ -546,12 +546,17 @@ def explore_data_page(request):
                  'display_name': attr_by_source[set]['attributes'][x]['obj'].display_name,
                  'values': attr_by_source[set]['attributes'][x]['vals']
                  } for x in attr_filter[set]]
+            if not counts_only:
+                attr_by_source[set]['docs'] = faceted_counts['docs']
 
+        attr_by_source['total'] = faceted_counts['total']
 
+        #if not is_json:
+        #    attr_by_source['collection_id'] = attr_by_source['origin_set']['collection_id']
 
         context['set_attributes'] = attr_by_source
-        context['tcga_collections'] = tcga_in_tcia
-
+        if with_clinical:
+            context['tcga_collections'] = tcga_in_tcia
 
 
     except Exception as e:

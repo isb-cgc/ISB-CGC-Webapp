@@ -1,3 +1,24 @@
+ .spinner {
+  position: absolute;
+  width: 100%;
+  height: 200%;
+     text-align: center;
+  top: 0px;
+  left: 0px;
+     font-size: 100px;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10; }
+
+.spinner .spin{
+    display:inline-block;
+    position:absolute;
+    #position:absolute;
+    top: 30%;
+    #left: 40%;
+}
+
+
+
 .filter-type{
     background-color:#a66206;
     color:#F8F8F8;

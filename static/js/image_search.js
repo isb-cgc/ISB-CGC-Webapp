@@ -48,7 +48,7 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         }
 
         mkFiltText();
-        fetchCountData(false);
+        updateFacetsData();
 
     }
 
@@ -98,59 +98,69 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         $('.related-graphs').animate({height: '200px'}, 800);
     }
 
-    var mkSlider = function(divName, inpDiv, displaySet, header, attributeName, isInt) {
-        $("#" + divName).slider({
+    var mkAgeSlider = function(divName) {
+
+        $('#' + divName).append('<div id="age_slide"></div>  <input id="inp_age_slide" type="text" value="0-120"> <button onclick=\'resetAge()\'>Reset</button>');
+
+        $('#age_slide').slider({
             values: [0, 120],
             step: 1,
             min: 0,
             max: 120,
             range: true,
             slide: function (event, ui) {
-                $("#" + inpDiv).val(ui.values[0] + "-" + ui.values[1]);
+                $('#inp_age_slide').val(ui.values[0] + "-" + ui.values[1]);
             },
             stop: function (event, ui) {
-                updateSliderSelection(inpDiv, displaySet, header, attributeName, isInt);
+             //   updateSliderSelection(inpDiv, displaySet, header, attributeName, isInt);
+
+             var val = $('#inp_age_slide')[0].value;
+             var valArr = val.split('-');
+             var attVal = [ parseInt(valArr[0]), parseInt(valArr[1])  ];
+             filterObj['age_at_diagnosis_btw'] = attVal;
+             mkFiltText();
+             updateFacetsData();
+
             }
         });
     }
 
 
-    window.editProjectsTable = function(tableId, scopeId) {
-        var project_scope = document.getElementById(scopeId).selectedOptions[0].value;
 
+    var editProjectsTableAfterFilter = function(tableId, scopeId) {
+        var selectedElem = document.getElementById(scopeId).selectedOptions[0];
+        var project_scope = selectedElem.value;
+        var curCount = collection[project_scope];
         var tableElem = document.getElementById(tableId);
-        var countElems = $(tableElem).find('.projects_table_num_cohort');
-        //countElems.forEach( function(element) { element.innerHTML='0'});
-        for (i = 0; i < countElems.length; i++) {
-            countElems[i].innerHTML = '0';
+        var tableRows =$(tableElem).find('tr');
+        for (var i=0;i<tableRows.length;i++){
+            var curRow= $(tableRows)[i];
+            var projId = curRow.id.replace('project_row_','');
+            var newTot = String(window.collection[projId]);
+            var newCohortCol = 'patient_col_'+String(projId);
+            document.getElementById(newCohortCol).innerHTML = newTot;
+
+            var patientElemId = 'patient_col_' + projId;
+
+            if ((project_scope === 'All') || (project_scope === projId)) {
+                 document.getElementById(patientElemId).innerHTML = String(window.collection[projId]);
+                 curRow.classList.remove('hide');
+                 if (project_scope === projId){
+                     window.selItems.selProjects.push(projId);
+                     curRow.classList.add("selected_grey");
+                     window.selItems.selProjects = [projId];
+                 }
+            }
+            else{
+                if (window.selItems.selStudies.hasOwnProperty(projId)){
+                    delete window.selItems.selStudies[projId];
+                }
+                curRow.classList.add('hide');
+                curRow.classList.remove("selected_grey");
+                document.getElementById(patientElemId).innerHTML = '0';
+            }
         }
 
-        var projKeys = Object.keys(originalDataCounts.collection_id);
-        for (i = 0; i < projKeys.length; i++) {
-            var idStr = projKeys[i]
-            var countStr = originalDataCounts.collection_id[idStr].toString();
-            var patientElemId = 'patient_col_' + idStr;
-            if (document.getElementById(patientElemId)) {
-                if ((project_scope === 'All') || (project_scope === idStr)) {
-                    document.getElementById(patientElemId).innerHTML = countStr
-                }
-            }
-            var projectElemId = 'project_row_' + idStr;
-            if (document.getElementById(projectElemId)) {
-                if ((project_scope === 'All') || (project_scope === idStr)) {
-                    document.getElementById(projectElemId).classList.remove('hide');
-                    if (project_scope === idStr){
-                        document.getElementById(projectElemId).classList.add("selected_grey");
-                        window.projIdSel = [idStr];
-                        addStudyOrSeries([idStr], [], "studies_table");
-                     }
-                } else {
-                    document.getElementById(projectElemId).classList.add('hide');
-                }
-
-            }
-
-        }
 
     }
 
@@ -181,13 +191,8 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         tableElem.innerHTML = newInnerHTML;
     }
 
-    window.resetTables = function(projectId, studyId, seriesId) {
+    var resetSeriesAndStudiesTables = function(studyId, seriesId) {
 
-        projRows = $('#' + projectId).find(".selected_grey");
-        for (i = 0; i < projRows.length; i++) {
-            projRow = projRows[i];
-            $(projRow).removeClass("selected_grey");
-        }
         tableElem = document.getElementById(studyId);
         //var newInnerHTML = '<tr><th>Project Name</th><th>Patient Id</th><th>Study Id</th><th>Study Description</th></tr>';
         tableElem.innerHTML = '';
@@ -205,24 +210,46 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         }
         if (projRow.classList.contains("selected_grey")) {
             $(projRow).removeClass("selected_grey");
-            projPos = window.projIdSel.indexOf(projectId)
+            projPos = window.selItems.selProjects.indexOf(projectId)
             if (projPos > -1) {
-                projIdSel.splice(projPos, 1);
+                 window.selItems.selProjects.splice(projPos, 1);
             }
-            removeStudiesAndSeries(projectId, "studies_table")
+            if (projectId in window.selItems.selStudies){
+                delete window.selItems.selStudies[projectId];
+            }
+            removeStudiesAndSeries(projectId, "studies_table","series_table")
 
         } else {
             $(projRow).addClass("selected_grey");
-            window.projIdSel.push(projectId);
-            addStudyOrSeries([projectId], [], "studies_table");
+            window.selItems.selProjects.push(projectId);
+            addStudyOrSeries([projectId], [], "studies_table", false);
         }
     }
 
     window.toggleStudy = function(studyRow, studyId, projectId) {
+
         if (studyRow.classList.contains("selected_grey")) {
             $(studyRow).removeClass("selected_grey");
             removeSeries(studyRow.id, "series_table");
+            if (window.selItems.selStudies.hasOwnProperty(projectId)){
+
+                   studyPos = window.selItems.selStudies[projectId].indexOf(studyId);
+                   if (studyPos > -1) {
+                       window.selItems.selStudies[projectId].splice(studyPos, 1);
+                       if (window.selItems.selStudies[projectId].length ==0){
+                           delete window.selItems.selStudies[projectId];
+                       }
+                   }
+             }
+
+
         } else {
+
+            if (!(window.selItems.selStudies.hasOwnProperty(projectId))){
+                   window.selItems.selStudies[projectId] = new Array();
+             }
+            window.selItems.selStudies[projectId].push(studyId);
+
             $(studyRow).addClass("selected_grey");
             addStudyOrSeries([projectId], [studyId], "series_table", false);
         }
@@ -232,32 +259,65 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         var pclass = "project_" + projectId;
         var studiesTable = document.getElementById(studyTableId);
         $('#' + studyTableId).find('.project_' + projectId).remove();
-        removeSeries(pclass, 'series_table');
+            if (window.selItems.selStudies.hasOwnProperty(projectId)){
+                delete window.selItems.selStudies[projectId];
+             }
+
+        removeSeries(pclass, seriesTableId);
     }
 
     window.removeSeries = function(selClass, seriesTableId) {
         $('#' + seriesTableId).find('.' + selClass).remove();
     }
 
-    window.addStudyOrSeries = function(projectIdArr, studyIdArr, tableId, refresh) {
+    var changeAjax = function(isIncrement){
+        if (isIncrement){
+            $('#number_ajax')[0].value = String(parseInt($('#number_ajax')[0].value)+1);
+        }
+        else{
+            $('#number_ajax')[0].value = String(parseInt($('#number_ajax')[0].value)-1);
+        }
+        //alert($('#number_ajax')[0].value)
 
-        curFilterObj = JSON.parse(JSON.stringify(filterObj));
+        if ( $('#number_ajax')[0].value === '0'){
+            $('.spinner').hide();
+        }
+        else{
+            $('.spinner').show();
+        }
+
+    }
+    window.addStudyOrSeries = function(projectIdArr, studyIdArr, tableId, refresh) {
+        changeAjax(true);
+        var curSelStudiesDic = new Object();
+        var newSelStudies = new Object();
+
+        var curFilterObj = JSON.parse(JSON.stringify(filterObj));
         curFilterObj.collection_id = projectIdArr;
         var isSeries = false;
         if (studyIdArr.length > 0) {
             curFilterObj.StudyInstanceUID = studyIdArr;
             isSeries = true;
         }
+        else if(refresh){
+            for (projId in window.selItems.selStudies){
+                curSelStudiesDic[projId] = new Object();
+                for (var i=0;i<window.selItems.selStudies[projId].length;i++){
+                     var curStudy =  window.selItems.selStudies[projId][i];
+                     curSelStudiesDic[projId][curStudy] = 1;
+                }
+            }
+        }
 
-        filterStr = JSON.stringify(curFilterObj);
-        fields = ["collection_id", "PatientID", "StudyInstanceUID", "StudyDescription", "StudyDate"];
-        collapse_on = 'StudyInstanceUID'
+        var filterStr = JSON.stringify(curFilterObj);
+        var fields = ["collection_id", "PatientID", "StudyInstanceUID", "StudyDescription", "StudyDate"];
+        var collapse_on = 'StudyInstanceUID'
         if (isSeries) {
             fields = ["collection_id", "PatientID", "StudyInstanceUID", "SeriesInstanceUID", "Modality", "BodyPartExamined", "SeriesNumber"];
             collapse_on = 'SeriesInstanceUID'
         }
-        fieldStr = JSON.stringify(fields);
-        let url = '/idc/filtered/?counts_only=False&collapse_on=' + collapse_on + '&with_clinical=False&filters=' + filterStr + '&fields=' + fieldStr;
+        var fieldStr = JSON.stringify(fields);
+        let url = '/explore/?counts_only=False&is_json=True&collapse_on=' + collapse_on + '&with_clinical=False&filters=' + filterStr + '&fields=' + fieldStr;
         url = encodeURI(url);
 
         $.ajax({
@@ -267,29 +327,41 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
             contentType: 'application/x-www-form-urlencoded',
             success: function (data) {
                 //nstart = new Date().getTime();
-                for (i = 0; i < data['docs'].length; i++) {
-                    curData = data['docs'][i]
+                for (i = 0; i < data['origin_set']['docs'].length; i++) {
+                    var curData = data['origin_set']['docs'][i];
                     var projectId = curData.collection_id;
                     var patientId = curData.PatientID;
                     var studyId = curData.StudyInstanceUID;
                     var fetchUrl = '/projects/chc-tcia/locations/us-central1/datasets/' + projectId.replace('_', '-') + '/dicomStores/' + projectId.replace('_', '-') + '/study/' + studyId;
                     var hrefTxt = '<a href="' + fetchUrl + '" target="_blank">' + studyId + '</a>';
                     var pclass = 'project_' + projectId;
+                    var newHtml='';
                     if (isSeries) {
                         var seriesId = curData.SeriesInstanceUID;
                         var bodyPartExamined = curData.BodyPartExamined;
                         var modality = curData.Modality;
                         var rowId = 'series_' + seriesId.replace(/\./g, '-')
                         var studyClass = 'study_' + studyId.replace(/\./g, '-');
-                        var newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1">' + hrefTxt + '</td><td class="col2">' + seriesId + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td></tr>'
+                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1">' + hrefTxt + '</td><td class="col2">' + seriesId + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td></tr>'
 
                     } else {
 
                         var studyDescription = curData.StudyDescription;
                         //var studyDate = curData.StudyDate;
                         var rowId = 'study_' + studyId.replace(/\./g, '-');
-                        var newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td></tr>'
 
+                        if ( refresh && (projectId in curSelStudiesDic) && (studyId in curSelStudiesDic[projId]) ){
+                             if (!(projectId in newSelStudies)){
+                                  newSelStudies[projectId] = new Array();
+                             }
+                              newSelStudies[projectId].push(studyId);
+
+                             newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head selected_grey" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td></tr>'
+
+                        }
+                        else {
+                             newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td></tr>'
+                        }
                     }
                     //var rowId='study_'+projectId+'_'+patientIndex[patientId].toString()+"_"+studyIndex[studyId].toString();
 
@@ -300,11 +372,17 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
                 /* nend = new Date().getTime();
                 diff = nend - nstart;
                 alert(diff); */
+                if (refresh && !isSeries){
+                    window.selItems.selStudies = newSelStudies;
+                }
+                changeAjax(false);
 
             },
             error: function () {
+                changeAjax(false);
                 console.log("problem getting data");
             }
+
         });
 
 
@@ -387,8 +465,11 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
             filterObj['collection_id'] = [project_scope];
 
         }
+        //document.getElementById('total').innerHTML = window.collection[project_scope];
         mkFiltText();
-        fetchCountData(false);
+        updateFacetsData(false);
+
+
 
     }
 
@@ -410,42 +491,34 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
 
     }
 
-    var updateFilterSelection = function(checkBoxDiv, displaySet, header, attributeName, isImageAttr, isRangeAttr) {
-        var newText = "&emsp;&emsp;" + header + ": ";
-        var checkBoxElem = document.getElementById(checkBoxDiv);
-
-        var listItems = checkBoxElem.getElementsByTagName('li');
-        var numChecked = 0;
-        var attributeVals = new Array();
-        for (i = 0; i < listItems.length; i++) {
-            checkBoxElem = listItems[i].getElementsByTagName('input')[0];
-            if (checkBoxElem.checked) {
-                if (numChecked > 0) {
-                    newText += ", ";
-                }
-                newText += listItems[i].innerText;
-                attributeVals.push(checkBoxElem.value)
-                numChecked++;
-            }
+    var updateCollectionTotals = function(total,dic){
+         for (var item in window.collection) {
+             if (item === 'All'){
+                  window.collection[item] = parseInt(total);
+             }
+             else if (dic.hasOwnProperty(item)){
+                 window.collection[item] = parseInt(dic[item].count);
+             }
+             else{
+                 window.collection[item] = '0';
+             }
         }
-        if (numChecked === 0) {
-            //newText="&emsp;&emsp;"+header+": All";
-            delete filterObj[attributeName];
-        } else {
-            filterObj[attributeName] = attributeVals;
-        }
-        //document.getElementById(displaySet).innerHTML=newText;
-        mkFiltText();
-        fetchCountData(false);
 
+         var selectedElem = document.getElementById('project_scope').selectedOptions[0];
+         var curCount = 0;
+         var project_scope = selectedElem.value;
+         curCount = window.collection[project_scope];
+         document.getElementById('total').innerHTML = String(curCount);
     }
 
-    var fetchCountData = function(refresh) {
+    var updateFacetsData = function() {
+        changeAjax(true);
+
         var url = '';
         if (Object.keys(filterObj).length === 0) {
-            url = '/idc/filtered/?counts_only=True';
+            url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True';
         } else {
-            url = '/idc/filtered/?counts_only=True&filters=' + JSON.stringify(filterObj);
+            url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True&filters=' + JSON.stringify(filterObj);
         }
         url = encodeURI(url);
 
@@ -455,132 +528,36 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
             type: 'get',
             contentType: 'application/x-www-form-urlencoded',
             success: function (data) {
-                clinicalDataCounts = data['clinical'];
-                originalDataCounts = data['facets'];
-
-                var isEdit = true;
-                if (refresh) {
-
-
-                    filter = new Object();
-
-                    diseaseCodeH = Object.keys(data['clinical']['disease_code']).sort();
-                    nonePos = diseaseCodeH.indexOf('None');
-                    diseaseCodeH.splice(nonePos, 1);
-                    diseaseCodeH.push('None');
-
-
-                    raceH = Object.keys(data['clinical']['race']).sort();
-                    nonePos = raceH.indexOf('None');
-                    raceH.splice(nonePos, 1);
-                    raceH.push('None');
-                    ethnicityH = Object.keys(data['clinical']['ethnicity']).sort();
-
-                    nonePos = ethnicityH.indexOf('None');
-                    ethnicityH.splice(nonePos, 1);
-                    ethnicityH.push('None');
-                    isEdit = false;
-                    constructClinicalFilterOptions();
-                    createProjectsTable("projects_table");
-                    mkSlider('age_slide', 'inp_age_slide', 'age_set', 'Age', 'age_at_diagnosis_btw', true);
-                } else {
-                    resetTables('projects_table', 'studies_table', 'series_table');
-                    editProjectsTable('projects_table', 'project_scope');
+                updateCollectionTotals(data.total, data.origin_set.attributes.collection_id);
+                updateFilterSelections('search_orig_set',data.origin_set.attributes);
+                updateFilterSelections('search_related_set',data.related_set.attributes);
+                createPlots('search_orig_set');
+                createPlots('search_related_set');
+                editProjectsTableAfterFilter('projects_table','project_scope');
+                resetSeriesAndStudiesTables ('series_table', 'studies_table');
+                var studyArr = new Array();
+                for (projId in window.selItems.selStudies){
+                    studyArr.push.apply(studyArr, window.selItems.selStudies[projId]);
                 }
-                resolveAllPlots();
-
-
+                if (window.selItems.selProjects.length >0) {
+                    addStudyOrSeries(window.selItems.selProjects, [], "studies_table", true);
+                }
+                if (studyArr.length>0) {
+                    addStudyOrSeries(window.selItems.selProjects, studyArr, "series_table", true);
+                }
+               changeAjax(false);
             },
             error: function () {
+                changeAjax(false);
                 console.log("problem getting data");
+
             }
+
         });
     }
 
-    var constructClinicalFilterOptions = function() {
-
-        projectElem = document.getElementById("project_scope");
-        projList = tcgaColls;
-        for (i = 0; i < projList.length; i++) {
-            nm = projList[i]
-            if (nm !== 'None') {
-                opt = document.createElement("option");
-                opt.value = nm;
-                opt.innerHTML = nm;
-                projectElem.appendChild(opt);
-            }
-        }
 
 
-        diseaseElem = document.getElementById("disease_list");
-        removeChildren(diseaseElem);
-        for (i = 0; i < diseaseCodeH.length; i++) {
-            diseaseCode = diseaseCodeH[i];
-            if (diseaseCode !== "None") {
-                var opt = document.createElement("LI");
-                opt.classList.add("checkbox")
-                if (i > 5) {
-                    opt.classList.add("extra-values");
-                }
-                opt.innerHTML = '&emsp;<input type="checkbox" value="' + diseaseCode + '">' + diseaseCode;
-                diseaseElem.appendChild(opt);
-            }
-        }
-
-        opt = document.createElement("LI");
-        opt.classList.add("checkbox");
-        opt.classList.add("extra-values");
-        opt.innerHTML = '&emsp;<input type="checkbox" value="None">NA';
-        diseaseElem.appendChild(opt);
-
-
-        filterItemBindings('disease', 'disease_list', 'disease_code_set', 'Disease Code', 'disease_code', false, false);
-        raceElem = document.getElementById("race_list");
-        for (i = 0; i < raceH.length; i++) {
-            race = raceH[i];
-            if (race !== "None") {
-                var opt = document.createElement("LI");
-                opt.classList.add("checkbox");
-                if (i > 5) {
-                    opt.classList.add("extra-values");
-                }
-                opt.innerHTML = '&emsp;<input type="checkbox" value="' + race + '">' + race;
-                raceElem.appendChild(opt);
-            }
-        }
-        opt = document.createElement("LI");
-        opt.classList.add("checkbox");
-        opt.classList.add("extra-values");
-        opt.innerHTML = '&emsp;<input id="race_list_none" type="checkbox" value="None" >NA';
-        raceElem.appendChild(opt);
-
-        filterItemBindings('race', 'race_list', 'race_set', 'Race', 'race', 'false', 'false');
-
-        ethnicityElem = document.getElementById("ethnicity_list");
-        for (i = 0; i < ethnicityH.length; i++) {
-            ethnicity = ethnicityH[i];
-            if (ethnicity !== "None") {
-                var opt = document.createElement("LI");
-                opt.classList.add("checkbox");
-                opt.innerHTML = '&emsp;<input type="checkbox" value="' + ethnicity + '" >' + ethnicity;
-                ethnicityElem.appendChild(opt);
-            }
-        }
-        opt = document.createElement("LI");
-        opt.classList.add("checkbox");
-        opt.innerHTML = '&emsp;<input id="ethnicity_list_none" type="checkbox" value="none" >NA';
-        ethnicityElem.appendChild(opt);
-
-        filterItemBindings('ethnicity', 'ethnicity_list', 'ethnicity_set', 'Ethnicity', 'ethnicity', 'false', 'false');
-
-
-    }
-
-    var removeChildren = function(elem) {
-        while (elem.firstChild) {
-            elem.removeChild(elem.firstChild);
-        }
-    }
 
 
      var plotCategoricalData=function(plotId, lbl, plotData) {
@@ -636,13 +613,52 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         for (var i=0;i<filterCats.length;i++){
              filterCat = filterCats[i];
              filterData = parseFilterForCounts(filterCat);
+
              plotId = filterCat+"_chart";
              plotCategoricalData(plotId, filterCat, filterData);
+
         }
 
      }
 
-     var updateFilterSelection = function(filterCat) {
+     var updateFilters = function(filterCat,dic,dataFound){
+         var allFilters = $('#'+filterCat).find('input');
+         var checkedFilters = $('#'+filterCat).find('input:checked');
+         var useAll = ( (checkedFilters.length==0) ? true : false)
+
+         for (var i = 0; i < allFilters.length; i++) {
+             var elem = allFilters.get(i);
+             var val = $(elem)[0].value;
+             var checked =$(elem)[0].checked;
+
+             var spans = $(elem).parent().find('span');
+             var lbl = spans.get(0).innerHTML;
+             var cnt = parseInt(spans.get(1).innerHTML);
+
+             if( (checked || useAll) && dataFound && dic.hasOwnProperty(val)){
+                 spans.get(1).innerHTML = String(dic[val].count);
+             }
+             else{
+                 spans.get(1).innerHTML = '0';
+             }
+         }
+
+    }
+
+
+     var updateFilterSelections = function(id,dicofdic){
+         filterCats = findFilterCats(id);
+         for (i=0;i<filterCats.length;i++){
+             cat=filterCats[i]
+             if (dicofdic.hasOwnProperty(cat)) {
+                 updateFilters(filterCats[i], dicofdic[cat], true);
+             }
+             else {
+                 updateFilters(filterCats[i], '', false);
+             }
+         }
+   }
+     var handleFilterSelectionUpdate = function(filterCat) {
         var numFilters = $('#'+filterCat).find('input').length;
         var checkedFilters = $('#'+filterCat).find('input:checked');
 
@@ -659,13 +675,13 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
          }
 
         mkFiltText();
-        //fetchCountData(false);
+        updateFacetsData();
 
     }
 
     var filterItemBindings = function (filterId) {
         $('#' + filterId).find('.checkbox').find(':input').on('click', function () {
-            updateFilterSelection(filterId);
+            handleFilterSelectionUpdate(filterId);
         });
 
         $('#' + filterId).find('.show-more').on('click', function () {
@@ -683,7 +699,7 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
 
         $('#' + filterId).find('.check-all').on('click', function () {
             $('#' + filterId).find('.checkbox').find('input').prop('checked', true);
-            updateFilterSelection(filterId);
+           handleFilterSelectionUpdate(filterId);
             //$('#'+filterId).find('.checkbox').find('input').each(function(){
             //  $(this).triggerHandler('change');
             //});
@@ -691,7 +707,7 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
 
         $('#' + filterId).find('.uncheck-all').on('click', function () {
             $('#' + filterId).find('.checkbox').find('input').prop('checked', false);
-            updateFilterSelection(filterId);
+            handleFilterSelectionUpdate(filterId);
             //$('#'+filterId).find('.checkbox').find('input').each(function(){
             //  $(this).triggerHandler('change');
             //});
@@ -714,14 +730,12 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
             createPlots('search_related_set');
             addFilterBindings('search_orig_set');
             addFilterBindings('search_related_set');
-            createProjectsTable("projects_table");
-            //parseFilterForCounts('Modality');
-            //filterItemBindings('Modality', 'Modality', 'modality_set', 'Modality', 'Modality', true, false);
-            //filterItemBindings('BodyPartExamined', 'BodyPartExamined', 'body_part_examined_set', 'Body Part Examined', 'BodyPartExamined', true, false);
+            $('#age_at_diagnosis_list').addClass('hide');
+            $('#age_at_diagnosis').find('.more-checks').addClass('hide');
+            $('#age_at_diagnosis').find('.less-checks').addClass('hide');
+            mkAgeSlider('age_at_diagnosis');
 
-            //filterItemBindings('vital_status', 'vital_list', 'vital_status_set', 'Vital Status', 'vital_status', false, false);
-            //filterItemBindings('gender', 'gender_list', 'gender_set', 'Gender', 'gender', false, false)
-            //fetchCountData(true);
+            //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
 
         }
     );
