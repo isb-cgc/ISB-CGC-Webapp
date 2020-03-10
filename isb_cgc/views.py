@@ -706,6 +706,9 @@ def opt_in_update(request):
 
     except Exception as e:
         error_msg = '[Error] There has been an error while updating your subscription status.'
+        logger.exception(e)
+        logger.error(error_msg)
+
 
     return JsonResponse({
         'redirect-url': redirect_url,
