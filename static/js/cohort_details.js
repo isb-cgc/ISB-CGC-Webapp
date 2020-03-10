@@ -515,10 +515,6 @@ require([
         $('#unallowed-chars-alert').hide();
     });
 
-    $('#log-in-to-save-btn').on('click', function(e) {
-        window.location.href = '/accounts/login/?next=/';
-    });
-
     $('button[data-target="#create-cohort-modal"]').on('click',function(e){
 
         // Clear previous alerts
@@ -1191,8 +1187,8 @@ require([
         }
     });
 
-    $('.login-link').on("click",function(){
-        $.setCookie('login_from','new_cohort','/new_cohort/');
+    $('.login-link, #log-in-to-save-btn').on("click",function(){
+        $.setCookie('login_from','new_cohort','/');
     });
 
     filter_panel_load(cohort_id);

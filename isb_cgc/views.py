@@ -209,7 +209,7 @@ def bucket_object_list(request):
 def extended_login_view(request):
     redirect_to = 'dashboard'
     if request.COOKIES and request.COOKIES.get('login_from', '') == 'new_cohort':
-        redirect_to = 'new_cohort'
+        redirect_to = 'cohort'
     try:
         # Write log entry
         st_logger = StackDriverLogger.build_from_django_settings()
