@@ -52,23 +52,6 @@ require([
     var savingChanges = false;
     var validated_barcodes = null;
 
-    // Used for getting the CORS token for submitting data
-    function get_cookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie != '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
     function validateJson(json) {
         var jv = new ajv();
         var validator = jv.compile(base.gdcSchema);
@@ -216,7 +199,7 @@ require([
         // Any entries which were valid during the initial parse must now be checked against the database
         if(result.valid_entries) {
             var deferred = $.Deferred();
-            var csrftoken = get_cookie('csrftoken');
+            var csrftoken = $.getCookie('csrftoken');
             $.ajax({
                 type        : 'POST',
                 dataType    :'json',
