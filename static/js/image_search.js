@@ -312,12 +312,16 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         var filterStr = JSON.stringify(curFilterObj);
         var fields = ["collection_id", "PatientID", "StudyInstanceUID", "StudyDescription", "StudyDate"];
         var collapse_on = 'StudyInstanceUID'
+        var order_docs =["collection_id", "PatientID", "StudyInstanceUID"];
         if (isSeries) {
-            fields = ["collection_id", "PatientID", "StudyInstanceUID", "SeriesInstanceUID", "Modality", "BodyPartExamined", "SeriesNumber"];
+            fields = ["collection_id", "PatientID", "StudyInstanceUID", "SeriesInstanceUID", "Modality", "BodyPartExamined", "SeriesNumber","SeriesDescription"];
             collapse_on = 'SeriesInstanceUID'
+            order_docs =["collection_id", "PatientID", "StudyInstanceUID","SeriesInstanceUID"];
         }
+
         var fieldStr = JSON.stringify(fields);
-        let url = '/explore/?counts_only=False&is_json=True&collapse_on=' + collapse_on + '&with_clinical=False&filters=' + filterStr + '&fields=' + fieldStr;
+        var orderDocStr =  JSON.stringify(order_docs);
+        let url = '/explore/?counts_only=False&is_json=True&collapse_on=' + collapse_on + '&with_clinical=False&filters=' + filterStr + '&fields=' + fieldStr + '&order_docs=' + orderDocStr;
         url = encodeURI(url);
 
         $.ajax({
@@ -342,7 +346,7 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
                         var modality = curData.Modality;
                         var rowId = 'series_' + seriesId.replace(/\./g, '-')
                         var studyClass = 'study_' + studyId.replace(/\./g, '-');
-                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1">' + hrefTxt + '</td><td class="col2">' + seriesId + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td></tr>'
+                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 ">' + hrefTxt + '</td><td class="col2 id-names">' + seriesId + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td></tr>'
 
                     } else {
 
@@ -444,9 +448,9 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         plotLayout.title = lbl
         Plotly.newPlot(plotId, pdata, plotLayout, {displayModeBar: false});
 
-        document.getElementById(plotId).on('plotly_click', function (data) {
+       /* document.getElementById(plotId).on('plotly_click', function (data) {
             alert('here');
-        });
+        }); */
 
 
     };

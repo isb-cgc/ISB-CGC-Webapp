@@ -426,12 +426,13 @@ def explore_data_page(request):
     source = DataSource.SOLR
     versions = []
     filters = {}
-    fields = {}
+    fields = []
     counts_only = True
     with_clinical = True
     collapse_on = 'PatientID'
     is_json = False
     is_dicofdic = False
+    order_docs = []
 
     try:
         if request.GET:
@@ -439,6 +440,7 @@ def explore_data_page(request):
             versions = json.loads(request.GET.get('versions','[]'))
             filters = json.loads(request.GET.get('filters', '{}'))
             fields = json.loads(request.GET.get('fields', '[]'))
+            order_docs = json.loads(request.GET.get('order_docs', '[]'))
             counts_only = (request.GET.get('counts_only', "False").lower() == "true")
             with_clinical = (request.GET.get('with_clinical', "True").lower() == "true")
             collapse_on = request.GET.get('collapse_on', 'PatientID')
@@ -450,6 +452,7 @@ def explore_data_page(request):
             versions = request.loads(request.POST.get('versions', '[]'))
             filters = json.loads(request.POST.get('filters', '{}'))
             fields = json.loads(request.POST.get('fields', '[]'))
+            order_docs = json.loads(request.GET.get('order_docs', '[]'))
             counts_only = (request.POST.get('counts_only', "False").lower() == "true")
             with_clinical = (request.POST.get('with_clinical', "True").lower() == "true")
             collapse_on = request.POST.get('collapse_on', 'PatientID')
@@ -488,7 +491,7 @@ def explore_data_page(request):
             fields = list(attrs.values_list('name', flat=True))
         faceted_counts = get_collex_metadata(
             filters, fields,
-             record_limit=50000, counts_only=counts_only, with_clinical = with_clinical, collapse_on = collapse_on
+             record_limit=50000, counts_only=counts_only, with_clinical = with_clinical, collapse_on = collapse_on, order_docs = order_docs
         )
 
         if with_clinical:

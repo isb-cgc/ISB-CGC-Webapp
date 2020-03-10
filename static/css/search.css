@@ -17,6 +17,11 @@
     #left: 40%;
 }
 
+.id-names{
+    text-overflow:ellipsis;
+    overflow:hidden;
+    max-lines:1;
+}
 
 
 .filter-type{
@@ -101,6 +106,7 @@ th, tb,tr,td {border: 1px solid black;}
        #studies_table td, #series_table td{
            width:25%;
            word-break: break-word;
+           max-width:25%;
       }
 
 

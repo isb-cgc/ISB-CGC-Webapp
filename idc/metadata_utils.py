@@ -24,8 +24,16 @@ from django.conf import settings
 logger = logging.getLogger('main_logger')
 
 
+def retTuple(x, order_docs):
+    tlist = []
+    for field in order_docs:
+        if field in x:
+            tlist.push(x[field])
+    return tuple(tlist)
+
+
 # Fetch metadata from Solr
-def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, with_clinical = True, collapse_on = 'PatientID' ):
+def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, with_clinical = True, collapse_on = 'PatientID', order_docs='[]' ):
     try:
         results = {'docs': None, 'facets': {}}
 
@@ -85,6 +93,9 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
         })
         if not counts_only:
             results['docs'] = solr_result['docs']
+            if (len(order_docs)>0):
+                results['docs'] = sorted(results['docs'], key=lambda x: tuple([x[item] for item in order_docs]))
+
 
         results['facets']['cross_collex'] = solr_result['facets']
         if 'BodyPartExamined' in solr_result['facets']:
