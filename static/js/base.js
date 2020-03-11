@@ -190,8 +190,15 @@ require([
                 {
                     window.open(redirect_url, '_blank')
                 }
+                // else{
+                //     location.reload(true);
+                // }
             },
-            error: function(data) {
+            error: function(e) {
+                throw new Error( e );
+            },
+            complete: function () {
+                location.reload(true);
             }
         });
     }
@@ -200,7 +207,7 @@ require([
     $('#submit-opt-in-btn').on('click', function() {
         var opt_in_radio_value = $('input[name="opt-in-radio"]:checked').val();
         send_opt_in_update(opt_in_radio_value);
-        location.reload(true);
+        // location.reload(true);
     });
 
 
