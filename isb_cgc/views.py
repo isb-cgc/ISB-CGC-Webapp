@@ -676,7 +676,7 @@ def opt_in_update(request):
 
     try:
         user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=request.user).first()
-        feedback_form_link = request.build_absolute_uri('/opt_in/form')
+        feedback_form_link = request.build_absolute_uri(reverse('opt_in_form'))
 
         if user_opt_in_stat_obj:
             if opt_in_choice == 'opt-out':
@@ -699,13 +699,16 @@ def opt_in_update(request):
                 feedback_form_link_params = feedback_form_link_template.format(email=user_email, firstName=first_name,
                                                                         lastName=last_name)
                 resp = send_feedback_form(user_email, first_name, last_name, feedback_form_link_params)
-                if resp.status == 'error':
-                    error_msg = resp.message
+                if resp['status'] == 'error':
+                    error_msg = resp['message']
             else:  # opt-in-now
                 redirect_url = feedback_form_link
 
     except Exception as e:
         error_msg = '[Error] There has been an error while updating your subscription status.'
+        logger.exception(e)
+        logger.error(error_msg)
+
 
     return JsonResponse({
         'redirect-url': redirect_url,
@@ -732,7 +735,7 @@ def send_feedback_form(user_email, firstName, lastName, formLink):
                 ('Dear {firstName} {lastName},\n\n' +
                  'ISB-CGC is funded by the National Cancer Institute (NCI) to provide cloud-based tools and data to the cancer research community.\n' +
                  'Your feedback is important to the NCI and us.\n' +
-                 'Please help us by filling out this Google Form:\n' +
+                 'Please help us by filling out this form:\n' +
                  '{formLink}\n' +
                  'Thank you.\n\n' +
                  'ISB-CGC team').format(firstName=firstName, lastName=lastName, formLink=formLink),
@@ -742,10 +745,10 @@ def send_feedback_form(user_email, firstName, lastName, formLink):
     except Exception as e:
         status = 'error'
         message = '[Error] There has been an error while trying to send an email to {}.'.format(user_email)
-    return JsonResponse({
+    return {
         'status': status,
         'message': message
-    })
+        }
 
 
 def opt_in_form(request):
