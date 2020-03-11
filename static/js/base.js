@@ -191,7 +191,8 @@ require([
                     window.open(redirect_url, '_blank')
                 }
             },
-            error: function(data) {
+            error: function(e) {
+                throw new Error( e );
             }
         });
     }
