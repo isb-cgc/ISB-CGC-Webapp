@@ -38,13 +38,35 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
     };
 
 
-    window.resetAge = function() {
-        $("#age_slide").slider("values", "0", 0);
-        $("#age_slide").slider("values", "1", 120);
+    window.setSlider = function(divName,reset,strt,end,isInt) {
+        slideDiv= divName + "_slide";
+        if (reset){
+            strt = $('#'+slideDiv).slider("option","min");
+            end = $('#'+slideDiv).slider("option","max");
+        }
+        $('#'+slideDiv).slider("values", "0", strt);
+        $('#'+slideDiv).slider("values", "1", end);
+
+        var inpDiv = divName + "_input";
+        var val = String(strt)+"-"+String(end);
+
         // $("#inp_age_slide").value="0-120";
-        document.getElementById("inp_age_slide").value = "0-120";
-        if (filterObj.hasOwnProperty("age_at_diagnosis_btw")) {
-            delete filterObj["age_at_diagnosis_btw"];
+        document.getElementById(inpDiv).value = val;
+        filtAtt = divName + '_btw'
+        if (reset) {
+            if (window.filterObj.hasOwnProperty("age_at_diagnosis_btw")) {
+                delete window.filterObj["age_at_diagnosis_btw"];
+            }
+        }
+        else{
+            var attVal=[];
+            if (isInt){
+                attVal = [ parseInt(strt), parseInt(end)  ];
+            }
+            else{
+                attVal = [ parseFloat(strt), parseFloat(end)  ];
+            }
+            window.filterObj[filtAtt] = attVal
         }
 
         mkFiltText();
@@ -98,26 +120,36 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         $('.related-graphs').animate({height: '200px'}, 800);
     }
 
-    var mkAgeSlider = function(divName) {
+    var mkSlider = function(divName,min,max,step,isInt) {
 
-        $('#' + divName).append('<div id="age_slide"></div>  <input id="inp_age_slide" type="text" value="0-120"> <button onclick=\'resetAge()\'>Reset</button>');
+         var slideName = divName +'_slide';
+         var inpName = divName + '_input';
+         var strtInp = min + '-' + max;
+         var filtName = divName + '_btw';
+        $('#' + divName).append('<div id="'+ slideName + '"></div>  <input id="'+ inpName +'" type="text" value="'+ strtInp + '"> <button onclick=\'setSlider("'+divName+'",true,0,0,'+String(isInt)+')\'>Reset</button>');
 
-        $('#age_slide').slider({
-            values: [0, 120],
-            step: 1,
-            min: 0,
-            max: 120,
+        $('#'+slideName).slider({
+            values: [min, max],
+            step: step,
+            min: min,
+            max: max,
             range: true,
             slide: function (event, ui) {
-                $('#inp_age_slide').val(ui.values[0] + "-" + ui.values[1]);
+                $('#' + inpName).val(ui.values[0] + "-" + ui.values[1]);
             },
             stop: function (event, ui) {
              //   updateSliderSelection(inpDiv, displaySet, header, attributeName, isInt);
 
-             var val = $('#inp_age_slide')[0].value;
+             var val = $('#'+inpName)[0].value;
              var valArr = val.split('-');
-             var attVal = [ parseInt(valArr[0]), parseInt(valArr[1])  ];
-             filterObj['age_at_diagnosis_btw'] = attVal;
+             var attVal =[];
+             if (isInt) {
+                 attVal = [parseInt(valArr[0]), parseInt(valArr[1])];
+             }
+             else{
+                 attVal = [parseFloat(valArr[0]), parseFloat(valArr[1])];
+             }
+             window.filterObj[filtName] = attVal;
              mkFiltText();
              updateFacetsData();
 
@@ -287,6 +319,12 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         }
 
     }
+
+    var pretty_print_id = function(id){
+        var newId = id.slice(0,12)+'...'+id.slice(id.length-12,id.length);
+        return newId;
+    }
+
     window.addStudyOrSeries = function(projectIdArr, studyIdArr, tableId, refresh) {
         changeAjax(true);
         var curSelStudiesDic = new Object();
@@ -316,7 +354,7 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         if (isSeries) {
             fields = ["collection_id", "PatientID", "StudyInstanceUID", "SeriesInstanceUID", "Modality", "BodyPartExamined", "SeriesNumber","SeriesDescription"];
             collapse_on = 'SeriesInstanceUID'
-            order_docs =["collection_id", "PatientID", "StudyInstanceUID","SeriesInstanceUID"];
+            order_docs =["collection_id", "PatientID", "StudyInstanceUID","SeriesNumber"];
         }
 
         var fieldStr = JSON.stringify(fields);
@@ -336,17 +374,21 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
                     var projectId = curData.collection_id;
                     var patientId = curData.PatientID;
                     var studyId = curData.StudyInstanceUID;
+                    var ppStudyId = pretty_print_id(studyId);
                     var fetchUrl = '/projects/chc-tcia/locations/us-central1/datasets/' + projectId.replace('_', '-') + '/dicomStores/' + projectId.replace('_', '-') + '/study/' + studyId;
-                    var hrefTxt = '<a href="' + fetchUrl + '" target="_blank">' + studyId + '</a>';
+                    var hrefTxt = '<a href="' + fetchUrl + '" target="_blank">' + ppStudyId + '</a><span class="tooltiptext_ex">' + studyId + '</span>';
                     var pclass = 'project_' + projectId;
                     var newHtml='';
                     if (isSeries) {
                         var seriesId = curData.SeriesInstanceUID;
+                        var ppSeriesId = pretty_print_id(seriesId);
+                        var seriesNumber = String(curData.SeriesNumber);
+                        var seriesDescription = curData.SeriesDescription;
                         var bodyPartExamined = curData.BodyPartExamined;
                         var modality = curData.Modality;
                         var rowId = 'series_' + seriesId.replace(/\./g, '-')
                         var studyClass = 'study_' + studyId.replace(/\./g, '-');
-                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 ">' + hrefTxt + '</td><td class="col2 id-names">' + seriesId + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td></tr>'
+                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col2 tooltip_ex">' + ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span></td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td></tr>';
 
                     } else {
 
@@ -360,11 +402,11 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
                              }
                               newSelStudies[projectId].push(studyId);
 
-                             newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head selected_grey" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td></tr>'
+                             newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head selected_grey" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td></tr>'
 
                         }
                         else {
-                             newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td></tr>'
+                             newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td></tr>'
                         }
                     }
                     //var rowId='study_'+projectId+'_'+patientIndex[patientId].toString()+"_"+studyIndex[studyId].toString();
@@ -577,8 +619,32 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         plotLayout.title = lbl;
         Plotly.newPlot(plotId, pdata, plotLayout, {displayModeBar: false});
 
-        document.getElementById(plotId).on('plotly_click', function (data) {
-            alert('here');
+        document.getElementById(plotId).on('plotly_click', function (data, plotId) {
+            var chartid = data.event.path[6].id;
+            var filterId = chartid.replace("_chart","");
+            if (filterId === 'age_at_diagnosis'){
+                var sel = data.points[0].x;
+                var selArr = sel.split(' To ');
+                var strt = parseInt((selArr[0] === '*') ? '0': selArr[0]);
+                var end = parseInt((selArr[0] === '*') ?'0': selArr[1]);
+                setSlider(filterId,false,strt,end,true);
+
+            }
+            else {
+                //alert(String(data.event.path[6].id));
+                var index = data.points[0].pointIndex;
+                var listId = filterId + '_list';
+                var inputList = $('#'+listId).find(':input');
+                for (var i=0;i<inputList.length;i++){
+                    if (i === index){
+                        inputList[i].checked = true;
+                    }
+                    else{
+                        inputList[i].checked = false;
+                    }
+                }
+                handleFilterSelectionUpdate(filterId);
+            }
         });
 
     };
@@ -737,7 +803,7 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
             $('#age_at_diagnosis_list').addClass('hide');
             $('#age_at_diagnosis').find('.more-checks').addClass('hide');
             $('#age_at_diagnosis').find('.less-checks').addClass('hide');
-            mkAgeSlider('age_at_diagnosis');
+            mkSlider('age_at_diagnosis',0,120,1,true);
 
             //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
 

@@ -93,6 +93,9 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
         })
         if not counts_only:
             results['docs'] = solr_result['docs']
+            if 'SeriesNumber' in fields:
+                for res in results['docs']:
+                    res['SeriesNumber'] = res['SeriesNumber'][0]
             if (len(order_docs)>0):
                 results['docs'] = sorted(results['docs'], key=lambda x: tuple([x[item] for item in order_docs]))
 
