@@ -513,7 +513,12 @@ def explore_data_page(request):
                             'display_value': val if this_attr.preformatted_values else None,
                             'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
                         })
-                attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
+
+                if attr == 'bmi':
+                    sortDic = {'underweight':0, 'normal weight': 1, 'overweight': 2, 'obese': 3}
+                    attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: sortDic[x['value']])
+                else:
+                    attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
         for attr in faceted_counts['facets']['cross_collex']:
             this_attr_vals = attr_by_source['origin_set']['attributes'][attr]['vals']
@@ -532,14 +537,16 @@ def explore_data_page(request):
                         'value': val,
                         'display_value': val if this_attr.preformatted_values else None,
                         'count': faceted_counts['facets']['cross_collex'][attr][val] if val in faceted_counts['facets']['cross_collex'][attr] else 0
-                    })
+
+                   })
+            #bmiSort{''}
             attr_by_source['origin_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
 
         attr_filter={}
         attr_filter['origin_set'] =['Modality', 'BodyPartExamined','collection_id']
         if with_clinical:
-            attr_filter['related_set'] = ['disease_code', 'vital_status','gender','age_at_diagnosis', 'race','ethnicity']
+            attr_filter['related_set'] = ['disease_code', 'vital_status','gender','age_at_diagnosis', 'bmi','race','ethnicity']
         for set in attr_by_source:
             if is_dicofdic:
                 attr_by_source[set]['attributes'] ={x: {y['value']: {'display_value': y['display_value'], 'count': y['count']} for y in attr_by_source[set]['attributes'][x]['vals']} for x in attr_filter[set]}
