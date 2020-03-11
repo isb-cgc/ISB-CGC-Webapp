@@ -65,9 +65,11 @@ MANAGERS                = ADMINS
 
 GCLOUD_PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
 GCLOUD_PROJECT_NUMBER          = os.environ.get('GCLOUD_PROJECT_NUMBER', '')
-BIGQUERY_PROJECT_ID           = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PROJECT_ID)
-BIGQUERY_DATASET_V1         = os.environ.get('BIGQUERY_DATASET_V1', '')
-BIGQUERY_DATA_PROJECT_ID  = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
+BIGQUERY_PROJECT_ID            = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PROJECT_ID)
+BIGQUERY_DATASET_V1            = os.environ.get('BIGQUERY_DATASET_V1', '')
+BIGQUERY_DATA_PROJECT_ID       = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
+BIGQUERY_FEEDBACK_DATASET      = os.environ.get('BIGQUERY_FEEDBACK_DATASET', '')
+BIGQUERY_FEEDBACK_TABLE        = os.environ.get('BIGQUERY_FEEDBACK_TABLE', '')
 
 # Deployment module
 CRON_MODULE             = os.environ.get('CRON_MODULE')
@@ -309,10 +311,9 @@ INSTALLED_APPS = (
 #  django-session-security  #
 #############################
 
-# testing "session security works at the moment" commit
 INSTALLED_APPS += ('session_security',)
-SESSION_SECURITY_WARN_AFTER = 540
-SESSION_SECURITY_EXPIRE_AFTER = 600
+SESSION_SECURITY_WARN_AFTER = int(os.environ.get('SESSION_SECURITY_WARN_AFTER','540'))
+SESSION_SECURITY_EXPIRE_AFTER = int(os.environ.get('SESSION_SECURITY_EXPIRE_AFTER','600'))
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 MIDDLEWARE.append(
     # for django-session-security -- must go *after* AuthenticationMiddleware
@@ -618,6 +619,7 @@ SOLR_CERT = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCAL_PATH, os
 EMAIL_SERVICE_API_URL = os.environ.get('EMAIL_SERVICE_API_URL', '')
 EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
 NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')
+NOTIFICATION_EMAIL_TO_ADDRESS = os.environ.get('NOTIFICATION_EMAIL_TO_ADDRESS', '')
 
 # Explicitly check for known items
 BLACKLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'

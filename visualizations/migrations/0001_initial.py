@@ -31,8 +31,8 @@ class Migration(migrations.Migration):
             name='Plot_Cohorts',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('cohort', models.ForeignKey(to='cohorts.Cohort')),
-                ('plot', models.ForeignKey(to='visualizations.Plot')),
+                ('cohort', models.ForeignKey(on_delete=models.CASCADE, to='cohorts.Cohort')),
+                ('plot', models.ForeignKey(on_delete=models.CASCADE, to='visualizations.Plot')),
             ],
             options={
             },
@@ -44,8 +44,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('date_created', models.DateTimeField(auto_now_add=True)),
                 ('content', models.CharField(max_length=1024)),
-                ('plot', models.ForeignKey(related_name='plot_comment', to='visualizations.Plot')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('plot', models.ForeignKey(on_delete=models.CASCADE, related_name='plot_comment', to='visualizations.Plot')),
+                ('user', models.ForeignKey(on_delete=models.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
             },
@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
                 ('name', models.TextField(null=True)),
                 ('last_date_saved', models.DateTimeField(auto_now=True)),
                 ('active', models.BooleanField(default=True)),
-                ('parent', models.ForeignKey(default=None, blank=True, to='visualizations.SavedViz', null=True)),
+                ('parent', models.ForeignKey(on_delete=models.CASCADE, default=None, blank=True, to='visualizations.SavedViz', null=True)),
             ],
             options={
                 'verbose_name_plural': 'Saved Visualizations',
@@ -70,8 +70,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('perm', models.CharField(default=b'READER', max_length=10, choices=[(b'READER', b'Reader'), (b'OWNER', b'Owner')])),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
-                ('visualization', models.ForeignKey(to='visualizations.SavedViz')),
+                ('user', models.ForeignKey(on_delete=models.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('visualization', models.ForeignKey(on_delete=models.CASCADE, to='visualizations.SavedViz')),
             ],
             options={
             },
@@ -80,7 +80,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='plot',
             name='visualization',
-            field=models.ForeignKey(to='visualizations.SavedViz'),
+            field=models.ForeignKey(on_delete=models.CASCADE, to='visualizations.SavedViz'),
             preserve_default=True,
         ),
     ]

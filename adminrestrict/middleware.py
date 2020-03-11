@@ -11,7 +11,7 @@ import socket
 import re
 
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseForbidden
 
 from adminrestrict.models import AllowedIP

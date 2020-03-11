@@ -11,4 +11,4 @@ Here's a quick description of {{ item.name }}
     {{ item.description }}
 {% endif %}
 
-Copyright 2015 Institute of Systems Biology
+Copyright 2020 ISB

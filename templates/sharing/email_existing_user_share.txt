@@ -9,4 +9,4 @@ Here's a quick description of the {{ type|lower }}
     {{ item.description|escape }}
 {% endif %}
 
-Copyright 2015 Institute of Systems Biology
+Copyright 2020 ISB
