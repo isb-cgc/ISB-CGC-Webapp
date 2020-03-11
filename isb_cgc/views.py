@@ -699,8 +699,8 @@ def opt_in_update(request):
                 feedback_form_link_params = feedback_form_link_template.format(email=user_email, firstName=first_name,
                                                                         lastName=last_name)
                 resp = send_feedback_form(user_email, first_name, last_name, feedback_form_link_params)
-                if resp.status == 'error':
-                    error_msg = resp.message
+                if resp['status'] == 'error':
+                    error_msg = resp['message']
             else:  # opt-in-now
                 redirect_url = feedback_form_link
 
@@ -735,7 +735,7 @@ def send_feedback_form(user_email, firstName, lastName, formLink):
                 ('Dear {firstName} {lastName},\n\n' +
                  'ISB-CGC is funded by the National Cancer Institute (NCI) to provide cloud-based tools and data to the cancer research community.\n' +
                  'Your feedback is important to the NCI and us.\n' +
-                 'Please help us by filling out this Form:\n' +
+                 'Please help us by filling out this form:\n' +
                  '{formLink}\n' +
                  'Thank you.\n\n' +
                  'ISB-CGC team').format(firstName=firstName, lastName=lastName, formLink=formLink),
@@ -745,10 +745,10 @@ def send_feedback_form(user_email, firstName, lastName, formLink):
     except Exception as e:
         status = 'error'
         message = '[Error] There has been an error while trying to send an email to {}.'.format(user_email)
-    return JsonResponse({
+    return {
         'status': status,
         'message': message
-    })
+        }
 
 
 def opt_in_form(request):
