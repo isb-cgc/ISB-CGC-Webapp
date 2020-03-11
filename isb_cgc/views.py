@@ -676,7 +676,7 @@ def opt_in_update(request):
 
     try:
         user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=request.user).first()
-        feedback_form_link = request.build_absolute_uri('/opt_in/form')
+        feedback_form_link = request.build_absolute_uri(reverse('opt_in_form'))
 
         if user_opt_in_stat_obj:
             if opt_in_choice == 'opt-out':
