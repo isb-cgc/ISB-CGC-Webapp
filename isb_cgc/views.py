@@ -735,7 +735,7 @@ def send_feedback_form(user_email, firstName, lastName, formLink):
                 ('Dear {firstName} {lastName},\n\n' +
                  'ISB-CGC is funded by the National Cancer Institute (NCI) to provide cloud-based tools and data to the cancer research community.\n' +
                  'Your feedback is important to the NCI and us.\n' +
-                 'Please help us by filling out this Google Form:\n' +
+                 'Please help us by filling out this Form:\n' +
                  '{formLink}\n' +
                  'Thank you.\n\n' +
                  'ISB-CGC team').format(firstName=firstName, lastName=lastName, formLink=formLink),
