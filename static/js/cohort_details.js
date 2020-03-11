@@ -698,7 +698,7 @@ require([
     var save_changes_btn_modal = $('#apply-edits-form input[type="submit"]');
     var save_changes_btn = $('button[data-target="#apply-filters-modal"]');
     var save_new_cohort_btn = $('button[data-target="#create-cohort-modal"]');
-    var log_in__to_save_btn = $('#log-in-to-save-btn');
+    var log_in_to_save_btn = $('#log-in-to-save-btn');
     var check_for_changes = function() {
         var totalCases = 0;
         $('.total-cases').each(function(){
@@ -719,14 +719,14 @@ require([
                     save_new_cohort_btn.attr('disabled','disabled');
                 }
             }
-            if(log_in__to_save_btn.length > 0)
+            if(log_in_to_save_btn.length > 0)
             {
                 if (totalCases > 0) {
-                    log_in__to_save_btn.removeAttr('disabled');
-                    log_in__to_save_btn.removeAttr('title');
+                    log_in_to_save_btn.removeAttr('disabled');
+                    log_in_to_save_btn.removeAttr('title');
                 } else {
-                    log_in__to_save_btn.attr("title", "Please adjust your filters to include at least one case in the cohort.");
-                    log_in__to_save_btn.attr('disabled','disabled');
+                    log_in_to_save_btn.attr("title", "Please adjust your filters to include at least one case in the cohort.");
+                    log_in_to_save_btn.attr('disabled','disabled');
                 }
             }
         } else {
@@ -734,8 +734,8 @@ require([
             save_changes_btn_modal.prop('disabled',true);
             save_new_cohort_btn.attr('disabled','disabled');
             save_new_cohort_btn.attr("title","Please select at least one filter.");
-            log_in__to_save_btn.attr('disabled','disabled');
-            log_in__to_save_btn.attr("title","Please select at least one filter.");
+            log_in_to_save_btn.attr('disabled','disabled');
+            log_in_to_save_btn.attr("title","Please select at least one filter.");
         }
     };
 
@@ -1184,6 +1184,32 @@ require([
         if (reject_load) {
             e.preventDefault();
             e.stopPropagation();
+        }
+    });
+
+    $('#save_session').on("click", function()
+    {
+        var filters = [];
+        $('.selected-filters .panel-body span.filter-token').each(function() {
+            var $this = $(this);
+            var value = {
+                'feature': { name: $this.data('feature-name'), id: $this.data('feature-id') },
+                'value'  : { name: $this.data('value-name')  , id: $this.data('value-id')   },
+                'program': { name: $this.data('prog-name')   , id: $this.data('prog-id')    }
+            };
+            filters.push(value);
+        });
+        var filterStr = JSON.stringify(filters);
+        sessionStorage.setItem('anonymous_filters', filterStr)
+    });
+
+    $('#load_session').on("click", function()
+    {
+        var str = sessionStorage.getItem('anonymous_filters');
+        var filters = JSON.parse(str);
+        for (i = 0; i < filters.length; ++i)
+        {
+            console.log(filters[i]);
         }
     });
 
