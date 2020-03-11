@@ -22,7 +22,7 @@ require.config({
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
+        session_security: 'session_security/script',
         underscore: 'libs/underscore-min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
@@ -90,27 +90,15 @@ require([
         })
     };
 
-    // Adapted from https://docs.djangoproject.com/en/1.9/ref/csrf/
-    $.getCookie = function getCookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie != '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    };
+    $.getCookie = utils.getCookie;
+    $.setCookie = utils.setCookie;
+    $.removeCookie = utils.removeCookie;
 
     function csrfSafeMethod(method) {
         // these HTTP methods do not require CSRF protection
         return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
     };
+
     $.ajaxSetup({
         beforeSend: function(xhr, settings) {
             var csrftoken = $.getCookie('csrftoken');
@@ -189,11 +177,63 @@ require([
         sessionStorage.removeItem("reloadMsg");
     });
 
+    function send_opt_in_update(opt_in_selection) {
+        // Ajax call to update the backend of the user's selection
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + '/opt_in/update/',
+            dataType  :'json',
+            data: {'opt-in-radio': opt_in_selection},
+            success: function(data) {
+                var redirect_url = data['redirect-url'];
+                if (redirect_url != "")
+                {
+                    window.open(redirect_url, '_blank')
+                }
+                // else{
+                //     location.reload(true);
+                // }
+            },
+            error: function(e) {
+                throw new Error( e );
+            },
+            complete: function () {
+                location.reload(true);
+            }
+        });
+    }
+
+    // Code to handle opt-in dialog interaction
+    $('#submit-opt-in-btn').on('click', function() {
+        var opt_in_radio_value = $('input[name="opt-in-radio"]:checked').val();
+        send_opt_in_update(opt_in_radio_value);
+        // location.reload(true);
+    });
+
+
+    $('#will-email-message').collapse({toggle: false});
+    $('[name="opt-in-radio"]').on('change', function() {
+        if ($(this).val() === "opt-in-email") {
+            $('#will-email-message').collapse('show');
+        } else {
+            $('#will-email-message').collapse('hide');
+        }
+    });
     // Per https://stackoverflow.com/questions/13550477/twitter-bootstrap-alert-message-close-and-open-again
     // Set up our own data-hide type to 'hide' our alerts instead of popping them off the DOM entirely
     $("[data-hide]").on("click", function(){
         $(this).closest("." + $(this).attr("data-hide")).hide();
     });
+
+    if(user_is_auth) {
+        var sessionSecurity = new yourlabs.SessionSecurity({
+            pingUrl: pingUrl,
+            warnAfter: warnAfter,
+            expireAfter: expireAfter,
+            confirmFormDiscard: confirmFormDiscard,
+            returnToUrl: BASE_URL
+        });
+    }
 });
 
 // Return an object for consts/methods used by most views
@@ -209,6 +249,12 @@ define(['jquery', 'utils'], function($, utils) {
         // at document load time
         setReloadMsg: function(type,text) {
             sessionStorage.setItem("reloadMsg",JSON.stringify({type: type, text: text}));
+        },
+        setCookie: function(name,val,expires_in,path) {
+            utils.setCookie(name,val,expires_in,path);
+        },
+        removeCookie: function(name, path) {
+            utils.removeCookie(name, path);
         },
         gdcSchema: {
             "type": "array",
@@ -260,3 +306,4 @@ define(['jquery', 'utils'], function($, utils) {
         blockResubmit: utils.blockResubmit
     };
 });
+

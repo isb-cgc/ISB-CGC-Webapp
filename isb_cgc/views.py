@@ -27,8 +27,11 @@ from django.views.decorators.cache import never_cache
 from django.contrib.auth.models import User
 from django.db.models import Count
 from django.shortcuts import render, redirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils import formats
+from django.core.exceptions import ObjectDoesNotExist
+# from django.core.mail import send_mail
+from sharing.service import send_email_message
 from django.contrib import messages
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
@@ -42,12 +45,14 @@ from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
 from projects.models import Program
 from workbooks.models import Workbook
-from accounts.models import GoogleProject
+from accounts.models import GoogleProject, UserOptInStatus
 from accounts.sa_utils import get_nih_user_details
 # from notebooks.notebook_vm import check_vm_stat
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
+from django.template.loader import get_template
 from google_helpers.bigquery.service import get_bigquery_service
+from google_helpers.bigquery.feedback_support import BigQueryFeedbackSupport
 
 import requests
 
@@ -147,6 +152,17 @@ def user_detail(request, user_id):
         user = User.objects.get(id=user_id)
         social_account = SocialAccount.objects.get(user_id=user_id, provider='google')
 
+        user_status_obj = UserOptInStatus.objects.filter(user=user).first()
+        if user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.NEW:
+            user_status_obj.opt_in_status = UserOptInStatus.NOT_SEEN
+            user_status_obj.save()
+        if user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.YES:
+            user_opt_in_status = "Opted-In"
+        elif user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.NO:
+            user_opt_in_status = "Opted-Out"
+        else:
+            user_opt_in_status = "N/A"
+
         user_details = {
             'date_joined': user.date_joined,
             'email': user.email,
@@ -154,7 +170,8 @@ def user_detail(request, user_id):
             'first_name': user.first_name,
             'id': user.id,
             'last_login': user.last_login,
-            'last_name': user.last_name
+            'last_name': user.last_name,
+            'user_opt_in_status': user_opt_in_status
         }
 
         user_details['gcp_list'] = len(GoogleProject.objects.filter(user=user))
@@ -190,6 +207,9 @@ def bucket_object_list(request):
 
 # Extended login view so we can track user logins
 def extended_login_view(request):
+    redirect_to = 'dashboard'
+    if request.COOKIES and request.COOKIES.get('login_from', '') == 'new_cohort':
+        redirect_to = 'new_cohort'
     try:
         # Write log entry
         st_logger = StackDriverLogger.build_from_django_settings()
@@ -201,10 +221,17 @@ def extended_login_view(request):
                                                                                    datetime.datetime.utcnow())
         )
 
+        # If user logs in for the second time, or user has not completed the survey, opt-in status changes to NOT_SEEN
+        user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=user).first()
+        if user_opt_in_stat_obj and \
+                (user_opt_in_stat_obj.opt_in_status == UserOptInStatus.NEW or user_opt_in_stat_obj.opt_in_status == UserOptInStatus.SEEN):
+            user_opt_in_stat_obj.opt_in_status = UserOptInStatus.NOT_SEEN
+            user_opt_in_stat_obj.save()
+
     except Exception as e:
         logger.exception(e)
 
-    return redirect(reverse('dashboard'))
+    return redirect(reverse(redirect_to))
 
 
 '''
@@ -270,14 +297,14 @@ def user_landing(request):
         del cohort['name']
 
     return render(request, 'isb_cgc/user_landing.html', {'request': request,
-                                                            'cohorts': cohorts,
-                                                            'user_list': users,
-                                                            'cohorts_listing': cohort_listing,
-                                                            'visualizations': visualizations,
-                                                            'seqpeek_list': seqpeek_viz,
-                                                            'base_url': settings.BASE_URL,
-                                                            'base_api_url': settings.BASE_API_URL
-                                                            })
+                                                         'cohorts': cohorts,
+                                                         'user_list': users,
+                                                         'cohorts_listing': cohort_listing,
+                                                         'visualizations': visualizations,
+                                                         'seqpeek_list': seqpeek_viz,
+                                                         'base_url': settings.BASE_URL,
+                                                         'base_api_url': settings.BASE_API_URL
+                                                         })
 
 
 '''
@@ -466,7 +493,7 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     readgroupset_list = []
     bam_list = []
 
-    checked_list = json.loads(request.POST.__getitem__('checked_list'))
+    checked_list = json.loads(request.POST.get('checked_list','{}'))
     build = request.POST.__getitem__('build')
 
     for item in checked_list['gcs_bam']:
@@ -541,6 +568,7 @@ def bq_meta_search(request):
     bq_filter_file_path = BQ_ECOSYS_BUCKET + bq_filter_file_name
     bq_filters = requests.get(bq_filter_file_path).json()
     return render(request, 'isb_cgc/bq_meta_search.html', bq_filters)
+
 
 def bq_meta_data(request):
     bq_meta_data_file_name = 'bq_meta_data.json'
@@ -618,6 +646,207 @@ def dashboard_page(request):
         'workbooks': workbooks,
         'genefaves': genefaves,
         'varfaves': varfaves,
+        # 'optinstatus': opt_in_status
         # 'notebook_vm': notebook_vm,
         # 'gcp_list': gcp_list,
     })
+
+
+@login_required
+def opt_in_check_show(request):
+    try:
+        obj, created = UserOptInStatus.objects.get_or_create(user=request.user)
+        result = (obj.opt_in_status == UserOptInStatus.NOT_SEEN)
+    except Exception as e:
+        result = False
+
+    return JsonResponse({
+        'result': result
+    })
+
+
+@login_required
+def opt_in_update(request):
+    # If user logs in for the second time, opt-in status changes to NOT_SEEN
+    error_msg = ''
+    opt_in_choice = ''
+    redirect_url = ''
+    if request.POST:
+        opt_in_choice = request.POST.get('opt-in-radio')
+
+    try:
+        user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=request.user).first()
+        feedback_form_link = request.build_absolute_uri(reverse('opt_in_form'))
+
+        if user_opt_in_stat_obj:
+            if opt_in_choice == 'opt-out':
+                opt_in_status_code = UserOptInStatus.NO
+                user_opt_in_stat_obj.opt_in_status = opt_in_status_code
+                user_opt_in_stat_obj.save()
+            elif user_opt_in_stat_obj.opt_in_status == UserOptInStatus.NOT_SEEN:
+                #chose YES and not seen
+                opt_in_status_code = UserOptInStatus.SEEN
+                user_opt_in_stat_obj.opt_in_status = opt_in_status_code
+                user_opt_in_stat_obj.save()
+
+        if opt_in_choice.startswith('opt-in-'):
+            user_email = request.user.email
+            first_name = request.user.first_name
+            last_name = request.user.last_name
+
+            if opt_in_choice == 'opt-in-email':
+                feedback_form_link_template = feedback_form_link + '?email={email}&first_name={firstName}&last_name={lastName}'
+                feedback_form_link_params = feedback_form_link_template.format(email=user_email, firstName=first_name,
+                                                                        lastName=last_name)
+                resp = send_feedback_form(user_email, first_name, last_name, feedback_form_link_params)
+                if resp['status'] == 'error':
+                    error_msg = resp['message']
+            else:  # opt-in-now
+                redirect_url = feedback_form_link
+
+    except Exception as e:
+        error_msg = '[Error] There has been an error while updating your subscription status.'
+        logger.exception(e)
+        logger.error(error_msg)
+
+
+    return JsonResponse({
+        'redirect-url': redirect_url,
+        'error_msg': error_msg
+    })
+
+
+def send_feedback_form(user_email, firstName, lastName, formLink):
+    status = None
+    message = None
+
+    try:
+        email_template = get_template('sharing/email_opt_in_form.html')
+        ctx = {
+            'firstName': firstName,
+            'lastName': lastName,
+            'formLink': formLink
+        }
+        message_data = {
+            'from': settings.NOTIFICATION_EMAIL_FROM_ADDRESS,
+            'to': user_email,
+            'subject': 'Join the ISB-CGC community!',
+            'text':
+                ('Dear {firstName} {lastName},\n\n' +
+                 'ISB-CGC is funded by the National Cancer Institute (NCI) to provide cloud-based tools and data to the cancer research community.\n' +
+                 'Your feedback is important to the NCI and us.\n' +
+                 'Please help us by filling out this form:\n' +
+                 '{formLink}\n' +
+                 'Thank you.\n\n' +
+                 'ISB-CGC team').format(firstName=firstName, lastName=lastName, formLink=formLink),
+            'html': email_template.render(ctx)
+        }
+        send_email_message(message_data)
+    except Exception as e:
+        status = 'error'
+        message = '[Error] There has been an error while trying to send an email to {}.'.format(user_email)
+    return {
+        'status': status,
+        'message': message
+        }
+
+
+def opt_in_form(request):
+    template = 'isb_cgc/opt_in_form.html'
+    opt_in_status = 'opt-in'
+
+    if request.user.is_authenticated:
+        user = request.user
+        first_name = user.first_name
+        last_name = user.last_name
+        email = user.email
+        opt_in_status_obj = UserOptInStatus.objects.filter(user=user).first()
+        if opt_in_status_obj and opt_in_status_obj.opt_in_status == UserOptInStatus.NO:
+            opt_in_status = 'opt-out'
+    else:
+        email = request.GET.get('email') if request.GET.get('email') else ''
+        first_name = request.GET.get('first_name') if request.GET.get('first_name') else ''
+        last_name = request.GET.get('last_name') if request.GET.get('last_name') else ''
+
+    form = {'first_name': first_name,
+            'last_name': last_name,
+            'email': email,
+            'opt_in_status': opt_in_status
+            }
+
+    return render(request, template, form)
+
+def opt_in_form_submitted(request):
+    msg = ''
+    error_msg = ''
+    template = 'isb_cgc/opt_in_form_submitted.html'
+
+    # get values and update optin status
+    first_name= request.POST.get('first-name')
+    last_name= request.POST.get('last-name')
+    email= request.POST.get('email')
+    affiliation= request.POST.get('affiliation')
+    feedback= request.POST.get('feedback')
+    subscribed = (request.POST.get('subscribed') == 'opt-in')
+
+    try:
+        users = User.objects.filter(email__iexact=email)
+        if len(users) > 0:
+            user = users.first()
+            user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=user).first()
+            if user_opt_in_stat_obj:
+                user_opt_in_stat_obj.opt_in_status = UserOptInStatus.YES if subscribed else UserOptInStatus.NO
+                user_opt_in_stat_obj.save()
+                # record to store in bq table
+                feedback_row = {
+                    "email": email,
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "affiliation": affiliation,
+                    "subscribed": subscribed,
+                    "feedback": feedback,
+                    "submitted_time": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                }
+                BigQueryFeedbackSupport.add_rows_to_table([feedback_row])
+                # send a notification to feedback@isb-cgc.org about the entry
+                send_feedback_notification(feedback_row)
+                msg = 'We thank you for your time and suggestions.'
+        else:
+            error_msg = 'We were not able to find a user with the given email. Please check with us again later.'
+    except Exception as e:
+        logger.exception(e)
+        error_msg = 'We were not able to submit your feedback due to some errors. Please check with us again later.'
+    message = {
+        'msg': msg,
+        'error_msg': error_msg
+    }
+    return render(request, template, message)
+
+def send_feedback_notification(feedback_dict):
+    try:
+        message_data = {
+            'from': settings.NOTIFICATION_EMAIL_FROM_ADDRESS,
+            'to': settings.NOTIFICATION_EMAIL_TO_ADDRESS,
+            'subject': '[ISB-CGC] A user feedback has been submitted.',
+            'text':
+                ('We have just received a user feedback from ISB-CGC WebApp at {timestamp} (UTC).\n\n' +
+                 'Here is what has been received:\n\n---------------------------------------\n' +
+                 'First Name: {firstName}\n' +
+                 'Last Name: {lastName}\n' +
+                 'E-mail: {email}\n' +
+                 'Affiliation: {affiliation}\n' +
+                 'Subscribed: {subscribed}\n' +
+                 'Feedback: {feedback}\n\n---------------------------------------\n' +
+                 'Thank you.\n\n' +
+                 'ISB-CGC team').format(
+                    timestamp=feedback_dict['submitted_time'],
+                                        firstName=feedback_dict['first_name'],
+                                        lastName=feedback_dict['last_name'],
+                                        email=feedback_dict['email'],
+                                        affiliation=feedback_dict['affiliation'],
+                                        subscribed=('Yes' if feedback_dict['subscribed'] else 'No'),
+                                        feedback=feedback_dict['feedback'])}
+        send_email_message(message_data)
+    except Exception as e:
+        logger.error('[Error] Error has occured while sending out feedback notifications to {}.'.format(settings.NOTIFICATION_EMAIL_TO_ADDRESS))
+        logger.exception(e)

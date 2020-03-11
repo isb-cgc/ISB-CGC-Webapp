@@ -11,6 +11,7 @@
 {% endblock %}
 {% block page_name %}bq-meta-searcher{% endblock %}
 {% block page_header %}
+
     <div class="bq-header-container container">
         <h1 class="page-header">BigQuery Table Search</h1>
         <ul class="nav">
@@ -73,6 +74,15 @@
                         <label>Name</label>
                         <input type="text" class="form-control bq-filter" data-column-name="friendlyName">
                     </div>
+                    <div>
+                        <label>Program</label>
+                        <select multiple data-placeholder="Choose Programs..."
+                                class="autocomplete_select_box form-control bq-select" data-column-name="program">
+                            {% for option in program.options %}
+                                <option value="{{ option.value }}">{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     <div class="checkbox-div">
                         <label>Category</label>
                         {% for option in category.options %}
@@ -113,6 +123,15 @@
                         <select multiple data-placeholder="Choose Data Types..."
                                 class="autocomplete_select_box form-control bq-select" data-column-name="dataType">
                             {% for option in data_type.options %}
+                                <option value="{{ option.value }}">{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label>Experimental Strategy</label>
+                        <select multiple data-placeholder="Choose Experimental Strategy..."
+                                class="autocomplete_select_box form-control bq-select" data-column-name="expStrat">
+                            {% for option in experimental_strategy.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
                         </select>
@@ -166,14 +185,16 @@
                     <thead>
                     <tr>
                         <th style="width:3%;"></th>
-                        <th style="width:20%;">Name</th>
+                        <th style="width:17%;">Name</th>
                         <th style="width:15%;">Dataset ID</th>
                         <th style="width:15%;">Table ID</th>
                         <th>Full ID</th>
+                        <th style="width:8%;">Program</th>
                         <th style="width:8%;">Category</th>
                         <th>Reference Genome</th>
                         <th>Source</th>
                         <th>Data Type</th>
+                        <th title="Experimental Strategy">Exp. Strategy</th>
                         <th style="width:9%;">Status</th>
                         <th style="width:8%;">Rows</th>
                         <th style="width:8%;">Created</th>
@@ -181,6 +202,7 @@
                         <th style="width:7%;">Description</th>
                         <th>Labels</th>
                         <th>Fields</th>
+                        <th style="width:3%;">Open</th>
                     </tr>
                     </thead>
                     <tbody></tbody>
@@ -195,6 +217,54 @@
         </div>
     </div>
 
+
+    <!-- Modal -->
+    <div class="modal fade" id="gcp-open-modal" tabindex="-1" role="dialog" aria-labelledby="gcp-open-modal-title" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="gcp-open-modal-title">Before you go...</h4>
+                </div>
+                <div class="modal-body">
+                    <p>You will now be sent to the <b>BigQuery Google Cloud Platform Console</b>.</p>
+                    <p>In order to view the table you will need to:</p>
+                    <p>
+                        <ul>
+                            <li>Be logged in with a Google account</li>
+                            <li>Choose a <b>project</b> associated with your Google account.
+                                <br>
+                                Creating a project is easy - See
+                                <a target="_blank" href="https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project">
+                                    How to Create a Project</a>.
+                            </li>
+                        </ul>
+                    </p>
+                    <p>Consider using
+                        <a target="_blank" href="https://cloud.google.com/free/docs/gcp-free-tier">
+                            Google Cloud Platform Free-Tier
+                        </a> and run queries at no cost!
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <div class="checkbox">
+                        <label>
+                            <input id="do-not-show-cb" type="checkbox"> Do not show this again.
+                        </label>
+                    </div>
+                    <div>
+                        <a id="gcp-open-btn" class="btn submit-btn" href="" target="_blank" class="btn btn-primary"
+                        ><span>OK</span></a>
+                        <button type="button" class="btn" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var gcp_modal_disabled = ('{{ user.is_authenticated}}' === 'True');
+    </script>
 {% endblock %}
 
 {% block js_file %}{% static 'js/bq_meta_search.js' %}{% endblock %}
