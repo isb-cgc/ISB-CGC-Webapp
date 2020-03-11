@@ -252,7 +252,7 @@ require([
                 },
                 {
                     // "name": "gcpLink",
-                    "class": "text-center no-export colvis-toggle",
+                    "class": "text-center no-export",
                     "searchable": false,
                     "data": function (data) {
                         return format_bq_gcp_console_link(data.tableReference);
