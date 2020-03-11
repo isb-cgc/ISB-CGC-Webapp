@@ -80,6 +80,12 @@ require([
 
     var SELECTED_FILTERS = {};
 
+    var ANONYMOUS_FILTERS = {};
+
+    var str = sessionStorage.getItem('anonymous_filters');
+    ANONYMOUS_FILTERS = JSON.parse(str);
+    sessionStorage.removeItem('anonymous_filters');
+
     $('.program-tab a').each(function(){
         SELECTED_FILTERS[$(this).data('program-id')] = {};
     });
@@ -1140,6 +1146,23 @@ require([
                     $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
                     $(program_data_selector).addClass('active');
                     $('#placeholder').hide();
+                    // Check if anonymous filter exist, then find all checkbox and check them
+                    if (ANONYMOUS_FILTERS != null && ANONYMOUS_FILTERS.length > 0)
+                    {
+                        for (i = 0; i < ANONYMOUS_FILTERS.length; ++i)
+                        {
+                            var aFilter = ANONYMOUS_FILTERS[i];
+                            if (aFilter.program.id != active_program_id)
+                                continue;
+
+                            var checkboxId = aFilter.program.id + "-" + aFilter.feature.id + "-" + aFilter.value.id;
+                            checkboxId = checkboxId.toUpperCase();
+                            var checkbox = $('#'+checkboxId);
+                            if (checkbox != null) {
+                                checkbox.prop('checked', true).trigger('change');
+                            }
+                        }
+                    }
                 },
                 error: function () {
                     console.log('Failed to load program panel');
@@ -1206,18 +1229,31 @@ require([
     $('#load_session').on("click", function()
     {
         var str = sessionStorage.getItem('anonymous_filters');
-        var filters = JSON.parse(str);
-        for (i = 0; i < filters.length; ++i)
+        ANONYMOUS_FILTERS = JSON.parse(str);
+        for (i = 0; i < ANONYMOUS_FILTERS.length; ++i)
         {
-            console.log(filters[i]);
+            console.log(ANONYMOUS_FILTERS[i]);
         }
     });
 
     $('.login-link, #log-in-to-save-btn').on("click",function(){
         $.setCookie('login_from','new_cohort','/');
+
+        var filters = [];
+        $('.selected-filters .panel-body span.filter-token').each(function() {
+            var $this = $(this);
+            var value = {
+                'feature': { name: $this.data('feature-name'), id: $this.data('feature-id') },
+                'value'  : { name: $this.data('value-name')  , id: $this.data('value-id')   },
+                'program': { name: $this.data('prog-name')   , id: $this.data('prog-id')    }
+            };
+            filters.push(value);
+        });
+        var filterStr = JSON.stringify(filters);
+        sessionStorage.setItem('anonymous_filters', filterStr)
     });
 
     filter_panel_load(cohort_id);
-    
+
 });
 
