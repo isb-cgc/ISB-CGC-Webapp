@@ -359,9 +359,6 @@ def help_page(request):
 
 @login_required
 def get_filtered_idc_cohort(request):
-    print("url "+request.build_absolute_uri())
-    ageRng = [0,20,30,40,50,60,70,80]
-    bmiRng = [18.5,25,30]
 
     counts_only = (request.GET.get('counts_only',"False").lower() == "true")
     with_clinical = (request.GET.get('with_clinical', "True").lower() == "true")
@@ -429,15 +426,37 @@ def explore_data_page(request):
     source = DataSource.SOLR
     versions = []
     filters = {}
+    fields = []
+    counts_only = True
+    with_clinical = True
+    collapse_on = 'PatientID'
+    is_json = False
+    is_dicofdic = False
+    order_docs = []
+
     try:
         if request.GET:
             source = request.GET.get('source',DataSource.SOLR)
             versions = json.loads(request.GET.get('versions','[]'))
             filters = json.loads(request.GET.get('filters', '{}'))
+            fields = json.loads(request.GET.get('fields', '[]'))
+            order_docs = json.loads(request.GET.get('order_docs', '[]'))
+            counts_only = (request.GET.get('counts_only', "False").lower() == "true")
+            with_clinical = (request.GET.get('with_clinical', "True").lower() == "true")
+            collapse_on = request.GET.get('collapse_on', 'PatientID')
+            is_json = (request.GET.get('is_json', "False").lower() == "true")
+            is_dicofdic = (request.GET.get('is_dicofdic', "False").lower() == "true")
+
         if request.POST:
             source = request.POST.get('source', DataSource.SOLR)
             versions = request.loads(request.POST.get('versions', '[]'))
-            filters = json.loads(request.GET.get('filters', '{}'))
+            filters = json.loads(request.POST.get('filters', '{}'))
+            fields = json.loads(request.POST.get('fields', '[]'))
+            order_docs = json.loads(request.GET.get('order_docs', '[]'))
+            counts_only = (request.POST.get('counts_only', "False").lower() == "true")
+            with_clinical = (request.POST.get('with_clinical', "True").lower() == "true")
+            collapse_on = request.POST.get('collapse_on', 'PatientID')
+            is_json = (request.POST.get('is_json', "False").lower() == "true")
 
         if not len(versions):
             versions = DataVersion.objects.filter(active=True)
@@ -458,6 +477,8 @@ def explore_data_page(request):
                 set_type = 'origin_set'
             else:
                 set_type = 'related_set'
+                if not with_clinical:
+                    continue
             if set_type not in attr_by_source:
                 attr_by_source[set_type] = {}
 
@@ -466,30 +487,38 @@ def explore_data_page(request):
             for attr in attr_by_source[set_type]['attributes']:
                 attr_by_source[set_type]['attributes'][attr]['vals'] = attr_by_source[set_type]['attributes'][attr]['obj'].get_display_values()
 
+        if (len(fields)==0):
+            fields = list(attrs.values_list('name', flat=True))
         faceted_counts = get_collex_metadata(
-            filters, list(attrs.values_list('name', flat=True)),
-            counts_only=True, record_limit=0
+            filters, fields,
+             record_limit=50000, counts_only=counts_only, with_clinical = with_clinical, collapse_on = collapse_on, order_docs = order_docs
         )
 
-        for attr in faceted_counts['clinical']['facets']:
-            this_attr_vals = attr_by_source['related_set']['attributes'][attr]['vals']
-            this_attr = attr_by_source['related_set']['attributes'][attr]['obj']
-            values = []
-            if len(this_attr_vals):
-                for val in this_attr_vals:
-                    values.append({
-                        'value': val,
-                        'display_value': this_attr_vals[val],
-                        'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
-                    })
-            else:
-                for val in faceted_counts['clinical']['facets'][attr]:
-                    values.append({
-                        'value': val,
-                        'display_value': val if this_attr.preformatted_values else None,
-                        'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
-                    })
-            attr_by_source['related_set']['attributes'][attr]['vals'] = values
+        if with_clinical:
+            for attr in faceted_counts['clinical']['facets']:
+                this_attr_vals = attr_by_source['related_set']['attributes'][attr]['vals']
+                this_attr = attr_by_source['related_set']['attributes'][attr]['obj']
+                values = []
+                if len(this_attr_vals):
+                    for val in this_attr_vals:
+                        values.append({
+                            'value': val,
+                            'display_value': this_attr_vals[val],
+                            'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
+                        })
+                else:
+                    for val in faceted_counts['clinical']['facets'][attr]:
+                        values.append({
+                            'value': val,
+                            'display_value': val if this_attr.preformatted_values else None,
+                            'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
+                        })
+
+                if attr == 'bmi':
+                    sortDic = {'underweight':0, 'normal weight': 1, 'overweight': 2, 'obese': 3}
+                    attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: sortDic[x['value']])
+                else:
+                    attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
         for attr in faceted_counts['facets']['cross_collex']:
             this_attr_vals = attr_by_source['origin_set']['attributes'][attr]['vals']
@@ -508,24 +537,47 @@ def explore_data_page(request):
                         'value': val,
                         'display_value': val if this_attr.preformatted_values else None,
                         'count': faceted_counts['facets']['cross_collex'][attr][val] if val in faceted_counts['facets']['cross_collex'][attr] else 0
-                    })
-            attr_by_source['origin_set']['attributes'][attr]['vals'] = values
 
+                   })
+            #bmiSort{''}
+            attr_by_source['origin_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
+
+
+        attr_filter={}
+        attr_filter['origin_set'] =['Modality', 'BodyPartExamined','collection_id']
+        if with_clinical:
+            attr_filter['related_set'] = ['disease_code', 'vital_status','gender','age_at_diagnosis', 'bmi','race','ethnicity']
         for set in attr_by_source:
-            attr_by_source[set]['attributes'] = [{'name': x,
+            if is_dicofdic:
+                attr_by_source[set]['attributes'] ={x: {y['value']: {'display_value': y['display_value'], 'count': y['count']} for y in attr_by_source[set]['attributes'][x]['vals']} for x in attr_filter[set]}
+
+            else:
+                attr_by_source[set]['attributes'] = [{'name': x,
                  'display_name': attr_by_source[set]['attributes'][x]['obj'].display_name,
                  'values': attr_by_source[set]['attributes'][x]['vals']
-                 } for x in attr_by_source[set]['attributes']]
+                 } for x in attr_filter[set]]
+            if not counts_only:
+                attr_by_source[set]['docs'] = faceted_counts['docs']
+
+        attr_by_source['total'] = faceted_counts['total']
+
+        #if not is_json:
+        #    attr_by_source['collection_id'] = attr_by_source['origin_set']['collection_id']
 
         context['set_attributes'] = attr_by_source
-        context['tcga_collections'] = tcga_in_tcia
+        if with_clinical:
+            context['tcga_collections'] = tcga_in_tcia
+
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
         logger.exception(e)
         messages.error(request, "Encountered an error when attempting to load the page - please contact the administrator.")
 
-    return render(request, 'idc/explore.html', context)
+    if is_json:
+        return JsonResponse(attr_by_source)
+    else:
+        return render(request, 'idc/explore.html', context)
 
 @login_required
 def ohif_test_page(request):
