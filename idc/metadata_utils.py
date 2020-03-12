@@ -60,7 +60,7 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
         query_filter = {
             'collection_id': [x.lower().replace("-","_") for x in list(tcga_in_tcia.values_list('name', flat=True))]
         }
-        tcga_query_filter = build_solr_query(query_filter)
+        tcga_query_filter = build_solr_query(query_filter, with_tags_for_ex=True)
 
         query_set = []
 
