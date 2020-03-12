@@ -50,7 +50,7 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
-DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
+DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') and (os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost'))
 
 print("[STATUS] DEBUG mode is {}".format(str(DEBUG)), file=sys.stdout)
 
