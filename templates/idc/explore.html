@@ -52,6 +52,8 @@
                 <ol class="breadcrumb">
                     <li><a href="/dashboard/">Your Dashboard</a></li>
                     <li><a href="/explore/">Explore</a></li>
+                    <li id="previous" style="display:none"><a href="#" onclick="javascript:selectHistoricFilter(-1)">Previous Filter</a></li>
+                    <li id="next" style="display:none"><a href="#" onclick="javascript:selectHistoricFilter(1)">Next Filter</a></li>
                 </ol>
 
                 <h1 class="page-header pull-left" role="heading" aria-level="1">Explore Image Data</h1>
@@ -142,7 +144,7 @@
                                             <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
                                                    <label>
                                                        <input type="checkbox" value="{{ val.value }}">
-                                                        <span>{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count">{{ val.count }}</span>
+                                                        <span>{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
                                                     </label>
                                                 </li>
                                             {% endfor %}
@@ -195,7 +197,7 @@
                                             <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
                                                    <label>
                                                        <input type="checkbox" value="{{ val.value }}">
-                                                        <span>{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count">{{ val.count }}</span>
+                                                        <span>{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
                                                     </label>
                                                 </li>
                                             {% endfor %}
