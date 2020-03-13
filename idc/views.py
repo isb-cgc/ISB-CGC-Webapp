@@ -567,6 +567,7 @@ def explore_data_page(request):
         #    attr_by_source['collection_id'] = attr_by_source['origin_set']['collection_id']
 
         context['set_attributes'] = attr_by_source
+        context['filters'] = filters
         if with_clinical:
             context['tcga_collections'] = tcga_in_tcia
 

@@ -103,8 +103,10 @@
                                   {% for attr in set_attributes.origin_set.attributes %}
                                       {% if attr.name == "collection_id" %}
                                           {% for val in attr.values %}
-                                              {% if val.value != "None" %}
-                                                   <option value="{{ val.value }}">{{ val.value }}</option>
+                                              {% if val.value in filters.collection_id %}
+                                                  {% if val.value != "None"  %}
+                                                       <option value="{{ val.value }}">{{ val.value }}</option>
+                                                  {% endif %}
                                               {% endif %}
                                           {% endfor %}
                                       {% endif %}
@@ -293,8 +295,10 @@
                              {% for attr in set_attributes.origin_set.attributes %}
                                       {% if attr.name == "collection_id" %}
                                           {% for val in attr.values %}
-                                              {% if val.value != "None" %}
-                                                  <tr id="project_row_{{ val.value }}" class="text_head" onclick="(toggleProj(this,'{{ val.value }}'))"><td>{{ val.value }}</td><td>{{ val.count }}</td><td id="patient_col_{{ val.value }}" class="projects_table_num_cohort">{{ val.count }}</td> </tr>
+                                              {% if val.value in filters.collection_id %}
+                                                  {% if val.value != "None" %}
+                                                      <tr id="project_row_{{ val.value }}" class="text_head" onclick="(toggleProj(this,'{{ val.value }}'))"><td>{{ val.value }}</td><td>{{ val.count }}</td><td id="patient_col_{{ val.value }}" class="projects_table_num_cohort">{{ val.count }}</td> </tr>
+                                                  {% endif %}
                                               {% endif %}
                                           {% endfor %}
                                       {% endif %}
