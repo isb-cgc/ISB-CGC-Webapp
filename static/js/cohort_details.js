@@ -1146,6 +1146,7 @@ require([
                     $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
                     $(program_data_selector).addClass('active');
                     $('#placeholder').hide();
+
                     // Check if anonymous filter exist, then find all checkbox and check them
                     if (ANONYMOUS_FILTERS != null && ANONYMOUS_FILTERS.length > 0)
                     {
@@ -1155,11 +1156,18 @@ require([
                             if (aFilter.program.id != active_program_id)
                                 continue;
 
-                            var checkboxId = aFilter.program.id + "-" + aFilter.feature.id + "-" + aFilter.value.id;
+                            var programId = aFilter.program.id.toString().replace(/ /g, "_");
+                            var featureId = aFilter.feature.id.toString().replace(/ /g, "_");
+                            var valueId = aFilter.value.id.toString().replace(/ /g, "_");
+
+                            var checkboxId = programId + "-" + featureId + "-" + valueId;
                             checkboxId = checkboxId.toUpperCase();
-                            var checkbox = $('#'+checkboxId);
+                            var checkbox = document.getElementById(checkboxId);
+
                             if (checkbox != null) {
-                                checkbox.prop('checked', true).trigger('change');
+                                checkbox.checked = true;
+                                var event = new Event('change');
+                                checkbox.dispatchEvent(event);
                             }
                         }
                     }
@@ -1207,32 +1215,6 @@ require([
         if (reject_load) {
             e.preventDefault();
             e.stopPropagation();
-        }
-    });
-
-    $('#save_session').on("click", function()
-    {
-        var filters = [];
-        $('.selected-filters .panel-body span.filter-token').each(function() {
-            var $this = $(this);
-            var value = {
-                'feature': { name: $this.data('feature-name'), id: $this.data('feature-id') },
-                'value'  : { name: $this.data('value-name')  , id: $this.data('value-id')   },
-                'program': { name: $this.data('prog-name')   , id: $this.data('prog-id')    }
-            };
-            filters.push(value);
-        });
-        var filterStr = JSON.stringify(filters);
-        sessionStorage.setItem('anonymous_filters', filterStr)
-    });
-
-    $('#load_session').on("click", function()
-    {
-        var str = sessionStorage.getItem('anonymous_filters');
-        ANONYMOUS_FILTERS = JSON.parse(str);
-        for (i = 0; i < ANONYMOUS_FILTERS.length; ++i)
-        {
-            console.log(ANONYMOUS_FILTERS[i]);
         }
     });
 
