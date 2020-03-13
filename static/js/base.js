@@ -211,6 +211,9 @@ require([
         // location.reload(true);
     });
 
+    $('#cancel-opt-in-btn, #close-opt-in-btn').on('click', function() {
+        send_opt_in_update('dismiss');
+    });
 
     $('#will-email-message').collapse({toggle: false});
     $('[name="opt-in-radio"]').on('change', function() {
@@ -242,7 +245,7 @@ define(['jquery', 'utils'], function($, utils) {
 
     return {
         blacklist: /<script>|<\/script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|<iframe>|<\/iframe>/ig,
-        barcode_file_whitelist: /[^A-Za-z0-9\-,\t_\."'\s\(\)\/;:]/g,
+        barcode_file_whitelist: /[^A-Za-z0-9\-,\t_\."'\s\(\) \/;:]/g,
         // From http://www.regular-expressions.info/email.html
         email: /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/,
         showJsMessage: utils.showJsMessage,
