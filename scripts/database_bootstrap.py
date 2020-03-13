@@ -249,7 +249,7 @@ def main():
                 else:
                     display_vals[line_split[0]]['vals'] = [{'raw_value': line_split[1], 'display_value': line_split[2]}]
             else:
-                display_vals[line_split[0]]['vals'].append({'raw_value': line_split[1], 'display_value': line_split[2]})
+                display_vals[line_split[0]]['vals'].append({'raw_value': line_split[1], 'display_value': line_split[2]/})
 
         attr_vals_file.close()
 
