@@ -82,6 +82,7 @@ require([
 
     var ANONYMOUS_FILTERS = {};
 
+    // Load anonymous filters from session storage and clear it, so it is not always there
     var str = sessionStorage.getItem('anonymous_filters');
     ANONYMOUS_FILTERS = JSON.parse(str);
     sessionStorage.removeItem('anonymous_filters');
@@ -1153,18 +1154,22 @@ require([
                         for (i = 0; i < ANONYMOUS_FILTERS.length; ++i)
                         {
                             var aFilter = ANONYMOUS_FILTERS[i];
-                            if (aFilter.program.id != active_program_id)
+                            if (aFilter.programId != active_program_id)
                                 continue;
 
-                            var programId = aFilter.program.id.toString().replace(/ /g, "_");
-                            var featureId = aFilter.feature.id.toString().replace(/ /g, "_");
-                            var valueId = aFilter.value.id.toString().replace(/ /g, "_");
+                            var programId = aFilter.programId.toString();
+                            var featureId = aFilter.featureId.toString();
+                            var valueId = aFilter.valueId.toString();
 
                             var checkboxId = programId + "-" + featureId + "-" + valueId;
+                            checkboxId = checkboxId.replace(/ /g, "_");
                             checkboxId = checkboxId.toUpperCase();
+
+                            // Get checkbox by id, jQuery does not work for some special characters so using DOM here
                             var checkbox = document.getElementById(checkboxId);
 
                             if (checkbox != null) {
+                                // Set checked and trigger change to update other related data
                                 checkbox.checked = true;
                                 var event = new Event('change');
                                 checkbox.dispatchEvent(event);
@@ -1221,16 +1226,18 @@ require([
     $('.login-link, #log-in-to-save-btn').on("click",function(){
         $.setCookie('login_from','new_cohort','/');
 
+        // Collect all selected filters and save to session storage
         var filters = [];
         $('.selected-filters .panel-body span.filter-token').each(function() {
             var $this = $(this);
             var value = {
-                'feature': { name: $this.data('feature-name'), id: $this.data('feature-id') },
-                'value'  : { name: $this.data('value-name')  , id: $this.data('value-id')   },
-                'program': { name: $this.data('prog-name')   , id: $this.data('prog-id')    }
+                'programId': $this.data('prog-id'),
+                'featureId': $this.data('feature-id'),
+                'valueId'  : $this.data('value-id'),
             };
             filters.push(value);
         });
+
         var filterStr = JSON.stringify(filters);
         sessionStorage.setItem('anonymous_filters', filterStr)
     });
