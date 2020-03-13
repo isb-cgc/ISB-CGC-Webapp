@@ -179,26 +179,27 @@ require([
 
     function send_opt_in_update(opt_in_selection) {
         // Ajax call to update the backend of the user's selection
+        var redirect_url = '';
         $.ajax({
             type: 'POST',
             url: BASE_URL + '/opt_in/update/',
             dataType  :'json',
             data: {'opt-in-radio': opt_in_selection},
             success: function(data) {
-                var redirect_url = data['redirect-url'];
-                if (redirect_url != "")
+                redirect_url = data['redirect-url'];
+                if (redirect_url)
                 {
-                    window.open(redirect_url, '_blank')
+                    location.assign(redirect_url);
                 }
-                // else{
-                //     location.reload(true);
-                // }
             },
             error: function(e) {
                 throw new Error( e );
             },
             complete: function () {
-                location.reload(true);
+                if (!redirect_url || redirect_url === ''){
+                    location.reload(true);
+                }
+
             }
         });
     }
