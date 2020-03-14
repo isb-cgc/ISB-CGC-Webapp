@@ -50,6 +50,28 @@ require([
         $(this).find('i').toggleClass('fa-angle-double-down');
     });
 
+    // detect if popup are being blocked from the user browser: if so show popup blocker warning banner
+    var popupsBlocked;
+    var test_window = window.open('', "_blank");
+    if (!test_window) {
+        popupsBlocked = new Boolean(true);
+    } else {
+        test_window.onload = function (e) {
+            setTimeout(function () {
+                if (test_window.outerWidth === 0) {
+                    popupsBlocked = new Boolean(true);
+                } else {
+                    popupsBlocked = new Boolean(false);
+                }
+            }, 1000);
+        };
+    }
+    if (popupsBlocked){
+        $('#popup-blocker-warning').show();
+    }else{
+        test_window.close();
+    }
+
     // Ajax call to get opt_in_show value
     $.ajax({
         type: 'GET',
