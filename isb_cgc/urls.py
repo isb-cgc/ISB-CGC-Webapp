@@ -86,7 +86,7 @@ if settings.IS_DEV:
     from django.contrib.staticfiles.urls import staticfiles_urlpatterns
     urlpatterns += staticfiles_urlpatterns()
 
-if settings.DEBUG and settings.DEBUG_TOOLBAR:
+if settings.DEBUG_TOOLBAR:
     import debug_toolbar
     urlpatterns = [
         url(r'^__debug__/', include(debug_toolbar.urls)),

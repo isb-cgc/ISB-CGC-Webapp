@@ -50,7 +50,7 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
-DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
+DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') and (os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost'))
 
 print("[STATUS] DEBUG mode is "+str(DEBUG), file=sys.stdout)
 
@@ -543,8 +543,11 @@ DCF_LOGIN_EXPIRATION_SECONDS             = int(os.environ.get('DCF_LOGIN_EXPIRAT
 #   Start django-finalware   #
 ##############################
 
-INSTALLED_APPS += (
-    'finalware',)
+# ONLY load finalware if this is a local dev VM connected to its own build.
+# NEVER load finalware when connecting to a deployed instance
+if IS_DEV and os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost':
+    INSTALLED_APPS += (
+        'finalware',)
 
 SITE_SUPERUSER_USERNAME = os.environ.get('SUPERUSER_USERNAME', '')
 SITE_SUPERUSER_EMAIL = ''
