@@ -48,7 +48,7 @@ except ObjectDoesNotExist:
 
 token = Token.objects.create(user=api_user)
 
-if settings.IS_DEV and settings.DATABASES['default']['HOST'] == 'localhost':
+if settings.IS_DEV and settings.CONNECTION_IS_LOCAL:
     f = open(join(dirname(__file__), '../{}{}'.format(settings.SECURE_LOCAL_PATH, "dev.api_token.json")), "w")
     f.write(str(token))
     f.close()
