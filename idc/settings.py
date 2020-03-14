@@ -158,6 +158,8 @@ if BIGQUERY_COHORT_TABLE_ID is None:
 
 BQ_MAX_ATTEMPTS             = int(os.environ.get('BQ_MAX_ATTEMPTS', '10'))
 
+API_USER = os.environ.get('API_USER', 'api_user')
+API_AUTH_KEY = os.environ.get('API_AUTH_KEY', 'Token')
 
 # TODO Remove duplicate class.
 #
@@ -395,7 +397,8 @@ INSTALLED_APPS += (
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.google'
+    'allauth.socialaccount.providers.google',
+    'rest_framework.authtoken'
 )
 
 # Template Engine Settings
