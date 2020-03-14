@@ -7,9 +7,10 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security/script',
         plotly: 'libs/plotly-latest.min',
-
+        base: 'base'
     },
     shim: {
+        'bootstrap': ['jquery'],
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
@@ -17,8 +18,9 @@ require.config({
 });
 
 
-require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], function($, jquery, jqueryui, bootstrap, session_security, plotly,  _)
-{
+require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
+    function($, jqueryui, bootstrap, plotly) {
+
     window.filterObj = {};
     window.projIdSel = [];
     window.studyIdSel = [];
