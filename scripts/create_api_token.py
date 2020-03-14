@@ -38,15 +38,19 @@ django.setup()
 from idc import settings
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
+from django.core.exceptions import ObjectDoesNotExist
 
 try:
-    api_user = User.objects.get(settings.API_USER)
-except Exception as e:
+    api_user = User.objects.get(username=settings.API_USER)
+except ObjectDoesNotExist:
     print("API user {} not found - creating.".format(settings.API_USER))
     api_user = User.objects.create(username=settings.API_USER)
 
 token = Token.objects.create(user=api_user)
 
-f = open(join(dirname(__file__), '../{}{}'.format(settings.SECURE_LOCAL_PATH, "dev.api_token.json")), "w")
-f.write(str(token))
-f.close()
+if settings.IS_DEV and settings.CONNECTION_IS_LOCAL:
+    f = open(join(dirname(__file__), '../{}{}'.format(settings.SECURE_LOCAL_PATH, "dev.api_token.json")), "w")
+    f.write(str(token))
+    f.close()
+else:
+    print("{} user token: {}".format(settings.API_USER,str(token)))
