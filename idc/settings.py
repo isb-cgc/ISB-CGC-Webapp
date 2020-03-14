@@ -519,7 +519,7 @@ SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS
 #
 # This should only be done on a local system which is running against its own VM. Deployed systems will already have
 # a site superuser so this would simply overwrite that user. Don't enable this in production!
-if IS_DEV and os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost':
+if IS_DEV and CONNECTION_IS_LOCAL:
     INSTALLED_APPS += (
         'finalware',)
 
