@@ -78,12 +78,7 @@ if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
     pip3 install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
 fi
 
-
-
 echo "Libraries Installed"
-
-# Install SASS
-gem install sass
 
 # Install Google Cloud SDK
 # If we're not on CircleCI or we are but google-cloud-sdk isn't there, install it

@@ -52,10 +52,6 @@ mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL
 echo "Running Migrations..."
 python3 ${HOMEROOT}/manage.py migrate --noinput
 
-# If the IDC superuser isn't present already, they need to be added.
-# echo "Creating idc Django superuser..."
-# echo "from django.contrib.auth.models import User; User.objects.create_superuser('${SUPERUSER_USERNAME}', '', '${SUPERUSER_PASSWORD}')" | python3 ${HOMEROOT}/manage.py shell
-
 echo "Adding in default Django admin IP allowances for local development"
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e "INSERT INTO adminrestrict_allowedip (ip_address) VALUES('127.0.0.1'),('10.0.*.*');"
 
@@ -85,3 +81,7 @@ python3 ${HOMEROOT}/scripts/add_site_ids.py
 # preserve expansion of GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET
 echo "Setting Up Social Application Login..."
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e 'BEGIN; INSERT INTO socialaccount_socialapp (provider, `name`, client_id, secret, `key`) VALUES("google", "Google", "'$OAUTH2_CLIENT_ID'", "'$OAUTH2_CLIENT_SECRET'", " "); INSERT INTO socialaccount_socialapp_sites (socialapp_id, site_id) VALUES(1, 2), (1, 3); COMMIT;'
+
+# Setting up API token
+python3 ${HOMEROOT}/scripts/create_api_token.py
+

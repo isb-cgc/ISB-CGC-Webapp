@@ -50,7 +50,8 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
-DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') and (os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost'))
+CONNECTION_IS_LOCAL     = (os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost')
+DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') and CONNECTION_IS_LOCAL)
 
 print("[STATUS] DEBUG mode is {}".format(str(DEBUG)), file=sys.stdout)
 
@@ -158,6 +159,8 @@ if BIGQUERY_COHORT_TABLE_ID is None:
 
 BQ_MAX_ATTEMPTS             = int(os.environ.get('BQ_MAX_ATTEMPTS', '10'))
 
+API_USER = os.environ.get('API_USER', 'api_user')
+API_AUTH_KEY = os.environ.get('API_AUTH_KEY', 'Token')
 
 # TODO Remove duplicate class.
 #
@@ -395,7 +398,8 @@ INSTALLED_APPS += (
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.google'
+    'allauth.socialaccount.providers.google',
+    'rest_framework.authtoken'
 )
 
 # Template Engine Settings
@@ -495,8 +499,8 @@ SERVER_EMAIL = "info@canceridc.dev"
 
 
 GOOGLE_APPLICATION_CREDENTIALS  = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
-OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
-OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET', '')
+OAUTH2_CLIENT_ID                = os.environ.get('OAUTH2_CLIENT_ID', '')
+OAUTH2_CLIENT_SECRET            = os.environ.get('OAUTH2_CLIENT_SECRET', '')
 
 if not exists(GOOGLE_APPLICATION_CREDENTIALS):
     print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
@@ -515,7 +519,7 @@ SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS
 #
 # This should only be done on a local system which is running against its own VM. Deployed systems will already have
 # a site superuser so this would simply overwrite that user. Don't enable this in production!
-if IS_DEV and os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost':
+if IS_DEV and CONNECTION_IS_LOCAL:
     INSTALLED_APPS += (
         'finalware',)
 
