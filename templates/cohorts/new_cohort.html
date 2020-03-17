@@ -79,7 +79,7 @@
             <div class="panel panel-default">
                 <ul class="nav nav-tabs nav-tabs-data" role="tablist">
                     {% for program in programs %}
-                    <li role="presentation" class="{% if forloop.first %}active{% endif %} program-tab"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
+                    <li role="presentation" class="{% if forloop.first %}active{% endif %} program-tab"><a href="#{{ program.id }}-data" class="program-tab-btn" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
                     {% endfor %}
                     {% if is_logged_in %}
                     <li role="presentation" class="program-tab"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>

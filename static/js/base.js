@@ -179,19 +179,27 @@ require([
 
     function send_opt_in_update(opt_in_selection) {
         // Ajax call to update the backend of the user's selection
+        var redirect_url = '';
         $.ajax({
             type: 'POST',
             url: BASE_URL + '/opt_in/update/',
             dataType  :'json',
             data: {'opt-in-radio': opt_in_selection},
             success: function(data) {
-                var redirect_url = data['redirect-url'];
-                if (redirect_url != "")
+                redirect_url = data['redirect-url'];
+                if (redirect_url)
                 {
-                    window.open(redirect_url, '_blank')
+                    location.assign(redirect_url);
                 }
             },
-            error: function(data) {
+            error: function(e) {
+                throw new Error( e );
+            },
+            complete: function () {
+                if (!redirect_url || redirect_url === ''){
+                    location.reload(true);
+                }
+
             }
         });
     }
@@ -200,9 +208,12 @@ require([
     $('#submit-opt-in-btn').on('click', function() {
         var opt_in_radio_value = $('input[name="opt-in-radio"]:checked').val();
         send_opt_in_update(opt_in_radio_value);
-        location.reload(true);
+        // location.reload(true);
     });
 
+    $('#cancel-opt-in-btn, #close-opt-in-btn').on('click', function() {
+        send_opt_in_update('dismiss');
+    });
 
     $('#will-email-message').collapse({toggle: false});
     $('[name="opt-in-radio"]').on('change', function() {
@@ -234,7 +245,7 @@ define(['jquery', 'utils'], function($, utils) {
 
     return {
         blacklist: /<script>|<\/script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|<iframe>|<\/iframe>/ig,
-        barcode_file_whitelist: /[^A-Za-z0-9\-,\t_\."'\s\(\)\/;:]/g,
+        barcode_file_whitelist: /[^A-Za-z0-9\-,\t_\."'\s\(\) \/;:]/g,
         // From http://www.regular-expressions.info/email.html
         email: /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/,
         showJsMessage: utils.showJsMessage,
