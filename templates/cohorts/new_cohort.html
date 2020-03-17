@@ -36,10 +36,12 @@
             <li><a href="{% url 'worksheet_display' workbook.id worksheet.id%}">{{ workbook.name }}</a></li>
         </ol>
     {% else %}
-        <ol class="breadcrumb">
-            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-            <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
-        </ol>
+        {% if is_logged_in %}
+            <ol class="breadcrumb">
+                <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+                <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
+            </ol>
+        {%  endif %}
     {% endif %}
     <h1 class="page-header pull-left">Create Cohort - Filters</h1>
     {% if workbook %}
