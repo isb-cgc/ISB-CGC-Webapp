@@ -389,7 +389,10 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
                         var modality = curData.Modality;
                         var rowId = 'series_' + seriesId.replace(/\./g, '-')
                         var studyClass = 'study_' + studyId.replace(/\./g, '-');
-                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col2 tooltip_ex">' + ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span></td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td></tr>';
+                        var fetchUrlSeries = fetchUrl+'?SeriesInstanceUID='+seriesId;
+                        var hrefSeriesTxt = '<a href="' + fetchUrlSeries + '" target="_blank">' + ppSeriesId + '</a><span class="tooltiptext_ex">' + seriesId + '</span>';
+                        var seriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
+                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col2 tooltip_ex">' + seriesTxt + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td></tr>';
 
                     } else {
 

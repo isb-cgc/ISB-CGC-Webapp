@@ -52,9 +52,6 @@ urlpatterns = [
     url(r'^help/', views.help_page, name='help'),
     url(r'^explore/', views.explore_data_page, name='explore_data'),
 
-    url(r'^idc/filtered/', views.get_filtered_idc_cohort, name='idc_filtered'),
-
-
 
     url(r'^viewer/', views.ohif_viewer_page, name='ohif_view'),
     url(r'^callback', views.ohif_callback_page, name='ohif_callback'),
