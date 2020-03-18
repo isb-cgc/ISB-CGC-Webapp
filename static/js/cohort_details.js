@@ -1298,7 +1298,8 @@ require([
         }
     });
 
-    $('.login-link, #log-in-to-save-btn').on("click",function(){
+    $('#log-in-to-save-btn').on('click', function()
+    {
         $.setCookie('login_from','new_cohort','/');
         save_anonymous_filters();
     });
