@@ -374,7 +374,7 @@ require([
         update_displays();
     });
 
-    var filter_change_callback = function(e) {
+    var filter_change_callback = function(e, withoutDisplayUpdates) {
 
         var activeDataTab = $('.data-tab.active').attr('id');
         var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
@@ -483,7 +483,7 @@ require([
             }
         }
 
-        update_displays();
+        !withoutDisplayUpdates && update_displays();
 
         if(!cohort_id && $('.selected-filters .panel-body span').length > 0) {
             $('#at-least-one-filter-alert-modal').hide();
@@ -1134,7 +1134,7 @@ require([
         sessionStorage.removeItem('anonymous_filters');
 
         // Find out the tabs need to load to support anonymous filters
-        if (ANONYMOUS_FILTERS != null && ANONYMOUS_FILTERS.length > 0) {
+        if (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS.length > 0) {
             for (i = 0; i < ANONYMOUS_FILTERS.length; ++i) {
                 var program_id = ANONYMOUS_FILTERS[i].program.id;
                 if (!load_tabs_queue.includes(program_id))
@@ -1148,10 +1148,10 @@ require([
     var apply_anonymous_filters = function(active_program_id)
     {
         // Check if anonymous filter exist, then find all checkbox and check them
-        if (ANONYMOUS_FILTERS != null && ANONYMOUS_FILTERS.length > 0) {
+        if (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS.length > 0) {
             for (i = 0; i < ANONYMOUS_FILTERS.length; ++i) {
                 var aFilter = ANONYMOUS_FILTERS[i];
-                if (aFilter.program.id != active_program_id)
+                if (aFilter.program.id !== active_program_id)
                     continue;
 
                 var programId = aFilter.program.id.toString();
@@ -1162,14 +1162,15 @@ require([
                 checkboxId = checkboxId.replace(/ /g, "_");
                 checkboxId = checkboxId.toUpperCase();
 
-                // Get checkbox by id, jQuery does not work for some special characters so using DOM here
-                var checkbox = document.getElementById(checkboxId);
+                // Escape special chars
+                checkboxId = checkboxId.replace(/([$%&()*+,./:;<=>?@\[\\\]^\{|}~])/g, '\\$1');
 
-                if (checkbox != null) {
+                var checkbox = $('#'+checkboxId);
+
+                if (checkbox !== null) {
                     // Set checked and trigger change to update other related data
-                    checkbox.checked = true;
-                    var event = new Event('change');
-                    checkbox.dispatchEvent(event);
+                    checkbox.prop("checked", true);
+                    checkbox.trigger('change', [Boolean(i !== (ANONYMOUS_FILTERS.length-1))]);
                 }
             }
         }
@@ -1227,7 +1228,7 @@ require([
                 complete: function(xhr, status) {
                     reject_load = false;
 
-                    if (load_tabs_queue != null && load_tabs_queue.length > 0)
+                    if (load_tabs_queue !== null && load_tabs_queue.length > 0)
                     {
                         // Remove the just loaded tab from the queue
                         const index = load_tabs_queue.indexOf(load_program_id);
