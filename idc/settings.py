@@ -474,7 +474,6 @@ AUTH_PASSWORD_VALIDATORS = [
     }
 ]
 
-
 #########################################
 #   MailGun Email Settings for requests #
 #########################################
@@ -482,7 +481,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # These settings allow use of MailGun as a simple API call
 EMAIL_SERVICE_API_URL = os.environ.get('EMAIL_SERVICE_API_URL', '')
 EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
-NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')
+NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', 'info@canceridc.dev')
 
 #########################
 # django-anymail        #
@@ -496,7 +495,6 @@ ANYMAIL = {
 EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 DEFAULT_FROM_EMAIL = NOTIFICATION_EMAIL_FROM_ADDRESS
 SERVER_EMAIL = "info@canceridc.dev"
-
 
 GOOGLE_APPLICATION_CREDENTIALS  = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
 OAUTH2_CLIENT_ID                = os.environ.get('OAUTH2_CLIENT_ID', '')
