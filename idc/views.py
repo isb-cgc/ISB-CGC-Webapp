@@ -365,67 +365,6 @@ def health_check(request, match):
 def help_page(request):
     return render(request, 'idc/help.html',{'request': request})
 
-@login_required
-def get_filtered_idc_cohort(request):
-
-    counts_only = (request.GET.get('counts_only',"False").lower() == "true")
-    with_clinical = (request.GET.get('with_clinical', "True").lower() == "true")
-    collapse_on = request.GET.get('collapse_on', 'PatientID')
-
-    # filters = {"vital_status": ["Alive", "Dead"], "age_at_diagnosis_btw": [15, 70], "race": ["BLACK OR AFRICAN AMERICAN","WHITE"]}
-    # filters = {"BodyPartExamined": ["CHEST"]}
-    # filters = {"age_at_diagnosis_btw": [0,50]}
-    # filters={"race":['ASIAN', 'BLACK OR AFRICAN AMERICAN','WHITE']}
-    # filters = {"race": ['AMERICAN INDIAN OR ALASKA NATIVE', 'ASIAN', 'BLACK OR AFRICAN AMERICAN', 'NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER', 'None']}
-    # filters = {}
-
-    try:
-        filters = json.loads(request.GET.get('filters', "{}"))
-
-    except Exception as e:
-        logger.error("[ERROR] In get_filtered_idc_cohort_data parsing filters")
-        logger.exception(e)
-        return render(request, '404.html')
-
-
-    defFieldStr = '["collection_id", "case_barcode", "PatientID","race", "vital_status", "ethnicity", "bmi", "age_at_diagnosis", "gender", "disease_code", \
-               "StudyInstanceUID", "StudyDescription", "StudyDate", "SeriesInstanceUID", "SeriesDescription", "SeriesNumber", "BodyPartExamined", "Modality"]'
-
-    try:
-        fields = json.loads(request.GET.get('fields', defFieldStr))
-
-    except Exception as e:
-        logger.error("[ERROR] In get_filtered_idc_cohort_data parsing fields")
-        logger.exception(e)
-        return render(request, '404.html')
-
-
-    try:
-        # for a version which isn't current, or for a user cohort
-        facets_and_lists = get_collex_metadata(filters, fields, record_limit=50000, counts_only=counts_only, with_clinical = with_clinical, collapse_on = collapse_on )
-
-
-    except Exception as e:
-        logger.error("[ERROR] In get_filtered_idc_cohort_data:")
-        logger.exception(e)
-
-    ret={}
-    ret['facets'] = facets_and_lists['facets']['cross_collex']
-    if not counts_only:
-         ret['docs'] = facets_and_lists['docs']
-    #    translateCollectionData(facets_and_lists['docs'], ret)
-
-    if with_clinical:
-        ret['clinical'] =  {}
-        ret['clinical']['vital_status'] = facets_and_lists['clinical']['facets']['vital_status']
-        ret['clinical']['disease_code'] = facets_and_lists['clinical']['facets']['disease_code']
-        ret['clinical']['race'] = facets_and_lists['clinical']['facets']['race']
-        ret['clinical']['gender'] = facets_and_lists['clinical']['facets']['gender']
-        ret['clinical']['ethnicity'] = facets_and_lists['clinical']['facets']['ethnicity']
-        ret['clinical']['age'] = facets_and_lists['clinical']['facets']['age_at_diagnosis']
-        ret['clinical']['bmi'] = facets_and_lists['clinical']['facets']['bmi']
-
-    return JsonResponse(ret)
 
 @login_required
 def explore_data_page(request):
@@ -557,8 +496,14 @@ def explore_data_page(request):
             attr_filter['related_set'] = ['disease_code', 'vital_status','gender','age_at_diagnosis', 'bmi','race','ethnicity']
         for set in attr_by_source:
             if is_dicofdic:
-                attr_by_source[set]['attributes'] ={x: {y['value']: {'display_value': y['display_value'], 'count': y['count']} for y in attr_by_source[set]['attributes'][x]['vals']} for x in attr_filter[set]}
-
+                for x in list(attr_by_source[set]['attributes'].keys()):
+                    if x in attr_filter[set]:
+                        if (isinstance(attr_by_source[set]['attributes'][x]['vals'],list) and (len(attr_by_source[set]['attributes'][x]['vals']) > 0)):
+                            attr_by_source[set]['attributes'][x] = {y['value']: {'display_value': y['display_value'], 'count': y['count']} for y in attr_by_source[set]['attributes'][x]['vals']}
+                        else:
+                            attr_by_source[set]['attributes'][x] = {}
+                    else:
+                        del attr_by_source[set]['attributes'][x]
             else:
                 attr_by_source[set]['attributes'] = [{'name': x,
                  'display_name': attr_by_source[set]['attributes'][x]['obj'].display_name,
@@ -573,6 +518,7 @@ def explore_data_page(request):
         #    attr_by_source['collection_id'] = attr_by_source['origin_set']['collection_id']
 
         context['set_attributes'] = attr_by_source
+        context['filters'] = filters
         if with_clinical:
             context['tcga_collections'] = tcga_in_tcia
 

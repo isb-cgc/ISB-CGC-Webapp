@@ -52,6 +52,8 @@
                 <ol class="breadcrumb">
                     <li><a href="/dashboard/">Your Dashboard</a></li>
                     <li><a href="/explore/">Explore</a></li>
+                    <li id="previous" style="display:none"><a href="#" onclick="javascript:selectHistoricFilter(-1)">Previous Filter</a></li>
+                    <li id="next" style="display:none"><a href="#" onclick="javascript:selectHistoricFilter(1)">Next Filter</a></li>
                 </ol>
 
                 <h1 class="page-header pull-left" role="heading" aria-level="1">Explore Image Data</h1>
@@ -101,8 +103,10 @@
                                   {% for attr in set_attributes.origin_set.attributes %}
                                       {% if attr.name == "collection_id" %}
                                           {% for val in attr.values %}
-                                              {% if val.value != "None" %}
-                                                   <option value="{{ val.value }}">{{ val.value }}</option>
+                                              {% if val.value in filters.collection_id %}
+                                                  {% if val.value != "None"  %}
+                                                       <option value="{{ val.value }}">{{ val.value }}</option>
+                                                  {% endif %}
                                               {% endif %}
                                           {% endfor %}
                                       {% endif %}
@@ -142,7 +146,7 @@
                                             <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
                                                    <label>
                                                        <input type="checkbox" value="{{ val.value }}">
-                                                        <span>{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count">{{ val.count }}</span>
+                                                        <span>{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
                                                     </label>
                                                 </li>
                                             {% endfor %}
@@ -195,7 +199,7 @@
                                             <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
                                                    <label>
                                                        <input type="checkbox" value="{{ val.value }}">
-                                                        <span>{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count">{{ val.count }}</span>
+                                                        <span>{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
                                                     </label>
                                                 </li>
                                             {% endfor %}
@@ -291,8 +295,10 @@
                              {% for attr in set_attributes.origin_set.attributes %}
                                       {% if attr.name == "collection_id" %}
                                           {% for val in attr.values %}
-                                              {% if val.value != "None" %}
-                                                  <tr id="project_row_{{ val.value }}" class="text_head" onclick="(toggleProj(this,'{{ val.value }}'))"><td>{{ val.value }}</td><td>{{ val.count }}</td><td id="patient_col_{{ val.value }}" class="projects_table_num_cohort">{{ val.count }}</td> </tr>
+                                              {% if val.value in filters.collection_id %}
+                                                  {% if val.value != "None" %}
+                                                      <tr id="project_row_{{ val.value }}" class="text_head" onclick="(toggleProj(this,'{{ val.value }}'))"><td>{{ val.value }}</td><td>{{ val.count }}</td><td id="patient_col_{{ val.value }}" class="projects_table_num_cohort">{{ val.count }}</td> </tr>
+                                                  {% endif %}
                                               {% endif %}
                                           {% endfor %}
                                       {% endif %}

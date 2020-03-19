@@ -37,6 +37,8 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
     };
 
 
+
+
     window.setSlider = function(divName,reset,strt,end,isInt) {
         slideDiv= divName + "_slide";
         if (reset){
@@ -69,7 +71,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
         }
 
         mkFiltText();
-        updateFacetsData();
+        updateFacetsData(true);
 
     }
 
@@ -150,7 +152,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
              }
              window.filterObj[filtName] = attVal;
              mkFiltText();
-             updateFacetsData();
+             updateFacetsData(true);
 
             }
         });
@@ -387,7 +389,10 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
                         var modality = curData.Modality;
                         var rowId = 'series_' + seriesId.replace(/\./g, '-')
                         var studyClass = 'study_' + studyId.replace(/\./g, '-');
-                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col2 tooltip_ex">' + ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span></td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td></tr>';
+                        var fetchUrlSeries = fetchUrl+'?SeriesInstanceUID='+seriesId;
+                        var hrefSeriesTxt = '<a href="' + fetchUrlSeries + '" target="_blank">' + ppSeriesId + '</a><span class="tooltiptext_ex">' + seriesId + '</span>';
+                        var seriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
+                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col2 tooltip_ex">' + seriesTxt + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td></tr>';
 
                     } else {
 
@@ -512,11 +517,50 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
         }
         //document.getElementById('total').innerHTML = window.collection[project_scope];
         mkFiltText();
-        updateFacetsData(false);
+        updateFacetsData(true);
 
 
 
     }
+
+    var resetFilterAttr = function(filterCat, filtDic){
+         filtElem = $('#'+filterCat)[0];
+         selElements = $('#'+filterCat).find('input:checkbox');
+         for (var i=0;i<selElements.length;i++){
+             selElement = selElements[i];
+             if (filtDic.hasOwnProperty(selElement.value)){
+                 selElement.checked = true;
+             }
+             else{
+                 selElement.checked = false;
+             }
+         }
+
+    }
+
+    var resetSearchScope = function(scopeArr, searchId){
+        var selectElem= $('#'+searchId)[0];
+        var selIndex = 0;
+        if (scopeArr === window.tcgaColls){
+            selIndex = 0;
+        }
+        else{
+            selProject = scopeArr[0];
+            selectionArr = $(selectElem).children("option");
+            for (var i=0;i<selectionArr.length;i++){
+                selectItem = selectionArr[i];
+                if (selProject === selectItem.value){
+                    selIndex = i;
+                    break;
+                }
+            }
+
+        }
+        selectElem.selectedIndex=selIndex;
+    }
+
+
+
 
 
     var updateSliderSelection = function(inpDiv, displaySet, header, attributeName, isInt) {
@@ -536,6 +580,37 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
 
     }
 
+    window.selectHistoricFilter = function(num){
+        //alert('previous');
+        window.histIndex = window.histIndex + num ;
+        histObj = window.filtHistory[window.histIndex];
+        window.filterObj = JSON.parse(JSON.stringify(histObj.filterObj));
+        window.selItems = JSON.parse(JSON.stringify(histObj.selItems));
+        if ( (histObj.filterObj.hasOwnProperty('collection_id')) && (histObj.filterObj['collection_id']===window.tcgaColls)){
+            window.filterObj['collection_id'] = window.tcgaColls;
+        }
+        var filterCatsArr = new Array();
+        filterCatsArr.push(findFilterCats('search_orig_set'));
+        filterCatsArr.push(findFilterCats('search_related_set'));
+        for (var i=0;i<filterCatsArr.length;i++){
+            filterCats = filterCatsArr[i];
+            for (var j=0;j<filterCats.length;j++){
+                filterCat = filterCats[j];
+                filtdic = {}
+                if (histObj.filterObj.hasOwnProperty(filterCat)){
+                    for (var k=0;k<histObj.filterObj[filterCat].length;k++){
+                        filtAtt = histObj.filterObj[filterCat][k];
+                        filtdic[filtAtt]=1;
+                    }
+                }
+                resetFilterAttr(filterCat,filtdic);
+            }
+        }
+        resetSearchScope(histObj.filterObj.collection_id,'project_scope');
+        mkFiltText();
+        updateFacetsData(false);
+
+    }
     var updateCollectionTotals = function(total,dic){
          for (var item in window.collection) {
              if (item === 'All'){
@@ -556,7 +631,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
          document.getElementById('total').innerHTML = String(curCount);
     }
 
-    var updateFacetsData = function() {
+    var updateFacetsData = function(newFilt) {
         changeAjax(true);
 
         var url = '';
@@ -590,7 +665,39 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
                 if (studyArr.length>0) {
                     addStudyOrSeries(window.selItems.selProjects, studyArr, "series_table", true);
                 }
+
+                if (newFilt) {
+                    histObj = new Object();
+                    histObj.selItems = JSON.parse(JSON.stringify(window.selItems));
+                    histObj.filterObj = JSON.parse(JSON.stringify(window.filterObj));
+                    if ( (window.filterObj.hasOwnProperty('collection_id')) && (window.filterObj['collection_id']===window.tcgaColls)){
+                        histObj.filterObj['collection_id'] = window.tcgaColls;
+                    }
+
+                    window.filtHistory.push(histObj);
+
+                    if (window.filtHistory.length > window.histMaxLength){
+                        window.filtHistory.shift();
+                    }
+                    window.histIndex = window.filtHistory.length -1;
+                }
+
+                if ( (window.filtHistory.length-1) > window.histIndex){
+                    $('#next').show();
+                }
+                else{
+                    $('#next').hide();
+                }
+                if ( (window.filtHistory.length>0) && (window.histIndex>0)){
+                    $('#previous').show();
+                }
+                else{
+                    $('#previous').hide();
+                }
+
+
                changeAjax(false);
+
             },
             error: function () {
                 changeAjax(false);
@@ -600,8 +707,6 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
 
         });
     }
-
-
 
 
 
@@ -672,7 +777,12 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             lbl = spans.get(0).innerHTML;
             cnt = parseInt(spans.get(1).innerHTML);
             dataLabel.push(lbl);
-            dataCnt.push(cnt);
+            if ($(spans.get(1)).hasClass("plotit")) {
+                dataCnt.push(cnt);
+            }
+            else{
+                dataCnt.push(0);
+            }
         }
         return {'dataLabel': dataLabel, 'dataCnt': dataCnt}
     }
@@ -704,11 +814,18 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
              var lbl = spans.get(0).innerHTML;
              var cnt = parseInt(spans.get(1).innerHTML);
 
-             if( (checked || useAll) && dataFound && dic.hasOwnProperty(val)){
+             if( dataFound && dic.hasOwnProperty(val)){
                  spans.get(1).innerHTML = String(dic[val].count);
+
              }
              else{
                  spans.get(1).innerHTML = '0';
+             }
+             if (checked || useAll){
+                     $(spans.get(1)).addClass('plotit');
+                 }
+             else{
+                 $(spans.get(1)).removeClass('plotit');
              }
          }
 
@@ -744,7 +861,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
          }
 
         mkFiltText();
-        updateFacetsData();
+        updateFacetsData(true);
 
     }
 
@@ -794,7 +911,18 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
      }
 
      $(document).ready(function () {
-            filterObj.collection_id = tcgaColls;
+            window.filterObj.collection_id = window.tcgaColls;
+            window.selItems = new Object();
+            window.selItems.selStudies = new Object();
+            window.selItems.selProjects = new Array();
+            window.histIndex  = 0;
+            window.histMaxLength = 6;
+            histObj = new Object();
+            histObj.selItems = JSON.parse(JSON.stringify(window.selItems));
+            histObj.filterObj = JSON.parse(JSON.stringify(window.filterObj));
+            histObj.filterObj.collection_id = window.tcgaColls;
+            window.filtHistory = new Array();
+            window.filtHistory.push(histObj);
             createPlots('search_orig_set');
             createPlots('search_related_set');
             addFilterBindings('search_orig_set');
