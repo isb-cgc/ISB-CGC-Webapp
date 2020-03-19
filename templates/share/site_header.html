@@ -43,7 +43,13 @@
                 {% if user.is_authenticated %}
                     <div id="user-login" class="navbar-item">
                         <a class="avatar-link" href="{% url 'user_detail' user.id %}">
-                            <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="32" height="32" alt="Avatar Link to User Details">
+                            {% with avatar_url=user.socialaccount_set.all.0.get_avatar_url %}
+                                {% if avatar_url %}
+                                    <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="32" height="32" alt="Avatar Link to User Details">
+                                {% else %}
+                                    <i class="fa fa-user basic-avatar"> </i>
+                                {% endif %}
+                            {% endwith %}
                         </a>
 
                         <div class="dropdown">
@@ -69,10 +75,10 @@
                         <a id="btnGroupDropCohortCreate" href=""
                            class="btn btn-link dropdown-toggle"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fa fa-arrow-right"></i>Sign In</a>
+                            <i class="fa fa-sign-in"></i>Sign In</a>
                         <ul class="dropdown-menu" aria-labelledby="btnGroupDropCohortCreate">
                             <li><a class="login-link" href="{% provider_login_url 'google' %}" title="Google Sign In"><i class="fa fa-sign-in"></i> via Google</a></li>
-                            <!--<li><a class="login-link" href="{% url 'account_login' %}" title="IDC Sign In"><i class="fa fa-sign-in"></i> via IDC</a></li>-->
+                            <li><a class="login-link" href="{% url 'account_login' %}" title="IDC Sign In"><i class="fa fa-sign-in"></i> via IDC</a></li>
                         </ul>
                     </div>
                 {% endif %}

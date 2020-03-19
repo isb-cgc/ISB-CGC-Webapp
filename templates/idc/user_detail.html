@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
 {% load custom_tags %}
+{% load staticfiles %}
 {% load tz %}
 {% comment %}
 
@@ -28,9 +28,14 @@
 {% block page_name %}user-details{% endblock %}
 
 {% block content %}
+    {% if not local_account %}
     <img src="{{ user_details.extra_data.picture }}" class="avatar space-top-10" alt="User Avatar"/>
-
-    <h4>Welcome {{ user_details.first_name }} {{ user_details.last_name }}!</h4>
+    {% else %}
+        <div class="user-detail">
+            <i class="fa fa-user space-top-10 basic-avatar" alt="User Avatar"/> </i>
+        </div>
+    {% endif %}
+    <h4>Welcome {% if not local_account %}{{ user_details.first_name }} {{ user_details.last_name }}{% else %}{{ user_details.email }}{% endif %}!</h4>
     <div class="row">
         <div class="panel panel-default user-panel">
             <div class="panel-heading">
@@ -41,8 +46,13 @@
             <div class="panel-body">
                 <table class="user-info" role="presentation">
                     <tr>
+                    {% if not local_account %}
                         <td>Name</td>
                         <td>{{ user_details.first_name }} {{ user_details.last_name }}</td>
+                    {% else %}
+                        <td>User Name</td>
+                        <td>{{ user_details.username }}</td>
+                    {% endif %}
                     </tr>
                     <tr>
                         <td>Email</td>
@@ -56,16 +66,6 @@
             </div>
         </div>
 
-        <div class="panel panel-default data-panel">
-            <div class="panel-heading">
-                <h5>
-                    Data Access
-                </h5>
-            </div>
-            <div class="panel-body">
-            </div>
-        </div>
-
         <div class="panel panel-default gcp-panel">
             <div class="panel-heading">
                 <h5>
@@ -73,101 +73,15 @@
                 </h5>
             </div>
             <div class="panel-body">
-                {% if True %}
-                    <p>
-                        Apply for "cloud credits" and your own Google Cloud project by submitting a request <a href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/request-gcp" target="_blank">here</a>.
-                    </p>
+                <p>
+                    Apply for "cloud credits" and your own Google Cloud project by submitting a request <a href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/request-gcp" target="_blank">here</a>.
+                </p>
 
-                    <p>Go to the <a href="http://console.cloud.google.com" target="_blank">Google Cloud Console</a>.</p>
-                {% else %}
-                    <p><i class="fa fa-check-circle"></i> Connected to Google Cloud Platform</p>
-                    <hr>
-                    <p>
-                        User Google Cloud Platform to run custom pipelines or visualize your own datasets.
-                    </p>
-
-                    <!-- Button trigger modal -->
-{#                    <a class="more-credits-modal" data-toggle="modal" data-target="#more-credits-modal">#}
-{#                        Request Credits#}
-{#                    </a>#}
-
-                    <a href="#">Run a Custom Pipeline</a>
-{#                    <a href="#">Upload Your Own Datasets</a>#}
-                {% endif %}
+                <p>Go to the <a href="http://console.cloud.google.com" target="_blank">Google Cloud Console</a>.</p>
             </div>
         </div>
     </div>
 
-
-    <!-- Modal -->
-{#    <div class="modal fade" id="more-credits-modal" tabindex="-1" role="dialog" aria-labelledby="MoreCreditLabel" aria-hidden="true">#}
-{#        <div class="modal-dialog">#}
-{#            <div class="modal-content">#}
-{#                <div class="modal-header">#}
-{#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
-{#                    <h4 class="modal-title" id="MoreCreditLabel">Request Additional Google Cloud Platform Credits</h4>#}
-{#                </div>#}
-{#                <form id="request-credits" method="POST" action="#" class="form-horizontal">#}
-{#                    <div class="modal-body">#}
-{#                        <div class="form-group">#}
-{#                            <label for="name" class="col-sm-3 control-label">Name</label>#}
-{#                            <div class="col-sm-9">#}
-{#                                <input type="text" class="form-control" name="name" id="name" placeholder="Name" value="{{ user_details.first_name }} {{ user_details.last_name }}"/>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                        <div class="form-group">#}
-{#                            <label for="email" class="col-sm-3 control-label">Email Address</label>#}
-{#                            <div class="col-sm-9">#}
-{#                                <input type="text" class="form-control" name="email" id="email" placeholder="email@example.com" value="{{ user_details.email }}"/>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                        <div class="form-group">#}
-{#                            <label for="credits" class="col-sm-3 control-label">Credits Requested</label>#}
-{#                            <div class="col-sm-9">#}
-{#                                <div class="btn-group" role="group">#}
-{#                                    <button type="button" class="btn btn-primary" value="1000">$1000</button>#}
-{#                                    <button type="button" class="btn btn-primary" value="2000">$2000</button>#}
-{#                                    <button type="button" class="btn btn-primary" value="5000">$5000</button>#}
-{#                                </div>#}
-{#                                <input type="hidden" name="credits" value=""/>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                        <div class="form-group">#}
-{#                            <label for="project-details" class="col-sm-3 control-label">Project Details</label>#}
-{#                            <div class="col-sm-9">#}
-{#                                <textarea class="form-control" name="project-details" id="project-details" rows="3" placeholder="Explain your project and why you need additional Google Cloud Platform Credits..."></textarea>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                    <div class="modal-footer">#}
-{#                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>#}
-{#                        {% csrf_token %}#}
-{#                        <input type="submit" value="Submit Request" class="btn btn-primary" />#}
-{#                    </div>#}
-{#                </form>#}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
-
-
-    <!-- Modal -->
-    <div class="modal fade" id="bucket-contents-modal" tabindex="-1" role="dialog" aria-labelledby="ControlledDataTitle" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="ControlledDataTitle">Contents of isb-cgc-mock-cntl Bucket:</h4>
-                </div>
-                <ul>
-                {% for item in object_list %}
-                    <li>
-                    {{ item.name }}
-                    </li>
-                {% endfor %}
-                </ul>
-            </div>
-        </div>
-    </div>
     <script type="text/javascript"> 
         var last_login_client_time = new Date("{{ user_details.last_login|safe }}".replace(" ","T"));
         document.getElementById('last_login').innerHTML = last_login_client_time; 
