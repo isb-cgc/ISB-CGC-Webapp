@@ -833,6 +833,18 @@ nav, .site-header {
     color: #2B7388;
     font-weight: bold; }
 
+.site-header .basic-avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 29px;
+}
+
+.user-detail .basic-avatar {
+  width: 54px;
+  height: 54px;
+  font-size: 50px;
+}
+
 .navbar-item {
   display: inline-block !important;
   vertical-align: middle;

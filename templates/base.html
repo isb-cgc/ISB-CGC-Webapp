@@ -31,11 +31,7 @@
     <link type="text/css" rel="stylesheet" href="{% static 'css/select2.min.css' %}" />
     <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}" />
     <link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/jquery-ui.min.css' %}">
-
     <script type="text/javascript" src="{% static 'js/libs/modernizr.js' %}"></script>
-    <script type="text/javascript" src="{%  static '/js/libs/jquery-1.11.1.min.js' %}"></script>
-    <script type="text/javascript" src="{%  static '/js/libs/jquery-ui.min.js' %}"></script>
 
     {% block header %}{% endblock %}
 
@@ -54,7 +50,6 @@
         var STATIC_FILES_URL = '{{ STATIC_FILES_URL }}';
         var BASE_URL = '{{ BASE_URL }}' || "";
         var STORAGE_URI = '{{ STORAGE_URI }}';
-
     </script>
 
 </head>

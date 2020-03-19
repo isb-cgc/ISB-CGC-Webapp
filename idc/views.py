@@ -159,24 +159,30 @@ def user_detail(request, user_id):
     if int(request.user.id) == int(user_id):
 
         user = User.objects.get(id=user_id)
-        social_account = SocialAccount.objects.get(user_id=user_id, provider='google')
-
+        try:
+            social_account = SocialAccount.objects.get(user_id=user_id, provider='google')
+        except Exception as e:
+            # This is a local account
+            social_account = None
         user_details = {
             'date_joined':  user.date_joined,
             'email':        user.email,
-            'extra_data':   social_account.extra_data,
-            'first_name':   user.first_name,
             'id':           user.id,
-            'last_login':   user.last_login,
-            'last_name':    user.last_name
+            'last_login':   user.last_login
         }
 
-        forced_logout = 'dcfForcedLogout' in request.session
+        if social_account:
+            user_details['extra_data'] = social_account.extra_data if social_account else None
+            user_details['first_name'] = user.first_name
+            user_details['last_name'] = user.last_name
+        else:
+            user_details['username'] = user.username
 
         return render(request, 'idc/user_detail.html',
                       {'request': request,
                        'user': user,
-                       'user_details': user_details
+                       'user_details': user_details,
+                       'local_account': bool(social_account is None)
                        })
     else:
         return render(request, '403.html')
