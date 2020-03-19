@@ -401,12 +401,21 @@ nav {
 
 .btn-default {
   color: #fff !important;
-  background-color: #F7991B;
+  background-color: #d97c17;
   border: 1px solid #e18408 !important; }
   .btn-default:hover, .btn-default:active, .btn-default:focus {
-    background-color: #e18408 !important;
+    background-color: #ed8b08 !important;
     color: #fff !important;
     border: 1px solid #fac57e !important; }
+
+.btn-special {
+  color: #fff !important;
+  background-color: #743796;
+  border: 1px solid #4e1a61 !important; }
+  .btn-special:hover, .btn-special:active, .btn-special:focus {
+    background-color: #8d43b6 !important;
+    color: #fff !important;
+    border: 1px solid #8a6dbc !important; }
 
 .btn-link {
   font-weight: 400; }
