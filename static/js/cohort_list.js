@@ -494,4 +494,78 @@ require([
     $('input.cohort:checked').each(function(){
         $('#cohort-apply-to-workbook').append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
     });
+
+    if (document.readyState == 'complete') {
+        update_table_display();
+    } else {
+        document.onreadystatechange = function () {
+            if (document.readyState === "complete") {
+                update_table_display();
+            }
+        }
+    }
+
+    function update_table_display()
+    {
+        var tab_selector = '#saved-cohorts-list';
+        var total_cohorts = cohort_list.length;
+        var total_pages = Math.ceil(total_cohorts / cohorts_per_page);
+        if (total_cohorts <= 0) {
+            $(tab_selector).find('.cohort-page-count').hide();
+            $(tab_selector).find('.no-cohort-page-count').show();
+            $(tab_selector).find('.paginate_button_space').hide();
+            $(tab_selector).find('.dataTables_length').addClass('disabled');
+            $(tab_selector).find('.sortable_table th').addClass('disabled');
+            $(tab_selector).find('.dataTables_goto_page').addClass('disabled');
+        }
+        else {
+            var page_list = pagination(page, total_pages);
+            var html_page_button = "";
+            for(var i in page_list){
+                if(page_list[i] === "..."){
+                    html_page_button += "<span class='\ellipsis\'>...</span>"
+                }
+                else{
+                    html_page_button += "<a class=\'dataTables_button paginate_button numeric_button"+ (page_list[i] == page ? " current\'":"\'") +">" + page_list[i] + "</a>";
+                }
+            }
+            $(tab_selector).find('.cohort-page-count').show();
+            $(tab_selector).find('.no-cohort-page-count').hide();
+            $(tab_selector).find('.paginate_button_space').show();
+            $(tab_selector).find('.dataTables_length').removeClass('disabled');
+            $(tab_selector).find('.sortable_table th').removeClass('disabled');
+            $(tab_selector).find('.dataTables_goto_page').removeClass('disabled');
+            $(tab_selector).find('.dataTables_goto_page .goto-page-number').attr('max', total_pages);
+            $(tab_selector).find('.panel .panel-body .total-cohort-count').html(total_pages);
+            $(tab_selector).find('.panel .panel-body .paginate_button_space').html(html_page_button);
+        }
+    };
+
+    function pagination(c, m) {
+        var current = parseInt(c),
+            last = m,
+            delta = 2,
+            left = current - delta,
+            right = current + delta + 1,
+            range = [],
+            rangeWithDots = [],
+            l;
+        for (var i = 1; i <= last; i++) {
+            if (i == 1 || i == last || i >= left && i < right) {
+                range.push(i);
+            }
+        }
+        for(var i in range){
+            if (l) {
+                if (range[i] - l === 2) {
+                    rangeWithDots.push(l + 1);
+                } else if (range[i] - l !== 1) {
+                    rangeWithDots.push('...');
+                }
+            }
+            rangeWithDots.push(range[i]);
+            l = range[i];
+        }
+        return rangeWithDots;
+    }
 });
