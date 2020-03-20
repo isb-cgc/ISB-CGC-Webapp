@@ -164,6 +164,18 @@
   ul.no-bullet
     list-style: none
     margin-left: -15px
+    li.plot-ready-check
+      &:before
+        font-family: FontAwesome
+        content: '\f18e'
+        display: inline-block
+        width: 12px
+        color: #ce7907
+      &.check-off:before
+        content: '\f05d'
+        color: #3c763d
+
+
 
   .alert-dismissable
     margin-top: 8px
