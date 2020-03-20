@@ -268,7 +268,10 @@
                                 <a class="fa fa-caret-right"></a>
                             </div>
                             {% if workbook.owner.id == user.id %}
-                                <h5>Analysis Type</h5>
+                                <label>Analysis Type</label>
+                                <a style="margin-left: 5px;" href="{% url 'sample_analyses' %}" target="_blank">
+                                    <i class="fa fa-angle-double-right fa-fw" aria-hidden="true"></i>Learn more about our available Analyses
+                                </a>
                                 <div class="form-group">
                                     <select aria-label="Analysis Type" id="{{ worksheet.id }}-analysis-type" worksheet_id="{{ worksheet.id }}" class="form-control plot_selection">
                                         {% if worksheet.active_plot %}
