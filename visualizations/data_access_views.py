@@ -267,7 +267,7 @@ def get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, 
                 elif type(logTransform['xBase']) is int:
                     xdata['value'] = str(math.log((float(xdata['value']) + 1), logTransform['xBase']))
                 else:
-                    logger.warn(
+                    logger.warning(
                         "[WARNING] No valid log base was supplied - log transformation will not be applied!"
                     )
 
