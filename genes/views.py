@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.utils.safestring import mark_safe

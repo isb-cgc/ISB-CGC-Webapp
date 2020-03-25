@@ -35,8 +35,13 @@
         background-color: white
         background-image: none
         &:hover
+            border: 1px solid #ddd
             color: #19424e
             background-color: #eeeeee
+    .submit-btn
+        border: 1px solid #2B7388
+        color: white
+        background-color: #2B7388
     .dataTables_paginate
         float: right
     .pagination
@@ -219,9 +224,6 @@
                         border: 1px solid #dddddd
                         table td
                             border: 1px solid #efefef
-
-            &.td-body-right
-                text-align: right
             &.tbl-preview
                 &:before
                     font-family: FontAwesome
@@ -251,7 +253,9 @@
                     color: $isb-warning
                     margin: 0 6px 0 20px
 
-
+    .modal ul
+        list-style: inherit
+        margin-left: 30px
     //.switch
     //    position: relative
     //    display: inline-block

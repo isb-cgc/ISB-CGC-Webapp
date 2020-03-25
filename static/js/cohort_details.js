@@ -22,7 +22,7 @@ require.config({
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
+        session_security: 'session_security/script',
         underscore: 'libs/underscore-min',
         d3: 'libs/d3.min',
         d3tip: 'libs/d3-tip',
@@ -159,7 +159,7 @@ require([
 
     function validate_genes(list, cb){
         if(list.length > 0){
-            var csrftoken = get_cookie('csrftoken');
+            var csrftoken = $.getCookie('csrftoken');
             $.ajax({
                 type        : 'POST',
                 dataType    :'json',
@@ -176,23 +176,6 @@ require([
                 }
             });
         }
-    }
-
-    //Used for getting the CORS token for submitting data
-    function get_cookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie != '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
     }
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
@@ -513,6 +496,8 @@ require([
         var activeDataTab = $('.data-tab.active').attr('id');
         var prog_id = $('.data-tab.active .filter-panel').data('prog-id');
         var filterType = $(this).attr('id').split('-clear-filters')[0];
+        var createFormFilterSet = $('p#'+activeDataTab+'-filters');
+
         $(this).parents('.selected-filters').find('.panel-body').empty();
         $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
             $(this).prop('checked', false);
@@ -520,7 +505,8 @@ require([
 
         delete SELECTED_FILTERS[prog_id];
 
-        $('p#'+activeDataTab+'-filters span.'+filterType+'-token').remove();
+        $(createFormFilterSet+' span.'+filterType+'-token').remove();
+
         update_displays();
     });
 
@@ -899,7 +885,14 @@ require([
 
         $(program_data_selector + ' .clear-filters').on('click', function() {
             var filterType = $(this).attr('id').split('-clear-filters')[0];
+            var creationFormFilterSet = $('p#'+filterType+'-filters');
+
+
             $(this).parents('.selected-filters').find('.panel-body').empty();
+
+            // bug fix #2722
+            creationFormFilterSet.hide();
+
             $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
                 $(this).prop('checked', false);
             });
@@ -1180,6 +1173,10 @@ require([
             e.preventDefault();
             e.stopPropagation();
         }
+    });
+
+    $('.login-link').on("click",function(){
+        $.setCookie('login_from','new_cohort','/new_cohort/');
     });
 
     filter_panel_load(cohort_id);

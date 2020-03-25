@@ -22,7 +22,7 @@ require.config({
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
+        session_security: 'session_security/script',
         underscore: 'libs/underscore-min',
         base: 'base'
     },
@@ -114,5 +114,4 @@ require([
     $('.modal form').on('submit',function(){
         $(this).find('input[type="submit"]').attr("disabled","disabled");
     });
-
 });
