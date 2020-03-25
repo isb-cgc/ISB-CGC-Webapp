@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ('last_date_saved', models.DateTimeField(auto_now_add=True)),
                 ('active', models.BooleanField(default=True)),
                 ('is_public', models.BooleanField(default=False)),
-                ('owner', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('owner', models.ForeignKey(on_delete=models.CASCADE, to=settings.AUTH_USER_MODEL)),
                 ('shared', models.ManyToManyField(to='sharing.Shared_Resource')),
             ],
             options={
@@ -38,8 +38,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('test', models.DateTimeField(auto_now_add=True, null=True)),
                 ('last_view', models.DateTimeField(auto_now=True, auto_now_add=True)),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
-                ('workbook', models.ForeignKey(to='workbooks.Workbook')),
+                ('user', models.ForeignKey(on_delete=models.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('workbook', models.ForeignKey(on_delete=models.CASCADE, to='workbooks.Workbook')),
             ],
             options={
             },
@@ -50,8 +50,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('perm', models.CharField(default=b'READER', max_length=10, choices=[(b'READER', b'Reader'), (b'OWNER', b'Owner')])),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, blank=True)),
-                ('workbook', models.ForeignKey(to='workbooks.Workbook')),
+                ('user', models.ForeignKey(on_delete=models.CASCADE, to=settings.AUTH_USER_MODEL, blank=True)),
+                ('workbook', models.ForeignKey(on_delete=models.CASCADE, to='workbooks.Workbook')),
             ],
             options={
             },
@@ -65,7 +65,7 @@ class Migration(migrations.Migration):
                 ('description', models.CharField(max_length=2024)),
                 ('last_date_saved', models.DateTimeField(auto_now_add=True)),
                 ('date_created', models.DateTimeField(auto_now_add=True)),
-                ('workbook', models.ForeignKey(to='workbooks.Workbook')),
+                ('workbook', models.ForeignKey(on_delete=models.CASCADE, to='workbooks.Workbook')),
             ],
             options={
             },
@@ -77,8 +77,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(serialize=False, primary_key=True)),
                 ('date_created', models.DateTimeField(auto_now_add=True)),
                 ('modified_date', models.DateTimeField(auto_now=True)),
-                ('cohort', models.ForeignKey(to='cohorts.Cohort')),
-                ('worksheet', models.ForeignKey(to='workbooks.Worksheet')),
+                ('cohort', models.ForeignKey(on_delete=models.CASCADE, to='cohorts.Cohort')),
+                ('worksheet', models.ForeignKey(on_delete=models.CASCADE, to='workbooks.Worksheet')),
             ],
             options={
             },
@@ -91,8 +91,8 @@ class Migration(migrations.Migration):
                 ('date_created', models.DateTimeField(auto_now_add=True)),
                 ('modified_date', models.DateTimeField(auto_now=True)),
                 ('content', models.CharField(max_length=2024)),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
-                ('worksheet', models.ForeignKey(to='workbooks.Worksheet')),
+                ('user', models.ForeignKey(on_delete=models.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('worksheet', models.ForeignKey(on_delete=models.CASCADE, to='workbooks.Worksheet')),
             ],
             options={
             },
@@ -105,7 +105,7 @@ class Migration(migrations.Migration):
                 ('date_created', models.DateTimeField(auto_now_add=True)),
                 ('modified_date', models.DateTimeField(auto_now=True)),
                 ('gene', models.CharField(max_length=2024)),
-                ('worksheet', models.ForeignKey(to='workbooks.Worksheet')),
+                ('worksheet', models.ForeignKey(on_delete=models.CASCADE, to='workbooks.Worksheet')),
             ],
             options={
             },
@@ -119,7 +119,7 @@ class Migration(migrations.Migration):
                 ('modified_date', models.DateTimeField(auto_now=True)),
                 ('type', models.CharField(max_length=1024, null=True)),
                 ('active', models.BooleanField(default=True)),
-                ('cohort', models.ForeignKey(related_name='worksheet_plot.cohort', blank=True, to='workbooks.Worksheet_cohort', null=True)),
+                ('cohort', models.ForeignKey(on_delete=models.CASCADE, related_name='worksheet_plot.cohort', blank=True, to='workbooks.Worksheet_cohort', null=True)),
             ],
             options={
             },
@@ -134,8 +134,8 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=2024)),
                 ('type', models.CharField(max_length=1024, null=True, blank=True)),
                 ('url_code', models.CharField(max_length=2024)),
-                ('feature', models.ForeignKey(blank=True, to='projects.User_Feature_Definitions', null=True)),
-                ('worksheet', models.ForeignKey(to='workbooks.Worksheet')),
+                ('feature', models.ForeignKey(on_delete=models.CASCADE, blank=True, to='projects.User_Feature_Definitions', null=True)),
+                ('worksheet', models.ForeignKey(on_delete=models.CASCADE, to='workbooks.Worksheet')),
             ],
             options={
             },
@@ -144,25 +144,25 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='worksheet_plot',
             name='color_by',
-            field=models.ForeignKey(related_name='worksheet_plot.color_by', blank=True, to='workbooks.Worksheet_variable', null=True),
+            field=models.ForeignKey(on_delete=models.CASCADE, related_name='worksheet_plot.color_by', blank=True, to='workbooks.Worksheet_variable', null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='worksheet_plot',
             name='worksheet',
-            field=models.ForeignKey(to='workbooks.Worksheet', null=True),
+            field=models.ForeignKey(on_delete=models.CASCADE, to='workbooks.Worksheet', null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='worksheet_plot',
             name='x_axis',
-            field=models.ForeignKey(related_name='worksheet_plot.x_axis', blank=True, to='workbooks.Worksheet_variable', null=True),
+            field=models.ForeignKey(on_delete=models.CASCADE, related_name='worksheet_plot.x_axis', blank=True, to='workbooks.Worksheet_variable', null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='worksheet_plot',
             name='y_axis',
-            field=models.ForeignKey(related_name='worksheet_plot.y_axis', blank=True, to='workbooks.Worksheet_variable', null=True),
+            field=models.ForeignKey(on_delete=models.CASCADE, related_name='worksheet_plot.y_axis', blank=True, to='workbooks.Worksheet_variable', null=True),
             preserve_default=True,
         ),
     ]

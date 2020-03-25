@@ -44,7 +44,9 @@ require([
     'buttons-colvis',
     'chosen'
 ], function ($) {
+
     $(document).ready(function () {
+
         var table = $('#bqmeta').DataTable({
             dom: 'lfBrtip',
             ajax: {
@@ -113,6 +115,16 @@ require([
                     'visible': false
                 },
                 {
+                    'name': 'program',
+                    'data': function (data) {
+                        return filtered_label_data(data.labels, 'program');
+                    },
+                    'render': function(data, type){
+                        return format_label_display(data, type);
+                    },
+                    'className': 'label-filter colvis-toggle'
+                },
+                {
                     'name': 'category',
                     'data': function (data) {
                         return filtered_label_data(data.labels, 'category');
@@ -151,6 +163,17 @@ require([
                     'className': 'label-filter colvis-toggle'
                 },
                 {
+                    'name': 'expStrat',
+                    'data': function (data) {
+                        return filtered_label_data(data.labels, 'experimental_strategy');
+                    },
+                    'render': function(data, type) {
+                        return format_label_display(data, type);
+                    },
+                    'className': 'label-filter colvis-toggle',
+                    'visible': false
+                },
+                {
                     'name': 'status',
                     'data': function (data) {
                         return (data.labels && data.labels.status) ? data.labels.status: null;
@@ -164,13 +187,13 @@ require([
                 {
                     'name': 'numRows',
                     'data': 'numRows',
-                    'className': 'td-body-right colvis-toggle',
+                    'className': 'text-right colvis-toggle',
                     'render': $.fn.dataTable.render.number( ',', '.')
                 },
                 {
                     'name': 'createdDate',
                     'data': 'creationTime',
-                    'className': 'td-body-right colvis-toggle',
+                    'className': 'text-right colvis-toggle',
                     'render': function (data, type) {
                         if (type === 'display') {
                             var date = new Date(parseInt(data));
@@ -226,6 +249,23 @@ require([
                         return format_schema_field_names(row.schema.fields, false);
                     },
                     'visible': false
+                },
+                {
+                    // "name": "gcpLink",
+                    "class": "text-center no-export",
+                    "searchable": false,
+                    "data": function (data) {
+                        return format_bq_gcp_console_link(data.tableReference);
+                    },
+                    "render": function (data, type) {
+                        return type === 'display' ?
+                            '<a class="open-gcp-btn" data-gcpurl="'
+                            + data
+                            + '" title="Open in Google Cloud Platform Console"><svg fill="none" fill-rule="evenodd" height="15" viewBox="0 0 32 32" width="15" xmlns="http://www.w3.org/2000/svg" fit="" preserveAspectRatio="xMidYMid meet" focusable="false"><path d="M8.627 14.358v3.69c.58.998 1.4 1.834 2.382 2.435v-6.125H8.62z" fill="#19424e"></path><path d="M13.044 10.972v10.54c.493.073.998.12 1.516.12.473 0 .934-.042 1.386-.104V10.972h-2.902z" fill="#3A79B8"></path><path d="M18.294 15.81v4.604a6.954 6.954 0 0 0 2.384-2.556v-2.05h-2.384zm5.74 6.233l-1.99 1.992a.592.592 0 0 0 0 .836L27 29.83c.23.23.606.23.836 0l1.992-1.99a.594.594 0 0 0 0-.837l-4.957-4.956a.593.593 0 0 0-.83 0" fill="#3A79B8"></path><path d="M14.615 2C7.648 2 2 7.648 2 14.615 2 21.582 7.648 27.23 14.615 27.23c6.966 0 12.614-5.648 12.614-12.615C27.23 7.648 21.58 2 14.61 2m0 21.96a9.346 9.346 0 0 1-9.346-9.345 9.347 9.347 0 1 1 9.346 9.346" fill="#3A79B8"></path></svg></a>'
+                            : data;
+
+                    },
+                    "orderable": false
                 }
             ],
             serverSide: false,
@@ -236,6 +276,7 @@ require([
             },
             drawCallback: function (settings) {
                 reset_table_style(settings);
+                set_gcp_open_btn($('#bqmeta'));
             }
         });
 
@@ -277,6 +318,17 @@ require([
             $('.bq-filter').trigger('keyup');
 
         });
+
+        $('#gcp-open-btn').on('click', function () {
+            var do_not_show_again = ($('#do-not-show-cb:checked').length > 0);
+            if (typeof(Storage) !== "undefined") {
+                // Store
+                gcp_modal_disabled |= do_not_show_again;
+                sessionStorage.setItem("gcp_modal_disabled", gcp_modal_disabled);
+            }
+            $('#gcp-open-modal').modal('hide');
+        });
+
 
         $('#bqmeta').find('tbody').on('click', 'td.tbl-preview', function () {
 
@@ -335,6 +387,7 @@ require([
                 $(".copy-btn").on('click', function () {
                     copy_to_clipboard($(this).siblings('.full_id_txt'));
                 });
+                set_gcp_open_btn($(tr).next('tr').find('.detail-table'));
                 tr.addClass('shown details-shown');
                 tr.removeClass('preview-shown');
             }
@@ -363,20 +416,34 @@ require([
         tr.addClass('shown preview-shown');
     };
 
-
+    var format_bq_gcp_console_link = function(tbl_ref){
+        return 'https://console.cloud.google.com/bigquery'
+                            + '?p=' + tbl_ref.projectId
+                            + '&d=' + tbl_ref.datasetId
+                            + '&t=' + tbl_ref.tableId
+                            + '&page=table';
+    };
 
     var format_tbl_details = function(d) {
         // `d` is the original data object for the row
         return '<table class="detail-table">' +
-            '<tr>' +
             '<td style="vertical-align:top;"><strong>Full ID</strong></td>' +
             '<td>'+
             '<span class="full_id_txt">' + formatFullId(d.tableReference, false) +
             '</span>'+
             '<button class="copy-btn" title="Copy to Clipboard">' +
             '<i class="fa fa-clipboard" aria-hidden="true"></i>'+
-            'Copy' +
+            'COPY' +
             '</button>' +
+            '<button data-gcpurl="'+format_bq_gcp_console_link(d.tableReference)+'" class="open-gcp-btn" style="margin-left: 0;" title="Open in Google Cloud Platform Console">' +
+                '<svg id="BIGQUERY_SECTION_cache12" fill="none" fill-rule="evenodd" height="10" viewBox="0 0 28 24" width="9" xmlns="http://www.w3.org/2000/svg" fit="" preserveAspectRatio="xMidYMid meet" focusable="false">' +
+                '<path d="M8.627 14.358v3.69c.58.998 1.4 1.834 2.382 2.435v-6.125H8.62z" fill="#19424e"></path>' +
+                '<path d="M13.044 10.972v10.54c.493.073.998.12 1.516.12.473 0 .934-.042 1.386-.104V10.972h-2.902z" fill="#3A79B8"></path>' +
+                '<path d="M18.294 15.81v4.604a6.954 6.954 0 0 0 2.384-2.556v-2.05h-2.384zm5.74 6.233l-1.99 1.992a.592.592 0 0 0 0 .836L27 29.83c.23.23.606.23.836 0l1.992-1.99a.594.594 0 0 0 0-.837l-4.957-4.956a.593.593 0 0 0-.83 0" fill="#3A79B8"></path>' +
+                '<path d="M14.615 2C7.648 2 2 7.648 2 14.615 2 21.582 7.648 27.23 14.615 27.23c6.966 0 12.614-5.648 12.614-12.615C27.23 7.648 21.58 2 14.61 2m0 21.96a9.346 9.346 0 0 1-9.346-9.345 9.347 9.347 0 1 1 9.346 9.346" fill="#3A79B8"></path></svg>'+
+                ' OPEN' +
+            '</button>' +
+
             '</td>'+
             '</tr><tr>' +
             '<td style="vertical-align:top;"><strong>Dataset ID</strong></td>' +
@@ -583,6 +650,22 @@ require([
         else {
             csv_button.enable();
         }
+    };
+
+    var set_gcp_open_btn = function (selection){
+        $(selection).find(".open-gcp-btn").on('click', function () {
+            $('#gcp-open-btn').attr('href',$(this).data('gcpurl'));
+            if (typeof(Storage) !== "undefined") {
+                gcp_modal_disabled |= sessionStorage.getItem("gcp_modal_disabled") == "true";
+            }
+            if(!gcp_modal_disabled){
+                $('#gcp-open-modal').modal('show');
+            }
+            else{
+                $('#gcp-open-btn span').trigger('click');
+            }
+
+        });
     };
 
 });

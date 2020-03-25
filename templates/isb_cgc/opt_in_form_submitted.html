@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    ISB-CGC|Opt-In Form Submitted
+{% endblock %}
+
+{% block description %}
+    Opt-In Form Submitted to ISB-CGC
+{% endblock %}
+{% block page_name %}opt-in-form-submitted{% endblock %}
+{% block page_header %}
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <div style="margin-top: 50px;padding-top: 50px;" class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-sm-3"></div>
+                    <div class="col-sm-6">
+                        <h4>
+                            <a href="/" target="_blank">
+                                <img height="24" width="24" style="margin-right: 5px;"  src="{% static 'img/isblogo.png' %}"
+                                     alt="ISB Logo">
+                            </a>
+                            {% if error_msg %}
+                                Opps...
+                            {% else %}
+                                Your feedback has been submitted
+                            {% endif %}
+                        </h4>
+                    </div>
+                    <div class="col-sm-3"></div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-sm-3"></div>
+                    <div class="col-sm-6">
+                        {% if error_msg %}
+                            <div>{{ error_msg }}</div>
+                        {% else %}
+                            <div>{{ msg }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-3"></div>
+                </div>
+            </div>
+            <div class="panel-footer">
+                <div class="row">
+                    <div class="col-sm-3"></div>
+                    <div class="col-sm-6">
+                        {% if error_msg %}
+                        <button type="button" onclick="window.history.back();" class="btn btn-default">
+                            Back
+                        </button>
+                        {% else %}
+                        <a href="/" type="button"  class="btn btn-primary">
+                            Visit ISB-CGC
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-3"></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block js_file %}{% static 'js/landing.js' %}{% endblock %}

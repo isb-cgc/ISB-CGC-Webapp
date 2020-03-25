@@ -23,7 +23,7 @@ import sys
 import traceback
 
 from django.shortcuts import render, redirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from bq_data_access.v1.feature_search.util import SearchableFieldHelper
 from bq_data_access.v2.feature_search.util import SearchableFieldHelper as SearchableFieldHelper_v2
@@ -343,7 +343,8 @@ def variable_fav_copy(request, variable_fav_id):
 @login_required
 def variable_fav_save(request, variable_fav_id=0):
     try:
-        data   = json.loads(request.body)
+        body_unicode = request.body.decode('utf-8')
+        data = json.loads(body_unicode)
         result = {}
 
         name = data['name']

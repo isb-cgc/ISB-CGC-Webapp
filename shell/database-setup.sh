@@ -16,6 +16,11 @@ if [ -n "$CI" ]; then
 else
     if ( "/home/vagrant/www/shell/get_env.sh" ) ; then
         export $(cat ${ENV_FILE_PATH} | grep -v ^# | xargs) 2> /dev/null
+        if [ -z "${SECURE_LOCAL_PATH}" ] || [ "${SECURE_LOCAL_PATH}" == "" ] ; then
+            echo "[ERROR] SECURE_LOCAL_PATH not found, but this is a VM build! Something might be wrong with your .env file"
+            echo "or your secure_files directory."
+            exit 1
+        fi
     else
         exit 1
     fi
@@ -59,7 +64,7 @@ mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL
 
 # If we have migrations for older, pre-migrations apps which haven't yet been or will never be added to the database dump, make them here eg.:
 # python3 ${HOMEROOT}/manage.py makemigrations <appname>
-python3 ${HOMEROOT}/manage.py makemigrations adminrestrict
+
 # Now run migrations
 echo "Running Migrations..."
 python3 ${HOMEROOT}/manage.py migrate --noinput
