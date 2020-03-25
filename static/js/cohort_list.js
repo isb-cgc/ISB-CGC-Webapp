@@ -540,70 +540,29 @@ require([
             $(tab_selector).find('.paginate_button_space').html(html_page_button);
         }
 
-        $(tab_selector).find('.cohort-table tbody').empty();
+        first_page_entry = ((page - 1) * cohorts_per_page) + 1;
+        last_page_entry = first_page_entry + cohorts_per_page - 1;
+
+        // $(tab_selector).find('.cohort-table tbody').empty();
 
         if(cohort_list.length <= 0) {
-            $(tab_selector).find('.cohort-table tbody').append(
-                '<tr>' +
-                '<td colspan="9"><i>No saved nohort.</i></td><td></td>'
-            );
+            first_page_entry = 0;
+            last_page_entry = 0;
         }
         else {
-            var cohorts_for_page = [];
-            var first_page_entry = ((page - 1) * cohorts_per_page) + 1;
-            var last_page_entry = first_page_entry + cohorts_per_page - 1;
-            for (i = 0; i < cohort_list.length; ++i)
-            {
-                if (i >= first_page_entry && i <= last_page_entry)
-                {
-                    cohorts_for_page.push(cohort_list[i]);
+            for (i = 1; i <= cohort_list.length; ++i) {
+                var cohort_index_id = "#cohort-index-" + i;
+                if (i >= first_page_entry && i <= last_page_entry) {
+                    $(cohort_index_id).show();
+                    // $(cohort_index_id).removeClass('disabled');
+                } else {
+                    $(cohort_index_id).hide();
+                    // $(cohort_index_id).addClass('disabled');
                 }
             }
 
             $(tab_selector).find('.showing').text(first_page_entry + " to " + last_page_entry);
-            for (var i = 0; i < cohorts_for_page.length; i++) {
-
-                var cohort = cohorts_for_page[i];
-                var row = '<tr>';
-
-                // if (cohort.owner.is_superuser)
-                {
-                    row += '<td class="checkbox-col">'
-                    row += '<input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/>';
-                    row += '</td>'
-                    row += '<td class="name-col"><a href="{% url \'cohort_details\' cohort.id %}">{{ cohort.name }}</a></td>'
-                    row += '<td>{{ cohort.case_size }}</td>';
-                    row += '<td class="sample-col"> {{ cohort.sample_size }} </td>';
-                    row += '<td class="date-col">{{ cohort.last_date_saved|date:\'M d, Y, g:i a\' }}</td>';
-                    row += '</tr>';
-                }
-
-                $(tab_selector).find('.cohort-table tbody').append(row);
-
-                // Remember any previous checks
-               // var thisCheck = $(tab_selector).find('.filelist-panel input[value="'+val+'"]');
-               // selIgvFiles[thisCheck.attr('data-type')] && selIgvFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
-            }
         }
-        // var columns_display = tab_columns_display[active_tab];
-        // var column_toggle_html = "";
-        // for (var i in columns_display) {
-        //     column_toggle_html += "<a class=\'column_toggle_button " + (columns_display[i][1] ? '' : 'column_hide') + "\'>" + columns_display[i][0] + "</a>";
-        //     if (columns_display[i][1]) {
-        //         $(tab_selector).find('table.file-list-table th:nth-child(' + (parseInt(i) + 1) + '), table.file-list-table td:nth-child(' + (parseInt(i) + 1) + ')').removeClass('hide');
-        //     }
-        //     else
-        //         $(tab_selector).find('table.file-list-table th:nth-child(' + (parseInt(i) + 1) + '), table.file-list-table td:nth-child(' + (parseInt(i) + 1) + ')').addClass('hide');
-        // }
-        // $(tab_selector).find('.column-toggle').html(column_toggle_html);
-
-        // If we're at the max, disable all checkboxes which are not currently checked
-        // selIgvFiles.count() >= SEL_IGV_FILE_MAX && $(tab_selector).find('.filelist-panel input.igv.accessible[type="checkbox"]:not(:checked)').attr('disabled',true);
-
-        // Update the Launch buttons
-        // $('#igv-viewer input[type="submit"]').prop('disabled', (selIgvFiles.count() <= 0));
-
-        // $('#selected-files-igv').tokenfield('setTokens',selIgvFiles.toTokens());
 
         $(tab_selector).find('.prev-page').removeClass('disabled');
         $(tab_selector).find('.next-page').removeClass('disabled');
@@ -621,14 +580,13 @@ require([
     }
 
     $('.tab-content').on('click', '.goto-page-button', function () {
-        var this_tab = $(this).parents('.data-tab').data('file-type');
         var page_no_input = $(this).siblings('.goto-page-number').val();
         if (page_no_input == "")
             return;
         var page = parseInt(page_no_input);
         var max_page_no = parseInt($(this).siblings('.goto-page-number').attr('max'));
         if (page > 0 && page <= max_page_no) {
-            goto_table_page(this_tab, page);
+            goto_table_page(page);
             $(this).siblings('.goto-page-number').val("");
         }
         else {
@@ -655,7 +613,7 @@ require([
         else{
             page_no = 1;
         }
-        goto_table_page(this_tab, page_no)
+        goto_table_page(page_no)
     });
 
     function pagination(c, m) {

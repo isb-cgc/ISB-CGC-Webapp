@@ -119,36 +119,36 @@
                             <th class="date-col">Last Modified</th>
                         </tr></thead>
                         <tbody>
-{#                        {% for cohort in cohorts %}#}
-{#                        {% if cohort.owner.is_superuser == False %}#}
-{#                            <tr>#}
-{#                                <td class="checkbox-col">#}
-{#                                    <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} class="cohort" type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>#}
-{#                                </td>#}
-{#                                <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</a></td>#}
-{#                                <td class="case-col">{{ cohort.case_size }}</td>#}
-{#                                <td class="sample-col"> {{ cohort.sample_size }} </td>#}
-{#                                <td class="owner-col">#}
-{#                                    {% if cohort.perm == 'Owner' %}#}
-{#                                        You#}
-{#                                    {% else %}#}
-{#                                        {{cohort.owner.first_name}} {{cohort.owner.last_name}}#}
-{#                                    {% endif %}#}
-{#                                </td>#}
-{#                                <td class="share-col">#}
-{#                                    {% if request.user.id == cohort.owner.id %}#}
-{#                                        ( {% if cohort.shared_with_users|length %}<a data-toggle="modal" data-target="#share-cohorts-modal" data-cohort-id="{{ cohort.id }}" class="shared">{{cohort.shared_with_users|length}}</a>{% else %}0{% endif %} )#}
-{#                                    {% else %}#}
-{#                                        You#}
-{#                                    {% endif %}#}
-{#                                </td>#}
-{#                                <td class="id-col">#}
-{#                                    {{ cohort.id }}#}
-{#                                </td>#}
-{#                                <td class="date-col">{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</td>#}
-{#                            </tr>#}
-{#                        {% endif %}#}
-{#                        {% endfor %}#}
+                        {% for cohort in cohorts %}
+                        {% if cohort.owner.is_superuser == False %}
+                            <tr id="cohort-index-{{ forloop.counter }}">
+                                <td class="checkbox-col">
+                                    <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} class="cohort" type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>
+                                </td>
+                                <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</a></td>
+                                <td class="case-col">{{ cohort.case_size }}</td>
+                                <td class="sample-col"> {{ cohort.sample_size }} </td>
+                                <td class="owner-col">
+                                    {% if cohort.perm == 'Owner' %}
+                                        You
+                                    {% else %}
+                                        {{cohort.owner.first_name}} {{cohort.owner.last_name}}
+                                    {% endif %}
+                                </td>
+                                <td class="share-col">
+                                    {% if request.user.id == cohort.owner.id %}
+                                        ( {% if cohort.shared_with_users|length %}<a data-toggle="modal" data-target="#share-cohorts-modal" data-cohort-id="{{ cohort.id }}" class="shared">{{cohort.shared_with_users|length}}</a>{% else %}0{% endif %} )
+                                    {% else %}
+                                        You
+                                    {% endif %}
+                                </td>
+                                <td class="id-col">
+                                    {{ cohort.id }}
+                                </td>
+                                <td class="date-col">{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</td>
+                            </tr>
+                        {% endif %}
+                        {% endfor %}
                         </tbody>
                     </table>
                 {% else %}
@@ -331,6 +331,9 @@
     var cohort_list = {{ cohorts_listing|safe }};
     var shared_users = {{ shared_users|safe }};
     var from_workbook = {{ from_workbook|lower }};
+    var previously_selected_cohort_ids = {{ previously_selected_cohort_ids|safe }};
+    var first_page_entry=0;
+    var last_page_entry=3;
     </script>
 {% endblock %}
 
