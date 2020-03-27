@@ -81,6 +81,7 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
 
         solr_facets = build_solr_facets(list(tcia_facet_attrs), solr_query['filter_tags'] if solr_query else None)
 
+        #fields = ['Modality', 'BodyPartExamined', 'Species', 'collection_id', 'PatientID']
         solr_result = query_solr_and_format_result({
             'collection': tcia_solr.name,
             'fields': fields,

@@ -23,6 +23,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
     window.studyIdSel = [];
     window.tcgaColls = ["tcga_blca", "tcga_brca", "tcga_cesc", "tcga_coad", "tcga_esca", "tcga_gbm", "tcga_hnsc", "tcga_kich", "tcga_kirc", "tcga_kirp", "tcga_lgg", "tcga_lihc", "tcga_luad", "tcga_lusc", "tcga_ov", "tcga_prad", "tcga_read", "tcga_sarc", "tcga_stad", "tcga_thca", "tcga_ucec"];
 
+
     var plotLayout = {
         title: '',
         autosize: true,
@@ -34,6 +35,33 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             pad: 0
         },
         xaxis: {type: 'category', dtick: 1}
+    };
+
+    var pieLayout = {
+        title: '',
+        autosize: true,
+        margin: {
+            l: 30,
+            r: 30,
+            b: 60,
+            t: 30,
+            pad: 0
+        },
+        showlegend: false,
+        legend: {
+          x: 2,
+           y: 0,
+            traceorder: 'normal',
+        font: {
+          family: 'sans-serif',
+          size: 4,
+          color: '#000'
+       },
+        bgcolor: '#E2E2E2',
+        bordercolor: '#FFFFFF',
+          borderwidth: 2
+        }
+
     };
 
 
@@ -712,19 +740,44 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
 
      var plotCategoricalData=function(plotId, lbl, plotData) {
 
+        xdata= new Array();
+        ydata = new Array();
+        for (var i=0;i<plotData.dataCnt.length;i++){
+            if (plotData.dataCnt[i] >0){
+                ydata.push(plotData.dataCnt[i]);
+                xdata.push(plotData.dataLabel[i]);
+            }
+        }
+        var data = [{
+       values: ydata,
+        labels: xdata,
+        type: 'pie',
+        textposition: 'inside',
+        textinfo: 'none',
+        sort:false
+       }];
+
+       var layout = {
+        height: 400,
+         width: 500
+        };
+      pieLayout.title = lbl.toUpperCase().replace(/_/g, " ");
+Plotly.newPlot(plotId, data, pieLayout,{displayModeBar: false});
+        /*
         var pdata = [
             {
                 x: plotData.dataLabel,
                 y: plotData.dataCnt,
-                type: 'bar'
+                type: 'pie'
             }
         ];
 
         plotLayout.title = lbl;
-        Plotly.newPlot(plotId, pdata, plotLayout, {displayModeBar: false});
+        Plotly.newPlot(plotId, pdata, plotLayout, {displayModeBar: false});*/
+
 
         document.getElementById(plotId).on('plotly_click', function (data, plotId) {
-            var chartid = data.event.path[6].id;
+            var chartid = data.event.path[7].id;
             var filterId = chartid.replace("_chart","");
             if (filterId === 'age_at_diagnosis'){
                 var sel = data.points[0].x;
@@ -736,11 +789,12 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             }
             else {
                 //alert(String(data.event.path[6].id));
-                var index = data.points[0].pointIndex;
+                var label = data.points[0].label;
                 var listId = filterId + '_list';
                 var inputList = $('#'+listId).find(':input');
                 for (var i=0;i<inputList.length;i++){
-                    if (i === index){
+                   var curLabel = $(inputList[i]).parent().children()[1].innerHTML;
+                    if (label === curLabel){
                         inputList[i].checked = true;
                     }
                     else{
@@ -794,7 +848,9 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
              filterData = parseFilterForCounts(filterCat);
 
              plotId = filterCat+"_chart";
-             plotCategoricalData(plotId, filterCat, filterData);
+             lbl = $('#'+filterCat+'_heading').children()[0].innerText;
+
+             plotCategoricalData(plotId, lbl, filterData);
 
         }
 
@@ -910,6 +966,8 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
         }
      }
 
+
+
      $(document).ready(function () {
             window.filterObj.collection_id = window.tcgaColls;
             window.selItems = new Object();
@@ -927,10 +985,15 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             createPlots('search_related_set');
             addFilterBindings('search_orig_set');
             addFilterBindings('search_related_set');
+
+
             $('#age_at_diagnosis_list').addClass('hide');
             $('#age_at_diagnosis').find('.more-checks').addClass('hide');
             $('#age_at_diagnosis').find('.less-checks').addClass('hide');
             mkSlider('age_at_diagnosis',0,120,1,true);
+
+
+
 
             //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
 
