@@ -92,7 +92,8 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
             'query_string': tcga_query_filter['full_query_str'],
             'facets': solr_facets,
             'limit': 0,
-            'counts_only': counts_only
+            'counts_only': counts_only,
+            'unique': tcia_solr.shared_id_col
         })
 
         if not counts_only:
@@ -158,7 +159,8 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
                 'facets': solr_facets,
                 'limit': 0,
                 'collapse_on': tcga_solr.shared_id_col,
-                'counts_only': True
+                'counts_only': True,
+                'unique': tcga_solr.shared_id_col
             })
 
             results['clinical'] = solr_result

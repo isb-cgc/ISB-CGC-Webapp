@@ -70,7 +70,6 @@ def convert(data):
 
 
 def _decode_list(data):
-    # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     rv = []
     for item in data:
         if isinstance(item, str):
@@ -84,7 +83,6 @@ def _decode_list(data):
 
 
 def _decode_dict(data):
-    # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     rv = {}
     for key, value in list(data.items()):
         if isinstance(key, str):
