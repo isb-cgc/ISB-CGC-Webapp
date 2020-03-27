@@ -40,23 +40,21 @@ require([
     // All code which doesn't need to be accessed by other modules goes here
 
     // Eg. event listener setup
-
-
-
+    
 
 });
-
-define(['jquery',
-    'base',
-    'imagesearch',
-    'plotly',
-    'jqueryui',
-    'bootstrap'
-],function($, base, imagesearch, plotly){
-    // Setup and static/private variables here
-
-    // If this module is invoked in a RequireJS statement, this is what's available
-    return {
-
-    }
-});
+// If this module needs to be invoked via RequireJS, fill this out.
+//
+// define(['jquery',
+//     'base',
+//     'imagesearch',
+//     'plotly',
+//     'jqueryui',
+//     'bootstrap'
+// ],function($, base, imagesearch, plotly){
+//     // Setup and static/private variables here
+//
+//     return {
+//          <PROP/METHOD>: <VALUE/DEFINITION>
+//     }
+// });
