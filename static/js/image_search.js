@@ -77,7 +77,6 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
 
 // Show more/less links on categories with >6 fiilters
 
-
     var mkFiltText = function() {
         var curKeys = Object.keys(filterObj).sort();
         oStringA = new Array();
