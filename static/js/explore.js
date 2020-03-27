@@ -40,7 +40,7 @@ require([
     // All code which doesn't need to be accessed by other modules goes here
 
     // Eg. event listener setup
-    
+
 
 });
 // If this module needs to be invoked via RequireJS, fill this out.
