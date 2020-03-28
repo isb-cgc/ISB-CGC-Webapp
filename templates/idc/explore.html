@@ -4,7 +4,7 @@
 
 {% comment %}
 
-   Copyright 2015, Institute for Systems Biology
+   Copyright 2020, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,23 +21,13 @@
 {% endcomment %}
 
 {% block header %}
-
-
-    <!-- <script type="text/javascript" src="{% static 'js/libs/require.js' %}"></script> -->
-    <!-- <script type="text/javascript" src="{% static 'js/image_search.js' %}"></script> -->
      <script type="text/javascript" src="{% static 'js/libs/plotly-latest.min.js' %}"></script>
 
     <script data-main="{% static 'js/image_search.js' %}" src="{% static 'js/libs/require.js' %}"></script>
 
 
     <link type="text/css" rel="stylesheet" href="{% static 'css/search.css' %}">
-    <link href = "https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css"
-         rel = "stylesheet">
-    <!-- <link type="text/css" rel="stylesheet" href="{% static 'css/vendor.css' %}">
-    <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.css' %}"> -->
-
-
-
+    <link type="text/css" rel="stylesheet" href = "{% static jquery-ui.css %}" rel = "stylesheet">
 
 {% endblock %}
 
@@ -51,15 +41,15 @@
 {% block page_header %}
     <div class="page-heading">
         <div class="container" style="display: block;">
-                <ol class="breadcrumb">
-                    <li><a href="/dashboard/">Your Dashboard</a></li>
-                    <li><a href="/explore/">Explore</a></li>
-                    <li id="previous" style="display:none"><a href="#" onclick="javascript:selectHistoricFilter(-1)">Previous Filter</a></li>
-                    <li id="next" style="display:none"><a href="#" onclick="javascript:selectHistoricFilter(1)">Next Filter</a></li>
-                </ol>
+            <ol class="breadcrumb">
+                <li><a href="/dashboard/">Your Dashboard</a></li>
+                <li><a href="/explore/">Explore</a></li>
+                <li id="previous" style="display:none"><a href="#" onclick="javascript:selectHistoricFilter(-1)">Previous Filter</a></li>
+                <li id="next" style="display:none"><a href="#" onclick="javascript:selectHistoricFilter(1)">Next Filter</a></li>
+            </ol>
 
-                <h1 class="page-header pull-left" role="heading" aria-level="1">Explore Image Data</h1>
-                <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal" title="Please select at least one filter." disabled="disabled">Save As New Cohort</button>
+            <h1 class="page-header pull-left" role="heading" aria-level="1">Explore Image Data</h1>
+            <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal" title="Please select at least one filter." disabled="disabled">Save As New Cohort</button>
         </div>
     </div>
 {% endblock %}
@@ -73,30 +63,25 @@
    window.selItems.selProjects = new Array();
    window.selItems.selStudies = new Object();
 
-   window.collection = new Object();
-   window.collection['All'] = {{ set_attributes.total }};
-   {% for attr in set_attributes.origin_set.attributes %}
-       {% if attr.name == "collection_id" %}
-           {% for val in attr.values %}
-               {% if val.value != "None" %}
-                   window.collection['{{ val.value }}'] = {{ val.count }};
-               {% endif %}
-           {% endfor %}
-       {% endif %}
-   {% endfor %}
+   window.collection = {{ collections|tojson|safe }};
 </script>
 
 
+<<<<<<< HEAD
 
   <div class="container" style="display:block">
      <div class ="row">
 
 
+=======
+<div class="container" style="display:block">
+    <div class ="row">
+>>>>>>> de7c2a6a77bd452c11c92b03e934750a9d45c51e
         <div class="tab-content data-tab-content">
-        <input id="number_ajax" type="hidden" value="0">
-         <div class="spinner" style="display:none"><i class="fa fa-spinner fa-spin spin" style="font-family :'FontAwesome' !important"></i></div>
-
+            <input id="number_ajax" type="hidden" value="0">
+            <div class="spinner" style="display:none"><i class="fa fa-spinner fa-spin spin" style="font-family :'FontAwesome' !important"></i></div>
             <div class="tab-pane data-tab active" role="tabpanel">
+<<<<<<< HEAD
                  <div class="col-lg-3">
 
 
@@ -226,8 +211,123 @@
                             {%  endfor %}
 
 
+=======
+                <div class="col-lg-3 col-md-3">
+                    <div class="tabpanel data-tab-content-panel">
+                        <div class="panel panel-default">
+                            <div class="panel-heading clearfix"><h4 class="panel-title">Search Scope</h4></div>
+                                <div class="panel-body">
+                                    <select id="project_scope" onchange="updateSearchScope(this)">
+                                        <option  selected value="All" >All data </option>
+                                        {% for attr in set_attributes.origin_set.attributes %}
+                                              {% if attr.name == "collection_id" %}
+                                                  {% for val in attr.values %}
+                                                      {% if val.value in filters.collection_id %}
+                                                          {% if val.value != "None"  %}
+                                                               <option value="{{ val.value }}">{{ val.value }}</option>
+                                                          {% endif %}
+                                                      {% endif %}
+                                                  {% endfor %}
+                                              {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                    <span id='total' class="float-right case_count count">{{ set_attributes.total }}</span>
+                                </div>
+                             </div>
+>>>>>>> de7c2a6a77bd452c11c92b03e934750a9d45c51e
                     </div>
+                    <div class="filter-panel" role="tabpanel">
+                        <div class="tabpanel panel-default" role="tabpanel">
+                            <div class="panel-heading clearfix"><h4 class="panel-title">Configuration</h4></div>
+                            <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
+                                <li id = "search_orig" role="presentation" class="filter-tab active"><a href="#search_orig_set" role="tab" data-toggle="tab" title="orig" aria-expanded="true">Original</a></li>
+                                <li id = "search_derived" role="presentation" class="filter-tab"><a href="#search_derived_set" role="tab" data-toggle="tab" title="derived" aria-expanded="false">Derived</a></li>
+                                <li id = "search_related" role="presentation" class="filter-tab"><a href="#search_related_set" role="tab" data-toggle="tab" title="related" aria-expanded="false">Related</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div id = "search_orig_set" role="tabpanel" class="tab-pane active">
+                                    {% for attr in set_attributes.origin_set.attributes %}
+                                    {% if attr.name != "collection_id" %}
+                                     <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                         <li class="list-group-item">
+                                            <div id="{{ attr.name }}_heading" class="list-group-item__heading">
+                                                <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
+                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
+                                                </a>
+                                            </div>
+                                            <div id="{{ attr.name }}" class="collapse list-group-item__body collapse">
+                                                <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
+                                                   {% for val in attr.values %}
+                                                    <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
+                                                           <label>
+                                                               <input type="checkbox" value="{{ val.value }}">
+                                                                <span class="value">{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
+                                                            </label>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                                <p style="display: block;" >
+                                                   {% if attr.values|length > 5 %}
+                                                        <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                        <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                         </li>
+                                     </ul>
+                                    {% endif %}
+                                {%  endfor %}
+                                </div>
+                                <div id = "search_derived_set" role="tabpanel" class="tab-pane">
+                                    <ul class="list-group" role="tablist", aria-multiselectable="true">
+                                        <li class="list-group-item">
+                                            <div id="segmentation_heading" class="list-group-item__heading">
+                                                <a role="button" data-toggle="collapse"  href="#segmentation" aria-expanded="false" aria-controls="segmentation" class="">
+                                                <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>Segmentation</a>
+                                            </div>
+                                            <div id="segmentation" class="collapse list-group-item__body">
+                                                <ul style="list-style: none;">
+                                                    <li>&emsp;<input type="checkbox" value="yes">&emsp;Segmentation Available</li>
+                                                    <li>&emsp;<input type="checkbox" value="no">&emsp;Segmentation Not Available</li>
+                                                </ul>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div id = "search_related_set" role="tabpanel" class="tab-pane">
+                                {% for attr in set_attributes.related_set.attributes %}
+                                     <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                         <li class="list-group-item">
+                                             <div id="{{ attr.name }}_heading" class="list-group-item__heading">
+                                                 <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
+                                                     <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
+                                                 </a>
+                                             </div>
+                                             <div id="{{ attr.name }}" class="collapse list-group-item__body collapse">
+                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
+                                                 {% for val in attr.values %}
+                                                     <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
+                                                         <label>
+                                                             <input type="checkbox" value="{{ val.value }}">
+                                                                <span class="value">{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
+                                                        </label>
+                                                     </li>
+                                                {% endfor %}
+                                                </ul>
+                                                <p style="display: block;" >
+                                                {% if attr.values|length > 5 %}
+                                                    <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                    <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                {% endif %}
+                                                </p>
+                                           </div>
+                                        </li>
+                                     </ul>
+                                {%  endfor %}
+                                </div>
+                            </div>
                         </div>
+<<<<<<< HEAD
                          </div>
                       </div>
                  </div>
@@ -237,58 +337,63 @@
                  <div class="col-lg-9 col-md-9">
                      <div class="tabpanel data-tab-content-panel">
                          <div class="panel panel-default">
+=======
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-9 col-md-9">
+                <div class="tabpanel data-tab-content-panel">
+                     <div class="panel panel-default">
+>>>>>>> de7c2a6a77bd452c11c92b03e934750a9d45c51e
                          <div class="panel-heading clearfix"><h4 class="panel-title">Filter Definition</h4></div>
                          <div class="panel-body">
-                                <div id ="search_def"></div>
+                             <div id ="search_def"><span class="placeholder">&nbsp;</span></div>
                          </div>
-                         </div>
-                     </div>
-                     <div class="filter-panel panel" role="tabpanel">
-                          <div class="tabpanel panel-default" role="tabpanel">
-                              <div class="panel-heading clearfix"><h4 class="panel-title">Search Results</h4></div>
-                              <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
-                                 <li id = "results_orig" role="presentation" class="filter-tab active"><a href="#results_orig_set" role="tab" data-toggle="tab" title="orig" aria-expanded="true">Original</a></li>
-                                 <li id = "results_derived" role="presentation" class="filter-tab"><a href="#results_derived_set" role="tab" data-toggle="tab" title="derived" aria-expanded="false">Derived</a></li>
-                                 <li id = "results_related" role="presentation" class="filter-tab"><a href="#results_related_set" role="tab" data-toggle="tab" title="related" aria-expanded="false">Related</a></li>
-                              </ul>
-                             <div class="tab-content">
-                               <div id = "results_orig_set" role="tabpanel" class="tab-pane active panel">
-                                    <div class="panel-body bar-charts-div">
-                                         {% for attr in set_attributes.origin_set.attributes %}
-                                             <div id="{{ attr.name  }}_chart" class="bar-chart"></div>
-                                        {%  endfor %}
-
-                                    </div>
-                               </div>
-                             <div id = "results_derived_set" role="tabpanel" class="tab-pane panel">
-                                 <div class="panel-body bar-charts-div"></div>
-                             </div>
-
-                             <div id = "results_related_set" role="tabpanel" class="tab-pane panel">
-                                 <div class="panel-body bar-charts-div related-graphs">
-                                     {% for attr in set_attributes.related_set.attributes %}
-                                             <div id="{{ attr.name  }}_chart" class="bar-chart"></div>
-                                        {%  endfor %}
-
-                                 </div>
-                                 <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="showMoreGraphs()">Show More</button></div>
-                                 <div class="less-graphs" style="display: none; width:100%"><button class="btn btn-link" role="button" onclick="showLessGraphs()">Show Less</button></div>
-                             </div>
-                            </div>
-                          </div>
                     </div>
-                    <div class="tabpanel data-tab-content-panel">
-                         <div class="panel panel-default">
+                </div>
+                <div class="filter-panel panel" role="tabpanel">
+                    <div class="tabpanel panel-default" role="tabpanel">
+                        <div class="panel-heading clearfix"><h4 class="panel-title">Search Results</h4></div>
+                        <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
+                            <li id = "results_orig" role="presentation" class="filter-tab active"><a href="#results_orig_set" role="tab" data-toggle="tab" title="orig" aria-expanded="true">Original</a></li>
+                            <li id = "results_derived" role="presentation" class="filter-tab"><a href="#results_derived_set" role="tab" data-toggle="tab" title="derived" aria-expanded="false">Derived</a></li>
+                            <li id = "results_related" role="presentation" class="filter-tab"><a href="#results_related_set" role="tab" data-toggle="tab" title="related" aria-expanded="false">Related</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div id = "results_orig_set" role="tabpanel" class="tab-pane active panel">
+                                <div class="panel-body bar-charts-div">
+                                     {% for attr in set_attributes.origin_set.attributes %}
+                                         <div id="{{ attr.name  }}_chart" class="bar-chart"></div>
+                                    {%  endfor %}
+                                </div>
+                            </div>
+                            <div id = "results_derived_set" role="tabpanel" class="tab-pane panel">
+                                <div class="panel-body bar-charts-div"></div>
+                            </div>
+                            <div id = "results_related_set" role="tabpanel" class="tab-pane panel">
+                                 <div class="panel-body bar-charts-div related-graphs">
+                                    {% for attr in set_attributes.related_set.attributes %}
+                                        <div id="{{ attr.name  }}_chart" class="bar-chart"></div>
+                                    {%  endfor %}
+                                </div>
+                                <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="showMoreGraphs()">Show More</button></div>
+                                <div class="less-graphs" style="display: none; width:100%"><button class="btn btn-link" role="button" onclick="showLessGraphs()">Show Less</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tabpanel data-tab-content-panel">
+                    <div class="panel panel-default">
                          <div class="panel-heading clearfix"><h4 class="panel-title">Collections</h4></div>
                          <div class="panel-body">
-                                <table >
-                             <thead id="projects_table_head">
-                             <tr>
-                                <th>Collection Name</th><th>Total # of Patients</th><th># of Patients(this cohort)</th>
-                             </tr>
-                             </thead>
-                             <tbody id="projects_table" class="set_height">
-                             {% for attr in set_attributes.origin_set.attributes %}
+                            <table>
+                                <thead id="projects_table_head">
+                                    <tr>
+                                        <th>Collection Name</th><th>Total # of Patients</th><th># of Patients(this cohort)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="projects_table" class="set_height">
+                                {% for attr in set_attributes.origin_set.attributes %}
                                       {% if attr.name == "collection_id" %}
                                           {% for val in attr.values %}
                                               {% if val.value in filters.collection_id %}
@@ -298,55 +403,52 @@
                                               {% endif %}
                                           {% endfor %}
                                       {% endif %}
-                             {% endfor %}
-
-                             </tbody>
-                          </table>
-                         </div>
+                                {% endfor %}
+                                </tbody>
+                            </table>
                          </div>
                      </div>
+                </div>
+                <div class="tabpanel data-tab-content-panel">
+                     <div class="panel panel-default">
+                         <div class="panel-heading clearfix"><h4 class="panel-title">Selected Studies</h4></div>
+                         <div class="panel-body">
+                               <table >
+                              <thead id="studies_table_head">
+                             <tr>
+                                 <th >Project Name </th><th >Patient Id</th><th>Study Id</th><th>Study Description</th>
+                             </tr>
+                              </thead>
 
-                      <div class="tabpanel data-tab-content-panel">
-                         <div class="panel panel-default">
-                             <div class="panel-heading clearfix"><h4 class="panel-title">Selected Studies</h4></div>
-                             <div class="panel-body">
-                                   <table >
-                                  <thead id="studies_table_head">
-                                 <tr>
-                                     <th >Project Name </th><th >Patient Id</th><th>Study Id</th><th>Study Description</th>
-                                 </tr>
-                                  </thead>
-
-                                 <tbody  id="studies_table" class="set_height">
-                                  </tbody>
-                              </table >
-                             </div>
+                             <tbody  id="studies_table" class="set_height">
+                              </tbody>
+                          </table >
                          </div>
                      </div>
-
-                     <div class="tabpanel data-tab-content-panel">
-                         <div class="panel panel-default">
-                             <div class="panel-heading clearfix"><h4 class="panel-title">Selected Series</h4></div>
-                             <div class="panel-body">
-                                    <table>
-                                 <thead id="series_table_head">
-                                  <tr>
-                                    <th>Study Id</th><th>Series Number</th><th>Series Id</th><th>Modality</th><th>Body Part Examined</th><th>Series Description</th>
-                                  </tr>
-                                  </thead>
-
-                                  <tbody id="series_table" class="set_height">
-
-                                  </tbody>
-                              </table>
-                             </div>
+                </div>
+                <div class="tabpanel data-tab-content-panel">
+                     <div class="panel panel-default">
+                         <div class="panel-heading clearfix"><h4 class="panel-title">Selected Series</h4></div>
+                         <div class="panel-body">
+                             <table>
+                                <thead id="series_table_head">
+                                    <tr>
+                                        <th>Study Id</th><th>Series Number</th><th>Series Id</th><th>Modality</th><th>Body Part Examined</th><th>Series Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="series_table" class="set_height"></tbody>
+                             </table>
                          </div>
                      </div>
+<<<<<<< HEAD
                  </div>
 
+=======
+                </div>
+>>>>>>> de7c2a6a77bd452c11c92b03e934750a9d45c51e
             </div>
-             </div>
         </div>
+<<<<<<< HEAD
 
 </div>
 
@@ -391,3 +493,15 @@
 {% endblock %}
 
 
+=======
+    </div>
+</div>
+
+{% endblock %}
+
+{% block js_file %}
+    <script type="text/javascript" src="{% static 'js/libs/plotly-latest.min.js' %}"></script>
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'js/explore.js' %}"></script>
+{% endblock %}
+>>>>>>> de7c2a6a77bd452c11c92b03e934750a9d45c51e

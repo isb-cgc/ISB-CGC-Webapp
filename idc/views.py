@@ -70,7 +70,6 @@ def convert(data):
 
 
 def _decode_list(data):
-    # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     rv = []
     for item in data:
         if isinstance(item, str):
@@ -84,7 +83,6 @@ def _decode_list(data):
 
 
 def _decode_dict(data):
-    # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     rv = {}
     for key, value in list(data.items()):
         if isinstance(key, str):
@@ -502,11 +500,18 @@ def explore_data_page(request):
                             attr_by_source[set]['attributes'][x] = {}
                     else:
                         del attr_by_source[set]['attributes'][x]
+                if set == 'origin_set':
+                    context['collections'] = {a: attr_by_source[set]['attributes']['collection_id'][a]['count'] for a in attr_by_source[set]['attributes']['collection_id']}
+                    context['collections']['All'] = faceted_counts['total']
             else:
                 attr_by_source[set]['attributes'] = [{'name': x,
                  'display_name': attr_by_source[set]['attributes'][x]['obj'].display_name,
                  'values': attr_by_source[set]['attributes'][x]['vals']
                  } for x in attr_filter[set]]
+                if set == 'origin_set':
+                    context['collections'] = {b['value']: b['count'] for a in attr_by_source[set]['attributes'] for
+                                              b in a['values'] if a['name'] == 'collection_id' }
+                    context['collections']['All'] = faceted_counts['total']
             if not counts_only:
                 attr_by_source[set]['docs'] = faceted_counts['docs']
 
@@ -517,9 +522,9 @@ def explore_data_page(request):
 
         context['set_attributes'] = attr_by_source
         context['filters'] = filters
+
         if with_clinical:
             context['tcga_collections'] = tcga_in_tcia
-
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")

@@ -105,7 +105,6 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
 
 // Show more/less links on categories with >6 fiilters
 
-
     var mkFiltText = function() {
         var curKeys = Object.keys(filterObj).sort();
         oStringA = new Array();
@@ -130,9 +129,9 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
         }
         if (oStringA.length > 0) {
             var oString = oStringA.join(" AND");
-            document.getElementById("search_def").innerHTML = oString;
+            document.getElementById("search_def").innerHTML = '<p>'+oString+'</p>';
         } else {
-            document.getElementById("search_def").innerHTML = "";
+            document.getElementById("search_def").innerHTML = '<span class="placeholder">&nbsp;</span>';
         }
         //alert(oString);
     }

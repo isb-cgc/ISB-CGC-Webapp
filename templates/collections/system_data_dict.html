@@ -54,4 +54,7 @@
 
 {% endblock %}
 
-{% block js_file %}{% static 'js/data_upload.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/data_upload.js' %}"></script>
+{% endblock %}
