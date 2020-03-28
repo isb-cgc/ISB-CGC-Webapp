@@ -83,10 +83,9 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
 
         solr_facets = build_solr_facets(list(tcia_facet_attrs), solr_query['filter_tags'] if solr_query else None, unique='PatientID')
 
-
         # Collapse and unique faceted counting can't be used together, so we have to request twice - once to collapse on the requested
         # field and once to faceted count
-        solr_result = query_solr_and_format_result({
+        solr_counts = query_solr_and_format_result({
             'collection': tcia_solr.name,
             'fields': None,
             'fqs': query_set,
