@@ -1,6 +1,7 @@
 window.config = {
   routerBasename: '/',
   whiteLabelling: {},
+  filterQueryParam: true,
   enableGoogleCloudAdapter: true,
   healthcareApiEndpoint: 'https://healthcare.googleapis.com/v1beta1',
   servers: {
@@ -28,4 +29,5 @@ window.config = {
     },
   ],
   studyListFunctionsEnabled: true,
+
 };

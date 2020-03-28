@@ -18,15 +18,22 @@ import logging
 import re
 from idc_collections.models import DataSource, Attribute, Attribute_Display_Values, Program, DataVersion
 from solr_helpers import *
-from idc_collections.collex_metadata_utils import get_bq_metadata, get_bq_string
+from idc_collections.collex_metadata_utils import get_bq_metadata, get_bq_facet_counts
 from django.conf import settings
 
 logger = logging.getLogger('main_logger')
 
 
+def retTuple(x, order_docs):
+    tlist = []
+    for field in order_docs:
+        if field in x:
+            tlist.push(x[field])
+    return tuple(tlist)
+
 
 # Fetch metadata from Solr
-def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, with_clinical = True, collapse_on = 'PatientID' ):
+def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, with_clinical = True, collapse_on = 'PatientID', order_docs='[]' ):
     try:
         results = {'docs': None, 'facets': {}}
 
@@ -43,6 +50,8 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
         tcia_facet_attrs = tcia_solr.get_collection_attr(for_ui=True).values_list('name', flat=True)
         tcia_filter_attrs = tcia_solr.get_collection_attr(for_faceting=False).values_list('name', flat=True)
 
+        tcia_fields = [x for x in fields if x in tcia_filter_attrs]
+
         solr_query = None
         if len(filters):
             solr_query = build_solr_query(filters, with_tags_for_ex=True)
@@ -53,7 +62,7 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
         query_filter = {
             'collection_id': [x.lower().replace("-","_") for x in list(tcga_in_tcia.values_list('name', flat=True))]
         }
-        tcga_query_filter = build_solr_query(query_filter)
+        tcga_query_filter = build_solr_query(query_filter, with_tags_for_ex=True)
 
         query_set = []
 
@@ -72,23 +81,49 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
                 tcga_solr.shared_id_col, tcga_solr.name, tcia_solr.shared_id_col
             ))
 
-        solr_facets = build_solr_facets(list(tcia_facet_attrs), solr_query['filter_tags'] if solr_query else None)
+        solr_facets = build_solr_facets(list(tcia_facet_attrs), solr_query['filter_tags'] if solr_query else None, unique='PatientID')
 
-        solr_result = query_solr_and_format_result({
+        # Collapse and unique faceted counting can't be used together, so we have to request twice - once to collapse on the requested
+        # field and once to faceted count
+        solr_counts = query_solr_and_format_result({
             'collection': tcia_solr.name,
-            'fields': fields,
+            'fields': None,
             'fqs': query_set,
             'query_string': tcga_query_filter['full_query_str'],
             'facets': solr_facets,
-            'limit': record_limit,
-            'collapse_on': collapse_on,
-            'counts_only': counts_only
+            'limit': 0,
+            'counts_only': counts_only,
+            'unique': tcia_solr.shared_id_col
         })
-        if not counts_only:
-            results['docs'] = solr_result['docs']
 
-        results['facets']['cross_collex'] = solr_result['facets']
-        results['total'] = solr_result['numFound']
+        if not counts_only:
+            solr_result = query_solr_and_format_result({
+                'collection': tcia_solr.name,
+                'fields': tcia_fields,
+                'fqs': query_set,
+                'query_string': tcga_query_filter['full_query_str'],
+                'collapse_on': collapse_on,
+                'counts_only': counts_only,
+                'limit': record_limit
+            })
+            results['docs'] = solr_result['docs']
+            if 'SeriesNumber' in fields:
+                for res in results['docs']:
+                    res['SeriesNumber'] = res['SeriesNumber'][0]
+            if (len(order_docs)>0):
+                results['docs'] = sorted(results['docs'], key=lambda x: tuple([x[item] for item in order_docs]))
+            results['total'] = solr_result['numFound']
+        else:
+            results['total'] = solr_counts['numFound']
+
+        results['facets']['cross_collex'] = solr_counts['facets']
+        if 'BodyPartExamined' in solr_counts['facets']:
+            if 'Kidney' in results['facets']['cross_collex']['BodyPartExamined'] and 'KIDNEY' in results['facets']['cross_collex']['BodyPartExamined']:
+                results['facets']['cross_collex']['BodyPartExamined']['KIDNEY'] = results['facets']['cross_collex']['BodyPartExamined']['KIDNEY'] + results['facets']['cross_collex']['BodyPartExamined']['Kidney']
+                del results['facets']['cross_collex']['BodyPartExamined']['Kidney']
+            elif 'Kidney' in results['facets']['cross_collex']['BodyPartExamined']:
+                results['facets']['cross_collex']['BodyPartExamined']['KIDNEY'] = results['facets']['cross_collex']['BodyPartExamined']['Kidney']
+                del results['facets']['cross_collex']['BodyPartExamined']['Kidney']
 
         if with_clinical:
             # The attributes being faceted against here would be whatever list of facet counts we want to display in the
@@ -96,7 +131,7 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
             solr_facets = build_solr_facets(list(tcga_facet_attrs), solr_query['filter_tags'])
 
             query_set = []
-
+            joined = False
             # Ancilary data faceting and querying
             if solr_query['queries'] is not None:
                 for attr in solr_query['queries']:
@@ -105,8 +140,14 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
                         query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
                             tcia_solr.shared_id_col, tcia_solr.name, tcga_solr.shared_id_col
                         )) + solr_query['queries'][attr])
+                        joined = True
                     else:
                         query_set.append(solr_query['queries'][attr])
+
+            if not joined:
+                query_set.append("{!join %s}*:*" % "from={} fromIndex={} to={}".format(
+                    tcia_solr.shared_id_col, tcia_solr.name, tcga_solr.shared_id_col
+                ))
 
             # Fields is hardlocked to None for all Ancillary data because we don't display them,
             # we only faceted count
@@ -118,7 +159,8 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
                 'facets': solr_facets,
                 'limit': 0,
                 'collapse_on': tcga_solr.shared_id_col,
-                'counts_only': True
+                'counts_only': True,
+                'unique': tcga_solr.shared_id_col
             })
 
             results['clinical'] = solr_result

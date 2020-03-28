@@ -1,24 +1,23 @@
 
 require.config({
-    baseUrl: '/static/js/',
+    baseUrl: STATIC_FILES_URL + 'js/',
     paths: {
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security/script',
         plotly: 'libs/plotly-latest.min',
-
+        base: 'base'
     },
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
     }
 });
 
 
-require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], function($, jquery, jqueryui, bootstrap, session_security, plotly,  _)
-{
+require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
+    function($, jqueryui, bootstrap, plotly) {
+
     window.filterObj = {};
     window.projIdSel = [];
     window.studyIdSel = [];
@@ -38,60 +37,45 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
     };
 
 
-    window.resetAge = function() {
-        $("#age_slide").slider("values", "0", 0);
-        $("#age_slide").slider("values", "1", 120);
+
+
+    window.setSlider = function(divName,reset,strt,end,isInt) {
+        slideDiv= divName + "_slide";
+        if (reset){
+            strt = $('#'+slideDiv).slider("option","min");
+            end = $('#'+slideDiv).slider("option","max");
+        }
+        $('#'+slideDiv).slider("values", "0", strt);
+        $('#'+slideDiv).slider("values", "1", end);
+
+        var inpDiv = divName + "_input";
+        var val = String(strt)+"-"+String(end);
+
         // $("#inp_age_slide").value="0-120";
-        document.getElementById("inp_age_slide").value = "0-120";
-        if (filterObj.hasOwnProperty("age_at_diagnosis_btw")) {
-            delete filterObj["age_at_diagnosis_btw"];
+        document.getElementById(inpDiv).value = val;
+        filtAtt = divName + '_btw'
+        if (reset) {
+            if (window.filterObj.hasOwnProperty("age_at_diagnosis_btw")) {
+                delete window.filterObj["age_at_diagnosis_btw"];
+            }
+        }
+        else{
+            var attVal=[];
+            if (isInt){
+                attVal = [ parseInt(strt), parseInt(end)  ];
+            }
+            else{
+                attVal = [ parseFloat(strt), parseFloat(end)  ];
+            }
+            window.filterObj[filtAtt] = attVal
         }
 
         mkFiltText();
-        fetchCountData(false);
+        updateFacetsData(true);
 
     }
 
 // Show more/less links on categories with >6 fiilters
-
-    var filterItemBindings = function (filterId, checkBoxDiv, displaySet, header, attributeName, isImageAttr, isRangeAttr) {
-        $('#' + filterId).find('.checkbox').find(':input').on('click', function () {
-            updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, isImageAttr, isRangeAttr);
-        });
-
-        $('#' + filterId).find('.show-more').on('click', function () {
-            $('#' + filterId).find('.extra-values').show();
-            $('#' + filterId).find('.less-checks').show();
-            $('#' + filterId).find('.more-checks').hide();
-        });
-
-
-        $('#' + filterId).find('.show-less').on('click', function () {
-            $('#' + filterId).find('.extra-values').hide();
-            $('#' + filterId).find('.more-checks').show();
-            $('#' + filterId).find('.less-checks').hide();
-        });
-
-        $('#' + filterId).find('.check-all').on('click', function () {
-            $('#' + filterId).find('.checkbox').find('input').prop('checked', true);
-            updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, isImageAttr, isRangeAttr);
-            //$('#'+filterId).find('.checkbox').find('input').each(function(){
-            //  $(this).triggerHandler('change');
-            //});
-        });
-
-        $('#' + filterId).find('.uncheck-all').on('click', function () {
-            $('#' + filterId).find('.checkbox').find('input').prop('checked', false);
-            updateFilterSelection(checkBoxDiv, displaySet, header, attributeName, isImageAttr, isRangeAttr);
-            //$('#'+filterId).find('.checkbox').find('input').each(function(){
-            //  $(this).triggerHandler('change');
-            //});
-        });
-
-
-    }
-
-
 
     var mkFiltText = function() {
         var curKeys = Object.keys(filterObj).sort();
@@ -136,59 +120,79 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         $('.related-graphs').animate({height: '200px'}, 800);
     }
 
-    var mkSlider = function(divName, inpDiv, displaySet, header, attributeName, isInt) {
-        $("#" + divName).slider({
-            values: [0, 120],
-            step: 1,
-            min: 0,
-            max: 120,
+    var mkSlider = function(divName,min,max,step,isInt) {
+
+         var slideName = divName +'_slide';
+         var inpName = divName + '_input';
+         var strtInp = min + '-' + max;
+         var filtName = divName + '_btw';
+        $('#' + divName).append('<div id="'+ slideName + '"></div>  <input id="'+ inpName +'" type="text" value="'+ strtInp + '"> <button onclick=\'setSlider("'+divName+'",true,0,0,'+String(isInt)+')\'>Reset</button>');
+
+        $('#'+slideName).slider({
+            values: [min, max],
+            step: step,
+            min: min,
+            max: max,
             range: true,
             slide: function (event, ui) {
-                $("#" + inpDiv).val(ui.values[0] + "-" + ui.values[1]);
+                $('#' + inpName).val(ui.values[0] + "-" + ui.values[1]);
             },
             stop: function (event, ui) {
-                updateSliderSelection(inpDiv, displaySet, header, attributeName, isInt);
+             //   updateSliderSelection(inpDiv, displaySet, header, attributeName, isInt);
+
+             var val = $('#'+inpName)[0].value;
+             var valArr = val.split('-');
+             var attVal =[];
+             if (isInt) {
+                 attVal = [parseInt(valArr[0]), parseInt(valArr[1])];
+             }
+             else{
+                 attVal = [parseFloat(valArr[0]), parseFloat(valArr[1])];
+             }
+             window.filterObj[filtName] = attVal;
+             mkFiltText();
+             updateFacetsData(true);
+
             }
         });
     }
 
 
-    window.editProjectsTable = function(tableId, scopeId) {
-        var project_scope = document.getElementById(scopeId).selectedOptions[0].value;
 
+    var editProjectsTableAfterFilter = function(tableId, scopeId) {
+        var selectedElem = document.getElementById(scopeId).selectedOptions[0];
+        var project_scope = selectedElem.value;
+        var curCount = collection[project_scope];
         var tableElem = document.getElementById(tableId);
-        var countElems = $(tableElem).find('.projects_table_num_cohort');
-        //countElems.forEach( function(element) { element.innerHTML='0'});
-        for (i = 0; i < countElems.length; i++) {
-            countElems[i].innerHTML = '0';
+        var tableRows =$(tableElem).find('tr');
+        for (var i=0;i<tableRows.length;i++){
+            var curRow= $(tableRows)[i];
+            var projId = curRow.id.replace('project_row_','');
+            var newTot = String(window.collection[projId]);
+            var newCohortCol = 'patient_col_'+String(projId);
+            document.getElementById(newCohortCol).innerHTML = newTot;
+
+            var patientElemId = 'patient_col_' + projId;
+
+            if ((project_scope === 'All') || (project_scope === projId)) {
+                 document.getElementById(patientElemId).innerHTML = String(window.collection[projId]);
+                 curRow.classList.remove('hide');
+                 if (project_scope === projId){
+                     window.selItems.selProjects.push(projId);
+                     curRow.classList.add("selected_grey");
+                     window.selItems.selProjects = [projId];
+                 }
+            }
+            else{
+                if (window.selItems.selStudies.hasOwnProperty(projId)){
+                    delete window.selItems.selStudies[projId];
+                }
+                curRow.classList.add('hide');
+                curRow.classList.remove("selected_grey");
+                document.getElementById(patientElemId).innerHTML = '0';
+            }
         }
 
-        var projKeys = Object.keys(originalDataCounts.collection_id);
-        for (i = 0; i < projKeys.length; i++) {
-            var idStr = projKeys[i]
-            var countStr = originalDataCounts.collection_id[idStr].toString();
-            var patientElemId = 'patient_col_' + idStr;
-            if (document.getElementById(patientElemId)) {
-                if ((project_scope === 'All') || (project_scope === idStr)) {
-                    document.getElementById(patientElemId).innerHTML = countStr
-                }
-            }
-            var projectElemId = 'project_row_' + idStr;
-            if (document.getElementById(projectElemId)) {
-                if ((project_scope === 'All') || (project_scope === idStr)) {
-                    document.getElementById(projectElemId).classList.remove('hide');
-                    if (project_scope === idStr){
-                        document.getElementById(projectElemId).classList.add("selected_grey");
-                        window.projIdSel = [idStr];
-                        addStudyOrSeries([idStr], [], "studies_table");
-                     }
-                } else {
-                    document.getElementById(projectElemId).classList.add('hide');
-                }
-
-            }
-
-        }
 
     }
 
@@ -219,13 +223,8 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         tableElem.innerHTML = newInnerHTML;
     }
 
-    window.resetTables = function(projectId, studyId, seriesId) {
+    var resetSeriesAndStudiesTables = function(studyId, seriesId) {
 
-        projRows = $('#' + projectId).find(".selected_grey");
-        for (i = 0; i < projRows.length; i++) {
-            projRow = projRows[i];
-            $(projRow).removeClass("selected_grey");
-        }
         tableElem = document.getElementById(studyId);
         //var newInnerHTML = '<tr><th>Project Name</th><th>Patient Id</th><th>Study Id</th><th>Study Description</th></tr>';
         tableElem.innerHTML = '';
@@ -243,24 +242,46 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         }
         if (projRow.classList.contains("selected_grey")) {
             $(projRow).removeClass("selected_grey");
-            projPos = window.projIdSel.indexOf(projectId)
+            projPos = window.selItems.selProjects.indexOf(projectId)
             if (projPos > -1) {
-                projIdSel.splice(projPos, 1);
+                 window.selItems.selProjects.splice(projPos, 1);
             }
-            removeStudiesAndSeries(projectId, "studies_table")
+            if (projectId in window.selItems.selStudies){
+                delete window.selItems.selStudies[projectId];
+            }
+            removeStudiesAndSeries(projectId, "studies_table","series_table")
 
         } else {
             $(projRow).addClass("selected_grey");
-            window.projIdSel.push(projectId);
-            addStudyOrSeries([projectId], [], "studies_table");
+            window.selItems.selProjects.push(projectId);
+            addStudyOrSeries([projectId], [], "studies_table", false);
         }
     }
 
     window.toggleStudy = function(studyRow, studyId, projectId) {
+
         if (studyRow.classList.contains("selected_grey")) {
             $(studyRow).removeClass("selected_grey");
             removeSeries(studyRow.id, "series_table");
+            if (window.selItems.selStudies.hasOwnProperty(projectId)){
+
+                   studyPos = window.selItems.selStudies[projectId].indexOf(studyId);
+                   if (studyPos > -1) {
+                       window.selItems.selStudies[projectId].splice(studyPos, 1);
+                       if (window.selItems.selStudies[projectId].length ==0){
+                           delete window.selItems.selStudies[projectId];
+                       }
+                   }
+             }
+
+
         } else {
+
+            if (!(window.selItems.selStudies.hasOwnProperty(projectId))){
+                   window.selItems.selStudies[projectId] = new Array();
+             }
+            window.selItems.selStudies[projectId].push(studyId);
+
             $(studyRow).addClass("selected_grey");
             addStudyOrSeries([projectId], [studyId], "series_table", false);
         }
@@ -270,32 +291,75 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         var pclass = "project_" + projectId;
         var studiesTable = document.getElementById(studyTableId);
         $('#' + studyTableId).find('.project_' + projectId).remove();
-        removeSeries(pclass, 'series_table');
+            if (window.selItems.selStudies.hasOwnProperty(projectId)){
+                delete window.selItems.selStudies[projectId];
+             }
+
+        removeSeries(pclass, seriesTableId);
     }
 
     window.removeSeries = function(selClass, seriesTableId) {
         $('#' + seriesTableId).find('.' + selClass).remove();
     }
 
-    window.addStudyOrSeries = function(projectIdArr, studyIdArr, tableId, refresh) {
+    var changeAjax = function(isIncrement){
+        if (isIncrement){
+            $('#number_ajax')[0].value = String(parseInt($('#number_ajax')[0].value)+1);
+        }
+        else{
+            $('#number_ajax')[0].value = String(parseInt($('#number_ajax')[0].value)-1);
+        }
+        //alert($('#number_ajax')[0].value)
 
-        curFilterObj = JSON.parse(JSON.stringify(filterObj));
+        if ( $('#number_ajax')[0].value === '0'){
+            $('.spinner').hide();
+        }
+        else{
+            $('.spinner').show();
+        }
+
+    }
+
+    var pretty_print_id = function(id){
+        var newId = id.slice(0,12)+'...'+id.slice(id.length-12,id.length);
+        return newId;
+    }
+
+    window.addStudyOrSeries = function(projectIdArr, studyIdArr, tableId, refresh) {
+        changeAjax(true);
+        var curSelStudiesDic = new Object();
+        var newSelStudies = new Object();
+
+        var curFilterObj = JSON.parse(JSON.stringify(filterObj));
         curFilterObj.collection_id = projectIdArr;
         var isSeries = false;
         if (studyIdArr.length > 0) {
             curFilterObj.StudyInstanceUID = studyIdArr;
             isSeries = true;
         }
-
-        filterStr = JSON.stringify(curFilterObj);
-        fields = ["collection_id", "PatientID", "StudyInstanceUID", "StudyDescription", "StudyDate"];
-        collapse_on = 'StudyInstanceUID'
-        if (isSeries) {
-            fields = ["collection_id", "PatientID", "StudyInstanceUID", "SeriesInstanceUID", "Modality", "BodyPartExamined", "SeriesNumber"];
-            collapse_on = 'SeriesInstanceUID'
+        else if(refresh){
+            for (projId in window.selItems.selStudies){
+                curSelStudiesDic[projId] = new Object();
+                for (var i=0;i<window.selItems.selStudies[projId].length;i++){
+                     var curStudy =  window.selItems.selStudies[projId][i];
+                     curSelStudiesDic[projId][curStudy] = 1;
+                }
+            }
         }
-        fieldStr = JSON.stringify(fields);
-        let url = '/idc/filtered/?counts_only=False&collapse_on=' + collapse_on + '&with_clinical=False&filters=' + filterStr + '&fields=' + fieldStr;
+
+        var filterStr = JSON.stringify(curFilterObj);
+        var fields = ["collection_id", "PatientID", "StudyInstanceUID", "StudyDescription", "StudyDate"];
+        var collapse_on = 'StudyInstanceUID'
+        var order_docs =["collection_id", "PatientID", "StudyInstanceUID"];
+        if (isSeries) {
+            fields = ["collection_id", "PatientID", "StudyInstanceUID", "SeriesInstanceUID", "Modality", "BodyPartExamined", "SeriesNumber","SeriesDescription"];
+            collapse_on = 'SeriesInstanceUID'
+            order_docs =["collection_id", "PatientID", "StudyInstanceUID","SeriesNumber"];
+        }
+
+        var fieldStr = JSON.stringify(fields);
+        var orderDocStr =  JSON.stringify(order_docs);
+        let url = '/explore/?counts_only=False&is_json=True&collapse_on=' + collapse_on + '&with_clinical=False&filters=' + filterStr + '&fields=' + fieldStr + '&order_docs=' + orderDocStr;
         url = encodeURI(url);
 
         $.ajax({
@@ -305,29 +369,48 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
             contentType: 'application/x-www-form-urlencoded',
             success: function (data) {
                 //nstart = new Date().getTime();
-                for (i = 0; i < data['docs'].length; i++) {
-                    curData = data['docs'][i]
+                for (i = 0; i < data['origin_set']['docs'].length; i++) {
+                    var curData = data['origin_set']['docs'][i];
                     var projectId = curData.collection_id;
                     var patientId = curData.PatientID;
                     var studyId = curData.StudyInstanceUID;
+                    var ppStudyId = pretty_print_id(studyId);
                     var fetchUrl = '/projects/chc-tcia/locations/us-central1/datasets/' + projectId.replace('_', '-') + '/dicomStores/' + projectId.replace('_', '-') + '/study/' + studyId;
-                    var hrefTxt = '<a href="' + fetchUrl + '" target="_blank">' + studyId + '</a>';
+                    var hrefTxt = '<a href="' + fetchUrl + '" target="_blank">' + ppStudyId + '</a><span class="tooltiptext_ex">' + studyId + '</span>';
                     var pclass = 'project_' + projectId;
+                    var newHtml='';
                     if (isSeries) {
                         var seriesId = curData.SeriesInstanceUID;
+                        var ppSeriesId = pretty_print_id(seriesId);
+                        var seriesNumber = String(curData.SeriesNumber);
+                        var seriesDescription = curData.SeriesDescription;
                         var bodyPartExamined = curData.BodyPartExamined;
                         var modality = curData.Modality;
                         var rowId = 'series_' + seriesId.replace(/\./g, '-')
                         var studyClass = 'study_' + studyId.replace(/\./g, '-');
-                        var newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1">' + hrefTxt + '</td><td class="col2">' + seriesId + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td></tr>'
+                        var fetchUrlSeries = fetchUrl+'?SeriesInstanceUID='+seriesId;
+                        var hrefSeriesTxt = '<a href="' + fetchUrlSeries + '" target="_blank">' + ppSeriesId + '</a><span class="tooltiptext_ex">' + seriesId + '</span>';
+                        var seriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
+                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col2 tooltip_ex">' + seriesTxt + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td></tr>';
 
                     } else {
 
                         var studyDescription = curData.StudyDescription;
                         //var studyDate = curData.StudyDate;
                         var rowId = 'study_' + studyId.replace(/\./g, '-');
-                        var newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td></tr>'
 
+                        if ( refresh && (projectId in curSelStudiesDic) && (studyId in curSelStudiesDic[projId]) ){
+                             if (!(projectId in newSelStudies)){
+                                  newSelStudies[projectId] = new Array();
+                             }
+                              newSelStudies[projectId].push(studyId);
+
+                             newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head selected_grey" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td></tr>'
+
+                        }
+                        else {
+                             newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td></tr>'
+                        }
                     }
                     //var rowId='study_'+projectId+'_'+patientIndex[patientId].toString()+"_"+studyIndex[studyId].toString();
 
@@ -338,11 +421,17 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
                 /* nend = new Date().getTime();
                 diff = nend - nstart;
                 alert(diff); */
+                if (refresh && !isSeries){
+                    window.selItems.selStudies = newSelStudies;
+                }
+                changeAjax(false);
 
             },
             error: function () {
+                changeAjax(false);
                 console.log("problem getting data");
             }
+
         });
 
 
@@ -376,57 +465,7 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
     }
 
 
-    var resolveAllPlots = function() {
-        plotCategoricalData('modality', 'modality_chart', 'Modality', originalDataCounts['Modality'], 'Modality');
-        plotCategoricalData('body_part', 'body_part_examined_chart', 'BodyPartExamined', originalDataCounts['BodyPartExamined'], 'BodyPartExamined');
 
-        plotCategoricalData('disease', 'disease_code_chart', 'Disease Code', clinicalDataCounts['disease_code'], 'disease_code');
-        plotCategoricalData('vital_status', 'vital_status_chart', 'Vital Status', clinicalDataCounts['vital_status'], 'vital_status');
-        plotCategoricalData('gender', 'gender_chart', 'Gender', clinicalDataCounts['gender'], 'gender');
-        var aHeader = [['* to 10', '0 to 10'], ['10 to 20', '11 to 20'], ['20 to 30', '21 to 30'], ['30 to 40', '31 to 40'], ['40 to 50', '41 to 50'], ['50 to 60', '51 to 60'], ['60 to 70', '61 to 70'], ['70 to 80', '71 to 80'], ['80 to *', '81+'], ['None', 'None']]
-        resolveRelatedPlotsCatWCountsRng(clinicalDataCounts['age'], "age_chart", "Age", aHeader);
-
-        plotCategoricalData('race', 'race_chart', 'Race', clinicalDataCounts['race'], 'race');
-        plotCategoricalData('ethnicity', "ethnicity_chart", "Ethnicity", clinicalDataCounts['ethnicity'], "ethnicity");
-
-    }
-
-     var plotCategoricalData=function(elem, plotId, lbl, dataDic, filterA) {
-        var dataList = document.getElementById(elem).getElementsByTagName("ul")[0].getElementsByTagName("input");
-        var dataHeaders = new Array();
-        var dataValues = new Array();
-        var dataValueMp = new Object();
-        var dataCount = new Array();
-
-        for (i = 0; i < dataList.length; i++) {
-            var input = dataList[i];
-            var dataHeader = input.innerHTML;
-            dataHeaders.push(dataHeader);
-            dataCount[i] = 0;
-            var dataVal = input.value;
-            dataValueMp[dataVal] = i;
-            dataValues.push(dataVal);
-            if (dataDic.hasOwnProperty(dataVal) && (!filterObj.hasOwnProperty(filterA) || filterObj[filterA].indexOf(dataVal) > -1)) {
-                dataCount[i] = dataDic[dataVal];
-            }
-        }
-
-        var pdata = [
-            {
-                x: dataValues,
-                y: dataCount,
-                type: 'bar'
-            }
-        ];
-
-        plotLayout.title = lbl;
-        Plotly.newPlot(plotId, pdata, plotLayout, {displayModeBar: false});
-
-        document.getElementById(plotId).on('plotly_click', function (data) {
-            alert('here');
-        });
-
-    };
 
     var resolveRelatedPlotsCatWCountsRng=function(plotData, plotId, lbl, pHeader) {
         phA = new Array();
@@ -454,9 +493,9 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
         plotLayout.title = lbl
         Plotly.newPlot(plotId, pdata, plotLayout, {displayModeBar: false});
 
-        document.getElementById(plotId).on('plotly_click', function (data) {
+       /* document.getElementById(plotId).on('plotly_click', function (data) {
             alert('here');
-        });
+        }); */
 
 
     };
@@ -475,10 +514,52 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
             filterObj['collection_id'] = [project_scope];
 
         }
+        //document.getElementById('total').innerHTML = window.collection[project_scope];
         mkFiltText();
-        fetchCountData(false);
+        updateFacetsData(true);
+
+
 
     }
+
+    var resetFilterAttr = function(filterCat, filtDic){
+         filtElem = $('#'+filterCat)[0];
+         selElements = $('#'+filterCat).find('input:checkbox');
+         for (var i=0;i<selElements.length;i++){
+             selElement = selElements[i];
+             if (filtDic.hasOwnProperty(selElement.value)){
+                 selElement.checked = true;
+             }
+             else{
+                 selElement.checked = false;
+             }
+         }
+
+    }
+
+    var resetSearchScope = function(scopeArr, searchId){
+        var selectElem= $('#'+searchId)[0];
+        var selIndex = 0;
+        if (scopeArr === window.tcgaColls){
+            selIndex = 0;
+        }
+        else{
+            selProject = scopeArr[0];
+            selectionArr = $(selectElem).children("option");
+            for (var i=0;i<selectionArr.length;i++){
+                selectItem = selectionArr[i];
+                if (selProject === selectItem.value){
+                    selIndex = i;
+                    break;
+                }
+            }
+
+        }
+        selectElem.selectedIndex=selIndex;
+    }
+
+
+
 
 
     var updateSliderSelection = function(inpDiv, displaySet, header, attributeName, isInt) {
@@ -498,42 +579,65 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
 
     }
 
-    var updateFilterSelection = function(checkBoxDiv, displaySet, header, attributeName, isImageAttr, isRangeAttr) {
-        var newText = "&emsp;&emsp;" + header + ": ";
-        var checkBoxElem = document.getElementById(checkBoxDiv);
-
-        var listItems = checkBoxElem.getElementsByTagName('li');
-        var numChecked = 0;
-        var attributeVals = new Array();
-        for (i = 0; i < listItems.length; i++) {
-            checkBoxElem = listItems[i].getElementsByTagName('input')[0];
-            if (checkBoxElem.checked) {
-                if (numChecked > 0) {
-                    newText += ", ";
+    window.selectHistoricFilter = function(num){
+        //alert('previous');
+        window.histIndex = window.histIndex + num ;
+        histObj = window.filtHistory[window.histIndex];
+        window.filterObj = JSON.parse(JSON.stringify(histObj.filterObj));
+        window.selItems = JSON.parse(JSON.stringify(histObj.selItems));
+        if ( (histObj.filterObj.hasOwnProperty('collection_id')) && (histObj.filterObj['collection_id']===window.tcgaColls)){
+            window.filterObj['collection_id'] = window.tcgaColls;
+        }
+        var filterCatsArr = new Array();
+        filterCatsArr.push(findFilterCats('search_orig_set'));
+        filterCatsArr.push(findFilterCats('search_related_set'));
+        for (var i=0;i<filterCatsArr.length;i++){
+            filterCats = filterCatsArr[i];
+            for (var j=0;j<filterCats.length;j++){
+                filterCat = filterCats[j];
+                filtdic = {}
+                if (histObj.filterObj.hasOwnProperty(filterCat)){
+                    for (var k=0;k<histObj.filterObj[filterCat].length;k++){
+                        filtAtt = histObj.filterObj[filterCat][k];
+                        filtdic[filtAtt]=1;
+                    }
                 }
-                newText += listItems[i].innerText;
-                attributeVals.push(checkBoxElem.value)
-                numChecked++;
+                resetFilterAttr(filterCat,filtdic);
             }
         }
-        if (numChecked === 0) {
-            //newText="&emsp;&emsp;"+header+": All";
-            delete filterObj[attributeName];
-        } else {
-            filterObj[attributeName] = attributeVals;
-        }
-        //document.getElementById(displaySet).innerHTML=newText;
+        resetSearchScope(histObj.filterObj.collection_id,'project_scope');
         mkFiltText();
-        fetchCountData(false);
+        updateFacetsData(false);
 
     }
+    var updateCollectionTotals = function(total,dic){
+         for (var item in window.collection) {
+             if (item === 'All'){
+                  window.collection[item] = parseInt(total);
+             }
+             else if (dic.hasOwnProperty(item)){
+                 window.collection[item] = parseInt(dic[item].count);
+             }
+             else{
+                 window.collection[item] = '0';
+             }
+        }
 
-    var fetchCountData = function(refresh) {
+         var selectedElem = document.getElementById('project_scope').selectedOptions[0];
+         var curCount = 0;
+         var project_scope = selectedElem.value;
+         curCount = window.collection[project_scope];
+         document.getElementById('total').innerHTML = String(curCount);
+    }
+
+    var updateFacetsData = function(newFilt) {
+        changeAjax(true);
+
         var url = '';
         if (Object.keys(filterObj).length === 0) {
-            url = '/idc/filtered/?counts_only=True';
+            url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True';
         } else {
-            url = '/idc/filtered/?counts_only=True&filters=' + JSON.stringify(filterObj);
+            url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True&filters=' + JSON.stringify(filterObj);
         }
         url = encodeURI(url);
 
@@ -543,144 +647,295 @@ require(['jquery', 'jqueryui', 'session_security', 'bootstrap','plotly'], functi
             type: 'get',
             contentType: 'application/x-www-form-urlencoded',
             success: function (data) {
-                clinicalDataCounts = data['clinical'];
-                originalDataCounts = data['facets'];
-
-                var isEdit = true;
-                if (refresh) {
-
-
-                    filter = new Object();
-
-                    diseaseCodeH = Object.keys(data['clinical']['disease_code']).sort();
-                    nonePos = diseaseCodeH.indexOf('None');
-                    diseaseCodeH.splice(nonePos, 1);
-                    diseaseCodeH.push('None');
-
-
-                    raceH = Object.keys(data['clinical']['race']).sort();
-                    nonePos = raceH.indexOf('None');
-                    raceH.splice(nonePos, 1);
-                    raceH.push('None');
-                    ethnicityH = Object.keys(data['clinical']['ethnicity']).sort();
-
-                    nonePos = ethnicityH.indexOf('None');
-                    ethnicityH.splice(nonePos, 1);
-                    ethnicityH.push('None');
-                    isEdit = false;
-                    constructClinicalFilterOptions();
-                    createProjectsTable("projects_table");
-                    mkSlider('age_slide', 'inp_age_slide', 'age_set', 'Age', 'age_at_diagnosis_btw', true);
-                } else {
-                    resetTables('projects_table', 'studies_table', 'series_table');
-                    editProjectsTable('projects_table', 'project_scope');
+                updateCollectionTotals(data.total, data.origin_set.attributes.collection_id);
+                updateFilterSelections('search_orig_set',data.origin_set.attributes);
+                updateFilterSelections('search_related_set',data.related_set.attributes);
+                createPlots('search_orig_set');
+                createPlots('search_related_set');
+                editProjectsTableAfterFilter('projects_table','project_scope');
+                resetSeriesAndStudiesTables ('series_table', 'studies_table');
+                var studyArr = new Array();
+                for (projId in window.selItems.selStudies){
+                    studyArr.push.apply(studyArr, window.selItems.selStudies[projId]);
                 }
-                resolveAllPlots();
+                if (window.selItems.selProjects.length >0) {
+                    addStudyOrSeries(window.selItems.selProjects, [], "studies_table", true);
+                }
+                if (studyArr.length>0) {
+                    addStudyOrSeries(window.selItems.selProjects, studyArr, "series_table", true);
+                }
 
+                if (newFilt) {
+                    histObj = new Object();
+                    histObj.selItems = JSON.parse(JSON.stringify(window.selItems));
+                    histObj.filterObj = JSON.parse(JSON.stringify(window.filterObj));
+                    if ( (window.filterObj.hasOwnProperty('collection_id')) && (window.filterObj['collection_id']===window.tcgaColls)){
+                        histObj.filterObj['collection_id'] = window.tcgaColls;
+                    }
+
+                    window.filtHistory.push(histObj);
+
+                    if (window.filtHistory.length > window.histMaxLength){
+                        window.filtHistory.shift();
+                    }
+                    window.histIndex = window.filtHistory.length -1;
+                }
+
+                if ( (window.filtHistory.length-1) > window.histIndex){
+                    $('#next').show();
+                }
+                else{
+                    $('#next').hide();
+                }
+                if ( (window.filtHistory.length>0) && (window.histIndex>0)){
+                    $('#previous').show();
+                }
+                else{
+                    $('#previous').hide();
+                }
+
+
+               changeAjax(false);
 
             },
             error: function () {
+                changeAjax(false);
                 console.log("problem getting data");
+
             }
+
         });
     }
 
-    var constructClinicalFilterOptions = function() {
 
-        projectElem = document.getElementById("project_scope");
-        projList = tcgaColls;
-        for (i = 0; i < projList.length; i++) {
-            nm = projList[i]
-            if (nm !== 'None') {
-                opt = document.createElement("option");
-                opt.value = nm;
-                opt.innerHTML = nm;
-                projectElem.appendChild(opt);
+
+     var plotCategoricalData=function(plotId, lbl, plotData) {
+
+        var pdata = [
+            {
+                x: plotData.dataLabel,
+                y: plotData.dataCnt,
+                type: 'bar'
             }
-        }
+        ];
 
+        plotLayout.title = lbl;
+        Plotly.newPlot(plotId, pdata, plotLayout, {displayModeBar: false});
 
-        diseaseElem = document.getElementById("disease_list");
-        removeChildren(diseaseElem);
-        for (i = 0; i < diseaseCodeH.length; i++) {
-            diseaseCode = diseaseCodeH[i];
-            if (diseaseCode !== "None") {
-                var opt = document.createElement("LI");
-                opt.classList.add("checkbox")
-                if (i > 5) {
-                    opt.classList.add("extra-values");
+        document.getElementById(plotId).on('plotly_click', function (data, plotId) {
+            var chartid = data.event.path[6].id;
+            var filterId = chartid.replace("_chart","");
+            if (filterId === 'age_at_diagnosis'){
+                var sel = data.points[0].x;
+                var selArr = sel.split(' To ');
+                var strt = parseInt((selArr[0] === '*') ? '0': selArr[0]);
+                var end = parseInt((selArr[0] === '*') ?'0': selArr[1]);
+                setSlider(filterId,false,strt,end,true);
+
+            }
+            else {
+                //alert(String(data.event.path[6].id));
+                var index = data.points[0].pointIndex;
+                var listId = filterId + '_list';
+                var inputList = $('#'+listId).find(':input');
+                for (var i=0;i<inputList.length;i++){
+                    if (i === index){
+                        inputList[i].checked = true;
+                    }
+                    else{
+                        inputList[i].checked = false;
+                    }
                 }
-                opt.innerHTML = '&emsp;<input type="checkbox" value="' + diseaseCode + '">' + diseaseCode;
-                diseaseElem.appendChild(opt);
+                handleFilterSelectionUpdate(filterId);
+            }
+        });
+
+    };
+
+     var findFilterCats = function(id){
+        filterCats = new Array();
+        listElems  = $('#' + id).find('.list-group-item__body');
+         for (i=0;i<listElems.length;i++) {
+             elem = listElems.get(i);
+             nm = elem.id;
+             filterCats.push(nm);
+         }
+         return filterCats
+    }
+
+
+
+    var parseFilterForCounts = function(id) {
+        var dataLabel = new Array();
+        var dataCnt = new Array();
+
+        listElems = $('#' + id).find('.checkbox')
+        for (var i=0;i<listElems.length;i++) {
+            elem=listElems.get(i);
+            spans = $(elem).find('span')
+            lbl = spans.get(0).innerHTML;
+            cnt = parseInt(spans.get(1).innerHTML);
+            dataLabel.push(lbl);
+            if ($(spans.get(1)).hasClass("plotit")) {
+                dataCnt.push(cnt);
+            }
+            else{
+                dataCnt.push(0);
             }
         }
+        return {'dataLabel': dataLabel, 'dataCnt': dataCnt}
+    }
 
-        opt = document.createElement("LI");
-        opt.classList.add("checkbox");
-        opt.classList.add("extra-values");
-        opt.innerHTML = '&emsp;<input type="checkbox" value="None">NA';
-        diseaseElem.appendChild(opt);
+    var createPlots = function(id){
+        var filterCats = findFilterCats(id);
+        for (var i=0;i<filterCats.length;i++){
+             filterCat = filterCats[i];
+             filterData = parseFilterForCounts(filterCat);
 
+             plotId = filterCat+"_chart";
+             plotCategoricalData(plotId, filterCat, filterData);
 
-        filterItemBindings('disease', 'disease_list', 'disease_code_set', 'Disease Code', 'disease_code', false, false);
-        raceElem = document.getElementById("race_list");
-        for (i = 0; i < raceH.length; i++) {
-            race = raceH[i];
-            if (race !== "None") {
-                var opt = document.createElement("LI");
-                opt.classList.add("checkbox");
-                if (i > 5) {
-                    opt.classList.add("extra-values");
-                }
-                opt.innerHTML = '&emsp;<input type="checkbox" value="' + race + '">' + race;
-                raceElem.appendChild(opt);
-            }
         }
-        opt = document.createElement("LI");
-        opt.classList.add("checkbox");
-        opt.classList.add("extra-values");
-        opt.innerHTML = '&emsp;<input id="race_list_none" type="checkbox" value="None" >NA';
-        raceElem.appendChild(opt);
 
-        filterItemBindings('race', 'race_list', 'race_set', 'Race', 'race', 'false', 'false');
+     }
 
-        ethnicityElem = document.getElementById("ethnicity_list");
-        for (i = 0; i < ethnicityH.length; i++) {
-            ethnicity = ethnicityH[i];
-            if (ethnicity !== "None") {
-                var opt = document.createElement("LI");
-                opt.classList.add("checkbox");
-                opt.innerHTML = '&emsp;<input type="checkbox" value="' + ethnicity + '" >' + ethnicity;
-                ethnicityElem.appendChild(opt);
-            }
-        }
-        opt = document.createElement("LI");
-        opt.classList.add("checkbox");
-        opt.innerHTML = '&emsp;<input id="ethnicity_list_none" type="checkbox" value="none" >NA';
-        ethnicityElem.appendChild(opt);
+     var updateFilters = function(filterCat,dic,dataFound){
+         var allFilters = $('#'+filterCat).find('input');
+         var checkedFilters = $('#'+filterCat).find('input:checked');
+         var useAll = ( (checkedFilters.length==0) ? true : false)
 
-        filterItemBindings('ethnicity', 'ethnicity_list', 'ethnicity_set', 'Ethnicity', 'ethnicity', 'false', 'false');
+         for (var i = 0; i < allFilters.length; i++) {
+             var elem = allFilters.get(i);
+             var val = $(elem)[0].value;
+             var checked =$(elem)[0].checked;
+
+             var spans = $(elem).parent().find('span');
+             var lbl = spans.get(0).innerHTML;
+             var cnt = parseInt(spans.get(1).innerHTML);
+
+             if( dataFound && dic.hasOwnProperty(val)){
+                 spans.get(1).innerHTML = String(dic[val].count);
+
+             }
+             else{
+                 spans.get(1).innerHTML = '0';
+             }
+             if (checked || useAll){
+                     $(spans.get(1)).addClass('plotit');
+                 }
+             else{
+                 $(spans.get(1)).removeClass('plotit');
+             }
+         }
+
+    }
+
+
+     var updateFilterSelections = function(id,dicofdic){
+         filterCats = findFilterCats(id);
+         for (i=0;i<filterCats.length;i++){
+             cat=filterCats[i]
+             if (dicofdic.hasOwnProperty(cat)) {
+                 updateFilters(filterCats[i], dicofdic[cat], true);
+             }
+             else {
+                 updateFilters(filterCats[i], '', false);
+             }
+         }
+   }
+     var handleFilterSelectionUpdate = function(filterCat) {
+        var numFilters = $('#'+filterCat).find('input').length;
+        var checkedFilters = $('#'+filterCat).find('input:checked');
+
+        var attributeVals = new Array();
+        checkedFilters.each(function() {
+            attributeVals.push( $(this)[0].value );
+         });
+
+         if (attributeVals.length>0){
+             filterObj[filterCat] = attributeVals;
+         }
+         else if(filterObj.hasOwnProperty(filterCat)){
+             delete filterObj[filterCat];
+         }
+
+        mkFiltText();
+        updateFacetsData(true);
+
+    }
+
+    var filterItemBindings = function (filterId) {
+        $('#' + filterId).find('.checkbox').find(':input').on('click', function () {
+            handleFilterSelectionUpdate(filterId);
+        });
+
+        $('#' + filterId).find('.show-more').on('click', function () {
+            $('#' + filterId).find('.extra-values').show();
+            $('#' + filterId).find('.less-checks').show();
+            $('#' + filterId).find('.more-checks').hide();
+        });
+
+
+        $('#' + filterId).find('.show-less').on('click', function () {
+            $('#' + filterId).find('.extra-values').hide();
+            $('#' + filterId).find('.more-checks').show();
+            $('#' + filterId).find('.less-checks').hide();
+        });
+
+        $('#' + filterId).find('.check-all').on('click', function () {
+            $('#' + filterId).find('.checkbox').find('input').prop('checked', true);
+           handleFilterSelectionUpdate(filterId);
+            //$('#'+filterId).find('.checkbox').find('input').each(function(){
+            //  $(this).triggerHandler('change');
+            //});
+        });
+
+        $('#' + filterId).find('.uncheck-all').on('click', function () {
+            $('#' + filterId).find('.checkbox').find('input').prop('checked', false);
+            handleFilterSelectionUpdate(filterId);
+            //$('#'+filterId).find('.checkbox').find('input').each(function(){
+            //  $(this).triggerHandler('change');
+            //});
+        });
 
 
     }
 
-    var removeChildren = function(elem) {
-        while (elem.firstChild) {
-            elem.removeChild(elem.firstChild);
+
+     var addFilterBindings = function(id){
+         var filterCats = findFilterCats(id);
+         for (var i=0;i<filterCats.length;i++){
+             filterItemBindings(filterCats[i]);
         }
-    }
+     }
 
      $(document).ready(function () {
-            filterObj.collection_id = tcgaColls;
-            filterItemBindings('modality', 'modality', 'modality_set', 'Modality', 'Modality', true, false);
-            filterItemBindings('body_part', 'body_part', 'body_part_examined_set', 'Body Part Examined', 'BodyPartExamined', true, false);
+            window.filterObj.collection_id = window.tcgaColls;
+            window.selItems = new Object();
+            window.selItems.selStudies = new Object();
+            window.selItems.selProjects = new Array();
+            window.histIndex  = 0;
+            window.histMaxLength = 6;
+            histObj = new Object();
+            histObj.selItems = JSON.parse(JSON.stringify(window.selItems));
+            histObj.filterObj = JSON.parse(JSON.stringify(window.filterObj));
+            histObj.filterObj.collection_id = window.tcgaColls;
+            window.filtHistory = new Array();
+            window.filtHistory.push(histObj);
+            createPlots('search_orig_set');
+            createPlots('search_related_set');
+            addFilterBindings('search_orig_set');
+            addFilterBindings('search_related_set');
+            $('#age_at_diagnosis_list').addClass('hide');
+            $('#age_at_diagnosis').find('.more-checks').addClass('hide');
+            $('#age_at_diagnosis').find('.less-checks').addClass('hide');
+            mkSlider('age_at_diagnosis',0,120,1,true);
 
-            filterItemBindings('vital_status', 'vital_list', 'vital_status_set', 'Vital Status', 'vital_status', false, false);
-            filterItemBindings('gender', 'gender_list', 'gender_set', 'Gender', 'gender', false, false)
-            fetchCountData(true);
+            //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
 
         }
     );
+
 
 
 });

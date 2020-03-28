@@ -1,5 +1,5 @@
 ###
-# Copyright 2015-2019, Institute for Systems Biology
+# Copyright 2015-2020, Institute for Systems Biology
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,11 +50,12 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
-DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
+CONNECTION_IS_LOCAL     = (os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost')
+DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') and CONNECTION_IS_LOCAL)
 
 print("[STATUS] DEBUG mode is {}".format(str(DEBUG)), file=sys.stdout)
 
-RESTRICT_ACCESS = (os.environ.get('RESTRICT_ACCESS', 'True') == 'True')
+RESTRICT_ACCESS          = (os.environ.get('RESTRICT_ACCESS', 'True') == 'True')
 RESTRICTED_ACCESS_GROUPS = os.environ.get('RESTRICTED_ACCESS_GROUPS', '').split(',')
 
 if RESTRICT_ACCESS:
@@ -73,16 +74,16 @@ MANAGERS                = ADMINS
 
 GCLOUD_PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
 GCLOUD_PROJECT_NUMBER          = os.environ.get('GCLOUD_PROJECT_NUMBER', '')
-BIGQUERY_PROJECT_ID           = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PROJECT_ID)
-BIGQUERY_DATA_PROJECT_ID  = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
+BIGQUERY_PROJECT_ID            = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PROJECT_ID)
+BIGQUERY_DATA_PROJECT_ID       = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
 
 # Deployment module
 CRON_MODULE             = os.environ.get('CRON_MODULE')
 
 # Log Names
-SERVICE_ACCOUNT_LOG_NAME = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev_logging')
-WEBAPP_LOGIN_LOG_NAME = os.environ.get('WEBAPP_LOGIN_LOG_NAME', 'local_dev_logging')
-GCP_ACTIVITY_LOG_NAME = os.environ.get('GCP_ACTIVITY_LOG_NAME', 'local_dev_logging')
+SERVICE_ACCOUNT_LOG_NAME      = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev_logging')
+WEBAPP_LOGIN_LOG_NAME         = os.environ.get('WEBAPP_LOGIN_LOG_NAME', 'local_dev_logging')
+GCP_ACTIVITY_LOG_NAME         = os.environ.get('GCP_ACTIVITY_LOG_NAME', 'local_dev_logging')
 
 BASE_URL                = os.environ.get('BASE_URL', 'https://idc-dev.appspot.com')
 BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-idc-dev.appspot.com')
@@ -96,11 +97,10 @@ GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET')
 
 # BigQuery cohort storage settings
 BIGQUERY_COHORT_DATASET_ID           = os.environ.get('BIGQUERY_COHORT_DATASET_ID', 'cohort_dataset')
-BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
-BIGQUERY_IDC_TABLE_ID    = os.environ.get('BIGQUERY_IDC_TABLE_ID', '')
-MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
-
-USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
+BIGQUERY_COHORT_TABLE_ID             = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
+BIGQUERY_IDC_TABLE_ID                = os.environ.get('BIGQUERY_IDC_TABLE_ID', '')
+MAX_BQ_INSERT                        = int(os.environ.get('MAX_BQ_INSERT', '500'))
+USER_DATA_ON                         = bool(os.environ.get('USER_DATA_ON', False))
 
 database_config = {
     'default': {
@@ -113,7 +113,6 @@ database_config = {
 }
 
 # On the build system, we need to use build-system specific database information
-
 if os.environ.get('CI', None) is not None:
     database_config = {
         'default': {
@@ -151,10 +150,8 @@ if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
     print("[STATUS] AppEngine Flex detected.", file=sys.stdout)
     SITE_ID = 3
 
-
 def get_project_identifier():
     return BIGQUERY_PROJECT_ID
-
 
 # Set cohort table here
 if BIGQUERY_COHORT_TABLE_ID is None:
@@ -162,6 +159,8 @@ if BIGQUERY_COHORT_TABLE_ID is None:
 
 BQ_MAX_ATTEMPTS             = int(os.environ.get('BQ_MAX_ATTEMPTS', '10'))
 
+API_USER = os.environ.get('API_USER', 'api_user')
+API_AUTH_KEY = os.environ.get('API_AUTH_KEY', 'Token')
 
 # TODO Remove duplicate class.
 #
@@ -177,13 +176,13 @@ def GET_BQ_COHORT_SETTINGS():
     return BigQueryCohortStorageSettings(BIGQUERY_COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
 
 
-USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', False)
+USE_CLOUD_STORAGE              = os.environ.get('USE_CLOUD_STORAGE', False)
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_PROXY_SSL_HEADER        = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-CSRF_COOKIE_SECURE = bool(os.environ.get('CSRF_COOKIE_SECURE', False))
-SESSION_COOKIE_SECURE = bool(os.environ.get('SESSION_COOKIE_SECURE', False))
-SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
+CSRF_COOKIE_SECURE             = bool(os.environ.get('CSRF_COOKIE_SECURE', False))
+SESSION_COOKIE_SECURE          = bool(os.environ.get('SESSION_COOKIE_SECURE', False))
+SECURE_SSL_REDIRECT            = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
 
 SECURE_REDIRECT_EXEMPT = []
 
@@ -257,8 +256,8 @@ STATICFILES_FINDERS = (
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 
 SECURE_HSTS_INCLUDE_SUBDOMAINS = (os.environ.get('SECURE_HSTS_INCLUDE_SUBDOMAINS','True') == 'True')
-SECURE_HSTS_PRELOAD = (os.environ.get('SECURE_HSTS_PRELOAD','True') == 'True')
-SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS','3600'))
+SECURE_HSTS_PRELOAD            = (os.environ.get('SECURE_HSTS_PRELOAD','True') == 'True')
+SECURE_HSTS_SECONDS            = int(os.environ.get('SECURE_HSTS_SECONDS','3600'))
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -289,6 +288,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
+    'anymail',
     'idc',
     'data_upload',
     'sharing',
@@ -301,17 +301,14 @@ INSTALLED_APPS = (
 #############################
 #  django-session-security  #
 #############################
-
-# testing "session security works at the moment" commit
 INSTALLED_APPS += ('session_security',)
-SESSION_SECURITY_WARN_AFTER = int(os.environ.get('SESSION_SECURITY_WARN_AFTER','540'))
-SESSION_SECURITY_EXPIRE_AFTER = int(os.environ.get('SESSION_SECURITY_EXPIRE_AFTER','600'))
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SECURITY_WARN_AFTER        = int(os.environ.get('SESSION_SECURITY_WARN_AFTER','540'))
+SESSION_SECURITY_EXPIRE_AFTER      = int(os.environ.get('SESSION_SECURITY_EXPIRE_AFTER','600'))
+SESSION_EXPIRE_AT_BROWSER_CLOSE    = True
 MIDDLEWARE.append(
     # for django-session-security -- must go *after* AuthenticationMiddleware
     'session_security.middleware.SessionSecurityMiddleware',
 )
-
 ###############################
 # End django-session-security #
 ###############################
@@ -401,7 +398,9 @@ INSTALLED_APPS += (
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.google')
+    'allauth.socialaccount.providers.google',
+    'rest_framework.authtoken'
+)
 
 # Template Engine Settings
 TEMPLATES = [
@@ -448,31 +447,66 @@ SOCIALACCOUNT_PROVIDERS = \
         }
     }
 
-# Trying to force allauth to only use https
+ACCOUNT_EMAIL_REQUIRED = bool(os.environ.get('ACCOUNT_EMAIL_REQUIRED', 'True') == 'True')
+ACCOUNT_EMAIL_VERIFICATION = os.environ.get('ACCOUNT_EMAIL_VERIFICATION', 'mandatory').lower()
+
+# Force allauth to only use https
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 # ...but not if this is a local dev build
 if IS_DEV:
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
-
-
 ##########################
 #   End django-allauth   #
 ##########################
 
+##########################
+# Django local auth      #
+##########################
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 16,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    }
+]
+
+#########################################
+#   MailGun Email Settings for requests #
+#########################################
+#
+# These settings allow use of MailGun as a simple API call
+EMAIL_SERVICE_API_URL = os.environ.get('EMAIL_SERVICE_API_URL', '')
+EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
+NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', 'info@canceridc.dev')
+
+#########################
+# django-anymail        #
+#########################
+#
+# Anymail lets us use the Django mail system with mailgun (eg. in local account email verification)
+ANYMAIL = {
+    "MAILGUN_API_KEY": EMAIL_SERVICE_API_KEY,
+    "MAILGUN_SENDER_DOMAIN": 'mg.canceridc.dev',  # your Mailgun domain, if needed
+}
+EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+DEFAULT_FROM_EMAIL = NOTIFICATION_EMAIL_FROM_ADDRESS
+SERVER_EMAIL = "info@canceridc.dev"
+
 GOOGLE_APPLICATION_CREDENTIALS  = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
+OAUTH2_CLIENT_ID                = os.environ.get('OAUTH2_CLIENT_ID', '')
+OAUTH2_CLIENT_SECRET            = os.environ.get('OAUTH2_CLIENT_SECRET', '')
 
 if not exists(GOOGLE_APPLICATION_CREDENTIALS):
     print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
     exit(1)
 
-OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
-
-OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET', '')
-
 #################################
 #   For NIH/eRA Commons login   #
 #################################
-
 GOOGLE_GROUP_ADMIN                      = os.environ.get('GOOGLE_GROUP_ADMIN', '')
 SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS', '')
 
@@ -481,17 +515,15 @@ SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS
 #   Start django-finalware   #
 ##############################
 #
-# This should only be done on a local system. Production systems will already have a site superuser
-# so this would simply overwrite that user. Don't enable this in production!
-
-if IS_DEV:
+# This should only be done on a local system which is running against its own VM. Deployed systems will already have
+# a site superuser so this would simply overwrite that user. Don't enable this in production!
+if IS_DEV and CONNECTION_IS_LOCAL:
     INSTALLED_APPS += (
         'finalware',)
 
     SITE_SUPERUSER_USERNAME = os.environ.get('SUPERUSER_USERNAME', '')
     SITE_SUPERUSER_EMAIL = ''
     SITE_SUPERUSER_PASSWORD = os.environ.get('SUPERUSER_PASSWORD', '')
-
 ############################
 #   End django-finalware   #
 ############################
@@ -505,7 +537,6 @@ CONN_MAX_AGE = 60
 ############################
 #   METRICS SETTINGS
 ############################
-
 SITE_GOOGLE_ANALYTICS   = bool(os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKING_ID', None) is not None)
 SITE_GOOGLE_ANALYTICS_TRACKING_ID = os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKING_ID', '')
 
@@ -517,6 +548,7 @@ SITE_GOOGLE_ANALYTICS_TRACKING_ID = os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKI
 # equal just under the 32M limit. If each individual listing is ever lengthened or shortened this
 # number should be adjusted
 MAX_FILE_LIST_REQUEST = 65000
+MAX_BQ_RECORD_RESULT = int(os.environ.get('MAX_BQ_RECORD_RESULT', '1000'))
 
 # Rough max file size to allow for eg. barcode list upload, to revent triggering RequestDataTooBig
 FILE_SIZE_UPLOAD_MAX = 1950000
@@ -529,19 +561,12 @@ DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
 #################################
 # SOLR settings
 #################################
-SOLR_URI = os.environ.get('SOLR_URI', '')
-SOLR_LOGIN = os.environ.get('SOLR_LOGIN', '')
-SOLR_PASSWORD = os.environ.get('SOLR_PASSWORD', '')
-SOLR_CERT = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCAL_PATH, os.environ.get('SOLR_CERT', '')))
+SOLR_URI            = os.environ.get('SOLR_URI', '')
+SOLR_LOGIN          = os.environ.get('SOLR_LOGIN', '')
+SOLR_PASSWORD       = os.environ.get('SOLR_PASSWORD', '')
+SOLR_CERT           = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCAL_PATH, os.environ.get('SOLR_CERT', '')))
 DEFAULT_FETCH_COUNT = os.environ.get('DEFAULT_FETCH_COUNT', 10)
 
-##############################################################
-#   MailGun Email Settings
-##############################################################
-
-EMAIL_SERVICE_API_URL = os.environ.get('EMAIL_SERVICE_API_URL', '')
-EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
-NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')
 
 # Explicitly check for known items
 BLACKLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
