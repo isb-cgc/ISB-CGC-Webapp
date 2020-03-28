@@ -139,9 +139,6 @@ def test_methods(request):
                 'listings': facets_and_lists['docs']
             }
 
-        #print(get_bq_facet_counts(filters, ["gender","vital_status","Modality","BodyPartExamined"], DataVersion.objects.filter(active=True)))
-        #print(facets_and_lists)
-
     except Exception as e:
         logger.error("[ERROR] In explore_data:")
         logger.exception(e)
@@ -490,8 +487,9 @@ def explore_data_page(request):
             attr_by_source['origin_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
 
-        attr_filter={}
-        attr_filter['origin_set'] =['Modality', 'BodyPartExamined','collection_id']
+        attr_filter = {
+            'origin_set': ['Modality', 'BodyPartExamined','collection_id']
+        }
         if with_clinical:
             attr_filter['related_set'] = ['disease_code', 'vital_status','gender','age_at_diagnosis', 'bmi','race','ethnicity']
         for set in attr_by_source:

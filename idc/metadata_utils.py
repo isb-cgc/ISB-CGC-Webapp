@@ -50,6 +50,8 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
         tcia_facet_attrs = tcia_solr.get_collection_attr(for_ui=True).values_list('name', flat=True)
         tcia_filter_attrs = tcia_solr.get_collection_attr(for_faceting=False).values_list('name', flat=True)
 
+        tcia_fields = [x for x in fields if x in tcia_filter_attrs]
+
         solr_query = None
         if len(filters):
             solr_query = build_solr_query(filters, with_tags_for_ex=True)
@@ -79,39 +81,49 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
                 tcga_solr.shared_id_col, tcga_solr.name, tcia_solr.shared_id_col
             ))
 
-        solr_facets = build_solr_facets(list(tcia_facet_attrs), solr_query['filter_tags'] if solr_query else None)
+        solr_facets = build_solr_facets(list(tcia_facet_attrs), solr_query['filter_tags'] if solr_query else None, unique='PatientID')
 
-        #fields = ['Modality', 'BodyPartExamined', 'Species', 'collection_id', 'PatientID']
+
+        # Collapse and unique faceted counting can't be used together, so we have to request twice - once to collapse on the requested
+        # field and once to faceted count
         solr_result = query_solr_and_format_result({
             'collection': tcia_solr.name,
-            'fields': fields,
+            'fields': None,
             'fqs': query_set,
             'query_string': tcga_query_filter['full_query_str'],
             'facets': solr_facets,
-            'limit': record_limit,
-            'collapse_on': collapse_on,
+            'limit': 0,
             'counts_only': counts_only
         })
+
         if not counts_only:
+            solr_result = query_solr_and_format_result({
+                'collection': tcia_solr.name,
+                'fields': tcia_fields,
+                'fqs': query_set,
+                'query_string': tcga_query_filter['full_query_str'],
+                'collapse_on': collapse_on,
+                'counts_only': counts_only,
+                'limit': record_limit
+            })
             results['docs'] = solr_result['docs']
             if 'SeriesNumber' in fields:
                 for res in results['docs']:
                     res['SeriesNumber'] = res['SeriesNumber'][0]
             if (len(order_docs)>0):
                 results['docs'] = sorted(results['docs'], key=lambda x: tuple([x[item] for item in order_docs]))
+            results['total'] = solr_result['numFound']
+        else:
+            results['total'] = solr_counts['numFound']
 
-
-        results['facets']['cross_collex'] = solr_result['facets']
-        if 'BodyPartExamined' in solr_result['facets']:
+        results['facets']['cross_collex'] = solr_counts['facets']
+        if 'BodyPartExamined' in solr_counts['facets']:
             if 'Kidney' in results['facets']['cross_collex']['BodyPartExamined'] and 'KIDNEY' in results['facets']['cross_collex']['BodyPartExamined']:
                 results['facets']['cross_collex']['BodyPartExamined']['KIDNEY'] = results['facets']['cross_collex']['BodyPartExamined']['KIDNEY'] + results['facets']['cross_collex']['BodyPartExamined']['Kidney']
                 del results['facets']['cross_collex']['BodyPartExamined']['Kidney']
             elif 'Kidney' in results['facets']['cross_collex']['BodyPartExamined']:
                 results['facets']['cross_collex']['BodyPartExamined']['KIDNEY'] = results['facets']['cross_collex']['BodyPartExamined']['Kidney']
                 del results['facets']['cross_collex']['BodyPartExamined']['Kidney']
-
-
-        results['total'] = solr_result['numFound']
 
         if with_clinical:
             # The attributes being faceted against here would be whatever list of facet counts we want to display in the
