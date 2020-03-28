@@ -2379,10 +2379,20 @@ section .min-max {
 #cohort-details .search-checkbox-list label, #cohort-filelist .search-checkbox-list label {
   width: 100%; }
 
+#cohort-details #search_def {
+  max-height: 12em;
+  overflow-y: auto;
+}
+
+#cohort-details .search-checkbox-list label .value {
+  display: inline-block;
+  max-width: 75% }
+
 #cohort-details .case_count, #cohort-filelist .case_count {
-  background-color: #bababa;
+  background-color: #818181;
   color: white;
-  border-radius: 10px;
+  color: white;
+  border-radius: 7px;
   font-size: .8em;
   padding: 2px 5px;
   text-align: right; }
