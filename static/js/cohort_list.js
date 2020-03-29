@@ -505,6 +505,12 @@ require([
         }
     }
 
+    // change no of entries per page
+    $('.tab-content').on('change', '.cohorts-per-page', function () {
+        cohorts_per_page = parseInt($('#saved-cohorts-list').find('.cohorts-per-page :selected').val());
+        goto_table_page(1);
+    });
+
     function update_table_display()
     {
         var tab_selector = '#saved-cohorts-list';
@@ -541,9 +547,7 @@ require([
         }
 
         first_page_entry = ((page - 1) * cohorts_per_page) + 1;
-        last_page_entry = first_page_entry + cohorts_per_page - 1;
-
-        // $(tab_selector).find('.cohort-table tbody').empty();
+        last_page_entry = Math.min(first_page_entry + cohorts_per_page - 1, cohort_list.length);
 
         if(cohort_list.length <= 0) {
             first_page_entry = 0;
@@ -554,10 +558,8 @@ require([
                 var cohort_index_id = "#cohort-index-" + i;
                 if (i >= first_page_entry && i <= last_page_entry) {
                     $(cohort_index_id).show();
-                    // $(cohort_index_id).removeClass('disabled');
                 } else {
                     $(cohort_index_id).hide();
-                    // $(cohort_index_id).addClass('disabled');
                 }
             }
 
