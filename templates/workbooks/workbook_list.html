@@ -24,37 +24,35 @@
 {% block content %}
 <div class="container">
     <div class="panel panel-default">
-        <div class="panel-body">
+        <div class="panel-body" id="workbook-list">
             {% if workbooks %}
-
-            <div class="dataTables_info">
-                <span class="file-page-count">Showing <span class="showing">25</span> of <span class="total-file-count"></span> entries</span>
-                <span class="no-file-page-count" style="display: none;">Showing 0 files.</span>
+           <div class="dataTables_info">
+                <span class="workbook-page-count">Showing <span class="showing">10</span> of <span class="total-workbook-count"></span> entries</span>
+                <span class="no-workbook-page-count" style="display: none;">Showing 0 files.</span>
                 <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
-            </div>
+           </div>
             <div>
-                <div class="dataTables_length files-per-page">
-                    <label for="files-per-page-igv-select">Show</label>
-                    <select id="files-per-page-igv-select">
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
+                <div class="dataTables_length workbooks-per-page">
+                    <label for="workbooks-per-page-select">Show</label>
+                    <select id="workbooks-per-page-select">
+                        <option value="5">5</option>
+                        <option value="20">20</option>
+                        <option value="40">40</option>
                     </select>
                     <label>entries</label>
-                </div>
                 <div class="dataTables_goto_page">
-                    <label for="goto-page-no-igv">Page</label>
-                    <input id="goto-page-no-igv" type="number" class="goto-page-number" min="1" max="1">
+                    <label for="goto-page">Page</label>
+                    <input id="goto-page" type="number" class="goto-page-number" min="1" max="1">
                     <div class="goto-page-button dataTables_button">Go</div>
                 </div>
                 <div class="dataTables_paginate">
                     <a class="prev-page paginate_button dataTables_button disabled">Previous</a>
-                    <span class="paginate_button_space"/>
+                    <span class="paginate_button_space"></span>
                     <a class="next-page paginate_button dataTables_button">Next</a>
                 </div>
             </div>
 
-            <table id="workbook-table" class="table table-striped tablesorter">
+            <table id="workbook-table" class="table table-striped tablesorter workbook-table">
                 <thead>
                     <th></th>
                     <th>Version and Build</th>
@@ -65,7 +63,7 @@
                 </thead>
                 <tbody>
                     {% for workbook in workbooks %}
-                        <tr>
+                        <tr id="workbook-index-{{ forloop.counter }}">
                             <td class="control-col">
 {#                                {% if workbook.owner.id == user.id %}#}
                                 <div class="dropdown">
@@ -106,6 +104,13 @@
         </div>
     </div>
 </div>
+<script type="text/javascript">
+var workbooks_per_page=5;
+var page=1;
+var workbook_list = {{ workbook_listing|safe }};
+var first_page_entry=0;
+var last_page_entry=3;
+</script>
 
 {% endblock %}
 
