@@ -24,7 +24,7 @@ require([
     'session_security',
     'underscore',
     'base',
-], function($, jqueryui, bootstrap, session_security, _) {
+], function($, jqueryui, bootstrap, session_security, _, base) {
     'use strict';
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
@@ -81,28 +81,28 @@ require([
     }
 
     // change no of entries per page
-    $('.panel-body').on('change', '.workbooks-per-page', function () {
-        workbooks_per_page = parseInt($('#workbook-list').find('.workbooks-per-page :selected').val());
+    $('.panel-body').on('change', '.items-per-page', function () {
+        items_per_page = parseInt($('#workbook-list').find('.items-per-page :selected').val());
         goto_table_page(1);
     });
 
     function update_table_display()
     {
         var tab_selector = '#workbook-list';
-        var total_workbooks = workbook_list.length;
-        var total_pages = Math.ceil(total_workbooks / workbooks_per_page);
+        var total_items = workbook_list.length;
+        var total_pages = Math.ceil(total_items / items_per_page);
 
         //change another part at here
-        if (total_workbooks <= 0) {
-            $(tab_selector).find('.workbook-page-count').hide();
-            $(tab_selector).find('.no-workbook-page-count').show();
+        if (total_items <= 0) {
+            $(tab_selector).find('.item-page-count').hide();
+            $(tab_selector).find('.no-item-page-count').show();
             $(tab_selector).find('.paginate_button_space').hide();
             $(tab_selector).find('.dataTables_length').addClass('disabled');
             $(tab_selector).find('.sortable_table th').addClass('disabled');
             $(tab_selector).find('.dataTables_goto_page').addClass('disabled');
         }
         else {
-            var page_list = pagination(page, total_pages);
+            var page_list = base.pagination(page, total_pages);
             var html_page_button = "";
             for(var i in page_list){
                 if(page_list[i] === "..."){
@@ -112,31 +112,31 @@ require([
                     html_page_button += "<a class=\'dataTables_button paginate_button numeric_button"+ (page_list[i] == page ? " current\'":"\'") +">" + page_list[i] + "</a>";
                 }
             }
-            $(tab_selector).find('.workbook-page-count').show();
-            $(tab_selector).find('.no-workbook-page-count').hide();
+            $(tab_selector).find('.item-page-count').show();
+            $(tab_selector).find('.no-item-page-count').hide();
             $(tab_selector).find('.paginate_button_space').show();
             $(tab_selector).find('.dataTables_length').removeClass('disabled');
             $(tab_selector).find('.sortable_table th').removeClass('disabled');
             $(tab_selector).find('.dataTables_goto_page').removeClass('disabled');
             $(tab_selector).find('.dataTables_goto_page .goto-page-number').attr('max', total_pages);
-            $(tab_selector).find('.total-workbook-count').html(total_workbooks);
+            $(tab_selector).find('.total-item-count').html(total_items);
             $(tab_selector).find('.paginate_button_space').html(html_page_button);
         }
 
-        first_page_entry = ((page - 1) * workbooks_per_page) + 1;
-        last_page_entry = Math.min(first_page_entry + workbooks_per_page - 1, workbook_list.length);
+        first_page_entry = ((page - 1) * items_per_page) + 1;
+        last_page_entry = Math.min(first_page_entry + items_per_page - 1, total_items);
 
-        if(workbook_list.length <= 0) {
+        if(total_items <= 0) {
             first_page_entry = 0;
             last_page_entry = 0;
         }
         else {
-            for (i = 1; i <= workbook_list.length; ++i) {
-                var workbook_index_id = "#workbook-index-" + i;
+            for (i = 1; i <= total_items; ++i) {
+                var item_index_id = "#item-index-" + i;
                 if (i >= first_page_entry && i <= last_page_entry) {
-                    $(workbook_index_id).show();
+                    $(item_index_id).show();
                 } else {
-                    $(workbook_index_id).hide();
+                    $(item_index_id).hide();
                 }
             }
 
@@ -148,7 +148,7 @@ require([
         if (parseInt(page) == 1) {
             $(tab_selector).find('.prev-page').addClass('disabled');
         }
-        if (parseInt(page) * workbooks_per_page >= total_workbooks) {
+        if (parseInt(page) * items_per_page >= total_items) {
             $(tab_selector).find('.next-page').addClass('disabled');
         }
     };
@@ -175,7 +175,6 @@ require([
     });
 
     $('.panel-body').on('click', '.paginate_button', function () {
-        var this_tab = $(this).parents('.data-tab').data('file-type');
         var page_no;
         if ($(this).hasClass('next-page')) {
             page_no = parseInt(page) + 1;
@@ -190,32 +189,4 @@ require([
         }
         goto_table_page(page_no)
     });
-
-    function pagination(c, m) {
-        var current = parseInt(c),
-            last = m,
-            delta = 2,
-            left = current - delta,
-            right = current + delta + 1,
-            range = [],
-            rangeWithDots = [],
-            l;
-        for (var i = 1; i <= last; i++) {
-            if (i == 1 || i == last || i >= left && i < right) {
-                range.push(i);
-            }
-        }
-        for (var i in range) {
-            if (l) {
-                if (range[i] - l === 2) {
-                    rangeWithDots.push(l + 1);
-                } else if (range[i] - l !== 1) {
-                    rangeWithDots.push('...');
-                }
-            }
-            rangeWithDots.push(range[i]);
-            l = range[i];
-        }
-        return rangeWithDots;
-    }
 });

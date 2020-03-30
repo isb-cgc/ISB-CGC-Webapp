@@ -506,26 +506,28 @@ require([
     }
 
     // change no of entries per page
-    $('.tab-content').on('change', '.cohorts-per-page', function () {
-        cohorts_per_page = parseInt($('#saved-cohorts-list').find('.cohorts-per-page :selected').val());
+    $('.panel-body').on('change', '.items-per-page', function () {
+        items_per_page = parseInt($('#saved-cohorts-list').find('.items-per-page :selected').val());
         goto_table_page(1);
     });
 
     function update_table_display()
     {
         var tab_selector = '#saved-cohorts-list';
-        var total_cohorts = cohort_list.length;
-        var total_pages = Math.ceil(total_cohorts / cohorts_per_page);
-        if (total_cohorts <= 0) {
-            $(tab_selector).find('.cohort-page-count').hide();
-            $(tab_selector).find('.no-cohort-page-count').show();
+        var total_items = cohort_list.length;
+        var total_pages = Math.ceil(total_items / items_per_page);
+
+        //change another part at here
+        if (total_items <= 0) {
+            $(tab_selector).find('.item-page-count').hide();
+            $(tab_selector).find('.no-item-page-count').show();
             $(tab_selector).find('.paginate_button_space').hide();
             $(tab_selector).find('.dataTables_length').addClass('disabled');
             $(tab_selector).find('.sortable_table th').addClass('disabled');
             $(tab_selector).find('.dataTables_goto_page').addClass('disabled');
         }
         else {
-            var page_list = pagination(page, total_pages);
+            var page_list = base.pagination(page, total_pages);
             var html_page_button = "";
             for(var i in page_list){
                 if(page_list[i] === "..."){
@@ -535,31 +537,31 @@ require([
                     html_page_button += "<a class=\'dataTables_button paginate_button numeric_button"+ (page_list[i] == page ? " current\'":"\'") +">" + page_list[i] + "</a>";
                 }
             }
-            $(tab_selector).find('.cohort-page-count').show();
-            $(tab_selector).find('.no-cohort-page-count').hide();
+            $(tab_selector).find('.item-page-count').show();
+            $(tab_selector).find('.no-item-page-count').hide();
             $(tab_selector).find('.paginate_button_space').show();
             $(tab_selector).find('.dataTables_length').removeClass('disabled');
             $(tab_selector).find('.sortable_table th').removeClass('disabled');
             $(tab_selector).find('.dataTables_goto_page').removeClass('disabled');
             $(tab_selector).find('.dataTables_goto_page .goto-page-number').attr('max', total_pages);
-            $(tab_selector).find('.total-cohort-count').html(total_cohorts);
+            $(tab_selector).find('.total-item-count').html(total_items);
             $(tab_selector).find('.paginate_button_space').html(html_page_button);
         }
 
-        first_page_entry = ((page - 1) * cohorts_per_page) + 1;
-        last_page_entry = Math.min(first_page_entry + cohorts_per_page - 1, cohort_list.length);
+        first_page_entry = ((page - 1) * items_per_page) + 1;
+        last_page_entry = Math.min(first_page_entry + items_per_page - 1, total_items);
 
-        if(cohort_list.length <= 0) {
+        if(total_items <= 0) {
             first_page_entry = 0;
             last_page_entry = 0;
         }
         else {
-            for (i = 1; i <= cohort_list.length; ++i) {
-                var cohort_index_id = "#cohort-index-" + i;
+            for (i = 1; i <= total_items; ++i) {
+                var item_index_id = "#item-index-" + i;
                 if (i >= first_page_entry && i <= last_page_entry) {
-                    $(cohort_index_id).show();
+                    $(item_index_id).show();
                 } else {
-                    $(cohort_index_id).hide();
+                    $(item_index_id).hide();
                 }
             }
 
@@ -571,7 +573,7 @@ require([
         if (parseInt(page) == 1) {
             $(tab_selector).find('.prev-page').addClass('disabled');
         }
-        if (parseInt(page) * cohorts_per_page >= total_cohorts) {
+        if (parseInt(page) * items_per_page >= total_items) {
             $(tab_selector).find('.next-page').addClass('disabled');
         }
     };
@@ -581,7 +583,7 @@ require([
         update_table_display();
     }
 
-    $('.tab-content').on('click', '.goto-page-button', function () {
+    $('.panel-body').on('click', '.goto-page-button', function () {
         var page_no_input = $(this).siblings('.goto-page-number').val();
         if (page_no_input == "")
             return;
@@ -590,59 +592,27 @@ require([
         if (page > 0 && page <= max_page_no) {
             goto_table_page(page);
             $(this).siblings('.goto-page-number').val("");
-        }
-        else {
+        } else {
             base.showJsMessage("warning",
-                "Page number you have entered is invalid. Please enter a number between 1 and "+max_page_no, true);
+                "Page number you have entered is invalid. Please enter a number between 1 and " + max_page_no, true);
             $('#placeholder').hide();
         }
     });
 
-    $('.tab-content').on('click', '.paginate_button', function () {
-        var this_tab = $(this).parents('.data-tab').data('file-type');
+    $('.panel-body').on('click', '.paginate_button', function () {
         var page_no;
-        if($(this).hasClass('next-page')){
-            page_no = parseInt(page)+1;
-        }
-        else if($(this).hasClass('prev-page')){
-            page_no = page_no == 1 ? 1 : page-1;
-        }
-        else if($(this).hasClass('numeric_button')){
-            if($(this).hasClass('current'))
+        if ($(this).hasClass('next-page')) {
+            page_no = parseInt(page) + 1;
+        } else if ($(this).hasClass('prev-page')) {
+            page_no = page_no == 1 ? 1 : page - 1;
+        } else if ($(this).hasClass('numeric_button')) {
+            if ($(this).hasClass('current'))
                 return;
             page_no = $(this).text();
-        }
-        else{
+        } else {
             page_no = 1;
         }
         goto_table_page(page_no)
     });
 
-    function pagination(c, m) {
-        var current = parseInt(c),
-            last = m,
-            delta = 2,
-            left = current - delta,
-            right = current + delta + 1,
-            range = [],
-            rangeWithDots = [],
-            l;
-        for (var i = 1; i <= last; i++) {
-            if (i == 1 || i == last || i >= left && i < right) {
-                range.push(i);
-            }
-        }
-        for(var i in range){
-            if (l) {
-                if (range[i] - l === 2) {
-                    rangeWithDots.push(l + 1);
-                } else if (range[i] - l !== 1) {
-                    rangeWithDots.push('...');
-                }
-            }
-            rangeWithDots.push(range[i]);
-            l = range[i];
-        }
-        return rangeWithDots;
-    }
 });

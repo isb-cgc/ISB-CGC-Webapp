@@ -1,0 +1,29 @@
+{% load static %}
+
+    <!-- Table Pagination Control Modal -->
+    <div class="dataTables_info">
+        <span class="item-page-count">Showing <span class="showing">10</span> of <span class="total-item-count"></span> entries</span>
+        <span class="no-item-page-count" style="display: none;">Showing 0 items.</span>
+        <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
+    </div>
+    <div>
+        <div class="dataTables_length items-per-page">
+            <label for="items-per-page-select">Show</label>
+            <select id="items-per-page-select">
+                <option value="5">5</option>
+                <option value="20">20</option>
+                <option value="40">40</option>
+            </select>
+            <label>entries</label>
+        </div>
+        <div class="dataTables_goto_page">
+            <label for="goto-page">Page</label>
+            <input id="goto-page" type="number" class="goto-page-number" min="1" max="1">
+            <div class="goto-page-button dataTables_button">Go</div>
+        </div>
+        <div class="dataTables_paginate">
+            <a class="prev-page paginate_button dataTables_button disabled">Previous</a>
+            <span class="paginate_button_space"></span>
+            <a class="next-page paginate_button dataTables_button">Next</a>
+        </div>
+    </div>

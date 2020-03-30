@@ -80,32 +80,7 @@
                         </div>
                     {% endif %}
 
-                    <div class="dataTables_info">
-                        <span class="cohort-page-count">Showing <span class="showing">10</span> of <span class="total-cohort-count"></span> entries</span>
-                        <span class="no-cohort-page-count" style="display: none;">Showing 0 files.</span>
-                        <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
-                    </div>
-                    <div>
-                        <div class="dataTables_length cohorts-per-page">
-                            <label for="cohorts-per-page-select">Show</label>
-                            <select id="cohorts-per-page-select">
-                                <option value="5">5</option>
-                                <option value="20">20</option>
-                                <option value="40">40</option>
-                            </select>
-                            <label>entries</label>
-                        </div>
-                        <div class="dataTables_goto_page">
-                            <label for="goto-page">Page</label>
-                            <input id="goto-page" type="number" class="goto-page-number" min="1" max="1">
-                            <div class="goto-page-button dataTables_button">Go</div>
-                        </div>
-                        <div class="dataTables_paginate">
-                            <a class="prev-page paginate_button dataTables_button disabled">Previous</a>
-                            <span class="paginate_button_space"></span>
-                            <a class="next-page paginate_button dataTables_button">Next</a>
-                        </div>
-                    </div>
+                    {% include "isb_cgc/pagination.html" %}
 
                     <table id="cohort-table" class="table table-striped tablesorter cohort-table">
                         <thead><tr>
@@ -121,7 +96,7 @@
                         <tbody>
                         {% for cohort in cohorts %}
                         {% if cohort.owner.is_superuser == False %}
-                            <tr id="cohort-index-{{ forloop.counter }}">
+                            <tr id="item-index-{{ forloop.counter }}">
                                 <td class="checkbox-col">
                                     <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} class="cohort" type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>
                                 </td>
@@ -326,7 +301,7 @@
     </div>
 
     <script type="text/javascript">
-    var cohorts_per_page=5;
+    var items_per_page=5;
     var page=1;
     var cohort_list = {{ cohorts_listing|safe }};
     var shared_users = {{ shared_users|safe }};

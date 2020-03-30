@@ -259,6 +259,9 @@ define(['jquery', 'utils'], function($, utils) {
         removeCookie: function(name, path) {
             utils.removeCookie(name, path);
         },
+        pagination: function(current_page, total_pages) {
+            return utils.pagination(current_page, total_pages);
+        },
         gdcSchema: {
             "type": "array",
             "items": {
