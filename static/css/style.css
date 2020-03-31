@@ -401,12 +401,21 @@ nav {
 
 .btn-default {
   color: #fff !important;
-  background-color: #F7991B;
+  background-color: #d97c17;
   border: 1px solid #e18408 !important; }
   .btn-default:hover, .btn-default:active, .btn-default:focus {
-    background-color: #e18408 !important;
+    background-color: #ed8b08 !important;
     color: #fff !important;
     border: 1px solid #fac57e !important; }
+
+.btn-special {
+  color: #fff !important;
+  background-color: #743796;
+  border: 1px solid #4e1a61 !important; }
+  .btn-special:hover, .btn-special:active, .btn-special:focus {
+    background-color: #8d43b6 !important;
+    color: #fff !important;
+    border: 1px solid #8a6dbc !important; }
 
 .btn-link {
   font-weight: 400; }
@@ -832,6 +841,18 @@ nav, .site-header {
   nav a, .site-header a {
     color: #2B7388;
     font-weight: bold; }
+
+.site-header .basic-avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 29px;
+}
+
+.user-detail .basic-avatar {
+  width: 54px;
+  height: 54px;
+  font-size: 50px;
+}
 
 .navbar-item {
   display: inline-block !important;
@@ -2096,7 +2117,7 @@ section .min-max {
 #cohort-details .filter-panel .checks, #cohort-filelist .filter-panel .checks {
   float: right;
   display: block;
-  width: 55%; }
+  width: 60%; }
 
 #cohort-details .filter-panel .tabpanel, #cohort-filelist .filter-panel .tabpanel {
   border-top-left-radius: 3px;
@@ -2358,15 +2379,25 @@ section .min-max {
 #cohort-details .search-checkbox-list label, #cohort-filelist .search-checkbox-list label {
   width: 100%; }
 
-#cohort-details .sample_count, #cohort-filelist .sample_count {
-  background-color: #bababa;
+#cohort-details #search_def {
+  max-height: 12em;
+  overflow-y: auto;
+}
+
+#cohort-details .search-checkbox-list label .value {
+  display: inline-block;
+  max-width: 75% }
+
+#cohort-details .case_count, #cohort-filelist .case_count {
+  background-color: #818181;
   color: white;
-  border-radius: 10px;
+  color: white;
+  border-radius: 7px;
   font-size: .8em;
   padding: 2px 5px;
   text-align: right; }
-  #cohort-details .sample_count:after, #cohort-filelist .sample_count:after {
-    content: 'sample(s)';
+  #cohort-details .case_count:after, #cohort-filelist .case_count:after {
+    content: 'case(s)';
     font-size: 0.9em;
     padding-left: 5px; }
 

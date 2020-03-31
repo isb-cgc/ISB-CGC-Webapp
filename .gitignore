@@ -81,6 +81,8 @@ scripts/metadata_featdef_tables.sql
 *.xls
 *.txt
 !requirements.txt
+!LICENSE.txt
+!LICENSE_django_rest_framework.txt
 
 # Vagrant Files
 .vagrant/

@@ -1,9 +1,12 @@
 {% load staticfiles %}
 {% load cohort_filters %}
 {% load custom_tags %}
+{% load socialaccount %}
 {% load idc_collections_custom_tags %}
 
 <header class="navbar navbar-fixed-top site-header" role="menubar">
+
+
     {% is_allowed user as has_access %}
     <nav class="container">
         <div class="row">
@@ -11,21 +14,13 @@
             <div class="nav navbar-left">
                 <ul class="">
                     <li class="navbar-item">
-                        {% if user.is_authenticated and has_access %}
-                             <a href="{% url 'dashboard' %}" title="Dashboard" >
-                        {%  else %}
-                            <a href="{% url 'landing_page' %}" title="Home Page" >
-                        {%  endif %}
+                        <a href="{% url 'landing_page' %}" title="Home Page" >
                         <img class="navbar-brand" src="{% static 'img/idclogo.png' %}" alt="ISB Logo"/><span class="navbar-item">IDC</span></a>
                     </li>
-                    {% if request.path != '/' %}
-                        <li class="navbar-link navbar-item">
-                            <a href="{% url 'landing_page' %}">Home Page</a>
-                        </li>
-                    {% endif %}
                     <li class="navbar-link navbar-item">
                         <a href="{% url 'explore_data' %}">Data Exploration</a>
                     </li>
+                    <!--
                     <li class="navbar-link navbar-item">
                         <a href="http://imaging-data-commons.readthedocs.org/en/latest/" target="_blank">Documentation</a>
                     </li>
@@ -40,6 +35,7 @@
                             </ul>
                         </div>
                     </li>
+                    -->
                 </ul>
             </div>
 
@@ -47,7 +43,13 @@
                 {% if user.is_authenticated %}
                     <div id="user-login" class="navbar-item">
                         <a class="avatar-link" href="{% url 'user_detail' user.id %}">
-                            <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="32" height="32" alt="Avatar Link to User Details">
+                            {% with avatar_url=user.socialaccount_set.all.0.get_avatar_url %}
+                                {% if avatar_url %}
+                                    <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="32" height="32" alt="Avatar Link to User Details">
+                                {% else %}
+                                    <i class="fa fa-user basic-avatar"> </i>
+                                {% endif %}
+                            {% endwith %}
                         </a>
 
                         <div class="dropdown">
@@ -69,9 +71,15 @@
                     </div>
                     {% endif %}
                 {% else %}
-                    <div id="user-login" class="navbar-form inline-block">
-                        <!-- same thing as /accounts/login-->
-                        <a class="login-link" href="{% url 'account_login' %}" title="Sign In"><i class="fa fa-sign-in"></i> Sign In</a>
+                    <div class="pull-right dropdown">
+                        <a id="btnGroupDropCohortCreate" href=""
+                           class="btn btn-link dropdown-toggle"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-sign-in"></i>Sign In</a>
+                        <ul class="dropdown-menu" aria-labelledby="btnGroupDropCohortCreate">
+                            <li><a class="login-link" href="{% provider_login_url 'google' %}" title="Google Sign In"><i class="fa fa-sign-in"></i> via Google</a></li>
+                            <li><a class="login-link" href="{% url 'account_login' %}" title="IDC Sign In"><i class="fa fa-sign-in"></i> via IDC</a></li>
+                        </ul>
                     </div>
                 {% endif %}
             </div>
@@ -86,6 +94,7 @@
                 <a href="{% url 'dashboard' %}">DASHBOARD</a>
             </li>
             {%  endif %}
+            <!--
             {% if USER_DATA_ON %}
             <li class="menu-item has-drop-down">
                 <a>PROGRAMS <i class="fa fa-caret-down"></i></a>
@@ -96,6 +105,7 @@
                 </ul>
             </li>
             {% endif %}
+            -->
             <li class="menu-item has-drop-down">
                 <a>COHORTS <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">

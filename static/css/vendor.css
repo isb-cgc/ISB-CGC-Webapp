@@ -1517,7 +1517,7 @@ pre {
       width: 970px; } }
   @media (min-width: 1200px) {
     .container {
-      width: 1280px; } }
+      width: 1400px; } }
 
 .container-fluid {
   margin-right: auto;
@@ -4539,7 +4539,7 @@ a.thumbnail.active {
   list-style: none; }
 
 .list-group {
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
   padding-left: 0; }
 
 .list-group-item {

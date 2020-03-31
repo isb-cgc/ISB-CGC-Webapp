@@ -24,6 +24,7 @@
             <div class="col-lg-12">
             </div>
         </div>
+        <!--
         <div class="row">
             <div class="col-md-12">
                 <section class="panel panel-default">
@@ -32,11 +33,11 @@
                             A Panel
                         </h3>
                         <div class="min-max">
-                            <a data-toggle="collapse" aria-label="Open/Close Notebook" href="#notebook-panel"><i
+                            <a data-toggle="collapse" aria-label="Open/Close <NAME HERE>" href="#<name here>-panel"><i
                                     class="show fa fa-angle-double-down"></i></a>
                         </div>
                     </div>
-                    <div id="workbook-panel" class="panel panel-collapse collapse in" aria-expanded="true">
+                    <div id="<name here>-panel" class="panel panel-collapse collapse in" aria-expanded="true">
                         <div class="panel-body">
                         </div>
                         <div class="panel-footer">
@@ -48,7 +49,7 @@
                 </section>
             </div>
         </div>
-
+        -->
         <div class="row">
             <div class="col-md-12">
                 <section class="panel panel-default">
@@ -87,7 +88,8 @@
                                                 </div>
                                             {% endif %}
                                             <div class="list-info col-3">
-                                                <span>{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</span>
+                                                {#  <span>{{ cohort.date_created|date:'M d, Y, g:i a' }}</span> #}
+                                                <span>n/a</span>
                                             </div>
                                         </li>
                                     {% endfor %}
@@ -114,6 +116,7 @@
             </div>
         </div>
 
+        <!--
         {% if USER_DATA_ON %}
             <hr>
             <div class="row">
@@ -163,7 +166,7 @@
                 </div>
             </div>
         {% endif %}
-
+        -->
     </div>
 
     <script type="text/javascript">
@@ -173,4 +176,7 @@
 {% endblock %}
 
 
-{% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

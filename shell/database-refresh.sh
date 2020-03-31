@@ -1,7 +1,18 @@
 if [ -n "$CI" ]; then
-    export "[ERROR] Never refresh databases on deployments!"
+    echo "[ERROR] Never refresh databases on deployments!"
+    exit 1
 else
-    export $(cat /home/vagrant/parentDir/secure_files/idc/.env | grep -v ^# | xargs) 2> /dev/null
+    if ( "/home/vagrant/www/shell/get_env.sh" ) ; then
+        export $(cat ${ENV_FILE_PATH} | grep -v ^# | xargs) 2> /dev/null
+    else
+        exit 1
+    fi
+    # Doublecheck where we're running this...
+    if [ "${DATABASE_HOST}" != "localhost" ]; then
+        echo "[ERROR] Possible remote database detected! This script IS ONLY intended for use on local developer builds!"
+        echo "[ERROR] Host seen: ${DATABASE_HOST}"
+        exit 1
+    fi
     export MYSQL_ROOT_USER=root
     echo "Dropping database $DATABASE_NAME in prepatation for reload..."
     mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "DROP DATABASE IF EXISTS $DATABASE_NAME"

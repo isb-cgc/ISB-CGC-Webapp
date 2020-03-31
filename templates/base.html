@@ -1,6 +1,6 @@
 <!--
 
- Copyright 2016, Institute for Systems Biology
+ Copyright 2020, Institute for Systems Biology
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>{% block title %}IDC{% endblock %}</title>
-    <meta name="description" content="{% block description %}Imagine Data Commons{% endblock %}">
+    <meta name="description" content="{% block description %}Imaging Data Commons{% endblock %}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     {% block extra_css_libs %}{% endblock %}
@@ -32,24 +32,26 @@
     <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}" />
     <link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}" />
     <script type="text/javascript" src="{% static 'js/libs/modernizr.js' %}"></script>
+
     {% block header %}{% endblock %}
 
-    {% if SITE_GOOGLE_ANALYTICS %}
-        <!-- Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id={{ SITE_GOOGLE_ANALYTICS_TRACKING_ID }}"></script>
-        <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-
-          gtag('config', '{{ SITE_GOOGLE_ANALYTICS_TRACKING_ID }}');
-        </script>
-    {%  endif %}
+{#    {% if SITE_GOOGLE_ANALYTICS %}#}
+{#        <!-- Global site tag (gtag.js) - Google Analytics -->#}
+{#        <script async src="https://www.googletagmanager.com/gtag/js?id={{ SITE_GOOGLE_ANALYTICS_TRACKING_ID }}"></script>#}
+{#        <script>#}
+{#          window.dataLayer = window.dataLayer || [];#}
+{#          function gtag(){dataLayer.push(arguments);}#}
+{#          gtag('js', new Date());#}
+{##}
+{#          gtag('config', '{{ SITE_GOOGLE_ANALYTICS_TRACKING_ID }}');#}
+{#        </script>#}
+{#    {%  endif %}#}
     <script>
         var STATIC_FILES_URL = '{{ STATIC_FILES_URL }}';
         var BASE_URL = '{{ BASE_URL }}' || "";
         var STORAGE_URI = '{{ STORAGE_URI }}';
     </script>
+
 </head>
 <body id="body">
 <!--Include site main header-->
@@ -86,6 +88,32 @@
 
     <!-- Logout Modal -->
 </main>
+
+<div class="modal fade" id="gov_warning" tabindex="-1" role="dialog" aria-labelledby="gov_warning-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="gov_warning-header">Warning</h4>
+            </div>
+            <div class="modal-body">
+            <p>You are accessing a US Government web site which may contain information that must be protected under the
+                US Privacy Act or other sensitive information and is intended for Government authorized use only. </p>
+            <p>Unauthorized attempts to upload information, change information, or use of this web site may result in
+                disciplinary action, civil, and/or criminal penalties. Unauthorized users of this website should have no
+                expectation of privacy regarding any communications or data processed by this website.</p>
+            <p> Anyone accessing this website expressly consents to monitoring of their actions and all communications
+                or data transiting or stored on related to this website and is advised that if such monitoring reveals
+                possible evidence of criminal activity, NIH may provide that evidence to law enforcement officials</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div class="modal fade" id="logout-modal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -113,6 +141,11 @@
 {% load i18n l10n %}
 {% load static from staticfiles %}
 
+<script>
+    var warningSeen = {% if request.session.seenWarning %}true{% else %}false{% endif %};
+    var user_is_auth = {% if request.user.is_authenticated %}true{% else %}false{% endif %};
+</script>
+
 {# If the user is not authenticated then there is no session to secure ! #}
 {% if request.user.is_authenticated %}
     <link rel="stylesheet" type="text/css" href="{% static 'session_security/style.css' %}"></link>
@@ -129,7 +162,9 @@
     </script>
     {% endlocalize %}
 {% endif %}
-<script data-main="{% block js_file %}{% endblock %}" src="{% static 'js/libs/require.js' %}"></script>
+{% block js_file %}
+    <script src="{% static 'js/libs/require.js' %}"></script>
+{% endblock %}
 
 </body>
 </html>

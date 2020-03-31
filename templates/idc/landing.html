@@ -37,6 +37,7 @@
                             <h1 class="lj-text-center"><span>Imaging Data Commons</span></h1>
                         </div>
                     </div>
+                    jkl {{ request.session.name }} jkl
                     <div class="col-xs-8 col-xs-offset-2 lj-title-paragraph">
                         <p class="lj-text-center">The Imaging Data Commons (IDC) is a cloud-based data commons within the NCI Cancer Research Data Commons (CRDC)
                             that connects researchers with cancer imaging datasets and resources for exploring those datasets and identifying relevant cohorts for computation.</p>
@@ -51,7 +52,8 @@
                     <div class="row footer">
                         <div class="col-xs-8 col-xs-offset-2">
                             <p>IDC has been funded in whole with Federal funds from the <b>National Cancer Institute</b>,
-                                <b>National Institutes of Health</b>, under contract No. TBD
+                                <b>National Institutes of Health</b>, under contract number 19X037Q from Leidos Biomedical Research,
+                                under Task Order HHSN26100071.
                             </p>
                             <div class="pull-down-button">
                                 <a href="#about-div">
@@ -112,7 +114,9 @@
                     <div class="row">
                         <div class="col-sm-10 col-sm-offset-1">
                             <h2>Funding</h2>
-                            <p>This project has been funded TBD. The content of this publication does not necessarily
+                            <p>This project has been funded in whole with Federal funds from the <b>National Cancer Institute</b>,
+                                <b>National Institutes of Health</b>, under contract number 19X037Q from Leidos Biomedical Research,
+                                under Task Order HHSN26100071. The content of this publication does not necessarily
                                 reflect the views or policies of the Department of Health and Human Services, nor does
                                 mention of trade names, commercial products, or organizations imply endorsement by the
                                 U.S. Government.</p>
@@ -143,4 +147,7 @@
     </div>
 {% endblock %}
 
-{% block js_file %}{% static 'js/landing.js' %}{% endblock %}
+{% block js_file %}
+    {{ block.super }}
+    <script src="{% static 'js/landing.js' %}"></script>
+{% endblock %}

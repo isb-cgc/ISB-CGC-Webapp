@@ -98,7 +98,8 @@
                                 <td class="id-col">
                                     {{ cohort.id }}
                                 </td>
-                                <td class="date-col">{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</td>
+                            {#  <td class="date-col">{{ cohort.date_created|date:'M d, Y, g:i a' }}</td> #}
+                                <td class="date-col">N/A</td>
                             </tr>
                         {% endif %}
                         {% endfor %}
@@ -139,7 +140,8 @@
                                 <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>
                                 <td>{{ cohort.case_size }}</td>
                                 <td class="sample-col"> {{ cohort.sample_size }} </td>
-                                <td class="date-col">{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</td>
+                                {#  <td class="date-col">{{ cohort.date_created|date:'M d, Y, g:i a' }}</td> #}
+                                <td class="date-col">N/A</td>
                             </tr>
                             {% endif %}
 
@@ -285,4 +287,7 @@
     </script>
 {% endblock %}
 
-{% block js_file %}{% static 'js/cohort_list.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/cohort_list.js' %}"></script>
+{% endblock %}

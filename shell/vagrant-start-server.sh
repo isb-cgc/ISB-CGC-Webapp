@@ -1,4 +1,4 @@
-export $(cat /home/vagrant/parentDir/secure_files/idc/.env | grep -v ^# | xargs) 2> /dev/null
+export $(cat ${ENV_FILE_PATH} | grep -v ^# | xargs) 2> /dev/null
 
 echo "Killing any running processes..."
 sudo killall -9 sass 2> /dev/null

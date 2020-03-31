@@ -10,7 +10,11 @@ if [ -n "$CI" ]; then
     echo "Cloning IDC-Common branch ${COMMON_BRANCH}..."
     git clone -b ${COMMON_BRANCH} https://github.com/ImagingDataCommons/IDC-Common.git
 else
-    export $(cat /home/vagrant/parentDir/secure_files/idc/.env | grep -v ^# | xargs) 2> /dev/null
+    if ( "/home/vagrant/www/shell/get_env.sh" ) ; then
+        export $(cat ${ENV_FILE_PATH} | grep -v ^# | xargs) 2> /dev/null
+    else
+        exit 1
+    fi
     export HOME=/home/vagrant
     export HOMEROOT=/home/vagrant/www
 fi
@@ -64,15 +68,17 @@ else
     echo "Using restored cache for Python Libraries"
 fi
 
+if [ -z "${CI}" ]; then
+    echo "Installing responses library for unit tests, but not for deployment..."
+    pip3 install -q responses -t ${HOMEROOT}/lib --only-binary all
+fi
+
 if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
     echo "Installing Django Debug Toolbar for local dev..."
     pip3 install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
 fi
 
 echo "Libraries Installed"
-
-# Install SASS
-gem install sass
 
 # Install Google Cloud SDK
 # If we're not on CircleCI or we are but google-cloud-sdk isn't there, install it
