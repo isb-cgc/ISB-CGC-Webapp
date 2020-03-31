@@ -10,10 +10,18 @@ import logging
 # https://github.com/pre-commit/pre-commit-hooks/blob/master/pre_commit_hooks/detect_private_key.py
 
 BLACKLIST = [
+    # Standard GCP credentials format
     b'BEGIN PRIVATE KEY',
 	b'private_key_id',
 	b'private_key',
-	b'MYSQL_ROOT_PASSWORD='
+	# .env file checks
+	b'_PASSWORD=',
+	b'_SECRET=',
+    b'_API_KEY=',
+    b'_SECRET_KEY=',
+    # Prevent yaml files with env vars from going in, as they
+    # may also have passwords
+    b'env_variables:'
 ]
 
 #: For a complete list, we need to make an OS call:
@@ -21,12 +29,10 @@ BLACKLIST = [
 GIT_COMMIT_LIST = ["git", "diff-index", "-z", "--cached", "HEAD", "--name-only"]
 
 def main():
-    process = subprocess.Popen(GIT_COMMIT_LIST,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
+    process = subprocess.Popen(GIT_COMMIT_LIST, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
-
     files_to_check = stdout.decode("utf-8").split("\0")
+
     private_key_files = []
 
     for filename in files_to_check:
@@ -38,7 +44,7 @@ def main():
                     private_key_files.append(filename)
 
     if len(private_key_files):
-        print(">>>>>> Commit rejected <<<<<<<")
+        print(">>>>>> COMMIT REJECTED <<<<<<<")
         print("Reason(s): POSSIBLE CREDENTIALS LEAKAGE")
         print("Check the following files: \"{}\"".format("\", \"".join(private_key_files)))
         return 1
