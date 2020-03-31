@@ -102,4 +102,4 @@ if [ -z "${CI}" ]
     cp ${HOMEROOT}/git-hooks/* ${HOMEROOT}/.git/hooks/
 endif
 
-echo "private_key_id"
+echo "private_key_id     "
