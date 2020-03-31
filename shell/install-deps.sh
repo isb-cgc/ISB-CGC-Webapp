@@ -99,5 +99,5 @@ dos2unix ${HOMEROOT}/shell/*.sh
 
 echo "Loading Git Hooks"
 if [ -z "${CI}" ]
-    cp ${HOMEROOT}/git-hooks/* ${HOMEROOT}/.git/hooks/
+    cp -r ${HOMEROOT}/git-hooks/ ${HOMEROOT}/.git/hooks/
 endif
