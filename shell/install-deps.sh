@@ -101,3 +101,5 @@ echo "Loading Git Hooks"
 if [ -z "${CI}" ]
     cp ${HOMEROOT}/git-hooks/* ${HOMEROOT}/.git/hooks/
 endif
+
+echo "private_key_id"
