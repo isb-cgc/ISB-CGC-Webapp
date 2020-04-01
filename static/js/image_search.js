@@ -23,6 +23,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
     window.studyIdSel = [];
     window.tcgaColls = ["tcga_blca", "tcga_brca", "tcga_cesc", "tcga_coad", "tcga_esca", "tcga_gbm", "tcga_hnsc", "tcga_kich", "tcga_kirc", "tcga_kirp", "tcga_lgg", "tcga_lihc", "tcga_luad", "tcga_lusc", "tcga_ov", "tcga_prad", "tcga_read", "tcga_sarc", "tcga_stad", "tcga_thca", "tcga_ucec"];
 
+
     var plotLayout = {
         title: '',
         autosize: true,
@@ -34,6 +35,33 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             pad: 0
         },
         xaxis: {type: 'category', dtick: 1}
+    };
+
+    var pieLayout = {
+        title: '',
+        autosize: true,
+        margin: {
+            l: 30,
+            r: 30,
+            b: 60,
+            t: 30,
+            pad: 0
+        },
+        showlegend: false,
+        legend: {
+          x: 2,
+           y: 0,
+            traceorder: 'normal',
+        font: {
+          family: 'sans-serif',
+          size: 4,
+          color: '#000'
+       },
+        bgcolor: '#E2E2E2',
+        bordercolor: '#FFFFFF',
+          borderwidth: 2
+        }
+
     };
 
 
@@ -62,7 +90,9 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
         else{
             var attVal=[];
             if (isInt){
-                attVal = [ parseInt(strt), parseInt(end)  ];
+                 attVal = [parseInt(strt), parseInt(end)];
+                 // edge effect
+                 attVal = [parseInt(strt), parseInt(end) -1];
             }
             else{
                 attVal = [ parseFloat(strt), parseFloat(end)  ];
@@ -86,7 +116,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
                 continue;
             }
             if (curKey === 'age_at_diagnosis_btw') {
-                var nstr = '<span class="filter-type">AGE</span> IN (<span class="filter-att">' + filterObj[curKey][0].toString() + '-' + filterObj[curKey][1].toString() + ')</span>';
+                var nstr = '<span class="filter-type">AGE</span> IN (<span class="filter-att">' + filterObj[curKey][0].toString() + '-' + (filterObj[curKey][1]+1).toString() + ')</span>';
 
             } else {
                 var disp = curKey;
@@ -144,7 +174,9 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
              var valArr = val.split('-');
              var attVal =[];
              if (isInt) {
-                 attVal = [parseInt(valArr[0]), parseInt(valArr[1])];
+                 //attVal = [parseInt(valArr[0]), parseInt(valArr[1])];
+                 // edge effect
+                 attVal = [parseInt(valArr[0]), parseInt(valArr[1]) -1];
              }
              else{
                  attVal = [parseFloat(valArr[0]), parseFloat(valArr[1])];
@@ -649,11 +681,22 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             success: function (data) {
                 updateCollectionTotals(data.total, data.origin_set.attributes.collection_id);
                 updateFilterSelections('search_orig_set',data.origin_set.attributes);
-                updateFilterSelections('search_related_set',data.related_set.attributes);
                 createPlots('search_orig_set');
-                createPlots('search_related_set');
+
+                if (data.hasOwnProperty('derived_set')) {
+                    $('#search_derived_set').removeClass('disabled');
+                    updateFilterSelections('search_derived_set', data.derived_set.attributes);
+                    createPlots('search_derived_set');
+                }
+
+                if (data.hasOwnProperty('related_set')) {
+                    $('#search_related_set').removeClass('disabled');
+                    updateFilterSelections('search_related_set', data.related_set.attributes);
+                    createPlots('search_related_set');
+                }
+
                 editProjectsTableAfterFilter('projects_table','project_scope');
-                resetSeriesAndStudiesTables ('series_table', 'studies_table');
+                resetSeriesAndStudiesTables ('series_table', 'studies_table') ;
                 var studyArr = new Array();
                 for (projId in window.selItems.selStudies){
                     studyArr.push.apply(studyArr, window.selItems.selStudies[projId]);
@@ -711,35 +754,60 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
 
      var plotCategoricalData=function(plotId, lbl, plotData) {
 
-        var pdata = [
-            {
-                x: plotData.dataLabel,
-                y: plotData.dataCnt,
-                type: 'bar'
+        pieLayout.title = lbl.toUpperCase().replace(/_/g, " ");
+        delete pieLayout.annotations;
+        xdata= new Array();
+        ydata = new Array();
+        var plotCats=0;
+       for (var i=0;i<plotData.dataCnt.length;i++){
+            if (plotData.dataCnt[i] >0){
+                ydata.push(plotData.dataCnt[i]);
+                xdata.push(plotData.dataLabel[i]);
+                plotCats++;
             }
-        ];
+        }
 
-        plotLayout.title = lbl;
-        Plotly.newPlot(plotId, pdata, plotLayout, {displayModeBar: false});
+       var data = [{
+        values: ydata,
+        labels: xdata,
+        //marker: {colors:['rgb(256,256,256)']},
+        type: 'pie',
+        textposition: 'inside',
+        textinfo: 'none',
+        sort:false
+       }];
+
+
+
+      if (plotCats === 0){
+          data[0].values = [0];
+          data[0].labels= [''];
+          data[0].marker = {colors:['rgb(256,256,256)']};
+          pieLayout.annotations = [{text: 'No Data', showarrow:false, font:{size:18}}];
+      }
+
+      Plotly.newPlot(plotId, data, pieLayout,{displayModeBar: false});
 
         document.getElementById(plotId).on('plotly_click', function (data, plotId) {
-            var chartid = data.event.path[6].id;
+            var chartid = data.event.path[7].id;
             var filterId = chartid.replace("_chart","");
             if (filterId === 'age_at_diagnosis'){
-                var sel = data.points[0].x;
+                //var sel = data.points[0].x;
+                var sel = data.points[0].label;
                 var selArr = sel.split(' To ');
                 var strt = parseInt((selArr[0] === '*') ? '0': selArr[0]);
-                var end = parseInt((selArr[0] === '*') ?'0': selArr[1]);
+                var end = parseInt((selArr[1] === '*') ?'120': selArr[1]);
                 setSlider(filterId,false,strt,end,true);
 
             }
             else {
                 //alert(String(data.event.path[6].id));
-                var index = data.points[0].pointIndex;
+                var label = data.points[0].label;
                 var listId = filterId + '_list';
                 var inputList = $('#'+listId).find(':input');
                 for (var i=0;i<inputList.length;i++){
-                    if (i === index){
+                   var curLabel = $(inputList[i]).parent().children()[1].innerHTML;
+                    if (label === curLabel){
                         inputList[i].checked = true;
                     }
                     else{
@@ -793,17 +861,19 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
              filterData = parseFilterForCounts(filterCat);
 
              plotId = filterCat+"_chart";
-             plotCategoricalData(plotId, filterCat, filterData);
+             lbl = $('#'+filterCat+'_heading').children()[0].innerText;
+
+             plotCategoricalData(plotId, lbl, filterData);
 
         }
 
      }
 
      var updateFilters = function(filterCat,dic,dataFound){
-         var allFilters = $('#'+filterCat).find('input');
+         var allFilters = $('#'+filterCat).find('input:checkbox');
          var checkedFilters = $('#'+filterCat).find('input:checked');
          var useAll = ( (checkedFilters.length==0) ? true : false)
-
+         var numAttrShown  = 0;
          for (var i = 0; i < allFilters.length; i++) {
              var elem = allFilters.get(i);
              var val = $(elem)[0].value;
@@ -813,12 +883,20 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
              var lbl = spans.get(0).innerHTML;
              var cnt = parseInt(spans.get(1).innerHTML);
 
-             if( dataFound && dic.hasOwnProperty(val)){
+             if( dataFound && dic.hasOwnProperty(val) && (dic[val].count>0)){
+                 numAttrShown++;
                  spans.get(1).innerHTML = String(dic[val].count);
+                 $(elem).parent().parent().removeClass('hidden');
+                 if(numAttrShown>5){
+                     $(elem).parent().parent().addClass('extra-values');
+                 }
 
              }
              else{
                  spans.get(1).innerHTML = '0';
+                 $(elem).parent().parent().addClass('hidden');
+                 $(elem).parent().parent().removeClass('extra-values');
+
              }
              if (checked || useAll){
                      $(spans.get(1)).addClass('plotit');
@@ -827,6 +905,27 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
                  $(spans.get(1)).removeClass('plotit');
              }
          }
+         if ($('#'+filterCat).find('.more-checks').length>0){
+             if (numAttrShown<6){
+                 $('#'+filterCat).find('.more-checks').hide();
+                 $('#'+filterCat).find('.less-checks').hide();
+                 $('#' + filterCat).find('.extra-values').removeClass('extra-values');
+
+             }
+             else{
+                 if (  $('#'+filterCat).find('.less-checks').is(":hidden")  ){
+                     $('#'+filterCat).find('.more-checks').show();
+                     $('#' + filterCat).find('.extra-values').hide();
+                 }
+                 else{
+                     $('#'+filterCat).find('.more-checks').hide();
+                     $('#'+filterCat).find('.less-checks').show();
+                     $('#' + filterCat).find('.extra-values').show();
+                 }
+             }
+         }
+
+
 
     }
 
@@ -909,6 +1008,8 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
         }
      }
 
+
+
      $(document).ready(function () {
             window.filterObj.collection_id = window.tcgaColls;
             window.selItems = new Object();
@@ -926,10 +1027,15 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             createPlots('search_related_set');
             addFilterBindings('search_orig_set');
             addFilterBindings('search_related_set');
+
+
             $('#age_at_diagnosis_list').addClass('hide');
             $('#age_at_diagnosis').find('.more-checks').addClass('hide');
             $('#age_at_diagnosis').find('.less-checks').addClass('hide');
             mkSlider('age_at_diagnosis',0,120,1,true);
+
+
+
 
             //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
 

@@ -96,3 +96,8 @@ fi
 # Run dos2unix on the files in shell/ because of line terminator shenanigans with Windows
 echo "Running dos2unix on shell/*.sh..."
 dos2unix ${HOMEROOT}/shell/*.sh
+
+echo "Loading Git Hooks"
+if [ -z "${CI}" ] && [ -d "${HOMEROOT}/git-hooks/" ]; then
+    cp -r ${HOMEROOT}/git-hooks/* ${HOMEROOT}/.git/hooks/
+fi
