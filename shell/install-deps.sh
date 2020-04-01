@@ -98,6 +98,6 @@ echo "Running dos2unix on shell/*.sh..."
 dos2unix ${HOMEROOT}/shell/*.sh
 
 echo "Loading Git Hooks"
-if [ -z "${CI}" ]
+if [ -z "${CI}" ] && [ -d "${HOMEROOT}/git-hooks/" ]; then
     cp -r ${HOMEROOT}/git-hooks/* ${HOMEROOT}/.git/hooks/
 fi
