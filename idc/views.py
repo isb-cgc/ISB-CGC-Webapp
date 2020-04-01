@@ -566,6 +566,8 @@ def warn_page(request):
 def about_page(request):
     return render(request, 'idc/about.html',{'request': request})
 
+
+
 def vid_tutorials_page(request):
     return render(request, 'idc/video_tutorials.html',{'request': request})
 
