@@ -14,6 +14,7 @@ from django.shortcuts import render, redirect
 from django.utils.safestring import mark_safe
 from .models import GeneFavorite, GeneSymbol
 from workbooks.models import Workbook, Worksheet
+from django.utils.html import escape
 
 BLACKLIST_RE = settings.BLACKLIST_RE
 
@@ -82,6 +83,15 @@ def gene_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
             template = 'genes/genes_edit.html'
             context['genes'] = []
             context['base_url'] = settings.BASE_URL
+
+    gene_id_names = gene_list.values('id', 'name')
+    gene_fav_listing = []
+    for gene in gene_id_names:
+        gene_fav_listing.append({
+            'value': int(gene['id']),
+            'label': escape(gene['name'])
+        })
+    context['gene_fav_listing'] = gene_fav_listing
 
     return render(request, template, context)
 

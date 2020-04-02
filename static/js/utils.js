@@ -101,36 +101,6 @@ define(['jquery'], function($) {
         callback();
     };
 
-    // Returns a list of page numbers to show pagination buttons
-    // c is current page, m is total pages
-    function _pagination(c, m) {
-        var current = parseInt(c),
-            last = m,
-            delta = 2,
-            left = current - delta,
-            right = current + delta + 1,
-            range = [],
-            rangeWithDots = [],
-            l;
-        for (var i = 1; i <= last; i++) {
-            if (i == 1 || i == last || i >= left && i < right) {
-                range.push(i);
-            }
-        }
-        for(var i in range){
-            if (l) {
-                if (range[i] - l === 2) {
-                    rangeWithDots.push(l + 1);
-                } else if (range[i] - l !== 1) {
-                    rangeWithDots.push('...');
-                }
-            }
-            rangeWithDots.push(range[i]);
-            l = range[i];
-        }
-        return rangeWithDots;
-    }
-
     return {
         // Simple method for displaying an alert-<type> message at a given selector or DOM element location.
         //
@@ -176,7 +146,6 @@ define(['jquery'], function($) {
         },
         setCookie: _setCookie,
         getCookie: _getCookie,
-        removeCookie: _removeCookie,
-        pagination: _pagination
+        removeCookie: _removeCookie
     };
 });

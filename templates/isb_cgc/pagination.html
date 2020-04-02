@@ -2,7 +2,7 @@
 
     <!-- Table Pagination Control Modal -->
     <div class="dataTables_info">
-        <span class="item-page-count">Showing <span class="showing">10</span> of <span class="total-item-count"></span> entries</span>
+        <span class="item-page-count">Showing <span class="showing-page">10</span> of <span class="total-item-count"></span> entries</span>
         <span class="no-item-page-count" style="display: none;">Showing 0 items.</span>
         <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
     </div>
@@ -10,7 +10,7 @@
         <div class="dataTables_length items-per-page">
             <label for="items-per-page-select">Show</label>
             <select id="items-per-page-select">
-                <option value="5">5</option>
+                <option value="10">10</option>
                 <option value="20">20</option>
                 <option value="40">40</option>
             </select>
@@ -27,3 +27,10 @@
             <a class="next-page paginate_button dataTables_button">Next</a>
         </div>
     </div>
+
+    <script type="text/javascript">
+    var items_per_page=10;
+    var page=1;
+    var first_page_entry;
+    var last_page_entry;
+    </script>
