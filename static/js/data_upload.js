@@ -568,15 +568,15 @@ require([
             data: form,
             processData: false,
             contentType: false
-        }).done(function (e) {
-            if (e.status === 'success') {
+        }).done(function (res) {
+            if (res.status === 'success') {
                 $('#base-data-form')[0].reset();
-                location.href = e.redirect_url;
+                location.href = res.redirect_url;
             } else {
-                errorMessage('Error submitting response : ' + e.responseJSON.msg);
+                errorMessage('Error submitting response : ' + res.message);
             }
-        }).error(function (e) {
-            errorMessage('We had an error submitting the response: ' + e.responseJSON.msg);
+        }).error(function (res) {
+            errorMessage('We had an error submitting the response' + (res.responseJSON ? ': '+res.responseJSON.msg : '.'));
         }).always(function () {
             $('#upload-button, #back-button').removeClass('disabled')
                 .siblings('.progress-message').addClass('hidden');
