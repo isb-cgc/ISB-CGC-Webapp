@@ -494,4 +494,5 @@ require([
     $('input.cohort:checked').each(function(){
         $('#cohort-apply-to-workbook').append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
     });
+
 });
