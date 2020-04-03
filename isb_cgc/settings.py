@@ -291,6 +291,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
+    'anymail',
     'isb_cgc',
     'visualizations',
     'seqpeek',
@@ -409,7 +410,8 @@ INSTALLED_APPS += (
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.google')
+    'allauth.socialaccount.providers.google',
+    'rest_framework.authtoken')
 
 # Template Engine Settings
 TEMPLATES = [
@@ -620,6 +622,19 @@ EMAIL_SERVICE_API_URL = os.environ.get('EMAIL_SERVICE_API_URL', '')
 EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
 NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')
 NOTIFICATION_EMAIL_TO_ADDRESS = os.environ.get('NOTIFICATION_EMAIL_TO_ADDRESS', '')
+
+#########################
+# django-anymail        #
+#########################
+#
+# Anymail lets us use the Django mail system with mailgun (eg. in local account email verification)
+ANYMAIL = {
+    "MAILGUN_API_KEY": EMAIL_SERVICE_API_KEY,
+    "MAILGUN_SENDER_DOMAIN": 'mg.isb-cgc.org',  # your Mailgun domain, if needed
+}
+EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+DEFAULT_FROM_EMAIL = NOTIFICATION_EMAIL_FROM_ADDRESS
+SERVER_EMAIL = "info@isb-cgc.org"
 
 # Explicitly check for known items
 BLACKLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
