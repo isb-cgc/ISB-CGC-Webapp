@@ -43,7 +43,7 @@ from django.core.exceptions import ObjectDoesNotExist
 try:
     cron_user = User.objects.get(username=settings.CRON_USER)
 except ObjectDoesNotExist:
-    print("API user {} not found - creating.".format(settings.CRON_USER))
+    print("Cron user {} not found - creating.".format(settings.CRON_USER))
     cron_user = User.objects.create(username=settings.CRON_USER)
 
 token = Token.objects.create(user=cron_user)
