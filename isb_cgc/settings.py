@@ -641,6 +641,10 @@ EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 DEFAULT_FROM_EMAIL = NOTIFICATION_EMAIL_FROM_ADDRESS
 SERVER_EMAIL = "info@isb-cgc.org"
 
+# Cron user settings
+CRON_USER = os.environ.get('CRON_USER', 'cron_user')
+CRON_AUTH_KEY = os.environ.get('CRON_AUTH_KEY', 'Token')
+
 # Explicitly check for known items
 BLACKLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
 
