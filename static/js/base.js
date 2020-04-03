@@ -189,6 +189,13 @@ require([
         sortList: [[4,1]]
     });
 
+    $("#share-share_users").on("keypress", function(e) {
+        // Suppress enter key to change line in share text boxes
+        if ((e.keyCode == 10 || e.keyCode == 13)) {
+            e.preventDefault()
+        }
+    });
+
     // ------ pagination -------
 
     if (document.readyState == 'complete') {
@@ -209,6 +216,9 @@ require([
 
     function update_table_display()
     {
+        if ($('.page-item').length === 0)
+            return;
+
         var total_items = item_list.length;
         var total_pages = Math.ceil(total_items / items_per_page);
 
