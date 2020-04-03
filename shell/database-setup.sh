@@ -9,8 +9,6 @@ if [ -n "$CI" ]; then
     export DATABASE_PASSWORD=${MYSQL_ROOT_PASSWORD_BUILD}
     export DATABASE_NAME=${DATABASE_NAME_BUILD}
     export DATABASE_HOST=${DATABASE_HOST_BUILD}
-    export SUPERUSER_USERNAME=isb
-    export SUPERUSER_PASSWORD=${SUPERUSER_PASSWORD_BUILD}
     # Give the 'ubuntu' test user access
     mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'ubuntu'@'%' IDENTIFIED BY 'isb';"
 else
