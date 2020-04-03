@@ -80,7 +80,10 @@ require([
                     "className": 'details-control no-export',
                     "orderable": false,
                     "data": null,
-                    "defaultContent": ''
+                    "defaultContent": '',
+                    "createdCell": function (cell) {
+                        $(cell).attr('title', 'View Table Details');
+                    }
                 },
                 {
                     'name': 'friendlyName',
@@ -215,9 +218,12 @@ require([
                         return type === 'display' ?
                             '<i class="preview-loading fa fa-circle-o-notch fa-spin" style="display: none; color:#19424e;" aria-hidden="true"></i>' : data;
                     },
-                    "className": 'tbl-preview no-export',
+                    'className': 'tbl-preview no-export',
                     'searchable': false,
-                    'orderable': false
+                    'orderable': false,
+                    'createdCell': function (cell) {
+                        $(cell).attr('title', 'Preview Table');
+                    }
                 },
                 {
                     'name': 'description',

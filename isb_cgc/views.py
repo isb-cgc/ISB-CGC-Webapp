@@ -209,7 +209,7 @@ def bucket_object_list(request):
 def extended_login_view(request):
     redirect_to = 'dashboard'
     if request.COOKIES and request.COOKIES.get('login_from', '') == 'new_cohort':
-        redirect_to = 'new_cohort'
+        redirect_to = 'cohort'
     try:
         # Write log entry
         st_logger = StackDriverLogger.build_from_django_settings()
@@ -684,7 +684,7 @@ def opt_in_update(request):
                 user_opt_in_stat_obj.opt_in_status = opt_in_status_code
                 user_opt_in_stat_obj.save()
             elif user_opt_in_stat_obj.opt_in_status == UserOptInStatus.NOT_SEEN:
-                #chose YES and not seen
+                # user chosen Yes or cancel (dismiss) and status is still not_seen
                 opt_in_status_code = UserOptInStatus.SEEN
                 user_opt_in_stat_obj.opt_in_status = opt_in_status_code
                 user_opt_in_stat_obj.save()
@@ -813,9 +813,12 @@ def opt_in_form_submitted(request):
                 msg = 'We thank you for your time and suggestions.'
         else:
             error_msg = 'We were not able to find a user with the given email. Please check with us again later.'
+            logger.error(error_msg)
     except Exception as e:
-        logger.exception(e)
         error_msg = 'We were not able to submit your feedback due to some errors. Please check with us again later.'
+        logger.exception(e)
+        logger.error(error_msg)
+
     message = {
         'msg': msg,
         'error_msg': error_msg

@@ -23,12 +23,12 @@ require([
     'bootstrap',
     'session_security',
     'underscore',
-    'base'
-], function($, jqueryui, bootstrap, session_security, _) {
+    'base',
+], function($, jqueryui, bootstrap, session_security, _, base) {
     'use strict';
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
-    $('.modal').on('hide.bs.modal', function() {
+    $('.modal').on('hide.bs.modal', function () {
         var forms = $(this).find('form');
         if (forms.length)
             _.each(forms, function (form) {
@@ -53,7 +53,7 @@ require([
             method: 'POST'
         }).then(function () {
             $this.closest('.modal').modal('hide');
-            if($this.data('redirect')) {
+            if ($this.data('redirect')) {
                 window.location = $this.data('redirect');
             } else {
                 window.location.reload();
@@ -65,8 +65,8 @@ require([
                     .text('There was an error deleting that study. Please reload and try again, or try again later.')
             );
         })
-        .always(function () {
-            $this.find('.btn').removeClass('btn-disabled').attr('disabled', false);
-        });
+            .always(function () {
+                $this.find('.btn').removeClass('btn-disabled').attr('disabled', false);
+            });
     });
 });

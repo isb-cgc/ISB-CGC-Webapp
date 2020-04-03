@@ -26,6 +26,8 @@
         </div>
         <div class="panel-body">
             {% if variable_list %}
+                {% include "isb_cgc/pagination.html" %}
+
                 <table id="var-list-table" class="table table-stripe tablesorter">
                     <thead>
                         <tr>
@@ -38,7 +40,7 @@
                     </thead>
                     <tbody>
                         {% for favorite in variable_list %}
-                            <tr>
+                            <tr class="page-item">
                                 <td class="control-col">
                                     <div class="dropdown">
                                         <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
@@ -70,6 +72,13 @@
         </div>
     </section>
 </div>
+
+<script type="text/javascript">
+var variable_list = {{ variable_fav_listing|safe }};
+var item_list = variable_list;
+</script>
+
 {% endblock %}
+
 
 {% block js_file %}{% static 'js/form_utils.js' %}{% endblock %}
