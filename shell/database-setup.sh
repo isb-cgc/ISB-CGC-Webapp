@@ -67,10 +67,6 @@ mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL
 echo "Running Migrations..."
 python3 ${HOMEROOT}/manage.py migrate --noinput
 
-# If the ISB superuser isn't present already, they need to be added.
-echo "Creating isb superuser..."
-echo "from django.contrib.auth.models import User; User.objects.create_superuser('${SUPERUSER_USERNAME}', '', '${SUPERUSER_PASSWORD}')" | python3 ${HOMEROOT}/manage.py shell
-
 echo "Adding in default Django admin IP allowances for local development"
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e "INSERT INTO adminrestrict_allowedip (ip_address) VALUES('127.0.0.1'),('10.0.*.*');"
 
