@@ -50,7 +50,8 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
-DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
+CONNECTION_IS_LOCAL     = (os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost')
+DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') and CONNECTION_IS_LOCAL)
 
 print("[STATUS] DEBUG mode is "+str(DEBUG), file=sys.stdout)
 
@@ -544,13 +545,16 @@ DCF_LOGIN_EXPIRATION_SECONDS             = int(os.environ.get('DCF_LOGIN_EXPIRAT
 ##############################
 #   Start django-finalware   #
 ##############################
+#
+# This should only be done on a local system which is running against its own VM. Deployed systems will already have
+# a site superuser so this would simply overwrite that user. Don't enable this in production!
+if IS_DEV and CONNECTION_IS_LOCAL:
+    INSTALLED_APPS += (
+        'finalware',)
 
-INSTALLED_APPS += (
-    'finalware',)
-
-SITE_SUPERUSER_USERNAME = os.environ.get('SUPERUSER_USERNAME', '')
-SITE_SUPERUSER_EMAIL = ''
-SITE_SUPERUSER_PASSWORD = os.environ.get('SUPERUSER_PASSWORD', '')
+    SITE_SUPERUSER_USERNAME = os.environ.get('SUPERUSER_USERNAME', '')
+    SITE_SUPERUSER_EMAIL = ''
+    SITE_SUPERUSER_PASSWORD = os.environ.get('SUPERUSER_PASSWORD', '')
 
 ############################
 #   End django-finalware   #
