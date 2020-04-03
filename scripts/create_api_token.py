@@ -30,7 +30,7 @@ import sys
 import time
 from copy import deepcopy
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "idc.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "isb_cgc.settings")
 
 import django
 django.setup()
