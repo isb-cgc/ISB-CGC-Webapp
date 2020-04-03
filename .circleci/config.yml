@@ -61,6 +61,7 @@ commands:
             xargs -a deployment_config.txt -I{} echo "export {}" >> $BASH_ENV
             # Set up test/deployment database values
             echo "export MYSQL_ROOT_PASSWORD_BUILD=isb" >> $BASH_ENV
+            echo "export SUPERUSER_PASSWORD_BUILD=password" >> $BASH_ENV
             echo "export DATABASE_NAME_BUILD=build_database" >> $BASH_ENV
             echo "export DATABASE_PASSWORD_BUILD=isb" >> $BASH_ENV
             echo "export DATABASE_USER_BUILD=django-user" >> $BASH_ENV
