@@ -80,6 +80,8 @@
                         </div>
                     {% endif %}
 
+                    {% include "isb_cgc/pagination.html" %}
+
                     <table id="cohort-table" class="table table-striped tablesorter cohort-table">
                         <thead><tr>
                             <th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>
@@ -94,7 +96,7 @@
                         <tbody>
                         {% for cohort in cohorts %}
                         {% if cohort.owner.is_superuser == False %}
-                            <tr>
+                            <tr class="page-item">
                                 <td class="checkbox-col">
                                     <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} class="cohort" type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>
                                 </td>
@@ -300,8 +302,10 @@
 
     <script type="text/javascript">
     var cohort_list = {{ cohorts_listing|safe }};
+    var item_list = cohort_list;
     var shared_users = {{ shared_users|safe }};
     var from_workbook = {{ from_workbook|lower }};
+    var previously_selected_cohort_ids = {{ previously_selected_cohort_ids|safe }};
     </script>
 {% endblock %}
 
