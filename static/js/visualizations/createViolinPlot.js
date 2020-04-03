@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2016, Institute for Systems Biology
+ * Copyright 2020, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,6 +109,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             var x = d3.scale.ordinal()
                 .domain(xdomain)
                 .rangeBands([0, plot_width]);
+            var rangeBand = x.rangeBand();
 
             var colorVal = function(d) { return d[colorBy]; };
 
@@ -233,7 +234,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                         }
                     })
                     .attr('cx', function (d) {
-                        var histogram = histo_dict[parseInt(x(d[xAttr]) / (violin_width + padding))];
+                        var histogram = histo_dict[xdomain.indexOf(d[xAttr])];
                         var histo_index = 0;
                         for (var j = 0; j < histogram.length; j++) {
                             var higher = histogram[j][0];
@@ -254,7 +255,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
                                 })]);
                             rand_pos = plusOrMinus * Math.floor(Math.random() * y_horizontal(histogram[histo_index]['y']) * 0.8);
                         }
-                        var xpos = x(d[xAttr]) + (violin_width + padding) / 2 + rand_pos;
+                        var xpos = x(d[xAttr]) + rangeBand/2 +rand_pos;
                         return xpos;
                     }) // Staggers points across a histogram
                     .attr('cy', function (d) {
@@ -490,6 +491,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             }
 
             var plot_width = (violin_width + x_padding) * Object.keys(processed_data).length;
+            plot_width = Math.max(view_width - margin.left - margin.right, plot_width);
             if (view_width < plot_width + margin.left + margin.right) {
                 svg.attr('width', plot_width + margin.left + margin.right);
             }
@@ -518,8 +520,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             var scatter_processed_data = {};
             for (var key in processed_data) {
                 var g = violin_area.append('g')
-                    .attr('class', 'violin-plot')
-                    .attr('transform', 'translate(' + (i * (violin_width+x_padding)+x_padding/2) + ')');
+                    .attr('class', 'violin-plot violin-no-'+i);
                 scatter_processed_data[i] = [];
                 var values_only = [];
 
@@ -572,11 +573,16 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             var x = d3.scale.ordinal()
                 .domain(xdomain)
                 .rangeBands([0, plot_width]);
+            var rangeBand = x.rangeBand();
+
+            for(var l = 0; l < xdomain.length; l++){
+                svg.select('.violin-no-'+l)
+                    .attr('transform', 'translate(' + (x(xdomain[l])+ (rangeBand-violin_width)/2) + ', 0)');
+            }
             var xAxis = d3.svg.axis()
                 .scale(x)
-                .ticks(xdomain.length)
                 .orient('bottom')
-                .tickSize(-height + margin.top + margin.bottom, 0, 0);
+                .tickSize(-height + margin.top + margin.bottom,0,0);
 
             // Axis used for panning
             var x2_width = plot_width < view_width - margin.left - margin.right ? view_width - margin.left - margin.right : plot_width;
@@ -715,7 +721,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
                     violin_area.selectAll('.violin-plot')
                         .attr('transform', function (d, i) {
-                            return 'translate(' + ((i * (violin_width + x_padding) + x_padding / 2) * d3.event.scale + d3.event.translate[0]) + ', ' + d3.event.translate[1] + ') scale(' + d3.event.scale + ', ' + d3.event.scale + ')';
+                            return 'translate(' + ( x(xdomain[i]) + (rangeBand-violin_width)/2*d3.event.scale + d3.event.translate[0]) + ', ' + d3.event.translate[1] + ') scale(' + d3.event.scale + ', ' + d3.event.scale + ')';
                         });
 
                     violin_area.selectAll('.violin, .median-line') //maintain same stroke-width

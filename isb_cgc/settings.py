@@ -50,7 +50,9 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
-DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') and (os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost'))
+CONNECTION_IS_LOCAL     = (os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost')
+IS_CIRCLE               = (os.environ.get('CI', None) is not None)
+DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') and CONNECTION_IS_LOCAL)
 
 print("[STATUS] DEBUG mode is "+str(DEBUG), file=sys.stdout)
 
@@ -291,6 +293,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
+    'anymail',
     'isb_cgc',
     'visualizations',
     'seqpeek',
@@ -409,7 +412,8 @@ INSTALLED_APPS += (
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.google')
+    'allauth.socialaccount.providers.google',
+    'rest_framework.authtoken')
 
 # Template Engine Settings
 TEMPLATES = [
@@ -542,16 +546,16 @@ DCF_LOGIN_EXPIRATION_SECONDS             = int(os.environ.get('DCF_LOGIN_EXPIRAT
 ##############################
 #   Start django-finalware   #
 ##############################
-
-# ONLY load finalware if this is a local dev VM connected to its own build.
-# NEVER load finalware when connecting to a deployed instance
-if IS_DEV and os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost':
+#
+# This should only be done on a local system which is running against its own VM. Deployed systems will already have
+# a site superuser so this would simply overwrite that user. Don't enable this in production!
+if (IS_DEV and CONNECTION_IS_LOCAL) or IS_CIRCLE:
     INSTALLED_APPS += (
         'finalware',)
 
-SITE_SUPERUSER_USERNAME = os.environ.get('SUPERUSER_USERNAME', '')
-SITE_SUPERUSER_EMAIL = ''
-SITE_SUPERUSER_PASSWORD = os.environ.get('SUPERUSER_PASSWORD', '')
+    SITE_SUPERUSER_USERNAME = os.environ.get('SUPERUSER_USERNAME', 'isb')
+    SITE_SUPERUSER_EMAIL = ''
+    SITE_SUPERUSER_PASSWORD = os.environ.get('SUPERUSER_PASSWORD')
 
 ############################
 #   End django-finalware   #
@@ -623,6 +627,23 @@ EMAIL_SERVICE_API_URL = os.environ.get('EMAIL_SERVICE_API_URL', '')
 EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
 NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')
 NOTIFICATION_EMAIL_TO_ADDRESS = os.environ.get('NOTIFICATION_EMAIL_TO_ADDRESS', '')
+
+#########################
+# django-anymail        #
+#########################
+#
+# Anymail lets us use the Django mail system with mailgun (eg. in local account email verification)
+ANYMAIL = {
+    "MAILGUN_API_KEY": EMAIL_SERVICE_API_KEY,
+    "MAILGUN_SENDER_DOMAIN": 'mg.isb-cgc.org',  # your Mailgun domain, if needed
+}
+EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+DEFAULT_FROM_EMAIL = NOTIFICATION_EMAIL_FROM_ADDRESS
+SERVER_EMAIL = "info@isb-cgc.org"
+
+# Cron user settings
+CRON_USER = os.environ.get('CRON_USER', 'cron_user')
+CRON_AUTH_KEY = os.environ.get('CRON_AUTH_KEY', 'Token')
 
 # Explicitly check for known items
 BLACKLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'

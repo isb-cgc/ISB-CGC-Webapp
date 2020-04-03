@@ -203,7 +203,7 @@ def data_access_for_plot(request):
             # TODO Use jsonschema to validate logTransform object
             logTransform = json.loads(request.GET.get('log_transform', None))
         except Exception as e:
-            logger.warn("[WARNING] Log transform parameter not supplied")
+            logger.warning("[WARNING] Log transform parameter not supplied")
             logTransform = None
 
         cohort_id_array = request.GET.getlist('cohort_id', None)
@@ -305,6 +305,6 @@ def data_access_for_plot(request):
     except Exception as e:
         logger.error("[ERROR] In data access for plot: ")
         logger.exception(e)
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({'message': '[{}] Unable to generate a plot- please revise the plot settings.'.format(str(e))})
 
 

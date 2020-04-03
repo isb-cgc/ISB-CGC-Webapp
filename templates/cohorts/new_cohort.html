@@ -36,10 +36,14 @@
             <li><a href="{% url 'worksheet_display' workbook.id worksheet.id%}">{{ workbook.name }}</a></li>
         </ol>
     {% else %}
-        <ol class="breadcrumb">
-            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-            <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
-        </ol>
+            <ol class="breadcrumb">
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+                    <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
+                {% else %}
+                    <br>
+                {% endif %}
+            </ol>
     {% endif %}
     <h1 class="page-header pull-left">Create Cohort - Filters</h1>
     {% if workbook %}
@@ -47,10 +51,10 @@
     {% elif create_workbook %}
         <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal" title="Please select at least one filter." disabled>Apply to new Worksheet</button>
     {% else %}
-        {% if is_logged_in %}
+        {% if user.is_authenticated %}
             <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal" title="Please select at least one filter." disabled> Save As New Cohort</button>
         {% else %}
-            <a href="{% url 'account_login' %}" class="btn btn-primary pull-right" id="log-in-to-save-btn" title="Please select at least one filter." disabled>Log In to Save New Cohort</a>
+            <button class="btn btn-primary pull-right" id="log-in-to-save-btn" title="Please select at least one filter." onclick="location.href='{% url 'account_login' %}'" disabled>Log In to Save New Cohort</button>
         {%  endif %}
     {% endif %}
 </div>
@@ -81,7 +85,7 @@
                     {% for program in programs %}
                     <li role="presentation" class="{% if forloop.first %}active{% endif %} program-tab"><a href="#{{ program.id }}-data" class="program-tab-btn" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
                     {% endfor %}
-                    {% if is_logged_in %}
+                    {% if user.is_authenticated %}
                     <li role="presentation" class="program-tab"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
                     {%  else %}
                     <li role="presentation" class="program-tab disabled"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0" disabled>User Data</a></li>
