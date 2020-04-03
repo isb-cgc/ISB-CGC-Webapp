@@ -129,7 +129,12 @@ require([
         type: 'numeric'
     });
 
-    $('#gene-list-table').tablesorter({
+    $('#gene-list-table')
+        .on('sortEnd', function()
+        {
+            update_table_display();
+        })
+        .tablesorter({
         headers: {
             0: {sorter:false},
             3: {sorter: 'fullDate'}
@@ -137,7 +142,12 @@ require([
         sortList: [[3,1]]
     });
 
-    $('#var-list-table').tablesorter({
+    $('#var-list-table')
+        .on('sortEnd', function()
+        {
+            update_table_display();
+        })
+        .tablesorter({
         headers: {
             0: {sorter:false},
             4: {sorter: 'fullDate'}
@@ -145,7 +155,12 @@ require([
         sortList: [[4,1]]
     });
 
-    $('#workbook-table').tablesorter({
+    $('#workbook-table')
+        .on('sortEnd', function()
+        {
+            update_table_display();
+        })
+        .tablesorter({
         headers: {
             0: {sorter:false},
             5: {sorter: 'fullDate'}
@@ -154,8 +169,9 @@ require([
     });
 
     $('#cohort-table')
-        .on('sortStart', function() {
-          update_table_display();
+        .on('sortEnd', function()
+        {
+            update_table_display();
         })
         .tablesorter({
         headers: {
@@ -202,7 +218,6 @@ require([
             $('.no-item-page-count').show();
             $('.paginate_button_space').hide();
             $('.dataTables_length').addClass('disabled');
-            $('.sortable_table th').addClass('disabled');
             $('.dataTables_goto_page').addClass('disabled');
         }
         else {
@@ -220,7 +235,6 @@ require([
             $('.no-item-page-count').hide();
             $('.paginate_button_space').show();
             $('.dataTables_length').removeClass('disabled');
-            $('.sortable_table th').removeClass('disabled');
             $('.dataTables_goto_page').removeClass('disabled');
             $('.dataTables_goto_page .goto-page-number').attr('max', total_pages);
             $('.total-item-count').html(total_items);
@@ -235,14 +249,15 @@ require([
             last_page_entry = 0;
         }
         else {
-            for (i = 1; i <= total_items; ++i) {
-                var item_index_id = "#item-index-" + i;
-                if (i >= first_page_entry && i <= last_page_entry) {
-                    $(item_index_id).show();
+            $('.page-item').each(function(index)
+            {
+                index = index + 1;
+                if (index >= first_page_entry && index <= last_page_entry) {
+                    $(this).show();
                 } else {
-                    $(item_index_id).hide();
+                    $(this).hide();
                 }
-            }
+            });
 
             $('.showing-page').text(first_page_entry + " to " + last_page_entry);
         }

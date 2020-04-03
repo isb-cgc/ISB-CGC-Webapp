@@ -96,7 +96,7 @@
                         <tbody>
                         {% for cohort in cohorts %}
                         {% if cohort.owner.is_superuser == False %}
-                            <tr id="item-index-{{ forloop.counter }}">
+                            <tr class="page-item">
                                 <td class="checkbox-col">
                                     <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} class="cohort" type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>
                                 </td>
