@@ -23,8 +23,8 @@ require([
     'bootstrap',
     'session_security',
     'underscore',
-    'base',
-], function($, jqueryui, bootstrap, session_security, _, base) {
+    'base'
+], function($, jqueryui, bootstrap, session_security, _) {
     'use strict';
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms

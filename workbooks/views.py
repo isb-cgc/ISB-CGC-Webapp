@@ -62,16 +62,7 @@ def workbook_list(request):
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct()
 
-    workbook_id_names = workbooks.values('id', 'name')
-    workbook_listing = []
-    for wb in workbook_id_names:
-        workbook_listing.append({
-            'value': int(wb['id']),
-            'label': escape(wb['name'])
-        })
-
-    return render(request, template, {'workbooks': workbooks,
-                                      'workbook_listing': workbook_listing})
+    return render(request, template, {'workbooks': workbooks})
 
 def workbook_samples(request):
     template = 'workbooks/workbook_samples.html'
