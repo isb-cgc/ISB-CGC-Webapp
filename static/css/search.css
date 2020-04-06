@@ -68,8 +68,8 @@
     height: 200px
 }
 
-th, tb,tr,td {
-    border: 1px solid black; }
+/* th, tb,tr,td {
+    border: 1px solid black; } */
 
 tr.selected_grey td {
     background-color: #333; color: #fff; }

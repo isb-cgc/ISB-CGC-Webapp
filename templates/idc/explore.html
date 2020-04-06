@@ -267,7 +267,34 @@
                     <div class="panel panel-default">
                          <div class="panel-heading clearfix"><h4 class="panel-title">Collections</h4></div>
                          <div class="panel-body">
-                            <table>
+
+                         <div class="dataTables_info">
+                    <span class="file-page-count">Showing <span class="showing">1 to 25</span> of <span class="total-file-count">39692</span> entries</span>
+                    <span class="no-file-page-count" style="display: none;">Showing 0 files.</span>
+                         </div>
+                         <div>
+                    <div class="dataTables_length files-per-page">
+                        <label for="files-per-page-all-select">Show</label>
+                        <select id="files-per-page-all-select" data-fpp="25" cl>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <label>entries</label>
+                    </div>
+                    <div class="dataTables_goto_page">
+                        <label for="goto-page-no-all">Page</label>
+                        <input id="goto-page-no-all" type="number" class="goto-page-number" min="1" max="1588">
+                        <div class="goto-page-button dataTables_button">Go</div>
+                    </div>
+                    <div class="dataTables_paginate">
+                        <a class="prev-page paginate_button dataTables_button disabled">Previous</a>
+                        <span class="paginate_button_space"><a class="dataTables_button paginate_button numeric_button current">1</a><a class="dataTables_button paginate_button numeric_button">2</a><a class="dataTables_button paginate_button numeric_button">3</a><span class="ellipsis">...</span><a class="dataTables_button paginate_button numeric_button">1588</a></span>
+                        <a class="next-page paginate_button dataTables_button">Next</a>
+                    </div>
+                </div>
+
+                            <table class="table table-striped">
                                 <thead id="projects_table_head">
                                     <tr>
                                         <th>Collection Name</th><th>Total # of Patients</th><th># of Patients(this cohort)</th>

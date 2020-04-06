@@ -664,12 +664,12 @@ require([
 
     // change no of entries per page
     $('.data-tab-content').on('change', '.files-per-page', function () {
-        var this_tab = $(this).parents('.data-tab').data('file-type');
-        var old_fpp = tab_files_per_page[this_tab];
-        var new_fpp = tab_files_per_page[this_tab] = $('#'+this_tab+'-files').find('.files-per-page :selected').val();
+        var old_fpp = $(this).find('.files-per-page').data('fpp');
+        //var old_fpp = tab_files_per_page[this_tab];
+        var new_fpp = $(this).find('.files-per-page :selected').val();
         //calculate the new page no that would include the first file item
-        var new_page_no = parseInt((tab_page[this_tab]-1) * old_fpp/new_fpp) + 1;
-        goto_table_page(this_tab, new_page_no);
+        //var new_page_no = parseInt((tab_page[this_tab]-1) * old_fpp/new_fpp) + 1;
+        //goto_table_page(this_tab, new_page_no);
     });
 
     // change column sorting
