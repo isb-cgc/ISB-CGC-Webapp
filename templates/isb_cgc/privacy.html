@@ -176,4 +176,6 @@
 </div>
 {% endblock %}
 
-{% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+{% endblock %}

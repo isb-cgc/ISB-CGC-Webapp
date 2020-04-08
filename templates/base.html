@@ -185,7 +185,11 @@
     </script>
     {% endlocalize %}
 {% endif %}
-<script data-main="{% block js_file %}{% endblock %}" src="{% static 'js/libs/require.js' %}"></script>
+
+{% block js_file %}
+    <script src="{% static 'js/libs/require.js' %}"></script>
+    <script src="{% static 'js/base.js' %}"></script>
+{% endblock %}
 
 </body>
 </html>
