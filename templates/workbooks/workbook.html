@@ -362,4 +362,7 @@
 </script>
 
 {% endblock content %}
-{% block js_file %}{% static 'js/workbooks.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/workbooks.js' %}"></script>
+{% endblock %}
