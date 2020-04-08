@@ -60,4 +60,7 @@
     </script>
 {% endblock %}
 
-{% block js_file %}{% static 'js/path_pdf_viewer.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/path_pdf_viewer.js' %}"></script>
+{% endblock %}

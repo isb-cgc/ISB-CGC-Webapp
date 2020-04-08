@@ -274,4 +274,7 @@
     </div>
 {% endblock %}
 
-{% block js_file %}{% static 'js/landing.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/landing.js' %}"></script>
+{% endblock %}

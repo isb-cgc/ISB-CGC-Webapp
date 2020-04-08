@@ -66,4 +66,7 @@
 
 {% endblock %}
 
-{% block js_file %}{% static 'js/form_utils.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/form_utils.js' %}"></script>
+{% endblock %}
