@@ -170,4 +170,7 @@
     </script>
 {% endblock %}
 
-{% block js_file %}{% static 'js/cohort_details.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/cohort_details.js' %}"></script>
+{% endblock %}

@@ -73,12 +73,10 @@
     </section>
 </div>
 
-<script type="text/javascript">
-var variable_list = {{ variable_fav_listing|safe }};
-var item_list = variable_list;
-</script>
-
 {% endblock %}
 
 
-{% block js_file %}{% static 'js/form_utils.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/form_utils.js' %}"></script>
+{% endblock %}

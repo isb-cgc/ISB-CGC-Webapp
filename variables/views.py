@@ -36,7 +36,6 @@ from django.contrib import messages
 from django.conf import settings
 from django.contrib.auth.models import User as Django_User
 from django.http import HttpResponse, JsonResponse
-from django.utils.html import escape
 
 from cohorts.metadata_helpers import fetch_program_attr
 from isb_cgc.templatetags.custom_tags import get_readable_name
@@ -85,15 +84,6 @@ def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
             template = 'variables/variables_select.html'
         else:
             return initialize_variable_selection_page(request, new_workbook=True)
-
-    variable_id_names = variable_list.values('id', 'name')
-    variable_fav_listing = []
-    for variable in variable_id_names:
-        variable_fav_listing.append({
-            'value': int(variable['id']),
-            'label': escape(variable['name'])
-        })
-    context['variable_fav_listing'] = variable_fav_listing
 
     return render(request, template, context)
 
