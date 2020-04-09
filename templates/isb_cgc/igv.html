@@ -68,4 +68,7 @@
     </script>
 {% endblock %}
 
-{% block js_file %}{% static 'js/igv.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/igv.js' %}"></script>
+{% endblock %}
