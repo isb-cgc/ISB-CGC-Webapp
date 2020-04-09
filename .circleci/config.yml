@@ -27,8 +27,8 @@ commands:
             if [[ ${TIER} == "PROD" ]]; then
               CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC}
               PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC}
-              BUCKET=${DEPLOYMENT_BUCKET_ISB_CGC}
-              BUCKET="${BUCKET}/${TIER,,}"
+              BUCKET="${DEPLOYMENT_BUCKET_ISB_CGC}/${TIER,,}"
+              KEY=${DEPLOYMENT_KEY_ISB_CGC}
             elif [[ ${TIER} == "UAT" ]]; then
               KEY=${DEPLOYMENT_KEY_ISB_CGC_UAT}
               CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC_UAT}
