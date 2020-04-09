@@ -134,10 +134,10 @@ require([
 
     var checkbox_change_callback = function() {
         var tablename = '#' + $(this).closest('table')[0].id;
-        // If no checkboxes are selected
-        if ($(tablename+' tr:not(:first) input[type="checkbox"]:checked').length == 0) {
-            $(tablename+' .select-all').prop('checked', false);
-        }
+
+        var checkbox_length = $(tablename+' tr:not(:first) input[type="checkbox"]').length;
+        var checked_length = $(tablename+' tr:not(:first) input[type="checkbox"]:checked').length;
+        $(tablename+' .select-all').prop('checked', checkbox_length == checked_length);
 
         toggle_buttons();
 

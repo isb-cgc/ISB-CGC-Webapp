@@ -24,12 +24,12 @@
 {% block content %}
 <div class="container">
     <div class="panel panel-default">
-        <div class="panel-body" id="workbook-list">
+        <div class="panel-body">
             {% if workbooks %}
 
             {% include "isb_cgc/pagination.html" %}
 
-            <table id="workbook-table" class="table table-striped tablesorter workbook-table">
+            <table id="workbook-table" class="table table-striped tablesorter">
                 <thead>
                     <th></th>
                     <th>Version and Build</th>
@@ -81,11 +81,9 @@
         </div>
     </div>
 </div>
-<script type="text/javascript">
-var workbook_list = {{ workbook_listing|safe }};
-var item_list = workbook_list;
-</script>
-
 {% endblock %}
 
-{% block js_file %}{% static 'js/workbooks_list.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/workbooks_list.js' %}"></script>
+{% endblock %}
