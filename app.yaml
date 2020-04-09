@@ -16,7 +16,7 @@
 
 runtime: custom
 env: flex
-service: mvm
+service: default
 api_version: 1
 threadsafe: true
 
@@ -25,7 +25,7 @@ builtins:
 - deferred: on
 
 beta_settings:
-    cloud_sql_instances: isb-cgc:us-central1:dev-v3
+    cloud_sql_instances: isb-cgc-test:us-central1:test-data-migration
 
 env_variables:
   DJANGO_SETTINGS_MODULE: 'isb_cgc.settings'

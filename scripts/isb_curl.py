@@ -115,5 +115,3 @@ def main():
 # this allows us to call this from command line
 if __name__ == '__main__':
     main()
-
-
