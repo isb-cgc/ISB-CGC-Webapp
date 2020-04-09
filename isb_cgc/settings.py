@@ -81,8 +81,8 @@ SERVICE_ACCOUNT_LOG_NAME = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev
 WEBAPP_LOGIN_LOG_NAME = os.environ.get('WEBAPP_LOGIN_LOG_NAME', 'local_dev_logging')
 GCP_ACTIVITY_LOG_NAME = os.environ.get('GCP_ACTIVITY_LOG_NAME', 'local_dev_logging')
 
-BASE_URL                = os.environ.get('BASE_URL', 'https://isb-cgc-test.appspot.com')
-BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc-test.appspot.com')
+BASE_URL                = os.environ.get('BASE_URL', 'https://mvm-dot-isb-cgc.appspot.com')
+BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://mvm-api-dot-isb-cgc.appspot.com')
 
 # Compute services - Should not be necessary in webapp
 PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
