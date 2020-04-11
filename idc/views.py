@@ -364,6 +364,7 @@ def help_page(request):
 @login_required
 def explore_data_page(request):
     attr_by_source = {}
+    attr_sets = {}
     context = {'request': request}
     source = DataSource.SOLR
     versions = []
@@ -426,7 +427,7 @@ def explore_data_page(request):
 
             attrs = source.get_collection_attr(for_ui=True)
             attr_by_source[set_type]['attributes'] = {attr.name: {'obj': attr, 'vals':None} for attr in attrs}
-            attr_by_source[set_type]['attr_set'] = attrs
+            attr_sets[set_type] = attrs
 
         if (len(fields)==0):
             fields = list(attrs.values_list('name', flat=True))
@@ -437,7 +438,7 @@ def explore_data_page(request):
 
         if with_clinical:
             attr_display_vals = Attribute_Display_Values.objects.filter(
-                attribute__id__in=attr_by_source['related_set']['attr_set']).to_dict()
+                attribute__id__in=attr_sets['related_set']).to_dict()
             for attr in faceted_counts['clinical']['facets']:
                 this_attr = attr_by_source['related_set']['attributes'][attr]['obj']
                 values = []
@@ -454,7 +455,7 @@ def explore_data_page(request):
                 else:
                     attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
-        attr_display_vals = Attribute_Display_Values.objects.filter(attribute__id__in=attr_by_source['origin_set']['attr_set']).to_dict()
+        attr_display_vals = Attribute_Display_Values.objects.filter(attribute__id__in=attr_sets['origin_set']).to_dict()
         for attr in faceted_counts['facets']['cross_collex']:
             this_attr = attr_by_source['origin_set']['attributes'][attr]['obj']
             values = []
@@ -506,16 +507,10 @@ def explore_data_page(request):
         if with_clinical:
             context['tcga_collections'] = tcga_in_tcia
 
-        for set in attr_by_source:
-            if 'attr_set' in attr_by_source:
-                del attr_by_source[set]['attr_set']
-
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
         logger.exception(e)
         messages.error(request, "Encountered an error when attempting to load the page - please contact the administrator.")
-
-    print(attr_by_source)
 
     if is_json:
         return JsonResponse(attr_by_source)
