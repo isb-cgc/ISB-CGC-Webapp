@@ -311,7 +311,7 @@ def main():
                     {'label': 'underweight', 'first': "*", "last": "18.5", "gap": "0", "include_lower": True, "include_upper": False, 'type': 'F'},
                     {'label': 'obese', 'first': "30", "last": "*", "gap": "0", "include_lower": True,
                      "include_upper": True, 'type': 'F'},
-                    {'label': 'normal', 'first': "18.5", "last": "25", "gap": "0", "include_lower": True,
+                    {'label': 'normal weight', 'first': "18.5", "last": "25", "gap": "0", "include_lower": True,
                      "include_upper": False, 'type': 'F'},
                     {'label': 'overweight', 'first': "25", "last": "30", "gap": "0", "include_lower": True,
                      "include_upper": False, 'type': 'F'}
