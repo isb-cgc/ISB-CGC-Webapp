@@ -53,10 +53,10 @@ from oauth2client.file import Storage
 
 VERBOSE = False
 # for native application - same as settings.INSTALLED_APP_CLIENT_ID
-CLIENT_ID = '907668440978-0ol0griu70qkeb6k3gnn2vipfa5mgl60.apps.googleusercontent.com'
+CLIENT_ID = '586186890913-atr969tu3lf7u574khjjplb45fgpq1bg.apps.googleusercontent.com'
 # NOTE: this is NOT actually a 'secret' -- we're using the 'installed
 # application' OAuth pattern here
-CLIENT_SECRET = 'To_WJH7-1V-TofhNGcEqmEYi'
+CLIENT_SECRET = 'XeBxiK7NQ0yvAkAnRIKufkFE'
 
 EMAIL_SCOPE = 'https://www.googleapis.com/auth/userinfo.email'
 DEFAULT_STORAGE_FILE = os.path.join(os.path.expanduser("~"), '.isb_credentials')
