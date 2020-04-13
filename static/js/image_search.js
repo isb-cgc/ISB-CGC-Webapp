@@ -327,11 +327,40 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
                 delete window.selItems.selStudies[projectId];
              }
 
-        removeSeries(pclass, seriesTableId);
+            removeSeries(pclass, seriesTableId);
     }
 
     window.removeSeries = function(selClass, seriesTableId) {
         $('#' + seriesTableId).find('.' + selClass).remove();
+    }
+
+    var setTableView = function(panelTableElem){
+        var curPage = $($panelTableElem).find('.dataTables_goto_page').data('curpage');
+        var recordsPP = $($panelTableElem).find('.files-per-page-select').val();
+
+    }
+
+    var resetTableControls =function(tableId){
+        var numRecords = $('#'+tableId).find('tr').length;
+        var recordsPP = $('#'+tableId).parent().parent().find('.files-per-page-select').val();
+        $('#'+tableId).parent().parent().find('.total-file-count')[0].innerHTML = numRecords.toString();
+        var numPages = parseInt(numRecords/recordsPP)+1;
+
+        pageElem = $('#'+tableId).parent().parent().find('.paginate_button_space')[0];
+        var html = '<a class="dataTables_button paginate_button numeric_button current">1</a>';
+        for (var i=2;i<Math.min(4,numPages);i++){
+            html+='<a class="dataTables_button paginate_button numeric_button current">'+i.toString()+'</a>';
+        }
+        if (numPages ==4){
+            html+='<a class="dataTables_button paginate_button numeric_button current">4</a>';
+        }
+        else if (numPages >4){
+            html+='<span class="ellipsis">...</span>';
+            html+='<a class="dataTables_button paginate_button numeric_button current">'+numPages.toString()+'</a>';
+
+        }
+        pageElem.innerHTML = html;
+
     }
 
     var changeAjax = function(isIncrement){
@@ -1034,7 +1063,9 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             $('#age_at_diagnosis').find('.less-checks').addClass('hide');
             mkSlider('age_at_diagnosis',0,120,1,true);
 
-
+            var numCol = $('#projects_table').children('tr').length
+            $('#projects_panel').find('.total-file-count')[0].innerHTML = numCol.toString();
+             $('#projects_panel').find('.goto-page-number')[0].max=3;
 
 
             //$("#number_ajax").bind("change", function(){ alert($()this.val)} );

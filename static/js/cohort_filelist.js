@@ -598,7 +598,7 @@ require([
         }
     });
 
-    $('.data-tab-content').on('click', '.paginate_button', function () {
+    /* $('.data-tab-content').on('click', '.paginate_button', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
         var page_no;
         if($(this).hasClass('next-page')){
@@ -617,7 +617,7 @@ require([
         }
         goto_table_page(this_tab, page_no)
     });
-
+     */
     $('.data-tab-content').on('click', '.case-barcode-search-btn', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
         var search_input = $(this).siblings('.case-barcode-search-text');
@@ -625,7 +625,16 @@ require([
         search_case_barcode(this_tab, search_input.val());
     });
 
-    $('.data-tab-content').on('click', '.case-barcode-search-clear-btn', function () {
+    $('.table-content').on('click', '.prev-page', function () {
+        var this_tab = $(this).parents('.data-tab').data('file-type');
+        var search_input = $(this).siblings('.case-barcode-search-text');
+        search_input.val("");
+        search_case_barcode(this_tab, search_input.val());
+    });
+
+
+
+    $('.table-content').on('click', '.case-barcode-search-clear-btn', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
         var search_input = $(this).siblings('.case-barcode-search-text');
         search_input.val("");
@@ -663,14 +672,62 @@ require([
     });
 
     // change no of entries per page
-    $('.data-tab-content').on('change', '.files-per-page', function () {
-        var old_fpp = $(this).find('.files-per-page').data('fpp');
-        //var old_fpp = tab_files_per_page[this_tab];
-        var new_fpp = $(this).find('.files-per-page :selected').val();
-        //calculate the new page no that would include the first file item
-        //var new_page_no = parseInt((tab_page[this_tab]-1) * old_fpp/new_fpp) + 1;
-        //goto_table_page(this_tab, new_page_no);
+    $('.table-panel').on('change', '.files-per-page', function () {
+        var old_fpp = $(this).find('.files-per-page-select').data('fpp');
+
+        var new_fpp = $(this).find('.files-per-page-select :selected').val();
+
+        $(this).find('.files-per-page-select').data('fpp',new_fpp);
+
+       var curpage = $(this).parent().parent().find('.dataTables_goto_page').data('curpage');
+       new_page_no = parseInt( (curpage-1)* old_fpp/new_fpp ) + 1;
+       $(this).parent().parent().find('.dataTables_goto_page').data('curpage',new_page_no);
+
+
     });
+
+    $('.table-panel').on('click', '.goto-page-button', function () {
+        var new_page_no = $(this).parent().find('.goto-page-number').val();
+        $(this).parent().find('.goto-page-number')[0].innerHTML='';
+        $(this).parent().find('.dataTables_goto_page').data('curpage',new_page_no);
+
+    });
+
+
+    $('.table-panel').on('click', '.prev-age', function () {
+        var page_no = $(this).parent().find('.dataTables_goto_page').data('curpage');
+        var page_no_id=parseInt(page_no);
+        if (page_no_id>1){
+            var new_page_no=(page_no_id-1).toString();
+            $(this).parent().find('.dataTables_goto_page').data('curpage',new_page_no);
+        }
+
+    });
+
+
+
+
+
+
+
+    $('.table-panel').on('change', '.files-per-page', function () {
+        var old_fpp = $(this).find('.files-per-page-select').data('fpp');
+
+        var new_fpp = $(this).find('.files-per-page-select :selected').val();
+
+        $(this).find('.files-per-page-select').data('fpp') = new_fpp;
+
+       var curpage = $(this).parent().parent().find('.dataTables_goto_page').data('curpage');
+       new_page_no = parseInt( (curpage-1)* old_fpp/new_fpp ) + 1;
+       $(this).parent().parent().find('.dataTables_goto_page').data('curpage') = new_page_no;
+
+
+    });
+
+
+
+
+
 
     // change column sorting
     $('.data-tab-content').on('click', '.sortable_table th:not(.sorting_disabled)', function () {
@@ -849,7 +906,7 @@ require([
         update_displays($('ul.nav-tabs-files li.active a').data('file-type'));
     });
 
-    browser_tab_load(cohort_id);
+    //browser_tab_load(cohort_id);
 
     $('.data-tab-content').on('click', '.download-btn', function() {
         var self=$(this);
