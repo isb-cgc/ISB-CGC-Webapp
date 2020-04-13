@@ -364,6 +364,7 @@ def help_page(request):
 @login_required
 def explore_data_page(request):
     attr_by_source = {}
+    attr_sets = {}
     context = {'request': request}
     source = DataSource.SOLR
     versions = []
@@ -426,8 +427,7 @@ def explore_data_page(request):
 
             attrs = source.get_collection_attr(for_ui=True)
             attr_by_source[set_type]['attributes'] = {attr.name: {'obj': attr, 'vals':None} for attr in attrs}
-            for attr in attr_by_source[set_type]['attributes']:
-                attr_by_source[set_type]['attributes'][attr]['vals'] = attr_by_source[set_type]['attributes'][attr]['obj'].get_display_values()
+            attr_sets[set_type] = attrs
 
         attr_by_source['origin_set']['attributes']['collection_id']['vals'].update([('tcga_cesc','TCGA_CESC'),('tcga_coad','TCGA_COAD'),('tcga_gbm','TCGA_GBM'),('tcga_kirc','TCGA_KIRP'),('tcga_luad','TCGA_LUAD'),('tcga_lusc','TCGA_LUSC'),('tcga_prad','TCGA_PRAD'),('tcga_read','TCGA_READ'),('tcga_sarc','TCGA_SARC'),('tcga_stad','TCGA_STAD'),('tcga_thca','TCGA_THCA')])
 
@@ -439,53 +439,37 @@ def explore_data_page(request):
         )
 
         if with_clinical:
+            attr_display_vals = Attribute_Display_Values.objects.filter(
+                attribute__id__in=attr_sets['related_set']).to_dict()
             for attr in faceted_counts['clinical']['facets']:
-                this_attr_vals = attr_by_source['related_set']['attributes'][attr]['vals']
                 this_attr = attr_by_source['related_set']['attributes'][attr]['obj']
                 values = []
-                if len(this_attr_vals):
-                    for val in this_attr_vals:
-                        values.append({
-                            'value': val,
-                            'display_value': this_attr_vals[val],
-                            'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
-                        })
-                else:
-                    for val in faceted_counts['clinical']['facets'][attr]:
-                        values.append({
-                            'value': val,
-                            'display_value': val if this_attr.preformatted_values else None,
-                            'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
-                        })
-
+                for val in faceted_counts['clinical']['facets'][attr]:
+                    displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
+                    values.append({
+                        'value': val,
+                        'display_value': displ_val,
+                        'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
+                    })
                 if attr == 'bmi':
                     sortDic = {'underweight':0, 'normal weight': 1, 'overweight': 2, 'obese': 3}
                     attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: sortDic[x['value']])
                 else:
                     attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
+        attr_display_vals = Attribute_Display_Values.objects.filter(attribute__id__in=attr_sets['origin_set']).to_dict()
         for attr in faceted_counts['facets']['cross_collex']:
-            this_attr_vals = attr_by_source['origin_set']['attributes'][attr]['vals']
             this_attr = attr_by_source['origin_set']['attributes'][attr]['obj']
             values = []
-            if len(this_attr_vals):
-                for val in this_attr_vals:
-                    values.append({
-                        'value': val,
-                        'display_value': this_attr_vals[val],
-                        'count': faceted_counts['facets']['cross_collex'][attr][val] if val in faceted_counts['facets']['cross_collex'][attr] else 0
-                    })
-            else:
-                for val in faceted_counts['facets']['cross_collex'][attr]:
-                    values.append({
-                        'value': val,
-                        'display_value': val if this_attr.preformatted_values else None,
-                        'count': faceted_counts['facets']['cross_collex'][attr][val] if val in faceted_counts['facets']['cross_collex'][attr] else 0
+            for val in faceted_counts['facets']['cross_collex'][attr]:
+                displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
+                values.append({
+                    'value': val,
+                    'display_value': displ_val,
+                    'count': faceted_counts['facets']['cross_collex'][attr][val] if val in faceted_counts['facets']['cross_collex'][attr] else 0
 
-                   })
-            #bmiSort{''}
+               })
             attr_by_source['origin_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
-
 
         attr_filter = {
             'origin_set': ['Modality', 'BodyPartExamined','collection_id']
@@ -518,9 +502,6 @@ def explore_data_page(request):
                 attr_by_source[set]['docs'] = faceted_counts['docs']
 
         attr_by_source['total'] = faceted_counts['total']
-
-        #if not is_json:
-        #    attr_by_source['collection_id'] = attr_by_source['origin_set']['collection_id']
 
         context['set_attributes'] = attr_by_source
         context['filters'] = filters
