@@ -148,7 +148,7 @@ SITE_ID = 3
 
 if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
     print("[STATUS] AppEngine Flex detected.", file=sys.stdout)
-    SITE_ID = 5
+    SITE_ID = 4
 
 
 def get_project_identifier():
