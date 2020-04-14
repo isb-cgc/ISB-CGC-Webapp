@@ -325,7 +325,7 @@ require([
             var csrftoken = $.getCookie('csrftoken');
             $.ajax({
                 type        : 'POST',
-                dataType    :'json',
+                dataType    : 'json',
                 url         : BASE_URL + '/genes/is_valid/',
                 data        : JSON.stringify({'genes-list' : list}),
                 beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
