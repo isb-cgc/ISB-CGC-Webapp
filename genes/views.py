@@ -7,6 +7,7 @@ import re
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_protect
 from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from django.http import HttpResponse
@@ -21,7 +22,7 @@ logger = logging.getLogger('main_logger')
 
 # validates whether each gene is a list of gene symbols are known gene symbols
 # returns a json object keyed on each gene symbol with values of whether or not they are valid
-@login_required
+@csrf_protect
 def check_gene_list_validity(request):
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
@@ -36,7 +37,7 @@ def check_gene_list_validity(request):
 
 # based on input entered, return a list of gene symbol suggestions
 # returns a json array of gene symbol suggestions
-@login_required
+@csrf_protect
 def suggest_gene_symbols(request, string):
     response = GeneSymbol.suggest_symbol(string)
     result = []
