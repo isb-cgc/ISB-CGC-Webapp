@@ -195,4 +195,7 @@
 
 {% endblock %}
 
-{% block js_file %}{% static 'js/user_details.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/user_details.js' %}"></script>
+{% endblock %}

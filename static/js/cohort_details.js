@@ -98,10 +98,18 @@ require([
     var gene_suggestions = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
         queryTokenizer: Bloodhound.tokenizers.whitespace,
-        prefetch : BASE_URL + '/genes/suggest/a.json',
+        prefetch : BASE_URL + '/genes/suggest/a',
         remote: {
-            url: BASE_URL + '/genes/suggest/%QUERY.json',
+            url: BASE_URL + '/genes/suggest/%QUERY',
             wildcard: '%QUERY'
+        },
+        prepare: function (query, settings) {
+            var csrftoken = $.getCookie('csrftoken');
+            settings.url = settings.url + '&q=' + query;
+            settings.headers = {
+              "X-CSRFToken": csrftoken
+            };
+            return settings;
         }
     });
     gene_suggestions.initialize();

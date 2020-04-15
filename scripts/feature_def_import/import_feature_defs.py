@@ -57,7 +57,7 @@ def run_import(database_name, database_password, table_name, data_path):
             parsed_data.append(tuple(item))
             counter += 1
         except Exception as e:
-            print("Error: " + e.message)
+            print("Error: " + e)
 
     # Insert in chunks
     CHUNK_SIZE = 1000

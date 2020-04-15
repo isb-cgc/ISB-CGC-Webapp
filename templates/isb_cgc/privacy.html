@@ -14,9 +14,11 @@
 
 {% block page_header %}
 <div class="container">
+    {% if request.user.is_authenticated %}
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
     </ol>
+    {% endif %}
 {% endblock %}
 {% block content %}
     <h1 class="page-header">Privacy Policy</h1>
@@ -175,5 +177,3 @@
 
 </div>
 {% endblock %}
-
-{% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}

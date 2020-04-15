@@ -422,7 +422,7 @@ require([
 });
 
 // Return an object for consts/methods used by most views
-define(['jquery', 'utils'], function($, utils) {
+define('base',['jquery', 'utils'], function($, utils) {
 
     return {
         blacklist: /<script>|<\/script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|<iframe>|<\/iframe>/ig,
