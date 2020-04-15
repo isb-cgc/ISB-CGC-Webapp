@@ -1158,14 +1158,26 @@ require([
                 var featureId = aFilter.feature.id.toString();
                 var valueId = aFilter.value.id.toString();
 
-                var checkboxId = programId + "-" + featureId + "-" + valueId;
-                checkboxId = checkboxId.replace(/ /g, "_");
-                checkboxId = checkboxId.toUpperCase();
+                var checkbox = null;
+                if (featureId === "data_type") {
+                    $("input[data-value-id ='"+valueId+"']").each(function()
+                    {
+                        if($(this).closest("[data-feature-id=\"data_type\"]").length !== 0)
+                        {
+                            checkbox = $(this);
+                            return;
+                        }
+                    });
+                }
+                else {
+                    var checkboxId = programId + "-" + featureId + "-" + valueId;
+                    checkboxId = checkboxId.replace(/ /g, "_");
+                    checkboxId = checkboxId.toUpperCase();
 
-                // Escape special chars
-                checkboxId = checkboxId.replace(/([$%&()*+,./:;<=>?@\[\\\]^\{|}~])/g, '\\$1');
-
-                var checkbox = $('#'+checkboxId);
+                    // Escape special chars
+                    checkboxId = checkboxId.replace(/([$%&()*+,./:;<=>?@\[\\\]^\{|}~])/g, '\\$1');
+                    checkbox = $('#'+checkboxId);
+                }
 
                 if (checkbox !== null) {
                     // Set checked and trigger change to update other related data
