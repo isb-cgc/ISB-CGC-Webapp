@@ -101,8 +101,7 @@ def get_public_program_name_set_for_cohorts(cohort_id_array):
     Returns:
         Set of program names in lower case.
     """
-    superuser_username = django_settings.SITE_SUPERUSER_USERNAME
-    superuser = User.objects.get(username=superuser_username, is_staff=True, is_superuser=True)
+    superuser = User.objects.get(is_staff=True, is_superuser=True, is_active=True)
     program_set = set()
     result = Cohort.objects.filter(id__in=cohort_id_array)
 

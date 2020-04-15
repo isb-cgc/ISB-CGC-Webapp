@@ -317,4 +317,7 @@
 
 {% endblock %}
 
-{% block js_file %}{% static 'js/register_gcp.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/register_gcp.js' %}"></script>
+{% endblock %}

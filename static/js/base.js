@@ -216,10 +216,10 @@ require([
 
     function update_table_display()
     {
-        if ($('.page-item').length === 0)
+        var total_items = $('.page-item').length;
+        if (total_items === 0)
             return;
 
-        var total_items = item_list.length;
         var total_pages = Math.ceil(total_items / items_per_page);
 
         //change another part at here
@@ -422,7 +422,7 @@ require([
 });
 
 // Return an object for consts/methods used by most views
-define(['jquery', 'utils'], function($, utils) {
+define('base',['jquery', 'utils'], function($, utils) {
 
     return {
         blacklist: /<script>|<\/script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|<iframe>|<\/iframe>/ig,
