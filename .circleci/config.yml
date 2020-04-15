@@ -16,17 +16,19 @@ commands:
           command: |
             if [ ! -f deployment.key.json ]; then
               echo "Deployment JSON keyfile not found - loading from CircleCI."
-              KEY=${DEPLOYMENT_KEY_ISB_CGC}
+              KEY=${DEPLOYMENT_KEY_ISB_CGC_DEV}
             else
               echo "Deployment JSON keyfile found."
               KEY="NA"
             fi
-            CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC}
-            PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC}
-            BUCKET=${DEPLOYMENT_BUCKET_ISB_CGC}
-            if [[ ${TIER} == "PROD" ]] || [[ ${TIER} == "DEV" ]]; then
-              BUCKET="${BUCKET}/${TIER,,}"
-              echo "Using default project ${PROJECT_ID} and related deployment SA and bucket."
+            CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC_DEV}
+            PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC_DEV}
+            BUCKET=${DEPLOYMENT_BUCKET_ISB_CGC_DEV}
+            if [[ ${TIER} == "PROD" ]]; then
+              CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC}
+              PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC}
+              BUCKET="${DEPLOYMENT_BUCKET_ISB_CGC}/${TIER,,}"
+              KEY=${DEPLOYMENT_KEY_ISB_CGC}
             elif [[ ${TIER} == "UAT" ]]; then
               KEY=${DEPLOYMENT_KEY_ISB_CGC_UAT}
               CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC_UAT}
@@ -37,6 +39,8 @@ commands:
               CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC_TEST}
               PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC_TEST}
               BUCKET=${DEPLOYMENT_BUCKET_ISB_CGC_TEST}
+            elif [[ ${TIER} == "DEV" ]]; then
+              echo "Using default deployment configuration for tier ${TIER}"
             else
               echo "[ERROR] - Unrecognized tier: ${TIER} - exitng."
               exit 1

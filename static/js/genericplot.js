@@ -112,7 +112,7 @@ require([
     //             cohort_str += '&cohort_id=' + cohorts[i];
     //         }
     //     }
-    //     var api_url = BASE_API_URL + '/_ah/api/feature_data_api/v1/feature_data_plot?' + cohort_str;
+    //     var api_url = base_api_url + '/_ah/api/feature_data_api/v1/feature_data_plot?' + cohort_str;
     //
     //     api_url += '&x_id=' + x_attr + '&c_id=' + color_by;
     //     if (y_attr && y_attr != '') {
