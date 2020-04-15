@@ -46,7 +46,7 @@
         </script>
     {%  endif %}
     <script>
-        var STATIC_FILES_URL = '{{ STATIC_FILES_URL }}';
+        var STATIC_FILES_URL = {% if STATIC_FILES_URL %}'{{ STATIC_FILES_URL }}'{% else %}'{% static '' %}'{% endif %};
         var BASE_URL = '{{ BASE_URL }}' || "";
         var STORAGE_URI = '{{ STORAGE_URI }}';
     </script>
