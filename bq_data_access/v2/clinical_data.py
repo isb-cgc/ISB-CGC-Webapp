@@ -85,8 +85,9 @@ class ClinicalFeatureDef(object):
             schema = TABLE_TO_SCHEMA_MAP[table_config.table_id]
 
             for field_item in schema:
-                if field_item['name'] == column_name:
+                if field_item['name'].lower() == column_name.lower():
                     # Capture the type of the field in this table
+                    field_item['name'] = column_name
                     found_tables.append((table_config, field_item['type']))
                     break
 

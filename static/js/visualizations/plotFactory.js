@@ -643,7 +643,7 @@ define([
                             .style('font-size', 20)
                             .attr('text-anchor', 'middle')
                             .attr('transform', 'translate(' + (width/2) + ',' + (height/3.5) + ')')
-                            .text('There was an error retrieving plot data. Please try again');
+                            .text('There was an error retrieving plot data. Please try again.');
                 callback({error : true});
             }
         });
