@@ -365,19 +365,19 @@
         <div class="plot-div">
             {% if workbook.owner.id == user.id %}
                 <div class="worksheet-instruction">
-                    <p><i class="fa fa-exclamation-circle"></i> To complete this analysis: </p>
+                    <label style="padding-left:5px;"><i class="fa fa-exclamation-circle" aria-hidden="true"></i> To complete this analysis: </label>
                     <ul class="ul no-bullet">
-                        <li class="checkbox"><label><input class="plot-ready-check" type="checkbox" id="selAnType-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select an Analysis Type (above)</label></li>
-                        <li class="checkbox">
-                            <label>
-                                <input class="plot-ready-check" type="checkbox" id="selGenVar-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;">
-                                Select <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes & miRNAs</a>
-                                <span class="and_or_variables_label">
-                                    and/or <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables</a>
-                                </span>
-                            </label>
+                        <li class="plot-ready-check selAnType">
+                            Select an <b>Analysis Type</b> (above)
                         </li>
-                        <li class="checkbox"><label><input class="plot-ready-check" type="checkbox" id="selCoh-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select a <a href="{% url 'cohort_select_for_existing_workbook' workbook.id worksheet.id %}">Cohort</a></label></li>
+                        <li class="plot-ready-check selGenVar">
+                            Select <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}"><b>Genes & miRNAs</b></a>
+                                    and/or <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}"><b>Variables</b></a>
+
+                        </li>
+                        <li class="plot-ready-check selCoh">
+                            Select a <a href="{% url 'cohort_select_for_existing_workbook' workbook.id worksheet.id %}"><b>Cohort</b></a>
+                        </li>
                     </ul>
                 </div>
             {% endif %}

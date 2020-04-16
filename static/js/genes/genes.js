@@ -100,10 +100,18 @@ require([
     var gene_suggestions = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
         queryTokenizer: Bloodhound.tokenizers.whitespace,
-        prefetch : BASE_URL + '/genes/suggest/a.json',
+        prefetch : BASE_URL + '/genes/suggest/a',
         remote: {
-            url: BASE_URL + '/genes/suggest/%QUERY.json',
+            url: BASE_URL + '/genes/suggest/%QUERY',
             wildcard: '%QUERY'
+        },
+        prepare: function (query, settings) {
+            var csrftoken = $.getCookie('csrftoken');
+            settings.url = settings.url + '&q=' + query;
+            settings.headers = {
+              "X-CSRFToken": csrftoken
+            };
+            return settings;
         }
     });
 
@@ -317,7 +325,7 @@ require([
             var csrftoken = $.getCookie('csrftoken');
             $.ajax({
                 type        : 'POST',
-                dataType    :'json',
+                dataType    : 'json',
                 url         : BASE_URL + '/genes/is_valid/',
                 data        : JSON.stringify({'genes-list' : list}),
                 beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},

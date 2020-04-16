@@ -1107,13 +1107,13 @@ require([
     }
 
     // Get plot model when plot selection changes
-    $(".plot_selection").on("change", function(event){
+    $(".plot_selection").on("change", function(e){
         var self = this;
         $(this).find(":disabled :selected").remove();
         turn_off_toggle_selector();
         var plot_type = $(this).val();
         var flyout = $(this).closest('.worksheet-body').find('.settings-flyout');
-        plot_type_selex_update();
+        update_plot_elem_rdy(e);
         hide_show_widgets(plot_type, flyout);
         get_plot_info(this, function(success){
             disable_invalid_variable_options($('.worksheet.active .main-settings'));
@@ -1123,15 +1123,9 @@ require([
     });
 
     var cohort_selex_update = function(e){
-        var cohSel = false;
-        $('.worksheet.active').find('.cohort-selex').each(function(ev){
-            if($(this).is(':checked')) {
-                cohSel = true;
-            }
-        });
-        $('#selCoh-' + $('.worksheet.active').attr('id')).prop('checked', cohSel);
+        var cohSel = ($('.worksheet.active').find('.cohort-selex:checked').length > 0);
+        $('.worksheet.active li.selCoh').toggleClass('check-off', cohSel);
         plotReady.setReady($('.worksheet.active').attr('id'),'cohort',cohSel);
-        check_for_plot_rdy();
     };
 
     var axis_selex_update = function(e){
@@ -1169,15 +1163,15 @@ require([
                 });
             }
         }
+        $('.worksheet.active li.selGenVar').toggleClass('check-off', axisRdy);
         plotReady.setReady($('.worksheet.active').attr('id'),'axis',axisRdy);
-        $('#selGenVar-'+ $('.worksheet.active').attr('id')).prop('checked',axisRdy);
-        check_for_plot_rdy();
+
     };
 
     var plot_type_selex_update = function(e) {
-        $('#selAnType-'+$('.worksheet.active').attr('id')).prop('checked',!!$('.worksheet.active').find('.plot_selection :selected').val());
-        plotReady.setReady($('.worksheet.active').attr('id'),'type',!!$('.worksheet.active').find('.plot_selection :selected').val());
-        check_for_plot_rdy();
+        var selAnTypeRdy = !!$('.worksheet.active').find('.plot_selection :selected').val();
+        $('.worksheet.active li.selAnType').toggleClass('check-off', selAnTypeRdy);
+        plotReady.setReady($('.worksheet.active').attr('id'),'type', selAnTypeRdy);
     };
 
     var check_for_plot_rdy = function(e){
@@ -1194,17 +1188,18 @@ require([
     };
 
     var update_plot_elem_rdy = function(e) {
-        axis_selex_update();
-        plot_type_selex_update();
-        cohort_selex_update();
+        axis_selex_update(e);
+        plot_type_selex_update(e);
+        cohort_selex_update(e);
+        check_for_plot_rdy(e);
     };
 
     $('.cohort-selex').on('change',function(e){
-        cohort_selex_update();
+        update_plot_elem_rdy(e);
     });
 
     $('.axis-select, .gene-selex, .select-all-genes-checkbox').on('change',function(e){
-        axis_selex_update();
+        update_plot_elem_rdy(e);
     });
 
     // Because we do not have a fixed height set but won't know our ideal height (per the size of the source panel)

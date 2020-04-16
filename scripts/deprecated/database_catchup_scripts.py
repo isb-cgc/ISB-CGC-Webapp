@@ -902,7 +902,7 @@ def create_public_programs(big_query_dataset, bucket_name, bucket_permissions):
         db.commit()
 
     except Exception as e:
-        print('[ERROR] Exception while making public program entries: '+e.message, file=sys.stderr)
+        print('[ERROR] Exception while making public program entries: ', file=sys.stderr)
         print(traceback.format_exc(), file=sys.stderr)
     finally:
         if cursor: cursor.close
