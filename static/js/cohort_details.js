@@ -1114,6 +1114,7 @@ require([
     });
 
     var ANONYMOUS_FILTERS = {};
+    var MUTATION_FILTER_COMBINE = "and";
 
     var save_anonymous_filters = function()
     {
@@ -1131,6 +1132,9 @@ require([
 
         var filterStr = JSON.stringify(filters);
         sessionStorage.setItem('anonymous_filters', filterStr);
+
+        var comb = $(".mut-filter-combine").find(':selected').val();
+        sessionStorage.setItem('mutation_filter_combine', comb);
     };
 
     var load_tabs_queue = [];
@@ -1150,6 +1154,8 @@ require([
                     load_tabs_queue.push(program_id);
                 }
             }
+
+            MUTATION_FILTER_COMBINE = sessionStorage.getItem('mutation_filter_combine');
         }
     };
 
@@ -1157,6 +1163,7 @@ require([
     {
         // Check if anonymous filter exist, then find all checkbox and check them
         if (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS.length > 0) {
+            var has_mut_filter = false;
             for (i = 0; i < ANONYMOUS_FILTERS.length; ++i) {
                 var aFilter = ANONYMOUS_FILTERS[i];
                 if (aFilter.program.id !== active_program_id)
@@ -1166,26 +1173,90 @@ require([
                 var featureId = aFilter.feature.id.toString();
                 var valueId = aFilter.value.id.toString();
 
-                var checkboxId = programId + "-" + featureId + "-" + valueId;
-                checkboxId = checkboxId.replace(/ /g, "_");
-                checkboxId = checkboxId.toUpperCase();
-
-                // Escape special chars
-                checkboxId = checkboxId.replace(/([$%&()*+,./:;<=>?@\[\\\]^\{|}~])/g, '\\$1');
-
-                var checkbox = $('#'+checkboxId);
-
-                if (checkbox !== null) {
-                    // Set checked and trigger change to update other related data
-                    checkbox.prop("checked", true);
-                    checkbox.trigger('change', [Boolean(i !== (ANONYMOUS_FILTERS.length-1))]);
+                if (featureId.startsWith("MUT:"))
+                {
+                    // molecule filters...
+                    apply_anonymous_molec_filter(programId, featureId, valueId);
+                    has_mut_filter = true;
                 }
+                else
+                {
+                    // case and data_type filters
+                    apply_anonymous_checkbox_filter(programId, featureId, valueId);
+                }
+            }
+
+            if (has_mut_filter)
+            {
+                $('#p-2-mut-filter-combine').val(MUTATION_FILTER_COMBINE);
+                $('.mut-filter-combine').trigger('change');
             }
         }
     };
 
-    load_anonymous_filters();
+    var apply_anonymous_checkbox_filter = function(programId, featureId, valueId)
+    {
+        var checkbox = null;
+        if (featureId === "data_type") {
+            // data type filters...
+            $("input[data-value-id ='"+valueId+"']").each(function()
+            {
+                if($(this).closest("[data-feature-id=\"data_type\"]").length !== 0)
+                {
+                    checkbox = $(this);
+                    return;
+                }
+            });
+        }
+        else {
+            // case filters...
+            var checkboxId = programId + "-" + featureId + "-" + valueId;
+            checkboxId = checkboxId.replace(/ /g, "_");
+            checkboxId = checkboxId.toUpperCase();
 
+            // Escape special chars
+            checkboxId = checkboxId.replace(/([$%&()*+,./:;<=>?@\[\\\]^\{|}~])/g, '\\$1');
+            checkbox = $('#'+checkboxId);
+        }
+
+        if (checkbox !== null) {
+            // Set checked and trigger change to update other related data
+            checkbox.prop("checked", true);
+            checkbox.trigger('change', [Boolean(i !== (ANONYMOUS_FILTERS.length-1))]);
+        }
+    };
+
+    var apply_anonymous_molec_filter = function(programId, featureId, valueId)
+    {
+        var parts = featureId.split(":");
+
+        var build = parts[1];
+        $('#p-' + programId + '-mutation-build').val(build);
+
+        var gene = parts[2];
+        $('#p-' + programId + '-paste-in-genes').tokenfield('setTokens', gene);
+
+        var is_negative = (parts.length === 5);
+        $('.inversion-checkbox').prop("checked", is_negative);
+
+        var mut_cat = is_negative ? parts[4] : parts[3];
+        var mut_type = valueId;
+        if (mut_cat === 'specific')
+        {
+            $('.mutation-category-selector').val('indv-selex');
+            $('.spec-molecular-attrs ul').show();
+            $('.spec-molecular-attrs ul').find("[data-value-id='"+mut_type+"']").prop("checked", true);
+        }
+        else if (mut_cat === 'category')
+        {
+            $('.mutation-category-selector').val(mut_type);
+        }
+
+        $('.build-mol-filter').removeAttr('disabled');
+        $('.build-mol-filter').trigger( "click" );
+    };
+
+    load_anonymous_filters();
 
     // Fix for Issue #1950. While user is waiting for cohort data request, we prevent them from clicking on
     // another tab and starting another request.
