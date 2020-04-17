@@ -277,4 +277,7 @@
 {% block js_file %}
 	{{ block.super }}
 	<script src="{% static 'js/landing.js' %}"></script>
+    <script>
+    console.debug("[STATUS] Loading landing.html at "+(new Date()));
+    </script>
 {% endblock %}
