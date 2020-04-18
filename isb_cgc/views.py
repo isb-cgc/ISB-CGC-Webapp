@@ -115,6 +115,7 @@ Returns user to landing page.
 
 @never_cache
 def landing_page(request):
+    logger.info("[STATUS] Received landing page view request at {}".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
     return render(request, 'isb_cgc/landing.html', {'request': request, })
 
 
