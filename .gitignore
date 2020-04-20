@@ -24,9 +24,6 @@ ssl/
 .installed.cfg
 *.egg
 
-# robots.txt
-!robots.txt
-
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -84,6 +81,7 @@ scripts/metadata_featdef_tables.sql
 *.xls
 *.txt
 !requirements.txt
+!robots.txt
 
 # Vagrant Files
 .vagrant/
