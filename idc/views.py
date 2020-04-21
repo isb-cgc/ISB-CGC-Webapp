@@ -429,7 +429,7 @@ def explore_data_page(request):
             attr_by_source[set_type]['attributes'] = {attr.name: {'obj': attr, 'vals':None} for attr in attrs}
             attr_sets[set_type] = attrs
 
-        attr_by_source['origin_set']['attributes']['collection_id']['vals'].update([('tcga_cesc','TCGA_CESC'),('tcga_coad','TCGA_COAD'),('tcga_gbm','TCGA_GBM'),('tcga_kirc','TCGA_KIRP'),('tcga_luad','TCGA_LUAD'),('tcga_lusc','TCGA_LUSC'),('tcga_prad','TCGA_PRAD'),('tcga_read','TCGA_READ'),('tcga_sarc','TCGA_SARC'),('tcga_stad','TCGA_STAD'),('tcga_thca','TCGA_THCA')])
+        #attr_by_source['origin_set']['attributes']['collection_id']['vals'].update([('tcga_cesc','TCGA_CESC'),('tcga_coad','TCGA_COAD'),('tcga_gbm','TCGA_GBM'),('tcga_kirc','TCGA_KIRP'),('tcga_luad','TCGA_LUAD'),('tcga_lusc','TCGA_LUSC'),('tcga_prad','TCGA_PRAD'),('tcga_read','TCGA_READ'),('tcga_sarc','TCGA_SARC'),('tcga_stad','TCGA_STAD'),('tcga_thca','TCGA_THCA')])
 
         if (len(fields)==0):
             fields = list(attrs.values_list('name', flat=True))

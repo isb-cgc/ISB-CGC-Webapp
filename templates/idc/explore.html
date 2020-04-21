@@ -268,30 +268,33 @@
                          <div class="panel-heading clearfix"><h4 class="panel-title">Collections</h4></div>
                          <div id = "projects_panel" class="panel-body">
 
-                         <div class="dataTables_info hidden">
-                    <span class="file-page-count">Showing <span class="showing">1 to 25</span> of <span class="total-file-count"> </span> entries</span>
-                    <span class="no-file-page-count" style="display: none;">Showing 0 files.</span>
+                           <div class="dataTables_info">
+                    <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count"> </span> entries</span>
+                    <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
                          </div>
-                         <div class="hidden">
-                    <div class="dataTables_length files-per-page">
-                        <label for="files-per-page-all-select">Show</label>
-                        <select id="files-per-page-all-select" data-fpp="25" class="disabled">
+                         <div>
+
+                      <div class="dataTables_length files-per-page">
+                        <label>Show</label>
+                        <select class="files-per-page-select" data-fpp="10">
+                            <option value="10">10</option>
                             <option value="25">25</option>
                             <option value="50">50</option>
-                            <option value="100">100</option>
                         </select>
                         <label>entries</label>
                     </div>
-                    <div class="dataTables_goto_page disabled">
-                        <label for="goto-page-no-all">Page</label>
-                        <input id="goto-page-no-all" type="number" class="goto-page-number" min="1" max="1588">
+
+
+                   <div class="dataTables_goto_page" data-curpage="1">
+                        <label for="goto-page-no">Page</label>
+                        <input id="goto-page-no-inp" type="number" class="goto-page-number" min="1" max="1">
                         <div class="goto-page-button dataTables_button">Go</div>
                     </div>
-                    <div class="dataTables_paginate">
-                        <a class="prev-page paginate_button dataTables_button disabled">Previous</a>
+                               <div class="dataTables_goto_page">
+                        <a class="prev-page paginate_button dataTables_button">Previous</a>
                         <span class="paginate_button_space"><a class="dataTables_button paginate_button numeric_button current">1</a></span>
-                        <a class="next-page paginate_button dataTables_button disabled">Next</a>
-                    </div>
+                        <a class="next-page paginate_button dataTables_button">Next</a>
+                       </div>
                 </div>
 
                             <table class="table table-striped">
@@ -322,30 +325,34 @@
                          <div class="panel-heading clearfix"><h4 class="panel-title">Selected Studies</h4></div>
                          <div class="panel-body">
 
-                         <div class="dataTables_info hidden">
-                    <span class="file-page-count">Showing <span class="showing">1 to 25</span> of <span class="total-file-count"> </span> entries</span>
+                         <div class="dataTables_info">
+                    <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count"> </span> entries</span>
                     <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
                          </div>
-                       <div class="hidden">
+                       <div>
+
                           <div class="dataTables_length files-per-page">
                         <label>Show</label>
-                        <select class="files-per-page-select" data-fpp="25">
+                        <select class="files-per-page-select" data-fpp="10">
+                            <option value="10">10</option>
                             <option value="25">25</option>
                             <option value="50">50</option>
-                            <option value="100">100</option>
                         </select>
                         <label>entries</label>
                     </div>
+
                               <div class="dataTables_goto_page" data-curpage="1">
                         <label for="goto-page-no">Page</label>
                         <input id="goto-page-no-inp" type="number" class="goto-page-number" min="1" max="1">
                         <div class="goto-page-button dataTables_button">Go</div>
                     </div>
-                               <div class="dataTables_paginate">
+                               <div class="dataTables_goto_page">
                         <a class="prev-page paginate_button dataTables_button">Previous</a>
                         <span class="paginate_button_space"><a class="dataTables_button paginate_button numeric_button current">1</a></span>
                         <a class="next-page paginate_button dataTables_button">Next</a>
                        </div>
+
+
                        </div>
                                <table class="table table-striped" >
                               <thead id="studies_table_head">
@@ -354,16 +361,50 @@
                              </tr>
                               </thead>
 
-                             <tbody  id="studies_table" class="set_height">
+                             <tbody  id="studies_table" class="set_height" data-rowpos="">
                               </tbody>
                           </table >
                          </div>
                      </div>
                 </div>
+
+
                 <div class="tabpanel data-tab-content-panel table-panel">
                      <div class="panel panel-default">
                          <div class="panel-heading clearfix"><h4 class="panel-title">Selected Series</h4></div>
                          <div class="panel-body">
+
+                             <div class="dataTables_info">
+                    <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count"> </span> entries</span>
+                    <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
+                         </div>
+                       <div>
+
+                          <div class="dataTables_length files-per-page">
+                        <label>Show</label>
+                        <select class="files-per-page-select" data-fpp="10">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                        <label>entries</label>
+                    </div>
+
+                              <div class="dataTables_goto_page" data-curpage="1">
+                        <label for="goto-page-no">Page</label>
+                        <input id="goto-page-no-inp" type="number" class="goto-page-number" min="1" max="1">
+                        <div class="goto-page-button dataTables_button">Go</div>
+                    </div>
+                               <div class="dataTables_goto_page">
+                        <a class="prev-page paginate_button dataTables_button">Previous</a>
+                        <span class="paginate_button_space"><a class="dataTables_button paginate_button numeric_button current">1</a></span>
+                        <a class="next-page paginate_button dataTables_button">Next</a>
+                       </div>
+
+
+                       </div>
+
+
                              <table class = "table table-striped">
                                 <thead id="series_table_head">
                                     <tr>

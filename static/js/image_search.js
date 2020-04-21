@@ -321,11 +321,27 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
 
     window.removeStudiesAndSeries =  function(projectId, studyTableId, seriesTableId) {
         var pclass = "project_" + projectId;
+        var scrollPos = document.getElementById(studyTableId).scrollTop;
         var studiesTable = document.getElementById(studyTableId);
+        //var remainingTrs = $('#' + studyTableId).find('tr').not('.project_' + projectId)
+
+        var scrollPos = document.getElementById(studyTableId).scrollTop;
+        var remainingTrs = $('#' + studyTableId).find('tr').not('.project_' + projectId);
+        var newScrollInd = Array.from(remainingTrs.map(function(){return ((this.offsetTop<=scrollPos)? 0:1 )  })).indexOf(1);
+        if (newScrollInd>0) {
+            var scrollB = remainingTrs.get(newScrollInd-1).offsetTop;
+            var scrollF = remainingTrs.get(newScrollInd).offsetTop;
+
+            if ( (scrollPos-scrollB)<(scrollF-scrollPos) ){
+                var newScrollInd=newScrollInd+1;
+            }
+        }
+
         $('#' + studyTableId).find('.project_' + projectId).remove();
             if (window.selItems.selStudies.hasOwnProperty(projectId)){
                 delete window.selItems.selStudies[projectId];
              }
+        resetTableControls($('#'+studyTableId), true, newScrollInd);
 
             removeSeries(pclass, seriesTableId);
     }
@@ -334,57 +350,6 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
         $('#' + seriesTableId).find('.' + selClass).remove();
     }
 
-    var setTableView = function(panelTableElem){
-        var curPage = $($panelTableElem).find('.dataTables_goto_page').data('curpage');
-        var recordsPP = $($panelTableElem).find('.files-per-page-select').val();
-
-    }
-
-    var resetTableControls =function(tableId){
-        var numRecords = $('#'+tableId).find('tr').length;
-        var recordsPP = $('#'+tableId).parent().parent().find('.files-per-page-select').val();
-        $('#'+tableId).parent().parent().find('.total-file-count')[0].innerHTML = numRecords.toString();
-        var numPages = parseInt(numRecords/recordsPP)+1;
-
-        pageElem = $('#'+tableId).parent().parent().find('.paginate_button_space')[0];
-        var html = '<a class="dataTables_button paginate_button numeric_button current">1</a>';
-        for (var i=2;i<Math.min(4,numPages);i++){
-            html+='<a class="dataTables_button paginate_button numeric_button current">'+i.toString()+'</a>';
-        }
-        if (numPages ==4){
-            html+='<a class="dataTables_button paginate_button numeric_button current">4</a>';
-        }
-        else if (numPages >4){
-            html+='<span class="ellipsis">...</span>';
-            html+='<a class="dataTables_button paginate_button numeric_button current">'+numPages.toString()+'</a>';
-
-        }
-        pageElem.innerHTML = html;
-
-    }
-
-    var changeAjax = function(isIncrement){
-        if (isIncrement){
-            $('#number_ajax')[0].value = String(parseInt($('#number_ajax')[0].value)+1);
-        }
-        else{
-            $('#number_ajax')[0].value = String(parseInt($('#number_ajax')[0].value)-1);
-        }
-        //alert($('#number_ajax')[0].value)
-
-        if ( $('#number_ajax')[0].value === '0'){
-            $('.spinner').hide();
-        }
-        else{
-            $('.spinner').show();
-        }
-
-    }
-
-    var pretty_print_id = function(id){
-        var newId = id.slice(0,12)+'...'+id.slice(id.length-12,id.length);
-        return newId;
-    }
 
     window.addStudyOrSeries = function(projectIdArr, studyIdArr, tableId, refresh) {
         changeAjax(true);
@@ -478,7 +443,11 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
 
                     //document.getElementById(tableId).innerHTML += newHtml;
                     $('#'+tableId).append(newHtml);
+
                 }
+                //newScrollInd = findScrollInd(tableId);
+                resetTableControls($('#'+tableId),false,0);
+
                 /* nend = new Date().getTime();
                 diff = nend - nstart;
                 alert(diff); */
@@ -525,6 +494,178 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
 
     }
 
+   var findScrollInd = function(tableId){
+        var scrollPos = document.getElementById(tableId).scrollTop;
+        var remainingTrs = $('#' + studyTableId).find('tr').not('.project_' + projectId);
+        var newScrollInd = remainingTrs.map(function(){return ((this.offsetTop<=scrollPos)? 0:1 )  }).indexOf(1);
+        if (newScrollInd>0) {
+            var scrollB = remainingTrs.get(newScrollInd-1).offsetTop;
+            scrollF = remainingTrs.get(newScrollInd).offsetTop;
+
+            if ( (scrollPos-scrollB)<(scrollF-scrollPos) ){
+                var newScrollInd=newScrollInd+1;
+
+            }
+        }
+        return newScrollInd;
+   }
+
+
+     $('.table').find('tbody').on('scroll',function () {
+         var rowPos = $(this).find('tr').map(function(){ return this.offsetTop}  );
+         var curScrollPos = $(this)[0].scrollTop;
+         var scrollPosInd = Array.from(rowPos.map(function(){return ((this<curScrollPos)? 0:1 )  })).indexOf(1);
+         var recordsPP = parseInt($(this).parent().parent().find('.files-per-page-select').val());
+         var numRecords = $(this).find('tr').length;
+          var numPages = parseInt(numRecords/recordsPP)+1;
+
+         var lastInd = scrollPosInd + recordsPP - 1;
+         if (scrollPosInd === -1){
+            scrollPosInd = (numPages-1)*recordsPP;
+            lastInd = numRecords-1;
+         }
+         else if ((scrollPosInd + recordsPP) > numRecords) {
+                lastInd = numRecords - 1;
+         }
+         var currentPage = parseInt(scrollPosInd/recordsPP)+1;
+         //var tblbody = $(this).find('tbody')[0];
+         var totalHeight = $(this)[0].rows[lastInd].offsetTop + $(this)[0].rows[lastInd].offsetHeight - $(this)[0].rows[scrollPosInd].offsetTop;
+         $(this).css('max-height', totalHeight.toString() + 'px');
+         $(this).parent().parent().find('.showing')[0].innerHTML = (scrollPosInd+1).toString()+" to "+(lastInd+1).toString();
+
+         resetPagination($(this).parent().parent(), currentPage, numPages);
+         //alert('mv');
+     });
+
+    var setTableView = function(panelTableElem){
+        var curPage = $(panelTableElem).find('.dataTables_goto_page').data('curpage');
+        var recordsPP = $(panelTableElem).find('.files-per-page-select').val();
+        var curRecords =$(panelTableElem).find('tbody').find('tr');
+
+
+    }
+
+    window.resetTableControls =function(tableElem, mvScroll, curIndex){
+
+        var rowPos = tableElem.find('tr').map(function(){ return this.offsetTop}  );
+        tableElem.data('rowpos',JSON.stringify(rowPos));
+        var numRecords = tableElem.find('tr').length;
+        var recordsPP = parseInt(tableElem.parent().parent().find('.files-per-page-select').val());
+        tableElem.parent().parent().find('.total-file-count')[0].innerHTML = numRecords.toString();
+        var numPages = parseInt(numRecords/recordsPP)+1;
+
+
+        if (!mvScroll)  {
+            var curScrollPos = tableElem[0].scrollTop;
+            curIndex = Array.from(rowPos.map(function(){return ((this<=curScrollPos)? 0:1 )  })).indexOf(1);
+        }
+        var lastInd = curIndex + recordsPP - 1;
+        var currentPage = parseInt(curIndex/recordsPP)+1;
+        atEnd = false;
+        if (curIndex === -1){
+            curIndex = (numPages-1)*recordsPP;
+            lastInd = numRecords-1;
+        }
+        else if ((curIndex + recordsPP) > numRecords) {
+                lastInd = numRecords - 1;
+                atEnd = true;
+        }
+
+        if ((curIndex>-1) && (lastInd>-1)) {
+            var totalHeight = tableElem[0].rows[lastInd].offsetTop + tableElem[0].rows[lastInd].offsetHeight - tableElem[0].rows[curIndex].offsetTop;
+            tableElem.css('max-height', totalHeight.toString() + 'px');
+
+            if (mvScroll){
+            tableElem[0].scrollTop = rowPos[curIndex]-tableElem[0].offsetTop;
+            }
+
+        }
+
+
+        tableElemGm = tableElem.parent().parent();
+        tableElemGm.find('.showing')[0].innerHTML = (curIndex+1).toString()+" to "+(lastInd+1).toString();
+        tableElemGm.find('.goto-page-number')[0].max = numPages;
+        if (atEnd){
+            currentPage=numPages;
+        }
+
+
+
+        resetPagination(tableElemGm, currentPage, numPages, recordsPP, numRecords);
+
+    }
+
+    var resetPagination = function(tableElem, currentPage, numPages, recordsPP, numRecords){
+        if (numPages===0){
+            $(tableElem).parent().parent().find('.dataTables_info').hide();
+            $(tableElem).parent().parent().find('.dataTables_length').hide();
+        }
+        else{
+            $(tableElem).parent().parent().find('.dataTables_info').show();
+            $(tableElem).parent().parent().find('.dataTables_length').show();
+        }
+
+        if (numPages<=1){
+            $(tableElem).parent().parent().find('.dataTables_goto_page').hide();
+        }
+        else{
+            $(tableElem).parent().parent().find('.dataTables_goto_page').show();
+        }
+
+
+        $(tableElem).parent().parent().find('.dataTables_goto_page').data('curpage',currentPage);
+        pageElem = $(tableElem).find('.paginate_button_space')[0];
+        var html='';
+        if (currentPage>3){
+           html += '<a class="dataTables_button paginate_button numeric_button">1</a>';
+        }
+        if (currentPage>4){
+            html+='<span class="ellipsis">...</span>';
+        }
+
+        for (var i=Math.max(1,(currentPage-2));i<currentPage;i++){
+            html+='<a class="dataTables_button paginate_button numeric_button">'+i.toString()+'</a>';
+        }
+        html+='<a class="dataTables_button paginate_button numeric_button current">'+currentPage.toString()+'</a>';
+
+        for (var i=currentPage+1;i<Math.min((numPages+1), currentPage+3);i++){
+            html+='<a class="dataTables_button paginate_button numeric_button">'+i.toString()+'</a>';
+        }
+
+
+        if (numPages>currentPage+3 ){
+            html+='<span class="ellipsis">...</span>';
+        }
+        if (numPages > currentPage+2){
+            html+='<a class="dataTables_button paginate_button numeric_button">'+numPages.toString()+'</a>';
+
+        }
+        pageElem.innerHTML = html;
+
+    }
+
+    var changeAjax = function(isIncrement){
+        if (isIncrement){
+            $('#number_ajax')[0].value = String(parseInt($('#number_ajax')[0].value)+1);
+        }
+        else{
+            $('#number_ajax')[0].value = String(parseInt($('#number_ajax')[0].value)-1);
+        }
+        //alert($('#number_ajax')[0].value)
+
+        if ( $('#number_ajax')[0].value === '0'){
+            $('.spinner').hide();
+        }
+        else{
+            $('.spinner').show();
+        }
+
+    }
+
+    var pretty_print_id = function(id){
+        var newId = id.slice(0,12)+'...'+id.slice(id.length-12,id.length);
+        return newId;
+    }
 
 
 
@@ -1063,10 +1204,13 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             $('#age_at_diagnosis').find('.less-checks').addClass('hide');
             mkSlider('age_at_diagnosis',0,120,1,true);
 
-            var numCol = $('#projects_table').children('tr').length
+            /* var numCol = $('#projects_table').children('tr').length
             $('#projects_panel').find('.total-file-count')[0].innerHTML = numCol.toString();
-             $('#projects_panel').find('.goto-page-number')[0].max=3;
+             $('#projects_panel').find('.goto-page-number')[0].max=3; */
 
+             window.resetTableControls ($('#projects_table'), false, 0);
+             window.resetTableControls ($('#studies_table'), false, 0);
+            window.resetTableControls ($('#series_table'), false, 0);
 
             //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
 
