@@ -225,7 +225,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             }
         }
 
-
+        window.resetTableControls($('#projects_table'),true,0);
     }
 
     window.createProjectsTable = function(tableId) {
@@ -574,9 +574,10 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
 
     window.resetTableControls =function(tableElem, mvScroll, curIndex){
 
-        var rowPos = tableElem.find('tr').map(function(){ return this.offsetTop}  );
+        var displayedRows = tableElem.find('tr').not('.hide');
+        var rowPos = displayedRows.map(function(){ return this.offsetTop}  );
         tableElem.data('rowpos',JSON.stringify(rowPos));
-        var numRecords = tableElem.find('tr').length;
+        var numRecords = displayedRows.length;
         var recordsPP = parseInt(tableElem.parent().parent().find('.files-per-page-select').val());
         tableElem.parent().parent().find('.total-file-count')[0].innerHTML = numRecords.toString();
         var numPages = parseInt(numRecords/recordsPP)+1;
@@ -599,7 +600,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
         }
 
         if ((curIndex>-1) && (lastInd>-1)) {
-            var totalHeight = tableElem[0].rows[lastInd].offsetTop + tableElem[0].rows[lastInd].offsetHeight - tableElem[0].rows[curIndex].offsetTop;
+            var totalHeight = displayedRows[lastInd].offsetTop + displayedRows[lastInd].offsetHeight - displayedRows[curIndex].offsetTop;
             tableElem.css('max-height', totalHeight.toString() + 'px');
 
             if (mvScroll){
@@ -746,8 +747,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
         //document.getElementById('total').innerHTML = window.collection[project_scope];
         mkFiltText();
         updateFacetsData(true);
-
-
+        //window.resetTableControls($('#projects_table'),true,0);
 
     }
 
