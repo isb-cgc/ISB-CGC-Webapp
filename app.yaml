@@ -20,6 +20,11 @@ service: default
 api_version: 1
 threadsafe: true
 
+resources:
+  cpu: 2
+  memory_gb: 8
+  disk_size_gb: 10
+
 builtins:
 - appstats: on
 - deferred: on
