@@ -949,7 +949,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
 
 
 
-     var plotCategoricalData=function(plotId, lbl, plotData) {
+     /* var plotCategoricalData=function(plotId, lbl, plotData) {
 
         pieLayout.title = lbl.toUpperCase().replace(/_/g, " ");
         delete pieLayout.annotations;
@@ -1015,7 +1015,126 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             }
         });
 
+    }; */
+
+     var plotCategoricalData=function(plotId, lbl, plotData,isPie) {
+
+        var layout = new Object();
+        if (isPie){
+            layout = pieLayout;
+        }
+        else{
+            layout = plotLayout;
+        }
+        layout.title = lbl.toUpperCase().replace(/_/g, " ");
+        delete layout.annotations;
+        var type='';
+        if (isPie){
+           type = 'pie';
+        }
+        else{
+            type = 'chart';
+        }
+
+        xdata= new Array();
+        ydata = new Array();
+        var plotCats=0;
+       for (var i=0;i<plotData.dataCnt.length;i++){
+            if (plotData.dataCnt[i] >0){
+                ydata.push(plotData.dataCnt[i]);
+                xdata.push(plotData.dataLabel[i]);
+                plotCats++;
+            }
+        }
+
+       var data = [{
+        values: ydata,
+        labels: xdata,
+        //marker: {colors:['rgb(256,256,256)']},
+        type: type,
+        textposition: 'inside',
+        textinfo: 'none',
+        sort:false
+       }];
+
+
+
+      if (plotCats === 0){
+          data[0].values = [0];
+          data[0].labels= [''];
+          data[0].marker = {colors:['rgb(256,256,256)']};
+          layout.annotations = [{text: 'No Data', showarrow:false, font:{size:18}}];
+      }
+
+      Plotly.newPlot(plotId, data, layout,{displayModeBar: false});
+
+        document.getElementById(plotId).on('plotly_click', function (data, plotId) {
+            var chartid = new Object();
+            if (isPie){
+               chartid = data.event.path[7].id;
+            }
+            else{
+                chartid = data.event.path[6].id;
+            }
+
+            var filterId = chartid.replace("_chart","");
+            if (filterId === 'age_at_diagnosis'){
+                //var sel = data.points[0].x;
+                var sel = new Object();
+                if (isPie) {
+                    sel = data.points[0].label;
+                }
+                else {
+                    sel = data.points[0].x;
+                }
+                var selArr = sel.split(' To ');
+                var strt = parseInt((selArr[0] === '*') ? '0': selArr[0]);
+                var end = parseInt((selArr[1] === '*') ?'120': selArr[1]);
+                setSlider(filterId,false,strt,end,true);
+
+            }
+            else {
+                //alert(String(data.event.path[6].id));
+                var index;
+                var label;
+                if (isPie) {
+                    label = data.points[0].label;
+                }
+                else{
+                    index = data.points[0].pointIndex;
+                }
+                var listId = filterId + '_list';
+                var inputList = $('#'+listId).find(':input');
+                for (var i=0;i<inputList.length;i++) {
+                    if (isPie) {
+                        var curLabel = $(inputList[i]).parent().children()[1].innerHTML;
+                        if (label === curLabel) {
+                            inputList[i].checked = true;
+                        } else {
+                            inputList[i].checked = false;
+                        }
+                    }
+                    else{
+                        if (i === index){
+                            inputList[i].checked = true;
+                        }
+                        else {
+                            inputList[i].checked = false;
+                        }
+                    }
+                }
+                handleFilterSelectionUpdate(filterId);
+            }
+        });
+
     };
+
+
+
+
+
+
+
 
      var findFilterCats = function(id){
         filterCats = new Array();
@@ -1060,7 +1179,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
              plotId = filterCat+"_chart";
              lbl = $('#'+filterCat+'_heading').children()[0].innerText;
 
-             plotCategoricalData(plotId, lbl, filterData);
+             plotCategoricalData(plotId, lbl, filterData, false);
 
         }
 
