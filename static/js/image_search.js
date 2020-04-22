@@ -267,6 +267,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
     }
 
     window.toggleProj = function(projRow, projectId) {
+
         var num_cohort = parseInt($(projRow).find(".projects_table_num_cohort")[0].innerHTML)
         if (num_cohort === 0) {
             alert('no patients for this project in the selected cohort')
@@ -284,6 +285,13 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             removeStudiesAndSeries(projectId, "studies_table","series_table")
 
         } else {
+             if (!(window.event.shiftKey)) {
+                $(projRow).parent().find('tr').removeClass("selected_grey");
+                window.selItems.selProjects = [];
+                window.selItems.selStudies = {};
+                window.clearAllStudiesAndSeries("studies_table","series_table");
+
+            }
             $(projRow).addClass("selected_grey");
             window.selItems.selProjects.push(projectId);
             addStudyOrSeries([projectId], [], "studies_table", false);
@@ -309,6 +317,13 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
 
         } else {
 
+            if (!(window.event.shiftKey)) {
+                $(studyRow).parent().find('tr').removeClass("selected_grey");
+                window.selItems.selStudies = {};
+                window.clearAllSeries("series_table");
+
+            }
+
             if (!(window.selItems.selStudies.hasOwnProperty(projectId))){
                    window.selItems.selStudies[projectId] = new Array();
              }
@@ -317,6 +332,18 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             $(studyRow).addClass("selected_grey");
             addStudyOrSeries([projectId], [studyId], "series_table", false);
         }
+    }
+
+    window.clearAllSeries = function(seriesTableId){
+        $('#'+seriesTableId).find('tr').remove();
+        resetTableControls($('#'+seriesTableId), true, 0);
+
+    }
+
+    window.clearAllStudiesAndSeries = function(studyTableId,seriesTableId){
+        $('#'+studyTableId).find('tr').remove();
+        resetTableControls($('#'+studyTableId), true, 0);
+        window.clearAllSeries(seriesTableId);
     }
 
     window.removeStudiesAndSeries =  function(projectId, studyTableId, seriesTableId) {
