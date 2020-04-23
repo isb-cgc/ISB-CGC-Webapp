@@ -1018,45 +1018,47 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
     }; */
 
      var plotCategoricalData=function(plotId, lbl, plotData,isPie) {
-
         var layout = new Object();
-        if (isPie){
-            layout = pieLayout;
-        }
-        else{
-            layout = plotLayout;
-        }
-        layout.title = lbl.toUpperCase().replace(/_/g, " ");
-        delete layout.annotations;
-        var type='';
-        if (isPie){
-           type = 'pie';
-        }
-        else{
-            type = 'chart';
-        }
-
         xdata= new Array();
         ydata = new Array();
         var plotCats=0;
-       for (var i=0;i<plotData.dataCnt.length;i++){
+
+        for (var i=0;i<plotData.dataCnt.length;i++){
             if (plotData.dataCnt[i] >0){
                 ydata.push(plotData.dataCnt[i]);
                 xdata.push(plotData.dataLabel[i]);
                 plotCats++;
             }
         }
+       var data = new Object();
 
-       var data = [{
-        values: ydata,
-        labels: xdata,
-        //marker: {colors:['rgb(256,256,256)']},
-        type: type,
-        textposition: 'inside',
-        textinfo: 'none',
-        sort:false
-       }];
+        if(isPie || (plotCats ===0)) {
+           layout = pieLayout;
+           data = [{
+               values: ydata,
+               labels: xdata,
+               //marker: {colors:['rgb(256,256,256)']},
+               type: 'pie',
+               textposition: 'inside',
+               textinfo: 'none',
+               sort: false
+           }];
+       }
 
+      else{
+          layout=plotLayout;
+          data =[
+          {
+           x:xdata,
+           y: ydata,
+          type: 'bar'
+         }
+
+       ];
+     }
+
+      layout.title = lbl.toUpperCase().replace(/_/g, " ");
+      delete layout.annotations;
 
 
       if (plotCats === 0){
@@ -1066,7 +1068,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
           layout.annotations = [{text: 'No Data', showarrow:false, font:{size:18}}];
       }
 
-      Plotly.newPlot(plotId, data, layout,{displayModeBar: false});
+      Plotly.newPlot(plotId, data, layout, {displayModeBar: false});
 
         document.getElementById(plotId).on('plotly_click', function (data, plotId) {
             var chartid = new Object();
