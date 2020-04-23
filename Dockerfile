@@ -73,7 +73,8 @@ RUN pip3 install gunicorn==19.6.0
 
 ENV PYTHONPATH=/app:/app/lib:/app/ISB-CGC-Common:${PYTHONPATH}
 
-# Until we figure out a way to do it in CircleCI without whitelisting IPs this has to be done by a dev from their local install
+# Until we figure out a way to do it in CircleCI without whitelisting IPs this has to be done by a dev from
+# ISB
 # RUN python /app/manage.py migrate --noinput
 
-CMD gunicorn -c gunicorn.conf.py -b :$PORT isb_cgc.wsgi -w 5 -t 130
+CMD gunicorn -c gunicorn.conf.py -b :$PORT isb_cgc.wsgi -w 5 -t 90

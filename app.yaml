@@ -18,12 +18,11 @@ runtime: custom
 env: flex
 service: default
 api_version: 1
-threadsafe: true
 
 resources:
   cpu: 2
   memory_gb: 8
-  disk_size_gb: 10
+  disk_size_gb: 20
 
 builtins:
 - appstats: on
