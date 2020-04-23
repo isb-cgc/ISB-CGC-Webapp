@@ -1385,5 +1385,18 @@ require([
 
     filter_panel_load(cohort_id);
 
+    $('#more-dataset-toggle').on('click', function()
+    {
+        $(this).parent().toggleClass('open');
+    });
+
+    $('body').on('click', function (e) {
+        if (!$('#more-dataset-toggle').is(e.target)
+            && $('.more-dataset-dropdown').has(e.target).length === 0)
+        {
+            $('.more-dataset-dropdown').removeClass('open');
+        }
+    });
+
 });
 
