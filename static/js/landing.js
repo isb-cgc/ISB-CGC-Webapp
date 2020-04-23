@@ -48,7 +48,6 @@ require([
     ,'assetsresponsive'
 ], function($) {
     A11y.Core();
-    console.debug("[STATUS] Loading landing.js at "+(new Date()));
     //pause video when scrolling to other videos
     $(".carousel-control, .carousel-indicators li:not(.active)").click(function () {
         $('.tutorial-vid').each(function() {
