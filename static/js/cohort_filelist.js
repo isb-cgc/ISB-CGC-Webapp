@@ -218,7 +218,7 @@ require([
         update_displays(this_tab);
     });
 
-    function update_filters(checked) {
+   /* function update_filters(checked) {
         var type_tab = checked.parents('.data-tab.active')[0];
         var active_tab = $(type_tab).data('file-type');
         var build = $('#'+active_tab+'-files').find('.build :selected').val();
@@ -237,7 +237,7 @@ require([
         UPDATE_QUEUE.push(function(){
             update_displays(active_tab);
         });
-    }
+    } */
 
     function dequeueUpdate(){
         if(UPDATE_QUEUE.length > 0) {

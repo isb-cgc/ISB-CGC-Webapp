@@ -444,7 +444,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
                         var fetchUrlSeries = fetchUrl+'?SeriesInstanceUID='+seriesId;
                         var hrefSeriesTxt = '<a href="' + fetchUrlSeries + '" target="_blank">' + ppSeriesId + '</a><span class="tooltiptext_ex">' + seriesId + '</span>';
                         var seriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
-                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col2 tooltip_ex">' + seriesTxt + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td></tr>';
+                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefSeriesTxt + '</td><td>' + seriesNumber + '</td><td class="col2 tooltip_ex">' + hrefSeriesTxt + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td></tr>';
 
                     } else {
 
@@ -1017,7 +1017,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
 
     }; */
 
-     var plotCategoricalData=function(plotId, lbl, plotData,isPie) {
+     var plotCategoricalData=function(plotId, lbl, plotData,isPie,showLbl) {
         var layout = new Object();
         xdata= new Array();
         ydata = new Array();
@@ -1031,6 +1031,13 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             }
         }
        var data = new Object();
+        var textinfo=""
+        if (showLbl && (plotCats>0)){
+            textinfo ='label';
+        }
+        else{
+            textinfo ='none';
+        }
 
         if(isPie || (plotCats ===0)) {
            layout = pieLayout;
@@ -1040,13 +1047,21 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
                //marker: {colors:['rgb(256,256,256)']},
                type: 'pie',
                textposition: 'inside',
-               textinfo: 'none',
+               textinfo:textinfo,
+               //textinfo: textinfo,
                sort: false
            }];
        }
 
       else{
           layout=plotLayout;
+          if (showLbl) {
+              delete layout.xaxis;
+          }
+          else
+          {
+              layout.xaxis = {tickvals: []};
+          }
           data =[
           {
            x:xdata,
@@ -1172,17 +1187,28 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
         return {'dataLabel': dataLabel, 'dataCnt': dataCnt}
     }
 
+    window.updatePlots = function(selectElem){
+          createPlots('search_orig_set');
+          createPlots('search_related_set');
+    }
+
     var createPlots = function(id){
+
+         var isPie = true;
+         var ptIndx = document.getElementById("plot_type").selectedIndex;
+         if (ptIndx ===1){
+             isPie = false;
+         }
+         var showLbl = document.getElementById("plot_label").checked
+
+
         var filterCats = findFilterCats(id);
         for (var i=0;i<filterCats.length;i++){
              filterCat = filterCats[i];
              filterData = parseFilterForCounts(filterCat);
-
              plotId = filterCat+"_chart";
              lbl = $('#'+filterCat+'_heading').children()[0].innerText;
-
-             plotCategoricalData(plotId, lbl, filterData, false);
-
+             plotCategoricalData(plotId, lbl, filterData, isPie, showLbl);
         }
 
      }
