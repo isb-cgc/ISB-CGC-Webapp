@@ -1385,17 +1385,24 @@ require([
 
     filter_panel_load(cohort_id);
 
-    $('#more-dataset-toggle').on('click', function()
+    $('#more-program-toggle').on('click', function()
     {
         $(this).parent().toggleClass('open');
     });
 
     $('body').on('click', function (e) {
-        if (!$('#more-dataset-toggle').is(e.target)
-            && $('.more-dataset-dropdown').has(e.target).length === 0)
+        if (!$('#more-program-toggle').is(e.target)
+            && $('.more-program-dropdown').has(e.target).length === 0)
         {
-            $('.more-dataset-dropdown').removeClass('open');
+            $('.more-program-dropdown').removeClass('open');
         }
+    });
+
+    $('.program-tab').each(function()
+    {
+        var program_cnt = $(".program-tab").length;
+        var tab_width = 94 / program_cnt;
+        $(this).css('width', tab_width.toString() + "%");
     });
 
 });

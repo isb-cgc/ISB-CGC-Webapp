@@ -83,19 +83,19 @@
             <div class="panel panel-default">
                 <ul class="nav nav-tabs nav-tabs-data" role="tablist">
                     {% for program in programs %}
-                    <li role="presentation" class="{% if forloop.first %}active{% endif %} program-tab"><a href="#{{ program.id }}-data" class="program-tab-btn" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
+                    <li role="presentation" class="{% if forloop.first %}active{% endif %} program-tab"><a href="#{{ program.id }}-data" class="program-tab-btn" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }}</a></li>
                     {% endfor %}
 {#                    {% if user.is_authenticated %}#}
 {#                    <li role="presentation" class="program-tab"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>#}
 {#                    {%  else %}#}
 {#                    <li role="presentation" class="program-tab disabled"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0" disabled>User Data</a></li>#}
 {#                    {%  endif %}#}
-                    <li role = "presentation" class = "program-tab">
-                        <div class="more-dataset-dropdown">
-                            <a role="button class=dropdown-toggle navbar-item__text"  id="more-dataset-toggle" aria-label="Need Help Dropdown" aria-expanded="true">
-                                Need Help? <i class="fa fa-caret-down"></i>
+                    <li role = "presentation" class = "more-program-tab">
+                        <div class="more-program-dropdown">
+                            <a role="button class=dropdown-toggle navbar-item__text"  id="more-program-toggle" aria-expanded="true">
+                                More <i class="fa fa-caret-down"></i>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-left" aria-label="user-dropdown">
+                            <ul class="dropdown-menu dropdown-menu-left">
                                 <li><input type="checkbox">FM Data</li>
                                 <li><input type="checkbox">CPTAC Data</li>
                                 <li><input type="checkbox">FM Data</li>
