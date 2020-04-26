@@ -81,29 +81,33 @@
     <div class="row cgc-user-data-type-tabs">
         <div class="col-sm-12 col-md-12 col-lg-12">
             <div class="panel panel-default">
-                <ul class="nav nav-tabs nav-tabs-data" role="tablist">
-                    {% for program in programs %}
-                    <li role="presentation" class="{% if forloop.first %}active{% endif %} program-tab"><a href="#{{ program.id }}-data" class="program-tab-btn" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }}</a></li>
-                    {% endfor %}
+                <ul id="my-tabs" class="nav nav-tabs nav-tabs-data" role="tablist">
+{#                    {% for program in programs %}#}
+{#                    <li role="presentation" class="{% if forloop.first %}active{% endif %} program-tab"><a href="#{{ program.id }}-data" class="program-tab-btn" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }}</a></li>#}
+{#                    {% endfor %}#}
+                        <li role="presentation" class="active program-tab"><a href="#1-data" class="program-tab-btn" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="1">TARGET</a></li>
+                        <li role="presentation" class="program-tab"><a href="#2-data" class="program-tab-btn" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="2">TCGA</a></li>
+                        <li role="presentation" class="program-tab"><a href="#3-data" class="program-tab-btn" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="3">CCLE</a></li>
+
 {#                    {% if user.is_authenticated %}#}
 {#                    <li role="presentation" class="program-tab"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>#}
 {#                    {%  else %}#}
 {#                    <li role="presentation" class="program-tab disabled"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0" disabled>User Data</a></li>#}
 {#                    {%  endif %}#}
-                    <li role = "presentation" class = "more-program-tab">
+                    <li role = "presentation" id = "more-program-tab">
                         <div class="more-program-dropdown">
                             <a role="button class=dropdown-toggle navbar-item__text"  id="more-program-toggle" aria-expanded="true">
                                 More <i class="fa fa-caret-down"></i>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-left">
-                                <li><input type="checkbox">FM Data</li>
-                                <li><input type="checkbox">CPTAC Data</li>
-                                <li><input type="checkbox">FM Data</li>
-                                <li><input type="checkbox">CPTAC Data</li>
+                            {% for program in programs %}
+                                {% if program.id > 3 %}
+                                    <li><input class="dropdown-value" type="checkbox" program-id={{ program.id }} program-name={{ program.name }}>{{ program.name }}</li>
+                                {% endif %}
+                            {% endfor %}
                             </ul>
                         </div>
                     </ul>
-                </ul>
             </div>
         </div>
     </div>
