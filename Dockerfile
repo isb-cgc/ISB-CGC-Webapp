@@ -77,4 +77,4 @@ ENV PYTHONPATH=/app:/app/lib:/app/IDC-Common:${PYTHONPATH}
 # ISB
 # RUN python /app/manage.py migrate --noinput
 
-CMD gunicorn -c gunicorn.conf.py -b :$PORT idc.wsgi -w 3 -t 90
+CMD gunicorn -c gunicorn.conf.py -b :$PORT idc.wsgi -w 5 -t 70
