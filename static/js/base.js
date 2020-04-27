@@ -174,13 +174,18 @@ require([
     }
 
     $('#gov_warning button').on('click', function(){
+        $('#gov_warning button').prop("disabled", true);
+        $('#gov_warning').modal('hide');
         $.ajax({
             async: true,
             type: "GET",
             url: "/warning/",
             contentType: "charset=utf-8",
-            success: function (response) {
-                 $('#gov_warning').modal('hide');
+            fail: function () {
+                console.warn("Unable to record status for Government Notice! You may see that popup again.");
+            },
+            always: function() {
+                $('#gov_warning button').prop("disabled", false);
             }
         });
     });
