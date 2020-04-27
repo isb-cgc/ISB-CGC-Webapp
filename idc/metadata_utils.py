@@ -99,7 +99,7 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
         if not counts_only:
             solr_result = query_solr_and_format_result({
                 'collection': tcia_solr.name,
-                'fields': fields,
+                'fields': tcia_fields,
                 'fqs': query_set,
                 'query_string': tcga_query_filter['full_query_str'],
                 'collapse_on': collapse_on,
