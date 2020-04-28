@@ -373,11 +373,7 @@ def explore_data_page(request):
         collapse_on = req.get('collapse_on', 'PatientID')
         is_json = (req.get('is_json', "False").lower() == "true")
 
-        if not len(versions):
-            versions = DataVersion.objects.filter(active=True)
-        else:
-            versions = DataVersion.objects.filter(name__in=versions)
-
+        versions = DataVersion.objects.filter(name__in=versions) if len(versions) else DataVersion.objects.filter(active=True)
         sources = DataSource.objects.select_related('version').filter(version__in=versions, source_type=source)
 
         # For now we're only allowing TCGA
@@ -388,6 +384,10 @@ def explore_data_page(request):
 
         for source in sources:
             set_type = 'origin_set' if source.version.data_type == DataVersion.IMAGE_DATA else 'related_set'
+
+            if set_type == 'origin_set' and not len(fields):
+                fields = source.get_collection_attr(for_faceting=False).filter(default_ui_display=True).exclude(
+                    name='Species').values_list('name', flat=True)
 
             if set_type == 'origin_set' or with_related:
                 if set_type not in attr_by_source:
@@ -402,46 +402,45 @@ def explore_data_page(request):
 
                 attr_by_source[set_type]['attributes'].update({attr.name: {'source': source.id, 'obj': attr, 'vals': None, 'id': attr.id} for attr in attrs})
 
-        if (len(fields)==0):
-            fields = list(attrs.values_list('name', flat=True))
         faceted_counts = get_collex_metadata(
-            filters, fields, record_limit=50000, counts_only=counts_only, with_ancillary = with_related,
+            filters, fields, record_limit=10, counts_only=counts_only, with_ancillary = with_related,
             collapse_on = collapse_on, order_docs = order_docs, sources = sources, versions = versions
         )
 
         if with_related:
             attr_display_vals = Attribute_Display_Values.objects.filter(
                 attribute__id__in=attr_sets['related_set']).to_dict()
-            for source in faceted_counts['clinical']:
-                for attr in faceted_counts['clinical'][source]['facets']:
+            for source in faceted_counts['facets']['clinical']:
+                for attr in faceted_counts['facets']['clinical'][source]['facets']:
                     this_attr = attr_by_source['related_set']['attributes'][attr]['obj']
                     values = []
-                    for val in faceted_counts['clinical'][source]['facets'][attr]:
+                    for val in faceted_counts['facets']['clinical'][source]['facets'][attr]:
                         displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
                         values.append({
                             'value': val,
                             'display_value': displ_val,
-                            'count': faceted_counts['clinical'][source]['facets'][attr][val] if val in faceted_counts['clinical'][source]['facets'][attr] else 0
+                            'count': faceted_counts['facets']['clinical'][source]['facets'][attr][val] if val in faceted_counts['facets']['clinical'][source]['facets'][attr] else 0
                         })
                     if attr == 'bmi':
-                        sortDic = {'underweight':0, 'normal weight': 1, 'overweight': 2, 'obese': 3}
+                        sortDic = {'underweight':0, 'normal weight': 1, 'overweight': 2, 'obese': 3, 'none': 4}
                         attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: sortDic[x['value']])
                     else:
                         attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
         attr_display_vals = Attribute_Display_Values.objects.filter(attribute__id__in=attr_sets['origin_set']).to_dict()
-        for attr in faceted_counts['facets']['cross_collex']:
-            this_attr = attr_by_source['origin_set']['attributes'][attr]['obj']
-            values = []
-            for val in faceted_counts['facets']['cross_collex'][attr]:
-                displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
-                values.append({
-                    'value': val,
-                    'display_value': displ_val,
-                    'count': faceted_counts['facets']['cross_collex'][attr][val] if val in faceted_counts['facets']['cross_collex'][attr] else 0
+        for source in faceted_counts['facets']['cross_collex']:
+            for attr in faceted_counts['facets']['cross_collex'][source]['facets']:
+                this_attr = attr_by_source['origin_set']['attributes'][attr]['obj']
+                values = []
+                for val in faceted_counts['facets']['cross_collex'][source]['facets'][attr]:
+                    displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
+                    values.append({
+                        'value': val,
+                        'display_value': displ_val,
+                        'count': faceted_counts['facets']['cross_collex'][source]['facets'][attr][val] if val in faceted_counts['facets']['cross_collex'][source]['facets'][attr] else 0
 
                })
-            attr_by_source['origin_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
+                attr_by_source['origin_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
         attr_filter = {
             'origin_set': ['Modality', 'BodyPartExamined','collection_id']

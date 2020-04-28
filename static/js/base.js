@@ -185,7 +185,7 @@ require([
                 console.warn("Unable to record status for Government Notice! You may see that popup again.");
             },
             always: function() {
-                $('#gov_warning button').prop("disable", false);
+                $('#gov_warning button').prop("disabled", false);
             }
         });
     });
