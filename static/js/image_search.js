@@ -225,7 +225,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             }
         }
 
-
+        window.resetTableControls($('#projects_table'),true,0);
     }
 
     window.createProjectsTable = function(tableId) {
@@ -267,6 +267,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
     }
 
     window.toggleProj = function(projRow, projectId) {
+
         var num_cohort = parseInt($(projRow).find(".projects_table_num_cohort")[0].innerHTML)
         if (num_cohort === 0) {
             alert('no patients for this project in the selected cohort')
@@ -284,6 +285,13 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             removeStudiesAndSeries(projectId, "studies_table","series_table")
 
         } else {
+             if (!(window.event.shiftKey)) {
+                $(projRow).parent().find('tr').removeClass("selected_grey");
+                window.selItems.selProjects = [];
+                window.selItems.selStudies = {};
+                window.clearAllStudiesAndSeries("studies_table","series_table");
+
+            }
             $(projRow).addClass("selected_grey");
             window.selItems.selProjects.push(projectId);
             addStudyOrSeries([projectId], [], "studies_table", false);
@@ -309,6 +317,13 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
 
         } else {
 
+            if (!(window.event.shiftKey)) {
+                $(studyRow).parent().find('tr').removeClass("selected_grey");
+                window.selItems.selStudies = {};
+                window.clearAllSeries("series_table");
+
+            }
+
             if (!(window.selItems.selStudies.hasOwnProperty(projectId))){
                    window.selItems.selStudies[projectId] = new Array();
              }
@@ -319,43 +334,49 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
         }
     }
 
+    window.clearAllSeries = function(seriesTableId){
+        $('#'+seriesTableId).find('tr').remove();
+        resetTableControls($('#'+seriesTableId), true, 0);
+
+    }
+
+    window.clearAllStudiesAndSeries = function(studyTableId,seriesTableId){
+        $('#'+studyTableId).find('tr').remove();
+        resetTableControls($('#'+studyTableId), true, 0);
+        window.clearAllSeries(seriesTableId);
+    }
+
     window.removeStudiesAndSeries =  function(projectId, studyTableId, seriesTableId) {
         var pclass = "project_" + projectId;
+        var scrollPos = document.getElementById(studyTableId).scrollTop;
         var studiesTable = document.getElementById(studyTableId);
+        //var remainingTrs = $('#' + studyTableId).find('tr').not('.project_' + projectId)
+
+        var scrollPos = document.getElementById(studyTableId).scrollTop;
+        var remainingTrs = $('#' + studyTableId).find('tr').not('.project_' + projectId);
+        var newScrollInd = Array.from(remainingTrs.map(function(){return ((this.offsetTop<=scrollPos)? 0:1 )  })).indexOf(1);
+        if (newScrollInd>0) {
+            var scrollB = remainingTrs.get(newScrollInd-1).offsetTop;
+            var scrollF = remainingTrs.get(newScrollInd).offsetTop;
+
+            if ( (scrollPos-scrollB)<(scrollF-scrollPos) ){
+                var newScrollInd=newScrollInd+1;
+            }
+        }
+
         $('#' + studyTableId).find('.project_' + projectId).remove();
             if (window.selItems.selStudies.hasOwnProperty(projectId)){
                 delete window.selItems.selStudies[projectId];
              }
+        resetTableControls($('#'+studyTableId), true, newScrollInd);
 
-        removeSeries(pclass, seriesTableId);
+            removeSeries(pclass, seriesTableId);
     }
 
     window.removeSeries = function(selClass, seriesTableId) {
         $('#' + seriesTableId).find('.' + selClass).remove();
     }
 
-    var changeAjax = function(isIncrement){
-        if (isIncrement){
-            $('#number_ajax')[0].value = String(parseInt($('#number_ajax')[0].value)+1);
-        }
-        else{
-            $('#number_ajax')[0].value = String(parseInt($('#number_ajax')[0].value)-1);
-        }
-        //alert($('#number_ajax')[0].value)
-
-        if ( $('#number_ajax')[0].value === '0'){
-            $('.spinner').hide();
-        }
-        else{
-            $('.spinner').show();
-        }
-
-    }
-
-    var pretty_print_id = function(id){
-        var newId = id.slice(0,12)+'...'+id.slice(id.length-12,id.length);
-        return newId;
-    }
 
     window.addStudyOrSeries = function(projectIdArr, studyIdArr, tableId, refresh) {
         changeAjax(true);
@@ -423,7 +444,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
                         var fetchUrlSeries = fetchUrl+'?SeriesInstanceUID='+seriesId;
                         var hrefSeriesTxt = '<a href="' + fetchUrlSeries + '" target="_blank">' + ppSeriesId + '</a><span class="tooltiptext_ex">' + seriesId + '</span>';
                         var seriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
-                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col2 tooltip_ex">' + seriesTxt + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td></tr>';
+                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefSeriesTxt + '</td><td>' + seriesNumber + '</td><td class="col2 tooltip_ex">' + hrefSeriesTxt + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td></tr>';
 
                     } else {
 
@@ -449,7 +470,11 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
 
                     //document.getElementById(tableId).innerHTML += newHtml;
                     $('#'+tableId).append(newHtml);
+
                 }
+                //newScrollInd = findScrollInd(tableId);
+                resetTableControls($('#'+tableId),false,0);
+
                 /* nend = new Date().getTime();
                 diff = nend - nstart;
                 alert(diff); */
@@ -496,6 +521,179 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
 
     }
 
+   var findScrollInd = function(tableId){
+        var scrollPos = document.getElementById(tableId).scrollTop;
+        var remainingTrs = $('#' + studyTableId).find('tr').not('.project_' + projectId);
+        var newScrollInd = remainingTrs.map(function(){return ((this.offsetTop<=scrollPos)? 0:1 )  }).indexOf(1);
+        if (newScrollInd>0) {
+            var scrollB = remainingTrs.get(newScrollInd-1).offsetTop;
+            scrollF = remainingTrs.get(newScrollInd).offsetTop;
+
+            if ( (scrollPos-scrollB)<(scrollF-scrollPos) ){
+                var newScrollInd=newScrollInd+1;
+
+            }
+        }
+        return newScrollInd;
+   }
+
+
+     $('.table').find('tbody').on('scroll',function () {
+         var rowPos = $(this).find('tr').map(function(){ return this.offsetTop}  );
+         var curScrollPos = $(this)[0].scrollTop;
+         var scrollPosInd = Array.from(rowPos.map(function(){return ((this<curScrollPos)? 0:1 )  })).indexOf(1);
+         var recordsPP = parseInt($(this).parent().parent().find('.files-per-page-select').val());
+         var numRecords = $(this).find('tr').length;
+          var numPages = parseInt(numRecords/recordsPP)+1;
+
+         var lastInd = scrollPosInd + recordsPP - 1;
+         if (scrollPosInd === -1){
+            scrollPosInd = (numPages-1)*recordsPP;
+            lastInd = numRecords-1;
+         }
+         else if ((scrollPosInd + recordsPP) > numRecords) {
+                lastInd = numRecords - 1;
+         }
+         var currentPage = parseInt(scrollPosInd/recordsPP)+1;
+         //var tblbody = $(this).find('tbody')[0];
+         var totalHeight = $(this)[0].rows[lastInd].offsetTop + $(this)[0].rows[lastInd].offsetHeight - $(this)[0].rows[scrollPosInd].offsetTop;
+         $(this).css('max-height', totalHeight.toString() + 'px');
+         $(this).parent().parent().find('.showing')[0].innerHTML = (scrollPosInd+1).toString()+" to "+(lastInd+1).toString();
+
+         resetPagination($(this).parent().parent(), currentPage, numPages);
+         //alert('mv');
+     });
+
+    var setTableView = function(panelTableElem){
+        var curPage = $(panelTableElem).find('.dataTables_goto_page').data('curpage');
+        var recordsPP = $(panelTableElem).find('.files-per-page-select').val();
+        var curRecords =$(panelTableElem).find('tbody').find('tr');
+
+
+    }
+
+    window.resetTableControls =function(tableElem, mvScroll, curIndex){
+
+        var displayedRows = tableElem.find('tr').not('.hide');
+        var rowPos = displayedRows.map(function(){ return this.offsetTop}  );
+        tableElem.data('rowpos',JSON.stringify(rowPos));
+        var numRecords = displayedRows.length;
+        var recordsPP = parseInt(tableElem.parent().parent().find('.files-per-page-select').val());
+        tableElem.parent().parent().find('.total-file-count')[0].innerHTML = numRecords.toString();
+        var numPages = parseInt(numRecords/recordsPP)+1;
+
+
+        if (!mvScroll)  {
+            var curScrollPos = tableElem[0].scrollTop;
+            curIndex = Array.from(rowPos.map(function(){return ((this<=curScrollPos)? 0:1 )  })).indexOf(1);
+        }
+        var lastInd = curIndex + recordsPP - 1;
+        var currentPage = parseInt(curIndex/recordsPP)+1;
+        atEnd = false;
+        if (curIndex === -1){
+            curIndex = (numPages-1)*recordsPP;
+            lastInd = numRecords-1;
+        }
+        else if ((curIndex + recordsPP) > numRecords) {
+                lastInd = numRecords - 1;
+                atEnd = true;
+        }
+
+        if ((curIndex>-1) && (lastInd>-1)) {
+            var totalHeight = displayedRows[lastInd].offsetTop + displayedRows[lastInd].offsetHeight - displayedRows[curIndex].offsetTop;
+            tableElem.css('max-height', totalHeight.toString() + 'px');
+
+            if (mvScroll){
+            tableElem[0].scrollTop = rowPos[curIndex]-tableElem[0].offsetTop;
+            }
+
+        }
+
+
+        tableElemGm = tableElem.parent().parent();
+        tableElemGm.find('.showing')[0].innerHTML = (curIndex+1).toString()+" to "+(lastInd+1).toString();
+        tableElemGm.find('.goto-page-number')[0].max = numPages;
+        if (atEnd){
+            currentPage=numPages;
+        }
+
+
+
+        resetPagination(tableElemGm, currentPage, numPages, recordsPP, numRecords);
+
+    }
+
+    var resetPagination = function(tableElem, currentPage, numPages, recordsPP, numRecords){
+        if (numPages===0){
+            $(tableElem).parent().parent().find('.dataTables_info').hide();
+            $(tableElem).parent().parent().find('.dataTables_length').hide();
+        }
+        else{
+            $(tableElem).parent().parent().find('.dataTables_info').show();
+            $(tableElem).parent().parent().find('.dataTables_length').show();
+        }
+
+        if (numPages<=1){
+            $(tableElem).parent().parent().find('.dataTables_goto_page').hide();
+        }
+        else{
+            $(tableElem).parent().parent().find('.dataTables_goto_page').show();
+        }
+
+
+        $(tableElem).parent().parent().find('.dataTables_goto_page').data('curpage',currentPage);
+        pageElem = $(tableElem).find('.paginate_button_space')[0];
+        var html='';
+        if (currentPage>3){
+           html += '<a class="dataTables_button paginate_button numeric_button">1</a>';
+        }
+        if (currentPage>4){
+            html+='<span class="ellipsis">...</span>';
+        }
+
+        for (var i=Math.max(1,(currentPage-2));i<currentPage;i++){
+            html+='<a class="dataTables_button paginate_button numeric_button">'+i.toString()+'</a>';
+        }
+        html+='<a class="dataTables_button paginate_button numeric_button current">'+currentPage.toString()+'</a>';
+
+        for (var i=currentPage+1;i<Math.min((numPages+1), currentPage+3);i++){
+            html+='<a class="dataTables_button paginate_button numeric_button">'+i.toString()+'</a>';
+        }
+
+
+        if (numPages>currentPage+3 ){
+            html+='<span class="ellipsis">...</span>';
+        }
+        if (numPages > currentPage+2){
+            html+='<a class="dataTables_button paginate_button numeric_button">'+numPages.toString()+'</a>';
+
+        }
+        pageElem.innerHTML = html;
+
+    }
+
+    var changeAjax = function(isIncrement){
+        if (isIncrement){
+            $('#number_ajax')[0].value = String(parseInt($('#number_ajax')[0].value)+1);
+        }
+        else{
+            $('#number_ajax')[0].value = String(parseInt($('#number_ajax')[0].value)-1);
+        }
+        //alert($('#number_ajax')[0].value)
+
+        if ( $('#number_ajax')[0].value === '0'){
+            $('.spinner').hide();
+        }
+        else{
+            $('.spinner').show();
+        }
+
+    }
+
+    var pretty_print_id = function(id){
+        var newId = id.slice(0,12)+'...'+id.slice(id.length-12,id.length);
+        return newId;
+    }
 
 
 
@@ -549,8 +747,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
         //document.getElementById('total').innerHTML = window.collection[project_scope];
         mkFiltText();
         updateFacetsData(true);
-
-
+        //window.resetTableControls($('#projects_table'),true,0);
 
     }
 
@@ -751,7 +948,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
 
 
 
-     var plotCategoricalData=function(plotId, lbl, plotData) {
+     /* var plotCategoricalData=function(plotId, lbl, plotData) {
 
         pieLayout.title = lbl.toUpperCase().replace(/_/g, " ");
         delete pieLayout.annotations;
@@ -817,7 +1014,143 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             }
         });
 
+    }; */
+
+     var plotCategoricalData=function(plotId, lbl, plotData,isPie,showLbl) {
+        var layout = new Object();
+        xdata= new Array();
+        ydata = new Array();
+        var plotCats=0;
+
+        for (var i=0;i<plotData.dataCnt.length;i++){
+            if (plotData.dataCnt[i] >0){
+                ydata.push(plotData.dataCnt[i]);
+                xdata.push(plotData.dataLabel[i]);
+                plotCats++;
+            }
+        }
+       var data = new Object();
+        var textinfo=""
+        if (showLbl && (plotCats>0)){
+            textinfo ='label';
+        }
+        else{
+            textinfo ='none';
+        }
+
+        if(isPie || (plotCats ===0)) {
+           layout = pieLayout;
+           data = [{
+               values: ydata,
+               labels: xdata,
+               //marker: {colors:['rgb(256,256,256)']},
+               type: 'pie',
+               textposition: 'inside',
+               textinfo:textinfo,
+               //textinfo: textinfo,
+               sort: false
+           }];
+       }
+
+      else{
+          layout=plotLayout;
+          if (showLbl) {
+              delete layout.xaxis;
+          }
+          else
+          {
+              layout.xaxis = {tickvals: []};
+          }
+          data =[
+          {
+           x:xdata,
+           y: ydata,
+          type: 'bar'
+         }
+
+       ];
+     }
+
+      layout.title = lbl.toUpperCase().replace(/_/g, " ");
+      delete layout.annotations;
+
+
+      if (plotCats === 0){
+          data[0].values = [0];
+          data[0].labels= [''];
+          data[0].marker = {colors:['rgb(256,256,256)']};
+          layout.annotations = [{text: 'No Data', showarrow:false, font:{size:18}}];
+      }
+
+      Plotly.newPlot(plotId, data, layout, {displayModeBar: false});
+
+        document.getElementById(plotId).on('plotly_click', function (data, plotId) {
+            var chartid = new Object();
+            if (isPie){
+               chartid = data.event.path[7].id;
+            }
+            else{
+                chartid = data.event.path[6].id;
+            }
+
+            var filterId = chartid.replace("_chart","");
+            if (filterId === 'age_at_diagnosis'){
+                //var sel = data.points[0].x;
+                var sel = new Object();
+                if (isPie) {
+                    sel = data.points[0].label;
+                }
+                else {
+                    sel = data.points[0].x;
+                }
+                var selArr = sel.split(' To ');
+                var strt = parseInt((selArr[0] === '*') ? '0': selArr[0]);
+                var end = parseInt((selArr[1] === '*') ?'120': selArr[1]);
+                setSlider(filterId,false,strt,end,true);
+
+            }
+            else {
+                //alert(String(data.event.path[6].id));
+                var index;
+                var label;
+                if (isPie) {
+                    label = data.points[0].label;
+                }
+                else{
+                    index = data.points[0].pointIndex;
+                }
+                var listId = filterId + '_list';
+                var inputList = $('#'+listId).find(':input');
+                for (var i=0;i<inputList.length;i++) {
+                    if (isPie) {
+                        var curLabel = $(inputList[i]).parent().children()[1].innerHTML;
+                        if (label === curLabel) {
+                            inputList[i].checked = true;
+                        } else {
+                            inputList[i].checked = false;
+                        }
+                    }
+                    else{
+                        if (i === index){
+                            inputList[i].checked = true;
+                        }
+                        else {
+                            inputList[i].checked = false;
+                        }
+                    }
+                }
+                handleFilterSelectionUpdate(filterId);
+            }
+        });
+
     };
+
+
+
+
+
+
+
 
      var findFilterCats = function(id){
         filterCats = new Array();
@@ -853,17 +1186,28 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
         return {'dataLabel': dataLabel, 'dataCnt': dataCnt}
     }
 
+    window.updatePlots = function(selectElem){
+          createPlots('search_orig_set');
+          createPlots('search_related_set');
+    }
+
     var createPlots = function(id){
+
+         var isPie = true;
+         var ptIndx = document.getElementById("plot_type").selectedIndex;
+         if (ptIndx ===1){
+             isPie = false;
+         }
+         var showLbl = document.getElementById("plot_label").checked
+
+
         var filterCats = findFilterCats(id);
         for (var i=0;i<filterCats.length;i++){
              filterCat = filterCats[i];
              filterData = parseFilterForCounts(filterCat);
-
              plotId = filterCat+"_chart";
              lbl = $('#'+filterCat+'_heading').children()[0].innerText;
-
-             plotCategoricalData(plotId, lbl, filterData);
-
+             plotCategoricalData(plotId, lbl, filterData, isPie, showLbl);
         }
 
      }
@@ -1033,8 +1377,13 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
             $('#age_at_diagnosis').find('.less-checks').addClass('hide');
             mkSlider('age_at_diagnosis',0,120,1,true);
 
+            /* var numCol = $('#projects_table').children('tr').length
+            $('#projects_panel').find('.total-file-count')[0].innerHTML = numCol.toString();
+             $('#projects_panel').find('.goto-page-number')[0].max=3; */
 
-
+             window.resetTableControls ($('#projects_table'), false, 0);
+             window.resetTableControls ($('#studies_table'), false, 0);
+            window.resetTableControls ($('#series_table'), false, 0);
 
             //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
 
