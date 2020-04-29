@@ -16,6 +16,7 @@
 
 from builtins import str
 from builtins import map
+import time
 from past.builtins import basestring
 import collections
 import json
@@ -363,7 +364,7 @@ def explore_data_page(request):
     try:
         req = request.GET if request.GET else request.POST
         is_dicofdic = (req.get('is_dicofdic', "False").lower() == "true")
-        source = req.get('source', DataSource.SOLR)
+        source = req.get('data_source_type', DataSource.SOLR)
         versions = json.loads(req.get('versions', '[]'))
         filters = json.loads(req.get('filters', '{}'))
         fields = json.loads(req.get('fields', '[]'))
@@ -402,10 +403,16 @@ def explore_data_page(request):
 
                 attr_by_source[set_type]['attributes'].update({attr.name: {'source': source.id, 'obj': attr, 'vals': None, 'id': attr.id} for attr in attrs})
 
+        start = time.time()
         faceted_counts = get_collex_metadata(
             filters, fields, record_limit=10, counts_only=counts_only, with_ancillary = with_related,
             collapse_on = collapse_on, order_docs = order_docs, sources = sources, versions = versions
         )
+        stop = time.time()
+        logger.debug("[STATUS] Benchmarking: Time to collect metadata for source type {}: {}s".format(
+            "BigQuery" if sources.first().source_type == DataSource.BIGQUERY else "Solr",
+            str((stop-start))
+        ))
 
         if with_related:
             attr_display_vals = Attribute_Display_Values.objects.filter(

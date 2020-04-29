@@ -82,22 +82,21 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
                     'filters': ancillary_sources.get_source_attrs(for_ui=True),
                     'facets': ancillary_sources.get_source_attrs()
                 }
+
             results = get_metadata_solr(filters, fields, {
                 'img': img,
                 'anc': anc
             }, counts_only, collapse_on, record_limit)
 
-        if 'BodyPartExamined' in results['facets']['cross_collex']:
-            if 'Kidney' in results['facets']['cross_collex']['BodyPartExamined'] and 'KIDNEY' in \
-                    results['facets']['cross_collex']['BodyPartExamined']:
-                results['facets']['cross_collex']['BodyPartExamined']['KIDNEY'] = \
-                results['facets']['cross_collex']['BodyPartExamined']['KIDNEY'] + \
-                results['facets']['cross_collex']['BodyPartExamined']['Kidney']
-                del results['facets']['cross_collex']['BodyPartExamined']['Kidney']
-            elif 'Kidney' in results['facets']['cross_collex']['BodyPartExamined']:
-                results['facets']['cross_collex']['BodyPartExamined']['KIDNEY'] = \
-                results['facets']['cross_collex']['BodyPartExamined']['Kidney']
-                del results['facets']['cross_collex']['BodyPartExamined']['Kidney']
+        for source in results['facets']['cross_collex']:
+            facets = results['facets']['cross_collex'][source]['facets']
+            if 'BodyPartExamined' in facets:
+                if 'Kidney' in facets['BodyPartExamined']:
+                    if 'KIDNEY' in facets['BodyPartExamined']:
+                        facets['BodyPartExamined']['KIDNEY'] += facets['BodyPartExamined']['Kidney']
+                    else:
+                        facets['KIDNEY'] = facets['BodyPartExamined']['Kidney']
+                    del facets['BodyPartExamined']['Kidney']
 
         if not counts_only:
             if 'SeriesNumber' in fields:
@@ -251,8 +250,6 @@ def get_metadata_solr(filters, fields, sources_and_attrs, counts_only, collapse_
                 })
 
                 results['facets']['clinical']["{}:{}".format(anc_source.name, anc_source.version.name)] = {'facets': solr_result['facets']}
-
-    print(results)
 
     return results
 
