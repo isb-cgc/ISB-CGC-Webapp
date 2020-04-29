@@ -405,7 +405,7 @@ def explore_data_page(request):
 
         start = time.time()
         faceted_counts = get_collex_metadata(
-            filters, fields, record_limit=10, counts_only=counts_only, with_ancillary = with_related,
+            filters, fields, record_limit=5000, counts_only=counts_only, with_ancillary = with_related,
             collapse_on = collapse_on, order_docs = order_docs, sources = sources, versions = versions
         )
         stop = time.time()
