@@ -38,8 +38,6 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
 
     try:
         source_type = sources.first().source_type if sources else DataSource.SOLR
-        #source_type = DataSource.BIGQUERY
-        #sources = DataSource.objects.select_related('version').filter(version__in=versions, source_type=source_type)
 
         if not versions:
             versions = DataVersion.objects.filter(active=True)
@@ -156,11 +154,6 @@ def get_metadata_solr(filters, fields, sources_and_attrs, counts_only, collapse_
                 elif attr_name in image_filter_attrs['list'] and attr_name in image_filter_attrs['sources'][img_src.id][
                     'list']:
                     query_set.append(solr_query['queries'][attr])
-        elif with_ancillary:
-            # This is forcing all faceted counting to be against an ancillary set, i.e., doesn't allow non-TCGA for the moment
-            query_set.append("{!join %s}" % "from={} fromIndex={} to={}".format(
-                ancillary_sources.first().shared_id_col, ancillary_sources.first().name, img_src.shared_id_col
-            ))
 
         solr_facets = build_solr_facets(list(image_facet_attrs['sources'][img_src.id]['attrs']),
                                         solr_query['filter_tags'] if solr_query else None, unique='PatientID')
@@ -201,11 +194,11 @@ def get_metadata_solr(filters, fields, sources_and_attrs, counts_only, collapse_
             # UI (probably not ALL of them).
             for anc_source in ancillary_sources:
                 solr_facets = build_solr_facets(list(ancillary_facet_attrs['sources'][anc_source.id]['attrs']),
-                                                solr_query['filter_tags'])
+                                                solr_query['filter_tags'] if solr_query else None)
                 query_set = []
                 joined = []
                 # Ancilary data faceting and querying
-                if solr_query['queries'] is not None:
+                if solr_query and solr_query['queries'] is not None:
                     for attr in solr_query['queries']:
                         attr_name = re.sub("(_btw|_lt|_lte|_gt|_gte)", "", attr)
                         if attr_name in image_filter_attrs['list']:

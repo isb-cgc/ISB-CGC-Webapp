@@ -388,8 +388,7 @@ def explore_data_page(request):
 
             # If a field list wasn't provided, work from a default set
             if set_type == 'origin_set' and not len(fields):
-                fields = source.get_collection_attr(for_faceting=False).filter(default_ui_display=True).exclude(
-                    name='Species').values_list('name', flat=True)
+                fields = source.get_collection_attr(for_faceting=False).filter(default_ui_display=True).values_list('name', flat=True)
 
             if set_type == 'origin_set' or with_related:
                 if set_type not in attr_by_source:
@@ -419,7 +418,7 @@ def explore_data_page(request):
             set_name = 'related_set'
             attr_display_vals = Attribute_Display_Values.objects.filter(
                 attribute__id__in=attr_sets[set_name]).to_dict()
-            for source in source_metadata['facets'][source_metadata]:
+            for source in source_metadata['facets'][set_name]:
                 facet_set = source_metadata['facets'][set_name][source]['facets']
                 for attr in facet_set:
                     this_attr = attr_by_source[set_name]['attributes'][attr]['obj']
@@ -454,21 +453,13 @@ def explore_data_page(request):
                })
                 attr_by_source[set_name]['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
-        attr_filter = {
-            'origin_set': ['Modality', 'BodyPartExamined','collection_id']
-        }
-        if with_related:
-            attr_filter['related_set'] = ['disease_code', 'vital_status','gender','age_at_diagnosis', 'bmi','race','ethnicity']
         for set in attr_by_source:
             if is_dicofdic:
-                for x in attr_by_source[set]['attributes']:
-                    if x in attr_filter[set]:
-                        if (isinstance(attr_by_source[set]['attributes'][x]['vals'],list) and (len(attr_by_source[set]['attributes'][x]['vals']) > 0)):
-                            attr_by_source[set]['attributes'][x] = {y['value']: {'display_value': y['display_value'], 'count': y['count']} for y in attr_by_source[set]['attributes'][x]['vals']}
-                        else:
-                            attr_by_source[set]['attributes'][x] = {}
+                for x in list(attr_by_source[set]['attributes'].keys()):
+                    if (isinstance(attr_by_source[set]['attributes'][x]['vals'],list) and (len(attr_by_source[set]['attributes'][x]['vals']) > 0)):
+                        attr_by_source[set]['attributes'][x] = {y['value']: {'display_value': y['display_value'], 'count': y['count']} for y in attr_by_source[set]['attributes'][x]['vals']}
                     else:
-                        del attr_by_source[set]['attributes'][x]
+                        attr_by_source[set]['attributes'][x] = {}
                 if set == 'origin_set':
                     context['collections'] = {a: attr_by_source[set]['attributes']['collection_id'][a]['count'] for a in attr_by_source[set]['attributes']['collection_id']}
                     context['collections']['All'] = source_metadata['total']
@@ -476,7 +467,7 @@ def explore_data_page(request):
                 attr_by_source[set]['attributes'] = [{'name': x,
                  'display_name': attr_by_source[set]['attributes'][x]['obj'].display_name,
                  'values': attr_by_source[set]['attributes'][x]['vals']
-                 } for x in attr_filter[set]]
+                 } for x in attr_by_source[set]['attributes']]
                 if set == 'origin_set':
                     context['collections'] = {b['value']: b['count'] for a in attr_by_source[set]['attributes'] for
                                               b in a['values'] if a['name'] == 'collection_id' }
