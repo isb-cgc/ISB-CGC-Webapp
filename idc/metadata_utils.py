@@ -88,8 +88,8 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
                 'anc': anc
             }, counts_only, collapse_on, record_limit)
 
-        for source in results['facets']['cross_collex']:
-            facets = results['facets']['cross_collex'][source]['facets']
+        for source in results['facets']['origin_set']:
+            facets = results['facets']['origin_set'][source]['facets']
             if 'BodyPartExamined' in facets:
                 if 'Kidney' in facets['BodyPartExamined']:
                     if 'KIDNEY' in facets['BodyPartExamined']:
@@ -113,7 +113,7 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
 
 
 def get_metadata_solr(filters, fields, sources_and_attrs, counts_only, collapse_on, record_limit):
-    results = {'docs': None, 'facets': { 'cross_collex': {}, 'clinical': {}}}
+    results = {'docs': None, 'facets': { 'origin_set': {}, 'related_set': {}}}
     with_ancillary = False
 
     if 'anc' in sources_and_attrs and sources_and_attrs['anc']:
@@ -178,7 +178,7 @@ def get_metadata_solr(filters, fields, sources_and_attrs, counts_only, collapse_
             'unique': img_src.shared_id_col
         })
 
-        results['facets']['cross_collex'][img_src.id] = {'facets': solr_counts['facets']}
+        results['facets']['origin_set'][img_src.id] = {'facets': solr_counts['facets']}
 
         if not counts_only:
             solr_result = query_solr_and_format_result({
@@ -196,7 +196,7 @@ def get_metadata_solr(filters, fields, sources_and_attrs, counts_only, collapse_
             results['total'] = solr_counts['numFound']
 
         if with_ancillary:
-            results['facets']['clinical'] = {}
+            results['facets']['related_set'] = {}
             # The attributes being faceted against here would be whatever list of facet counts we want to display in the
             # UI (probably not ALL of them).
             for anc_source in ancillary_sources:
@@ -249,7 +249,7 @@ def get_metadata_solr(filters, fields, sources_and_attrs, counts_only, collapse_
                     'unique': anc_source.shared_id_col
                 })
 
-                results['facets']['clinical']["{}:{}".format(anc_source.name, anc_source.version.name)] = {'facets': solr_result['facets']}
+                results['facets']['related_set']["{}:{}".format(anc_source.name, anc_source.version.name)] = {'facets': solr_result['facets']}
 
     return results
 

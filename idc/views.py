@@ -386,6 +386,7 @@ def explore_data_page(request):
         for source in sources:
             set_type = 'origin_set' if source.version.data_type == DataVersion.IMAGE_DATA else 'related_set'
 
+            # If a field list wasn't provided, work from a default set
             if set_type == 'origin_set' and not len(fields):
                 fields = source.get_collection_attr(for_faceting=False).filter(default_ui_display=True).exclude(
                     name='Species').values_list('name', flat=True)
@@ -404,7 +405,7 @@ def explore_data_page(request):
                 attr_by_source[set_type]['attributes'].update({attr.name: {'source': source.id, 'obj': attr, 'vals': None, 'id': attr.id} for attr in attrs})
 
         start = time.time()
-        faceted_counts = get_collex_metadata(
+        source_metadata = get_collex_metadata(
             filters, fields, record_limit=5000, counts_only=counts_only, with_ancillary = with_related,
             collapse_on = collapse_on, order_docs = order_docs, sources = sources, versions = versions
         )
@@ -417,16 +418,17 @@ def explore_data_page(request):
         if with_related:
             attr_display_vals = Attribute_Display_Values.objects.filter(
                 attribute__id__in=attr_sets['related_set']).to_dict()
-            for source in faceted_counts['facets']['clinical']:
-                for attr in faceted_counts['facets']['clinical'][source]['facets']:
+            for source in source_metadata['facets'][source_metadata]:
+                facet_set = source_metadata['facets']['related_set'][source]['facets']
+                for attr in facet_set:
                     this_attr = attr_by_source['related_set']['attributes'][attr]['obj']
                     values = []
-                    for val in faceted_counts['facets']['clinical'][source]['facets'][attr]:
+                    for val in source_metadata['facets']['related_set'][source]['facets'][attr]:
                         displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
                         values.append({
                             'value': val,
                             'display_value': displ_val,
-                            'count': faceted_counts['facets']['clinical'][source]['facets'][attr][val] if val in faceted_counts['facets']['clinical'][source]['facets'][attr] else 0
+                            'count': facet_set[attr][val] if val in facet_set[attr] else 0
                         })
                     if attr == 'bmi':
                         sortDic = {'underweight':0, 'normal weight': 1, 'overweight': 2, 'obese': 3, 'none': 4}
@@ -435,16 +437,17 @@ def explore_data_page(request):
                         attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
         attr_display_vals = Attribute_Display_Values.objects.filter(attribute__id__in=attr_sets['origin_set']).to_dict()
-        for source in faceted_counts['facets']['cross_collex']:
-            for attr in faceted_counts['facets']['cross_collex'][source]['facets']:
+        for source in source_metadata['facets']['cross_collex']:
+            facet_set = source_metadata['facets']['cross_collex'][source]['facets']
+            for attr in facet_set:
                 this_attr = attr_by_source['origin_set']['attributes'][attr]['obj']
                 values = []
-                for val in faceted_counts['facets']['cross_collex'][source]['facets'][attr]:
+                for val in facet_set[attr]:
                     displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
                     values.append({
                         'value': val,
                         'display_value': displ_val,
-                        'count': faceted_counts['facets']['cross_collex'][source]['facets'][attr][val] if val in faceted_counts['facets']['cross_collex'][source]['facets'][attr] else 0
+                        'count': facet_set[attr][val] if val in facet_set[attr] else 0
 
                })
                 attr_by_source['origin_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
@@ -456,7 +459,7 @@ def explore_data_page(request):
             attr_filter['related_set'] = ['disease_code', 'vital_status','gender','age_at_diagnosis', 'bmi','race','ethnicity']
         for set in attr_by_source:
             if is_dicofdic:
-                for x in list(attr_by_source[set]['attributes'].keys()):
+                for x in attr_by_source[set]['attributes']:
                     if x in attr_filter[set]:
                         if (isinstance(attr_by_source[set]['attributes'][x]['vals'],list) and (len(attr_by_source[set]['attributes'][x]['vals']) > 0)):
                             attr_by_source[set]['attributes'][x] = {y['value']: {'display_value': y['display_value'], 'count': y['count']} for y in attr_by_source[set]['attributes'][x]['vals']}
@@ -466,7 +469,7 @@ def explore_data_page(request):
                         del attr_by_source[set]['attributes'][x]
                 if set == 'origin_set':
                     context['collections'] = {a: attr_by_source[set]['attributes']['collection_id'][a]['count'] for a in attr_by_source[set]['attributes']['collection_id']}
-                    context['collections']['All'] = faceted_counts['total']
+                    context['collections']['All'] = source_metadata['total']
             else:
                 attr_by_source[set]['attributes'] = [{'name': x,
                  'display_name': attr_by_source[set]['attributes'][x]['obj'].display_name,
@@ -475,11 +478,11 @@ def explore_data_page(request):
                 if set == 'origin_set':
                     context['collections'] = {b['value']: b['count'] for a in attr_by_source[set]['attributes'] for
                                               b in a['values'] if a['name'] == 'collection_id' }
-                    context['collections']['All'] = faceted_counts['total']
+                    context['collections']['All'] = source_metadata['total']
             if not counts_only:
-                attr_by_source[set]['docs'] = faceted_counts['docs']
+                attr_by_source[set]['docs'] = source_metadata['docs']
 
-        attr_by_source['total'] = faceted_counts['total']
+        attr_by_source['total'] = source_metadata['total']
 
         context['set_attributes'] = attr_by_source
         context['filters'] = filters
