@@ -57,6 +57,7 @@ DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') 
 print("[STATUS] DEBUG mode is {}".format(str(DEBUG)), file=sys.stdout)
 
 RESTRICT_ACCESS          = (os.environ.get('RESTRICT_ACCESS', 'True') == 'True')
+
 RESTRICTED_ACCESS_GROUPS = os.environ.get('RESTRICTED_ACCESS_GROUPS', '').split(',')
 
 if RESTRICT_ACCESS:
