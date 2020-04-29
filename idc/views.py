@@ -416,14 +416,15 @@ def explore_data_page(request):
         ))
 
         if with_related:
+            set_name = 'related_set'
             attr_display_vals = Attribute_Display_Values.objects.filter(
-                attribute__id__in=attr_sets['related_set']).to_dict()
+                attribute__id__in=attr_sets[set_name]).to_dict()
             for source in source_metadata['facets'][source_metadata]:
-                facet_set = source_metadata['facets']['related_set'][source]['facets']
+                facet_set = source_metadata['facets'][set_name][source]['facets']
                 for attr in facet_set:
-                    this_attr = attr_by_source['related_set']['attributes'][attr]['obj']
+                    this_attr = attr_by_source[set_name]['attributes'][attr]['obj']
                     values = []
-                    for val in source_metadata['facets']['related_set'][source]['facets'][attr]:
+                    for val in source_metadata['facets'][set_name][source]['facets'][attr]:
                         displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
                         values.append({
                             'value': val,
@@ -432,15 +433,16 @@ def explore_data_page(request):
                         })
                     if attr == 'bmi':
                         sortDic = {'underweight':0, 'normal weight': 1, 'overweight': 2, 'obese': 3, 'none': 4}
-                        attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: sortDic[x['value']])
+                        attr_by_source[set_name]['attributes'][attr]['vals'] = sorted(values, key=lambda x: sortDic[x['value']])
                     else:
-                        attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
+                        attr_by_source[set_name]['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
         attr_display_vals = Attribute_Display_Values.objects.filter(attribute__id__in=attr_sets['origin_set']).to_dict()
-        for source in source_metadata['facets']['cross_collex']:
-            facet_set = source_metadata['facets']['cross_collex'][source]['facets']
+        set_name = 'origin_set'
+        for source in source_metadata['facets'][set_name]:
+            facet_set = source_metadata['facets'][set_name][source]['facets']
             for attr in facet_set:
-                this_attr = attr_by_source['origin_set']['attributes'][attr]['obj']
+                this_attr = attr_by_source[set_name]['attributes'][attr]['obj']
                 values = []
                 for val in facet_set[attr]:
                     displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
@@ -450,7 +452,7 @@ def explore_data_page(request):
                         'count': facet_set[attr][val] if val in facet_set[attr] else 0
 
                })
-                attr_by_source['origin_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
+                attr_by_source[set_name]['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
         attr_filter = {
             'origin_set': ['Modality', 'BodyPartExamined','collection_id']

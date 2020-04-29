@@ -61,7 +61,7 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
 
             results = get_metadata_bq(filters, fields, {
                 'filters': sources.get_source_attrs(for_ui=True),
-                'facets': sources.get_source_attrs(),
+                'facets': sources.get_source_attrs(for_ui=True),
                 'fields': sources.get_source_attrs(for_faceting=False, named_set=fields)
             }, counts_only, collapse_on, record_limit)
         elif source_type == DataSource.SOLR:
@@ -70,7 +70,7 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
             img = {
                 'src': image_sources,
                 'filters': image_sources.get_source_attrs(for_ui=True),
-                'facets': image_sources.get_source_attrs()
+                'facets': image_sources.get_source_attrs(for_ui=True)
             }
 
             anc = None
@@ -80,7 +80,7 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
                 anc = {
                     'src': ancillary_sources,
                     'filters': ancillary_sources.get_source_attrs(for_ui=True),
-                    'facets': ancillary_sources.get_source_attrs()
+                    'facets': ancillary_sources.get_source_attrs(for_ui=True)
                 }
 
             results = get_metadata_solr(filters, fields, {
