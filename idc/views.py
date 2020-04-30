@@ -16,6 +16,7 @@
 
 from builtins import str
 from builtins import map
+import time
 from past.builtins import basestring
 import collections
 import json
@@ -258,16 +259,9 @@ def user_landing(request):
                                                             'cohorts': cohorts,
                                                             'user_list': users,
                                                             'cohorts_listing': cohort_listing,
-                                                            'visualizations': visualizations,
-                                                            'seqpeek_list': seqpeek_viz,
                                                             'base_url': settings.BASE_URL,
                                                             'base_api_url': settings.BASE_API_URL
                                                             })
-
-
-
-
-
 
 
 # get_image_data which allows for URI arguments, falls through to get_image_data(request, slide_barcode)
@@ -349,7 +343,6 @@ def dicom(request, study_uid=None):
     return render(request, template, context)
 
 
-
 # Because the match for vm_ is always done regardless of its presense in the URL
 # we must always provide an argument slot for it
 #
@@ -366,47 +359,23 @@ def explore_data_page(request):
     attr_by_source = {}
     attr_sets = {}
     context = {'request': request}
-    source = DataSource.SOLR
-    versions = []
-    filters = {}
-    fields = []
-    counts_only = True
-    with_clinical = True
-    collapse_on = 'PatientID'
     is_json = False
-    is_dicofdic = False
-    order_docs = []
 
     try:
-        if request.GET:
-            source = request.GET.get('source',DataSource.SOLR)
-            versions = json.loads(request.GET.get('versions','[]'))
-            filters = json.loads(request.GET.get('filters', '{}'))
-            fields = json.loads(request.GET.get('fields', '[]'))
-            order_docs = json.loads(request.GET.get('order_docs', '[]'))
-            counts_only = (request.GET.get('counts_only', "False").lower() == "true")
-            with_clinical = (request.GET.get('with_clinical', "True").lower() == "true")
-            collapse_on = request.GET.get('collapse_on', 'PatientID')
-            is_json = (request.GET.get('is_json', "False").lower() == "true")
-            is_dicofdic = (request.GET.get('is_dicofdic', "False").lower() == "true")
+        req = request.GET if request.GET else request.POST
+        is_dicofdic = (req.get('is_dicofdic', "False").lower() == "true")
+        source = req.get('data_source_type', DataSource.SOLR)
+        versions = json.loads(req.get('versions', '[]'))
+        filters = json.loads(req.get('filters', '{}'))
+        fields = json.loads(req.get('fields', '[]'))
+        order_docs = json.loads(req.get('order_docs', '[]'))
+        counts_only = (req.get('counts_only', "False").lower() == "true")
+        with_related = (req.get('with_clinical', "True").lower() == "true")
+        collapse_on = req.get('collapse_on', 'PatientID')
+        is_json = (req.get('is_json', "False").lower() == "true")
 
-        if request.POST:
-            source = request.POST.get('source', DataSource.SOLR)
-            versions = request.loads(request.POST.get('versions', '[]'))
-            filters = json.loads(request.POST.get('filters', '{}'))
-            fields = json.loads(request.POST.get('fields', '[]'))
-            order_docs = json.loads(request.GET.get('order_docs', '[]'))
-            counts_only = (request.POST.get('counts_only', "False").lower() == "true")
-            with_clinical = (request.POST.get('with_clinical', "True").lower() == "true")
-            collapse_on = request.POST.get('collapse_on', 'PatientID')
-            is_json = (request.POST.get('is_json', "False").lower() == "true")
-
-        if not len(versions):
-            versions = DataVersion.objects.filter(active=True)
-        else:
-            versions = DataVersion.objects.filter(name__in=versions)
-
-        sources = DataSource.objects.filter(version__in=versions, source_type=source)
+        versions = DataVersion.objects.filter(name__in=versions) if len(versions) else DataVersion.objects.filter(active=True)
+        sources = DataSource.objects.select_related('version').filter(version__in=versions, source_type=source)
 
         # For now we're only allowing TCGA
         # TODO: REMOVE THIS ONCE WE'RE ALLOWING MORE
@@ -415,98 +384,103 @@ def explore_data_page(request):
             filters['collection_id'] = [x.lower().replace("-","_") for x in list(tcga_in_tcia.values_list('name', flat=True))]
 
         for source in sources:
-            set_type = None
-            if source.version.data_type == DataVersion.IMAGE_DATA:
-                set_type = 'origin_set'
-            else:
-                set_type = 'related_set'
-                if not with_clinical:
-                    continue
-            if set_type not in attr_by_source:
-                attr_by_source[set_type] = {}
+            set_type = 'origin_set' if source.version.data_type == DataVersion.IMAGE_DATA else 'related_set'
 
-            attrs = source.get_collection_attr(for_ui=True)
-            attr_by_source[set_type]['attributes'] = {attr.name: {'obj': attr, 'vals':None} for attr in attrs}
-            attr_sets[set_type] = attrs
+            # If a field list wasn't provided, work from a default set
+            if set_type == 'origin_set' and not len(fields):
+                fields = source.get_collection_attr(for_faceting=False).filter(default_ui_display=True).values_list('name', flat=True)
 
-        #attr_by_source['origin_set']['attributes']['collection_id']['vals'].update([('tcga_cesc','TCGA_CESC'),('tcga_coad','TCGA_COAD'),('tcga_gbm','TCGA_GBM'),('tcga_kirc','TCGA_KIRP'),('tcga_luad','TCGA_LUAD'),('tcga_lusc','TCGA_LUSC'),('tcga_prad','TCGA_PRAD'),('tcga_read','TCGA_READ'),('tcga_sarc','TCGA_SARC'),('tcga_stad','TCGA_STAD'),('tcga_thca','TCGA_THCA')])
+            if set_type == 'origin_set' or with_related:
+                if set_type not in attr_by_source:
+                    attr_by_source[set_type] = {}
 
-        if (len(fields)==0):
-            fields = list(attrs.values_list('name', flat=True))
-        faceted_counts = get_collex_metadata(
-            filters, fields,
-             record_limit=50000, counts_only=counts_only, with_clinical = with_clinical, collapse_on = collapse_on, order_docs = order_docs
+                attrs = source.get_collection_attr(for_ui=True)
+                if 'attributes' not in attr_by_source[set_type]:
+                    attr_by_source[set_type]['attributes'] = {}
+                    attr_sets[set_type] = attrs
+                else:
+                    attr_sets[set_type] = attr_sets[set_type] | attrs
+
+                attr_by_source[set_type]['attributes'].update({attr.name: {'source': source.id, 'obj': attr, 'vals': None, 'id': attr.id} for attr in attrs})
+
+        start = time.time()
+        source_metadata = get_collex_metadata(
+            filters, fields, record_limit=5000, counts_only=counts_only, with_ancillary = with_related,
+            collapse_on = collapse_on, order_docs = order_docs, sources = sources, versions = versions
         )
+        stop = time.time()
+        logger.debug("[STATUS] Benchmarking: Time to collect metadata for source type {}: {}s".format(
+            "BigQuery" if sources.first().source_type == DataSource.BIGQUERY else "Solr",
+            str((stop-start))
+        ))
 
-        if with_clinical:
+        if with_related:
+            set_name = 'related_set'
             attr_display_vals = Attribute_Display_Values.objects.filter(
-                attribute__id__in=attr_sets['related_set']).to_dict()
-            for attr in faceted_counts['clinical']['facets']:
-                this_attr = attr_by_source['related_set']['attributes'][attr]['obj']
+                attribute__id__in=attr_sets[set_name]).to_dict()
+            for source in source_metadata['facets'][set_name]:
+                facet_set = source_metadata['facets'][set_name][source]['facets']
+                for attr in facet_set:
+                    this_attr = attr_by_source[set_name]['attributes'][attr]['obj']
+                    values = []
+                    for val in source_metadata['facets'][set_name][source]['facets'][attr]:
+                        displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
+                        values.append({
+                            'value': val,
+                            'display_value': displ_val,
+                            'count': facet_set[attr][val] if val in facet_set[attr] else 0
+                        })
+                    if attr == 'bmi':
+                        sortDic = {'underweight':0, 'normal weight': 1, 'overweight': 2, 'obese': 3, 'none': 4}
+                        attr_by_source[set_name]['attributes'][attr]['vals'] = sorted(values, key=lambda x: sortDic[x['value']])
+                    else:
+                        attr_by_source[set_name]['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
+
+        attr_display_vals = Attribute_Display_Values.objects.filter(attribute__id__in=attr_sets['origin_set']).to_dict()
+        set_name = 'origin_set'
+        for source in source_metadata['facets'][set_name]:
+            facet_set = source_metadata['facets'][set_name][source]['facets']
+            for attr in facet_set:
+                this_attr = attr_by_source[set_name]['attributes'][attr]['obj']
                 values = []
-                for val in faceted_counts['clinical']['facets'][attr]:
+                for val in facet_set[attr]:
                     displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
                     values.append({
                         'value': val,
                         'display_value': displ_val,
-                        'count': faceted_counts['clinical']['facets'][attr][val] if val in faceted_counts['clinical']['facets'][attr] else 0
-                    })
-                if attr == 'bmi':
-                    sortDic = {'underweight':0, 'normal weight': 1, 'overweight': 2, 'obese': 3}
-                    attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: sortDic[x['value']])
-                else:
-                    attr_by_source['related_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
-
-        attr_display_vals = Attribute_Display_Values.objects.filter(attribute__id__in=attr_sets['origin_set']).to_dict()
-        for attr in faceted_counts['facets']['cross_collex']:
-            this_attr = attr_by_source['origin_set']['attributes'][attr]['obj']
-            values = []
-            for val in faceted_counts['facets']['cross_collex'][attr]:
-                displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
-                values.append({
-                    'value': val,
-                    'display_value': displ_val,
-                    'count': faceted_counts['facets']['cross_collex'][attr][val] if val in faceted_counts['facets']['cross_collex'][attr] else 0
+                        'count': facet_set[attr][val] if val in facet_set[attr] else 0
 
                })
-            attr_by_source['origin_set']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
+                attr_by_source[set_name]['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
-        attr_filter = {
-            'origin_set': ['Modality', 'BodyPartExamined','collection_id']
-        }
-        if with_clinical:
-            attr_filter['related_set'] = ['disease_code', 'vital_status','gender','age_at_diagnosis', 'bmi','race','ethnicity']
         for set in attr_by_source:
             if is_dicofdic:
                 for x in list(attr_by_source[set]['attributes'].keys()):
-                    if x in attr_filter[set]:
-                        if (isinstance(attr_by_source[set]['attributes'][x]['vals'],list) and (len(attr_by_source[set]['attributes'][x]['vals']) > 0)):
-                            attr_by_source[set]['attributes'][x] = {y['value']: {'display_value': y['display_value'], 'count': y['count']} for y in attr_by_source[set]['attributes'][x]['vals']}
-                        else:
-                            attr_by_source[set]['attributes'][x] = {}
+                    if (isinstance(attr_by_source[set]['attributes'][x]['vals'],list) and (len(attr_by_source[set]['attributes'][x]['vals']) > 0)):
+                        attr_by_source[set]['attributes'][x] = {y['value']: {'display_value': y['display_value'], 'count': y['count']} for y in attr_by_source[set]['attributes'][x]['vals']}
                     else:
-                        del attr_by_source[set]['attributes'][x]
+                        attr_by_source[set]['attributes'][x] = {}
                 if set == 'origin_set':
                     context['collections'] = {a: attr_by_source[set]['attributes']['collection_id'][a]['count'] for a in attr_by_source[set]['attributes']['collection_id']}
-                    context['collections']['All'] = faceted_counts['total']
+                    context['collections']['All'] = source_metadata['total']
             else:
                 attr_by_source[set]['attributes'] = [{'name': x,
                  'display_name': attr_by_source[set]['attributes'][x]['obj'].display_name,
                  'values': attr_by_source[set]['attributes'][x]['vals']
-                 } for x in attr_filter[set]]
+                 } for x in attr_by_source[set]['attributes']]
                 if set == 'origin_set':
                     context['collections'] = {b['value']: b['count'] for a in attr_by_source[set]['attributes'] for
                                               b in a['values'] if a['name'] == 'collection_id' }
-                    context['collections']['All'] = faceted_counts['total']
+                    context['collections']['All'] = source_metadata['total']
             if not counts_only:
-                attr_by_source[set]['docs'] = faceted_counts['docs']
+                attr_by_source[set]['docs'] = source_metadata['docs']
 
-        attr_by_source['total'] = faceted_counts['total']
+        attr_by_source['total'] = source_metadata['total']
 
         context['set_attributes'] = attr_by_source
         context['filters'] = filters
 
-        if with_clinical:
+        if with_related:
             context['tcga_collections'] = tcga_in_tcia
 
     except Exception as e:

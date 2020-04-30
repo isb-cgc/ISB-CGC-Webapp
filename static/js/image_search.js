@@ -862,12 +862,11 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
     var updateFacetsData = function(newFilt) {
         changeAjax(true);
 
-        var url = '';
-        if (Object.keys(filterObj).length === 0) {
-            url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True';
-        } else {
-            url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True&filters=' + JSON.stringify(filterObj);
+        var url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True&data_source_type=' + $("#data_source_type option:selected").val();
+        if (Object.keys(filterObj).length > 0) {
+            url += '&filters=' + JSON.stringify(filterObj);
         }
+
         url = encodeURI(url);
 
         $.ajax({
