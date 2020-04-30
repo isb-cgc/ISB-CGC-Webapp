@@ -94,19 +94,22 @@
 {#                    {%  else %}#}
 {#                    <li role="presentation" class="program-tab disabled"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0" disabled>User Data</a></li>#}
 {#                    {%  endif %}#}
-                    <li role = "presentation" id = "more-program-tab">
-                        <div class="more-program-dropdown">
-                            <a role="button class=dropdown-toggle navbar-item__text"  id="more-program-toggle" aria-expanded="true">
+                    <li role = "presentation" id="more-program-tab" class="more-program-dropdown">
+{#                        <div >#}
+                            <a role="button class= dropdown-toggle"  id="more-program-toggle">
                                 More <i class="fa fa-caret-down"></i>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-left">
+                            <ul class="dropdown-menu">
                             {% for program in programs %}
                                 {% if program.id > 3 %}
-                                    <li><input class="dropdown-value" type="checkbox" program-id={{ program.id }} program-name={{ program.name }}>{{ program.name }}</li>
+                                    <li style="text-align: left; padding: 3px">
+                                        <input class="dropdown-value" type="checkbox" program-id={{ program.id }} program-name={{ program.name }}>
+                                        {{ program.name }}
+                                    </li>
                                 {% endif %}
                             {% endfor %}
                             </ul>
-                        </div>
+{#                        </div>#}
                     </ul>
             </div>
         </div>

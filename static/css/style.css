@@ -2282,7 +2282,7 @@ section .min-max {
   #cohort-details .nav-tabs li.file-browser-tab, .nav-tabs #cohort-details li.active > a:focus li.file-browser-tab, #cohort-filelist .nav-tabs li.file-browser-tab, .nav-tabs #cohort-filelist li.active > a:focus li.file-browser-tab {
     width: 20%; }
   #cohort-details .nav-tabs li.program-tab, .nav-tabs #cohort-details li.active > a:focus li.program-tab, #cohort-filelist .nav-tabs li.program-tab, .nav-tabs #cohort-filelist li.active > a:focus li.program-tab {
-    width: 5.8%; }
+    width: 25%; }
   #cohort-details .nav-tabs li.filter-tab, .nav-tabs #cohort-details li.active > a:focus li.filter-tab, #cohort-filelist .nav-tabs li.filter-tab, .nav-tabs #cohort-filelist li.active > a:focus li.filter-tab {
     width: 33.33333%; }
   #cohort-details .nav-tabs li:first-child a, .nav-tabs #cohort-details li.active > a:focus li:first-child a, #cohort-filelist .nav-tabs li:first-child a, .nav-tabs #cohort-filelist li.active > a:focus li:first-child a {

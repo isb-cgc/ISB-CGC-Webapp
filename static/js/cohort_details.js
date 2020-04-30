@@ -1430,8 +1430,9 @@ require([
         $('.program-tab').each(function()
         {
             var program_cnt = $(".program-tab").length;
-            var tab_width = 94 / program_cnt;
+            var tab_width = 90 / program_cnt;
             $(this).css('width', tab_width.toString() + "%");
+            $('#more-program-tab').css('width', "10%");
         });
     };
 
