@@ -58,23 +58,7 @@ require([
     var UPDATE_QUEUE = [];
 
     var SELECTED_FILTERS = {
-        'all': {
-            'HG19': {},
-            'HG38': {}
-        },
-        'igv': {
-            'HG19': {},
-            'HG38': {}
-        },
-        'camic': {
-            'HG19': {}
-        },
-        'dicom': {
-            'HG19': {}
-        },
-        'pdf': {
-            'HG19': {}
-        }
+
     };
         
     var file_list_total = 0;
@@ -129,11 +113,7 @@ require([
          //$(paginateElem).parent().parent().find('.dataTables_goto_page').data('curpage',pageNo);
          var tableElem = $(paginateElem).parent().parent().parent().find('tbody');
          window.resetTableControls(tableElem, true, curIndex);
-    }
-
-
-
-
+    };
 
     // change no of entries per page
     $('.table-panel').on('change', '.files-per-page', function () {
@@ -160,15 +140,6 @@ require([
 
     }); */
 
-
-
-
-
-
-
-
-
-
     // change column sorting
     $('.data-tab-content').on('click', '.sortable_table th:not(.sorting_disabled)', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
@@ -184,39 +155,11 @@ require([
         $(this).parent().siblings('.less-checks').show();
         $(this).parent().hide();
     }); */
-    $('.data-tab-content').on('click', '.show-less', function() {
-        $(this).parent().siblings('li.extra-values').hide();
-        $(this).parent().siblings('.more-checks').show();
-        $(this).parent().hide();
-    });
-
-    $('.data-tab-content').on('change','.build', function(){
-        var this_tab = $(this).parents('.data-tab').data('file-type');
-        $('#'+this_tab+'-files').find('.filter-build-panel').hide();
-        $('#'+this_tab+'-filter-panel-'+$(this).find(':selected').val()).show();
-
-        if(this_tab == 'igv') {
-            // Remove any selected files not from this build
-            var new_build = $('#'+this_tab+'-files').find('.build :selected').val();
-            var selCount = Object.keys(selIgvFiles.gcs_bam).length;
-            for (var i in selIgvFiles.gcs_bam) {
-                if (selIgvFiles.gcs_bam.hasOwnProperty(i)) {
-                    if (selIgvFiles.gcs_bam[i].build !== new_build) {
-                        delete selIgvFiles.gcs_bam[i];
-                        $('.filelist-panel input[value="' + i + '"').prop('checked', false);
-                    }
-                }
-            }
-            if (Object.keys(selIgvFiles.gcs_bam).length !== selCount) {
-                $('#selected-files-igv').tokenfield('setTokens', selIgvFiles.toTokens());
-                update_on_selex_change();
-            }
-            $('#igv-form-build').attr("value",new_build);
-            // Prevent users from selecting igv files during loading time
-            $('.filelist-panel input.igv.accessible[type="checkbox"]').attr('disabled',true);
-        }
-        update_displays(this_tab);
-    });
+    // $('.data-tab-content').on('click', '.show-less', function() {
+    //     $(this).parent().siblings('li.extra-values').hide();
+    //     $(this).parent().siblings('.more-checks').show();
+    //     $(this).parent().hide();
+    // });
 
    /* function update_filters(checked) {
         var type_tab = checked.parents('.data-tab.active')[0];
@@ -329,113 +272,46 @@ require([
             },SUBSEQUENT_DELAY);
     };
 
-    $('.data-tab-content').on('change','.filter-panel input[type="checkbox"]',function(){
-        update_filters($(this));
-        update_displays($('ul.nav-tabs-files li.active a').data('file-type'));
-    });
-
-    // Click events for 'Check All/Uncheck All' in filter categories
-    $('.data-tab-content').on('click', '.check-all', function(){
-        $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',true);
-        update_filters($($(this).parent().parent().siblings('.checkbox').find('input')[0]));
-        update_displays($('ul.nav-tabs-files li.active a').data('file-type'));
-    });
-    $('.data-tab-content').on('click', '.uncheck-all', function(){
-        $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',false);
-        update_filters($($(this).parent().parent().siblings('.checkbox').find('input')[0]));
-        update_displays($('ul.nav-tabs-files li.active a').data('file-type'));
-    });
+    // $('.data-tab-content').on('change','.filter-panel input[type="checkbox"]',function(){
+    //     //update_filters($(this));
+    //     update_displays($('ul.nav-tabs-files li.active a').data('file-type'));
+    // });
+    //
+    // // Click events for 'Check All/Uncheck All' in filter categories
+    // $('.data-tab-content').on('click', '.check-all', function(){
+    //     $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',true);
+    //     //update_filters($($(this).parent().parent().siblings('.checkbox').find('input')[0]));
+    //     update_displays($('ul.nav-tabs-files li.active a').data('file-type'));
+    // });
+    // $('.data-tab-content').on('click', '.uncheck-all', function(){
+    //     $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',false);
+    //     //update_filters($($(this).parent().parent().siblings('.checkbox').find('input')[0]));
+    //     update_displays($('ul.nav-tabs-files li.active a').data('file-type'));
+    // });
 
     //browser_tab_load(cohort_id);
 
-    $('.data-tab-content').on('click', '.download-btn', function() {
-        var self=$(this);
-        var msg = $('#download-in-prog');
-
-        self.attr('disabled','disabled');
-        msg.show();
-
-        base.blockResubmit(function() {
-            self.removeAttr('disabled');
-            msg.hide();
-        },$('.filelist-obtain .download-token').val(),"downloadToken");
-
-        if($(this).parents('.data-tab').find('.build :selected').val() == 'HG38'
-            && _.find(programs_this_cohort, function(prog){return prog == 'CCLE';})) {
-            base.showJsMessage("warning",
-                "You have exported a file list for a cohort which contains CCLE samples, with the build set to HG38.<br/>"+
-                "Please note that there are no HG38 samples for CCLE, so that program will be absent from the export."
-                , true
-            );
-        }
-    });
-
-    $('.data-tab-content').on('hover enter mouseover','.study-uid, .col-filename',function(e){
-        $(this).find('.osmisis').show();
-    });
-
-    $('.data-tab-content').on('leave mouseout mouseleave','.study-uid, .col-filename',function(e){
-        $(this).find('.osmisis').hide();
-    });
-
-    // When an export button is clicked, add the filters to that modal's form
-    // Note that the export modals will always clear any 'filters' inputs applied to them when hidden/closed
-    $('.container').on('click', 'button[data-target="#export-to-bq-modal"], button[data-target="#export-to-gcs-modal"]', function (e) {
-        var target_form = $($($(this).data('target')).find('form')[0]);
-        var this_tab = $(this).parents('.data-tab');
-        var tab_type = this_tab.data('file-type');
-
-        // Clear the previous parameter settings from the export form, and re-add the build
-        var build = this_tab.find('.build :selected').val() || null;
-        target_form.find('input[name="build"], input[name="filters"]').remove();
-        target_form.append(
-            '<input class="param" type="hidden" name="build" value="'+build+'" />'
-        );
-        target_form.append(
-            '<input class="param" type="hidden" name="filters" value="" />'
-        );
-
-        var filter_param = {};
-        switch(tab_type) {
-            case "igv":
-                filter_param = {"data_format": ["BAM"]};
-                break;
-            case "dicom":
-                filter_param = {"data_type": ["Radiology image"]};
-                break;
-            case "camic":
-                filter_param = {"data_type": ["Diagnostic image", "Tissue slide image"]};
-                break;
-            case "pdf":
-                filter_param = {"data_format": ["PDF"]};
-        }
-
-        if(Object.keys(SELECTED_FILTERS[tab_type][build]).length > 0) {
-            Object.assign(filter_param, SELECTED_FILTERS[tab_type][build]);
-        }
-        if(tab_case_barcode[tab_type] && Object.keys(tab_case_barcode[tab_type][build]).length > 0) {
-            filter_param['case_barcode'] = tab_case_barcode[tab_type][build];
-        }
-
-        if(Object.keys(filter_param).length>0){
-            target_form.find('input[name="filters"]').attr(
-                'value',JSON.stringify(filter_param)
-            );
-        }
-        else{
-            target_form.find('input[name="filters"]').remove();
-        }
-
-        if(this_tab.find('.build :selected').val() == 'HG38' && _.find(programs_this_cohort, function(prog){return prog == 'CCLE';})) {
-            base.showJsMessage(
-                "warning",
-                "You are exporting a file list for a cohort which contains CCLE samples, with the build set to HG38. "
-                +"Please note that there are no HG38 samples for CCLE, so that program will be absent from the export.",
-                false,
-                $($(this).data('target')).find('.modal-js-messages')
-            );
-        }
-    });
+    // $('.data-tab-content').on('click', '.download-btn', function() {
+    //     var self=$(this);
+    //     var msg = $('#download-in-prog');
+    //
+    //     self.attr('disabled','disabled');
+    //     msg.show();
+    //
+    //     base.blockResubmit(function() {
+    //         self.removeAttr('disabled');
+    //         msg.hide();
+    //     },$('.filelist-obtain .download-token').val(),"downloadToken");
+    //
+    //     if($(this).parents('.data-tab').find('.build :selected').val() == 'HG38'
+    //         && _.find(programs_this_cohort, function(prog){return prog == 'CCLE';})) {
+    //         base.showJsMessage("warning",
+    //             "You have exported a file list for a cohort which contains CCLE samples, with the build set to HG38.<br/>"+
+    //             "Please note that there are no HG38 samples for CCLE, so that program will be absent from the export."
+    //             , true
+    //         );
+    //     }
+    // });
 
     function formatFileSize(bytes) {
         if(bytes == 0) return '0 B';
