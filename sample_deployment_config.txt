@@ -1,0 +1,10 @@
+ENV_FILE=<.env file name in GCS deployment bucket>
+WEBAPP_RUNTIME_SA_KEY=<Web App runtime SA JSON key file name in GCS deployment bucket>
+STATIC_BUCKET=<GCS bucket name of the bucket for static files (must include /static/ subfolder if being used)>
+WEBAPP_APP_YAML=<WebApp app.yaml file name in GCS deployment bucket>
+API_RUNTIME_SA_KEY=<API runtime SA JSON key file name in GCS deployment bucket>
+OPEN_API_YAML=<OpenAPI YAML file for the API in GCS deployment bucket>
+API_APP_YAML=<API app.yaml file name in GCS deployment bucket>
+GCLOUD_BUCKET_DEV_SQL=<GCS bucket name where the SQL database seed for use in testing is located>
+METADATA_SQL_FILE=<File name of the SQL database seed for use in testing is located>
+API_TOKEN_FILE=<API authorization token in GCS deployment bucket>
