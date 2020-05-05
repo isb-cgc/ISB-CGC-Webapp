@@ -209,7 +209,7 @@ def bucket_object_list(request):
 def extended_login_view(request):
     redirect_to = 'dashboard'
     if request.COOKIES and request.COOKIES.get('login_from', '') == 'new_cohort':
-        redirect_to = 'new_cohort'
+        redirect_to = 'cohort'
     try:
         # Write log entry
         st_logger = StackDriverLogger.build_from_django_settings()
@@ -259,7 +259,7 @@ def user_landing(request):
 
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     # check to see if user has read access to 'All TCGA Data' cohort
-    isb_superuser = User.objects.get(username='isb')
+    isb_superuser = User.objects.get(is_staff=True,is_superuser=True,is_active=True)
     superuser_perm = Cohort_Perms.objects.get(user=isb_superuser)
     user_all_data_perm = Cohort_Perms.objects.filter(user=request.user, cohort=superuser_perm.cohort)
     if not user_all_data_perm:
@@ -579,77 +579,86 @@ def bq_meta_data(request):
 
 @login_required
 def dashboard_page(request):
-    # Cohort List
-    isb_superuser = User.objects.get(username='isb')
-    public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser, perm=Cohort_Perms.OWNER).values_list('cohort',
-                                                                                                          flat=True)
-    cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(
-        cohort__id__in=public_cohorts)))
-    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
+    context = {}
+    try:
+        # Cohort List
+        isb_superuser = User.objects.get(is_staff=True, is_superuser=True, is_active=True)
+        public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser, perm=Cohort_Perms.OWNER).values_list('cohort',
+                                                                                                              flat=True)
+        cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(
+            cohort__id__in=public_cohorts)))
+        cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
 
-    # Program List
-    ownedPrograms = request.user.program_set.filter(active=True)
-    sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-    programs = ownedPrograms | sharedPrograms
-    programs = programs.distinct().order_by('-last_date_saved')
+        # Program List
+        ownedPrograms = request.user.program_set.filter(active=True)
+        sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+        programs = ownedPrograms | sharedPrograms
+        programs = programs.distinct().order_by('-last_date_saved')
 
-    # Workbook List
-    userWorkbooks = request.user.workbook_set.filter(active=True)
-    sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-    workbooks = userWorkbooks | sharedWorkbooks
-    workbooks = workbooks.distinct().order_by('-last_date_saved')
+        # Workbook List
+        userWorkbooks = request.user.workbook_set.filter(active=True)
+        sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+        workbooks = userWorkbooks | sharedWorkbooks
+        workbooks = workbooks.distinct().order_by('-last_date_saved')
 
-    # # Notebook VM Instance
-    # user_instances = request.user.instance_set.filter(active=True)
-    # user = User.objects.get(id=request.user.id)
-    # gcp_list = GoogleProject.objects.filter(user=user, active=1)
-    # vm_username = request.user.email.split('@')[0]
-    # client_ip = get_ip_address_from_request(request)
-    # logger.debug('client_ip: '+client_ip)
-    # client_ip_range = ', '.join([client_ip])
-    #
-    # if user_instances:
-    #     user_vm = user_instances[0]
-    #     machine_name = user_vm.name
-    #     project_id = user_vm.gcp.project_id
-    #     zone = user_vm.zone
-    #     result = check_vm_stat(project_id, zone, machine_name)
-    #     status = result['status']
-    # else:
-    #     # default values to fill in fields in form
-    #     project_id = ''
-    #     # remove special characters
-    #     machine_header = re.sub(r'[^A-Za-z0-9]+', '', vm_username.lower())
-    #     machine_name = '{}-jupyter-vm'.format(machine_header)
-    #     zone = 'us-central1-c'
-    #     status = 'NOT FOUND'
-    #
-    # notebook_vm = {
-    #     'user': vm_username,
-    #     'project_id': project_id,
-    #     'name': machine_name,
-    #     'zone': zone,
-    #     'client_ip_range': client_ip_range,
-    #     'status': status
-    # }
+        # # Notebook VM Instance
+        # user_instances = request.user.instance_set.filter(active=True)
+        # user = User.objects.get(id=request.user.id)
+        # gcp_list = GoogleProject.objects.filter(user=user, active=1)
+        # vm_username = request.user.email.split('@')[0]
+        # client_ip = get_ip_address_from_request(request)
+        # logger.debug('client_ip: '+client_ip)
+        # client_ip_range = ', '.join([client_ip])
+        #
+        # if user_instances:
+        #     user_vm = user_instances[0]
+        #     machine_name = user_vm.name
+        #     project_id = user_vm.gcp.project_id
+        #     zone = user_vm.zone
+        #     result = check_vm_stat(project_id, zone, machine_name)
+        #     status = result['status']
+        # else:
+        #     # default values to fill in fields in form
+        #     project_id = ''
+        #     # remove special characters
+        #     machine_header = re.sub(r'[^A-Za-z0-9]+', '', vm_username.lower())
+        #     machine_name = '{}-jupyter-vm'.format(machine_header)
+        #     zone = 'us-central1-c'
+        #     status = 'NOT FOUND'
+        #
+        # notebook_vm = {
+        #     'user': vm_username,
+        #     'project_id': project_id,
+        #     'name': machine_name,
+        #     'zone': zone,
+        #     'client_ip_range': client_ip_range,
+        #     'status': status
+        # }
 
-    # Gene & miRNA Favorites
-    genefaves = request.user.genefavorite_set.filter(active=True)
+        # Gene & miRNA Favorites
+        genefaves = request.user.genefavorite_set.filter(active=True)
 
-    # Variable Favorites
-    varfaves = request.user.variablefavorite_set.filter(active=True)
+        # Variable Favorites
+        varfaves = request.user.variablefavorite_set.filter(active=True)
 
-    return render(request, 'isb_cgc/dashboard.html', {
-        'request': request,
-        'cohorts': cohorts,
-        'programs': programs,
-        'workbooks': workbooks,
-        'genefaves': genefaves,
-        'varfaves': varfaves,
-        # 'optinstatus': opt_in_status
-        # 'notebook_vm': notebook_vm,
-        # 'gcp_list': gcp_list,
-    })
+        context = {
+            'request': request,
+            'cohorts': cohorts,
+            'programs': programs,
+            'workbooks': workbooks,
+            'genefaves': genefaves,
+            'varfaves': varfaves,
+            # 'optinstatus': opt_in_status
+            # 'notebook_vm': notebook_vm,
+            # 'gcp_list': gcp_list,
+        }
+
+    except Exception as e:
+        logger.error("[ERROR] While prepping dashboard:")
+        logger.exception(e)
+        messages.error(request, "Encountered an error while building the dashboard - please contact the administrator.")
+
+    return render(request, 'isb_cgc/dashboard.html', context)
 
 
 @login_required
@@ -684,7 +693,7 @@ def opt_in_update(request):
                 user_opt_in_stat_obj.opt_in_status = opt_in_status_code
                 user_opt_in_stat_obj.save()
             elif user_opt_in_stat_obj.opt_in_status == UserOptInStatus.NOT_SEEN:
-                #chose YES and not seen
+                # user chosen Yes or cancel (dismiss) and status is still not_seen
                 opt_in_status_code = UserOptInStatus.SEEN
                 user_opt_in_stat_obj.opt_in_status = opt_in_status_code
                 user_opt_in_stat_obj.save()
@@ -813,9 +822,12 @@ def opt_in_form_submitted(request):
                 msg = 'We thank you for your time and suggestions.'
         else:
             error_msg = 'We were not able to find a user with the given email. Please check with us again later.'
+            logger.error(error_msg)
     except Exception as e:
-        logger.exception(e)
         error_msg = 'We were not able to submit your feedback due to some errors. Please check with us again later.'
+        logger.exception(e)
+        logger.error(error_msg)
+
     message = {
         'msg': msg,
         'error_msg': error_msg

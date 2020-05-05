@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2016, Institute for Systems Biology
+ * Copyright 2020, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -251,13 +251,20 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 var zoomer = function () {
                     if (!selex_active) {
                         var scaled_tick_font_size =  d3.event.scale * scale_ratio * tick_font_size;
-
-                        svg.attr('width', plot_width * (d3.event.scale > 1 ? d3.event.scale : 1))
-                            .attr('height', plot_height * (d3.event.scale > 1 ? d3.event.scale : 1));
-
-                        svg.select('.x.grid').attr('transform', 'translate(' + (d3.event.translate[0] + x_band_width * d3.event.scale / 2) + ',' + (d3.event.scale*x_grid_height+d3.event.translate[1]) + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+                        svg.select('.x.grid')
+                            .attr('transform', 'translate(' +
+                                    (x_band_width * d3.event.scale / 2) +
+                                ',' +
+                                    (d3.event.scale*x_grid_height) +
+                                ')'+
+                                ' scale(' + d3.event.scale + ',' + d3.event.scale + ')');
                         svg.select('.x.axis')
-                            .attr('transform', 'translate(' +  (margin.left + d3.event.translate[0]) + ', ' + (margin.top+plot_no_margin_height*d3.event.scale) + ')')
+                            .attr('transform',
+                                'translate(' +
+                                    margin.left +
+                                ', ' +
+                                    (margin.top+plot_no_margin_height*d3.event.scale) +
+                                ')')
                             .selectAll('foreignObject')
                             .attr('style', function(d){
                                 var scale_ratio_2  = 1 - Math.floor(d.length/20) * 0.1; // Decrease font size if label text is too long (>28)
@@ -269,15 +276,19 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                         x_axis_area
                             .select('clipPath')
                             .select('rect')
-                            .attr('transform', 'translate(' +  (margin.left) + ', ' + (margin.top+plot_no_margin_height*d3.event.scale) + ')')
+                            .attr('transform', 'translate(' +
+                                (margin.left) + ', ' + (margin.top+plot_no_margin_height*d3.event.scale)
+                                + ')')
                             .attr('width', plot_no_margin_width*d3.event.scale);
                         svg.select('.y.axis-label')
                             .attr('transform', 'rotate(-90) translate(-' + (margin.top + plot_no_margin_height * (d3.event.scale < 1 ? d3.event.scale : 1)/ 2) + ', 15)')
 
                         svg.select('.y.grid')
-                            .attr('transform', 'translate(' + d3.event.translate[0] + ', ' + (d3.event.translate[1] - (y_band_width * d3.event.scale) / 2) + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+                            .attr('transform',
+                                'translate(0, ' +  (-y_band_width * d3.event.scale) / 2 + ')'+
+                                'scale(' + d3.event.scale + ',' + d3.event.scale + ')');
                         svg.select('.y.axis')
-                            .attr('transform', 'translate('+ margin.left +', ' + (margin.top + d3.event.translate[1])+')')
+                            .attr('transform', 'translate('+ margin.left +', ' + margin.top +')')
                             .selectAll('foreignObject')
                             .attr('height', y.rangeBand()+'px')
                             .attr('style', function(d) {
@@ -302,13 +313,17 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                             .select('rect')
                             .attr('width', plot_no_margin_width*d3.event.scale)
                             .attr('height', plot_no_margin_height*d3.event.scale);
-                        plot_area.selectAll('.expected_fill').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
-                        plot_area.selectAll('text').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+                        plot_area.selectAll('.expected_fill')
+                            .attr('transform',
+                                'scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+                        plot_area.selectAll('text')
+                            .attr('transform',
+                                'scale(' + d3.event.scale + ',' + d3.event.scale + ')');
                     }
                 };
 
 
-                var min_scale = 25/x_band_width;
+                var min_scale = 50/x_band_width;
                 var max_scale = 150/x_band_width;
                 var zoom = d3.behavior.zoom()
                     .x(x2).scaleExtent([min_scale, max_scale])

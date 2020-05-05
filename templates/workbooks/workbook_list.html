@@ -26,6 +26,9 @@
     <div class="panel panel-default">
         <div class="panel-body">
             {% if workbooks %}
+
+            {% include "isb_cgc/pagination.html" %}
+
             <table id="workbook-table" class="table table-striped tablesorter">
                 <thead>
                     <th></th>
@@ -37,7 +40,7 @@
                 </thead>
                 <tbody>
                     {% for workbook in workbooks %}
-                        <tr>
+                        <tr class="page-item">
                             <td class="control-col">
 {#                                {% if workbook.owner.id == user.id %}#}
                                 <div class="dropdown">
@@ -78,7 +81,9 @@
         </div>
     </div>
 </div>
-
 {% endblock %}
 
-{% block js_file %}{% static 'js/workbooks_list.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/workbooks_list.js' %}"></script>
+{% endblock %}
