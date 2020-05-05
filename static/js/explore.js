@@ -35,7 +35,9 @@ require([
 
     // Resets forms in modals on hide. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function () {
-        $(this).find('form').reset();
+        if($(this).find('form').get().length) {
+            $(this).find('form').get(0).reset();
+        }
     });
 
 
