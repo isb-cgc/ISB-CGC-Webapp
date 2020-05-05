@@ -93,7 +93,7 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
                     if 'KIDNEY' in facets['BodyPartExamined']:
                         facets['BodyPartExamined']['KIDNEY'] += facets['BodyPartExamined']['Kidney']
                     else:
-                        facets['KIDNEY'] = facets['BodyPartExamined']['Kidney']
+                        facets['BodyPartExamined']['KIDNEY'] = facets['BodyPartExamined']['Kidney']
                     del facets['BodyPartExamined']['Kidney']
 
         if not counts_only:
