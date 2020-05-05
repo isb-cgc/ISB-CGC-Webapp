@@ -48,7 +48,7 @@ try:
     db.commit()
 
 except Exception as e:
-    print("[ERROR] Exception in add_site_ids: " + e.message, file=sys.stderr)
+    print("[ERROR] Exception in add_site_ids: ", file=sys.stderr)
     print(traceback.format_exc(), file=sys.stderr)
 finally:
     if cursor: cursor.close()

@@ -114,13 +114,13 @@ require([
                     'displayName': 'Sample Barcode',
                     test: function (col) { return !!(col.name.match(/barcode/i) && !col.name.match(/participant/i)); },
                     type: 'string',
-                    key: 'sample_barcode',
+                    key: 'sample_barcode'
                 },
                 'case': {
                     'displayName': 'Case Barcode',
                     test: function (col) { return !!(col.name.match(/barcode/i) && col.name.match(/participant/i)); },
                     type: 'string',
-                    key: 'case_barcode',
+                    key: 'case_barcode'
                 }
             }
         };
@@ -168,7 +168,7 @@ require([
                 //fileObj.rows = [];
                 for (var i = 1, l = lines.length; i < l; i++) {
                     var row = lines[i].split('\t');
-                    if (row.length != len) {
+                    if (row.length !== len) {
                         // Allow an empty last line for a file that ends with a newline
                         if (i === l - 1 && lines[i].match(/^\s*$/)) {
                             lines.pop();
@@ -247,7 +247,7 @@ require([
         addedFiles.splice(addedFiles.indexOf(obj), 1);
         fileEl.remove();
 
-        if(addedFiles.length == 0) {
+        if(addedFiles.length === 0) {
             $('#file-list-table .table-message').show();
         }
 
@@ -281,7 +281,7 @@ require([
                     addedFiles.push({
                         file: this.files[f],
                         $el : tr,
-                        uid: uidCounter++,
+                        uid: uidCounter++
                     });
                     table.append(tr);
                 }
@@ -326,8 +326,8 @@ require([
             fileDataTypes[type]++;
         });
 
-        if( (tabSet == 'new' && !$.trim( $('#program-name').val() )) ||
-            (tabSet == 'existing' && !$.trim( $('#program-selection').val() )) ) {
+        if( (tabSet === 'new' && !$.trim( $('#program-name').val() )) ||
+            (tabSet === 'existing' && !$.trim( $('#program-selection').val() )) ) {
 
             hasErrors = true;
             errorMessage('Please select an existing program or insert a name for a new program');
@@ -367,7 +367,7 @@ require([
                     return true;
 
                 return 1 === _.reduce(file.processed.columns, function (n, col) {
-                        return !col.ignored && col.controlled && col.controlled.key == 'sample_barcode' ? n + 1 : n;
+                        return !col.ignored && col.controlled && col.controlled.key === 'sample_barcode' ? n + 1 : n;
                     }, 0);
             }),
             platformPipelineValid = _.every(addedFiles, function (file) {
@@ -548,9 +548,8 @@ require([
         form.append('bucket', $('#select-gcp-bucket').val());
         form.append('dataset', $('#select-gcp-dataset').val());
 
-        var pipelines_valid = true;
         _.each(addedFiles, function (added) {
-            form.append('file_'+added.uid, added.file, added.file.name);
+            form.append('file_' + added.uid, added.file, added.file.name);
             form.append('file_' + added.uid + '_type', added.datatype);
             if(!added.processed)
                 added.processed = {};
@@ -568,7 +567,7 @@ require([
             type: 'POST',
             data: form,
             processData: false,
-            contentType: false,
+            contentType: false
         }).done(function (res) {
             if (res.status === 'success') {
                 $('#base-data-form')[0].reset();
@@ -576,8 +575,8 @@ require([
             } else {
                 errorMessage('Error submitting response : ' + res.message);
             }
-        }).fail(function (res) {
-            errorMessage('We had an error submitting the response: ' + res.message);
+        }).error(function (res) {
+            errorMessage('We had an error submitting the response' + (res.responseJSON ? ': '+res.responseJSON.msg : '.'));
         }).always(function () {
             $('#upload-button, #back-button').removeClass('disabled')
                 .siblings('.progress-message').addClass('hidden');

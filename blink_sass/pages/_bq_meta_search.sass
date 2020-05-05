@@ -192,6 +192,8 @@
                 &.preview-table-container
                     overflow-x: scroll
                     max-width: 1070px
+            a.open-gcp-btn
+                cursor: pointer
             table
                 &.detail-table
                     th, td
@@ -241,17 +243,14 @@
         &.details-shown
             td.details-control
                 &:before
-                    font-family: FontAwesome
-                    font-size: 1.1em
+                    //font-family: FontAwesome
+                    //font-size: 1.1em
                     content: "\f056"
                     color: #993333
         &.preview-shown
             td.tbl-preview
                 &:before
-                    font-family: FontAwesome
-                    content: "\f0ce"
                     color: $isb-warning
-                    margin: 0 6px 0 20px
 
     .modal ul
         list-style: inherit

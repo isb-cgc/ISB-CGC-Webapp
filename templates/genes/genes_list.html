@@ -22,6 +22,7 @@
     <div class="panel penel-default">
         <div class="panel-body">
             {% if gene_fav_list %}
+                {% include "isb_cgc/pagination.html" %}
                 <table id="gene-list-table" class="table table-striped tablesorter">
                     <thead>
                         <tr>
@@ -33,7 +34,7 @@
                     </thead>
                     <tbody>
                         {% for genes_fav in gene_fav_list %}
-                            <tr>
+                            <tr class="page-item">
                                 <td class="control-col">
                                     <div class="dropdown">
                                         <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
@@ -65,4 +66,7 @@
 
 {% endblock %}
 
-{% block js_file %}{% static 'js/form_utils.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/form_utils.js' %}"></script>
+{% endblock %}

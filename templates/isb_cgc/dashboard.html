@@ -80,15 +80,6 @@
         <!--
          Use this row to embed announcements for users to see on their dashboards.
          -->
-        <div class="row">
-            <div class="col-lg-12">
-                <div id="popup-blocker-warning" class="alert alert-warning alert-dismissible" style="display: none;">
-                    <button type="button" class="close" data-dismiss="alert"><span
-                            aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                    A Pop-up Blocker is Enabled! Please go to your browser's settings and add this site to your allowed/exception site list.
-                </div>
-            </div>
-        </div>
 
 {#        <div class="row">#}
 {#            <div class="col-md-12">#}
@@ -696,4 +687,7 @@
 {% endblock %}
 
 
-{% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}
+{% block js_file %}
+    {{ block.super }}
+    <script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}
