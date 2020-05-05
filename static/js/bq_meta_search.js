@@ -252,7 +252,7 @@ require([
                 {
                     'name': 'fields',
                     'data': function(row){
-                        return format_schema_field_names(row.schema.fields, false);
+                        return format_schema_field_names(row.schema.fields ? row.schema.fields: [], false);
                     },
                     'visible': false
                 },
@@ -413,7 +413,7 @@ require([
         if(err_mssg) {
             row.child('<div class="float-right"><i class="fa fa-exclamation-triangle" style="margin-right: 5px;"></i>'+err_mssg+'</div>').show();
         } else {
-            var schema_fields = row.data().schema.fields;
+            var schema_fields = row.data().schema.fields ? row.data().schema.fields:[];
             var tbl_data = td.data('preview-data');
             row.child(format_tbl_preview(schema_fields, tbl_data)).show();
         }
@@ -462,7 +462,7 @@ require([
             '<td>' + (d.description == null? 'N/A' : d.description)+ '</td>' +
             '</tr><tr>' +
             '<td><strong>Schema</strong></td>' +
-            '<td>' + form_schema_table(d.schema.fields) + '</td>' +
+            '<td>' + form_schema_table(d.schema.fields ? d.schema.fields : []) + '</td>' +
             '</tr><tr>' +
             '<td><strong>Labels</strong></td>' +
             '<td>'+tokenize_labels(d.labels)+'</td>' +
