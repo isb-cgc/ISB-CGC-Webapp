@@ -33,7 +33,7 @@ require([
     'cohortfilelist',
 ], function ($, base, imagesearch, plotly, cohortfilelist) {
 
-    // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
+    // Resets forms in modals on hide. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function () {
         $(this).find('form').reset();
     });
