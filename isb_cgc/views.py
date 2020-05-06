@@ -115,12 +115,18 @@ def landing_page(request):
 
 # Redirect all requests for appspot to our actual domain.
 def domain_redirect(request):
-    appspot_host = '^.*{}\.appspot\.com.*$'.format(settings.GCLOUD_PROEJCT_ID.lower())
-    logger.info("[STATUS] host: {}".format(request.META.get('HTTP_HOST', '')))
-    if re.search(appspot_host,request.META.get('HTTP_HOST', '')) and not re.search(appspot_host,settings.BASE_URL):
-        return redirect(settings.BASE_URL)
-    else:
-        return landing_page(request)
+    try:
+        appspot_host = '^.*{}\.appspot\.com.*$'.format(settings.GCLOUD_PROJECT_ID.lower())
+        logger.info("[STATUS] host: {}".format(request.META.get('HTTP_HOST', '')))
+        if re.search(appspot_host,request.META.get('HTTP_HOST', '')) and not re.search(appspot_host,settings.BASE_URL):
+            return redirect(settings.BASE_URL)
+        else:
+            return landing_page(request)
+    except Exception as e:
+        logger.error("[ERROR] While handling domain redirect:")
+        logger.exception(e)
+
+    return landing_page(request)
 
 '''
 Displays the privacy policy
