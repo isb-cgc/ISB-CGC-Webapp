@@ -1377,6 +1377,7 @@ require([
         }
     });
 
+
     $('#log-in-to-save-btn').on('click', function()
     {
         $.setCookie('login_from','new_cohort','/');
@@ -1385,5 +1386,64 @@ require([
 
     filter_panel_load(cohort_id);
 
+    $('#more-program-toggle').on('click', function()
+    {
+        $(this).parent().toggleClass('open');
+    });
+
+    $('body').on('click', function (e) {
+        if (!$('#more-program-toggle').is(e.target)
+            && $('.more-program-dropdown').has(e.target).length === 0)
+        {
+            $('.more-program-dropdown').removeClass('open');
+        }
+    });
+
+
+    $('.dropdown-value').click(function() {
+        $('.program-tab').each(function(index) {
+            if (index > 2)
+            {
+                $(this).remove();
+            }
+        });
+        var tab_count = 2;
+        $(".dropdown-value").each(function() {
+            if($(this).is(":checked")) {
+                var prog_id = $(this).attr('program-id');
+                var prog_name = $(this).attr('program-name');
+                var item = '<li role="presentation" class="program-tab">' +
+                    '<a href="#' + prog_id + '-data" class="program-tab-btn" role="tab" data-toggle="tab" title="ISB-CGC Data"' +
+                    ' data_program_id="' + prog_id + '">' + prog_name + '</a></li>';
+
+                //$(item).insertAfter("#");
+                $('#my-tabs').append(item);
+                tab_count++;
+            }
+        });
+        var more_tab = $('#more-program-tab');
+        more_tab.insertAfter(more_tab.siblings(':eq(' + tab_count + ')'));
+        recalc_prog_tab_width();
+    });
+
+    var recalc_prog_tab_width = function() {
+        $('.program-tab').each(function()
+        {
+            var program_cnt = $(".program-tab").length;
+            var tab_width = 90 / program_cnt;
+            $(this).css('width', tab_width.toString() + "%");
+            $('#more-program-tab').css('width', "10%");
+        });
+    };
+
+    recalc_prog_tab_width();
+
+    /*
+    $('.dropdown-menu').change(function() {
+      var cbVal = this.checked ? 'on ' : 'off ';
+      cbVal += $('[for='+this.id+']').text ();
+      $('program-tab').append('<li>'+cbVal+'</li>');
+    });
+    */
 });
 
