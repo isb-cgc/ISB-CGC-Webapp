@@ -107,17 +107,20 @@ def _decode_dict(data):
     return rv
 
 
-'''
-Handles login and user creation for new users.
-Returns user to landing page.
-'''
-
-
 @never_cache
 def landing_page(request):
     logger.info("[STATUS] Received landing page view request at {}".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
     return render(request, 'isb_cgc/landing.html', {'request': request, })
 
+
+# Redirect all requests for appspot to our actual domain.
+def domain_redirect(request):
+    appspot_host = '^.*{}\.appspot\.com.*$'.format(settings.GCLOUD_PROEJCT_ID.lower())
+    logger.info("[STATUS] host: {}".format(request.META.get('HTTP_HOST', '')))
+    if re.search(appspot_host,request.META.get('HTTP_HOST', '')) and not re.search(appspot_host,settings.BASE_URL):
+        return redirect(settings.BASE_URL)
+    else:
+        return landing_page(request)
 
 '''
 Displays the privacy policy
