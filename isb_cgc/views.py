@@ -689,10 +689,10 @@ def opt_in_check_show(request):
 def opt_in_update(request):
     # If user logs in for the second time, opt-in status changes to NOT_SEEN
     error_msg = ''
-    opt_in_choice = ''
+    opt_in_selection = ''
     redirect_url = ''
     if request.POST:
-        opt_in_choice = request.POST.get('opt-in-selection')
+        opt_in_selection = request.POST.get('opt-in-selection')
 
     try:
         user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=request.user).first()
@@ -701,9 +701,9 @@ def opt_in_update(request):
         if user_opt_in_stat_obj:
             user_opt_in_stat_obj.opt_in_status = UserOptInStatus.SEEN
             user_opt_in_stat_obj.save()
-            if opt_in_choice == 'yes' or opt_in_choice == 'no':
-                feedback_form_link_template = feedback_form_link + '?selection={opt_in_choice}'
-                feedback_form_link_params = feedback_form_link_template.format(selection=opt_in_choice)
+            if opt_in_selection == 'yes' or opt_in_selection == 'no':
+                feedback_form_link_template = feedback_form_link + '?opt_in_selection={opt_in_selection}'
+                feedback_form_link_params = feedback_form_link_template.format(opt_in_selection=opt_in_selection)
                 redirect_url = feedback_form_link_params
 
     except Exception as e:
@@ -765,7 +765,12 @@ def opt_in_form(request):
         opt_in_status_obj = UserOptInStatus.objects.filter(user=user).first()
         if opt_in_status_obj and opt_in_status_obj.opt_in_status == UserOptInStatus.NO:
             opt_in_status = 'opt-out'
-        selection = request.GET.get('opt_in_choice') if request.GET.geet('opt_in_choice') else''
+        selection = request.GET.get('opt_in_selection') if request.GET.get('opt_in_selection') else ''
+        if selection == 'yes':
+            opt_in_status = 'opt-in'
+        elif selection == 'no':
+            opt_in_status = 'opt-out'
+
     else:
         email = request.GET.get('email') if request.GET.get('email') else ''
         first_name = request.GET.get('first_name') if request.GET.get('first_name') else ''
