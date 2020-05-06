@@ -154,9 +154,6 @@ def user_detail(request, user_id):
         social_account = SocialAccount.objects.get(user_id=user_id, provider='google')
 
         user_status_obj = UserOptInStatus.objects.filter(user=user).first()
-        if user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.NEW:
-            user_status_obj.opt_in_status = UserOptInStatus.NOT_SEEN
-            user_status_obj.save()
         if user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.YES:
             user_opt_in_status = "Opted-In"
         elif user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.NO:
@@ -224,10 +221,14 @@ def extended_login_view(request):
 
         # If user logs in for the second time, or user has not completed the survey, opt-in status changes to NOT_SEEN
         user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=user).first()
-        if user_opt_in_stat_obj and \
-                (user_opt_in_stat_obj.opt_in_status == UserOptInStatus.NEW or user_opt_in_stat_obj.opt_in_status == UserOptInStatus.SEEN):
-            user_opt_in_stat_obj.opt_in_status = UserOptInStatus.NOT_SEEN
-            user_opt_in_stat_obj.save()
+        if user_opt_in_stat_obj:
+            if user_opt_in_stat_obj.opt_in_status == UserOptInStatus.NEW or \
+                    user_opt_in_stat_obj.opt_in_status == UserOptInStatus.SKIP_ONCE:
+                user_opt_in_stat_obj.opt_in_status = UserOptInStatus.NOT_SEEN
+                user_opt_in_stat_obj.save()
+            elif user_opt_in_stat_obj.opt_in_status == UserOptInStatus.SEEN:
+                user_opt_in_stat_obj.opt_in_status = UserOptInStatus.SKIP_ONCE
+                user_opt_in_stat_obj.save()
 
     except Exception as e:
         logger.exception(e)
@@ -682,37 +683,19 @@ def opt_in_update(request):
     opt_in_choice = ''
     redirect_url = ''
     if request.POST:
-        opt_in_choice = request.POST.get('opt-in-radio')
+        opt_in_choice = request.POST.get('opt-in-selection')
 
     try:
         user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=request.user).first()
         feedback_form_link = request.build_absolute_uri(reverse('opt_in_form'))
 
         if user_opt_in_stat_obj:
-            if opt_in_choice == 'opt-out':
-                opt_in_status_code = UserOptInStatus.NO
-                user_opt_in_stat_obj.opt_in_status = opt_in_status_code
-                user_opt_in_stat_obj.save()
-            elif user_opt_in_stat_obj.opt_in_status == UserOptInStatus.NOT_SEEN:
-                # user chosen Yes or cancel (dismiss) and status is still not_seen
-                opt_in_status_code = UserOptInStatus.SEEN
-                user_opt_in_stat_obj.opt_in_status = opt_in_status_code
-                user_opt_in_stat_obj.save()
-
-        if opt_in_choice.startswith('opt-in-'):
-            user_email = request.user.email
-            first_name = request.user.first_name
-            last_name = request.user.last_name
-
-            if opt_in_choice == 'opt-in-email':
-                feedback_form_link_template = feedback_form_link + '?email={email}&first_name={firstName}&last_name={lastName}'
-                feedback_form_link_params = feedback_form_link_template.format(email=user_email, firstName=first_name,
-                                                                        lastName=last_name)
-                resp = send_feedback_form(user_email, first_name, last_name, feedback_form_link_params)
-                if resp['status'] == 'error':
-                    error_msg = resp['message']
-            else:  # opt-in-now
-                redirect_url = feedback_form_link
+            user_opt_in_stat_obj.opt_in_status = UserOptInStatus.SEEN
+            user_opt_in_stat_obj.save()
+            if opt_in_choice == 'yes' or opt_in_choice == 'no':
+                feedback_form_link_template = feedback_form_link + '?selection={opt_in_choice}'
+                feedback_form_link_params = feedback_form_link_template.format(selection=opt_in_choice)
+                redirect_url = feedback_form_link_params
 
     except Exception as e:
         error_msg = '[Error] There has been an error while updating your subscription status.'
@@ -773,10 +756,12 @@ def opt_in_form(request):
         opt_in_status_obj = UserOptInStatus.objects.filter(user=user).first()
         if opt_in_status_obj and opt_in_status_obj.opt_in_status == UserOptInStatus.NO:
             opt_in_status = 'opt-out'
+        selection = request.GET.get('opt_in_choice') if request.GET.geet('opt_in_choice') else''
     else:
         email = request.GET.get('email') if request.GET.get('email') else ''
         first_name = request.GET.get('first_name') if request.GET.get('first_name') else ''
         last_name = request.GET.get('last_name') if request.GET.get('last_name') else ''
+
 
     form = {'first_name': first_name,
             'last_name': last_name,
