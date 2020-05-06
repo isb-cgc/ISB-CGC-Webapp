@@ -26,7 +26,7 @@ admin.autodiscover()
 
 urlpatterns = [
 
-    url(r'^$', views.landing_page, name='landing_page'),
+    url(r'^$', views.domain_redirect, name='domain_redirect'),
     url(r'^user_landing/$', views.user_landing, name='user_landing'),
     url(r'^search_cohorts_viz/$', views.search_cohorts_viz, name='search_cohorts_viz'),
     url(r'^style_guide/', views.css_test),
