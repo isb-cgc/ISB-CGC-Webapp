@@ -1384,6 +1384,5 @@ require([
     });
 
     filter_panel_load(cohort_id);
-
 });
 

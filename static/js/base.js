@@ -366,7 +366,7 @@ require([
             type: 'POST',
             url: BASE_URL + '/opt_in/update/',
             dataType  :'json',
-            data: {'opt-in-radio': opt_in_selection},
+            data: {'opt-in-selection': opt_in_selection},
             success: function(data) {
                 redirect_url = data['redirect-url'];
                 if (redirect_url)
@@ -387,23 +387,18 @@ require([
     }
 
     // Code to handle opt-in dialog interaction
-    $('#submit-opt-in-btn').on('click', function() {
-        var opt_in_radio_value = $('input[name="opt-in-radio"]:checked').val();
-        send_opt_in_update(opt_in_radio_value);
+    $('#opt-in-yes-btn').on('click', function() {
+        send_opt_in_update("yes");
     });
 
-    $('#cancel-opt-in-btn, #close-opt-in-btn').on('click', function() {
-        send_opt_in_update('dismiss');
+    $('#opt-in-no-btn').on('click', function() {
+        send_opt_in_update("no");
     });
 
-    $('#will-email-message').collapse({toggle: false});
-    $('[name="opt-in-radio"]').on('change', function() {
-        if ($(this).val() === "opt-in-email") {
-            $('#will-email-message').collapse('show');
-        } else {
-            $('#will-email-message').collapse('hide');
-        }
+    $('#opt-in-ask-later-btn').on('click', function() {
+        send_opt_in_update('ask_later');
     });
+
     // Per https://stackoverflow.com/questions/13550477/twitter-bootstrap-alert-message-close-and-open-again
     // Set up our own data-hide type to 'hide' our alerts instead of popping them off the DOM entirely
     $("[data-hide]").on("click", function(){
