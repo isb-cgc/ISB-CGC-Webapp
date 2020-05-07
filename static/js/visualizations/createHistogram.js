@@ -161,6 +161,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
             var zoom = d3.behavior.zoom()
                 .x(x)
                 .y(y)
+                .scaleExtent([0.5, 1.5])
                 .on('zoom', zoomer);
 
             svg.call(zoom);

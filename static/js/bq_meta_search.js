@@ -19,7 +19,7 @@
 require.config({
     paths: {
         'bootstrap': ['//stackpath.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min', 'libs/bootstrap.min'],
-        'jquery': ['//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min', 'libs/jquery-1.11.1.min'],
+        'jquery': ['//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min'],
         'datatables.net': ['//cdn.datatables.net/1.10.19/js/jquery.dataTables.min', 'libs/jquery.dataTables.min'],
         'datatables.bootstrap': ['https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap.min'],
         'datatables.net-buttons': ['//cdn.datatables.net/buttons/1.6.0/js/dataTables.buttons.min'],
@@ -43,11 +43,11 @@ require([
     'datatables.net-html5',
     'buttons-colvis',
     'chosen'
-], function ($) {
+], function (jq) {
 
-    $(document).ready(function () {
+    jq(document).ready(function () {
 
-        var table = $('#bqmeta').DataTable({
+        var table = jq('#bqmeta').DataTable({
             dom: 'lfBrtip',
             ajax: {
                 url: BASE_URL+'/bq_meta_data',
@@ -82,7 +82,7 @@ require([
                     "data": null,
                     "defaultContent": '',
                     "createdCell": function (cell) {
-                        $(cell).attr('title', 'View Table Details');
+                        jq(cell).attr('title', 'View Table Details');
                     }
                 },
                 {
@@ -191,7 +191,7 @@ require([
                     'name': 'numRows',
                     'data': 'numRows',
                     'className': 'text-right colvis-toggle',
-                    'render': $.fn.dataTable.render.number( ',', '.')
+                    'render': jq.fn.dataTable.render.number( ',', '.')
                 },
                 {
                     'name': 'createdDate',
@@ -222,7 +222,7 @@ require([
                     'searchable': false,
                     'orderable': false,
                     'createdCell': function (cell) {
-                        $(cell).attr('title', 'Preview Table');
+                        jq(cell).attr('title', 'Preview Table');
                     }
                 },
                 {
@@ -238,7 +238,7 @@ require([
                         return row.labels ? row.labels: null;
                     },
                     'render': function(data, type){
-                        var labels_arr = $.map(data, function(v, k){
+                        var labels_arr = jq.map(data, function(v, k){
                             if (type === 'display') {
                                 return v ? k+':'+v : k;
                             }else{
@@ -252,7 +252,7 @@ require([
                 {
                     'name': 'fields',
                     'data': function(row){
-                        return format_schema_field_names(row.schema.fields, false);
+                        return format_schema_field_names(row.schema.fields ? row.schema.fields: [], false);
                     },
                     'visible': false
                 },
@@ -277,70 +277,70 @@ require([
             serverSide: false,
             order: [[1, 'asc']],
             initComplete: function (settings, json) {
-                $('.spinner').remove();
+                jq('.spinner').remove();
                 reset_table_style(settings);
             },
             drawCallback: function (settings) {
                 reset_table_style(settings);
-                set_gcp_open_btn($('#bqmeta'));
+                set_gcp_open_btn(jq('#bqmeta'));
             }
         });
 
-        $('.bq-filter').on('keyup', function () {
-            var column_name = $(this).attr('data-column-name');
+        jq('.bq-filter').on('keyup', function () {
+            var column_name = jq(this).attr('data-column-name');
             columnSearch(column_name, this.value);
         });
 
-        $('.bq-checkbox').on('change', function () {
-            var column_name = $(this).attr('data-column-name');
+        jq('.bq-checkbox').on('change', function () {
+            var column_name = jq(this).attr('data-column-name');
             var checkbox_vals = '';
-            $('input[data-column-name='+column_name+']:checked').each(function(i){
-                checkbox_vals += (i > 0 ? '|': '') + $(this).val();
+            jq('input[data-column-name='+column_name+']:checked').each(function(i){
+                checkbox_vals += (i > 0 ? '|': '') + jq(this).val();
             });
             columnSearch(column_name, checkbox_vals, true, false);
         });
 
-        $('.bq-select').on('change', function () {
-            var column_name = $(this).attr('data-column-name');
-            if($(this).prop('multiple')){
+        jq('.bq-select').on('change', function () {
+            var column_name = jq(this).attr('data-column-name');
+            if(jq(this).prop('multiple')){
                 var regex_term = '';
-                $.each($(this).val(),function(index, value){
+                jq.each(jq(this).val(),function(index, value){
                     regex_term += (index > 0 ? '|' : '') + '\\b' + value + '\\b(?!-)';
                 });
                 columnSearch(column_name, regex_term, true, false);
             }
             else{
-                columnSearch(column_name, $(this).val(), false, false);
+                columnSearch(column_name, jq(this).val(), false, false);
             }
         });
 
-        $(".reset-btn").on('click', function () {
+        jq(".reset-btn").on('click', function () {
 
-            $(".autocomplete_select_box").val('').trigger("chosen:updated");
-            $('.bq-filter, .bq-select').val('');
-            $('#status').val('current');
-            $('.bq-checkbox').prop('checked', false);
-            $('.bq-select, .bq-checkbox').trigger('change');
-            $('.bq-filter').trigger('keyup');
+            jq(".autocomplete_select_box").val('').trigger("chosen:updated");
+            jq('.bq-filter, .bq-select').val('');
+            jq('#status').val('current');
+            jq('.bq-checkbox').prop('checked', false);
+            jq('.bq-select, .bq-checkbox').trigger('change');
+            jq('.bq-filter').trigger('keyup');
 
         });
 
-        $('#gcp-open-btn').on('click', function () {
-            var do_not_show_again = ($('#do-not-show-cb:checked').length > 0);
+        jq('#gcp-open-btn').on('click', function () {
+            var do_not_show_again = (jq('#do-not-show-cb:checked').length > 0);
             if (typeof(Storage) !== "undefined") {
                 // Store
                 gcp_modal_disabled |= do_not_show_again;
                 sessionStorage.setItem("gcp_modal_disabled", gcp_modal_disabled);
             }
-            $('#gcp-open-modal').modal('hide');
+            jq('#gcp-open-modal').modal('hide');
         });
 
 
-        $('#bqmeta').find('tbody').on('click', 'td.tbl-preview', function () {
+        jq('#bqmeta').find('tbody').on('click', 'td.tbl-preview', function () {
 
-            var td = $(this).closest('td');
+            var td = jq(this).closest('td');
             var tbl_path = table.cell(td).data();
-            var tr = $(this).closest('tr');
+            var tr = jq(this).closest('tr');
             var row = table.row(tr);
             if (row.child.isShown() && tr.hasClass('preview-shown')) {
                 // This row is already open - close it
@@ -350,7 +350,7 @@ require([
                 if(!td.data('preview-data')) {
                     //check if the preview data is stored
                     //if not get the data and store it
-                    $.ajax({
+                    jq.ajax({
                         type: "GET",
                         url: BASE_URL + "/get_tbl_preview/" + tbl_path + "/",
                         beforeSend: function () {
@@ -379,8 +379,8 @@ require([
         };
 
         // Add event listener for opening and closing details
-        $('#bqmeta').find('tbody').on('click', 'td.details-control', function () {
-            var tr = $(this).closest('tr');
+        jq('#bqmeta').find('tbody').on('click', 'td.details-control', function () {
+            var tr = jq(this).closest('tr');
             var row = table.row(tr);
             if (row.child.isShown() && tr.hasClass('details-shown')) {
                 // This row is already open - close it
@@ -390,18 +390,18 @@ require([
             else {
                 // Open this row
                 row.child(format_tbl_details(row.data())).show();
-                $(".copy-btn").on('click', function () {
-                    copy_to_clipboard($(this).siblings('.full_id_txt'));
+                jq(".copy-btn").on('click', function () {
+                    copy_to_clipboard(jq(this).siblings('.full_id_txt'));
                 });
-                set_gcp_open_btn($(tr).next('tr').find('.detail-table'));
+                set_gcp_open_btn(jq(tr).next('tr').find('.detail-table'));
                 tr.addClass('shown details-shown');
                 tr.removeClass('preview-shown');
             }
         });
-        $('#bq-meta-form').find('i.fa-info-circle').tooltip();
-        $('#status').val('current');
-        $('#status').trigger('change');
-        $(".autocomplete_select_box").chosen({
+        jq('#bq-meta-form').find('i.fa-info-circle').tooltip();
+        jq('#status').val('current');
+        jq('#status').trigger('change');
+        jq(".autocomplete_select_box").chosen({
             // disable_search_threshold: 10,
             no_results_text: "Oops, nothing found!",
             width: "100%"
@@ -413,7 +413,7 @@ require([
         if(err_mssg) {
             row.child('<div class="float-right"><i class="fa fa-exclamation-triangle" style="margin-right: 5px;"></i>'+err_mssg+'</div>').show();
         } else {
-            var schema_fields = row.data().schema.fields;
+            var schema_fields = row.data().schema.fields ? row.data().schema.fields:[];
             var tbl_data = td.data('preview-data');
             row.child(format_tbl_preview(schema_fields, tbl_data)).show();
         }
@@ -462,7 +462,7 @@ require([
             '<td>' + (d.description == null? 'N/A' : d.description)+ '</td>' +
             '</tr><tr>' +
             '<td><strong>Schema</strong></td>' +
-            '<td>' + form_schema_table(d.schema.fields) + '</td>' +
+            '<td>' + form_schema_table(d.schema.fields ? d.schema.fields : []) + '</td>' +
             '</tr><tr>' +
             '<td><strong>Labels</strong></td>' +
             '<td>'+tokenize_labels(d.labels)+'</td>' +
@@ -474,11 +474,11 @@ require([
     };
 
     var copy_to_clipboard = function(el) {
-        var $temp = $("<input>");
-        $("body").append($temp);
-        $temp.val( '`' + $(el).text() + '`' ).select();
+        var temp = jq("<input>");
+        jq("body").append(temp);
+        temp.val( '`' + jq(el).text() + '`' ).select();
         document.execCommand("copy");
-        $temp.remove();
+        temp.remove();
     };
 
     var format_schema_field_names = function(schema_fields, in_html){
@@ -577,7 +577,7 @@ require([
                     else {
                         var n_cell = cell[n_row]['v']['f'][n_col]['v'];
                         if(typeof n_cell === 'object' &&  n_cell){
-                            td_str += '['+ ($.map(n_cell, function(nn_row){
+                            td_str += '['+ (jq.map(n_cell, function(nn_row){
                                 return nn_row['v'];
                             }).join(', ')) + ']';
                         }
@@ -604,7 +604,7 @@ require([
 
     var tokenize_labels = function(labels_obj){
         var tokenized_str = '';
-        $.each(labels_obj, function(key, value){
+        jq.each(labels_obj, function(key, value){
             tokenized_str += '<span class="label">'+ key + (value ? ' : ' + value : '') + '</span>';
         });
         return tokenized_str;
@@ -616,13 +616,13 @@ require([
         if(data){
             schema_table += '<tr><th>Field Name</th><th>Type</th><th>Mode</th><th>Description</th></tr>'
         }
-        $.each(data, function (i, d) {
+        jq.each(data, function (i, d) {
             schema_table += '<tr><td>'+ d.name + '</td><td>' + d.type + '</td><td>' + d.mode +'</td><td>' + d.description +'</td></tr>';
             if(d.type === 'RECORD'){
-                $.each(d.fields, function(ii, dd){
+                jq.each(d.fields, function(ii, dd){
                     schema_table += '<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;.'+ dd.name + '</td><td>' + dd.type + '</td><td>' + dd.mode +'</td><td>' + dd.description +'</td></tr>';
                     if(dd.type === 'RECORD'){
-                        $.each(dd.fields, function(iii, ddd) {
+                        jq.each(dd.fields, function(iii, ddd) {
                             schema_table += '<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.'+ ddd.name + '</td><td>' + ddd.type + '</td><td>' + ddd.mode +'</td><td>' + ddd.description +'</td></tr>';
                         });
                     }
@@ -635,7 +635,7 @@ require([
     };
 
     var filtered_label_data = function(data_labels, filter_key_term){
-        var filtered_val_arr = $.map(data_labels, function (val, key) {
+        var filtered_val_arr = jq.map(data_labels, function (val, key) {
             return key.startsWith(filter_key_term) ? val : null;
         });
         return (filtered_val_arr.length > 0 ? filtered_val_arr.join(', ') : null);
@@ -647,8 +647,8 @@ require([
     };
 
     var reset_table_style = function (settings) {
-        $('#bqmeta').find('th').attr('style','');
-        var api = new $.fn.dataTable.Api( settings );
+        jq('#bqmeta').find('th').attr('style','');
+        var api = new jq.fn.dataTable.Api( settings );
         var csv_button = api.buttons('.buttons-csv');
         if (api.rows({ filter: 'applied' }).data().length === 0) {
             csv_button.disable();
@@ -659,19 +659,23 @@ require([
     };
 
     var set_gcp_open_btn = function (selection){
-        $(selection).find(".open-gcp-btn").on('click', function () {
-            $('#gcp-open-btn').attr('href',$(this).data('gcpurl'));
+        jq(selection).find(".open-gcp-btn").on('click', function () {
+            jq('#gcp-open-btn').attr('href',jq(this).data('gcpurl'));
             if (typeof(Storage) !== "undefined") {
                 gcp_modal_disabled |= sessionStorage.getItem("gcp_modal_disabled") == "true";
             }
             if(!gcp_modal_disabled){
-                $('#gcp-open-modal').modal('show');
+                jq('#gcp-open-modal').modal('show');
             }
             else{
-                $('#gcp-open-btn span').trigger('click');
+                jq('#gcp-open-btn span').trigger('click');
             }
 
         });
     };
 
+});
+
+define('base',['jquery'], function (jq) {
+    return jq.noConflict( true );
 });
