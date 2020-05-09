@@ -44,7 +44,7 @@
                             <td class="control-col">
 {#                                {% if workbook.owner.id == user.id %}#}
                                 <div class="dropdown">
-                                    <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                    <a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
                                     <ul class="dropdown-menu">
                                         {% if workbook.owner.id == user.id %}
                                             <li><a data-toggle="modal" data-target="#edit-workbook-details-modal-{{ workbook.id }}">Edit</a></li>
