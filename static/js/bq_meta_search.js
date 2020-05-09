@@ -18,8 +18,6 @@
 
 require.config({
     paths: {
-        'bootstrap': ['//stackpath.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min', 'libs/bootstrap.min'],
-        'jquery': ['//cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min', 'libs/jquery-3.5.1.min.js'],
         'datatables.net': ['//cdn.datatables.net/1.10.19/js/jquery.dataTables.min', 'libs/jquery.dataTables.min'],
         'datatables.bootstrap': ['https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap.min'],
         'datatables.net-buttons': ['//cdn.datatables.net/buttons/1.6.0/js/dataTables.buttons.min'],
@@ -28,7 +26,7 @@ require.config({
         'buttons-colvis': ['//cdn.datatables.net/buttons/1.6.0/js/buttons.colVis.min']
     },
     shim: {
-        'bootstrap': ['jquery'],
+        // 'bootstrap': ['jquery'],
         'datatables.net': ['jquery'],
         'chosen':['jquery']
     }

@@ -19,11 +19,11 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security/script',
-        underscore: 'libs/underscore-min',
+        // jquery: 'libs/jquery-1.11.1.min',
+        // bootstrap: 'libs/bootstrap.min',
+        // jqueryui: 'libs/jquery-ui.min',
+        // session_security: 'session_security/script',
+        // underscore: 'libs/underscore-min',
         d3: 'libs/d3.min',
         d3tip: 'libs/d3-tip',
         search_helpers: 'helpers/search_helpers',
@@ -32,7 +32,7 @@ require.config({
         stack_bar_chart: 'visualizations/createStackedBarchart',
         d3parsets: 'libs/d3.parsets',
         draw_parsets: 'parallel_sets',
-        base: 'base',
+        // base: 'base',
         bloodhound: 'libs/bloodhound',
         typeahead : 'libs/typeahead',
         tokenfield: 'libs/bootstrap-tokenfield.min',
@@ -40,9 +40,9 @@ require.config({
         gcs_export: 'export_to_gcs'
     },
     shim: {
-        'bootstrap': ['jquery'],
-        'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
+        // 'bootstrap': ['jquery'],
+        // 'jqueryui': ['jquery'],
+        // 'session_security': ['jquery'],
         'tokenfield': ['jquery', 'jqueryui'],
         'typeahead':{
             deps: ['jquery'],
@@ -54,7 +54,7 @@ require.config({
            deps: ['jquery'],
            exports: 'Bloodhound'
         },
-        'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
+        // 'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
     }
 });
 

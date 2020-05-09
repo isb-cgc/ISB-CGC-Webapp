@@ -19,14 +19,14 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        'jquery': ['//cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min', 'libs/jquery-3.5.1.min.js'],
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security/script',
-        underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
-        tablesorter:'libs/jquery.tablesorter.min'
+        'jquery': ['//cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min', 'libs/jquery-3.5.1.min'],
+        'bootstrap': ['//stackpath.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min', 'libs/bootstrap.min'],
+        'jqueryui': ['//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min', 'libs/jquery-ui.min'],
+        'session_security': ['session_security/script'],
+        'underscore': ['libs/underscore-min'],
+        'assetscore': ['libs/assets.core'],
+        'assetsresponsive': ['libs/assets.responsive'],
+        'tablesorter': ['libs/jquery.tablesorter.min']
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -38,6 +38,29 @@ require.config({
         'underscore': {exports: '_'}
     }
 });
+
+// require.config({
+//     baseUrl: STATIC_FILES_URL+'js/',
+//     paths: {
+//         'jquery': ['//cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min', 'libs/jquery-3.5.1.min.js'],
+//         bootstrap: 'libs/bootstrap.min',
+//         jqueryui: 'libs/jquery-ui.min',
+//         session_security: 'session_security/script',
+//         underscore: 'libs/underscore-min',
+//         assetscore: 'libs/assets.core',
+//         assetsresponsive: 'libs/assets.responsive',
+//         tablesorter:'libs/jquery.tablesorter.min'
+//     },
+//     shim: {
+//         'bootstrap': ['jquery'],
+//         'jqueryui': ['jquery'],
+//         'session_security': ['jquery'],
+//         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
+//         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
+//         'tablesorter': ['jquery'],
+//         'underscore': {exports: '_'}
+//     }
+// });
 
 // Set up common JS UI actions which span most views
 require([
