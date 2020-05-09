@@ -17,6 +17,7 @@
  */
 
 require.config({
+    baseUrl: STATIC_FILES_URL+'js/',
     paths: {
         'bootstrap': ['//stackpath.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min', 'libs/bootstrap.min'],
         'jquery': ['//cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min', 'libs/jquery-3.5.1.min.js'],
