@@ -696,7 +696,7 @@ def opt_in_update(request):
 
     try:
         user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=request.user).first()
-        feedback_form_link = request.build_absolute_uri(reverse('opt_in_form'))
+        feedback_form_link = request.build_absolute_uri(reverse('opt_in_form_reg_user'))
 
         if user_opt_in_stat_obj:
             user_opt_in_stat_obj.opt_in_status = UserOptInStatus.SEEN
@@ -752,6 +752,9 @@ def send_feedback_form(user_email, firstName, lastName, formLink):
         'message': message
         }
 
+@login_required
+def form_reg_user(request):
+    return opt_in_form(request);
 
 def opt_in_form(request):
     template = 'isb_cgc/opt_in_form.html'
