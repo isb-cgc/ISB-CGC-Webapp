@@ -17,9 +17,10 @@
  */
 
 require.config({
+    baseUrl: STATIC_FILES_URL+'js/',
     paths: {
         'bootstrap': ['//stackpath.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min', 'libs/bootstrap.min'],
-        'jquery': ['//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min', 'libs/jquery-1.11.1.min'],
+        'jquery': ['//cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min', 'libs/jquery-3.5.1.min.js'],
         'datatables.net': ['//cdn.datatables.net/1.10.19/js/jquery.dataTables.min', 'libs/jquery.dataTables.min'],
         'datatables.bootstrap': ['https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap.min'],
         'datatables.net-buttons': ['//cdn.datatables.net/buttons/1.6.0/js/dataTables.buttons.min'],
@@ -252,7 +253,7 @@ require([
                 {
                     'name': 'fields',
                     'data': function(row){
-                        return format_schema_field_names(row.schema.fields, false);
+                        return format_schema_field_names(row.schema.fields ? row.schema.fields: [], false);
                     },
                     'visible': false
                 },
@@ -413,7 +414,7 @@ require([
         if(err_mssg) {
             row.child('<div class="float-right"><i class="fa fa-exclamation-triangle" style="margin-right: 5px;"></i>'+err_mssg+'</div>').show();
         } else {
-            var schema_fields = row.data().schema.fields;
+            var schema_fields = row.data().schema.fields ? row.data().schema.fields:[];
             var tbl_data = td.data('preview-data');
             row.child(format_tbl_preview(schema_fields, tbl_data)).show();
         }
@@ -462,7 +463,7 @@ require([
             '<td>' + (d.description == null? 'N/A' : d.description)+ '</td>' +
             '</tr><tr>' +
             '<td><strong>Schema</strong></td>' +
-            '<td>' + form_schema_table(d.schema.fields) + '</td>' +
+            '<td>' + form_schema_table(d.schema.fields ? d.schema.fields : []) + '</td>' +
             '</tr><tr>' +
             '<td><strong>Labels</strong></td>' +
             '<td>'+tokenize_labels(d.labels)+'</td>' +
