@@ -5,7 +5,7 @@
  * Generic style resets
  *******************************************/
 @import url("./chosen.min.css");
-@import url("./dataTables.min.css");
+@import url("./buttons.dataTables.min.css");
 @import url("https://fonts.googleapis.com/css?family=Lato:300,400,700&subset=latin,latin-ext");
 @import url("https://fonts.googleapis.com/css?family=Montserrat:300,700&subset=latin,latin-ext");
 html, body, ul, ol {
