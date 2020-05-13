@@ -188,6 +188,7 @@ def user_detail(request, user_id):
         nih_details = get_nih_user_details(user_id, forced_logout)
         for key in list(nih_details.keys()):
             user_details[key] = nih_details[key]
+        print(user_details['NIH_assertion_expiration']<timezone.now())
         user_details['NIH_expired'] = user_details['NIH_assertion_expiration']<timezone.now()
 
         return render(request, 'isb_cgc/user_detail.html',
