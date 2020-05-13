@@ -738,8 +738,9 @@ function($, d3, d3tip, d3textwrap, vizhelpers, _) {
             var min_scale = 100/violin_width;
             var max_scale = 5;
             var zoom = d3.behavior.zoom()
-                .x(x2).scaleExtent([min_scale, max_scale])
-                .y(y).scaleExtent([min_scale, max_scale])
+                .x(x2)
+                .y(y)
+                .scaleExtent([min_scale, max_scale])
                 .on('zoom', zoomer);
 
             svg.call(zoom);

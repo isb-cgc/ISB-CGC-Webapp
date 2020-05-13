@@ -1,21 +1,11 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security/script',
-        underscore: 'libs/underscore-min',
-        base: 'base',
         bloodhound: 'libs/bloodhound',
         typeahead : 'libs/typeahead',
         tokenfield: 'libs/bootstrap-tokenfield.min'
     },
     shim: {
-        'bootstrap': ['jquery'],
-        'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
-        'underscore': {exports: '_'},
         'tokenfield': ['jquery', 'jqueryui'],
         'typeahead':{
             deps: ['jquery'],

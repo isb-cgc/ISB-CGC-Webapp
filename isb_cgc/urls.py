@@ -26,7 +26,7 @@ admin.autodiscover()
 
 urlpatterns = [
 
-    url(r'^$', views.landing_page, name='landing_page'),
+    url(r'^$', views.domain_redirect, name='landing_page'),
     url(r'^user_landing/$', views.user_landing, name='user_landing'),
     url(r'^search_cohorts_viz/$', views.search_cohorts_viz, name='search_cohorts_viz'),
     url(r'^style_guide/', views.css_test),
@@ -79,6 +79,7 @@ urlpatterns = [
     url(r'^opt_in/check_show', views.opt_in_check_show, name='opt_in'),
     url(r'^opt_in/update', views.opt_in_update, name='opt_in_update'),
     url(r'^opt_in/form/$', views.opt_in_form, name='opt_in_form'),
+    url(r'^opt_in/form_reg_user/$', views.form_reg_user, name='opt_in_form_reg_user'),
     url(r'^opt_in/form_submit', views.opt_in_form_submitted, name='opt_in_form_submitted'),
 ]
 

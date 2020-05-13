@@ -19,21 +19,23 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security/script',
-        underscore: 'libs/underscore-min',
+        // jquery: 'libs/jquery-1.11.1.min',
+        // bootstrap: 'libs/bootstrap.min',
+        // jqueryui: 'libs/jquery-ui.min',
+        // session_security: 'session_security/script',
+        // underscore: 'libs/underscore-min',
         ajv: 'libs/ajv.bundle',
-        base: 'base',
-        dataTables:'libs/jquery.dataTables.min'
+        // base: 'base',
+        // dataTables:'libs/jquery.dataTables.min'
+        'datatables.net': ['//cdn.datatables.net/1.10.19/js/jquery.dataTables.min', 'libs/jquery.dataTables.min'],
     },
     shim: {
-        'bootstrap': ['jquery'],
-        'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
-        'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore'],
-        'dataTables':['jquery']
+        // 'bootstrap': ['jquery'],
+        // 'jqueryui': ['jquery'],
+        // 'session_security': ['jquery'],
+        // 'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore'],
+        // 'dataTables':['jquery']
+        'datatables.net': ['jquery'],
     }
 });
 
@@ -45,7 +47,9 @@ require([
     'underscore',
     'base',
     'ajv',
-    'dataTables'
+    // 'dataTables'
+    'datatables.net'
+
 ], function ($, jqueryui, bootstrap, session_security, _, base, ajv) {
 
     var BARCODE_LENGTH_MAX = 45;

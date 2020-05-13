@@ -16,27 +16,27 @@
  *
  */
 
-require.config({
-    baseUrl: STATIC_FILES_URL + 'js/',
-    paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
-        underscore: 'libs/underscore-min',
-        base: 'base',
-        session_security: 'session_security/script'
-    },
-    shim: {
-        'bootstrap': ['jquery'],
-        'jqueryui': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
-        'session_security': ['jquery'],
-        'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
-    }
-});
+// require.config({
+//     baseUrl: STATIC_FILES_URL + 'js/',
+//     paths: {
+//         jquery: 'libs/jquery-1.11.1.min',
+//         bootstrap: 'libs/bootstrap.min',
+//         jqueryui: 'libs/jquery-ui.min',
+//         assetscore: 'libs/assets.core',
+//         assetsresponsive: 'libs/assets.responsive',
+//         underscore: 'libs/underscore-min',
+//         base: 'base',
+//         session_security: 'session_security/script'
+//     },
+//     shim: {
+//         'bootstrap': ['jquery'],
+//         'jqueryui': ['jquery'],
+//         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
+//         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
+//         'session_security': ['jquery'],
+//         'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
+//     }
+// });
 
 require([
     'jquery'
