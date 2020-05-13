@@ -1,20 +1,20 @@
-require.config({
-    baseUrl: STATIC_FILES_URL+'js/',
-    paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security/script',
-        underscore: 'libs/underscore-min',
-        base: 'base',
-    },
-    shim: {
-        'bootstrap': ['jquery'],
-        'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
-        'underscore': {exports: '_'},
-    }
-});
+// require.config({
+//     baseUrl: STATIC_FILES_URL+'js/',
+//     paths: {
+//         jquery: 'libs/jquery-1.11.1.min',
+//         bootstrap: 'libs/bootstrap.min',
+//         jqueryui: 'libs/jquery-ui.min',
+//         session_security: 'session_security/script',
+//         underscore: 'libs/underscore-min',
+//         base: 'base',
+//     },
+//     shim: {
+//         'bootstrap': ['jquery'],
+//         'jqueryui': ['jquery'],
+//         'session_security': ['jquery'],
+//         'underscore': {exports: '_'},
+//     }
+// });
 
 require([
     'jquery',
@@ -22,7 +22,7 @@ require([
     'bootstrap',
     'session_security',
     'underscore',
-    'base'
+    // 'base'
 ], function($, jqueryui, bootstrap, session_security, _) {
     'use strict';
     var warning = false;
