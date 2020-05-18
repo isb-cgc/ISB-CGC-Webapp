@@ -17,6 +17,7 @@
  */
 
 require.config({
+    baseUrl: STATIC_FILES_URL+'js/',
     paths: {
         'datatables.net': ['libs/jquery.dataTables.min'],
         'datatables.bootstrap': ['libs/jquery.dataTables.bootstrap.min'],
