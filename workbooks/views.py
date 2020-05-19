@@ -762,7 +762,7 @@ def worksheet_comment(request, workbook_id=0, worksheet_id=0, comment_id=0):
     if request.method == "POST":
         wrkbk = Workbook.objects.get(id=workbook_id)
         wrkbk.save()
-        content = request.POST.get('content', '').encode('utf-8')
+        content = request.POST.get('content', '')
         if command == "create":
             return_obj = Worksheet_comment.create(worksheet_id=worksheet_id,
                                                   content=content,
