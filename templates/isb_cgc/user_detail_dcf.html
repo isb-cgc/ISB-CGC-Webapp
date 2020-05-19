@@ -47,9 +47,6 @@
             <p id="NIH_expiration"></p>
         <hr>
         <p><a data-toggle="modal" data-target="#unlink-nih-account-modal">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
-    {# Access timestamp has expired, but SA has not been kicked off due to cron job delay #}
-    {% elif NIH_expired %}
-        Your data access is about to expire.
     {# Everything is great. Note we only tell people what they are valid during their 24 hour access period. #}
     {% else %}
         <p><i class="fa fa-check-circle"></i> dbGaP Access Authorized</p>
