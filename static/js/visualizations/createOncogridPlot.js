@@ -381,6 +381,7 @@ define (['jquery', 'oncogridjs'],
         isb_legend['data']['case_score']['max_val'] = gene_track_ca_max;
         var grid_params = initParams(donors, genes, observations, donorTracks);
         var grid = new OncoGrid(grid_params);
+        console.log(grid);
         $(active_plot_selector).find('#grid-data').data('grid-data', grid);
         grid.render();
         updateToolBar(grid);
