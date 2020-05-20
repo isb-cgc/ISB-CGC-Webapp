@@ -137,7 +137,7 @@ jobs:
             sudo -E /bin/bash ./shell/gcloud-pull-staging-files.sh
             sudo -E /bin/bash ./shell/database-setup.sh
       - save_cache:
-          key: idc-webapp-{{ epoch }}
+          key: idc-webapp-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
           paths:
             - ./adminrestrict
             - ./.git
@@ -170,7 +170,7 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - idc-webapp-
+            - idc-webapp-{{ .Branch }}-{{ .Revision }}-
       - install_cloud_sdk
       - deployment_setup
       - auth
