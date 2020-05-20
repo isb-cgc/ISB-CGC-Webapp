@@ -79,9 +79,6 @@ def oncogrid_view_data(request):
 
         gene_data_list, observation_data_list, obs_donors = get_gene_data_list(gene_data_query)
         observation_data_size = len(observation_data_list)
-        logger.info('observation_data_size: {}'.format(observation_data_size))
-        logger.info('gene_data_list size: {}'.format(len(gene_data_list)))
-        logger.info('obs_donors size: {}'.format(len(obs_donors)))
         if observation_data_size> NUM_CELLS_MAX:
             return JsonResponse(
                 {'message': "Data size is too large to plot: Try with smaller number of genes or with smaller set of cohorts."})
