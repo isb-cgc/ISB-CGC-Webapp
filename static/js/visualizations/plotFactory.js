@@ -536,7 +536,9 @@ define([
             // Hide the legend
             $(args.legend_selector).hide();
         }
+        
         if(visualization){
+            console.log(visualization.plot);
             plot_button_options.removeClass('disabled');
             $('.worksheet.active .plot-args').data('plot-json', (visualization.plot && visualization.plot.get_json) ? visualization.plot.get_json : null);
             $('.worksheet.active .plot-args').data('plot-csv', (visualization.plot && visualization.plot.get_csv) ? visualization.plot.get_csv : null);
