@@ -30,7 +30,6 @@ logger = logging.getLogger('main_logger')
 
 DONOR_TRACK_TYPE = 'donor'
 GENE_TRACK_TYPE = 'gene'
-NUM_CELLS_MAX = 3700
 
 def get_program_set_for_oncogrid(cohort_id_array):
     return Program.objects.filter(name='TCGA',is_public=True,active=True)
@@ -78,11 +77,8 @@ def oncogrid_view_data(request):
 
 
         gene_data_list, observation_data_list, obs_donors = get_gene_data_list(gene_data_query)
-        observation_data_size = len(observation_data_list)
-        if observation_data_size> NUM_CELLS_MAX:
-            return JsonResponse(
-                {'message': "Data size is too large to plot: Try with smaller number of genes or with smaller set of cohorts."})
-        elif observation_data_size > 0:
+
+        if len(observation_data_list) > 0:
             # get donor list
             donor_data_query, donor_bq_tables = create_oncogrid_bq_statement(DONOR_TRACK_TYPE, genomic_build, project_set,
                                                                              None, None, obs_donors)
