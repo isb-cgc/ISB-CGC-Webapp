@@ -70,7 +70,8 @@
                                     <div class="item active">
                                         <iframe class="tutorial-vid"
                                                 src="https://www.youtube-nocookie.com/embed/RQsLKDTciWk?enablejsapi=1&version=3&playerapiid=ytplayer"
-                                                frameborder="0" allow="autoplay; encrypted-media"
+                                                frameborder="0"
+                                                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
                                                 allowfullscreen></iframe>
                                     </div>
                                     <div class="item">
@@ -134,19 +135,20 @@
                                 <a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html#community-notebooks"
                                    target="_blank">Community Notebooks
                                 </a><span class="badge"
-                                      style="font-size:14px;height:20px;width:50px;margin-left:-25px;padding-top:3px;padding-left:8px;margin-top:-25px;background-color:#4cc2d6;">New</span>
+                                          style="font-size:14px;height:20px;width:50px;margin-left:-25px;padding-top:3px;padding-left:8px;margin-top:-25px;background-color:#4cc2d6;">New</span>
                             </p>
-                            <p><a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a></p>
+                            <p><a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a>
+                            </p>
 
 
-{#                                <a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/QueryOfTheMonthClub.html"#}
-{#                                   target="_blank">#}
-{#                                    <i class="fa fa-search fa-large"></i> Query of the Month#}
-{#                                </a></p>#}
+                            {#                                <a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/QueryOfTheMonthClub.html"#}
+                            {#                                   target="_blank">#}
+                            {#                                    <i class="fa fa-search fa-large"></i> Query of the Month#}
+                            {#                                </a></p>#}
 
 
-{#                            <p><a href="https://github.com/isb-cgc/" target="_blank"> <i class="fa fa-github fa-lg"></i>#}
-{#                                GitHub</a></p>#}
+                            {#                            <p><a href="https://github.com/isb-cgc/" target="_blank"> <i class="fa fa-github fa-lg"></i>#}
+                            {#                                GitHub</a></p>#}
 
                         </div>
                     </div>
@@ -164,8 +166,10 @@
                             </div>
                         </div>
                         <div class="follow-us col-xs-2">
-                            <a href="https://github.com/isb-cgc/" target="_blank"> <i class="fa fa-github fa-lg"></i></a>
-                            <a href="https://twitter.com/isb_cgc" target="_blank"> <i class="fa fa-twitter fa-lg"></i></a>
+                            <a href="https://github.com/isb-cgc/" target="_blank"> <i
+                                    class="fa fa-github fa-lg"></i></a>
+                            <a href="https://twitter.com/isb_cgc" target="_blank"> <i
+                                    class="fa fa-twitter fa-lg"></i></a>
                         </div>
                     </div>
                 </div>
@@ -275,9 +279,9 @@
 {% endblock %}
 
 {% block js_file %}
-	{{ block.super }}
-	<script src="{% static 'js/landing.js' %}"></script>
+    {{ block.super }}
+    <script src="{% static 'js/landing.js' %}"></script>
     <script>
-    console.debug("[STATUS] Loading landing.html at "+(new Date()));
+        console.debug("[STATUS] Loading landing.html at " + (new Date()));
     </script>
 {% endblock %}
