@@ -298,6 +298,8 @@ define([
         var observation_data_list = view_data['observation_data_list'];
         var donor_track_count_max = view_data['donor_track_count_max'];
         var plot;
+        console.log('donor_data_list');
+        console.log(donor_data_list);
         if (donor_data_list && gene_data_list && observation_data_list) {
             plot = oncogrid_obj.createOncogridPlot(donor_data_list, gene_data_list, observation_data_list, donor_track_count_max);
         }
@@ -437,6 +439,8 @@ define([
 
         height = height < 600 ? 650 : height;
         var data = args.data;
+        console.log('args.data');
+        console.log(args.data);
         if (data.hasOwnProperty('pairwise_result')) {
             configure_pairwise_display(args.pairwise_element, data);
         }
@@ -615,6 +619,8 @@ define([
             type: 'GET',
             url: plot_data_url,
             success: function(data, status, xhr) {
+                console.log('data');
+                console.log(data);
                 var plot_args = {plot_selector    : args.plot_selector,
                              legend_selector  : args.legend_selector,
                              pairwise_element : args.pairwise_element,
