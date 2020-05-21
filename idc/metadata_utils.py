@@ -58,7 +58,7 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
                 sources = sources.filter(version__data_type=DataVersion.IMAGE_DATA)
 
             results = get_metadata_bq(filters, fields, {
-                'filters': sources.get_source_attrs(for_ui=True),
+                'filters': sources.get_source_attrs(for_ui=True, for_faceting=False),
                 'facets': sources.get_source_attrs(for_ui=True),
                 'fields': sources.get_source_attrs(for_faceting=False, named_set=fields)
             }, counts_only, collapse_on, record_limit)
@@ -67,7 +67,7 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
             image_sources = sources.filter(version__data_type=DataVersion.IMAGE_DATA)
             img = {
                 'src': image_sources,
-                'filters': image_sources.get_source_attrs(for_ui=True),
+                'filters': image_sources.get_source_attrs(for_ui=True, for_faceting=False),
                 'facets': image_sources.get_source_attrs(for_ui=True)
             }
 
