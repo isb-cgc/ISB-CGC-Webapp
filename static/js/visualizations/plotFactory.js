@@ -298,10 +298,10 @@ define([
         var observation_data_list = view_data['observation_data_list'];
         var donor_track_count_max = view_data['donor_track_count_max'];
         var plot;
-        
-        console.log('donor_data_list');
-        console.log(donor_data_list);
-        if (donor_data_list && gene_data_list && observation_data_list) {
+        if (donor_data_list.length === 0){
+            display_low_mem_mssg(plot_selector);
+        }
+        else if (donor_data_list && gene_data_list && observation_data_list) {
             plot = oncogrid_obj.createOncogridPlot(donor_data_list, gene_data_list, observation_data_list, donor_track_count_max);
         }
         else {
@@ -440,8 +440,6 @@ define([
 
         height = height < 600 ? 650 : height;
         var data = args.data;
-        console.log('args.data');
-        console.log(args.data);
         if (data.hasOwnProperty('pairwise_result')) {
             configure_pairwise_display(args.pairwise_element, data);
         }
@@ -541,7 +539,6 @@ define([
             // Hide the legend
             $(args.legend_selector).hide();
         }
-
         if(visualization){
             plot_button_options.removeClass('disabled');
             $('.worksheet.active .plot-args').data('plot-json', (visualization.plot && visualization.plot.get_json) ? visualization.plot.get_json : null);
@@ -620,8 +617,6 @@ define([
             type: 'GET',
             url: plot_data_url,
             success: function(data, status, xhr) {
-                console.log('data');
-                console.log(data);
                 var plot_args = {plot_selector    : args.plot_selector,
                              legend_selector  : args.legend_selector,
                              pairwise_element : args.pairwise_element,
@@ -760,6 +755,10 @@ define([
 
     var display_no_gene_mut_mssg = function(plot_selector, hugo_symbol_list) {
         $(plot_selector).html('<p> The selected cohorts have no somatic mutations in the gene <b>' + hugo_symbol_list.join(', ') + '</b></p>');
+    };
+
+    var display_low_mem_mssg = function(plot_selector) {
+        $(plot_selector).html('<p> Your plot data may be too large to display in your browser. Try again with smaller set of cohort or genes.</p>');
     };
 
     return {
