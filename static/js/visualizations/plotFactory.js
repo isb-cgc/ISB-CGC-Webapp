@@ -298,6 +298,7 @@ define([
         var observation_data_list = view_data['observation_data_list'];
         var donor_track_count_max = view_data['donor_track_count_max'];
         var plot;
+        
         console.log('donor_data_list');
         console.log(donor_data_list);
         if (donor_data_list && gene_data_list && observation_data_list) {
