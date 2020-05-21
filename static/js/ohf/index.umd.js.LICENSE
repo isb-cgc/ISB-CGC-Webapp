@@ -664,7 +664,7 @@
 
 /*! exports provided: vertexShader */
 
-/*! cornerstone-tools - 4.12.5 - 2020-03-13 | (c) 2017 Chris Hafey | https://github.com/cornerstonejs/cornerstoneTools */
+/*! cornerstone-tools - 4.15.1 - 2020-05-12 | (c) 2017 Chris Hafey | https://github.com/cornerstonejs/cornerstoneTools */
 
 /*!****************************************************************!*\
   !*** ../node_modules/@babel/runtime/helpers/arrayWithHoles.js ***!
@@ -1594,6 +1594,8 @@
 
 /*! exports provided: addToolState, getToolState, removeToolState, clearToolState, setElementToolStateManager, getElementToolStateManager */
 
+/*! ../util/uuidv4.js */
+
 /*!**************************************!*\
   !*** ./stateManagement/toolStyle.js ***!
   \**************************************/
@@ -1644,9 +1646,11 @@
   !*** ./store/index.js ***!
   \************************/
 
-/*! exports provided: state, getters, setters, modules, getModule, default */
+/*! exports provided: state, getters, modules, getModule, default */
 
 /*! ./modules/segmentationModule */
+
+/*! ./modules/manipulatorStateModule */
 
 /*! ./modules/cursorModule.js */
 
@@ -1683,6 +1687,10 @@
 /*!****************************************************!*\
   !*** ./store/modules/globalConfigurationModule.js ***!
   \****************************************************/
+
+/*!*************************************************!*\
+  !*** ./store/modules/manipulatorStateModule.js ***!
+  \*************************************************/
 
 /*!*****************************************************************!*\
   !*** ./store/modules/segmentationModule/activeLabelmapIndex.js ***!
@@ -1950,7 +1958,7 @@
   !*** ./toolOptions.js ***!
   \************************/
 
-/*! exports provided: getToolOptions, setToolOptions, clearToolOptions, clearToolOptionsByToolType, clearToolOptionsByElement */
+/*! exports provided: getToolOptions, setToolOptions, clearToolOptions, clearToolOptionsByToolType, clearToolOptionsByToolName, clearToolOptionsByElement */
 
 /*!*********************************!*\
   !*** ./tools/CrosshairsTool.js ***!
@@ -2244,7 +2252,7 @@
 
 /*! ../../../util/getActiveTool */
 
-/*! ../../base/BaseAnnotationTool */
+/*! ../BidirectionalTool */
 
 /*! ./utils/updatePerpendicularLineHandles.js */
 
@@ -3051,6 +3059,10 @@
 /*!******************************!*\
   !*** ./util/triggerEvent.js ***!
   \******************************/
+
+/*!************************!*\
+  !*** ./util/uuidv4.js ***!
+  \************************/
 
 /*!**********************!*\
   !*** ./util/wait.js ***!
