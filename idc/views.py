@@ -404,6 +404,7 @@ def explore_data_page(request):
                 attr_by_source[set_type]['attributes'].update({attr.name: {'source': source.id, 'obj': attr, 'vals': None, 'id': attr.id} for attr in attrs})
 
         start = time.time()
+
         source_metadata = get_collex_metadata(
             filters, fields, record_limit=5000, counts_only=counts_only, with_ancillary = with_related,
             collapse_on = collapse_on, order_docs = order_docs, sources = sources, versions = versions
