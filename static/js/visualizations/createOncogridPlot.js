@@ -360,6 +360,7 @@ define (['jquery', 'oncogridjs'],
     }
 
     var updateOncogrid = function(donors, genes, observations, donor_track_count_max){
+        console.log('updateOncogrid');
         clinical_legend['data']['days_to_death']['max_val'] = donor_track_count_max['days_to_death'];
         var donorTracks =[];
         //do not add donor tracks with no counts
@@ -380,6 +381,9 @@ define (['jquery', 'oncogridjs'],
         }
         isb_legend['data']['case_score']['max_val'] = gene_track_ca_max;
         var grid_params = initParams(donors, genes, observations, donorTracks);
+        console.log('grid_params ');
+        console.log(grid_params);
+
         var grid = new OncoGrid(grid_params);
         console.log(grid);
         $(active_plot_selector).find('#grid-data').data('grid-data', grid);
