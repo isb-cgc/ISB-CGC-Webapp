@@ -298,7 +298,10 @@ define([
         var observation_data_list = view_data['observation_data_list'];
         var donor_track_count_max = view_data['donor_track_count_max'];
         var plot;
-        if (donor_data_list && gene_data_list && observation_data_list) {
+        if (donor_data_list.length === 0){
+            display_low_mem_mssg(plot_selector);
+        }
+        else if (donor_data_list && gene_data_list && observation_data_list) {
             plot = oncogrid_obj.createOncogridPlot(donor_data_list, gene_data_list, observation_data_list, donor_track_count_max);
         }
         else {
@@ -752,6 +755,10 @@ define([
 
     var display_no_gene_mut_mssg = function(plot_selector, hugo_symbol_list) {
         $(plot_selector).html('<p> The selected cohorts have no somatic mutations in the gene <b>' + hugo_symbol_list.join(', ') + '</b></p>');
+    };
+
+    var display_low_mem_mssg = function(plot_selector) {
+        $(plot_selector).html('<p> Your plot data may be too large to display in your browser. Try again with smaller set of cohort or genes.</p>');
     };
 
     return {

@@ -498,11 +498,11 @@ require([
 
                 if(plot_settings.axis[axis_index].type == 'CATEGORICAL') {
                     $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').prop('checked',false);
-                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').prop('title','Log transformation is not available with this axis for this plot type.');
-                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').parent().prop('title','Log transformation is not available with this axis for this plot type.');
+                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').attr('title','Log transformation is not available with this axis for this plot type.');
+                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').parent().attr('title','Log transformation is not available with this axis for this plot type.');
                 } else {
-                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').parent().prop('title','');
-                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').prop('title','');
+                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').parent().attr('title','');
+                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').attr('title','');
                 }
 
                 options.each(function (i, element) {
@@ -1357,7 +1357,7 @@ require([
                 if (result.bq_tables && result.bq_tables.length > 0) {
                     plot_element.find('.bq-table-display').empty();
                     for (var i = 0; i < result.bq_tables.length; i++) {
-                        plot_element.find('.bq-table-display').append($('<li>').text(result.bq_tables[i]).prop('title', result.bq_tables[i]));
+                        plot_element.find('.bq-table-display').append($('<li>').text(result.bq_tables[i]).attr('title', result.bq_tables[i]));
                     }
                     plot_element.find('.bq-tables').show();
                 } else {
