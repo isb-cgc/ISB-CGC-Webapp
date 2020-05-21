@@ -315,7 +315,7 @@ define([
     function get_data_url(base_url, cohorts, x_attr, y_attr, color_by_url_code, logTransform){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
-            if (i == 0) {
+            if (i === 0) {
                 cohort_str += 'cohort_id=' + cohorts[i];
             } else {
                 cohort_str += '&cohort_id=' + cohorts[i];
