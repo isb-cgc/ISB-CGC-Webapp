@@ -677,12 +677,6 @@ define (['jquery', 'oncogridjs'],
 
     return {
         createOncogridPlot: function (donor_data, gene_data, observation_data, donor_track_count_max){
-            console.log('donor_data');
-            console.log(donor_data.length);
-            console.log('gene_data');
-            console.log(gene_data.length);
-            console.log('observation_data');
-            console.log(observation_data.length);
             if (donor_data.length > 0 && gene_data.length > 0 && observation_data.length) {
                 updateOncogrid(donor_data, gene_data, observation_data, donor_track_count_max);
             }
