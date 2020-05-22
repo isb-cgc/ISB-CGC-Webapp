@@ -374,7 +374,20 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
     }
 
     window.removeSeries = function(selClass, seriesTableId) {
+         var scrollPos = document.getElementById(seriesTableId).scrollTop;
+         var remainingTrs = $('#' + seriesTableId).find('tr').not('.' + selClass);
+        var newScrollInd = Array.from(remainingTrs.map(function(){return ((this.offsetTop<=scrollPos)? 0:1 )  })).indexOf(1);
+        if (newScrollInd>0) {
+            var scrollB = remainingTrs.get(newScrollInd-1).offsetTop;
+            var scrollF = remainingTrs.get(newScrollInd).offsetTop;
+
+            if ( (scrollPos-scrollB)<(scrollF-scrollPos) ){
+                var newScrollInd=newScrollInd+1;
+            }
+        }
+
         $('#' + seriesTableId).find('.' + selClass).remove();
+        resetTableControls($('#' + seriesTableId), true, newScrollInd)
     }
 
 
@@ -444,7 +457,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
                         var fetchUrlSeries = fetchUrl+'?SeriesInstanceUID='+seriesId;
                         var hrefSeriesTxt = '<a href="' + fetchUrlSeries + '" target="_blank">' + ppSeriesId + '</a><span class="tooltiptext_ex">' + seriesId + '</span>';
                         var seriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
-                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefSeriesTxt + '</td><td>' + seriesNumber + '</td><td class="col2 tooltip_ex">' + hrefSeriesTxt + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td></tr>';
+                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col2 tooltip_ex">' + hrefSeriesTxt + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td></tr>';
 
                     } else {
 

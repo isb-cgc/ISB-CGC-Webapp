@@ -6,6 +6,7 @@ window.config = function(props) {
     enableGoogleCloudAdapter: true,
     enableGoogleCloudAdapterUI: false,
     showStudyList: true,
+    filterQueryParam: true,
     httpErrorHandler: error => {
       // This is 429 when rejected from the public idc sandbox too often.
       console.warn(error.status);
