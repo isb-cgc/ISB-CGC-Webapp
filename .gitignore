@@ -83,6 +83,7 @@ scripts/metadata_featdef_tables.sql
 !requirements.txt
 !LICENSE.txt
 !LICENSE_django_rest_framework.txt
+!sample_deployment_config.txt
 
 # Vagrant Files
 .vagrant/

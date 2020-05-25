@@ -51,6 +51,7 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 CONNECTION_IS_LOCAL     = (os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost')
+IS_CIRCLE               = (os.environ.get('CI', None) is not None)
 DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') and CONNECTION_IS_LOCAL)
 
 print("[STATUS] DEBUG mode is {}".format(str(DEBUG)), file=sys.stdout)
@@ -517,13 +518,13 @@ SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS
 #
 # This should only be done on a local system which is running against its own VM. Deployed systems will already have
 # a site superuser so this would simply overwrite that user. Don't enable this in production!
-if IS_DEV and CONNECTION_IS_LOCAL:
+if (IS_DEV and CONNECTION_IS_LOCAL) or IS_CIRCLE:
     INSTALLED_APPS += (
         'finalware',)
 
     SITE_SUPERUSER_USERNAME = os.environ.get('SUPERUSER_USERNAME', '')
     SITE_SUPERUSER_EMAIL = ''
-    SITE_SUPERUSER_PASSWORD = os.environ.get('SUPERUSER_PASSWORD', '')
+    SITE_SUPERUSER_PASSWORD = os.environ.get('SUPERUSER_PASSWORD')
 ############################
 #   End django-finalware   #
 ############################

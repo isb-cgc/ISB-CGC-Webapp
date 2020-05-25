@@ -8,6 +8,7 @@ require.config({
         tablesorter: 'libs/jquery.tablesorter.min',
         base: 'base',
         imagesearch: 'image_search',
+        cohortfilelist: 'cohort_filelist',
         plotly: 'libs/plotly-latest.min'
     },
     shim: {
@@ -28,12 +29,15 @@ require([
     'plotly',
     'jqueryui',
     'bootstrap',
-    'tablesorter'
-], function ($, base, imagesearch, plotly) {
+    'tablesorter',
+    'cohortfilelist',
+], function ($, base, imagesearch, plotly, cohortfilelist) {
 
-    // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
+    // Resets forms in modals on hide. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function () {
-        $(this).find('form')[0].reset();
+        if($(this).find('form').get().length) {
+            $(this).find('form').get(0).reset();
+        }
     });
 
 

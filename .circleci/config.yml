@@ -7,7 +7,7 @@ commands:
           command: |
             TIER=DEV
             if [[ ${CIRCLE_BRANCH} =~ idc-(prod|uat|test).* ]]; then
-              TIER=$(awk -F- '{print toupper($3)}' \<<< ${CIRCLE_BRANCH})
+              TIER=$(awk -F- '{print toupper($2)}' \<<< ${CIRCLE_BRANCH})
             fi
             echo "export TIER=${TIER}" >> $BASH_ENV
             echo "Tier was identified as ${TIER} for branch ${CIRCLE_BRANCH}"
@@ -137,7 +137,7 @@ jobs:
             sudo -E /bin/bash ./shell/gcloud-pull-staging-files.sh
             sudo -E /bin/bash ./shell/database-setup.sh
       - save_cache:
-          key: idc-webapp-{{ epoch }}
+          key: idc-webapp-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
           paths:
             - ./adminrestrict
             - ./.git
@@ -170,7 +170,7 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - idc-webapp-
+            - idc-webapp-{{ .Branch }}-{{ .Revision }}-
       - install_cloud_sdk
       - deployment_setup
       - auth

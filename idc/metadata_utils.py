@@ -33,137 +33,75 @@ def retTuple(x, order_docs):
 
 
 # Fetch metadata from Solr
-def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, with_clinical = True, collapse_on = 'PatientID', order_docs='[]' ):
+def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, with_ancillary = True,
+                        collapse_on = 'PatientID', order_docs='[]', sources = None, versions = None):
+
     try:
-        results = {'docs': None, 'facets': {}}
+        source_type = sources.first().source_type if sources else DataSource.SOLR
 
-        # TODO: This needs to be altered to accept settings on *which* image program/collection set and corresponding
-        #  ancillary data it's querying, presumably as a list. That will take the place of the current name=<foo>
-        #  search being used here; instead, it'll be id=<etc> Presumably this will come in from the request, based
-        #  on the tab a user is looking at, or where they clicked the filter, etc.
-        tcga_solr = DataSource.objects.get(name="tcga_clin_bios")
-        tcia_solr = DataSource.objects.get(name="tcia_images")
+        if not versions:
+            versions = DataVersion.objects.filter(active=True)
+        if not versions.first().active and not sources:
+            source_type = DataSource.BIGQUERY
 
-        tcga_facet_attrs = tcga_solr.get_collection_attr(for_ui=True).values_list('name', flat=True)
-        tcga_filter_attrs = tcga_solr.get_collection_attr(for_faceting=False).values_list('name', flat=True)
+        sources = DataSource.objects.select_related('version').filter(
+            version__in=versions, source_type=source_type
+        ) if not sources else sources.select_related('version')
 
-        tcia_facet_attrs = tcia_solr.get_collection_attr(for_ui=True).values_list('name', flat=True)
-        tcia_filter_attrs = tcia_solr.get_collection_attr(for_faceting=False).values_list('name', flat=True)
 
-        tcia_fields = [x for x in fields if x in tcia_filter_attrs]
+        # Only active data is available in Solr, not archived
+        if not versions.first().active and sources.first().source_type == DataSource.SOLR:
+            raise Exception("[ERROR] Can't request archived data from Solr, only BigQuery.")
 
-        solr_query = None
-        if len(filters):
-            solr_query = build_solr_query(filters, with_tags_for_ex=True)
+        if source_type == DataSource.BIGQUERY:
+            if not with_ancillary:
+                sources = sources.filter(version__data_type=DataVersion.IMAGE_DATA)
 
-        # For now we're query filtering on TCGA only
-        # TODO: REMOVE THIS ONCE WE'RE ALLOWING MORE
-        tcga_in_tcia = Program.objects.get(short_name="TCGA").collection_set.all()
-        query_filter = {
-            'collection_id': [x.lower().replace("-","_") for x in list(tcga_in_tcia.values_list('name', flat=True))]
-        }
-        tcga_query_filter = build_solr_query(query_filter, with_tags_for_ex=True)
+            results = get_metadata_bq(filters, fields, {
+                'filters': sources.get_source_attrs(for_ui=True, for_faceting=False),
+                'facets': sources.get_source_attrs(for_ui=True),
+                'fields': sources.get_source_attrs(for_faceting=False, named_set=fields)
+            }, counts_only, collapse_on, record_limit)
+        elif source_type == DataSource.SOLR:
+            # Split these into source version type
+            image_sources = sources.filter(version__data_type=DataVersion.IMAGE_DATA)
+            img = {
+                'src': image_sources,
+                'filters': image_sources.get_source_attrs(for_ui=True, for_faceting=False),
+                'facets': image_sources.get_source_attrs(for_ui=True)
+            }
 
-        query_set = []
+            anc = None
 
-        # Image Data query
-        if solr_query and solr_query['queries'] is not None:
-            for attr in solr_query['queries']:
-                attr_name = re.sub("(_btw|_lt|_lte|_gt|_gte)", "", attr)
-                if attr_name in tcga_filter_attrs:
-                    query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
-                        tcga_solr.shared_id_col, tcga_solr.name, tcia_solr.shared_id_col
-                    )) + solr_query['queries'][attr])
-                else:
-                    query_set.append(solr_query['queries'][attr])
-        else:
-            query_set.append("{!join %s}" % "from={} fromIndex={} to={}".format(
-                tcga_solr.shared_id_col, tcga_solr.name, tcia_solr.shared_id_col
-            ))
+            if with_ancillary:
+                ancillary_sources = sources.filter(version__data_type=DataVersion.ANCILLARY_DATA)
+                anc = {
+                    'src': ancillary_sources,
+                    'filters': ancillary_sources.get_source_attrs(for_ui=True),
+                    'facets': ancillary_sources.get_source_attrs(for_ui=True)
+                }
 
-        solr_facets = build_solr_facets(list(tcia_facet_attrs), solr_query['filter_tags'] if solr_query else None, unique='PatientID')
+            results = get_metadata_solr(filters, fields, {
+                'img': img,
+                'anc': anc
+            }, counts_only, collapse_on, record_limit)
 
-        # Collapse and unique faceted counting can't be used together, so we have to request twice - once to collapse on the requested
-        # field and once to faceted count
-        solr_counts = query_solr_and_format_result({
-            'collection': tcia_solr.name,
-            'fields': None,
-            'fqs': query_set,
-            'query_string': tcga_query_filter['full_query_str'],
-            'facets': solr_facets,
-            'limit': 0,
-            'counts_only': counts_only,
-            'unique': tcia_solr.shared_id_col
-        })
+        for source in results['facets']['origin_set']:
+            facets = results['facets']['origin_set'][source]['facets']
+            if 'BodyPartExamined' in facets:
+                if 'Kidney' in facets['BodyPartExamined']:
+                    if 'KIDNEY' in facets['BodyPartExamined']:
+                        facets['BodyPartExamined']['KIDNEY'] += facets['BodyPartExamined']['Kidney']
+                    else:
+                        facets['BodyPartExamined']['KIDNEY'] = facets['BodyPartExamined']['Kidney']
+                    del facets['BodyPartExamined']['Kidney']
 
         if not counts_only:
-            solr_result = query_solr_and_format_result({
-                'collection': tcia_solr.name,
-                'fields': tcia_fields,
-                'fqs': query_set,
-                'query_string': tcga_query_filter['full_query_str'],
-                'collapse_on': collapse_on,
-                'counts_only': counts_only,
-                'limit': record_limit
-            })
-            results['docs'] = solr_result['docs']
             if 'SeriesNumber' in fields:
                 for res in results['docs']:
-                    res['SeriesNumber'] = res['SeriesNumber'][0]
-            if (len(order_docs)>0):
+                    res['SeriesNumber'] = res['SeriesNumber'][0] if 'SeriesNumber' in res else 'None'
+            if len(order_docs):
                 results['docs'] = sorted(results['docs'], key=lambda x: tuple([x[item] for item in order_docs]))
-            results['total'] = solr_result['numFound']
-        else:
-            results['total'] = solr_counts['numFound']
-
-        results['facets']['cross_collex'] = solr_counts['facets']
-        if 'BodyPartExamined' in solr_counts['facets']:
-            if 'Kidney' in results['facets']['cross_collex']['BodyPartExamined'] and 'KIDNEY' in results['facets']['cross_collex']['BodyPartExamined']:
-                results['facets']['cross_collex']['BodyPartExamined']['KIDNEY'] = results['facets']['cross_collex']['BodyPartExamined']['KIDNEY'] + results['facets']['cross_collex']['BodyPartExamined']['Kidney']
-                del results['facets']['cross_collex']['BodyPartExamined']['Kidney']
-            elif 'Kidney' in results['facets']['cross_collex']['BodyPartExamined']:
-                results['facets']['cross_collex']['BodyPartExamined']['KIDNEY'] = results['facets']['cross_collex']['BodyPartExamined']['Kidney']
-                del results['facets']['cross_collex']['BodyPartExamined']['Kidney']
-
-        if with_clinical:
-            # The attributes being faceted against here would be whatever list of facet counts we want to display in the
-            # UI (probably not ALL of them).
-            solr_facets = build_solr_facets(list(tcga_facet_attrs), solr_query['filter_tags'])
-
-            query_set = []
-            joined = False
-            # Ancilary data faceting and querying
-            if solr_query['queries'] is not None:
-                for attr in solr_query['queries']:
-                    attr_name = re.sub("(_btw|_lt|_lte|_gt|_gte)", "", attr)
-                    if attr_name in tcia_filter_attrs:
-                        query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
-                            tcia_solr.shared_id_col, tcia_solr.name, tcga_solr.shared_id_col
-                        )) + solr_query['queries'][attr])
-                        joined = True
-                    else:
-                        query_set.append(solr_query['queries'][attr])
-
-            if not joined:
-                query_set.append("{!join %s}*:*" % "from={} fromIndex={} to={}".format(
-                    tcia_solr.shared_id_col, tcia_solr.name, tcga_solr.shared_id_col
-                ))
-
-            # Fields is hardlocked to None for all Ancillary data because we don't display them,
-            # we only faceted count
-            solr_result = query_solr_and_format_result({
-                'collection': tcga_solr.name,
-                'fields': None,
-                'fqs': query_set,
-                'query_string': "*:*",
-                'facets': solr_facets,
-                'limit': 0,
-                'collapse_on': tcga_solr.shared_id_col,
-                'counts_only': True,
-                'unique': tcga_solr.shared_id_col
-            })
-
-            results['clinical'] = solr_result
 
     except Exception as e:
         logger.error("[ERROR] While fetching solr metadata:")
@@ -171,6 +109,164 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
 
     return results
 
+
+def get_metadata_solr(filters, fields, sources_and_attrs, counts_only, collapse_on, record_limit):
+    results = {'docs': None, 'facets': { 'origin_set': {}, 'related_set': {}}}
+    with_ancillary = False
+
+    if 'anc' in sources_and_attrs and sources_and_attrs['anc']:
+        ancillary_sources = sources_and_attrs['anc']['src']
+        ancillary_facet_attrs = sources_and_attrs['anc']['facets']
+        ancillary_filter_attrs = sources_and_attrs['anc']['filters']
+        with_ancillary = True
+
+    image_sources = sources_and_attrs['img']['src']
+    image_facet_attrs = sources_and_attrs['img']['facets']
+    image_filter_attrs = sources_and_attrs['img']['filters']
+
+    solr_query = None
+    if len(filters):
+        solr_query = build_solr_query(filters, with_tags_for_ex=True)
+
+    # For now we're query filtering on TCGA only
+    # TODO: REMOVE THIS ONCE WE'RE ALLOWING MORE
+    tcga_in_tcia = Program.objects.get(short_name="TCGA").collection_set.all()
+    query_filter = {
+        'collection_id': [x.lower().replace("-", "_") for x in list(tcga_in_tcia.values_list('name', flat=True))]
+    }
+    tcga_query_filter = build_solr_query(query_filter, with_tags_for_ex=True)
+
+    query_set = []
+
+    # We only have one image source right now (TCIA) but theoretically we may have more
+    for img_src in image_sources:
+        # Image Data query
+        if solr_query and solr_query['queries'] is not None:
+            for attr in solr_query['queries']:
+                attr_name = re.sub("(_btw|_lt|_lte|_gt|_gte)", "", attr)
+                if with_ancillary and attr_name in ancillary_filter_attrs['list']:
+                    for source in ancillary_filter_attrs['sources']:
+                        if attr_name in ancillary_filter_attrs['sources'][source]['list']:
+                            ds = ancillary_filter_attrs['sources'][source]
+                            query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
+                                ds['shared_id_col'], ds['name'], img_src.shared_id_col
+                            )) + solr_query['queries'][attr])
+                elif attr_name in image_filter_attrs['list'] and attr_name in image_filter_attrs['sources'][img_src.id][
+                    'list']:
+                    query_set.append(solr_query['queries'][attr])
+
+        solr_facets = build_solr_facets(list(image_facet_attrs['sources'][img_src.id]['attrs']),
+                                        solr_query['filter_tags'] if solr_query else None, unique='PatientID')
+
+        # Collapse and unique faceted counting can't be used together, so we have to request twice - once to collapse on the requested
+        # field and once to faceted count
+        solr_counts = query_solr_and_format_result({
+            'collection': img_src.name,
+            'fields': None,
+            'fqs': query_set,
+            'query_string': tcga_query_filter['full_query_str'],
+            'facets': solr_facets,
+            'limit': 0,
+            'counts_only': counts_only,
+            'unique': img_src.shared_id_col
+        })
+
+        results['facets']['origin_set'][img_src.id] = {'facets': solr_counts['facets']}
+
+        if not counts_only:
+            solr_result = query_solr_and_format_result({
+                'collection': img_src.name,
+                'fields': list(fields),
+                'fqs': query_set,
+                'query_string': tcga_query_filter['full_query_str'],
+                'collapse_on': collapse_on,
+                'counts_only': counts_only,
+                'limit': record_limit
+            })
+            results['docs'] = solr_result['docs']
+            results['total'] = solr_result['numFound']
+        else:
+            results['total'] = solr_counts['numFound']
+
+        if with_ancillary:
+            results['facets']['related_set'] = {}
+            # The attributes being faceted against here would be whatever list of facet counts we want to display in the
+            # UI (probably not ALL of them).
+            for anc_source in ancillary_sources:
+                solr_facets = build_solr_facets(list(ancillary_facet_attrs['sources'][anc_source.id]['attrs']),
+                                                solr_query['filter_tags'] if solr_query else None)
+                query_set = []
+                joined = []
+                # Ancilary data faceting and querying
+                if solr_query and solr_query['queries'] is not None:
+                    for attr in solr_query['queries']:
+                        attr_name = re.sub("(_btw|_lt|_lte|_gt|_gte)", "", attr)
+                        if attr_name in image_filter_attrs['list']:
+                            for source in image_filter_attrs['sources']:
+                                if attr_name in image_filter_attrs['sources'][source]['list']:
+                                    ds = image_filter_attrs['sources'][source]
+                                    query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
+                                        ds['shared_id_col'], ds['name'], anc_source.shared_id_col
+                                    )) + solr_query['queries'][attr])
+                                    joined.append(source)
+                        elif attr_name not in ancillary_filter_attrs['sources'][anc_source.id]['list']:
+                            for source in ancillary_filter_attrs['sources']:
+                                if source != anc_source.id and attr_name in ancillary_filter_attrs['sources'][source][
+                                    'list']:
+                                    ds = ancillary_filter_attrs['sources'][source]
+                                    query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
+                                        ds['shared_id_col'], ds['name'], anc_source.shared_id_col
+                                    )) + solr_query['queries'][attr])
+                                    joined.append(source)
+                        else:
+                            query_set.append(solr_query['queries'][attr])
+
+                # Make sure we only look at ancillary data which is related to image data
+                for source in image_sources:
+                    if source.id not in joined:
+                        query_set.append("{!join %s}*:*" % "from={} fromIndex={} to={}".format(
+                            source.shared_id_col, source.name, anc_source.shared_id_col
+                        ))
+
+                # Fields is hardlocked to None for all Ancillary data because we don't display them,
+                # we only faceted count
+                solr_result = query_solr_and_format_result({
+                    'collection': anc_source.name,
+                    'fields': None,
+                    'fqs': query_set,
+                    'query_string': "*:*",
+                    'facets': solr_facets,
+                    'limit': 0,
+                    'collapse_on': anc_source.shared_id_col,
+                    'counts_only': True,
+                    'unique': anc_source.shared_id_col
+                })
+
+                results['facets']['related_set']["{}:{}".format(anc_source.name, anc_source.version.name)] = {'facets': solr_result['facets']}
+
+    return results
+
+
+def get_metadata_bq(filters, fields, sources_and_attrs, counts_only, collapse_on, record_limit):
+    results = {'docs': None, 'facets': {}}
+
+    try:
+        res = get_bq_facet_counts(filters, None, None, sources_and_attrs)
+        results['facets'] = res['facets']
+        results['total'] = res['facets']['total']
+
+        if not counts_only:
+            docs = get_bq_metadata(filters, fields, None, sources_and_attrs, [collapse_on], record_limit)
+            doc_result_schema = {i: x['name'] for i,x in enumerate(docs['schema']['fields'])}
+
+            results['docs'] = [{
+                doc_result_schema[i]: y['v'] for i,y in enumerate(x['f'])
+            } for x in docs['results'] ]
+
+    except Exception as e:
+        logger.error("[ERROR] During BQ facet and doc fetching:")
+        logger.exception(e)
+    return results
 
 # Returns the Display settings for all attributes, or optionally an indicated set
 # TODO: this is accepting names but going forward should require either PKs or ORM objects

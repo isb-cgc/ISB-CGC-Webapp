@@ -208,12 +208,12 @@ def main():
         }])
 
         add_data_versions([
-            {"name": "TCGA Clinical and Biospecimen Data", "ver": "r9", "type": "A"},
+            {"name": "GDC Data Release 9", "ver": "r9", "type": "A"},
             {"name": "TCIA Image Data", "ver": "0", "type": "I"}]
         )
 
         add_solr_collex(['tcia_images'])
-        add_solr_collex(['tcga_clin_bios'], 'r9')
+        add_solr_collex(['tcga_clin', 'tcga_bios'], 'r9')
         add_bq_tables(['isb-cgc.TCGA_bioclin_v0.Biospecimen', 'isb-cgc.TCGA_bioclin_v0.Clinical'])
 
         add_bq_tables(["idc-dev-etl.tcia.dicom_metadata"], "0")
@@ -253,7 +253,7 @@ def main():
 
         attr_vals_file.close()
 
-        attr_file = open("clin.csv", "r")
+        attr_file = open("tcga_clin.csv", "r")
         line_reader = attr_file.readlines()
         clin_table_attr = []
         for line in line_reader:
@@ -262,7 +262,7 @@ def main():
 
         attr_file.close()
 
-        attr_file = open("bios.csv", "r")
+        attr_file = open("tcga_bios.csv", "r")
         line_reader = attr_file.readlines()
         bios_table_attr = []
         for line in line_reader:
@@ -271,7 +271,7 @@ def main():
 
         attr_file.close()
 
-        attr_file = open("clin_attributes.csv", "r")
+        attr_file = open("tcga_attributes.csv", "r")
         line_reader = attr_file.readlines()
         attr_set = []
 
@@ -286,15 +286,17 @@ def main():
                 "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
                 line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
                 "collex": Collection.objects.values_list('short_name', flat=True),
-                'solr_collex': ['tcga_clin_bios'],
+                'solr_collex': [],
                 'bq_tables': [],
                 'display': True if line_split[-1] == 'True' else False
             }
 
             if attr['name'] in clin_table_attr:
+                attr['solr_collex'].append('tcga_clin')
                 attr['bq_tables'].append('isb-cgc.TCGA_bioclin_v0.Clinical')
 
             if attr['name'] in bios_table_attr:
+                attr['solr_collex'].append('tcga_bios')
                 attr['bq_tables'].append('isb-cgc.TCGA_bioclin_v0.Biospecimen')
 
             if attr['name'] in display_vals:
@@ -311,7 +313,7 @@ def main():
                     {'label': 'underweight', 'first': "*", "last": "18.5", "gap": "0", "include_lower": True, "include_upper": False, 'type': 'F'},
                     {'label': 'obese', 'first': "30", "last": "*", "gap": "0", "include_lower": True,
                      "include_upper": True, 'type': 'F'},
-                    {'label': 'normal', 'first': "18.5", "last": "25", "gap": "0", "include_lower": True,
+                    {'label': 'normal weight', 'first': "18.5", "last": "25", "gap": "0", "include_lower": True,
                      "include_upper": False, 'type': 'F'},
                     {'label': 'overweight', 'first': "25", "last": "30", "gap": "0", "include_lower": True,
                      "include_upper": False, 'type': 'F'}

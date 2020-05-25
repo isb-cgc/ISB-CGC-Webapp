@@ -664,7 +664,7 @@
 
 /*! exports provided: vertexShader */
 
-/*! cornerstone-tools - 4.9.0 - 2019-12-11 | (c) 2017 Chris Hafey | https://github.com/cornerstonejs/cornerstoneTools */
+/*! cornerstone-tools - 4.15.1 - 2020-05-12 | (c) 2017 Chris Hafey | https://github.com/cornerstonejs/cornerstoneTools */
 
 /*!****************************************************************!*\
   !*** ../node_modules/@babel/runtime/helpers/arrayWithHoles.js ***!
@@ -1186,7 +1186,7 @@
 
 /*! ./lib.js */
 
-/*! exports provided: AngleTool, ArrowAnnotateTool, BidirectionalTool, CircleRoiTool, CobbAngleTool, EllipticalRoiTool, FreehandRoiTool, LengthTool, ProbeTool, RectangleRoiTool, TextMarkerTool, BrushTool, SphericalBrushTool, RectangleScissorsTool, FreehandScissorsTool, CircleScissorsTool, CorrectionScissorsTool, CrosshairsTool, DoubleTapFitToWindowTool, DragProbeTool, EraserTool, FreehandRoiSculptorTool, MagnifyTool, OrientationMarkersTool, PanMultiTouchTool, PanTool, ReferenceLinesTool, RotateTool, RotateTouchTool, ScaleOverlayTool, StackScrollMouseWheelTool, StackScrollMultiTouchTool, StackScrollTool, WwwcRegionTool, WwwcTool, ZoomMouseWheelTool, ZoomTool, ZoomTouchPinchTool, init, stackPrefetch, stackRenderers, playClip, stopClip, store, getModule, getToolForElement, addTool, addToolForElement, removeTool, removeToolForElement, setToolOptions, setToolOptionsForElement, isToolActiveForElement, setToolActive, setToolActiveForElement, setToolEnabled, setToolEnabledForElement, setToolDisabled, setToolDisabledForElement, setToolPassive, setToolPassiveForElement, addToolState, getToolState, removeToolState, clearToolState, setElementToolStateManager, getElementToolStateManager, textStyle, toolStyle, toolColors, toolCoordinates, stackSpecificStateManager, newStackSpecificToolStateManager, addStackStateManager, loadHandlerManager, newImageIdSpecificToolStateManager, globalImageIdSpecificToolStateManager, newFrameOfReferenceSpecificToolStateManager, globalFrameOfReferenceSpecificToolStateManager, forceEnabledElementResize, orientation, SaveAs, enableLogger, disableLogger, register, registerSome, wwwcSynchronizer, updateImageSynchronizer, Synchronizer, stackScrollSynchronizer, stackImagePositionSynchronizer, stackImagePositionOffsetSynchronizer, stackImageIndexSynchronizer, panZoomSynchronizer, requestPoolManager, importInternal, external, EVENTS, version, import, default */
+/*! exports provided: AngleTool, ArrowAnnotateTool, BidirectionalTool, CircleRoiTool, CobbAngleTool, EllipticalRoiTool, FreehandRoiTool, LengthTool, ProbeTool, RectangleRoiTool, TextMarkerTool, BrushTool, SphericalBrushTool, RectangleScissorsTool, FreehandScissorsTool, CircleScissorsTool, CorrectionScissorsTool, CrosshairsTool, DoubleTapFitToWindowTool, DragProbeTool, EraserTool, FreehandRoiSculptorTool, MagnifyTool, OverlayTool, OrientationMarkersTool, PanMultiTouchTool, PanTool, ReferenceLinesTool, RotateTool, RotateTouchTool, ScaleOverlayTool, StackScrollMouseWheelTool, StackScrollMultiTouchTool, StackScrollTool, WwwcRegionTool, WwwcTool, ZoomMouseWheelTool, ZoomTool, ZoomTouchPinchTool, init, stackPrefetch, stackRenderers, playClip, stopClip, store, getModule, getToolForElement, addTool, addToolForElement, removeTool, removeToolForElement, setToolOptions, setToolOptionsForElement, isToolActiveForElement, setToolActive, setToolActiveForElement, setToolEnabled, setToolEnabledForElement, setToolDisabled, setToolDisabledForElement, setToolPassive, setToolPassiveForElement, addToolState, getToolState, removeToolState, clearToolState, setElementToolStateManager, getElementToolStateManager, textStyle, toolStyle, toolColors, toolCoordinates, stackSpecificStateManager, newStackSpecificToolStateManager, addStackStateManager, loadHandlerManager, newImageIdSpecificToolStateManager, globalImageIdSpecificToolStateManager, newFrameOfReferenceSpecificToolStateManager, globalFrameOfReferenceSpecificToolStateManager, forceEnabledElementResize, orientation, SaveAs, enableLogger, disableLogger, register, registerSome, wwwcSynchronizer, updateImageSynchronizer, Synchronizer, stackScrollSynchronizer, stackImagePositionSynchronizer, stackImagePositionOffsetSynchronizer, stackImageIndexSynchronizer, panZoomSynchronizer, requestPoolManager, importInternal, external, EVENTS, version, import, default */
 
 /*! ./tools/annotation/index.js */
 
@@ -1594,6 +1594,8 @@
 
 /*! exports provided: addToolState, getToolState, removeToolState, clearToolState, setElementToolStateManager, getElementToolStateManager */
 
+/*! ../util/uuidv4.js */
+
 /*!**************************************!*\
   !*** ./stateManagement/toolStyle.js ***!
   \**************************************/
@@ -1644,9 +1646,11 @@
   !*** ./store/index.js ***!
   \************************/
 
-/*! exports provided: state, getters, setters, modules, getModule, default */
+/*! exports provided: state, getters, modules, getModule, default */
 
 /*! ./modules/segmentationModule */
+
+/*! ./modules/manipulatorStateModule */
 
 /*! ./modules/cursorModule.js */
 
@@ -1684,6 +1688,10 @@
   !*** ./store/modules/globalConfigurationModule.js ***!
   \****************************************************/
 
+/*!*************************************************!*\
+  !*** ./store/modules/manipulatorStateModule.js ***!
+  \*************************************************/
+
 /*!*****************************************************************!*\
   !*** ./store/modules/segmentationModule/activeLabelmapIndex.js ***!
   \*****************************************************************/
@@ -1710,9 +1718,15 @@
   !*** ./store/modules/segmentationModule/addLabelmap2D.js ***!
   \***********************************************************/
 
+/*! ./arrayTypes */
+
 /*!***********************************************************!*\
   !*** ./store/modules/segmentationModule/addLabelmap3D.js ***!
   \***********************************************************/
+
+/*!********************************************************!*\
+  !*** ./store/modules/segmentationModule/arrayTypes.js ***!
+  \********************************************************/
 
 /*!******************************************************!*\
   !*** ./store/modules/segmentationModule/colorLUT.js ***!
@@ -1944,7 +1958,7 @@
   !*** ./toolOptions.js ***!
   \************************/
 
-/*! exports provided: getToolOptions, setToolOptions, clearToolOptions, clearToolOptionsByToolType, clearToolOptionsByElement */
+/*! exports provided: getToolOptions, setToolOptions, clearToolOptions, clearToolOptionsByToolType, clearToolOptionsByToolName, clearToolOptionsByElement */
 
 /*!*********************************!*\
   !*** ./tools/CrosshairsTool.js ***!
@@ -2005,6 +2019,10 @@
   \*****************************************/
 
 /*! ../orientation/index.js */
+
+/*!******************************!*\
+  !*** ./tools/OverlayTool.js ***!
+  \******************************/
 
 /*!************************************!*\
   !*** ./tools/PanMultiTouchTool.js ***!
@@ -2234,7 +2252,7 @@
 
 /*! ../../../util/getActiveTool */
 
-/*! ../../base/BaseAnnotationTool */
+/*! ../BidirectionalTool */
 
 /*! ./utils/updatePerpendicularLineHandles.js */
 
@@ -2494,7 +2512,7 @@
   !*** ./tools/index.js ***!
   \************************/
 
-/*! exports provided: CrosshairsTool, DoubleTapFitToWindowTool, DragProbeTool, EraserTool, FreehandRoiSculptorTool, MagnifyTool, OrientationMarkersTool, PanMultiTouchTool, PanTool, ReferenceLinesTool, RotateTool, RotateTouchTool, ScaleOverlayTool, StackScrollMouseWheelTool, StackScrollMultiTouchTool, StackScrollTool, WwwcRegionTool, WwwcTool, ZoomMouseWheelTool, ZoomTool, ZoomTouchPinchTool, default */
+/*! exports provided: CrosshairsTool, DoubleTapFitToWindowTool, DragProbeTool, EraserTool, FreehandRoiSculptorTool, MagnifyTool, OverlayTool, OrientationMarkersTool, PanMultiTouchTool, PanTool, ReferenceLinesTool, RotateTool, RotateTouchTool, ScaleOverlayTool, StackScrollMouseWheelTool, StackScrollMultiTouchTool, StackScrollTool, WwwcRegionTool, WwwcTool, ZoomMouseWheelTool, ZoomTool, ZoomTouchPinchTool, default */
 
 /*! ./CrosshairsTool.js */
 
@@ -2507,6 +2525,8 @@
 /*! ./FreehandRoiSculptorTool.js */
 
 /*! ./MagnifyTool.js */
+
+/*! ./OverlayTool.js */
 
 /*! ./OrientationMarkersTool.js */
 
@@ -3040,6 +3060,10 @@
   !*** ./util/triggerEvent.js ***!
   \******************************/
 
+/*!************************!*\
+  !*** ./util/uuidv4.js ***!
+  \************************/
+
 /*!**********************!*\
   !*** ./util/wait.js ***!
   \**********************/
@@ -3098,6 +3122,8 @@
  * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
  * @license  MIT
  */
+
+/*! cornerstone-math - 0.1.8 - 2019-01-16 | (c) 2017 Chris Hafey | https://github.com/cornerstonejs/cornerstoneMath */
 
 /*
 object-assign
@@ -3162,8 +3188,6 @@ and limitations under the License.
  *
  * Copyright (c) 2016 Jorik Tangelder;
  * Licensed under the MIT license */
-
-/*! cornerstone-math - 0.1.8 - 2019-01-16 | (c) 2017 Chris Hafey | https://github.com/cornerstonejs/cornerstoneMath */
 
 /*!
     Copyright (c) 2017 Jed Watson.
