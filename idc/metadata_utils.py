@@ -50,7 +50,7 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
 
 
         # Only active data is available in Solr, not archived
-        if len(versions.objects.filter(active=False)) and len(sources.objects.filter(source_type=DataSource.SOLR)):
+        if len(versions.filter(active=False)) and len(sources.filter(source_type=DataSource.SOLR)):
             raise Exception("[ERROR] Can't request archived data from Solr, only BigQuery.")
 
         if source_type == DataSource.BIGQUERY:
