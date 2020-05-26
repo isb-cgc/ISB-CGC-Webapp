@@ -33,32 +33,5 @@ require([
     'cohortfilelist',
 ], function ($, base, imagesearch, plotly, cohortfilelist) {
 
-    // Resets forms in modals on hide. Suppressed warning when leaving page with dirty forms
-    $('.modal').on('hide.bs.modal', function () {
-        if($(this).find('form').get().length) {
-            $(this).find('form').get(0).reset();
-        }
-    });
-
-
-    // All code which doesn't need to be accessed by other modules goes here
-
-    // Eg. event listener setup
-
 
 });
-// If this module needs to be invoked via RequireJS, fill this out.
-//
-// define(['jquery',
-//     'base',
-//     'imagesearch',
-//     'plotly',
-//     'jqueryui',
-//     'bootstrap'
-// ],function($, base, imagesearch, plotly){
-//     // Setup and static/private variables here
-//
-//     return {
-//          <PROP/METHOD>: <VALUE/DEFINITION>
-//     }
-// });

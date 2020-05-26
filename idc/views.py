@@ -465,10 +465,12 @@ def explore_data_page(request):
                     context['collections'] = {a: attr_by_source[set]['attributes']['collection_id'][a]['count'] for a in attr_by_source[set]['attributes']['collection_id']}
                     context['collections']['All'] = source_metadata['total']
             else:
-                attr_by_source[set]['attributes'] = [{'name': x,
-                 'display_name': attr_by_source[set]['attributes'][x]['obj'].display_name,
-                 'values': attr_by_source[set]['attributes'][x]['vals']
-                 } for x in attr_by_source[set]['attributes']]
+                attr_by_source[set]['attributes'] = [{
+                    'name': x,
+                    'id': attr_by_source[set]['attributes'][x]['obj'].id,
+                    'display_name': attr_by_source[set]['attributes'][x]['obj'].display_name,
+                    'values': attr_by_source[set]['attributes'][x]['vals']
+                } for x in attr_by_source[set]['attributes']]
                 if set == 'origin_set':
                     context['collections'] = {b['value']: b['count'] for a in attr_by_source[set]['attributes'] for
                                               b in a['values'] if a['name'] == 'collection_id' }
