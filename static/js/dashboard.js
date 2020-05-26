@@ -26,11 +26,6 @@ require([
     'tablesorter'
 ], function ($, base) {
 
-    // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
-    $('.modal').on('hide.bs.modal', function () {
-        $(this).find('form')[0].reset();
-    });
-
     $('.min-max a').on('click', function () {
         $(this).find('i').toggleClass('fa-angle-double-up');
         $(this).find('i').toggleClass('fa-angle-double-down');
