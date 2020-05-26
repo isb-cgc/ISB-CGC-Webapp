@@ -55,7 +55,6 @@
    window.selItems = new Object();
    window.selItems.selProjects = new Array();
    window.selItems.selStudies = new Object();
-
    window.collection = {{ collections|tojson|safe }};
 </script>
 
@@ -118,14 +117,9 @@
                                     <li id = "search_related" role="presentation" class="filter-tab"><a href="#search_related_set" role="tab" data-toggle="tab" title="related" aria-expanded="false">Related</a></li>
 
                                 {%  endif %}
-
-
-
-
                             </ul>
                             <div class="tab-content">
                                 <div id = "search_orig_set" role="tabpanel" class="tab-pane active">
-
                                     {% for attr in set_attributes.origin_set.attributes %}
                                     {% if attr.name != "collection_id" %}
                                      <ul class="list-group" role="tablist" aria-multiselectable="true">
@@ -135,7 +129,7 @@
                                                     <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
                                                 </a>
                                             </div>
-                                            <div id="{{ attr.name }}" class="collapse list-group-item__body collapse">
+                                            <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse">
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                    {% for val in attr.values %}
                                                     <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
@@ -168,7 +162,7 @@
                                                     <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
                                                 </a>
                                             </div>
-                                            <div id="{{ attr.name }}" class="collapse list-group-item__body collapse">
+                                            <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse">
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                     {% for val in attr.values %}
                                                         <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
@@ -201,7 +195,7 @@
                                                          <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
                                                      </a>
                                                  </div>
-                                                 <div id="{{ attr.name }}" class="collapse list-group-item__body collapse">
+                                                 <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse">
                                                      <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                      {% for val in attr.values %}
                                                          <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
@@ -240,11 +234,13 @@
                 </div>
                 <div class="filter-panel panel" role="tabpanel">
                     <div class="tabpanel panel-default" role="tabpanel">
-                        <div class="panel-heading clearfix"><h4 class="panel-title">Search Results</h4><br> <label>Chart Type:</label><select id="plot_type" onchange="updatePlots(this)">
-                            <option  selected value="pie" >Pie</option><option value="bar" >Bar</option></select>
-                        <label><input id="plot_label" type="checkbox" onchange="updatePlots(this)"> Add labels?</label>
-
-
+                        <div class="panel-heading clearfix"><h4 class="panel-title">Search Results</h4><br>
+                            <label>Chart Type:</label>
+                            <select id="plot_type" onchange="updatePlots(this)">
+                                <option  selected value="pie" >Pie</option>
+                                <option value="bar" >Bar</option>
+                            </select>
+                            <label><input id="plot_label" type="checkbox" onchange="updatePlots(this)"> Add labels?</label>
                         </div>
 
                         <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
@@ -384,44 +380,35 @@
                          </div>
                      </div>
                 </div>
-
-
                 <div class="tabpanel data-tab-content-panel table-panel">
                      <div class="panel panel-default">
                          <div class="panel-heading clearfix"><h4 class="panel-title">Selected Series</h4></div>
                          <div class="panel-body">
-
-                             <div class="dataTables_info">
-                    <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count"> </span> entries</span>
-                    <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
-                         </div>
-                       <div>
-
-                          <div class="dataTables_length files-per-page">
-                        <label>Show</label>
-                        <select class="files-per-page-select" data-fpp="10">
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                        </select>
-                        <label>entries</label>
-                    </div>
-
-                              <div class="dataTables_goto_page" data-curpage="1">
-                        <label for="goto-page-no">Page</label>
-                        <input id="goto-page-no-inp" type="number" class="goto-page-number" min="1" max="1">
-                        <div class="goto-page-button dataTables_button">Go</div>
-                    </div>
-                               <div class="dataTables_goto_page">
-                        <a class="prev-page paginate_button dataTables_button">Previous</a>
-                        <span class="paginate_button_space"><a class="dataTables_button paginate_button numeric_button current">1</a></span>
-                        <a class="next-page paginate_button dataTables_button">Next</a>
-                       </div>
-
-
-                       </div>
-
-
+                            <div class="dataTables_info">
+                                <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count"> </span> entries</span>
+                                <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
+                            </div>
+                            <div>
+                                <div class="dataTables_length files-per-page">
+                                    <label>Show</label>
+                                    <select class="files-per-page-select" data-fpp="10">
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                    </select>
+                                    <label>entries</label>
+                                </div>
+                                <div class="dataTables_goto_page" data-curpage="1">
+                                    <label for="goto-page-no">Page</label>
+                                    <input id="goto-page-no-inp" type="number" class="goto-page-number" min="1" max="1">
+                                    <div class="goto-page-button dataTables_button">Go</div>
+                                </div>
+                                <div class="dataTables_goto_page">
+                                    <a class="prev-page paginate_button dataTables_button">Previous</a>
+                                    <span class="paginate_button_space"><a class="dataTables_button paginate_button numeric_button current">1</a></span>
+                                    <a class="next-page paginate_button dataTables_button">Next</a>
+                               </div>
+                            </div>
                              <table class = "table table-striped">
                                 <thead id="series_table_head">
                                     <tr>
@@ -437,6 +424,8 @@
         </div>
     </div>
 </div>
+
+{% include "save-cohort-modal.html" %}
 
 {% endblock %}
 
