@@ -6,13 +6,14 @@ window.config = function(props) {
     enableGoogleCloudAdapter: true,
     enableGoogleCloudAdapterUI: false,
     showStudyList: true,
+    filterQueryParam: true,
     httpErrorHandler: error => {
       // This is 429 when rejected from the public idc sandbox too often.
       console.warn(error.status);
 
       // Could use services manager here to bring up a dialog/modal if needed.
       // console.warn('test, navigate to https://ohif.org/');
-      window.location = 'https://storage.googleapis.com/idc-sandbox-002-static/quota_exceeded.html';
+      window.location =  'https://storage.googleapis.com/idc-sandbox-002-static/quota_exceeded.html';
     },
     healthcareApiEndpoint: 'https://idc-sandbox-002.appspot.com/v1beta1',
 
