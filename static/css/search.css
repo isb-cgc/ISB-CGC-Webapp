@@ -1,3 +1,25 @@
+.greyout {
+    background-style: grey;
+}
+
+
+.fa-stack {
+  text-align: center;
+}
+
+.fa-stack .fa-caret-down {
+    position: absolute;
+    background-color:grey;
+    bottom: 0;
+}
+
+.fa-stack .fa-caret-up {
+  position: absolute;
+  top: 0;
+}
+
+
+
 html {
   overflow-y: scroll;
 }
