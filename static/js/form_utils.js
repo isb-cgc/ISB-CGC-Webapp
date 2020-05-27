@@ -44,14 +44,4 @@ require([
             return false;
         }
     });
-
-    // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
-    // Hides unallowed-chars warning
-    $('.modal').on('hide.bs.modal', function() {
-        $(this).find('.unallowed-chars-wb-alert').hide();
-        var form = $(this).find('form')[0];
-        if(form){
-            form.reset();
-        }
-    });
 });

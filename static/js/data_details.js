@@ -192,14 +192,6 @@ require([
         return cookieValue;
     }
 
-    // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
-    $('.modal').on('hide.bs.modal', function() {
-        var form = $(this).find('form')[0];
-        if(form){
-            form.reset();
-        }
-    });
-
     var search_helper_obj = Object.create(search_helpers, {});
 
     var UPDATE_QUEUE = [];

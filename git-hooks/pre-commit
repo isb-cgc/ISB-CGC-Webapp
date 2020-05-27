@@ -15,13 +15,18 @@ BLACKLIST = [
 	b'private_key_id',
 	b'private_key',
 	# .env file checks
-	b'_PASSWORD=',
+	b'PASSWORD=',
 	b'_SECRET=',
     b'_API_KEY=',
     b'_SECRET_KEY=',
     # Prevent yaml files with env vars from going in, as they
     # may also have passwords
     b'env_variables:'
+]
+
+EXEMPTED = [
+    'git-hooks/pre-commit',
+    'shell/database-setup.sh'
 ]
 
 #: For a complete list, we need to make an OS call:
@@ -36,7 +41,7 @@ def main():
     private_key_files = []
 
     for filename in files_to_check:
-        if len(filename):
+        if len(filename) and os.path.exists(filename) and filename not in EXEMPTED:
             file_path = join(dirname(dirname(dirname(__file__))),filename)
             with open(file_path, 'rb') as f:
                 content = f.read()
