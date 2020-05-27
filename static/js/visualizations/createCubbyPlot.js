@@ -323,11 +323,12 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'underscore'],
                 };
 
 
-                var min_scale = 50/x_band_width;
+                var min_scale = 50/x_band_width > 1 ? 1:50/x_band_width ;
                 var max_scale = 150/x_band_width;
                 var zoom = d3.behavior.zoom()
-                    .x(x2).scaleExtent([min_scale, max_scale])
-                    .y(y2).scaleExtent([min_scale, max_scale])
+                    .x(x2)
+                    .y(y2)
+                    .scaleExtent([min_scale, max_scale])
                     .on('zoom', zoomer);
 
                 svg.call(zoom);

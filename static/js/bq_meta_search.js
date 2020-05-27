@@ -19,17 +19,14 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        'bootstrap': ['//stackpath.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min', 'libs/bootstrap.min'],
-        'jquery': ['//cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min', 'libs/jquery-3.5.1.min'],
-        'datatables.net': ['//cdn.datatables.net/1.10.19/js/jquery.dataTables.min', 'libs/jquery.dataTables.min'],
-        'datatables.bootstrap': ['https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap.min'],
-        'datatables.net-buttons': ['//cdn.datatables.net/buttons/1.6.0/js/dataTables.buttons.min'],
-        'datatables.net-html5': ['//cdn.datatables.net/buttons/1.6.0/js/buttons.html5.min'],
-        'chosen': ['//cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min'],
-        'buttons-colvis': ['//cdn.datatables.net/buttons/1.6.0/js/buttons.colVis.min']
+        'datatables.net': ['libs/jquery.dataTables.min'],
+        'datatables.bootstrap': ['libs/jquery.dataTables.bootstrap.min'],
+        'datatables.net-buttons': ['libs/dataTables.buttons.min'],
+        'datatables.net-html5': ['libs/buttons.html5.min'],
+        'chosen': ['libs/chosen.jquery.min'],
+        'buttons-colvis': ['libs/buttons.colVis.min']
     },
     shim: {
-        'bootstrap': ['jquery'],
         'datatables.net': ['jquery'],
         'chosen':['jquery']
     }

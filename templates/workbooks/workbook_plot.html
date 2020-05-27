@@ -166,7 +166,7 @@
                             </div>
                         {% endfor %}
                         <label for="{{ worksheet.id }}-x-log-transform">
-                            <input id="{{ worksheet.id }}-x-log-transform" type="checkbox" class="log-scale"> Plot as log<sub>10</sub>(n+1)
+                            <input id="{{ worksheet.id }}-x-log-transform" type="checkbox" class="log-scale {% if workbook.owner.id != user.id %} disabled {% endif %}" > Plot as log<sub>10</sub>(n+1)
                         </label>
                     </div>
 
@@ -229,14 +229,14 @@
                             </div>
                         {% endfor %}
                         <label for="{{ worksheet.id }}-y-log-transform">
-                            <input id="{{ worksheet.id }}-y-log-transform" type="checkbox" class="log-scale"> Plot as log<sub>10</sub>(n+1)
+                            <input id="{{ worksheet.id }}-y-log-transform" type="checkbox" class="log-scale {% if workbook.owner.id != user.id %} disabled {% endif %}" > Plot as log<sub>10</sub>(n+1)
                         </label>
                     </div>
 
                     <!-- Plot By Cases vs Samples Selection -->
                     <div class="form-group plot-by-group">
                         <label for="{{ worksheet.id }}-plot-by">Plot By</label>
-                        <select id="{{ worksheet.id }}-plot-by" class="form-control plot-by">
+                        <select id="{{ worksheet.id }}-plot-by" class="form-control plot-by" {% if workbook.owner.id != user.id %} disabled {% endif %}>
                             <option value="cases">Cases</option>
                             <option value="samples">Samples</option>
                         </select>

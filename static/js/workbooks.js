@@ -21,11 +21,11 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security/script',
-        underscore: 'libs/underscore-min',
+        // jquery: 'libs/jquery-1.11.1.min',
+        // bootstrap: 'libs/bootstrap.min',
+        // jqueryui: 'libs/jquery-ui.min',
+        // session_security: 'session_security/script',
+        // underscore: 'libs/underscore-min',
         d3: 'libs/d3.min',
         d3tip: 'libs/d3-tip',
         d3textwrap: 'libs/d3-textwrap.min',
@@ -48,7 +48,7 @@ require.config({
         oncoprint_setup: 'visualizations/oncoprint-setup',
         cbio_util: 'visualizations/cbio-util',
         download_util: 'visualizations/download-util',
-        base: 'base',
+        // base: 'base',
         plot_factory : 'visualizations/plotFactory',
         histogram_plot : 'visualizations/createHistogram',
         scatter_plot : 'visualizations/createScatterPlot',
@@ -61,11 +61,11 @@ require.config({
         seqpeek: 'seqpeek_view/seqpeek'
     },
     shim: {
-        'bootstrap': ['jquery'],
-        'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
+        // 'bootstrap': ['jquery'],
+        // 'jqueryui': ['jquery'],
+        // 'session_security': ['jquery'],
+        // 'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
+        // 'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'select2': ['jquery'],
         'plot_factory':['vizhelpers', 'session_security'],
         'stats':['science'],
@@ -498,11 +498,11 @@ require([
 
                 if(plot_settings.axis[axis_index].type == 'CATEGORICAL') {
                     $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').prop('checked',false);
-                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').prop('title','Log transformation is not available with this axis for this plot type.');
-                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').parent().prop('title','Log transformation is not available with this axis for this plot type.');
+                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').attr('title','Log transformation is not available with this axis for this plot type.');
+                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').parent().attr('title','Log transformation is not available with this axis for this plot type.');
                 } else {
-                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').parent().prop('title','');
-                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').prop('title','');
+                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').parent().attr('title','');
+                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').attr('title','');
                 }
 
                 options.each(function (i, element) {
@@ -1357,7 +1357,7 @@ require([
                 if (result.bq_tables && result.bq_tables.length > 0) {
                     plot_element.find('.bq-table-display').empty();
                     for (var i = 0; i < result.bq_tables.length; i++) {
-                        plot_element.find('.bq-table-display').append($('<li>').text(result.bq_tables[i]).prop('title', result.bq_tables[i]));
+                        plot_element.find('.bq-table-display').append($('<li>').text(result.bq_tables[i]).attr('title', result.bq_tables[i]));
                     }
                     plot_element.find('.bq-tables').show();
                 } else {
