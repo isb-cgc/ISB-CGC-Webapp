@@ -27,7 +27,7 @@ require.config({
         ajv: 'libs/ajv.bundle',
         // base: 'base',
         // dataTables:'libs/jquery.dataTables.min'
-        'datatables.net': ['//cdn.datatables.net/1.10.19/js/jquery.dataTables.min', 'libs/jquery.dataTables.min'],
+        'datatables.net': ['libs/jquery.dataTables.min']
     },
     shim: {
         // 'bootstrap': ['jquery'],
