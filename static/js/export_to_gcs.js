@@ -16,20 +16,20 @@
  *
  */
 
-require.config({
-    baseUrl: STATIC_FILES_URL+'js/',
-    paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        base: 'base'
-    },
-    shim: {
-        'bootstrap': ['jquery'],
-        'jqueryui': ['jquery'],
-        'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
-    }
-});
+// require.config({
+//     baseUrl: STATIC_FILES_URL+'js/',
+//     paths: {
+//         jquery: 'libs/jquery-1.11.1.min',
+//         bootstrap: 'libs/bootstrap.min',
+//         jqueryui: 'libs/jquery-ui.min',
+//         base: 'base'
+//     },
+//     shim: {
+//         'bootstrap': ['jquery'],
+//         'jqueryui': ['jquery'],
+//         'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
+//     }
+// });
 
 require([
     'jquery',

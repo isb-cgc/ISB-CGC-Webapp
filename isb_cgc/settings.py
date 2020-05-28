@@ -58,6 +58,7 @@ print("[STATUS] DEBUG mode is "+str(DEBUG), file=sys.stdout)
 
 # Theoretically Nginx allows us to use '*' for ALLOWED_HOSTS but...
 ALLOWED_HOSTS = list(set(os.environ.get('ALLOWED_HOST', 'localhost').split(',') + ['localhost', '127.0.0.1', '[::1]', gethostname(), gethostbyname(gethostname()),]))
+print("ALLOWED_HOSTS: {}".format(ALLOWED_HOSTS))
 #ALLOWED_HOSTS = ['*']
 
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
@@ -239,7 +240,7 @@ STATIC_ROOT = ''
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = os.environ.get('STATIC_URL', '/static/')
 
-BQ_ECOSYS_STATIC_URL = os.environ.get('BQ_ECOSYS_STATIC_URL', 'https://storage.googleapis.com/webapp-dev-static-files/bq_ecosys/')
+BQ_ECOSYS_STATIC_URL = os.environ.get('BQ_ECOSYS_STATIC_URL', 'https://storage.googleapis.com/webapp-static-files-isb-cgc-dev/bq_ecosys/')
 
 GCS_STORAGE_URI = os.environ.get('GCS_STORAGE_URI', 'https://storage.googleapis.com/')
 
