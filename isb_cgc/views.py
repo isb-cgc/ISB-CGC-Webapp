@@ -17,6 +17,7 @@ from past.builtins import basestring
 import collections
 import json
 import logging
+import time
 import sys
 import re
 import datetime
@@ -53,6 +54,8 @@ from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
 from google_helpers.bigquery.service import get_bigquery_service
 from google_helpers.bigquery.feedback_support import BigQueryFeedbackSupport
+from solr_helpers import query_solr_and_format_result, build_solr_query, build_solr_facets
+from projects.models import Attribute, DataVersion, DataSource
 
 import requests
 
@@ -64,6 +67,9 @@ BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 BQ_ECOSYS_BUCKET = settings.BQ_ECOSYS_STATIC_URL
 
+def _needs_redirect(request):
+    appspot_host = '^.*{}\.appspot\.com.*$'.format(settings.GCLOUD_PROJECT_ID.lower())
+    return re.search(appspot_host, request.META.get('HTTP_HOST', '')) and not re.search(appspot_host, settings.BASE_URL)
 
 def convert(data):
     # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
@@ -113,15 +119,10 @@ def landing_page(request):
     return render(request, 'isb_cgc/landing.html', {'request': request, })
 
 
-# Redirect all requests for appspot to our actual domain.
+# Redirect all requests for the old landing page location to isb-cgc.org
 def domain_redirect(request):
     try:
-        appspot_host = '^.*{}\.appspot\.com.*$'.format(settings.GCLOUD_PROJECT_ID.lower())
-        logger.info("[STATUS] host: {}".format(request.META.get('HTTP_HOST', '')))
-        if re.search(appspot_host,request.META.get('HTTP_HOST', '')) and not re.search(appspot_host,settings.BASE_URL):
-            return redirect(settings.BASE_URL)
-        else:
-            return landing_page(request)
+        return redirect(settings.BASE_URL) if _needs_redirect(request) else landing_page(request)
     except Exception as e:
         logger.error("[ERROR] While handling domain redirect:")
         logger.exception(e)
@@ -476,6 +477,73 @@ def dicom(request, study_uid=None):
     }
     return render(request, template, context)
 
+@login_required
+def test_solr_data(request):
+    status=200
+
+    try:
+        start = time.time()
+        filters = json.loads(request.GET.get('filters', '{}'))
+        versions = json.loads(request.GET.get('versions', '[]'))
+        source_type = request.GET.get('source', DataSource.SOLR)
+        versions = DataVersion.objects.filter(data_type__in=versions) if len(versions) else DataVersion.objects.filter(
+            active=True)
+
+        programs = Program.objects.filter(active=1,is_public=1,owner=User.objects.get(is_superuser=1,is_active=1,is_staff=1))
+
+        if len(filters):
+            programs = programs.filter(id__in=[int(x) for x in filters.keys()])
+
+        results = {}
+
+        for prog in programs:
+            results[prog.id] = {}
+            prog_versions = prog.dataversion_set.filter(id__in=versions)
+            sources = prog.get_data_sources(source_type=source_type).filter(version__in=prog_versions)
+            prog_filters = filters.get(str(prog.id), None)
+            attrs = sources.get_source_attrs(for_ui=True)
+            for source in sources:
+                solr_query = build_solr_query(prog_filters, with_tags_for_ex=True) if prog_filters else None
+                solr_facets = build_solr_facets(attrs['sources'][source.id]['attrs'], filter_tags=solr_query['filter_tags'] if solr_query else None, unique='case_barcode')
+                query_set = []
+
+                if solr_query:
+                    for attr in solr_query['queries']:
+                        attr_name = re.sub("(_btw|_lt|_lte|_gt|_gte)", "", attr)
+                        # If an attribute is not in this program's attribute listing, then it's ignored
+                        if attr_name in attrs['list']:
+                            # If the attribute is from this source, just add the query
+                            if attr_name in attrs['sources'][source.id]['list']:
+                                query_set.append(solr_query['queries'][attr])
+                            # If it's in another source for this program, we need to join on that source
+                            else:
+                                for ds in sources:
+                                    if ds.id != source.id and attr_name in attrs['sources'][ds.id]['list']:
+                                        query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
+                                            ds.shared_id_col, ds.name, source.shared_id_col
+                                        )) + solr_query['queries'][attr])
+                        else:
+                            logger.warning("[WARNING] Attribute {} not found in program {}".format(attr_name,prog.name))
+
+                solr_result = query_solr_and_format_result({
+                    'collection': source.name,
+                    'facets': solr_facets,
+                    'fqs': query_set
+                })
+
+                results[prog.id][source.name] = solr_result
+
+        stop = time.time()
+
+        results['elapsed_time'] = "{}s".format(str(stop-start))
+
+    except Exception as e:
+        logger.error("[ERROR] While trying to fetch Solr metadata:")
+        logger.exception(e)
+        results = {'msg': 'Encountered an error'}
+        status=500
+
+    return JsonResponse({'result': results}, status=status)
 
 @login_required
 def camic(request, file_uuid=None):

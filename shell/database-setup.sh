@@ -109,7 +109,7 @@ echo "Populating Gene Symbol list..."
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/populate_gene_symbols.sql
 
 #echo "Bootstrapping new models..."
-#python3 ${HOMEROOT}/scripts/data_source_bootstrap.py
+python3 ${HOMEROOT}/scripts/data_source_bootstrap.py
 
 # Setting up Cron token
 python3 ${HOMEROOT}/scripts/create_api_token.py

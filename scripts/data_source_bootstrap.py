@@ -38,7 +38,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "isb_cgc.settings")
 import django
 django.setup()
 
-from projects.models import Program, Project, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataVersion
+from projects.models import Program, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataVersion
 
 from django.contrib.auth.models import User
 isb_superuser = User.objects.get(username="isb")
@@ -67,7 +67,7 @@ def add_data_versions(dv_set):
             logger.exception(e)
 
 
-def add_solr_collex(solr_set, ver_name):
+def add_solr_collex(solr_set, ver_name, programs):
     for collex in solr_set:
         try:
             obj, created = DataSource.objects.update_or_create(
@@ -76,13 +76,22 @@ def add_solr_collex(solr_set, ver_name):
                 shared_id_col="PatientID" if "tcia" in collex else "case_barcode",
                 source_type='S'
             )
+
+            progs = Program.objects.filter(name__in=programs)
+            src_to_prog = []
+
+            for prog in progs:
+                src_to_prog.append(DataSource.programs.through(datasource_id=obj.id, program_id=prog.id))
+
+            DataSource.programs.through.objects.bulk_create(src_to_prog)
+
             print("Solr Collection entry created: {}".format(collex))
         except Exception as e:
             logger.error("[ERROR] Solr Collection {} may not have been added!".format(collex))
             logger.exception(e)
 
 
-def add_bq_tables(tables, ver_name):
+def add_bq_tables(tables, ver_name, programs):
     for table in tables:
         try:
             obj, created = DataSource.objects.update_or_create(
@@ -90,6 +99,15 @@ def add_bq_tables(tables, ver_name):
                 shared_id_col="PatientID" if "idc" in table else "case_barcode",
                 source_type='B'
             )
+
+            progs = Program.objects.filter(name__in=programs)
+            src_to_prog = []
+
+            for prog in progs:
+                src_to_prog.append(DataSource.programs.through(datasource_id=obj.id, program_id=prog.id))
+
+            DataSource.programs.through.objects.bulk_create(src_to_prog)
+
             print("BQ Table created: {}".format(table))
         except Exception as e:
             logger.error("[ERROR] BigQuery Table {} may not have been added!".format(table))
@@ -97,6 +115,7 @@ def add_bq_tables(tables, ver_name):
 
 def add_attributes(attr_set):
     for attr in attr_set:
+        print(attr)
         try:
             obj, created = Attribute.objects.update_or_create(
                 name=attr['name'], display_name=attr['display_name'], data_type=attr['type'],
@@ -120,13 +139,21 @@ def add_attributes(attr_set):
                         raw_value=dv['raw_value'], display_value=dv['display_value'], attribute=obj
                     )
             if 'solr_collex' in attr:
-                for solr in attr['solr_collex']:
-                    for sc in DataSource.objects.filter(name=solr):
-                        obj.data_sources.add(sc)
+                sources = DataSource.objects.filter(name__in=attr['solr_collex'])
+                attr_to_src = []
+
+                for src in sources:
+                    attr_to_src.append(Attribute.data_sources.through(datasource_id=src.id, attribute_id=obj.id))
+
+                Attribute.data_sources.through.objects.bulk_create(attr_to_src)
             if 'bq_tables' in attr:
-                for table in attr['bq_tables']:
-                    for bqt in DataSource.objects.filter(name=table):
-                        obj.data_sources.add(bqt)
+                sources = DataSource.objects.filter(name__in=attr['bq_tables'])
+                attr_to_src = []
+
+                for src in sources:
+                    attr_to_src.append(Attribute.data_sources.through(datasource_id=src.id, attribute_id=obj.id))
+
+                Attribute.data_sources.through.objects.bulk_create(attr_to_src)
 
         except Exception as e:
             logger.error("[ERROR] Attribute {} may not have been added!".format(attr['name']))
@@ -144,32 +171,29 @@ def main():
             {"name": "GDC Release 9 Mutation Data", "ver": "r9", "type": "M", "programs": ["TCGA"]}
         ])
 
-        add_solr_collex(['tcia_images'], "TCIA Image Data Ver 0")
-        add_solr_collex(['tcga_biopec', 'target_biospec', 'ccle_biospec'], "GDC Release 9 Biospecimen Data")
-        add_solr_collex(['tcga_clin', 'ccle_clin', 'target_clin'], "GDC Release 9 Clinical")
-        add_solr_collex(['tcga_mut'], "GDC Release 9 Mutation Data")
-        add_solr_collex(['tcga_hg19', 'tcga_hg38', 'target_hg19', 'target_hg38', 'ccle_hg19'], "GDC Release 9 File Data")
+        add_solr_collex(['tcia_images'], "TCIA Image Data Ver 0", ["TCGA"])
+        add_solr_collex(['ccle_bios'], "GDC Release 9 Biospecimen Data", ["CCLE"])
+        add_solr_collex(['tcga_bios'], "GDC Release 9 Biospecimen Data", ["TCGA"])
+        add_solr_collex(['target_bios'], "GDC Release 9 Biospecimen Data", ["TARGET"])
+        add_solr_collex(['tcga_clin'], "GDC Release 9 Clinical", ["TCGA"])
+        add_solr_collex(['target_clin'], "GDC Release 9 Clinical", ["TARGET"])
+        add_solr_collex(['ccle_clin'], "GDC Release 9 Clinical", ["CCLE"])
+        add_solr_collex(['tcga_mut'], "GDC Release 9 Mutation Data", ["TCGA"])
+        add_solr_collex(['tcga_hg19', 'tcga_hg38'], "GDC Release 9 File Data", ["TCGA"])
+        add_solr_collex(['target_hg19', 'target_hg38'], "GDC Release 9 File Data", ["TARGET"])
+        add_solr_collex(['ccle_hg19'], "GDC Release 9 File Data", ["CCLE"])
 
-        add_bq_tables(['idc-dev-etl.tcia.dicom_metadata'], "TCIA Image Data Ver 0")
-        add_bq_tables([
-            'isb-cgc.TCGA_bioclin_v0.Biospecimen',
-            'isb-cgc.TARGET_bioclin_v0.Biospecimen',
-            'isb-cgc.CCLE_bioclin_v0.biospecimen_v1'
-        ], "GDC Release 9 Biospecimen Data")
-        add_bq_tables([
-            'isb-cgc.TCGA_bioclin_v0.Clinical',
-            'isb-cgc.CCLE_bioclin_v0.clinical_v0',
-            'isb-cgc.TARGET_bioclin_v0.Clinical'
-            'isb-cgc.TARGET_bioclin_v0.Clinical'
-        ], "GDC Release 9 Clinical")
-        add_bq_tables(['isb-cgc.TCGA_hg19_data_v0.Somatic_Mutation_MC3','isb-cgc.TCGA_hg38_data_v0.Somatic_Mutation'], "GDC Release 9 Mutation Data")
-        add_bq_tables([
-            'isb-cgc.TCGA_hg19_data_v0.tcga_metadata_data_hg19_r14',
-            'isb-cgc.TCGA_hg38_data_v0.tcga_metadata_data_hg38_r14',
-            'isb-cgc.TARGET_hg38_data_v0.target_metadata_data_hg38_r14',
-            'isb-cgc.TARGET_hg19_data_v0.target_metadata_data_hg19_r14',
-            'isb-cgc.CCLE_hg19_data_v0.ccle_metadata_data_hg19_r14'
-        ], "GDC Release 9 File Data")
+        add_bq_tables(['idc-dev-etl.tcia.dicom_metadata'], "TCIA Image Data Ver 0", ["TCGA"])
+        add_bq_tables(['isb-cgc.TCGA_bioclin_v0.Biospecimen'], "GDC Release 9 Biospecimen Data", ["TCGA"])
+        add_bq_tables(['isb-cgc.TARGET_bioclin_v0.Biospecimen'], "GDC Release 9 Biospecimen Data", ["TARGET"])
+        add_bq_tables(['isb-cgc.CCLE_bioclin_v0.biospecimen_v1'], "GDC Release 9 Biospecimen Data", ["CCLE"])
+        add_bq_tables(['isb-cgc.TCGA_bioclin_v0.Clinical'], "GDC Release 9 Clinical", ["TCGA"])
+        add_bq_tables(['isb-cgc.CCLE_bioclin_v0.clinical_v0'], "GDC Release 9 Clinical", ["CCLE"])
+        add_bq_tables(['isb-cgc.TARGET_bioclin_v0.Clinical'], "GDC Release 9 Clinical", ["TARGET"])
+        add_bq_tables(['isb-cgc.TCGA_hg19_data_v0.Somatic_Mutation_MC3','isb-cgc.TCGA_hg38_data_v0.Somatic_Mutation'], "GDC Release 9 Mutation Data", ["TCGA"])
+        add_bq_tables(['isb-cgc.TCGA_hg19_data_v0.tcga_metadata_data_hg19_r14','isb-cgc.TCGA_hg38_data_v0.tcga_metadata_data_hg38_r14'], "GDC Release 9 File Data", ["TCGA"])
+        add_bq_tables(['isb-cgc.TARGET_hg38_data_v0.target_metadata_data_hg38_r14','isb-cgc.TARGET_hg19_data_v0.target_metadata_data_hg19_r14'], "GDC Release 9 File Data", ["TARGET"])
+        add_bq_tables(['isb-cgc.CCLE_hg19_data_v0.ccle_metadata_data_hg19_r14'], "GDC Release 9 File Data", ["CCLE"])
 
         attr_vals_file = open("display_vals.csv", "r")
         line_reader = attr_vals_file.readlines()
@@ -192,24 +216,22 @@ def main():
         attr_list = {}
         clin_table_attr = {}
         bios_table_attr = {}
-        file_table_attr = None
 
         for program in Program.objects.filter(owner=isb_superuser,active=True,is_public=True):
             attr_file = open("{}_clin.csv".format(program.name.lower()), "r")
             line_reader = attr_file.readlines()
-            clin_table_attr[program.name.lower()] = [line.strip for line in line_reader]
+            clin_table_attr[program.name.lower()] = [line.strip() for line in line_reader]
 
             attr_file.close()
 
             attr_file = open("{}_bios.csv".format(program.name.lower()), "r")
             line_reader = attr_file.readlines()
-            bios_table_attr[program.name.lower()] = [line.strip for line in line_reader]
+            bios_table_attr[program.name.lower()] = [line.strip() for line in line_reader]
 
             attr_file.close()
 
             attr_file = open("{}_attributes.csv".format(program.name.lower()), "r")
             line_reader = attr_file.readlines()
-            attr_set = []
 
             for line in line_reader:
                 line = line.strip()
@@ -230,12 +252,12 @@ def main():
                 attr = attr_list[line_split[0]]
 
                 if attr['name'] in clin_table_attr[program.name.lower()]:
-                    attr['bq_tables'].extend(program.get_data_sources(DataVersion.CLINICAL_DATA).filter(source_type=DataSource.BIGQUERY).values_list('name', flat=True))
-                    attr['solr_collex'].extend(program.get_data_sources(DataVersion.CLINICAL_DATA).filter(source_type=DataSource.SOLR).values_list('name', flat=True))
+                    attr['bq_tables'].extend(list(program.get_data_sources(DataVersion.CLINICAL_DATA, DataSource.BIGQUERY).values_list('name', flat=True)))
+                    attr['solr_collex'].extend(list(program.get_data_sources(DataVersion.CLINICAL_DATA, DataSource.SOLR).values_list('name', flat=True)))
 
                 if attr['name'] in bios_table_attr[program.name.lower()]:
-                    attr['bq_tables'].extend(program.get_data_sources(DataVersion.BIOSPECIMEN_DATA).filter(source_type=DataSource.BIGQUERY).values_list('name', flat=True))
-                    attr['solr_collex'].extend(program.get_data_sources(DataVersion.BIOSPECIMEN_DATA).filter(source_type=DataSource.SOLR).values_list('name', flat=True))
+                    attr['bq_tables'].extend(list(program.get_data_sources(DataVersion.BIOSPECIMEN_DATA, DataSource.BIGQUERY).values_list('name', flat=True)))
+                    attr['solr_collex'].extend(list(program.get_data_sources(DataVersion.BIOSPECIMEN_DATA, DataSource.SOLR).values_list('name', flat=True)))
 
                 if attr['name'] in display_vals:
                     if 'preformatted_values' in display_vals[attr['name']]:
@@ -266,7 +288,6 @@ def main():
                     else:
                         attr['display_vals'] = display_vals[attr['name']]['vals']
 
-                attr_set.append(attr)
             attr_file.close()
 
             # Right now, we only have TCGA image and mutation data
@@ -278,19 +299,21 @@ def main():
                     line = line.strip()
                     line_split = line.split(",")
 
-                    attr = {
-                        'name': line_split[0],
-                        "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
-                        line_split[1],
-                        "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
-                        line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
-                        'cross_collex': True,
-                        'solr_collex': ['tcia_images'],
-                        'bq_tables': ["idc-dev-etl.tcia.dicom_metadata"],
-                        'display': True if line_split[-1] == 'True' else False
-                    }
-
-                    attr_set.append(attr)
+                    if line_split[0] not in attr_list:
+                        attr_list[line_split[0]] = {
+                            'name': line_split[0],
+                            "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
+                            line_split[1],
+                            "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
+                            line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                            'cross_collex': True,
+                            'solr_collex': [],
+                            'bq_tables': [],
+                            'display': True if line_split[-1] == 'True' else False
+                        }
+                    attr = attr_list[line_split[0]]
+                    attr['solr_collex'].append('tcia_images')
+                    attr['bq_tables'].append("idc-dev-etl.tcia.dicom_metadata")
 
                 attr_file.close()
 
@@ -301,19 +324,21 @@ def main():
                     line = line.strip()
                     line_split = line.split(",")
 
-                    attr = {
-                        'name': line_split[0],
-                        "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
-                        line_split[1],
-                        "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
-                        line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
-                        'cross_collex': True,
-                        'solr_collex': ['tcga_mut_hg19','tcga_mut_hg19'],
-                        'bq_tables': ['isb-cgc.TCGA_hg19_data_v0.MC3','isb-cgc.TCGA_hg38_data_v0.DCM'],
-                        'display': True if line_split[-1] == 'True' else False
-                    }
-
-                    attr_set.append(attr)
+                    if line_split[0] not in attr_list:
+                        attr_list[line_split[0]] = {
+                            'name': line_split[0],
+                            "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
+                            line_split[1],
+                            "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
+                            line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                            'cross_collex': True,
+                            'solr_collex': [],
+                            'bq_tables': [],
+                            'display': True if line_split[-1] == 'True' else False
+                        }
+                    attr = attr_list[line_split[0]]
+                    attr['solr_collex'].extend(['tcga_mut_hg19','tcga_mut_hg38'])
+                    attr['bq_tables'].extend(['isb-cgc.TCGA_hg19_data_v0.MC3','isb-cgc.TCGA_hg38_data_v0.DCM'])
 
                 attr_file.close()
 
@@ -341,11 +366,9 @@ def main():
             attr['solr_collex'].extend(list(DataSource.objects.filter(version__in=DataVersion.objects.filter(active=True,data_type=DataVersion.FILE_DATA), source_type=DataSource.SOLR).values_list('name', flat=True)))
             attr['bq_tables'].extend(list(DataSource.objects.filter(version__in=DataVersion.objects.filter(active=True,data_type=DataVersion.FILE_DATA), source_type=DataSource.BIGQUERY).values_list('name', flat=True)))
 
-
-            attr_set.append(attr)
         attr_file.close()
 
-        add_attributes(attr_set)
+        add_attributes([attr_list[x] for x in attr_list])
 
     except Exception as e:
         logging.exception(e)

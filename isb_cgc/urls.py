@@ -43,7 +43,9 @@ urlpatterns = [
 
     url(r'^images/(?P<file_uuid>[A-Za-z0-9\-]+)/$', views.get_image_data, name='image_data'),
     url(r'^images/', views.get_image_data_args, name='image_data_args'),
-    url(r'dicom/(?P<study_uid>[A-Za-z0-9\.]+)/$', views.dicom, name='dicom'),
+    url(r'^dicom/(?P<study_uid>[A-Za-z0-9\.]+)/$', views.dicom, name='dicom'),
+
+    url(r'^solr_test/', views.test_solr_data, name='solr_test'),
 
     url(r'^analysis/', include('analysis.urls')),
     url(r'^workbooks/', include('workbooks.urls')),
@@ -53,7 +55,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^accounts/', include('accounts.urls')),
     url(r'^seqpeek/', include('seqpeek.urls')),
-    url(r'session_security/', include('session_security.urls')),
+    url(r'^session_security/', include('session_security.urls')),
     url(r'^data/', include('data_upload.urls')),
     url(r'^_ah/(vm_)?health$', views.health_check),
 
