@@ -1046,8 +1046,7 @@ require(['jquery', 'jqueryui', 'bootstrap','plotly', 'base'],
         var textinfo=""
         if (showLbl && (plotCats>0)){
             textinfo ='label';
-        }
-        else{
+        } else{
             textinfo ='none';
         }
 
