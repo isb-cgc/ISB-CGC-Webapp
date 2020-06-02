@@ -51,6 +51,14 @@ def add_data_versions(dv_set):
         try:
             obj, created = DataVersion.objects.update_or_create(name=dv['name'], data_type=dv['type'], version=dv['ver'])
 
+            progs = Program.objects.filter(name="TCGA")
+            ver_to_prog = []
+
+            for prog in progs:
+                ver_to_prog.append(DataVersion.programs.through(dataversion_id=obj.id, program_id=prog.id))
+
+            DataVersion.programs.through.objects.bulk_create(ver_to_prog)
+
             print("Data Version created:")
             print(obj)
         except Exception as e:
@@ -72,29 +80,47 @@ def add_programs(program_set):
             logger.exception(e)
 
 
-def add_solr_collex(solr_set, version="0"):
+def add_solr_collex(solr_set, ver_name):
     for collex in solr_set:
         try:
             obj, created = DataSource.objects.update_or_create(
                 name=collex,
-                version=DataVersion.objects.get(version=version),
+                version=DataVersion.objects.get(name=ver_name),
                 shared_id_col="case_barcode" if "tcga" in collex else "PatientID",
                 source_type='S'
             )
+
+            progs = Program.objects.filter(name="TCGA")
+            src_to_prog = []
+
+            for prog in progs:
+                src_to_prog.append(DataSource.programs.through(datasource_id=obj.id, program_id=prog.id))
+
+            DataSource.programs.through.objects.bulk_create(src_to_prog)
+
             print("Solr Collection entry created: {}".format(collex))
         except Exception as e:
             logger.error("[ERROR] Solr Collection {} may not have been added!".format(collex))
             logger.exception(e)
 
 
-def add_bq_tables(tables, version="r9"):
+def add_bq_tables(tables, ver_name):
     for table in tables:
         try:
             obj, created = DataSource.objects.update_or_create(
-                name=table, version=DataVersion.objects.get(version=version),
+                name=table, version=DataVersion.objects.get(name=ver_name),
                 shared_id_col="case_barcode" if "isb-cgc" in table else "PatientID",
                 source_type='B'
             )
+
+            progs = Program.objects.filter(name="TCGA")
+            src_to_prog = []
+
+            for prog in progs:
+                src_to_prog.append(DataSource.programs.through(datasource_id=obj.id, program_id=prog.id))
+
+            DataSource.programs.through.objects.bulk_create(src_to_prog)
+
             print("BQ Table created: {}".format(table))
         except Exception as e:
             logger.error("[ERROR] BigQuery Table {} may not have been added!".format(table))
@@ -209,14 +235,16 @@ def main():
 
         add_data_versions([
             {"name": "GDC Data Release 9", "ver": "r9", "type": "A"},
-            {"name": "TCIA Image Data", "ver": "0", "type": "I"}]
-        )
+            {"name": "TCIA Image Data", "ver": "0", "type": "I"},
+            {"name": "TCIA Segmentation Analysis", "ver": "0", "type": "D"},
+        ])
 
-        add_solr_collex(['tcia_images'])
-        add_solr_collex(['tcga_clin', 'tcga_bios'], 'r9')
-        add_bq_tables(['isb-cgc.TCGA_bioclin_v0.Biospecimen', 'isb-cgc.TCGA_bioclin_v0.Clinical'])
-
-        add_bq_tables(["idc-dev-etl.tcia.dicom_metadata"], "0")
+        add_solr_collex(['tcia_images'], "TCIA Image Data")
+        add_solr_collex(['segmentations'], "TCIA Segmentation Analysis")
+        add_solr_collex(['tcga_clin', 'tcga_bios'], "GDC Data Release 9")
+        add_bq_tables(['isb-cgc.TCGA_bioclin_v0.Biospecimen', 'isb-cgc.TCGA_bioclin_v0.Clinical'], "GDC Data Release 9")
+        add_bq_tables(["idc-dev-etl.tcia.dicom_metadata"], "TCIA Image Data")
+        add_bq_tables(["idc-dev-etl.etl_metadata.segmentations_solr_export"], "TCIA Segmentation Analysis")
 
         collection_file = open("tcia_collex.csv", "r")
         line_reader = collection_file.readlines()
@@ -337,6 +365,33 @@ def main():
                 'cross_collex': True,
                 'solr_collex': ['tcia_images'],
                 'bq_tables': ["idc-dev-etl.tcia.dicom_metadata"],
+                'display': True if line_split[-1] == 'True' else False
+            }
+
+            if attr['name'] in display_vals:
+                if 'preformatted_values' in display_vals[attr['name']]:
+                    attr['preformatted_values'] = True
+                else:
+                    attr['display_vals'] = display_vals[attr['name']]['vals']
+
+            attr_set.append(attr)
+
+        attr_file.close()
+
+        attr_file = open("segs_attr.csv", "r")
+        line_reader = attr_file.readlines()
+
+        for line in line_reader:
+            line = line.strip()
+            line_split = line.split(",")
+
+            attr = {
+                'name': line_split[0],
+                "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else line_split[1],
+                "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                'cross_collex': True,
+                'solr_collex': ['segmentations'],
+                'bq_tables': ["idc-dev-etl.etl_metadata.segmentations_solr_export"],
                 'display': True if line_split[-1] == 'True' else False
             }
 

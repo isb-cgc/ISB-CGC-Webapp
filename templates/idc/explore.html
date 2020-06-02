@@ -43,7 +43,7 @@
             </ol>
 
             <h1 class="page-header pull-left" role="heading" aria-level="1">Explore Image Data</h1>
-            <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal" title="Please select at least one filter." disabled="disabled">Save As New Cohort</button>
+            <button id="save-cohort-btn" class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal" title="Please select at least one filter." disabled="disabled">Save As New Cohort</button>
         </div>
     </div>
 {% endblock %}
@@ -262,7 +262,11 @@
                                 </div>
                             </div>
                             <div id = "results_derived_set" role="tabpanel" class="tab-pane panel">
-                                <div class="panel-body bar-charts-div"></div>
+                                <div class="panel-body bar-charts-div derived-graphs">
+                                    {% for attr in set_attributes.derived_set.attributes %}
+                                        <div id="{{ attr.name  }}_chart" class="bar-chart"></div>
+                                    {%  endfor %}
+                                </div>
                             </div>
                             <div id = "results_related_set" role="tabpanel" class="tab-pane panel">
                                  <div class="panel-body bar-charts-div related-graphs">

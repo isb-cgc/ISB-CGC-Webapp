@@ -33,5 +33,15 @@ require([
     'cohortfilelist',
 ], function ($, base, imagesearch, plotly, cohortfilelist) {
 
+    $('.filter-panel li.checkbox').on('change', 'input', function() {
+        if($('#search_def p').length > 0) {
+            $('#save-cohort-btn').prop('disabled','');
+            if(user_is_auth) {
+                $('#save-cohort-btn').prop('title','Please log in to save this cohort.');
+                $('#save-cohort-btn').text('Log in to this Save Cohort');
+            }
+        }
+    });
+
 
 });
