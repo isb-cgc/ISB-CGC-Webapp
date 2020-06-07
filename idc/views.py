@@ -418,7 +418,7 @@ def explore_data_page(request):
         ))
 
         for set_name in [DataVersion.SET_TYPES[DataVersion.DERIVED_DATA], DataVersion.SET_TYPES[DataVersion.ANCILLARY_DATA]]:
-            if set_name in source_metadata['facets']:
+            if (set_name in source_metadata['facets']) and (set_name in attr_sets):
                 attr_display_vals = Attribute_Display_Values.objects.filter(
                     attribute__id__in=attr_sets[set_name]).to_dict()
                 for source in source_metadata['facets'][set_name]:
