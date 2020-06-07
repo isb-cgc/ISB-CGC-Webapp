@@ -23,8 +23,11 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
         window.filterObj = {};
         window.projIdSel = [];
         window.studyIdSel = [];
-        window.tcgaColls = ["tcga_blca", "tcga_brca", "tcga_cesc", "tcga_coad", "tcga_esca", "tcga_gbm", "tcga_hnsc", "tcga_kich", "tcga_kirc", "tcga_kirp", "tcga_lgg", "tcga_lihc", "tcga_luad", "tcga_lusc", "tcga_ov", "tcga_prad", "tcga_read", "tcga_sarc", "tcga_stad", "tcga_thca", "tcga_ucec"];
-
+        //window.tcgaColls = ["tcga_blca", "tcga_brca", "tcga_cesc", "tcga_coad", "tcga_esca", "tcga_gbm", "tcga_hnsc", "tcga_kich", "tcga_kirc", "tcga_kirp", "tcga_lgg", "tcga_lihc", "tcga_luad", "tcga_lusc", "tcga_ov", "tcga_prad", "tcga_read", "tcga_sarc", "tcga_stad", "tcga_thca", "tcga_ucec"];
+        window.projSets = new Object();
+        window.projSets['tcga']=["tcga_blca", "tcga_brca", "tcga_cesc", "tcga_coad", "tcga_esca", "tcga_gbm", "tcga_hnsc", "tcga_kich", "tcga_kirc", "tcga_kirp", "tcga_lgg", "tcga_lihc", "tcga_luad", "tcga_lusc", "tcga_ov", "tcga_prad", "tcga_read", "tcga_sarc", "tcga_stad", "tcga_thca", "tcga_ucec"];
+        window.projSets['rider']=["rider_lung_ct", "rider_phantom_pet_ct","rider_breast_mri", "rider_neuro_mri","rider_phantom_mri", "rider_lung_pet_ct"];
+        window.projSets['qin'] = ["qin_headneck","qin_lung_ct","qin_pet_phantom","qin_breast_dce_mri"];
 
         var plotLayout = {
             title: '',
@@ -106,16 +109,28 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 // Show more/less links on categories with >6 fiilters
 
         var mkFiltText = function () {
+
             var curKeys = Object.keys(filterObj).sort();
             oStringA = new Array();
+             var collection = new Array();
             for (i = 0; i < curKeys.length; i++) {
-                var curKey = curKeys[i];
-                if ((curKey === 'collection_id') && (filterObj[curKey] === tcgaColls)) {
-                    continue;
-                }
-                if (curKey === 'age_at_diagnosis_btw') {
-                    var nstr = '<span class="filter-type">AGE</span> IN (<span class="filter-att">' + filterObj[curKey][0].toString() + '-' + (filterObj[curKey][1] + 1).toString() + ')</span>';
 
+                var curKey = curKeys[i];
+                /* if ((curKey === 'collection_id') && (filterObj[curKey] === tcgaColls)) {
+                    continue;
+                } */
+                if (curKey.startsWith('Program')){
+                     curArr= filterObj[curKey];
+                     for (var j=0;j<curArr.length;j++){
+                         if ( ! ( ('Program.'+curArr[j]) in filterObj)){
+                             collection.push(curArr[j]);
+                         }
+                     }
+                }
+
+                else if (curKey === 'age_at_diagnosis_btw') {
+                    var nstr = '<span class="filter-type">AGE</span> IN (<span class="filter-att">' + filterObj[curKey][0].toString() + '-' + (filterObj[curKey][1] + 1).toString() + ')</span>';
+                     oStringA.push(nstr);
                 } else {
                     var disp = curKey;
                     var oArray = filterObj[curKey].sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
@@ -123,23 +138,33 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     //nstr += oArray.join(", &ensp; ");
                     nstr = '<span class="filter-type">' + disp + '</span>';
                     nstr += 'IN (' + oArray.join("") + ')';
+                    oStringA.push(nstr);
 
                 }
-                oStringA.push(nstr);
+               
             }
+
+            if (collection.length>0){
+                var oArray = collection.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
+                nstr = '<span class="filter-type">Collection</span>';
+                nstr += 'IN (' + oArray.join("") + ')';
+                oStringA.unshift(nstr);
+            }
+
             if (oStringA.length > 0) {
                 var oString = oStringA.join(" AND");
                 document.getElementById("search_def").innerHTML = '<p>' + oString + '</p>';
             } else {
                 document.getElementById("search_def").innerHTML = '<span class="placeholder">&nbsp;</span>';
             }
+
             //alert(oString);
         }
 
         window.showMoreGraphs = function () {
             $('.more-graphs').hide();
             $('.less-graphs').show();
-            $('.related-graphs').animate({height: '400px'}, 800);
+            $('.related-graphs').animate({height: '1000px'}, 800);
         }
 
         window.showLessGraphs = function () {
@@ -187,38 +212,39 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
         }
 
 
-        var editProjectsTableAfterFilter = function (tableId, scopeId) {
-            var selectedElem = document.getElementById(scopeId).selectedOptions[0];
-            var project_scope = selectedElem.value;
-            var curCount = collection[project_scope];
+        var editProjectsTableAfterFilter = function (tableId, collFilt, collectionsData) {
+            //var selectedElem = document.getElementById(scopeId).selectedOptions[0];
+            //var project_scope = selectedElem.value;
+            //var curCount = collection[project_scope];
             var tableElem = document.getElementById(tableId);
             var tableRows = $(tableElem).find('tr');
             for (var i = 0; i < tableRows.length; i++) {
                 var curRow = $(tableRows)[i];
                 var projId = curRow.id.replace('project_row_', '');
-                var newTot = String(window.collection[projId]);
+                var newTot = 0;
+                if (projId in collectionsData){
+                        newTot = collectionsData[projId]['count'];
+                }
+                //var newTot = String(window.collection[projId]);
                 var newCohortCol = 'patient_col_' + String(projId);
                 document.getElementById(newCohortCol).innerHTML = newTot;
-
                 var patientElemId = 'patient_col_' + projId;
+                document.getElementById(patientElemId).innerHTML =  String(newTot);
 
-                if ((project_scope === 'All') || (project_scope === projId)) {
-                    document.getElementById(patientElemId).innerHTML = String(window.collection[projId]);
+                if ( (newTot> 0) && ((collFilt.length ===0) || (collFilt.indexOf(projId) >-1)) ) {
                     curRow.classList.remove('hide');
-                    if (project_scope === projId) {
-                        window.selItems.selProjects.push(projId);
-                        curRow.classList.add("selected_grey");
-                        window.selItems.selProjects = [projId];
-                    }
+
                 } else {
                     if (window.selItems.selStudies.hasOwnProperty(projId)) {
                         delete window.selItems.selStudies[projId];
                     }
                     curRow.classList.add('hide');
                     curRow.classList.remove("selected_grey");
-                    document.getElementById(patientElemId).innerHTML = '0';
+
                 }
             }
+
+
 
             window.resetTableControls($('#projects_table'), true, 0);
         }
@@ -228,7 +254,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             //var newInnerHTML='<tr><th>Project Name</th><th>Total # of Patients</th><th># of Patients(this cohort)</th></tr>';
             var newInnerHTML = '';
             //projectH = Object.keys(originalDataCounts.collection_id).sort();
-            projectH = tcgaColls;
+            //projectH = tcgaColls;
             nonePos = projectH.indexOf('None');
             /* if (nonePos > -1) {
                 projectH.splice(nonePos, 1);
@@ -395,7 +421,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             var curSelStudiesDic = new Object();
             var newSelStudies = new Object();
 
-            var curFilterObj = JSON.parse(JSON.stringify(filterObj));
+            var curFilterObj = JSON.parse(JSON.stringify(parseFilterObj()));
             curFilterObj.collection_id = projectIdArr;
             var isSeries = false;
             if (studyIdArr.length > 0) {
@@ -423,7 +449,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
             var fieldStr = JSON.stringify(fields);
             var orderDocStr = JSON.stringify(order_docs);
-            let url = '/explore/?counts_only=False&is_json=True&collapse_on=' + collapse_on + '&with_clinical=False&filters=' + filterStr + '&fields=' + fieldStr + '&order_docs=' + orderDocStr;
+            let url = '/explore/?counts_only=False&is_json=True&collapse_on=' + collapse_on + '&filters=' + filterStr + '&fields=' + fieldStr + '&order_docs=' + orderDocStr;
             url = encodeURI(url);
 
             $.ajax({
@@ -746,15 +772,15 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
         window.updateSearchScope = function (searchElem) {
             var project_scope = searchElem.selectedOptions[0].value;
             //document.getElementById('selected_project').innerHTML=project_scope;
+
+            /*
             if (project_scope === 'All') {
-                /*if (filterObj.hasOwnProperty('collection_id')){
-                    delete filterObj['collection_id']
-                }*/
+
                 filterObj['collection_id'] = tcgaColls;
             } else {
                 filterObj['collection_id'] = [project_scope];
 
-            }
+            }*/
             //document.getElementById('total').innerHTML = window.collection[project_scope];
             mkFiltText();
             updateFacetsData(true);
@@ -775,7 +801,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             }
 
         }
-
+    /*
         var resetSearchScope = function (scopeArr, searchId) {
             var selectElem = $('#' + searchId)[0];
             var selIndex = 0;
@@ -796,7 +822,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             selectElem.selectedIndex = selIndex;
         }
 
-
+*/
         var updateSliderSelection = function (inpDiv, displaySet, header, attributeName, isInt) {
             var val = document.getElementById(inpDiv).value;
             var newText = "&emsp;&emsp;" + header + ": " + val;
@@ -820,9 +846,9 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             histObj = window.filtHistory[window.histIndex];
             window.filterObj = JSON.parse(JSON.stringify(histObj.filterObj));
             window.selItems = JSON.parse(JSON.stringify(histObj.selItems));
-            if ((histObj.filterObj.hasOwnProperty('collection_id')) && (histObj.filterObj['collection_id'] === window.tcgaColls)) {
+            /* if ((histObj.filterObj.hasOwnProperty('collection_id')) && (histObj.filterObj['collection_id'] === window.tcgaColls)) {
                 window.filterObj['collection_id'] = window.tcgaColls;
-            }
+            } */
             var filterCatsArr = new Array();
             filterCatsArr.push(findFilterCats('search_orig_set'));
             filterCatsArr.push(findFilterCats('search_related_set'));
@@ -845,30 +871,73 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             updateFacetsData(false);
 
         }
-        var updateCollectionTotals = function (total, dic) {
-            for (var item in window.collection) {
-                if (item === 'All') {
-                    window.collection[item] = parseInt(total);
-                } else if (dic.hasOwnProperty(item)) {
-                    window.collection[item] = parseInt(dic[item].count);
-                } else {
-                    window.collection[item] = '0';
+        var updateCollectionTotals = function (listId, progDic) {
+            //dic.val dic.projects
+            progList=$('#'+listId).children('.list-group-item');
+            for (var ind=0;ind< progList.length;ind++){
+                progItem=progList.get(ind);
+                prog= $(progItem).children('.list-group-item__heading').find('input:checkbox')[0].value
+                valSp = $(progItem).children('.list-group-item__heading').find('.case_count');
+                if (prog in progDic){
+                    valSp[0].innerHTML=String(progDic[prog].val);
+                }
+                else{
+                    valSp[0].innerHTML='0'
+                }
+                projList = $(progItem).children('.list-group-item__body').children('.search-checkbox-list').children('.checkbox');
+                for (var pjInd=0; pjInd<projList.length;pjInd++){
+                    projItem=projList.get(pjInd);
+                    proj=$(projItem).find('input:checkbox')[0].value;
+                    valSp = $(projItem).find('.case_count');
+                    if ( (prog in progDic) && ('projects' in progDic[prog]) && (proj in progDic[prog]['projects']) ){
+                        valSp[0].innerHTML = progDic[prog]['projects'][proj];
+                    }
                 }
             }
-
-            var selectedElem = document.getElementById('project_scope').selectedOptions[0];
-            var curCount = 0;
-            var project_scope = selectedElem.value;
-            curCount = window.collection[project_scope];
-            document.getElementById('total').innerHTML = String(curCount);
         }
 
+        var parseFilterObj = function (){
+            collObj=new Array();
+            filtObj = new Object();
+            for (ckey in window.filterObj){
+                if (ckey ==='Program'){
+
+                    for (ind=0;ind<window.filterObj[ckey].length;ind++){
+                        program = window.filterObj[ckey][ind];
+                        if (program in window.projSets){
+                            if (!('Program.'+program in window.filterObj)){
+                               collObj= collObj.concat(window.projSets[program]);
+                            }
+                        }
+                        else {
+                            collObj.push(program);
+                        }
+                    }
+                }
+                else if (ckey.startsWith('Program.')){
+                     for (ind=0;ind<window.filterObj[ckey].length;ind++){
+                         collObj.push(window.filterObj[ckey][ind]);
+                     }
+                }
+                else{
+                    nmA = ckey.split('.');
+                    nm=nmA[nmA.length-1];
+                    filtObj[nm]= window.filterObj[ckey];
+                }
+            }
+            if (collObj.length>0){
+                filtObj['collection_id']= collObj.sort();
+            }
+            return filtObj;
+        }
         var updateFacetsData = function (newFilt) {
             changeAjax(true);
 
             var url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True&data_source_type=' + $("#data_source_type option:selected").val();
-            if (Object.keys(filterObj).length > 0) {
-                url += '&filters=' + JSON.stringify(filterObj);
+            var parsedFiltObj=parseFilterObj();
+            if (Object.keys(parsedFiltObj).length > 0) {
+
+                url += '&filters=' + JSON.stringify(parsedFiltObj);
             }
 
             url = encodeURI(url);
@@ -879,23 +948,31 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 type: 'get',
                 contentType: 'application/x-www-form-urlencoded',
                 success: function (data) {
-                    updateCollectionTotals(data.total, data.origin_set.attributes.collection_id);
+                    //updateCollectionTotals(data.total, data.origin_set.attributes.collection_id);
+                    updateCollectionTotals('Program_list', data.programs);
+
                     updateFilterSelections('search_orig_set', data.origin_set.attributes);
                     createPlots('search_orig_set');
 
                     if (data.hasOwnProperty('derived_set')) {
                         $('#search_derived_set').removeClass('disabled');
                         updateFilterSelections('search_derived_set', data.derived_set.attributes);
-                        createPlots('search_derived_set');
+                       // createPlots('search_derived_set');
+                          createPlots('segmentation');
                     }
 
                     if (data.hasOwnProperty('related_set')) {
                         $('#search_related_set').removeClass('disabled');
                         updateFilterSelections('search_related_set', data.related_set.attributes);
-                        createPlots('search_related_set');
+                        createPlots('tcga_clinical');
+                       // createPlots('search_related_set');
+                    }
+                    var collFilt = new Array();
+                    if ('collection_id' in parsedFiltObj){
+                        collFilt=parsedFiltObj['collection_id'];
                     }
 
-                    editProjectsTableAfterFilter('projects_table', 'project_scope');
+                    editProjectsTableAfterFilter('projects_table', collFilt,data.origin_set.attributes.collection_id);
                     resetSeriesAndStudiesTables('series_table', 'studies_table');
                     var studyArr = new Array();
                     for (projId in window.selItems.selStudies) {
@@ -908,13 +985,11 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                         addStudyOrSeries(window.selItems.selProjects, studyArr, "series_table", true);
                     }
 
+                    /*
                     if (newFilt) {
                         histObj = new Object();
                         histObj.selItems = JSON.parse(JSON.stringify(window.selItems));
                         histObj.filterObj = JSON.parse(JSON.stringify(window.filterObj));
-                        if ((window.filterObj.hasOwnProperty('collection_id')) && (window.filterObj['collection_id'] === window.tcgaColls)) {
-                            histObj.filterObj['collection_id'] = window.tcgaColls;
-                        }
 
                         window.filtHistory.push(histObj);
 
@@ -935,7 +1010,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                         $('#previous').hide();
                     }
 
-
+                   */
                     changeAjax(false);
 
                 },
@@ -949,73 +1024,6 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
         }
 
 
-        /* var plotCategoricalData=function(plotId, lbl, plotData) {
-
-           pieLayout.title = lbl.toUpperCase().replace(/_/g, " ");
-           delete pieLayout.annotations;
-           xdata= new Array();
-           ydata = new Array();
-           var plotCats=0;
-          for (var i=0;i<plotData.dataCnt.length;i++){
-               if (plotData.dataCnt[i] >0){
-                   ydata.push(plotData.dataCnt[i]);
-                   xdata.push(plotData.dataLabel[i]);
-                   plotCats++;
-               }
-           }
-
-          var data = [{
-           values: ydata,
-           labels: xdata,
-           //marker: {colors:['rgb(256,256,256)']},
-           type: 'pie',
-           textposition: 'inside',
-           textinfo: 'none',
-           sort:false
-          }];
-
-
-
-         if (plotCats === 0){
-             data[0].values = [0];
-             data[0].labels= [''];
-             data[0].marker = {colors:['rgb(256,256,256)']};
-             pieLayout.annotations = [{text: 'No Data', showarrow:false, font:{size:18}}];
-         }
-
-         Plotly.newPlot(plotId, data, pieLayout,{displayModeBar: false});
-
-           document.getElementById(plotId).on('plotly_click', function (data, plotId) {
-               var chartid = data.event.path[7].id;
-               var filterId = chartid.replace("_chart","");
-               if (filterId === 'age_at_diagnosis'){
-                   //var sel = data.points[0].x;
-                   var sel = data.points[0].label;
-                   var selArr = sel.split(' To ');
-                   var strt = parseInt((selArr[0] === '*') ? '0': selArr[0]);
-                   var end = parseInt((selArr[1] === '*') ?'120': selArr[1]);
-                   setSlider(filterId,false,strt,end,true);
-
-               }
-               else {
-                   //alert(String(data.event.path[6].id));
-                   var label = data.points[0].label;
-                   var listId = filterId + '_list';
-                   var inputList = $('#'+listId).find(':input');
-                   for (var i=0;i<inputList.length;i++){
-                      var curLabel = $(inputList[i]).parent().children()[1].innerHTML;
-                       if (label === curLabel){
-                           inputList[i].checked = true;
-                       }
-                       else{
-                           inputList[i].checked = false;
-                       }
-                   }
-                   handleFilterSelectionUpdate(filterId);
-               }
-           });
-
-       }; */
 
         var plotCategoricalData = function (plotId, lbl, plotData, isPie, showLbl) {
             var layout = new Object();
@@ -1128,8 +1136,14 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                                 inputList[i].checked = false;
                             }
                         }
+                        if (i<inputList.length-1) {
+                            handleFilterSelectionUpdate(inputList[i], false, false);
+                        }
+                        else{
+                            handleFilterSelectionUpdate(inputList[i], true, true);
+                        }
                     }
-                    handleFilterSelectionUpdate(filterId);
+                    //handleFilterSelectionUpdate(filterId);
                 }
             });
 
@@ -1211,14 +1225,14 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 if (dataFound && dic.hasOwnProperty(val) && (dic[val].count > 0)) {
                     numAttrShown++;
                     spans.get(1).innerHTML = String(dic[val].count);
-                    $(elem).parent().parent().removeClass('hidden');
+                    //$(elem).parent().parent().removeClass('hidden');
                     if (numAttrShown > 5) {
                         $(elem).parent().parent().addClass('extra-values');
                     }
 
                 } else {
                     spans.get(1).innerHTML = '0';
-                    $(elem).parent().parent().addClass('hidden');
+                    //$(elem).parent().parent().addClass('hidden');
                     $(elem).parent().parent().removeClass('extra-values');
 
                 }
@@ -1261,25 +1275,86 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 }
             }
         }
-        var handleFilterSelectionUpdate = function (filterCat) {
-            var numFilters = $('#' + filterCat).find('input').length;
-            var checkedFilters = $('#' + filterCat).find('input:checked');
 
-            var attributeVals = new Array();
-            checkedFilters.each(function () {
-                attributeVals.push($(this)[0].value);
-            });
+        var handleFilterSelectionUpdate = function(filterElem, mkFilt, doUpdate) {
+        var checked = $(filterElem)[0].checked;
+        var filterCats= $(filterElem).parentsUntil('.tab-pane','.list-group-item, .checkbox');
+        var j = 1;
 
-            if (attributeVals.length > 0) {
-                filterObj[filterCat] = attributeVals;
-            } else if (filterObj.hasOwnProperty(filterCat)) {
-                delete filterObj[filterCat];
+        var curCat='';
+        for (var i=0;i<filterCats.length;i++){
+            ind = filterCats.length-1-i;
+            filterCat=filterCats[ind];
+            hasCheckBox=false;
+            if (filterCat.classList.contains('checkbox')){
+                 checkBox =$(filterCat).find('input:checkbox')[0];
+                 filtnm=checkBox.value;
+                 hasCheckBox = true;
+            }
+            else {
+                filtnm=$(filterCat).children('.list-group-item__body')[0].id;
+                if  ($(filterCat).children('.list-group-item__heading').children('input:checkbox').length>0) {
+                   hasCheckBox = true;
+                }
+               checkBox = $(filterCat).children('.list-group-item__heading').children('input:checkbox')[0];
+            }
+            if ((checked) && (curCat.length>0) && hasCheckBox  ){
+                checkBox.checked = true;
+                if (!(filterObj.hasOwnProperty(curCat))){
+                    filterObj[curCat] = new Array();
+                }
+                if (filterObj[curCat].indexOf(filtnm)<0){
+                    filterObj[curCat].push(filtnm)
+                }
             }
 
-            mkFiltText();
-            updateFacetsData(true);
+            if (!checked && (ind==0)){
+
+               if ( filterObj.hasOwnProperty(curCat) && (filterObj[curCat].indexOf(filtnm)>-1) ){
+                    pos = filterObj[curCat].indexOf(filtnm);
+                    filterObj[curCat].splice(pos,1);
+                    if (Object.keys(filterObj[curCat]).length===0){
+                         delete filterObj[curCat];
+                    }
+               }
+
+               if (curCat.length>0){
+                 curCat+="."
+                 }
+                curCat+=filtnm;
+                //$(filterElem).find('input:checkbox').checked=false;
+                if ($(filterElem).parent().hasClass('list-group-item__heading')){
+                      chkList=$(filterElem).parent().siblings().filter('.list-group-item__body').find('input:checkbox');
+                      for (var ind=0; ind<chkList.length;ind++){
+                          chkList[ind].checked=false;
+                      }
+                }
+
+                for (var ckey in filterObj){
+                    if (ckey.startsWith(curCat)){
+                       delete filterObj[curCat];
+                   }
+               }
+            }
+            if (curCat.length>0){
+                curCat+="."
+            }
+            curCat+=filtnm;
 
         }
+        if (mkFilt) {
+            mkFiltText();
+        }
+        if (doUpdate){
+            updateFacetsData(true);
+        }
+
+
+    }
+
+
+
+
 
         var tableSortBindings = function (filterId) {
             $('#' + filterId).find('.fa-caret-up, .fa-caret-down').on('click', function () {
@@ -1319,42 +1394,88 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             $(tbl).find('tbody').append(rowSet);
         }
 
+
+
         var filterItemBindings = function (filterId) {
-            $('#' + filterId).find('.checkbox').find(':input').on('click', function () {
-                handleFilterSelectionUpdate(filterId);
-            });
-
-            $('#' + filterId).find('.show-more').on('click', function () {
-                $('#' + filterId).find('.extra-values').show();
-                $('#' + filterId).find('.less-checks').show();
-                $('#' + filterId).find('.more-checks').hide();
-            });
+        $('#' + filterId).find('input:checkbox').on('click', function () {
+            handleFilterSelectionUpdate(this, true, true);
+        });
 
 
-            $('#' + filterId).find('.show-less').on('click', function () {
-                $('#' + filterId).find('.extra-values').hide();
-                $('#' + filterId).find('.more-checks').show();
-                $('#' + filterId).find('.less-checks').hide();
-            });
 
-            $('#' + filterId).find('.check-all').on('click', function () {
-                $('#' + filterId).find('.checkbox').find('input').prop('checked', true);
-                handleFilterSelectionUpdate(filterId);
-                //$('#'+filterId).find('.checkbox').find('input').each(function(){
-                //  $(this).triggerHandler('change');
-                //});
-            });
+        $('#' + filterId).find('.show-more').on('click', function () {
 
-            $('#' + filterId).find('.uncheck-all').on('click', function () {
-                $('#' + filterId).find('.checkbox').find('input').prop('checked', false);
-                handleFilterSelectionUpdate(filterId);
-                //$('#'+filterId).find('.checkbox').find('input').each(function(){
-                //  $(this).triggerHandler('change');
-                //});
-            });
+            $(this).parent().parent().find('.less-checks').show();
+            $(this).parent().hide();
+            $(this).parent().parent().children('.search-checkbox-list').children('.extra-values').show();
 
 
-        }
+        });
+
+
+        $('#' + filterId).find('.show-less').on('click', function () {
+
+            $(this).parent().parent().find('.more-checks').show();
+            $(this).parent().hide();
+            $(this).parent().parent().children('.search-checkbox-list').children('.extra-values').hide();
+
+
+        });
+
+
+        $('#' + filterId).find('.check-all').on('click', function () {
+            //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
+            var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body').children('ul').children();
+            for (var ind =0;ind<filterElems.length;ind++)
+            {
+                var ckElem = new Object();
+                if ($(filterElems[ind]).children().filter('.list-group-item__heading').length>0){
+                    ckElem = $(filterElems[ind]).children().filter('.list-group-item__heading').children().filter('input:checkbox')[0];
+                }
+                else{
+                   ckElem=$(filterElems[ind]).children().filter('label').children().filter('input:checkbox')[0];
+                }
+
+                ckElem.checked= true;
+              //$(filterElem)[0].checked = true;
+              if (ind<filterElems.length-1) {
+                  handleFilterSelectionUpdate(ckElem, false, false);
+              }
+              else{
+                  handleFilterSelectionUpdate(ckElem, true, true);
+              }
+            }
+        });
+
+
+
+        $('#' + filterId).find('.uncheck-all').on('click', function () {
+             //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
+            var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body').children('ul').children();
+            for (var ind =0;ind<filterElems.length;ind++)
+            {
+                var ckElem = new Object();
+                if ($(filterElems[ind]).children().filter('.list-group-item__heading').length>0){
+                    ckElem = $(filterElems[ind]).children().filter('.list-group-item__heading').children().filter('input:checkbox')[0];
+                }
+                else{
+                   ckElem=$(filterElems[ind]).children().filter('label').children().filter('input:checkbox')[0];
+                }
+
+              ckElem.checked = false;
+                if (ind<filterElems.length-1) {
+                  handleFilterSelectionUpdate(ckElem, false, false);
+              }
+              else{
+                  handleFilterSelectionUpdate(ckElem, true, true);
+              }
+
+            }
+
+        });
+
+
+    }
 
         var clearFilter = function (filterElem) {
             if (filterElem.classList.contains('all')){
@@ -1381,7 +1502,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
      $(document).ready(function () {
 
            // $('#proj_table').DataTable();
-            window.filterObj.collection_id = window.tcgaColls;
+           // window.filterObj.collection_id = window.tcgaColls;
             window.selItems = new Object();
             window.selItems.selStudies = new Object();
             window.selItems.selProjects = new Array();
@@ -1390,13 +1511,20 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             histObj = new Object();
             histObj.selItems = JSON.parse(JSON.stringify(window.selItems));
             histObj.filterObj = JSON.parse(JSON.stringify(window.filterObj));
-            histObj.filterObj.collection_id = window.tcgaColls;
+            //histObj.filterObj.collection_id = window.tcgaColls;
             window.filtHistory = new Array();
             window.filtHistory.push(histObj);
             createPlots('search_orig_set');
-            createPlots('search_related_set');
-            addFilterBindings('search_orig_set');
-            addFilterBindings('search_related_set');
+            createPlots('segmentation');
+           createPlots('tcga_clinical');
+           /* addFilterBindings('search_orig_set');
+            addFilterBindings('search_related_set');*/
+
+            filterItemBindings('program_set');
+            filterItemBindings('search_orig_set');
+            filterItemBindings('search_derived_set');
+            filterItemBindings('search_related_set');
+
 
             tableSortBindings('projects_table_head');
             tableSortBindings('studies_table_head');
@@ -1411,9 +1539,9 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             $('#projects_panel').find('.total-file-count')[0].innerHTML = numCol.toString();
              $('#projects_panel').find('.goto-page-number')[0].max=3; */
 
-             window.resetTableControls ($('#projects_table'), false, 0);
-             window.resetTableControls ($('#studies_table'), false, 0);
-            window.resetTableControls ($('#series_table'), false, 0);
+            // window.resetTableControls ($('#projects_table'), false, 0);
+            // window.resetTableControls ($('#studies_table'), false, 0);
+            //window.resetTableControls ($('#series_table'), false, 0);
 
             //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
 

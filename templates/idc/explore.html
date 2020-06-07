@@ -69,25 +69,76 @@
                     <div class="tabpanel data-tab-content-panel">
                         <div class="panel panel-default">
                             <div class="panel-heading clearfix"><h4 class="panel-title">Search Scope</h4></div>
-                            <div class="panel-body">
-                                <select id="project_scope" onchange="updateSearchScope(this)">
-                                    <option  selected value="All" >All data </option>
-                                    {% for attr in set_attributes.origin_set.attributes %}
-                                          {% if attr.name == "collection_id" %}
-                                              {% for val in attr.values %}
-                                                  {% if val.value in filters.collection_id %}
-                                                      {% if val.value != "None"  %}
-                                                           <option value="{{ val.value }}">{{ val.value }}</option>
-                                                      {% endif %}
-                                                  {% endif %}
-                                              {% endfor %}
-                                          {% endif %}
-                                    {% endfor %}
-                                </select>
-                                <span id='total' class="float-right case_count count">{{ set_attributes.total }}</span>
-                            </div>
+                            <div id="program_set" class="panel-body">
+                             <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                 <li class="list-group-item">
+                                     <div id="Program_heading" class="list-group-item__heading">
+                                         <a role="button" data-toggle="collapse" href="#Program" aria-expanded="false" aria-controls="Program">
+                                             <i class="fa fa-caret-right" style="font-family :&#39;FontAwesome&#39; !important"></i> <i class="fa fa-caret-down" style="font-family :&#39;FontAwesome&#39; !important"></i>Collection
+                                         </a>
+                                     </div>
+
+
+                                     <div id="Program" class="collapse list-group-item__body filter-panel">
+                                         <ul id="Program_list" class="search-checkbox-list" style="list-style: none;">
+
+                                             {% for progK, progV in programs.items|dictsort:"0.lower" %}
+                                                 {% if progK != "All" and progK != "None" %}
+                                                 <li class="list-group-item {% if forloop.counter >= 6 %} extra-values{% endif %}">
+                                                     <div id="{{ progK }}_heading" class="list-group-item__heading">
+                                                         <input type="checkbox" value="{{ progK }}">
+
+                                                       {% if progV.projects %}
+                                                            <a role="button" data-toggle="collapse" href="#{{ progK }}" aria-expanded="false" aria-controls="{{ progK }}">
+                                                                 <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>
+                                                             </a>
+                                                       {% endif %}
+                                                                <span class="value">{{ progK|format_val }}</span> <span class="float-right case_count count">{{ progV.val }}</span>
+                                                         </div>
+
+
+                                                              <div id="{{ progK }}" class="collapse list-group-item__body collapse">
+                                                              {% if progV.projects %}
+                                                               <ul id="{{ progK }}_proj_list" class="search-checkbox-list" style="list-style: none;">
+                                                               {% for proj, projK in progV.projects.items %}
+                                                                  <li class="checkbox {% if forloop.counter >= 6 %} extra-values{% endif %}">
+                                                                    <label>
+                                                                      <input type="checkbox" value="{{ proj }}">
+                                                                        <span class="value">{{ proj|format_val }}</span> <span class="float-right case_count count plotit">{{ projK }}</span>
+                                                                     </label>
+                                                                   </li>
+                                                                {% endfor %}
+                                                                </ul>
+                                                                  <p class="more-checks" style="display: block;"><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                                  <p class="less-checks" style="display: none;"> <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                              {% endif %}
+                                                              </div>
+
+
+
+                                                 </li>
+                                                {% endif %}
+                                             {% endfor %}
+
+                                         </ul>
+                                         <!-- <div style="display: block;" > -->
+                                               <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                               <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                         <!-- </div> -->
+
+                                      </div>
+
+
+                                 </li>
+                             </ul>
                          </div>
                     </div>
+            </div>
+
+
+
+
+
                     <div class="tabpanel data-tab-content-panel">
                         <div class="panel panel-default">
                             <div class="panel-heading clearfix"><h4 class="panel-title">Data Source</h4></div>
@@ -154,7 +205,16 @@
                                 </div>
 
                                 <div id = "search_derived_set" role="tabpanel" class="tab-pane">
-                                {% for attr in set_attributes.derived_set.attributes %}
+                                <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                    <li class="list-group-item">
+                                      <div id="segmentation_heading" class="list-group-item__heading">
+                                                         <a role="button" data-toggle="collapse" href="#segmentation" aria-expanded="false" aria-controls="segmentation" class="">
+                                                         <i class="fa fa-caret-right" style="font-family :'FontAwesome' !important"></i> <i class="fa fa-caret-down" style="font-family :'FontAwesome' !important"></i>Segmentation
+                                                        </a>
+                                      </div>
+
+                                      <div id="segmentation" class="collapse list-group-item__body collapse in" aria-expanded="false" style>
+                                          {% for attr in set_attributes.derived_set.attributes %}
                                     <ul class="list-group" role="tablist" aria-multiselectable="true">
                                         <li class="list-group-item">
                                             <div id="{{ attr.name }}_heading" class="list-group-item__heading">
@@ -183,19 +243,30 @@
                                             </li>
                                          </ul>
                                     {%  endfor %}
-
+                                      </div>
+                                    </li>
+                                </ul>
                                 </div>
 
                                 <div id = "search_related_set" role="tabpanel" class="tab-pane">
-                                    {% for attr in set_attributes.related_set.attributes %}
-                                         <ul class="list-group" role="tablist" aria-multiselectable="true">
-                                             <li class="list-group-item">
+                                    <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                    <li class="list-group-item">
+                                      <div id="tcga_clinical_heading" class="list-group-item__heading">
+                                                         <a role="button" data-toggle="collapse" href="#tcga_clinical" aria-expanded="false" aria-controls="tcga_clinical" class="">
+                                                         <i class="fa fa-caret-right" style="font-family :'FontAwesome' !important"></i> <i class="fa fa-caret-down" style="font-family :'FontAwesome' !important"></i>TCGA
+                                                        </a>
+                                      </div>
+                                      <div id="tcga_clinical" class="collapse list-group-item__body collapse in" aria-expanded="false" style>
+
+                                               {% for attr in set_attributes.related_set.attributes %}
+                                                <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                                   <li class="list-group-item">
                                                  <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                      <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
                                                          <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
                                                      </a>
                                                  </div>
-                                                 <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse">
+                                                 <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse" aria-expanded="false">
                                                      <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                      {% for val in attr.values %}
                                                          <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
@@ -214,9 +285,12 @@
                                                     </p>
                                                </div>
                                             </li>
-                                         </ul>
-                                    {%  endfor %}
+                                                </ul>
+                                               {%  endfor %}
 
+                                      </div>
+                                    </li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
@@ -283,6 +357,8 @@
                 <div class="tabpanel data-tab-content-panel table-panel">
                     <div class="panel panel-default">
                          <div class="panel-heading clearfix"><h4 class="panel-title">Collections</h4></div>
+
+
                          <div id = "projects_panel" class="panel-body">
 
                            <div class="dataTables_info">
@@ -314,11 +390,14 @@
                        </div>
                 </div>
 
+
                             <table id="proj_table" class="table table-striped">
                                 <thead id="projects_table_head">
                                     <tr>
                                         <th class='text_data'>Collection Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'>Total # of Patients<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'># of Patients(this cohort)<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
                                    <!-- <th>Collection Name </th><th>Total # of Patients</th><th># of Patients(this cohort)</th> -->
+
+
 
                                     </tr>
                                 </thead>
@@ -326,10 +405,8 @@
                                 {% for attr in set_attributes.origin_set.attributes %}
                                       {% if attr.name == "collection_id" %}
                                           {% for val in attr.values %}
-                                              {% if val.value in filters.collection_id %}
-                                                  {% if val.value != "None" %}
-                                                      <tr id="project_row_{{ val.value }}" class="text_head" onclick="(toggleProj(this,'{{ val.value }}'))"><td>{{ val.value }}</td><td>{{ val.count }}</td><td id="patient_col_{{ val.value }}" class="projects_table_num_cohort">{{ val.count }}</td> </tr>
-                                                  {% endif %}
+                                              {% if val.value != "None" %}
+                                                  <tr id="project_row_{{ val.value }}" class="text_head" onclick="(toggleProj(this,'{{ val.value }}'))"><td>{{ val.value }}</td><td>{{ val.count }}</td><td id="patient_col_{{ val.value }}" class="projects_table_num_cohort">{{ val.count }}</td> </tr>
                                               {% endif %}
                                           {% endfor %}
                                       {% endif %}

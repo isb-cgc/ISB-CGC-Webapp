@@ -471,7 +471,7 @@ def explore_data_page(request):
                     'id': attr_by_source[set]['attributes'][x]['obj'].id,
                     'display_name': attr_by_source[set]['attributes'][x]['obj'].display_name,
                     'values': attr_by_source[set]['attributes'][x]['vals']
-                } for x in attr_by_source[set]['attributes']]
+                } for x, val in sorted(attr_by_source[set]['attributes'].items())]
                 if set == 'origin_set':
                     context['collections'] = {b['value']: b['count'] for a in attr_by_source[set]['attributes'] for
                                               b in a['values'] if a['name'] == 'collection_id' }
@@ -484,8 +484,34 @@ def explore_data_page(request):
         context['set_attributes'] = attr_by_source
         context['filters'] = filters
 
+        if ('derived_set' in attr_by_source) and ('attributes' in attr_by_source):
+            for attr in attr_by_source['derived_set']['attributes']:
+                if ('name' in attr) and (attr['name'] == 'AnatomicRegionSequence'):
+                    attr['display_name'] = 'Anatomic Region'
+                elif ('name' in attr) and (attr['name'] == 'SegmentedPropertyCategoryCodeSequence'):
+                    attr['display_name'] = 'Segmentation Category'
+                elif ('name' in attr) and (attr['name'] == 'SegmentedPropertyTypeCodeSequence'):
+                    attr['display_name'] ='Segmentation Type'
+
+        programSet = {'tcga','qin', 'rider'}
+        programs ={}
+        for collection in context['collections']:
+            pref = collection.split('_')[0]
+            if pref in programSet:
+                if not pref in programs:
+                    programs[pref] ={}
+                    programs[pref]['projects'] = {}
+                    programs[pref]['val'] = 0
+                programs[pref]['projects'][collection] = context['collections'][collection]
+                programs[pref]['val'] = programs[pref]['val'] + context['collections'][collection]
+            else:
+                programs[collection] = {}
+                programs[collection]['val'] = context['collections'][collection]
+
         if with_related:
             context['tcga_collections'] = tcga_in_tcia
+
+        context['programs'] = programs
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
@@ -493,6 +519,7 @@ def explore_data_page(request):
         messages.error(request, "Encountered an error when attempting to load the page - please contact the administrator.")
 
     if is_json:
+        attr_by_source['programs'] =programs
         return JsonResponse(attr_by_source)
     else:
         return render(request, 'idc/explore.html', context)
