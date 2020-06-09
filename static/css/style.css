@@ -3314,6 +3314,10 @@ html {
     color: #676767;
     font-size: .9em;
     font-style: italic; }
+  #register-gcp .dataset-limit-note, #user-register-sa .dataset-limit-note, #user-adjust-sa .dataset-limit-note {
+    color: #D32F2F;
+    font-size: .9em;
+    font-style: italic; }
   #register-gcp .verify-register-sa-div > div, #user-register-sa .verify-register-sa-div > div, #user-adjust-sa .verify-register-sa-div > div {
     padding: 10px 0; }
   #register-gcp .verify-register-sa-div .verification-success:before, #user-register-sa .verify-register-sa-div .verification-success:before, #user-adjust-sa .verify-register-sa-div .verification-success:before {
