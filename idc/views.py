@@ -378,9 +378,14 @@ def explore_data_page(request):
         versions = DataVersion.objects.filter(name__in=versions) if len(versions) else DataVersion.objects.filter(active=True)
         sources = DataSource.objects.select_related('version').filter(version__in=versions, source_type=source)
 
-        # For now we're only allowing TCGA
+        # For now we're only allowing TCGA+ispy1+lidc-idri+qin_headneck
         # TODO: REMOVE THIS ONCE WE'RE ALLOWING MORE
         tcga_in_tcia = Program.objects.get(short_name="TCGA").collection_set.all()
+        collectionFilterList = [proj.name.lower().replace('-','_') for proj in tcga_in_tcia]+['ispy1', 'lidc-idri', 'qin_headneck', 'nsclc_radiomics']
+        if not 'collection_id' in filters:
+            filters['collection_id'] =  collectionFilterList
+        collectionFilterSet = {*collectionFilterList}
+        #collectionFilterSet={*['ispy1', 'lidc-idri', 'qin_headneck', 'nsclc_radiomics']}
 
         for source in sources:
             is_origin = bool(source.version.data_type == DataVersion.IMAGE_DATA)
@@ -474,26 +479,21 @@ def explore_data_page(request):
                 } for x, val in sorted(attr_by_source[set]['attributes'].items())]
                 if set == 'origin_set':
                     context['collections'] = {b['value']: b['count'] for a in attr_by_source[set]['attributes'] for
-                                              b in a['values'] if a['name'] == 'collection_id' }
+                                              b in a['values'] if a['name'] == 'collection_id' and b['value'] in collectionFilterSet}
                     context['collections']['All'] = source_metadata['total']
             if not counts_only:
                 attr_by_source[set]['docs'] = source_metadata['docs']
+
+
 
         attr_by_source['total'] = source_metadata['total']
 
         context['set_attributes'] = attr_by_source
         context['filters'] = filters
 
-        if ('derived_set' in attr_by_source) and ('attributes' in attr_by_source):
-            for attr in attr_by_source['derived_set']['attributes']:
-                if ('name' in attr) and (attr['name'] == 'AnatomicRegionSequence'):
-                    attr['display_name'] = 'Anatomic Region'
-                elif ('name' in attr) and (attr['name'] == 'SegmentedPropertyCategoryCodeSequence'):
-                    attr['display_name'] = 'Segmentation Category'
-                elif ('name' in attr) and (attr['name'] == 'SegmentedPropertyTypeCodeSequence'):
-                    attr['display_name'] ='Segmentation Type'
 
-        programSet = {'tcga','qin', 'rider'}
+
+        programSet = {'tcga'}
         programs ={}
         for collection in context['collections']:
             pref = collection.split('_')[0]

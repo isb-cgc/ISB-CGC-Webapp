@@ -121,11 +121,12 @@
                                              {% endfor %}
 
                                          </ul>
+                                     {%  comment %}
                                          <!-- <div style="display: block;" > -->
                                                <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                          <!-- </div> -->
-
+                                    {%  endcomment %}
                                       </div>
 
 
@@ -362,7 +363,7 @@
                          <div id = "projects_panel" class="panel-body">
 
                            <div class="dataTables_info">
-                    <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count"> </span> entries</span>
+                    <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">23</span>entries</span>
                     <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
                          </div>
                          <div>
@@ -402,13 +403,9 @@
                                     </tr>
                                 </thead>
                                 <tbody id="projects_table" class="set_height">
-                                {% for attr in set_attributes.origin_set.attributes %}
-                                      {% if attr.name == "collection_id" %}
-                                          {% for val in attr.values %}
-                                              {% if val.value != "None" %}
-                                                  <tr id="project_row_{{ val.value }}" class="text_head" onclick="(toggleProj(this,'{{ val.value }}'))"><td>{{ val.value }}</td><td>{{ val.count }}</td><td id="patient_col_{{ val.value }}" class="projects_table_num_cohort">{{ val.count }}</td> </tr>
-                                              {% endif %}
-                                          {% endfor %}
+                                {% for coll, cnt in collections.items|dictsort:"0.lower" %}
+                                      {% if coll != "All" %}
+                                          <tr id="project_row_{{ coll }}" class="text_head" onclick="(toggleProj(this,'{{ coll }}'))"><td>{{ coll }}</td><td>{{ cnt }}</td><td id="patient_col_{{ coll }}" class="projects_table_num_cohort">{{ cnt }}</td> </tr>
                                       {% endif %}
                                 {% endfor %}
                                 </tbody>

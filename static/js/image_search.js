@@ -449,7 +449,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
             var fieldStr = JSON.stringify(fields);
             var orderDocStr = JSON.stringify(order_docs);
-            let url = '/explore/?counts_only=False&is_json=True&with_clinical=False&collapse_on=' + collapse_on + '&filters=' + filterStr + '&fields=' + fieldStr + '&order_docs=' + orderDocStr;
+            let url = '/explore/?counts_only=False&is_json=True&with_clinical=FalseG&collapse_on=' + collapse_on + '&filters=' + filterStr + '&fields=' + fieldStr + '&order_docs=' + orderDocStr;
             url = encodeURI(url);
 
             $.ajax({
