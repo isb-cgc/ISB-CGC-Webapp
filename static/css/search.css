@@ -1,3 +1,39 @@
+#proj_table thead .sorting:after,
+#proj_table thead .sorting:before,
+#proj_table thead .sorting_asc:after,
+#proj_table thead .sorting_before:after,
+#proj_table thead .sorting_asc_disabled:after,
+#proj_table thead .sorting_asc_disabled:before,
+#proj_table thead .sorting_desc:after,
+#proj_table thead .sorting_desc:before,
+#proj_table thead .sorting_desc_disabled:after,
+#proj_table thead .sorting_desc_disabled:before {
+    bottom: .5em;
+}
+
+
+
+.fa-stack .greyout {
+    background-style: grey;
+}
+
+
+.fa-stack {
+  text-align: center;
+}
+
+.fa-stack .fa-caret-down {
+    position: absolute;
+    bottom: 0;
+}
+
+.fa-stack .fa-caret-up {
+  position: absolute;
+  top: 0;
+}
+
+
+
 html {
   overflow-y: scroll;
 }
