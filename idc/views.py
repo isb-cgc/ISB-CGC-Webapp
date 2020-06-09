@@ -378,9 +378,14 @@ def explore_data_page(request):
         versions = DataVersion.objects.filter(name__in=versions) if len(versions) else DataVersion.objects.filter(active=True)
         sources = DataSource.objects.select_related('version').filter(version__in=versions, source_type=source)
 
-        # For now we're only allowing TCGA
+        # For now we're only allowing TCGA+ispy1+lidc-idri+qin_headneck
         # TODO: REMOVE THIS ONCE WE'RE ALLOWING MORE
         tcga_in_tcia = Program.objects.get(short_name="TCGA").collection_set.all()
+        collectionFilterList = [proj.name.lower().replace('-','_') for proj in tcga_in_tcia]+['ispy1', 'lidc-idri', 'qin_headneck', 'nsclc_radiomics']
+        if not 'collection_id' in filters:
+            filters['collection_id'] =  collectionFilterList
+        collectionFilterSet = {*collectionFilterList}
+        #collectionFilterSet={*['ispy1', 'lidc-idri', 'qin_headneck', 'nsclc_radiomics']}
 
         for source in sources:
             is_origin = bool(source.version.data_type == DataVersion.IMAGE_DATA)
@@ -418,7 +423,7 @@ def explore_data_page(request):
         ))
 
         for set_name in [DataVersion.SET_TYPES[DataVersion.DERIVED_DATA], DataVersion.SET_TYPES[DataVersion.ANCILLARY_DATA]]:
-            if set_name in source_metadata['facets']:
+            if (set_name in source_metadata['facets']) and (set_name in attr_sets):
                 attr_display_vals = Attribute_Display_Values.objects.filter(
                     attribute__id__in=attr_sets[set_name]).to_dict()
                 for source in source_metadata['facets'][set_name]:
@@ -471,21 +476,42 @@ def explore_data_page(request):
                     'id': attr_by_source[set]['attributes'][x]['obj'].id,
                     'display_name': attr_by_source[set]['attributes'][x]['obj'].display_name,
                     'values': attr_by_source[set]['attributes'][x]['vals']
-                } for x in attr_by_source[set]['attributes']]
+                } for x, val in sorted(attr_by_source[set]['attributes'].items())]
                 if set == 'origin_set':
                     context['collections'] = {b['value']: b['count'] for a in attr_by_source[set]['attributes'] for
-                                              b in a['values'] if a['name'] == 'collection_id' }
+                                              b in a['values'] if a['name'] == 'collection_id' and b['value'] in collectionFilterSet}
                     context['collections']['All'] = source_metadata['total']
             if not counts_only:
                 attr_by_source[set]['docs'] = source_metadata['docs']
+
+
 
         attr_by_source['total'] = source_metadata['total']
 
         context['set_attributes'] = attr_by_source
         context['filters'] = filters
 
+
+
+        programSet = {'tcga'}
+        programs ={}
+        for collection in context['collections']:
+            pref = collection.split('_')[0]
+            if pref in programSet:
+                if not pref in programs:
+                    programs[pref] ={}
+                    programs[pref]['projects'] = {}
+                    programs[pref]['val'] = 0
+                programs[pref]['projects'][collection] = context['collections'][collection]
+                programs[pref]['val'] = programs[pref]['val'] + context['collections'][collection]
+            else:
+                programs[collection] = {}
+                programs[collection]['val'] = context['collections'][collection]
+
         if with_related:
             context['tcga_collections'] = tcga_in_tcia
+
+        context['programs'] = programs
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
@@ -493,6 +519,7 @@ def explore_data_page(request):
         messages.error(request, "Encountered an error when attempting to load the page - please contact the administrator.")
 
     if is_json:
+        attr_by_source['programs'] =programs
         return JsonResponse(attr_by_source)
     else:
         return render(request, 'idc/explore.html', context)
