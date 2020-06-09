@@ -33,7 +33,7 @@ def retTuple(x, order_docs):
 
 
 # Fetch metadata from Solr
-def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, with_ancillary = True,
+def get_collex_metadata(filters, fields, record_limit=1000, counts_only=False, with_ancillary = True,
                         collapse_on = 'PatientID', order_docs='[]', sources = None, versions = None, with_derived=True):
 
     try:
@@ -65,7 +65,7 @@ def get_collex_metadata(filters, fields, record_limit=10, counts_only=False, wit
                 'fields': sources.get_source_attrs(for_faceting=False, named_set=fields)
             }, counts_only, collapse_on, record_limit)
         elif source_type == DataSource.SOLR:
-            results = get_metadata_solr(filters, fields, sources, counts_only, collapse_on, 5)
+            results = get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record_limit)
 
         for source in results['facets']['origin_set']:
             facets = results['facets']['origin_set'][source]['facets']
