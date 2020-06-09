@@ -489,7 +489,7 @@ def explore_data_page(request):
         context['set_attributes'] = attr_by_source
         context['filters'] = filters
 
-        programs = [x.lower() for x in list(Program.get_public_programs().values_list('name', flat=True))]
+        programs = [x.lower() for x in list(Program.get_public_programs().values_list('short_name', flat=True))]
         programSet = {}
         for collection in context['collections']:
             pref = collection.split('_')[0]
@@ -500,7 +500,7 @@ def explore_data_page(request):
                         'val': 0
                     }
                 programSet[pref]['projects'][collection] = context['collections'][collection]
-                programSet[pref]['val'] = programSet[pref]['val'] + context['collections'][collection]
+                programSet[pref]['val'] += context['collections'][collection]
             else:
                 programSet[collection] = {'val': context['collections'][collection]}
 

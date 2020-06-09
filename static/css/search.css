@@ -155,3 +155,11 @@ tr {
 table {
   table-layout: fixed;
   width: 100%; }
+
+.list-group-item__body .list-group:last-child .list-group-item, .search-checkbox-list .list-group-item:last-child {
+    border: 0;
+}
+
+.search-checkbox-list .list-group-item:last-child {
+    border-top: 1px solid #d9d9d9;
+}
