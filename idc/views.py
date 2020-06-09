@@ -413,7 +413,7 @@ def explore_data_page(request):
         start = time.time()
 
         source_metadata = get_collex_metadata(
-            filters, fields, record_limit=5000, counts_only=counts_only, with_ancillary = with_related,
+            filters, fields, record_limit=1000, counts_only=counts_only, with_ancillary = with_related,
             collapse_on = collapse_on, order_docs = order_docs, sources = sources, versions = versions
         )
         stop = time.time()
@@ -484,34 +484,30 @@ def explore_data_page(request):
             if not counts_only:
                 attr_by_source[set]['docs'] = source_metadata['docs']
 
-
-
         attr_by_source['total'] = source_metadata['total']
 
         context['set_attributes'] = attr_by_source
         context['filters'] = filters
 
-
-
-        programSet = {'tcga'}
-        programs ={}
+        programs = [x.lower() for x in list(Program.get_public_programs().values_list('short_name', flat=True))]
+        programSet = {}
         for collection in context['collections']:
             pref = collection.split('_')[0]
-            if pref in programSet:
-                if not pref in programs:
-                    programs[pref] ={}
-                    programs[pref]['projects'] = {}
-                    programs[pref]['val'] = 0
-                programs[pref]['projects'][collection] = context['collections'][collection]
-                programs[pref]['val'] = programs[pref]['val'] + context['collections'][collection]
+            if pref in programs:
+                if not pref in programSet:
+                    programSet[pref] = {
+                        'projects': {},
+                        'val': 0
+                    }
+                programSet[pref]['projects'][collection] = context['collections'][collection]
+                programSet[pref]['val'] += context['collections'][collection]
             else:
-                programs[collection] = {}
-                programs[collection]['val'] = context['collections'][collection]
+                programSet[collection] = {'val': context['collections'][collection]}
 
         if with_related:
             context['tcga_collections'] = tcga_in_tcia
 
-        context['programs'] = programs
+        context['programs'] = programSet
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
@@ -519,7 +515,7 @@ def explore_data_page(request):
         messages.error(request, "Encountered an error when attempting to load the page - please contact the administrator.")
 
     if is_json:
-        attr_by_source['programs'] =programs
+        attr_by_source['programs'] = programSet
         return JsonResponse(attr_by_source)
     else:
         return render(request, 'idc/explore.html', context)
