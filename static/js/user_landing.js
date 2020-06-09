@@ -49,11 +49,6 @@ require([
 ], function($) {
     A11y.Core();
 
-    // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
-    $('.modal').on('hide.bs.modal', function() {
-        $(this).find('form')[0].reset();
-    });
-
     var delete_x_callback = function () {
         $(this).parent('.cohort-label').remove();
         return false;

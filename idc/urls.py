@@ -50,7 +50,7 @@ urlpatterns = [
     url(r'^_ah/(vm_)?health$', views.health_check),
 
     url(r'^help/', views.help_page, name='help'),
-    url(r'^explore/', views.explore_data_page, name='explore_data'),
+     url(r'^explore/', views.explore_data_page, name='explore_data'),
 
 
     url(r'^viewer/', views.ohif_viewer_page, name='ohif_view'),
