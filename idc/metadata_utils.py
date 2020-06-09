@@ -67,8 +67,8 @@ def get_collex_metadata(filters, fields, record_limit=1000, counts_only=False, w
         elif source_type == DataSource.SOLR:
             results = get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record_limit)
 
-        for source in results['facets']['origin_set']:
-            facets = results['facets']['origin_set'][source]['facets']
+        for source in results['facets'][DataVersion.SET_TYPES[DataVersion.IMAGE_DATA]]:
+            facets = results['facets'][DataVersion.SET_TYPES[DataVersion.IMAGE_DATA]][source]['facets']
             if 'BodyPartExamined' in facets:
                 if 'Kidney' in facets['BodyPartExamined']:
                     if 'KIDNEY' in facets['BodyPartExamined']:
@@ -85,7 +85,7 @@ def get_collex_metadata(filters, fields, record_limit=1000, counts_only=False, w
                 results['docs'] = sorted(results['docs'], key=lambda x: tuple([x[item] for item in order_docs]))
 
     except Exception as e:
-        logger.error("[ERROR] While fetching solr metadata:")
+        logger.error("[ERROR] While fetching metadata:")
         logger.exception(e)
 
     return results
