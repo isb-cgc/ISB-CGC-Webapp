@@ -33,32 +33,15 @@ require([
     'cohortfilelist',
 ], function ($, base, imagesearch, plotly, cohortfilelist) {
 
-    // Resets forms in modals on hide. Suppressed warning when leaving page with dirty forms
-    $('.modal').on('hide.bs.modal', function () {
-        if($(this).find('form').get().length) {
-            $(this).find('form').get(0).reset();
+    $('.filter-panel li.checkbox').on('change', 'input', function() {
+        if($('#search_def p').length > 0) {
+            $('#save-cohort-btn').prop('disabled','');
+            if(user_is_auth) {
+                $('#save-cohort-btn').prop('title','Please log in to save this cohort.');
+                $('#save-cohort-btn').text('Log in to this Save Cohort');
+            }
         }
     });
 
 
-    // All code which doesn't need to be accessed by other modules goes here
-
-    // Eg. event listener setup
-
-
 });
-// If this module needs to be invoked via RequireJS, fill this out.
-//
-// define(['jquery',
-//     'base',
-//     'imagesearch',
-//     'plotly',
-//     'jqueryui',
-//     'bootstrap'
-// ],function($, base, imagesearch, plotly){
-//     // Setup and static/private variables here
-//
-//     return {
-//          <PROP/METHOD>: <VALUE/DEFINITION>
-//     }
-// });

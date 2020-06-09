@@ -1194,7 +1194,7 @@ a.skip-nav {
     color: #2A537A;
     font-weight: 500;
     padding: 10px 0 10px 15px;
-    text-transform: uppercase;
+    #text-transform: uppercase;
     position: relative; }
     .list-group .list-group-item__heading a {
       color: #2A537A;

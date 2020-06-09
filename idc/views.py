@@ -371,41 +371,47 @@ def explore_data_page(request):
         order_docs = json.loads(req.get('order_docs', '[]'))
         counts_only = (req.get('counts_only', "False").lower() == "true")
         with_related = (req.get('with_clinical', "True").lower() == "true")
+        with_derived = (req.get('with_derived', "True").lower() == "true")
         collapse_on = req.get('collapse_on', 'PatientID')
         is_json = (req.get('is_json', "False").lower() == "true")
 
         versions = DataVersion.objects.filter(name__in=versions) if len(versions) else DataVersion.objects.filter(active=True)
         sources = DataSource.objects.select_related('version').filter(version__in=versions, source_type=source)
 
-        # For now we're only allowing TCGA
+        # For now we're only allowing TCGA+ispy1+lidc-idri+qin_headneck
         # TODO: REMOVE THIS ONCE WE'RE ALLOWING MORE
         tcga_in_tcia = Program.objects.get(short_name="TCGA").collection_set.all()
-        if 'collection_id' not in filters:
-            filters['collection_id'] = [x.lower().replace("-","_") for x in list(tcga_in_tcia.values_list('name', flat=True))]
+        collectionFilterList = [proj.name.lower().replace('-','_') for proj in tcga_in_tcia] + ['ispy1', 'lidc_idri', 'qin_headneck', 'nsclc_radiomics']
+        if not 'collection_id' in filters:
+            filters['collection_id'] =  collectionFilterList
 
         for source in sources:
-            set_type = 'origin_set' if source.version.data_type == DataVersion.IMAGE_DATA else 'related_set'
-
+            is_origin = bool(source.version.data_type == DataVersion.IMAGE_DATA)
             # If a field list wasn't provided, work from a default set
-            if set_type == 'origin_set' and not len(fields):
+            if is_origin and not len(fields):
                 fields = source.get_collection_attr(for_faceting=False).filter(default_ui_display=True).values_list('name', flat=True)
 
-            if set_type == 'origin_set' or with_related:
-                if set_type not in attr_by_source:
-                    attr_by_source[set_type] = {}
+            if is_origin or \
+             (bool(source.version.data_type == DataVersion.ANCILLARY_DATA) and with_related) or \
+             (bool(source.version.data_type == DataVersion.DERIVED_DATA) and with_derived):
+                if source.version.get_set_type() not in attr_by_source:
+                    attr_by_source[source.version.get_set_type()] = {}
 
                 attrs = source.get_collection_attr(for_ui=True)
-                if 'attributes' not in attr_by_source[set_type]:
-                    attr_by_source[set_type]['attributes'] = {}
-                    attr_sets[set_type] = attrs
+                if 'attributes' not in attr_by_source[source.version.get_set_type()]:
+                    attr_by_source[source.version.get_set_type()]['attributes'] = {}
+                    attr_sets[source.version.get_set_type()] = attrs
                 else:
-                    attr_sets[set_type] = attr_sets[set_type] | attrs
+                    attr_sets[source.version.get_set_type()] = attr_sets[source.version.get_set_type()] | attrs
 
-                attr_by_source[set_type]['attributes'].update({attr.name: {'source': source.id, 'obj': attr, 'vals': None, 'id': attr.id} for attr in attrs})
+                attr_by_source[source.version.get_set_type()]['attributes'].update(
+                    {attr.name: {'source': source.id, 'obj': attr, 'vals': None, 'id': attr.id} for attr in attrs}
+                )
 
         start = time.time()
+
         source_metadata = get_collex_metadata(
-            filters, fields, record_limit=5000, counts_only=counts_only, with_ancillary = with_related,
+            filters, fields, record_limit=1000, counts_only=counts_only, with_ancillary = with_related,
             collapse_on = collapse_on, order_docs = order_docs, sources = sources, versions = versions
         )
         stop = time.time()
@@ -414,30 +420,30 @@ def explore_data_page(request):
             str((stop-start))
         ))
 
-        if with_related:
-            set_name = 'related_set'
-            attr_display_vals = Attribute_Display_Values.objects.filter(
-                attribute__id__in=attr_sets[set_name]).to_dict()
-            for source in source_metadata['facets'][set_name]:
-                facet_set = source_metadata['facets'][set_name][source]['facets']
-                for attr in facet_set:
-                    this_attr = attr_by_source[set_name]['attributes'][attr]['obj']
-                    values = []
-                    for val in source_metadata['facets'][set_name][source]['facets'][attr]:
-                        displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
-                        values.append({
-                            'value': val,
-                            'display_value': displ_val,
-                            'count': facet_set[attr][val] if val in facet_set[attr] else 0
-                        })
-                    if attr == 'bmi':
-                        sortDic = {'underweight':0, 'normal weight': 1, 'overweight': 2, 'obese': 3, 'none': 4}
-                        attr_by_source[set_name]['attributes'][attr]['vals'] = sorted(values, key=lambda x: sortDic[x['value']])
-                    else:
-                        attr_by_source[set_name]['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
+        for set_name in [DataVersion.SET_TYPES[DataVersion.DERIVED_DATA], DataVersion.SET_TYPES[DataVersion.ANCILLARY_DATA]]:
+            if (set_name in source_metadata['facets']) and (set_name in attr_sets):
+                attr_display_vals = Attribute_Display_Values.objects.filter(
+                    attribute__id__in=attr_sets[set_name]).to_dict()
+                for source in source_metadata['facets'][set_name]:
+                    facet_set = source_metadata['facets'][set_name][source]['facets']
+                    for attr in facet_set:
+                        this_attr = attr_by_source[set_name]['attributes'][attr]['obj']
+                        values = []
+                        for val in source_metadata['facets'][set_name][source]['facets'][attr]:
+                            displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
+                            values.append({
+                                'value': val,
+                                'display_value': displ_val,
+                                'count': facet_set[attr][val] if val in facet_set[attr] else 0
+                            })
+                        if attr == 'bmi':
+                            sortDic = {'underweight': 0, 'normal weight': 1, 'overweight': 2, 'obese': 3, 'none': 4}
+                            attr_by_source[set_name]['attributes'][attr]['vals'] = sorted(values, key=lambda x: sortDic[x['value']])
+                        else:
+                            attr_by_source[set_name]['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
-        attr_display_vals = Attribute_Display_Values.objects.filter(attribute__id__in=attr_sets['origin_set']).to_dict()
-        set_name = 'origin_set'
+        set_name = DataVersion.SET_TYPES[DataVersion.IMAGE_DATA]
+        attr_display_vals = Attribute_Display_Values.objects.filter(attribute__id__in=attr_sets[set_name]).to_dict()
         for source in source_metadata['facets'][set_name]:
             facet_set = source_metadata['facets'][set_name][source]['facets']
             for attr in facet_set:
@@ -449,8 +455,7 @@ def explore_data_page(request):
                         'value': val,
                         'display_value': displ_val,
                         'count': facet_set[attr][val] if val in facet_set[attr] else 0
-
-               })
+                    })
                 attr_by_source[set_name]['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
         for set in attr_by_source:
@@ -464,13 +469,15 @@ def explore_data_page(request):
                     context['collections'] = {a: attr_by_source[set]['attributes']['collection_id'][a]['count'] for a in attr_by_source[set]['attributes']['collection_id']}
                     context['collections']['All'] = source_metadata['total']
             else:
-                attr_by_source[set]['attributes'] = [{'name': x,
-                 'display_name': attr_by_source[set]['attributes'][x]['obj'].display_name,
-                 'values': attr_by_source[set]['attributes'][x]['vals']
-                 } for x in attr_by_source[set]['attributes']]
+                attr_by_source[set]['attributes'] = [{
+                    'name': x,
+                    'id': attr_by_source[set]['attributes'][x]['obj'].id,
+                    'display_name': attr_by_source[set]['attributes'][x]['obj'].display_name,
+                    'values': attr_by_source[set]['attributes'][x]['vals']
+                } for x, val in sorted(attr_by_source[set]['attributes'].items())]
                 if set == 'origin_set':
                     context['collections'] = {b['value']: b['count'] for a in attr_by_source[set]['attributes'] for
-                                              b in a['values'] if a['name'] == 'collection_id' }
+                                              b in a['values'] if a['name'] == 'collection_id' and b['value'] in collectionFilterList}
                     context['collections']['All'] = source_metadata['total']
             if not counts_only:
                 attr_by_source[set]['docs'] = source_metadata['docs']
@@ -480,8 +487,25 @@ def explore_data_page(request):
         context['set_attributes'] = attr_by_source
         context['filters'] = filters
 
+        programs = [x.lower() for x in list(Program.get_public_programs().values_list('short_name', flat=True))]
+        programSet = {}
+        for collection in context['collections']:
+            pref = collection.split('_')[0]
+            if pref in programs:
+                if not pref in programSet:
+                    programSet[pref] = {
+                        'projects': {},
+                        'val': 0
+                    }
+                programSet[pref]['projects'][collection] = context['collections'][collection]
+                programSet[pref]['val'] += context['collections'][collection]
+            else:
+                programSet[collection] = {'val': context['collections'][collection]}
+
         if with_related:
             context['tcga_collections'] = tcga_in_tcia
+
+        context['programs'] = programSet
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
@@ -489,6 +513,7 @@ def explore_data_page(request):
         messages.error(request, "Encountered an error when attempting to load the page - please contact the administrator.")
 
     if is_json:
+        attr_by_source['programs'] = programSet
         return JsonResponse(attr_by_source)
     else:
         return render(request, 'idc/explore.html', context)
