@@ -45,7 +45,10 @@ isb_superuser = User.objects.get(username="isb")
 
 logger = logging.getLogger('main_logger')
 
-ranges_needed = ['wbc_at_diagnosis', 'event_free_survival', 'days_to_death', 'days_to_last_known_alive', 'days_to_last_followup', 'age_at_diagnosis', 'year_of_diagnosis']
+ranges_needed = [
+    'wbc_at_diagnosis', 'event_free_survival_time_in_days', 'days_to_death', 'days_to_last_known_alive',
+    'days_to_last_followup', 'age_at_diagnosis', 'year_of_diagnosis', 'days_to_birth'
+]
 
 
 def add_data_versions(dv_set):
@@ -115,7 +118,6 @@ def add_bq_tables(tables, ver_name, programs):
 
 def add_attributes(attr_set):
     for attr in attr_set:
-        print(attr)
         try:
             obj, created = Attribute.objects.update_or_create(
                 name=attr['name'], display_name=attr['display_name'], data_type=attr['type'],
@@ -167,6 +169,7 @@ def main():
             {"name": "GDC Release 9 Clinical", "ver": "r9", "type": "C", "programs": ['TCGA','CCLE','TARGET']},
             {"name": "GDC Release 9 Biospecimen Data", "ver": "r9", "type": "B", "programs": ['TCGA','CCLE','TARGET']},
             {"name": "GDC Release 9 File Data", "ver": "r9", "type": "F", "programs": ['TCGA','CCLE','TARGET']},
+            {"name": "GDC Release 9 Data Availability", "ver": "r9", "type": "D", "programs": ['TCGA', 'TARGET']},
             {"name": "TCIA Image Data Ver 0", "ver": "0", "type": "I", "programs": ["TCGA"]},
             {"name": "GDC Release 9 Mutation Data", "ver": "r9", "type": "M", "programs": ["TCGA"]}
         ])
@@ -178,10 +181,7 @@ def main():
         add_solr_collex(['tcga_clin'], "GDC Release 9 Clinical", ["TCGA"])
         add_solr_collex(['target_clin'], "GDC Release 9 Clinical", ["TARGET"])
         add_solr_collex(['ccle_clin'], "GDC Release 9 Clinical", ["CCLE"])
-        add_solr_collex(['tcga_mut'], "GDC Release 9 Mutation Data", ["TCGA"])
-        add_solr_collex(['tcga_hg19', 'tcga_hg38'], "GDC Release 9 File Data", ["TCGA"])
-        add_solr_collex(['target_hg19', 'target_hg38'], "GDC Release 9 File Data", ["TARGET"])
-        add_solr_collex(['ccle_hg19'], "GDC Release 9 File Data", ["CCLE"])
+        add_solr_collex(['files_hg19', 'files_hg38'], "GDC Release 9 File Data", ['TCGA','CCLE','TARGET'])
 
         add_bq_tables(['idc-dev-etl.tcia.dicom_metadata'], "TCIA Image Data Ver 0", ["TCGA"])
         add_bq_tables(['isb-cgc.TCGA_bioclin_v0.Biospecimen'], "GDC Release 9 Biospecimen Data", ["TCGA"])
@@ -190,7 +190,6 @@ def main():
         add_bq_tables(['isb-cgc.TCGA_bioclin_v0.Clinical'], "GDC Release 9 Clinical", ["TCGA"])
         add_bq_tables(['isb-cgc.CCLE_bioclin_v0.clinical_v0'], "GDC Release 9 Clinical", ["CCLE"])
         add_bq_tables(['isb-cgc.TARGET_bioclin_v0.Clinical'], "GDC Release 9 Clinical", ["TARGET"])
-        add_bq_tables(['isb-cgc.TCGA_hg19_data_v0.Somatic_Mutation_MC3','isb-cgc.TCGA_hg38_data_v0.Somatic_Mutation'], "GDC Release 9 Mutation Data", ["TCGA"])
         add_bq_tables(['isb-cgc.TCGA_hg19_data_v0.tcga_metadata_data_hg19_r14','isb-cgc.TCGA_hg38_data_v0.tcga_metadata_data_hg38_r14'], "GDC Release 9 File Data", ["TCGA"])
         add_bq_tables(['isb-cgc.TARGET_hg38_data_v0.target_metadata_data_hg38_r14','isb-cgc.TARGET_hg19_data_v0.target_metadata_data_hg19_r14'], "GDC Release 9 File Data", ["TARGET"])
         add_bq_tables(['isb-cgc.CCLE_hg19_data_v0.ccle_metadata_data_hg19_r14'], "GDC Release 9 File Data", ["CCLE"])
@@ -279,7 +278,7 @@ def main():
                              "include_upper": False, 'type': 'F'}
                         ]
                     else:
-                        if attr['name'] in ranges_needed:
+                        if attr['name'].lower() in ranges_needed:
                             attr['range'] = []
 
                 if attr['name'] in display_vals:
