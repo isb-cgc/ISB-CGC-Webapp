@@ -164,7 +164,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
         window.showMoreGraphs = function () {
             $('.more-graphs').hide();
             $('.less-graphs').show();
-            $('.related-graphs').animate({height: '1000px'}, 800);
+            $('.related-graphs').animate({height: '800px'}, 800);
         }
 
         window.showLessGraphs = function () {
@@ -466,7 +466,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                         var studyId = curData.StudyInstanceUID;
                         var ppStudyId = pretty_print_id(studyId);
                         var fetchUrl = '/projects/chc-tcia/locations/us-central1/datasets/' + projectId.replace('_', '-') + '/dicomStores/' + projectId.replace('_', '-') + '/study/' + studyId;
-                        var hrefTxt = '<a href="' + fetchUrl + '" target="_blank">' + ppStudyId + '</a><span class="tooltiptext_ex">' + studyId + '</span>';
+                        //var hrefTxt = '<a href="' + fetchUrl + '" target="_blank">' + ppStudyId + '</a><span class="tooltiptext_ex">' + studyId + '</span>';
+                        var hrefTxt =  ppStudyId + '<span class="tooltiptext_ex">' + studyId + '</span>';
                         var pclass = 'project_' + projectId;
                         var newHtml = '';
                         if (isSeries) {
@@ -481,7 +482,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                             var fetchUrlSeries = fetchUrl + '?SeriesInstanceUID=' + seriesId;
                             var hrefSeriesTxt = '<a href="' + fetchUrlSeries + '" target="_blank">' + ppSeriesId + '</a><span class="tooltiptext_ex">' + seriesId + '</span>';
                             var seriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
-                            newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col2 tooltip_ex">' + hrefSeriesTxt + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td></tr>';
+
+                            newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head" onclick="window.open(\''+fetchUrlSeries+'\',\'_blank\')"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td></tr>';
 
                         } else {
 
@@ -577,16 +579,25 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
 
         $('.table').find('tbody').on('scroll', function () {
-            var rowPos = $(this).find('tr').map(function () {
-                return this.offsetTop
+            var tbodyOff= $(this)[0].offsetTop;
+            var rowPos = $(this).find('tr').not('.hide').map(function () {
+                return (this.offsetTop -tbodyOff);
             });
             var curScrollPos = $(this)[0].scrollTop;
             var scrollPosInd = Array.from(rowPos.map(function () {
                 return ((this < curScrollPos) ? 0 : 1)
-            })).indexOf(1);
+            })).indexOf(1)-1;
+            scrollPosInd = Math.max(0,scrollPosInd);
+            if (scrollPosInd<(rowPos.length-1)){
+                if ( (rowPos[scrollPosInd+1] -curScrollPos)/(rowPos[scrollPosInd+1]-rowPos[scrollPosInd]) <0.20)
+                {
+                  scrollPosInd++;
+                }
+            }
             var recordsPP = parseInt($(this).parent().parent().find('.files-per-page-select').val());
             var numRecords = $(this).find('tr').length;
             var numPages = parseInt(numRecords / recordsPP) + 1;
+
 
             var lastInd = scrollPosInd + recordsPP - 1;
             if (scrollPosInd === -1) {
@@ -596,6 +607,12 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 lastInd = numRecords - 1;
             }
             var currentPage = parseInt(scrollPosInd / recordsPP) + 1;
+            if (lastInd === (numRecords -1)){
+                currentPage = numPages;
+            }
+
+
+
             //var tblbody = $(this).find('tbody')[0];
             var totalHeight = $(this)[0].rows[lastInd].offsetTop + $(this)[0].rows[lastInd].offsetHeight - $(this)[0].rows[scrollPosInd].offsetTop;
             $(this).css('max-height', totalHeight.toString() + 'px');
@@ -985,7 +1002,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                         addStudyOrSeries(window.selItems.selProjects, studyArr, "series_table", true);
                     }
 
-                    /*
+
                     if (newFilt) {
                         histObj = new Object();
                         histObj.selItems = JSON.parse(JSON.stringify(window.selItems));
@@ -1010,7 +1027,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                         $('#previous').hide();
                     }
 
-                   */
+
                     changeAjax(false);
 
                 },
@@ -1184,7 +1201,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
         window.updatePlots = function (selectElem) {
             createPlots('search_orig_set');
-            createPlots('search_related_set');
+            createPlots('tcga_clinical');
+             createPlots('segmentation');
         }
 
         var createPlots = function (id) {
@@ -1359,7 +1377,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
         var tableSortBindings = function (filterId) {
             $('#' + filterId).find('.fa-caret-up, .fa-caret-down').on('click', function () {
                 var sorter = this;
-                $(this).parent().parent().parent().find('.fa-caret-up, .fa-caret-down').removeClass('.greyout');
+                $(this).parent().parent().parent().find('.fa-caret-up, .fa-caret-down').removeClass('selected_grey');
+                $(this).addClass('selected_grey');
                 var asc = false;
                 if (sorter.classList.contains('fa-caret-up')) {
                     asc = true;
@@ -1374,7 +1393,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
         var sortTable = function (tbl, curInd, asc) {
             var thd = $(tbl).find('thead').find('th')[curInd];
-
+            var isSeries = ( ($(tbl).find('tbody')[0].id === 'series_table') ? true : false);
             rowSet = $(tbl).find('tbody').children();
             rowSet = rowSet.sort(function (a, b) {
 
@@ -1384,12 +1403,34 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     item1 = parseFloat(item1);
                     item2 = parseFloat(item2);
                 }
-                if (((item1 > item2) && asc) || ((item2 > item1) && !asc)) {
-                    return 1;
-                } else {
-                    return -1;
+
+                if (item1 ===item2){
+                    if ( isSeries && (curInd===0)){
+
+                        var seriesNuma = parseInt( $(a).children()[1].innerText  );
+                        var seriesNumb = parseInt( $(b).children()[1].innerText  );
+
+                        if (seriesNuma === seriesNumb){
+                            return 0;
+                        }
+                        else if (((seriesNuma > seriesNumb) )){
+                            return 1;
+                        }
+                        else {
+                            return -1;
+                        }
+                    }
+                   else{
+                       return 0;
+                    }
                 }
 
+                else if (((item1 > item2) && asc) || ((item2 > item1) && !asc)) {
+                    return 1;
+                }
+                else {
+                    return -1
+                }
             });
             $(tbl).find('tbody').append(rowSet);
         }
@@ -1528,6 +1569,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
             tableSortBindings('projects_table_head');
             tableSortBindings('studies_table_head');
+            tableSortBindings('series_table_head');
 
 
             $('#age_at_diagnosis_list').addClass('hide');
@@ -1535,13 +1577,13 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             $('#age_at_diagnosis').find('.less-checks').addClass('hide');
             mkSlider('age_at_diagnosis',0,120,1,true);
 
-            /* var numCol = $('#projects_table').children('tr').length
+            var numCol = $('#projects_table').children('tr').length
             $('#projects_panel').find('.total-file-count')[0].innerHTML = numCol.toString();
-             $('#projects_panel').find('.goto-page-number')[0].max=3; */
+             $('#projects_panel').find('.goto-page-number')[0].max=3;
 
-            // window.resetTableControls ($('#projects_table'), false, 0);
-            // window.resetTableControls ($('#studies_table'), false, 0);
-            //window.resetTableControls ($('#series_table'), false, 0);
+            window.resetTableControls ($('#projects_table'), false, 0);
+            window.resetTableControls ($('#studies_table'), false, 0);
+            window.resetTableControls ($('#series_table'), false, 0);
 
             //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
 
