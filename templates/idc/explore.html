@@ -322,14 +322,16 @@
                         </ul>
                         <div class="tab-content">
                             <div id = "results_orig_set" role="tabpanel" class="tab-pane active panel">
-                                <div class="panel-body bar-charts-div">
+                                <div class="panel-body derived-graphs graph-set">
                                      {% for attr in set_attributes.origin_set.attributes %}
+                                         {% if attr.name != 'collection_id' %}
                                          <div id="{{ attr.name  }}_chart" class="bar-chart"></div>
+                                         {% endif %}
                                     {%  endfor %}
                                 </div>
                             </div>
                             <div id = "results_derived_set" role="tabpanel" class="tab-pane panel">
-                                <div class="panel-body bar-charts-div derived-graphs">
+                                <div class="panel-body derived-graphs graph-set">
                                     {% for attr in set_attributes.derived_set.attributes %}
                                         <div id="{{ attr.name  }}_chart" class="bar-chart"></div>
                                     {%  endfor %}
@@ -355,7 +357,7 @@
                          <div id = "projects_panel" class="panel-body">
 
                            <div class="dataTables_info">
-                    <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">23</span>entries</span>
+                    <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">23</span> entries</span>
                     <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
                          </div>
                          <div>
@@ -387,7 +389,7 @@
                             <table id="proj_table" class="table table-striped">
                                 <thead id="projects_table_head">
                                     <tr>
-                                        <th class='text_data'>Collection Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'>Total # of Patients<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'># of Patients(this cohort)<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                        <th class='text_data'>Collection Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'>Total # of Cases<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'># of Cases(this cohort)<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
                                    <!-- <th>Collection Name </th><th>Total # of Patients</th><th># of Patients(this cohort)</th> -->
 
 
@@ -411,7 +413,7 @@
                          <div class="panel-body">
 
                          <div class="dataTables_info">
-                    <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count"> </span> entries</span>
+                    <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">0</span> entries</span>
                     <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
                          </div>
                        <div>
@@ -447,6 +449,7 @@
                               </thead>
 
                              <tbody  id="studies_table" class="set_height" data-rowpos="">
+
                               </tbody>
                           </table >
                          </div>
@@ -457,7 +460,7 @@
                          <div class="panel-heading clearfix"><h4 class="panel-title">Selected Series</h4></div>
                          <div class="panel-body">
                             <div class="dataTables_info">
-                                <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count"> </span> entries</span>
+                                <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">0</span> entries</span>
                                 <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
                             </div>
                             <div>
@@ -484,7 +487,7 @@
                              <table class = "table table-striped">
                                 <thead id="series_table_head">
                                     <tr>
-                                        <th>Study Id</th><th>Series Number</th><th>Series Id</th><th>Modality</th><th>Body Part Examined</th><th>Series Description</th>
+                                        <th>Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Series Number<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Modality<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Body Part Examined<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Series Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="series_table" class="set_height"></tbody>
