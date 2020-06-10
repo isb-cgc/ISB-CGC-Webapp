@@ -94,14 +94,15 @@ def get_collex_metadata(filters, fields, record_limit=1000, counts_only=False, w
 def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record_limit):
     results = {'docs': None, 'facets': {}}
 
-    attrs = sources.get_source_attrs(for_ui=True)
+    attrs_for_faceting = sources.get_source_attrs(for_ui=True)
+    all_ui_attrs = sources.get_source_attrs(for_ui=True, for_faceting=False)
     # Eventually this will need to go per program
     for source in sources:
         joined_origin = False
         if source.version.get_set_type() not in results['facets']:
             results['facets'][source.version.get_set_type()] = {}
         solr_query = build_solr_query(filters, with_tags_for_ex=True) if filters else None
-        solr_facets = build_solr_facets(attrs['sources'][source.id]['attrs'],
+        solr_facets = build_solr_facets(attrs_for_faceting['sources'][source.id]['attrs'],
                                         filter_tags=solr_query['filter_tags'] if solr_query else None,
                                         unique=source.shared_id_col)
 
@@ -111,14 +112,14 @@ def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record
             for attr in solr_query['queries']:
                 attr_name = re.sub("(_btw|_lt|_lte|_gt|_gte)", "", attr)
                 # If an attribute from the filters isn't in the attribute listing, just warn and continue
-                if attr_name in attrs['list']:
+                if attr_name in all_ui_attrs['list']:
                     # If the attribute is from this source, just add the query
-                    if attr_name in attrs['sources'][source.id]['list']:
+                    if attr_name in all_ui_attrs['sources'][source.id]['list']:
                         query_set.append(solr_query['queries'][attr])
                     # If it's in another source for this program, we need to join on that source
                     else:
                         for ds in sources:
-                            if ds.id != source.id and attr_name in attrs['sources'][ds.id]['list']:
+                            if ds.id != source.id and attr_name in all_ui_attrs['sources'][ds.id]['list']:
                                 if source.version.data_type != DataVersion.IMAGE_DATA and not joined_origin and ds.version.data_type == DataVersion.IMAGE_DATA:
                                     joined_origin = True
                                 query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
