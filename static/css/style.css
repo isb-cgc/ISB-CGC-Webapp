@@ -2397,8 +2397,8 @@ section .min-max {
   padding: 2px 5px;
   text-align: right; }
   #cohort-details .case_count:after, #cohort-filelist .case_count:after {
-    content: 'case(s)';
-    font-size: 0.9em;
+   #content: 'case(s)';
+    font-size: 1.2em;
     padding-left: 5px; }
 
 #cohort-filelist #placeholder .panel-body {
