@@ -762,13 +762,12 @@ def worksheet_comment(request, workbook_id=0, worksheet_id=0, comment_id=0):
     if request.method == "POST":
         wrkbk = Workbook.objects.get(id=workbook_id)
         wrkbk.save()
-        content = request.POST.get('content', '').encode('utf-8')
+        content = request.POST.get('content', '')
         if command == "create":
             return_obj = Worksheet_comment.create(worksheet_id=worksheet_id,
                                                   content=content,
                                                   user=request.user)
 
-            return_obj['content'] = escape(return_obj['content'])
             return HttpResponse(json.dumps(return_obj), status=200)
         elif command == "delete":
             result = Worksheet_comment.destroy(comment_id=comment_id)

@@ -166,7 +166,7 @@
                             </div>
                         {% endfor %}
                         <label for="{{ worksheet.id }}-x-log-transform">
-                            <input id="{{ worksheet.id }}-x-log-transform" type="checkbox" class="log-scale" {% if workbook.owner.id != user.id %} disabled {% endif %} > Plot as log<sub>10</sub>(n+1)
+                            <input id="{{ worksheet.id }}-x-log-transform" type="checkbox" class="log-scale {% if workbook.owner.id != user.id %} disabled {% endif %}" > Plot as log<sub>10</sub>(n+1)
                         </label>
                     </div>
 
@@ -229,7 +229,7 @@
                             </div>
                         {% endfor %}
                         <label for="{{ worksheet.id }}-y-log-transform">
-                            <input id="{{ worksheet.id }}-y-log-transform" type="checkbox" class="log-scale" {% if workbook.owner.id != user.id %} disabled {% endif %} > Plot as log<sub>10</sub>(n+1)
+                            <input id="{{ worksheet.id }}-y-log-transform" type="checkbox" class="log-scale {% if workbook.owner.id != user.id %} disabled {% endif %}" > Plot as log<sub>10</sub>(n+1)
                         </label>
                     </div>
 
