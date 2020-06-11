@@ -466,8 +466,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                         var studyId = curData.StudyInstanceUID;
                         var ppStudyId = pretty_print_id(studyId);
                         var fetchUrl = '/projects/chc-tcia/locations/us-central1/datasets/' + projectId.replace('_', '-') + '/dicomStores/' + projectId.replace('_', '-') + '/study/' + studyId;
-                        //var hrefTxt = '<a href="' + fetchUrl + '" target="_blank">' + ppStudyId + '</a><span class="tooltiptext_ex">' + studyId + '</span>';
-                        var hrefTxt =  ppStudyId + '<span class="tooltiptext_ex">' + studyId + '</span>';
+                        var hrefTxt = '<a href="' + fetchUrl + '" target="_blank">' + ppStudyId + '</a><span class="tooltiptext_ex">' + studyId + '</span>';
+                        //var hrefTxt =  ppStudyId + '<span class="tooltiptext_ex">' + studyId + '</span>';
                         var pclass = 'project_' + projectId;
                         var newHtml = '';
                         if (isSeries) {
