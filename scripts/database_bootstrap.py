@@ -237,14 +237,20 @@ def main():
             {"name": "GDC Data Release 9", "ver": "r9", "type": "A"},
             {"name": "TCIA Image Data", "ver": "0", "type": "I"},
             {"name": "TCIA Segmentation Analysis", "ver": "0", "type": "D"},
+            {"name": "TCIA Qualitative Analysis", "ver": "0", "type": "D"},
+            #{"name": "TCIA Quantitative Analysis", "ver": "0", "type": "D"},
         ])
 
         add_solr_collex(['tcia_images'], "TCIA Image Data")
         add_solr_collex(['segmentations'], "TCIA Segmentation Analysis")
+        add_solr_collex(['qualitative_measurements'], "TCIA Qualitative Analysis")
+        #add_solr_collex(['quantitative_measurements'], "TCIA Quantitative Analysis")
         add_solr_collex(['tcga_clin', 'tcga_bios'], "GDC Data Release 9")
         add_bq_tables(['isb-cgc.TCGA_bioclin_v0.Biospecimen', 'isb-cgc.TCGA_bioclin_v0.Clinical'], "GDC Data Release 9")
         add_bq_tables(["idc-dev-etl.tcia.dicom_metadata"], "TCIA Image Data")
         add_bq_tables(["idc-dev-etl.etl_metadata.segmentations_solr_export"], "TCIA Segmentation Analysis")
+        add_bq_tables(["idc-dev.metadata.qualitative_measurements"], "TCIA Qualitative Analysis")
+        #add_bq_tables(["idc-dev.metadata.quantitative_measurements"], "TCIA Quantitative Analysis")
 
         collection_file = open("tcia_collex.csv", "r")
         line_reader = collection_file.readlines()
@@ -392,6 +398,33 @@ def main():
                 'cross_collex': True,
                 'solr_collex': ['segmentations'],
                 'bq_tables': ["idc-dev-etl.etl_metadata.segmentations_solr_export"],
+                'display': True if line_split[-1] == 'True' else False
+            }
+
+            if attr['name'] in display_vals:
+                if 'preformatted_values' in display_vals[attr['name']]:
+                    attr['preformatted_values'] = True
+                else:
+                    attr['display_vals'] = display_vals[attr['name']]['vals']
+
+            attr_set.append(attr)
+
+        attr_file = open("quals_attr.csv", "r")
+        line_reader = attr_file.readlines()
+
+        for line in line_reader:
+            line = line.strip()
+            line_split = line.split(",")
+
+            attr = {
+                'name': line_split[0],
+                "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
+                line_split[1],
+                "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
+                line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                'cross_collex': True,
+                'solr_collex': ['qualitative_measurements'],
+                'bq_tables': ["idc-dev.metadata.qualitative_measurements"],
                 'display': True if line_split[-1] == 'True' else False
             }
 
