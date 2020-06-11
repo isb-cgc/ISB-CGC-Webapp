@@ -125,6 +125,10 @@ body {
 tr.selected_grey td, i.selected_grey {
     background-color: #333; color: #fff; }
 
+tr.selected_grey td  a {
+    color: #fff;
+}
+
 tbody.set_height {
     max-height: 200px;       /* Just for the demo          */
     overflow-y: scroll;
