@@ -140,7 +140,7 @@ def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record
             'fqs': query_set,
             'query_string': None,
             'limit': 0,
-            'counts_only': counts_only,
+            'counts_only': True,
             'fields': None
         })
 

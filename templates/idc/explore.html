@@ -340,7 +340,7 @@
                             <div id = "results_related_set" role="tabpanel" class="tab-pane panel">
                                  <div class="panel-body bar-charts-div related-graphs">
                                     {% for attr in set_attributes.related_set.attributes %}
-                                        <div id="{{ attr.name  }}_chart" class="bar-chart"></div>
+                                        <div id="{{ attr.name }}_chart" class="bar-chart"></div>
                                     {%  endfor %}
                                 </div>
                                 <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="showMoreGraphs()">Show More</button></div>
