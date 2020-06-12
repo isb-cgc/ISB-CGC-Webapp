@@ -46,7 +46,7 @@ from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
 from googleapiclient.errors import HttpError
 from cohorts.models import Cohort, Cohort_Perms
-from idc_collections.models import Program, Attribute, Attribute_Display_Values, DataSource, DataVersion
+from idc_collections.models import Program, Attribute, Attribute_Display_Values, DataSource, DataVersion, Collection
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 from .metadata_utils import get_collex_metadata
@@ -469,16 +469,20 @@ def explore_data_page(request):
                     context['collections'] = {a: attr_by_source[set]['attributes']['collection_id'][a]['count'] for a in attr_by_source[set]['attributes']['collection_id']}
                     context['collections']['All'] = source_metadata['total']
             else:
+                if set == 'origin_set':
+                    collex = attr_by_source[set]['attributes']['collection_id']
+                    if collex['vals']:
+                        context['collections'] = {a['value']: a['count'] for a in collex['vals'] if a['value'] in collectionFilterList}
+                    else:
+                        context['collections'] = {a.name: 0 for a in Collection.objects.filter(active=True, name__in=collectionFilterList)}
+                    context['collections']['All'] = source_metadata['total']
                 attr_by_source[set]['attributes'] = [{
                     'name': x,
                     'id': attr_by_source[set]['attributes'][x]['obj'].id,
                     'display_name': attr_by_source[set]['attributes'][x]['obj'].display_name,
                     'values': attr_by_source[set]['attributes'][x]['vals']
                 } for x, val in sorted(attr_by_source[set]['attributes'].items())]
-                if set == 'origin_set':
-                    context['collections'] = {b['value']: b['count'] for a in attr_by_source[set]['attributes'] for
-                                              b in a['values'] if a['name'] == 'collection_id' and b['value'] in collectionFilterList}
-                    context['collections']['All'] = source_metadata['total']
+
             if not counts_only:
                 attr_by_source[set]['docs'] = source_metadata['docs']
 

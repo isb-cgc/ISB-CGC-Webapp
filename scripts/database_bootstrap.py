@@ -28,6 +28,7 @@ from argparse import ArgumentParser
 import sys
 import time
 from copy import deepcopy
+from itertools import combinations, product
 
 from idc import secret_settings, settings
 
@@ -38,7 +39,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "idc.settings")
 import django
 django.setup()
 
-from idc_collections.models import Program, Collection, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataVersion
+from idc_collections.models import Program, Collection, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataSourceJoin, DataVersion
 
 from django.contrib.auth.models import User
 idc_superuser = User.objects.get(username="idc")
@@ -86,7 +87,7 @@ def add_solr_collex(solr_set, ver_name):
             obj, created = DataSource.objects.update_or_create(
                 name=collex,
                 version=DataVersion.objects.get(name=ver_name),
-                shared_id_col="case_barcode" if "tcga" in collex else "PatientID",
+                count_col="case_barcode" if "tcga" in collex else "PatientID",
                 source_type='S'
             )
 
@@ -109,7 +110,7 @@ def add_bq_tables(tables, ver_name):
         try:
             obj, created = DataSource.objects.update_or_create(
                 name=table, version=DataVersion.objects.get(name=ver_name),
-                shared_id_col="case_barcode" if "isb-cgc" in table else "PatientID",
+                count_col="case_barcode" if "isb-cgc" in table else "PatientID",
                 source_type='B'
             )
 
@@ -125,6 +126,32 @@ def add_bq_tables(tables, ver_name):
         except Exception as e:
             logger.error("[ERROR] BigQuery Table {} may not have been added!".format(table))
             logger.exception(e)
+
+
+def add_source_joins(froms, from_col, tos=None, to_col=None):
+    src_joins = []
+
+    if not tos and not to_col:
+        joins = combinations(froms, 2)
+        for join in joins:
+            src_joins.append(DataSourceJoin(
+                from_src=DataSource.objects.get(name=join[0]),
+                to_src=DataSource.objects.get(name=join[1]),
+                from_src_col=from_col,
+                to_src_col=from_col)
+            )
+    else:
+        joins = product(froms,tos)
+        for join in joins:
+            src_joins.append(DataSourceJoin(
+                from_src=DataSource.objects.get(name=join[0]),
+                to_src=DataSource.objects.get(name=join[1]),
+                from_src_col=from_col,
+                to_src_col=to_col)
+            )
+
+    if len(src_joins):
+        DataSourceJoin.objects.bulk_create(src_joins)
 
 
 def add_collections(collection_set):
@@ -245,11 +272,28 @@ def main():
         add_solr_collex(['qualitative_measurements'], "TCIA Qualitative Analysis")
         add_solr_collex(['quantitative_measurements'], "TCIA Quantitative Analysis")
         add_solr_collex(['tcga_clin', 'tcga_bios'], "GDC Data Release 9")
-        add_bq_tables(['isb-cgc.TCGA_bioclin_v0.Biospecimen', 'isb-cgc.TCGA_bioclin_v0.Clinical'], "GDC Data Release 9")
+
         add_bq_tables(["idc-dev.metadata.dicom_mvp"], "TCIA Image Data")
+        add_bq_tables(['isb-cgc.TCGA_bioclin_v0.Biospecimen', 'isb-cgc.TCGA_bioclin_v0.Clinical'], "GDC Data Release 9")
         add_bq_tables(["idc-dev.metadata.segmentations"], "TCIA Segmentation Analysis")
         add_bq_tables(["idc-dev.metadata.qualitative_measurements"], "TCIA Qualitative Analysis")
         add_bq_tables(["idc-dev.metadata.quantitative_measurements"], "TCIA Quantitative Analysis")
+
+        add_source_joins(["tcia_images", "segmentations", "qualitative_measurements", "quantitative_measurements"], "SOPInstanceUID")
+        add_source_joins(["tcga_clin", "tcga_bios"], "case_barcode")
+        add_source_joins(
+            ["tcia_images", "segmentations", "qualitative_measurements", "quantitative_measurements"],
+            "PatientID",
+            ["tcga_clin", "tcga_bios"], "case_barcode"
+        )
+
+        add_source_joins(["idc-dev.metadata.dicom_mvp", "idc-dev.metadata.segmentations", "idc-dev.metadata.qualitative_measurements", "idc-dev.metadata.quantitative_measurements"], "SOPInstanceUID")
+        add_source_joins(["isb-cgc.TCGA_bioclin_v0.Clinical", "isb-cgc.TCGA_bioclin_v0.Biospecimen"], "case_barcode")
+        add_source_joins(
+            ["idc-dev.metadata.dicom_mvp", "idc-dev.metadata.segmentations", "idc-dev.metadata.qualitative_measurements", "idc-dev.metadata.quantitative_measurements"],
+            "PatientID",
+            ["isb-cgc.TCGA_bioclin_v0.Clinical", "isb-cgc.TCGA_bioclin_v0.Biospecimen"], "case_barcode"
+        )
 
         all_attrs = {}
 

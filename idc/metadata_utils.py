@@ -16,7 +16,7 @@
 
 import logging
 import re
-from idc_collections.models import DataSource, Attribute, Attribute_Display_Values, Program, DataVersion
+from idc_collections.models import DataSource, Attribute, Attribute_Display_Values, Program, DataVersion, DataSourceJoin
 from solr_helpers import *
 from idc_collections.collex_metadata_utils import get_bq_metadata, get_bq_facet_counts
 from django.conf import settings
@@ -104,7 +104,7 @@ def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record
         solr_query = build_solr_query(filters, with_tags_for_ex=True) if filters else None
         solr_facets = build_solr_facets(attrs_for_faceting['sources'][source.id]['attrs'],
                                         filter_tags=solr_query['filter_tags'] if solr_query else None,
-                                        unique=source.shared_id_col)
+                                        unique=source.count_col)
 
         query_set = []
 
@@ -122,16 +122,19 @@ def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record
                             if ds.id != source.id and attr_name in all_ui_attrs['sources'][ds.id]['list']:
                                 if source.version.data_type != DataVersion.IMAGE_DATA and not joined_origin and ds.version.data_type == DataVersion.IMAGE_DATA:
                                     joined_origin = True
+                                # DataSource join pairs are unique, so, this should only produce a single record
+                                source_join = DataSourceJoin.objects.get(from_src__in=[ds.id,source.id], to_src__in=[ds.id,source.id])
                                 query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
-                                    ds.shared_id_col, ds.name, source.shared_id_col
+                                    source_join.get_col(ds.name), ds.name, source_join.get_col(source.name)
                                 )) + solr_query['queries'][attr])
                 else:
                     logger.warning("[WARNING] Attribute {} not found in data sources {}".format(attr_name, ", ".join(list(sources.values_list('name',flat=True)))))
 
-        if not joined_origin:
+        if not joined_origin and source.version.data_type != DataVersion.IMAGE_DATA:
             ds = sources.filter(version__data_type=DataVersion.IMAGE_DATA).first()
+            source_join = DataSourceJoin.objects.get(from_src__in=[ds.id, source.id], to_src__in=[ds.id, source.id])
             query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
-                ds.shared_id_col, ds.name, source.shared_id_col
+                source_join.get_col(ds.name), ds.name, source_join.get_col(source.name)
             ))+"*:*")
 
         solr_result = query_solr_and_format_result({
