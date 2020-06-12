@@ -66,9 +66,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 bordercolor: '#FFFFFF',
                 borderwidth: 2
             }
-
         };
-
 
         window.setSlider = function (divName, reset, strt, end, isInt) {
             slideDiv = divName + "_slide";
@@ -100,11 +98,9 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 }
                 window.filterObj[filtAtt] = attVal
             }
-
             mkFiltText();
             updateFacetsData(true);
-
-        }
+        };
 
 // Show more/less links on categories with >6 fiilters
 
@@ -126,7 +122,6 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                          }
                      }
                 }
-
                 else if (curKey === 'age_at_diagnosis_btw') {
                     var nstr = '<span class="filter-type">AGE</span> IN (<span class="filter-att">' + filterObj[curKey][0].toString() + '-' + (filterObj[curKey][1] + 1).toString() + '</span>)';
                      oStringA.push(nstr);
@@ -138,9 +133,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     nstr = '<span class="filter-type">' + disp + '</span>';
                     nstr += 'IN (' + oArray.join("") + ')';
                     oStringA.push(nstr);
-
                 }
-
             }
 
             if (collection.length>0){
