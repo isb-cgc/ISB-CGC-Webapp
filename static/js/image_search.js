@@ -109,7 +109,6 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 // Show more/less links on categories with >6 fiilters
 
         var mkFiltText = function () {
-
             var curKeys = Object.keys(filterObj).sort();
             oStringA = new Array();
              var collection = new Array();
@@ -129,7 +128,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 }
 
                 else if (curKey === 'age_at_diagnosis_btw') {
-                    var nstr = '<span class="filter-type">AGE</span> IN (<span class="filter-att">' + filterObj[curKey][0].toString() + '-' + (filterObj[curKey][1] + 1).toString() + ')</span>';
+                    var nstr = '<span class="filter-type">AGE</span> IN (<span class="filter-att">' + filterObj[curKey][0].toString() + '-' + (filterObj[curKey][1] + 1).toString() + '</span>)';
                      oStringA.push(nstr);
                 } else {
                     var disp = curKey;
@@ -159,19 +158,19 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             }
 
             //alert(oString);
-        }
+        };
 
         window.showMoreGraphs = function () {
             $('.more-graphs').hide();
             $('.less-graphs').show();
             $('.related-graphs').animate({height: '800px'}, 800);
-        }
+        };
 
         window.showLessGraphs = function () {
             $('.less-graphs').hide();
             $('.more-graphs').show();
             $('.related-graphs').animate({height: '200px'}, 800);
-        }
+        };
 
         var mkSlider = function (divName, min, max, step, isInt) {
 
@@ -855,7 +854,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             mkFiltText();
             fetchCountData(false);
 
-        }
+        };
 
         window.selectHistoricFilter = function (num) {
             //alert('previous');
@@ -911,7 +910,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     }
                 }
             }
-        }
+        };
 
         var parseFilterObj = function (){
             collObj=new Array();
@@ -946,7 +945,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 filtObj['collection_id']= collObj.sort();
             }
             return filtObj;
-        }
+        };
+
         var updateFacetsData = function (newFilt) {
             changeAjax(true);
 
@@ -1002,7 +1002,6 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                         addStudyOrSeries(window.selItems.selProjects, studyArr, "series_table", true);
                     }
 
-
                     if (newFilt) {
                         histObj = new Object();
                         histObj.selItems = JSON.parse(JSON.stringify(window.selItems));
@@ -1026,21 +1025,14 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     } else {
                         $('#previous').hide();
                     }
-
-
                     changeAjax(false);
-
                 },
                 error: function () {
                     changeAjax(false);
                     console.log("problem getting data");
-
                 }
-
             });
-        }
-
-
+        };
 
         var plotCategoricalData = function (plotId, lbl, plotData, isPie, showLbl) {
             var layout = new Object();
@@ -1094,8 +1086,6 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
             layout.title = lbl.toUpperCase().replace(/_/g, " ");
             delete layout.annotations;
-
-
             if (plotCats === 0) {
                 data[0].values = [0];
                 data[0].labels = [''];
@@ -1163,9 +1153,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     //handleFilterSelectionUpdate(filterId);
                 }
             });
-
         };
-
 
         var findFilterCats = function (id) {
             filterCats = new Array();
@@ -1176,8 +1164,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 filterCats.push(nm);
             }
             return filterCats
-        }
-
+        };
 
         var parseFilterForCounts = function (id) {
             var dataLabel = new Array();
