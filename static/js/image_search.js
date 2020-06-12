@@ -417,6 +417,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
 
         window.addStudyOrSeries = function (projectIdArr, studyIdArr, tableId, refresh) {
+
             changeAjax(true);
             var curSelStudiesDic = new Object();
             var newSelStudies = new Object();

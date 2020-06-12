@@ -15,7 +15,7 @@ window.config = function(props) {
       // console.warn('test, navigate to https://ohif.org/');
       window.location =  'https://storage.googleapis.com/idc-sandbox-002-static/quota_exceeded.html';
     },
-    healthcareApiEndpoint: 'https://idc-sandbox-002.appspot.com/v1beta1',
+    healthcareApiEndpoint: 'https://console.cloud.google.com/healthcare/browser/locations/us/datasets/pre-mvp-temp/datastores?project=idc-dev-etl',
 
     hotkeys: [
       // ~ Global
