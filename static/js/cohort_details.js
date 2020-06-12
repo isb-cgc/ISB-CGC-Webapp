@@ -81,7 +81,7 @@ require([
     var SELECTED_FILTERS = {};
 
     $('.program-tab a').each(function(){
-        SELECTED_FILTERS[$(this).data('programId')] = {};
+        SELECTED_FILTERS[$(this).data('program-id')] = {};
     });
 
     var UPDATE_PENDING = false;
@@ -221,7 +221,7 @@ require([
             return;
         }
 
-        var prog_id = (alternate_prog_id === null || alternate_prog_id === undefined) ? $('ul.nav-tabs-data li.active a').data('programId') : alternate_prog_id;
+        var prog_id = (alternate_prog_id === null || alternate_prog_id === undefined) ? $('ul.nav-tabs-data li.active a').data('program-id') : alternate_prog_id;
         (update_displays_thread !== null) && clearTimeout(update_displays_thread);
 
         update_displays_thread = setTimeout(function(){
@@ -261,8 +261,8 @@ require([
     };
 
     $('.tab-content').on('change', '.mutation-build', function(e){
-        $(this).siblings().find('.bq-table-display').text($(this).find(':selected').data('bqTable'));
-        $(this).siblings().find('.bq-table-display').attr('title',$(this).find(':selected').data('bqTable'));
+        $(this).siblings().find('.bq-table-display').text($(this).find(':selected').data('bq-table'));
+        $(this).siblings().find('.bq-table-display').attr('title',$(this).find(':selected').data('bq-table'));
     });
 
     // Clears the current filter build (note this does NOT clear the filter
@@ -305,7 +305,7 @@ require([
         if(createFormFilterSet.length <= 0) {
             $('#selected-filters').append('<p id="'+activeDataTab+'-filters"></p>');
             createFormFilterSet = $('p#'+activeDataTab+'-filters')
-            createFormFilterSet.append('<h5>'+(prog.data('progDisplName'))+'</h5>');
+            createFormFilterSet.append('<h5>'+(prog.data('prog-displ-name'))+'</h5>');
         } else {
             createFormFilterSet.show();
         }
@@ -314,8 +314,9 @@ require([
             $(selFilterPanel + ' .panel-body').append($('<span class="mol-filter-container">'));
         }
 
-        var tokenProgDisplName = prog.data('progDisplName'),
-            tokenProgId = prog.data('progId');
+        var tokenProgDisplName = prog.data('prog-displ-name'),
+            tokenProgId = prog.data('prog-id');
+
 
         var build = $('#p-' + tokenProgId + '-mutation-build :selected').val();
         var gene = $('#' + activeDataTab + ' .paste-in-genes').tokenfield('getTokens')[0];
@@ -331,39 +332,39 @@ require([
             value = $(this).parents('.molecular-accordion').find('.spec-molecular-attrs.cohort-feature-select-block :checked');
         }
 
-        feature_id += feature.data('featureId');
-        var tokenDisplay = gene.label + ' [' + build + ', ' + feature.data('featureDisplName') + ', ';
+        feature_id += feature.data('feature-id');
+        var tokenDisplay = gene.label + ' [' + build + ', ' + feature.data('feature-displ-name') + ', ';
 
         value.each(function(index){
             var elem = $(this);
-            var filter = feature_id+':'+elem.data('valueId');
+            var filter = feature_id+':'+elem.data('value-id');
             if(!SELECTED_FILTERS[tokenProgId][filter]) {
                 SELECTED_FILTERS[tokenProgId][filter] = true;
-                var valTokenDisplay = tokenDisplay+elem.data('valueDisplName') + ']';
+                var valTokenDisplay = tokenDisplay+elem.data('value-displ-name') + ']';
 
                 if(invert) {
                     valTokenDisplay = "NOT("+valTokenDisplay+")";
                 }
 
                 token = $('<span>').data({
-                    'featureId': feature_id,
-                    'featureType': 'molecular',
-                    'featureName': feature.data('featureName'),
-                    'progId': tokenProgId,
-                    'progName': tokenProgDisplName,
+                    'feature-id': feature_id,
+                    'feature-type': 'molecular',
+                    'feature-name': feature.data('feature-name'),
+                    'prog-id': tokenProgId,
+                    'prog-name': tokenProgDisplName,
                     'filter': filter,
                     'class': '',
                     'build': build,
-                    'valueId': elem.data('valueId'),
-                    'valueName': elem.data('valueName')
+                    'value-id': elem.data('value-id'),
+                    'value-name': elem.data('value-name')
                 })
-                    .attr('data-featureId', feature_id)
-                    .attr('data-valueId', elem.data('valueId'))
+                    .attr('data-feature-id', feature_id)
+                    .attr('data-value-id', elem.data('value-id'))
                     .attr('data-filter', filter)
                     .addClass(activeDataTab + '-token mol-filter filter-token filter-combine-'+$('.mut-filter-combine :selected').val());
-
                 token.append(
-                    $('<a>').addClass('delete-x filter-label label label-default mol-cat-filter-x')
+                    $('<a>').addClass('delete-x filter-label label label-default')
+                    // $('<a>').addClass('delete-x filter-label label label-default mol-cat-filter-x')
                         .text(valTokenDisplay)
                         .append('<i class="fa fa-times">')
                         .attr("title", valTokenDisplay)
@@ -398,64 +399,64 @@ require([
 
         if(createFormFilterSet.length <= 0) {
             $('#selected-filters').append('<p id="'+activeDataTab+'-filters"></p>');
-            createFormFilterSet = $('p#'+activeDataTab+'-filters')
-            createFormFilterSet.append('<h5>'+(prog.data('progDisplName'))+'</h5>');
+            createFormFilterSet = $('p#'+activeDataTab+'-filters');
+            createFormFilterSet.append('<h5>'+(prog.data('prog-displ-name'))+'</h5>');
         } else {
             createFormFilterSet.show();
         }
 
-        var tokenProgDisplName = prog.data('progDisplName'),
-            tokenProgId = prog.data('progId');
+        var tokenProgDisplName = prog.data('prog-displ-name'),
+            tokenProgId = prog.data('prog-id');
 
         if ($this.is(':checked')) { // Checkbox checked
-            var tokenValDisplName = (value.data('valueDisplName') && value.data('valueDisplName').length > 0) ?
-                    value.data('valueDisplName') : (value.data('valueName') == 'None' ? 'NA' : value.data('valueName')),
-                tokenFeatDisplName = (feature.data('featureDisplName') && feature.data('featureDisplName').length > 0) ?
-                 feature.data('featureDisplName') : feature.data('featureName');
+            var tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
+                    value.data('value-displ-name') : (value.data('value-name') === 'None' ? 'NA' : value.data('value-name')),
+                tokenFeatDisplName = (feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
+                 feature.data('feature-displ-name') : feature.data('feature-name');
 
             var tokenUserProgId = null;
 
             if(tokenProgId <= 0){
-                tokenUserProgId = value.data('userProgramId');
+                tokenUserProgId = value.data('user-program-id');
             }
 
-            var feature_id = feature.data('featureId'), value_id =  value.data('valueId');
+            var feature_id = feature.data('feature-id'), value_id =  value.data('value-id');
 
-            if (feature.data('featureType') == 'datatype') { // Datatype filter
+            if (feature.data('feature-type') === 'datatype') { // Datatype filter
 
-                var token = $('<span>').data({
-                    'featureId': 'data_type',
-                    'featureName': 'data_type',
-                    'valueId': value_id,
-                    'valueName': value.data('valueName'),
-                    'progId': tokenProgId,
-                    'progName': tokenProgDisplName,
-                }).attr('data-featureId',feature_id).attr('data-valueId',value_id).addClass(activeDataTab+'-token filter-token');
-
-            } else if (feature.data('featureType') === 'donor') { // Case filter
                 token = $('<span>').data({
-                    'featureId': feature_id,
-                    'featureName': feature.data('featureName'),
-                    'valueId': value_id,
-                    'valueName': value.data('valueName'),
-                    'progId': tokenProgId,
-                    'progName': tokenProgDisplName
-                }).attr('data-featureId',feature_id).attr('data-valueId',value_id).addClass(activeDataTab+'-token filter-token');
+                    'feature-id': 'data_type',
+                    'feature-name': 'data_type',
+                    'value-id': value_id,
+                    'value-name': value.data('value-name'),
+                    'prog-id': tokenProgId,
+                    'prog-name': tokenProgDisplName,
+                }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
 
-            } else if (feature.data('featureType') === 'user-data') { // User data filter
+            } else if (feature.data('feature-type') === 'donor') { // Case filter
                 token = $('<span>').data({
-                    'featureId': feature_id,
-                    'featureName': feature.data('featureName'),
-                    'valueId': value_id,
-                    'valueName': value.data('valueName'),
-                    'progId': tokenProgId,
-                    'progName': tokenProgDisplName,
-                    'userProgramId': tokenUserProgId,
-                }).attr('data-featureId',feature_id).attr('data-valueId',value_id).addClass(activeDataTab+'-token filter-token');
+                    'feature-id': feature_id,
+                    'feature-name': feature.data('feature-name'),
+                    'value-id': value_id,
+                    'value-name': value.data('value-name'),
+                    'prog-id': tokenProgId,
+                    'prog-name': tokenProgDisplName
+                }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
+
+            } else if (feature.data('feature-type') === 'user-data') { // User data filter
+                token = $('<span>').data({
+                    'feature-id': feature_id,
+                    'feature-name': feature.data('feature-name'),
+                    'value-id': value_id,
+                    'value-name': value.data('value-name'),
+                    'prog-id': tokenProgId,
+                    'prog-name': tokenProgDisplName,
+                    'user-program-id': tokenUserProgId,
+                }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
             }
 
             // Don't re-add the token and filter if it already exists
-            if($(selFilterPanel+' .panel-body span[data-featureId="'+feature_id+'"][data-valueId="'+value_id+'"]').length <= 0) {
+            if($(selFilterPanel+' .panel-body span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').length <= 0) {
                 token.append(
                     $('<a>').addClass('delete-x filter-label label label-default')
                         .text(tokenFeatDisplName + ': ' + tokenValDisplName)
@@ -463,9 +464,9 @@ require([
                         .attr("title",tokenFeatDisplName + ': ' + tokenValDisplName)
                 );
 
-                if (feature.data('featureType') === 'molecular') {
-                    token.find('a.delete-x').addClass('mol-spec-filter-x');
-                }
+                // if (feature.data('feature-type') === 'molecular') {
+                //     token.find('a.delete-x').addClass('mol-spec-filter-x');
+                // }
 
                 $this.data({
                     'select-filters-item': token.clone(true),
@@ -481,8 +482,8 @@ require([
             // Remove create cohort form pill if it exists
             if($this.data('create-cohort-form-item')) {
                 createFormFilterSet.find('span').each(function () {
-                    if ($(this).data('featureId') === $this.data('create-cohort-form-item').data('featureId') &&
-                        $(this).data('valueName') === $this.data('create-cohort-form-item').data('valueName')) {
+                    if ($(this).data('feature-id') === $this.data('create-cohort-form-item').data('feature-id') &&
+                        $(this).data('value-name') === $this.data('create-cohort-form-item').data('value-name')) {
                         $(this).remove();
                     }
                 });
@@ -490,7 +491,6 @@ require([
                 $this.data('create-cohort-form-item').remove();
             }
         }
-
         !withoutDisplayUpdates && update_displays();
 
         if(!cohort_id && $('.selected-filters .panel-body span').length > 0) {
@@ -502,7 +502,7 @@ require([
 
     $('.clear-filters').on('click', function() {
         var activeDataTab = $('.data-tab.active').attr('id');
-        var prog_id = $('.data-tab.active .filter-panel').data('progId');
+        var prog_id = $('.data-tab.active .filter-panel').data('prog-id');
         var filterType = $(this).attr('id').split('-clear-filters')[0];
         var createFormFilterSet = $('p#'+activeDataTab+'-filters');
 
@@ -629,12 +629,12 @@ require([
         $('.selected-filters .panel-body span.filter-token').each(function() {
             var $this = $(this);
             var value = {
-                'feature': { name: $this.data('featureName'), id: $this.data('featureId') },
-                'value'  : { name: $this.data('valueName')  , id: $this.data('valueId')   },
-                'program': { name: $this.data('progName')   , id: $this.data('progId')    }
+                'feature': { name: $this.data('feature-name'), id: $this.data('feature-id') },
+                'value'  : { name: $this.data('value-name')  , id: $this.data('value-id')   },
+                'program': { name: $this.data('prog-name')   , id: $this.data('prog-id')    }
             };
-            if($this.data('userProgramId')) {
-                value['user_program'] = $this.data('userProgramId');
+            if($this.data('user-program-id')) {
+                value['user_program'] = $this.data('user-program-id');
             }
             form.append($('<input>').attr({ type: 'hidden', name: 'filters', value: JSON.stringify(value)}));
         });
@@ -847,7 +847,7 @@ require([
 
     // Remove shared user
     $('.remove-shared-user').on('click', function() {
-        var user_id = $(this).attr('data-userId');
+        var user_id = $(this).attr('data-user-id');
         var url = base_url + '/cohorts/unshare_cohort/' + cohort_id + '/';
         var csrftoken = $.getCookie('csrftoken');
         var button = $(this);
@@ -1024,75 +1024,71 @@ require([
     };
 
     // Handler for the 'x' of the mutation 'category' filter tokens
-    $('.tab-content, #selected-filters').on('click', 'a.mol-cat-filter-x', function (e) {
-        var prog_id = $(this).parents('span').data('progId');
-        var activeDataTab = prog_id+'-data';
-        var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
-        var createFormFilterSet = $('p#'+activeDataTab+'-filters');
-
-        var filter = $(this).parents('span').data('filter');
-
-        if(filter && SELECTED_FILTERS[prog_id][filter]) {
-            delete SELECTED_FILTERS[prog_id][filter];
-        }
-
-        // When the 'Selected Filters' token is removed, remove this filter from other
-        // locations in which it's stored
-        $(this).parent('span').remove();
-
-        if($(selFilterPanel+' .panel-body .mol-filter').length <= 0) {
-            $(selFilterPanel+' .panel-body .mol-filter-container').hide();
-        }
-
-        createFormFilterSet.find('span[data-filter="'+filter+'"]').remove();
-
-        if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
-            $('#at-least-one-filter-alert-modal').show();
-            $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
-        }
-
-        // If this has emptied out a program's filter set, hide the modal's subsection for that program
-        // if a new value isn't replacing it
-        if(createFormFilterSet.find('span').length <= 0) {
-            createFormFilterSet.hide();
-        }
-
-        // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
-        var progCount = 0;
-        $('.selected-filters .panel-body').each(function(){
-            if($(this).find('span').length > 0) {
-                progCount++;
-            }
-        });
-        (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
-
-        update_displays(false,false,$(this).parent('span').data('progId'));
-        return false;
-    });
+    // $('.tab-content, #selected-filters').on('click', 'a.mol-cat-filter-x', function (e) {
+    //     var prog_id = $(this).parents('span').data('prog-id');
+    //     var activeDataTab = prog_id+'-data';
+    //     var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
+    //     var createFormFilterSet = $('p#'+activeDataTab+'-filters');
+    //     var filter = $(this).parents('span').data('filter');
+    //     if(filter && SELECTED_FILTERS[prog_id][filter]) {
+    //         delete SELECTED_FILTERS[prog_id][filter];
+    //     }
+    //
+    //     // When the 'Selected Filters' token is removed, remove this filter from other
+    //     // locations in which it's stored
+    //
+    //     $(this).parent('span').remove();
+    //     if($(selFilterPanel+' .panel-body .mol-filter').length <= 0) {
+    //         $(selFilterPanel+' .panel-body .mol-filter-container').hide();
+    //     }
+    //
+    //     createFormFilterSet.find('span[data-filter="'+filter+'"]').remove();
+    //
+    //     if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
+    //         $('#at-least-one-filter-alert-modal').show();
+    //         $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
+    //     }
+    //
+    //     // If this has emptied out a program's filter set, hide the modal's subsection for that program
+    //     // if a new value isn't replacing it
+    //     if(createFormFilterSet.find('span').length <= 0) {
+    //         createFormFilterSet.hide();
+    //     }
+    //
+    //     // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
+    //     var progCount = 0;
+    //     $('.selected-filters .panel-body').each(function(){
+    //         if($(this).find('span').length > 0) {
+    //             progCount++;
+    //         }
+    //     });
+    //     (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
+    //
+    //     update_displays(false,false,prog_id);
+    //     return false;
+    // });
 
 
     $('.tab-content, #selected-filters').on('click', 'a.delete-x', function(e,data) {
-        var activeDataTab = $(this).parents('span').data('progId')+'-data';
+        var activeDataTab = $(this).parents('span').data('prog-id')+'-data';
         var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
         var createFormFilterSet = $('p#'+activeDataTab+'-filters');
 
-        var checked_box = $('div[data-featureId="' + $(this).parent('span').data('featureId')
-            + '"] input[type="checkbox"][data-valueName="' + $(this).parent('span').data('valueName') + '"]');
+        var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id')
+            + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
 
-        if($(this).parent('span').data('featureType') == 'molecular') {
-            checked_box = $('div[data-featureId="' + $(this).parent('span').data('featureId').split(":")[3]
-                + '"] input[type="checkbox"][data-valueName="' + $(this).parent('span').data('valueName') + '"]');
+        if($(this).parent('span').data('feature-type') === 'molecular') {
+            checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id').split(":")[3]
+                + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
         }
         checked_box.prop('checked', false);
         var span_data = $(this).parent('span').data();
-        // console.log('p#'+activeDataTab+'-filters');
-        // console.log(createFormFilterSet);
-        createFormFilterSet.find('span[data-featureId="'+span_data['featureId']+'"][data-valueId="'+span_data['valueId']+'"]').remove();
-        $(selFilterPanel+' .panel-body span[data-featureId="'+span_data['featureId']+'"][data-valueId="'+span_data['valueId']+'"]').remove();
-        // console.log(selFilterPanel+' .panel-body span[featureId="'+span_data['featureId']+'"][valueId="'+span_data['valueId']+'"]');
-        // console.log($(selFilterPanel+' .panel-body span[featureId="'+span_data['featureId']+'"][valueId="'+span_data['valueId']+'"]'));
-        // console.log('span[featureId="'+span_data['featureId']+'"][valueId="'+span_data['valueId']+'"]');
-        // console.log(createFormFilterSet.find('span[featureId="'+span_data['featureId']+'"]'));
+
+
+        // Remove the filter tokens from their respective containers
+        createFormFilterSet.find('span[data-feature-id="'+span_data['featureId']+'"][data-value-id="'+span_data['valueId']+'"]').remove();
+        $(selFilterPanel+' .panel-body span[data-feature-id="'+span_data['featureId']+'"][data-value-id="'+span_data['valueId']+'"]').remove();
+
         if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
             $('#at-least-one-filter-alert-modal').show();
             $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
@@ -1126,9 +1122,9 @@ require([
         $('.selected-filters .panel-body span.filter-token').each(function() {
             var $this = $(this);
             var value = {
-                'feature': { name: $this.data('featureName'), id: $this.data('featureId') },
-                'value'  : { name: $this.data('valueName')  , id: $this.data('valueId')   },
-                'program': { name: $this.data('progName')   , id: $this.data('progId')    }
+                'feature': { name: $this.data('feature-name'), id: $this.data('feature-id') },
+                'value'  : { name: $this.data('value-name')  , id: $this.data('value-id')   },
+                'program': { name: $this.data('prog-name')   , id: $this.data('prog-id')    }
             };
             filters.push(value);
         });
@@ -1202,9 +1198,9 @@ require([
         var checkbox = null;
         if (featureId === "data_type") {
             // data type filters...
-            $("input[data-valueId ='"+valueId+"']").each(function()
+            $("input[data-value-id ='"+valueId+"']").each(function()
             {
-                if($(this).closest("[data-featureId=\"data_type\"]").length !== 0)
+                if($(this).closest("[data-feature-id=\"data_type\"]").length !== 0)
                 {
                     checkbox = $(this);
                     return;
@@ -1248,7 +1244,7 @@ require([
         {
             $('.mutation-category-selector').val('indv-selex');
             $('.spec-molecular-attrs ul').show();
-            $('.spec-molecular-attrs ul').find("[data-valueId='"+mut_type+"']").prop("checked", true);
+            $('.spec-molecular-attrs ul').find("[data-value-id='"+mut_type+"']").prop("checked", true);
         }
         else if (mut_cat === 'category')
         {
@@ -1271,7 +1267,7 @@ require([
             return;
         }
 
-        var active_program_id = $('ul.nav-tabs-data li.active a').data('programId');
+        var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id');
 
         if (load_program_id == null)
         {
