@@ -219,7 +219,8 @@ def add_attributes(attr_set):
                 name=attr['name'], display_name=attr['display_name'], data_type=attr['type'],
                 preformatted_values=True if 'preformatted_values' in attr else False,
                 is_cross_collex=True if 'cross_collex' in attr else False,
-                default_ui_display=attr['display']
+                default_ui_display=attr['display'],
+                units=attr.get('units',None)
             )
             if 'range' in attr:
                 if len(attr['range']) > 0:
@@ -485,10 +486,11 @@ def main():
                 line_split[1],
                 "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
                 line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                'units': line_split[-1],
                 'cross_collex': True,
                 'solr_collex': [],
                 'bq_tables': [],
-                'display': True if line_split[-1] == 'True' else False
+                'display': True if line_split[3] == 'True' else False
             }
 
             attr = all_attrs[line_split[0]]
@@ -516,16 +518,16 @@ def main():
 
             if line_split[0] not in all_attrs:
                 all_attrs[line_split[0]] = {
-                'name': line_split[0],
-                "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
-                line_split[1],
-                "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
-                line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
-                'cross_collex': True,
-                'solr_collex': [],
-                'bq_tables': [],
-                'display': True if line_split[-1] == 'True' else False
-            }
+                    'name': line_split[0],
+                    "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
+                    line_split[1],
+                    "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
+                    line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                    'cross_collex': True,
+                    'solr_collex': [],
+                    'bq_tables': [],
+                    'display': True if line_split[-1] == 'True' else False
+                }
 
             attr = all_attrs[line_split[0]]
 

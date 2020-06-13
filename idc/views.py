@@ -454,6 +454,7 @@ def explore_data_page(request):
                     values.append({
                         'value': val,
                         'display_value': displ_val,
+                        'units': this_attr.units,
                         'count': facet_set[attr][val] if val in facet_set[attr] else 0
                     })
                 attr_by_source[set_name]['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
@@ -480,7 +481,8 @@ def explore_data_page(request):
                     'name': x,
                     'id': attr_by_source[set]['attributes'][x]['obj'].id,
                     'display_name': attr_by_source[set]['attributes'][x]['obj'].display_name,
-                    'values': attr_by_source[set]['attributes'][x]['vals']
+                    'values': attr_by_source[set]['attributes'][x]['vals'],
+                    'units': attr_by_source[set]['attributes'][x]['obj'].units
                 } for x, val in sorted(attr_by_source[set]['attributes'].items())]
 
             if not counts_only:

@@ -212,7 +212,7 @@
                                         <li class="list-group-item">
                                             <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                 <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
-                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
+                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}
                                                 </a>
                                             </div>
                                             <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse">
@@ -312,8 +312,7 @@
 
                         <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
                             <li id = "results_orig" role="presentation" class="filter-tab active"><a href="#results_orig_set" role="tab" data-toggle="tab" title="orig" aria-expanded="true">Original</a></li>
-
-                             {% if set_attributes.derived_set is None %}
+                            {% if set_attributes.derived_set is None %}
                                  <li id = "results_derived" role="presentation" class="filter-tab disabled"><a href="#results_derived_set" role="tab" data-toggle="tab" title="derived" aria-expanded="false">Derived</a></li>
                             {% else %}
                                   <li id = "results_derived" role="presentation" class="filter-tab"><a href="#results_derived_set" role="tab" data-toggle="tab" title="derived" aria-expanded="false">Derived</a></li>
@@ -338,7 +337,7 @@
                                 </div>
                             </div>
                             <div id = "results_related_set" role="tabpanel" class="tab-pane panel">
-                                 <div class="panel-body bar-charts-div related-graphs">
+                                 <div class="panel-body bar-charts-div related-graphs graph-set">
                                     {% for attr in set_attributes.related_set.attributes %}
                                         <div id="{{ attr.name }}_chart" class="bar-chart"></div>
                                     {%  endfor %}
