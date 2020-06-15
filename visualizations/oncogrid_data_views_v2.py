@@ -74,21 +74,20 @@ def oncogrid_view_data(request):
         # get gene list
         gene_data_query, gene_bq_tables = create_oncogrid_bq_statement(GENE_TRACK_TYPE, genomic_build, project_set,
                                                                            cohort_ids, gene_list, None)
+
+
         gene_data_list, observation_data_list, obs_donors = get_gene_data_list(gene_data_query)
 
-        # get donor list
-        donor_data_query, donor_bq_tables = create_oncogrid_bq_statement(DONOR_TRACK_TYPE, genomic_build, project_set,
-                                                                         None, None, obs_donors)
-        donor_data_list, donor_track_count_max = get_donor_data_list(donor_data_query)
-
-        bq_tables = list(set(donor_bq_tables + gene_bq_tables))
-
-        if len(observation_data_list):
+        if len(observation_data_list) > 0:
+            # get donor list
+            donor_data_query, donor_bq_tables = create_oncogrid_bq_statement(DONOR_TRACK_TYPE, genomic_build, project_set,
+                                                                             None, None, obs_donors)
+            donor_data_list, donor_track_count_max = get_donor_data_list(donor_data_query)
+            bq_tables = list(set(donor_bq_tables + gene_bq_tables))
             return JsonResponse({
                 'donor_data_list': donor_data_list,
                 'gene_data_list': gene_data_list,
                 'observation_data_list': observation_data_list,
-                # 'obs_donors': obs_donors,
                 'bq_tables': bq_tables,
                 'donor_track_count_max': donor_track_count_max
             })

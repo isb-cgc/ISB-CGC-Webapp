@@ -19,23 +19,18 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security/script',
-        underscore: 'libs/underscore-min',
+        // jquery: 'libs/jquery-1.11.1.min',
+        // bootstrap: 'libs/bootstrap.min',
+        // jqueryui: 'libs/jquery-ui.min',
+        // session_security: 'session_security/script',
+        // underscore: 'libs/underscore-min',
         tokenfield: 'libs/bootstrap-tokenfield.min',
-        base: 'base',
+        // base: 'base',
         bq_export: 'export_to_bq',
         gcs_export: 'export_to_gcs'
     },
     shim: {
-        'bootstrap': ['jquery'],
-        'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
         'tokenfield': ['jquery', 'jqueryui'],
-        'underscore': {exports: '_'},
-        'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
     }
 });
 

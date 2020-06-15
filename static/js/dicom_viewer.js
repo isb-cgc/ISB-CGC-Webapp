@@ -16,14 +16,14 @@
  *
  */
 
-require.config({
-    baseUrl: STATIC_FILES_URL+'js/',
-    paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-    },
-    shim: {
-    }
-});
+// require.config({
+//     baseUrl: STATIC_FILES_URL+'js/',
+//     paths: {
+//         jquery: 'libs/jquery-1.11.1.min',
+//     },
+//     shim: {
+//     }
+// });
 
 require([
     'jquery',

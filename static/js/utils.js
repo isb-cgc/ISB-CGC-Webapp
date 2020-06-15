@@ -17,29 +17,29 @@
  */
 
 // Common utilities which are pulled into base.js (and used there)
-
-require.config({
-    baseUrl: STATIC_FILES_URL+'js/',
-    paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security/script',
-        underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
-        tablesorter:'libs/jquery.tablesorter.min'
-    },
-    shim: {
-        'bootstrap': ['jquery'],
-        'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
-        'tablesorter': ['jquery'],
-        'underscore': {exports: '_'}
-    }
-});
+//
+// require.config({
+//     baseUrl: STATIC_FILES_URL+'js/',
+//     paths: {
+//         jquery: 'libs/jquery-1.11.1.min',
+//         bootstrap: 'libs/bootstrap.min',
+//         jqueryui: 'libs/jquery-ui.min',
+//         session_security: 'session_security/script',
+//         underscore: 'libs/underscore-min',
+//         assetscore: 'libs/assets.core',
+//         assetsresponsive: 'libs/assets.responsive',
+//         tablesorter:'libs/jquery.tablesorter.min'
+//     },
+//     shim: {
+//         'bootstrap': ['jquery'],
+//         'jqueryui': ['jquery'],
+//         'session_security': ['jquery'],
+//         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
+//         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
+//         'tablesorter': ['jquery'],
+//         'underscore': {exports: '_'}
+//     }
+// });
 
 // Return an object for consts/methods used by most views
 define(['jquery'], function($) {

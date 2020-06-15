@@ -240,11 +240,12 @@ def main(config):
                         "type": attr_type,
                         'solr_collex': [],
                         'bq_tables': [],
-                        'display': (attr_type == Attribute.STRING or field['name'].lower() in ranges_needed)
+                        'display': (
+                            (attr_type == Attribute.STRING and not re.search('_id|_barcode',field['name'].lower())) or attr_type == Attribute.CATEGORICAL or field['name'].lower() in ranges_needed)
                     }
                 attr = attr_set[field['name']]
                 attr['bq_tables'].append(table['name'])
-                attr['solr_collex'].append(table['name'])
+                attr['solr_collex'].append(table_name[-1])
 
                 if attr['name'] in display_vals:
                     if 'preformatted_values' in display_vals[attr['name']]:
