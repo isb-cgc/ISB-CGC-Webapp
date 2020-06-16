@@ -28,6 +28,7 @@ from argparse import ArgumentParser
 import sys
 import time
 from copy import deepcopy
+from itertools import combinations, product
 
 from idc import secret_settings, settings
 
@@ -38,7 +39,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "idc.settings")
 import django
 django.setup()
 
-from idc_collections.models import Program, Collection, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataVersion
+from idc_collections.models import Program, Collection, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataSourceJoin, DataVersion
 
 from django.contrib.auth.models import User
 idc_superuser = User.objects.get(username="idc")
@@ -86,7 +87,7 @@ def add_solr_collex(solr_set, ver_name):
             obj, created = DataSource.objects.update_or_create(
                 name=collex,
                 version=DataVersion.objects.get(name=ver_name),
-                shared_id_col="case_barcode" if "tcga" in collex else "PatientID",
+                count_col="case_barcode" if "tcga" in collex else "PatientID",
                 source_type='S'
             )
 
@@ -109,7 +110,7 @@ def add_bq_tables(tables, ver_name):
         try:
             obj, created = DataSource.objects.update_or_create(
                 name=table, version=DataVersion.objects.get(name=ver_name),
-                shared_id_col="case_barcode" if "isb-cgc" in table else "PatientID",
+                count_col="case_barcode" if "isb-cgc" in table else "PatientID",
                 source_type='B'
             )
 
@@ -125,6 +126,32 @@ def add_bq_tables(tables, ver_name):
         except Exception as e:
             logger.error("[ERROR] BigQuery Table {} may not have been added!".format(table))
             logger.exception(e)
+
+
+def add_source_joins(froms, from_col, tos=None, to_col=None):
+    src_joins = []
+
+    if not tos and not to_col:
+        joins = combinations(froms, 2)
+        for join in joins:
+            src_joins.append(DataSourceJoin(
+                from_src=DataSource.objects.get(name=join[0]),
+                to_src=DataSource.objects.get(name=join[1]),
+                from_src_col=from_col,
+                to_src_col=from_col)
+            )
+    else:
+        joins = product(froms,tos)
+        for join in joins:
+            src_joins.append(DataSourceJoin(
+                from_src=DataSource.objects.get(name=join[0]),
+                to_src=DataSource.objects.get(name=join[1]),
+                from_src_col=from_col,
+                to_src_col=to_col)
+            )
+
+    if len(src_joins):
+        DataSourceJoin.objects.bulk_create(src_joins)
 
 
 def add_collections(collection_set):
@@ -192,7 +219,8 @@ def add_attributes(attr_set):
                 name=attr['name'], display_name=attr['display_name'], data_type=attr['type'],
                 preformatted_values=True if 'preformatted_values' in attr else False,
                 is_cross_collex=True if 'cross_collex' in attr else False,
-                default_ui_display=attr['display']
+                default_ui_display=attr['display'],
+                units=attr.get('units',None)
             )
             if 'range' in attr:
                 if len(attr['range']) > 0:
@@ -200,7 +228,6 @@ def add_attributes(attr_set):
                         Attribute_Ranges.objects.update_or_create(
                             **attr_range, attribute=obj
                         )
-
                 else:
                     Attribute_Ranges.objects.update_or_create(
                         attribute=obj
@@ -238,19 +265,38 @@ def main():
             {"name": "TCIA Image Data", "ver": "0", "type": "I"},
             {"name": "TCIA Segmentation Analysis", "ver": "0", "type": "D"},
             {"name": "TCIA Qualitative Analysis", "ver": "0", "type": "D"},
-            #{"name": "TCIA Quantitative Analysis", "ver": "0", "type": "D"},
+            {"name": "TCIA Quantitative Analysis", "ver": "0", "type": "D"},
         ])
 
         add_solr_collex(['tcia_images'], "TCIA Image Data")
         add_solr_collex(['segmentations'], "TCIA Segmentation Analysis")
         add_solr_collex(['qualitative_measurements'], "TCIA Qualitative Analysis")
-        #add_solr_collex(['quantitative_measurements'], "TCIA Quantitative Analysis")
+        add_solr_collex(['quantitative_measurements'], "TCIA Quantitative Analysis")
         add_solr_collex(['tcga_clin', 'tcga_bios'], "GDC Data Release 9")
+
+        add_bq_tables(["idc-dev.metadata.dicom_mvp"], "TCIA Image Data")
         add_bq_tables(['isb-cgc.TCGA_bioclin_v0.Biospecimen', 'isb-cgc.TCGA_bioclin_v0.Clinical'], "GDC Data Release 9")
-        add_bq_tables(["idc-dev-etl.tcia.dicom_metadata"], "TCIA Image Data")
-        add_bq_tables(["idc-dev-etl.etl_metadata.segmentations_solr_export"], "TCIA Segmentation Analysis")
+        add_bq_tables(["idc-dev.metadata.segmentations"], "TCIA Segmentation Analysis")
         add_bq_tables(["idc-dev.metadata.qualitative_measurements"], "TCIA Qualitative Analysis")
-        #add_bq_tables(["idc-dev.metadata.quantitative_measurements"], "TCIA Quantitative Analysis")
+        add_bq_tables(["idc-dev.metadata.quantitative_measurements"], "TCIA Quantitative Analysis")
+
+        add_source_joins(["tcia_images", "segmentations", "qualitative_measurements", "quantitative_measurements"], "SOPInstanceUID")
+        add_source_joins(["tcga_clin", "tcga_bios"], "case_barcode")
+        add_source_joins(
+            ["tcia_images", "segmentations", "qualitative_measurements", "quantitative_measurements"],
+            "PatientID",
+            ["tcga_clin", "tcga_bios"], "case_barcode"
+        )
+
+        add_source_joins(["idc-dev.metadata.dicom_mvp", "idc-dev.metadata.segmentations", "idc-dev.metadata.qualitative_measurements", "idc-dev.metadata.quantitative_measurements"], "SOPInstanceUID")
+        add_source_joins(["isb-cgc.TCGA_bioclin_v0.Clinical", "isb-cgc.TCGA_bioclin_v0.Biospecimen"], "case_barcode")
+        add_source_joins(
+            ["idc-dev.metadata.dicom_mvp", "idc-dev.metadata.segmentations", "idc-dev.metadata.qualitative_measurements", "idc-dev.metadata.quantitative_measurements"],
+            "PatientID",
+            ["isb-cgc.TCGA_bioclin_v0.Clinical", "isb-cgc.TCGA_bioclin_v0.Biospecimen"], "case_barcode"
+        )
+
+        all_attrs = {}
 
         collection_file = open("tcia_collex.csv", "r")
         line_reader = collection_file.readlines()
@@ -313,7 +359,8 @@ def main():
             line = line.strip()
             line_split = line.split(",")
 
-            attr = {
+            if line_split[0] not in all_attrs:
+                all_attrs[line_split[0]] = {
                 'name': line_split[0],
                 "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
                 line_split[1],
@@ -324,6 +371,8 @@ def main():
                 'bq_tables': [],
                 'display': True if line_split[-1] == 'True' else False
             }
+
+            attr = all_attrs[line_split[0]]
 
             if attr['name'] in clin_table_attr:
                 attr['solr_collex'].append('tcga_clin')
@@ -339,9 +388,6 @@ def main():
                 else:
                     attr['display_vals'] = display_vals[attr['name']]['vals']
 
-            if attr['name'] == "age_at_diagnosis":
-                attr['range'] = []
-
             if attr['name'] == 'bmi':
                 attr['range'] = [
                     {'label': 'underweight', 'first': "*", "last": "18.5", "gap": "0", "include_lower": True, "include_upper": False, 'type': 'F'},
@@ -352,6 +398,8 @@ def main():
                     {'label': 'overweight', 'first': "25", "last": "30", "gap": "0", "include_lower": True,
                      "include_upper": False, 'type': 'F'}
                 ]
+            elif attr['type'] == Attribute.CONTINUOUS_NUMERIC:
+                attr['range'] = []
 
             attr_set.append(attr)
 
@@ -364,15 +412,21 @@ def main():
             line = line.strip()
             line_split = line.split(",")
 
-            attr = {
-                'name': line_split[0],
-                "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else line_split[1],
-                "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
-                'cross_collex': True,
-                'solr_collex': ['tcia_images'],
-                'bq_tables': ["idc-dev-etl.tcia.dicom_metadata"],
-                'display': True if line_split[-1] == 'True' else False
-            }
+            if line_split[0] not in all_attrs:
+                all_attrs[line_split[0]] = {
+                    'name': line_split[0],
+                    "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else line_split[1],
+                    "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                    'cross_collex': True,
+                    'solr_collex': [],
+                    'bq_tables': [],
+                    'display': True if line_split[-1] == 'True' else False
+                }
+
+            attr = all_attrs[line_split[0]]
+
+            attr['solr_collex'].append('tcia_images')
+            attr['bq_tables'].append('idc-dev.metadata.dicom_mvp')
 
             if attr['name'] in display_vals:
                 if 'preformatted_values' in display_vals[attr['name']]:
@@ -391,15 +445,61 @@ def main():
             line = line.strip()
             line_split = line.split(",")
 
-            attr = {
+            if line_split[0] not in all_attrs:
+                all_attrs[line_split[0]] = {
+                    'name': line_split[0],
+                    "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else line_split[1],
+                    "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                    'cross_collex': True,
+                    'solr_collex': [],
+                    'bq_tables': [],
+                    'display': True if line_split[-1] == 'True' else False
+                }
+
+            attr = all_attrs[line_split[0]]
+
+            if attr['type'] == Attribute.CONTINUOUS_NUMERIC:
+                attr['range'] = []
+
+            attr['solr_collex'].append('segmentations')
+            attr['bq_tables'].append('idc-dev.metadata.segmentations')
+
+            if attr['name'] in display_vals:
+                if 'preformatted_values' in display_vals[attr['name']]:
+                    attr['preformatted_values'] = True
+                else:
+                    attr['display_vals'] = display_vals[attr['name']]['vals']
+
+            attr_set.append(attr)
+
+        attr_file = open("quants_attr.csv", "r")
+        line_reader = attr_file.readlines()
+
+        for line in line_reader:
+            line = line.strip()
+            line_split = line.split(",")
+
+            if line_split[0] not in all_attrs:
+                all_attrs[line_split[0]] = {
                 'name': line_split[0],
-                "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else line_split[1],
-                "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
+                line_split[1],
+                "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
+                line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                'units': line_split[-1],
                 'cross_collex': True,
-                'solr_collex': ['segmentations'],
-                'bq_tables': ["idc-dev-etl.etl_metadata.segmentations_solr_export"],
-                'display': True if line_split[-1] == 'True' else False
+                'solr_collex': [],
+                'bq_tables': [],
+                'display': True if line_split[3] == 'True' else False
             }
+
+            attr = all_attrs[line_split[0]]
+
+            if attr['type'] == Attribute.CONTINUOUS_NUMERIC:
+                attr['range'] = []
+
+            attr['solr_collex'].append('quantitative_measurements')
+            attr['bq_tables'].append('idc-dev.metadata.quantitative_measurements')
 
             if attr['name'] in display_vals:
                 if 'preformatted_values' in display_vals[attr['name']]:
@@ -416,17 +516,26 @@ def main():
             line = line.strip()
             line_split = line.split(",")
 
-            attr = {
-                'name': line_split[0],
-                "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
-                line_split[1],
-                "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
-                line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
-                'cross_collex': True,
-                'solr_collex': ['qualitative_measurements'],
-                'bq_tables': ["idc-dev.metadata.qualitative_measurements"],
-                'display': True if line_split[-1] == 'True' else False
-            }
+            if line_split[0] not in all_attrs:
+                all_attrs[line_split[0]] = {
+                    'name': line_split[0],
+                    "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
+                    line_split[1],
+                    "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
+                    line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                    'cross_collex': True,
+                    'solr_collex': [],
+                    'bq_tables': [],
+                    'display': True if line_split[-1] == 'True' else False
+                }
+
+            attr = all_attrs[line_split[0]]
+
+            if attr['type'] == Attribute.CONTINUOUS_NUMERIC:
+                attr['range'] = []
+
+            attr['solr_collex'].append('qualitative_measurements')
+            attr['bq_tables'].append('idc-dev.metadata.qualitative_measurements')
 
             if attr['name'] in display_vals:
                 if 'preformatted_values' in display_vals[attr['name']]:

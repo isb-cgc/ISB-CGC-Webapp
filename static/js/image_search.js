@@ -66,9 +66,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 bordercolor: '#FFFFFF',
                 borderwidth: 2
             }
-
         };
-
 
         window.setSlider = function (divName, reset, strt, end, isInt) {
             slideDiv = divName + "_slide";
@@ -100,16 +98,13 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 }
                 window.filterObj[filtAtt] = attVal
             }
-
             mkFiltText();
             updateFacetsData(true);
-
-        }
+        };
 
 // Show more/less links on categories with >6 fiilters
 
         var mkFiltText = function () {
-
             var curKeys = Object.keys(filterObj).sort();
             oStringA = new Array();
              var collection = new Array();
@@ -127,9 +122,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                          }
                      }
                 }
-
                 else if (curKey === 'age_at_diagnosis_btw') {
-                    var nstr = '<span class="filter-type">AGE</span> IN (<span class="filter-att">' + filterObj[curKey][0].toString() + '-' + (filterObj[curKey][1] + 1).toString() + ')</span>';
+                    var nstr = '<span class="filter-type">AGE</span> IN (<span class="filter-att">' + filterObj[curKey][0].toString() + '-' + (filterObj[curKey][1] + 1).toString() + '</span>)';
                      oStringA.push(nstr);
                 } else {
                     var disp = curKey;
@@ -139,9 +133,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     nstr = '<span class="filter-type">' + disp + '</span>';
                     nstr += 'IN (' + oArray.join("") + ')';
                     oStringA.push(nstr);
-
                 }
-
             }
 
             if (collection.length>0){
@@ -159,19 +151,19 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             }
 
             //alert(oString);
-        }
+        };
 
-        window.showMoreGraphs = function () {
-            $('.more-graphs').hide();
-            $('.less-graphs').show();
-            $('.related-graphs').animate({height: '800px'}, 800);
-        }
+        window.showMoreGraphs = function (graphClass, height) {
+            $('.'+graphClass).parent().find('.more-graphs').hide();
+            $('.'+graphClass).parent().find('.less-graphs').show();
+            $('.'+graphClass).animate({height: height}, 800);
+        };
 
-        window.showLessGraphs = function () {
-            $('.less-graphs').hide();
-            $('.more-graphs').show();
-            $('.related-graphs').animate({height: '200px'}, 800);
-        }
+        window.showLessGraphs = function (graphClass, height) {
+            $('.'+graphClass).parent().find('.less-graphs').hide();
+            $('.'+graphClass).parent().find('.more-graphs').show();
+            $('.'+graphClass).animate({height: height}, 800);
+        };
 
         var mkSlider = function (divName, min, max, step, isInt) {
 
@@ -856,7 +848,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             mkFiltText();
             fetchCountData(false);
 
-        }
+        };
 
         window.selectHistoricFilter = function (num) {
             //alert('previous');
@@ -868,8 +860,9 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 window.filterObj['collection_id'] = window.tcgaColls;
             } */
             var filterCatsArr = new Array();
-            filterCatsArr.push(findFilterCats('search_orig_set'));
-            filterCatsArr.push(findFilterCats('search_related_set'));
+            filterCatsArr.push(findFilterCats('search_orig_set',false));
+            filterCatsArr.push(findFilterCats('search_derived_set',false));
+            filterCatsArr.push(findFilterCats('search_related_set',false));
             for (var i = 0; i < filterCatsArr.length; i++) {
                 filterCats = filterCatsArr[i];
                 for (var j = 0; j < filterCats.length; j++) {
@@ -912,7 +905,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     }
                 }
             }
-        }
+        };
 
         var parseFilterObj = function (){
             collObj=new Array();
@@ -947,7 +940,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 filtObj['collection_id']= collObj.sort();
             }
             return filtObj;
-        }
+        };
+
         var updateFacetsData = function (newFilt) {
             changeAjax(true);
 
@@ -969,28 +963,32 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     //updateCollectionTotals(data.total, data.origin_set.attributes.collection_id);
                     updateCollectionTotals('Program_list', data.programs);
 
-                    updateFilterSelections('search_orig_set', data.origin_set.attributes);
+                    updateFilterSelections('search_orig_set', data.origin_set.All.attributes);
                     createPlots('search_orig_set');
 
                     if (data.hasOwnProperty('derived_set')) {
                         $('#search_derived_set').removeClass('disabled');
-                        updateFilterSelections('search_derived_set', data.derived_set.attributes);
-                       // createPlots('search_derived_set');
-                          createPlots('segmentation');
+                        for (facetSet in data.derived_set) {
+                            if ('attributes' in data.derived_set[facetSet]) {
+                                updateFilterSelections(data.derived_set[facetSet].name, data.derived_set[facetSet].attributes);
+                            }
+                        }
+                       createPlots('search_derived_set');
+                          //createPlots('segmentation');
                     }
 
                     if (data.hasOwnProperty('related_set')) {
                         $('#search_related_set').removeClass('disabled');
-                        updateFilterSelections('search_related_set', data.related_set.attributes);
-                        createPlots('tcga_clinical');
-                       // createPlots('search_related_set');
+                        updateFilterSelections('search_related_set', data.related_set.All.attributes);
+                        //createPlots('tcga_clinical');
+                       createPlots('search_related_set');
                     }
                     var collFilt = new Array();
                     if ('collection_id' in parsedFiltObj){
                         collFilt=parsedFiltObj['collection_id'];
                     }
 
-                    editProjectsTableAfterFilter('projects_table', collFilt,data.origin_set.attributes.collection_id);
+                    editProjectsTableAfterFilter('projects_table', collFilt,data.origin_set.All.attributes.collection_id);
                     resetSeriesAndStudiesTables('series_table', 'studies_table');
                     var studyArr = new Array();
                     for (projId in window.selItems.selStudies) {
@@ -1002,7 +1000,6 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     if (studyArr.length > 0) {
                         addStudyOrSeries(window.selItems.selProjects, studyArr, "series_table", true);
                     }
-
 
                     if (newFilt) {
                         histObj = new Object();
@@ -1027,21 +1024,14 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     } else {
                         $('#previous').hide();
                     }
-
-
                     changeAjax(false);
-
                 },
                 error: function () {
                     changeAjax(false);
                     console.log("problem getting data");
-
                 }
-
             });
-        }
-
-
+        };
 
         var plotCategoricalData = function (plotId, lbl, plotData, isPie, showLbl) {
             var layout = new Object();
@@ -1095,8 +1085,6 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
             layout.title = lbl.toUpperCase().replace(/_/g, " ");
             delete layout.annotations;
-
-
             if (plotCats === 0) {
                 data[0].values = [0];
                 data[0].labels = [''];
@@ -1164,21 +1152,21 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     //handleFilterSelectionUpdate(filterId);
                 }
             });
-
         };
 
-
-        var findFilterCats = function (id) {
+        var findFilterCats = function (id, wCheckBox) {
             filterCats = new Array();
             listElems = $('#' + id).find('.list-group-item__body');
+            if (wCheckBox){
+                listElems = listElems.children('.search-checkbox-list').parent()
+            }
             for (i = 0; i < listElems.length; i++) {
                 elem = listElems.get(i);
                 nm = elem.id;
                 filterCats.push(nm);
             }
             return filterCats
-        }
-
+        };
 
         var parseFilterForCounts = function (id) {
             var dataLabel = new Array();
@@ -1216,7 +1204,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             var showLbl = document.getElementById("plot_label").checked
 
 
-            var filterCats = findFilterCats(id);
+            var filterCats = findFilterCats(id,true);
             for (var i = 0; i < filterCats.length; i++) {
                 filterCat = filterCats[i];
                 filterData = parseFilterForCounts(filterCat);
@@ -1284,7 +1272,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
 
         var updateFilterSelections = function (id, dicofdic) {
-            filterCats = findFilterCats(id);
+            filterCats = findFilterCats(id,false);
             for (i = 0; i < filterCats.length; i++) {
                 cat = filterCats[i]
                 if (dicofdic.hasOwnProperty(cat)) {
@@ -1533,7 +1521,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
         }
 
      var addFilterBindings = function(id){
-         var filterCats = findFilterCats(id);
+         var filterCats = findFilterCats(id,false);
          for (var i=0;i<filterCats.length;i++){
              filterItemBindings(filterCats[i]);
         }
@@ -1557,7 +1545,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             window.filtHistory = new Array();
             window.filtHistory.push(histObj);
             createPlots('search_orig_set');
-            createPlots('segmentation');
+            createPlots('search_derived_set');
            createPlots('tcga_clinical');
            /* addFilterBindings('search_orig_set');
             addFilterBindings('search_related_set');*/
