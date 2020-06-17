@@ -44,11 +44,10 @@ var TRANSLATION_DICT = {
     '1':                        'Mutant'
 };
 
-define(['jquery', 'tree_graph', 'stack_bar_chart', 'draw_parsets'],
-function($, tree_graph, stack_bar_chart, draw_parsets) {
+define(['jquery', 'tree_graph', 'stack_bar_chart'],
+function($, tree_graph, stack_bar_chart) {
     
     var tree_graph_obj = Object.create(tree_graph, {});
-    var parsets_obj = Object.create(draw_parsets, {});
 
     var PROG_CLIN_TREES = {
         'TCGA': {
@@ -192,10 +191,6 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                         }
                         metadata_counts['data_avail'][i] = new_item;
                     }
-
-                    if(cohort_id) {
-                        parsets_obj.draw_parsets(metadata_counts, plot_features, program_id);
-                    }
                 } else {
                     console.debug(metadata_counts);
                 }
@@ -228,7 +223,6 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                         var stopReq = new Date().getTime();
                         console.debug("[BENCHMARKING] Time for response in update_counts_parsets: "+(stopReq-startReq)+ "ms");
                         case_counts = results['count'];
-                        data_counts = results['data_counts'];
 
 
                         $('#p-'+program_id+'-data-total-samples').html(format_num_with_commas(metadata_counts['total']));
@@ -239,7 +233,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                             $('#c-'+cohort_id+'-data-total-participants').html(format_num_with_commas(metadata_counts['cohort-cases']));
                         }
 
-                        context.update_filter_counts(case_counts, data_counts, program_id);
+                        context.update_filter_counts(case_counts, null, program_id);
 
                         var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(case_counts, clin_tree_attr) : case_counts;
                         clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
@@ -268,10 +262,6 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                                     new_item[plot_features[j]] = context.get_readable_name(item[features[j]]);
                                 }
                                 metadata_counts['data_avail'][i] = new_item;
-                            }
-
-                            if(cohort_id) {
-                                parsets_obj.draw_parsets(results, plot_features, program_id);
                             }
                         } else {
                             console.debug(results);
@@ -350,21 +340,6 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     values[val.value] = val.count;
                 });
             });
-
-            // User data (program_id === 0) doesn't have data type information at this time
-            if(program_id > 0) {
-                data_counts.map(function(obj){
-                    counts_by_name[obj.name] = {
-                        values: {},
-                        total: obj.total
-                    };
-                    var values = counts_by_name[obj.name].values;
-                    obj.values.map(function(val){
-                        values[val.value] = val.count;
-                    });
-                });
-            }
-
 
             $('#'+program_id+'-data-filter-panel li.list-group-item div.cohort-feature-select-block').each(function() {
                 var $this = $(this),

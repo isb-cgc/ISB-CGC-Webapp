@@ -271,17 +271,6 @@
             <div class="more-graphs"><button class="btn btn-link" role="button">Show More</button></div>
             <div class="less-graphs" style="display: none;"><button class="btn btn-link" role="button">Show Less</button></div>
         </div>
-        {% if cohort.id %}
-        <div class="parallel-sets panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">Data File Availability</h4>
-            </div>
-            <div class="panel-body">
-                <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                <div class="multi-categorical" id="multi-categorical-{{ program.id }}"></div>
-            </div>
-        </div>
-        {% endif %}
     </div>
 </div>
 <script type="text/javascript">
