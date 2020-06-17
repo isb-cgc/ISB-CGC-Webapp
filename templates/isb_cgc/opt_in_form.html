@@ -52,9 +52,6 @@
 
                         <p>You can learn more about ISB-CGC at <a href="/" target="_blank">isb-cgc.org</a>.</p>
                         <br>
-                        <div class="text-right">
-                            <small class="text-danger">* Required</small>
-                        </div>
 
                         <form id="opt-in-form" method="POST" action="{% url 'opt_in_form_submitted' %}">
                             {% csrf_token %}
@@ -76,18 +73,18 @@
                                 <input type="email" class="form-control" name="email" id="email" required value="{{ email }}" readonly>
                             </div>
                             {% endif %}
-                            <div class="form-group required">
-                                <label for="affiliation" >Affiliation</label>
-                                <input type="text" class="form-control" name="affiliation" id="affiliation" required>
-                            </div>
                             <div class="form-group">
                                 <label for="subscribed">
-                                    Is it OK to contact me with occasional communication about ISB-CGC updates?
+                                    Would you like to subscribe to ISB-CGC?
                                 </label>
                                 <select id="subscribed" name="subscribed" class="form-control">
                                     <option value="opt-in" {% if opt_in_status == 'opt-in'%} selected {% endif %}>Yes</option>
                                     <option value="opt-out" {% if opt_in_status == 'opt-out'%} selected {% endif %}>No</option>
                                 </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="affiliation" >Affiliation</label>
+                                <input type="text" class="form-control" name="affiliation" id="affiliation">
                             </div>
                             <div class="form-group">
                                 <label for="feedback">
