@@ -201,8 +201,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
                 }
             });
-        }
-
+        };
 
         var editProjectsTableAfterFilter = function (tableId, collFilt, collectionsData) {
             //var selectedElem = document.getElementById(scopeId).selectedOptions[0];
@@ -235,11 +234,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
                 }
             }
-
-
-
             window.resetTableControls($('#projects_table'), true, 0);
-        }
+        };
 
         window.createProjectsTable = function (tableId) {
             tableElem = document.getElementById(tableId);
@@ -266,7 +262,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
             }
             tableElem.innerHTML = newInnerHTML;
-        }
+        };
 
         var resetSeriesAndStudiesTables = function (studyId, seriesId) {
 
@@ -326,15 +322,11 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                         }
                     }
                 }
-
-
             } else {
-
                 if (!(window.event.shiftKey)) {
                     $(studyRow).parent().find('tr').removeClass("selected_grey");
                     window.selItems.selStudies = {};
                     window.clearAllSeries("series_table");
-
                 }
 
                 if (!(window.selItems.selStudies.hasOwnProperty(projectId))) {
@@ -345,19 +337,18 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 $(studyRow).addClass("selected_grey");
                 addStudyOrSeries([projectId], [studyId], "series_table", false);
             }
-        }
+        };
 
         window.clearAllSeries = function (seriesTableId) {
             $('#' + seriesTableId).find('tr').remove();
             resetTableControls($('#' + seriesTableId), true, 0);
-
-        }
+        };
 
         window.clearAllStudiesAndSeries = function (studyTableId, seriesTableId) {
             $('#' + studyTableId).find('tr').remove();
             resetTableControls($('#' + studyTableId), true, 0);
             window.clearAllSeries(seriesTableId);
-        }
+        };
 
         window.removeStudiesAndSeries = function (projectId, studyTableId, seriesTableId) {
             var pclass = "project_" + projectId;
@@ -458,7 +449,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                         var patientId = curData.PatientID;
                         var studyId = curData.StudyInstanceUID;
                         var ppStudyId = pretty_print_id(studyId);
-                        var fetchUrl = '/projects/chc-tcia/locations/us-central1/datasets/' + projectId.replace('_', '-') + '/dicomStores/' + projectId.replace('_', '-') + '/study/' + studyId;
+                        var fetchUrl = 'projects/idc-dev-etl/locations/us/datasets/pre-mvp-temp/dicomStores/cross-collection-temp/study/' + studyId;
                         var hrefTxt = '<a href="' + fetchUrl + '" target="_blank">' + ppStudyId + '</a><span class="tooltiptext_ex">' + studyId + '</span>';
                         //var hrefTxt =  ppStudyId + '<span class="tooltiptext_ex">' + studyId + '</span>';
                         var pclass = 'project_' + projectId;
@@ -513,17 +504,13 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                         window.selItems.selStudies = newSelStudies;
                     }
                     changeAjax(false);
-
                 },
                 error: function () {
                     changeAjax(false);
                     console.log("problem getting data");
                 }
-
             });
-
-
-        }
+        };
 
         window.addSeries = function (studyId, studyClass, seriesTableId) {
             var sIndex = studyIndex[studyId]
@@ -541,16 +528,14 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 var seriesNumber = curSeries.SeriesNumber;
                 var rowId = 'series_' + projectId + '_' + patientIndex[patientId].toString() + "_" + studyIndex[studyId].toString() + '_' + seriesNumber.toString();
                 var pclass = 'project_' + projectId;
-                var fetchUrl = '/projects/chc-tcia/locations/us-central1/datasets/' + projectId.toLowerCase() + '/dicomStores/' + projectId.toLowerCase() + '/study/' + studyId;
+                var fetchUrl = 'projects/idc-dev-etl/locations/us/datasets/pre-mvp-temp/dicomStores/cross-collection-temp/study/' + studyId;
                 var hrefTxt = '<a href="' + fetchUrl + '">' + studyId + '</a>';
 
                 //var sclass='study_'+projectId+'_'+patientIndex[patientId].toString()+"_"+studyIndex[studyId].toString();
                 var newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td>' + hrefTxt + '</td><td>' + seriesId + '</td><td>' + seriesNumber + '</td><td>' + modality + '</td><td>' + bodypart + '</td></tr>'
                 $('#' + seriesTableId + ' tr:last').after(newHtml);
             });
-
-
-        }
+        };
 
         var findScrollInd = function (tableId) {
             var scrollPos = document.getElementById(tableId).scrollTop;
