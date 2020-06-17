@@ -114,48 +114,19 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" id = "close-opt-in-btn">
-                        <span aria-hidden="true">x</span></button>
+{#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" id = "close-opt-in-btn">#}
+{#                        <span aria-hidden="true">x</span></button>#}
                     <h4 class="modal-title" id="opt-in-modal-header">Join Our Community</h4>
                 </div>
                 <div class="modal-body">
                     <p  align="justify" class="modal-title" id="opt-in-modal-header">
-                        ISB-CGC is funded by the National Cancer Institute (NCI) to provide cloud-based tools and data
-                        to the cancer research community. Your feedback is important to the NCI and us.
-                        Please help us help you by considering "Opting-In" to our user feedback mailing list and
-                        allowing us to contact you in the future regarding ISB-CGC!</p>
-
-                    <div style="margin-top: 20px;"><label> Would you like to opt-in to our user feedback mailing list? </label>
-                    </div>
-                    <div style="margin-left: 20px;">
-                        <div>
-                            <input id="opt-in-now-radio" type="radio" name="opt-in-radio"
-                                   value="opt-in-now" checked>
-                            <label for="opt-in-now-radio">Yes, take me to the opt-in form
-                                now</label>
-                        </div>
-                        <div>
-                            <input id="opt-in-email-radio" type="radio" name="opt-in-radio"
-                                   value="opt-in-email">
-                            <label for="opt-in-email-radio">Yes, email me a link to the opt-in
-                                form</label>
-                        </div>
-                        <div>
-                            <label style="margin-left: 15px; color:#5e5e5e;" class="collapse" id="will-email-message">
-                                <i>A link to the opt-in form will be sent to your account email.</i>
-                            </label>
-                        </div>
-                        <div>
-                            <input id="opt-out-radio" type="radio" name="opt-in-radio"
-                                   value="opt-out">
-                            <label for="opt-out-radio">No, I don't want to be contacted
-                                for feedback</label>
-                        </div>
-                    </div>
+                        Let us keep you updated with our cloud-resources! <br>
+                        Would you like to subscribe to our mailing list? </p>
                 </div>
                 <div class="modal-footer">
-                    <input type="submit" value="Submit" data-dismiss="modal" class="btn btn-primary" id="submit-opt-in-btn"/>
-                    <button type="button" class="btn btn-link btn-cancel" data-dismiss="modal" id="cancel-opt-in-btn">Cancel</button>
+                    <input type="submit" value="Yes" data-dismiss="modal" class="btn btn-primary" id="opt-in-yes-btn"/>
+                    <input type="submit" value="No" data-dismiss="modal" class="btn btn-secondary" id="opt-in-no-btn"/>
+                    <button type="button" class="btn btn-link pull-right" data-dismiss="modal" id="opt-in-ask-later-btn">Ask me later</button>
                 </div>
             </div>
         </div>

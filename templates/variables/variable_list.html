@@ -43,7 +43,7 @@
                             <tr class="page-item">
                                 <td class="control-col">
                                     <div class="dropdown">
-                                        <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                        <a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
                                         <ul class="dropdown-menu">
                                             <li>{% if favorite.version == 'v2' %}<a href="{% url 'variable_fav_edit' favorite.id %}">Edit</a>
                                                 {% else %}<span title="Version 1 Variable lists cannot be edited due to changes in variable names." class="disabled" disabled>Edit</span>{% endif %}</li>
