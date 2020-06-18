@@ -986,6 +986,20 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     var collFilt = new Array();
                     if ('collection_id' in parsedFiltObj){
                         collFilt=parsedFiltObj['collection_id'];
+                        var ind=0;
+                        while (ind <window.selItems.selProjects.length)
+                        {
+                            proj=window.selItems.selProjects[ind]
+                            if (  (collFilt.indexOf(proj)>-1)){
+                                ind++
+                            }
+                            else{
+                                window.selItems.selProjects.splice(ind,1);
+                                if (proj in window.selItems.selStudies){
+                                    delete window.selItems.selStudies[proj];
+                                }
+                            }
+                        }
                     }
 
                     editProjectsTableAfterFilter('projects_table', collFilt,data.origin_set.All.attributes.collection_id);
@@ -1573,6 +1587,13 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             window.resetTableControls ($('#projects_table'), false, 0);
             window.resetTableControls ($('#studies_table'), false, 0);
             window.resetTableControls ($('#series_table'), false, 0);
+
+             $('.clear-filters').on('click', function () {
+                   $('input:checkbox').removeAttr('checked');
+                   window.filterObj = new Object();
+                   mkFiltText();
+                   updateFacetsData(true);
+             });
 
             //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
 
