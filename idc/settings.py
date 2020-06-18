@@ -595,3 +595,5 @@ if DEBUG and DEBUG_TOOLBAR:
 
 APPEND_SLASH = False
 # default is to add trailing '/' to urls ie /callback becomes /callback/. Ohif does not like /callback/ !
+
+DICOM_STORE_PATH=os.environ.get('DICOM_STORE_PATH','')
