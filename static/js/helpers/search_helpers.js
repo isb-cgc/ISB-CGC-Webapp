@@ -166,35 +166,6 @@ function($, tree_graph, stack_bar_chart) {
                 var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
                 clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
 
-                if (metadata_counts.hasOwnProperty('data_avail')) {
-                    var features = [
-                        'cnvrPlatform',
-                        'DNAseq_data',
-                        'methPlatform',
-                        'gexpPlatform',
-                        'mirnPlatform',
-                        'rppaPlatform'
-                    ];
-                    var plot_features = [
-                        context.get_readable_name(features[0]),
-                        context.get_readable_name(features[1]),
-                        context.get_readable_name(features[2]),
-                        context.get_readable_name(features[3]),
-                        context.get_readable_name(features[4]),
-                        context.get_readable_name(features[5])
-                    ];
-                    for (var i = 0; i < metadata_counts['data_avail'].length; i++) {
-                        var new_item = {};
-                        for (var j = 0; j < features.length; j++) {
-                            var item = metadata_counts['data_avail'][i];
-                            new_item[plot_features[j]] = context.get_readable_name(item[features[j]]);
-                        }
-                        metadata_counts['data_avail'][i] = new_item;
-                    }
-                } else {
-                    console.debug(metadata_counts);
-                }
-
                 $('.clinical-trees .spinner').hide();
                 $('.user-data-trees .spinner').hide();
                 $('.parallel-sets .spinner').hide();
@@ -222,10 +193,10 @@ function($, tree_graph, stack_bar_chart) {
                         metadata_counts = results;
                         var stopReq = new Date().getTime();
                         console.debug("[BENCHMARKING] Time for response in update_counts_parsets: "+(stopReq-startReq)+ "ms");
-                        case_counts = results['count'];
+                        case_counts = results['counts'];
 
 
-                        $('#p-'+program_id+'-data-total-samples').html(format_num_with_commas(metadata_counts['total']));
+                        $('#p-'+program_id+'-data-total-samples').html(format_num_with_commas(metadata_counts['samples']));
                         $('#p-'+program_id+'-data-total-participants').html(format_num_with_commas(metadata_counts['cases']));
 
                         if(cohort_id){

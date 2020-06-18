@@ -365,6 +365,7 @@ def list_contains_name(list, value):
             return True
     return False
 
+
 @register.filter
 def dict_contains_key(dict, key):
     return key in dict
