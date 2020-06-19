@@ -439,31 +439,59 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
     else:
         try:
             bq_service = get_bigquery_service()
-            response = bq_service.tabledata().list(projectId=proj_id, datasetId=dataset_id, tableId=table_id,
-                                                   maxResults=MAX_ROW).execute()
-            if response and int(response['totalRows']) > 0:
-                result = {
-                    'rows': response['rows']
-                }
+            dataset = bq_service.datasets().get(projectId=proj_id, datasetId=dataset_id).execute()
+            is_public = False
+            for access_entry in dataset['access']:
+                # print(access_entry)
+                if access_entry['role'] == 'READER' and access_entry['specialGroup'] == 'allAuthenticatedUsers':
+                    is_public = True
+                    break
+            if is_public:
+                response = bq_service.tabledata().list(projectId=proj_id, datasetId=dataset_id, tableId=table_id,
+                                                       maxResults=MAX_ROW).execute()
+                if response and int(response['totalRows']) > 0:
+                    result = {
+                        'rows': response['rows']
+                    }
+                else:
+                    status = 200
+                    result = {
+                        'msg': 'No record has been found for table { proj_id }{ dataset_id }{ table_id }.'.format(
+                            proj_id=proj_id,
+                            dataset_id=dataset_id,
+                            table_id=table_id)
+                    }
             else:
+                status = 401
                 result = {
-                    'msg': 'No record has been found for table { proj_id }{ dataset_id }{ table_id }.'.format(
+                    'message': "Preview is not available for this table/view."
+                }
+
+        except Exception as e:
+            if type(e) is HttpError and e.resp.status == 403:
+                logger.error(
+                    "[ERROR] Access to preview table [{ proj_id }.{ dataset_id }.{ table_id }] was denied.".format(
+                        proj_id=proj_id,
+                        dataset_id=dataset_id,
+                        table_id=table_id))
+                result = {
+                    'message': "Your access to preview this table [{ proj_id }.{ dataset_id }.{ table_id }] was denied.".format(
                         proj_id=proj_id,
                         dataset_id=dataset_id,
                         table_id=table_id)
                 }
-
-        except Exception as e:
-            logger.error(
-                "[ERROR] While attempting to retrieve preview data for { proj_id }{ dataset_id }{ table_id } table.".format(
-                    proj_id=proj_id,
-                    dataset_id=dataset_id,
-                    table_id=table_id))
-            logger.exception(e)
-            status = '503'
-            result = {
-                'message': "There was an error while processing this request."
-            }
+                status = 403
+            else:
+                logger.error(
+                    "[ERROR] While attempting to retrieve preview data for { proj_id }.{ dataset_id }.{ table_id } table.".format(
+                        proj_id=proj_id,
+                        dataset_id=dataset_id,
+                        table_id=table_id))
+                logger.exception(e)
+                status = '503'
+                result = {
+                    'message': "There was an error while processing this request."
+                }
 
     return JsonResponse(result, status=status)
 
