@@ -294,7 +294,7 @@ def main():
                         ]
                     else:
                         if attr['name'].lower() in ranges_needed:
-                            attr['range'] = ranges_needed.get(attr['name'],[])
+                            attr['range'] = ranges.get(ranges_needed.get(attr['name'],''),[])
 
                 if attr['name'] in display_vals:
                     if 'preformatted_values' in display_vals[attr['name']]:
