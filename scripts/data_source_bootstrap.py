@@ -45,11 +45,26 @@ isb_superuser = User.objects.get(username="isb")
 
 logger = logging.getLogger('main_logger')
 
-ranges_needed = [
-    'wbc_at_diagnosis', 'event_free_survival_time_in_days', 'days_to_death', 'days_to_last_known_alive',
-    'days_to_last_followup', 'age_at_diagnosis', 'year_of_diagnosis', 'days_to_birth'
-]
+ranges_needed = {
+    'wbc_at_diagnosis': 'by_200',
+    'event_free_survival_time_in_days': 'by_500',
+    'days_to_death': 'by_500',
+    'days_to_last_known_alive': 'by_500',
+    'days_to_last_followup': 'by_500',
+    'year_of_diagnosis': 'year',
+    'days_to_birth': 'by_negative_3k'
+}
 
+ranges = {
+    'by_200': [{'first': "200", "last": "1400", "gap": "200", "include_lower": True, "unbounded": True,
+                             "include_upper": True, 'type': 'F', 'unit': '0.01'}],
+    'by_negative_3k': [{'first': "-15000", "last": "-5000", "gap": "3000", "include_lower": True, "unbounded": True,
+                             "include_upper": False, 'type': 'I'}],
+    'by_500': [{'first': "500", "last": "6000", "gap": "500", "include_lower": False, "unbounded": True,
+                             "include_upper": True, 'type': 'I'}],
+    'year': [{'first': "1976", "last": "2015", "gap": "5", "include_lower": True, "unbounded": False,
+                             "include_upper": False, 'type': 'I'}]
+}
 
 def add_data_versions(dv_set):
     for dv in dv_set:
@@ -279,7 +294,7 @@ def main():
                         ]
                     else:
                         if attr['name'].lower() in ranges_needed:
-                            attr['range'] = []
+                            attr['range'] = ranges_needed.get(attr['name'],[])
 
                 if attr['name'] in display_vals:
                     if 'preformatted_values' in display_vals[attr['name']]:
