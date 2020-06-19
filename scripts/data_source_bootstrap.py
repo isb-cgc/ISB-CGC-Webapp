@@ -174,7 +174,7 @@ def main():
             {"name": "GDC Release 9 Mutation Data", "ver": "r9", "type": "M", "programs": ["TCGA"]}
         ])
 
-        add_solr_collex(['tcia_images'], "TCIA Image Data Ver 0", ["TCGA"])
+        add_solr_collex(['tcga_tcia_images'], "TCIA Image Data Ver 0", ["TCGA"])
         add_solr_collex(['ccle_bios'], "GDC Release 9 Biospecimen Data", ["CCLE"])
         add_solr_collex(['tcga_bios'], "GDC Release 9 Biospecimen Data", ["TCGA"])
         add_solr_collex(['target_bios'], "GDC Release 9 Biospecimen Data", ["TARGET"])
@@ -311,7 +311,7 @@ def main():
                             'display': True if line_split[-1] == 'True' else False
                         }
                     attr = attr_list[line_split[0]]
-                    attr['solr_collex'].append('tcia_images')
+                    attr['solr_collex'].append('tcga_tcia_images')
                     attr['bq_tables'].append("idc-dev-etl.tcia.dicom_metadata")
 
                 attr_file.close()
