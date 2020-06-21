@@ -962,6 +962,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 success: function (data) {
                     //updateCollectionTotals(data.total, data.origin_set.attributes.collection_id);
                     updateCollectionTotals('Program_list', data.programs);
+                    //updateFilterSelections('search_orig_set', data.origin_set.All.attributes);
 
                     updateFilterSelections('search_orig_set', data.origin_set.All.attributes);
                     createPlots('search_orig_set');
@@ -1230,10 +1231,21 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
         }
 
         var updateFilters = function (filterCat, dic, dataFound) {
-            var allFilters = $('#' + filterCat).find('input:checkbox');
-            var checkedFilters = $('#' + filterCat).find('input:checked');
-            var useAll = ((checkedFilters.length == 0) ? true : false)
-            var numAttrShown = 0;
+            var allListItems=$('#'+filterCat).children('ul').children('li');
+            var allFilters=allListItems.children().children('input:checkbox');
+            var checkedFilters=allListItems.children().children('input:checked');
+            var showZeros = true;
+            if ( ($('#' + filterCat).find('.show-zeros').length>0) &&  ($('#' + filterCat).find('.show-zeros').is(":hidden")) ){
+                showZeros = false;
+            }
+            var showExtras = false;
+            if ( ($('#' + filterCat).find('.more-checks').length>0) && $('#' + filterCat).find('.more-checks').is(":hidden")) {
+                showExtras = true;
+            }
+
+            var allUnchecked = ((checkedFilters.length == 0) ? true : false)
+            var numAttrAvail = 0;
+
             for (var i = 0; i < allFilters.length; i++) {
                 var elem = allFilters.get(i);
                 var val = $(elem)[0].value;
@@ -1241,46 +1253,63 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
                 var spans = $(elem).parent().find('span');
                 var lbl = spans.get(0).innerHTML;
-                var cnt = parseInt(spans.get(1).innerHTML);
-
-                if (dataFound && dic.hasOwnProperty(val) && (dic[val].count > 0)) {
-                    numAttrShown++;
+                var oldCnt = parseInt(spans.get(1).innerHTML);
+                if (dataFound && dic.hasOwnProperty(val) ){
                     spans.get(1).innerHTML = String(dic[val].count);
-                    //$(elem).parent().parent().removeClass('hidden');
-                    if (numAttrShown > 5) {
-                        $(elem).parent().parent().addClass('extra-values');
-                    }
-
-                } else {
-                    spans.get(1).innerHTML = '0';
-                    //$(elem).parent().parent().addClass('hidden');
-                    $(elem).parent().parent().removeClass('extra-values');
-
+                    cnt = String(dic[val].count)
                 }
-                if (checked || useAll) {
+                else{
+                    cnt = oldCnt;
+                }
+
+
+                if ( (cnt>0) || checked)  {
+                    $(elem).parent().parent().removeClass('zeroed');
+                }
+                else {
+                    $(elem).parent().parent().addClass('zeroed');
+                }
+
+                if ( (cnt>0) || checked || showZeros) {
+                      numAttrAvail++;
+                }
+
+                if ( (numAttrAvail>5) ) {
+                    $(elem).parent().parent().addClass('.extra-values');
+                }
+                else {
+                    $(elem).parent().parent().removeClass('.extra-values');
+                }
+
+                if ( ( (cnt>0) || checked || showZeros ) && (showExtras || (numAttrAvail<6)) ) {
+                      $(elem).parent().parent().show();
+                }
+                else {
+                    $(elem).parent().parent().hide();
+                }
+
+
+                if (checked || allUnchecked) {
                     $(spans.get(1)).addClass('plotit');
                 } else {
                     $(spans.get(1)).removeClass('plotit');
                 }
             }
-            if ($('#' + filterCat).find('.more-checks').length > 0) {
-                if (numAttrShown < 6) {
+
+            if ( numAttrAvail < 6)  {
                     $('#' + filterCat).find('.more-checks').hide();
                     $('#' + filterCat).find('.less-checks').hide();
-                    $('#' + filterCat).find('.extra-values').removeClass('extra-values');
 
-                } else {
-                    if ($('#' + filterCat).find('.less-checks').is(":hidden")) {
-                        $('#' + filterCat).find('.more-checks').show();
-                        $('#' + filterCat).find('.extra-values').hide();
-                    } else {
-                        $('#' + filterCat).find('.more-checks').hide();
-                        $('#' + filterCat).find('.less-checks').show();
-                        $('#' + filterCat).find('.extra-values').show();
-                    }
                 }
+            else if (showExtras) {
+                $('#' + filterCat).find('.more-checks').hide();
+                $('#' + filterCat).find('.less-checks').show();
             }
 
+            else {
+                 $('#' + filterCat).find('.more-checks').show();
+                $('#' + filterCat).find('.less-checks').hide();
+            }
 
         }
 
@@ -1444,6 +1473,23 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
         $('#' + filterId).find('input:checkbox').on('click', function () {
             handleFilterSelectionUpdate(this, true, true);
         });
+
+        $('#' + filterId).find('.hide-zeros-a').on('click', function () {
+            $(this).parent().parent().children('.show-zeros').show();
+            $(this).parent().hide();
+            var filterCat =$(this).parent().parent()[0].id;
+            updateFilters(filterCat, {}, false);
+        });
+
+
+        $('#' + filterId).find('.show-zeros-a').on('click', function () {
+            $(this).parent().parent().children('.hide-zeros').show();
+            $(this).parent().hide();
+            var filterCat =$(this).parent().parent()[0].id;
+            updateFilters(filterCat, {}, false);
+
+        });
+
 
 
 
