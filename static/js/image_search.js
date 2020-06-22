@@ -867,7 +867,24 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             updateFacetsData(false);
 
         }
-        var updateCollectionTotals = function (listId, progDic) {
+
+        var updateCollectionTotals = function(listId, progDic){
+            var reformDic = new Object();
+            reformDic[listId] = new Object();
+            for (item in progDic){
+                if ((item !=='All') && (item !=='None')){
+                    reformDic[listId][item]=progDic[item]['val']
+                    if  ('projects' in progDic[item]){
+                        reformDic[item] =  new Object();
+                        for (project in progDic[item][project]){
+                            reformDic[item][project]=progDic[item][project]['val']
+                        }
+                    }
+                }
+            }
+            updateFilterSelections('Program', reformDic);
+        }
+        var updateCollectionTotals_old = function (listId, progDic) {
             //dic.val dic.projects
             progList=$('#'+listId).children('.list-group-item');
             for (var ind=0;ind< progList.length;ind++){
@@ -946,7 +963,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 contentType: 'application/x-www-form-urlencoded',
                 success: function (data) {
                     //updateCollectionTotals(data.total, data.origin_set.attributes.collection_id);
-                    updateCollectionTotals('Program_list', data.programs);
+                    updateCollectionTotals('Program', data.programs);
                     //updateFilterSelections('search_orig_set', data.origin_set.All.attributes);
 
                     updateFilterSelections('search_orig_set', data.origin_set.All.attributes);
@@ -965,13 +982,13 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
                     if (data.hasOwnProperty('related_set')) {
                         $('#search_related_set').removeClass('disabled');
-                        updateFilterSelections('search_related_set', data.related_set.All.attributes);
+                        ('search_related_set', data.related_set.All.attributes);
                         //createPlots('tcga_clinical');
                        createPlots('search_related_set');
                     }
                     var collFilt = new Array();
                     if ('collection_id' in parsedFiltObj){
-                        collFilt=parsedFiltObj['collection_id'];
+                        collFilt=parsedFupdateFilterSelectionsiltObj['collection_id'];
                         var ind=0;
                         while (ind <window.selItems.selProjects.length)
                         {
