@@ -15,6 +15,10 @@
         font-size: 20px
     h4
         font-size: 25px
+    a
+        color: #226caa
+        &:hover
+            color: #2aabd2
     .header-div
         text-align: center
         padding: 15px
@@ -23,6 +27,14 @@
         background-size: cover
         font-size: 20px
         color: #2b537b
+    .crdc-div
+        color: #5e5e5e
+        >a
+            color: #5e5e5e
+            //font-weight: bold
+            &:hover
+                color: #2aabd2
+                text-decoration: none
     .banner-section
         padding: 0
         .alert
@@ -46,23 +58,26 @@
 
     .panel-heading
         min-height: 130px
+        img
+            padding: 0
     .panel-body
-        min-height: 206px
+        min-height: 228px
     .panel-footer
         font-size: 14px
         border-radius: 10px
     .landing-icon
         background-size: contain
         background-repeat: no-repeat
+        background-position: center top
         width: 60px
         height: 60px
-        display: block
         margin: auto
+        display: inline-block
 
     .panel
         border-radius: 10px
-        max-width: 550px
-        min-width: 250px
+        max-width: 350px
+        min-width: 200px
         box-shadow: none
         border-width: 1px
         border-style: solid
@@ -113,12 +128,44 @@
             background-image: url('../img/orange-github.png')
             &:hover
                 background-image: url('../img/orange-github-hover.png')
-
     .container
-        padding: 10px 0
+        padding: 10px 100px
     .bottom-div
         font-size: 18px
     .footer-div
-        //padding: 0
         font-size: 16px
-        //background-color: #efefef
+        .social-media-div a
+            font-size: 20px
+            padding: 0 5px
+            text-decoration: none
+
+#privacy, #about
+    h2
+        font-size: 20px
+        margin-top: 20px
+    h3
+        font-size: 18px
+    ul
+        margin-left: 20px
+        list-style: circle
+        margin-bottom: 10px
+    //a
+    //    font-weight: bold
+    a
+        color: #226caa
+        &:hover
+            color: #2aabd2
+#about
+    .partners-div
+        display: inline-block
+        img
+            height: 80px
+    .cite-text
+        background-color: lighten(grey, 40%)
+        color: darken($isb-dark, 10%)
+        font-size: 0.9em
+        border-radius: 5px
+        border-width: 1px
+        border-color: grey
+        padding: 10px
+

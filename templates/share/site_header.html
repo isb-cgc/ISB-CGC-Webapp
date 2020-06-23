@@ -13,7 +13,16 @@
                          loading="lazy">
                     <span>ISB-CGC</span>
                 </a>
+
                 <ul class="nav navbar-left">
+                    {#                <div class="inline-block">#}
+
+                    {% if user.is_authenticated %}
+                        <li class="navbar-link navbar-item">
+                            <a href="{% url 'dashboard' %}">Dashboard</a>
+                        </li>
+                    {% endif %}
+
                     <li class="navbar-link navbar-item">
                         <div class="dropdown">
                             <a role="button class=dropdown-toggle navbar-item__text" id="db-dropdown"
@@ -32,11 +41,11 @@
                     </li>
                     <li class="navbar-link navbar-item">
                         <div class="dropdown">
-                            <a role="button class=dropdown-toggle navbar-item__text" id="need-help-dropdown"
-                               data-toggle="dropdown" aria-label="Need Help Dropdown" aria-expanded="true">
+                            <a role="button class=dropdown-toggle navbar-item__text" id="res-dropdown"
+                               data-toggle="dropdown" aria-label="Resource Dropdown" aria-expanded="true">
                                 Resources<span class="caret"></span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-label="user-dropdown">
+                            <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-label="res-dropdown">
                                 <li role="menuitem"><a href="{% url 'cohort' %}">Interactive Patient Cohort
                                     Exploration</a></li>
                                 <li role="menuitem"><a href="https://api-dot-isb-cgc.appspot.com/v4/swagger"
@@ -65,12 +74,15 @@
                         <a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a>
                     </li>
                     <li class="navbar-link navbar-item">
+                        <a href="{% url 'about_page' %}" target="_blank">About</a>
+                    </li>
+                    <li class="navbar-link navbar-item">
                         <div class="dropdown">
-                            <a role="button class=dropdown-toggle navbar-item__text" id="need-help-dropdown"
-                               data-toggle="dropdown" aria-label="Need Help Dropdown" aria-expanded="true">
-                                Need Help? <span class="caret"></span>
+                            <a role="button class=dropdown-toggle navbar-item__text" id="help-dropdown"
+                               data-toggle="dropdown" aria-label="Help Dropdown" aria-expanded="true">
+                                Help <span class="caret"></span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-label="user-dropdown">
+                            <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-label="help-dropdown">
                                 <li role="menuitem"><a
                                         href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowToGetStartedonISB-CGC.html"
                                         target="_blank">How To Get Started</a></li>
@@ -87,6 +99,7 @@
                             </ul>
                         </div>
                     </li>
+                    {#                </div><div class="inline-block float-right">#}
                 </ul>
                 <ul class="navbar-right">
                     {% if user.is_authenticated %}
@@ -123,23 +136,21 @@
                                     class="fa fa-sign-in"></i> Sign In</a>
                         </li>
                     {% endif %}
+                    {#            </div>#}
                 </ul>
-            </ul>
+                {#        </div>#}
+            </div>
         </div>
     </nav>
     {% if user.is_authenticated %}
-        <nav class="nav subnav collapse" role="navigation" id="subnav">
+        <nav class="nav subnav collapse center" role="navigation" id="subnav">
             <ul class="container">
-                {% if user.is_authenticated %}
-                    <li>
-                        <a href="{% url 'dashboard' %}">DASHBOARD</a>
-                    </li>
-                {% endif %}
+
                 <li class="menu-item has-drop-down">
-                    <a>WORKBOOKS <span class="caret"></span>></a>
+                    <a>WORKBOOKS <span class="caret"></span></a>
                     <ul class="sub-menu drop">
                         <li class="menu-item"><a href="{% url 'workbooks' %}">Saved Workbooks
-                            ( {% user_workbook_count %} )</a></li>
+                            <span class="badge">{% user_workbook_count %}</span></a></li>
                         <li class="menu-item">
                             <form action="{% url 'workbook_create' %}" method="POST">
                                 {% csrf_token %}
@@ -151,13 +162,13 @@
                 </li>
                 {% if USER_DATA_ON %}
                     <li class="menu-item has-drop-down">
-                        <a>PROGRAMS <span class="caret"></span></i></a>
+                        <a>PROGRAMS <span class="caret"></span></a>
                         <ul class="sub-menu drop">
                             <li class="menu-item"><a href="{% url 'programs' %}">Saved Programs
-                                ( {% user_program_count %} )</a></li>
+                                <span class="badge">{% user_program_count %}</span></a></li>
                             <li class="menu-item"><a href="{% url 'program_upload' %}">Upload Program Data</a></li>
                             <li class="menu-item"><a href="{% url 'public_programs' %}">Public Program
-                                ( {% public_program_count %} )</a></li>
+                                <span class="badge">{% public_program_count %}</span></a></li>
                         </ul>
                     </li>
                 {% endif %}
@@ -240,7 +251,7 @@
                         <a>GENES & miRNAs <span class="caret"></span></a>
                         <ul class="sub-menu drop genes-mirnas">
                             <li class="menu-item"><a href="{% url 'genes' %}">Manage Gene & miRNA Favorites
-                                ( {{ genefaves_count }} )</a></li>
+                                <span class="badge">{{ genefaves_count }}</span></a></li>
                             <li class="menu-item"><a href="{% url 'gene_fav_create' %}">Create Gene & miRNA
                                 Favorites</a></li>
                             <li class="menu-item"><a href="{% url 'gene_select_for_new_workbook' %}">Select Genes &
@@ -252,7 +263,7 @@
                     <a>VARIABLES <span class="caret"></span></a>
                     <ul class="sub-menu drop">
                         <li class="menu-item"><a href="{% url 'variables' %}">Manage Variable Favorites Lists
-                            ( {{ user.variablefavorite_set.all|active|count }} )</a></li>
+                            <span class="badge">{{ user.variablefavorite_set.all|active|count }}</span></a></li>
                         <li class="menu-item"><a href="{% url 'variable_fav_create' %}">Create Variable Favorites
                             List</a></li>
                         <li class="menu-item"><a href="{% url 'variable_select_for_new_workbook' %}">Select Variables
@@ -260,13 +271,15 @@
                     </ul>
                 </li>
                 <li class="menu-item has-drop-down">
-                    <a>COHORTS <span class="caret"></span>></a>
+                    <a>COHORTS <span class="caret"></span></a>
                     <ul class="sub-menu drop">
                         <li class="menu-item"><a href="{% url 'cohort_list' %}">Manage Saved Cohorts
-                            ( {{ user.cohort_perms_set.all|active:'cohort'|cohort_owner_permission|count }} )</a></li>
+                            <span class="badge">
+                                {{ user.cohort_perms_set.all|active:'cohort'|cohort_owner_permission|count }}</span></a>
+                        </li>
                         <li class="menu-item"><a href="{% url 'public_cohort_list' %}">Public Cohorts
-                            ( {% public_cohort_count %} )</a></li>
-                        <li class="menu-item has-drop-down__more"> Create a New Cohort
+                            <span class="badge">{% public_cohort_count %}</span></a></li>
+                        <li class="menu-item has-drop-down__more"><span>Create a New Cohort</span>
                             <ul class="drop">
                                 <li class="menu-item"><a href="{% url 'cohort' %}">Filters</a></li>
                                 <li class="menu-item"><a href="{% url 'cohort_barcodes' %}">Barcodes</a></li>

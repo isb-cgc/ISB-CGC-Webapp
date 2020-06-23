@@ -27,7 +27,6 @@
     <main>
         <div class="banner-section container-fluid">
             <div class="alert alert-dismissible show" role="alert">
-                {#            <div>#}
                 <strong>Get Started!</strong> <a
                     href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowtoRequestCloudCredits.html"
                     target="_blank">Free Cloud credits</a> with pointers to how to
@@ -37,14 +36,16 @@
                 </button>
             </div>
         </div>
-        <div>
-            <div class="row header-div container-fluid">
+        <div class="header-div container-fluid">
+            <div class="row ">
                 <div class="col-lg-3"></div>
                 <div class="col-lg-6">
 
-                    <div style="color:#5e5e5e;">A RESOURCE OF THE NIH CANCER DATA RESEARCH COMMONS</div>
+                    <div class="crdc-div">A RESOURCE OF THE <a href="https://datacommons.cancer.gov/"
+                                                               target="_blank">NIH CANCER RESEARCH DATA COMMONS</a>
+                    </div>
                     <h1>ISB-CGC</h1>
-                    <h2>Cancer Gateway in the Clouds</h2>
+                    <h2>Cancer Gateway in the Cloud</h2>
                     <div>Access, Explore and Analyze Large-Scale Cancer Data Through the Google Cloud with ISB-CGC</div>
                 </div>
                 <div class="col-lg-3"></div>
@@ -62,7 +63,7 @@
                         <div class="panel">
                             <div class="panel-heading row">
                                 <div class="col-md-9 col-sm-10"><h4>BigQuery Table Search</h4></div>
-                                <div class="col-md-3 col-sm-2">
+                                <div class="col-md-3 col-sm-2 padding-left-0">
                                     <img src="{% static 'img/bq-icon.png' %}" class="img-fluid"
                                          alt="bq table icon">
                                 </div>
@@ -97,7 +98,7 @@
                         <div class="panel">
                             <div class="panel-heading row">
                                 <div class="col-md-9 col-sm-10"><h4>Data Browser</h4></div>
-                                <div class="col-md-3 col-sm-2">
+                                <div class="col-md-3 col-sm-2 padding-left-0">
                                     <img src="{% static 'img/de-icon.png' %}" class="img-fluid"
                                          alt="data explorer icon">
                                 </div>
@@ -132,7 +133,7 @@
                         <div class="panel">
                             <div class="panel-heading row">
                                 <div class="col-md-9 col-sm-10"><h4>Chromosomal Aberrations & Gene Fusions DB</h4></div>
-                                <div class="col-md-3 col-sm-2">
+                                <div class="col-md-3 col-sm-2 padding-left-0">
                                     <img src="{% static 'img/md-icon.png' %}" class="img-fluid"
                                          alt="database icon">
                                 </div>
@@ -179,7 +180,7 @@
                         <div class="panel">
                             <div class="panel-heading row">
                                 <div class="col-md-9 col-sm-10"><h4>Interactive Patient Cohort Exploration</h4></div>
-                                <div class="col-md-3 col-sm-2">
+                                <div class="col-md-3 col-sm-2 padding-left-0">
                                     <img src="{% static 'img/ca-icon.png' %}" class="img-fluid"
                                          alt="bq table icon">
                                 </div>
@@ -217,7 +218,7 @@
                         <div class="panel">
                             <div class="panel-heading row">
                                 <div class="col-md-9 col-sm-10"><h4>Programmatic Access</h4></div>
-                                <div class="col-md-3 col-sm-2">
+                                <div class="col-md-3 col-sm-2 padding-left-0">
                                     <img src="{% static 'img/api-icon.png' %}" class="img-fluid"
                                          alt="bq table icon">
                                 </div>
@@ -254,7 +255,7 @@
                         <div class="panel">
                             <div class="panel-heading row">
                                 <div class="col-md-9 col-sm-10"><h4>Notebooks</h4></div>
-                                <div class="col-md-3 col-sm-2">
+                                <div class="col-md-3 col-sm-2 padding-left-0">
                                     <img src="{% static 'img/nb-icon.png' %}" class="img-fluid"
                                          alt="bq table icon">
                                 </div>
@@ -310,27 +311,29 @@
             </div>
         </div>
 
-{#        <div class="jumbotron-fluid footer-div">#}
+        <div class="jumbotron-fluid footer-div">
             <div class="container footer-div">
                 <div class="row">
                     <div class="col-lg-4">
-                        Copyright 2020, ISB
+                        COPYRIGHT 2020, ISB
+                    </div>
+                    <div class="col-lg-4 text-center">
+                        <a href="{% url 'privacy' %}">PRIVACY POLICY</a>
+{#                        <a href="http://localhost:8080/privacy/">PRIVACY POLICY</a>#}
                     </div>
                     <div class="col-lg-4">
-                        <a href="http://localhost:8080/privacy/">Privacy Policy</a>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="float-right">
+                        <div class="float-right social-media-div">
                             <a href="https://github.com/isb-cgc/" target="_blank">
                                 <i class="fa fa-github fa-lg"></i>
                             </a>
                             <a href="https://twitter.com/isb_cgc" target="_blank">
                                 <i class="fa fa-twitter fa-lg"></i>
-                            </a></div>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
-{#        </div>#}
+        </div>
     </main>
 {% endblock %}
 
