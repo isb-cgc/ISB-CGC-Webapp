@@ -873,16 +873,18 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             reformDic[listId] = new Object();
             for (item in progDic){
                 if ((item !=='All') && (item !=='None')){
-                    reformDic[listId][item]=progDic[item]['val']
+                    reformDic[listId][item]=new Object();
+                    reformDic[listId][item]['count']=progDic[item]['val']
                     if  ('projects' in progDic[item]){
                         reformDic[item] =  new Object();
-                        for (project in progDic[item][project]){
-                            reformDic[item][project]=progDic[item][project]['val']
+                        for (project in progDic[item]['projects']){
+                            reformDic[item][project]=new Object();
+                            reformDic[item][project]['count']=progDic[item]['projects'][project];
                         }
                     }
                 }
             }
-            updateFilterSelections('Program', reformDic);
+            updateFilterSelections('program_set', reformDic);
         }
         var updateCollectionTotals_old = function (listId, progDic) {
             //dic.val dic.projects
@@ -988,7 +990,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     }
                     var collFilt = new Array();
                     if ('collection_id' in parsedFiltObj){
-                        collFilt=parsedFupdateFilterSelectionsiltObj['collection_id'];
+                        collFilt=parsedFiltObj['collection_id'];
                         var ind=0;
                         while (ind <window.selItems.selProjects.length)
                         {
@@ -1237,11 +1239,11 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             var allFilters=allListItems.children().children('input:checkbox');
             var checkedFilters=allListItems.children().children('input:checked');
             var showZeros = true;
-            if ( ($('#' + filterCat).find('.show-zeros').length>0) &&  ($('#' + filterCat).find('.show-zeros').is(":hidden")) ){
+            if ( ($('#' + filterCat).children('.show-zeros').length>0) &&  ($('#' + filterCat).children('.show-zeros').is(":hidden")) ){
                 showZeros = false;
             }
             var showExtras = false;
-            if ( ($('#' + filterCat).find('.more-checks').length>0) && $('#' + filterCat).find('.more-checks').is(":hidden")) {
+            if ( ($('#' + filterCat).children('.more-checks').length>0) && $('#' + filterCat).children('.more-checks').is(":hidden")) {
                 showExtras = true;
             }
 
@@ -1256,13 +1258,18 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 var spans = $(elem).parent().find('span');
                 var lbl = spans.get(0).innerHTML;
                 var oldCnt = parseInt(spans.get(1).innerHTML);
+                var cnt=''
                 if (dataFound && dic.hasOwnProperty(val) ){
-                    spans.get(1).innerHTML = String(dic[val].count);
                     cnt = String(dic[val].count)
+                }
+                else if (dataFound){
+                    cnt = String('0');
                 }
                 else{
                     cnt = oldCnt;
                 }
+
+                spans.get(1).innerHTML = cnt;
 
 
                 if ( (cnt>0) || checked)  {
