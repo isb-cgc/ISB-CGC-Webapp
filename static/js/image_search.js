@@ -226,6 +226,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     curRow.classList.remove('hide');
 
                 } else {
+                    var projIndex = window.selItems.selProjects.indexOf(projId);
+                    if (projIndex !==-1) window.selItems.selProjects.splice(projIndex,1);
                     if (window.selItems.selStudies.hasOwnProperty(projId)) {
                         delete window.selItems.selStudies[projId];
                     }
@@ -1239,11 +1241,11 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             var allFilters=allListItems.children().children('input:checkbox');
             var checkedFilters=allListItems.children().children('input:checked');
             var showZeros = true;
-            if ( ($('#' + filterCat).children('.show-zeros').length>0) &&  ($('#' + filterCat).children('.show-zeros').is(":hidden")) ){
+            if ( ($('#' + filterCat).children('.hide-zeros').length>0) &&  ($('#' + filterCat).children('.hide-zeros').hasClass("notDisp")) ){
                 showZeros = false;
             }
             var showExtras = false;
-            if ( ($('#' + filterCat).children('.more-checks').length>0) && $('#' + filterCat).children('.more-checks').is(":hidden")) {
+            if ( ($('#' + filterCat).children('.more-checks').length>0) && $('#' + filterCat).children('.more-checks').hasClass("notDisp")) {
                 showExtras = true;
             }
 
@@ -1306,18 +1308,18 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             }
 
             if ( numAttrAvail < 6)  {
-                    $('#' + filterCat).find('.more-checks').hide();
-                    $('#' + filterCat).find('.less-checks').hide();
+                    $('#' + filterCat).children().children('.more-checks').hide();
+                    $('#' + filterCat).children().children('.less-checks').hide();
 
                 }
             else if (showExtras) {
-                $('#' + filterCat).find('.more-checks').hide();
-                $('#' + filterCat).find('.less-checks').show();
+                $('#' + filterCat).children().children('.more-checks').hide();
+                $('#' + filterCat).children().children('.less-checks').show();
             }
 
             else {
-                 $('#' + filterCat).find('.more-checks').show();
-                $('#' + filterCat).find('.less-checks').hide();
+                 $('#' + filterCat).children().children('.more-checks').show();
+                $('#' + filterCat).children().children('.less-checks').hide();
             }
 
         }
@@ -1485,6 +1487,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
         $('#' + filterId).find('.hide-zeros-a').on('click', function () {
             $(this).parent().parent().children('.show-zeros').show();
+            $(this).parent().parent().children('.show-zeros').removeClass('notDisp');
+            $(this).parent().parent().children('.hide-zeros').addClass('notDisp');
             $(this).parent().hide();
             var filterCat =$(this).parent().parent()[0].id;
             updateFilters(filterCat, {}, false);
@@ -1493,6 +1497,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
         $('#' + filterId).find('.show-zeros-a').on('click', function () {
             $(this).parent().parent().children('.hide-zeros').show();
+            $(this).parent().parent().children('.hide-zeros').removeClass('notDisp');
+            $(this).parent().parent().children('.show-zeros').addClass('notDisp');
             $(this).parent().hide();
             var filterCat =$(this).parent().parent()[0].id;
             updateFilters(filterCat, {}, false);
@@ -1505,6 +1511,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
         $('#' + filterId).find('.show-more').on('click', function () {
 
             $(this).parent().parent().find('.less-checks').show();
+            $(this).parent().parent().find('.less-checks').removeClass('notDisp');
+            $(this).parent().parent().find('.more-checks').addClass('notDisp');
             $(this).parent().hide();
             $(this).parent().parent().children('.search-checkbox-list').children('.extra-values').show();
 
@@ -1515,6 +1523,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
         $('#' + filterId).find('.show-less').on('click', function () {
 
             $(this).parent().parent().find('.more-checks').show();
+            $(this).parent().parent().find('.more-checks').removeClass('notDisp');
+            $(this).parent().parent().find('.less-checks').addClass('notDisp');
             $(this).parent().hide();
             $(this).parent().parent().children('.search-checkbox-list').children('.extra-values').hide();
 
