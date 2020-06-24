@@ -16,9 +16,7 @@ From there perform the following steps...
  2. Copy the `sample.env` file to a file named `.env` in `secure_files/`
  3. Fill out the `.env` file with the proper values
    * For most **development** environments, `MYSQL_ROOT_PASSWORD` and `DATABASE_PASSWORD` can be the same, and `DATABASE_USER` can be `root`
-   * `GCLOUD_PROJECT_ID` is available after creating a project in the [Google Cloud Dashboard](https://console.developers.google.com/)
-   * `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` can also be obtained in the Google Cloud Dashboard by going to API & Auth > Credentials > Add New > OAuth 2.0 Client > Web Application
-   * Be sure when developing locally that you have 127.0.0.1 in the list of allowed domains for the OAuth 2.0 key
+   * `GCLOUD_PROJECT_ID`, `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` will be obtained from one of the other developers, as part of the initial set of information in your `.env` file.
 
 ## Configuring PyCharm
 
