@@ -27,9 +27,10 @@
     <main>
         <div class="banner-section container-fluid">
             <div class="alert alert-dismissible show" role="alert">
-                <strong>Get Started!</strong> <a
-                    href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowtoRequestCloudCredits.html"
-                    target="_blank">Free Cloud credits</a> with pointers to how to
+                <strong>Get Started!</strong>
+                <strong><a
+                        href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowtoRequestCloudCredits.html"
+                        target="_blank">Free Cloud credits</a></strong> with pointers to how to
                 get in touch with us and quick start pages
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -46,13 +47,13 @@
                     </div>
                     <h1>ISB-CGC</h1>
                     <h2>Cancer Gateway in the Cloud</h2>
-                    <div>Access, Explore and Analyze Large-Scale Cancer Data Through the Google Cloud with ISB-CGC</div>
+                    <div>Access, Explore and Analyze Large-Scale Cancer Data <br/> Through the Google Cloud with ISB-CGC</div>
                 </div>
                 <div class="col-lg-3"></div>
             </div>
         </div>
         <div class="jumbotron-fluid dbrowser-div">
-            <div class="container">
+            <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-12">
                         <h3>Data Browsers</h3>
@@ -62,17 +63,16 @@
                     <div class="col-lg-4">
                         <div class="panel">
                             <div class="panel-heading row">
-                                <div class="col-md-9 col-sm-10"><h4>BigQuery Table Search</h4></div>
-                                <div class="col-md-3 col-sm-2 padding-left-0">
+                                <div class="col-lg-10"><h4>BigQuery Table Search</h4></div>
+                                <div class="col-lg-2 padding-left-0">
                                     <img src="{% static 'img/bq-icon.png' %}" class="img-fluid"
                                          alt="bq table icon">
                                 </div>
                             </div>
                             <div class="panel-body">
-                                Browse a selection of metadata and molecular cancer data from the Genomic Data Commons
-                                and
-                                other sources. These tables are hosted on Google BigQuery, allowing for easy and cheap
-                                computation and retrieval with the use of Structured Query Language (SQL).
+                                Browse metadata and molecular cancer data BigQuery tables from the Genomic Data Commons
+                                and other sources. Jump directly to a table to perform discovery and computation via
+                                Structured Query Language (SQL).
                             </div>
                             <div class="panel-footer">
                                 <div class="row">
@@ -97,17 +97,16 @@
                     <div class="col-lg-4">
                         <div class="panel">
                             <div class="panel-heading row">
-                                <div class="col-md-9 col-sm-10"><h4>Data Browser</h4></div>
-                                <div class="col-md-3 col-sm-2 padding-left-0">
+                                <div class="col-lg-10"><h4>Data Browser</h4></div>
+                                <div class="col-lg-2 padding-left-0">
                                     <img src="{% static 'img/de-icon.png' %}" class="img-fluid"
                                          alt="data explorer icon">
                                 </div>
                             </div>
                             <div class="panel-body">
-                                Explore a comprehensive selection of cancer related data files hosted in Google Cloud
-                                Storage Buckets, such as raw sequencing, cancer nucleotide variation, pathology or
-                                radiology
-                                images, etc through a user-friendly file browser
+                                Explore a comprehensive selection of cancer related data files in Google Cloud Storage
+                                Buckets, such as raw sequencing, cancer nucleotide variation, pathology or radiology
+                                images.
                             </div>
                             <div class="panel-footer">
                                 <div class="row">
@@ -132,16 +131,15 @@
                     <div class="col-lg-4">
                         <div class="panel">
                             <div class="panel-heading row">
-                                <div class="col-md-9 col-sm-10"><h4>Chromosomal Aberrations & Gene Fusions DB</h4></div>
-                                <div class="col-md-3 col-sm-2 padding-left-0">
+                                <div class="col-lg-10"><h4>Chromosomal Aberrations & Gene Fusions DB</h4></div>
+                                <div class="col-lg-2 padding-left-0">
                                     <img src="{% static 'img/md-icon.png' %}" class="img-fluid"
                                          alt="database icon">
                                 </div>
                             </div>
                             <div class="panel-body">
-                                The Mitelman Database of Chromosome Aberrations and Gene Fusions in Cancer relates
-                                cytogenetic changes and their genomic consequences, in particular gene fusions, to tumor
-                                characteristics. Browse this data using the Mitelman Database UI.
+                                Browse the Mitelman Database of Chromosome Aberrations and Gene Fusions in Cancer which
+                                relates cytogenetic changes, in particular gene fusions, to tumor characteristics.
                             </div>
                             <div class="panel-footer">
                                 <div class="row">
@@ -168,7 +166,7 @@
             </div>
         </div>
         <div class="jumbotron-fluid resources-div">
-            <div class="container">
+            <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-12">
                         <h3>Resources</h3>
@@ -176,23 +174,19 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-lg-4">
+                    <div class="col-lg-3">
                         <div class="panel">
                             <div class="panel-heading row">
-                                <div class="col-md-9 col-sm-10"><h4>Interactive Patient Cohort Exploration</h4></div>
-                                <div class="col-md-3 col-sm-2 padding-left-0">
+                                <div class="col-lg-9"><h4>Interactive Patient Cohort Exploration</h4></div>
+                                <div class="col-lg-3 padding-left-0">
                                     <img src="{% static 'img/ca-icon.png' %}" class="img-fluid"
                                          alt="bq table icon">
                                 </div>
                             </div>
                             <div class="panel-body">
-                                Interactive web interface to build and explore cohorts based on clinical demographics
-                                (age,
-                                race, gender, tumor type, etc) and molecular filters (e.g. gene mutations). Compare
-                                patient
-                                cohorts with various interactive exploration tools including IGV viewer, image viewers,
-                                and
-                                analytical visualization features.
+                                A web interface to build cohorts based on clinical demographics and molecular filters.
+                                Compare patient cohorts with various exploration tools including IGV viewer, image
+                                viewers, and analytical visualization.
                             </div>
                             <div class="panel-footer">
                                 <div class="row">
@@ -214,22 +208,19 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4">
+                    <div class="col-lg-3">
                         <div class="panel">
                             <div class="panel-heading row">
-                                <div class="col-md-9 col-sm-10"><h4>Programmatic Access</h4></div>
-                                <div class="col-md-3 col-sm-2 padding-left-0">
+                                <div class="col-lg-9"><h4>Programmatic Access</h4></div>
+                                <div class="col-lg-3 padding-left-0">
                                     <img src="{% static 'img/api-icon.png' %}" class="img-fluid"
                                          alt="bq table icon">
                                 </div>
                             </div>
                             <div class="panel-body">
-                                Access and explore data through command-line interfaces including: Python, R, Google
-                                Compute
-                                Engines (VMs), local terminals. The ISB-CGC API can be used to programmatically interact
-                                with cohorts as well as access data about saved cohorts, metadata about patients &
-                                samples,
-                                and info about your Google Cloud Project.
+                                Access data through command-line interfaces including: Python, R, bash, etc. The ISB-CGC
+                                API can be used to create or modify cohorts and view metadata about patients, samples,
+                                or information about your Google Cloud Project.
                             </div>
                             <div class="panel-footer">
                                 <div class="row">
@@ -251,23 +242,19 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4">
+                    <div class="col-lg-3">
                         <div class="panel">
                             <div class="panel-heading row">
-                                <div class="col-md-9 col-sm-10"><h4>Notebooks</h4></div>
-                                <div class="col-md-3 col-sm-2 padding-left-0">
+                                <div class="col-lg-9"><h4>Notebooks</h4></div>
+                                <div class="col-lg-3 padding-left-0">
                                     <img src="{% static 'img/nb-icon.png' %}" class="img-fluid"
                                          alt="bq table icon">
                                 </div>
                             </div>
                             <div class="panel-body">
-                                <p>
-                                    A collection of notebooks written in R and python, compiled by the ISB-CGC team to
-                                    serve
-                                    as both tutorials or analysis tools for both novice and experienced users. Includes
-                                    a
-                                    set of notebooks reproducing the high level functionality of Regulome Explorer.
-                                </p>
+                                A collection of notebooks written in R and Python, to serve as both tutorials or
+                                analysis tools for a range of users. Including reproductions of Regulome Explorer
+                                functionality.
                             </div>
                             <div class="panel-footer">
                                 <div class="row">
@@ -293,33 +280,69 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-lg-3">
+                        <div class="panel">
+                            <div class="panel-heading row">
+                                <div class="col-lg-9"><h4>Controlled Access Data</h4></div>
+                                <div class="col-lg-3 padding-left-0">
+                                    <div style="background-color: #fee9d5;border-radius: 8px;font-size: 35px; height:56.3px; padding: 7px; text-align: center; vertical-align: center;">
+                                        <i class="fa fa-key inline-block" aria-hidden="true"></i></div>
+
+                                    {#                                    <img src="{% static 'img/nb-icon.png' %}" class="img-fluid"#}
+                                    {#                                         alt="bq table icon">#}
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                Authenticated user with dbGaP authorization can access various controlled-access data.
+                            </div>
+                            <div class="panel-footer">
+                                <div class="row">
+                                    <div class="col-xs-2"></div>
+                                    <div class="col-xs-4 text-center">
+                                        <a class="learn-icon landing-icon" target="_blank"
+                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/progapi/progAPI-v4/Programmatic-Demo.html">
+                                        </a>
+                                        <div class="text-muted">Learn</div>
+                                    </div>
+                                    <div class="col-xs-4 text-center">
+                                        <a class="launch-icon landing-icon" target="_blank"
+                                           href="https://api-dot-isb-cgc.appspot.com/v4/swagger">
+                                        </a>
+                                        <div class="text-muted">Launch</div>
+                                    </div>
+                                    <div class="col-xs-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="container bottom-div">
-            <div class="row">
-                <div class="col-md-12">
-                    ISB-CGC is a component of the <a href="https://datacommons.cancer.gov/">NCI Cancer Research
-                    Data Commons</a> and has been funded in whole or in part with Federal funds from the
-                    National Cancer
-                    Institute, National Institutes of Health, Department of Health and Human Services, under
-                    Contract
-                    No.
-                    HHSN261201400008C and ID/IQ Agreement No. 17X146 under Contract No. HHSN261201500003I.
-                </div>
+        <div class="jumbotron-fluid bottom-div">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        ISB-CGC is a component of the <a href="https://datacommons.cancer.gov/">NCI Cancer Research
+                        Data Commons</a> and has been funded in whole or in part with Federal funds from the
+                        National Cancer
+                        Institute, National Institutes of Health, Department of Health and Human Services, under
+                        Contract
+                        No.
+                        HHSN261201400008C and ID/IQ Agreement No. 17X146 under Contract No. HHSN261201500003I.
+                    </div>
 
+                </div>
             </div>
         </div>
 
         <div class="jumbotron-fluid footer-div">
-            <div class="container footer-div">
+            <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-4">
                         COPYRIGHT 2020, ISB
                     </div>
                     <div class="col-lg-4 text-center">
                         <a href="{% url 'privacy' %}">PRIVACY POLICY</a>
-{#                        <a href="http://localhost:8080/privacy/">PRIVACY POLICY</a>#}
                     </div>
                     <div class="col-lg-4">
                         <div class="float-right social-media-div">

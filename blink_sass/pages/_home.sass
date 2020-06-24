@@ -7,14 +7,19 @@
 #landing
     font-family: 'Open Sans', sans-serif
     background-color: white
+    > .container-fluid
+        padding-bottom: 0
     h1
+        font-size: 65px
         font-size: 65px
     h2
         font-size: 30px
     h3
-        font-size: 20px
+        font-size: 16px
+        //font-size: 20px
     h4
-        font-size: 25px
+        font-size: 20px
+        //font-size: 25px
     a
         color: #226caa
         &:hover
@@ -37,53 +42,64 @@
                 text-decoration: none
     .banner-section
         padding: 0
+        a
+            text-decoration: underline
+        a, button.close
+            color: darken(#fee9d5,10%)
+
+            &:hover
+                color: darken(#e2ebf3,10%)
         .alert
             text-align: center
             background-color: #7e7e7e
             color: white
             margin: 0
             padding: 0 20px
-            a
-                color: #f18621
-                &:hover
-                    color: #2aabd2
         .alert-dismissible
             button.close
                 padding: 0 20px
-                &:hover
-                    color: #2aabd2
     .jumbotron-fluid
-        padding-top: 15px
-        padding-bottom: 15px
+        //padding: 8px 0
+        padding-bottom: 8px
 
     .panel-heading
-        min-height: 130px
+        padding: 5px 10px
+        //min-height: 130px
         img
             padding: 0
     .panel-body
-        min-height: 228px
+        padding: 5px 10px
+        //min-height: 228px
     .panel-footer
+        padding: 5px 10px
         font-size: 14px
         border-radius: 10px
     .landing-icon
         background-size: contain
         background-repeat: no-repeat
         background-position: center top
-        width: 60px
-        height: 60px
+        //width: 60px
+        width: 30px
+        height: 30px
+        //height: 60px
         margin: auto
         display: inline-block
 
     .panel
         border-radius: 10px
-        max-width: 350px
-        min-width: 200px
+        //max-width: 350px
+        //min-width: 200px
         box-shadow: none
         border-width: 1px
         border-style: solid
         font-size: 16px
         padding: 10px
-
+        h4
+            margin: 0
+        //> div
+        //    margin: 5px 0
+    //.panel-*
+    //    padding: 0
     .dbrowser-div
         background-color: #e2ebf3
         h3
@@ -100,6 +116,10 @@
             background-image: url('../img/blue-rocket.png')
             &:hover
                 background-image: url('../img/blue-rocket-hover.png')
+        //.panel-heading
+        //    min-height: 75px
+        .panel-body
+            min-height: 120px
     .resources-div
         background-color: #fee9d5
         h3
@@ -128,12 +148,20 @@
             background-image: url('../img/orange-github.png')
             &:hover
                 background-image: url('../img/orange-github-hover.png')
-    .container
-        padding: 10px 100px
+        .panel-heading
+            min-height: 77px
+        .panel-body
+            min-height: 164px
+    .jumbotron-fluid > .container-fluid
+        padding: 0 5%
     .bottom-div
-        font-size: 18px
+        font-size: 16px
+        padding: 15px 0
     .footer-div
         font-size: 16px
+        background-color: #eee
+        padding: 15px 0
+        //border-top: 1px solid #DDDDDD
         .social-media-div a
             font-size: 20px
             padding: 0 5px
