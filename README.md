@@ -30,21 +30,18 @@ PyCharm Pro can be used to run your server through Vagrant and the Google App En
  4. Click Add Remote
  5. Select Vagrant (if it asks to start the machine, say yes)
  6. Set the Python interpreter path to `/home/vagrant/www/shell/python-su.sh` and click Ok
- 7. Select **Languages & Frameworks > Google App Engine**
- 8. Change the SDK directory to `/home/vagrant/google_appengine/`
- 9. Click Ok to save
- 10. Go to **Run > Edit Configurations**
- 11. If there is not a Django Configuration, add one
- 12. Set the host to `0.0.0.0` and the port to `8080`. 
- 13. Set the Python Interpreter to the Vagrant Machine (if it is not set to that already); do NOT use any local interpreters installed on your host computer.
- 14. Set the working directory to `/home/vagrant/www`
- 15. Click `...` next to the `Environment variables:`, box and add the following values:
+ 7. Go to **Run > Edit Configurations**
+ 8. If there is not a Django Configuration, add one
+ 9. Set the host to `0.0.0.0` and the port to `8080`. 
+ 10. Set the Python Interpreter to the Vagrant Machine (if it is not set to that already); do NOT use any local interpreters installed on your host computer.
+ 11. Set the working directory to `/home/vagrant/www`
+ 12. Click `...` next to the `Environment variables:`, box and add the following values:
      `SECURE_LOCAL_PATH = ../parentDir/secure_files/`
      `PYTHONPATH = /home/vagrant/www:/home/vagrant/www/lib:/home/vagrant/www/ISB-CGC-Common`
      `VM_PYTHONPATH = /home/vagrant/www:/home/vagrant/www/lib:/home/vagrant/www/ISB-CGC-Common`
      `DJANGO_SETTINGS_MODULE = isb_cgc.settings`
      `PYTHONUNBUFFERED = 1`
- 16. Click ok to save
+ 13. Click ok to save
 
 **Note for OSX:** You will need to set *all* the scripts in the `shell/` directory to executable from your OSX terminal, using `chmod +x *.sh`   
 
