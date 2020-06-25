@@ -44,6 +44,7 @@ if [ -n "$CI" ]; then
 fi
 
 apt-get update -qq
+apt-get install ca-certificates
 
 # Install apt-get dependencies
 echo "Installing Dependencies..."
