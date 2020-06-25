@@ -13,7 +13,7 @@ window.config = function(props) {
       if (error.status == 429) {
           // Could use services manager here to bring up a dialog/modal if needed.
           // console.warn('test, navigate to https://ohif.org/');
-          window.location = 'https://storage.googleapis.com/idc-sandbox-002-static/quota_exceeded.html';
+          window.location =  'https://storage.googleapis.com/idc-sandbox-002-static/quota_exceeded.html';
       }
     },
     //healthcareApiEndpoint: 'https://console.cloud.google.com/healthcare/browser/locations/us/datasets/pre-mvp-temp/datastores?project=idc-dev-etl',
