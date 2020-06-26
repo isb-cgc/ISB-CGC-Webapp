@@ -2,7 +2,7 @@ window.config = function(props) {
   var servicesManager = props.servicesManager;
 
   return {
-    routerBasename: 'https://storage.googleapis.com/idc-web-static-files/dev/static/js/ohf/'
+    routerBasename: 'https://storage.googleapis.com/idc-web-static-files/dev/static/js/ohf/',
     enableGoogleCloudAdapter: true,
     enableGoogleCloudAdapterUI: false,
     showStudyList: true,
