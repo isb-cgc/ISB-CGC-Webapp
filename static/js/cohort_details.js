@@ -952,14 +952,14 @@ require([
 
             $('.curr-filter-panel').animate({
                 height: (max_height+15)+'px'
-            }, 800);
+            }, 800).toggleClass('gradient-overlay', false);
         });
         $('.less-filters button').on('click', function() {
             $('.less-filters').hide();
             $('.more-filters').show();
             $('.curr-filter-panel').animate({
                 height: '95px'
-            }, 800);
+            }, 800).toggleClass('gradient-overlay', true);
         });
 
         $('.more-details button').on('click', function() {
@@ -1342,7 +1342,7 @@ require([
         }
     });
     if(max_height < $('.curr-filter-panel').innerHeight()){
-        $('.curr-filter-panel').css('height','105px');
+        $('.curr-filter-panel').css('height','105px').toggleClass('gradient-overlay', false);
         $('.more-filters').hide();
     }
 
