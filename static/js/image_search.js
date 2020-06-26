@@ -1606,6 +1606,18 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
         }
      }
 
+     var addSliders = function(id){
+            attElems = $('#'+id).find('.list-group-item__body');
+            for (var i=0;i<attElems.length;i++){
+                attElem=attElems.get(i);
+                var id=attElem.id;
+                //$('#'+id).addClass('hide');
+                $('#'+id).find('.more-checks').addClass('hide');
+                $('#'+id).find('.less-checks').addClass('hide');
+                mkSlider(id,0,120,1,true);
+
+            }
+     }
 
 
      $(document).ready(function () {
@@ -1644,6 +1656,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             $('#age_at_diagnosis').find('.more-checks').addClass('hide');
             $('#age_at_diagnosis').find('.less-checks').addClass('hide');
             mkSlider('age_at_diagnosis',0,120,1,true);
+
+            //addSliders('quantitative');
 
             var numCol = $('#projects_table').children('tr').length
             $('#projects_panel').find('.total-file-count')[0].innerHTML = numCol.toString();
