@@ -2,7 +2,7 @@ window.config = function(props) {
   var servicesManager = props.servicesManager;
 
   return {
-    routerBasename: '/static/js/ohf/',
+    routerBasename: STATIC_FILES_URL + 'js/ohf/',
     enableGoogleCloudAdapter: true,
     enableGoogleCloudAdapterUI: false,
     showStudyList: true,
