@@ -10,10 +10,11 @@ window.config = function(props) {
     httpErrorHandler: error => {
       // This is 429 when rejected from the public idc sandbox too often.
       console.warn(error.status);
-
-      // Could use services manager here to bring up a dialog/modal if needed.
-      // console.warn('test, navigate to https://ohif.org/');
-      window.location =  'https://storage.googleapis.com/idc-sandbox-002-static/quota_exceeded.html';
+      if (error.status == 429) {
+          // Could use services manager here to bring up a dialog/modal if needed.
+          // console.warn('test, navigate to https://ohif.org/');
+          window.location =  'https://storage.googleapis.com/idc-sandbox-002-static/quota_exceeded.html';
+      }
     },
     //healthcareApiEndpoint: 'https://console.cloud.google.com/healthcare/browser/locations/us/datasets/pre-mvp-temp/datastores?project=idc-dev-etl',
      healthcareApiEndpoint: 'https://proxy-dot-idc-dev.appspot.com/v1beta1',
@@ -113,6 +114,34 @@ window.config = function(props) {
         keys: ['9'],
       },
     ],
-    cornerstoneExtensionConfig: {}
+    cornerstoneExtensionConfig: {},
+
+     whiteLabeling: {
+  /* Optional: Should return a React component to be rendered in the "Logo" section of the application's Top Navigation bar */
+    createLogoComponentFn: function(React) {
+      return React.createElement('a', {
+        target: '_self',
+        rel: 'noopener noreferrer',
+        className: 'header-brand',
+        href: '/',
+        style: {
+          display: 'block',
+          textIndent: '-9999px',
+          background: 'url(/static/img/idc-black.svg)',
+          backgroundSize: 'contain',
+          backgroundRepeat: 'no-repeat',
+          width: '200px',
+        },
+      });
+    },
+  },
+
+
+
   };
+
+
+
+
+
 };
