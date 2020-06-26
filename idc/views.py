@@ -46,7 +46,7 @@ from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
 from googleapiclient.errors import HttpError
 from cohorts.models import Cohort, Cohort_Perms
-from idc_collections.models import Program, Attribute, Attribute_Display_Values, DataSource, DataVersion, Collection
+from idc_collections.models import Program, Attribute, Attribute_Display_Values, DataSource, DataVersion, Collection, DataSetType
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 from .metadata_utils import get_collex_metadata
@@ -375,7 +375,7 @@ def explore_data_page(request):
         collapse_on = req.get('collapse_on', 'PatientID')
         is_json = (req.get('is_json', "False").lower() == "true")
 
-        versions = DataVersion.objects.filter(name__in=versions) if len(versions) else DataVersion.objects.filter(active=True)
+        versions = DataVersion.objects.select_related('datasettype').filter(name__in=versions) if len(versions) else DataVersion.objects.filter(active=True)
         sources = DataSource.objects.select_related('version').filter(version__in=versions, source_type=source)
 
         # For now we're only allowing TCGA+ispy1+lidc-idri+qin_headneck
@@ -386,14 +386,14 @@ def explore_data_page(request):
             filters['collection_id'] =  collectionFilterList
 
         for source in sources:
-            is_origin = bool(source.version.data_type == DataVersion.IMAGE_DATA)
+            is_origin = bool(source.version.datasettype.get_set_data_type() == DataSetType.IMAGE_DATA)
             # If a field list wasn't provided, work from a default set
             if is_origin and not len(fields):
                 fields = source.get_collection_attr(for_faceting=False).filter(default_ui_display=True).values_list('name', flat=True)
 
             if is_origin or \
-             (bool(source.version.data_type == DataVersion.ANCILLARY_DATA) and with_related) or \
-             (bool(source.version.data_type == DataVersion.DERIVED_DATA) and with_derived):
+             (bool(source.version.datasettype.get_set_data_type() == DataSetType.ANCILLARY_DATA) and with_related) or \
+             (bool(source.version.datasettype.get_set_data_type() == DataSetType.DERIVED_DATA) and with_derived):
                 if source.version.get_set_type() not in attr_by_source:
                     attr_by_source[source.version.get_set_type()] = {}
 
@@ -420,7 +420,7 @@ def explore_data_page(request):
             str((stop-start))
         ))
 
-        for set_name in [DataVersion.SET_TYPES[DataVersion.IMAGE_DATA], DataVersion.SET_TYPES[DataVersion.ANCILLARY_DATA]]:
+        for set_name in [DataVersion.SET_TYPES[DataSetType.IMAGE_DATA], DataVersion.SET_TYPES[DataSetType.ANCILLARY_DATA]]:
             if (set_name in source_metadata['facets']) and (set_name in attr_sets):
                 attr_display_vals = Attribute_Display_Values.objects.filter(
                     attribute__id__in=attr_sets[set_name]).to_dict()
@@ -446,7 +446,7 @@ def explore_data_page(request):
                             attr_by_source[set_name]['All']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
                 attr_by_source[set_name].pop('attributes')
 
-        set_name = DataVersion.SET_TYPES[DataVersion.DERIVED_DATA]
+        set_name = DataVersion.SET_TYPES[DataSetType.DERIVED_DATA]
         if (set_name in source_metadata['facets']) and (set_name in attr_sets):
             attr_display_vals = Attribute_Display_Values.objects.filter(attribute__id__in=attr_sets[set_name]).to_dict()
             for source in source_metadata['facets'][set_name]:

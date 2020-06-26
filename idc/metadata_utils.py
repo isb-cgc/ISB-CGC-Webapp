@@ -16,8 +16,9 @@
 
 import logging
 import re
-from idc_collections.models import DataSource, Attribute, Attribute_Display_Values, Program, DataVersion, DataSourceJoin
+from idc_collections.models import DataSource, Attribute, Attribute_Display_Values, Program, DataVersion, DataSourceJoin, DataSetType
 from solr_helpers import *
+import time
 from idc_collections.collex_metadata_utils import get_bq_metadata, get_bq_facet_counts
 from django.conf import settings
 
@@ -40,7 +41,7 @@ def get_collex_metadata(filters, fields, record_limit=1000, counts_only=False, w
         source_type = sources.first().source_type if sources else DataSource.SOLR
 
         if not versions:
-            versions = DataVersion.objects.filter(active=True)
+            versions = DataVersion.objects.select_related('datasettype').filter(active=True)
         if not versions.first().active and not sources:
             source_type = DataSource.BIGQUERY
 
@@ -53,9 +54,9 @@ def get_collex_metadata(filters, fields, record_limit=1000, counts_only=False, w
             raise Exception("[ERROR] Can't request archived data from Solr, only BigQuery.")
 
         if source_type == DataSource.BIGQUERY:
-            data_types = [DataVersion.IMAGE_DATA]
-            if with_ancillary: data_types.append(DataVersion.ANCILLARY_DATA)
-            if with_derived: data_types.append(DataVersion.DERIVED_DATA)
+            data_types = [DataSetType.IMAGE_DATA]
+            if with_ancillary: data_types.append(DataSetType.ANCILLARY_DATA)
+            if with_derived: data_types.append(DataSetType.DERIVED_DATA)
 
             sources = sources.filter(version__data_type__in=data_types)
 
@@ -67,8 +68,8 @@ def get_collex_metadata(filters, fields, record_limit=1000, counts_only=False, w
         elif source_type == DataSource.SOLR:
             results = get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record_limit)
 
-        for source in results['facets'][DataVersion.SET_TYPES[DataVersion.IMAGE_DATA]]:
-            facets = results['facets'][DataVersion.SET_TYPES[DataVersion.IMAGE_DATA]][source]['facets']
+        for source in results['facets'][DataSetType.get_set_type_name(DataSetType.IMAGE_DATA)]:
+            facets = results['facets'][DataSetType.get_set_type_name(DataSetType.IMAGE_DATA)][source]['facets']
             if 'BodyPartExamined' in facets:
                 if 'Kidney' in facets['BodyPartExamined']:
                     if 'KIDNEY' in facets['BodyPartExamined']:
@@ -98,6 +99,7 @@ def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record
     all_ui_attrs = sources.get_source_attrs(for_ui=True, for_faceting=False)
     # Eventually this will need to go per program
     for source in sources:
+        start = time.time()
         joined_origin = False
         if source.version.get_set_type() not in results['facets']:
             results['facets'][source.version.get_set_type()] = {}
@@ -120,7 +122,7 @@ def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record
                     else:
                         for ds in sources:
                             if ds.id != source.id and attr_name in all_ui_attrs['sources'][ds.id]['list']:
-                                if source.version.data_type != DataVersion.IMAGE_DATA and not joined_origin and ds.version.data_type == DataVersion.IMAGE_DATA:
+                                if source.version.get_set_data_type() != DataSetType.IMAGE_DATA and not joined_origin and ds.version.get_set_data_type() == DataSetType.IMAGE_DATA:
                                     joined_origin = True
                                 # DataSource join pairs are unique, so, this should only produce a single record
                                 source_join = DataSourceJoin.objects.get(from_src__in=[ds.id,source.id], to_src__in=[ds.id,source.id])
@@ -130,8 +132,8 @@ def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record
                 else:
                     logger.warning("[WARNING] Attribute {} not found in data sources {}".format(attr_name, ", ".join(list(sources.values_list('name',flat=True)))))
 
-        if not joined_origin and source.version.data_type != DataVersion.IMAGE_DATA:
-            ds = sources.filter(version__data_type=DataVersion.IMAGE_DATA).first()
+        if not joined_origin and source.version.get_set_data_type() != DataSetType.IMAGE_DATA:
+            ds = sources.filter(version__data_type=DataSetType.objects.get(data_type=DataSetType.IMAGE_DATA)).first()
             source_join = DataSourceJoin.objects.get(from_src__in=[ds.id, source.id], to_src__in=[ds.id, source.id])
             query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
                 source_join.get_col(ds.name), ds.name, source_join.get_col(source.name)
@@ -146,8 +148,10 @@ def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record
             'counts_only': True,
             'fields': None
         })
+        stop = time.time()
+        logger.info("[BENCHMARKING] Total time to examine source {} and query: {}".format(source.name, str(stop-start)))
 
-        if source.version.data_type == DataVersion.IMAGE_DATA:
+        if source.version.get_set_data_type() == DataSetType.IMAGE_DATA:
             results['facets'][source.version.get_set_type()][source.id] = {'facets': solr_result['facets']}
             if not counts_only:
                 solr_result = query_solr_and_format_result({

@@ -304,10 +304,10 @@ def main():
             {"name": "TCIA Quantitative Analysis", "ver": "0", "type": "D"},
         ])
 
-        add_solr_collex(['tcia_images'], "TCIA Image Data")
-        add_solr_collex(['segmentations'], "TCIA Segmentation Analysis")
-        add_solr_collex(['qualitative_measurements'], "TCIA Qualitative Analysis")
-        add_solr_collex(['quantitative_measurements'], "TCIA Quantitative Analysis")
+        add_solr_collex(['dicom_derived_all'], "TCIA Image Data")
+        add_solr_collex(['dicom_derived_all'], "TCIA Segmentation Analysis")
+        add_solr_collex(['dicom_derived_all'], "TCIA Qualitative Analysis")
+        add_solr_collex(['dicom_derived_all'], "TCIA Quantitative Analysis")
         add_solr_collex(['tcga_clin', 'tcga_bios'], "GDC Data Release 9")
 
         add_bq_tables(["idc-dev.metadata.dicom_mvp"], "TCIA Image Data")
@@ -316,10 +316,9 @@ def main():
         add_bq_tables(["idc-dev.metadata.qualitative_measurements"], "TCIA Qualitative Analysis")
         add_bq_tables(["idc-dev.metadata.quantitative_measurements"], "TCIA Quantitative Analysis")
 
-        add_source_joins(["tcia_images", "segmentations", "qualitative_measurements", "quantitative_measurements"], "SOPInstanceUID")
         add_source_joins(["tcga_clin", "tcga_bios"], "case_barcode")
         add_source_joins(
-            ["tcia_images", "segmentations", "qualitative_measurements", "quantitative_measurements"],
+            ["dicom_derived_all"],
             "PatientID",
             ["tcga_clin", "tcga_bios"], "case_barcode"
         )
@@ -460,7 +459,7 @@ def main():
 
             attr = all_attrs[line_split[0]]
 
-            attr['solr_collex'].append('tcia_images')
+            attr['solr_collex'].append('dicom_derived_all')
             attr['bq_tables'].append('idc-dev.metadata.dicom_mvp')
 
             attr['set_types'].append(DataSetType.IMAGE_DATA)
@@ -498,7 +497,7 @@ def main():
             if attr['type'] == Attribute.CONTINUOUS_NUMERIC:
                 attr['range'] = []
 
-            attr['solr_collex'].append('segmentations')
+            attr['solr_collex'].append('dicom_derived_all')
             attr['bq_tables'].append('idc-dev.metadata.segmentations')
 
             attr['set_types'].append(DataSetType.DERIVED_DATA)
@@ -534,7 +533,7 @@ def main():
             if attr['type'] == Attribute.CONTINUOUS_NUMERIC:
                 attr['range'] = []
 
-            attr['solr_collex'].append('quantitative_measurements')
+            attr['solr_collex'].append('dicom_derived_all')
             attr['bq_tables'].append('idc-dev.metadata.quantitative_measurements')
 
             attr['set_types'].append(DataSetType.DERIVED_DATA)
@@ -570,7 +569,7 @@ def main():
             if attr['type'] == Attribute.CONTINUOUS_NUMERIC:
                 attr['range'] = []
 
-            attr['solr_collex'].append('qualitative_measurements')
+            attr['solr_collex'].append('dicom_derived_all')
             attr['bq_tables'].append('idc-dev.metadata.qualitative_measurements')
 
             attr['set_types'].append(DataSetType.DERIVED_DATA)
