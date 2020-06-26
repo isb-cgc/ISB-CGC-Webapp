@@ -39,7 +39,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "idc.settings")
 import django
 django.setup()
 
-from idc_collections.models import Program, Collection, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataSourceJoin, DataVersion
+from idc_collections.models import Program, Collection, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataSourceJoin, DataVersion, DataSetType, Attribute_Set_Type
 
 from django.contrib.auth.models import User
 idc_superuser = User.objects.get(username="idc")
@@ -47,10 +47,36 @@ idc_superuser = User.objects.get(username="idc")
 logger = logging.getLogger('main_logger')
 
 
+def new_attribute(name, displ_name, type, units, display_default, cross_collex=False):
+    return {
+                'name': name,
+                "display_name": displ_name,
+                "type": type,
+                'units': units,
+                'cross_collex': cross_collex,
+                'solr_collex': [],
+                'bq_tables': [],
+                'set_types': [],
+                'display': display_default
+            }
+
+
+def add_data_sets(sets_set):
+    for dss in sets_set:
+        try:
+            obj, created = DataSetType.objects.update_or_create(name=dss['name'], data_type=dss['data_type'], set_type=dss['set_type'])
+
+            print("Data Set Type created:")
+            print(obj)
+        except Exception as e:
+            logger.error("[ERROR] Data Version {} may not have been added!".format(dss['name']))
+            logger.exception(e)
+
+
 def add_data_versions(dv_set):
     for dv in dv_set:
         try:
-            obj, created = DataVersion.objects.update_or_create(name=dv['name'], data_type=dv['type'], version=dv['ver'])
+            obj, created = DataVersion.objects.update_or_create(name=dv['name'], datasettype=dv['type'], version=dv['ver'])
 
             progs = Program.objects.filter(name="TCGA")
             ver_to_prog = []
@@ -223,7 +249,7 @@ def add_attributes(attr_set):
                 units=attr.get('units',None)
             )
             if 'range' in attr:
-                if len(attr['range']) > 0:
+                if len(attr['range']):
                     for attr_range in attr['range']:
                         Attribute_Ranges.objects.update_or_create(
                             **attr_range, attribute=obj
@@ -232,19 +258,23 @@ def add_attributes(attr_set):
                     Attribute_Ranges.objects.update_or_create(
                         attribute=obj
                     )
-            if 'display_vals' in attr:
+            if len(attr.get('display_vals',[])):
                 for dv in attr['display_vals']:
                     Attribute_Display_Values.objects.update_or_create(
                         raw_value=dv['raw_value'], display_value=dv['display_value'], attribute=obj
                     )
-            if 'solr_collex' in attr:
-                for solr in attr['solr_collex']:
-                    for sc in DataSource.objects.filter(name=solr):
-                        obj.data_sources.add(sc)
-            if 'bq_tables' in attr:
-                for table in attr['bq_tables']:
-                    for bqt in DataSource.objects.filter(name=table):
-                        obj.data_sources.add(bqt)
+            if len(attr.get('solr_collex',[])):
+                for sc in DataSource.objects.filter(name__in=attr['solr_collex']):
+                    obj.data_sources.add(sc)
+            if len(attr.get('bq_tables',[])):
+                for bqt in DataSource.objects.filter(name__in=attr['bq_tables']):
+                    obj.data_sources.add(bqt)
+            if len(attr.get('set_types',[])):
+                for set_type in DataSetType.objects.filter(data_type__in=attr['set_types']):
+                    Attribute_Set_Type.objects.update_or_create(
+                        datasettype=set_type, attribute=obj
+                    )
+
 
         except Exception as e:
             logger.error("[ERROR] Attribute {} may not have been added!".format(attr['name']))
@@ -259,6 +289,12 @@ def main():
             "short_name": "TCGA",
             "public": True
         }])
+
+        add_data_sets([
+            {'name': 'IDC Source Data', 'data_type': 'I', 'set_type': 'O'},
+            {'name': 'Clinical, Biospecimen, and Mutation Data', 'data_type': 'A', 'set_type': 'C'},
+            {'name': 'Derived Data', 'data_type': 'D', 'set_type': 'R'}
+        ])
 
         add_data_versions([
             {"name": "GDC Data Release 9", "ver": "r9", "type": "A"},
@@ -360,19 +396,18 @@ def main():
             line_split = line.split(",")
 
             if line_split[0] not in all_attrs:
-                all_attrs[line_split[0]] = {
-                'name': line_split[0],
-                "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
-                line_split[1],
-                "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
-                line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
-                "collex": Collection.objects.values_list('short_name', flat=True),
-                'solr_collex': [],
-                'bq_tables': [],
-                'display': True if line_split[-1] == 'True' else False
-            }
+                all_attrs[line_split[0]] = new_attribute(
+                    line_split[0],
+                    line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
+                    line_split[1],
+                    Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
+                    line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                    True if line_split[-1] == 'True' else False
+                )
 
             attr = all_attrs[line_split[0]]
+
+            attr['set_types'].append(DataSetType.ANCILLARY_DATA)
 
             if attr['name'] in clin_table_attr:
                 attr['solr_collex'].append('tcga_clin')
@@ -413,20 +448,22 @@ def main():
             line_split = line.split(",")
 
             if line_split[0] not in all_attrs:
-                all_attrs[line_split[0]] = {
-                    'name': line_split[0],
-                    "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else line_split[1],
-                    "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
-                    'cross_collex': True,
-                    'solr_collex': [],
-                    'bq_tables': [],
-                    'display': True if line_split[-1] == 'True' else False
-                }
+                all_attrs[line_split[0]] = new_attribute(
+                    line_split[0],
+                    line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
+                    line_split[1],
+                    Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
+                    line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                    True if line_split[-1] == 'True' else False,
+                    True
+                )
 
             attr = all_attrs[line_split[0]]
 
             attr['solr_collex'].append('tcia_images')
             attr['bq_tables'].append('idc-dev.metadata.dicom_mvp')
+
+            attr['set_types'].append(DataSetType.IMAGE_DATA)
 
             if attr['name'] in display_vals:
                 if 'preformatted_values' in display_vals[attr['name']]:
@@ -446,15 +483,15 @@ def main():
             line_split = line.split(",")
 
             if line_split[0] not in all_attrs:
-                all_attrs[line_split[0]] = {
-                    'name': line_split[0],
-                    "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else line_split[1],
-                    "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
-                    'cross_collex': True,
-                    'solr_collex': [],
-                    'bq_tables': [],
-                    'display': True if line_split[-1] == 'True' else False
-                }
+                all_attrs[line_split[0]] = new_attribute(
+                    line_split[0],
+                    line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
+                    line_split[1],
+                    Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
+                    line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                    True if line_split[-1] == 'True' else False,
+                    True
+                )
 
             attr = all_attrs[line_split[0]]
 
@@ -463,6 +500,8 @@ def main():
 
             attr['solr_collex'].append('segmentations')
             attr['bq_tables'].append('idc-dev.metadata.segmentations')
+
+            attr['set_types'].append(DataSetType.DERIVED_DATA)
 
             if attr['name'] in display_vals:
                 if 'preformatted_values' in display_vals[attr['name']]:
@@ -480,18 +519,15 @@ def main():
             line_split = line.split(",")
 
             if line_split[0] not in all_attrs:
-                all_attrs[line_split[0]] = {
-                'name': line_split[0],
-                "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
-                line_split[1],
-                "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
-                line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
-                'units': line_split[-1],
-                'cross_collex': True,
-                'solr_collex': [],
-                'bq_tables': [],
-                'display': True if line_split[3] == 'True' else False
-            }
+                all_attrs[line_split[0]] = new_attribute(
+                    line_split[0],
+                    line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
+                    line_split[1],
+                    Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
+                    line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                    True if line_split[-1] == 'True' else False,
+                    True
+                )
 
             attr = all_attrs[line_split[0]]
 
@@ -500,6 +536,8 @@ def main():
 
             attr['solr_collex'].append('quantitative_measurements')
             attr['bq_tables'].append('idc-dev.metadata.quantitative_measurements')
+
+            attr['set_types'].append(DataSetType.DERIVED_DATA)
 
             if attr['name'] in display_vals:
                 if 'preformatted_values' in display_vals[attr['name']]:
@@ -517,17 +555,15 @@ def main():
             line_split = line.split(",")
 
             if line_split[0] not in all_attrs:
-                all_attrs[line_split[0]] = {
-                    'name': line_split[0],
-                    "display_name": line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
+                all_attrs[line_split[0]] = new_attribute(
+                    line_split[0],
+                    line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
                     line_split[1],
-                    "type": Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
+                    Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
                     line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
-                    'cross_collex': True,
-                    'solr_collex': [],
-                    'bq_tables': [],
-                    'display': True if line_split[-1] == 'True' else False
-                }
+                    True if line_split[-1] == 'True' else False,
+                    True
+                )
 
             attr = all_attrs[line_split[0]]
 
@@ -536,6 +572,8 @@ def main():
 
             attr['solr_collex'].append('qualitative_measurements')
             attr['bq_tables'].append('idc-dev.metadata.qualitative_measurements')
+
+            attr['set_types'].append(DataSetType.DERIVED_DATA)
 
             if attr['name'] in display_vals:
                 if 'preformatted_values' in display_vals[attr['name']]:
