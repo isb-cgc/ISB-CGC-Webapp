@@ -13,5 +13,6 @@ def additional_context(request):
             'STORAGE_URI': settings.GCS_STORAGE_URI,
             'FILE_SIZE_UPLOAD_MAX': settings.FILE_SIZE_UPLOAD_MAX,
             'RESTRICTED_ACCESS': settings.RESTRICT_ACCESS,
-            'RESTRICTED_ACCESS_GROUPS': settings.RESTRICTED_ACCESS_GROUPS
+            'RESTRICTED_ACCESS_GROUPS': settings.RESTRICTED_ACCESS_GROUPS,
+            'DICOM_STORE_PATH': settings.DICOM_STORE_PATH
     }

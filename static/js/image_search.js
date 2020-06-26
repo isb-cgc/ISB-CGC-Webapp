@@ -451,7 +451,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                         var patientId = curData.PatientID;
                         var studyId = curData.StudyInstanceUID;
                         var ppStudyId = pretty_print_id(studyId);
-                        var fetchUrl = '/projects/idc-dev-etl/locations/us/datasets/pre-mvp-temp/dicomStores/cross-collection-temp/study/' + studyId;
+                        var fetchUrl = DICOM_STORE_PATH + studyId;
                         var hrefTxt = '<a href="' + fetchUrl + '" target="_blank">' + ppStudyId + '</a><span class="tooltiptext_ex">' + studyId + '</span>';
                         //var hrefTxt =  ppStudyId + '<span class="tooltiptext_ex">' + studyId + '</span>';
                         var pclass = 'project_' + projectId;
@@ -530,7 +530,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 var seriesNumber = curSeries.SeriesNumber;
                 var rowId = 'series_' + projectId + '_' + patientIndex[patientId].toString() + "_" + studyIndex[studyId].toString() + '_' + seriesNumber.toString();
                 var pclass = 'project_' + projectId;
-                var fetchUrl = '/projects/idc-dev-etl/locations/us/datasets/pre-mvp-temp/dicomStores/cross-collection-temp/study/' + studyId;
+                var fetchUrl = DICOM_STORE_PATH + studyId;
                 var hrefTxt = '<a href="' + fetchUrl + '">' + studyId + '</a>';
 
                 //var sclass='study_'+projectId+'_'+patientIndex[patientId].toString()+"_"+studyIndex[studyId].toString();
