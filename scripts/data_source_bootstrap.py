@@ -52,7 +52,8 @@ ranges_needed = {
     'days_to_last_known_alive': 'by_500',
     'days_to_last_followup': 'by_500',
     'year_of_diagnosis': 'year',
-    'days_to_birth': 'by_negative_3k'
+    'days_to_birth': 'by_negative_3k',
+    'age_at_diagnosis': None
 }
 
 ranges = {
@@ -377,8 +378,12 @@ def main():
 
             attr = attr_list[line_split[0]]
 
-            attr['solr_collex'].extend(list(DataSource.objects.filter(version__in=DataVersion.objects.filter(active=True,data_type=DataVersion.FILE_DATA), source_type=DataSource.SOLR).values_list('name', flat=True)))
-            attr['bq_tables'].extend(list(DataSource.objects.filter(version__in=DataVersion.objects.filter(active=True,data_type=DataVersion.FILE_DATA), source_type=DataSource.BIGQUERY).values_list('name', flat=True)))
+            attr['solr_collex'].extend(list(DataSource.objects.filter(
+                version__in=DataVersion.objects.filter(active=True,data_type=DataVersion.FILE_DATA),
+                source_type=DataSource.SOLR).values_list('name', flat=True)))
+            attr['bq_tables'].extend(list(DataSource.objects.filter(
+                version__in=DataVersion.objects.filter(active=True,data_type=DataVersion.FILE_DATA),
+                source_type=DataSource.BIGQUERY).values_list('name', flat=True)))
 
         attr_file.close()
 
