@@ -1,1 +1,1 @@
-sudo SECURE_LOCAL_PATH="$SECURE_LOCAL_PATH" PYTHONPATH="$VM_PYTHONPATH" /usr/bin/python3 "$@"
+sudo SECURE_LOCAL_PATH="../parentDir/secure_files/" PYTHONPATH="/home/vagrant/www:/home/vagrant/www/lib:/home/vagrant/www/ISB-CGC-Common" /usr/bin/python3 "$@"
