@@ -24,6 +24,8 @@
         color: #226caa
         &:hover
             color: #2aabd2
+    .alert
+        margin: 0 -15px
     .header-div
         text-align: center
         padding: 15px
@@ -40,15 +42,18 @@
             &:hover
                 color: #2aabd2
                 text-decoration: none
-    .banner-section
+    .banner-section, .footer-div
         padding: 0
         a
             text-decoration: underline
         a, button.close
             color: darken(#fee9d5,10%)
-
             &:hover
                 color: darken(#e2ebf3,10%)
+    .banner-section
+
+
+
         .alert
             text-align: center
             background-color: #7e7e7e
@@ -158,13 +163,18 @@
     .bottom-div
         font-size: 16px
         padding: 15px 0
-    .footer-div
-        font-size: 16px
-        background-color: #eee
-        padding: 15px 0
+    .footer-div, .footer-div a
+        color: white
+        font-weight: bold
+        font-size: 14px
+        background-color: #7e7e7e
+        //background-color: #eee
+        padding: 12px 0
         //border-top: 1px solid #DDDDDD
         .social-media-div a
-            font-size: 20px
+            //color: white
+            font-size: 15px
+            //font-size: 20px
             padding: 0 5px
             text-decoration: none
 
