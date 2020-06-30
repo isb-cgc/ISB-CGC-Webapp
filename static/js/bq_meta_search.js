@@ -91,6 +91,44 @@ require([
                     'className': 'label-filter colvis-toggle'
                 },
                 {
+                    'name': 'dataAccess',
+                    'data': function (data) {
+                        return filtered_label_data(data.labels, 'access');
+                        // return (data.labels && data.labels.access) ? data.labels.access: null;
+                    },
+                    'render': function(data, type){
+                        if (type === 'display') {
+                            if (data != null && data.toLowerCase() === 'open') {
+                                return '<i class="fa fa-unlock"  title="Open Access" aria-hidden="true"></i>';
+                            }
+                            // if(data != null && data.toLowerCase() === 'open'){
+                            else if (data != null && data.toLowerCase() === 'controlled') {
+
+                                return '<i class="fa fa-lock" aria-hidden="true" title="Controlled Access"></i>';
+                                // +
+                                // (user_is_authenticated ? '':
+                                // 'Sign in to verify your data access')
+
+                                // '<button class="dropdown-toggle dropdown-btn" type="button" data-toggle="collapse" data-target="#dropdownMenu'+meta.row+'" aria-haspopup="true" aria-expanded="true">\n' +
+                                // ' <span class="caret"></span>' +
+                                // '</button>' +
+                                // '<div class="collapse" id="dropdownMenu'+meta.row+'">' +
+                                // ' <div><button class="dt-button" href="#">Unlock</button></div>' +
+                                // '</div>'
+                            }
+                            else {
+                                return '';
+                            }
+                        }
+                        else {
+                            return data;
+                        }
+                    },
+                    'className': 'label-filter text-center',
+                    'orderable': false
+
+                },
+                {
                     'name': 'datasetId',
                     'data': 'tableReference.datasetId',
                     'visible': false,
@@ -174,43 +212,7 @@ require([
                     'className': 'label-filter colvis-toggle',
                     'visible': false
                 },
-                {
-                    'name': 'dataAccess',
-                    'data': function (data) {
-                        return filtered_label_data(data.labels, 'access');
-                        // return (data.labels && data.labels.access) ? data.labels.access: null;
-                    },
-                    'render': function(data, type){
-                        if (type === 'display') {
-                            if (data != null && data.toLowerCase() === 'open') {
-                                return '<i class="fa fa-unlock"  title="Open Access" aria-hidden="true"></i>';
-                            }
-                            // if(data != null && data.toLowerCase() === 'open'){
-                            else if (data != null && data.toLowerCase() === 'controlled') {
 
-                                return '<i class="fa fa-lock" aria-hidden="true" title="Controlled Access"></i>';
-                                // +
-                                // (user_is_authenticated ? '':
-                                // 'Sign in to verify your data access')
-
-                                // '<button class="dropdown-toggle dropdown-btn" type="button" data-toggle="collapse" data-target="#dropdownMenu'+meta.row+'" aria-haspopup="true" aria-expanded="true">\n' +
-                                // ' <span class="caret"></span>' +
-                                // '</button>' +
-                                // '<div class="collapse" id="dropdownMenu'+meta.row+'">' +
-                                // ' <div><button class="dt-button" href="#">Unlock</button></div>' +
-                                // '</div>'
-                            }
-                            else {
-                                return '';
-                            }
-                        }
-                        else {
-                            return data;
-                        }
-                    },
-                    'className': 'label-filter text-center colvis-toggle'
-
-                },
                 {
                     'name': 'status',
                     'data': function (data) {
@@ -225,11 +227,11 @@ require([
                 {
                     'name': 'numRows',
                     'data': function (data){
-                        if (data.type.toLowerCase() === 'view'){
-                            return 'N/A';
-                        }
-                        else
-                            return data.numRows;
+                        // if (data.type.toLowerCase() === 'view'){
+                        //     return 'N/A';
+                        // }
+                        // else
+                        return data.numRows;
                     },
                     'className': 'text-right colvis-toggle',
                     'render': function(data, type){
@@ -525,13 +527,14 @@ require([
 
             '</td>'+
             '</tr><tr>' +
-            '<td style="vertical-align:top;"><strong>Type</strong></td>' +
-            '<td>' + d.type.toLowerCase()+ '</td>' +
-            '</tr><tr>' +
+            // '<td style="vertical-align:top;"><strong>Type</strong></td>' +
+            // '<td>' + d.type.toLowerCase()+ '</td>' +
+            // '</tr><tr>' +
             '<td style="vertical-align:top;"><strong>Dataset ID</strong></td>' +
             '<td>' + d.tableReference.datasetId+ '</td>' +
             '</tr><tr>' +
-            '<td style="vertical-align:top;"><strong>'+( d.type.toLowerCase() === 'table'? 'Table': 'View')+' ID</strong></td>' +
+            '<td style="vertical-align:top;"><strong>Table ID</strong></td>' +
+            // '<td style="vertical-align:top;"><strong>'+( d.type.toLowerCase() === 'table'? 'Table': 'View')+' ID</strong></td>' +
             '<td>' + d.tableReference.tableId + '</td>' +
             '</tr><tr>' +
             '<td style="vertical-align:top;"><strong>Description</strong></td>' +
