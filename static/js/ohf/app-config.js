@@ -2,7 +2,7 @@ window.config = function(props) {
   var servicesManager = props.servicesManager;
 
   return {
-    routerBasename: 'https://storage.googleapis.com/idc-web-static-files/dev/static/js/ohf/',
+    routerBasename: '/',
     enableGoogleCloudAdapter: true,
     enableGoogleCloudAdapterUI: false,
     showStudyList: true,
@@ -127,7 +127,7 @@ window.config = function(props) {
         style: {
           display: 'block',
           textIndent: '-9999px',
-          background: 'url(/static/img/idc-black.svg)',
+          background: 'url(/idc-black.svg)',
           backgroundSize: 'contain',
           backgroundRepeat: 'no-repeat',
           width: '200px',
