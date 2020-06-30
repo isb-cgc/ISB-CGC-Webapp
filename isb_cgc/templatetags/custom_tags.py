@@ -112,7 +112,7 @@ def check_for_order(items, attr):
         ordered_items = []
         for ordinal in item_order:
             for item in items:
-                if item['value'] == ordinal:
+                if item.get('displ_value','') == ordinal or item.get('value','') == ordinal:
                     ordered_items.append(item)
         return ordered_items
     elif attr in ALPHANUM_SORT:

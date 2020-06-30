@@ -398,7 +398,8 @@ nav {
   background-color: rgba(255, 255, 255, 0.25);
   display: inline-block;
   position: absolute;
-  animation: ripple 0.3s ease-out; }
+  -webkit-animation: ripple 0.3s ease-out;
+          animation: ripple 0.3s ease-out; }
 
 .btn-default {
   color: #fff !important;
@@ -457,6 +458,7 @@ nav {
 .lines-button {
   display: inline-block;
   padding: 1rem 0.5rem;
+  -webkit-transition: .3s;
   transition: .3s;
   cursor: pointer;
   -webkit-user-select: none;
@@ -470,6 +472,7 @@ nav {
     height: 0.28571rem;
     background: #2A537A;
     border-radius: 0.14286rem;
+    -webkit-transition: 0.3s;
     transition: 0.3s;
     position: relative;
     vertical-align: middle; }
@@ -479,15 +482,19 @@ nav {
       height: 0.28571rem;
       background: #2A537A;
       border-radius: 0.14286rem;
+      -webkit-transition: 0.3s;
       transition: 0.3s;
       left: 0;
-      transform-origin: 0.14286rem center; }
+      -webkit-transform-origin: 0.14286rem center;
+              transform-origin: 0.14286rem center; }
     .lines-button.collapsed .lines:before {
       top: 0.5rem;
-      transform: rotate3d(0, 0, 1, 0); }
+      -webkit-transform: rotate3d(0, 0, 1, 0);
+              transform: rotate3d(0, 0, 1, 0); }
     .lines-button.collapsed .lines:after {
       top: -0.5rem;
-      transform: rotate3d(0, 0, 1, 0); }
+      -webkit-transform: rotate3d(0, 0, 1, 0);
+              transform: rotate3d(0, 0, 1, 0); }
   .lines-button.collapsed:hover {
     opacity: 1; }
     .lines-button.collapsed:hover .lines:before {
@@ -500,6 +507,7 @@ nav {
     height: 0.28571rem;
     background: transparent;
     border-radius: 0.14286rem;
+    -webkit-transition: 0.3s;
     transition: 0.3s;
     position: relative;
     vertical-align: middle;
@@ -510,17 +518,22 @@ nav {
       height: 0.28571rem;
       background: #2A537A;
       border-radius: 0.14286rem;
+      -webkit-transition: 0.3s;
       transition: 0.3s;
       position: absolute;
       content: '';
-      transform-origin: 50% 50%;
+      -webkit-transform-origin: 50% 50%;
+              transform-origin: 50% 50%;
       top: 0;
       width: 2rem; }
     .lines-button .lines:before {
-      transform: rotate3d(0, 0, 1, 45deg); }
+      -webkit-transform: rotate3d(0, 0, 1, 45deg);
+              transform: rotate3d(0, 0, 1, 45deg); }
     .lines-button .lines:after {
-      transform: rotate3d(0, 0, 1, -45deg); }
+      -webkit-transform: rotate3d(0, 0, 1, -45deg);
+              transform: rotate3d(0, 0, 1, -45deg); }
   .lines-button:active {
+    -webkit-transition: 0;
     transition: 0;
     background: rgba(0, 0, 0, 0.1); }
 
@@ -796,10 +809,12 @@ nav {
   padding: 5px; }
 
 body {
+  -webkit-transition: all 0.4s ease-in;
   transition: all 0.4s ease-in; }
 
 .menu-open {
   padding-top: 50px;
+  -webkit-transition: all 0.4s ease-in-out;
   transition: all 0.4s ease-in-out; }
 
 .navbar-left {
@@ -965,7 +980,8 @@ a.skip-nav {
       content: "\f0da";
       position: absolute;
       top: 50%;
-      transform: translateY(-50%);
+      -webkit-transform: translateY(-50%);
+              transform: translateY(-50%);
       right: 15px; }
     .menu-item.has-drop-down__more > .drop {
       display: none;
@@ -1089,7 +1105,8 @@ a.skip-nav {
   .label .fa-times, .tokenfield .token .fa-times {
     position: absolute;
     top: 50%;
-    transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+            transform: translateY(-50%);
     right: 5px; }
   .label.label-default, .tokenfield .token {
     background-color: #F4F8FF; }
@@ -1173,7 +1190,8 @@ a.skip-nav {
         position: absolute;
         left: 0;
         top: 50%;
-        transform: translateY(-50%); }
+        -webkit-transform: translateY(-50%);
+                transform: translateY(-50%); }
   .list-group .list-group-item__body {
     padding-bottom: 10px; }
   .list-group .list-group-item .search_enter .search_input {
@@ -1295,14 +1313,20 @@ a.skip-nav {
       position: absolute;
       left: 0;
       bottom: -1px;
-      transform: scale(0); }
+      -webkit-transform: scale(0);
+              transform: scale(0); }
   .nav-tabs > li.active > a, .nav-tabs > li > a > li.active > a, .nav-tabs li.active > a:focus > li.active > a, .nav-tabs.nav-stacked > li.active > a > li.active > a, .nav-tabs.nav-stacked > li:hover > a > li.active > a, .nav-tabs li.active > a:focus, .nav-tabs > li > a li.active > a:focus, .nav-tabs.nav-stacked li.active > a:focus li.active > a:focus {
     border: none;
     color: #a66206; }
     .nav-tabs > li.active > a:after, .nav-tabs > li > a > li.active > a:after, .nav-tabs li.active > a:focus > li.active > a:after, .nav-tabs.nav-stacked > li.active > a > li.active > a:after, .nav-tabs.nav-stacked > li:hover > a > li.active > a:after, .nav-tabs li.active > a:focus:after, .nav-tabs > li > a li.active > a:focus:after, .nav-tabs li.active > a:focus li.active > a:focus:after {
-      transform: scale(1);
-      transform-origin: left;
-      transition: transform 0.25s ease-in-out; }
+      -webkit-transform: scale(1);
+              transform: scale(1);
+      -webkit-transform-origin: left;
+              transform-origin: left;
+      -webkit-transition: -webkit-transform 0.25s ease-in-out;
+      transition: -webkit-transform 0.25s ease-in-out;
+      transition: transform 0.25s ease-in-out;
+      transition: transform 0.25s ease-in-out, -webkit-transform 0.25s ease-in-out; }
   .nav-tabs > li.active:hover > a, .nav-tabs > li > a > li.active:hover > a, .nav-tabs li.active > a:focus > li.active:hover > a {
     border: none;
     border-bottom: 1px solid #d9d9d9;
@@ -1473,7 +1497,8 @@ a.skip-nav {
     right: 10px;
     position: absolute;
     top: 50%;
-    transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+            transform: translateY(-50%);
     font-size: 14px;
     font-weight: 400; }
   .message-error:before {
@@ -1500,6 +1525,7 @@ a.skip-nav {
   z-index: 100; }
   .menu-open .fly-out {
     top: 119px;
+    -webkit-transition: top 0.6s ease-in-out;
     transition: top 0.6s ease-in-out; }
   .fly-out .flyout-heading {
     border-bottom: 1px solid #D5D5D5;
@@ -2244,6 +2270,16 @@ section .min-max {
   padding: 0;
   margin-bottom: 15px; }
 
+#cohort-details .gradient-overlay, #cohort-filelist .gradient-overlay {
+  position: relative; }
+  #cohort-details .gradient-overlay:after, #cohort-filelist .gradient-overlay:after {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    content: "";
+    background: linear-gradient(to top, white 15%, rgba(255, 255, 255, 0) 80%); }
+
 #cohort-details .details-panel, #cohort-filelist .details-panel {
   overflow: hidden;
   height: 110px; }
@@ -2573,22 +2609,18 @@ section .min-max {
 #cohort-details .search-checkbox-list label, #cohort-filelist .search-checkbox-list label {
   width: 100%; }
 
-#cohort-details .sample_count, #cohort-details .case_count, #cohort-filelist .sample_count, #cohort-filelist .case_count {
+#cohort-details .sample_count, #cohort-filelist .sample_count {
   background-color: #bababa;
   color: white;
   border-radius: 10px;
   font-size: .8em;
   padding: 2px 5px;
   text-align: right; }
-  #cohort-details .sample_count:after, #cohort-filelist .sample_count:after {
-    content: 'sample(s)';
-    font-size: 0.9em;
-    padding-left: 5px; }
-  #cohort-details .case_count:after, #cohort-filelist .case_count:after {
-    content: 'case(s)';
-    font-size: 0.9em;
-    padding-left: 5px; }
 
+#cohort-details .sample_count:after, #cohort-filelist .sample_count:after {
+  content: 'sample(s)';
+  font-size: 0.9em;
+  padding-left: 5px; }
 
 #cohort-filelist #placeholder .panel-body {
   height: 500px;
@@ -3069,8 +3101,8 @@ html {
     #landing .landing-content-div .container .header-div .header-content-div {
       position: relative;
       top: 45%;
-        -webkit-transform: translateY(-45%);
-                transform: translateY(-45%); }
+      -webkit-transform: translateY(-45%);
+              transform: translateY(-45%); }
       #landing .landing-content-div .container .header-div .header-content-div a {
         color: #4CC2D6; }
       #landing .landing-content-div .container .header-div .header-content-div .lj-title h1 {
