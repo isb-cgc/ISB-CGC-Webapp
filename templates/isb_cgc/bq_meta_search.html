@@ -136,6 +136,14 @@
                             {% endfor %}
                         </select>
                     </div>
+                    <div>
+                        <label>Access</label>
+                        <select id="dataAccess" class="form-control bq-select" data-column-name="dataAccess">
+                            <option value="" selected>All</option>
+                            <option value="open">Open Access</option>
+                            <option value="controlled">Controlled Access</option>
+                        </select>
+                    </div>
                     <div id="advSearch0" class="adv-div collapse">
                         <div>
                             <label>Dataset ID</label>
@@ -186,6 +194,7 @@
                     <tr>
                         <th style="width:3%;"></th>
                         <th style="width:17%;">Name</th>
+                        <th></th>
                         <th style="width:15%;">Dataset ID</th>
                         <th style="width:15%;">Table ID</th>
                         <th>Full ID</th>
@@ -195,6 +204,7 @@
                         <th>Source</th>
                         <th>Data Type</th>
                         <th title="Experimental Strategy">Exp. Strategy</th>
+
                         <th style="width:9%;">Status</th>
                         <th style="width:8%;">Rows</th>
                         <th style="width:8%;">Created</th>
@@ -264,6 +274,8 @@
     </div>
     <script type="text/javascript">
         var gcp_modal_disabled = ('{{ user.is_authenticated}}' === 'True');
+        {#var user_is_authenticated = ('{{ user.is_authenticated}}' === 'True');#}
+        {#var user_is_ca_authorized = false;#}
     </script>
 {% endblock %}
 
