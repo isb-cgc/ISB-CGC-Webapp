@@ -77,12 +77,18 @@ if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
         sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/deployment.key.json
     # otherwise just use privatekey.json
     else
-        sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/${SECURE_LOCAL_PATH}/privatekey.json
+        sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/${SECURE_LOCAL_PATH}${GOOGLE_APPLICATION_CREDENTIALS}
         sudo gcloud config set project "${GCLOUD_PROJECT_ID}"
     fi
     echo "Downloading SQL Table File..."
     sudo gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/dev_table_and_routines_file.sql" ${HOMEROOT}/scripts/metadata_featdef_tables.sql
 fi
+
+if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
+    echo "[ERROR] Unable to download database seed file -halting build."
+    exit 1
+fi
+
 echo "Applying SQL Table File... (may take a while)"
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
 
@@ -110,6 +116,9 @@ mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NA
 
 #echo "Bootstrapping new models..."
 #python3 ${HOMEROOT}/scripts/data_source_bootstrap.py
+
+#echo "ETLing additional models..."
+#python3 ${HOMEROOT}/scripts/data_source_etl.py -j data_sources.json
 
 # Setting up Cron token
 python3 ${HOMEROOT}/scripts/create_api_token.py

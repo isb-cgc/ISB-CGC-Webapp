@@ -34,7 +34,7 @@
                                                                        data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
                                                                        data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
                                                                 {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
-                                                                <span class="float-right sample_count count">{{ v.count|format_num_with_commmas }}</span>
+                                                                <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>
                                                             </label>
                                                         </li>
                                                     {% elif forloop.counter0 == 6 and num_more > 0 %}
@@ -46,7 +46,7 @@
                                                                        data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
                                                                        data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
                                                                 {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
-                                                                <span class="float-right sample_count count">{{ v.count|format_num_with_commmas }}</span>
+                                                                <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>
                                                             </label>
                                                         </li>
                                                     {% else %}
@@ -57,7 +57,7 @@
                                                                        data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
                                                                        data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
                                                                 {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
-                                                                 <span class="float-right sample_count count">{{ v.count|format_num_with_commmas }}</span>
+                                                                 <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>
                                                             </label>
                                                         </li>
                                                     {% endif %}
@@ -77,7 +77,7 @@
                 <div role="tabpanel" class="tab-pane" id="data-filters-{{ program.id }}">
                     <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
                         {% for attr in data_types|get_sorted_items %}
-                            {% if data_type_counts|list_contains_name:attr.name %}
+                            {% if attr_counts|list_contains_name:attr.name %}
                                 <li class="list-group-item">
                                 <div class="list-group-item__heading" role="tab" id="{{ program.id }}-heading-{{ attr.name }}">
                                     <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#{{ program.id }}-collapse-{{ attr.name }}"
@@ -89,13 +89,13 @@
                                      aria-labelledby="{{ program.id }}-heading-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}"
                                      data-feature-type="datatype" data-feature-id="data_type">
                                     <ul class="search-checkbox-list" id="{{ program.id }}-{{ attr.name }}">
-                                        {% for v in data_type_counts|get_named_item:attr.name|get_item:'values' %}
+                                        {% for v in attr_counts|get_named_item:attr.name|get_item:'values' %}
                                             <li class="checkbox">
                                                 <label>
                                                     <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
                                                            data-value-displ-name="{% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %}"
                                                            data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
-                                                     {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %} <span class="float-right sample_count count">{{ v.count|format_num_with_commmas }}</span>
+                                                     {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %} <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>
                                                 </label>
                                             </li>
                                         {% endfor %}
@@ -256,7 +256,7 @@
                 <div class="row col-md-6">
                     <span class="detail-label">Total Number of Samples:</span>
                     <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                    <span class="total-values total-samples" id="p-{{ program.id }}-data-total-samples">{{ metadata_counts.total|format_num_with_commmas }}</span>
+                    <span class="total-values total-samples" id="p-{{ program.id }}-data-total-samples">{{ metadata_counts.samples|format_num_with_commmas }}</span>
                 </div>
             </div>
         </div>
@@ -271,17 +271,6 @@
             <div class="more-graphs"><button class="btn btn-link" role="button">Show More</button></div>
             <div class="less-graphs" style="display: none;"><button class="btn btn-link" role="button">Show Less</button></div>
         </div>
-        {% if cohort.id %}
-        <div class="parallel-sets panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">Data File Availability</h4>
-            </div>
-            <div class="panel-body">
-                <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                <div class="multi-categorical" id="multi-categorical-{{ program.id }}"></div>
-            </div>
-        </div>
-        {% endif %}
     </div>
 </div>
 <script type="text/javascript">

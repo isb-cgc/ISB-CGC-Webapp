@@ -112,7 +112,7 @@
                 <div class="panel-heading">
                     <h4 class="panel-title">Current Filters</h4>
                 </div>
-                <div class="panel-body curr-filter-panel">
+                <div class="panel-body curr-filter-panel gradient-overlay">
                     {% for prog, filters in cohort.get_current_filters.items %}
                         <div class="col-sm-{{ cohort.get_current_filters.keys|get_prog_col_size }} prog-filter-set">
                         <h5>{{ prog }}</h5>
