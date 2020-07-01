@@ -148,6 +148,7 @@ jobs:
             - ./etc
             - ./static
             - ./idc
+            - ./ohf
             - ./offline
             - ./scripts
             - ./templates

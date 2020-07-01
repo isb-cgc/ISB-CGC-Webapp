@@ -39,7 +39,9 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "idc.settings")
 import django
 django.setup()
 
-from idc_collections.models import Program, Collection, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataSourceJoin, DataVersion, DataSetType, Attribute_Set_Type
+from idc_collections.models import Program, Collection, Attribute, Attribute_Ranges, \
+    Attribute_Display_Values, DataSource, DataSourceJoin, DataVersion, DataSetType, \
+    Attribute_Set_Type, Attribute_Display_Category
 
 from django.contrib.auth.models import User
 idc_superuser = User.objects.get(username="idc")
@@ -47,7 +49,7 @@ idc_superuser = User.objects.get(username="idc")
 logger = logging.getLogger('main_logger')
 
 
-def new_attribute(name, displ_name, type, units, display_default, cross_collex=False):
+def new_attribute(name, displ_name, type, display_default, cross_collex=False, units=None):
     return {
                 'name': name,
                 "display_name": displ_name,
@@ -57,7 +59,8 @@ def new_attribute(name, displ_name, type, units, display_default, cross_collex=F
                 'solr_collex': [],
                 'bq_tables': [],
                 'set_types': [],
-                'display': display_default
+                'display': display_default,
+                'categories': []
             }
 
 
@@ -76,9 +79,9 @@ def add_data_sets(sets_set):
 def add_data_versions(dv_set):
     for dv in dv_set:
         try:
-            obj, created = DataVersion.objects.update_or_create(name=dv['name'], datasettype=dv['type'], version=dv['ver'])
+            obj, created = DataVersion.objects.update_or_create(name=dv['name'], version=dv['ver'])
 
-            progs = Program.objects.filter(name="TCGA")
+            progs = Program.objects.filter(name__in=dv['progs'])
             ver_to_prog = []
 
             for prog in progs:
@@ -106,53 +109,37 @@ def add_programs(program_set):
             logger.error("[ERROR] Program {} may not have been added!".format(prog['short_name']))
             logger.exception(e)
 
-
-def add_solr_collex(solr_set, ver_name):
-    for collex in solr_set:
+def add_data_source(source_set, versions, programs, data_sets, source_type):
+    for source in source_set:
         try:
             obj, created = DataSource.objects.update_or_create(
-                name=collex,
-                version=DataVersion.objects.get(name=ver_name),
-                count_col="case_barcode" if "tcga" in collex else "PatientID",
-                source_type='S'
+                name=source,
+                count_col="case_barcode" if "tcga" in source else "PatientID",
+                source_type=source_type
             )
 
-            progs = Program.objects.filter(name="TCGA")
+            progs = Program.objects.filter(name__in=programs)
             src_to_prog = []
-
             for prog in progs:
                 src_to_prog.append(DataSource.programs.through(datasource_id=obj.id, program_id=prog.id))
-
             DataSource.programs.through.objects.bulk_create(src_to_prog)
 
-            print("Solr Collection entry created: {}".format(collex))
+            data_versions = DataVersion.objects.filter(name__in=versions)
+            versions_to_source = []
+            for dv in data_versions:
+                versions_to_source.append(DataSource.versions.through(dataversion_id=dv.id, datasource_id=obj.id))
+            DataSource.versions.through.objects.bulk_create(versions_to_source)
+
+            datasets = DataSetType.objects.filter(name__in=data_sets)
+            datasets_to_source = []
+            for data_set in datasets:
+                datasets_to_source.append(DataSource.data_sets.through(datasource_id=obj.id, datasettype_id=data_set.id))
+            DataSource.data_sets.through.objects.bulk_create(datasets_to_source)
+
+            print("DataSource entry created: {}".format(source))
         except Exception as e:
-            logger.error("[ERROR] Solr Collection {} may not have been added!".format(collex))
+            logger.error("[ERROR] DataSource {} may not have been added!".format(source))
             logger.exception(e)
-
-
-def add_bq_tables(tables, ver_name):
-    for table in tables:
-        try:
-            obj, created = DataSource.objects.update_or_create(
-                name=table, version=DataVersion.objects.get(name=ver_name),
-                count_col="case_barcode" if "isb-cgc" in table else "PatientID",
-                source_type='B'
-            )
-
-            progs = Program.objects.filter(name="TCGA")
-            src_to_prog = []
-
-            for prog in progs:
-                src_to_prog.append(DataSource.programs.through(datasource_id=obj.id, program_id=prog.id))
-
-            DataSource.programs.through.objects.bulk_create(src_to_prog)
-
-            print("BQ Table created: {}".format(table))
-        except Exception as e:
-            logger.error("[ERROR] BigQuery Table {} may not have been added!".format(table))
-            logger.exception(e)
-
 
 def add_source_joins(froms, from_col, tos=None, to_col=None):
     src_joins = []
@@ -160,25 +147,28 @@ def add_source_joins(froms, from_col, tos=None, to_col=None):
     if not tos and not to_col:
         joins = combinations(froms, 2)
         for join in joins:
-            src_joins.append(DataSourceJoin(
-                from_src=DataSource.objects.get(name=join[0]),
-                to_src=DataSource.objects.get(name=join[1]),
-                from_src_col=from_col,
-                to_src_col=from_col)
-            )
+            for from_join in DataSource.objects.filter(name=join[0]):
+                for to_join in DataSource.objects.filter(name=join[1]):
+                    src_joins.append(DataSourceJoin(
+                        from_src=from_join,
+                        to_src=to_join,
+                        from_src_col=from_col,
+                        to_src_col=from_col)
+                    )
     else:
         joins = product(froms,tos)
         for join in joins:
-            src_joins.append(DataSourceJoin(
-                from_src=DataSource.objects.get(name=join[0]),
-                to_src=DataSource.objects.get(name=join[1]),
-                from_src_col=from_col,
-                to_src_col=to_col)
-            )
+            for from_join in DataSource.objects.filter(name=join[0]):
+                for to_join in DataSource.objects.filter(name=join[1]):
+                    src_joins.append(DataSourceJoin(
+                        from_src=from_join,
+                        to_src=to_join,
+                        from_src_col=from_col,
+                        to_src_col=to_col)
+                    )
 
     if len(src_joins):
         DataSourceJoin.objects.bulk_create(src_joins)
-
 
 def add_collections(collection_set):
     collex_list = []
@@ -196,42 +186,27 @@ def add_collections(collection_set):
         Collection.objects.bulk_create(collex_list)
 
         for collex in collection_set:
-            if 'prog' in collex:
-                obj = Collection.objects.get(
-                    short_name=collex['short_name'], name=collex['full_name'], is_public=collex['public'],
-                    owner=User.objects.get(email=collex['owner']) if 'owner' in collex else idc_superuser
-                )
+            obj = Collection.objects.get(
+                short_name=collex['short_name'], name=collex['full_name'], is_public=collex['public'],
+                owner=User.objects.get(email=collex['owner']) if 'owner' in collex else idc_superuser
+            )
 
-                if len(collex['prog']) > 1:
-                    collex_to_prog = []
-                    for prog in collex['prog']:
-                        prog_obj = Program.objects.get(
-                            short_name=prog, owner=collex['owner'] if 'owner' in collex else idc_superuser,
-                            active=True)
-                        collex_to_prog.append(Collection.program.through(collection_id=obj.id, program_id=prog_obj.id))
+            if len(collex.get('progs',[])):
+                progs = Program.objects.filter(
+                    short_name__in=collex['progs'], owner=collex['owner'] if 'owner' in collex else idc_superuser,
+                    active=True)
+                collex_to_prog = []
+                for prog in progs:
+                    collex_to_prog.append(Collection.program.through(collection_id=obj.id, program_id=prog.id))
+                Collection.program.through.objects.bulk_create(collex_to_prog)
 
-                    Collection.program.through.objects.bulk_create(collex_to_prog)
-                else:
-                    obj.program.add(Program.objects.get(
-                        short_name=collex['prog'][0], owner=collex['owner'] if 'owner' in collex else idc_superuser,
-                        active=True
-                    ))
+            if len(collex.get('data_versions',[])):
+                collex_to_dv = []
+                data_versions = DataVersion.objects.filter(name__in=collex['data_versions'])
+                for dv in data_versions:
+                    collex_to_dv.append(Collection.data_versions.through(collection_id=obj.id, dataversion_id=dv.id))
 
-            if 'data_versions' in collex:
-                obj = Collection.objects.get(
-                    short_name=collex['short_name'], name=collex['full_name'], is_public=collex['public'],
-                    owner=User.objects.get(email=collex['owner']) if 'owner' in collex else idc_superuser
-                )
-
-                if len(collex['data_versions']) > 1:
-                    collex_to_dv = []
-                    for dv in collex['data_versions']:
-                        dv_obj = DataVersion.objects.get(active=True, version=dv['ver'], data_type=dv['type'])
-                        collex_to_dv.append(Collection.data_versions.through(collection_id=obj.id, dataversion_id=dv_obj.id))
-
-                    Collection.data_versions.through.objects.bulk_create(collex_to_dv)
-                else:
-                    obj.data_versions.add(DataVersion.objects.get(active=True, version=dv['ver'], data_type=dv['type']))
+                Collection.data_versions.through.objects.bulk_create(collex_to_dv)
 
     except Exception as e:
         logger.error("[ERROR] Collection {} may not have been added!".format(collex['short_name']))
@@ -274,7 +249,11 @@ def add_attributes(attr_set):
                     Attribute_Set_Type.objects.update_or_create(
                         datasettype=set_type, attribute=obj
                     )
-
+            if len(attr.get('categories',[])):
+                for cat in attr['categories']:
+                    Attribute_Display_Category.objects.update_or_create(
+                        category=cat['name'], category_display_name=cat['display_name'], attribute=obj
+                    )
 
         except Exception as e:
             logger.error("[ERROR] Attribute {} may not have been added!".format(attr['name']))
@@ -288,6 +267,26 @@ def main():
             "full_name": "The Cancer Genome Atlas",
             "short_name": "TCGA",
             "public": True
+        },
+        {
+            "full_name": "Quantitative Imagine Network",
+            "short_name": "QIN",
+            "public": True
+        },
+        {
+            "full_name": "I-SPY TRIAL",
+            "short_name": "ISPY1",
+            "public": True
+        },
+        {
+            "full_name": "Non-Small-Cell Lung Carcinoma Radiomics",
+            "short_name": "NSCLC",
+            "public": True
+        },
+        {
+            "full_name": "Lung Image Database Consortium",
+            "short_name": "LIDC",
+            "public": True
         }])
 
         add_data_sets([
@@ -297,24 +296,19 @@ def main():
         ])
 
         add_data_versions([
-            {"name": "GDC Data Release 9", "ver": "r9", "type": "A"},
-            {"name": "TCIA Image Data", "ver": "0", "type": "I"},
-            {"name": "TCIA Segmentation Analysis", "ver": "0", "type": "D"},
-            {"name": "TCIA Qualitative Analysis", "ver": "0", "type": "D"},
-            {"name": "TCIA Quantitative Analysis", "ver": "0", "type": "D"},
+            {"name": "GDC Data Release 9", "ver": "r9", "progs":["TCGA"]},
+            {"name": "TCIA Image Data", "ver": "1","progs":["TCGA", "NSCLC", "ISPY1", "QIN", "LIDC"]},
+            {"name": "TCIA Derived Data", "ver": "1", "progs":["LIDC"]},
         ])
 
-        add_solr_collex(['dicom_derived_all'], "TCIA Image Data")
-        add_solr_collex(['dicom_derived_all'], "TCIA Segmentation Analysis")
-        add_solr_collex(['dicom_derived_all'], "TCIA Qualitative Analysis")
-        add_solr_collex(['dicom_derived_all'], "TCIA Quantitative Analysis")
-        add_solr_collex(['tcga_clin', 'tcga_bios'], "GDC Data Release 9")
+        add_data_source(['dicom_derived_all'], ["TCIA Image Data", "TCIA Derived Data"],["TCGA", "NSCLC", "ISPY1", "QIN", "LIDC"], ["IDC Source Data", "Derived Data"], DataSource.SOLR)
+        add_data_source(['tcga_clin', 'tcga_bios'], ["GDC Data Release 9"],["TCGA"], ["Clinical, Biospecimen, and Mutation Data"], DataSource.SOLR)
 
-        add_bq_tables(["idc-dev.metadata.dicom_mvp"], "TCIA Image Data")
-        add_bq_tables(['isb-cgc.TCGA_bioclin_v0.Biospecimen', 'isb-cgc.TCGA_bioclin_v0.Clinical'], "GDC Data Release 9")
-        add_bq_tables(["idc-dev.metadata.segmentations"], "TCIA Segmentation Analysis")
-        add_bq_tables(["idc-dev.metadata.qualitative_measurements"], "TCIA Qualitative Analysis")
-        add_bq_tables(["idc-dev.metadata.quantitative_measurements"], "TCIA Quantitative Analysis")
+        add_data_source(["idc-dev.metadata.dicom_mvp"], ["TCIA Image Data"],["TCGA", "NSCLC", "ISPY1", "QIN", "LIDC"], ["IDC Source Data"], DataSource.BIGQUERY)
+        add_data_source(['isb-cgc.TCGA_bioclin_v0.Biospecimen', 'isb-cgc.TCGA_bioclin_v0.Clinical'], ["GDC Data Release 9"],["TCGA"], ["Clinical, Biospecimen, and Mutation Data"], DataSource.BIGQUERY)
+        add_data_source(["idc-dev.metadata.segmentations"], ["TCIA Derived Data"],["LIDC"], ["Derived Data"], DataSource.BIGQUERY)
+        add_data_source(["idc-dev.metadata.qualitative_measurements"], ["TCIA Derived Data"],["LIDC"], ["Derived Data"], DataSource.BIGQUERY)
+        add_data_source(["idc-dev.metadata.quantitative_measurements"], ["TCIA Derived Data"],["LIDC"], ["Derived Data"], DataSource.BIGQUERY)
 
         add_source_joins(["tcga_clin", "tcga_bios"], "case_barcode")
         add_source_joins(
@@ -340,11 +334,18 @@ def main():
         for line in line_reader:
             line = line.strip()
             line_split = line.split(",")
-            collection_set.append({
-                "short_name": line_split[0], "full_name": line_split[1], "public": True,
-                "description": line_split[2], "prog": ["TCGA"],
-                "data_versions": [{"ver": "r9", "type": "A"},{"ver": "0", "type": "I"}]
-            })
+            collex = {
+                "id": line_split[0],
+                "short_name": line_split[1], "full_name": line_split[2], "public": True,
+                "description": line_split[3], "program": line_split[4],
+                "data_versions": [{"ver": "r9", "name": "GDC Data Release 9"},
+                                  {"ver": "1", "name": "TCIA Image Data"}]
+            }
+            if 'lidc' in line_split[0]:
+                collex['data_versions'].append({"ver": "1", "name": "TCIA Derived Data"})
+            if 'tcga' in line_split[0]:
+                collex['progs'] = ["TCGA"]
+            collection_set.append(collex)
 
         add_collections(collection_set)
 
@@ -397,10 +398,8 @@ def main():
             if line_split[0] not in all_attrs:
                 all_attrs[line_split[0]] = new_attribute(
                     line_split[0],
-                    line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
-                    line_split[1],
-                    Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
-                    line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                    line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else line_split[1],
+                    Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
                     True if line_split[-1] == 'True' else False
                 )
 
@@ -449,10 +448,8 @@ def main():
             if line_split[0] not in all_attrs:
                 all_attrs[line_split[0]] = new_attribute(
                     line_split[0],
-                    line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
-                    line_split[1],
-                    Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
-                    line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                    line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else line_split[1],
+                    Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
                     True if line_split[-1] == 'True' else False,
                     True
                 )
@@ -484,10 +481,8 @@ def main():
             if line_split[0] not in all_attrs:
                 all_attrs[line_split[0]] = new_attribute(
                     line_split[0],
-                    line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
-                    line_split[1],
-                    Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
-                    line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                    line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else line_split[1],
+                    Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
                     True if line_split[-1] == 'True' else False,
                     True
                 )
@@ -501,6 +496,8 @@ def main():
             attr['bq_tables'].append('idc-dev.metadata.segmentations')
 
             attr['set_types'].append(DataSetType.DERIVED_DATA)
+
+            attr['categories'].append({'name': 'segmentation', 'display_name': 'Segmentation'})
 
             if attr['name'] in display_vals:
                 if 'preformatted_values' in display_vals[attr['name']]:
@@ -520,12 +517,11 @@ def main():
             if line_split[0] not in all_attrs:
                 all_attrs[line_split[0]] = new_attribute(
                     line_split[0],
-                    line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
-                    line_split[1],
-                    Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
-                    line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
-                    True if line_split[-1] == 'True' else False,
-                    True
+                    line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else line_split[1],
+                    Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                    True if line_split[3] == 'True' else False,
+                    True,
+                    line_split[-1]
                 )
 
             attr = all_attrs[line_split[0]]
@@ -537,6 +533,8 @@ def main():
             attr['bq_tables'].append('idc-dev.metadata.quantitative_measurements')
 
             attr['set_types'].append(DataSetType.DERIVED_DATA)
+
+            attr['categories'].append({'name': 'quantitative', 'display_name': 'Quantitative Analysis'})
 
             if attr['name'] in display_vals:
                 if 'preformatted_values' in display_vals[attr['name']]:
@@ -556,10 +554,8 @@ def main():
             if line_split[0] not in all_attrs:
                 all_attrs[line_split[0]] = new_attribute(
                     line_split[0],
-                    line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else
-                    line_split[1],
-                    Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if
-                    line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                    line_split[0].replace("_", " ").title() if re.search(r'_', line_split[1]) else line_split[1],
+                    Attribute.CATEGORICAL if line_split[2] == 'CATEGORICAL STRING' else Attribute.STRING if line_split[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
                     True if line_split[-1] == 'True' else False,
                     True
                 )
@@ -571,6 +567,8 @@ def main():
 
             attr['solr_collex'].append('dicom_derived_all')
             attr['bq_tables'].append('idc-dev.metadata.qualitative_measurements')
+
+            attr['categories'].append({'name': 'qualitative', 'display_name': 'Qualitative Analysis'})
 
             attr['set_types'].append(DataSetType.DERIVED_DATA)
 

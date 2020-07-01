@@ -46,7 +46,7 @@ from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
 from googleapiclient.errors import HttpError
 from cohorts.models import Cohort, Cohort_Perms
-from idc_collections.models import Program, Attribute, Attribute_Display_Values, DataSource, DataVersion, Collection, DataSetType
+from idc_collections.models import Program, Attribute, Attribute_Display_Values, DataSource, DataVersion, Collection, DataSetType, Attribute_Set_Type
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 from .metadata_utils import get_collex_metadata
@@ -372,11 +372,18 @@ def explore_data_page(request):
         counts_only = (req.get('counts_only', "False").lower() == "true")
         with_related = (req.get('with_clinical', "True").lower() == "true")
         with_derived = (req.get('with_derived', "True").lower() == "true")
-        collapse_on = req.get('collapse_on', 'PatientID')
+        collapse_on = req.get('collapse_on', 'SeriesInstanceUID')
         is_json = (req.get('is_json', "False").lower() == "true")
 
-        versions = DataVersion.objects.select_related('datasettype').filter(name__in=versions) if len(versions) else DataVersion.objects.filter(active=True)
-        sources = DataSource.objects.select_related('version').filter(version__in=versions, source_type=source)
+        versions = DataVersion.objects.filter(name__in=versions) if len(versions) else DataVersion.objects.filter(active=True)
+
+        data_types = [DataSetType.IMAGE_DATA,]
+        with_related and data_types.extend(DataSetType.ANCILLARY_DATA)
+        with_derived and data_types.extend(DataSetType.DERIVED_DATA)
+        data_sets = DataSetType.objects.filter(data_type__in=data_types)
+        sources = data_sets.get_data_sources().filter(source_type=source, id__in=versions.get_data_sources().filter(source_type=source).values_list("id",flat=True)).distinct()
+
+        source_attrs = sources.get_source_attrs(for_ui=True, with_set_map=True)
 
         # For now we're only allowing TCGA+ispy1+lidc-idri+qin_headneck
         # TODO: REMOVE THIS ONCE WE'RE ALLOWING MORE
@@ -386,30 +393,28 @@ def explore_data_page(request):
             filters['collection_id'] =  collectionFilterList
 
         for source in sources:
-            is_origin = bool(source.version.datasettype.get_set_data_type() == DataSetType.IMAGE_DATA)
+            is_origin = source.has_data_type(DataSetType.IMAGE_DATA)
             # If a field list wasn't provided, work from a default set
             if is_origin and not len(fields):
-                fields = source.get_collection_attr(for_faceting=False).filter(default_ui_display=True).values_list('name', flat=True)
+                fields = source.get_attr(for_faceting=False).filter(default_ui_display=True).values_list('name', flat=True)
 
-            if is_origin or \
-             (bool(source.version.datasettype.get_set_data_type() == DataSetType.ANCILLARY_DATA) and with_related) or \
-             (bool(source.version.datasettype.get_set_data_type() == DataSetType.DERIVED_DATA) and with_derived):
-                if source.version.get_set_type() not in attr_by_source:
-                    attr_by_source[source.version.get_set_type()] = {}
+            for dataset in data_sets:
+                if source.has_data_type(dataset.data_type):
+                    set_type = dataset.get_set_name()
+                    if set_type not in attr_by_source:
+                        attr_by_source[set_type] = {}
+                    attrs = source_attrs['sources'][source.id]['attr_sets'][dataset.id]
+                    if 'attributes' not in attr_by_source[set_type]:
+                        attr_by_source[set_type]['attributes'] = {}
+                        attr_sets[set_type] = attrs
+                    else:
+                        attr_sets[set_type] = attr_sets[set_type] | attrs
 
-                attrs = source.get_collection_attr(for_ui=True)
-                if 'attributes' not in attr_by_source[source.version.get_set_type()]:
-                    attr_by_source[source.version.get_set_type()]['attributes'] = {}
-                    attr_sets[source.version.get_set_type()] = attrs
-                else:
-                    attr_sets[source.version.get_set_type()] = attr_sets[source.version.get_set_type()] | attrs
-
-                attr_by_source[source.version.get_set_type()]['attributes'].update(
-                    {attr.name: {'source': source.id, 'obj': attr, 'vals': None, 'id': attr.id} for attr in attrs}
-                )
+                    attr_by_source[set_type]['attributes'].update(
+                        {attr.name: {'source': source.id, 'obj': attr, 'vals': None, 'id': attr.id} for attr in attrs}
+                    )
 
         start = time.time()
-
         source_metadata = get_collex_metadata(
             filters, fields, record_limit=1000, counts_only=counts_only, with_ancillary = with_related,
             collapse_on = collapse_on, order_docs = order_docs, sources = sources, versions = versions
@@ -420,56 +425,59 @@ def explore_data_page(request):
             str((stop-start))
         ))
 
-        for set_name in [DataVersion.SET_TYPES[DataSetType.IMAGE_DATA], DataVersion.SET_TYPES[DataSetType.ANCILLARY_DATA]]:
-            if (set_name in source_metadata['facets']) and (set_name in attr_sets):
-                attr_display_vals = Attribute_Display_Values.objects.filter(
-                    attribute__id__in=attr_sets[set_name]).to_dict()
-                for source in source_metadata['facets'][set_name]:
-                    facet_set = source_metadata['facets'][set_name][source]['facets']
-                    attr_by_source[set_name]['All'] = {}
-                    attr_by_source[set_name]['All']['attributes'] = attr_by_source[set_name]['attributes']
-
-                    for attr in facet_set:
-                        this_attr = attr_by_source[set_name]['attributes'][attr]['obj']
-                        values = []
-                        for val in source_metadata['facets'][set_name][source]['facets'][attr]:
-                            displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
-                            values.append({
-                                'value': val,
-                                'display_value': displ_val,
-                                'count': facet_set[attr][val] if val in facet_set[attr] else 0
-                            })
-                        if attr == 'bmi':
-                            sortDic = {'underweight': 0, 'normal weight': 1, 'overweight': 2, 'obese': 3, 'none': 4}
-                            attr_by_source[set_name]['All']['attributes'][attr]['vals'] = sorted(values, key=lambda x: sortDic[x['value']])
+        for source in source_metadata['facets']:
+            source_name = ":".join(source.split(":")[0:2])
+            facet_set = source_metadata['facets'][source]['facets']
+            for dataset in data_sets:
+                if DataSource.objects.get(id=int(source.split(":")[-1])).has_data_type(dataset.data_type):
+                    set_name = dataset.get_set_name()
+                    if dataset.data_type in data_types and set_name in attr_sets:
+                        attr_display_vals = Attribute_Display_Values.objects.filter(
+                            attribute__id__in=attr_sets[set_name]).to_dict()
+                        if dataset.data_type == DataSetType.DERIVED_DATA:
+                            attr_cats = attr_sets[set_name].get_attr_cats()
+                            for attr in facet_set:
+                                if attr in attr_by_source[set_name]['attributes']:
+                                    source_name = "{}:{}".format(source_name.split(":")[0], attr_cats[attr]['cat_name'])
+                                    if source_name not in attr_by_source[set_name]:
+                                        attr_by_source[set_name][source_name] = {'attributes': {}}
+                                    attr_by_source[set_name][source_name]['attributes'][attr] = \
+                                    attr_by_source[set_name]['attributes'][attr]
+                                    this_attr = attr_by_source[set_name]['attributes'][attr]['obj']
+                                    values = []
+                                    for val in facet_set[attr]:
+                                        displ_val = val if this_attr.preformatted_values else attr_display_vals.get(
+                                            this_attr.id, {}).get(val, None)
+                                        values.append({
+                                            'value': val,
+                                            'display_value': displ_val,
+                                            'units': this_attr.units,
+                                            'count': facet_set[attr][val] if val in facet_set[attr] else 0
+                                        })
+                                    attr_by_source[set_name][source_name]['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
                         else:
-                            attr_by_source[set_name]['All']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
-                attr_by_source[set_name].pop('attributes')
-
-        set_name = DataVersion.SET_TYPES[DataSetType.DERIVED_DATA]
-        if (set_name in source_metadata['facets']) and (set_name in attr_sets):
-            attr_display_vals = Attribute_Display_Values.objects.filter(attribute__id__in=attr_sets[set_name]).to_dict()
-            for source in source_metadata['facets'][set_name]:
-                facet_set = source_metadata['facets'][set_name][source]['facets']
-                attr_by_source[set_name][source] = {}
-                attr_by_source[set_name][source]['attributes'] = {}
-                for attr in facet_set:
-                    attr_by_source[set_name][source]['attributes'][attr] = attr_by_source[set_name]['attributes'][attr]
-                    this_attr = attr_by_source[set_name]['attributes'][attr]['obj']
-                    values = []
-                    for val in facet_set[attr]:
-                        displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
-                        values.append({
-                            'value': val,
-                            'display_value': displ_val,
-                            'units': this_attr.units,
-                            'count': facet_set[attr][val] if val in facet_set[attr] else 0
-                        })
-                    attr_by_source[set_name][source]['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
-            attr_by_source[set_name].pop('attributes')
+                            attr_by_source[set_name]['All'] = {'attributes': attr_by_source[set_name]['attributes']}
+                            for attr in facet_set:
+                                if attr in attr_by_source[set_name]['attributes']:
+                                    this_attr = attr_by_source[set_name]['attributes'][attr]['obj']
+                                    values = []
+                                    for val in source_metadata['facets'][source]['facets'][attr]:
+                                        displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
+                                        values.append({
+                                            'value': val,
+                                            'display_value': displ_val,
+                                            'count': facet_set[attr][val] if val in facet_set[attr] else 0
+                                        })
+                                    if attr == 'bmi':
+                                        sortDic = {'underweight': 0, 'normal weight': 1, 'overweight': 2, 'obese': 3, 'none': 4}
+                                        attr_by_source[set_name]['All']['attributes'][attr]['vals'] = sorted(values, key=lambda x: sortDic[x['value']])
+                                    else:
+                                        attr_by_source[set_name]['All']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
 
         for set in attr_by_source:
             for source in attr_by_source[set]:
+                if source == 'attributes':
+                    continue
                 if is_dicofdic:
                     for x in list(attr_by_source[set][source]['attributes'].keys()):
                         if (isinstance(attr_by_source[set][source]['attributes'][x]['vals'],list) and (len(attr_by_source[set][source]['attributes'][x]['vals']) > 0)):
@@ -500,6 +508,12 @@ def explore_data_page(request):
             if not counts_only:
                 attr_by_source[set]['docs'] = source_metadata['docs']
 
+        for key, source_set in attr_by_source.items():
+            sources = list(source_set.keys())
+            for key in sources:
+                if key == 'attributes':
+                    source_set.pop(key)
+
         attr_by_source['total'] = source_metadata['total']
 
         context['set_attributes'] = attr_by_source
@@ -526,13 +540,10 @@ def explore_data_page(request):
         context['programs'] = programSet
         #context['derived_list'] = [{'segmentations:TCIA Segmentation Analysis':'Segmentation'}, {'qualitative_measurements:TCIA Qualitative Analysis': 'Qualitative Analysis'}, {'quantitative_measurements:TCIA Quantitative Analysis':'Quantitative Analysis'}]
 
-        if ('derived_set' in context['set_attributes']):
-            context['set_attributes']['derived_set']['segmentations:TCIA Segmentation Analysis']['display_name']='Segmentation'
-            context['set_attributes']['derived_set']['segmentations:TCIA Segmentation Analysis']['name'] = 'segmentation'
-            context['set_attributes']['derived_set']['qualitative_measurements:TCIA Qualitative Analysis']['display_name'] = 'Qualitative Analysis'
-            context['set_attributes']['derived_set']['qualitative_measurements:TCIA Qualitative Analysis']['name'] = 'qualitative'
-            context['set_attributes']['derived_set']['quantitative_measurements:TCIA Quantitative Analysis']['display_name'] = 'Quantitative Analysis'
-            context['set_attributes']['derived_set']['quantitative_measurements:TCIA Quantitative Analysis']['name'] = 'quantitative'
+        if 'derived_set' in context['set_attributes']:
+            context['set_attributes']['derived_set']['dicom_derived_all:segmentation'].update({'display_name': 'Segmentation', 'name': 'segmentation'})
+            context['set_attributes']['derived_set']['dicom_derived_all:qualitative'].update({'display_name': 'Qualitative Analysis', 'name': 'qualitative'})
+            context['set_attributes']['derived_set']['dicom_derived_all:quantitative'].update({'display_name': 'Quantitative Analysis', 'name': 'quantitative'})
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
