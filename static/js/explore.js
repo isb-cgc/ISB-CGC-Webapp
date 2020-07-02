@@ -37,11 +37,38 @@ require([
         if($('#search_def p').length > 0) {
             $('#save-cohort-btn').prop('disabled','');
             if(user_is_auth) {
-                $('#save-cohort-btn').prop('title','Please log in to save this cohort.');
-                $('#save-cohort-btn').text('Log in to this Save Cohort');
+                $('#save-cohort-btn').prop('title','');
+            }
+        } else {
+            $('#save-cohort-btn').prop('disabled','disabled');
+            if(user_is_auth) {
+                $('#save-cohort-btn').prop('title','Please select at least one filter.');
             }
         }
     });
 
+    // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
+    $('#save-cohort-modal').on('show.bs.modal', function() {
+        $('#search_orig_set .search-checkbox-list input:checked').each(function(){
+            $('#selected-filters-orig-set').append('<span>'+$(this).data('filter-display-attr')+': '+$(this).data('filter-display-val')+'</span>');
+        });
+        $('#search_related_set .search-checkbox-list input:checked').each(function(){
+            $('#selected-filters-rel-set').append('<span>'+$(this).data('filter-display-attr')+': '+$(this).data('filter-display-val')+'</span>');
+        });
+        $('#search_derived_set .search-checkbox-list input:checked').each(function(){
+            $('#selected-filters-der-set').append('<span>'+$(this).data('filter-display-attr')+': '+$(this).data('filter-display-val')+'</span>');
+        });
+        $('#save-cohort-modal .selected-filters').each(function(){
+            if($(this).find('span').length <= 0) {
+                $(this).hide();
+            } else {
+                $(this).show();
+            }
+        });
+    });
+
+    $('#save-cohort-modal').on('hide.bs.modal', function() {
+        $('#save-cohort-modal .selected-filters span').remove();
+    });
 
 });

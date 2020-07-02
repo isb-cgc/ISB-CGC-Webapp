@@ -43,7 +43,8 @@
             </ol>
 
             <h1 class="page-header pull-left" role="heading" aria-level="1">Explore Image Data</h1>
-            <button id="save-cohort-btn" class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal" title="Please select at least one filter." disabled="disabled">Save As New Cohort</button>
+            <button id="save-cohort-btn" class="btn btn-primary pull-right" data-toggle="modal" data-target="#save-cohort-modal" title="{% if request.user.is_authenticated %}Please select at least one filter.{% else %}Please log in to save this cohort.{% endif %}" disabled="disabled">
+                {% if request.user.is_authenticated %}Save As New Cohort{% else %}Log in to Save{% endif %}</button>
         </div>
     </div>
 {% endblock %}
@@ -185,12 +186,14 @@
                                                 <span>Sort by: <input type="radio" id="nm" name="{{ attr.name }}_sort"><label>Name</label> <input type="radio" id="num" name="{{ attr.name }}_sort"><label>Number</label>   </span>
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                    {% for val in attr.values %}
+                                                       {% with val.display_value|get_display_val:val.value as display_value %}
                                                     <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
                                                            <label>
-                                                               <input type="checkbox" value="{{ val.value }}">
-                                                                <span class="value">{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
+                                                               <input type="checkbox" value="{{ val.value }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
+                                                                <span class="value">{{ display_value }}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
                                                             </label>
                                                         </li>
+                                                       {% endwith %}
                                                     {% endfor %}
                                                 </ul>
                                                 <p style="display: block;" >
@@ -237,12 +240,14 @@
                                                           <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse">
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                     {% for val in attr.values %}
+                                                        {% with val.display_value|get_display_val:val.value as display_value %}
                                                         <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
                                                             <label>
-                                                                 <input type="checkbox" value="{{ val.value }}">
-                                                                    <span class="value">{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
+                                                                 <input type="checkbox" value="{{ val.value }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
+                                                                    <span class="value">{{ display_value }}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
                                                              </label>
                                                           </li>
+                                                        {% endwith %}
                                                      {% endfor %}
                                                     </ul>
                                                     <p style="display: block;" >
@@ -384,16 +389,12 @@
                 <div class="tabpanel data-tab-content-panel table-panel">
                     <div class="panel panel-default">
                          <div class="panel-heading clearfix"><h4 class="panel-title">Collections</h4></div>
-
-
                          <div id = "projects_panel" class="panel-body">
-
-                           <div class="dataTables_info">
-                    <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">23</span> entries</span>
-                    <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
-                         </div>
+                             <div class="dataTables_info">
+                                 <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">23</span> entries</span>
+                                 <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
+                             </div>
                          <div>
-
                       <div class="dataTables_length files-per-page">
                         <label>Show</label>
                         <select class="files-per-page-select" data-fpp="10">
@@ -403,8 +404,6 @@
                         </select>
                         <label>entries</label>
                     </div>
-
-
                    <div class="dataTables_goto_page" data-curpage="1">
                         <label for="goto-page-no">Page</label>
                         <input id="goto-page-no-inp" type="number" class="goto-page-number" min="1" max="1">
