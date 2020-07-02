@@ -43,7 +43,8 @@
             </ol>
 
             <h1 class="page-header pull-left" role="heading" aria-level="1">Explore Image Data</h1>
-            <button id="save-cohort-btn" class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal" title="Please select at least one filter." disabled="disabled">Save As New Cohort</button>
+            <button id="save-cohort-btn" class="btn btn-primary pull-right" data-toggle="modal" data-target="#save-cohort-modal" title="{% if request.user.is_authenticated %}Please select at least one filter.{% else %}Please log in to save this cohort.{% endif %}" disabled="disabled">
+                {% if request.user.is_authenticated %}Save As New Cohort{% else %}Log in to Save{% endif %}</button>
         </div>
     </div>
 {% endblock %}
@@ -95,7 +96,7 @@
                                                        {% endif %}
                                                          <span class="value">{{ progK|upper }}</span> <span class="float-right case_count count">{{ progV.val }}</span>
                                                          </div>
-                                                          <div id="{{ progK }}" class="collapse list-group-item__body collapse">
+                                                          <div id="{{ progK }}" class="collapse list-group-item__body">
                                                           {% if progV.projects %}
                                                            <ul id="{{ progK }}_proj_list" class="search-checkbox-list" style="list-style: none;">
                                                            {% for proj, projK in progV.projects.items %}
@@ -107,8 +108,12 @@
                                                                </li>
                                                             {% endfor %}
                                                             </ul>
+                                                              <div style="display: block;" ></div>
                                                               <p class="more-checks" style="display: block;"><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                              <p class="less-checks" style="display: none;"> <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                              <p class="less-checks" style="display: none;" class="notDisp"> <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                              <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
+                                                              <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
+
                                                           {% endif %}
                                                           </div>
                                                  </li>
@@ -122,7 +127,11 @@
                                                <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                          <!-- </div> -->
                                     {%  endcomment %}
-                                      </div>
+
+                                        <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
+                                         <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
+
+                                     </div>
 
 
                                  </li>
@@ -164,7 +173,7 @@
                             </ul>
                             <div class="tab-content">
                                 <div id = "search_orig_set" role="tabpanel" class="tab-pane active">
-                                    {% for attr in set_attributes.origin_set.attributes %}
+                                    {% for attr in set_attributes.origin_set.All.attributes %}
                                     {% if attr.name != "collection_id" %}
                                      <ul class="list-group" role="tablist" aria-multiselectable="true">
                                          <li class="list-group-item">
@@ -173,15 +182,17 @@
                                                     <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
                                                 </a>
                                             </div>
-                                            <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse">
+                                            <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body">
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                    {% for val in attr.values %}
+                                                       {% with val.display_value|get_display_val:val.value as display_value %}
                                                     <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
                                                            <label>
-                                                               <input type="checkbox" value="{{ val.value }}">
-                                                                <span class="value">{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
+                                                               <input type="checkbox" value="{{ val.value }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
+                                                                <span class="value">{{ display_value }}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
                                                             </label>
                                                         </li>
+                                                       {% endwith %}
                                                     {% endfor %}
                                                 </ul>
                                                 <p style="display: block;" >
@@ -189,6 +200,9 @@
                                                         <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                         <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                     {% endif %}
+                                                    <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
+                                                    <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
+
                                                 </p>
                                             </div>
                                          </li>
@@ -198,32 +212,41 @@
                                 </div>
 
                                 <div id = "search_derived_set" role="tabpanel" class="tab-pane">
-                                <ul class="list-group" role="tablist" aria-multiselectable="true">
-                                    <li class="list-group-item">
-                                      <div id="segmentation_heading" class="list-group-item__heading">
-                                                         <a role="button" data-toggle="collapse" href="#segmentation" aria-expanded="false" aria-controls="segmentation" class="">
-                                                         <i class="fa fa-caret-right" style="font-family :'FontAwesome' !important"></i> <i class="fa fa-caret-down" style="font-family :'FontAwesome' !important"></i>Segmentation
-                                                        </a>
-                                      </div>
 
-                                      <div id="segmentation" class="collapse list-group-item__body collapse in" aria-expanded="false" style>
-                                          {% for attr in set_attributes.derived_set.attributes %}
-                                    <ul class="list-group" role="tablist" aria-multiselectable="true">
-                                        <li class="list-group-item">
-                                            <div id="{{ attr.name }}_heading" class="list-group-item__heading">
+                                <ul class="list-group" role="tablist" aria-multiselectable="true">
+
+                                     {% for attr_setK, attr_setV in set_attributes.derived_set.items|dictsort:"0.lower" %}
+
+                                         {% if 'attributes' in attr_setV %}
+
+                                            <li class="list-group-item">
+                                                   <div id="{{ attr_setV.name }}_heading" class="list-group-item__heading">
+                                                         <a role="button" data-toggle="collapse" href="#{{ attr_setV.name }}" aria-expanded="false" aria-controls="{{ attr_setV.name }}">
+                                                         <i class="fa fa-caret-right" style="font-family :'FontAwesome' !important"></i> <i class="fa fa-caret-down" style="font-family :'FontAwesome' !important"></i>{{ attr_setV.display_name }}
+                                                        </a>
+                                                  </div>
+
+                                                 <div id="{{ attr_setV.name }}" class="collapse list-group-item__body in">
+
+                                                  <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                                  {% for attr in attr_setV.attributes %}
+                                                       <li class="list-group-item">
+                                                          <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                 <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
-                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
+                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}
                                                 </a>
                                             </div>
-                                            <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse">
+                                                          <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse">
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                     {% for val in attr.values %}
+                                                        {% with val.display_value|get_display_val:val.value as display_value %}
                                                         <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
                                                             <label>
-                                                                 <input type="checkbox" value="{{ val.value }}">
-                                                                    <span class="value">{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
+                                                                 <input type="checkbox" value="{{ val.value }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
+                                                                    <span class="value">{{ display_value }}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
                                                              </label>
                                                           </li>
+                                                        {% endwith %}
                                                      {% endfor %}
                                                     </ul>
                                                     <p style="display: block;" >
@@ -231,13 +254,18 @@
                                                         <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                         <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                     {% endif %}
+                                                              <p class="hide-zeros" style="display: block;"><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
+                                                    <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
                                                     </p>
                                                </div>
-                                            </li>
-                                         </ul>
-                                    {%  endfor %}
-                                      </div>
-                                    </li>
+                                                       </li>
+
+                                                  {% endfor %}
+                                                   </ul>
+                                               </div>
+                                           </li>
+                                         {% endif %}
+                                     {% endfor %}
                                 </ul>
                                 </div>
 
@@ -251,7 +279,7 @@
                                       </div>
                                       <div id="tcga_clinical" class="collapse list-group-item__body collapse in" aria-expanded="false" style>
 
-                                               {% for attr in set_attributes.related_set.attributes %}
+                                               {% for attr in set_attributes.related_set.All.attributes %}
                                                 <ul class="list-group" role="tablist" aria-multiselectable="true">
                                                    <li class="list-group-item">
                                                  <div id="{{ attr.name }}_heading" class="list-group-item__heading">
@@ -275,6 +303,9 @@
                                                         <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                         <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                     {% endif %}
+                                                         <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
+                                                         <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
+
                                                     </p>
                                                </div>
                                             </li>
@@ -293,7 +324,7 @@
             <div class="col-lg-9 col-md-9">
                 <div class="tabpanel data-tab-content-panel">
                      <div class="panel panel-default">
-                         <div class="panel-heading clearfix"><h4 class="panel-title">Filter Definition</h4></div>
+                         <div class="panel-heading clearfix"><h4 class="panel-title">Filter Definition</h4><a class="pull-right clear-filters" role="button" id="5-data-clear-filters">Clear All</a></div>
                          <div class="panel-body">
                              <div id ="search_def"><span class="placeholder">&nbsp;</span></div>
                          </div>
@@ -312,8 +343,7 @@
 
                         <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
                             <li id = "results_orig" role="presentation" class="filter-tab active"><a href="#results_orig_set" role="tab" data-toggle="tab" title="orig" aria-expanded="true">Original</a></li>
-
-                             {% if set_attributes.derived_set is None %}
+                            {% if set_attributes.derived_set is None %}
                                  <li id = "results_derived" role="presentation" class="filter-tab disabled"><a href="#results_derived_set" role="tab" data-toggle="tab" title="derived" aria-expanded="false">Derived</a></li>
                             {% else %}
                                   <li id = "results_derived" role="presentation" class="filter-tab"><a href="#results_derived_set" role="tab" data-toggle="tab" title="derived" aria-expanded="false">Derived</a></li>
@@ -322,8 +352,8 @@
                         </ul>
                         <div class="tab-content">
                             <div id = "results_orig_set" role="tabpanel" class="tab-pane active panel">
-                                <div class="panel-body derived-graphs graph-set">
-                                     {% for attr in set_attributes.origin_set.attributes %}
+                                <div class="panel-body original-graphs graph-set">
+                                     {% for attr in set_attributes.origin_set.All.attributes %}
                                          {% if attr.name != 'collection_id' %}
                                          <div id="{{ attr.name  }}_chart" class="bar-chart"></div>
                                          {% endif %}
@@ -331,20 +361,26 @@
                                 </div>
                             </div>
                             <div id = "results_derived_set" role="tabpanel" class="tab-pane panel">
-                                <div class="panel-body derived-graphs graph-set">
-                                    {% for attr in set_attributes.derived_set.attributes %}
-                                        <div id="{{ attr.name  }}_chart" class="bar-chart"></div>
-                                    {%  endfor %}
+                                <div class="panel-body bar-charts-div derived-graphs graph-set">
+                                    {% for attr_setK, attr_setV in set_attributes.derived_set.items|dictsort:"0.lower" %}
+                                        {% if 'attributes' in attr_setV %}
+                                           {% for attr in attr_setV.attributes %}
+                                             <div id="{{ attr.name  }}_chart" class="bar-chart"></div>
+                                           {%  endfor %}
+                                       {% endif %}
+                                 {% endfor %}
                                 </div>
+                               <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="showMoreGraphs('derived-graphs','1400px')">Show More</button></div>
+                                <div class="less-graphs" style="display: none; width:100%"><button class="btn btn-link" role="button" onclick="showLessGraphs('derived-graphs','200px')">Show Less</button></div>
                             </div>
                             <div id = "results_related_set" role="tabpanel" class="tab-pane panel">
-                                 <div class="panel-body bar-charts-div related-graphs">
-                                    {% for attr in set_attributes.related_set.attributes %}
+                                 <div class="panel-body bar-charts-div related-graphs graph-set">
+                                    {% for attr in set_attributes.related_set.All.attributes %}
                                         <div id="{{ attr.name }}_chart" class="bar-chart"></div>
                                     {%  endfor %}
                                 </div>
-                                <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="showMoreGraphs()">Show More</button></div>
-                                <div class="less-graphs" style="display: none; width:100%"><button class="btn btn-link" role="button" onclick="showLessGraphs()">Show Less</button></div>
+                                <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="showMoreGraphs('related-graphs','800px')">Show More</button></div>
+                                <div class="less-graphs" style="display: none; width:100%"><button class="btn btn-link" role="button" onclick="showLessGraphs('related-graphs','200px')">Show Less</button></div>
                             </div>
                         </div>
                     </div>
@@ -352,16 +388,12 @@
                 <div class="tabpanel data-tab-content-panel table-panel">
                     <div class="panel panel-default">
                          <div class="panel-heading clearfix"><h4 class="panel-title">Collections</h4></div>
-
-
                          <div id = "projects_panel" class="panel-body">
-
-                           <div class="dataTables_info">
-                    <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">23</span> entries</span>
-                    <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
-                         </div>
+                             <div class="dataTables_info">
+                                 <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">23</span> entries</span>
+                                 <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
+                             </div>
                          <div>
-
                       <div class="dataTables_length files-per-page">
                         <label>Show</label>
                         <select class="files-per-page-select" data-fpp="10">
@@ -371,8 +403,6 @@
                         </select>
                         <label>entries</label>
                     </div>
-
-
                    <div class="dataTables_goto_page" data-curpage="1">
                         <label for="goto-page-no">Page</label>
                         <input id="goto-page-no-inp" type="number" class="goto-page-number" min="1" max="1">
