@@ -357,6 +357,10 @@ def get_sorted_items(attr_set):
     return sorted_list
 
 @register.filter
+def get_display_val(displ_val, val):
+    return displ_val or format_val(val)
+
+@register.filter
 def format_num_with_commmas(value):
     try:
         return "{:,}".format(int(value))
