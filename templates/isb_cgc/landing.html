@@ -303,14 +303,19 @@
                                     <div class="col-xs-2"></div>
                                     <div class="col-xs-4 text-center">
                                         <a class="learn-icon landing-icon" target="_blank"
-                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/progapi/progAPI-v4/Programmatic-Demo.html">
+                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/Gaining-Access-To-Controlled-Access-Data.html">
                                         </a>
                                         <div class="text-muted">Learn</div>
                                     </div>
                                     <div class="col-xs-4 text-center">
-                                        <a class="launch-icon landing-icon" target="_blank"
-                                           href="https://api-dot-isb-cgc.appspot.com/v4/swagger">
-                                        </a>
+                                        <a class="launch-icon landing-icon"
+                                           target="_blank"
+                                                {% if user.is_authenticated %}
+                                                    href="{% url 'user_detail' user.id %}"
+                                                {% else %}
+                                                    href="{% url 'user_detail_login' %}"
+                                                {% endif %}
+                                        ></a>
                                         <div class="text-muted">Launch</div>
                                     </div>
                                     <div class="col-xs-2"></div>
