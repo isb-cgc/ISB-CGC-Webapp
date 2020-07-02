@@ -91,6 +91,44 @@ require([
                     'className': 'label-filter colvis-toggle'
                 },
                 {
+                    'name': 'dataAccess',
+                    'data': function (data) {
+                        return filtered_label_data(data.labels, 'access');
+                        // return (data.labels && data.labels.access) ? data.labels.access: null;
+                    },
+                    'render': function(data, type){
+                        if (type === 'display') {
+                            if (data != null && data.toLowerCase() === 'open') {
+                                return '<i class="fa fa-unlock"  title="Open Access" aria-hidden="true"></i>';
+                            }
+                            // if(data != null && data.toLowerCase() === 'open'){
+                            else if (data != null && data.toLowerCase() === 'controlled') {
+
+                                return '<i class="fa fa-lock" aria-hidden="true" title="Controlled Access"></i>';
+                                // +
+                                // (user_is_authenticated ? '':
+                                // 'Sign in to verify your data access')
+
+                                // '<button class="dropdown-toggle dropdown-btn" type="button" data-toggle="collapse" data-target="#dropdownMenu'+meta.row+'" aria-haspopup="true" aria-expanded="true">\n' +
+                                // ' <span class="caret"></span>' +
+                                // '</button>' +
+                                // '<div class="collapse" id="dropdownMenu'+meta.row+'">' +
+                                // ' <div><button class="dt-button" href="#">Unlock</button></div>' +
+                                // '</div>'
+                            }
+                            else {
+                                return '';
+                            }
+                        }
+                        else {
+                            return data;
+                        }
+                    },
+                    'className': 'label-filter text-center',
+                    'orderable': false
+
+                },
+                {
                     'name': 'datasetId',
                     'data': 'tableReference.datasetId',
                     'visible': false,
@@ -174,6 +212,7 @@ require([
                     'className': 'label-filter colvis-toggle',
                     'visible': false
                 },
+
                 {
                     'name': 'status',
                     'data': function (data) {
@@ -187,9 +226,21 @@ require([
                 },
                 {
                     'name': 'numRows',
-                    'data': 'numRows',
+                    'data': function (data){
+                        // if (data.type.toLowerCase() === 'view'){
+                        //     return 'N/A';
+                        // }
+                        // else
+                        return data.numRows;
+                    },
                     'className': 'text-right colvis-toggle',
-                    'render': $.fn.dataTable.render.number( ',', '.')
+                    'render': function(data, type){
+                        if(type === 'display'){
+                            return $.fn.dataTable.render.number(',', '.').display(data);
+                        }
+                        else return data;
+                    }
+
                 },
                 {
                     'name': 'createdDate',
@@ -210,18 +261,41 @@ require([
                 {
                     'name': 'preview',
                     'data': function (row){
-                        return row.id.split(/[.:]/).join('/');
+                        return {
+                            id: row.id.split(/[.:]/).join('/'),
+                            access: row.labels ? (row.labels.access ? row.labels.access : '') : ''
+                        };
                     },
                     'render': function (data, type) {
-                        return type === 'display' ?
-                            '<i class="preview-loading fa fa-circle-o-notch fa-spin" style="display: none; color:#19424e;" aria-hidden="true"></i>' : data;
+                        if (type === 'display'){
+                            if (data.access && data.access === 'controlled') {
+                                return '<div title="Unavailable for Controlled Access Data"><div class="tbl-preview disabled"></div></div>';
+
+                            // if (data.access && data.access === 'open') {
+                            //     if(user_is_authenticated){
+                            //         if(user_is_ca_authorized){
+                            //             return '<div class="tbl-preview" title="Preview Table"><i class="preview-loading fa fa-circle-o-notch fa-spin" style="display: none; color:#19424e;" aria-hidden="true"></i></div>';
+                            //         }
+                            //         else{
+                            //             return '<div title="You do not have access to this table."><div class="tbl-preview disabled"></div></div>';
+                            //         }
+                            //     }
+                            //     else{
+                            //         return '<div title="Please sign in to view"><div class="tbl-preview disabled"></div></div>';
+                            //     }
+                            }
+                            else {
+                                return '<div class="tbl-preview" title="Preview Table"><i class="preview-loading fa fa-circle-o-notch fa-spin" style="display: none; color:#19424e;" aria-hidden="true"></i></div>';
+                            }
+                        }
+                        else {
+                            return data;
+                        }
+
                     },
-                    'className': 'tbl-preview no-export',
+                    'className': 'no-export',
                     'searchable': false,
-                    'orderable': false,
-                    'createdCell': function (cell) {
-                        $(cell).attr('title', 'Preview Table');
-                    }
+                    'orderable': false
                 },
                 {
                     'name': 'description',
@@ -334,10 +408,9 @@ require([
         });
 
 
-        $('#bqmeta').find('tbody').on('click', 'td.tbl-preview', function () {
-
+        $('#bqmeta').find('tbody').on('click', 'td .tbl-preview', function () {
             var td = $(this).closest('td');
-            var tbl_path = table.cell(td).data();
+            var tbl_path = table.cell(td).data().id;
             var tr = $(this).closest('tr');
             var row = table.row(tr);
             if (row.child.isShown() && tr.hasClass('preview-shown')) {
@@ -355,7 +428,11 @@ require([
                             td.find('.preview-loading').show();
                         },
                         error: function (result) {
-                            show_tbl_preview(row, tr, td, 'There has been an error retrieving the preview table.');
+                            var msg = 'There has been an error retrieving the preview table.';
+                            if(result.responseJSON && result.responseJSON.message){
+                                msg = result.responseJSON.message;
+                            }
+                            show_tbl_preview(row, tr, td, msg);
                         },
                         success: function (data) {
                             td.data('preview-data', data.rows);
@@ -450,10 +527,14 @@ require([
 
             '</td>'+
             '</tr><tr>' +
+            // '<td style="vertical-align:top;"><strong>Type</strong></td>' +
+            // '<td>' + d.type.toLowerCase()+ '</td>' +
+            // '</tr><tr>' +
             '<td style="vertical-align:top;"><strong>Dataset ID</strong></td>' +
             '<td>' + d.tableReference.datasetId+ '</td>' +
             '</tr><tr>' +
             '<td style="vertical-align:top;"><strong>Table ID</strong></td>' +
+            // '<td style="vertical-align:top;"><strong>'+( d.type.toLowerCase() === 'table'? 'Table': 'View')+' ID</strong></td>' +
             '<td>' + d.tableReference.tableId + '</td>' +
             '</tr><tr>' +
             '<td style="vertical-align:top;"><strong>Description</strong></td>' +
