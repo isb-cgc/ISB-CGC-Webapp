@@ -33,7 +33,7 @@
 {% block page_name %}cohort-details{% endblock %}
 
 {% block page_header %}
-    <div class="page-heading">
+    <div class="pf-heading">
         <div class="container" style="display: block;">
             <ol class="breadcrumb">
                 <li><a href="/dashboard/">Your Dashboard</a></li>
@@ -182,6 +182,7 @@
                                                 </a>
                                             </div>
                                             <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body">
+                                                <span>Sort by: <input type="radio" id="nm" name="{{ attr.name }}_sort"><label>Name</label> <input type="radio" id="num" name="{{ attr.name }}_sort"><label>Number</label>   </span>
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                    {% for val in attr.values %}
                                                     <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
