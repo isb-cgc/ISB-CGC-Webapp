@@ -846,9 +846,20 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             reformDic[listId] = new Object();
             for (item in progDic){
                 if ((item !=='All') && (item !=='None')){
-                    reformDic[listId][item]=new Object();
-                    reformDic[listId][item]['count']=progDic[item]['val']
-                    if  ('projects' in progDic[item]){
+
+                    if (! ('projects' in progDic[item]) ) {
+                        reformDic[listId][item]=new Object();
+                        reformDic[listId][item]['count'] = progDic[item]['val'];
+                    }
+                    else if (('projects' in progDic[item]) && Object.keys(progDic[item]['projects']).length == 1 ){
+                        nm = Object.keys(progDic[item]['projects'])[0];
+                        reformDic[listId][nm]=new Object();
+                        reformDic[listId][nm]['count'] = progDic[item]['val'];
+                    }
+
+                    else {
+                        reformDic[listId][item]=new Object();
+                        reformDic[listId][item]['count'] = progDic[item]['val'];
                         reformDic[item] =  new Object();
                         for (project in progDic[item]['projects']){
                             reformDic[item][project]=new Object();
@@ -944,23 +955,43 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     updateFilterSelections('search_orig_set', data.origin_set.All.attributes);
                     createPlots('search_orig_set');
 
+                    var derivedAttrs = Array.from($('#search_derived_set').children('.list-group').children('.list-group-item').children('.list-group-item__body').map( function() {return this.id;}  ));
+
                     if (data.hasOwnProperty('derived_set')) {
                         $('#search_derived_set').removeClass('disabled');
-                        for (facetSet in data.derived_set) {
-                            if ('attributes' in data.derived_set[facetSet]) {
+                        for (facetSet in data.derived_set){
+                            if ('attributes' in data.derived_set[facetSet]){
                                 updateFilterSelections(data.derived_set[facetSet].name, data.derived_set[facetSet].attributes);
+                                var derivedAttrIndex = derivedAttrs.indexOf(data.derived_set[facetSet].name);
+                                if (derivedAttrIndex>-1){
+                                    derivedAttrs.splice(derivedAttrIndex,1);
+                                }
                             }
                         }
-                       createPlots('search_derived_set');
-                          //createPlots('segmentation');
                     }
+                    else{
+                        $('#search_derived_set').addClass('disabled');
+                    }
+
+
+                    for (var i=0; i< derivedAttrs.length;i++) {
+                        updateFilterSelections(derivedAttrs[i], {});
+                    }
+                    createPlots('search_derived_set');
+
+
 
                     if (data.hasOwnProperty('related_set')) {
                         $('#search_related_set').removeClass('disabled');
-                        ('search_related_set', data.related_set.All.attributes);
+                        updateFilterSelections('search_related_set', data.related_set.All.attributes);
                         //createPlots('tcga_clinical');
-                       createPlots('search_related_set');
                     }
+                    else{
+                        $('#search_related_set').addClass('disabled');
+                        updateFilterSelections('search_related_set', {});
+                    }
+
+                    createPlots('search_related_set');
                     var collFilt = new Array();
                     if ('collection_id' in parsedFiltObj){
                         collFilt=parsedFiltObj['collection_id'];
@@ -1209,7 +1240,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
         }
 
-        var updateFilters = function (filterCat, dic, dataFound) {
+        var updateFilters = function (filterCat, dic, dataFetched) {
             var allListItems=$('#'+filterCat).children('ul').children('li');
             var allFilters=allListItems.children().children('input:checkbox');
             var checkedFilters=allListItems.children().children('input:checked');
@@ -1234,10 +1265,10 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 var lbl = spans.get(0).innerHTML;
                 var oldCnt = parseInt(spans.get(1).innerHTML);
                 var cnt=''
-                if (dataFound && dic.hasOwnProperty(val) ){
+                if (dataFetched && dic.hasOwnProperty(val) ){
                     cnt = String(dic[val].count)
                 }
-                else if (dataFound){
+                else if (dataFetched){
                     cnt = String('0');
                 }
                 else{
@@ -1305,7 +1336,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 if (dicofdic.hasOwnProperty(cat)) {
                     updateFilters(filterCats[i], dicofdic[cat], true);
                 } else {
-                    updateFilters(filterCats[i], '', false);
+                    updateFilters(filterCats[i], '', true);
                 }
             }
         }

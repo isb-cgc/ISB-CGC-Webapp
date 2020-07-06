@@ -78,7 +78,7 @@
                                  <li class="list-group-item">
                                      <div id="Program_heading" class="list-group-item__heading">
                                          <a role="button" data-toggle="collapse" href="#Program" aria-expanded="false" aria-controls="Program">
-                                             <i class="fa fa-caret-right" style="font-family :&#39;FontAwesome&#39; !important"></i> <i class="fa fa-caret-down" style="font-family :&#39;FontAwesome&#39; !important"></i>Collection
+                                             <i class="fa fa-caret-right" style="font-family :&#39;FontAwesome&#39; !important"></i> <i class="fa fa-caret-down" style="font-family :&#39;FontAwesome&#39; !important"></i>COLLECTION
                                          </a>
                                      </div>
                                      <div id="Program" class="collapse list-group-item__body filter-panel">
@@ -86,24 +86,40 @@
                                              {% for progK, progV in programs.items|dictsort:"0.lower" %}
                                                  {% if progK != "All" and progK != "None" %}
                                                  <li class="list-group-item">
+                                                      {% if progV.projects and progV.projects.items|length == 1 %}
+                                                           {% for proj, projK in progV.projects.items %}
+
+                                                               <div id="{{ proj }}_heading" class="list-group-item__heading">
+                                                                   <input type="checkbox" value="{{ proj }}">
+                                                                   <span class="value">{{ proj|upper }}</span> <span class="float-right case_count count">{{ projK }}</span>
+                                                               </div>
+                                                            <div id="{{ proj }}" class="collapse list-group-item__body">
+                                                           {% endfor %}
+
+                                                      {% else %}
+
                                                      <div id="{{ progK }}_heading" class="list-group-item__heading">
                                                          <input type="checkbox" value="{{ progK }}">
-
-                                                       {% if progV.projects %}
                                                             <a role="button" data-toggle="collapse" href="#{{ progK }}" aria-expanded="false" aria-controls="{{ progK }}">
                                                                  <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>
                                                              </a>
-                                                       {% endif %}
+
                                                          <span class="value">{{ progK|upper }}</span> <span class="float-right case_count count">{{ progV.val }}</span>
                                                          </div>
-                                                          <div id="{{ progK }}" class="collapse list-group-item__body">
-                                                          {% if progV.projects %}
+                                                      <div id="{{ progK }}" class="collapse list-group-item__body">
+                                                     {% endif %}
+
+
+
+
+
+                                                          {% if progV.projects and progV.projects.items|length > 1 %}
                                                            <ul id="{{ progK }}_proj_list" class="search-checkbox-list" style="list-style: none;">
                                                            {% for proj, projK in progV.projects.items %}
                                                               <li class="checkbox {% if forloop.counter >= 6 %} extra-values{% endif %}">
                                                                 <label>
                                                                   <input type="checkbox" value="{{ proj }}">
-                                                                    <span class="value">{{ proj|lower }}</span> <span class="float-right case_count count plotit">{{ projK }}</span>
+                                                                    <span class="value">{{ proj|upper }} </span> <span class="float-right case_count count plotit">{{ projK }}</span>
                                                                  </label>
                                                                </li>
                                                             {% endfor %}
@@ -115,6 +131,7 @@
                                                               <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
 
                                                           {% endif %}
+
                                                           </div>
                                                  </li>
                                                 {% endif %}
