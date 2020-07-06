@@ -183,7 +183,7 @@
                                                 </a>
                                             </div>
                                             <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body">
-                                                <span>Sort by: <input type="radio" id="nm" name="{{ attr.name }}_sort"><label>Name</label> <input type="radio" id="num" name="{{ attr.name }}_sort"><label>Number</label>   </span>
+                                                {% comment %} <span>Sort by: <input type="radio" id="nm" name="{{ attr.name }}_sort"><label>Name</label> <input type="radio" id="num" name="{{ attr.name }}_sort"><label>Number</label>   </span> {% endcomment %}
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                    {% for val in attr.values %}
                                                        {% with val.display_value|get_display_val:val.value as display_value %}
@@ -475,7 +475,7 @@
                                <table class="table table-striped" >
                               <thead id="studies_table_head">
                              <tr>
-                                 <th class='text_data'>Project Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Patient Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Study Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                 <th class='text_data'>Project Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Case Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Study Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
                              </tr>
                               </thead>
 
