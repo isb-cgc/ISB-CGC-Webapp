@@ -1776,7 +1776,7 @@ a#user-dropdown:hover {
     border: 1px solid #dddddd; }
     #bq-meta-searcher #bqmeta tr td table.preview-table th table td, #bq-meta-searcher #bqmeta tr td table.preview-table td table td {
       border: 1px solid #efefef; }
-  #bq-meta-searcher #bqmeta tr td.tbl-preview:before {
+  #bq-meta-searcher #bqmeta tr td .tbl-preview:before {
     font-family: FontAwesome;
     content: "\f0ce";
     color: #3A79B8;
@@ -1793,12 +1793,16 @@ a#user-dropdown:hover {
   content: "\f056";
   color: #993333; }
 
-#bq-meta-searcher #bqmeta tr.preview-shown td.tbl-preview:before {
+#bq-meta-searcher #bqmeta tr.preview-shown td > .tbl-preview:before {
   color: #F7991B; }
 
 #bq-meta-searcher .modal ul {
   list-style: inherit;
   margin-left: 30px; }
+
+#bq-meta-searcher .dropdown-btn {
+  border: 0;
+  background-color: transparent; }
 
 #analysis-body li {
   width: 22%;

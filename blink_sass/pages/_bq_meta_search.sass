@@ -2,6 +2,7 @@
 @import url("./buttons.dataTables.min.css")
 
 #bq-meta-searcher
+
     .custom-width-20
         padding: 0 5px
         float: left
@@ -84,6 +85,7 @@
     .navbar-item
         display: inline-block
 
+
     //div.hover-bubble
     //    //display: block
     //    display: none
@@ -116,6 +118,7 @@
     //            padding: 5px 4px
     //            margin: -6px -5px
     //            border-radius: 3px
+
 
     #bq-meta-form
         div
@@ -229,7 +232,8 @@
                         border: 1px solid #dddddd
                         table td
                             border: 1px solid #efefef
-            &.tbl-preview
+            //&.tbl-preview
+            .tbl-preview
                 &:before
                     font-family: FontAwesome
                     content: "\f0ce"
@@ -251,13 +255,21 @@
                     content: "\f056"
                     color: #993333
         &.preview-shown
-            td.tbl-preview
+            td > .tbl-preview
                 &:before
                     color: $isb-warning
 
     .modal ul
         list-style: inherit
         margin-left: 30px
+
+    .dropdown-btn
+        border: 0
+        background-color: transparent
+    //.dropdown-menu
+
+        //position: relative
+
     //.switch
     //    position: relative
     //    display: inline-block
