@@ -9,11 +9,16 @@ body
   padding-top: 59px
   transition: all 0.4s ease-in-out
 
+
+
+.navbar-fixed-top .navbar-collapse
+  max-height: none
+
 .navbar
   font-family: 'Open Sans', sans-serif
 
   ul
-    margin-top: 15px
+    margin-top: 8px
   > .subnav ul
     margin-top: 0
     .sub-menu
@@ -36,8 +41,6 @@ body
   .badge
     background-color: #9d9d9d
 
-.navbar-right
-  display: inline-block
 
 .navbar-brand
   img
@@ -61,18 +64,12 @@ nav, .site-header
         margin: 0
         padding: 1px 0
 .navbar-item
-  display: inline-block !important
-  vertical-align: top
-  padding-right: 5px
-  padding-left: 5px
-  float: none !important
+  padding: 7px 10px
   .dropdown:hover
     cursor: pointer
   > a
     padding: 0 !important
-
   &__text
-    display: inline-block
     font-size: 16px
     vertical-align: top
     &:hover
@@ -112,9 +109,8 @@ a.skip-nav
     text-decoration: none
   .login-link
     font-size: 16px
-
   img
-    margin: -9px 5px
+    margin: -9px 0
     border-radius: 50%
     border: 1px solid $bg-color
 
