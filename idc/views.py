@@ -541,9 +541,12 @@ def explore_data_page(request):
         #context['derived_list'] = [{'segmentations:TCIA Segmentation Analysis':'Segmentation'}, {'qualitative_measurements:TCIA Qualitative Analysis': 'Qualitative Analysis'}, {'quantitative_measurements:TCIA Quantitative Analysis':'Quantitative Analysis'}]
 
         if 'derived_set' in context['set_attributes']:
-            context['set_attributes']['derived_set']['dicom_derived_all:segmentation'].update({'display_name': 'Segmentation', 'name': 'segmentation'})
-            context['set_attributes']['derived_set']['dicom_derived_all:qualitative'].update({'display_name': 'Qualitative Analysis', 'name': 'qualitative'})
-            context['set_attributes']['derived_set']['dicom_derived_all:quantitative'].update({'display_name': 'Quantitative Analysis', 'name': 'quantitative'})
+            if 'dicom_derived_all:segmentation' in context['set_attributes']['derived_set']:
+                context['set_attributes']['derived_set']['dicom_derived_all:segmentation'].update({'display_name': 'Segmentation', 'name': 'segmentation'})
+            if 'dicom_derived_all:qualitative' in context['set_attributes']['derived_set']:
+                context['set_attributes']['derived_set']['dicom_derived_all:qualitative'].update({'display_name': 'Qualitative Analysis', 'name': 'qualitative'})
+            if 'dicom_derived_all:quantitative' in context['set_attributes']['derived_set']:
+                context['set_attributes']['derived_set']['dicom_derived_all:quantitative'].update({'display_name': 'Quantitative Analysis', 'name': 'quantitative'})
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")

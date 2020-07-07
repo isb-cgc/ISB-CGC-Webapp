@@ -557,50 +557,10 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             return newScrollInd;
         }
 
-
-        $('.table').find('tbody').on('scroll', function () {
-            var tbodyOff= $(this)[0].offsetTop;
-            var rowPos = $(this).find('tr').not('.hide').map(function () {
-                return (this.offsetTop -tbodyOff);
-            });
-            var curScrollPos = $(this)[0].scrollTop;
-            var scrollPosInd = Array.from(rowPos.map(function () {
-                return ((this < curScrollPos) ? 0 : 1)
-            })).indexOf(1)-1;
-            scrollPosInd = Math.max(0,scrollPosInd);
-            if (scrollPosInd<(rowPos.length-1)){
-                if ( (rowPos[scrollPosInd+1] -curScrollPos)/(rowPos[scrollPosInd+1]-rowPos[scrollPosInd]) <0.20)
-                {
-                  scrollPosInd++;
-                }
-            }
-            var recordsPP = parseInt($(this).parent().parent().find('.files-per-page-select').val());
-            var numRecords = $(this).find('tr').length;
-            var numPages = parseInt(numRecords / recordsPP) + 1;
-
-
-            var lastInd = scrollPosInd + recordsPP - 1;
-            if (scrollPosInd === -1) {
-                scrollPosInd = (numPages - 1) * recordsPP;
-                lastInd = numRecords - 1;
-            } else if ((scrollPosInd + recordsPP) > numRecords) {
-                lastInd = numRecords - 1;
-            }
-            var currentPage = parseInt(scrollPosInd / recordsPP) + 1;
-            if (lastInd === (numRecords -1)){
-                currentPage = numPages;
-            }
-
-
-
-            //var tblbody = $(this).find('tbody')[0];
-            var totalHeight = $(this)[0].rows[lastInd].offsetTop + $(this)[0].rows[lastInd].offsetHeight - $(this)[0].rows[scrollPosInd].offsetTop;
-            $(this).css('max-height', totalHeight.toString() + 'px');
-            $(this).parent().parent().find('.showing')[0].innerHTML = (scrollPosInd + 1).toString() + " to " + (lastInd + 1).toString();
-
-            resetPagination($(this).parent().parent(), currentPage, numPages);
-            //alert('mv');
+         $('.table').find('tbody').on('scroll', function () {
+            resetTableControls($(this), false,-1);
         });
+
 
         var setTableView = function (panelTableElem) {
             var curPage = $(panelTableElem).find('.dataTables_goto_page').data('curpage');
@@ -611,10 +571,10 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
         }
 
         window.resetTableControls = function (tableElem, mvScroll, curIndex) {
-
+            var tbodyOff= tableElem[0].offsetTop;
             var displayedRows = tableElem.find('tr').not('.hide');
             var rowPos = displayedRows.map(function () {
-                return this.offsetTop
+                return (this.offsetTop - tbodyOff);
             });
             tableElem.data('rowpos', JSON.stringify(rowPos));
             var numRecords = displayedRows.length;
@@ -627,7 +587,16 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 var curScrollPos = tableElem[0].scrollTop;
                 curIndex = Array.from(rowPos.map(function () {
                     return ((this <= curScrollPos) ? 0 : 1)
-                })).indexOf(1);
+                })).indexOf(1)-1;
+
+                curIndex = Math.max(0,curIndex);
+                if (curIndex<(rowPos.length-1)){
+                    if ( (rowPos[curIndex+1] -curScrollPos)/(rowPos[curIndex+1]-rowPos[curIndex]) <0.20)
+                   {
+                    curIndex++;
+                   }
+               }
+
             }
             var lastInd = curIndex + recordsPP - 1;
             var currentPage = parseInt(curIndex / recordsPP) + 1;
@@ -635,19 +604,21 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             if (curIndex === -1) {
                 curIndex = (numPages - 1) * recordsPP;
                 lastInd = numRecords - 1;
-            } else if ((curIndex + recordsPP) > numRecords) {
+                atEnd = true;
+            } else if (lastInd >= (numRecords-1)) {
                 lastInd = numRecords - 1;
                 atEnd = true;
             }
+
 
             if ((curIndex > -1) && (lastInd > -1)) {
                 var totalHeight = displayedRows[lastInd].offsetTop + displayedRows[lastInd].offsetHeight - displayedRows[curIndex].offsetTop;
                 tableElem.css('max-height', totalHeight.toString() + 'px');
 
-                if (mvScroll) {
-                    tableElem[0].scrollTop = rowPos[curIndex] - tableElem[0].offsetTop;
-                }
+            }
 
+            if (mvScroll) {
+                    tableElem[0].scrollTop = rowPos[curIndex];
             }
 
 
@@ -875,9 +846,20 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             reformDic[listId] = new Object();
             for (item in progDic){
                 if ((item !=='All') && (item !=='None')){
-                    reformDic[listId][item]=new Object();
-                    reformDic[listId][item]['count']=progDic[item]['val']
-                    if  ('projects' in progDic[item]){
+
+                    if (! ('projects' in progDic[item]) ) {
+                        reformDic[listId][item]=new Object();
+                        reformDic[listId][item]['count'] = progDic[item]['val'];
+                    }
+                    else if (('projects' in progDic[item]) && Object.keys(progDic[item]['projects']).length == 1 ){
+                        nm = Object.keys(progDic[item]['projects'])[0];
+                        reformDic[listId][nm]=new Object();
+                        reformDic[listId][nm]['count'] = progDic[item]['val'];
+                    }
+
+                    else {
+                        reformDic[listId][item]=new Object();
+                        reformDic[listId][item]['count'] = progDic[item]['val'];
                         reformDic[item] =  new Object();
                         for (project in progDic[item]['projects']){
                             reformDic[item][project]=new Object();
@@ -973,23 +955,43 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     updateFilterSelections('search_orig_set', data.origin_set.All.attributes);
                     createPlots('search_orig_set');
 
+                    var derivedAttrs = Array.from($('#search_derived_set').children('.list-group').children('.list-group-item').children('.list-group-item__body').map( function() {return this.id;}  ));
+
                     if (data.hasOwnProperty('derived_set')) {
                         $('#search_derived_set').removeClass('disabled');
-                        for (facetSet in data.derived_set) {
-                            if ('attributes' in data.derived_set[facetSet]) {
+                        for (facetSet in data.derived_set){
+                            if ('attributes' in data.derived_set[facetSet]){
                                 updateFilterSelections(data.derived_set[facetSet].name, data.derived_set[facetSet].attributes);
+                                var derivedAttrIndex = derivedAttrs.indexOf(data.derived_set[facetSet].name);
+                                if (derivedAttrIndex>-1){
+                                    derivedAttrs.splice(derivedAttrIndex,1);
+                                }
                             }
                         }
-                       createPlots('search_derived_set');
-                          //createPlots('segmentation');
                     }
+                    else{
+                        $('#search_derived_set').addClass('disabled');
+                    }
+
+
+                    for (var i=0; i< derivedAttrs.length;i++) {
+                        updateFilterSelections(derivedAttrs[i], {});
+                    }
+                    createPlots('search_derived_set');
+
+
 
                     if (data.hasOwnProperty('related_set')) {
                         $('#search_related_set').removeClass('disabled');
-                        ('search_related_set', data.related_set.All.attributes);
+                        updateFilterSelections('search_related_set', data.related_set.All.attributes);
                         //createPlots('tcga_clinical');
-                       createPlots('search_related_set');
                     }
+                    else{
+                        $('#search_related_set').addClass('disabled');
+                        updateFilterSelections('search_related_set', {});
+                    }
+
+                    createPlots('search_related_set');
                     var collFilt = new Array();
                     if ('collection_id' in parsedFiltObj){
                         collFilt=parsedFiltObj['collection_id'];
@@ -1034,7 +1036,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                         }
                         window.histIndex = window.filtHistory.length - 1;
                     }
-
+                    /*
                     if ((window.filtHistory.length - 1) > window.histIndex) {
                         $('#next').show();
                     } else {
@@ -1045,6 +1047,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     } else {
                         $('#previous').hide();
                     }
+                    
+                     */
                     changeAjax(false);
                 },
                 error: function () {
@@ -1236,7 +1240,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
         }
 
-        var updateFilters = function (filterCat, dic, dataFound) {
+        var updateFilters = function (filterCat, dic, dataFetched) {
             var allListItems=$('#'+filterCat).children('ul').children('li');
             var allFilters=allListItems.children().children('input:checkbox');
             var checkedFilters=allListItems.children().children('input:checked');
@@ -1261,10 +1265,10 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 var lbl = spans.get(0).innerHTML;
                 var oldCnt = parseInt(spans.get(1).innerHTML);
                 var cnt=''
-                if (dataFound && dic.hasOwnProperty(val) ){
+                if (dataFetched && dic.hasOwnProperty(val) ){
                     cnt = String(dic[val].count)
                 }
-                else if (dataFound){
+                else if (dataFetched){
                     cnt = String('0');
                 }
                 else{
@@ -1332,7 +1336,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 if (dicofdic.hasOwnProperty(cat)) {
                     updateFilters(filterCats[i], dicofdic[cat], true);
                 } else {
-                    updateFilters(filterCats[i], '', false);
+                    updateFilters(filterCats[i], '', true);
                 }
             }
         }
