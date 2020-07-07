@@ -29,7 +29,7 @@ urlpatterns = [
 
     url(r'^$', views.landing_page, name='landing_page'),
     url(r'^test_methods/', views.test_methods, name='test_methods'),
-    #url(r'^explore/', views.search_page, name='search'),
+
     url(r'^user_landing/$', views.user_landing, name='user_landing'),
     url(r'^style_guide/', views.css_test),
     url(r'^users/(?P<user_id>\d+)/$', views.user_detail, name='user_detail'),
@@ -50,7 +50,7 @@ urlpatterns = [
     url(r'^_ah/(vm_)?health$', views.health_check),
 
     url(r'^help/', views.help_page, name='help'),
-     url(r'^explore/', views.explore_data_page, name='explore_data'),
+    url(r'^explore/', views.explore_data_page, name='explore_data'),
 
 
     url(r'^viewer/', views.ohif_viewer_page, name='ohif_view'),
@@ -60,7 +60,7 @@ urlpatterns = [
     url(r'^ohif/', views.ohif_page, name='ohif'),
 
 
-     url(r'^warning/', views.warn_page, name='warn'),
+    url(r'^warning/', views.warn_page, name='warn'),
 
 
       url(r'^about/', views.about_page, name='about_page'),
