@@ -15,42 +15,26 @@
 ###
 
 from builtins import str
-from builtins import map
 import time
-from past.builtins import basestring
-import collections
 import json
 import logging
 import sys
-import re
 import datetime
-
-# import requests
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.models import User
-from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.utils import formats
 from django.contrib import messages
-from googleapiclient import discovery
-from oauth2client.client import GoogleCredentials
 
-from adminrestrict.middleware import get_ip_address_from_request
-
-from google_helpers.directory_service import get_directory_resource
-from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
-from googleapiclient.errors import HttpError
 from cohorts.models import Cohort, Cohort_Perms
-from idc_collections.models import Program, Attribute, Attribute_Display_Values, DataSource, DataVersion, Collection, DataSetType, Attribute_Set_Type
+from idc_collections.models import Program, Attribute_Display_Values, DataSource, DataVersion, Collection, DataSetType
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 from .metadata_utils import get_collex_metadata
-from idc_collections.collex_metadata_utils import get_bq_metadata, get_bq_string, get_bq_facet_counts
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
@@ -58,49 +42,7 @@ logger = logging.getLogger('main_logger')
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 
-
-def convert(data):
-    if isinstance(data, basestring):
-        return str(data)
-    elif isinstance(data, collections.Mapping):
-        return dict(list(map(convert, iter(list(data.items())))))
-    elif isinstance(data, collections.Iterable):
-        return type(data)(list(map(convert, data)))
-    else:
-        return data
-
-
-def _decode_list(data):
-    rv = []
-    for item in data:
-        if isinstance(item, str):
-            item = item.encode('utf-8')
-        elif isinstance(item, list):
-            item = _decode_list(item)
-        elif isinstance(item, dict):
-            item = _decode_dict(item)
-        rv.append(item)
-    return rv
-
-
-def _decode_dict(data):
-    rv = {}
-    for key, value in list(data.items()):
-        if isinstance(key, str):
-            key = key.encode('utf-8')
-        if isinstance(value, str):
-            value = value.encode('utf-8')
-        elif isinstance(value, list):
-            value = _decode_list(value)
-        elif isinstance(value, dict):
-            value = _decode_dict(value)
-        rv[key] = value
-    return rv
-
-'''
-Handles login and user creation for new users.
-Returns user to landing page.
-'''
+# The site's homepage
 @never_cache
 def landing_page(request):
     return render(request, 'idc/landing.html', {'request': request, })
@@ -110,13 +52,11 @@ def landing_page(request):
 def privacy_policy(request):
     return render(request, 'idc/privacy.html', {'request': request, })
 
-
 # Returns css_test page used to test css for general ui elements
 def css_test(request):
     return render(request, 'idc/css_test.html', {'request': request})
 
-
-# Returns the data exploration and filtering page, which also allows for cohort creation
+# View for testing methods manually
 @login_required
 def test_methods(request):
     context = {}
@@ -144,10 +84,7 @@ def test_methods(request):
 
     return render(request, 'idc/explore.html', {'request': request, 'context': context})
 
-
-'''
-Returns page that has user details
-'''
+# User details page
 @login_required
 def user_detail(request, user_id):
     if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
@@ -184,22 +121,7 @@ def user_detail(request, user_id):
         return render(request, '403.html')
 
 
-@login_required
-def bucket_object_list(request):
-    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
-    credentials = GoogleCredentials.get_application_default()
-    service = discovery.build('storage', 'v1', credentials=credentials, cache_discovery=False)
-
-    req = service.objects().list(bucket='idc-dev')
-    resp = req.execute()
-    object_list = None
-    if 'items' in resp:
-        object_list = json.dumps(resp['items'])
-
-        return HttpResponse(object_list)
-
-
-# Extended login view so we can track user logins
+# Extended login view so we can track user logins, redirects to data exploration page
 def extended_login_view(request):
 
     try:
@@ -218,142 +140,18 @@ def extended_login_view(request):
     return redirect(reverse('explore_data'))
 
 
-'''
-Returns page users see after signing in
-'''
-@login_required
-def user_landing(request):
-
-    directory_service, http_auth = get_directory_resource()
-    user_email = User.objects.get(id=request.user.id).email
-
-    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
-    # check to see if user has read access to 'All TCGA Data' cohort
-    idc_superuser = User.objects.get(username='idc')
-    superuser_perm = Cohort_Perms.objects.get(user=idc_superuser)
-    user_all_data_perm = Cohort_Perms.objects.filter(user=request.user, cohort=superuser_perm.cohort)
-    if not user_all_data_perm:
-        Cohort_Perms.objects.create(user=request.user, cohort=superuser_perm.cohort, perm=Cohort_Perms.READER)
-
-    # add_data_cohort = Cohort.objects.filter(name='All TCGA Data')
-
-    users = User.objects.filter(is_superuser=0)
-    cohort_perms = Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True)
-    # TODO: Make date_created column and sort on that
-    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-name').annotate(num_cases=Count('samples__case_barcode'))
-
-    for item in cohorts:
-        item.perm = item.get_perm(request).get_perm_display()
-        item.owner = item.get_owner()
-        # print local_zone.localize(item.last_date_saved)
-
-    # Used for autocomplete listing
-    cohort_listing = Cohort.objects.filter(id__in=cohort_perms, active=True).values('id', 'name')
-    for cohort in cohort_listing:
-        cohort['value'] = int(cohort['id'])
-        cohort['label'] = cohort['name'].encode('utf8')
-        del cohort['id']
-        del cohort['name']
-
-    return render(request, 'idc/user_landing.html', {'request': request,
-                                                            'cohorts': cohorts,
-                                                            'user_list': users,
-                                                            'cohorts_listing': cohort_listing,
-                                                            'base_url': settings.BASE_URL,
-                                                            'base_api_url': settings.BASE_API_URL
-                                                            })
-
-
-# get_image_data which allows for URI arguments, falls through to get_image_data(request, slide_barcode)
-def get_image_data_args(request):
-    file_uuid = None
-    if request.GET:
-        file_uuid = request.GET.get('file_uuid', None)
-    elif request.POST:
-        file_uuid = request.POST.get('file_uuid', None)
-
-    if file_uuid:
-        file_uuid = (None if re.compile(r'[^A-Za-z0-9\-]').search(file_uuid) else file_uuid)
-
-    return get_image_data(request, file_uuid)
-
-# Given a slide_barcode, returns image metadata in JSON format
-def get_image_data(request, file_uuid):
-    status=200
-    result = {}
-
-    if not file_uuid:
-        status=503
-        result = {
-            'message': "There was an error while processing this request: a valid file UUID was not supplied."
-        }
-    else:
-        try:
-            img_data_query = """
-                SELECT slide_barcode, level_0__width AS width, level_0__height AS height, mpp_x, mpp_y, file_gcs_url, sample_barcode, case_barcode, file_gdc_id
-                FROM [isb-cgc:metadata.TCGA_slide_images]
-                WHERE file_gdc_id = '{}';
-            """
-
-            query_results = BigQuerySupport.execute_query_and_fetch_results(img_data_query.format(file_uuid))
-
-            if query_results and len(query_results) > 0:
-                result = {
-                    'slide-barcode': query_results[0]['f'][0]['v'],
-                    'Width': query_results[0]['f'][1]['v'],
-                    'Height': query_results[0]['f'][2]['v'],
-                    'MPP-X': query_results[0]['f'][3]['v'],
-                    'MPP-Y': query_results[0]['f'][4]['v'],
-                    'FileLocation': query_results[0]['f'][5]['v'],
-                    'TissueID': query_results[0]['f'][0]['v'],
-                    'sample-barcode': query_results[0]['f'][6]['v'],
-                    'case-barcode': query_results[0]['f'][7]['v'],
-                    'file-uuid': query_results[0]['f'][8]['v'],
-                    'img-type': ('Diagnostic Image' if query_results[0]['f'][0]['v'].split("-")[-1].startswith("DX") else 'Tissue Slide Image' if query_results[0]['f'][0]['v'].split("-")[-1].startswith("TS") else "N/A")
-                }
-
-                sample_metadata = {}
-                result['disease-code'] = sample_metadata['disease_code']
-                result['project'] = sample_metadata['project']
-
-            else:
-                result = {
-                    'msg': 'File UUID {} was not found.'.format(file_uuid)
-                }
-
-        except Exception as e:
-            logger.error("[ERROR] While attempting to retrieve image data for {}:".format(file_uuid))
-            logger.exception(e)
-            status = '503'
-            result = {
-                'message': "There was an error while processing this request."
-            }
-
-    return JsonResponse(result, status=status)
-
-
-@login_required
-def dicom(request, study_uid=None):
-    template = 'idc/dicom.html'
-
-    context = {
-        'study_uid': study_uid,
-        'dicom_viewer': settings.DICOM_VIEWER
-    }
-    return render(request, template, context)
-
-
+# Health check callback
+#
 # Because the match for vm_ is always done regardless of its presense in the URL
 # we must always provide an argument slot for it
-#
 def health_check(request, match):
     return HttpResponse('')
 
-
+# Returns the basic help page (will direct to contact info and readthedocs
 def help_page(request):
     return render(request, 'idc/help.html',{'request': request})
 
-
+# Data exploration and cohort creation page
 @login_required
 def explore_data_page(request):
     attr_by_source = {}
@@ -469,7 +267,7 @@ def explore_data_page(request):
                                             'count': facet_set[attr][val] if val in facet_set[attr] else 0
                                         })
                                     if attr == 'bmi':
-                                        sortDic = {'underweight': 0, 'normal weight': 1, 'overweight': 2, 'obese': 3, 'none': 4}
+                                        sortDic = {'underweight': 0, 'normal weight': 1, 'overweight': 2, 'obese': 3, 'None': 4}
                                         attr_by_source[set_name]['All']['attributes'][attr]['vals'] = sorted(values, key=lambda x: sortDic[x['value']])
                                     else:
                                         attr_by_source[set_name]['All']['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
@@ -561,41 +359,39 @@ def explore_data_page(request):
         context['order']['derived_set']=['dicom_derived_all:segmentation','dicom_derived_all:qualitative','dicom_derived_all:quantitative']
         return render(request, 'idc/explore.html', context)
 
-@login_required
-def ohif_test_page(request):
-    request.session['last_path']=request.get_full_path()
-    return render(request, 'idc/ohif.html',{'request': request})
+# @login_required
+# def ohif_test_page(request):
+#     request.session['last_path']=request.get_full_path()
+#     return render(request, 'idc/ohif.html',{'request': request})
+#
+# @login_required
+# def ohif_viewer_page(request):
+#     request.session['last_path'] = request.get_full_path()
+#     return render(request, 'idc/ohif.html',{'request': request})
 
-@login_required
-def ohif_viewer_page(request):
-    request.session['last_path'] = request.get_full_path()
-    return render(request, 'idc/ohif.html',{'request': request})
+# @login_required
+# def ohif_callback_page(request):
+#     return render(request,'idc/ohif.html',{'request': request})
+#
+# @login_required
+# def ohif_projects_page(request):
+#     request.session['last_ohif_path'] = request.get_full_path()
+#     return render(request, 'idc/ohif.html',{'request': request})
+#
+# def ohif_page(request):
+#     request.session['last_path'] = request.get_full_path()
+#     return render(request, 'idc/ohif.html',{'request': request})
 
-@login_required
-def ohif_callback_page(request):
-    return render(request,'idc/ohif.html',{'request': request})
-
-@login_required
-def ohif_projects_page(request):
-    request.session['last_ohif_path'] = request.get_full_path()
-    return render(request, 'idc/ohif.html',{'request': request})
-
-def ohif_page(request):
-    request.session['last_path'] = request.get_full_path()
-    return render(request, 'idc/ohif.html',{'request': request})
-
+# Callback for recording the user's agreement to the warning popup
 def warn_page(request):
     request.session['seenWarning']=True;
     return JsonResponse({'warning_status': 'SEEN'}, status=200)
 
+# About page
 def about_page(request):
     return render(request, 'idc/about.html',{'request': request})
 
-
-
-def vid_tutorials_page(request):
-    return render(request, 'idc/video_tutorials.html',{'request': request})
-
+# User dashboard, where saved cohorts (and, in the future, uploaded/indexed data) are listed
 @login_required
 def dashboard_page(request):
 
@@ -603,9 +399,7 @@ def dashboard_page(request):
 
     try:
         # Cohort List
-        idc_superuser = User.objects.get(username='idc')
-        public_cohorts = Cohort_Perms.objects.filter(user=idc_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
-        cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
+        cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True)))
         # TODO: Add in 'date created' and sort on that
         context['cohorts'] = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-name')
 

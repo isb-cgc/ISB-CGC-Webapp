@@ -101,7 +101,11 @@ def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record
     for source in sources:
         start = time.time()
         joined_origin = False
-        solr_query = build_solr_query(filters, with_tags_for_ex=True) if filters else None
+        solr_query = build_solr_query(
+            filters,
+            with_tags_for_ex=True,
+            search_child_records_by="StudyInstanceUID" if source.has_data_type(DataSetType.DERIVED_DATA) else None
+        ) if filters else None
         solr_facets = build_solr_facets(attrs_for_faceting['sources'][source.id]['attrs'],
                                         filter_tags=solr_query['filter_tags'] if solr_query else None,
                                         unique=source.count_col)
