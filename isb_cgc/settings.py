@@ -669,3 +669,8 @@ if DEBUG and DEBUG_TOOLBAR:
     ]
     SHOW_TOOLBAR_CALLBACK = True
     INTERNAL_IPS = (os.environ.get('INTERNAL_IP', ''),)
+
+##########################
+# OAUTH PLATFORM         #
+##########################
+IDP        = os.environ.get('IDP', 'iTrust')
