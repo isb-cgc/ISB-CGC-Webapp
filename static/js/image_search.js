@@ -69,7 +69,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
         };
 
         window.setSlider = function (divName, reset, strt, end, isInt) {
-            slideDiv = divName + "_slide";
+            var slideDiv = divName + "_slide";
             if (reset) {
                 strt = $('#' + slideDiv).slider("option", "min");
                 end = $('#' + slideDiv).slider("option", "max");
@@ -82,10 +82,17 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
             // $("#inp_age_slide").value="0-120";
             document.getElementById(inpDiv).value = val;
-            filtAtt = divName + '_btw'
+            nm=new Array();
+            var filterCats= $('#'+divName).parentsUntil('.tab-pane','.list-group-item__body');
+            for (var i=0;i<filterCats.length;i++){
+                var ind = filterCats.length-1-i;
+                nm.push(filterCats[ind].id);
+            }
+            nm.push(divName);
+            filtAtt = nm.join('.')+ '_btw';
             if (reset) {
-                if (window.filterObj.hasOwnProperty("age_at_diagnosis_btw")) {
-                    delete window.filterObj["age_at_diagnosis_btw"];
+                if (window.filterObj.hasOwnProperty(filtAtt)) {
+                    delete window.filterObj[filtAtt];
                 }
             } else {
                 var attVal = [];
@@ -122,8 +129,9 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                          }
                      }
                 }
-                else if (curKey === 'age_at_diagnosis_btw') {
-                    var nstr = '<span class="filter-type">AGE</span> IN (<span class="filter-att">' + filterObj[curKey][0].toString() + '-' + (filterObj[curKey][1] + 1).toString() + '</span>)';
+                else if (curKey.endsWith('_btw')) {
+                    var disp = curKey.substring(0, curKey.length-4);
+                    var nstr = '<span class="filter-type">'+disp+'</span> IN (<span class="filter-att">' + filterObj[curKey][0].toString() + '-' + (filterObj[curKey][1] + 1).toString() + '</span>)';
                      oStringA.push(nstr);
                 } else {
                     var disp = curKey;
@@ -170,7 +178,14 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             var slideName = divName + '_slide';
             var inpName = divName + '_input';
             var strtInp = min + '-' + max;
-            var filtName = divName + '_btw';
+            var nm=new Array();
+            var filterCats= $('#'+divName).parentsUntil('.tab-pane','.list-group-item__body');
+            for (var i=0;i<filterCats.length;i++){
+                var ind = filterCats.length-1-i;
+                nm.push(filterCats[ind].id);
+            }
+            nm.push(divName);
+            var filtName = nm.join('.') + '_btw';
             $('#' + divName).append('<div id="' + slideName + '"></div>  <input id="' + inpName + '" type="text" value="' + strtInp + '"> <button onclick=\'setSlider("' + divName + '",true,0,0,' + String(isInt) + ')\'>Reset</button>');
 
             $('#' + slideName).slider({
@@ -201,6 +216,11 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
                 }
             });
+
+            $('#'+ divName+'_list').addClass('hide');
+            $('#'+ divName).find('.more-checks').addClass('hide');
+            $('#'+ divName).find('.less-checks').addClass('hide');
+             $('#'+ divName).find('.hide-zeros').addClass('hide');
         };
 
         var editProjectsTableAfterFilter = function (tableId, collFilt, collectionsData) {
@@ -557,9 +577,9 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             return newScrollInd;
         }
 
-         $('.table').find('tbody').on('scroll', function () {
+        /* $('.table').find('tbody').on('scroll', function () {
             resetTableControls($(this), false,-1);
-        });
+        }); */
 
 
         var setTableView = function (panelTableElem) {
@@ -1128,7 +1148,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 }
 
                 var filterId = chartid.replace("_chart", "");
-                if (filterId === 'age_at_diagnosis') {
+                var isSlider = $('#'+filterId).find('#'+filterId+'_slide').length>0 ? true : false;
+                if (isSlider) {
                     //var sel = data.points[0].x;
                     var sel = new Object();
                     if (isPie) {
@@ -1656,12 +1677,10 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             tableSortBindings('series_table_head');
 
 
-            $('#age_at_diagnosis_list').addClass('hide');
-            $('#age_at_diagnosis').find('.more-checks').addClass('hide');
-            $('#age_at_diagnosis').find('.less-checks').addClass('hide');
+
             mkSlider('age_at_diagnosis',0,120,1,true);
 
-            //addSliders('quantitative');
+            addSliders('quantitative');
 
             var numCol = $('#projects_table').children('tr').length
             $('#projects_panel').find('.total-file-count')[0].innerHTML = numCol.toString();
