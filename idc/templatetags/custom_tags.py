@@ -70,6 +70,10 @@ VALUE_SPECIFIC_ORDERS = {
 }
 
 ATTR_SPECIFIC_ORDERS = [
+    'dicom_derived_all:segmentation',
+    'dicom_derived_all:qualitative',
+    'dicom_derived_all:quantitative',
+
     'program_name',
     'project_short_name',
     'user_program',
