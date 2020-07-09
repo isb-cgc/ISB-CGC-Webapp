@@ -29,19 +29,8 @@ urlpatterns = [
 
     url(r'^$', views.landing_page, name='landing_page'),
     url(r'^test_methods/', views.test_methods, name='test_methods'),
-
-    url(r'^user_landing/$', views.user_landing, name='user_landing'),
     url(r'^style_guide/', views.css_test),
     url(r'^users/(?P<user_id>\d+)/$', views.user_detail, name='user_detail'),
-
-    url(r'^bucket_object_list/$', views.bucket_object_list, name='bucket_object_list'),
-    url(r'^dicom/$', views.dicom, name='dicom'),
-    url(r'^dicom/(?P<study_uid>[A-Za-z0-9]+)/$', views.dicom, name='dicom_study'),
-
-    url(r'^images/(?P<file_uuid>[A-Za-z0-9\-]+)/$', views.get_image_data, name='image_data'),
-    url(r'^images/', views.get_image_data_args, name='image_data_args'),
-    url(r'dicom/(?P<study_uid>[A-Za-z0-9\.]+)/$', views.dicom, name='dicom'),
-
     url(r'^cohorts/', include('cohorts.urls')),
     path('admin/', admin.site.urls),
     url(r'^accounts/', include('accounts.urls')),
@@ -52,25 +41,18 @@ urlpatterns = [
     url(r'^help/', views.help_page, name='help'),
     url(r'^explore/', views.explore_data_page, name='explore_data'),
 
-
-    url(r'^viewer/', views.ohif_viewer_page, name='ohif_view'),
-    url(r'^callback', views.ohif_callback_page, name='ohif_callback'),
-    url(r'^ocallback/', views.ohif_callback_page, name='ohif_callback'),
-    url(r'^projects/', views.ohif_projects_page, name='ohif_projects'),
-    url(r'^ohif/', views.ohif_page, name='ohif'),
-
-
+    # url(r'^viewer/', views.ohif_viewer_page, name='ohif_view'),
+    # url(r'^callback', views.ohif_callback_page, name='ohif_callback'),
+    # url(r'^ocallback/', views.ohif_callback_page, name='ohif_callback'),
+    # url(r'^projects/', views.ohif_projects_page, name='ohif_projects'),
+    # url(r'^ohif/', views.ohif_page, name='ohif'),
     url(r'^warning/', views.warn_page, name='warn'),
-
-
-      url(r'^about/', views.about_page, name='about_page'),
-      url(r'^dashboard/', views.dashboard_page, name='dashboard'),
-      url(r'^extended_login/$', views.extended_login_view, name='extended_login'),
-      url(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),
-      url(r'^privacy/', views.privacy_policy, name='privacy'),
-
-      url(r'^collections/', include('idc_collections.urls')),
-      url(r'^share/', include('sharing.urls')),
+    url(r'^about/', views.about_page, name='about_page'),
+    url(r'^dashboard/', views.dashboard_page, name='dashboard'),
+    url(r'^extended_login/$', views.extended_login_view, name='extended_login'),
+    url(r'^privacy/', views.privacy_policy, name='privacy'),
+    url(r'^collections/', include('idc_collections.urls')),
+    url(r'^share/', include('sharing.urls')),
 ]
 
 if settings.IS_DEV:
