@@ -235,9 +235,8 @@
 
                                 <ul class="list-group" role="tablist" aria-multiselectable="true">
 
-                                     {% comment %} {% for attr_setK, attr_setV in set_attributes.derived_set.items|check_for_order:attr_setK %}{% endcomment %}
-                                     {% for attr_setK, attr_setV in set_attributes.derived_set.items|dictsort:"0.lower" %}
-
+                                     {% comment %}{% for attr_setK, attr_setV in set_attributes.derived_set|check_for_order:attr_setK %}{% endcomment %}
+                                      {% for attr_setK, attr_setV in set_attributes.derived_set.items|dictsort:"0.lower" %}
 
                                          {% if 'attributes' in attr_setV %}
 

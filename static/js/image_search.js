@@ -1236,8 +1236,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
         window.updatePlots = function (selectElem) {
             createPlots('search_orig_set');
-            createPlots('tcga_clinical');
-             createPlots('segmentation');
+            createPlots('search_derived_set');
+             createPlots('search_related_set');
         }
 
         var createPlots = function (id) {
