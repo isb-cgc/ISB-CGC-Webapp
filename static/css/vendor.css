@@ -1517,7 +1517,13 @@ pre {
       width: 970px; } }
   @media (min-width: 1200px) {
     .container {
-      width: 1400px; } }
+      width: 1170px; } }
+  @media (min-width: 1400px) {
+    .container {
+      width: 1370px; } }
+  @media (min-width: 1600px) {
+    .container {
+      width: 1570px; } }
 
 .container-fluid {
   margin-right: auto;

@@ -132,7 +132,8 @@ tr.selected_grey td  a {
 
 tbody.set_height {
     max-height: 200px;       /* Just for the demo          */
-    overflow-y: scroll;
+    //overflow-y: scroll;
+    overflow-y: hidden;
     overflow-x: hidden;
     width: 100%;
     display: inline-block;
