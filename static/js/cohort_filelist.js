@@ -122,13 +122,16 @@ require([
         $(this).find('.files-per-page-select').data('fpp',new_fpp);
         var tableElem = $(this).parent().parent().find('tbody');
         var rowPos = tableElem.find('tr').map(function(){ return this.offsetTop}  );
-         var curScrollPos = tableElem[0].scrollTop;
-         var scrollPosInd = Array.from(rowPos.map(function(){return ((this<=curScrollPos)? 0:1 )  })).indexOf(1);
 
-       //var curpage = $(this).parent().parent().find('.dataTables_goto_page').data('curpage');
-       var new_page_no = parseInt( scrollPosInd/new_fpp ) + 1;
-       $(this).parent().parent().find('.dataTables_goto_page').data('curpage',new_page_no);
-       window.resetTableControls(tableElem, false, scrollPosInd);
+        //var curScrollPos = tableElem[0].scrollTop;
+         //var scrollPosInd = Array.from(rowPos.map(function(){return ((this<=curScrollPos)? 0:1 )  })).indexOf(1);
+
+       var curPage = $(this).parent().parent().find('.dataTables_goto_page').data('curpage');
+       curIndex=(parseInt(curPage)-1)*old_fpp
+       var new_page_no = parseInt( curIndex/new_fpp ) + 1;
+       var newIndex=(new_page_no-1)*new_fpp;
+       $(this).parent().parent().find('.dataTables_goto_page').data('curpage',newIndex.toString());
+       window.resetTableControls(tableElem, true, newIndex);
 
 
     });

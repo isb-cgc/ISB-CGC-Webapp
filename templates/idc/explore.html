@@ -33,7 +33,7 @@
 {% block page_name %}cohort-details{% endblock %}
 
 {% block page_header %}
-    <div class="page-heading">
+    <div class="pf-heading">
         <div class="container" style="display: block;">
             <ol class="breadcrumb">
                 <li><a href="/dashboard/">Your Dashboard</a></li>
@@ -43,8 +43,10 @@
             </ol>
 
             <h1 class="page-header pull-left" role="heading" aria-level="1">Explore Image Data</h1>
-            <button id="save-cohort-btn" class="btn btn-primary pull-right" data-toggle="modal" data-target="#save-cohort-modal" title="{% if request.user.is_authenticated %}Please select at least one filter.{% else %}Please log in to save this cohort.{% endif %}" disabled="disabled">
+            <button id="save-cohort-btn-disabled" class="btn btn-primary pull-right" data-toggle="modal" data-target="#save-cohort-modal" title="{% if request.user.is_authenticated %}Please select at least one filter.{% else %}Please log in to save this cohort.{% endif %}" disabled="disabled">
                 {% if request.user.is_authenticated %}Save As New Cohort{% else %}Log in to Save{% endif %}</button>
+{#            <button id="save-cohort-btn" class="btn btn-primary pull-right" data-toggle="modal" data-target="#save-cohort-modal" title="{% if request.user.is_authenticated %}Please select at least one filter.{% else %}Please log in to save this cohort.{% endif %}" disabled="disabled">#}
+{#                {% if request.user.is_authenticated %}Save As New Cohort{% else %}Log in to Save{% endif %}</button>#}
         </div>
     </div>
 {% endblock %}
@@ -78,7 +80,7 @@
                                  <li class="list-group-item">
                                      <div id="Program_heading" class="list-group-item__heading">
                                          <a role="button" data-toggle="collapse" href="#Program" aria-expanded="false" aria-controls="Program">
-                                             <i class="fa fa-caret-right" style="font-family :&#39;FontAwesome&#39; !important"></i> <i class="fa fa-caret-down" style="font-family :&#39;FontAwesome&#39; !important"></i>Collection
+                                             <i class="fa fa-caret-right" style="font-family :&#39;FontAwesome&#39; !important"></i> <i class="fa fa-caret-down" style="font-family :&#39;FontAwesome&#39; !important"></i>COLLECTION
                                          </a>
                                      </div>
                                      <div id="Program" class="collapse list-group-item__body filter-panel">
@@ -86,24 +88,40 @@
                                              {% for progK, progV in programs.items|dictsort:"0.lower" %}
                                                  {% if progK != "All" and progK != "None" %}
                                                  <li class="list-group-item">
+                                                      {% if progV.projects and progV.projects.items|length == 1 %}
+                                                           {% for proj, projK in progV.projects.items %}
+
+                                                               <div id="{{ proj }}_heading" class="list-group-item__heading">
+                                                                   <input type="checkbox" value="{{ proj }}">
+                                                                   <span class="value">{{ proj|upper }}</span> <span class="float-right case_count count">{{ projK }}</span>
+                                                               </div>
+                                                            <div id="{{ proj }}" class="collapse list-group-item__body">
+                                                           {% endfor %}
+
+                                                      {% else %}
+
                                                      <div id="{{ progK }}_heading" class="list-group-item__heading">
                                                          <input type="checkbox" value="{{ progK }}">
-
-                                                       {% if progV.projects %}
                                                             <a role="button" data-toggle="collapse" href="#{{ progK }}" aria-expanded="false" aria-controls="{{ progK }}">
                                                                  <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>
                                                              </a>
-                                                       {% endif %}
+
                                                          <span class="value">{{ progK|upper }}</span> <span class="float-right case_count count">{{ progV.val }}</span>
                                                          </div>
-                                                          <div id="{{ progK }}" class="collapse list-group-item__body">
-                                                          {% if progV.projects %}
+                                                      <div id="{{ progK }}" class="collapse list-group-item__body">
+                                                     {% endif %}
+
+
+
+
+
+                                                          {% if progV.projects and progV.projects.items|length > 1 %}
                                                            <ul id="{{ progK }}_proj_list" class="search-checkbox-list" style="list-style: none;">
                                                            {% for proj, projK in progV.projects.items %}
                                                               <li class="checkbox {% if forloop.counter >= 6 %} extra-values{% endif %}">
                                                                 <label>
                                                                   <input type="checkbox" value="{{ proj }}">
-                                                                    <span class="value">{{ proj|lower }}</span> <span class="float-right case_count count plotit">{{ projK }}</span>
+                                                                    <span class="value">{{ proj|upper }} </span> <span class="float-right case_count count plotit">{{ projK }}</span>
                                                                  </label>
                                                                </li>
                                                             {% endfor %}
@@ -115,6 +133,7 @@
                                                               <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
 
                                                           {% endif %}
+
                                                           </div>
                                                  </li>
                                                 {% endif %}
@@ -183,6 +202,7 @@
                                                 </a>
                                             </div>
                                             <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body">
+                                                {% comment %} <span>Sort by: <input type="radio" id="nm" name="{{ attr.name }}_sort"><label>Name</label> <input type="radio" id="num" name="{{ attr.name }}_sort"><label>Number</label>   </span> {% endcomment %}
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                    {% for val in attr.values %}
                                                        {% with val.display_value|get_display_val:val.value as display_value %}
@@ -474,7 +494,7 @@
                                <table class="table table-striped" >
                               <thead id="studies_table_head">
                              <tr>
-                                 <th class='text_data'>Project Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Patient Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Study Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                 <th class='text_data'>Project Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Case Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Study Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
                              </tr>
                               </thead>
 
