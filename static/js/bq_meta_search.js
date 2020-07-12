@@ -98,23 +98,8 @@ require([
                     },
                     'render': function(data, type){
                         if (type === 'display') {
-                            if (data != null && data.toLowerCase() === 'open') {
-                                return '<i class="fa fa-unlock"  title="Open Access" aria-hidden="true"></i>';
-                            }
-                            // if(data != null && data.toLowerCase() === 'open'){
-                            else if (data != null && data.toLowerCase() === 'controlled') {
-
+                            if (data != null && data.toLowerCase() === 'controlled') {
                                 return '<i class="fa fa-lock" aria-hidden="true" title="Controlled Access"></i>';
-                                // +
-                                // (user_is_authenticated ? '':
-                                // 'Sign in to verify your data access')
-
-                                // '<button class="dropdown-toggle dropdown-btn" type="button" data-toggle="collapse" data-target="#dropdownMenu'+meta.row+'" aria-haspopup="true" aria-expanded="true">\n' +
-                                // ' <span class="caret"></span>' +
-                                // '</button>' +
-                                // '<div class="collapse" id="dropdownMenu'+meta.row+'">' +
-                                // ' <div><button class="dt-button" href="#">Unlock</button></div>' +
-                                // '</div>'
                             }
                             else {
                                 return '';
