@@ -56,7 +56,9 @@
 {% endblock %}
 
 {% block content %}
-
+    <div class="spinner">
+        <i class="fa fa-spinner fa-spin"></i>
+    </div>
     <div class="custom-width-20">
 
         <div class="panel panel-default">
@@ -173,7 +175,7 @@
                         </button>
                     </div>
                     <div>
-                        <button type="button" data-target=".adv-div" data-toggle="collapse"
+                        <button type="button" data-target="#advSearch0" data-toggle="collapse"
                                 class="btn collapsed adv-toggle-btn">Show
                         </button>
                     </div>
@@ -185,9 +187,7 @@
 
     <div class="custom-width-80">
         <div class="panel panel-default">
-            <div class="spinner">
-                <i class="fa fa-spinner fa-spin"></i>
-            </div>
+
             <div class="panel-body">
                 <table id="bqmeta" class="table table-striped" style="width:100%">
                     <thead>
