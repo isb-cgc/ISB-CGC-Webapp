@@ -1,59 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap')
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap')
+
 body
   transition: all 0.4s ease-in
+  padding-top: 30px
 
 .menu-open
-  padding-top: 50px
+  padding-top: 59px
   transition: all 0.4s ease-in-out
 
-.navbar-left
-  float: left
-  margin-top: 5px
 
-.navbar-right
-  float: right
-  margin-top: 14px
-  margin-right: 0
+
+.navbar-fixed-top .navbar-collapse
+  max-height: none
+
+.navbar
+  font-family: 'Open Sans', sans-serif
+
+  ul
+    margin-top: 8px
+  > .subnav ul
+    margin-top: 0
+    .sub-menu
+      text-align: left
+      padding: 8px 15px
+      border-bottom-left-radius: 10px
+      border-bottom-right-radius: 10px
+      .has-drop-down__more ul.drop
+        background-color: $isb-dark
+        border-top-right-radius: 10px
+        border-bottom-right-radius: 10px
+        top: -5px
+        width: $submenu-width*.5
+        li:hover
+          background: none
+    > li.menu-item
+      > a, > form, > span
+        &:hover
+          color: #f18621
+  .badge
+    background-color: #9d9d9d
+
 
 .navbar-brand
-    height: 50px
-    padding: 5px 5px 5px 0
+  img
+    height: $nav-height * .8
+    margin-top: -$nav-height * .2
+    vertical-align: top
     width: auto
-    float: none
     display: inline-block
 
 nav, .site-header
   background: $nav-bg
   a
-    color: $link-color
-    font-weight: bold
+    color: #2b537b
+    font-size: 14px
+  .dropdown
+    > .dropdown-menu
+      border-radius: 5px
+      border: 1px solid lightgrey
+      margin-top: 20px
+      li
+        margin: 0
+        padding: 1px 0
 .navbar-item
-  display: inline-block !important
-  vertical-align: middle
-  padding-right: 5px
-  padding-left: 5px
-  float: none !important
+  padding: 7px 10px
   .dropdown:hover
     cursor: pointer
   > a
     padding: 0 !important
-
   &__text
-    display: inline-block
     font-size: 16px
-    vertical-align: middle
+    vertical-align: top
     &:hover
       text-decoration: none
-    i.fa
-      padding: 0 5px
 
 .navbar-link
   padding-right: 10px
   padding-left: 10px
   a
-    color: $link-color
+    color: #2b537b
     text-decoration: none
     &:hover, &:focus
-      color: darken($link-color, 10%)
+      color: #f18621
 
 nav.subnav li.has-drop-down__more ul.drop
   overflow-y: auto
@@ -64,38 +93,37 @@ nav.subnav li.has-drop-down__more ul.drop
   @media screen and (min-height: $screen-lg-h)
     max-height: 525px
 
-
 a.skip-nav
-    position: absolute
-    top: -1000px
-    left: -1000px
-    height: 1px
-    width: 1px
-    overflow: hidden
+  position: absolute
+  top: -1000px
+  left: -1000px
+  height: 1px
+  width: 1px
+  overflow: hidden
 
 #user-login
-    .avatar-link
-      display: inline-block
-      vertical-align: middle
-    .avatar-link:hover
-        text-decoration: none
-    .login-link
-        font-size: 16px
+  .avatar-link
+    display: inline-block
+    vertical-align: top
+  .avatar-link:hover
+    text-decoration: none
+  .login-link
+    font-size: 16px
+  img
+    margin: -9px 0
+    border-radius: 50%
+    border: 1px solid $bg-color
 
-    img
-        margin: 0px 10px
-        border-radius: 50%
-        border: 1px solid $bg-color
-
-    .dropdown
-        display: inline-block
-        vertical-align: middle
-        font-size: 16px
-        margin-right: 15px
-        > a:hover, > a:focus
-            background-color: #fff
-            cursor: pointer
-            text-decoration: none
-        > ul
-            margin-top: 10px
-
+  .dropdown
+    display: inline-block
+    vertical-align: top
+    font-size: 16px
+    margin-right: 15px
+    > a:hover, > a:focus
+      background-color: #fff
+      cursor: pointer
+      text-decoration: none
+    > ul
+      margin-top: 17px
+a#user-dropdown:hover
+  color: #f18621

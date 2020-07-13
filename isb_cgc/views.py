@@ -152,6 +152,10 @@ def css_test(request):
 '''
 Returns page that has user details
 '''
+@login_required
+def user_detail_login(request):
+    user_id = request.user.id
+    return user_detail(request, user_id)
 
 
 @login_required
