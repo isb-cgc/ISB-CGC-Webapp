@@ -51,7 +51,7 @@ simple_number_sort = [
 
 # If an attribute has a specific order, list it here; these should be the *values* not the display strings
 VALUE_SPECIFIC_ORDERS = {
-    'bmi': ['underweight', 'normal weight', 'overweight', 'obese', 'None', ],
+    'bmi': ['underweight', 'normal', 'overweight', 'obese', 'None', ],
     'hpv_status': ['Positive', 'Negative', 'None', ],
     'age_at_diagnosis': simple_number_sort,
     'year_of_diagnosis': ['1976 to 1980', '1981 to 1985', '1986 to 1990', '1991 to 1995', '1996 to 2000', '2001 to 2005', '2006 to 2010', '2011 to 2015', 'None',],
