@@ -66,6 +66,7 @@ OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 BQ_ECOSYS_BUCKET = settings.BQ_ECOSYS_STATIC_URL
+IDP = settings.IDP
 
 def _needs_redirect(request):
     appspot_host = '^.*{}\.appspot\.com.*$'.format(settings.GCLOUD_PROJECT_ID.lower())
@@ -195,6 +196,7 @@ def user_detail(request, user_id):
 
         return render(request, 'isb_cgc/user_detail.html',
                       {'request': request,
+                       'idp': IDP,
                        'user': user,
                        'user_details': user_details
                        })
