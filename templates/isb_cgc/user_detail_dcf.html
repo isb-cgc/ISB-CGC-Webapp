@@ -103,7 +103,7 @@
     <div class="modal fade" id="link-nih-account-modal" tabindex="-1" role="dialog" aria-labelledby="link-nih-account-header" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                {% if idp|lower == 'ras' %}
+                {% if idp == 'ras' %}
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
@@ -112,27 +112,25 @@
                     </div>
                     <div class="modal-body">
                         <p>
-                            You will now be sent to the Data Commons Framework (DCF) site to login to RAS and then to
-                            link your
-                            RAS and Google IDs.
-{#                            This will take three steps the first time you do it:#}
-{#                            <ul>#}
-{#                                <li>On the RAS page, login with your RAS ID and password.</li>#}
-{#                                <li>Next, you must allow ISB-CGC to access your account information (click <i>Yes, I#}
-{#                                    authorize</i>).#}
-{#                                </li>#}
-{#                                <li>Finally, you must login to the Data Commons Framework (i.e. <i>datacommons.io</i>) <b>using#}
-{#                                    your {{ user_details.email }} Google ID</b>.#}
-{#                                </li>#}
-{#                            </ul>#}
+                            You will now be sent to the Data Commons Framework (DCF) site to login to NIH and then to
+                            link your NIH and Google IDs. This will take three steps the first time you do it:
+                            <ul>
+                                <li>On the NIH page, login with your NIH ID and password.</li>
+                                <li>Next, you must allow ISB-CGC to access your account information (click <i>Yes, I
+                                    authorize</i>).
+                                </li>
+                                <li>Finally, you must login to the Data Commons Framework (i.e. <i>datacommons.io</i>) <b>using
+                                    your {{ user_details.email }} Google ID</b>.
+                                </li>
+                            </ul>
                         </p>
-{#                        <p>If you are having problems with linking, you might try <a#}
-{#                                href="{% url 'dcf_simple_logout' %}">logging out</a> of DCF before trying again.</p>#}
+                        <p>If you are having problems with linking, you might try <a
+                                href="{% url 'dcf_simple_logout' %}">logging out</a> of DCF before trying again.</p>
                     </div>
                     <form id="link-nih-account" method="GET" action="{% url 'dcf_login' %}">
                         {% csrf_token %}
                         <div class="modal-footer">
-                            <input type="hidden" name="idp" value="{{ idp|lower }}" />
+                            <input type="hidden" name="idp" value="{{ idp }}" />
                             <input type="submit" value="Go to DCF" class="btn btn-primary"/>
                             <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                         </div>
