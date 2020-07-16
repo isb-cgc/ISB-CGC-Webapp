@@ -68,6 +68,26 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             }
         };
 
+        window.hidePanel=function(){
+            $('#lh_panel').hide();
+             $('#show_lh').show();
+             $('#show_lh').removeClass('hidden');
+            $('#rh_panel').removeClass('col-lg-9');
+            $('#rh_panel').removeClass('col-md-9');
+            $('#rh_panel').addClass('col-lg-12');
+            $('#rh_panel').addClass('col-md-12');
+        }
+
+         window.showPanel=function(){
+            $('#lh_panel').show();
+            $('#show_lh').hide();
+            $('#rh_panel').removeClass('col-lg-12');
+            $('#rh_panel').removeClass('col-md-12');
+            $('#rh_panel').addClass('col-lg-9');
+            $('#rh_panel').addClass('col-md-9');
+        }
+
+
         window.setSlider = function (divName, reset, strt, end, isInt) {
             var slideDiv = divName + "_slide";
             if (reset) {
@@ -130,12 +150,20 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                      }
                 }
                 else if (curKey.endsWith('_btw')) {
-                    var disp = curKey.substring(0, curKey.length-4);
+                    var realKey=curKey.substring(0, curKey.length-4).split('.').pop();
+                    var disp = $('#'+realKey+'_heading').children()[0].innerText;
                     var nstr = '<span class="filter-type">'+disp+'</span> IN (<span class="filter-att">' + filterObj[curKey][0].toString() + '-' + (filterObj[curKey][1] + 1).toString() + '</span>)';
                      oStringA.push(nstr);
                 } else {
-                    var disp = curKey;
-                    var oArray = filterObj[curKey].sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
+                    var realKey=curKey.split('.').pop()
+                    var disp = $('#'+realKey+'_heading').children()[0].innerText;;
+                    var valueSpans = $('#'+realKey+'_list').children().children().children('input:checked').siblings('.value');
+                    oVals= new Array();
+                    valueSpans.each( function(){oVals.push($(this).text()) });
+
+                    var oArray = oVals.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
+
+
                     //var nstr=disp+": "
                     //nstr += oArray.join(", &ensp; ");
                     nstr = '<span class="filter-type">' + disp + '</span>';
@@ -160,6 +188,17 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
             //alert(oString);
         };
+
+        window.showGraphs = function(selectElem){
+            $(selectElem).parent().siblings('.graph-set').show();
+            $(selectElem).parent().siblings('.less-graphs').show();
+            $(selectElem).parent().hide();
+        }
+        window.hideGraphs = function(selectElem){
+            $(selectElem).parent().siblings('.graph-set').hide();
+            $(selectElem).parent().siblings('.more-graphs').show();
+            $(selectElem).parent().hide();
+        }
 
         window.showMoreGraphs = function (graphClass, height) {
             $('.'+graphClass).parent().find('.more-graphs').hide();
@@ -1236,8 +1275,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
         window.updatePlots = function (selectElem) {
             createPlots('search_orig_set');
-            createPlots('tcga_clinical');
-             createPlots('segmentation');
+            createPlots('search_derived_set');
+             createPlots('search_related_set');
         }
 
         var createPlots = function (id) {
@@ -1364,10 +1403,25 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
         var handleFilterSelectionUpdate = function(filterElem, mkFilt, doUpdate) {
         var checked = $(filterElem)[0].checked;
+
+        var neighbours =$(filterElem).parentsUntil('.list-group-item__body','ul').children().children().children('input:checkbox');
+        var neighboursCk = $(filterElem).parentsUntil('.list-group-item__body','ul').children().children().children(':checked');
+        var allChecked= false;
+        var noneChecked = false;
+        if (neighboursCk.length===0){
+            noneChecked = true;
+        }
+
+        if (neighbours.length === neighboursCk.length){
+            allChecked = true;
+        }
+
         var filterCats= $(filterElem).parentsUntil('.tab-pane','.list-group-item, .checkbox');
         var j = 1;
 
         var curCat='';
+        var lastCat='';
+        numCheckBoxes=0;
         for (var i=0;i<filterCats.length;i++){
             ind = filterCats.length-1-i;
             filterCat=filterCats[ind];
@@ -1376,11 +1430,13 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                  checkBox =$(filterCat).find('input:checkbox')[0];
                  filtnm=checkBox.value;
                  hasCheckBox = true;
+                 numCheckBoxes++;
             }
             else {
                 filtnm=$(filterCat).children('.list-group-item__body')[0].id;
                 if  ($(filterCat).children('.list-group-item__heading').children('input:checkbox').length>0) {
                    hasCheckBox = true;
+                   numCheckBoxes++;
                 }
                checkBox = $(filterCat).children('.list-group-item__heading').children('input:checkbox')[0];
             }
@@ -1392,10 +1448,15 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 if (filterObj[curCat].indexOf(filtnm)<0){
                     filterObj[curCat].push(filtnm)
                 }
+
+                /* if ( allChecked && (i === (filterCats.length-1)) && (numCheckBoxes>1)) {
+                    delete filterObj[curCat];
+                }*/
+
             }
 
-            if (!checked && (ind==0)){
-
+            if (!checked && ( (ind===0) || ( (ind===1) && hasCheckBox && noneChecked)) ){
+               checkBox.checked = false;
                if ( filterObj.hasOwnProperty(curCat) && (filterObj[curCat].indexOf(filtnm)>-1) ){
                     pos = filterObj[curCat].indexOf(filtnm);
                     filterObj[curCat].splice(pos,1);
@@ -1407,6 +1468,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                if (curCat.length>0){
                  curCat+="."
                  }
+                lastCat = curCat;
                 curCat+=filtnm;
                 //$(filterElem).find('input:checkbox').checked=false;
                 if ($(filterElem).parent().hasClass('list-group-item__heading')){
@@ -1428,6 +1490,23 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             curCat+=filtnm;
 
         }
+        var childBoxes=$(filterElem).parent().siblings().find('input:checkbox');
+        if (checked && (childBoxes.length>0)) {
+            filterObj[curCat] = new Array();
+            childBoxes.each(function(){
+               this.checked=true;
+               filterObj[curCat].push(this.value);
+            });
+            //$(filterElem).parent().siblings().find('input:checkbox').prop('checked',true);
+
+        }
+        else {
+            delete filterObj[curCat];
+            $(childBoxes).prop('checked',false);
+        }
+
+
+
         if (mkFilt) {
             mkFiltText();
         }
@@ -1510,6 +1589,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             handleFilterSelectionUpdate(this, true, true);
         });
 
+        /*
         $('#' + filterId).find('.hide-zeros-a').on('click', function () {
             $(this).parent().parent().children('.show-zeros').show();
             $(this).parent().parent().children('.show-zeros').removeClass('notDisp');
@@ -1530,7 +1610,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
         });
 
-
+         */
 
 
         $('#' + filterId).find('.show-more').on('click', function () {
@@ -1662,7 +1742,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             window.filtHistory.push(histObj);
             createPlots('search_orig_set');
             createPlots('search_derived_set');
-           createPlots('tcga_clinical');
+            createPlots('tcga_clinical');
            /* addFilterBindings('search_orig_set');
             addFilterBindings('search_related_set');*/
 

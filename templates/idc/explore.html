@@ -67,8 +67,12 @@
         <div class="tab-content data-tab-content">
             <input id="number_ajax" type="hidden" value="0">
             <div class="spinner" style="display:none"><i class="fa fa-spinner fa-spin spin" style="font-family :'FontAwesome' !important"></i></div>
-            <div class="tab-pane data-tab active" role="tabpanel">
-                <div class="col-lg-3 col-md-3">
+            <div id="lh_panel" class="tab-pane data-tab active flex_div" role="tabpanel">
+                <div  class="col-lg-3 col-md-3 main_cols">
+                <div class="filter-panel panel data-tab-content-panel lh">
+                            <a data-toggle="collapse" aria-label="hideit" onclick="hidePanel()" ><i class="show fa fa-angle-double-left" style="font-family :'FontAwesome' !important"></i></a>
+                    </div>
+
                     <div class="filter-panel panel data-tab-content-panel">
                         <div class="tab-panel panel-default">
                             <div class="panel-heading clearfix">
@@ -118,7 +122,7 @@
                                                           {% if progV.projects and progV.projects.items|length > 1 %}
                                                            <ul id="{{ progK }}_proj_list" class="search-checkbox-list" style="list-style: none;">
                                                            {% for proj, projK in progV.projects.items %}
-                                                              <li class="checkbox {% if forloop.counter >= 6 %} extra-values{% endif %}">
+                                                              <li class="checkbox {% if foloopr.counter >= 6 %} extra-values{% endif %}">
                                                                 <label>
                                                                   <input type="checkbox" value="{{ proj }}">
                                                                     <span class="value">{{ proj|upper }} </span> <span class="float-right case_count count plotit">{{ projK }}</span>
@@ -129,9 +133,10 @@
                                                               <div style="display: block;" ></div>
                                                               <p class="more-checks" style="display: block;"><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                               <p class="less-checks" style="display: none;" class="notDisp"> <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                              <!--
                                                               <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
                                                               <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
-
+                                                              -->
                                                           {% endif %}
 
                                                           </div>
@@ -146,10 +151,10 @@
                                                <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                          <!-- </div> -->
                                     {%  endcomment %}
-
+                                        <!--
                                         <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
                                          <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
-
+                                        -->
                                      </div>
 
 
@@ -173,7 +178,11 @@
                     </div>
                     <div class="filter-panel" role="tabpanel">
                         <div class="tabpanel panel-default" role="tabpanel">
-                            <div class="panel-heading clearfix"><h4 class="panel-title">Search Configuration</h4></div>
+                            <div class="panel-heading clearfix"><h4 class="panel-title">Search Configuration</h4>
+                                <span class="greyout" style="background-color:lightgrey"><br><input id="hide-zeros" type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</span>
+
+                            </div>
+
                             <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
                                 <li id = "search_orig" role="presentation" class="filter-tab active"><a href="#search_orig_set" role="tab" data-toggle="tab" title="orig" aria-expanded="true">Original</a></li>
                                 {% if set_attributes.derived_set is None %}
@@ -202,7 +211,12 @@
                                                 </a>
                                             </div>
                                             <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body">
-                                                {% comment %} <span>Sort by: <input type="radio" id="nm" name="{{ attr.name }}_sort"><label>Name</label> <input type="radio" id="num" name="{{ attr.name }}_sort"><label>Number</label>   </span> {% endcomment %}
+                                                {% if attr.name == "Modality" %}
+                                                <span style="background-color:lightgrey">Filter for cases with:<br>
+                                                <input type="radio" id="modality_and" name="modality_sel"> any selected Modality<br>
+                                                    <input type="radio" id="modality_and" name="modality_sel"> all selected Modalities
+                                                </span>
+                                                {% endif %}
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                    {% for val in attr.values %}
                                                        {% with val.display_value|get_display_val:val.value as display_value %}
@@ -220,9 +234,10 @@
                                                         <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                         <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                     {% endif %}
+                                                   <!--
                                                     <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
                                                     <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
-
+                                                   -->
                                                 </p>
                                             </div>
                                          </li>
@@ -234,8 +249,7 @@
                                 <div id = "search_derived_set" role="tabpanel" class="tab-pane">
 
                                 <ul class="list-group" role="tablist" aria-multiselectable="true">
-
-                                     {% for attr_setK, attr_setV in set_attributes.derived_set.items|dictsort:"0.lower" %}
+                                      {% for attr_setK, attr_setV in set_attributes.derived_set.items|check_for_order:"derived" %}
 
                                          {% if 'attributes' in attr_setV %}
 
@@ -274,9 +288,11 @@
                                                         <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                         <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                     {% endif %}
+                                                          <!--
                                                               <p class="hide-zeros" style="display: block;"><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
-                                                    <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
-                                                    </p>
+                                                             <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
+                                                             -->
+                                                              </p>
                                                </div>
                                                        </li>
 
@@ -285,6 +301,8 @@
                                                </div>
                                            </li>
                                          {% endif %}
+
+
                                      {% endfor %}
                                 </ul>
                                 </div>
@@ -323,9 +341,10 @@
                                                         <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                         <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                     {% endif %}
+                                                         <!--
                                                          <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
                                                          <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
-
+                                                         -->
                                                     </p>
                                                </div>
                                             </li>
@@ -340,8 +359,13 @@
                         </div>
                     </div>
                 </div>
+
             </div>
-            <div class="col-lg-9 col-md-9">
+            <div id="rh_panel" class="col-lg-9 col-md-9 main_cols" >
+               <div id="show_lh" class="filter-panel panel data-tab-content-panel rh hidden">
+                            <a data-toggle="collapse" aria-label="showit" onclick="showPanel()" ><i class="show fa fa-angle-double-right" style="font-family :'FontAwesome' !important"></i></a>
+                    </div>
+
                 <div class="tabpanel data-tab-content-panel">
                      <div class="panel panel-default">
                          <div class="panel-heading clearfix"><h4 class="panel-title">Filter Definition</h4><a class="pull-right clear-filters" role="button" id="5-data-clear-filters">Clear All</a></div>
@@ -350,7 +374,8 @@
                          </div>
                     </div>
                 </div>
-                <div class="filter-panel panel" role="tabpanel">
+                <div class="vert">
+                    <div class="filter-panel panel" role="tabpanel">
                     <div class="tabpanel panel-default" role="tabpanel">
                         <div class="panel-heading clearfix"><h4 class="panel-title">Search Results</h4><br>
                             <label>Chart Type:</label>
@@ -381,17 +406,35 @@
                                 </div>
                             </div>
                             <div id = "results_derived_set" role="tabpanel" class="tab-pane panel">
-                                <div class="panel-body bar-charts-div derived-graphs graph-set">
-                                    {% for attr_setK, attr_setV in set_attributes.derived_set.items|dictsort:"0.lower" %}
+                                <div class="panel-body bar-charts-div-derived derived-graphs">
+                                    {% for attr_setK, attr_setV in set_attributes.derived_set.items|check_for_order:"derived" %}
                                         {% if 'attributes' in attr_setV %}
-                                           {% for attr in attr_setV.attributes %}
-                                             <div id="{{ attr.name  }}_chart" class="bar-chart"></div>
-                                           {%  endfor %}
+
+                                            <div class="tab-pane">
+                                                <div style="text-align:center" class="panel-heading clearfix"><h3 style="text-align:center" class="panel-title">{{ attr_setV.display_name }}</h3></div>
+
+                                                {% if forloop.counter > 1 %}
+                                                    <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="showGraphs(this)">Show</button></div>
+                                                   <div class="less-graphs" style="display: none; width:100%"><button class="btn btn-link" role="button" onclick="hideGraphs(this)">Hide</button></div>
+
+                                                    <div class="panel-body  graph-set" style="display:none">
+                                                 {% else %}
+                                                    <div class="panel-body  graph-set">
+                                                 {% endif %}
+
+                                                    {% for attr in attr_setV.attributes %}
+                                                        <div id="{{ attr.name  }}_chart" class="bar-chart"> </div>
+                                                    {%  endfor %}
+                                                   </div>
+
+
+                                            </div>
                                        {% endif %}
                                  {% endfor %}
+
                                 </div>
-                               <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="showMoreGraphs('derived-graphs','1400px')">Show More</button></div>
-                                <div class="less-graphs" style="display: none; width:100%"><button class="btn btn-link" role="button" onclick="showLessGraphs('derived-graphs','200px')">Show Less</button></div>
+
+
                             </div>
                             <div id = "results_related_set" role="tabpanel" class="tab-pane panel">
                                  <div class="panel-body bar-charts-div related-graphs graph-set">
@@ -399,13 +442,15 @@
                                         <div id="{{ attr.name }}_chart" class="bar-chart"></div>
                                     {%  endfor %}
                                 </div>
+
                                 <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="showMoreGraphs('related-graphs','800px')">Show More</button></div>
                                 <div class="less-graphs" style="display: none; width:100%"><button class="btn btn-link" role="button" onclick="showLessGraphs('related-graphs','200px')">Show Less</button></div>
+
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="tabpanel data-tab-content-panel table-panel">
+                    <div class="tabpanel data-tab-content-panel table-panel">
                     <div class="panel panel-default">
                          <div class="panel-heading clearfix"><h4 class="panel-title">Collections</h4></div>
                          <div id = "projects_panel" class="panel-body">
@@ -457,7 +502,7 @@
                          </div>
                      </div>
                 </div>
-                <div class="tabpanel data-tab-content-panel table-panel">
+                    <div class="tabpanel data-tab-content-panel table-panel">
                      <div class="panel panel-default">
                          <div class="panel-heading clearfix"><h4 class="panel-title">Selected Studies</h4></div>
                          <div class="panel-body">
@@ -505,7 +550,7 @@
                          </div>
                      </div>
                 </div>
-                <div class="tabpanel data-tab-content-panel table-panel">
+                    <div class="tabpanel data-tab-content-panel table-panel">
                      <div class="panel panel-default">
                          <div class="panel-heading clearfix"><h4 class="panel-title">Selected Series</h4></div>
                          <div class="panel-body">
@@ -544,6 +589,7 @@
                              </table>
                          </div>
                      </div>
+                </div>
                 </div>
             </div>
         </div>
