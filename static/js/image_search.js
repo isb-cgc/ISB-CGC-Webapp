@@ -1403,13 +1403,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
         var handleFilterSelectionUpdate = function(filterElem, mkFilt, doUpdate) {
         var checked = $(filterElem)[0].checked;
-        if (checked) {
-            $(filterElem).parent().siblings().find('input:checkbox').prop('checked',true);
 
-        }
-        else{
-            $(filterElem).parent().siblings().find('input:checkbox').prop('checked',false);
-        }
         var neighbours =$(filterElem).parentsUntil('.list-group-item__body','ul').children().children().children('input:checkbox');
         var neighboursCk = $(filterElem).parentsUntil('.list-group-item__body','ul').children().children().children(':checked');
         var allChecked= false;
@@ -1455,9 +1449,9 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     filterObj[curCat].push(filtnm)
                 }
 
-                if ( allChecked && (i === (filterCats.length-1)) && (numCheckBoxes>1)) {
+                /* if ( allChecked && (i === (filterCats.length-1)) && (numCheckBoxes>1)) {
                     delete filterObj[curCat];
-                }
+                }*/
 
             }
 
@@ -1496,6 +1490,23 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             curCat+=filtnm;
 
         }
+        var childBoxes=$(filterElem).parent().siblings().find('input:checkbox');
+        if (checked && (childBoxes.length>0)) {
+            filterObj[curCat] = new Array();
+            childBoxes.each(function(){
+               this.checked=true;
+               filterObj[curCat].push(this.value);
+            });
+            //$(filterElem).parent().siblings().find('input:checkbox').prop('checked',true);
+
+        }
+        else {
+            delete filterObj[curCat];
+            $(childBoxes).prop('checked',false);
+        }
+
+
+
         if (mkFilt) {
             mkFiltText();
         }
