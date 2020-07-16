@@ -48,27 +48,29 @@
 {% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-sm-12 col-md-12 col-lg-12">
-            <div class="panel panel-default">
-                <ul class="nav nav-tabs nav-tabs-files" role="tablist">
-                    <li role="presentation" class="file-browser-tab active"><a href="#all-files" role="tab" data-toggle="tab" title="Browse All Files" data-file-type="all">All Files</a></li>
-                    <li role="presentation" class="file-browser-tab {% if user.is_anonymous %} disabled {% endif %}"><a href="#igv-files" role="tab" data-toggle="tab" title="Browse IGV Files" data-file-type="igv">IGV</a></li>
-                    <li role="presentation" class="file-browser-tab {% if user.is_anonymous %} disabled {% endif %}"><a href="#camic-files" role="tab" data-toggle="tab" title="Browse Pathology Image Files" data-file-type="camic">Pathology Images</a></li>
-                    <li role="presentation" class="file-browser-tab {% if user.is_anonymous %} disabled {% endif %}"><a href="#pdf-files" role="tab" data-toggle="tab" title="Browse Pathology Report Files" data-file-type="pdf">Pathology Reports</a></li>
-                    <li role="presentation" class="file-browser-tab {% if user.is_anonymous %} disabled {% endif %}"><a href="#dicom-files" role="tab" data-toggle="tab" title="Browse Radiology Image Files" data-file-type="dicom">Radiology Images</a></li>
-                </ul>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 col-md-12 col-lg-12">
+                <div class="panel panel-default">
+                    <ul class="nav nav-tabs nav-tabs-files" role="tablist">
+                        <li role="presentation" class="file-browser-tab active"><a href="#all-files" role="tab" data-toggle="tab" title="Browse All Files" data-file-type="all">All Files</a></li>
+                        <li role="presentation" class="file-browser-tab {% if user.is_anonymous %} disabled {% endif %}"><a href="#igv-files" role="tab" data-toggle="tab" title="Browse IGV Files" data-file-type="igv">IGV</a></li>
+                        <li role="presentation" class="file-browser-tab {% if user.is_anonymous %} disabled {% endif %}"><a href="#camic-files" role="tab" data-toggle="tab" title="Browse Pathology Image Files" data-file-type="camic">Pathology Images</a></li>
+                        <li role="presentation" class="file-browser-tab {% if user.is_anonymous %} disabled {% endif %}"><a href="#pdf-files" role="tab" data-toggle="tab" title="Browse Pathology Report Files" data-file-type="pdf">Pathology Reports</a></li>
+                        <li role="presentation" class="file-browser-tab {% if user.is_anonymous %} disabled {% endif %}"><a href="#dicom-files" role="tab" data-toggle="tab" title="Browse Radiology Image Files" data-file-type="dicom">Radiology Images</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="tab-content data-tab-content">
-            <div id="placeholder" class="tab-pane active file-browser-tab" role="tabpanel">
-                <div class="col-md-12 data-tab-content-panel spinner-panel">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
+        <div class="row">
+            <div class="tab-content data-tab-content">
+                <div id="placeholder" class="tab-pane active file-browser-tab" role="tabpanel">
+                    <div class="col-md-12 data-tab-content-panel spinner-panel">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
+                            </div>
                         </div>
                     </div>
                 </div>
