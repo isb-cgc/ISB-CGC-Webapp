@@ -162,6 +162,7 @@ jobs:
             - ./txt
             - ./json
             - ./.env
+            - ./version.env
             - ./solr-ssl.pem
 
   deploy_job:
