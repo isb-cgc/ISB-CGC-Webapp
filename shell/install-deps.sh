@@ -79,6 +79,11 @@ if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
     pip3 install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
 fi
 
+if ["$IS_DEV" = "True" ]; then
+    echo "Installing GitPython for local dev version display..."
+    pip3 install -q gitpython -t ${HOMEROOT}/lib --only-binary all
+fi
+
 echo "Libraries Installed"
 
 # Install Google Cloud SDK
@@ -102,4 +107,15 @@ dos2unix ${HOMEROOT}/shell/*.sh
 echo "Loading Git Hooks"
 if [ -z "${CI}" ] && [ -d "${HOMEROOT}/git-hooks/" ]; then
     cp -r ${HOMEROOT}/git-hooks/* ${HOMEROOT}/.git/hooks/
+fi
+
+# Create the application deployment version
+if [ -n "${CI}" ]; then
+    if [ "$DEPLOYMENT_TIER" = "PROD" ]; then
+        TIER=canceridc
+    else
+        TIER=tolower($DEPLOYMENT_TIER)
+    fi
+    SHA=$(git rev-list -1 HEAD)
+    echo "APP_VERSION=${TIER}.$(date '+%d%m%Y%H%M').${SHA: -6}" >> version.env
 fi
