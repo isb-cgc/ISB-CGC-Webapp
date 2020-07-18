@@ -355,6 +355,8 @@ def explore_data_page(request):
         attr_by_source['programs'] = programSet
         return JsonResponse(attr_by_source)
     else:
+        context['order']={}
+        context['order']['derived_set']=['dicom_derived_all:segmentation','dicom_derived_all:qualitative','dicom_derived_all:quantitative']
         return render(request, 'idc/explore.html', context)
 
 # @login_required
