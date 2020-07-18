@@ -114,7 +114,7 @@ if [ -n "${CI}" ]; then
     if [ "$DEPLOYMENT_TIER" = "PROD" ]; then
         TIER=canceridc
     else
-        TIER=tolower($DEPLOYMENT_TIER)
+        TIER=${DEPLOYMENT_TIER,,}
     fi
     SHA=$(git rev-list -1 HEAD)
     echo "APP_VERSION=${TIER}.$(date '+%d%m%Y%H%M').${SHA: -6}" > ${HOMEROOT}/version.env
