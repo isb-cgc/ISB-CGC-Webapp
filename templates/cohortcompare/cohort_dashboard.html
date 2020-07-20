@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{#{% load tz %}#}
+{% block header %}
+{% endblock %}
+
+{% block title %}
+    ISB-CGC
+{% endblock %}
+
+{% block link_page_name %}cohort-dashboard{% endblock %}
+{% block page_name %}cohort-dashboard{% endblock %}
+
+{% block page_header %}
+
+{% endblock %}
+{% block content %}
+
+
+    <script type="text/javascript">
+    var cohort_list = {{ cohorts_listing|safe }};
+    var shared_users = {{ shared_users|safe }};
+    var from_workbook = {{ from_workbook|lower }};
+    </script>
+{% endblock %}
+
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/cohort_list.js' %}"></script>
+{% endblock %}
