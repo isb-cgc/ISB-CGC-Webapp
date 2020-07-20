@@ -20,6 +20,7 @@ from builtins import str
 from builtins import object
 import os
 import re
+import datetime
 from os.path import join, dirname, exists
 import sys
 import dotenv
@@ -132,6 +133,19 @@ DB_SOCKET = database_config['default']['HOST'] if 'cloudsql' in database_config[
 IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
 IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
+
+VERSION = "{}.{}".format("local-dev", datetime.datetime.now().strftime('%d%m%Y%H%M'))
+
+if exists(join(dirname(__file__), '../version.env')):
+    dotenv.read_dotenv(join(dirname(__file__), '../version.env'))
+else:
+    if IS_DEV:
+        import git
+        repo = git.Repo(search_parent_directories=True)
+        VERSION = "{}.{}.{}".format("local-dev", datetime.datetime.now().strftime('%d%m%Y%H%M'),
+                                    str(repo.head.object.hexsha)[-6:])
+
+APP_VERSION = os.environ.get("APP_VERSION", VERSION)
 
 # If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
@@ -597,3 +611,5 @@ APPEND_SLASH = False
 # default is to add trailing '/' to urls ie /callback becomes /callback/. Ohif does not like /callback/ !
 
 DICOM_STORE_PATH=os.environ.get('DICOM_STORE_PATH','')
+
+print("[STATUS] Application Version is {}".format(APP_VERSION))
