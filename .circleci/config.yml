@@ -123,6 +123,7 @@ jobs:
       - restore_cache:
           keys:
             - idc-webapp-lib-{{ checksum "requirements.txt" }}
+      - deployment_setup
       - run:
           name: Install Dependencies
           command: |
@@ -131,7 +132,6 @@ jobs:
           key: idc-webapp-lib-{{ checksum "requirements.txt" }}
           paths:
             - ./lib
-      - deployment_setup
       - auth
       - deployment_config
       - run:
