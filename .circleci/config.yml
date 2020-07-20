@@ -49,7 +49,7 @@ commands:
               exit 1
             fi
 
-            echo "export DEPLOYMENT_TIER=\"${TIER}\"" >> $BASH_ENV
+            echo "export DEPLOYMENT_TIER=${TIER}" >> $BASH_ENV
             echo "export DEPLOYMENT_KEY=\"${KEY}\"" >> $BASH_ENV
             echo "export DEPLOYMENT_CLIENT_EMAIL=${CLIENT_EMAIL}" >> $BASH_ENV
             echo "export DEPLOYMENT_PROJECT_ID=${PROJECT_ID}" >> $BASH_ENV
