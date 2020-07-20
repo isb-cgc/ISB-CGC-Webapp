@@ -9,7 +9,6 @@ commands:
             if [[ ${CIRCLE_BRANCH} =~ idc-(prod|uat|test).* ]]; then
               TIER=$(awk -F- '{print toupper($2)}' \<<< ${CIRCLE_BRANCH})
             fi
-            echo "export TIER=${TIER}" >> $BASH_ENV
             echo "Tier was identified as ${TIER} for branch ${CIRCLE_BRANCH}"
       - run:
           name: "Assign Project-level vars"
