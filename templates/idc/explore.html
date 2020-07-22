@@ -112,11 +112,6 @@
                                                          </div>
                                                       <div id="{{ progK }}" class="collapse list-group-item__body">
                                                      {% endif %}
-
-
-
-
-
                                                           {% if progV.projects and progV.projects.items|length > 1 %}
                                                            <ul id="{{ progK }}_proj_list" class="search-checkbox-list" style="list-style: none;">
                                                            {% for proj, projK in progV.projects.items %}
@@ -208,7 +203,8 @@
                                                     <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
                                                 </a>
                                             </div>
-                                            <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body">
+                                            <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body"
+                                                 {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"{% endif %}>
                                                 {% if attr.name == "Modality" %}
                                                 <span style="background-color:lightgrey">Filter for cases with:<br>
                                                 <input type="radio" id="modality_and" name="modality_sel"> any selected Modality<br>
@@ -218,7 +214,7 @@
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                    {% for val in attr.values %}
                                                        {% with val.display_value|get_display_val:val.value as display_value %}
-                                                    <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
+                                                        <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
                                                            <label>
                                                                <input type="checkbox" value="{{ val.value }}" data-filter-attr-id="{{ attr.id }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
                                                                 <span class="value">{{ display_value }}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
@@ -268,7 +264,8 @@
                                                     <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}
                                                 </a>
                                             </div>
-                                                          <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse">
+                                               <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse"
+                                                 {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"{% endif %}>
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                     {% for val in attr.values %}
                                                         {% with val.display_value|get_display_val:val.value as display_value %}
@@ -323,7 +320,8 @@
                                                          <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
                                                      </a>
                                                  </div>
-                                                 <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse" aria-expanded="false">
+                                                 <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse" aria-expanded="false"
+                                                 {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"{% endif %}>
                                                      <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                      {% for val in attr.values %}
                                                          <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">

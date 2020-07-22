@@ -48,6 +48,28 @@ idc_superuser = User.objects.get(username="idc")
 
 logger = logging.getLogger('main_logger')
 
+ranges_needed = {
+    'wbc_at_diagnosis': 'by_200',
+    'event_free_survival_time_in_days': 'by_500',
+    'days_to_death': 'by_500',
+    'days_to_last_known_alive': 'by_500',
+    'days_to_last_followup': 'by_500',
+    'year_of_diagnosis': 'year',
+    'days_to_birth': 'by_negative_3k',
+    'year_of_initial_pathologic_diagnosis': 'year',
+    'age_at_diagnosis': None
+}
+
+ranges = {
+    'by_200': [{'first': "200", "last": "1400", "gap": "200", "include_lower": True, "unbounded": True,
+                             "include_upper": True, 'type': 'F', 'unit': '0.01'}],
+    'by_negative_3k': [{'first': "-15000", "last": "-5000", "gap": "3000", "include_lower": True, "unbounded": True,
+                             "include_upper": False, 'type': 'I'}],
+    'by_500': [{'first': "500", "last": "6000", "gap": "500", "include_lower": False, "unbounded": True,
+                             "include_upper": True, 'type': 'I'}],
+    'year': [{'first': "1976", "last": "2015", "gap": "5", "include_lower": True, "unbounded": False,
+                             "include_upper": False, 'type': 'I'}]
+}
 
 def new_attribute(name, displ_name, type, display_default, cross_collex=False, units=None):
     return {
@@ -431,8 +453,11 @@ def main():
                     {'label': 'overweight', 'first': "25", "last": "30", "gap": "0", "include_lower": True,
                      "include_upper": False, 'type': 'F'}
                 ]
-            elif attr['type'] == Attribute.CONTINUOUS_NUMERIC:
-                attr['range'] = []
+            elif attr['type'] == Attribute.CONTINUOUS_NUMERIC and 'range' not in attr:
+                if attr['name'].lower() in ranges_needed:
+                    attr['range'] = ranges.get(ranges_needed.get(attr['name'], ''), [])
+                else:
+                    attr['range'] = []
 
             attr_set.append(attr)
 

@@ -244,14 +244,17 @@ def explore_data_page(request):
                                     this_attr = attr_by_source[set_name]['attributes'][attr]['obj']
                                     values = []
                                     for val in facet_set[attr]:
-                                        displ_val = val if this_attr.preformatted_values else attr_display_vals.get(
-                                            this_attr.id, {}).get(val, None)
-                                        values.append({
-                                            'value': val,
-                                            'display_value': displ_val,
-                                            'units': this_attr.units,
-                                            'count': facet_set[attr][val] if val in facet_set[attr] else 0
-                                        })
+                                        if val == 'min_max':
+                                            attr_by_source[set_name][source_name]['attributes'][attr][val] = facet_set[attr][val]
+                                        else:
+                                            displ_val = val if this_attr.preformatted_values else attr_display_vals.get(
+                                                this_attr.id, {}).get(val, None)
+                                            values.append({
+                                                'value': val,
+                                                'display_value': displ_val,
+                                                'units': this_attr.units,
+                                                'count': facet_set[attr][val] if val in facet_set[attr] else 0
+                                            })
                                     attr_by_source[set_name][source_name]['attributes'][attr]['vals'] = sorted(values, key=lambda x: x['value'])
                         else:
                             attr_by_source[set_name]['All'] = {'attributes': attr_by_source[set_name]['attributes']}
@@ -260,12 +263,15 @@ def explore_data_page(request):
                                     this_attr = attr_by_source[set_name]['attributes'][attr]['obj']
                                     values = []
                                     for val in source_metadata['facets'][source]['facets'][attr]:
-                                        displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
-                                        values.append({
-                                            'value': val,
-                                            'display_value': displ_val,
-                                            'count': facet_set[attr][val] if val in facet_set[attr] else 0
-                                        })
+                                        if val == 'min_max':
+                                            attr_by_source[set_name]['All']['attributes'][attr][val] = facet_set[attr][val]
+                                        else:
+                                            displ_val = val if this_attr.preformatted_values else attr_display_vals.get(this_attr.id, {}).get(val, None)
+                                            values.append({
+                                                'value': val,
+                                                'display_value': displ_val,
+                                                'count': facet_set[attr][val] if val in facet_set[attr] else 0
+                                            })
                                     if attr == 'bmi':
                                         sortDic = {'underweight': 0, 'normal weight': 1, 'overweight': 2, 'obese': 3, 'None': 4}
                                         attr_by_source[set_name]['All']['attributes'][attr]['vals'] = sorted(values, key=lambda x: sortDic[x['value']])
@@ -279,7 +285,9 @@ def explore_data_page(request):
                 if is_dicofdic:
                     for x in list(attr_by_source[set][source]['attributes'].keys()):
                         if (isinstance(attr_by_source[set][source]['attributes'][x]['vals'],list) and (len(attr_by_source[set][source]['attributes'][x]['vals']) > 0)):
-                            attr_by_source[set][source]['attributes'][x] = {y['value']: {'display_value': y['display_value'], 'count': y['count']} for y in attr_by_source[set][source]['attributes'][x]['vals']}
+                            attr_by_source[set][source]['attributes'][x] = {y['value']: {
+                                'display_value': y['display_value'], 'count': y['count']
+                            } for y in attr_by_source[set][source]['attributes'][x]['vals']}
                         else:
                             attr_by_source[set][source]['attributes'][x] = {}
 
@@ -300,7 +308,8 @@ def explore_data_page(request):
                         'id': attr_by_source[set][source]['attributes'][x]['obj'].id,
                         'display_name': attr_by_source[set][source]['attributes'][x]['obj'].display_name,
                         'values': attr_by_source[set][source]['attributes'][x]['vals'],
-                        'units': attr_by_source[set][source]['attributes'][x]['obj'].units
+                        'units': attr_by_source[set][source]['attributes'][x]['obj'].units,
+                        'min_max': attr_by_source[set][source]['attributes'][x].get('min_max', None)
                    } for x, val in sorted(attr_by_source[set][source]['attributes'].items())]
 
             if not counts_only:

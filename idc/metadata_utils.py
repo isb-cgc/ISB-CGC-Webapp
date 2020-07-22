@@ -109,7 +109,7 @@ def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record
         ) if filters else None
         solr_facets = build_solr_facets(attrs_for_faceting['sources'][source.id]['attrs'],
                                         filter_tags=solr_query['filter_tags'] if solr_query else None,
-                                        unique=source.count_col)
+                                        unique=source.count_col, min_max=True)
 
         query_set = []
 

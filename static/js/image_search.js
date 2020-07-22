@@ -1712,17 +1712,14 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
      }
 
      var addSliders = function(id){
-            attElems = $('#'+id).find('.list-group-item__body');
-            for (var i=0;i<attElems.length;i++){
-                attElem=attElems.get(i);
-                var id=attElem.id;
-                //$('#'+id).addClass('hide');
-                $('#'+id).find('.more-checks').addClass('hide');
-                $('#'+id).find('.less-checks').addClass('hide');
-                mkSlider(id,0,120,1,true);
-
-            }
-     }
+            $('#'+id).find('.list-group-item__body').each(function(){
+                $(this).find('.more-checks').addClass('hide');
+                $(this).find('.less-checks').addClass('hide');
+                var min = Math.ceil($(this).data('attr-min') * 1000)/1000;
+                var max = Math.ceil($(this).data('attr-max') * 1000)/1000;
+                mkSlider($(this).prop('id'),min, max,1,true);
+            });
+     };
 
 
      $(document).ready(function () {
@@ -1758,7 +1755,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
 
 
-            mkSlider('age_at_diagnosis',0,120,1,true);
+            mkSlider('age_at_diagnosis',parseInt($('#age_at_diagnosis').data('attr-min')),parseInt($('#age_at_diagnosis').data('attr-max')),1,true);
 
             addSliders('quantitative');
 
