@@ -72,8 +72,7 @@
                                 </button>
                             </li>
                             <li role="menuitem">
-{#                                <a >Saved Workbooks ({{ workbooks.count }})</a>#}
-                                <button onclick="location.href='../compare'" class="btn btn-info set-ops" disabled title="Select one or more cohorts.">
+                                <button onclick="location.href='../compare/{{  }}'" class="btn btn-info set-ops" disabled title="Select one or more cohorts.">
                                 Compare
                                 </button>
                             </li>
@@ -240,20 +239,6 @@
                         <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
                     </div>
                 </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Compare Operation Modal -->
-    <div class="modal fade" id="compare-modal" tabindex="-1" role="dialog" aria-labelledby="union-header" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="union-header">Compare</h4>
-                </div>
-                <div class="modal-body">
-                </div>
             </div>
         </div>
     </div>
