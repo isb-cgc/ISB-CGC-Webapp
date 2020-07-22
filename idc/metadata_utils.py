@@ -94,9 +94,10 @@ def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record
     results = {'docs': None, 'facets': {}}
 
     source_versions = sources.get_source_versions()
-
+    filter_attrs = sources.get_source_attrs(for_ui=True, named_set=filters.keys(), with_set_map=False)
     attrs_for_faceting = sources.get_source_attrs(for_ui=True, with_set_map=False)
     all_ui_attrs = sources.get_source_attrs(for_ui=True, for_faceting=False, with_set_map=False)
+
     # Eventually this will need to go per program
     for source in sources:
         start = time.time()
@@ -104,7 +105,7 @@ def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record
         solr_query = build_solr_query(
             filters,
             with_tags_for_ex=True,
-            search_child_records_by="StudyInstanceUID" if source.has_data_type(DataSetType.DERIVED_DATA) else None
+            search_child_records_by=filter_attrs['sources'][source.id]['attrs'].get_attr_set_types().get_child_record_searches(DataSetType.DERIVED_DATA) if source.has_data_type(DataSetType.DERIVED_DATA) else None
         ) if filters else None
         solr_facets = build_solr_facets(attrs_for_faceting['sources'][source.id]['attrs'],
                                         filter_tags=solr_query['filter_tags'] if solr_query else None,

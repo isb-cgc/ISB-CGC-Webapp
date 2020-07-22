@@ -43,10 +43,8 @@
             </ol>
 
             <h1 class="page-header pull-left" role="heading" aria-level="1">Explore Image Data</h1>
-            <button id="save-cohort-btn-disabled" class="btn btn-primary pull-right" data-toggle="modal" data-target="#save-cohort-modal" title="{% if request.user.is_authenticated %}Please select at least one filter.{% else %}Please log in to save this cohort.{% endif %}" disabled="disabled">
+            <button id="save-cohort-btn" class="btn btn-primary pull-right" data-toggle="modal" data-target="#save-cohort-modal" title="{% if request.user.is_authenticated %}Please select at least one filter.{% else %}Please log in to save this cohort.{% endif %}" disabled="disabled">
                 {% if request.user.is_authenticated %}Save As New Cohort{% else %}Log in to Save{% endif %}</button>
-{#            <button id="save-cohort-btn" class="btn btn-primary pull-right" data-toggle="modal" data-target="#save-cohort-modal" title="{% if request.user.is_authenticated %}Please select at least one filter.{% else %}Please log in to save this cohort.{% endif %}" disabled="disabled">#}
-{#                {% if request.user.is_authenticated %}Save As New Cohort{% else %}Log in to Save{% endif %}</button>#}
         </div>
     </div>
 {% endblock %}
@@ -222,7 +220,7 @@
                                                        {% with val.display_value|get_display_val:val.value as display_value %}
                                                     <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
                                                            <label>
-                                                               <input type="checkbox" value="{{ val.value }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
+                                                               <input type="checkbox" value="{{ val.value }}" data-filter-attr-id="{{ attr.id }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
                                                                 <span class="value">{{ display_value }}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
                                                             </label>
                                                         </li>

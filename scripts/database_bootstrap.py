@@ -245,9 +245,9 @@ def add_attributes(attr_set):
                 for bqt in DataSource.objects.filter(name__in=attr['bq_tables']):
                     obj.data_sources.add(bqt)
             if len(attr.get('set_types',[])):
-                for set_type in DataSetType.objects.filter(data_type__in=attr['set_types']):
+                for set_type in attr.get('set_types'):
                     Attribute_Set_Type.objects.update_or_create(
-                        datasettype=set_type, attribute=obj
+                        datasettype=DataSetType.objects.get(data_type=set_type['set']), attribute=obj, child_record_search=set_type['child_record_search']
                     )
             if len(attr.get('categories',[])):
                 for cat in attr['categories']:
@@ -405,7 +405,7 @@ def main():
 
             attr = all_attrs[line_split[0]]
 
-            attr['set_types'].append(DataSetType.ANCILLARY_DATA)
+            attr['set_types'].append({'set': DataSetType.ANCILLARY_DATA, 'child_record_search': None})
 
             if attr['name'] in clin_table_attr:
                 attr['solr_collex'].append('tcga_clin')
@@ -459,7 +459,7 @@ def main():
             attr['solr_collex'].append('dicom_derived_all')
             attr['bq_tables'].append('idc-dev.metadata.dicom_mvp')
 
-            attr['set_types'].append(DataSetType.IMAGE_DATA)
+            attr['set_types'].append({'set': DataSetType.IMAGE_DATA, 'child_record_search': 'StudyInstanceUID'})
 
             if attr['name'] in display_vals:
                 if 'preformatted_values' in display_vals[attr['name']]:
@@ -495,7 +495,7 @@ def main():
             attr['solr_collex'].append('dicom_derived_all')
             attr['bq_tables'].append('idc-dev.metadata.segmentations')
 
-            attr['set_types'].append(DataSetType.DERIVED_DATA)
+            attr['set_types'].append({'set': DataSetType.DERIVED_DATA, 'child_record_search': 'StudyInstanceUID'})
 
             attr['categories'].append({'name': 'segmentation', 'display_name': 'Segmentation'})
 
@@ -532,7 +532,7 @@ def main():
             attr['solr_collex'].append('dicom_derived_all')
             attr['bq_tables'].append('idc-dev.metadata.quantitative_measurements')
 
-            attr['set_types'].append(DataSetType.DERIVED_DATA)
+            attr['set_types'].append({'set': DataSetType.DERIVED_DATA, 'child_record_search': 'StudyInstanceUID'})
 
             attr['categories'].append({'name': 'quantitative', 'display_name': 'Quantitative Analysis'})
 
@@ -570,7 +570,7 @@ def main():
 
             attr['categories'].append({'name': 'qualitative', 'display_name': 'Qualitative Analysis'})
 
-            attr['set_types'].append(DataSetType.DERIVED_DATA)
+            attr['set_types'].append({'set': DataSetType.DERIVED_DATA, 'child_record_search': 'StudyInstanceUID'})
 
             if attr['name'] in display_vals:
                 if 'preformatted_values' in display_vals[attr['name']]:
