@@ -49,14 +49,27 @@ require([
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('#save-cohort-modal').on('show.bs.modal', function() {
+        var filters = {};
         $('#search_orig_set .search-checkbox-list input:checked').each(function(){
             $('#selected-filters-orig-set').append('<span>'+$(this).data('filter-display-attr')+': '+$(this).data('filter-display-val')+'</span>');
+            if(!filters[$(this).data('filter-attr-id')]) {
+                filters[$(this).data('filter-attr-id')] = [];
+            }
+            filters[$(this).data('filter-attr-id')].push($(this).prop('value'));
         });
         $('#search_related_set .search-checkbox-list input:checked').each(function(){
             $('#selected-filters-rel-set').append('<span>'+$(this).data('filter-display-attr')+': '+$(this).data('filter-display-val')+'</span>');
+            if(!filters[$(this).data('filter-attr-id')]) {
+                filters[$(this).data('filter-attr-id')] = [];
+            }
+            filters[$(this).data('filter-attr-id')].push($(this).prop('value'));
         });
         $('#search_derived_set .search-checkbox-list input:checked').each(function(){
             $('#selected-filters-der-set').append('<span>'+$(this).data('filter-display-attr')+': '+$(this).data('filter-display-val')+'</span>');
+            if(!filters[$(this).data('filter-attr-id')]) {
+                filters[$(this).data('filter-attr-id')] = [];
+            }
+            filters[$(this).data('filter-attr-id')].push($(this).prop('value'));
         });
         $('#save-cohort-modal .selected-filters').each(function(){
             if($(this).find('span').length <= 0) {
@@ -65,10 +78,12 @@ require([
                 $(this).show();
             }
         });
+        $('input[name="selected-filters"]').prop('value', JSON.stringify(filters));
     });
 
     $('#save-cohort-modal').on('hide.bs.modal', function() {
         $('#save-cohort-modal .selected-filters span').remove();
+        $('input[name="selected-filters"]').prop('value', '');
     });
 
 });
