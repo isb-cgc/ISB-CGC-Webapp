@@ -53,6 +53,7 @@ ranges_needed = {
     'days_to_last_followup': 'by_500',
     'year_of_diagnosis': 'year',
     'days_to_birth': 'by_negative_3k',
+    'year_of_initial_pathologic_diagnosis': 'year',
     'age_at_diagnosis': None
 }
 
