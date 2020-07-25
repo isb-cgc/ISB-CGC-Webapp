@@ -689,6 +689,12 @@ def bq_meta_data(request):
     bq_meta_data = requests.get(bq_meta_data_file_path).json()
     return JsonResponse(bq_meta_data, safe=False)
 
+def programmatic_access_page(request):
+    return render(request, 'isb_cgc/programmatic_access.html')
+
+def workflow_page(request):
+    return render(request, 'isb_cgc/workflow.html')
+
 
 @login_required
 def dashboard_page(request):

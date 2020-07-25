@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Programmatic Access | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}programmatic_access{% endblock %}
+{% block page_name %}programmatic_access{% endblock %}
+
+{% block page_header %}
+    <div class="container">
+        <h1 class="page-header">Programmatic Access</h1>
+        <h5>A collection of tutorials on running bioinformatic pipelines on Google Cloud using workflow languages</h5>
+    </div>
+{% endblock %}
+{% block content %}
+    <div class="container width-80">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-body thumbnail">
+                        <div class="caption">
+                            Google Cloud Bioinformatic Pipelines Tutorials
+                        </div>
+                        <a href="{% url 'workflow' %}" target="_blank">
+                            <img src="{% static 'img/prog_access/workflow.png' %}" alt="Workflow">
+                                >> Visit
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="thumbnail">
+                        <div class="caption">
+                            ISB-CGC API
+                        </div>
+                        <a href="https://api-dot-isb-cgc.appspot.com/v4/swagger/" target="_blank">
+                            <img src="{% static 'img/prog_access/isb-cgc-api.png' %}" alt="ISB-CGC API">
+                                >> Visit
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="thumbnail">
+                        <div class="caption">
+                                Workflow Languages Comparison
+                            </div>
+                        <a href="{% static 'img/prog_access/comparison_page.png' %}" target="_blank">
+                            <img src="{% static 'img/prog_access/languages.png' %}" alt="ISB-CGC API">
+                            >> View
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
