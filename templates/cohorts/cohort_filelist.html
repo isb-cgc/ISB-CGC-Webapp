@@ -34,7 +34,7 @@
                 <li><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></li>
             </ol>
         {% endif %}
-        <h3 class="page-header">File Browser:
+        <h3 class="page-header">File Browser
             {% if cohort %}
                 <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
             {% endif %}

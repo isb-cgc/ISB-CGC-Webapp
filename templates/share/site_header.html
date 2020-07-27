@@ -56,8 +56,10 @@
                             <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-label="res-dropdown">
                                 <li role="menuitem"><a href="{% url 'cohort' %}">Interactive Patient Cohort
                                     Exploration</a></li>
-                                <li role="menuitem"><a href="https://api-dot-isb-cgc.appspot.com/v4/swagger"
-                                                       target="_blank">Programmatic Access</a></li>
+                                <li role="menuitem">
+{#                                    <a href="https://api-dot-isb-cgc.appspot.com/v4/swagger"#}
+                                    <a href="{% url 'programmatic_access' %}">
+                                        Programmatic Access</a></li>
                                 <li role="separator" class="divider"></li>
                                 <li><h4 class="dropdown-header">
                                     Notebooks
