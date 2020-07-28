@@ -16,6 +16,7 @@
 <div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+
         {% if workbook %}
             <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
             <li><a href="{% url 'workbook_detail' workbook_id=workbook.id %}">{{ workbook.name|title }}</a></li>
@@ -77,6 +78,8 @@
                                     Share
                                 </button>
                             </li>
+                            <!-- added by Niloo -->
+                            {% include 'comparison/compare_button.html' %}
                         </div>
                     {% endif %}
 
