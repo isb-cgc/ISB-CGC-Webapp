@@ -477,22 +477,6 @@ require([
         }
     });
 
-    $(".compareSelectedCohorts").on("click", function(){
-        //get the selected cohort
-        var cohorts = [];
-        $('#saved-cohorts-list input[type="checkbox"], #public-cohorts-list input[type="checkbox"]').each(function() {
-            if ($(this).is(':checked') && $(this).val() != 'on') {
-                cohorts.push($(this).val());
-            }
-        });
-
-        // var url = new URL(window.location.hostname);
-        // url.searchParams.append('cohort1', cohorts[0]);
-        // url.searchParams.append('cohort2', cohorts[1]);
-        // console.log(url);
-        window.location.href = '../compare';
-    });
-
     $('.selected-cohorts, #selected-ids, #base-id, #subtract-ids').on('click', '.delete-x', delete_x_callback);
 
     // Initiate buttons states on load

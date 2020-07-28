@@ -60,7 +60,6 @@ urlpatterns = [
     url(r'^session_security/', include('session_security.urls')),
     url(r'^data/', include('data_upload.urls')),
     url(r'^_ah/(vm_)?health$', views.health_check),
-    url(r'^compare/', include('cohortcompare.urls')),
 
     # ------------------------------------------
     # Blink views
