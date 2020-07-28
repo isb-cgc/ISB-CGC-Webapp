@@ -6,7 +6,7 @@ from cohorts.models import Cohort
 
 @login_required
 def compare_cohorts(request, cohort_id_1=1, cohort_id_2=2):
-    return render(request, 'comparison/compare_cohorts.html')
+    return render(request, 'comparison/compare_dashboard.html')
 
 
 @login_required
