@@ -530,11 +530,11 @@ require([
                     if (!data.error) {
                         window.location = BASE_URL + '/compare/cohorts/' + sel_cohort_ids[0] + '/' + sel_cohort_ids[1] + '/';
                     } else {
-                        base.setReloadMsg('error', 'Failed to create a workbook with cohort(s): ' + sel_cohort_ids.join(", "));
+                        base.setReloadMsg('error', 'Failed to compare cohorts: ' + sel_cohort_ids.join(", "));
                     }
                 },
                 error: function () {
-                    base.setReloadMsg('error', 'Failed to create a workbook with cohort(s): ' + sel_cohort_ids.join(", "));
+                    base.setReloadMsg('error', 'Failed to compare cohorts: ' + sel_cohort_ids.join(", "));
                 }
             }).always(function () {
                 $this.find('button[type="submit"]').removeClass('btn-disabled').removeAttr('disabled');
