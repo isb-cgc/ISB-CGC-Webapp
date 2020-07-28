@@ -1,56 +1,71 @@
-
-#user-landing
-    margin-top: 80px
-
-    .dropdown button
-        width: 100%
-
-    #share-viz-btn
-        vertical-align: top
-
-    #cohort-sets
-        padding-right: 20px
-        padding-top: 3px
-        padding-bottom: 3px
-        i
-            letter-spacing: -10px
-
-    #union-icons
-        display: inline-block
-        i:first-child
-            margin-right: -16px
-
-    #intersect-icons
-        display: inline-block
-        i:first-child
-            margin-right: -16px
-
-    #set-minus-icons
-        display: inline-block
-        i:first-child
-            margin-right: -16px
-
-    #circviz-icons
-        display: inline-block
-        i:first-child
-            margin-right: -20px
-
-    #selected-ids
-        .cohort-label
-            display: inline-block
+//
+//#user-landing
+//    margin-top: 80px
+//
+//    .dropdown button
+//        width: 100%
+//
+//    #share-viz-btn
+//        vertical-align: top
+//
+//    #cohort-sets
+//        padding-right: 20px
+//        padding-top: 3px
+//        padding-bottom: 3px
+//        i
+//            letter-spacing: -10px
+//
+//    #union-icons
+//        display: inline-block
+//        i:first-child
+//            margin-right: -16px
+//
+//    #intersect-icons
+//        display: inline-block
+//        i:first-child
+//            margin-right: -16px
+//
+//    #set-minus-icons
+//        display: inline-block
+//        i:first-child
+//            margin-right: -16px
+//
+//    #circviz-icons
+//        display: inline-block
+//        i:first-child
+//            margin-right: -20px
+//
+//    #selected-ids
+//        .cohort-label
+//            display: inline-block
 
 #user-details
-    margin-top: 80px
+    //margin-top: 80px
+    //.data-panel, .gcp-panel
 
+    .panel-heading
+        color: white
+        background-color: #2b537b
+        border-top-right-radius: 3px
+        border-top-left-radius: 3px
+    .panel i
+        //display: inline-block
+        margin-right: 5px
+    .panel-body
+        padding: 20px
     .avatar
         border-radius: 50%
-        display: block
-        margin: 20px auto
-        vertical-align: top
-        width: 200px
+        display: inline-block
+        float: right
+        margin: auto 5px
+        vertical-align: middle
+        height: 30px
+
 
     h4
         text-align: center
+    samp
+        color: grey
 
     .row
         width: 100%
@@ -59,7 +74,7 @@
         .panel
             display: inline-block
             margin: 0px 0px
-            width: 315px
+            //width: 315px
             text-align: left
             vertical-align: top
             &:nth-child(2)
@@ -68,7 +83,28 @@
         a
             text-decoration: underline
             cursor: pointer
+            color: #2b537b
 
+            &.sm_btn
+                //color: white
+                font-size: 13px
+                color: #226caa
+                border: 1px solid #226caa
+                //background-color: #226caa
+                display: inline-block
+                //display: block
+                border-radius: 3px
+                text-align: center
+                //border: 1px solid lightgrey
+                text-decoration: none
+                padding: 2px 5px
+                margin: 5px 0
+                &:hover
+                    //border: 1px solid #226caa
+                    background-color: #226caa
+                    color: white
+        .panel-heading a
+            color: white
         .gcp-panel a
             display: inline-block
 
@@ -87,12 +123,13 @@
                     width: 80%
 
         .fa-check-circle
-            color: $primary-color
-            font-size: 21px
-            line-height: 10px
+            color: #2b537b
+        //    font-size: 21px
+        //    line-height: 10px
 
         hr
-            margin: 0px -15px 10px -15px
+            margin: 10px -5px
+            //margin: 0px -15px 10px -15px
 
         ul
             margin-bottom: 10px
