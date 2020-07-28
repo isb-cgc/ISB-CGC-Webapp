@@ -61,6 +61,8 @@ urlpatterns = [
     url(r'^seqpeek/', include('seqpeek.urls')),
     url(r'^session_security/', include('session_security.urls')),
     url(r'^data/', include('data_upload.urls')),
+    #added by me
+    url(r'^compare/', include('comparison.urls')),
     url(r'^_ah/(vm_)?health$', views.health_check),
 
     # ------------------------------------------
