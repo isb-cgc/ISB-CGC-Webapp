@@ -177,7 +177,7 @@
                                 <button type="submit">Create a New Workbook</button>
                             </form>
                         </li>
-                        {#                    <li class="menu-item"><a href="{% url 'workbook_samples' %}">Sample Workbooks</a></li>#}
+                        {#<li class="menu-item"><a href="{% url 'workbook_samples' %}">Sample Workbooks</a></li>#}
                     </ul>
                 </li>
                 {% if USER_DATA_ON %}
@@ -305,6 +305,7 @@
                                 <li class="menu-item"><a href="{% url 'cohort_barcodes' %}">Barcodes</a></li>
                             </ul>
                         </li>
+                        <li class="menu-item"><a href="{% url 'cohort_list' %}"> Cohort Comparison </a></li>
                         <li class="menu-item"><a href="{% url 'cohort_select_for_new_workbook' %}">Select Cohort for a
                             New Workbook</a></li>
                     </ul>
