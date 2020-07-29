@@ -27,7 +27,7 @@
 {% block page_name %}cohort-details{% endblock %}
 
 {% block page_header %}
-    <link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}" />
+    <link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}"/>
 
     <div class="container">
         <ol class="breadcrumb">
@@ -37,56 +37,88 @@
         <h1 class="page-header">{{ cohort.name }}</h1>
 
         <label id="cohort-name-label" for="edit-cohort-name" class="hidden-label">Cohort Name:</label>
-        <input id="edit-cohort-name" type="text" name="cohort-name" value="{{ cohort.name }}" class="form-control input-lg space-top-15" style="display: none" aria-labelledby="cohort-name-label"/>
+        <input id="edit-cohort-name" type="text" name="cohort-name" value="{{ cohort.name }}"
+               class="form-control input-lg space-top-15" style="display: none" aria-labelledby="cohort-name-label"/>
 
         <div class="page-action-group">
             <ul id="default-cohort-menu">
                 {% if cohort.perm.perm != 'OWNER' %}
-                    <li class="menu-item"><h4>Owner: {% if cohort.is_public %}ISB-CGC{% else %}{{ cohort.owner.first_name|title}} {{ cohort.owner.last_name|title }}{% endif %}</h4></li>
+                    <li class="menu-item"><h4>Owner: {% if cohort.is_public %}ISB-CGC
+                        {% else %}{{ cohort.owner.first_name|title }} {{ cohort.owner.last_name|title }}{% endif %}</h4>
+                    </li>
                     <li class="separator"></li>
                 {% endif %}
                 <li class="menu-item">
                     <form action="{% url 'worksheet_create_with_cohort' %}" method="POST">
                         {% csrf_token %}
-                        <input type="hidden" name="cohort_id" value="{{ cohort.id}}">
+                        <input type="hidden" name="cohort_id" value="{{ cohort.id }}">
                         <button class="btn btn-primary" type="submit">New Workbook</button>
                     </form>
                 </li>
                 <li class="separator"></li>
                 {% if cohort.perm.perm == 'OWNER' %}
-                    <li class="menu-item"><button class="btn btn-info" id="edit-cohort-btn">Edit</button> </li>
+                    <li class="menu-item">
+                        <button class="btn btn-info" id="edit-cohort-btn">Edit</button>
+                    </li>
                     <input id="cohort-mode" type="hidden" value="VIEW">
                 {% endif %}
-                <li class="menu-item"><button class="show-flyout btn btn-info" title="Show Comments">Comments</button></li>
-                <li class="menu-item"><a href="{% url 'clone_cohort' cohort.id %}" class="btn btn-info clone-cohort-btn" title="Duplicate this cohort">Duplicate</a></li>
-                <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="{% if cohort.perm.perm == 'OWNER' %}#delete-cohort-modal{% else %}#remove-cohort-modal{% endif %}">
-                    {% if cohort.perm.perm == 'OWNER' %}
-                        Delete
-                    {% else %}
-                        Remove
-                    {% endif %}
-                </button></li>
-                <li class="separator"></li>
-                <li class="menu-item"><a href="{% url 'cohort_filelist' cohort.id %}" class="btn btn-info view-files-btn" {% if only_user_data %}disabled {% endif %}title="{% if only_user_data %}The file browser is not available at this time for cohorts containing only user data.{% else %}View this cohort's file list{% endif %}">File Browser</a></li>
-                {% if cohort.perm.perm == 'OWNER' %}
-                <li class="separator"></li>
-                <li class="menu-item"><a href="{%  url 'download_ids' cohort.id %}" class="btn btn-info download-ids-btn" title="Download this cohort's records as a CSV">CSV</a></li>
                 <li class="menu-item">
-                    <button class="btn btn-info" data-toggle="modal" data-target="#export-to-bq-modal" {% if has_user_data %}disabled {% endif %}title="{% if has_user_data %}Cohorts with User data cannot be exported at this time.{% else %}Export this cohort's records to a BigQuery table{% endif %}">BigQuery</button>
-                    <button class="btn btn-info" data-toggle="modal" data-target="#export-to-gcs-modal" {% if has_user_data %}disabled {% endif %}title="{% if has_user_data %}Cohorts with User data cannot be exported at this time.{% else %}Export this cohort's records to a GCS bucket{% endif %}">GCS</button>
+                    <button class="show-flyout btn btn-info" title="Show Comments">Comments</button>
+                </li>
+                <li class="menu-item"><a href="{% url 'clone_cohort' cohort.id %}" class="btn btn-info clone-cohort-btn"
+                                         title="Duplicate this cohort">Duplicate</a></li>
+                <li class="menu-item">
+                    <button class="btn btn-info" data-toggle="modal"
+                            data-target="{% if cohort.perm.perm == 'OWNER' %}#delete-cohort-modal{% else %}#remove-cohort-modal{% endif %}">
+                        {% if cohort.perm.perm == 'OWNER' %}
+                            Delete
+                        {% else %}
+                            Remove
+                        {% endif %}
+                    </button>
                 </li>
                 <li class="separator"></li>
-                <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#share-cohort-modal">Share</button></li>
+                <li class="menu-item"><a href="{% url 'cohort_filelist' cohort.id %}"
+                                         class="btn btn-info view-files-btn"
+                                         {% if only_user_data %}disabled {% endif %}title="{% if only_user_data %}The file browser is not available at this time for cohorts containing only user data.{% else %}View this cohort's file list{% endif %}">File
+                    Browser</a></li>
+                {% if cohort.perm.perm == 'OWNER' %}
+                    <li class="separator"></li>
+                    <li class="menu-item"><a href="{% url 'download_ids' cohort.id %}"
+                                             class="btn btn-info download-ids-btn"
+                                             title="Download this cohort's records as a CSV">CSV</a></li>
+                    <li class="menu-item">
+                        <button class="btn btn-info" data-toggle="modal" data-target="#export-to-bq-modal"
+                                {% if has_user_data %}disabled {% endif %}title="{% if has_user_data %}Cohorts with User data cannot be exported at this time.{% else %}Export this cohort's records to a BigQuery table{% endif %}">
+                            BigQuery
+                        </button>
+                        <button class="btn btn-info" data-toggle="modal" data-target="#export-to-gcs-modal"
+                                {% if has_user_data %}disabled {% endif %}title="{% if has_user_data %}Cohorts with User data cannot be exported at this time.{% else %}Export this cohort's records to a GCS bucket{% endif %}">
+                            GCS
+                        </button>
+                    </li>
+                    <li class="separator"></li>
+                    <li class="menu-item">
+                        <button class="btn btn-info" data-toggle="modal" data-target="#share-cohort-modal">Share
+                        </button>
+                    </li>
                 {% endif %}
                 {% if not cohort.is_public and cohort.perm.perm == 'OWNER' %}
-                <li class="separator"></li>
-                <li class="menu-item"><a data-target="#share-cohort-modal" data-toggle="modal" class="btn btn-link">Shared with (<span class="share-count">{{ shared_with_users|length}}</span>)</a></li>
+                    <li class="separator"></li>
+                    <li class="menu-item"><a data-target="#share-cohort-modal" data-toggle="modal" class="btn btn-link">Shared
+                        with (<span class="share-count">{{ shared_with_users|length }}</span>)</a></li>
                 {% endif %}
             </ul>
             <ul id="edit-cohort-menu" style="display: none">
                 {% if cohort.perm.perm == 'OWNER' %}
-                    <li class="menu-item"><button class="btn btn-primary" data-toggle="modal" data-target="#apply-edits-modal">Save Changes</button></li>
-                    <li class="menu-item"><button class="btn btn-link" id="cancel-edit-cohort-btn">Cancel</button></li>
+                    <li class="menu-item">
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#apply-edits-modal">Save
+                            Changes
+                        </button>
+                    </li>
+                    <li class="menu-item">
+                        <button class="btn btn-link" id="cancel-edit-cohort-btn">Cancel</button>
+                    </li>
                 {% endif %}
             </ul>
         </div>
@@ -94,225 +126,262 @@
 {% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="panel panel-default">
-                <div id="url-len-max-alert" class="alert alert-warning alert-dismissable" style="display: none;">
-                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                    You have selected too many filters. The current counts shown will not be accurate until one or more filter options are removed.
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div id="url-len-max-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span
+                                class="sr-only">Close</span></button>
+                        You have selected too many filters. The current counts shown will not be accurate until one or
+                        more filter options are removed.
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row cgc-user-data-type-tabs">
-        {% if cohort.id %}
-        <div class="col-sm-12 col-md-12 col-lg-12">
-            <div class="cohort-selected-filters panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">Current Filters</h4>
-                </div>
-                <div class="panel-body curr-filter-panel gradient-overlay">
-                    {% for prog, filters in current_filters.items %}
-                        <div class="col-sm-{{ current_filters.keys|get_prog_col_size }} prog-filter-set">
-                        <h5>{{ prog }}</h5>
-                        {% for filter in filters %}
-                            <span class="filter-label label label-default space-right-5">{{ filter.displ_name }}: {{ filter.displ_val }}</span>
-                        {% endfor %}
+        <div class="row cgc-user-data-type-tabs">
+            {% if cohort.id %}
+                <div class="col-sm-12 col-md-12 col-lg-12">
+                    <div class="cohort-selected-filters panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">Current Filters</h4>
                         </div>
-                    {% empty %}
-                        <div class="col-sm-12 prog-filter-set">
-                            <p>No filters have been applied to this cohort.</p>
+                        <div class="panel-body curr-filter-panel gradient-overlay">
+                            {% for prog, filters in current_filters.items %}
+                                <div class="col-sm-{{ current_filters.keys|get_prog_col_size }} prog-filter-set">
+                                    <h5>{{ prog }}</h5>
+                                    {% for filter in filters %}
+                                        <span class="filter-label label label-default space-right-5">{{ filter.displ_name }}: {{ filter.displ_val }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% empty %}
+                                <div class="col-sm-12 prog-filter-set">
+                                    <p>No filters have been applied to this cohort.</p>
+                                </div>
+                            {% endfor %}
                         </div>
-                    {% endfor %}
-                </div>
-                <div class="more-filters"><button class="btn btn-link" role="button">Show More</button></div>
-                <div class="less-filters" style="display: none;"><button class="btn btn-link" role="button">Show Less</button></div>
-            </div>
-            <div class="cohort-info panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">Cohort Details</h4>
-                </div>
-                <div class="panel-body details-panel">
-                    <div class="row col-md-12 space-bottom-10">
-                        <span>Internal ISB-CGC Cohort ID: {{ cohort.id }}</span>
+                        <div class="more-filters">
+                            <button class="btn btn-link" role="button">Show More</button>
+                        </div>
+                        <div class="less-filters" style="display: none;">
+                            <button class="btn btn-link" role="button">Show Less</button>
+                        </div>
                     </div>
-                    <div class="row col-md-12 space-bottom-10">
-                        <span class="detail-label">Total Number of Cases:</span>
-                        <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="c-{{ cohort.id }}-data-total-participants">{{ total_cases }}</span>
-                    </div>
-                    <div class="row col-md-12 space-bottom-10">
-                        <span class="detail-label">Total Number of Samples:</span>
-                        <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="c-{{ cohort.id }}-data-total-samples">{{ total_samples }}</span>
-                    </div>
-                    <div class="row col-md-12 space-bottom-10">
-                        <span>Your Permissions: {{ cohort.perm.perm }}</span>
-                    </div>
-                    <div class="row col-md-12 space-bottom-10">
-                        <span class="rev-history">Revision History:</span>
-                        <ul class="rev-history">
-                            {% for item in revision_history %}
-                                {%  if 'type' in item and item.type == 'filter' %}
-                                    <div class="panel-body revision-filter-panel">
-                                        {% for prog, filters in item.vals.items %}
-                                            <div class="col-sm-{{ item.vals.keys|get_prog_col_size }} revision-prog-filter-set">
+                    <div class="cohort-info panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">Cohort Details</h4>
+                        </div>
+                        <div class="panel-body details-panel">
+                            <div class="row col-md-12 space-bottom-10">
+                                <span>Internal ISB-CGC Cohort ID: {{ cohort.id }}</span>
+                            </div>
+                            <div class="row col-md-12 space-bottom-10">
+                                <span class="detail-label">Total Number of Cases:</span>
+                                <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                                <span class="total-values"
+                                      id="c-{{ cohort.id }}-data-total-participants">{{ total_cases }}</span>
+                            </div>
+                            <div class="row col-md-12 space-bottom-10">
+                                <span class="detail-label">Total Number of Samples:</span>
+                                <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                                <span class="total-values"
+                                      id="c-{{ cohort.id }}-data-total-samples">{{ total_samples }}</span>
+                            </div>
+                            <div class="row col-md-12 space-bottom-10">
+                                <span>Your Permissions: {{ cohort.perm.perm }}</span>
+                            </div>
+                            <div class="row col-md-12 space-bottom-10">
+                                <span class="rev-history">Revision History:</span>
+                                <ul class="rev-history">
+                                    {% for item in revision_history %}
+                                        {% if 'type' in item and item.type == 'filter' %}
+                                            <div class="panel-body revision-filter-panel">
+                                                {% for prog, filters in item.vals.items %}
+                                                    <div class="col-sm-{{ item.vals.keys|get_prog_col_size }} revision-prog-filter-set">
+                                                        <h6>{{ prog }}</h6>
+                                                        {% for filter in filters %}
+                                                            <span class="filter-label label label-default space-right-5">{{ filter.displ_name }}: {{ filter.displ_val }}</span>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <li>{{ item }}</li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div class="row col-md-12 space-bottom-10">
+                                <span>Creation Filters:</span>
+                                <div class="panel-body creation-filter-panel">
+                                    {% for prog, filters in creation_filters.items %}
+                                        <div class="col-sm-{{ creation_filters.keys|get_prog_col_size }} creation-prog-filter-set">
                                             <h6>{{ prog }}</h6>
                                             {% for filter in filters %}
                                                 <span class="filter-label label label-default space-right-5">{{ filter.displ_name }}: {{ filter.displ_val }}</span>
                                             {% endfor %}
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                {%  else %}
-                                    <li>{{ item }}</li>
-                                {%  endif %}
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    <div class="row col-md-12 space-bottom-10">
-                        <span>Creation Filters:</span>
-                        <div class="panel-body creation-filter-panel">
-                            {% for prog, filters in creation_filters.items %}
-                                <div class="col-sm-{{ creation_filters.keys|get_prog_col_size }} creation-prog-filter-set">
-                                <h6>{{ prog }}</h6>
-                                {% for filter in filters %}
-                                    <span class="filter-label label label-default space-right-5">{{ filter.displ_name }}: {{ filter.displ_val }}</span>
-                                {% endfor %}
+                                        </div>
+                                    {% empty %}
+                                        <p>There were no filters used to create this cohort.</p>
+                                    {% endfor %}
                                 </div>
-                            {% empty %}
-                                <p>There were no filters used to create this cohort.</p>
-                            {% endfor %}
+                            </div>
+                        </div>
+                        <div class="more-details">
+                            <button class="btn btn-link" role="button">Show More</button>
+                        </div>
+                        <div class="less-details" style="display: none;">
+                            <button class="btn btn-link" role="button">Show Less</button>
                         </div>
                     </div>
                 </div>
-                <div class="more-details"><button class="btn btn-link" role="button">Show More</button></div>
-                <div class="less-details" style="display: none;"><button class="btn btn-link" role="button">Show Less</button></div>
+            {% endif %}
+            <div class="col-sm-12 col-md-12 col-lg-12">
+                <div class="panel panel-default">
+                    <ul class="nav nav-tabs nav-tabs-data" role="tablist">
+                        {% for program in programs %}
+                            <li role="presentation"
+                                class="program-tab{% if not program.id|program_is_in_cohort:programs_this_cohort %} disabled{% elif program|program_is_first_in_cohort:cohort_programs %} active{% endif %}">
+                                <a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data"
+                                   data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
+                        {% endfor %}
+                        <li role="presentation"
+                            class="program-tab {% if only_user_data %}active{% endif %} {% if not has_user_data %}disabled{% endif %}">
+                            <a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User
+                                Data</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
-        {% endif %}
-        <div class="col-sm-12 col-md-12 col-lg-12">
-            <div class="panel panel-default">
-                <ul class="nav nav-tabs nav-tabs-data" role="tablist">
-                    {% for program in programs %}
-                         <li role="presentation" class="program-tab{% if not program.id|program_is_in_cohort:programs_this_cohort %} disabled{% elif program|program_is_first_in_cohort:cohort_programs %} active{% endif %}"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
-                    {% endfor %}
-                    <li role="presentation" class="program-tab {% if only_user_data %}active{% endif %} {% if not has_user_data %}disabled{% endif %}"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="tab-content data-tab-content">
-            <div id="placeholder" class="tab-pane active data-tab" role="tabpanel">
-                <div class="col-md-12 data-tab-content-panel spinner-panel">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
+        <div class="row">
+            <div class="tab-content data-tab-content">
+                <div id="placeholder" class="tab-pane active data-tab" role="tabpanel">
+                    <div class="col-md-12 data-tab-content-panel spinner-panel">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Comment Flyout -->
-    <div class="fly-out comment-flyout comments">
-        <div class="flyout-heading">
-            <h4>Comments <a role="button" class="hide-flyout" aria-label="Hide Flyout"><i class="fa fa-times"></i></a></h4>
-        </div>
-        <div class="flyout-body">
-            {% for comment in cohort.cohort_comment.all %}
-                <h5 class="comment-username">{{ comment.user.first_name }} {{ comment.user.last_name }}</h5>
-                <p class="comment-content">{{ comment.content }}</p>
-                <p class="comment-date">{{ comment.date_created }}</p>
-            {% endfor %}
-        </div>
-        <div class="flyout-footer">
-            <form class="add-comment" action="{% url 'save_cohort_comment' %}" method="POST">
-                {% csrf_token %}
-                <div id="unallowed-chars-alert-comment" class="alert alert-warning alert-dismissable" style="display: none;">
-                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                    Your comment contains invalid characters (<span id="unallowed-chars-comment"></span>). Please adjust the content accordingly.
-                </div>
-                <label for="comment-content">Add Comment (1000 character limit)</label>
-                <textarea id="comment-content" class="form-control space-bottom-10" name="content" maxlength="1000"></textarea>
-                <input type="hidden" name="cohort_id" value="{{ cohort.id }}" />
-                <button class="btn btn-primary save-comment-btn" type="submit">Comment</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Apply Edits Modal -->
-    <div class="modal fade" id="apply-edits-modal" tabindex="-1" role="dialog" aria-labelledby="applyFiltersModal" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="applyFiltersModal">Save Changes</h4>
-                </div>
-                <form id="apply-edits-form" method="POST" action="{% url 'save_cohort' %}">
-                    <div class="modal-body">
-                        <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
-                            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            Your cohort's name contains invalid characters (<span class="unallowed-chars"></span>). Please choose another name.
-                        </div>
-                        <label for="apply-edit-cohort-name">Saving changes will permanently modify the existing cohort.</label>
-                        <input type="hidden" id="apply-edit-cohort-name" name="name" value="{{ cohort.name }}"/>
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <input type="submit" value="Save Changes" class="btn btn-primary" />
-                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
-                        <div id="saving-cohort" class="collapse" style="display: none;">
-                            <i class="fa fa-circle-o-notch fa-spin"></i>  Saving Cohort...
-                        </div>
-                    </div>
-                </form>
+        <!-- Comment Flyout -->
+        <div class="fly-out comment-flyout comments">
+            <div class="flyout-heading">
+                <h4>Comments <a role="button" class="hide-flyout" aria-label="Hide Flyout"><i
+                        class="fa fa-times"></i></a></h4>
             </div>
-        </div>
-    </div>
-
-    <!-- Delete Cohort Modal -->
-    <div class="modal fade" id="delete-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="deleteCohortModal" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="deleteCohortModal">Delete Cohort</h4>
-                </div>
-                <form id="delete-cohort-form" method="POST" action="{% url 'delete_cohort' %}">
-                    <div class="modal-body">
-                        <label id="delete-confirm-label" for="cohort-id">Are you sure you want to delete this cohort?</label>
-                        <input type="hidden" id="cohort-id" name="id" value="{{ cohort.id }}" aria-labelledby="delete-confirm-label"/>
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <input type="submit" value="Delete" class="btn btn-primary" />
-                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
+            <div class="flyout-body">
+                {% for comment in cohort.cohort_comment.all %}
+                    <h5 class="comment-username">{{ comment.user.first_name }} {{ comment.user.last_name }}</h5>
+                    <p class="comment-content">{{ comment.content }}</p>
+                    <p class="comment-date">{{ comment.date_created }}</p>
+                {% endfor %}
             </div>
-        </div>
-    </div>
-
-    <!-- Remove Cohort Modal -->
-    <div class="ajax-form-modal modal fade" id="remove-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="remove-cohort-header" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="remove-cohort-header">Remove Yourself from this Cohort?</h4>
-                </div>
-                <form id="remove-cohort" method="POST" action="{% url 'unshare_cohort' cohort.id %}">
+            <div class="flyout-footer">
+                <form class="add-comment" action="{% url 'save_cohort_comment' %}" method="POST">
                     {% csrf_token %}
-                    <div class="modal-footer">
-                        <input type="submit" value="Remove" class="btn btn-primary" />
-                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                    <div id="unallowed-chars-alert-comment" class="alert alert-warning alert-dismissable"
+                         style="display: none;">
+                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span
+                                class="sr-only">Close</span></button>
+                        Your comment contains invalid characters (<span id="unallowed-chars-comment"></span>). Please
+                        adjust the content accordingly.
                     </div>
+                    <label for="comment-content">Add Comment (1000 character limit)</label>
+                    <textarea id="comment-content" class="form-control space-bottom-10" name="content"
+                              maxlength="1000"></textarea>
+                    <input type="hidden" name="cohort_id" value="{{ cohort.id }}"/>
+                    <button class="btn btn-primary save-comment-btn" type="submit">Comment</button>
                 </form>
+            </div>
+        </div>
+
+        <!-- Apply Edits Modal -->
+        <div class="modal fade" id="apply-edits-modal" tabindex="-1" role="dialog" aria-labelledby="applyFiltersModal"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="applyFiltersModal">Save Changes</h4>
+                    </div>
+                    <form id="apply-edits-form" method="POST" action="{% url 'save_cohort' %}">
+                        <div class="modal-body">
+                            <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable"
+                                 style="display: none;">
+                                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span
+                                        class="sr-only">Close</span></button>
+                                Your cohort's name contains invalid characters (<span class="unallowed-chars"></span>).
+                                Please choose another name.
+                            </div>
+                            <label for="apply-edit-cohort-name">Saving changes will permanently modify the existing
+                                cohort.</label>
+                            <input type="hidden" id="apply-edit-cohort-name" name="name" value="{{ cohort.name }}"/>
+                        </div>
+                        <div class="modal-footer">
+                            {% csrf_token %}
+                            <input type="submit" value="Save Changes" class="btn btn-primary"/>
+                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                            <div id="saving-cohort" class="collapse" style="display: none;">
+                                <i class="fa fa-circle-o-notch fa-spin"></i> Saving Cohort...
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Cohort Modal -->
+        <div class="modal fade" id="delete-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="deleteCohortModal"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="deleteCohortModal">Delete Cohort</h4>
+                    </div>
+                    <form id="delete-cohort-form" method="POST" action="{% url 'delete_cohort' %}">
+                        <div class="modal-body">
+                            <label id="delete-confirm-label" for="cohort-id">Are you sure you want to delete this
+                                cohort?</label>
+                            <input type="hidden" id="cohort-id" name="id" value="{{ cohort.id }}"
+                                   aria-labelledby="delete-confirm-label"/>
+                        </div>
+                        <div class="modal-footer">
+                            {% csrf_token %}
+                            <input type="submit" value="Delete" class="btn btn-primary"/>
+                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remove Cohort Modal -->
+        <div class="ajax-form-modal modal fade" id="remove-cohort-modal" tabindex="-1" role="dialog"
+             aria-labelledby="remove-cohort-header" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="remove-cohort-header">Remove Yourself from this Cohort?</h4>
+                    </div>
+                    <form id="remove-cohort" method="POST" action="{% url 'unshare_cohort' cohort.id %}">
+                        {% csrf_token %}
+                        <div class="modal-footer">
+                            <input type="submit" value="Remove" class="btn btn-primary"/>
+                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -327,12 +396,12 @@
     {% endif %}
 
     <script type="text/javascript">
-    var total_samples = {{ total_samples|safe }};
-    var base_url = '{{ base_url|safe }}';
-    var cohort_id = {{ cohort.id }};
-    var user_data = {{ user_data|tojson|safe }};
-    var cohort_programs = {{ cohort_programs|tojson|safe }};
-    var request_user_id = {{ user.id }};
+        var total_samples = {{ total_samples|safe }};
+        var base_url = '{{ base_url|safe }}';
+        var cohort_id = {{ cohort.id }};
+        var user_data = {{ user_data|tojson|safe }};
+        var cohort_programs = {{ cohort_programs|tojson|safe }};
+        var request_user_id = {{ user.id }};
     </script>
 {% endblock %}
 

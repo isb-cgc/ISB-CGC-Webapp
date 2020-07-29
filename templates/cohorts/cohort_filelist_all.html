@@ -99,8 +99,12 @@
                 <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                 The maximum number of file records which can be downloaded is <span class="file-list-limit">{{ file_list_max }}</span>. Your selections currently total
                 <span class="file-list-total">#</span>. If you download the list now, it will be arbitrarily cut off after the maximum. Please consider using the filter
-                panel to the left to limit the record count. In order to obtain the complete listing, you can register a Google Cloud Project and BigQuery Dataset, and
-                export the file record list to a BigQuery table.
+                panel to the left to limit the record count.
+                {% if user.is_anonymous %}
+                Once you have logged in, you can register a Google Cloud Project and BigQuery Dataset, and export the file record list to a BigQuery table.
+                {% else %}
+                In order to obtain the complete listing, you can register a Google Cloud Project and BigQuery Dataset, and export the file record list to a BigQuery table.
+                {% endif %}
             </div>
             <div class="panel-heading">
                 <div class="file-panel-toggle">
@@ -119,8 +123,14 @@
                         </li>
                         <li class="menu-item">
                             <div class="filelist-obtain">
-                                <button class="btn btn-info export-btn" data-toggle="modal" {% if has_user_data %}disabled {% endif %}data-target="#export-to-bq-modal" title="{% if has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a BigQuery table{% endif %}">BigQuery</button>
-                                <button class="btn btn-info export-btn" data-toggle="modal" {% if has_user_data %}disabled {% endif %}data-target="#export-to-gcs-modal" title="{% if has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a GCS bucket{% endif %}">GCS</button>
+                                <button class="btn btn-info export-btn {% if user.is_anonymous %} disabled {% endif %}"
+                                        data-toggle="modal" {% if has_user_data %}disabled {% endif %}data-target="#export-to-bq-modal"
+                                        title="{% if has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a BigQuery table{% endif %}">
+                                    BigQuery</button>
+                                <button class="btn btn-info export-btn {% if user.is_anonymous %} disabled {% endif %}"
+                                        data-toggle="modal" {% if has_user_data %}disabled {% endif %}data-target="#export-to-gcs-modal"
+                                        title="{% if has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a GCS bucket{% endif %}">
+                                    GCS</button>
                             </div>
                         </li>
                     </ul>

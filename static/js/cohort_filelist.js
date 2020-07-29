@@ -203,7 +203,14 @@ require([
             $('#placeholder').addClass('active');
             $('#placeholder').show();
             var data_tab_content_div = $('div.data-tab-content');
-            var get_panel_url = BASE_URL + '/cohorts/filelist/'+cohort+'/panel/' + active_tab +'/';
+            var get_panel_url = "";
+            if (cohort !== null) {
+                get_panel_url = BASE_URL + '/cohorts/filelist/'+cohort+'/panel/' + active_tab +'/';
+            }
+            else {
+                get_panel_url = BASE_URL + '/cohorts/filelist/panel/' + active_tab + '/';
+            }
+
 
             $.ajax({
                 type        :'GET',
