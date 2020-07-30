@@ -67,13 +67,13 @@
                     {% endif %}
                 </button></li>
                 <li class="separator"></li>
-                <li class="menu-item"><a href="{% url 'cohort_filelist' cohort.id %}" class="btn btn-info view-files-btn" {% if cohort.only_user_data %}disabled {% endif %}title="{% if cohort.only_user_data %}The file browser is not available at this time for cohorts containing only user data.{% else %}View this cohort's file list{% endif %}">File Browser</a></li>
+                <li class="menu-item"><a href="{% url 'cohort_filelist' cohort.id %}" class="btn btn-info view-files-btn" {% if only_user_data %}disabled {% endif %}title="{% if only_user_data %}The file browser is not available at this time for cohorts containing only user data.{% else %}View this cohort's file list{% endif %}">File Browser</a></li>
                 {% if cohort.perm.perm == 'OWNER' %}
                 <li class="separator"></li>
                 <li class="menu-item"><a href="{%  url 'download_ids' cohort.id %}" class="btn btn-info download-ids-btn" title="Download this cohort's records as a CSV">CSV</a></li>
                 <li class="menu-item">
-                    <button class="btn btn-info" data-toggle="modal" data-target="#export-to-bq-modal" {% if cohort_programs|has_user_data %}disabled {% endif %}title="{% if cohort_programs|has_user_data %}Cohorts with User data cannot be exported at this time.{% else %}Export this cohort's records to a BigQuery table{% endif %}">BigQuery</button>
-                    <button class="btn btn-info" data-toggle="modal" data-target="#export-to-gcs-modal" {% if cohort_programs|has_user_data %}disabled {% endif %}title="{% if cohort_programs|has_user_data %}Cohorts with User data cannot be exported at this time.{% else %}Export this cohort's records to a GCS bucket{% endif %}">GCS</button>
+                    <button class="btn btn-info" data-toggle="modal" data-target="#export-to-bq-modal" {% if has_user_data %}disabled {% endif %}title="{% if has_user_data %}Cohorts with User data cannot be exported at this time.{% else %}Export this cohort's records to a BigQuery table{% endif %}">BigQuery</button>
+                    <button class="btn btn-info" data-toggle="modal" data-target="#export-to-gcs-modal" {% if has_user_data %}disabled {% endif %}title="{% if has_user_data %}Cohorts with User data cannot be exported at this time.{% else %}Export this cohort's records to a GCS bucket{% endif %}">GCS</button>
                 </li>
                 <li class="separator"></li>
                 <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#share-cohort-modal">Share</button></li>
@@ -113,8 +113,8 @@
                     <h4 class="panel-title">Current Filters</h4>
                 </div>
                 <div class="panel-body curr-filter-panel gradient-overlay">
-                    {% for prog, filters in cohort.get_current_filters.items %}
-                        <div class="col-sm-{{ cohort.get_current_filters.keys|get_prog_col_size }} prog-filter-set">
+                    {% for prog, filters in current_filters.items %}
+                        <div class="col-sm-{{ current_filters.keys|get_prog_col_size }} prog-filter-set">
                         <h5>{{ prog }}</h5>
                         {% for filter in filters %}
                             <span class="filter-label label label-default space-right-5">{{ filter.displ_name }}: {{ filter.displ_val }}</span>
@@ -153,7 +153,7 @@
                     <div class="row col-md-12 space-bottom-10">
                         <span class="rev-history">Revision History:</span>
                         <ul class="rev-history">
-                            {% for item in cohort.get_revision_history %}
+                            {% for item in revision_history %}
                                 {%  if 'type' in item and item.type == 'filter' %}
                                     <div class="panel-body revision-filter-panel">
                                         {% for prog, filters in item.vals.items %}
@@ -174,8 +174,8 @@
                     <div class="row col-md-12 space-bottom-10">
                         <span>Creation Filters:</span>
                         <div class="panel-body creation-filter-panel">
-                            {% for prog, filters in cohort.get_creation_filters.items %}
-                                <div class="col-sm-{{ cohort.get_creation_filters.keys|get_prog_col_size }} creation-prog-filter-set">
+                            {% for prog, filters in creation_filters.items %}
+                                <div class="col-sm-{{ creation_filters.keys|get_prog_col_size }} creation-prog-filter-set">
                                 <h6>{{ prog }}</h6>
                                 {% for filter in filters %}
                                     <span class="filter-label label label-default space-right-5">{{ filter.displ_name }}: {{ filter.displ_val }}</span>
@@ -196,9 +196,9 @@
             <div class="panel panel-default">
                 <ul class="nav nav-tabs nav-tabs-data" role="tablist">
                     {% for program in programs %}
-                         <li role="presentation" class="program-tab{% if not program|program_is_in_cohort:cohort.get_programs %} disabled{% elif program|program_is_first_in_cohort:cohort.get_programs %} active{% endif %}"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
+                         <li role="presentation" class="program-tab{% if not program.id|program_is_in_cohort:programs_this_cohort %} disabled{% elif program|program_is_first_in_cohort:cohort_programs %} active{% endif %}"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
                     {% endfor %}
-                    <li role="presentation" class="program-tab {% if cohort.only_user_data %}active{% endif %} {% if not cohort_programs|has_user_data %}disabled{% endif %}"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
+                    <li role="presentation" class="program-tab {% if only_user_data %}active{% endif %} {% if not has_user_data %}disabled{% endif %}"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
                 </ul>
             </div>
         </div>
@@ -317,7 +317,7 @@
         </div>
     </div>
 
-    {% if not cohort_programs|has_user_data %}
+    {% if not has_user_data %}
         <!-- Export Modals -->
         {% include "cohorts/bq_export_modal.html" with export_type="Cohort" export_url=export_url %}
         {% include "cohorts/gcs_export_modal.html" with export_type="Cohort" export_url=export_url %}
