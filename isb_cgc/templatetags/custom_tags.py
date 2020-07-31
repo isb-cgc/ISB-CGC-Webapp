@@ -205,7 +205,7 @@ def is_superuser(this_user):
 def get_cohorts_this_user(this_user, is_active=True):
     isb_superuser = User.objects.get(username='isb')
     public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
-    cohort_perms = list(set(Cohort_Perms.objects.filter(user=this_user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
+    cohort_perms = list(set(Cohort_Perms.objects.select_related('cohort').filter(user=this_user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
     cohorts = Cohort.objects.filter(id__in=cohort_perms, active=is_active).order_by('-last_date_saved')
     return cohorts
 
@@ -332,8 +332,8 @@ def program_is_in_cohort(prog, cohort_progs):
 
 @register.filter
 def program_is_first_in_cohort(prog, cohort_progs):
-    if cohort_progs.count():
-        return (prog.id == cohort_progs[0].id)
+    if len(cohort_progs):
+        return (prog.id == cohort_progs[0]['id'])
     logger.error("[ERROR] This cohort doesn't appear to have any programs associated with it--this means the samples may not have project IDs!")
     return False
 
