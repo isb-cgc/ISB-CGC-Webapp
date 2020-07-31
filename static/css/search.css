@@ -69,8 +69,15 @@
     flex-direction:column;
 }
 .vert {
-    overflow-y: scroll;
-    height: 600px;
+  #overflow-y: scroll;
+    #max-height:800px;
+  #height: 600px;
+}
+
+.search-con {
+  overflow-y: auto;
+    overflow-x:hidden;
+  max-height: 1000px;
 }
 
 html {
