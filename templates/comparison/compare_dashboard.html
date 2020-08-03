@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    Cohort Comparison | ISB-CGC
+{% endblock %}
+
+{% block header %}
+{<link type="text/css" rel="stylesheet" href="{% static 'css/jquery.qtip.min.css' %}" />}
+{% endblock %}
+
+{% block link_page_name %}cohort-comparison{% endblock %}
+{% block page_name %}cohort-comparison{% endblock %}
+
+{% block page_header %}
+    <div class="container">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            <li><a href="{% url 'cohort_list' %}">Saved Cohorts</a></li>
+        </ol>
+        <h1 class="page-header">Cohort Comparison</h1>
+    </div>
+{% endblock %}
+
+{% block content %}
+
+{% endblock %}

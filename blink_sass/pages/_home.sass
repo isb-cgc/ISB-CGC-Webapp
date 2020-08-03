@@ -1,174 +1,185 @@
 /********************************************
  * Landing Page Styles
  *******************************************/
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap')
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap')
 
-@import url("https://fonts.googleapis.com/css?family=Lato:300,400,700&subset=latin,latin-ext")
-@import url("https://fonts.googleapis.com/css?family=Montserrat:300,700&subset=latin,latin-ext")
-
-html
-    scroll-behavior: smooth
 #landing
-    .landing-content-div
-        position: absolute
-        top: 57px
-        left: 0
-        width: 100%
-        .container
-            .header-div
-                min-height: 650px
-                height: 100vh
-                .header-content-div
-                    position: relative
-                    top: 45%
-                    transform: translateY(-45%)
-                    a
-                        color: $isb-lighter
-                    .lj-title h1
-                        font-family: 'Montserrat'
-                        font-size: 3.8em
-                        font-weight: 300
-                        color: #fff
-                        margin: 0
-                        word-wrap: break-word
-
-                    .lj-text-center
-                        text-align: center
-
-                    .lj-title span
-                        color: #4cc2d6
-                        font-weight: 700
-
-                    .lj-title-paragraph
-                        padding: 30px
-                        p
-                            color: #fff
-                            font-size: 1.5em
-                    .lj-header-vid
-                        text-align: right
-                        &.custom-width-55
-                            width: 55%
-                        .carousel
-                            float: right
-                            width: 320px
-                            height: 240px
-                            .carousel-control-button
-                                height: 42px
-                                width: 42px
-                                line-height: 38px
-                                position: absolute
-                                top: 50%
-                                border-radius: 50%
-                                border: 2px solid white
-                                transform: translateY(-50%)
-                                color: white
-                                background-color: rgba(0,0,0,.5)
-                                i
-                                    width: 38px
-                            .left, .right
-                                background-image: none
-                            .tutorial-vid
-                                width: 320px
-                                height: 240px
-                            .carousel-indicators
-                                bottom: -20px
-
-                .lj-header-button
-                    text-align: left
-                    margin-top: 2px
-                    a
-                        display: inline-block
-                        color: #fff
-                        text-align: center
-                        background-color: transparent
-                        font-family: 'Montserrat'
-                        font-weight: 700
-                        padding: 8px 10px
-                        border: 2px solid #4cc2d6
-                        -webkit-border-radius: 3px
-                        -moz-border-radius: 3px
-                        border-radius: 3px
-                        width: 200px
-                        text-decoration: none
-                        &:hover
-                            color: #fff
-                            background-color: darken($isb-primary, 10%)
-                            border: 2px solid #4cc2d6
-                    &.custom-width-45
-                        width: 45%
-            .about-content-div
-                position: relative
-                padding-top: 100px
-                padding-bottom: 100px
-                left: 0
-                h2
-                    font-size: 25px
-                    color: $isb-primary
-                p
-                    color: darken($isb-dark, 10%)
-
-        .lj-overlay
-            width: 100%
-            height: 100vh
-            min-height: 650px
-            position: absolute
-            top: 0
-            left: 0
-        .lj-overlay-bg
-            background-image: url('../img/bg.jpg')
-            background-size: cover
-        .lj-overlay-image
-            background-image: url('../img/lines.png')
-            background-repeat: repeat
-        .lj-overlay-color
-            background-color: rgba(0,0,0,0.5)
-
-
-    .footer
-        color: white
-        margin-top: 50px
+    font-family: 'Open Sans', sans-serif
+    background-color: white
+    > .container-fluid
+        padding-bottom: 0
+    h1
+        font-size: 65px
+        font-size: 65px
+    h2
+        font-size: 30px
+    h3
+        font-size: 16px
+        //font-size: 20px
+    h4
+        font-size: 20px
+        //font-size: 25px
+    a
+        color: #226caa
+        &:hover
+            color: #2aabd2
+    .alert
+        margin: 0 -15px
+    .header-div
         text-align: center
-        font-size: 1.1em
-        .follow-us
-            position: absolute
-            bottom: -30px
-            right: -30px
-            i
-                color: white
-                margin-left: 20px
-            a
-                font-size: 1.5em
-                float: bottom
-
-
-    .cite-text
-        background-color: lighten(grey, 40%)
-        color: darken($isb-dark, 10%)
-        font-size: 0.9em
-        border-radius: 5px
-        border-width: 1px
-        border-color: grey
-        padding: 5px
-
-    .pull-down-button
-        width: 100%
-        text-align: center
-        margin-top: 20px
-        display: block
-        font-weight: bold
-        text-align: center
-        font-size: 24px
-        i
-            color: white
-            padding: 8px
-            width: 50px
-            height: 50px
-            background-color: rgba(0,0,0,0.5)
-            border-radius: 50%
-            border: 2px solid #4cc2d6
+        padding: 15px
+        background-image: url('../img/background-isbcgc.png')
+        background-size: contain
+        font-size: 20px
+        color: #2b537b
+    .crdc-div
+        color: #5e5e5e
+        >a
+            color: #5e5e5e
+            //font-weight: bold
             &:hover
-                background-color: darken($isb-primary, 10%)
+                color: #2aabd2
+                text-decoration: none
+    .banner-section, .footer-div
+        padding: 0
+        a
+            text-decoration: underline
+        a, button.close
+            color: darken(#fee9d5,10%)
+            &:hover
+                color: darken(#e2ebf3,10%)
+    .banner-section
+        .alert
+            text-align: center
+            background-color: #7e7e7e
+            color: white
+            margin: 0
+            padding: 0 20px
+        .alert-dismissible
+            button.close
+                padding: 0 20px
+    .jumbotron-fluid
+        padding-bottom: 8px
 
-#privacy
+    .panel-heading
+        padding: 5px 10px
+        img
+            padding: 0
+            max-width: 100px
+    .panel-body
+        padding: 5px 10px
+    .panel-footer
+        padding: 5px 10px
+        font-size: 14px
+        border-radius: 10px
+    .landing-icon
+        background-size: contain
+        background-repeat: no-repeat
+        background-position: center top
+        width: 30px
+        height: 30px
+        margin: auto
+        display: inline-block
+
+    .panel
+        margin-left: auto
+        margin-right: auto
+        border-radius: 10px
+        max-width: 400px
+        box-shadow: none
+        border-width: 1px
+        border-style: solid
+        font-size: 16px
+        padding: 10px
+        h4
+            margin: 0
+        //> div
+        //    margin: 5px 0
+    //.panel-*
+    //    padding: 0
+    .dbrowser-div
+        background-color: #e2ebf3
+        h3
+            color: #2b537b
+        h4, i
+            color: #226caa
+        .panel
+            border-color: #2b537b
+        .learn-icon
+            background-image: url('../img/blue-lightbulb.png')
+            &:hover
+                background-image: url('../img/blue-lightbulb-hover.png')
+        .launch-icon
+            background-image: url('../img/blue-rocket.png')
+            &:hover
+                background-image: url('../img/blue-rocket-hover.png')
+        .panel-heading
+            min-height: 77px
+        .panel-body
+            min-height: 164px
+            //min-height: 120px
+    .resources-div
+        background-color: #fee9d5
+        h3
+            color: #925122
+        h4, i
+            color: #f18621
+        .panel
+            border-color: #925122
+        .learn-icon
+            background-image: url('../img/orange-lightbulb.png')
+            &:hover
+                background-image: url('../img/orange-lightbulb-hover.png')
+        .launch-icon
+            background-image: url('../img/orange-rocket.png')
+            &:hover
+                background-image: url('../img/orange-rocket-hover.png')
+        .statistical-icon
+            background-image: url('../img/orange-statistical.png')
+            &:hover
+                background-image: url('../img/orange-statistical-hover.png')
+        .community-icon
+            background-image: url('../img/orange-community.png')
+            &:hover
+                background-image: url('../img/orange-community-hover.png')
+        .github-icon
+            background-image: url('../img/orange-github.png')
+            &:hover
+                background-image: url('../img/orange-github-hover.png')
+        .panel-heading
+            min-height: 77px
+        .panel-body
+            min-height: 164px
+    .jumbotron-fluid > .container-fluid
+        padding: 0 5%
+    .bottom-div
+        font-size: 16px
+        padding: 15px 0
+    .footer-div, .footer-div a
+        color: white
+        font-weight: bold
+        font-size: 14px
+        background-color: #7e7e7e
+        //background-color: #eee
+        padding: 12px 0
+        //border-top: 1px solid #DDDDDD
+        .social-media-div a
+            //color: white
+            font-size: 15px
+            //font-size: 20px
+            padding: 0 15px
+            text-decoration: none
+
+    .col-lg-15p
+        width: 12.5%
+        display: block
+        float: left
+        position: relative
+        min-height: 1px
+        //padding-left: 15px
+        //padding-right: 15px
+#privacy, #about
     h2
         font-size: 20px
         margin-top: 20px
@@ -178,5 +189,24 @@ html
         margin-left: 20px
         list-style: circle
         margin-bottom: 10px
+    //a
+    //    font-weight: bold
     a
-        font-weight: bold
+        color: #226caa
+        &:hover
+            color: #2aabd2
+
+#about
+    .partners-div
+        display: inline-block
+        img
+            height: 80px
+    .cite-text
+        background-color: lighten(grey, 40%)
+        color: darken($isb-dark, 10%)
+        font-size: 0.9em
+        border-radius: 5px
+        border-width: 1px
+        border-color: grey
+        padding: 10px
+
