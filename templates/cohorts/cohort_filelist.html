@@ -36,7 +36,7 @@
         {% endif %}
         <h3 class="page-header">File Browser
             {% if cohort %}
-                <a href="{% url 'cohort_details' cohort.id %}">:{{ cohort.name }}</a>
+                : <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
             {% endif %}
         </h3>
         <div id="file-list-warning" class="alert alert-warning alert-dismissable" style="display: none;">
