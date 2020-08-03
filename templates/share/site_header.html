@@ -94,18 +94,16 @@
                 <a href="{% url 'dashboard' %}">DASHBOARD</a>
             </li>
             {%  endif %}
-            <!--
-            {% if USER_DATA_ON %}
-            <li class="menu-item has-drop-down">
-                <a>PROGRAMS <i class="fa fa-caret-down"></i></a>
-                <ul class="sub-menu drop">
-                    <li class="menu-item"><a href="{% url 'programs' %}">Saved Programs ( {% user_program_count %} )</a></li>
-                    <li class="menu-item"><a href="{% url 'program_upload' %}">Upload Program Data</a></li>
-                    <li class="menu-item"><a href="{% url 'public_programs' %}">Public Program ( {% public_program_count %} )</a></li>
-                </ul>
-            </li>
-            {% endif %}
-            -->
+{#            {% if USER_DATA_ON %}#}
+{#            <li class="menu-item has-drop-down">#}
+{#                <a>PROGRAMS <i class="fa fa-caret-down"></i></a>#}
+{#                <ul class="sub-menu drop">#}
+{#                    <li class="menu-item"><a href="{% url 'collections' %}">Saved Collections ( {% user_collection_count %} )</a></li>#}
+{#                    <li class="menu-item"><a href="{% url 'collection_upload' %}">Upload Collection Data</a></li>#}
+{#                </ul>#}
+{#            </li>#}
+{#            {% endif %}#}
+            <li class="menu-item"><a href="{% url 'collections' %}">COLLECTIONS</a></li>
             <li class="menu-item has-drop-down">
                 <a>COHORTS <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">

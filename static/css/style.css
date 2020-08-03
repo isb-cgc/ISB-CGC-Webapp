@@ -3887,6 +3887,15 @@ html {
   font-size: 25px;
   text-align: center; }
 
+.collex-panel div {
+  padding: 0 !important;
+}
+
+.collex-table th {
+  background-color: #e4d8f9;
+  border-top: 1px solid #ddd;
+}
+
 /********************************************
  * IGV Styles
  *******************************************/
