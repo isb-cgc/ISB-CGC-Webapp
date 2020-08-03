@@ -55,7 +55,7 @@
                                                         <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr_build }}-{{ attr.name }}-{{ v.value }}"
                                                                data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
                                                         {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
-                                                         <span class="count">({{ v.count }})</span>
+                                                         <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
                                                     </label>
                                                 </li>
                                             {% elif forloop.counter0 == 6 and num_more > 0 %}
@@ -65,7 +65,7 @@
                                                         <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr_build }}-{{ attr.name}}-{{ v.value }}"
                                                                data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
                                                         {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
-                                                         <span class="count">({{ v.count }})</span>
+                                                         <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
                                                     </label>
                                                 </li>
                                             {% else %}
@@ -74,7 +74,7 @@
                                                         <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr_build }}-{{ attr.name }}-{{ v.value }}"
                                                                data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
                                                         {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
-                                                         <span class="count">({{ v.count }})</span>
+                                                         <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
                                                     </label>
                                                 </li>
                                             {% endif %}
