@@ -1305,6 +1305,12 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             var allFilters=allListItems.children().children('input:checkbox');
             var checkedFilters=allListItems.children().children('input:checked');
             var showZeros = true;
+            if ( ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').length>0)  && ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros')[0].checked)){
+                showZeros = false;
+            }
+
+
+
             if ( ($('#' + filterCat).children('.hide-zeros').length>0) &&  ($('#' + filterCat).children('.hide-zeros').hasClass("notDisp")) ){
                 showZeros = false;
             }
@@ -1350,10 +1356,10 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 }
 
                 if ( (numAttrAvail>5) ) {
-                    $(elem).parent().parent().addClass('.extra-values');
+                    $(elem).parent().parent().addClass('extra-values');
                 }
                 else {
-                    $(elem).parent().parent().removeClass('.extra-values');
+                    $(elem).parent().parent().removeClass('extra-values');
                 }
 
                 if ( ( (cnt>0) || checked || showZeros ) && (showExtras || (numAttrAvail<6)) ) {
@@ -1371,23 +1377,35 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 }
             }
 
+
             if ( numAttrAvail < 6)  {
-                    $('#' + filterCat).children().children('.more-checks').hide();
-                    $('#' + filterCat).children().children('.less-checks').hide();
+                    $('#' + filterCat).children('.more-checks').hide();
+                    $('#' + filterCat).children('.less-checks').hide();
 
                 }
             else if (showExtras) {
-                $('#' + filterCat).children().children('.more-checks').hide();
-                $('#' + filterCat).children().children('.less-checks').show();
+                $('#' + filterCat).children('.more-checks').hide();
+                $('#' + filterCat).children('.less-checks').show();
             }
 
             else {
-                 $('#' + filterCat).children().children('.more-checks').show();
-                $('#' + filterCat).children().children('.less-checks').hide();
+                 $('#' + filterCat).children('.more-checks').show();
+                $('#' + filterCat).children('.less-checks').hide();
             }
+
+
 
         }
 
+        window.hideAtt = function(){
+            var filtSet = ["search_orig_set","segmentation","quantitative","qualitative","search_related_set"];
+            for (var i=0;i<filtSet.length;i++) {
+                filterCats = findFilterCats(filtSet[i], false);
+                for (var j = 0; j < filterCats.length; j++) {
+                        updateFilters(filterCats[j],{},false);
+                }
+            }
+        }
 
         var updateFilterSelections = function (id, dicofdic) {
             filterCats = findFilterCats(id,false);
@@ -1619,8 +1637,12 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             $(this).parent().parent().find('.less-checks').removeClass('notDisp');
             $(this).parent().parent().find('.more-checks').addClass('notDisp');
             $(this).parent().hide();
-            $(this).parent().parent().children('.search-checkbox-list').children('.extra-values').show();
+            var extras = $(this).parent().parent().children('.search-checkbox-list').children('.extra-values')
 
+            if ( ($('#'+filterId).closest('.search-configuration').find('#hide-zeros').length>0)  && ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros')[0].checked)){
+                extras=extras.not('.zeroed');
+            }
+                extras.show();
 
         });
 
