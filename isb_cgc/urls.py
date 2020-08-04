@@ -32,7 +32,9 @@ urlpatterns = [
     url(r'^user_landing/$', views.user_landing, name='user_landing'),
     url(r'^search_cohorts_viz/$', views.search_cohorts_viz, name='search_cohorts_viz'),
     url(r'^style_guide/', views.css_test),
+    url(r'^users/$', views.user_detail_login, name='user_detail_login'),
     url(r'^users/(?P<user_id>\d+)/$', views.user_detail, name='user_detail'),
+
 
     url(r'^bucket_object_list/$', views.bucket_object_list, name='bucket_object_list'),
     url(r'^igv/$', views.igv, name='igv'),
@@ -72,6 +74,8 @@ urlpatterns = [
     url(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),
     url(r'^bq_meta_search/', views.bq_meta_search, name='bq_meta_search'),
     url(r'^bq_meta_data/', views.bq_meta_data, name='bq_meta_data'),
+    url(r'^programmatic_access/', views.programmatic_access_page, name='programmatic_access'),
+    url(r'^workflow/', views.workflow_page, name='workflow'),
     url(r'^get_tbl_preview/(?P<proj_id>[A-Za-z0-9._/-]+)/(?P<dataset_id>[A-Za-z0-9._/-]+)/(?P<table_id>[A-Za-z0-9._/-]+)/$', views.get_tbl_preview, name='get_tbl_preview'),
 
     url(r'^privacy/', views.privacy_policy, name='privacy'),

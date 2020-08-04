@@ -203,7 +203,14 @@ require([
             $('#placeholder').addClass('active');
             $('#placeholder').show();
             var data_tab_content_div = $('div.data-tab-content');
-            var get_panel_url = BASE_URL + '/cohorts/filelist/'+cohort+'/panel/' + active_tab +'/';
+            var get_panel_url = "";
+            if (cohort !== null) {
+                get_panel_url = BASE_URL + '/cohorts/filelist/'+cohort+'/panel/' + active_tab +'/';
+            }
+            else {
+                get_panel_url = BASE_URL + '/cohorts/filelist/panel/' + active_tab + '/';
+            }
+
 
             $.ajax({
                 type        :'GET',
@@ -812,7 +819,7 @@ require([
                         for(var j=0; j < this_attr.values.length; j++) {
                             var this_val = this_attr.values[j];
                             if(this_val.count || this_val.count == 0) {
-                                $('#' + active_tab + '-' + data.build + '-' + this_attr.name + '-' + this_val.value).siblings('span.count').html('(' + this_val.count + ')');
+                                $('#' + active_tab + '-' + data.build + '-' + this_attr.name + '-' + this_val.value).siblings('span.count').html(this_val.count.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'));
                                 $('#' + active_tab + '-' + data.build + '-' + this_attr.name + '-' + this_val.value).attr('data-count', this_val.count);
                             }
                         }
