@@ -26,36 +26,30 @@
     padding: 0
     margin-bottom: 0
 
-  li
-    padding: 10px
-
   & > ul > li
     display: inline-block
-    vertical-align: top
+    vertical-align: middle
     position: relative
-    padding: 15px 25px
+    padding: 5px 15px
     font-weight: $medium-font-weight
-
     &:hover
       background: $isb-dark
 
 .menu-item
   position: relative
-
   .sub-menu
-    width: 275px
+    width: $submenu-width
     &.genes-mirnas
       width: 325px
-    padding: 10px 15px
     > li
-      padding: 10px 5px
+      padding: 5px
       border-bottom: 1px solid darken($white, 20%)
       font-weight: $medium-font-weight
 
       &:last-child
         border-bottom: none
-    .item-list li:hover
-      background: darken($isb-dark, 10%)
+    //.item-list li:hover
+    //  background: darken($isb-dark, 10%)
     .item-list li button,a
       overflow: hidden
       text-overflow: ellipsis
@@ -112,6 +106,8 @@
         left: auto
 
 @media screen and (max-width: $screen-sm)
+  .navbar ul
+    border-top: 1px solid lightgrey
   .subnav
     li
       padding: 10px 0

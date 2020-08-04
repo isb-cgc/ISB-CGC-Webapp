@@ -3,7 +3,7 @@
 
 {% comment %}
 
-   Copyright 2015, Institute for Systems Biology
+   Copyright 2020, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,268 +20,372 @@
 {% endcomment %}
 
 {% block header %}
-    <script type="text/javascript" src="{% static 'js/libs/d3.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/libs/d3-tip.js' %}"></script>
 {% endblock %}
 {% block link_page_name %}landing{% endblock %}
 {% block page_name %}landing{% endblock %}
 {% block content %}
-
-    <div class="landing-content-div">
-        <div class="lj-overlay lj-overlay-bg"></div>
-        <div class="lj-overlay lj-overlay-color lj-overlay-image"></div>
-        <div class="container">
-            <div class="header-div">
-                <div class="header-content-div">
-                    <div class="row">
-                        <div class="col-xs-12 lj-title">
-                            <h1 class="lj-text-center"><span>Cancer Genomics Cloud</span></h1>
-                        </div>
+    <main>
+        <div class="banner-section container-fluid">
+            <div class="alert alert-dismissible show" role="alert">
+                <div class="row ">
+                    <div class="col-xs-1"></div>
+                    <div class="col-xs-10">
+                        <strong>Get started today!</strong>
+                        <strong> Contact us about setting up your own Google Cloud Platform Project with <a
+                                href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowtoRequestCloudCredits.html"
+                                target="_blank">free cloud credits</a></strong>
                     </div>
-                    <div class="row">
-                        <div class="col-xs-8 col-xs-offset-2 lj-title-paragraph">
-                            <p class="lj-text-center">The ISB Cancer Genomics Cloud (ISB-CGC) is democratizing access to
-                                NCI
-                                Cancer Data (<a href="http://cancergenome.nih.gov/" target="_blank"><b>TCGA</b></a>, <a
-                                        href="https://ocg.cancer.gov/programs/target" target="_blank"><b>TARGET</b></a>,
-                                <a
-                                        href="https://portals.broadinstitute.org/ccle" target="_blank"><b>CCLE</b></a>)
-                                and
-                                coupling it with unprecedented computational power to allow researchers to explore and
-                                analyze this vast data-space.</p>
-                        </div>
+                    <div class="col-xs-1">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                    <div class="row lj-header-vid-button-div">
-                        <div class="col-sm-6 lj-header-vid custom-width-55">
-                            <div id="carousel-video-tutorials" class="carousel slide" data-ride="carousel"
-                                 data-interval="false">
-                                <ol class="carousel-indicators">
-                                    <li data-target="#carousel-video-tutorials" data-slide-to="0" class="active"></li>
-                                    <li data-target="#carousel-video-tutorials" data-slide-to="1" class=""></li>
-                                    <li data-target="#carousel-video-tutorials" data-slide-to="2" class=""></li>
-                                    <li data-target="#carousel-video-tutorials" data-slide-to="3" class=""></li>
-                                    <li data-target="#carousel-video-tutorials" data-slide-to="4" class=""></li>
-                                    <li data-target="#carousel-video-tutorials" data-slide-to="5" class=""></li>
-                                </ol>
-                                <div class="carousel-inner">
-                                    {% comment %}
-                                    include 'enablejsapi=1' inside the iframe src. This will enable javascript code to control the video play & pause
-                                {% endcomment %}
-                                    <div class="item active">
-                                        <iframe class="tutorial-vid"
-                                                src="https://www.youtube-nocookie.com/embed/pRwh-s_ZMro?enablejsapi=1&version=3&playerapiid=ytplayer"
-                                                frameborder="0"
-                                                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                                                allowfullscreen></iframe>
-                                    </div>
-                                    <div class="item">
-                                        <iframe class="tutorial-vid"
-                                                src="https://www.youtube-nocookie.com/embed/92vmO9udzP0?enablejsapi=1&version=3&playerapiid=ytplayer"
-                                                frameborder="0" allow="autoplay; encrypted-media"
-                                                allowfullscreen></iframe>
-                                    </div>
-                                    <div class="item">
-                                        <iframe class="tutorial-vid"
-                                                src="https://www.youtube-nocookie.com/embed/qnf7sPBQQSM?enablejsapi=1&version=3&playerapiid=ytplayer"
-                                                frameborder="0" allow="autoplay; encrypted-media"
-                                                allowfullscreen></iframe>
-                                    </div>
-                                    <div class="item">
-                                        <iframe class="tutorial-vid"
-                                                src="https://www.youtube-nocookie.com/embed/ysDYB38D0WA?enablejsapi=1&version=3&playerapiid=ytplayer"
-                                                frameborder="0" allow="autoplay; encrypted-media"
-                                                allowfullscreen></iframe>
-                                    </div>
-                                    <div class="item">
-                                        <iframe class="tutorial-vid"
-                                                src="https://www.youtube-nocookie.com/embed/kr7Ca3g6jvU?enablejsapi=1&version=3&playerapiid=ytplayer"
-                                                frameborder="0" allow="autoplay; encrypted-media"
-                                                allowfullscreen></iframe>
-                                    </div>
-                                    <div class="item">
-                                        <iframe class="tutorial-vid"
-                                                src="https://www.youtube-nocookie.com/embed/tKweSyrWK9I?enablejsapi=1&version=3&playerapiid=ytplayer"
-                                                frameborder="0" allow="autoplay; encrypted-media"
-                                                allowfullscreen></iframe>
-                                    </div>
-                                </div>
-                                <a class="left carousel-control carousel-control-button"
-                                   href="#carousel-video-tutorials" aria-label="Prev"
-                                   data-slide="prev">
-                                    <i class="fa fa-chevron-left prev"></i>
-                                </a>
-                                <a class="right carousel-control carousel-control-button"
-                                   href="#carousel-video-tutorials" aria-label="Next"
-                                   data-slide="next">
-                                    <i class="fa fa-chevron-right next"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 lj-header-button custom-width-45">
-                            <p><a href="{% url 'cohort' %}">Data Explorer</a>
-                                <span class="badge"
-                                      style="font-size:14px;height:20px;width:50px;margin-left:-25px;padding-top:3px;padding-left:8px;margin-top:-25px;background-color:#4cc2d6;">New</span>
-                            </p>
-                            <p><a href="{% url 'bq_meta_search' %}">BigQuery Table Search</a>
-                                <span class="badge"
-                                      style="font-size:14px;height:20px;width:50px;margin-left:-25px;padding-top:3px;padding-left:8px;margin-top:-25px;background-color:#4cc2d6;">New</span>
-                            </p>
-                            <p><a href="https://mitelmandatabase.isb-cgc.org"
-                                  target="_blank">Mitelman Database</a>
-                                <span class="badge"
-                                      style="font-size:14px;height:20px;width:50px;margin-left:-25px;padding-top:3px;padding-left:8px;margin-top:-25px;background-color:#4cc2d6;">New</span>
-                            </p>
-                            <p>
-                                <a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html#community-notebooks"
-                                   target="_blank">Community Notebooks
-                                </a><span class="badge"
-                                          style="font-size:14px;height:20px;width:50px;margin-left:-25px;padding-top:3px;padding-left:8px;margin-top:-25px;background-color:#4cc2d6;">New</span>
-                            </p>
-                            <p><a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a>
-                            </p>
 
-
-                            {#                                <a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/QueryOfTheMonthClub.html"#}
-                            {#                                   target="_blank">#}
-                            {#                                    <i class="fa fa-search fa-large"></i> Query of the Month#}
-                            {#                                </a></p>#}
-
-
-                            {#                            <p><a href="https://github.com/isb-cgc/" target="_blank"> <i class="fa fa-github fa-lg"></i>#}
-                            {#                                GitHub</a></p>#}
-
-                        </div>
-                    </div>
-                    <div class="row footer">
-                        <div class="col-xs-8 col-xs-offset-2">
-                            <p>ISB-CGC has been funded in whole with Federal funds from the <b>National Cancer
-                                Institute</b>,
-                                <b>National
-                                    Institutes of Health</b>, under contract No. HHSN261200800001E
-                            </p>
-                            <div class="pull-down-button">
-                                <a href="#about-div">
-                                    <i class="fa fa-chevron-down"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="follow-us col-xs-2">
-                            <a href="https://github.com/isb-cgc/" target="_blank"> <i
-                                    class="fa fa-github fa-lg"></i></a>
-                            <a href="https://twitter.com/isb_cgc" target="_blank"> <i
-                                    class="fa fa-twitter fa-lg"></i></a>
-                        </div>
-                    </div>
                 </div>
             </div>
+        </div>
+        <div class="header-div container-fluid">
+            <div class="row ">
+                <div class="col-lg-2"></div>
+                <div class="col-lg-8">
 
-            <div id="about-div">
-                <div class="about-content-div">
-                    <div class="row">
-                        <div class="col-sm-10 col-sm-offset-1 lj-text-left">
-                            <h2 style="display:inline-block">Partners</h2>
-                            <div style="display:inline-block; padding-left:50px">
-                                <a href="https://cloud.google.com/" target="_blank" style="text-decoration:none">
-                                    <img src="{% static 'img/gcp-logo.png' %}" alt="Google Cloud Platform"
-                                         style="width:130px;height:80px;"/>
-                                </a>
-                                <a href="https://gdit.com/" target="_blank" style="text-decoration:none">
-                                    <img src="{% static 'img/gdit_logo.png' %}"
-                                         alt="General Dynamics Information Technology, Inc."
-                                         style="padding-left:50px;height:80px;"/>
-                                </a>
+                    <div class="crdc-div">A RESOURCE OF THE <a href="https://datacommons.cancer.gov/"
+                                                               target="_blank">NCI CANCER RESEARCH DATA COMMONS</a>
+                    </div>
+                    <h1>ISB-CGC</h1>
+                    <h2>Cancer Gateway in the Cloud</h2>
+                    <div>Access, Explore and Analyze Large-Scale Cancer Data Through the Google Cloud</div>
+                </div>
+                <div class="col-lg-2"></div>
+            </div>
+        </div>
+        <div class="jumbotron-fluid dbrowser-div">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-3"></div>
+                    <div class="col-xs-12 col-md-6 col-lg-12">
+                        <h3>Data Browsers</h3>
+                    </div>
+                    <div class="col-md-3"></div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-15p"></div>
+                    <div class="col-lg-3">
+                        <div class="panel">
+                            <div class="panel-heading row">
+                                <div class="col-xs-9"><h4>BigQuery Table Search</h4></div>
+                                <div class="col-xs-3 padding-left-0">
+                                    <img src="{% static 'img/bq-icon.png' %}" class="img-fluid"
+                                         alt="bq table icon">
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                Browse BigQuery tables of metadata and molecular cancer data from the Genomic Data
+                                Commons and other sources. Jump directly to a table to perform discovery and computation
+                                via SQL.
+                            </div>
+                            <div class="panel-footer">
+                                <div class="row">
+                                    <div class="col-xs-2"></div>
+                                    <div class="col-xs-4 text-center">
+                                        <a class="learn-icon landing-icon" target="_blank"
+                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/BigQueryTableSearchUI.html">
+                                        </a>
+                                        <div class="text-muted">Learn</div>
+                                    </div>
+                                    <div class="col-xs-4 text-center">
+                                        <a class="launch-icon landing-icon" target="_blank"
+                                           href="{% url 'bq_meta_search' %}">
+                                        </a>
+                                        <div class="text-muted">Launch</div>
+                                    </div>
+                                    <div class="col-xs-2"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-10 col-sm-offset-1">
-                            <h2>About Us</h2>
-                            <p>The ISB Cancer Genomics Cloud Resource (ISB-CGC) is a platform that serves as a
-                                large-scale
-                                repository and provides the computational infrastructure necessary to carry out cancer
-                                genomics
-                                research at unprecedented scales.</p>
-                            <p>Please use a <a
-                                    href="https://accounts.google.com/signup/v2/webcreateaccount?hl=en&flowName=GlifWebSignIn&flowEntry=SignUp&nogm=true"
-                                    target="_blank">Google registered email account</a> to log into this system.</p>
-                            {% if version %}
-                                <br/>
-                                Last deployed to version {{ version.version }} on {{ version.date }}
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-10 col-sm-offset-1">
-                            <h2>How to Cite Us</h2>
-                            <p>Please cite the original ISB-CGC paper when you use the ISB-CGC platform.
-                            <div class='cite-text'>
-                                Sheila M. Reynolds, Michael Miller, Phyliss Lee, et al. <br/>
-                                The ISB Cancer Genomics Cloud: A Flexible Cloud-Based Platform for Cancer Genomics
-                                Research<br/>
-                                <a href="http://cancerres.aacrjournals.org/content/77/21/e7.long" target="_blank"><i>Cancer
-                                    Res</i> 2017 Nov;77(21): e7–10.</a>
+                    <div class="col-lg-3">
+                        <div class="panel">
+                            <div class="panel-heading row">
+                                <div class="col-xs-9"><h4>Data Browser</h4></div>
+                                <div class="col-xs-3 padding-left-0">
+                                    <img src="{% static 'img/de-icon.png' %}" class="img-fluid"
+                                         alt="data explorer icon">
+                                </div>
                             </div>
-                            </p>
+                            <div class="panel-body">
+                                Explore a comprehensive selection of cancer related data files in Google Cloud Storage
+                                Buckets, such as raw sequencing, cancer nucleotide variation, pathology or radiology
+                                images.
+                            </div>
+                            <div class="panel-footer">
+                                <div class="row">
+                                    <div class="col-xs-2"></div>
+                                    <div class="col-xs-4 text-center">
+                                        <a class="learn-icon landing-icon" target="_blank"
+                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/Saved-Cohorts.html#file-browserl">
+                                        </a>
+                                        <div class="text-muted">Learn</div>
+                                    </div>
+                                    <div class="col-xs-4 text-center">
+                                        <a class="launch-icon landing-icon" target="_blank"
+                                           href="/cohorts/filelist/">
+                                        </a>
+                                        <div class="text-muted">Launch</div>
+                                    </div>
+                                    <div class="col-xs-2"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-10 col-sm-offset-1">
-                            <h2>Privacy Policy</h2>
-                            <p><a href="{% url 'privacy' %}" target="_blank">Our privacy policy can be found here.</a>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-10 col-sm-offset-1">
-                            <h2>Funding</h2>
-                            <p>This project has been funded in whole with Federal funds from the National Cancer
-                                Institute,
-                                National Institutes of Health, under Contract No. HHSN261200800001E. The content of this
-                                publication does not necessarily reflect the views or policies of the Department of
-                                Health and
-                                Human Services, nor does mention of trade names, commercial products, or organizations
-                                imply
-                                endorsement by the U.S. Government.</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-10 col-sm-offset-1">
-                            <h2>Warning Notice</h2>
-                            <p>You are accessing a U.S. Government (National Institute of Health (NIH), National Cancer
-                                Institute (NCI) and Institute for Systems Biology ISB) website / application which may
-                                contain
-                                information that must be protected under the U. S. Privacy Act or other sensitive
-                                information
-                                which is intended for authorized Scientific or Research use only. Network activity and
-                                Application usage is monitored to maintain system security, availability, and to ensure
-                                appropriate and legitimate usage, there is no right or expectation to privacy on this
-                                website /
-                                system. Unauthorized attempts to upload information, change information, or use of this
-                                website
-                                for other than its intended purpose may result in disciplinary action, civil, and/or
-                                criminal
-                                penalties. Any individual or system that accesses this website should have no
-                                expectation of
-                                privacy regarding any communications or data processed by this website. Anyone accessing
-                                this
-                                website expressly consents to monitoring of their actions and all communication or data
-                                transiting or stored on or related to this website and is advised that if such
-                                monitoring
-                                reveals possible evidence of criminal activity, NIH may provide that evidence to law
-                                enforcement
-                                officials.</p>
+                    <div class="col-lg-3">
+                        <div class="panel">
+                            <div class="panel-heading row">
+                                <div class="col-xs-9"><h4>Chromosomal Aberrations & Gene Fusions DB</h4></div>
+                                <div class="col-xs-3 padding-left-0">
+                                    <img src="{% static 'img/md-icon.png' %}" class="img-fluid"
+                                         alt="database icon">
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                Browse the Mitelman Database of Chromosome Aberrations and Gene Fusions in Cancer which
+                                relates cytogenetic changes, in particular gene fusions, to tumor characteristics.
+                            </div>
+                            <div class="panel-footer">
+                                <div class="row">
+                                    <div class="col-xs-2"></div>
+                                    <div class="col-xs-4 text-center">
+                                        <a class="learn-icon landing-icon" target="_blank"
+                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/data/Mitelman_about.html">
+                                        </a>
+                                        <div class="text-muted">Learn</div>
+                                    </div>
+                                    <div class="col-xs-4 text-center">
+                                        <a class="launch-icon landing-icon" target="_blank"
+                                           href="https://mitelmandatabase.isb-cgc.org">
+                                        </a>
+                                        <div class="text-muted">Launch</div>
+
+                                    </div>
+                                    <div class="col-xs-2"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+        <div class="jumbotron-fluid resources-div">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-3"></div>
+                    <div class="col-xs-12 col-md-6 col-lg-12">
+                        <h3>Resources</h3>
+                    </div>
+                    <div class="col-md-3"></div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="panel">
+                            <div class="panel-heading row">
+                                <div class="col-xs-9"><h4>Interactive Patient Cohort Exploration</h4></div>
+                                <div class="col-xs-3 padding-left-0">
+                                    <img src="{% static 'img/ca-icon.png' %}" class="img-fluid"
+                                         alt="bq table icon">
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                A web interface to build cohorts based on clinical demographics and molecular filters.
+                                Compare patient cohorts with various exploration tools including IGV viewer, image
+                                viewers, and analytical visualization.
+                            </div>
+                            <div class="panel-footer">
+                                <div class="row">
+                                    <div class="col-xs-2"></div>
+                                    <div class="col-xs-4 text-center">
+                                        <a class="learn-icon landing-icon" target="_blank"
+                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/Saved-Cohorts.html">
+                                        </a>
+                                        <div class="text-muted">Learn</div>
+                                    </div>
+                                    <div class="col-xs-4 text-center">
+                                        <a class="launch-icon landing-icon" target="_blank"
+                                           href="{% url 'cohort' %}">
+                                        </a>
+                                        <div class="text-muted">Launch</div>
+                                    </div>
+                                    <div class="col-xs-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="panel">
+                            <div class="panel-heading row">
+                                <div class="col-xs-9"><h4>Programmatic Access</h4></div>
+                                <div class="col-xs-3 padding-left-0">
+                                    <img src="{% static 'img/api-icon.png' %}" class="img-fluid"
+                                         alt="bq table icon">
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                Learn more about how to access and analyze cancer data through programmatic interfaces
+                                including Google Cloud virtual machines and APIs.
+                            </div>
+                            <div class="panel-footer">
+                                <div class="row">
+                                    <div class="col-xs-2"></div>
+                                    <div class="col-xs-4 text-center">
+                                        <a class="learn-icon landing-icon" target="_blank"
+                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/progapi/progAPI-v4/Programmatic-Demo.html">
+                                        </a>
+                                        <div class="text-muted">Learn</div>
+                                    </div>
+                                    <div class="col-xs-4 text-center">
+                                        <a class="launch-icon landing-icon" target="_blank"
+                                           href="{% url 'programmatic_access' %}">
+                                        </a>
+                                        <div class="text-muted">Launch</div>
+                                    </div>
+                                    <div class="col-xs-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="panel">
+                            <div class="panel-heading row">
+                                <div class="col-xs-9"><h4>Notebooks</h4></div>
+                                <div class="col-xs-3 padding-left-0">
+                                    <img src="{% static 'img/nb-icon.png' %}" class="img-fluid"
+                                         alt="bq table icon">
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                A collection of notebooks written in R and Python, to serve as both tutorials or
+                                analysis tools for a range of users; includes reproductions of Regulome Explorer
+                                functionality.
+                            </div>
+                            <div class="panel-footer">
+                                <div class="row">
+                                    <div class="col-xs-4 text-center">
+                                        <a class="statistical-icon landing-icon" target="_blank"
+                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/RegulomeExplorerNotebooks.html">
+                                        </a>
+                                        <div class="text-muted">Statistical</div>
+                                    </div>
+                                    <div class="col-xs-4 text-center">
+                                        <a class="community-icon landing-icon" target="_blank"
+                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html">
+                                        </a>
+                                        <div class="text-muted">Community</div>
+                                    </div>
+                                    <div class="col-xs-4 text-center">
+                                        <a class="github-icon landing-icon" target="_blank"
+                                           href="https://github.com/isb-cgc/Community-Notebooks">
+                                        </a>
+                                        <div class="text-muted">Github</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="panel">
+                            <div class="panel-heading row">
+                                <div class="col-xs-9"><h4>Controlled Access Data</h4></div>
+                                <div class="col-xs-3 padding-left-0">
+                                    <img src="{% static 'img/cad-icon.png' %}" class="img-fluid"
+                                         alt="bq table icon">
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                Sign in to access controlled-access data on the Google Cloud. Authenticated users with
+                                proper dbGaP authorization only.
+                            </div>
+                            <div class="panel-footer">
+                                <div class="row">
+                                    <div class="col-xs-2"></div>
+                                    <div class="col-xs-4 text-center">
+                                        <a class="learn-icon landing-icon" target="_blank"
+                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/Gaining-Access-To-Controlled-Access-Data.html">
+                                        </a>
+                                        <div class="text-muted">Learn</div>
+                                    </div>
+                                    <div class="col-xs-4 text-center">
+                                        <a class="launch-icon landing-icon"
+                                           target="_blank"
+                                                {% if user.is_authenticated %}
+                                           href="{% url 'user_detail' user.id %}"
+                                                {% else %}
+                                           href="{% url 'user_detail_login' %}"
+                                                {% endif %}
+                                        ></a>
+                                        <div class="text-muted">Launch</div>
+                                    </div>
+                                    <div class="col-xs-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="jumbotron-fluid bottom-div">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <em>
+                            ISB-CGC is a component of the <a href="https://datacommons.cancer.gov/" target="_blank">NCI
+                            Cancer Research
+                            Data Commons</a> and has been funded in whole or in part with Federal funds from the
+                            National Cancer
+                            Institute, National Institutes of Health, Department of Health and Human Services, under
+                            Contract
+                            No.
+                            HHSN261201400008C and ID/IQ Agreement No. 17X146 under Contract No. HHSN261201500003I.
+                        </em>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jumbotron-fluid footer-div">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-xs-4 col-lg-2">
+                        &copy; 2020, ISB
+                    </div>
+                    <div class="col-xs-4 col-lg-8 text-center">
+                        <a href="{% url 'privacy' %}">PRIVACY POLICY</a>
+                    </div>
+                    <div class="col-xs-4 col-lg-2">
+                        <div class="row">
+                            <div class="col-xs-3"></div>
+                            <div class="col-xs-3">
+                                <a href="{% url 'vid_tutorials' %}" target="_blank">
+                                    <i class="fa fa-youtube-play" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                            <div class="col-xs-3">
+                                <a href="https://twitter.com/isb_cgc" target="_blank">
+                                    <i class="fa fa-twitter fa-lg"></i>
+                                </a>
+                            </div>
+                            <div class="col-xs-3">
+                                <a href="https://github.com/isb-cgc/" target="_blank">
+                                    <i class="fa fa-github fa-lg"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 {% endblock %}
 
 {% block js_file %}
     {{ block.super }}
-    <script src="{% static 'js/landing.js' %}"></script>
-    <script>
-        console.debug("[STATUS] Loading landing.html at " + (new Date()));
-    </script>
 {% endblock %}
