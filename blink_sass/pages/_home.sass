@@ -10,9 +10,9 @@
     > .container-fluid
         padding-bottom: 0
     h1
-        font-size: 65px
+        font-size: 55px
     h2
-        font-size: 30px
+        font-size: 25px
     h3
         font-size: 16px
     h4
@@ -104,7 +104,7 @@
         .panel-heading
             min-height: 77px
         .panel-body
-            min-height: 186px
+            min-height: 164px
     .resources-div
         background-color: #fee9d5
         h3
@@ -184,9 +184,14 @@
 
 #about
     .partners-div
-        display: inline-block
+        //display: inline-block
+        a:hover
+            text-decoration: none
         img
             height: 80px
+            padding: 10px
+            &.gcp-logo
+                padding: 25px
     .cite-text
         background-color: lighten(grey, 40%)
         color: darken($isb-dark, 10%)
