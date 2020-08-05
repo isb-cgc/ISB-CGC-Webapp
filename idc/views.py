@@ -173,6 +173,8 @@ def explore_data_page(request):
         collapse_on = req.get('collapse_on', 'SeriesInstanceUID')
         is_json = (req.get('is_json', "False").lower() == "true")
 
+        context['collection_tooltips'] = Collection.objects.filter(active=True).get_tooltips()
+
         versions = DataVersion.objects.filter(name__in=versions) if len(versions) else DataVersion.objects.filter(active=True)
 
         data_types = [DataSetType.IMAGE_DATA,]
@@ -186,18 +188,20 @@ def explore_data_page(request):
         # For now we're only allowing TCGA+ispy1+lidc-idri+qin_headneck
         # TODO: REMOVE THIS ONCE WE'RE ALLOWING MORE
         tcga_in_tcia = Program.objects.get(short_name="TCGA").collection_set.all()
-        collectionFilterList = [proj.name.lower().replace('-','_') for proj in tcga_in_tcia] + ['ispy1', 'lidc_idri', 'qin_headneck', 'nsclc_radiomics']
+        collectionFilterList = [collex.collection_id for collex in tcga_in_tcia] + ['ispy1', 'lidc_idri', 'qin_headneck', 'nsclc_radiomics']
         if not 'collection_id' in filters:
             filters['collection_id'] =  collectionFilterList
 
+        source_data_types = sources.get_source_data_types()
+
         for source in sources:
-            is_origin = source.has_data_type(DataSetType.IMAGE_DATA)
+            is_origin = DataSetType.IMAGE_DATA in source_data_types[source.id]
             # If a field list wasn't provided, work from a default set
             if is_origin and not len(fields):
                 fields = source.get_attr(for_faceting=False).filter(default_ui_display=True).values_list('name', flat=True)
 
             for dataset in data_sets:
-                if source.has_data_type(dataset.data_type):
+                if dataset.data_type in source_data_types[source.id]:
                     set_type = dataset.get_set_name()
                     if set_type not in attr_by_source:
                         attr_by_source[set_type] = {}
@@ -227,7 +231,7 @@ def explore_data_page(request):
             source_name = ":".join(source.split(":")[0:2])
             facet_set = source_metadata['facets'][source]['facets']
             for dataset in data_sets:
-                if DataSource.objects.get(id=int(source.split(":")[-1])).has_data_type(dataset.data_type):
+                if dataset.data_type in source_data_types[int(source.split(":")[-1])]:
                     set_name = dataset.get_set_name()
                     if dataset.data_type in data_types and set_name in attr_sets:
                         attr_display_vals = Attribute_Display_Values.objects.filter(

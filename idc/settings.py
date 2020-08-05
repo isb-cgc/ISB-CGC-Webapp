@@ -147,6 +147,8 @@ else:
 
 APP_VERSION = os.environ.get("APP_VERSION", VERSION)
 
+DEV_TIER = bool(DEBUG or re.search(r'^dev\.',APP_VERSION))
+
 # If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
 if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE_FLEX:

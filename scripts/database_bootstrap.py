@@ -23,6 +23,7 @@ import logging
 import traceback
 import os
 import re
+from csv import reader as csv_reader
 import csv
 from argparse import ArgumentParser
 import sys
@@ -199,8 +200,7 @@ def add_collections(collection_set):
 
             collex_list.append(
                 Collection(
-                    short_name=collex['short_name'], name=collex['full_name'], description=collex['description'],
-                    is_public=collex['public'],
+                    **collex['data'],
                     owner=User.objects.get(email=collex['owner']) if 'owner' in collex else idc_superuser
                 )
             )
@@ -208,10 +208,7 @@ def add_collections(collection_set):
         Collection.objects.bulk_create(collex_list)
 
         for collex in collection_set:
-            obj = Collection.objects.get(
-                short_name=collex['short_name'], name=collex['full_name'], is_public=collex['public'],
-                owner=User.objects.get(email=collex['owner']) if 'owner' in collex else idc_superuser
-            )
+            obj = Collection.objects.get(collection_id=collex['data']['collection_id'])
 
             if len(collex.get('progs',[])):
                 progs = Program.objects.filter(
@@ -231,7 +228,7 @@ def add_collections(collection_set):
                 Collection.data_versions.through.objects.bulk_create(collex_to_dv)
 
     except Exception as e:
-        logger.error("[ERROR] Collection {} may not have been added!".format(collex['short_name']))
+        logger.error("[ERROR] Collection {} may not have been added!".format(collex['data']['collection_id']))
         logger.exception(e)
 
 
@@ -349,23 +346,33 @@ def main():
 
         all_attrs = {}
 
-        collection_file = open("tcia_collex.csv", "r")
-        line_reader = collection_file.readlines()
+        collection_file = open("tcia_collections.csv", "r")
         collection_set = []
-
-        for line in line_reader:
-            line = line.strip()
-            line_split = line.split(",")
+        for line in csv_reader(collection_file):
             collex = {
-                "id": line_split[0],
-                "short_name": line_split[1], "full_name": line_split[2], "public": True,
-                "description": line_split[3], "program": line_split[4],
+                'data': {
+                    "collection_id": line[0],
+                    "status": line[1],
+                    "date_updated": line[2],
+                    "access": line[3],
+                    "image_types": line[4],
+                    "subject_count": line[5],
+                    "description": re.sub(r' style="[^"]+"', '', (re.sub(r'<div [^>]+>',"<p>", line[6]).replace("</div>","</p>"))),
+                    "location": line[7],
+                    "species": line[8],
+                    "supporting_data": line[9],
+                    "cancer_type": line[10],
+                    "doi": line[11],
+                    "tcia_collection_id": line[12],
+                    "nbia_collection_id": line[13]
+                },
+                "program": line[-1],
                 "data_versions": [{"ver": "r9", "name": "GDC Data Release 9"},
                                   {"ver": "1", "name": "TCIA Image Data"}]
             }
-            if 'lidc' in line_split[0]:
+            if 'lidc' in line[0]:
                 collex['data_versions'].append({"ver": "1", "name": "TCIA Derived Data"})
-            if 'tcga' in line_split[0]:
+            if 'tcga' in line[0]:
                 collex['progs'] = ["TCGA"]
             collection_set.append(collex)
 

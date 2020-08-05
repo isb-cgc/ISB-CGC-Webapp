@@ -91,35 +91,34 @@
                                              {% for progK, progV in programs.items|dictsort:"0.lower" %}
                                                  {% if progK != "All" and progK != "None" %}
                                                  <li class="list-group-item">
-                                                      {% if progV.projects and progV.projects.items|length == 1 %}
+                                                     {% if progV.projects and progV.projects.items|length == 1 %}
                                                            {% for proj, projK in progV.projects.items %}
-
                                                                <div id="{{ proj }}_heading" class="list-group-item__heading">
-                                                                   <input type="checkbox" value="{{ proj }}">
-                                                                   <span class="value">{{ proj|upper }}</span> <span class="float-right case_count count">{{ projK }}</span>
+                                                                   <input class="collection_value" type="checkbox" value="{{ proj }}">
+                                                                   <span class="collection_name value">{{ proj|upper }}</span> <span class="float-right case_count count">{{ projK }}</span>
                                                                </div>
                                                             <div id="{{ proj }}" class="collapse list-group-item__body">
                                                            {% endfor %}
-
-                                                      {% else %}
-
+                                                     {% else %}
                                                      <div id="{{ progK }}_heading" class="list-group-item__heading">
                                                          <input type="checkbox" value="{{ progK }}">
-                                                            <a role="button" data-toggle="collapse" href="#{{ progK }}" aria-expanded="false" aria-controls="{{ progK }}">
-                                                                 <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>
-                                                             </a>
-
-                                                         <span class="value">{{ progK|upper }}</span> <span class="float-right case_count count">{{ progV.val }}</span>
-                                                         </div>
-                                                      <div id="{{ progK }}" class="collapse list-group-item__body">
+                                                         <a role="button" data-toggle="collapse" href="#{{ progK }}" aria-expanded="false" aria-controls="{{ progK }}">
+                                                             <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>
+                                                         </a>
+                                                         <span class="value">
+                                                             {{ progK|upper }}
+                                                         </span>
+                                                         <span class="float-right case_count count">{{ progV.val }}</span>
+                                                     </div>
+                                                     <div id="{{ progK }}" class="collapse list-group-item__body">
                                                      {% endif %}
                                                           {% if progV.projects and progV.projects.items|length > 1 %}
                                                            <ul id="{{ progK }}_proj_list" class="search-checkbox-list" style="list-style: none;">
                                                            {% for proj, projK in progV.projects.items %}
                                                               <li class="checkbox {% if foloopr.counter >= 6 %} extra-values{% endif %}">
                                                                 <label>
-                                                                  <input type="checkbox" value="{{ proj }}">
-                                                                    <span class="value">{{ proj|upper }} </span> <span class="float-right case_count count plotit">{{ projK }}</span>
+                                                                  <input class="collection_value" type="checkbox" value="{{ proj }}">
+                                                                    <span class="collection_name value">{{ proj|upper }} </span> <span class="float-right case_count count plotit">{{ projK }}</span>
                                                                  </label>
                                                                </li>
                                                             {% endfor %}
@@ -159,6 +158,7 @@
                         </div>
                     </div>
 
+                    {% if IS_DEBUG %}
                     <div class="tabpanel data-tab-content-panel">
                         <div class="panel panel-default">
                             <div class="panel-heading clearfix"><h4 class="panel-title">Data Source</h4></div>
@@ -170,6 +170,7 @@
                             </div>
                          </div>
                     </div>
+                    {% endif %}
                     <div class="search-configuration filter-panel search-con" role="tabpanel">
                         <div class="tabpanel panel-default" role="tabpanel">
                             <div class="panel-heading clearfix"><h4 class="panel-title">Search Configuration</h4>
@@ -601,4 +602,7 @@
     <script type="text/javascript" src="{% static 'js/libs/plotly-latest.min.js' %}"></script>
     {{ block.super }}
     <script type="text/javascript" src="{% static 'js/explore.js' %}"></script>
+    <script>
+        var collection_tooltips = {{ collection_tooltips|safe }};
+    </script>
 {% endblock %}
