@@ -1583,7 +1583,6 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
         }
 
 
-
         var filterItemBindings = function (filterId) {
         $('#' + filterId).find('input:checkbox').on('click', function () {
             handleFilterSelectionUpdate(this, true, true);

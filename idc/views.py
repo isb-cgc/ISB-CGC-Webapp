@@ -173,6 +173,8 @@ def explore_data_page(request):
         collapse_on = req.get('collapse_on', 'SeriesInstanceUID')
         is_json = (req.get('is_json', "False").lower() == "true")
 
+        context['collection_tooltips'] = Collection.objects.filter(active=True).get_tooltips()
+
         versions = DataVersion.objects.filter(name__in=versions) if len(versions) else DataVersion.objects.filter(active=True)
 
         data_types = [DataSetType.IMAGE_DATA,]

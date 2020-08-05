@@ -184,7 +184,7 @@ nav {
 .dataTables_wrapper .dataTables_paginate {
   padding-top: 0.25em; }
 
-.dataTables_button {
+.dataTables_button, .dataTables_wrapper .paginate_button {
   box-sizing: border-box;
   display: inline-block;
   min-width: 1em;
@@ -199,15 +199,15 @@ nav {
   border: 1px solid #888 !important;
   border-radius: 2px;
   font-weight: 400; }
-  .dataTables_button:hover, .dataTables_button:active, .dataTables_button:focus {
+  .dataTables_button:hover, .dataTables_wrapper .paginate_button:hover, .dataTables_button:active, .dataTables_wrapper .paginate_button:active, .dataTables_button:focus, .dataTables_wrapper .paginate_button:focus {
     background-color: #FFA000 !important;
     color: #fff !important;
     border: 1px solid #996000 !important; }
-  .dataTables_button.current, .dataTables_button.current:hover {
+  .dataTables_button.current, .dataTables_wrapper .paginate_button.current, .dataTables_button.current:hover, .dataTables_wrapper .paginate_button.current:hover {
     color: #fff;
     border: 1px solid gray;
     background-color: #ffb333; }
-  .dataTables_button.disabled {
+  .dataTables_button.disabled, .dataTables_wrapper .paginate_button.disabled {
     color: #fff !important;
     border: 0px !important;
     background-color: #e0e0e0 !important; }
@@ -217,6 +217,20 @@ nav {
 
 .dataTables_paginate, .dataTables_goto_page {
   padding-left: 20px; }
+
+.dataTables_filter {
+  display: inline-block;
+  float: right;
+  padding-top: 0.755em;
+}
+
+.dataTables_filter input {
+  margin-left: 10px;
+}
+
+.dataTables_controls {
+  padding-bottom: 10px;
+}
 
 .dataTables_search {
   display: inline-block;
@@ -3886,10 +3900,6 @@ html {
   padding-top: 180px;
   font-size: 25px;
   text-align: center; }
-
-.collex-panel div {
-  padding: 0 !important;
-}
 
 .collex-table th {
   background-color: #e4d8f9;

@@ -1,7 +1,7 @@
 require.config({
     baseUrl: STATIC_FILES_URL + 'js/',
     paths: {
-        jquery: 'libs/jquery-1.11.1.min',
+        jquery: 'libs/jquery-3.5.1',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
         underscore: 'libs/underscore-min',
@@ -84,6 +84,31 @@ require([
     $('#save-cohort-modal').on('hide.bs.modal', function() {
         $('#save-cohort-modal .selected-filters span').remove();
         $('input[name="selected-filters"]').prop('value', '');
+    });
+
+    // Bootstrap and jQueryUI are not friends, because they overwrite each other's tooltip
+    // We want the jQueryUI tooltip, since it lets you use DOM elements.
+    // If bootstrap loaded first, revert the tooltip, copy it into a new function name, and
+    // restore Bootstrap's
+    if($.fn.tooltip.noConflict) {
+        var bsTooltip = $.fn.tooltip.noConflict();
+        $.fn.jqTooltip = $.fn.tooltip;
+        $.fn.tooltip = bsTooltip;
+    // If jQueryUI loaded first, just save it out; bootstrap will eventually clobber it,
+    // but now we have a copy safe and sound.
+    } else {
+        $.fn.jqTooltip = $.fn.tooltip;
+    }
+
+    $('.collection_name').jqTooltip({
+        hide: {
+            duration: 200,
+            delay: 900
+        },
+        items: 'span.collection_name',
+        content: function() {
+            return $('<div>' + collection_tooltips[$(this).siblings('input.collection_value').attr('value')]+'</div>')
+        }
     });
 
 });

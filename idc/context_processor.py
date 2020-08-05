@@ -15,5 +15,6 @@ def additional_context(request):
             'RESTRICTED_ACCESS': settings.RESTRICT_ACCESS,
             'RESTRICTED_ACCESS_GROUPS': settings.RESTRICTED_ACCESS_GROUPS,
             'DICOM_STORE_PATH': settings.DICOM_STORE_PATH,
-            'APP_VERSION': settings.APP_VERSION
+            'APP_VERSION': settings.APP_VERSION,
+            'DEV_TIER': settings.DEV_TIER
     }
