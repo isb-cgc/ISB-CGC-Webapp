@@ -107,7 +107,12 @@ require([
         },
         items: 'span.collection_name',
         content: function() {
-            return $('<div>' + collection_tooltips[$(this).siblings('input.collection_value').attr('value')]+'</div>')
+            var tooltip = collection_tooltips[$(this).siblings('input.collection_value').attr('value')];
+            if(tooltip) {
+                return $('<div>'+tooltip+'</div>')
+            }
+            return $('<span></span>')
+
         }
     });
 
