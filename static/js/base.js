@@ -193,6 +193,7 @@ require([
     if(!warningSeen) {
         $('#gov_warning').modal('show');
     }
+
 });
 
 // Return an object for consts/methods used by most views

@@ -11,8 +11,61 @@
     bottom: .5em;
 }
 
+.ui-slider {
+    display:inline-block;
+    width:70%;
+    margin-right:20px;
+}
+
+.slide_tooltip {
+    #left: 50%;
+    #top:40%;
+  #-webkit-transform: translateX(-50%);
+     #position: 'absolute';
+    #top: -25;
+    #left: -10;
+}
+
+
+.slide_tooltip::after {
+content: " ";
+position: absolute;
+top: 100%; /* At the bottom of the tooltip */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+
+}
+
+.main_cols{
+    display:inline-block;
+    #transition: width 2s;
+}
+.lh{
+    display:inline-block;
+    float:right;
+    position:relative;
+    #top: 100%;
+    right: -10px;
+
+}
+
+.rh{
+    display:inline-block;
+    float:left;
+    position:relative;
+    #top: 100%;
+    left: -10px;
+
+}
+
+
+
 .graph-set {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-around;
     justify-content: space-between;
     padding-top: 10px !important;
@@ -38,8 +91,21 @@
   position: absolute;
   top: 0;
 }
+.flex_div{
+    display: flex;
+    flex-direction:column;
+}
+.vert {
+  #overflow-y: scroll;
+    #max-height:800px;
+  #height: 600px;
+}
 
-
+.search-con {
+  overflow-y: auto;
+    overflow-x:hidden;
+  max-height: 1000px;
+}
 
 html {
   overflow-y: scroll;
@@ -65,13 +131,14 @@ body {
     visibility: visible; }
 
 .spinner {
-    position: absolute;
+    position: fixed;
     width: 100%;
-    height: 200%;
+    height: 100%;
     text-align: center;
-    top: 0px;
-    left: 0px;
+    top: 50%;
+    left: 50%;
     font-size: 100px;
+    transform: translate(-50%,-50%);
     background: rgba(0, 0, 0, 0.5);
     z-index: 10; }
 
@@ -79,8 +146,8 @@ body {
     display: inline-block;
     position: absolute;
     #position: absolute;
-    top: 30%;
-    #left: 40%; }
+    top: 50%;
+    left: 50%; }
 
 .id-names{
     text-overflow: ellipsis;
@@ -113,6 +180,15 @@ body {
     height: 200px;
     overflow: hidden
 }
+
+.bar-charts-div-derived {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden
+}
+
+
 
 .bar-chart {
    display: inline-block;

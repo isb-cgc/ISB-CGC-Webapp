@@ -53,6 +53,8 @@ simple_number_sort = [
 
 # If an attribute has a specific order, list it here; these should be the *values* not the display strings
 VALUE_SPECIFIC_ORDERS = {
+    'derived':['dicom_derived_all:segmentation','dicom_derived_all:qualitative','dicom_derived_all:quantitative'],
+
     'bmi': ['underweight', 'normal weight', 'overweight', 'obese', 'None', ],
     'hpv_status': ['Positive', 'Negative', 'None', ],
     'age_at_diagnosis': simple_number_sort,
@@ -70,6 +72,8 @@ VALUE_SPECIFIC_ORDERS = {
 }
 
 ATTR_SPECIFIC_ORDERS = [
+
+
     'program_name',
     'project_short_name',
     'user_program',
@@ -111,7 +115,11 @@ def check_for_order(items, attr):
         ordered_items = []
         for ordinal in item_order:
             for item in items:
-                if item['value'] == ordinal:
+                try:
+                    curValue = item['value']
+                except:
+                    curValue = item[0]
+                if curValue == ordinal:
                     ordered_items.append(item)
         return ordered_items
     elif attr in ALPHANUM_SORT:

@@ -14,5 +14,7 @@ def additional_context(request):
             'FILE_SIZE_UPLOAD_MAX': settings.FILE_SIZE_UPLOAD_MAX,
             'RESTRICTED_ACCESS': settings.RESTRICT_ACCESS,
             'RESTRICTED_ACCESS_GROUPS': settings.RESTRICTED_ACCESS_GROUPS,
-            'DICOM_STORE_PATH': settings.DICOM_STORE_PATH
+            'DICOM_STORE_PATH': settings.DICOM_STORE_PATH,
+            'APP_VERSION': settings.APP_VERSION,
+            'DEV_TIER': settings.DEV_TIER
     }

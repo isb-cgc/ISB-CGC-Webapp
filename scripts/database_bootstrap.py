@@ -23,6 +23,7 @@ import logging
 import traceback
 import os
 import re
+from csv import reader as csv_reader
 import csv
 from argparse import ArgumentParser
 import sys
@@ -48,6 +49,28 @@ idc_superuser = User.objects.get(username="idc")
 
 logger = logging.getLogger('main_logger')
 
+ranges_needed = {
+    'wbc_at_diagnosis': 'by_200',
+    'event_free_survival_time_in_days': 'by_500',
+    'days_to_death': 'by_500',
+    'days_to_last_known_alive': 'by_500',
+    'days_to_last_followup': 'by_500',
+    'year_of_diagnosis': 'year',
+    'days_to_birth': 'by_negative_3k',
+    'year_of_initial_pathologic_diagnosis': 'year',
+    'age_at_diagnosis': None
+}
+
+ranges = {
+    'by_200': [{'first': "200", "last": "1400", "gap": "200", "include_lower": True, "unbounded": True,
+                             "include_upper": True, 'type': 'F', 'unit': '0.01'}],
+    'by_negative_3k': [{'first': "-15000", "last": "-5000", "gap": "3000", "include_lower": True, "unbounded": True,
+                             "include_upper": False, 'type': 'I'}],
+    'by_500': [{'first': "500", "last": "6000", "gap": "500", "include_lower": False, "unbounded": True,
+                             "include_upper": True, 'type': 'I'}],
+    'year': [{'first': "1976", "last": "2015", "gap": "5", "include_lower": True, "unbounded": False,
+                             "include_upper": False, 'type': 'I'}]
+}
 
 def new_attribute(name, displ_name, type, display_default, cross_collex=False, units=None):
     return {
@@ -177,8 +200,7 @@ def add_collections(collection_set):
 
             collex_list.append(
                 Collection(
-                    short_name=collex['short_name'], name=collex['full_name'], description=collex['description'],
-                    is_public=collex['public'],
+                    **collex['data'],
                     owner=User.objects.get(email=collex['owner']) if 'owner' in collex else idc_superuser
                 )
             )
@@ -186,10 +208,7 @@ def add_collections(collection_set):
         Collection.objects.bulk_create(collex_list)
 
         for collex in collection_set:
-            obj = Collection.objects.get(
-                short_name=collex['short_name'], name=collex['full_name'], is_public=collex['public'],
-                owner=User.objects.get(email=collex['owner']) if 'owner' in collex else idc_superuser
-            )
+            obj = Collection.objects.get(collection_id=collex['data']['collection_id'])
 
             if len(collex.get('progs',[])):
                 progs = Program.objects.filter(
@@ -209,7 +228,7 @@ def add_collections(collection_set):
                 Collection.data_versions.through.objects.bulk_create(collex_to_dv)
 
     except Exception as e:
-        logger.error("[ERROR] Collection {} may not have been added!".format(collex['short_name']))
+        logger.error("[ERROR] Collection {} may not have been added!".format(collex['data']['collection_id']))
         logger.exception(e)
 
 
@@ -245,9 +264,9 @@ def add_attributes(attr_set):
                 for bqt in DataSource.objects.filter(name__in=attr['bq_tables']):
                     obj.data_sources.add(bqt)
             if len(attr.get('set_types',[])):
-                for set_type in DataSetType.objects.filter(data_type__in=attr['set_types']):
+                for set_type in attr.get('set_types'):
                     Attribute_Set_Type.objects.update_or_create(
-                        datasettype=set_type, attribute=obj
+                        datasettype=DataSetType.objects.get(data_type=set_type['set']), attribute=obj, child_record_search=set_type['child_record_search']
                     )
             if len(attr.get('categories',[])):
                 for cat in attr['categories']:
@@ -327,23 +346,33 @@ def main():
 
         all_attrs = {}
 
-        collection_file = open("tcia_collex.csv", "r")
-        line_reader = collection_file.readlines()
+        collection_file = open("tcia_collections.csv", "r")
         collection_set = []
-
-        for line in line_reader:
-            line = line.strip()
-            line_split = line.split(",")
+        for line in csv_reader(collection_file):
             collex = {
-                "id": line_split[0],
-                "short_name": line_split[1], "full_name": line_split[2], "public": True,
-                "description": line_split[3], "program": line_split[4],
+                'data': {
+                    "collection_id": line[0],
+                    "status": line[1],
+                    "date_updated": line[2],
+                    "access": line[3],
+                    "image_types": line[4],
+                    "subject_count": line[5],
+                    "description": re.sub(r' style="[^"]+"', '', (re.sub(r'<div [^>]+>',"<p>", line[6]).replace("</div>","</p>"))),
+                    "location": line[7],
+                    "species": line[8],
+                    "supporting_data": line[9],
+                    "cancer_type": line[10],
+                    "doi": line[11],
+                    "tcia_collection_id": line[12],
+                    "nbia_collection_id": line[13]
+                },
+                "program": line[-1],
                 "data_versions": [{"ver": "r9", "name": "GDC Data Release 9"},
                                   {"ver": "1", "name": "TCIA Image Data"}]
             }
-            if 'lidc' in line_split[0]:
+            if 'lidc' in line[0]:
                 collex['data_versions'].append({"ver": "1", "name": "TCIA Derived Data"})
-            if 'tcga' in line_split[0]:
+            if 'tcga' in line[0]:
                 collex['progs'] = ["TCGA"]
             collection_set.append(collex)
 
@@ -405,7 +434,7 @@ def main():
 
             attr = all_attrs[line_split[0]]
 
-            attr['set_types'].append(DataSetType.ANCILLARY_DATA)
+            attr['set_types'].append({'set': DataSetType.ANCILLARY_DATA, 'child_record_search': None})
 
             if attr['name'] in clin_table_attr:
                 attr['solr_collex'].append('tcga_clin')
@@ -431,8 +460,11 @@ def main():
                     {'label': 'overweight', 'first': "25", "last": "30", "gap": "0", "include_lower": True,
                      "include_upper": False, 'type': 'F'}
                 ]
-            elif attr['type'] == Attribute.CONTINUOUS_NUMERIC:
-                attr['range'] = []
+            elif attr['type'] == Attribute.CONTINUOUS_NUMERIC and 'range' not in attr:
+                if attr['name'].lower() in ranges_needed:
+                    attr['range'] = ranges.get(ranges_needed.get(attr['name'], ''), [])
+                else:
+                    attr['range'] = []
 
             attr_set.append(attr)
 
@@ -459,7 +491,7 @@ def main():
             attr['solr_collex'].append('dicom_derived_all')
             attr['bq_tables'].append('idc-dev.metadata.dicom_mvp')
 
-            attr['set_types'].append(DataSetType.IMAGE_DATA)
+            attr['set_types'].append({'set': DataSetType.IMAGE_DATA, 'child_record_search': 'StudyInstanceUID'})
 
             if attr['name'] in display_vals:
                 if 'preformatted_values' in display_vals[attr['name']]:
@@ -495,7 +527,7 @@ def main():
             attr['solr_collex'].append('dicom_derived_all')
             attr['bq_tables'].append('idc-dev.metadata.segmentations')
 
-            attr['set_types'].append(DataSetType.DERIVED_DATA)
+            attr['set_types'].append({'set': DataSetType.DERIVED_DATA, 'child_record_search': 'StudyInstanceUID'})
 
             attr['categories'].append({'name': 'segmentation', 'display_name': 'Segmentation'})
 
@@ -532,7 +564,7 @@ def main():
             attr['solr_collex'].append('dicom_derived_all')
             attr['bq_tables'].append('idc-dev.metadata.quantitative_measurements')
 
-            attr['set_types'].append(DataSetType.DERIVED_DATA)
+            attr['set_types'].append({'set': DataSetType.DERIVED_DATA, 'child_record_search': 'StudyInstanceUID'})
 
             attr['categories'].append({'name': 'quantitative', 'display_name': 'Quantitative Analysis'})
 
@@ -570,7 +602,7 @@ def main():
 
             attr['categories'].append({'name': 'qualitative', 'display_name': 'Qualitative Analysis'})
 
-            attr['set_types'].append(DataSetType.DERIVED_DATA)
+            attr['set_types'].append({'set': DataSetType.DERIVED_DATA, 'child_record_search': 'StudyInstanceUID'})
 
             if attr['name'] in display_vals:
                 if 'preformatted_values' in display_vals[attr['name']]:
