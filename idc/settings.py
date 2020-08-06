@@ -102,7 +102,7 @@ BIGQUERY_COHORT_DATASET_ID           = os.environ.get('BIGQUERY_COHORT_DATASET_I
 BIGQUERY_COHORT_TABLE_ID             = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
 BIGQUERY_IDC_TABLE_ID                = os.environ.get('BIGQUERY_IDC_TABLE_ID', '')
 MAX_BQ_INSERT                        = int(os.environ.get('MAX_BQ_INSERT', '500'))
-USER_DATA_ON                         = bool(os.environ.get('USER_DATA_ON', False))
+USER_DATA_ON                         = bool(os.environ.get('USER_DATA_ON', 'False') == 'True')
 
 database_config = {
     'default': {
@@ -193,13 +193,13 @@ def GET_BQ_COHORT_SETTINGS():
     return BigQueryCohortStorageSettings(BIGQUERY_COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
 
 
-USE_CLOUD_STORAGE              = os.environ.get('USE_CLOUD_STORAGE', False)
+USE_CLOUD_STORAGE              = bool(os.environ.get('USE_CLOUD_STORAGE', 'False') == 'True')
 
 SECURE_PROXY_SSL_HEADER        = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-CSRF_COOKIE_SECURE             = bool(os.environ.get('CSRF_COOKIE_SECURE', False))
-SESSION_COOKIE_SECURE          = bool(os.environ.get('SESSION_COOKIE_SECURE', False))
-SECURE_SSL_REDIRECT            = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
+CSRF_COOKIE_SECURE             = bool(os.environ.get('CSRF_COOKIE_SECURE', 'True') == 'True')
+SESSION_COOKIE_SECURE          = bool(os.environ.get('SESSION_COOKIE_SECURE', 'True') == 'True')
+SECURE_SSL_REDIRECT            = bool(os.environ.get('SECURE_SSL_REDIRECT', 'True') == 'True')
 
 SECURE_REDIRECT_EXEMPT = []
 
