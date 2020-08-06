@@ -1,7 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import date
 
 # Create your models here.
+
 class Comparison(models.Model):
     # TODO: can use ManyToMany for ids in future for cohort 2+ maybe?
     id1 = models.IntegerField()
@@ -10,31 +12,43 @@ class Comparison(models.Model):
     date_created = models.DateField()
 
     @classmethod
-    def create(cls, cohort_id1, cohort_id2):
-        comparison_model = cls.objects.create(id1=cohort_id1, id2=cohort_id2)
-        # TODO: set default title
-        # TODO: set date_created
-        comparison_model.save()
+    def new_comparison(cls, cohort_id1, cohort_id2):
+        today = date.today()
+        title = "compare - " + today.strftime("%m/%d/%y")
+        comparison_model = cls.objects.create(id1=cohort_id1, id2=cohort_id2, comparison_title=title, date_created=today)
 
+        comparison_model.save()
         return comparison_model
 
     @classmethod
-    def get_survival_analysis(cls):
+    def survival_analysis(cls):
         # TODO: return survival analysis
         return
 
     @classmethod
-    def get_percentage_comparison(cls, label):
+    def percentage_comparison(cls, label):
         # TODO: return percentage breakdown
         return
 
 class Dashboard(models.Model):
     compares = models.ManyToManyField(Comparison)
+    current_compare = Comparison()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
     @classmethod
-    def init(cls, user):
+    def start(cls, user):
+        dash = cls.objects.get(owner=user)
+        if dash is None:
+            cls.objects.create(owner=user)
+
+        # cls.compares.get()
+
+    @classmethod
+    def new_comparison(cls, cohort_1, cohort_2):
         comparison_dashboard = cls.objects.create(owner=user)
+        current_compare = None
         comparison_dashboard.save()
 
         return comparison_dashboard
+
+
