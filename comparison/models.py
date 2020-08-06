@@ -39,16 +39,19 @@ class Dashboard(models.Model):
     def start(cls, user):
         dash = cls.objects.get(owner=user)
         if dash is None:
-            cls.objects.create(owner=user)
+            dash = cls.objects.create(owner=user, current_compare=None)
+            dash.save()
 
-        # cls.compares.get()
+        # cls.current_compare = cls.compares.objects.latest('id').id
+        return dash
 
     @classmethod
     def new_comparison(cls, cohort_1, cohort_2):
-        comparison_dashboard = cls.objects.create(owner=user)
-        current_compare = None
-        comparison_dashboard.save()
+        comp = Comparison.new_comparison(cohort_id1=cohort_1, cohort_id2=cohort_2)
+        cls.current_compare = comp
+        cls.compares.add(comp)
+        cls.save()
 
-        return comparison_dashboard
+        return comp
 
 
