@@ -141,7 +141,7 @@ if exists(join(dirname(__file__), '../version.env')):
 else:
     if IS_DEV:
         import git
-        repo = git.Repo(search_parent_directories=True)
+        repo = git.Repo(path="/home/vagrant/www/",search_parent_directories=True)
         VERSION = "{}.{}.{}".format("local-dev", datetime.datetime.now().strftime('%d%m%Y%H%M'),
                                     str(repo.head.object.hexsha)[-6:])
 
