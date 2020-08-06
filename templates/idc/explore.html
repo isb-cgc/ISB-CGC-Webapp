@@ -43,11 +43,9 @@
             </ol>
 
             <h1 class="page-header pull-left" role="heading" aria-level="1">Explore Image Data</h1>
-            {% if DEV_TIER %}
-            <button id="save-cohort-btn" class="btn btn-primary pull-right" data-toggle="modal" data-target="#save-cohort-modal" title="{% if request.user.is_authenticated %}Please select at least one filter.{% else %}Please log in to save this cohort.{% endif %}" disabled="disabled">
+            <button {% if DEV_TIER %}id="save-cohort-btn"{% else %}id="disaled-chort-save-btn"{% endif %} class="btn btn-primary pull-right" data-toggle="modal" {% if DEV_TIER %}data-target="#save-cohort-modal"{% endif %} title="{% if request.user.is_authenticated %}Please select at least one filter.{% else %}Please log in to save this cohort.{% endif %}" disabled="disabled">
                 {% if request.user.is_authenticated %}Save As New Cohort{% else %}Log in to Save{% endif %}
             </button>
-            {% endif %}
         </div>
     </div>
 {% endblock %}
