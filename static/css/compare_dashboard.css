@@ -1,0 +1,110 @@
+
+/*.dropdown {*/
+/*    background-color: oldlace;*/
+/*}*/
+
+#dropdown-label {
+    /*background-color: floralwhite;*/
+
+    background-color: #fee9d5;
+    border-radius: 2px;
+    padding-right: 10px;
+
+}
+
+#panel .tab-content {
+    /*background-color: cornsilk;*/
+    padding: 5px 15px;
+}
+
+#panel .nav-tabs_excel {
+    font-size: 14px;
+}
+
+.lineHorizontal {
+  border-top: 1px solid lightgrey;
+  width: 100%;
+}
+
+/*#comp-tab {*/
+/*    !*background-color: #fee9d5;*!*/
+/*}*/
+
+/*#panel .nav-tabs_excel > li.active > a,*/
+/*#panel .nav-tabs_excel > li.active > a:focus,*/
+/*#panel .nav-tabs_excel > li.active > a:hover {*/
+/*    background-color: oldlace;*/
+
+/*}*/
+
+
+/*#panel .nav-tabs_excel > li.active > a {*/
+/*    display: block;*/
+/*}*/
+
+/*#comp-tab {*/
+/*    background-color: oldlace;*/
+/*}*/
+
+/*#diff-tab {*/
+/*    background-color: white;*/
+/*}*/
+.fa-caret-down {
+    padding-left: 3px;
+}
+
+
+#labels-card {
+    width: 25rem;
+    papadding: 60px;
+    margin: 10px 20px 350px;
+}
+
+#sel-labels {
+    padding: 20px;
+    background-color: floralwhite;
+    /*background-color: #fee9d5;*/
+    text-align: left;
+    box-shadow: 2px 2px 10px #999;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+#form-title {
+    color: #404040;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 15px 0;
+    bottom: 15px;
+}
+
+#sel-labels .form-check {
+    margin: 0 20px 5px;
+    position: relative;
+}
+
+#sel-labels .form-group .btn {
+    font-size: 14px;
+    font-family: Arial;
+    font-weight: 600;
+    background-color: #F9661A;
+    padding: 8px;
+    border: none;
+    display: block;
+    width: 13rem;
+    margin: 0 0 15px 0;
+    top: 10px;
+}
+
+#sel-labels .form-group .btn:focus,
+#sel-labels .form-group .btn:hover {
+    box-shadow: -1px 1px 10px #505050 inset;
+}
+
+#sel-labels .form-check .custom-control-label {
+    color: #404040;
+    font-weight: normal;
+    font-size: 15px;
+}
+
+
