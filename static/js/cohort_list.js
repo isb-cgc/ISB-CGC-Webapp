@@ -528,7 +528,11 @@ require([
                 },
                 success: function (data) {
                     if (!data.error) {
-                        window.location = BASE_URL + '/compare/cohorts/' + sel_cohort_ids[0] + '/' + sel_cohort_ids[1] + '/';
+                        if (sel_cohort_ids[0] < sel_cohort_ids[1]) {
+                            window.location = BASE_URL + '/compare/cohorts/' + sel_cohort_ids[0] + '/' + sel_cohort_ids[1] + '/';
+                        } else {
+                            window.location = BASE_URL + '/compare/cohorts/' + sel_cohort_ids[1] + '/' + sel_cohort_ids[0] + '/';
+                        }
                     } else {
                         base.setReloadMsg('error', 'Failed to compare cohorts: ' + sel_cohort_ids.join(", "));
                     }

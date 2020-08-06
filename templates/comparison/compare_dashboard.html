@@ -53,14 +53,8 @@
                         </ul>
                     </div>
                 </li>
-
                 <!-- plus sign for adding another comparison-->
-                <li><a data-target="" data-toggle="modal"><i class="fa fa-plus"></i></a></li>
-
-                {#                <li role="presentation">#}
-                {#                    <a href="#set-diff-tab" id="diff-tab" role="tab" data-toggle="tab">Set Difference</a>#}
-                {#                </li>#}
-
+                <li><a href="{% url 'cohort_list' %}"><i class="fa fa-plus"></i></a></li>
             </ul>  <!-- end of nav-tabs_excel -->
 
             <!-- content of each tab -->
@@ -80,9 +74,6 @@
 
 
                     <div class="comparison-body">
-
-                        {#                        <div id="source_pane-{{ worksheet.id }}" class="worksheet-nav">#}
-
                         <div class="card" id="labels-card">
                             <div class="card-content" id="card-body">
                                 <form id="sel-labels" method="post" action="">
