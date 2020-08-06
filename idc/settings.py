@@ -102,7 +102,7 @@ BIGQUERY_COHORT_DATASET_ID           = os.environ.get('BIGQUERY_COHORT_DATASET_I
 BIGQUERY_COHORT_TABLE_ID             = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
 BIGQUERY_IDC_TABLE_ID                = os.environ.get('BIGQUERY_IDC_TABLE_ID', '')
 MAX_BQ_INSERT                        = int(os.environ.get('MAX_BQ_INSERT', '500'))
-USER_DATA_ON                         = bool(os.environ.get('USER_DATA_ON', False))
+USER_DATA_ON                         = bool(os.environ.get('USER_DATA_ON', 'False') == 'True')
 
 database_config = {
     'default': {
