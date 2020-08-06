@@ -1040,7 +1040,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
         var updateFacetsData = function (newFilt) {
             changeAjax(true);
 
-            var url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True&data_source_type=' + $("#data_source_type option:selected").val();
+            var url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True&data_source_type=' + ($("#data_source_type option:selected").val() || 'S');
             var parsedFiltObj=parseFilterObj();
             if (Object.keys(parsedFiltObj).length > 0) {
 
