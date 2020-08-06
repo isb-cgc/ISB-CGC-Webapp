@@ -1,7 +1,7 @@
 require.config({
     baseUrl: STATIC_FILES_URL + 'js/',
     paths: {
-        jquery: 'libs/jquery-1.11.1.min',
+        jquery: 'libs/jquery-3.5.1',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
         underscore: 'libs/underscore-min',
@@ -49,14 +49,27 @@ require([
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('#save-cohort-modal').on('show.bs.modal', function() {
+        var filters = {};
         $('#search_orig_set .search-checkbox-list input:checked').each(function(){
             $('#selected-filters-orig-set').append('<span>'+$(this).data('filter-display-attr')+': '+$(this).data('filter-display-val')+'</span>');
+            if(!filters[$(this).data('filter-attr-id')]) {
+                filters[$(this).data('filter-attr-id')] = [];
+            }
+            filters[$(this).data('filter-attr-id')].push($(this).prop('value'));
         });
         $('#search_related_set .search-checkbox-list input:checked').each(function(){
             $('#selected-filters-rel-set').append('<span>'+$(this).data('filter-display-attr')+': '+$(this).data('filter-display-val')+'</span>');
+            if(!filters[$(this).data('filter-attr-id')]) {
+                filters[$(this).data('filter-attr-id')] = [];
+            }
+            filters[$(this).data('filter-attr-id')].push($(this).prop('value'));
         });
         $('#search_derived_set .search-checkbox-list input:checked').each(function(){
             $('#selected-filters-der-set').append('<span>'+$(this).data('filter-display-attr')+': '+$(this).data('filter-display-val')+'</span>');
+            if(!filters[$(this).data('filter-attr-id')]) {
+                filters[$(this).data('filter-attr-id')] = [];
+            }
+            filters[$(this).data('filter-attr-id')].push($(this).prop('value'));
         });
         $('#save-cohort-modal .selected-filters').each(function(){
             if($(this).find('span').length <= 0) {
@@ -65,10 +78,42 @@ require([
                 $(this).show();
             }
         });
+        $('input[name="selected-filters"]').prop('value', JSON.stringify(filters));
     });
 
     $('#save-cohort-modal').on('hide.bs.modal', function() {
         $('#save-cohort-modal .selected-filters span').remove();
+        $('input[name="selected-filters"]').prop('value', '');
+    });
+
+    // Bootstrap and jQueryUI are not friends, because they overwrite each other's tooltip
+    // We want the jQueryUI tooltip, since it lets you use DOM elements.
+    // If bootstrap loaded first, revert the tooltip, copy it into a new function name, and
+    // restore Bootstrap's
+    if($.fn.tooltip.noConflict) {
+        var bsTooltip = $.fn.tooltip.noConflict();
+        $.fn.jqTooltip = $.fn.tooltip;
+        $.fn.tooltip = bsTooltip;
+    // If jQueryUI loaded first, just save it out; bootstrap will eventually clobber it,
+    // but now we have a copy safe and sound.
+    } else {
+        $.fn.jqTooltip = $.fn.tooltip;
+    }
+
+    $('.collection_name').jqTooltip({
+        hide: {
+            duration: 200,
+            delay: 900
+        },
+        items: 'span.collection_name',
+        content: function() {
+            var tooltip = collection_tooltips[$(this).siblings('input.collection_value').attr('value')];
+            if(tooltip) {
+                return $('<div>'+tooltip+'</div>')
+            }
+            return $('<span></span>')
+
+        }
     });
 
 });
