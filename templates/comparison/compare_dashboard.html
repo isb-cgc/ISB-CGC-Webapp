@@ -1,13 +1,19 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 
-{% block title %}
-    Cohort Comparison | ISB-CGC
-{% endblock %}
+{% block title %} Cohort Comparison | ISB-CGC {% endblock %}
+{% block extra_css_libs %}{% endblock %}
 
 {% block header %}
-{<link type="text/css" rel="stylesheet" href="{% static 'css/jquery.qtip.min.css' %}" />}
+
+    {
+    <link type="text/css" rel="stylesheet" href="{% static 'css/compare_dashboard.css' %}"/>}
+    {
+    <link type="text/css" rel="stylesheet" href="{% static 'css/jquery.qtip.min.css' %}"/>}
+
+
 {% endblock %}
+
 
 {% block link_page_name %}cohort-comparison{% endblock %}
 {% block page_name %}cohort-comparison{% endblock %}
@@ -24,4 +30,103 @@
 
 {% block content %}
 
+    <div class="container">
+
+        <!-- panel -->
+        <div class="panel-invisible" id="panel">
+
+            <!-- tabs of panel -->
+            <ul class="nav nav-tabs_excel" role="tablist" id="comparison-tabs">
+
+                <li role="presentation" class="active">
+                    <a href="#label-comp-tab" id="comp-tab" role="tab" data-toggle="tab" data-toggle-type="comparison">Label
+                        Comparison</a>
+                    <div class="dropdown">
+                        <a class="dropdown-toggle comparison-drop" id="dropdown-label" role="button"
+                           data-toggle="dropdown"><i
+                                class="fa fa-caret-down"></i></a>
+
+                        <ul class="dropdown-menu">
+                            <li role="menuitem"><a data-toggle="modal" role="button" data-target="">Edit details</a>
+                            </li>
+                            <li role="menuitem"><a data-toggle="modal" role="button" data-target="">Delete</a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- plus sign for adding another comparison-->
+                <li><a data-target="" data-toggle="modal"><i class="fa fa-plus"></i></a></li>
+
+                {#                <li role="presentation">#}
+                {#                    <a href="#set-diff-tab" id="diff-tab" role="tab" data-toggle="tab">Set Difference</a>#}
+                {#                </li>#}
+
+            </ul>  <!-- end of nav-tabs_excel -->
+
+            <!-- content of each tab -->
+            <div class="tab-content">
+
+                <div class="tab-pane fade in active" id="label-comp-tab" role="tabpanel">
+
+                    <!-- comparison description -->
+                    <div class="worksheet-header">
+                        <p>{{ comparison.description }}</p>
+                        <button class="btn btn-primary pull-right" id="save-but">Save Comparison</button>
+                    </div>
+
+                    <div class="lineHorizontal__container">
+                        <div class="lineHorizontal"></div>
+                    </div>
+
+
+                    <div class="comparison-body">
+
+                        {#                        <div id="source_pane-{{ worksheet.id }}" class="worksheet-nav">#}
+
+                        <div class="card" id="labels-card">
+                            <div class="card-content" id="card-body">
+                                <form id="sel-labels" method="post" action="">
+                                    <p id="form-title" class="h4 text-left py-4">Select labels:</p>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="custom-control-input" id="survival-analysis"
+                                               checked>
+                                        <label class="custom-control-label" for="survival-analysis">Survival
+                                            Analysis</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="custom-control-input" id="age" unchecked>
+                                        <label class="custom-control-label" for="age">Age</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="custom-control-input" id="gender" unchecked>
+                                        <label class="custom-control-label" for="gender">Gender</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="custom-control-input" id="vital-status" unchecked>
+                                        <label class="custom-control-label" for="vital-status">Vital Status</label>
+                                    </div>
+                                    <div class="form-group">
+                                        <button class="btn btn-default" type="submit">Submit</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {#                <div class="tab-pane fade" id="set-diff-tab" role="tabpanel">#}
+                {#                    <h6>Set Difference Results Here</h6>#}
+                {#                </div>#}
+            </div>
+            <!-- end of tab-content -->
+        </div>
+        <!-- end of panel -->
+    </div>
+    <!-- end of container -->
+
+{% endblock %}  <!-- end of content block -->
+
+{% block js_file %}
+    {{ block.super }}
+    <script src="{% static 'js/compare_dashboard.js' %}"></script>
 {% endblock %}
