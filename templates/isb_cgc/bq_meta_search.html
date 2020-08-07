@@ -11,21 +11,14 @@
 {% endblock %}
 {% block page_name %}bq-meta-searcher{% endblock %}
 {% block page_header %}
-{#    <div class="alert alert-dismissible text-center" role="alert"#}
-{#         style="margin-bottom: 0;padding:2px 10%;background-color: #2A537A; color: white;">#}
-{#        <button type="button" class="close" style="top: 7px;" data-dismiss="alert" aria-label="Close"><span#}
-{#                aria-hidden="true">&times;</span></button>#}
-{#        <strong>ISB-CGC is now starting to migrate our BigQuery tables to a new project: isb-cgc-bq.</strong><br>You#}
-{#        might want to pin <<i class="fa fa-thumb-tack" aria-hidden="true"></i>> that project too in your Google BigQuery#}
-{#        console, next to <strong>isb-cgc</strong>. Read more at: <a style="color:white;text-decoration: underline;"#}
-{#                                                                    href="#">Migrating to isb-cgc-bq</a>.#}
-{#    </div>#}
-    <div class="bq-banner alert alert-dismissible text-center" role="alert">
+    <div class="bq-banner alert alert-dismissible text-center alert-warning" role="alert">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
                 aria-hidden="true">&times;</span></button>
         <strong>ISB-CGC is now starting to migrate our BigQuery tables to a new project: isb-cgc-bq.</strong><br>You
         might want to pin <<i class="fa fa-thumb-tack" aria-hidden="true"></i>> that project too in your Google BigQuery
-        console, next to <strong>isb-cgc</strong>. Read more at: <a href="#">Migrating to isb-cgc-bq</a>.
+        console, along with <strong>isb-cgc</strong>. Read more at:
+        <a target="_blank" href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/BigQuery/ISBCGC-BQ-Projects.html">
+        ISB-CGC BigQuery Projects</a>.
     </div>
     <div class="bq-header-container container">
         <div class="row">

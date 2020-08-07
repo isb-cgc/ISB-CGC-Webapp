@@ -82,7 +82,7 @@
          -->
         <div class="row">
             <div class="col-lg-12">
-                <div id="popup-blocker-warning" class="alert alert-warning alert-dismissible" style="display: none;">
+                <div id="popup-blocker-warning" class="alert alert-warning alert-dismissible text-center" style="display: none;">
                     <button type="button" class="close" data-dismiss="alert"><span
                             aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                     A Pop-up Blocker is Enabled! Please go to your browser's settings and add this site to your allowed/exception site list.
@@ -360,13 +360,13 @@
                                                 <a href="{% url 'cohort_filelist' cohort.id %}">
                                                     <div class="list-link">
                                                         <span class="list-title file-browser-link"
-                                                              title="Browse this cohort's file manifest">File browser</span>
+                                                              title="Browse this cohort's file manifest">View Files</span>
                                                     </div>
                                                 </a>
                                             {% else %}
                                                 <div class="list-link">
                                                     <span class="list-title file-browser-link"
-                                                          title="File browsing is unavailable for cohorts which contain only user data.">File Browser</span>
+                                                          title="File browsing is unavailable for cohorts which contain only user data.">View Files</span>
                                                 </div>
                                             {% endif %}
                                             <div class="list-info col-3">
