@@ -11,7 +11,15 @@
 {% endblock %}
 {% block page_name %}bq-meta-searcher{% endblock %}
 {% block page_header %}
-
+    <div class="bq-banner alert alert-dismissible text-center alert-warning" style="margin-top:2px;padding: 3px 10px;margin-bottom: 0;" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                aria-hidden="true">&times;</span></button>
+        <strong>ISB-CGC is now starting to migrate our BigQuery tables to a new project: isb-cgc-bq.</strong><br>You
+        might want to pin <<i class="fa fa-thumb-tack" aria-hidden="true"></i>> that project too in your Google BigQuery
+        console, along with <strong>isb-cgc</strong>. Read more at:
+        <a target="_blank" href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/BigQuery/ISBCGC-BQ-Projects.html">
+        ISB-CGC BigQuery Projects</a>.
+    </div>
     <div class="bq-header-container container">
         <h1 class="page-header">BigQuery Table Search</h1>
         <ul class="nav">
