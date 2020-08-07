@@ -187,6 +187,7 @@ def user_detail(request, user_id):
             'user_opt_in_status': user_opt_in_status
         }
 
+        print(GoogleProject.objects.filter(user=user, active=1))
         user_details['gcp_list'] = len(GoogleProject.objects.filter(user=user, active=1))
 
         forced_logout = 'dcfForcedLogout' in request.session
