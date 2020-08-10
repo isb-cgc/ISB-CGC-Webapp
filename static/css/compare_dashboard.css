@@ -1,7 +1,97 @@
 
-/*.dropdown {*/
-/*    background-color: oldlace;*/
+.content-container {
+    margin-left: 20px;
+    margin-right: 20px;
+    width: 98vw;
+}
+
+.grid-container {
+    /*border: solid green;*/
+    width: 96vw;
+    height: 95%;
+    display: flex;
+    /*border: solid black;*/
+    transition: 1s ease;
+    /*alignment: left;*/
+    position: absolute;
+    left: 0;
+}
+
+.sidebar {
+    width: 27vw;
+    height: 100%;
+    background: #f7f7f7;
+    transition: 1s ease;
+    position: relative;
+}
+
+.comp-body-content {
+    width: 73%;
+    height: 100%;
+    background-color: white;
+    transition: 1s ease;
+}
+
+#label-comp-tab {
+    /*border: solid red;*/
+    width: 94vw;
+    /*margin-left: 5px;*/
+    /*margin-right: 5px;*/
+    /*position: absolute;*/
+    /*left: 0;*/
+margin: 0 auto;
+
+}
+
+.tab-content {
+    padding: 5px 10px;
+    /*border: solid blue;*/
+}
+
+
+#panel {
+    width: 96vw;
+    height: 300vw;
+    margin-left: 10px;
+    margin-right: 10px;
+    position: absolute;
+    /*border: solid black;*/
+}
+
+#sidebar-but {
+    position: absolute;
+    border: none;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    box-shadow: 0px 1px 4px 1px rgba(0, 0, 0, .3);
+    left: 100%;
+    top: 2rem;
+    transform: translateX(-50%);
+    cursor: pointer;
+}
+
+.comp-body-content_large {
+    width: 100%;
+}
+
+.sidebar_small {
+    width: 0%;
+}
+
+/*#sidebar-but {*/
+
+/*    margin: 50px 330px 350px;*/
+/*    position: absolute;*/
+/*    border: none;*/
+/*    height: 30px;*/
+/*    width: 30px;*/
+/*    border-radius: 50%;*/
+/*    box-shadow: 0px 1px 4px 1px rgba(0, 0, 0, .3);*/
+/*    left: 4.4%;*/
+/*    background-color: #fee9d5;*/
 /*}*/
+
 
 #dropdown-label {
     /*background-color: floralwhite;*/
@@ -22,8 +112,8 @@
 }
 
 .lineHorizontal {
-  border-top: 1px solid lightgrey;
-  width: 100%;
+    border-top: 1px solid lightgrey;
+    width: 100%;
 }
 
 /*#comp-tab {*/
@@ -55,6 +145,7 @@
 
 
 #labels-card {
+    /*display: flex;*/
     width: 25rem;
     papadding: 60px;
     margin: 10px 20px 350px;

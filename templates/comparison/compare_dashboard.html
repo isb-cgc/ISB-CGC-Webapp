@@ -6,6 +6,7 @@
 
 {% block header %}
 
+
     {
     <link type="text/css" rel="stylesheet" href="{% static 'css/compare_dashboard.css' %}"/>}
     {
@@ -24,22 +25,22 @@
             <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
             <li><a href="{% url 'cohort_list' %}">Saved Cohorts</a></li>
         </ol>
-        <h1 class="page-header">Cohort Comparison</h1>
+        <h1 class="page-header">Cohort Comparison Dashboard</h1>
     </div>
 {% endblock %}
 
 {% block content %}
 
-    <div class="container">
+    <div class="content-container">
 
-        <!-- panel -->
         <div class="panel-invisible" id="panel">
 
             <!-- tabs of panel -->
             <ul class="nav nav-tabs_excel" role="tablist" id="comparison-tabs">
 
                 <li role="presentation" class="active">
-                    <a href="#label-comp-tab" id="comp-tab" role="tab" data-toggle="tab" data-toggle-type="comparison">Label
+                    <a href="#label-comp-tab" id="comp-tab" role="tab" data-toggle="tab"
+                       data-toggle-type="comparison">Label
                         Comparison</a>
                     <div class="dropdown">
                         <a class="dropdown-toggle comparison-drop" id="dropdown-label" role="button"
@@ -57,52 +58,71 @@
                 <li><a href="{% url 'cohort_list' %}"><i class="fa fa-plus"></i></a></li>
             </ul>  <!-- end of nav-tabs_excel -->
 
+
             <!-- content of each tab -->
             <div class="tab-content">
 
                 <div class="tab-pane fade in active" id="label-comp-tab" role="tabpanel">
-
-                    <!-- comparison description -->
                     <div class="worksheet-header">
+                        <!-- side panel for venn diagram -->
+                        <!-- comparison description -->
                         <p>{{ comparison.description }}</p>
                         <button class="btn btn-primary pull-right" id="save-but">Save Comparison</button>
                     </div>
 
-                    <div class="lineHorizontal__container">
-                        <div class="lineHorizontal"></div>
-                    </div>
+                    <div class="grid-container">
+
+                        <div class="sidebar" id="menubar">
+
+                            <button id="sidebar-but">M</button>
 
 
-                    <div class="comparison-body">
-                        <div class="card" id="labels-card">
-                            <div class="card-content" id="card-body">
-                                <form id="sel-labels" method="post" action="">
-                                    <p id="form-title" class="h4 text-left py-4">Select labels:</p>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="custom-control-input" id="survival-analysis"
-                                               checked>
-                                        <label class="custom-control-label" for="survival-analysis">Survival
-                                            Analysis</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="custom-control-input" id="age" unchecked>
-                                        <label class="custom-control-label" for="age">Age</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="custom-control-input" id="gender" unchecked>
-                                        <label class="custom-control-label" for="gender">Gender</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="custom-control-input" id="vital-status" unchecked>
-                                        <label class="custom-control-label" for="vital-status">Vital Status</label>
-                                    </div>
-                                    <div class="form-group">
-                                        <button class="btn btn-default" type="submit">Submit</button>
-                                    </div>
-                                </form>
+                        </div>
+
+                        <div class="comp-body-content">
+
+
+                            {#                            <div class="lineHorizontal__container">#}
+                            {#                                <div class="lineHorizontal"></div>#}
+                            {#                            </div>#}
+                            {#                            <div class="comparison-body"></div>#}
+                            <div class="card" id="labels-card">
+                                <div class="card-content" id="card-body">
+                                    <form id="sel-labels" method="post" action="">
+                                        <p id="form-title" class="h4 text-left py-4">Select labels:</p>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="custom-control-input"
+                                                   id="survival-analysis"
+                                                   checked>
+                                            <label class="custom-control-label" for="survival-analysis">Survival
+                                                Analysis</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="custom-control-input" id="age" unchecked>
+                                            <label class="custom-control-label" for="age">Age</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="custom-control-input" id="gender"
+                                                   unchecked>
+                                            <label class="custom-control-label" for="gender">Gender</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="custom-control-input" id="vital-status"
+                                                   unchecked>
+                                            <label class="custom-control-label" for="vital-status">Vital
+                                                Status</label>
+                                        </div>
+                                        <div class="form-group">
+                                            <button class="btn btn-default" type="submit">Submit</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
+
                     </div>
+
+
                 </div>
 
                 {#                <div class="tab-pane fade" id="set-diff-tab" role="tabpanel">#}
@@ -113,9 +133,20 @@
         </div>
         <!-- end of panel -->
     </div>
+
+    {#    <div class="container">#}
+
+
+    <!-- panel -->
+
+    {#    </div>#}
     <!-- end of container -->
 
-{% endblock %}  <!-- end of content block -->
+    <script type="text/javascript">
+        var base_url = '{{ base_url|safe }}';
+    </script>
+
+{% endblock content %}  <!-- end of content block -->
 
 {% block js_file %}
     {{ block.super }}
