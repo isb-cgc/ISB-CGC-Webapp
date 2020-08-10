@@ -131,7 +131,7 @@ require([
                 if (link_to_gcpr) {
                     data.responseJSON.msg = data.responseJSON.msg.replace(
                         "register at least one project",
-                        '<a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/Gaining-Access-To-Contolled-Access-Data.html?#registering-your-google-cloud-project-service-account" target="_BLANK">register at least one project</a>'
+                        '<a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/Gaining-Access-To-Controlled-Access-Data.html#requirements-for-registering-a-google-cloud-project-service-account" target="_BLANK">register at least one project</a>'
                     );
                 }
                 base.showJsMessage('error', data.responseJSON.msg, true, "#export-to-gcs-js-messages");
