@@ -3,18 +3,18 @@
 
 {% block dcf_content %}
 
-    {% if user_details.error_state%}
+    {% if user_details.error_state %}
         <p>{{ user_details.error_state }} </p>
-    {% elif user_details.dcf_comm_error%}
+    {% elif user_details.dcf_comm_error %}
         <p>Currently unable to contact Data Commons Framework. Please try later. </p>
     {# User has tried to sign in with a conflicting NIH Username and must be forced to change it: #}
-    {% elif user_details.force_DCF_logout%}
+    {% elif user_details.force_DCF_logout %}
         <p><a href="{% url 'dcf_simple_logout' %}">Logout from Data Commons now to restart linking process.</a></p>
     {# User is linked, but has never talked to DCF #}
-    {% elif user_details.legacy_linkage%}
+    {% elif user_details.legacy_linkage %}
         <p><a data-toggle="modal" data-target="#link-nih-account-modal">Please use new Data Commons login process to re-establish NIH identity: {{ user_details.NIH_username }}</a></p>
     {# Refresh token has expired (30 days). User must log into DCF again #}
-    {% elif user_details.refresh_required%}
+    {% elif user_details.refresh_required %}
         <p><a href="{% url 'dcf_login' %}">Stored Data Commons credentials have expired. Please log in again to refresh.</a></p>
      {# User has *never* been seen before with an NIH login, or they have disconnected from it. #}
     {% elif not user_details.NIH_username %}
@@ -103,29 +103,72 @@
     <div class="modal fade" id="link-nih-account-modal" tabindex="-1" role="dialog" aria-labelledby="link-nih-account-header" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="link-nih-account-header">Link {{ user_details.email }} to an NIH identity</h4>
-                </div>
-                <div class="modal-body">
-                    <p>
-                        You will now be sent to the Data Commons Framework (DCF) site to login to NIH and then to link your
-                        NIH and Google IDs. This will take three steps the first time you do it:
-                        <ul>
-                          <li>On the NIH iTrust page, login with your NIH ID and password.</li>
-                          <li>Next, you must allow ISB-CGC to access your account information (click <i>Yes, I authorize</i>).</li>
-                          <li>Finally, you must login to the Data Commons Framework (i.e. <i>datacommons.io</i>) <b>using your {{ user_details.email }} Google ID</b>.</li>
-                        </ul>
-                    </p>
-                    <p>If you are having problems with linking, you might try <a href="{% url 'dcf_simple_logout' %}">logging out</a> of DCF before trying again.</p>
-                </div>
-                <form id="link-nih-account" method="GET" action="{% url 'dcf_login' %}">
-                    {% csrf_token %}
-                    <div class="modal-footer">
-                        <input type="submit" value="Go to DCF" class="btn btn-primary" />
-                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                {% if idp == 'ras' %}
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="link-nih-account-header">Link {{ user_details.email }} to an RAS
+                            identity</h4>
                     </div>
-                </form>
+                    <div class="modal-body">
+                        <p>
+                            You will now be sent to the Data Commons Framework (DCF) site to login to NIH and then to
+                            link your NIH and Google IDs. This will take three steps the first time you do it:
+                            <ul>
+                                <li>On the NIH page, login with your NIH ID and password.</li>
+                                <li>Next, you must allow ISB-CGC to access your account information (click <i>Yes, I
+                                    authorize</i>).
+                                </li>
+                                <li>Finally, you must login to the Data Commons Framework (i.e. <i>datacommons.io</i>) <b>using
+                                    your {{ user_details.email }} Google ID</b>.
+                                </li>
+                            </ul>
+                        </p>
+                        <p>If you are having problems with linking, you might try <a
+                                href="{% url 'dcf_simple_logout' %}">logging out</a> of DCF before trying again.</p>
+                    </div>
+                    <form id="link-nih-account" method="GET" action="{% url 'dcf_login' %}">
+                        {% csrf_token %}
+                        <div class="modal-footer">
+                            <input type="hidden" name="idp" value="{{ idp }}" />
+                            <input type="submit" value="Go to DCF" class="btn btn-primary"/>
+                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                {% else %}
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="link-nih-account-header">Link {{ user_details.email }} to an NIH
+                            identity</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            You will now be sent to the Data Commons Framework (DCF) site to login to NIH and then to
+                            link your
+                            NIH and Google IDs. This will take three steps the first time you do it:
+                            <ul>
+                                <li>On the NIH iTrust page, login with your NIH ID and password.</li>
+                                <li>Next, you must allow ISB-CGC to access your account information (click <i>Yes, I
+                                    authorize</i>).
+                                </li>
+                                <li>Finally, you must login to the Data Commons Framework (i.e. <i>datacommons.io</i>) <b>using
+                                    your {{ user_details.email }} Google ID</b>.
+                                </li>
+                            </ul>
+                        </p>
+                        <p>If you are having problems with linking, you might try <a
+                                href="{% url 'dcf_simple_logout' %}">logging out</a> of DCF before trying again.</p>
+                    </div>
+                    <form id="link-nih-account" method="GET" action="{% url 'dcf_login' %}">
+                        {% csrf_token %}
+                        <div class="modal-footer">
+                            <input type="submit" value="Go to DCF" class="btn btn-primary"/>
+                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+
+                {% endif %}
             </div>
         </div>
     </div>

@@ -109,6 +109,15 @@
     .curr-filter-panel
         padding: 0
         margin-bottom: 15px
+    .gradient-overlay
+        position: relative
+        &:after
+            position: absolute
+            top: 0
+            height: 100%
+            width: 100%
+            content: ""
+            background: linear-gradient(to top, rgba(255,255,255, 1) 15%, rgba(255,255,255, 0) 80%)
 
     .details-panel
         overflow: hidden
@@ -429,15 +438,22 @@
     .search-checkbox-list
         label
             width: 100%
-    .sample_count
+    .sample_count, .case_count
         background-color: #bababa
         color: white
         border-radius: 10px
         font-size: .8em
         padding: 2px 5px
         text-align: right
+
+    .sample_count
         &:after
             content: 'sample(s)'
+            font-size: 0.9em
+            padding-left: 5px
+    .case_count
+        &:after
+            content: 'case(s)'
             font-size: 0.9em
             padding-left: 5px
 

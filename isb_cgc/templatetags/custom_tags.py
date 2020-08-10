@@ -43,22 +43,24 @@ ALPHANUM_SORT = [
 simple_number_sort = [
     '0 to 200', '200.01 to 400', '400.01 to 600', '600.01 to 800', '800.01 to 1000', '1000.01 to 1200', '1200.01 to 1400', '1400.01+',
     '0 to 4', '5 to 9', '10 to 14', '15 to 19', '20 to 24', '25 to 29', '30 to 34', '35 to 39', 'Over 40',
-    '10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80',
-    '1 to 500','501 to 1000','1001 to 1500','1501 to 2000','2001 to 2500','2501 to 3000', '3001 to 3500',
-    '3501 to 4000', '4001 to 4500', '4501 to 5000', '5001 to 5500', '5501 to 6000', '0 to -5000', 
-    '-5001 to -10000', '-10001 to -15000', '-15001 to -20000', '-20001 to -25000', '-25001 to -30000', 
+    '0 to 9', '* to 9', '10 to 19', '20 to 29', '30 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', '80 to *',
+    '* to 500','501 to 1000','1001 to 1500','1501 to 2000','2001 to 2500','2501 to 3000', '3001 to 3500',
+    '3501 to 4000', '4001 to 4500', '4501 to 5000', '5001 to 5500', '5501 to 6000', '* to -15001', '-15000 to -12001',
+    '-12000 to -9001', '-9000 to -6001', '-6000 to -3001', '-5000 to *',
     '-30001 to -35000', 'None', 'NA',]
 
 # If an attribute has a specific order, list it here; these should be the *values* not the display strings
 VALUE_SPECIFIC_ORDERS = {
-    'bmi': ['underweight', 'normal weight', 'overweight', 'obese', 'None', ],
+    'bmi': ['underweight', 'normal', 'overweight', 'obese', 'None', ],
     'hpv_status': ['Positive', 'Negative', 'None', ],
     'age_at_diagnosis': simple_number_sort,
     'year_of_diagnosis': ['1976 to 1980', '1981 to 1985', '1986 to 1990', '1991 to 1995', '1996 to 2000', '2001 to 2005', '2006 to 2010', '2011 to 2015', 'None',],
+    'year_of_initial_pathologic_diagnosis': ['1976 to 1980', '1981 to 1985', '1986 to 1990', '1991 to 1995', '1996 to 2000', '2001 to 2005', '2006 to 2010', '2011 to 2015', 'None',],
     'overall_survival': simple_number_sort,
     'event_free_survival': simple_number_sort,
     'days_to_death': simple_number_sort,
-    'days_to_last_followp': simple_number_sort,
+    'days_to_birth': simple_number_sort,
+    'days_to_last_followup': simple_number_sort,
     'days_to_last_known_alive': simple_number_sort,
     'wbc_at_diagnosis': simple_number_sort,
     'pathologic_stage': ['Stage 0','Stage I','Stage IA','Stage IB','Stage II','Stage IIA','Stage IIB','Stage IIC',
@@ -111,7 +113,7 @@ def check_for_order(items, attr):
         ordered_items = []
         for ordinal in item_order:
             for item in items:
-                if item['value'] == ordinal:
+                if item.get('displ_value','') == ordinal or item.get('value','') == ordinal:
                     ordered_items.append(item)
         return ordered_items
     elif attr in ALPHANUM_SORT:
@@ -203,7 +205,7 @@ def is_superuser(this_user):
 def get_cohorts_this_user(this_user, is_active=True):
     isb_superuser = User.objects.get(username='isb')
     public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
-    cohort_perms = list(set(Cohort_Perms.objects.filter(user=this_user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
+    cohort_perms = list(set(Cohort_Perms.objects.select_related('cohort').filter(user=this_user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
     cohorts = Cohort.objects.filter(id__in=cohort_perms, active=is_active).order_by('-last_date_saved')
     return cohorts
 
@@ -330,8 +332,8 @@ def program_is_in_cohort(prog, cohort_progs):
 
 @register.filter
 def program_is_first_in_cohort(prog, cohort_progs):
-    if cohort_progs.count():
-        return (prog.id == cohort_progs[0].id)
+    if len(cohort_progs):
+        return (prog.id == cohort_progs[0]['id'])
     logger.error("[ERROR] This cohort doesn't appear to have any programs associated with it--this means the samples may not have project IDs!")
     return False
 
@@ -365,6 +367,10 @@ def list_contains_name(list, value):
             return True
     return False
 
+
+@register.filter
+def dict_contains_key(dict, key):
+    return key in dict
 
 @register.filter
 def get_named_item(list, value):
