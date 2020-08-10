@@ -10,22 +10,21 @@
     > .container-fluid
         padding-bottom: 0
     h1
-        font-size: 65px
-        font-size: 65px
+        font-size: 55px
     h2
-        font-size: 30px
+        font-size: 25px
     h3
         font-size: 16px
-        //font-size: 20px
     h4
         font-size: 20px
-        //font-size: 25px
     a
         color: #226caa
         &:hover
             color: #2aabd2
     .alert
         margin: 0 -15px
+    .alert-success
+        text-align: center
     .header-div
         text-align: center
         padding: 15px
@@ -35,12 +34,6 @@
         color: #2b537b
     .crdc-div
         color: #5e5e5e
-        >a
-            color: #5e5e5e
-            //font-weight: bold
-            &:hover
-                color: #2aabd2
-                text-decoration: none
     .banner-section, .footer-div
         padding: 0
         a
@@ -94,10 +87,6 @@
         padding: 10px
         h4
             margin: 0
-        //> div
-        //    margin: 5px 0
-    //.panel-*
-    //    padding: 0
     .dbrowser-div
         background-color: #e2ebf3
         h3
@@ -118,7 +107,6 @@
             min-height: 77px
         .panel-body
             min-height: 164px
-            //min-height: 120px
     .resources-div
         background-color: #fee9d5
         h3
@@ -198,9 +186,14 @@
 
 #about
     .partners-div
-        display: inline-block
+        //display: inline-block
+        a:hover
+            text-decoration: none
         img
             height: 80px
+            padding: 10px
+            &.gcp-logo
+                padding: 25px
     .cite-text
         background-color: lighten(grey, 40%)
         color: darken($isb-dark, 10%)

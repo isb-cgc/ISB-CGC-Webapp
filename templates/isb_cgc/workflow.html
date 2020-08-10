@@ -11,8 +11,7 @@
 {% block page_header %}
     <div class="container">
         <h1 class="page-header">Workflow Gallery</h1>
-        <h5>Below are the list of tutorials and sample workflows designed to get users getting started running workflows
-            on Google Cloud Flatform using Snakemake, Nextflow, WDL, and CWL.
+        <h5>Below are tutorials and sample workflows designed to introduce users to running workflows (Snakemake, Nextflow, WDL, and CWL) on Google Cloud Platform (GCP).
         </h5>
     </div>
 {% endblock %}
@@ -23,7 +22,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h3 class="panel-title" role="heading" aria-level="3">
-                            <i class="fa fa-cloud" aria-hidden="true"></i>Getting started with Google Cloud Platform
+                            Getting started with Google Cloud Platform
                         </h3>
                     </div>
                     <div class="panel-body">
@@ -68,11 +67,11 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td>Cheat Sheet</td>
+                                        <td>Virtual Machine (VM) Cheat Sheet</td>
                                         <td>&nbsp;</td>
                                         <td>
                                             <a target="_blank" href="https://isb-cancer-genomics-cloud.readthedocs.io/en/kyle-staging/sections/gcp-info/Cheatsheet.html"
-                                               type="button" class="btn"><i class="fa fa-star" aria-hidden="true"></i>Cheatsheet
+                                               type="button" class="btn"><i class="fa fa-star" aria-hidden="true"></i>Cheat sheet
                                             </a>
                                         </td>
                                     </tr>
@@ -88,13 +87,11 @@
             <div class="col-md-12">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h3 class="panel-title" role="heading" aria-level="3"><i class="fa fa-exchange"
-                                                                                 aria-hidden="true"></i>Sample Workflows
+                        <h3 class="panel-title" role="heading" aria-level="3">
+                            Workflow Examples
                         </h3>
                     </div>
                     <div class="panel-body" aria-expanded="true">
-                        {#                        <div class="panel-body">#}
-
                         <ul class="table-list">
                             <table class="table table-striped table-hover">
                                 <thead>
@@ -239,6 +236,44 @@
                                                                         aria-hidden="true"></i>Docs</a>
                                         <a target="_blank"
                                            href="https://github.com/isb-cgc/RunningWorkflows-on-the-GoogleCloud/tree/master/WDL-GCgather"
+                                           type="button" class="btn"><i class="fa fa-github" aria-hidden="true"></i>Github</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><abbr
+                                            title="Extracting contigs of interest from a mixed library of DNA, using Blastn and Python Script">Blastn pipeline</abbr>
+                                    </td>
+                                    <td>GCP, Nextflow</td>
+                                    <td>Nextflow</td>
+                                    <td>Blast, Python</td>
+                                    <td>Fasta</td>
+                                    <td>Text file with contigs of interest</td>
+                                    <td>
+                                        <a target="_blank"
+                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/kyle-staging/sections/gcp-info/Nextflow-Blast.html"
+                                           type="button" class="btn"><i class="fa fa-book"
+                                                                        aria-hidden="true"></i>Docs</a>
+                                        <a target="_blank"
+                                           href="https://github.com/isb-cgc/RunningWorkflows-on-the-GoogleCloud/tree/master/Nextflow-Blast"
+                                           type="button" class="btn"><i class="fa fa-github" aria-hidden="true"></i>Github</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><abbr
+                                            title="Extracting contigs of interest from a mixed library of DNA, using Blastn and Python Script">Blastn pipeline</abbr>
+                                    </td>
+                                    <td>GCP, CWLtool</td>
+                                    <td>CWL</td>
+                                    <td>Blast, Python</td>
+                                    <td>Fasta</td>
+                                    <td>Text file with contigs of interest</td>
+                                    <td>
+                                        <a target="_blank"
+                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/kyle-staging/sections/gcp-info/CWL-Blast.html"
+                                           type="button" class="btn"><i class="fa fa-book"
+                                                                        aria-hidden="true"></i>Docs</a>
+                                        <a target="_blank"
+                                           href="https://github.com/isb-cgc/RunningWorkflows-on-the-GoogleCloud/tree/master/CWL-Blast"
                                            type="button" class="btn"><i class="fa fa-github" aria-hidden="true"></i>Github</a>
                                     </td>
                                 </tr>

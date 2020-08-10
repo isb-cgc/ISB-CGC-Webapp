@@ -33,19 +33,19 @@
                                                                        id="{% if v.full_id %}{{ program.id }}-{{ v.full_id }}{% endif %}"
                                                                        data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
                                                                        data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
+                                                                {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
                                                                 <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>
                                                             </label>
                                                         </li>
                                                     {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                        <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                        <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                         <li class="extra-values checkbox" style="display:none;">
                                                             <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
                                                                        id="{% if v.full_id %}{{ program.id }}-{{ v.full_id }}{% endif %}"
                                                                        data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
                                                                        data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
+                                                                {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
                                                                 <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>
                                                             </label>
                                                         </li>
@@ -56,14 +56,14 @@
                                                                        id="{% if v.full_id %}{{ program.id }}-{{ v.full_id }}{% endif %}"
                                                                        data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
                                                                        data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
+                                                                {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
                                                                  <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>
                                                             </label>
                                                         </li>
                                                     {% endif %}
                                                 {% endfor %}
                                                 {% if num_more > 0 %}
-                                                    <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                    <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                 {% endif %}
                                             {% endwith %}
                                         </ul>
@@ -93,9 +93,9 @@
                                             <li class="checkbox">
                                                 <label>
                                                     <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
-                                                           data-value-displ-name="{% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %}"
+                                                           data-value-displ-name="{% if v.value == 'None' %}None{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %}"
                                                            data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
-                                                     {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %} <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>
+                                                     {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %} <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>
                                                 </label>
                                             </li>
                                         {% endfor %}
