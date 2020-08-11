@@ -127,7 +127,7 @@ require([
                 if (link_to_bqr) {
                     data.responseJSON.msg = data.responseJSON.msg.replace(
                         "register at least one dataset",
-                        '<a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/program_data_upload.html#registering-cloud-storage-buckets-and-bigquery-datasets-a-pre-requisite-for-using-your-own-data-in-isb-cgc" target="_BLANK">register at least one dataset</a>'
+                        '<a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/program_data_upload.html#registering-cloud-storage-buckets-and-bigquery-datasets-a-pre-requisite-for-using-your-own-data-in-isb-cgc" target="_BLANK">register at least one dataset</a>'
                     );
                 }
                 if (link_to_gcpr) {
