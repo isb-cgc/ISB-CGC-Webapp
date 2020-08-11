@@ -35,7 +35,7 @@ env_variables:
   DJANGO_SETTINGS_MODULE: 'isb_cgc.settings'
 
 network:
-  name: solr
+  name: solr-uat
   instance_tag: isb-cgc-webapp
 
 skip_files:
