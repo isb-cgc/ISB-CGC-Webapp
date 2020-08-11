@@ -36,6 +36,7 @@ env_variables:
 
 network:
   name: solr-uat
+  subnetwork_name: uat-subnet
   instance_tag: isb-cgc-webapp
 
 skip_files:
