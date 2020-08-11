@@ -66,6 +66,8 @@
         padding: 5px 10px
         font-size: 14px
         border-radius: 10px
+        a
+            text-decoration: none
     .landing-icon
         background-size: contain
         background-repeat: no-repeat
@@ -74,6 +76,9 @@
         height: 30px
         margin: auto
         display: inline-block
+    .icon-caption
+        font-size: 14px
+        color: #777777
 
     .panel
         margin-left: auto
@@ -95,6 +100,13 @@
             color: #226caa
         .panel
             border-color: #2b537b
+        .panel-footer a:hover
+            .learn-icon
+                background-image: url('../img/blue-lightbulb-hover.png')
+            .launch-icon
+                background-image: url('../img/blue-rocket-hover.png')
+            .icon-caption
+                color: #2b537b
         .learn-icon
             background-image: url('../img/blue-lightbulb.png')
             &:hover
@@ -115,26 +127,29 @@
             color: #f18621
         .panel
             border-color: #925122
+        .panel-footer a:hover
+            .learn-icon
+                background-image: url('../img/orange-lightbulb-hover.png')
+            .launch-icon
+                background-image: url('../img/orange-rocket-hover.png')
+            .statistical-icon
+                background-image: url('../img/orange-statistical-hover.png')
+            .community-icon
+                background-image: url('../img/orange-community-hover.png')
+            .github-icon
+                background-image: url('../img/orange-github-hover.png')
+            .icon-caption
+                color: #925122
         .learn-icon
             background-image: url('../img/orange-lightbulb.png')
-            &:hover
-                background-image: url('../img/orange-lightbulb-hover.png')
         .launch-icon
             background-image: url('../img/orange-rocket.png')
-            &:hover
-                background-image: url('../img/orange-rocket-hover.png')
         .statistical-icon
             background-image: url('../img/orange-statistical.png')
-            &:hover
-                background-image: url('../img/orange-statistical-hover.png')
         .community-icon
             background-image: url('../img/orange-community.png')
-            &:hover
-                background-image: url('../img/orange-community-hover.png')
         .github-icon
             background-image: url('../img/orange-github.png')
-            &:hover
-                background-image: url('../img/orange-github-hover.png')
         .panel-heading
             min-height: 77px
         .panel-body
