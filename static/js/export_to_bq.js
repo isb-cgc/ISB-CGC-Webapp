@@ -118,7 +118,8 @@ require([
         }
     });
 
-    $('.container').on('hide.bs.modal', '#export-to-bq-modal', function () {
+    $('#export-to-bq-modal').on('hide.bs.modal', function () {
+    // $('.container').on('hide.bs.modal', '#export-to-bq-modal', function () {
         $('.table-type, .new-table-name').attr('disabled', 'disabled');
         $('.table-type, .new-table-name').attr('title', 'Select a project and dataset to enable this option');
         $('.new-table-name').show();
@@ -129,7 +130,8 @@ require([
         $('#export-underway').hide();
     });
 
-    $('.container').on('click', 'button[data-target="#export-to-bq-modal"]', function (e) {
+    $('button[data-target="#export-to-bq-modal"]').on('click', function (e) {
+    // $('.container').on('click', 'button[data-target="#export-to-bq-modal"]', function (e) {
         // Don't reload the data if we have it already
         if($('#export-to-bq-modal select optgroup').length > 0) {
             $('#export-to-bq-modal .loading-overlay').hide();
@@ -189,7 +191,8 @@ require([
     });
 
 
-    $('.container').on('submit', '#export-to-bq-form', function(e) {
+    $('#export-to-bq-form').on('submit', function(e) {
+    // $('.container').on('submit', '#export-to-bq-form', function(e) {
         e.preventDefault();
         e.stopPropagation();
 
