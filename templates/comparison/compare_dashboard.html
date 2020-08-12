@@ -6,13 +6,21 @@
 
 {% block header %}
 
-
+    <!-- custom css -->
     {
     <link type="text/css" rel="stylesheet" href="{% static 'css/compare_dashboard.css' %}"/>}
     {
     <link type="text/css" rel="stylesheet" href="{% static 'css/jquery.qtip.min.css' %}"/>}
 
+    <!-- Font Awesome JS -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js"
+            integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ"
+            crossorigin="anonymous"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js"
+            integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
+            crossorigin="anonymous"></script>
 
+    <script src="js/libs/d3.v5.min.js"></script>
 {% endblock %}
 
 
@@ -33,97 +41,118 @@
 
     <div class="content-container">
 
-        <div class="panel-invisible" id="panel">
+    <div class="panel-invisible" id="panel">
 
-            <!-- tabs of panel -->
-            <ul class="nav nav-tabs_excel" role="tablist" id="comparison-tabs">
+        <!-- tabs of panel -->
+        <ul class="nav nav-tabs_excel" role="tablist" id="comparison-tabs">
 
-                <li role="presentation" class="active">
-                    <a href="#label-comp-tab" id="comp-tab" role="tab" data-toggle="tab"
-                       data-toggle-type="comparison">Label
-                        Comparison</a>
-                    <div class="dropdown">
-                        <a class="dropdown-toggle comparison-drop" id="dropdown-label" role="button"
-                           data-toggle="dropdown"><i
-                                class="fa fa-caret-down"></i></a>
+            <li role="presentation" class="active">
+                <a href="#label-comp-tab" id="comp-tab" role="tab" data-toggle="tab"
+                   data-toggle-type="comparison">Label
+                    Comparison</a>
+                <div class="dropdown">
+                    <a class="dropdown-toggle comparison-drop" id="dropdown-label" role="button"
+                       data-toggle="dropdown"><i
+                            class="fa fa-caret-down"></i></a>
+                    <ul class="dropdown-menu">
+                        <li role="menuitem"><a data-toggle="modal" role="button" data-target="">Edit details</a>
+                        </li>
+                        <li role="menuitem"><a data-toggle="modal" role="button" data-target="">Delete</a></li>
+                    </ul>
+                </div>
+            </li>
+            <!-- plus sign for adding another comparison-->
+            <li><a href="{% url 'cohort_list' %}"><i class="fa fa-plus"></i></a></li>
+        </ul>  <!-- end of nav-tabs_excel -->
 
-                        <ul class="dropdown-menu">
-                            <li role="menuitem"><a data-toggle="modal" role="button" data-target="">Edit details</a>
-                            </li>
-                            <li role="menuitem"><a data-toggle="modal" role="button" data-target="">Delete</a></li>
-                        </ul>
+
+        <!-- content of each tab -->
+        <div class="tab-content">
+
+            <div class="tab-pane fade in active" id="label-comp-tab" role="tabpanel">
+
+                <nav id="sidebar">
+                    <div class="sidebar-header">
+                        <h3>Set Difference</h3>
                     </div>
-                </li>
-                <!-- plus sign for adding another comparison-->
-                <li><a href="{% url 'cohort_list' %}"><i class="fa fa-plus"></i></a></li>
-            </ul>  <!-- end of nav-tabs_excel -->
+                    <div class="card" id="labels-card">
 
-
-            <!-- content of each tab -->
-            <div class="tab-content">
-
-                <div class="tab-pane fade in active" id="label-comp-tab" role="tabpanel">
-                    <div class="worksheet-header">
-                        <!-- side panel for venn diagram -->
-                        <!-- comparison description -->
-                        <p>{{ comparison.description }}</p>
-                        <button class="btn btn-primary pull-right" id="save-but">Save Comparison</button>
-                    </div>
-
-                    <div class="grid-container">
-
-                        <div class="sidebar" id="menubar">
-
-                            <button id="sidebar-but">M</button>
-
-
-                        </div>
-
-                        <div class="comp-body-content">
-
-
-                            {#                            <div class="lineHorizontal__container">#}
-                            {#                                <div class="lineHorizontal"></div>#}
-                            {#                            </div>#}
-                            {#                            <div class="comparison-body"></div>#}
-                            <div class="card" id="labels-card">
-                                <div class="card-content" id="card-body">
-                                    <form id="sel-labels" method="post" action="">
-                                        <p id="form-title" class="h4 text-left py-4">Select labels:</p>
-                                        <div class="form-check">
-                                            <input type="checkbox" class="custom-control-input"
-                                                   id="survival-analysis"
-                                                   checked>
-                                            <label class="custom-control-label" for="survival-analysis">Survival
-                                                Analysis</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input type="checkbox" class="custom-control-input" id="age" unchecked>
-                                            <label class="custom-control-label" for="age">Age</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input type="checkbox" class="custom-control-input" id="gender"
-                                                   unchecked>
-                                            <label class="custom-control-label" for="gender">Gender</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input type="checkbox" class="custom-control-input" id="vital-status"
-                                                   unchecked>
-                                            <label class="custom-control-label" for="vital-status">Vital
-                                                Status</label>
-                                        </div>
-                                        <div class="form-group">
-                                            <button class="btn btn-default" type="submit">Submit</button>
-                                        </div>
-                                    </form>
+                        <div class="card-content" id="card-body">
+                            <form id="sel-labels" method="post" action="">
+                                <p id="form-title" class="h4 text-left py-4">Select labels:</p>
+                                <div class="form-check">
+                                    <input type="checkbox" class="custom-control-input"
+                                           id="survival-analysis"
+                                           checked>
+                                    <label class="custom-control-label" for="survival-analysis">Survival
+                                        Analysis</label>
                                 </div>
-                            </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="custom-control-input" id="age" unchecked>
+                                    <label class="custom-control-label" for="age">Age</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="custom-control-input" id="gender"
+                                           unchecked>
+                                    <label class="custom-control-label" for="gender">Gender</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="custom-control-input" id="vital-status"
+                                           unchecked>
+                                    <label class="custom-control-label" for="vital-status">Vital
+                                        Status</label>
+                                </div>
+                                <div class="form-group">
+                                    <button class="btn btn-default" type="submit">Submit</button>
+                                </div>
+                            </form>
                         </div>
-
                     </div>
+
+                </nav>
+
+
+                {#                            <button id="sidebar-but">M</button>#}
+
+
+                {#                        </div>#}
+
+                {#                        <div class="comp-body-content">#}
+
+
+                {#                            <div class="lineHorizontal__container">#}
+                {#                                <div class="lineHorizontal"></div>#}
+                {#                            </div>#}
+                {#                            <div class="comparison-body"></div>#}
+
+
+                {#                        </div>#}
+
+                <div id="content">
+
+                    <nav class="navbar content-collapse">
+                        <div class="container-fluid">
+                            {#                            <button type="button" id="sidebarCollapse" class="btn btn-primary">#}
+                            {#                                <i class="fas fa-align-justify"></i>#}
+                            {#                            </button>#}
+                            {#                                <i id="sidebarCollapse" class="fas fa-align-justify fa-2x"></i>#}
+                            <a href="#">
+                                <span class="fas fa-align-justify fa-2x" id="sidebarCollapse"></span>
+                            </a>
+
+                            <button class="btn btn-primary pull-right" id="save-but">Save Comparison</button>
+
+                        </div>
+                        <div class="compare-desc">
+                            <p>Description goes here!</p>
+                        </div>
+                    </nav>
 
 
                 </div>
+
+
+                {#                </div>#}
 
                 {#                <div class="tab-pane fade" id="set-diff-tab" role="tabpanel">#}
                 {#                    <h6>Set Difference Results Here</h6>#}
@@ -141,7 +170,18 @@
 
     {#    </div>#}
     <!-- end of container -->
-
+    <!-- jQuery CDN - Slim version (=without AJAX) -->
+    {#        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"#}
+    {#                integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"#}
+    {#                crossorigin="anonymous"></script>#}
+    <!-- Popper.JS -->
+    {#        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"#}
+    {#                integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ"#}
+    {#                crossorigin="anonymous"></script>#}
+    <!-- Bootstrap JS -->
+    {#    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"#}
+    {#            integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"#}
+    {#            crossorigin="anonymous"></script>#}
     <script type="text/javascript">
         var base_url = '{{ base_url|safe }}';
     </script>

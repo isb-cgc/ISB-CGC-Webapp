@@ -4,12 +4,12 @@ from django.contrib.auth.decorators import login_required
 import json
 from cohorts.models import Cohort
 
-@login_required
+# @login_required
 def compare_cohorts(request, cohort_id_1=1, cohort_id_2=2):
     return render(request, 'comparison/compare_dashboard.html')
 
 
-@login_required
+# @login_required
 def compare_validate_cohorts(request):
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
