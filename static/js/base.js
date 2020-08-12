@@ -114,7 +114,7 @@ require([
                             '<div class="alert alert-'+messageType+' alert-dismissible">' +
                             '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'
                             + message + '</div></div></div>');
-        message_obj.prependTo('main > .container');
+        message_obj.prependTo('main > .container-fluid');
     };
 
     $.tablesorter.addParser({

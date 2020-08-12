@@ -268,7 +268,7 @@ require([
         if(file_list_total <= 0) {
             // Can't download/export something that isn't there
             $(tab_selector).find('.download-link .btn, .export-btn').attr('disabled','disabled');
-        } else if(!HAS_USER_DATA) {
+        } else if(!HAS_USER_DATA &&  request_user_id) {
             $(tab_selector).find('.download-link .btn, .export-btn').removeAttr('disabled');
         }
 
@@ -890,8 +890,10 @@ require([
 
     // When an export button is clicked, add the filters to that modal's form
     // Note that the export modals will always clear any 'filters' inputs applied to them when hidden/closed
-    $('.container').on('click', 'button[data-target="#export-to-bq-modal"], button[data-target="#export-to-gcs-modal"]', function (e) {
+    $('button[data-target="#export-to-bq-modal"], button[data-target="#export-to-gcs-modal"]').on('click', function (e) {
+    // $('.container').on('click', 'button[data-target="#export-to-bq-modal"], button[data-target="#export-to-gcs-modal"]', function (e) {
         var target_form = $($($(this).data('target')).find('form')[0]);
+        // console.log(target_form);
         var this_tab = $(this).parents('.data-tab');
         var tab_type = this_tab.data('file-type');
 
