@@ -75,8 +75,7 @@ require([
         }
     });
 
-    $('#export-to-gcs-modal').on('hide.bs.modal', function () {
-    // $('.container').on('hide.bs.modal', '#export-to-gcs-modal', function () {
+    $('.container').on('hide.bs.modal', '#export-to-gcs-modal', function () {
         $('.file-name, .file-format').attr('disabled', 'disabled');
         $('.file-name, .file-format').attr('title', 'Select a project and bucket to enable this option.');
         $('.file-name, .file-format').show();
@@ -86,8 +85,7 @@ require([
         $('#gcs-export-underway').hide();
     });
 
-    $('button[data-target="#export-to-gcs-modal"]').on('click', function (e) {
-    // $('.container').on('click', 'button[data-target="#export-to-gcs-modal"]', function (e) {
+    $('.container').on('click', 'button[data-target="#export-to-gcs-modal"]', function (e) {
         // Don't reload the data if we have it already
         if($('#export-to-gcs-modal select optgroup').length > 0) {
             $('#export-to-gcs-modal .loading-overlay').hide();
@@ -145,7 +143,6 @@ require([
     });
 
 
-    // $('.container').on('submit', '#export-to-gcs-form', function(e) {
     $('#export-to-gcs-form').on('submit', function(e) {
         e.preventDefault();
         e.stopPropagation();
