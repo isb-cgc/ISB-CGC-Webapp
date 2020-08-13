@@ -20,7 +20,9 @@
             integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
             crossorigin="anonymous"></script>
 
-    <script src="js/libs/d3.v5.min.js"></script>
+    <!-- D3js lib -->
+    <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
+
 {% endblock %}
 
 
@@ -75,8 +77,8 @@
                     <div class="sidebar-header">
                         <h3>Set Difference</h3>
                     </div>
-                    <div class="card" id="labels-card">
 
+                    <div class="card" id="labels-card">
                         <div class="card-content" id="card-body">
                             <form id="sel-labels" method="post" action="">
                                 <p id="form-title" class="h4 text-left py-4">Select labels:</p>
@@ -108,68 +110,25 @@
                             </form>
                         </div>
                     </div>
-
                 </nav>
 
-
-                {#                            <button id="sidebar-but">M</button>#}
-
-
-                {#                        </div>#}
-
-                {#                        <div class="comp-body-content">#}
-
-
-                {#                            <div class="lineHorizontal__container">#}
-                {#                                <div class="lineHorizontal"></div>#}
-                {#                            </div>#}
-                {#                            <div class="comparison-body"></div>#}
-
-
-                {#                        </div>#}
-
                 <div id="content">
-
                     <nav class="navbar content-collapse">
                         <div class="container-fluid">
-                            {#                            <button type="button" id="sidebarCollapse" class="btn btn-primary">#}
-                            {#                                <i class="fas fa-align-justify"></i>#}
-                            {#                            </button>#}
-                            {#                                <i id="sidebarCollapse" class="fas fa-align-justify fa-2x"></i>#}
                             <a href="#">
                                 <span class="fas fa-align-justify fa-2x" id="sidebarCollapse"></span>
                             </a>
-
                             <button class="btn btn-primary pull-right" id="save-but">Save Comparison</button>
-
                         </div>
                         <div class="compare-desc">
                             <p>Description goes here!</p>
                         </div>
                     </nav>
-
-
                 </div>
-
-
-                {#                </div>#}
-
-                {#                <div class="tab-pane fade" id="set-diff-tab" role="tabpanel">#}
-                {#                    <h6>Set Difference Results Here</h6>#}
-                {#                </div>#}
             </div>
-            <!-- end of tab-content -->
         </div>
-        <!-- end of panel -->
     </div>
 
-    {#    <div class="container">#}
-
-
-    <!-- panel -->
-
-    {#    </div>#}
-    <!-- end of container -->
     <!-- jQuery CDN - Slim version (=without AJAX) -->
     {#        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"#}
     {#                integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"#}
@@ -182,6 +141,12 @@
     {#    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"#}
     {#            integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"#}
     {#            crossorigin="anonymous"></script>#}
+
+    <!-- D3js setup test -->
+    <script>
+        console.log(d3);
+    </script>
+
     <script type="text/javascript">
         var base_url = '{{ base_url|safe }}';
     </script>
