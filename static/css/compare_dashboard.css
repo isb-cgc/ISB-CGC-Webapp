@@ -1,16 +1,201 @@
+.content-container {
+    margin-left: 20px;
+    margin-right: 20px;
+    width: 98vw;
+}
 
-/*.dropdown {*/
-/*    background-color: oldlace;*/
+
+/*.grid-container {*/
+/*    display: flex;*/
+/*    width: 100%;*/
+/*    !*align-items: stretch;*!*/
+/*    border: solid black;*/
 /*}*/
 
-#dropdown-label {
-    /*background-color: floralwhite;*/
+/*.grid-container {*/
+/*    !*border: solid green;*!*/
+/*    width: 96vw;*/
+/*    height: 95%;*/
+/*    display: flex;*/
+/*    transition: 1s ease;*/
+/*    position: absolute;*/
+/*    left: 0;*/
+/*}*/
 
-    background-color: #fee9d5;
-    border-radius: 2px;
-    padding-right: 10px;
+/*#content {*/
+/*    !*height: 500px;*!*/
+/*    !*min-width: 100%;*!*/
+/*    !*max-width: 30%;*!*/
+/*    !*width: 100%;*!*/
+/*    height: 100%;*/
+/*    background-color: white;*/
+/*}*/
+
+#content {
+    /*border: solid salmon;*/
+    overflow: hidden;
+    height: 100%;
+    background-color: white;
+}
+
+#label-comp-tab {
+    /*border: solid springgreen;*/
+    position: absolute;
+    left: 0;
+    top: 38px;
+    width: 100%;
+    overflow: hidden;
+    height: 100%;
+}
+
+#sidebar {
+    width: 370px;
+    float: left;
+    /*border: solid crimson;*/
+    height: 100%;
+    /*min-width: 25%;*/
+    /*max-width: 25%;*/
+    /*height: 100%;*/
+    background: #f7f7f7;
+    /*color: black;*/
+    transition: .8s ease;
+    /*border: solid red;*/
+}
+
+#sidebar.active {
+    margin-left: -370px;
+}
+
+#sidebar .sidebar-header {
+    padding: 7px;
+   /*background: #f7f7f7;*/
+background-color: darksalmon;
+    text-align: center;
+
 
 }
+
+#sidebarCollapse {
+    position: absolute;
+    margin: 10px 0px 350px;
+    left: 5px;
+
+}
+
+#save-but {
+    margin-top: 10px;
+
+}
+
+.compare-desc {
+    position: absolute;
+    margin: 50px 10px 350px;
+}
+
+@media (max-width: 768px) {
+    #sidebar {
+        margin-left: -370px;
+    }
+    #sidebar.active {
+        margin-left: 0;
+    }
+}
+
+
+/*.sidebar {*/
+/*    width: 27vw;*/
+/*    height: 100%;*/
+/*    background: #f7f7f7;*/
+/*    transition: 1s ease;*/
+/*    position: relative;*/
+/*}*/
+
+/*#menubar .nav {*/
+/*    position: absolute;*/
+/*}*/
+
+/*.comp-body-content {*/
+/*    width: 73%;*/
+/*    height: 100%;*/
+/*    background-color: white;*/
+/*    transition: 1s ease;*/
+/*}*/
+
+/*#label-comp-tab {*/
+/*    border: solid red;*/
+/*    width: 94vw;*/
+/*    !*margin-left: 5px;*!*/
+/*    !*margin-right: 5px;*!*/
+/*    !*position: absolute;*!*/
+/*    !*left: 0;*!*/
+/*margin: 0 auto;*/
+
+/*}*/
+
+.tab-content {
+    padding: 5px 10px;
+    height: 150vw;
+    /*border: solid blue;*/
+    /*display: flex;*/
+}
+
+
+#panel {
+    width: 96vw;
+    height: 200vw;
+    margin-left: 10px;
+    margin-right: 10px;
+    position: absolute;
+    /*border: solid black;*/
+}
+
+/*#sidebar-but {*/
+/*    position: absolute;*/
+/*    border: none;*/
+/*    height: 40px;*/
+/*    width: 40px;*/
+/*    border-radius: 50%;*/
+/*    box-shadow: 0px 1px 4px 1px rgba(0, 0, 0, .3);*/
+/*    left: 100%;*/
+/*    top: 2rem;*/
+/*    transform: translateX(-50%);*/
+/*    cursor: pointer;*/
+/*}*/
+
+/*.comp-body-content_large {*/
+/*    width: 100%;*/
+/*}*/
+
+/*.sidebar_small {*/
+/*    width: 0%;*/
+/*}*/
+
+/*.card_small {*/
+/*    width: 0%;*/
+/*}*/
+
+/*#sidebar-but {*/
+
+/*    margin: 50px 330px 350px;*/
+/*    position: absolute;*/
+/*    border: none;*/
+/*    height: 30px;*/
+/*    width: 30px;*/
+/*    border-radius: 50%;*/
+/*    box-shadow: 0px 1px 4px 1px rgba(0, 0, 0, .3);*/
+/*    left: 4.4%;*/
+/*    background-color: #fee9d5;*/
+/*}*/
+
+
+/*#dropdown-label {*/
+/*    !*background-color: floralwhite;*!*/
+
+/*    background-color: #fee9d5;*/
+/*    border-radius: 2px;*/
+/*    padding-right: 10px;*/
+
+/*}*/
 
 #panel .tab-content {
     /*background-color: cornsilk;*/
@@ -22,8 +207,8 @@
 }
 
 .lineHorizontal {
-  border-top: 1px solid lightgrey;
-  width: 100%;
+    border-top: 1px solid lightgrey;
+    width: 100%;
 }
 
 /*#comp-tab {*/
@@ -49,12 +234,14 @@
 /*#diff-tab {*/
 /*    background-color: white;*/
 /*}*/
-.fa-caret-down {
-    padding-left: 3px;
-}
+
+/*.fa-caret-down {*/
+/*    padding-left: 3px;*/
+/*}*/
 
 
 #labels-card {
+    /*display: flex;*/
     width: 25rem;
     papadding: 60px;
     margin: 10px 20px 350px;
