@@ -29,7 +29,7 @@ builtins:
 - deferred: on
 
 beta_settings:
-    cloud_sql_instances: isb-cgc-test:us-central1:test-data-migration
+    cloud_sql_instances: isb-cgc-test:us-central1:test
 
 env_variables:
   DJANGO_SETTINGS_MODULE: 'isb_cgc.settings'
