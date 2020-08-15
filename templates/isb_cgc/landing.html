@@ -30,47 +30,46 @@
                 <div class="row ">
                     <div class="col-xs-1"></div>
                     <div class="col-xs-10">
-                        <strong>Get Started!</strong>
-                        <strong><a
+                        <strong>Get started today!</strong>
+                        <strong> Contact us about setting up your own Google Cloud Platform Project with <a
                                 href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowtoRequestCloudCredits.html"
-                                target="_blank">Free Cloud credits</a></strong> with pointers to how to
-                        get in touch with us and quick start pages
+                                target="_blank">free cloud credits</a></strong>
                     </div>
                     <div class="col-xs-1">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
+
                 </div>
             </div>
         </div>
         <div class="header-div container-fluid">
             <div class="row ">
-                <div class="col-lg-3"></div>
-                <div class="col-lg-6">
+                <div class="col-lg-2"></div>
+                <div class="col-lg-8">
 
                     <div class="crdc-div">A RESOURCE OF THE <a href="https://datacommons.cancer.gov/"
-                                                               target="_blank">NIH CANCER RESEARCH DATA COMMONS</a>
+                                                               target="_blank">NCI CANCER RESEARCH DATA COMMONS</a>
                     </div>
                     <h1>ISB-CGC</h1>
                     <h2>Cancer Gateway in the Cloud</h2>
-                    <div>Access, Explore and Analyze Large-Scale Cancer Data <br/> Through the Google Cloud with ISB-CGC</div>
+                    <div>Access, Explore and Analyze Large-Scale Cancer Data Through the Google Cloud</div>
                 </div>
-                <div class="col-lg-3"></div>
+                <div class="col-lg-2"></div>
             </div>
         </div>
         <div class="jumbotron-fluid dbrowser-div">
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-3"></div>
-                    <div class="col-xs-12 col-md-6 col-lg-12">
+                    <div class="col-md-6 col-lg-12">
                         <h3>Data Browsers</h3>
                     </div>
                     <div class="col-md-3"></div>
                 </div>
-                <div class="row">
-                    <div class="col-lg-15p"></div>
-                    <div class="col-lg-3">
+                <div class="row cards-row">
+                    <div class="col-lg-3 col-md-12 cards-col">
                         <div class="panel">
                             <div class="panel-heading row">
                                 <div class="col-xs-9"><h4>BigQuery Table Search</h4></div>
@@ -80,31 +79,35 @@
                                 </div>
                             </div>
                             <div class="panel-body">
-                                Browse metadata and molecular cancer data BigQuery tables from the Genomic Data Commons
-                                and other sources. Jump directly to a table to perform discovery and computation via
-                                Structured Query Language (SQL).
+                                Browse BigQuery tables of metadata and molecular cancer data from the Genomic Data
+                                Commons and other sources. Jump directly to a table to perform discovery and computation
+                                via SQL.
                             </div>
                             <div class="panel-footer">
                                 <div class="row">
                                     <div class="col-xs-2"></div>
                                     <div class="col-xs-4 text-center">
-                                        <a class="learn-icon landing-icon" target="_blank"
+                                        <a target="_blank"
                                            href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/BigQueryTableSearchUI.html">
+                                            <div class="learn-icon landing-icon">
+                                            </div>
+                                            <div class="icon-caption">Learn</div>
                                         </a>
-                                        <div class="text-muted">Learn</div>
+
                                     </div>
                                     <div class="col-xs-4 text-center">
-                                        <a class="launch-icon landing-icon" target="_blank"
+                                        <a target="_blank"
                                            href="{% url 'bq_meta_search' %}">
+                                            <div class="launch-icon landing-icon"></div>
+                                            <div class="icon-caption">Launch</div>
                                         </a>
-                                        <div class="text-muted">Launch</div>
                                     </div>
                                     <div class="col-xs-2"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3">
+                    <div class="col-lg-3 col-md-12 cards-col">
                         <div class="panel">
                             <div class="panel-heading row">
                                 <div class="col-xs-9"><h4>Data Browser</h4></div>
@@ -122,23 +125,26 @@
                                 <div class="row">
                                     <div class="col-xs-2"></div>
                                     <div class="col-xs-4 text-center">
-                                        <a class="learn-icon landing-icon" target="_blank"
-                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/Saved-Cohorts.html#file-browserl">
+                                        <a  target="_blank"
+                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/DataBrowser.html">
+                                            <div class="learn-icon landing-icon"></div>
+                                            <div class="icon-caption">Learn</div>
                                         </a>
-                                        <div class="text-muted">Learn</div>
+
                                     </div>
                                     <div class="col-xs-4 text-center">
-                                        <a class="launch-icon landing-icon" target="_blank"
+                                        <a target="_blank"
                                            href="/cohorts/filelist/">
+                                            <div class="launch-icon landing-icon"></div>
+                                            <div class="icon-caption">Launch</div>
                                         </a>
-                                        <div class="text-muted">Launch</div>
                                     </div>
                                     <div class="col-xs-2"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3">
+                    <div class="col-lg-3 col-md-12 cards-col">
                         <div class="panel">
                             <div class="panel-heading row">
                                 <div class="col-xs-9"><h4>Chromosomal Aberrations & Gene Fusions DB</h4></div>
@@ -155,17 +161,20 @@
                                 <div class="row">
                                     <div class="col-xs-2"></div>
                                     <div class="col-xs-4 text-center">
-                                        <a class="learn-icon landing-icon" target="_blank"
+                                        <a target="_blank"
                                            href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/data/Mitelman_about.html">
+                                            <div class="learn-icon landing-icon"></div>
+                                            <div class="icon-caption">Learn</div>
+
                                         </a>
-                                        <div class="text-muted">Learn</div>
+
                                     </div>
                                     <div class="col-xs-4 text-center">
-                                        <a class="launch-icon landing-icon" target="_blank"
+                                        <a target="_blank"
                                            href="https://mitelmandatabase.isb-cgc.org">
+                                            <div class="launch-icon landing-icon"></div>
+                                            <div class="icon-caption">Launch</div>
                                         </a>
-                                        <div class="text-muted">Launch</div>
-
                                     </div>
                                     <div class="col-xs-2"></div>
                                 </div>
@@ -179,14 +188,14 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-3"></div>
-                    <div class="col-xs-12 col-md-6 col-lg-12">
+                    <div class="col-md-6 col-lg-12">
                         <h3>Resources</h3>
                     </div>
                     <div class="col-md-3"></div>
                 </div>
 
-                <div class="row">
-                    <div class="col-lg-3">
+                <div class="row cards-row">
+                    <div class="col-lg-3 col-md-12 cards-col">
                         <div class="panel">
                             <div class="panel-heading row">
                                 <div class="col-xs-9"><h4>Interactive Patient Cohort Exploration</h4></div>
@@ -204,23 +213,26 @@
                                 <div class="row">
                                     <div class="col-xs-2"></div>
                                     <div class="col-xs-4 text-center">
-                                        <a class="learn-icon landing-icon" target="_blank"
-                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/Saved-Cohorts.html">
+                                        <a target="_blank"
+                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/DataExplorer.html">
+                                             <div class="learn-icon landing-icon" ></div>
+                                             <div class="icon-caption">Learn</div>
                                         </a>
-                                        <div class="text-muted">Learn</div>
+
                                     </div>
                                     <div class="col-xs-4 text-center">
-                                        <a class="launch-icon landing-icon" target="_blank"
+                                        <a target="_blank"
                                            href="{% url 'cohort' %}">
+                                            <div class="launch-icon landing-icon" ></div>
+                                            <div class="icon-caption">Launch</div>
                                         </a>
-                                        <div class="text-muted">Launch</div>
                                     </div>
                                     <div class="col-xs-2"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3">
+                    <div class="col-lg-3 col-md-12 cards-col">
                         <div class="panel">
                             <div class="panel-heading row">
                                 <div class="col-xs-9"><h4>Programmatic Access</h4></div>
@@ -230,32 +242,33 @@
                                 </div>
                             </div>
                             <div class="panel-body">
-                                Access data through command-line interfaces including: Python, R, bash, etc. The ISB-CGC
-                                API can be used to create or modify cohorts and view metadata about patients, samples,
-                                or information about your Google Cloud Project.
+                                Learn more about how to access and analyze cancer data through programmatic interfaces
+                                including Google Cloud virtual machines and APIs.
                             </div>
                             <div class="panel-footer">
                                 <div class="row">
                                     <div class="col-xs-2"></div>
                                     <div class="col-xs-4 text-center">
-                                        <a class="learn-icon landing-icon" target="_blank"
-                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/progapi/progAPI-v4/Programmatic-Demo.html">
+                                        <a target="_blank"
+                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/ProgrammaticAccess.html">
+                                            <div class="learn-icon landing-icon"></div>
+                                            <div class="icon-caption">Learn</div>
                                         </a>
-                                        <div class="text-muted">Learn</div>
                                     </div>
                                     <div class="col-xs-4 text-center">
-                                        <a class="launch-icon landing-icon" target="_blank"
+                                        <a target="_blank"
                                            href="{% url 'programmatic_access' %}">
-{#                                           href="https://api-dot-isb-cgc.appspot.com/v4/swagger">#}
+                                            <div class="launch-icon landing-icon"></div>
+                                            <div class="icon-caption">Launch</div>
                                         </a>
-                                        <div class="text-muted">Launch</div>
+
                                     </div>
                                     <div class="col-xs-2"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3">
+                    <div class="col-lg-3 col-md-12 cards-col">
                         <div class="panel">
                             <div class="panel-heading row">
                                 <div class="col-xs-9"><h4>Notebooks</h4></div>
@@ -266,34 +279,38 @@
                             </div>
                             <div class="panel-body">
                                 A collection of notebooks written in R and Python, to serve as both tutorials or
-                                analysis tools for a range of users. Including reproductions of Regulome Explorer
+                                analysis tools for a range of users; includes reproductions of Regulome Explorer
                                 functionality.
                             </div>
                             <div class="panel-footer">
                                 <div class="row">
                                     <div class="col-xs-4 text-center">
-                                        <a class="statistical-icon landing-icon" target="_blank"
+                                        <a target="_blank"
                                            href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/RegulomeExplorerNotebooks.html">
+                                            <div class="statistical-icon landing-icon"></div>
+                                            <div class="icon-caption">Statistical</div>
                                         </a>
-                                        <div class="text-muted">Statistical</div>
+
                                     </div>
                                     <div class="col-xs-4 text-center">
-                                        <a class="community-icon landing-icon" target="_blank"
+                                        <a target="_blank"
                                            href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html">
+                                            <div class="community-icon landing-icon"></div>
+                                            <div class="icon-caption">Community</div>
                                         </a>
-                                        <div class="text-muted">Community</div>
                                     </div>
                                     <div class="col-xs-4 text-center">
-                                        <a class="github-icon landing-icon" target="_blank"
+                                        <a target="_blank"
                                            href="https://github.com/isb-cgc/Community-Notebooks">
+                                            <div class="github-icon landing-icon"></div>
+                                            <div class="icon-caption">GitHub</div>
                                         </a>
-                                        <div class="text-muted">Github</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3">
+                    <div class="col-lg-3 col-md-12 cards-col">
                         <div class="panel">
                             <div class="panel-heading row">
                                 <div class="col-xs-9"><h4>Controlled Access Data</h4></div>
@@ -301,33 +318,32 @@
                                     <img src="{% static 'img/cad-icon.png' %}" class="img-fluid"
                                          alt="bq table icon">
                                 </div>
-{#                                <div class="col-xs-3 padding-left-0">#}
-{#                                    <div style="background-color: #fee9d5;border-radius: 8px;font-size: 35px; height:56.3px; padding: 7px; text-align: center; vertical-align: center;">#}
-{#                                        <i class="fa fa-key inline-block" aria-hidden="true"></i></div>#}
-{#                                </div>#}
                             </div>
                             <div class="panel-body">
-                                Authenticated user with dbGaP authorization can access various controlled-access data.
+                                Sign in to access controlled-access data on the Google Cloud. Authenticated users with
+                                proper dbGaP authorization only.
                             </div>
                             <div class="panel-footer">
                                 <div class="row">
                                     <div class="col-xs-2"></div>
                                     <div class="col-xs-4 text-center">
-                                        <a class="learn-icon landing-icon" target="_blank"
+                                        <a target="_blank"
                                            href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/Gaining-Access-To-Controlled-Access-Data.html">
+                                            <div class="learn-icon landing-icon"></div>
+                                            <div class="icon-caption">Learn</div>
                                         </a>
-                                        <div class="text-muted">Learn</div>
                                     </div>
                                     <div class="col-xs-4 text-center">
-                                        <a class="launch-icon landing-icon"
-                                           target="_blank"
+                                        <a target="_blank"
                                                 {% if user.is_authenticated %}
-                                                    href="{% url 'user_detail' user.id %}"
+                                           href="{% url 'user_detail' user.id %}"
                                                 {% else %}
-                                                    href="{% url 'user_detail_login' %}"
+                                           href="{% url 'user_detail_login' %}"
                                                 {% endif %}
-                                        ></a>
-                                        <div class="text-muted">Launch</div>
+                                        >
+                                            <div class="launch-icon landing-icon"></div>
+                                            <div class="icon-caption">Launch</div>
+                                        </a>
                                     </div>
                                     <div class="col-xs-2"></div>
                                 </div>
@@ -340,16 +356,18 @@
         <div class="jumbotron-fluid bottom-div">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-md-12">
-                        ISB-CGC is a component of the <a href="https://datacommons.cancer.gov/">NCI Cancer Research
-                        Data Commons</a> and has been funded in whole or in part with Federal funds from the
-                        National Cancer
-                        Institute, National Institutes of Health, Department of Health and Human Services, under
-                        Contract
-                        No.
-                        HHSN261201400008C and ID/IQ Agreement No. 17X146 under Contract No. HHSN261201500003I.
+                    <div class="col-lg-12">
+                        <em>
+                            ISB-CGC is a component of the <a href="https://datacommons.cancer.gov/" target="_blank">NCI
+                            Cancer Research
+                            Data Commons</a> and has been funded in whole or in part with Federal funds from the
+                            National Cancer
+                            Institute, National Institutes of Health, Department of Health and Human Services, under
+                            Contract
+                            No.
+                            HHSN261201400008C and ID/IQ Agreement No. 17X146 under Contract No. HHSN261201500003I.
+                        </em>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -357,25 +375,25 @@
         <div class="jumbotron-fluid footer-div">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-xs-3 col-lg-2">
+                    <div class="col-xs-3 col-md-2 col-lg-1 text-left">
                         &copy; 2020, ISB
                     </div>
-                    <div class="col-xs-6 col-lg-8 text-center">
+                    <div class="col-xs-6 col-md-8 col-lg-10 text-center">
                         <a href="{% url 'privacy' %}">PRIVACY POLICY</a>
                     </div>
-                    <div class="col-xs-3 col-lg-2">
+                    <div class="col-xs-3 col-md-2 col-lg-1">
                         <div class="row">
-                            <div class="col-xs-4">
+                            <div class="col-xs-4 text-center">
                                 <a href="{% url 'vid_tutorials' %}" target="_blank">
                                     <i class="fa fa-youtube-play" aria-hidden="true"></i>
                                 </a>
                             </div>
-                            <div class="col-xs-4">
+                            <div class="col-xs-4 text-center">
                                 <a href="https://twitter.com/isb_cgc" target="_blank">
                                     <i class="fa fa-twitter fa-lg"></i>
                                 </a>
                             </div>
-                            <div class="col-xs-4">
+                            <div class="col-xs-4 text-center">
                                 <a href="https://github.com/isb-cgc/" target="_blank">
                                     <i class="fa fa-github fa-lg"></i>
                                 </a>

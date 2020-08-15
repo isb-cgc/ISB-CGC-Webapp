@@ -10,22 +10,21 @@
     > .container-fluid
         padding-bottom: 0
     h1
-        font-size: 65px
-        font-size: 65px
+        font-size: 55px
     h2
-        font-size: 30px
+        font-size: 25px
     h3
         font-size: 16px
-        //font-size: 20px
     h4
         font-size: 20px
-        //font-size: 25px
     a
         color: #226caa
         &:hover
             color: #2aabd2
     .alert
         margin: 0 -15px
+    .alert-success
+        text-align: center
     .header-div
         text-align: center
         padding: 15px
@@ -35,12 +34,6 @@
         color: #2b537b
     .crdc-div
         color: #5e5e5e
-        >a
-            color: #5e5e5e
-            //font-weight: bold
-            &:hover
-                color: #2aabd2
-                text-decoration: none
     .banner-section, .footer-div
         padding: 0
         a
@@ -64,15 +57,26 @@
 
     .panel-heading
         padding: 5px 10px
+        min-height: 77px
         img
             padding: 0
             max-width: 100px
     .panel-body
         padding: 5px 10px
+        margin-bottom: 70px
+        min-height: 120px
     .panel-footer
+        position: absolute
+        bottom: 15px
         padding: 5px 10px
         font-size: 14px
         border-radius: 10px
+        width: calc(100% - 20px)
+        align-items: stretch
+        display: flex
+        flex-direction: column
+        a
+            text-decoration: none
     .landing-icon
         background-size: contain
         background-repeat: no-repeat
@@ -81,23 +85,31 @@
         height: 30px
         margin: auto
         display: inline-block
+    .icon-caption
+        font-size: 14px
+        color: #777777
+    .cards-row, .cards-col
+        display: flex
+        flex-wrap: wrap
+        justify-content: center
 
     .panel
         margin-left: auto
         margin-right: auto
         border-radius: 10px
         max-width: 400px
+        min-width: 250px
         box-shadow: none
         border-width: 1px
         border-style: solid
         font-size: 16px
         padding: 10px
+        position: relative
+        flex-direction: column
+        align-items: stretch
+        display: flex
         h4
             margin: 0
-        //> div
-        //    margin: 5px 0
-    //.panel-*
-    //    padding: 0
     .dbrowser-div
         background-color: #e2ebf3
         h3
@@ -106,6 +118,13 @@
             color: #226caa
         .panel
             border-color: #2b537b
+        .panel-footer a:hover
+            .learn-icon
+                background-image: url('../img/blue-lightbulb-hover.png')
+            .launch-icon
+                background-image: url('../img/blue-rocket-hover.png')
+            .icon-caption
+                color: #2b537b
         .learn-icon
             background-image: url('../img/blue-lightbulb.png')
             &:hover
@@ -114,11 +133,7 @@
             background-image: url('../img/blue-rocket.png')
             &:hover
                 background-image: url('../img/blue-rocket-hover.png')
-        .panel-heading
-            min-height: 77px
-        .panel-body
-            min-height: 164px
-            //min-height: 120px
+
     .resources-div
         background-color: #fee9d5
         h3
@@ -127,30 +142,30 @@
             color: #f18621
         .panel
             border-color: #925122
+        .panel-footer a:hover
+            .learn-icon
+                background-image: url('../img/orange-lightbulb-hover.png')
+            .launch-icon
+                background-image: url('../img/orange-rocket-hover.png')
+            .statistical-icon
+                background-image: url('../img/orange-statistical-hover.png')
+            .community-icon
+                background-image: url('../img/orange-community-hover.png')
+            .github-icon
+                background-image: url('../img/orange-github-hover.png')
+            .icon-caption
+                color: #925122
         .learn-icon
             background-image: url('../img/orange-lightbulb.png')
-            &:hover
-                background-image: url('../img/orange-lightbulb-hover.png')
         .launch-icon
             background-image: url('../img/orange-rocket.png')
-            &:hover
-                background-image: url('../img/orange-rocket-hover.png')
         .statistical-icon
             background-image: url('../img/orange-statistical.png')
-            &:hover
-                background-image: url('../img/orange-statistical-hover.png')
         .community-icon
             background-image: url('../img/orange-community.png')
-            &:hover
-                background-image: url('../img/orange-community-hover.png')
         .github-icon
             background-image: url('../img/orange-github.png')
-            &:hover
-                background-image: url('../img/orange-github-hover.png')
-        .panel-heading
-            min-height: 77px
-        .panel-body
-            min-height: 164px
+
     .jumbotron-fluid > .container-fluid
         padding: 0 5%
     .bottom-div
@@ -161,24 +176,9 @@
         font-weight: bold
         font-size: 14px
         background-color: #7e7e7e
-        //background-color: #eee
         padding: 12px 0
-        //border-top: 1px solid #DDDDDD
-        .social-media-div a
-            //color: white
-            font-size: 15px
-            //font-size: 20px
-            padding: 0 15px
-            text-decoration: none
-
-    .col-lg-15p
-        width: 12.5%
-        display: block
-        float: left
-        position: relative
-        min-height: 1px
-        //padding-left: 15px
-        //padding-right: 15px
+        .row > div
+            padding: 0
 #privacy, #about
     h2
         font-size: 20px
@@ -189,8 +189,6 @@
         margin-left: 20px
         list-style: circle
         margin-bottom: 10px
-    //a
-    //    font-weight: bold
     a
         color: #226caa
         &:hover
@@ -198,9 +196,13 @@
 
 #about
     .partners-div
-        display: inline-block
+        a:hover
+            text-decoration: none
         img
             height: 80px
+            padding: 10px
+            &.gcp-logo
+                padding: 25px
     .cite-text
         background-color: lighten(grey, 40%)
         color: darken($isb-dark, 10%)

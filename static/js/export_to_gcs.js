@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2017, Institute for Systems Biology
+ * Copyright 2020, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,13 +125,13 @@ require([
                 if (link_to_bqr) {
                     data.responseJSON.msg = data.responseJSON.msg.replace(
                         "register at least one dataset",
-                        '<a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/program_data_upload.html#registering-cloud-storage-buckets-and-bigquery-datasets-a-pre-requisite-for-using-your-own-data-in-isb-cgc" target="_BLANK">register at least one dataset</a>'
+                        '<a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/program_data_upload.html#registering-cloud-storage-buckets-and-bigquery-datasets-a-pre-requisite-for-using-your-own-data-in-isb-cgc" target="_BLANK">register at least one dataset</a>'
                     );
                 }
                 if (link_to_gcpr) {
                     data.responseJSON.msg = data.responseJSON.msg.replace(
                         "register at least one project",
-                        '<a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/Gaining-Access-To-Contolled-Access-Data.html?#registering-your-google-cloud-project-service-account" target="_BLANK">register at least one project</a>'
+                        '<a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/Gaining-Access-To-Controlled-Access-Data.html#requirements-for-registering-a-google-cloud-project-service-account" target="_BLANK">register at least one project</a>'
                     );
                 }
                 base.showJsMessage('error', data.responseJSON.msg, true, "#export-to-gcs-js-messages");
@@ -143,7 +143,7 @@ require([
     });
 
 
-    $('.container').on('submit', '#export-to-gcs-form', function(e) {
+    $('#export-to-gcs-form').on('submit', function(e) {
         e.preventDefault();
         e.stopPropagation();
 
