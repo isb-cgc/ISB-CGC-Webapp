@@ -33,6 +33,7 @@ def compare_validate_cohorts(request):
 # SEND
 # id1: id for first cohort
 # id2: id for second cohort
+# user: session user id
 #
 # RECEIVE
 # comparison_id: id of recently added cohort
@@ -64,3 +65,16 @@ def delete_comparison(request):
     dashboard.remove_comparison(comp_id)
 
     return HttpResponse(status=200)
+
+# SEND
+# comparison_id: id of comparison to be deleted
+#
+# RECEIVE
+# none
+def get_compares(request):
+    dashboard = Dashboard.objects.get(user=request.user)
+    # TODO if no dashboard is found?
+
+    result = dashboard.compares.all()
+
+    JsonResponse(result);
