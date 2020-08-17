@@ -10,5 +10,6 @@ urlpatterns = [
     #url(r'^(?P<cohort_id_1>\d+)/(?P<cohort_id_2>\d+)/$', views.compare_cohorts, name='compare')
     #url(r'^cohorts/$', views.compare_cohorts, name='compare')
     url(r'^cohorts/(?P<cohort_id_1>\d+)/(?P<cohort_id_2>\d+)/$', views.compare_cohorts, name='compare'),
-    url(r'^validate_cohorts$', views.compare_validate_cohorts, name='compare_validate_cohorts')
+    url(r'^validate_cohorts$', views.compare_validate_cohorts, name='compare_validate_cohorts'),
+    url(r'^new_compare', views.new_comparison(), name='create_new_comparison'),
 ]

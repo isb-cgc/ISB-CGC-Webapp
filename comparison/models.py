@@ -48,9 +48,18 @@ class Dashboard(models.Model):
     @classmethod
     def new_comparison(cls, cohort_1, cohort_2):
         comp = Comparison.new_comparison(cohort_id1=cohort_1, cohort_id2=cohort_2)
-        cls.current_compare = comp
+        comp.save()
+
         cls.compares.add(comp)
-        cls.save()
+        cls.current_compare = comp
+
+        return comp
+
+    @classmethod
+    def remove_comparison(cls, compare_id):
+        comp = cls.compares.get(id=compare_id)
+
+        cls.compares.remove(id=compare_id)
 
         return comp
 
