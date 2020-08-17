@@ -9,10 +9,16 @@ require([
 
     var $tabs = $('#comparison-tabs')
 
+    var csrftoken = $.getCookie('csrftoken');
     $.ajax({
-        type: 'GET',
-        url: 'cohort/get_compares',
+        type: 'POST',
+        // dataType: 'json',
+        url: BASE_URL + '/get_compares',
+        beforeSend: function (xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                },
         success: function(compares) {
+            console.log(compares)
             $.each(compares, function(i, compare) {
                 $tabs.append(
                     '<li role="presentation" class="active">\n' +
@@ -34,6 +40,9 @@ require([
             });
         }
     });
+
+
+
 
     // const sidebar = document.querySelector('.sidebar');
     // const mainContent = document.querySelector('.comp-body-content');

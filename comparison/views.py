@@ -5,12 +5,10 @@ import json
 from cohorts.models import Cohort
 from comparison.models import Comparison, Dashboard
 
-# @login_required
-def compare_cohorts(request, cohort_id_1=1, cohort_id_2=2):
+def compare_cohorts(request):
     return render(request, 'comparison/compare_dashboard.html')
 
 
-# @login_required
 def compare_validate_cohorts(request):
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
@@ -37,6 +35,7 @@ def compare_validate_cohorts(request):
 #
 # RECEIVE
 # comparison_id: id of recently added cohort
+@login_required
 def new_comparison(request):
     cohort1 = request.POST.get('id1')
     cohort2 = request.POST.get('id2')
@@ -56,6 +55,7 @@ def new_comparison(request):
 #
 # RECEIVE
 # none
+@login_required
 def delete_comparison(request):
     comp_id = request.POST.get('comparison_id')
 
@@ -70,11 +70,27 @@ def delete_comparison(request):
 # comparison_id: id of comparison to be deleted
 #
 # RECEIVE
-# none
+# json list for each compare exists
+# label: title for comparison
+# id: id for comparison
+# cohort_id1: first cohort id
+# cohort_id2: second cohort id
+@login_required
 def get_compares(request):
-    dashboard = Dashboard.objects.get(user=request.user)
-    # TODO if no dashboard is found?
+    dashboard = Dashboard.start(request.user)
+    compares = dashboard.compares.all()
 
-    result = dashboard.compares.all()
+    result = []
 
-    JsonResponse(result);
+    for compare in compares:
+        comp = {}
+        comp.label = compare.comparison_title
+        comp.id = compare.id
+        comp.cohort_id1 = compare.id1
+        comp.cohort_id2 = compare.id2
+
+        result.append(comp)
+
+    return JsonResponse(json.dumps(result), safe=False)
+
+    # return JsonResponse(result, safe=False);

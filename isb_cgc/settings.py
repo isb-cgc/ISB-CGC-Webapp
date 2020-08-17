@@ -309,7 +309,7 @@ INSTALLED_APPS = (
     'analysis',
     'offline',
     'adminrestrict',
-    'comparison',
+    'comparison'
 )
 
 #############################

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import date
+from django.core.exceptions import ObjectDoesNotExist
 
 # Create your models here.
 
@@ -10,6 +11,8 @@ class Comparison(models.Model):
     id2 = models.IntegerField()
     comparison_title = models.CharField(max_length=50)
     date_created = models.DateField()
+
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
     @classmethod
     def new_comparison(cls, cohort_id1, cohort_id2):
@@ -37,13 +40,13 @@ class Dashboard(models.Model):
 
     @classmethod
     def start(cls, user):
-        dash = cls.objects.get(owner=user)
-        if dash is None:
-            dash = cls.objects.create(owner=user, current_compare=None)
+        try:
+            dash = cls.objects.get(owner=user)
+            return dash
+        except ObjectDoesNotExist:
+            dash = cls.objects.create(owner=user)
             dash.save()
-
-        # cls.current_compare = cls.compares.objects.latest('id').id
-        return dash
+            return dash
 
     @classmethod
     def new_comparison(cls, cohort_1, cohort_2):
