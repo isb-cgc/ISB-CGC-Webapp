@@ -80,7 +80,7 @@
                 <li class="separator"></li>
                 <li class="menu-item"><a href="{% url 'cohort_filelist' cohort.id %}"
                                          class="btn btn-info view-files-btn"
-                                         {% if only_user_data %}disabled {% endif %}title="{% if only_user_data %}The data browser is not available at this time for cohorts containing only user data.{% else %}View this cohort's file list{% endif %}">View Files</a></li>
+                                         {% if only_user_data %}disabled {% endif %}title="{% if only_user_data %}The cancer data file browser is not available at this time for cohorts containing only user data.{% else %}View this cohort's file list{% endif %}">View Files</a></li>
                 {% if cohort.perm.perm == 'OWNER' %}
                     <li class="separator"></li>
                     <li class="menu-item"><a href="{% url 'download_ids' cohort.id %}"
