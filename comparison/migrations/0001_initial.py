@@ -22,7 +22,6 @@ class Migration(migrations.Migration):
                 ('id2', models.IntegerField()),
                 ('comparison_title', models.CharField(max_length=50)),
                 ('date_created', models.DateField()),
-                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(

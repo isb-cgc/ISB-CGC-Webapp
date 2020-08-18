@@ -12,13 +12,15 @@ class Comparison(models.Model):
     comparison_title = models.CharField(max_length=50)
     date_created = models.DateField()
 
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
-
     @classmethod
     def new_comparison(cls, cohort_id1, cohort_id2):
         today = date.today()
         title = "compare - " + today.strftime("%m/%d/%y")
-        comparison_model = cls.objects.create(id1=cohort_id1, id2=cohort_id2, comparison_title=title, date_created=today)
+        comparison_model = cls.objects.create(
+            id1=cohort_id1,
+            id2=cohort_id2,
+            comparison_title=title,
+            date_created=today)
 
         comparison_model.save()
         return comparison_model
@@ -51,10 +53,11 @@ class Dashboard(models.Model):
     @classmethod
     def new_comparison(cls, cohort_1, cohort_2):
         comp = Comparison.new_comparison(cohort_id1=cohort_1, cohort_id2=cohort_2)
-        comp.save()
 
-        cls.compares.add(comp)
+        cls.compares.add(Comparison.objects.get(id=comp.id))
         cls.current_compare = comp
+
+        cls.current_compare.save()
 
         return comp
 
