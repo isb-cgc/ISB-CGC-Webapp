@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Pipelines and APIs | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+​
+{% block link_page_name %}programmatic_access{% endblock %}
+{% block page_name %}programmatic_access{% endblock %}
+​
+{% block page_header %}
+    <div class="container">
+        <h1 class="page-header">Pipelines and APIs</h1>
+        <h5>A collection of tutorials and documentation on how to access and analyze cancer data programmatically through ISB-CGC APIs and Google Cloud Compute Engine.</h5>
+    </div>
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+           <div class="col-lg-12">
+               <h4 role="heading" aria-level="3">Getting Started</h4>
+               <p>Learn more about the different ways to access data programmatically</p>
+           </div>
+        </div>
+        <div class="row">
+​
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-graduation-cap" aria-hidden="true"></i> Tutorials for Workflow on Google Cloud
+                    </div>
+                    <div class="panel-body thumbnail">
+                        <a href="{% url 'workflow' %}" target="_blank">
+                            <img src="{% static 'img/prog_access/workflow.svg' %}" alt="Workflow">
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-exchange" aria-hidden="true"></i> Comparison of Workflow Languages
+                    </div>
+                    <div class="panel-body thumbnail">
+                        <a href="{% static 'img/prog_access/workflow_comparisons.pdf' %}" target="_blank">
+                            <img src="{% static 'img/prog_access/languages.svg' %}" alt="ISB-CGC API">
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-cogs" aria-hidden="true"></i> ISB-CGC API
+                    </div>
+                    <div class="panel-body thumbnail">
+                        <a href="https://api-dot-isb-cgc.appspot.com/v4/swagger/" target="_blank">
+                            <img src="{% static 'img/prog_access/isb-cgc-api.png' %}" alt="ISB-CGC API">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <p>For general information about the ISB-CGC, feature requests or bug reports please contact us at <a
+                        target="_blank" href="mailto:feedback%40isb-cgc.org">feedback<span>@</span>isb-cgc<span>.</span>org</a>.
+                    We are especially keen on learning about
+                    your particular use-cases, and how we can help you take advantage of the latest in cloud-computing
+                    technologies to answer your research questions.</p>
+            </div>
+        </div>
+​
+    </div>
+{% endblock %}

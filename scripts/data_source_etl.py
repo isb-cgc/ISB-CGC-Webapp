@@ -41,7 +41,28 @@ isb_superuser = User.objects.get(username="isb")
 
 logger = logging.getLogger('main_logger')
 
-ranges_needed = ['wbc_at_diagnosis', 'event_free_survival', 'days_to_death', 'days_to_last_known_alive', 'days_to_last_followup', 'age_at_diagnosis', 'year_of_diagnosis']
+ranges_needed = {
+    'wbc_at_diagnosis': 'by_200',
+    'event_free_survival_time_in_days': 'by_500',
+    'days_to_death': 'by_500',
+    'days_to_last_known_alive': 'by_500',
+    'days_to_last_followup': 'by_500',
+    'year_of_diagnosis': 'year',
+    'days_to_birth': 'by_negative_3k',
+    'year_of_initial_pathologic_diagnosis': 'year',
+    'age_at_diagnosis': None
+}
+
+ranges = {
+    'by_200': [{'first': "200", "last": "1400", "gap": "200", "include_lower": True, "unbounded": True,
+                             "include_upper": True, 'type': 'F', 'unit': '0.01'}],
+    'by_negative_3k': [{'first': "-15000", "last": "-5000", "gap": "3000", "include_lower": True, "unbounded": True,
+                             "include_upper": False, 'type': 'I'}],
+    'by_500': [{'first': "500", "last": "6000", "gap": "500", "include_lower": False, "unbounded": True,
+                             "include_upper": True, 'type': 'I'}],
+    'year': [{'first': "1976", "last": "2015", "gap": "5", "include_lower": True, "unbounded": False,
+                             "include_upper": False, 'type': 'I'}]
+}
 
 SOLR_TYPES = {
     'STRING': "string",
@@ -263,7 +284,7 @@ def main(config):
 
                 if 'range' not in attr:
                     if attr['name'].lower() in ranges_needed:
-                        attr['range'] = []
+                        attr['range'] = ranges.get(ranges_needed.get(attr['name'], ''), [])
 
                 solr_schema[table_name[2]].append({
                     "name": field['name'], "type": SOLR_TYPES[field['type']], "multiValued": False, "stored": True
@@ -289,19 +310,20 @@ def main(config):
 
 if __name__ == "__main__":
     cmd_line_parser = ArgumentParser(description="Extract a data source from BigQuery and ETL it into Solr")
-    cmd_line_parser.add_argument('-j', '--json-conf', type=str, default='', help="JSON settings file")
+    cmd_line_parser.add_argument('-j', '--json-config-file', type=str, default='', help="JSON settings file")
 
     args = cmd_line_parser.parse_args()
 
-    if not len(args.json_conf):
+    if not len(args.json_config_file):
         print("[ERROR] You must supply a JSON settings file!")
+        cmd_line_parser.print_help()
         exit(1)
 
-    if not exists(join(dirname(__file__),args.json_conf)):
-        print("[ERROR] JSON config file {} not found.".format(args.json_conf))
+    if not exists(join(dirname(__file__),args.json_config_file)):
+        print("[ERROR] JSON config file {} not found.".format(args.json_config_file))
         exit(1)
 
-    f = open(join(dirname(__file__),args.json_conf), "r")
+    f = open(join(dirname(__file__),args.json_config_file), "r")
     settings = json.load(f)
 
     main(settings)
