@@ -184,7 +184,7 @@
         .checks
             float: right
             display: block
-            width: 55%
+            width: 65%
         .tabpanel
             border-top-left-radius: 3px
             border-top-right-radius: 3px
@@ -438,7 +438,7 @@
     .search-checkbox-list
         label
             width: 100%
-    .sample_count, .case_count
+    .sample_count, .case_count, .file_count
         background-color: #bababa
         color: white
         border-radius: 10px
@@ -454,6 +454,11 @@
     .case_count
         &:after
             content: 'case(s)'
+            font-size: 0.9em
+            padding-left: 5px
+    .file_count
+        &:after
+            content: 'file(s)'
             font-size: 0.9em
             padding-left: 5px
 
