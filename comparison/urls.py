@@ -14,5 +14,6 @@ urlpatterns = [
     url(r'^validate_cohorts$', views.compare_validate_cohorts, name='compare_validate_cohorts'),
     url(r'^new_compare', views.new_comparison, name='create_new_comparison'),
     url(r'^delete_compare', views.delete_comparison, name='delete_comparison'),
-    url(r'^get_compares', views.get_compares, name='get_compares')
+    url(r'^get_compares', views.get_compares, name='get_compares'),
+    url(r'^get_gender', views.get_gender, name='get_gender')
 ]

@@ -8,7 +8,14 @@ from comparison.models import Comparison, Dashboard
 @login_required()
 def compare_cohorts(request, cohort_id_1, cohort_id_2):
     dashboard = Dashboard.start(user=request.user)
-    dashboard.new_comparison(cohort_1=cohort_id_1, cohort_2=cohort_id_2)
+    comp = Comparison.new_comparison(cohort_id1=cohort_id_1, cohort_id2=cohort_id_2)
+    comp.save()
+
+    dashboard.compares.add(comp)
+    dashboard.current_compare = comp
+    dashboard.save()
+
+    get_gender(cohort_id_1, cohort_id_2)
 
     return render(request, 'comparison/compare_dashboard.html')
 
@@ -44,10 +51,8 @@ def new_comparison(request):
     cohort1 = request.POST.get('id1')
     cohort2 = request.POST.get('id2')
 
-    dashboard = Dashboard.objects.get(user=request.user)
-    #TODO if no dashboard is found?
+    dashboard = Dashboard.start(user=request.user)
 
-    # probably only want to interact with the dashboard here
     comp = dashboard.new_comparison(cohort_1=cohort1, cohort_2=cohort2)
 
     result = { 'comparison_id': comp.id }
@@ -88,18 +93,11 @@ def get_compares(request):
     result = []
 
     for compare in compares:
-        # comp = {
-        #     'label' : compare.comparison_title,
-        #     'id' : compare.id,
-        #     'cohort_id1' : compare.id1,
-        #     'cohort_id2' : compare.id2
-        # }
-
         comp = {
-            'label': "a",
-            'id': "b",
-            'cohort_id1': "c",
-            'cohort_id2': "d"
+            'label' : compare.comparison_title,
+            'id' : compare.id,
+            'cohort_id1' : compare.id1,
+            'cohort_id2' : compare.id2
         }
 
         result.append(json.dumps(comp))
@@ -107,3 +105,14 @@ def get_compares(request):
     print(result)
 
     return JsonResponse(json.dumps(result), safe=False)
+
+def get_gender(id1, id2):
+    cohort1 = Cohort.objects.get(id=id1, active=True)
+    cohort2 = Cohort.objects.get(id=id2, active=True)
+
+    cases = cohort1.get_cohort_cases()
+    for case in cases:
+
+
+    print(cases)
+    return
