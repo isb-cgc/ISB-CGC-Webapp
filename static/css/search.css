@@ -229,16 +229,16 @@ tr {
     width: 33.33%;
     word-wrap: break-word; }
 #studies_table_head th {
-    width: 25%;
+    width: 20%;
     word-break: break-word; }
 #series_table_head th, #series_table td {
     width: 16.667%;
     word-break: break-word;
     max-width: 16.667%; }
 #studies_table td {
-    width: 25%;
+    width: 20%;
     word-break: break-word;
-    max-width: 25%; }
+    max-width: 20%; }
 
 table {
   table-layout: fixed;

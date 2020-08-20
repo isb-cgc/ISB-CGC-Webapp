@@ -1,42 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load staticfiles %}
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
 
-     <meta charset="utf-8" />
 
-  <meta name="description" content="Open Health Imaging Foundation DICOM Viewer" />
-  <meta name="viewport"
-    content="width=device-width,initial-scale=1.0,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-  <meta name="theme-color" content="#000000" />
-  <meta http-equiv="cleartype" content="on" />
-  <meta name="MobileOptimized" content="320" />
-  <meta name="HandheldFriendly" content="True" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
 
-  <script
-    src="/static/js/libs/polyfill.min.js?flags=gated&features=default%2CObject.values%2CArray.prototype.flat%2CObject.entries%2CSymbol%2CArray.prototype.includes%2CString.prototype.repeat%2CArray.prototype.find"></script>
 </head>
 <body>
-<div id="root"></div>
 
-  <script type="text/javascript" src="/ohf/app-config.js"></script>
-  <script src="/ohf/index.umd.js" ></script>
-  <script>
-    var containerId = 'root';
-    var componentRenderedOrUpdatedCallback = function () {
-      console.log('OHIF Viewer rendered/updated');
-    };
-    window.OHIFViewer.installViewer(
-      window.config, // See `/config/default.js`
-      containerId,
-      componentRenderedOrUpdatedCallback
-    );
-  </script>
+
 
 
 
 cxd
+<div style="background:#0e0e0e;">
+<img src="{% static 'img/ohif.png' %}">
+</div>
 </body>
 </html>
