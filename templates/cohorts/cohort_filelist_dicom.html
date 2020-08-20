@@ -112,8 +112,8 @@
                         </li>
                         <li class="menu-item">
                             <div class="filelist-obtain">
-                                <button class="btn btn-info export-btn {% if user.is_anonymous %} disabled {% endif %}" data-toggle="modal" {% if has_user_data %}disabled {% endif %}data-target="#export-to-bq-modal {% if user.is_anonymous %} disabled {% endif %}" title="{% if has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a BigQuery table{% endif %}">BigQuery</button>
-                                <button class="btn btn-info export-btn {% if user.is_anonymous %} disabled {% endif %}" data-toggle="modal" {% if has_user_data %}disabled {% endif %}data-target="#export-to-gcs-modal {% if user.is_anonymous %} disabled {% endif %}" title="{% if has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a GCS bucket{% endif %}">GCS</button>
+                                <button class="btn btn-info export-btn" data-toggle="modal" {% if has_user_data or user.is_anonymous %} disabled {% endif %} data-target="#export-to-bq-modal" title="{% if user.is_anonymous %} Log-in to export this file manifest to a BigQuery table {% elif has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a BigQuery table{% endif %}">BigQuery</button>
+                                <button class="btn btn-info export-btn" data-toggle="modal" {% if has_user_data or user.is_anonymous %} disabled {% endif %} data-target="#export-to-gcs-modal" title="{% if user.is_anonymous %} Log-in to export this file manifest to a GCS bucket {% elif has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a GCS bucket{% endif %}">GCS</button>
                             </div>
                         </li>
                     </ul>
