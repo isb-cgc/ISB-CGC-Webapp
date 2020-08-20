@@ -3,7 +3,8 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 import json
 from cohorts.models import Cohort, Samples
-from cohorts import file_helpers
+from cohorts import file_helpers, views
+from accounts import sa_utils
 from comparison.models import Comparison, Dashboard
 
 @login_required()
@@ -112,11 +113,19 @@ def get_gender(id1, id2, user_id):
     cohort2 = Cohort.objects.get(id=id2, active=True)
 
     # cohort1_gender = Samples.objects.filter(cohort_id__in=id1).values_list('gender', flat=True)
+
     # cases = cohort1.get_cohort_cases()
     # for case in cases:
+    #     print(case.gender)
     # gender_type, gender_vector = data_access.get_feature_vector('gender', id1)
 
-    cases = file_helpers.cohort_files(cohort_id=id1, user=user_id)
+    # cases = file_helpers.cohort_files(cohort_id=2, user=user_id)
 
-    print(cases)
+    # print(cohort1.get_programs()[0].id)
+    #
+    # cases = views.get_sample_case_list(user=user_id, inc_filters={'gender' : ['Female']}, cohort_id=id1, program_id=3)
+
+    items = file_helpers.cohort_files(id1, user=user_id, access=sa_utils.auth_dataset_whitelists_for_user(user_id))
+
+    print(items)
     return
