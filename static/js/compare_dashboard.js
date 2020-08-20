@@ -34,29 +34,8 @@ require([
     'session_security'
 ], function ($, base) {
 
-    // var $tabs = $('#comparison-tabs')
-    //
-    // var csrftoken = $.getCookie('csrftoken');
-    // $.ajax({
-    //     type: 'POST',
-    //     dataType: 'json',
-    //     url: BASE_URL + '/get_compares',
-    //     beforeSend: function (xhr) {
-    //                 xhr.setRequestHeader("X-CSRFToken", csrftoken);
-    //             },
-    //     success: function(compares) {
-    //         console.log(compares)
-    //         $.each(compares, function(i, compare) {
-    //             alert('dum')
-    //         });
-    //     }
-    // });
-
-
-
 
 // $(function () {
-
 
     // const sidebar = document.querySelector('.sidebar');
     // const mainContent = document.querySelector('.comp-body-content');
@@ -236,8 +215,41 @@ require([
     render(vital_data, vital_svg, vital_title);
     render(age_data, age_svg, age_title);
 
+    var $tabs = $('#comparison-tabs')
+    function addTab(compare, active) {
+        $tabs.prepend(
+        '<li role="presentation" ' +
+            'cohort_id_1=' + compare.cohort_id1 +
+            'cohort_id_2=' + compare.cohort_id2 +
+            (active ? 'class="active"' : '') + '>\n' +
+        '    <a href="#label-comp-tab" id="comp-tab" role="tab" data-toggle="tab"\n' +
+        '       data-toggle-type="comparison">'+ compare.label +'</a>\n' +
+        '    <div class="dropdown">\n' +
+        '        <a class="dropdown-toggle comparison-drop" id="dropdown-label" role="button"\n' +
+        '           data-toggle="dropdown"><i\n' +
+        '                class="fa fa-caret-down"></i></a>\n' +
+        '        <ul class="dropdown-menu">\n' +
+        '            <li role="menuitem"><a data-toggle="modal" role="button" data-target="">Edit details</a>\n' +
+        '            </li>\n' +
+        '            <li role="menuitem"><a data-toggle="modal" role="button" data-target="">Delete</a></li>\n' +
+        '        </ul>\n' +
+        '    </div>\n' +
+        '</li>'
+        )
+    }
 
     $(document).ready(function () {
+        $.ajax({
+            type: 'GET',
+            dataType: 'json',
+            url: BASE_URL + '/compare/get_compares',
+            success: function(data) {
+                console.log(data);
+                $.each(JSON.parse(data), function(i, compares) {
+                    addTab(JSON.parse(compares), false)
+                });
+            }
+        });
 
         $('#sidebarCollapse').on('click', function () {
             $('#sidebar').toggleClass('active');
@@ -245,12 +257,13 @@ require([
         });
 
         $('#save-but').on('click', function() {
+            var $current_tab = $(".active")
             $.ajax({
                 type: 'POST',
                 url: BASE_URL + '/compare/save_compare',
                 data: {
-                    'cohort_id_1': $(".active").attr('cohort_id_1'),
-                    'cohort_id_2': $(".active").attr('cohort_id_2')
+                    'cohort_id_1': $current_tab.attr('cohort_id_1'),
+                    'cohort_id_2': $current_tab.attr('cohort_id_2')
                 }
             });
         });
