@@ -34,39 +34,39 @@ require([
     'session_security'
 ], function ($, base) {
 
-    var $tabs = $('#comparison-tabs')
-
-    var csrftoken = $.getCookie('csrftoken');
-    $.ajax({
-        type: 'POST',
-        // dataType: 'json',
-        url: BASE_URL + '/get_compares',
-        beforeSend: function (xhr) {
-                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                },
-        success: function(compares) {
-            console.log(compares)
-            $.each(compares, function(i, compare) {
-                $tabs.append(
-                    '<li role="presentation" class="active">\n' +
-                    '     <a href="#label-comp-tab" id="comp-tab" role="tab" data-toggle="tab"\n' +
-                    '         data-toggle-type="comparison">Label\n' +
-                    '          Comparison</a>\n' +
-                    '      <div class="dropdown">\n' +
-                    '          <a class="dropdown-toggle comparison-drop" id="dropdown-label" role="button"\n' +
-                    '             data-toggle="dropdown"><i\n' +
-                    '                  class="fa fa-caret-down"></i></a>\n' +
-                    '          <ul class="dropdown-menu">\n' +
-                    '              <li role="menuitem"><a data-toggle="modal" role="button" data-target="">Edit details</a>\n' +
-                    '              </li>\n' +
-                    '              <li role="menuitem"><a data-toggle="modal" role="button" data-target="">Delete</a></li>\n' +
-                    '          </ul>\n' +
-                    '      </div>\n' +
-                    '  </li>'
-                )
-            });
-        }
-    });
+    // var $tabs = $('#comparison-tabs')
+    //
+    // var csrftoken = $.getCookie('csrftoken');
+    // $.ajax({
+    //     type: 'POST',
+    //     // dataType: 'json',
+    //     url: BASE_URL + '/get_compares',
+    //     beforeSend: function (xhr) {
+    //                 xhr.setRequestHeader("X-CSRFToken", csrftoken);
+    //             },
+    //     success: function(compares) {
+    //         console.log(compares)
+    //         $.each(compares, function(i, compare) {
+    //             $tabs.append(
+    //                 '<li role="presentation" class="active">\n' +
+    //                 '     <a href="#label-comp-tab" id="comp-tab" role="tab" data-toggle="tab"\n' +
+    //                 '         data-toggle-type="comparison">Label\n' +
+    //                 '          Comparison</a>\n' +
+    //                 '      <div class="dropdown">\n' +
+    //                 '          <a class="dropdown-toggle comparison-drop" id="dropdown-label" role="button"\n' +
+    //                 '             data-toggle="dropdown"><i\n' +
+    //                 '                  class="fa fa-caret-down"></i></a>\n' +
+    //                 '          <ul class="dropdown-menu">\n' +
+    //                 '              <li role="menuitem"><a data-toggle="modal" role="button" data-target="">Edit details</a>\n' +
+    //                 '              </li>\n' +
+    //                 '              <li role="menuitem"><a data-toggle="modal" role="button" data-target="">Delete</a></li>\n' +
+    //                 '          </ul>\n' +
+    //                 '      </div>\n' +
+    //                 '  </li>'
+    //             )
+    //         });
+    //     }
+    // });
 
 
 
@@ -86,28 +86,28 @@ require([
     const gender_data = [
         // {name: 'cohort1', male: 10000, female: 3000, NA: 500},
         // {name: 'cohort2', male: 10800, female: 5500, NA: 1000}
-        {name: 'Male', LUAD: 242, GBM: 366},
-        {name: 'Female', LUAD: 280, GBM: 230},
-        {name: 'None', LUAD: 63, GBM: 21}
+        {name: 'Male', LUAE: 242, GBM: 366},
+        {name: 'Female', LUAE: 280, GBM: 230},
+        {name: 'None', LUAE: 63, GBM: 21}
     ];
 
     const vital_data = [
-        {name: 'Alive', LUAD: 334, GBM: 103},
-        {name: 'Dead', LUAD: 188, GBM: 491},
-        {name: 'None', LUAD: 63, GBM: 23}
+        {name: 'Alive', LUAE: 334, GBM: 103},
+        {name: 'Dead', LUAE: 188, GBM: 491},
+        {name: 'None', LUAE: 63, GBM: 23}
     ];
 
     const age_data = [
-        {name: '0-9', LUAD: 0, GBM: 0},
-        {name: '10-19', LUAD: 0, GBM: 6},
-        {name: '20-29', LUAD: 0, GBM: 19},
-        {name: '30-39', LUAD: 3, GBM: 42},
-        {name: '40-49', LUAD: 30, GBM: 80},
-        {name: '50-59', LUAD: 106, GBM: 161},
-        {name: '60-69', LUAD: 170, GBM: 160},
-        {name: '70-79', LUAD: 162, GBM: 104},
-        {name: '80+', LUAD: 32, GBM: 24},
-        {name: 'None', LUAD: 82, GBM: 21}
+        {name: '0-9', LUAE: 0, GBM: 0},
+        {name: '10-19', LUAE: 0, GBM: 6},
+        {name: '20-29', LUAE: 0, GBM: 19},
+        {name: '30-39', LUAE: 3, GBM: 42},
+        {name: '40-49', LUAE: 30, GBM: 80},
+        {name: '50-59', LUAE: 106, GBM: 161},
+        {name: '60-69', LUAE: 170, GBM: 160},
+        {name: '70-79', LUAE: 162, GBM: 104},
+        {name: '80+', LUAE: 32, GBM: 24},
+        {name: 'None', LUAE: 82, GBM: 21}
     ];
 
 
