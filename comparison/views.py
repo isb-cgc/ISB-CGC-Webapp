@@ -9,11 +9,13 @@ from comparison.models import Comparison, Dashboard
 
 @login_required()
 def compare_cohorts(request, cohort_id_1, cohort_id_2):
-    new_comparison(cohort_id_1, cohort_id_2, request.user)
+    comp = new_comparison(cohort_id_1, cohort_id_2, request.user)
 
     # get_gender(cohort_id_1, cohort_id_2, request.user)
 
-    return render(request, 'comparison/compare_dashboard.html')
+    return render(request, 'comparison/compare_dashboard.html', {'cohort_id_1': comp.id1,
+                                                                 'cohort_id_2': comp.id2,
+                                                                 'label': comp.comparison_title })
 
 @login_required()
 def compare_validate_cohorts(request):
@@ -48,7 +50,7 @@ def save_comparison(request):
     dashboard.current_compare = comp
     dashboard.save()
 
-    return get_compares(request)
+    return HttpResponse(status=200)
 
 # SEND
 # comparison_id: id of comparison to be deleted
@@ -100,6 +102,7 @@ def new_comparison(cohort_id_1, cohort_id_2, user_id):
 
     dashboard.current_compare = comp
     dashboard.save()
+    return comp
 
 def get_gender(id1, id2, user_id):
     cohort1 = Cohort.objects.get(id=id1, active=True)
