@@ -36,6 +36,7 @@
     overflow: hidden;
     height: 100%;
     background-color: white;
+    /*border: solid #2b537b;*/
 }
 
 #label-comp-tab {
@@ -49,37 +50,55 @@
 }
 
 #sidebar {
-    width: 370px;
+    width: 390px;
     float: left;
     /*border: solid crimson;*/
     height: 100%;
     /*min-width: 25%;*/
     /*max-width: 25%;*/
     /*height: 100%;*/
-    background: #f7f7f7;
+    background: #f8f8f8;
+    /*background-color: white;*/
     /*color: black;*/
     transition: .8s ease;
     /*border: solid red;*/
+    /*border: solid #2b537b;*/
+
+}
+
+#sidebar-title {
+    font-size: 16px;
+    font-weight: lighter;
 }
 
 #sidebar.active {
-    margin-left: -370px;
+    margin-left: -390px;
 }
 
 #sidebar .sidebar-header {
-    padding: 7px;
-   /*background: #f7f7f7;*/
-background-color: darksalmon;
-    text-align: center;
+    padding: 1.15rem;
+    /*background: #f7f7f7;*/
+    /*margin-top: 16px;*/
+    /*margin: 0px 0 10px 0px;*/
+    background-color: #2b537b;
 
+    /*font-weight: normal;*/
+    text-align: center;
+    color: white;
+    /*text-size: 10px;*/
 
 }
 
 #sidebarCollapse {
     position: absolute;
-    margin: 10px 0px 350px;
+    margin: 14px 0px 350px;
     left: 5px;
 
+}
+
+#venn-text {
+    text-align: center;
+    margin-top: 200px;
 }
 
 #save-but {
@@ -94,11 +113,16 @@ background-color: darksalmon;
 
 @media (max-width: 768px) {
     #sidebar {
-        margin-left: -370px;
+        margin-left: -390px;
     }
+
     #sidebar.active {
         margin-left: 0;
     }
+
+    /*#main-canvas.active {*/
+    /*    margin-left: 300px;*/
+    /*}*/
 }
 
 
@@ -147,6 +171,50 @@ background-color: darksalmon;
     margin-right: 10px;
     position: absolute;
     /*border: solid black;*/
+}
+
+/*.compare-desc {*/
+/*    border: solid red;*/
+/*    !*margin: 0;*!*/
+/*}*/
+
+.worksheet-header {
+    margin-left: 10px;
+    margin-right: 5px;
+}
+
+/*.svg {*/
+/*    border: solid black;*/
+/*}*/
+
+#main-canvas {
+    margin-top: 15px;
+    margin-left: 200px;
+    margin-right: 200px;
+}
+
+#gender-canvas {
+    margin-left: 5px;
+    box-shadow: 2px 2px 10px #999;
+    border-radius: 5px;
+    /*background-color: #f8f8f8;*/
+    background-color: white;
+}
+
+#vital-canvas {
+    margin-left: 5px;
+    margin-top: 20px;
+    box-shadow: 2px 2px 10px #999;
+    border-radius: 5px;
+    background-color: white;
+}
+
+#age-canvas {
+    margin-left: 5px;
+    margin-top: 20px;
+    box-shadow: 2px 2px 10px #999;
+    border-radius: 5px;
+    background-color: white;
 }
 
 /*#sidebar-but {*/
@@ -242,14 +310,32 @@ background-color: darksalmon;
 
 #labels-card {
     /*display: flex;*/
-    width: 25rem;
+
+    /*width: 22rem;*/
+    /*height: 100px;*/
+    /*!*papadding: 10px;*!*/
+    /*!*margin: 150px 65px;*!*/
+    /*   overflow: hidden;*/
+    width: 23.5rem;
     papadding: 60px;
     margin: 10px 20px 350px;
+
 }
 
 #sel-labels {
+    /*padding: 32px;*/
+    /*!*background-color: #f6f6f6;*!*/
+    /*!*background-color: #f8f8f8;*!*/
+    /*!*background-color: floralwhite;*!*/
+    /*!*background-color: #fee9d5;*!*/
+    /*height: 250px;*/
+    /*background-color: white;*/
+    /*text-align: left;*/
+    /*box-shadow: 2px 2px 10px #999;*/
+    /*border-radius: 5px;*/
+    /*overflow: hidden;*/
     padding: 20px;
-    background-color: floralwhite;
+    background-color: white;
     /*background-color: #fee9d5;*/
     text-align: left;
     box-shadow: 2px 2px 10px #999;
@@ -259,34 +345,34 @@ background-color: darksalmon;
 
 #form-title {
     color: #404040;
-    font-size: 20px;
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: 500;
     margin: 0 0 15px 0;
     bottom: 15px;
 }
 
 #sel-labels .form-check {
-    margin: 0 20px 5px;
+    margin: 0 20px 7px;
     position: relative;
 }
 
-#sel-labels .form-group .btn {
-    font-size: 14px;
-    font-family: Arial;
-    font-weight: 600;
-    background-color: #F9661A;
-    padding: 8px;
-    border: none;
-    display: block;
-    width: 13rem;
-    margin: 0 0 15px 0;
-    top: 10px;
-}
+/*#sel-labels .form-group .btn {*/
+/*    font-size: 14px;*/
+/*    font-family: Arial;*/
+/*    font-weight: 400;*/
+/*    background-color: #F9661A;*/
+/*    padding: 8px;*/
+/*    border: none;*/
+/*    display: block;*/
+/*    width: 13rem;*/
+/*    margin: 0 0 15px 0;*/
+/*    top: 10px;*/
+/*}*/
 
-#sel-labels .form-group .btn:focus,
-#sel-labels .form-group .btn:hover {
-    box-shadow: -1px 1px 10px #505050 inset;
-}
+/*#sel-labels .form-group .btn:focus,*/
+/*#sel-labels .form-group .btn:hover {*/
+/*    box-shadow: -1px 1px 10px #505050 inset;*/
+/*}*/
 
 #sel-labels .form-check .custom-control-label {
     color: #404040;
