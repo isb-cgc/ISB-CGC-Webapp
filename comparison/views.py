@@ -9,15 +9,9 @@ from comparison.models import Comparison, Dashboard
 
 @login_required()
 def compare_cohorts(request, cohort_id_1, cohort_id_2):
-    dashboard = Dashboard.start(user=request.user)
-    comp = Comparison.new_comparison(cohort_id1=cohort_id_1, cohort_id2=cohort_id_2)
-    comp.save()
+    new_comparison(cohort_id_1, cohort_id_2, request.user)
 
-    dashboard.compares.add(comp)
-    dashboard.current_compare = comp
-    dashboard.save()
-
-    get_gender(cohort_id_1, cohort_id_2, request.user)
+    # get_gender(cohort_id_1, cohort_id_2, request.user)
 
     return render(request, 'comparison/compare_dashboard.html')
 
@@ -41,25 +35,20 @@ def compare_validate_cohorts(request):
 
     return HttpResponse(json.dumps(result), status=200)
 
-# SEND
-# id1: id for first cohort
-# id2: id for second cohort
-# user: session user id
-#
-# RECEIVE
-# comparison_id: id of recently added cohort
-@login_required
-def new_comparison(request):
-    cohort1 = request.POST.get('id1')
-    cohort2 = request.POST.get('id2')
+@login_required()
+def save_comparison(request):
+    id1 = request.POST.get('cohort_id_1')
+    id2 = request.POST.get('cohort_id_2')
 
     dashboard = Dashboard.start(user=request.user)
+    comp = Comparison.new_comparison(cohort_id1=id1, cohort_id2=id2)
+    comp.save()
 
-    comp = dashboard.new_comparison(cohort_1=cohort1, cohort_2=cohort2)
+    dashboard.compares.add(comp)
+    dashboard.current_compare = comp
+    dashboard.save()
 
-    result = { 'comparison_id': comp.id }
-
-    return HttpResponse(json.dumps(result), status=200)
+    return get_compares(request)
 
 # SEND
 # comparison_id: id of comparison to be deleted
@@ -89,7 +78,6 @@ def delete_comparison(request):
 @login_required
 def get_compares(request):
     dashboard = Dashboard.start(user=request.user)
-
     compares = dashboard.compares.all()
 
     result = []
@@ -104,9 +92,14 @@ def get_compares(request):
 
         result.append(json.dumps(comp))
 
-    print(result)
-
     return JsonResponse(json.dumps(result), safe=False)
+
+def new_comparison(cohort_id_1, cohort_id_2, user_id):
+    dashboard = Dashboard.start(user=user_id)
+    comp = Comparison.new_comparison(cohort_id1=cohort_id_1, cohort_id2=cohort_id_2)
+
+    dashboard.current_compare = comp
+    dashboard.save()
 
 def get_gender(id1, id2, user_id):
     cohort1 = Cohort.objects.get(id=id1, active=True)
