@@ -2,7 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 import json
-from cohorts.models import Cohort
+from cohorts.models import Cohort, Samples
+from cohorts import file_helpers
 from comparison.models import Comparison, Dashboard
 
 @login_required()
@@ -15,7 +16,7 @@ def compare_cohorts(request, cohort_id_1, cohort_id_2):
     dashboard.current_compare = comp
     dashboard.save()
 
-    get_gender(cohort_id_1, cohort_id_2)
+    get_gender(cohort_id_1, cohort_id_2, request.user)
 
     return render(request, 'comparison/compare_dashboard.html')
 
@@ -106,13 +107,16 @@ def get_compares(request):
 
     return JsonResponse(json.dumps(result), safe=False)
 
-def get_gender(id1, id2):
+def get_gender(id1, id2, user_id):
     cohort1 = Cohort.objects.get(id=id1, active=True)
     cohort2 = Cohort.objects.get(id=id2, active=True)
 
-    cases = cohort1.get_cohort_cases()
-    for case in cases:
+    # cohort1_gender = Samples.objects.filter(cohort_id__in=id1).values_list('gender', flat=True)
+    # cases = cohort1.get_cohort_cases()
+    # for case in cases:
+    # gender_type, gender_vector = data_access.get_feature_vector('gender', id1)
 
+    cases = file_helpers.cohort_files(cohort_id=id1, user=user_id)
 
     print(cases)
     return
