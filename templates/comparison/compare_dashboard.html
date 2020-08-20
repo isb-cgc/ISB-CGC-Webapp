@@ -47,17 +47,13 @@
 
     <!-- tabs of panel -->
     <ul class="nav nav-tabs_excel" role="tablist" id="comparison-tabs">
-        <li role="presentation" class="active" cohort_id_1={{ cohort_id_1 }} cohort_id_2={{ cohort_id_2 }}>
-            <a href="#label-comp-tab" id="comp-tab" role="tab" data-toggle="tab"
-               data-toggle-type="comparison">{{ label }}</a>
+        <li role="presentation" class="active" cohort_id_1="{{ cohort_id_1 }}" cohort_id_2="{{ cohort_id_2 }}">
+            <a href="#label-comp-tab" id="comp-tab" role="tab" data-toggle="tab" data-toggle-type="comparison">{{ label }}</a>
             <div class="dropdown">
-                <a class="dropdown-toggle comparison-drop" id="dropdown-label" role="button"
-                   data-toggle="dropdown"><i
-                        class="fa fa-caret-down"></i></a>
+                <a class="dropdown-toggle comparison-drop" id="dropdown-label" role="button" data-toggle="dropdown"><i class="fa fa-caret-down"></i></a>
                 <ul class="dropdown-menu">
-                    <li role="menuitem"><a data-toggle="modal" role="button" data-target="">Edit details</a>
-                    </li>
-                    <li role="menuitem"><a data-toggle="modal" role="button" data-target="">Delete</a></li>
+                    <li role="menuitem"><a data-toggle="modal" role="button">Edit details</a></li>
+                    <li role="menuitem"><a role="button" id="delete-comp">Delete</a></li>
                 </ul>
             </div>
         </li>

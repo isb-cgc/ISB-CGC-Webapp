@@ -216,25 +216,18 @@ require([
     render(age_data, age_svg, age_title);
 
     var $tabs = $('#comparison-tabs')
-    function addTab(compare, active) {
+    function addTab(compare) {
         $tabs.prepend(
-        '<li role="presentation" ' +
-            'cohort_id_1=' + compare.cohort_id1 +
-            'cohort_id_2=' + compare.cohort_id2 +
-            (active ? 'class="active"' : '') + '>\n' +
-        '    <a href="#label-comp-tab" id="comp-tab" role="tab" data-toggle="tab"\n' +
-        '       data-toggle-type="comparison">'+ compare.label +'</a>\n' +
-        '    <div class="dropdown">\n' +
-        '        <a class="dropdown-toggle comparison-drop" id="dropdown-label" role="button"\n' +
-        '           data-toggle="dropdown"><i\n' +
-        '                class="fa fa-caret-down"></i></a>\n' +
-        '        <ul class="dropdown-menu">\n' +
-        '            <li role="menuitem"><a data-toggle="modal" role="button" data-target="">Edit details</a>\n' +
-        '            </li>\n' +
-        '            <li role="menuitem"><a data-toggle="modal" role="button" data-target="">Delete</a></li>\n' +
-        '        </ul>\n' +
-        '    </div>\n' +
-        '</li>'
+            '<li role="presentation" comp_id=\"' + compare.id + '\">\n' +
+            '    <a href="#label-comp-tab" id="comp-tab" role="tab" data-toggle="tab" data-toggle-type="comparison" aria-expanded="true">'+ compare.label +'</a>\n' +
+            '    <div class="dropdown">\n' +
+            '        <a class="dropdown-toggle comparison-drop" id="dropdown-label" role="button" data-toggle="dropdown"><i class="fa fa-caret-down"></i></a>\n' +
+            '        <ul class="dropdown-menu">\n' +
+            '            <li role="menuitem"><a data-toggle="modal" role="button">Edit details</a>\n </li>\n' +
+            '            <li role="menuitem"><a role="button" id="delete-comp">Delete</a></li>\n' +
+            '        </ul>\n' +
+            '    </div>\n' +
+            '</li>'
         )
     }
 
@@ -244,7 +237,6 @@ require([
             dataType: 'json',
             url: BASE_URL + '/compare/get_compares',
             success: function(data) {
-                console.log(data);
                 $.each(JSON.parse(data), function(i, compares) {
                     addTab(JSON.parse(compares), false)
                 });
@@ -256,8 +248,31 @@ require([
             // $('#main-canvas').toggleClass('active');
         });
 
+        $tabs.delegate('#delete-comp', 'click', function() {
+            const $current_tab = $(".active");
+            if ($current_tab.attr('comp_id') === undefined) {
+                // comparison is not saved
+                return
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: BASE_URL + '/compare/delete_compare',
+                data: {
+                    'comp_id': $current_tab.attr('comp_id')
+                }
+            });
+            $current_tab.sibling().addClass('active')
+            $current_tab.remove()
+        });
+
         $('#save-but').on('click', function() {
-            var $current_tab = $(".active")
+            const $current_tab = $(".active");
+            if ($current_tab.attr('comp_id') !== undefined) {
+                // comparison is already saved
+                return
+            }
+
             $.ajax({
                 type: 'POST',
                 url: BASE_URL + '/compare/save_compare',

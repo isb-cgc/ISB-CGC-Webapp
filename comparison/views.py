@@ -59,12 +59,14 @@ def save_comparison(request):
 # none
 @login_required
 def delete_comparison(request):
+    dashboard = Dashboard.start(request.user)
     comp_id = request.POST.get('comparison_id')
 
-    dashboard = Dashboard.objects.get(user=request.user)
-    #TODO if no dashboard is found?
+    comp = dashboard.compares.get(id=comp_id)
+    dashboard.compares.remove(comp)
 
-    dashboard.remove_comparison(comp_id)
+    comp.delete()
+    dashboard.save()
 
     return HttpResponse(status=200)
 
