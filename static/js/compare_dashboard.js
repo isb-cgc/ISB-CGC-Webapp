@@ -252,6 +252,8 @@ require([
             const $current_tab = $(".active");
             if ($current_tab.attr('comp_id') === undefined) {
                 // comparison is not saved
+                $current_tab.siblings().closest("[role='presentation']").first().addClass('active');
+                $current_tab.closest("[role='presentation']").remove();
                 return
             }
 
@@ -262,9 +264,30 @@ require([
                     'comp_id': $current_tab.attr('comp_id')
                 }
             });
-            $current_tab.sibling().addClass('active')
-            $current_tab.remove()
+
+            $current_tab.siblings().closest("[role='presentation']").first().addClass('active');
+            $current_tab.closest("[role='presentation']").remove();
+
+            // render(gender_data, gender_svg, gender_title);
+            // render(vital_data, vital_svg, vital_title);
+            // render(age_data, age_svg, age_title);
         });
+
+        // $tabs.delegate('#comp-tab', onkeypress, function() {
+        //     var keycode = (Event ? key : event.which);
+        //     if(keycode == '13'){
+        //         alert('You pressed a "enter" key in textbox');
+        //     }
+        //     const $current_tab = $(".active");
+        //     $.ajax({
+        //         type: 'POST',
+        //         url: BASE_URL + '/compare/rename_compare',
+        //         data: {
+        //             'comp_id': $current_tab.attr('comp_id'),
+        //             'label' : $(this).text()
+        //         }
+        //     });
+        // });
 
         $('#save-but').on('click', function() {
             const $current_tab = $(".active");

@@ -53,16 +53,16 @@ def save_comparison(request):
     return HttpResponse(status=200)
 
 # SEND
-# comparison_id: id of comparison to be deleted
+# comp_id: id of comparison to be deleted
 #
 # RECEIVE
 # none
 @login_required
 def delete_comparison(request):
     dashboard = Dashboard.start(request.user)
-    comp_id = request.POST.get('comparison_id')
+    comp_id = request.POST.get('comp_id')
 
-    comp = dashboard.compares.get(id=comp_id)
+    comp = Comparison.objects.get(id=comp_id)
     dashboard.compares.remove(comp)
 
     comp.delete()
@@ -97,6 +97,16 @@ def get_compares(request):
         result.append(json.dumps(comp))
 
     return JsonResponse(json.dumps(result), safe=False)
+
+@login_required
+def rename_compare(request):
+    compare_id = request.POST.get('comp_id')
+    new_description = request.POST.get('label')
+
+    comp = Comparison.objects.get(id=compare_id)
+    comp.comparison_title = new_description
+    comp.save()
+
 
 def new_comparison(cohort_id_1, cohort_id_2, user_id):
     dashboard = Dashboard.start(user=user_id)

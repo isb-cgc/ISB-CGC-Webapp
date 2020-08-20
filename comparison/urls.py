@@ -15,4 +15,5 @@ urlpatterns = [
     url(r'^save_compare', views.save_comparison, name='save_compare'),
     url(r'^delete_compare', views.delete_comparison, name='delete_comparison'),
     url(r'^get_compares', views.get_compares, name='get_compares'),
+    url(r'^rename_compare', views.rename_compare, name='rename_compare'),
 ]
