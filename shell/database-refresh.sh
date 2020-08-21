@@ -23,5 +23,9 @@ else
     mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "DROP DATABASE IF EXISTS $DATABASE_NAME"
     mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE $DATABASE_NAME"
     echo "Database $DATABASE_NAME dropped and re-created."
-    ( "/home/vagrant/www/shell/database-setup.sh" )
+    if [ -n $1 ] && [ "$1" == "no_seed" ]; then
+        /home/vagrant/www/shell/database-setup.sh "$@"
+    else
+        ( "/home/vagrant/www/shell/database-setup.sh" )
+    fi
 fi

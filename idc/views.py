@@ -45,34 +45,27 @@ WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 # The site's homepage
 @never_cache
 def landing_page(request):
-    counts = get_collex_metadata(None, None, 0, True, False, with_derived=False, facets=["BodyPartExamined"])
+    collex = Collection.objects.filter(active=True).values()
 
-    facets = counts['facets']
+    sapien_counts = {}
 
-    exclusions = ["Undefined", "None", "Thorax_1Head_Nec", "Chestabdpelvis", "Tspine"]
-
-    sapien_counts = {
-        "Colorectal": {
-            'site': "Colorectal",
-            'cases': 0,
-            'fileCount': 0
-        }
+    changes = {
+        'Renal': 'Kidney',
+        'Head-Neck': 'Head and Neck',
+        'Colon': 'Colorectal',
+        'Rectum': 'Colorectal'
     }
 
-    for x in facets:
-        for y in facets[x]['facets']:
-            for z in facets[x]['facets'][y]:
-                key = z.title()
-                if key not in exclusions:
-                    if key in ["Rectum", "Colon"]:
-                        sapien_counts["Colorectal"]['cases'] += facets[x]['facets'][y][z]
-                    else:
-                        if z == 'HEADNECK':
-                            key = 'Head and Neck'
-                        sapien_counts[key] = {'site': key, 'cases': facets[x]['facets'][y][z], 'fileCount': 0}
+    for collection in collex:
+        loc = collection['location']
+        if collection['location'] in changes:
+            loc = changes[collection['location']]
+        if loc not in sapien_counts:
+            sapien_counts[loc] = 0
+        sapien_counts[loc] += collection['subject_count']
 
 
-    return render(request, 'idc/landing.html', {'request': request, 'case_counts': [sapien_counts[x] for x in sapien_counts] })
+    return render(request, 'idc/landing.html', {'request': request, 'case_counts': [{'site': x, 'cases':sapien_counts[x], 'fileCount':0 } for x in sapien_counts.keys()] })
 
 # Displays the privacy policy
 @never_cache

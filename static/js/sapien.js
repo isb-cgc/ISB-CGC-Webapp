@@ -69,7 +69,17 @@ require([
       Uterus: 'rgb(245, 97, 154)',
     };
 
-    let data = case_counts;
+    let data = case_counts.sort(function(a,b){
+        let aSite = a['site'].toLowerCase();
+        let bSite = b['site'].toLowerCase();
+        if( aSite == bSite) {
+            return 0;
+        }
+        if(aSite < bSite) {
+            return -1;
+        }
+        return 1;
+    });
 
     function clickHandler() {
       console.debug("HANDLE IT");

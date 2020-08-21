@@ -2929,12 +2929,23 @@ html {
 
 #landing .features {
   padding-top: 10px;
-  min-height: 525px;
+  min-height: 545px;
+  display: flex;
+}
+
+#landing .modality {
+  min-height: 545px;
+  margin-bottom: 0;
+}
+
+#landing .modality, #landing .modality .panel-heading {
+  background-color: #4b4b4b !important;
+  color: #fff;
+  box-shadow: none;
 }
 
 #landing .footer {
   background-color: #003a55;
-  margin-top: 50px;
   text-align: center;
   font-size: 1.2em;
 }
