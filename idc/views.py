@@ -45,7 +45,34 @@ WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 # The site's homepage
 @never_cache
 def landing_page(request):
-    return render(request, 'idc/landing.html', {'request': request, })
+    counts = get_collex_metadata(None, None, 0, True, False, with_derived=False, facets=["BodyPartExamined"])
+
+    facets = counts['facets']
+
+    exclusions = ["Undefined", "None", "Thorax_1Head_Nec", "Chestabdpelvis", "Tspine"]
+
+    sapien_counts = {
+        "Colorectal": {
+            'site': "Colorectal",
+            'cases': 0,
+            'fileCount': 0
+        }
+    }
+
+    for x in facets:
+        for y in facets[x]['facets']:
+            for z in facets[x]['facets'][y]:
+                key = z.title()
+                if key not in exclusions:
+                    if key in ["Rectum", "Colon"]:
+                        sapien_counts["Colorectal"]['cases'] += facets[x]['facets'][y][z]
+                    else:
+                        if z == 'HEADNECK':
+                            key = 'Head and Neck'
+                        sapien_counts[key] = {'site': key, 'cases': facets[x]['facets'][y][z], 'fileCount': 0}
+
+
+    return render(request, 'idc/landing.html', {'request': request, 'case_counts': [sapien_counts[x] for x in sapien_counts] })
 
 # Displays the privacy policy
 @never_cache
