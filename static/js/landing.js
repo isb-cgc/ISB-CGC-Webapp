@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2017, Institute for Systems Biology
+ * Copyright 2020, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,24 +25,29 @@ require.config({
         underscore: 'libs/underscore-min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
-        base: 'base'
+        base: 'base',
+        sapien: 'sapien'
     },
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui']
+        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
+        'sapien': {
+            exports: 'Sapien'
+        }
     }
 });
 
 require([
     'jquery',
+    'sapien',
     'jqueryui',
     'bootstrap',
     'assetscore'
     ,'assetsresponsive',
     'base'
-], function($, jqueryui, bootstrap) {
+], function($, Sapien, jqueryui, bootstrap) {
     A11y.Core();
 
 });
