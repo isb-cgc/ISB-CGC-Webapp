@@ -9,9 +9,18 @@ require.config({
         base: 'base',
         imagesearch: 'image_search',
         cohortfilelist: 'cohort_filelist',
-        plotly: 'libs/plotly-latest.min'
+        plotly: 'libs/plotly-latest.min',
+        tippy: 'libs/tippy-bundle.umd.min',
+        '@popperjs/core': 'libs/popper.min'
     },
     shim: {
+        '@popperjs/core': {
+          exports: "@popperjs/core"
+        },
+        'tippy': {
+          exports: 'tippy',
+            deps: ['@popperjs/core']
+        },
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
@@ -24,6 +33,7 @@ require.config({
 
 require([
     'jquery',
+    'tippy',
     'base',
     'imagesearch',
     'plotly',
@@ -31,7 +41,7 @@ require([
     'bootstrap',
     'tablesorter',
     'cohortfilelist',
-], function ($, base, imagesearch, plotly, cohortfilelist) {
+], function ($, tippy, base, imagesearch, plotly, cohortfilelist) {
 
     $('.filter-panel li.checkbox').on('change', 'input', function() {
         if($('#search_def p').length > 0) {
@@ -86,34 +96,18 @@ require([
         $('input[name="selected-filters"]').prop('value', '');
     });
 
-    // Bootstrap and jQueryUI are not friends, because they overwrite each other's tooltip
-    // We want the jQueryUI tooltip, since it lets you use DOM elements.
-    // If bootstrap loaded first, revert the tooltip, copy it into a new function name, and
-    // restore Bootstrap's
-    if($.fn.tooltip.noConflict) {
-        var bsTooltip = $.fn.tooltip.noConflict();
-        $.fn.jqTooltip = $.fn.tooltip;
-        $.fn.tooltip = bsTooltip;
-    // If jQueryUI loaded first, just save it out; bootstrap will eventually clobber it,
-    // but now we have a copy safe and sound.
-    } else {
-        $.fn.jqTooltip = $.fn.tooltip;
-    }
-
-    $('.collection_name').jqTooltip({
-        hide: {
-            duration: 200,
-            delay: 900
-        },
-        items: 'span.collection_name',
-        content: function() {
-            var tooltip = collection_tooltips[$(this).siblings('input.collection_value').attr('value')];
+    tippy('.collection_name', {
+        content: function(reference) {
+            let tooltip = collection_tooltips[$(reference).siblings('input.collection_value').attr('value')];
             if(tooltip) {
-                return $('<div>'+tooltip+'</div>')
+                return '<div class="collection-tooltip">'+tooltip+'</div>';
             }
-            return $('<span></span>')
+            return '<span></span>';
 
-        }
+        },
+        theme: 'light',
+        arrow: false,
+        allowHTML: true,
+        interactive: true
     });
-
 });

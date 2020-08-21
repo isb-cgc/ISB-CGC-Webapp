@@ -1,6 +1,7 @@
 @import url("./font-awesome.min.css");
 @import url("./vendor.css");
 @import url("./sapiens.css");
+@import url("./tippy-light.css");
 @import url("./bootstrap-tokenfield.min.css");
 /********************************************
  * Generic style resets
@@ -3892,9 +3893,9 @@ html {
   border-top: 1px solid #ddd;
 }
 
-.collex-table td a {
-  color: #755da0;
-  font-weight: 700;
+.collex-table td a, .collection-tooltip a {
+  color: #755da0 !important;
+  font-weight: 700 !important;
 }
 
 .collex-table td.row-label {
