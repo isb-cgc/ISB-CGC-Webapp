@@ -171,6 +171,10 @@ def health_check(request, match):
 def help_page(request):
     return render(request, 'idc/help.html',{'request': request})
 
+def quota_page(request):
+    return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
+
+
 # Data exploration and cohort creation page
 @login_required
 def explore_data_page(request):

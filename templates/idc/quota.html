@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% comment %}
+
+   Copyright 2019, Institute fo9 Systems Biology
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+{% endcomment %}
+
+{% block header %}
+
+{% endblock %}
+{% block link_page_name %}landing{% endblock %}
+{% block page_name %}landing{% endblock %}
+{% block content %}
+
+    <div class="landing-content-div">
+        <div class="lj-overlay lj-overlay-bg"></div>
+        <div class="lj-overlay lj-overlay-color lj-overlay-image"></div>
+        <div class="container">
+            <div class="header-div">
+                <div class="header-content-div">
+                    <div class="row">
+                        <div class="col-xs-12 lj-title">
+                            <h1 class="lj-text-center"><span>Daily Imaging Data Quota Exceeded</span></h1>
+                        </div>
+                    </div>
+                    jkl {{ request.session.name }} jkl
+                    <div class="col-xs-8 col-xs-offset-2 lj-title-paragraph">
+                        <p class="lj-text-center">Users are restricted to a quota of {{ quota }} MB per day of medical imaging files. You have reached your daily quota. Your quota will be reset at midnight GMT.</p>
+                    </div>
+
+
+
+
+
+
+
+
+
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block js_file %}
+    {{ block.super }}
+    <script src="{% static 'js/landing.js' %}"></script>
+{% endblock %}
