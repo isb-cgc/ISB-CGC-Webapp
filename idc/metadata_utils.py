@@ -103,11 +103,14 @@ def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record
     # Eventually this will need to go per program
     for source in sources:
         start = time.time()
+        search_child_records = None
+        if source.has_data_type(DataSetType.DERIVED_DATA):
+            search_child_records = filter_attrs['sources'][source.id]['attrs'].get_attr_set_types().get_child_record_searches()
         joined_origin = False
         solr_query = build_solr_query(
             filters,
             with_tags_for_ex=True,
-            search_child_records_by=filter_attrs['sources'][source.id]['attrs'].get_attr_set_types().get_child_record_searches(DataSetType.DERIVED_DATA) if source.has_data_type(DataSetType.DERIVED_DATA) else None
+            search_child_records_by=search_child_records
         ) if filters else None
         solr_facets = build_solr_facets(attrs_for_faceting['sources'][source.id]['attrs'],
                                         filter_tags=solr_query['filter_tags'] if solr_query else None,
