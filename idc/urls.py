@@ -28,6 +28,7 @@ admin.autodiscover()
 urlpatterns = [
 
     url(r'^$', views.landing_page, name='landing_page'),
+    url(r'^quota/', views.quota_page, name='quota_page'),
     url(r'^test_methods/', views.test_methods, name='test_methods'),
     url(r'^style_guide/', views.css_test),
     url(r'^users/(?P<user_id>\d+)/$', views.user_detail, name='user_detail'),

@@ -91,10 +91,18 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
         window.setSlider = function (slideDiv, reset, strt, end, isInt, updateNow) {
             //var slideDiv = divName + "_slide";
             var divName = slideDiv.replace("_slide","");
+
             if (reset) {
                 strt = $('#' + slideDiv).slider("option", "min");
                 end = $('#' + slideDiv).slider("option", "max");
+
+                vals = [strt, end];
+
+                $('#' + slideDiv).find('.ui-slider-handle').each( function(index){
+                        $(this).find('.slide_tooltip').text( vals[index].toString() );
+                });
             }
+
             $('#' + slideDiv).slider("values", "0", strt);
             $('#' + slideDiv).slider("values", "1", end);
 
@@ -113,8 +121,11 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             nm.push(divName);
             filtAtt = nm.join('.')+ '_btw';
             if (reset) {
-                if (window.filterObj.hasOwnProperty(filtAtt)) {
-                    delete window.filterObj[filtAtt];
+                if (  (window.filterObj.hasOwnProperty(filtAtt)) && (window.filterObj[filtAtt].hasOwnProperty('rng')) ) {
+                    delete window.filterObj[filtAtt]['rng'];
+                    if (!( 'none' in window.filterObj[filtAtt])){
+                        delete window.filterObj[filtAtt];
+                    }
                 }
             } else {
                 var attVal = [];
@@ -135,7 +146,9 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
 // Show more/less links on categories with >6 fiilters
 
-        var mkFiltText = function () {
+
+         var mkFiltText = function () {
+            var hasTcga = false;
             var curKeys = Object.keys(filterObj).sort();
             oStringA = new Array();
              var collection = new Array();
@@ -156,11 +169,33 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 else if (curKey.endsWith('_btw')) {
                     var realKey=curKey.substring(0, curKey.length-4).split('.').pop();
                     var disp = $('#'+realKey+'_heading').children()[0].innerText;
-                    var nstr = '<span class="filter-type">'+disp+'</span> IN (<span class="filter-att">' + filterObj[curKey][0].toString() + '-' + (filterObj[curKey][1] + 1).toString() + '</span>)';
-                     oStringA.push(nstr);
+                    if (curKey.startsWith('tcga_clinical')){
+                        disp='tcga.'+disp;
+                        hasTcga = true;
+                    }
+
+                    var fStr='';
+                    if ('rng' in filterObj[curKey]){
+                        fStr += filterObj[curKey]['rng'][0].toString()+'-'+(filterObj[curKey]['rng'][1] + 1).toString();
+                    }
+                    if (('rng' in filterObj[curKey]) && ('none' in filterObj[curKey])){
+                        fStr+=', ';
+                    }
+                    if ('none' in filterObj[curKey]){
+                        fStr+='None';
+                    }
+
+                    var nstr = '<span class="filter-type">'+disp+'</span> IN (<span class="filter-att">' + fStr + '</span>)';
+                    oStringA.push(nstr);
                 } else {
-                    var realKey=curKey.split('.').pop()
+                    var realKey=curKey.split('.').pop();
+
                     var disp = $('#'+realKey+'_heading').children()[0].innerText;;
+                    if (curKey.startsWith('tcga_clinical')){
+                        disp='tcga.'+disp;
+                        hasTcga = true;
+                    }
+
                     var valueSpans = $('#'+realKey+'_list').children().children().children('input:checked').siblings('.value');
                     oVals= new Array();
                     valueSpans.each( function(){oVals.push($(this).text()) });
@@ -173,6 +208,12 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     nstr = '<span class="filter-type">' + disp + '</span>';
                     nstr += 'IN (' + oArray.join("") + ')';
                     oStringA.push(nstr);
+                }
+                if (hasTcga){
+                    $('#search_def_warn').show();
+                }
+                else{
+                    $('#search_def_warn').hide();
                 }
             }
 
@@ -189,6 +230,143 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             } else {
                 document.getElementById("search_def").innerHTML = '<span class="placeholder">&nbsp;</span>';
             }
+
+            //alert(oString);
+        };
+
+        var mkFiltTextAlt = function () {
+
+            var curKeys = Object.keys(filterObj).sort();
+            outStr="";
+            oStringA = new Array();
+            oStringClinA = new Array();
+             var collection = new Array();
+             var collectionTcga = new Array();
+            for (i = 0; i < curKeys.length; i++) {
+
+                var curKey = curKeys[i];
+                /* if ((curKey === 'collection_id') && (filterObj[curKey] === tcgaColls)) {
+                    continue;
+                } */
+                if (curKey.startsWith('Program')){
+                    var hasCollection = true;
+                     curArr= filterObj[curKey];
+                     for (var j=0;j<curArr.length;j++){
+                         if ( ! ( ('Program.'+curArr[j]) in filterObj)){
+                             if ( (curArr[j]==='tcga') || (curArr[j].startsWith('tcga_'))){
+                                 collectionTcga.push(curArr[j]);
+                             }
+                             else{
+                               collection.push(curArr[j]);
+                             }
+
+                         }
+                     }
+                }
+                else{
+                     if (curKey.endsWith('_btw')) {
+                        var realKey=curKey.substring(0, curKey.length-4).split('.').pop();
+                        var disp = $('#'+realKey+'_heading').children()[0].innerText;
+                        var fStr='';
+                        if ('rng' in filterObj[curKey]){
+                            fStr += filterObj[curKey]['rng'][0].toString()+'-'+(filterObj[curKey]['rng'][1] + 1).toString();
+                        }
+                        if (('rng' in filterObj[curKey]) && ('none' in filterObj[curKey])){
+                            fStr+=', ';
+                        }
+                        if ('none' in filterObj[curKey]){
+                            fStr+='None';
+                        }
+
+
+                        var nstr = '<span class="filter-type">'+disp+'</span> IN (<span class="filter-att">' + fStr + '</span>)';
+
+                    } else {
+                        var realKey = curKey.split('.').pop()
+                        var disp = $('#' + realKey + '_heading').children()[0].innerText;
+
+                        var valueSpans = $('#' + realKey + '_list').children().children().children('input:checked').siblings('.value');
+                        oVals = new Array();
+                        valueSpans.each(function () {
+                            oVals.push($(this).text())
+                        });
+
+                        var oArray = oVals.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
+
+
+                        //var nstr=disp+": "
+                        //nstr += oArray.join(", &ensp; ");
+                        nstr = '<span class="filter-type">' + disp + '</span>';
+                        nstr += 'IN (' + oArray.join("") + ')';
+                    }
+
+                    if (curKey.startsWith('tcga_clinical')) {
+                        oStringClinA.push(nstr);
+                    }
+                    else{
+                        oStringA.push(nstr);
+                    }
+                }
+            }
+
+             if (oStringClinA.length>0){
+                 if ((collection.length ==0) && (collectionTcga.length ===0)){
+                    collection=['ispy1','lidc_idri','qin_headneck'];
+                    collectionTcga=['tcga_blca','tcga_brca','tcga_cesc','tcga_coad','tcga_esca','tcga_gbm','tcga_hnsc','tcga_kich','tcga_kirc','tcga_kirp','tcga_lgg','tcga_lihc','tcga_luad','tcga_lusc','tcga_ov','tcga_prad','tcga_read','tcga_sarc','tcga_stad','tcga_thca','tcga_ucec'];
+                }
+
+
+            }
+            else{
+                collection=collection.concat(collectionTcga).sort();
+                collectionTcga=[];
+            }
+
+
+
+            if ( (collection.length>0) && (collectionTcga.length>0) && (oStringA.length>0)){
+                outStr="{"
+            }
+            if (collection.length>0){
+                var oArray = collection.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
+                nstr = '<span class="filter-type">Collection</span>';
+                nstr += 'IN (' + oArray.join("") + ')';
+                outStr+=nstr;
+            }
+            if (collection.length>0 && collectionTcga.length>0){
+                outStr+=" OR (";
+            }
+            if (collectionTcga.length>0){
+                var oArray = collectionTcga.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
+                nstr = '<span class="filter-type">Collection</span>';
+                nstr += 'IN (' + oArray.join("") + ')';
+                outStr+=nstr+" AND ";
+                outStr+=oStringClinA.join(" AND ")
+
+            }
+
+            if (collection.length>0 && collectionTcga.length>0){
+                outStr+=")";
+
+            }
+            if ( (collection.length>0) && (collectionTcga.length>0) && (oStringA.length>0)){
+                outStr+="}";
+            }
+
+            if ((collection.length>0 || collectionTcga.length>0) && (oStringA.length > 0)){
+                outStr+=" AND ";
+            }
+
+
+            if (oStringA.length > 0) {
+                var oString = oStringA.join(" AND");
+                outStr+=oString;
+
+            }
+            document.getElementById("search_def").innerHTML = '<p>' + outStr + '</p>';
+            //else {
+            //    document.getElementById("search_def").innerHTML = '<span class="placeholder">&nbsp;</span>';
+            //}
 
             //alert(oString);
         };
@@ -216,7 +394,36 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             $('.'+graphClass).animate({height: height}, 800);
         };
 
-        var mkSlider = function (divName, min, max, step, isInt) {
+        window.addNone = function(elem, parStr)
+        {
+            var i = 1;
+            var id = parStr+$(elem).parent()[0].id+"_btw";
+
+            if (elem.checked){
+                if (!(id in window.filterObj)) {
+                    window.filterObj[id] = new Object();
+                }
+                window.filterObj[id]['none'] = true;
+            }
+
+            else{
+                if ((id in window.filterObj) && ('none' in window.filterObj[id])){
+                    delete window.filterObj[id]['none'];
+                    if (!('rng' in window.filterObj[id])){
+                        delete window.filterObj[id];
+                    }
+                }
+            }
+
+            if (parStr.startsWith('tcga_clinical')){
+                checkTcga();
+            }
+
+            mkFiltText();
+            updateFacetsData(true);
+        }
+
+        var mkSlider = function (divName, min, max, step, isInt, wNone, parStr) {
              var tooltip = $('<div class="slide_tooltip" />').text('stuff').css({
                    position: 'absolute',
                    top: -25,
@@ -237,6 +444,10 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             nm.push(divName);
             var filtName = nm.join('.') + '_btw';
             $('#' + divName).append('<div id="' + slideName + '"></div>  <input id="' + inpName + '" type="text" value="' + strtInp + '" style="display:none"> <button style="display:inline-block;" onclick=\'setSlider("' + slideName + '",true,0,0,' + String(isInt) + ', true)\'>Reset</button>');
+
+            /*if (wNone){
+                $('#' + divName).append( '<input type="checkbox" onchange="addNone(this, \''+parStr+'\')"> None' );
+            }*/
 
             $('#' + slideName).slider({
                 values: [min, max],
@@ -265,7 +476,16 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     } else {
                         attVal = [parseFloat(valArr[0]), parseFloat(valArr[1])];
                     }
-                    window.filterObj[filtName] = attVal;
+
+                    if (!( filtName in window.filterObj )) {
+                        window.filterObj[filtName] = new Object();
+                    }
+                    window.filterObj[filtName]['rng'] = attVal;
+
+                    if (filtName.startsWith('tcga_clinical')) {
+                        checkTcga();
+                    }
+
                     mkFiltText();
                     updateFacetsData(true);
 
@@ -559,7 +779,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                         var studyId = curData.StudyInstanceUID;
                         var ppStudyId = pretty_print_id(studyId);
                         var fetchUrl = DICOM_STORE_PATH + studyId;
-                        var hrefTxt = '<a href="' + fetchUrl + '" target="_blank">' + ppStudyId + '</a><span class="tooltiptext_ex">' + studyId + '</span>';
+                        var hrefTxt = ppStudyId + '</a><span class="tooltiptext_ex">' + studyId + '</span>';
                         //var hrefTxt =  ppStudyId + '<span class="tooltiptext_ex">' + studyId + '</span>';
                         var pclass = 'project_' + projectId;
                         var newHtml = '';
@@ -573,10 +793,10 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                             var rowId = 'series_' + seriesId.replace(/\./g, '-')
                             var studyClass = 'study_' + studyId.replace(/\./g, '-');
                             var fetchUrlSeries = fetchUrl + '?SeriesInstanceUID=' + seriesId;
-                            var hrefSeriesTxt = '<a href="' + fetchUrlSeries + '" target="_blank">' + ppSeriesId + '</a><span class="tooltiptext_ex">' + seriesId + '</span>';
+                            var hrefSeriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
                             var seriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
 
-                            newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head" onclick="window.open(\''+fetchUrlSeries+'\',\'_blank\')"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td></tr>';
+                            newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td><td style="background:#333333;"><a  href="' + fetchUrlSeries + '" target="_blank"><img style="width:100%" src="/static/img/ohif.png"></a></td></tr>';
 
                         } else {
 
@@ -590,10 +810,10 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                                 }
                                 newSelStudies[projectId].push(studyId);
 
-                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head selected_grey" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td></tr>'
+                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head selected_grey" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td><td style="background:#333333;"><a  href="' + fetchUrl + '" target="_blank"><img style="width:100%" src="/static/img/ohif.png"></a></td></tr>'
 
                             } else {
-                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td></tr>'
+                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td><td style="background:#333333;"><a  href="' + fetchUrl + '" target="_blank"><img style="width:100%" src="/static/img/ohif.png"></a></td></tr>'
                             }
                         }
                         //var rowId='study_'+projectId+'_'+patientIndex[patientId].toString()+"_"+studyIndex[studyId].toString();
@@ -683,7 +903,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             var rowPos = displayedRows.map(function () {
                 return (this.offsetTop - tbodyOff);
             });
-            tableElem.data('rowpos', JSON.stringify(rowPos));
+            //tableElem.data('rowpos', JSON.stringify(rowPos));
             var numRecords = displayedRows.length;
             var recordsPP = parseInt(tableElem.parent().parent().find('.files-per-page-select').val());
             tableElem.parent().parent().find('.total-file-count')[0].innerHTML = numRecords.toString();
@@ -1028,7 +1248,18 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 else{
                     nmA = ckey.split('.');
                     nm=nmA[nmA.length-1];
-                    filtObj[nm]= window.filterObj[ckey];
+                    if (nm.endsWith('_btw')){
+                        if ('rng' in window.filterObj[ckey]){
+                            filtObj[nm] = window.filterObj[ckey]['rng']
+                        }
+                        if ('none' in window.filterObj[ckey]){
+                            noneKey=nm.replace('_btw','');
+                            filtObj[noneKey]='None';
+                        }
+                    }
+                    else {
+                        filtObj[nm] = window.filterObj[ckey];
+                    }
                 }
             }
             if (collObj.length>0){
@@ -1467,7 +1698,34 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             }
         }
 
+        var checkTcga = function(){
+             if ( !('Program' in window.filterObj) ){
+                    window.filterObj['Program'] = new Array();
+                }
+                if (window.filterObj['Program'].indexOf('tcga')<0) {
+                    window.filterObj['Program'].push('tcga');
+                    window.filterObj['Program.tcga'] = ['tcga_blca','tcga_brca','tcga_cesc','tcga_coad','tcga_esca','tcga_gbm','tcga_hnsc','tcga_kich','tcga_kirc','tcga_kirp','tcga_lgg','tcga_lihc','tcga_luad','tcga_lusc','tcga_ov','tcga_prad','tcga_read','tcga_sarc','tcga_stad','tcga_thca','tcga_ucec'];
+                    $('#tcga_heading').parent().find('input:checkbox').prop('checked',true);
+                    $('#tcga_heading').parent().find('input:checkbox').prop('indeterminate',false);
+                }
+
+        }
+
+        var resetTcgaFilters = function(){
+            if ( ('Program' in window.filterObj) && (window.filterObj['Program'].indexOf('tcga')<0 )){
+                $('#tcga_clinical').find('input:checkbox').prop('checked',false);
+                setSlider('age_at_diagnosis_slide',true,0,0,true, false);
+                var attKey =  Object.keys(window.filterObj);
+                for (att in attKey){
+                    if (attKey[att].startsWith('tcga_clinical')){
+                        delete(window.filterObj[attKey[att]]);
+                    }
+                }
+            }
+        }
+
         var handleFilterSelectionUpdate = function(filterElem, mkFilt, doUpdate) {
+
 
         var checked = $(filterElem)[0].checked;
 
@@ -1516,6 +1774,12 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 checkBox.indeterminate = false;
             }
 
+            if ( (checked) && (filtnm ==='tcga_clinical')){
+                checkTcga();
+            }
+
+
+
             if ((checked) && (curCat.length>0) && hasCheckBox  ){
                 if (!(checkBox.indeterminate)) {
                     checkBox.checked = true;
@@ -1526,6 +1790,9 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 }
                 if (filterObj[curCat].indexOf(filtnm)<0){
                     filterObj[curCat].push(filtnm)
+                }
+                if ((ind ===0) && (curCat.startsWith('Program'))){
+                   resetTcgaFilters();
                 }
 
                 /* if ( allChecked && (i === (filterCats.length-1)) && (numCheckBoxes>1)) {
@@ -1544,6 +1811,11 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                          delete filterObj[curCat];
                     }
                }
+
+               if ((ind ===0) && (curCat.startsWith('Program'))){
+                   resetTcgaFilters();
+                }
+
 
                if (curCat.length>0){
                  curCat+="."
@@ -1811,7 +2083,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     max = 100;
                 }
                 //var max = Math.ceil($(this).data('attr-max') * 1000)/1000;
-                mkSlider($(this).prop('id'),min, max,1,true);
+                mkSlider($(this).prop('id'),min, max,1,true,false,'');
             });
      };
 
@@ -1849,7 +2121,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
 
 
-            mkSlider('age_at_diagnosis',parseInt($('#age_at_diagnosis').data('attr-min')),parseInt($('#age_at_diagnosis').data('attr-max')),1,true);
+            mkSlider('age_at_diagnosis',parseInt($('#age_at_diagnosis').data('attr-min')),parseInt($('#age_at_diagnosis').data('attr-max')),1,true,true, 'tcga_clinical.');
 
             addSliders('quantitative');
 
@@ -1862,11 +2134,14 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             window.resetTableControls ($('#series_table'), false, 0);
 
              $('.clear-filters').on('click', function () {
-                   $('input:checkbox').removeAttr('checked');
+                   $('input:checkbox').not('#hide-zeros').prop('checked',false);
+                   $('input:checkbox').not('#hide-zeros').prop('indeterminate',false);
                    window.filterObj = new Object();
                    $('.ui-slider').each(function(){
                        setSlider(this.id,true,0,0,true, false);
                    })
+                   $('#search_def_warn').hide();
+
                    mkFiltText();
                    updateFacetsData(true);
              });

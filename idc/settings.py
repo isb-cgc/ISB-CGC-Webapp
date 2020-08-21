@@ -55,6 +55,8 @@ CONNECTION_IS_LOCAL     = (os.environ.get('DATABASE_HOST', '127.0.0.1') == 'loca
 IS_CIRCLE               = (os.environ.get('CI', None) is not None)
 DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') and CONNECTION_IS_LOCAL)
 
+IMG_QUOTA = os.environ.get('IMG_QUOTA', '137')
+
 print("[STATUS] DEBUG mode is {}".format(str(DEBUG)), file=sys.stdout)
 
 RESTRICT_ACCESS          = (os.environ.get('RESTRICT_ACCESS', 'True') == 'True')
