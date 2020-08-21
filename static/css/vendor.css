@@ -11,7 +11,8 @@ html {
   -webkit-text-size-adjust: 100%; }
 
 body {
-  margin: 0; }
+  margin: 0;
+}
 
 article,
 aside,
@@ -1061,6 +1062,10 @@ body {
   color: #333333;
   background-color: #F8F8F8; }
 
+body.landing {
+  background-color: #003a55;
+}
+
 input,
 button,
 select,
@@ -1524,6 +1529,10 @@ pre {
   @media (min-width: 1600px) {
     .container {
       width: 1570px; } }
+
+#landing .container, .landing .container {
+  width: 100%;
+}
 
 .container-fluid {
   margin-right: auto;

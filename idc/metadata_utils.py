@@ -35,7 +35,8 @@ def retTuple(x, order_docs):
 
 # Fetch metadata from Solr
 def get_collex_metadata(filters, fields, record_limit=1000, counts_only=False, with_ancillary = True,
-                        collapse_on = 'PatientID', order_docs='[]', sources = None, versions = None, with_derived=True):
+                        collapse_on = 'PatientID', order_docs='[]', sources = None, versions = None, with_derived=True,
+                        facets=None):
 
     try:
         source_type = sources.first().source_type if sources else DataSource.SOLR
@@ -64,7 +65,7 @@ def get_collex_metadata(filters, fields, record_limit=1000, counts_only=False, w
                 'fields': sources.get_source_attrs(for_faceting=False, named_set=fields, with_set_map=False)
             }, counts_only, collapse_on, record_limit)
         elif source_type == DataSource.SOLR:
-            results = get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record_limit)
+            results = get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record_limit, facets)
 
         for source in results['facets']:
             facets = results['facets'][source]['facets']
@@ -90,22 +91,26 @@ def get_collex_metadata(filters, fields, record_limit=1000, counts_only=False, w
     return results
 
 
-def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record_limit):
+def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record_limit, facets=None):
+    filters = filters or {}
     results = {'docs': None, 'facets': {}}
 
     source_versions = sources.get_source_versions()
     filter_attrs = sources.get_source_attrs(for_ui=True, named_set=[x[:x.rfind('_')] if re.search('_[gl]t[e]|_btw',x) else x for x in filters.keys()], with_set_map=False)
-    attrs_for_faceting = sources.get_source_attrs(for_ui=True, with_set_map=False)
+    attrs_for_faceting = sources.get_source_attrs(for_ui=True, with_set_map=False) if not facets else sources.get_source_attrs(for_ui=True, with_set_map=False, named_set=facets)
     all_ui_attrs = sources.get_source_attrs(for_ui=True, for_faceting=False, with_set_map=False)
 
     # Eventually this will need to go per program
     for source in sources:
         start = time.time()
+        search_child_records = None
+        if source.has_data_type(DataSetType.DERIVED_DATA):
+            search_child_records = filter_attrs['sources'][source.id]['attrs'].get_attr_set_types().get_child_record_searches()
         joined_origin = False
         solr_query = build_solr_query(
             filters,
             with_tags_for_ex=True,
-            search_child_records_by=filter_attrs['sources'][source.id]['attrs'].get_attr_set_types().get_child_record_searches(DataSetType.DERIVED_DATA) if source.has_data_type(DataSetType.DERIVED_DATA) else None
+            search_child_records_by=search_child_records
         ) if filters else None
         solr_facets = build_solr_facets(attrs_for_faceting['sources'][source.id]['attrs'],
                                         filter_tags=solr_query['filter_tags'] if solr_query else None,

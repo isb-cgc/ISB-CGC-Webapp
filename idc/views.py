@@ -45,7 +45,27 @@ WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 # The site's homepage
 @never_cache
 def landing_page(request):
-    return render(request, 'idc/landing.html', {'request': request, })
+    collex = Collection.objects.filter(active=True).values()
+
+    sapien_counts = {}
+
+    changes = {
+        'Renal': 'Kidney',
+        'Head-Neck': 'Head and Neck',
+        'Colon': 'Colorectal',
+        'Rectum': 'Colorectal'
+    }
+
+    for collection in collex:
+        loc = collection['location']
+        if collection['location'] in changes:
+            loc = changes[collection['location']]
+        if loc not in sapien_counts:
+            sapien_counts[loc] = 0
+        sapien_counts[loc] += collection['subject_count']
+
+
+    return render(request, 'idc/landing.html', {'request': request, 'case_counts': [{'site': x, 'cases':sapien_counts[x], 'fileCount':0 } for x in sapien_counts.keys()] })
 
 # Displays the privacy policy
 @never_cache

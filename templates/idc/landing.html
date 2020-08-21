@@ -3,7 +3,7 @@
 
 {% comment %}
 
-   Copyright 2019, Institute fo9 Systems Biology
+   Copyright 2020, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,145 +19,59 @@
 
 {% endcomment %}
 
-{% block header %}
-
-{% endblock %}
+{% block header %}{% endblock %}
 {% block link_page_name %}landing{% endblock %}
 {% block page_name %}landing{% endblock %}
+{% block body_class %}landing{% endblock %}
 {% block content %}
+    <div class="landing-content-div container-fluid">
+            <div class="features row">
+                <div class="col-lg-6 col-md-6 col-sm-6 modality">
+                    <div class="modality panel panel-default">
+                        <div class="panel-heading"><h3>RADIOLOGY</h3></div>
+                        <div class="panel-body" style="min-height: 325px;">
 
-    <div class="landing-content-div">
-        <div class="lj-overlay lj-overlay-bg"></div>
-        <div class="lj-overlay lj-overlay-color lj-overlay-image"></div>
-        <div class="container">
-            <div class="header-div">
-                <div class="header-content-div">
-                    <div class="row">
-                        <div class="col-xs-12 lj-title">
-                            <h1 class="lj-text-center"><span>Imaging Data Commons</span></h1>
                         </div>
-                    </div>
-                    jkl {{ request.session.name }} jkl
-                    <div class="col-xs-8 col-xs-offset-2 lj-title-paragraph">
-                        <p class="lj-text-center">The Imaging Data Commons (IDC) is a cloud-based data commons within the NCI Cancer Research Data Commons (CRDC)
-                            that connects researchers with cancer imaging datasets and resources for exploring those datasets and identifying relevant cohorts for computation.</p>
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-6 col-xs-offset-5 lj-header-button">
-                            <p><a href="http://imaging-data-commons.readthedocs.org/en/latest/" target="_blank">Documentation</a></p>
-                            <p><a href="https://github.com/ImagingDataCommons/" target="_blank"> <i class="fa fa-github fa-lg"></i> GitHub</a></p>
-                            <p><a href="" target="_blank"><i class="fa fa-comment-o fa-lg"></i> Feedback</a></p>
-                        </div>
-                    </div>
-                    <div class="row footer">
-                        <div class="col-xs-8 col-xs-offset-2">
-                            <p>IDC has been funded in whole with Federal funds from the <b>National Cancer Institute</b>,
-                                <b>National Institutes of Health</b>, under contract number 19X037Q from Leidos Biomedical Research,
-                                under Task Order HHSN26100071.
-                            </p>
-                            <div class="pull-down-button">
-                                <a href="#about-div">
-                                    <i class="fa fa-chevron-down"></i>
-                                </a>
-                            </div>
+                        <div class="panel-body">
+                            <div class="panel-heading"><h4>Top Imaging Modalities</h4></div>
+                            <div class="col-sm-4"><p>Computer Tomography</p></div>
+                            <div class="col-sm-4">Magnetic Resonance</div>
+                            <div class="col-sm-4">PET</div>
                         </div>
                     </div>
                 </div>
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                        <div id="human-body-root"></div>
+                </div>
             </div>
-
-            <div id="about-div">
-                <div class="about-content-div">
-                    <div class="row">
-                        <div class="col-sm-10 col-sm-offset-1 lj-text-left">
-                            <h2 style="display:inline-block">Partners</h2>
-                            <div style="display:inline-block; padding-left:50px">
-                                <a href="https://cloud.google.com/" target="_blank" style="text-decoration:none">
-                                    <img src="{% static 'img/gcp-logo.png' %}" alt="Google Cloud Platform"
-                                         style="width:130px;height:80px;"/>
-                                </a>
-                                <a href="https://gdit.com/" target="_blank" style="text-decoration:none">
-                                    <img src="{% static 'img/gdit_logo.png' %}"
-                                         alt="General Dynamics Information Technology, Inc."
-                                         style="padding-left:50px;width:338px;height:40px;"/>
-                                </a>
-                            </div>
-                        </div>
+            <div class="footer row">
+                <div class="summary col-lg-12 col-md-12 col-sm-12">
+                    <div class="summary-header panel-body">
+                        <span><b>Data Portal Summary</b></span>
+                        <span>Data Release 1.0 September 21, 2020</span>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-10 col-sm-offset-1">
-                            <h2>About Us</h2>
-                            <p>The Imaging Data Commons (IDC) is a platform that serves as a large-scale
-                                repository for biomedical imaging.</p>
-                            <p>Please use a <a
-                                    href="https://accounts.google.com/signup/v2/webcreateaccount?hl=en&flowName=GlifWebSignIn&flowEntry=SignUp&nogm=true"
-                                    target="_blank">Google registered email account</a> to log into this system.</p>
-                            {% if version %}
-                                <br/>
-                                Last deployed to version {{ version.version }} on {{ version.date }}
-                            {% endif %}
-                        </div>
+                    <div class="summary-contents panel-body">
+                        <div class="summary-block col-lg-3 col-md-3 col-sm-3"><div><img src="{% static 'img/collex_icon_2.png' %}" alt="" /></div> <div>144<br/> Collections</div></div>
+                        <div class="summary-block col-lg-3 col-md-3 col-sm-3"><div><img src="{% static 'img/cases_icon.png' %}" alt="" /></div> <div>160,072<br/> Cases</div></div>
+                        <div class="summary-block col-lg-3 col-md-3 col-sm-3"><div><img src="{% static 'img/volume_icon.png' %}" alt="" /></div> <div>87 TB<br/> Data Volume</div></div>
+                        <div class="summary-block col-lg-3 col-md-3 col-sm-3"><div><img src="{% static 'img/img_series_icon.png' %}" alt="" /></div> <div>498<br/> Image Series</div></div>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-10 col-sm-offset-1">
-                            <h2>How to Cite Us</h2>
-                            TBD
-                            </p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-10 col-sm-offset-1">
-                            <h2>Privacy Policy</h2>
-                            <p><a href="{% url 'privacy' %}" target="_blank">Our privacy policy can be found here.</a>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-10 col-sm-offset-1">
-                            <h2>Funding</h2>
-                            <p>This project has been funded in whole with Federal funds from the <b>National Cancer Institute</b>,
-                                <b>National Institutes of Health</b>, under contract number 19X037Q from Leidos Biomedical Research,
-                                under Task Order HHSN26100071. The content of this publication does not necessarily
-                                reflect the views or policies of the Department of Health and Human Services, nor does
-                                mention of trade names, commercial products, or organizations imply endorsement by the
-                                U.S. Government.</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-10 col-sm-offset-1">
-                            <h2>Warning Notice</h2>
-                            <p>You are accessing a U.S. Government (National Institute of Health (NIH), National Cancer
-                                Institute (NCI) and Institute for Systems Biology (ISB) website / application which may
-                                contain information that must be protected under the U. S. Privacy Act or other sensitive
-                                information which is intended for authorized Scientific or Research use only. Network activity and
-                                Application usage is monitored to maintain system security, availability, and to ensure
-                                appropriate and legitimate usage, there is no right or expectation to privacy on this
-                                website / system. Unauthorized attempts to upload information, change information, or use of this
-                                website for other than its intended purpose may result in disciplinary action, civil, and/or
-                                criminal penalties. Any individual or system that accesses this website should have no
-                                expectation of privacy regarding any communications or data processed by this website. Anyone accessing
-                                this website expressly consents to monitoring of their actions and all communication or data
-                                transiting or stored on or related to this website and is advised that if such
-                                monitoring reveals possible evidence of criminal activity, NIH may provide that evidence to law
-                                enforcement officials.</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-10 col-sm-offset-1">
-                            &nbsp;
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-10 col-sm-offset-1">
-                            <i><b>Application Version:</b> {{ APP_VERSION }}</i>
-                        </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    <div class="about panel-body">
+                        <p><a href="{% url 'privacy' %}">Privacy Policy</a> | <a href="{% url 'privacy' %}">Collaborators</a></p>
+                        <p><i><b>Application Version:</b> {{ APP_VERSION }}</i></p>
+                        <p>Data Release 1.0 - September 21, 2020</p>
                     </div>
                 </div>
             </div>
-        </div>
     </div>
 {% endblock %}
 
 {% block js_file %}
     {{ block.super }}
     <script src="{% static 'js/landing.js' %}"></script>
+    <script>
+    var case_counts = {{ case_counts|safe }};
+    </script>
 {% endblock %}

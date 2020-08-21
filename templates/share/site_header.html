@@ -13,17 +13,27 @@
             <div class="col-lg-12">
             <div class="nav navbar-left">
                 <ul class="">
-                    <li class="navbar-item">
-                        <a href="{% url 'landing_page' %}" title="Home Page" >
-                        <img class="navbar-brand" src="{% static 'img/idclogo.png' %}" alt="ISB Logo"/><span class="navbar-item">IDC</span></a>
+                    <li class="navbar-item pr-20">
+                        <img class="navbar-brand" src="{% static 'img/NIH_IDC_title.png' %}" alt="NIH IDC Logo"/>
                     </li>
                     <li class="navbar-link navbar-item">
-                        <a href="{% url 'explore_data' %}">Data Exploration</a>
+                        <a href="{% url 'landing_page' %}" title="Home Page" ><img class="navbar-brand" src="{% static 'img/idclogo.png' %}" alt="NIH IDC Logo"/> Home</a>
                     </li>
+                    <li class="navbar-link navbar-item">
+                        <a href="{% url 'collections' %}"><img src="{% static 'img/collex_icon_hover.png' %}" alt="" /> Collections</a>
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a href="{% url 'explore_data' %}"><img src="{% static 'img/explore_icon_hover.png' %}" alt="" /> Exploration</a>
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a href="https://discourse.canceridc.dev" target="_blank"><i class="fa fa-comments"></i> <p class="navbar-label">Discuss</p></a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="navbar-link navbar-item">
+                        <a href="{% url 'cohort_list' %}" target="_blank"><i class="fa fa-archive"></i> Cohorts</a>
+                    </li>
+                    {% endif %}
                     <!--
-                    <li class="navbar-link navbar-item">
-                        <a href="http://imaging-data-commons.readthedocs.org/en/latest/" target="_blank">Documentation</a>
-                    </li>
                     <li class="navbar-link navbar-item">
                         <div class="dropdown">
                             <a role="button class=dropdown-toggle navbar-item__text" id="help-dropdown" data-toggle="dropdown" aria-label="Help Dropdown" aria-expanded="true">
@@ -45,13 +55,12 @@
                         <a class="avatar-link" href="{% url 'user_detail' user.id %}">
                             {% with avatar_url=user.socialaccount_set.all.0.get_avatar_url %}
                                 {% if avatar_url %}
-                                    <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="32" height="32" alt="Avatar Link to User Details">
+                                    <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="40" height="40" alt="Avatar Link to User Details">
                                 {% else %}
                                     <i class="fa fa-user basic-avatar"> </i>
                                 {% endif %}
                             {% endwith %}
                         </a>
-
                         <div class="dropdown">
                             <a role="button" class="dropdown-toggle navbar-item__text" id="user-dropdown" data-toggle="dropdown" aria-label="User Dropdown" aria-expanded="true">
                                 {{ user.first_name }} <i class="fa fa-caret-down"></i>
@@ -62,20 +71,12 @@
                             </ul>
                         </div>
                     </div>
-                    {% if has_access %}
-                    <div class="navbar-item">
-                        <a type="button" class="navbar-item__text lines-button x collapsed" data-toggle="collapse" data-target="#subnav" aria-expanded="false" aria-controls="subnav">
-                            <span class="lines"></span>
-                            Menu
-                        </a>
-                    </div>
-                    {% endif %}
                 {% else %}
                     <div class="pull-right dropdown">
                         <a id="btnGroupDropCohortCreate" href=""
                            class="btn btn-link dropdown-toggle"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fa fa-sign-in"></i>Sign In</a>
+                            <i class="fa fa-sign-in"></i><p class="navbar-label">Sign In</p></a>
                         <ul class="dropdown-menu" aria-labelledby="btnGroupDropCohortCreate">
                             <li><a class="login-link" href="{% provider_login_url 'google' %}" title="Google Sign In"><i class="fa fa-sign-in"></i> via Google</a></li>
                             <li><a class="login-link" href="{% url 'account_login' %}" title="IDC Sign In"><i class="fa fa-sign-in"></i> via IDC</a></li>
@@ -86,33 +87,4 @@
             </div>
         </div>
     </nav>
-    {% if user.is_authenticated %}
-    <nav class="nav subnav collapse" role="navigation" id="subnav">
-        <ul class="container">
-            {% if user.is_authenticated %}
-            <li>
-                <a href="{% url 'dashboard' %}">DASHBOARD</a>
-            </li>
-            {%  endif %}
-{#            {% if USER_DATA_ON %}#}
-{#            <li class="menu-item has-drop-down">#}
-{#                <a>PROGRAMS <i class="fa fa-caret-down"></i></a>#}
-{#                <ul class="sub-menu drop">#}
-{#                    <li class="menu-item"><a href="{% url 'collections' %}">Saved Collections ( {% user_collection_count %} )</a></li>#}
-{#                    <li class="menu-item"><a href="{% url 'collection_upload' %}">Upload Collection Data</a></li>#}
-{#                </ul>#}
-{#            </li>#}
-{#            {% endif %}#}
-            <li class="menu-item"><a href="{% url 'collections' %}">COLLECTIONS</a></li>
-            <li class="menu-item has-drop-down">
-                <a>COHORTS <i class="fa fa-caret-down"></i></a>
-                <ul class="sub-menu drop">
-                    <li class="menu-item"><a href="{% url 'cohort_list' %}">Manage Saved Cohorts ( {{ user.cohort_perms_set.all|active:'cohort'|cohort_owner_permission|count }} )</a></li>
-                    <li class="menu-item"><a href="{% url 'explore_data' %}">Create a New Cohort</a></li>
-                    </li>
-                </ul>
-            </li>
-        </ul>
-    </nav>
-    {% endif %}
 </header>

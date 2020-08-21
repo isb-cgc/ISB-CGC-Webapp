@@ -54,7 +54,7 @@
                             <td>{{ collection.image_types }}</td>
                             <td>{{ collection.subject_count }}</td>
                             <td>{{ collection.location }}</td>
-                            <td>{{ collection.doi }}</td>
+                            <td><a href="https://doi.org/{{ collection.doi }}" target="_blank">{{ collection.doi }}</a></td>
                             <td>{{ collection.supporting_data }}</td>
                         </tr>
                         {% endfor %}

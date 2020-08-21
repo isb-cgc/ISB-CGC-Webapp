@@ -5,30 +5,32 @@
 {% block head_title %}{% trans "Signup" %}{% endblock %}
 
 {% block page_header %}
-<div class="container">
-    <h1 class="page-header">{% trans "Sign Up" %}</h1>
-</div>
 {% endblock %}
 
 {% block content %}
 
     <div class="row">
         <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="col-lg-4"></div>
+            <div class="col-lg-4">
+            <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
             <div class="panel panel-default">
-                <div class="panel-heading">
+                <div class="panel-heading"><h3>Sign Up</h3></div>
+                <div class="panel-body">
                     <p>{% blocktrans %}Already have an account? Please <a href="{{ login_url }}"><b>sign in</b></a> instead.{% endblocktrans %}</p>
                 </div>
                 <div class="panel-body">
-                    <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
                       {% csrf_token %}
                       {{ form.as_p }}
                       {% if redirect_field_value %}
                       <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
                       {% endif %}
                       <button class="btn btn-special" type="submit">{% trans "Sign Up" %} &raquo;</button>
-                    </form>
                 </div>
             </div>
+            </form>
+            </div>
+        <div class="col-lg-4"></div>
         </div>
     </div>
 
