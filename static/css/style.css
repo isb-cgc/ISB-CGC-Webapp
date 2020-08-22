@@ -872,7 +872,7 @@ nav, .site-header {
   font-size: inherit;
 }
 
-.site-header nav .navbar-item a img {
+.site-header nav .navbar-item a.main-links img {
   filter:grayscale(100%);
 }
 
@@ -2928,10 +2928,66 @@ html {
   background-color: #245f80;
 }
 
+#landing .buttons img {
+  height: 35px;
+  filter: brightness(400%);
+}
+
+#landing .buttons .img-container {
+  border-radius: 5px;
+  background-color: rgba(255,255,255,0.3);
+  display: inline-block;
+  min-width: 45px;
+  align-content: center;
+  padding: 5px;
+  margin-right: 10px;
+
+}
+
 #landing .features {
   padding-top: 10px;
   min-height: 545px;
   display: flex;
+}
+
+#landing .features .chart {
+  font-weight: 600;
+  font-size: larger;
+}
+
+#landing .sapiens {
+  margin-left: -25px;
+}
+
+#landing .buttons a {
+  margin-left: 20px;
+  border-radius: 5px;
+  color: #fff;
+  width: 200px;
+  text-align: left;
+  font-size: 1.4em;
+  font-weight: 500;
+}
+
+#landing .buttons {
+  margin-top: 30px;
+  margin-bottom: 10px;
+}
+
+#landing .btn-collex {
+  background-color: rebeccapurple;
+}
+
+#landing .btn-explore {
+  background-color: darkgreen;
+}
+
+#landing .btn-collex:hover {
+  background-color: #4e1a61;
+}
+
+#landing .btn-explore:hover {
+  background-color: #004d00;
 }
 
 #landing .modality {
