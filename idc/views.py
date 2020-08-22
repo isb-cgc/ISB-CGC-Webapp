@@ -45,7 +45,7 @@ WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 # The site's homepage
 @never_cache
 def landing_page(request):
-    collex = Collection.objects.filter(active=True).values()
+    collex = Collection.objects.filter(active=True, subject_count__gt=6).values()
 
     sapien_counts = {}
 

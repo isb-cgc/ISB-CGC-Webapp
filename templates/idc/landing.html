@@ -25,6 +25,15 @@
 {% block body_class %}landing{% endblock %}
 {% block content %}
     <div class="landing-content-div container-fluid">
+            <div class="buttons row">
+                <div class="col-lg-4 col-md-4 col-sm-4">
+
+                    <a class="btn btn-explore" href="{% url 'explore_data' %}"><div class="img-container"><img src="{% static 'img/explore_icon.png' %}" /></div> Exploration</a>
+                    <a class="btn btn-collex" href="{% url 'collections' %}"><div class="img-container"><img src="{% static 'img/collex_icon.png' %}" /></div> Collections</a>
+                </div>
+                <div class="col-lg-8 col-md-8 col-sm-8">
+                </div>
+            </div>
             <div class="features row">
                 <div class="col-lg-6 col-md-6 col-sm-6 modality">
                     <div class="modality panel panel-default">
@@ -40,8 +49,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6 col-md-6 col-sm-6">
-                        <div id="human-body-root"></div>
+                <div class="col-lg-6 col-md-6 col-sm-6 sapiens">
+                    <div class="sapiens-heading"><h3>Cases by Primary Site</h3></div>
+                    <div id="human-body-root"></div>
                 </div>
             </div>
             <div class="footer row">

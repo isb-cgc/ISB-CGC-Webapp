@@ -1,3 +1,35 @@
+.sapiens-heading {
+  margin-left: 40px;
+  font-size: 2.5em;
+  font-weight: 500;
+  color: #fff;
+}
+
+#xAxisLabels line, #xAxisLabels .domain {
+  stroke: rgba(255,255,255,0.8);
+  stroke-width: 2;
+}
+
+#xAxisLabels text {
+  transform: translate(0, 5px);
+}
+
+.svg-content-responsive {
+    display: inline-block;
+    position: absolute;
+    top: 10px;
+    left: 0;
+}
+
+.svg-container {
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    vertical-align: top;
+    overflow: hidden;
+}
+
 #human-body-highlights > svg {
   position: absolute;
   cursor: pointer;
@@ -6,11 +38,10 @@
 }
 #human-body-root {
   padding: 15px;
-  min-height: 500px;
+  min-height: 550px;
 }
 #human-body-root .chart {
-  position: absolute;
-  left: 350px;
+  margin-left: 300px;
 }
 #human-body-svg-container {
   position: absolute;
@@ -23,8 +54,6 @@
 #title {
   margin-left: 87px;
   color: white;
-  font-size: larger;
-  font-weight: bold;
 }
 #male {
   position: absolute;
