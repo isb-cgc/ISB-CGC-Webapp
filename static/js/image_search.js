@@ -396,7 +396,6 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
         window.addNone = function(elem, parStr)
         {
-            var i = 1;
             var id = parStr+$(elem).parent()[0].id+"_btw";
 
             if (elem.checked){
@@ -418,9 +417,57 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             if (parStr.startsWith('tcga_clinical')){
                 checkTcga();
             }
-
+            var slideNm = $(elem).parent()[0].id+"_slide";
+            updatePlotBinsForSliders(slideNm);
             mkFiltText();
             updateFacetsData(true);
+        }
+
+        var updatePlotBinsForSliders =  function(slideName){
+            var inpName = slideName.replace("_slide","_input")
+            var listName =  slideName.replace("_slide","_list");
+
+            var val = $('#' + inpName)[0].value;
+            var valArr = val.split('-');
+            var strtInd = parseInt(valArr[0]);
+            var endInd = parseInt(valArr[1]);
+
+            var wNone = false;
+            if ( ($('#'+slideName).parent().children("input:checkbox").length>0) ){
+                wNone = $('#'+slideName).parent().children("input:checkbox")[0].checked;
+            }
+            var i=0;
+
+            $('#'+listName).find('.value').each(function(){
+                 val = this.innerHTML;
+                 var plotThis = false;
+                 if (val.includes(' To ')){
+                     valArr = val.split(' To ');
+                     for (i =0; i<2; i++){
+                         if (!(valArr[i]==='*')){
+                             valArr[i]=parseInt(valArr[i]);
+                         }
+
+                     }
+                     if ( ((valArr[0]==='*') || (endInd<= valArr[0])) && ((valArr[1]==='*') || (strtInd>= valArr[1])) ){
+                         $(this).parent().children('.case-count').addClass('plotit');
+                     }
+                     else{
+                         $(this).parent().children('.case-count').removeClass('plotit');
+                     }
+                 }
+                 else if (val.includes('None')){
+                     if (wNone){
+                         $(this).parent().children('.case-count').addClass('plotit');
+                     }
+                     else{
+                         $(this).parent().children('.case-count').removeClass('plotit');
+                     }
+                 }
+
+            });
+
+
         }
 
         var mkSlider = function (divName, min, max, step, isInt, wNone, parStr) {
@@ -445,9 +492,9 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             var filtName = nm.join('.') + '_btw';
             $('#' + divName).append('<div id="' + slideName + '"></div>  <input id="' + inpName + '" type="text" value="' + strtInp + '" style="display:none"> <button style="display:inline-block;" onclick=\'setSlider("' + slideName + '",true,0,0,' + String(isInt) + ', true)\'>Reset</button>');
 
-            /*if (wNone){
-                $('#' + divName).append( '<input type="checkbox" onchange="addNone(this, \''+parStr+'\')"> None' );
-            }*/
+            // if (wNone){
+             //   $('#' + divName).append( '<input type="checkbox" onchange="addNone(this, \''+parStr+'\')"> None' );
+          //  }
 
             $('#' + slideName).slider({
                 values: [min, max],
@@ -485,7 +532,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                     if (filtName.startsWith('tcga_clinical')) {
                         checkTcga();
                     }
-
+                    updatePlotBinsForSliders(slideName);
                     mkFiltText();
                     updateFacetsData(true);
 
@@ -907,7 +954,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             var numRecords = displayedRows.length;
             var recordsPP = parseInt(tableElem.parent().parent().find('.files-per-page-select').val());
             tableElem.parent().parent().find('.total-file-count')[0].innerHTML = numRecords.toString();
-            var numPages = parseInt(numRecords / recordsPP) + 1;
+            var numPages = parseInt((numRecords-1)  / recordsPP) + 1;
 
 
             if (!mvScroll) {
