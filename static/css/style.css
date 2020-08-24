@@ -2991,11 +2991,6 @@ html {
   background-color: #4e1a61;
 }
 
-#landing .modality {
-  min-height: 545px;
-  margin-bottom: 0;
-}
-
 #landing .modality, #landing .modality .panel-heading {
   background-color: #4b4b4b !important;
   color: #fff;
