@@ -2928,10 +2928,13 @@ html {
   background-color: #245f80;
 }
 
-#landing .features {
-  padding-top: 10px;
-  min-height: 545px;
-  display: flex;
+#landing .features .container-fluid {
+  padding-left: 0;
+  padding-bottom: 0;
+}
+
+#landing .features .modality {
+  min-height: 600px;
 }
 
 #landing .features .chart {
@@ -2940,7 +2943,7 @@ html {
 }
 
 #landing .sapiens {
-  margin-left: -25px;
+
 }
 
 #landing .buttons a {

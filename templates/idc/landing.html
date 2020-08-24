@@ -26,12 +26,15 @@
 {% block content %}
     <div class="landing-content-div container-fluid">
             <div class="buttons row">
+                <div class="container-fluid">
                 <div class="col-lg-12 col-md-12 col-sm-12">
                     <a class="btn btn-explore" href="{% url 'explore_data' %}"><span class="img-container"><img src="{% static 'img/explore_icon.png' %}" /></span> Exploration</a>
                     <a class="btn btn-collex" href="{% url 'collections' %}"><span class="img-container"><img src="{% static 'img/collex_icon.png' %}" /></span> Collections</a>
                 </div>
+                </div>
             </div>
             <div class="features row">
+                <div class="container-fluid">
                 <div class="col-lg-6 col-md-6 col-sm-6 modality">
                     <div class="modality panel panel-default">
                         <div class="panel-heading"><h3>RADIOLOGY</h3></div>
@@ -47,13 +50,13 @@
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-6 sapiens">
-                    <div class="sapiens-heading"><h3>Cases by Primary Site</h3></div>
-                    <div id="human-body-root"></div>
+                        <div class="sapiens-heading"><h3>Cases by Primary Site</h3></div>
+                        <div id="human-body-root"></div>
+                </div>
                 </div>
             </div>
-            <div class="footer row">
-                <div class="row summary">
-                <div class="summary col-lg-5 col-md-5 col-sm-5">
+            <div class="summary row">
+                <div class="col-lg-5 col-md-5 col-sm-5">
                     <div class="summary-header panel-body">
                         <span><b>Data Portal Summary</b></span>
                         <span>Data Release 1.0 September 21, 2020</span>
@@ -67,15 +70,14 @@
                         <div class="summary-block col-lg-3 col-md-3 col-sm-3"><div class="img-container"><img src="{% static 'img/img_series_icon.png' %}" alt="" /></div> <div>498<br/> Image Series</div></div>
                     </div>
                 </div>
-                </div>
-                <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12">
+            </div>
+            <div class="row footer">
+                <div class="about col-lg-12 col-md-12 col-sm-12">
                     <div class="about panel-body">
                         <p><a href="{% url 'privacy' %}">Privacy Policy</a> | <a href="{% url 'privacy' %}">Collaborators</a></p>
                         <p><i><b>Application Version:</b> {{ APP_VERSION }}</i></p>
                         <p>Data Release 1.0 - September 21, 2020</p>
                     </div>
-                </div>
                 </div>
             </div>
     </div>
