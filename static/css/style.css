@@ -2928,22 +2928,6 @@ html {
   background-color: #245f80;
 }
 
-#landing .buttons img {
-  height: 35px;
-  filter: brightness(400%);
-}
-
-#landing .buttons .img-container {
-  border-radius: 5px;
-  background-color: rgba(255,255,255,0.3);
-  display: inline-block;
-  min-width: 45px;
-  align-content: center;
-  padding: 5px;
-  margin-right: 10px;
-
-}
-
 #landing .features {
   padding-top: 10px;
   min-height: 545px;
@@ -2974,20 +2958,34 @@ html {
   margin-bottom: 10px;
 }
 
-#landing .btn-collex {
-  background-color: rebeccapurple;
+#landing .buttons img {
+  height: 25px;
+  filter: brightness(400%);
 }
 
-#landing .btn-explore {
+#landing .buttons .img-container {
+  border-radius: 5px;
+  background-color: rgba(255,255,255,0.3);
+  display: inline-block;
+  padding: 5px 10px 5px 10px;
+  margin-right: 10px;
+  justify-content: center;
+}
+
+#landing .btn-collex {
   background-color: darkgreen;
 }
 
+#landing .btn-explore {
+  background-color: rebeccapurple;
+}
+
 #landing .btn-collex:hover {
-  background-color: #4e1a61;
+  background-color: #004d00;
 }
 
 #landing .btn-explore:hover {
-  background-color: #004d00;
+  background-color: #4e1a61;
 }
 
 #landing .modality {
@@ -3020,14 +3018,19 @@ html {
 #landing .summary-contents {
   clear: left;
   font-size: 1.3em;
-  padding: 8px;
+  padding-top: 8px;
 }
 #landing .summary-contents img {
   vertical-align: top;
   float: left;
   margin-right: 10px;
-  width: 70%;
+  width: 50px;
 }
+
+.summary-block .img-container {
+  display: inline-block;
+}
+
 #landing .summary-header {
   padding-top: 8px;
 }
