@@ -97,12 +97,12 @@ require([
 
   if (!root) throw 'Must select an existing element!';
 
-  root.prepend(rawsvg.buildHumanBody(null,null,'Cases by Primary Site'));
+  root.prepend(rawsvg.buildHumanBody(null,null,'&nbsp;'));
 
   let width = 400;
   let height = 530;
   let labelSize ='12px';
-  let tickInterval = 500;
+  let tickInterval = 100;
 
   let offsetLeft = 0;
   let offsetTop = 0;
@@ -114,18 +114,20 @@ require([
   const barStartOffset = 130;
   const barWidth = width - barStartOffset;
   const maxCases = Math.max(...data.map(d => d[caseCountKey]));
-  const numberOfVerticalAxis = Math.floor(maxCases / tickInterval) + 1;
   const toClassName = key => key.split(' ').join('-');
   const halfPixel = 0.5;
 
   // The Bar Chart
   const svg = d3
     .select('#human-body-root')
+    .classed("svg-container", true)
     .append('svg')
+    .attr("preserveAspectRatio", "xMinYMin meet")
     .attr('class', 'chart')
+    .classed("svg-content-responsive", true)
     .attr('width', width)
     .attr('height', height)
-    .attr('viewBox', `0 0 ${width} ${height}`)
+    .attr('viewBox', `0 0 ${width+20} ${height}`)
     .append('g');
 
   // Bar Heights
@@ -136,44 +138,15 @@ require([
 
   // Bar Widths
   const x = d3
-    .scaleLinear()
-    .domain([0, maxCases * 1.1])
+    .scaleLog()
+    .domain([6, maxCases * 1.1])
     .range([0, barWidth]);
 
-  // Horizontal Axis
-  svg
-    .append('line')
-    .attr('stroke', 'rgba(255, 255, 255, 0.8)')
-    .attr('stroke-width', 4)
-    .attr('x1', barStartOffset)
-    .attr('x2', width)
-    .attr('y1', plotHeight + halfPixel)
-    .attr('y2', plotHeight + halfPixel);
-
-  const xAxisLabels = svg.append('g').attr('id', 'xAxisLabels');
-
-  // Vertical Axis
-  for (let i = 0; i < numberOfVerticalAxis; i++) {
-    svg
-      .append('line')
-      .attr('stroke', `rgba(255, 255, 255, 0.5)`)
-      .attr('stroke-width', 4)
-      .attr('x1', (x(tickInterval) * i) + barStartOffset)
-      .attr('x2', (x(tickInterval) * i) + barStartOffset)
-      .attr('y1', 0)
-      .attr('y2', plotHeight);
-
-    if (i) { // Don't display zero
-      xAxisLabels
-        .append('text')
-        .attr('y', plotHeight + 20)
-        .attr('x', (x(tickInterval) * i) + barStartOffset)
-        .attr('fill', 'rgb(10, 10, 10)')
-        .attr('font-size', '12px')
-        .style('text-anchor', 'middle')
-        .text(d => (tickInterval * i).toLocaleString());
-    }
-  }
+  svg.append('g').attr('id', 'xAxisLabels')
+        .attr("transform", "translate("+(barStartOffset-2)+","+(plotHeight)+")")
+        .call(d3.axisBottom(x).tickSizeOuter(-plotHeight).tickFormat((interval,i) => {
+          return [10,100,1000].indexOf(interval) >= 0 ? interval : " ";
+         }));
 
   // Primary Site Labels
   svg
@@ -184,7 +157,7 @@ require([
     .enter()
     .append('text')
     .attr('class', d => `primary-site-label-${toClassName(d[primarySiteKey])}`)
-    .attr('y', (d, i) => ((plotHeight / data.length) * i) + 20)
+    .attr('y', (d, i) => ((plotHeight / data.length) * i) + 25)
     .attr('x', barStartOffset - 10)
     .attr('fill', 'rgb(10, 10, 10)')
     .attr('font-size', labelSize)
@@ -386,6 +359,7 @@ require([
           return d.color;
         });
     });
+
   });
 
 });

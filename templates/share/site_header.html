@@ -14,19 +14,19 @@
             <div class="nav navbar-left">
                 <ul class="">
                     <li class="navbar-item pr-20">
-                        <img class="navbar-brand" src="{% static 'img/NIH_IDC_title.png' %}" alt="NIH IDC Logo"/>
+                        <a href="{% url 'landing_page' %}" title="Home Page" ><img class="navbar-brand" src="{% static 'img/NIH_IDC_title.png' %}" alt="NIH IDC Logo"/></a>
                     </li>
                     <li class="navbar-link navbar-item">
-                        <a href="{% url 'landing_page' %}" title="Home Page" ><img class="navbar-brand" src="{% static 'img/idclogo.png' %}" alt="NIH IDC Logo"/> Home</a>
+                        <a class="main-links" href="{% url 'collections' %}" title="View IDC collections"><img src="{% static 'img/collex_icon_hover.png' %}" alt="" /> Collections</a>
                     </li>
                     <li class="navbar-link navbar-item">
-                        <a href="{% url 'collections' %}"><img src="{% static 'img/collex_icon_hover.png' %}" alt="" /> Collections</a>
+                        <a class="main-links" href="{% url 'explore_data' %}" title="Explore image data"><img src="{% static 'img/explore_icon_hover.png' %}" alt="" /> Exploration</a>
                     </li>
                     <li class="navbar-link navbar-item">
-                        <a href="{% url 'explore_data' %}"><img src="{% static 'img/explore_icon_hover.png' %}" alt="" /> Exploration</a>
+                        <a href="https://discourse.canceridc.dev" title="Join us on Discourse" target="_blank"><i class="fa fa-comments"></i> <p class="navbar-label">Discourse</p></a>
                     </li>
                     <li class="navbar-link navbar-item">
-                        <a href="https://discourse.canceridc.dev" target="_blank"><i class="fa fa-comments"></i> <p class="navbar-label">Discuss</p></a>
+                        <a href="https://learn.canceridc.dev" title="Join us on Discourse" target="_blank"><i class="fa fa-book"></i> <p class="navbar-label">Documentation</p></a>
                     </li>
                     {% if user.is_authenticated %}
                     <li class="navbar-link navbar-item">
