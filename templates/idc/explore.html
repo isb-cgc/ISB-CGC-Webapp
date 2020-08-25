@@ -267,14 +267,14 @@
                                                  <div id="{{ attr_setV.name }}" class="collapse list-group-item__body in">
 
                                                   <ul class="list-group" role="tablist" aria-multiselectable="true">
-                                                  {% for attr in attr_setV.attributes %}
+                                                  {% for attr in attr_setV.attributes|order_quant:attr_setK %}
                                                        <li class="list-group-item">
                                                           <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                 <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
                                                     <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}
                                                 </a>
                                             </div>
-                                               <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse"
+                                               <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}"  data-plotnm="{{ attr.name|plotnm }}"   class="collapse list-group-item__body collapse"
                                                  {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"{% endif %}>
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                     {% for val in attr.values %}
