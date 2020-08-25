@@ -1,0 +1,12 @@
+{% load staticfiles %}
+{% load idc_collections_custom_tags %}
+
+        <div class="row site-footer">
+            <div class="about col-lg-12 col-md-12 col-sm-12">
+                <div class="about panel-body">
+                    <p><a href="{% url 'privacy' %}">Privacy Policy</a> | <a href="{% url 'privacy' %}">Collaborators</a></p>
+                    <p><i><b>Application Version:</b> {{ APP_VERSION }}</i></p>
+                    <p>Data Release 1.0 - September 21, 2020</p>
+                </div>
+            </div>
+        </div>

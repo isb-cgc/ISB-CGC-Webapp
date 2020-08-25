@@ -187,7 +187,7 @@ require([
           .html(`
             <div style="color: #bb0e3d">${d['site']}</div>
             <div style="font-size: 12px; color: rgb(20, 20, 20)">
-              ${d[caseCountKey]} cases (${d[fileCountKey] || 100} files)
+              ${d[caseCountKey]} cases
             </div>
           `)
           .style('left', `${d3.event.pageX - offsetLeft}px`)
@@ -328,7 +328,7 @@ require([
               .html(`
                 <div style="color: #bb0e3d">${d[primarySiteKey]}</div>
                 <div style="font-size: 12px; color: rgb(20, 20, 20)">
-                  ${d[caseCountKey].toLocaleString()} cases (${d[fileCountKey].toLocaleString() || 100} files)
+                  ${d[caseCountKey].toLocaleString()} cases
                 </div>
               `)
               .style('left', `${event.clientX - offsetLeft}px`)
