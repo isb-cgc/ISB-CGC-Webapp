@@ -67,20 +67,4 @@ require([
             $('.'+$(this).data('display-target')).show();
         }
     });
-
-    tippy('.example', {
-        content: function(reference) {
-            let tooltip = ex_tooltips[$(reference).data('study-id')];
-            if(tooltip) {
-                return '<div class="collection-tooltip">'+tooltip+'</div>';
-            }
-            return '<span></span>';
-        },
-        theme: 'light',
-        arrow: false,
-        allowHTML: true,
-        interactive: true
-    });
-
-
 });
