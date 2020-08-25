@@ -1,12 +1,18 @@
 .sapiens {
-  min-height: 535px;
+  min-height: 500px;
+  margin-bottom: 10px;
 }
 
 .sapiens-heading {
-  margin-left: 40px;
+  left: 400px;
+  position: absolute;
   font-size: 2.5em;
   font-weight: 500;
   color: #fff;
+}
+
+.sapiens-heading h4 {
+  margin: 0px;
 }
 
 #xAxisLabels line, #xAxisLabels .domain {

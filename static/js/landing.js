@@ -29,13 +29,22 @@ require.config({
         sapien: 'sapien'
     },
     shim: {
+        '@popperjs/core': {
+          exports: "@popperjs/core"
+        },
+        'tippy': {
+          exports: 'tippy',
+            deps: ['@popperjs/core']
+        },
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'sapien': {
             exports: 'Sapien'
-        }
+        },
+        tippy: 'libs/tippy-bundle.umd.min',
+        '@popperjs/core': 'libs/popper.min'
     }
 });
 
@@ -49,5 +58,29 @@ require([
     'base'
 ], function($, Sapien, jqueryui, bootstrap) {
     A11y.Core();
+
+    $('.img-example').on('click',function(){
+        if(!$(this).hasClass('selected')) {
+            $('.'+$('.img-example.selected').data('display-target')).hide();
+            $('.img-example.selected').toggleClass('selected');
+            $(this).toggleClass('selected');
+            $('.'+$(this).data('display-target')).show();
+        }
+    });
+
+    tippy('.example', {
+        content: function(reference) {
+            let tooltip = ex_tooltips[$(reference).data('study-id')];
+            if(tooltip) {
+                return '<div class="collection-tooltip">'+tooltip+'</div>';
+            }
+            return '<span></span>';
+        },
+        theme: 'light',
+        arrow: false,
+        allowHTML: true,
+        interactive: true
+    });
+
 
 });

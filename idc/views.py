@@ -64,8 +64,17 @@ def landing_page(request):
             sapien_counts[loc] = 0
         sapien_counts[loc] += collection['subject_count']
 
+    ex_tooltips = {
+        '1.3.6.1.4.1.14519.5.2.1.6279.6001.224985459390356936417021464571': '<p>Patient ID: LIDC-IDRI-0834</p><p>Modality: CT</p>',
+        '1.3.6.1.4.1.14519.5.2.1.1706.4001.149500105036523046215258942545': '<p>Patient ID: TCGA-02-0006</p><p>Modality: MR</p>',
+        '1.3.6.1.4.1.14519.5.2.1.2744.7002.950936925946327395356711739684': '<p>Patient ID: QIN-HEADNECK-01-0228</p><p>Modality: PET</p>'
+    }
 
-    return render(request, 'idc/landing.html', {'request': request, 'case_counts': [{'site': x, 'cases':sapien_counts[x], 'fileCount':0 } for x in sapien_counts.keys()] })
+    return render(request, 'idc/landing.html', {
+        'request': request,
+        'case_counts': [{'site': x, 'cases':sapien_counts[x], 'fileCount':0 } for x in sapien_counts.keys()],
+        'example_tooltips': ex_tooltips
+    })
 
 # Displays the privacy policy
 @never_cache

@@ -376,7 +376,11 @@ require([
           return;
       }
 
-      let redux = Math.min(1-((hOver)/initChartHeight), 1-((wOver)/initChartWidth), 1);
+      let redux = Math.min(Math.abs(1-((hOver)/initChartHeight)), Math.abs(1-((wOver)/initChartWidth)), 1);
+
+      if(redux < 0) {
+          return;
+      }
 
       console.debug("Resizing, w:h ",wOver,hOver, redux);
 
