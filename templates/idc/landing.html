@@ -35,34 +35,42 @@
             </div>
             <div class="features row">
                 <div class="container-fluid">
-                <div class="col-lg-6 col-md-6 col-sm-6 modality">
-                    <div class="modality panel panel-default">
+                <div class="col-lg-5 col-md-5 col-sm-12 modality">
+                    <div class="modality-panel panel panel-default">
                         <div class="panel-heading"><h3>RADIOLOGY</h3></div>
-                        <div class="panel-body" style="min-height: 325px;">
-
+                        <div class="panel-body">
+                            <a href="{{ DICOM_STORE_PATH }}1.3.6.1.4.1.14519.5.2.1.6279.6001.224985459390356936417021464571" target="_blank" title="Click to view in OHIF">
+                                <img class="ct-example example" data-study-id="1.3.6.1.4.1.14519.5.2.1.6279.6001.224985459390356936417021464571" src="{% static 'img/ct_ex.jpg' %}" />
+                            </a>
+                            <a href="{{ DICOM_STORE_PATH }}1.3.6.1.4.1.14519.5.2.1.1706.4001.149500105036523046215258942545" target="_blank" title="Click to view in OHIF">
+                                <img class="mr-example example" style="display: none;" data-study-id="1.3.6.1.4.1.14519.5.2.1.1706.4001.149500105036523046215258942545" src="{% static 'img/mr_ex.jpg' %}" />
+                            </a>
+                            <a href="{{ DICOM_STORE_PATH }}1.3.6.1.4.1.14519.5.2.1.2744.7002.950936925946327395356711739684" target="_blank" title="Click to view in OHIF">
+                                <img class="pet-example example" style="display: none;" data-study-id="1.3.6.1.4.1.14519.5.2.1.2744.7002.950936925946327395356711739684" src="{% static 'img/pet_ex.jpg' %}" />
+                            </a>
                         </div>
                         <div class="panel-body">
                             <div class="panel-heading"><h4>Top Imaging Modalities</h4></div>
-                            <div class="col-sm-4"><p>Computer Tomography</p></div>
-                            <div class="col-sm-4">Magnetic Resonance</div>
-                            <div class="col-sm-4">PET</div>
+                            <div class="col-sm-4 selected img-example" data-display-target="ct-example">Computed Tomography</div>
+                            <div class="col-sm-4 img-example" data-display-target="mr-example">Magnetic Resonance</div>
+                            <div class="col-sm-4 img-example" data-display-target="pet-example">PET</div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6 col-md-6 col-sm-6 sapiens">
-                        <div class="sapiens-heading"><h3>Cases by Primary Site</h3></div>
-                        <div id="human-body-root"></div>
+                <div class="col-lg-7 col-md-7 col-sm-12 sapiens">
+                    <div class="sapiens-heading"><h4>Cases by Major Primary Site</h4></div>
+                    <div id="human-body-root"></div>
                 </div>
                 </div>
             </div>
             <div class="summary row">
-                <div class="col-lg-5 col-md-5 col-sm-5">
+                <div class="col-lg-4 col-md-12 col-sm-12">
                     <div class="summary-header panel-body">
                         <span><b>Data Portal Summary</b></span>
                         <span>Data Release 1.0 September 21, 2020</span>
                     </div>
                 </div>
-                <div class="summary col-lg-7 col-md-7 col-sm-7">
+                <div class="summary col-lg-8 col-md-12 col-sm-12">
                     <div class="summary-contents panel-body">
                         <div class="summary-block col-lg-3 col-md-3 col-sm-3"><div class="img-container"><img src="{% static 'img/collex_icon_2.png' %}" alt="" /></div> <div>144<br/> Collections</div></div>
                         <div class="summary-block col-lg-3 col-md-3 col-sm-3"><div class="img-container"><img src="{% static 'img/cases_icon.png' %}" alt="" /></div> <div>160,072<br/> Cases</div></div>
@@ -88,5 +96,6 @@
     <script src="{% static 'js/landing.js' %}"></script>
     <script>
     var case_counts = {{ case_counts|safe }};
+    var ex_tooltips = {{ example_tooltips|safe }};
     </script>
 {% endblock %}

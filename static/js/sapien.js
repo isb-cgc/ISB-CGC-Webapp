@@ -34,8 +34,9 @@ require.config({
 require([
     'jquery',
     'rawSvg',
-    'd3'
-], function($, rawsvg, d3) {
+    'd3',
+    'underscore'
+], function($, rawsvg, d3, _) {
 
     let colorCodes = {
       'Adrenal Gland': 'rgb(190, 48, 44)',
@@ -81,38 +82,31 @@ require([
         return 1;
     });
 
-    function clickHandler() {
-      console.debug("HANDLE IT");
-    };
+    let clickHandler = null;
 
-    function mouseOutHandler() {
-      console.debug("OUT");
-    };
+    let mouseOutHandler = null;
 
-    function mouseOverHandler() {
-      console.debug("OVER");
-    };
+    let mouseOverHandler = null;
 
   let root = $('#human-body-root');
 
   if (!root) throw 'Must select an existing element!';
 
-  root.prepend(rawsvg.buildHumanBody(null,null,'&nbsp;'));
+  root.prepend(rawsvg.buildHumanBody(null,null,' '));
 
-  let width = 400;
-  let height = 530;
+  let initChartWidth = 400;
+  let initChartHeight = 470;
+  let top = 75;
   let labelSize ='12px';
   let tickInterval = 100;
 
-  let offsetLeft = 0;
-  let offsetTop = 0;
   let primarySiteKey = 'site';
   let caseCountKey = 'cases';
   let fileCountKey = 'fileCount';
 
-  const plotHeight = height - 30;
+  const plotHeight = initChartHeight - 30;
   const barStartOffset = 130;
-  const barWidth = width - barStartOffset;
+  const barWidth = initChartWidth - barStartOffset;
   const maxCases = Math.max(...data.map(d => d[caseCountKey]));
   const toClassName = key => key.split(' ').join('-');
   const halfPixel = 0.5;
@@ -125,9 +119,9 @@ require([
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr('class', 'chart')
     .classed("svg-content-responsive", true)
-    .attr('width', width)
-    .attr('height', height)
-    .attr('viewBox', `0 0 ${width+20} ${height}`)
+    .attr('width', initChartWidth)
+    .attr('height', initChartHeight)
+    .attr('viewBox', `0 0 ${initChartWidth+20} ${initChartHeight}`)
     .append('g');
 
   // Bar Heights
@@ -186,10 +180,12 @@ require([
 
       if (mouseOverHandler) mouseOverHandler(d);
       else {
+        let offsetLeft = $('#human-body-root').offset().left;
+        let offsetTop = $('#human-body-root').offset().top;
         tooltip
           .style('opacity', 1)
           .html(`
-            <div style="color: #bb0e3d">${d._key}</div>
+            <div style="color: #bb0e3d">${d['site']}</div>
             <div style="font-size: 12px; color: rgb(20, 20, 20)">
               ${d[caseCountKey]} cases (${d[fileCountKey] || 100} files)
             </div>
@@ -269,16 +265,18 @@ require([
 
       if (mouseOverHandler) mouseOverHandler(d);
       else {
+        let offsetLeft = $('#human-body-root').offset().left;
+        let offsetTop = $('#human-body-root').offset().top;
         tooltip
           .style('opacity', 1)
           .html(`
-            <div style="color: #bb0e3d">${d._key}</div>
+            <div style="color: #bb0e3d">${d['site']}</div>
             <div style="font-size: 12px; color: rgb(20, 20, 20)">
-              ${d[caseCountKey].toLocaleString()} cases, (${d[fileCountKey].toLocaleString() || 100} files)
+              ${d[caseCountKey].toLocaleString()} cases
             </div>
           `)
           .style('left', `${d3.event.pageX - offsetLeft}px`)
-          .style('top', `${d3.event.pageY - offsetTop - 86}px`)
+          .style('top', `${d3.event.pageY - offsetTop - 76}px`)
           .style('transform', 'translateX(-50%)')
           .style('transform', 'translateX(-50%)')
           .style('z-index', '99999');
@@ -306,7 +304,7 @@ require([
 
   [].forEach.call(svgs, svg => {
     svg.addEventListener('click', function () {
-      clickHandler({ _key: this.id });
+      clickHandler({ site: this.id });
     });
 
     svg.addEventListener('mouseover', function (event) { // needs `this`
@@ -323,6 +321,8 @@ require([
           // hacks
           if (mouseOverHandler) mouseOverHandler(d);
           else {
+            let offsetLeft = $('#human-body-root').offset().left;
+            let offsetTop = $('#human-body-root').offset().top;
             tooltip
               .style('opacity', 1)
               .html(`
@@ -361,5 +361,46 @@ require([
     });
 
   });
+
+  let initContainerWidth = $('svg.chart')[0].clientWidth+parseInt($('svg.chart').css("left").replace(/[^-\d\.]/g, ''));
+  let initContainerHeight = $('svg.chart')[0].clientHeight+parseInt($('svg.chart').css("top").replace(/[^-\d\.]/g, ''));
+
+  function redrawGraph(container, { width, height }) {
+      let wOver = 0, hOver = 0;
+      if (initContainerWidth > container.clientWidth || initContainerHeight > container.clientHeight) {
+          wOver = initContainerWidth - container.clientWidth;
+          hOver = initContainerHeight - container.clientHeight;
+      }
+
+      if(wOver < 5 && wOver > 0 && hOver > 0 && hOver < 5) {
+          return;
+      }
+
+      let redux = Math.min(Math.abs(1-((hOver)/initChartHeight)), Math.abs(1-((wOver)/initChartWidth)), 1);
+
+      if(redux < 0) {
+          return;
+      }
+
+      console.debug("Resizing, w:h ",wOver,hOver, redux);
+
+      d3
+      .select(container)
+      .select('svg.chart')
+      .attr('height', initChartHeight * redux)
+      .attr('width', initChartWidth * redux);
+  }
+
+  // Setup observer in constructor
+  const resizeObserver = new ResizeObserver(function(entries, observer) {
+      for (const entry of entries) {
+          // on resize logic specific to this component
+          redrawGraph(entry.target, entry.contentRect);
+      }
+  });
+
+    // Observe the container
+    const container = document.querySelector('.sapiens');
+    resizeObserver.observe(container)
 
 });

@@ -837,15 +837,6 @@ body {
   -webkit-transition: all 0.4s ease-in-out;
   transition: all 0.4s ease-in-out; }
 
-.navbar-left {
-  float: left;
-  margin-top: 5px; }
-
-.navbar-right {
-  float: right;
-  margin-top: 5px;
-  margin-right: 0; }
-
 .navbar-brand {
   height: 50px;
   padding: 5px 5px 5px 0;
@@ -893,11 +884,11 @@ nav, .site-header {
 }
 
 .navbar-item {
-  display: inline-block !important;
   vertical-align: middle;
-  padding-right: 5px;
+  padding-top: 10px;
+  padding-right: 10px;
   padding-left: 5px;
-  float: none !important; }
+  }
   .navbar-item .dropdown:hover {
     cursor: pointer; }
   .navbar-item > a {
@@ -2928,13 +2919,13 @@ html {
   background-color: #245f80;
 }
 
+#landing .features {
+  margin-top: -35px;
+}
+
 #landing .features .container-fluid {
   padding-left: 0;
   padding-bottom: 0;
-}
-
-#landing .features .modality {
-  min-height: 580px;
 }
 
 #landing .features .chart {
@@ -2943,7 +2934,7 @@ html {
 }
 
 #landing .sapiens {
-
+  margin-top: 40px;
 }
 
 #landing .buttons a {
@@ -2995,6 +2986,45 @@ html {
   background-color: #4b4b4b !important;
   color: #fff;
   box-shadow: none;
+}
+
+#landing .modality-panel {
+  margin-top: 0;
+  background-color: #4b4b4b !important;
+  color: #fff;
+  box-shadow: none;
+}
+
+#landing .modality-panel .panel-body, #landing .modality-panel .panel-heading {
+  margin-bottom: 0;
+  margin-top: 0;
+  padding-bottom: 0;
+  padding-top: 0;
+}
+
+#landing .modality-panel img.example {
+  height: 95%;
+  width: 85%;
+  max-width: 440px;
+  max-height: 363px;
+  border: 1px solid black;
+}
+
+#landing .features .modality {
+  max-height: 580px;
+  justify-content: end;
+  margin-top: 55px;
+  min-height: 500px; /* This should always be the height of the sapiens shapes. */
+}
+
+#landing .modality .img-example {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#landing .modality .selected.img-example {
+  color: #95b9db;
+  text-decoration: underline;
 }
 
 #landing .footer {
