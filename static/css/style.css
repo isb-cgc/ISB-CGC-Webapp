@@ -841,15 +841,20 @@ body {
   transition: all 0.4s ease-in-out; }
 
 .navbar-brand {
-  height: 50px;
-  padding: 5px 5px 5px 5px;
+  padding: 2px;
   margin-right: 60px;
-  width: auto;
   float: none;
+  width: 295px;
+  height: auto;
   display: inline-block; }
 
 .navbar-container {
   padding-bottom: 0px;
+}
+
+.navbar-header a {
+    width: 275px;
+    line-height: 20px;
 }
 
 nav, .site-header {
@@ -2931,6 +2936,7 @@ html {
 
 #landing .features {
   margin-top: -35px;
+  margin-bottom: 20px;
 }
 
 #landing .features .container-fluid {
@@ -2996,17 +3002,51 @@ html {
   background-color: #4e1a61;
 }
 
-#landing .modality, #landing .modality .panel-heading {
-  background-color: #4b4b4b !important;
-  color: #fff;
-  box-shadow: none;
+
+#landing .modality.option2 div {
+  background-color: rgb(133, 122, 156);
+  color: #e3dfe2;
 }
 
-#landing .modality-panel {
-  margin-top: 0;
-  background-color: #4b4b4b !important;
-  color: #fff;
-  box-shadow: none;
+#landing .modality.option1 div {
+  background-color: #fff;
+  color: #000000;
+}
+
+#landing .option2 .modality-panel {
+  padding: 5px 20px;
+  border: 3px solid #593a78;
+    border-radius: 4px;
+  max-width: 540px;
+  justify-content: end;
+  margin-top: 55px;
+  min-height: 500px; /* This should always be the height of the sapiens shapes. */
+}
+
+#landing .option1 .modality-panel {
+  padding: 5px 20px;
+  border: 3px solid #c55827;
+  max-width: 540px;
+  justify-content: end;
+  margin-top: 55px;
+  min-height: 500px; /* This should always be the height of the sapiens shapes. */
+  box-shadow: 2px 2px 5px #000000;
+}
+
+#landing .modality.option1 .selected.img-example {
+  color: #9f28b5;
+  text-decoration: underline;
+}
+
+#landing .modality.option2 .selected.img-example {
+    text-decoration: underline;
+    color: #c8c8ee;
+}
+
+
+#landing .modality .img-example {
+  font-weight: 600;
+  cursor: pointer;
 }
 
 #landing .modality-panel .panel-body, #landing .modality-panel .panel-heading {
@@ -3018,29 +3058,11 @@ html {
 
 #landing .modality-panel img.example {
   height: 95%;
-  width: 85%;
+  width: 95%;
   max-width: 440px;
   max-height: 363px;
-  border: 1px solid black;
+  border: 2px solid black;
 }
-
-#landing .features .modality {
-  max-height: 580px;
-  justify-content: end;
-  margin-top: 55px;
-  min-height: 500px; /* This should always be the height of the sapiens shapes. */
-}
-
-#landing .modality .img-example {
-  font-weight: 600;
-  cursor: pointer;
-}
-
-#landing .modality .selected.img-example {
-  color: #95b9db;
-  text-decoration: underline;
-}
-
 .site-footer {
   background-color: #003a55;
   text-align: center;
