@@ -3016,33 +3016,29 @@ html {
 #landing .option2 .modality-panel {
   padding: 5px 20px;
   border: 3px solid #593a78;
-    border-radius: 4px;
-  max-width: 540px;
+    border-radius: 4px 4px 0px 0px;
   justify-content: end;
   margin-top: 55px;
-  min-height: 500px; /* This should always be the height of the sapiens shapes. */
 }
 
 #landing .option1 .modality-panel {
   padding: 5px 20px;
-  border: 3px solid #c55827;
-  max-width: 540px;
-  justify-content: end;
+  position: relative;
+  z-index:300;
   margin-top: 55px;
-  min-height: 500px; /* This should always be the height of the sapiens shapes. */
-  box-shadow: 2px 2px 5px #000000;
+  box-shadow: 0px 8px 0px #fff, 0px 0px 5px #000000;
 }
 
 #landing .modality.option1 .selected.img-example {
   color: #9f28b5;
   text-decoration: underline;
+  border-bottom: 0;
 }
 
 #landing .modality.option2 .selected.img-example {
     text-decoration: underline;
-    color: #c8c8ee;
+    color: #281736;
 }
-
 
 #landing .modality .img-example {
   font-weight: 600;
@@ -3054,6 +3050,89 @@ html {
   margin-top: 0;
   padding-bottom: 0;
   padding-top: 0;
+}
+
+#landing .modality-panel .tab-pane {
+  text-align: center;
+  padding-bottom: 15px;
+}
+
+#modality-nav-tabs {
+    position: relative;
+    background-color: inherit;
+    height: 100%;
+    display: inline-flex;
+    align-content: flex-end;
+    width: 100%;
+    border: 0;
+}
+
+#modality-nav-tabs li {
+    width: 33.33%;
+    background-color: inherit;
+    text-transform: none !important;
+    color: #000;
+    padding-top: 0;
+    margin-top: -3px;
+}
+
+.option1 #modality-nav-tabs li {
+  background-color: #dcdcdc;
+  padding-top: 5px;
+  box-shadow: 0px 0px 5px #000000;
+  margin-top: 0;
+}
+
+.option1 #modality-nav-tabs li a {
+    border-top: 5px solid #3d884e;
+}
+
+.option1 #modality-nav-tabs li.active a {
+    border-top: 0;
+}
+
+.option1 #modality-nav-tabs li.active a:after {
+    height: 4px;
+}
+
+.option2 #modality-nav-tabs li {
+    border: 3px solid #593a78;
+    border-radius: 0px 0px 4px 4px;
+    border-top: none;
+}
+
+#modality-nav-tabs:before {
+    display: inline-block;
+}
+
+#modality-nav-tabs li:first-child {
+    margin-right: 3px;
+}
+
+#modality-nav-tabs li:last-child {
+    margin-left: 3px;
+}
+
+#modality-nav-tabs li>a {
+    text-transform: none !important;
+    background-color: inherit;
+    color: #000;
+    height: 100%;
+    border: 0;
+}
+
+.option2 #modality-nav-tabs li.active {
+    background-color: rgb(133, 122, 156);
+}
+
+.option1 #modality-nav-tabs li.active {
+    background-color: #fff;
+    color: #000;
+    border-top: 0;
+}
+
+.option2 #modality-nav-tabs li.active>a {
+    color: #fff;
 }
 
 #landing .modality-panel img.example {
