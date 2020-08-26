@@ -34,11 +34,11 @@
                         <a href="https://discourse.canceridc.dev" title="Join us on Discourse" target="_blank"><i class="fa fa-comments"></i> <p class="navbar-label">Discourse</p></a>
                     </li>
                     <li class="navbar-link navbar-item">
-                        <a href="https://learn.canceridc.dev" title="Join us on Discourse" target="_blank"><i class="fa fa-book"></i> <p class="navbar-label">Documentation</p></a>
+                        <a href="https://learn.canceridc.dev" title="View IDC Documentation" target="_blank"><i class="fa fa-book"></i> <p class="navbar-label">Documentation</p></a>
                     </li>
                     {% if user.is_authenticated %}
                     <li class="navbar-link navbar-item">
-                        <a href="{% url 'cohort_list' %}" target="_blank"><i class="fa fa-archive"></i> Cohorts</a>
+                        <a href="{% url 'cohort_list' %}" title="View Your Cohorts" target="_blank"><i class="fa fa-archive"></i> Cohorts</a>
                     </li>
                     {% endif %}
                     <!--
