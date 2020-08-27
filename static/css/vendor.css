@@ -3819,7 +3819,8 @@ tbody.collapse.in {
     display: block;
     width: 22px;
     height: 2px;
-    border-radius: 1px; }
+    border-radius: 1px;
+    background-color: #0c2127}
   .navbar-toggle .icon-bar + .icon-bar {
     margin-top: 4px; }
   @media (min-width: 768px) {

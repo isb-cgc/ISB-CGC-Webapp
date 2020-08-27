@@ -86,9 +86,12 @@ nav {
 
 .navbar {
   margin-bottom: 0px;
-  padding-bottom: 0px;
-  height: 70px;
-  box-shadow: 0px 2px 2px #a999a9;}
+  height: 55px;
+}
+
+.navbar, .navbar-collapse {
+  padding-bottom: 5px !important;
+}
 
 .navbar-nav .search-item .input-group {
   margin-top: 10px;
@@ -837,31 +840,28 @@ body {
   -webkit-transition: all 0.4s ease-in-out;
   transition: all 0.4s ease-in-out; }
 
-.navbar-left {
-  float: left;
-  margin-top: 5px; }
-
-.navbar-right {
-  float: right;
-  margin-top: 5px;
-  margin-right: 0; }
-
 .navbar-brand {
-  height: 50px;
-  padding: 5px 5px 5px 0;
-  width: auto;
+  padding: 2px;
+  margin-right: 60px;
   float: none;
+  width: 295px;
+  height: auto;
   display: inline-block; }
+
+.navbar-container {
+  padding-bottom: 0px;
+}
+
+.navbar-header a {
+    width: 275px;
+    line-height: 20px;
+}
 
 nav, .site-header {
   background: #fff; }
   nav a, .site-header a {
     color: #2B7388;
     font-weight: bold; }
-
-.site-header nav .navbar-item, .site-header nav .navbar-right .navbar-label {
-  font-size: large;
-}
 
 .site-header nav .navbar-item i, .site-header nav .navbar-right i {
   font-size: xx-large;
@@ -873,6 +873,8 @@ nav, .site-header {
 }
 
 .site-header nav .navbar-item a.main-links img {
+  height: 32px;
+  width: auto;
   filter:grayscale(100%);
 }
 
@@ -893,11 +895,11 @@ nav, .site-header {
 }
 
 .navbar-item {
-  display: inline-block !important;
   vertical-align: middle;
-  padding-right: 5px;
+  padding-top: 10px;
+  padding-right: 10px;
   padding-left: 5px;
-  float: none !important; }
+  }
   .navbar-item .dropdown:hover {
     cursor: pointer; }
   .navbar-item > a {
@@ -1687,7 +1689,7 @@ section .min-max {
     line-height: 30px; }
 
 .page-heading {
-  background: #fff;
+  background: #496a89;
   margin-bottom: 20px;
   padding: 0; }
   .page-heading .container {
@@ -1697,12 +1699,16 @@ section .min-max {
   .page-heading .page-action-group {
     margin-bottom: 0; }
 
-.page-header {
+.page-heading h1, .page-heading h4, .page-heading h2, .page-heading h3 {
   font-size: 24px;
   margin: 15px 0;
   padding-bottom: 0;
   border-bottom: none;
-  color: #2A537A; }
+  color: #fff; }
+
+.page-heading .container-fluid {
+  padding-bottom: 0;
+}
 
 .page-action-group {
   padding: 5px 0;
@@ -2920,7 +2926,7 @@ html {
   padding: 0;
 }
 
-#landing .summary, #landing .footer, #landing .footer a, #landing .summary s {
+#landing .summary, .site-footer, .site-footer a, #landing .summary s {
   color: #fff;
 }
 
@@ -2928,13 +2934,14 @@ html {
   background-color: #245f80;
 }
 
+#landing .features {
+  margin-top: -35px;
+  margin-bottom: 20px;
+}
+
 #landing .features .container-fluid {
   padding-left: 0;
   padding-bottom: 0;
-}
-
-#landing .features .modality {
-  min-height: 580px;
 }
 
 #landing .features .chart {
@@ -2943,7 +2950,16 @@ html {
 }
 
 #landing .sapiens {
+  margin-top: 40px;
+}
 
+#landing .buttons {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+#landing .buttons .buttons-col {
+  padding: 0;
 }
 
 #landing .buttons a {
@@ -2954,11 +2970,6 @@ html {
   text-align: left;
   font-size: 1.4em;
   font-weight: 500;
-}
-
-#landing .buttons {
-  margin-top: 30px;
-  margin-bottom: 10px;
 }
 
 #landing .buttons img {
@@ -2991,18 +3002,152 @@ html {
   background-color: #4e1a61;
 }
 
-#landing .modality, #landing .modality .panel-heading {
-  background-color: #4b4b4b !important;
-  color: #fff;
-  box-shadow: none;
+
+#landing .modality.option2 div {
+  background-color: rgb(133, 122, 156);
+  color: #e3dfe2;
 }
 
-#landing .footer {
+#landing .modality.option1 div {
+  background-color: #fff;
+  color: #000000;
+}
+
+#landing .option2 .modality-panel {
+  padding: 5px 20px;
+  border: 3px solid #593a78;
+    border-radius: 4px 4px 0px 0px;
+  justify-content: end;
+  margin-top: 55px;
+}
+
+#landing .option1 .modality-panel {
+  padding: 5px 20px;
+  position: relative;
+  z-index:300;
+  margin-top: 55px;
+  box-shadow: 0px 8px 0px #fff, 0px 0px 5px #000000;
+}
+
+#landing .modality.option1 .selected.img-example {
+  color: #9f28b5;
+  text-decoration: underline;
+  border-bottom: 0;
+}
+
+#landing .modality.option2 .selected.img-example {
+    text-decoration: underline;
+    color: #281736;
+}
+
+#landing .modality .img-example {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#landing .modality-panel .panel-body, #landing .modality-panel .panel-heading {
+  margin-bottom: 0;
+  margin-top: 0;
+  padding-bottom: 0;
+  padding-top: 0;
+}
+
+#landing .modality-panel .tab-pane {
+  text-align: center;
+  padding-bottom: 15px;
+}
+
+#modality-nav-tabs {
+    position: relative;
+    background-color: inherit;
+    height: 100%;
+    display: inline-flex;
+    align-content: flex-end;
+    width: 100%;
+    border: 0;
+}
+
+#modality-nav-tabs li {
+    width: 33.33%;
+    background-color: inherit;
+    text-transform: none !important;
+    color: #000;
+    padding-top: 0;
+    margin-top: -3px;
+}
+
+.option1 #modality-nav-tabs li {
+  background-color: #dcdcdc;
+  padding-top: 5px;
+  box-shadow: 0px 0px 5px #000000;
+  margin-top: 0;
+}
+
+.option1 #modality-nav-tabs li a {
+    border-top: 5px solid #3d884e;
+}
+
+.option1 #modality-nav-tabs li.active a {
+    border-top: 0;
+}
+
+.option1 #modality-nav-tabs li.active a:after {
+    height: 4px;
+}
+
+.option2 #modality-nav-tabs li {
+    border: 3px solid #593a78;
+    border-radius: 0px 0px 4px 4px;
+    border-top: none;
+}
+
+#modality-nav-tabs:before {
+    display: inline-block;
+}
+
+#modality-nav-tabs li:first-child {
+    margin-right: 3px;
+}
+
+#modality-nav-tabs li:last-child {
+    margin-left: 3px;
+}
+
+#modality-nav-tabs li>a {
+    text-transform: none !important;
+    background-color: inherit;
+    color: #000;
+    height: 100%;
+    border: 0;
+}
+
+.option2 #modality-nav-tabs li.active {
+    background-color: rgb(133, 122, 156);
+}
+
+.option1 #modality-nav-tabs li.active {
+    background-color: #fff;
+    color: #000;
+    border-top: 0;
+}
+
+.option2 #modality-nav-tabs li.active>a {
+    color: #fff;
+}
+
+#landing .modality-panel img.example {
+  height: 95%;
+  width: 95%;
+  max-width: 440px;
+  max-height: 363px;
+  border: 2px solid black;
+}
+.site-footer {
   background-color: #003a55;
   text-align: center;
   font-size: 1.2em;
 }
-#landing .footer p {
+.site-footer p {
   padding: 0;
   margin-bottom: 5px;
 }
@@ -3082,6 +3227,10 @@ html {
 
 #privacy a {
   font-weight: bold; }
+
+#privacy .privacy {
+  margin: 0px 30px 0px 20px;
+}
 
 #user-landing {
   margin-top: 80px; }

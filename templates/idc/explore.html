@@ -21,7 +21,6 @@
 {% endcomment %}
 
 {% block header %}
-
     <link type="text/css" rel="stylesheet" href="{% static 'css/search.css' %}">
     <link type="text/css" rel="stylesheet" href="{% static 'css/jquery-ui.min.css' %}">
     <script src="https://d3js.org/d3.v5.min.js"></script>
@@ -36,15 +35,13 @@
 
 {% block page_header %}
     <div class="pf-heading">
-        <div class="container" style="display: block;">
+        <div class="container-fluid">
             <ol class="breadcrumb">
-                <li><a href="/dashboard/">Your Dashboard</a></li>
-                <li><a href="/explore/">Explore</a></li>
                 <li id="previous" style="display:none"><a href="#" onclick="javascript:selectHistoricFilter(-1)">Previous Filter</a></li>
                 <li id="next" style="display:none"><a href="#" onclick="javascript:selectHistoricFilter(1)">Next Filter</a></li>
             </ol>
 
-            <h1 class="page-header pull-left" role="heading" aria-level="1">Explore Image Data</h1>
+            <h3 class="pull-left" role="heading" aria-level="1">Explore Image Data</h3>
         {% if DEV_TIER %}
             <button id="save-cohort-btn" class="btn btn-primary pull-right" data-toggle="modal" data-target="#save-cohort-modal" title="{% if request.user.is_authenticated %}Please select at least one filter.{% else %}Please log in to save this cohort.{% endif %}" disabled="disabled">
                 {% if request.user.is_authenticated %}Save As New Cohort{% else %}Log in to Save{% endif %}
