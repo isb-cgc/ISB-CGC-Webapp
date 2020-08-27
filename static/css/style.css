@@ -1,6 +1,7 @@
 @import url("./font-awesome.min.css");
 @import url("./vendor.css");
 @import url("./sapiens.css");
+@import url("./gdc-fonts.css");
 @import url("./tippy-light.css");
 @import url("./bootstrap-tokenfield.min.css");
 /********************************************
@@ -2977,13 +2978,13 @@ html {
   filter: brightness(400%);
 }
 
-#landing .buttons .img-container {
+#landing .buttons i {
   border-radius: 5px;
   background-color: rgba(255,255,255,0.3);
-  display: inline-block;
-  padding: 5px 10px 5px 10px;
+  padding: 3px 7px;
   margin-right: 10px;
-  justify-content: center;
+  vertical-align: middle;
+  font-size: 1.4em;
 }
 
 #landing .btn-collex {
