@@ -9,7 +9,6 @@ require.config({
         base: 'base',
         imagesearch: 'image_search',
         cohortfilelist: 'cohort_filelist',
-        plotly: 'libs/plotly-latest.min',
         tippy: 'libs/tippy-bundle.umd.min',
         '@popperjs/core': 'libs/popper.min'
     },
@@ -27,7 +26,6 @@ require.config({
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'tablesorter': ['jquery'],
         'base': ['jquery'],
-        'imagesearch': ['plotly']
     }
 });
 
@@ -36,12 +34,11 @@ require([
     'tippy',
     'base',
     'imagesearch',
-    'plotly',
     'jqueryui',
     'bootstrap',
     'tablesorter',
     'cohortfilelist',
-], function ($, tippy, base, imagesearch, plotly, cohortfilelist) {
+], function ($, tippy, base, imagesearch, cohortfilelist) {
 
     $('.filter-panel li.checkbox').on('change', 'input', function() {
         if($('#search_def p').length > 0) {

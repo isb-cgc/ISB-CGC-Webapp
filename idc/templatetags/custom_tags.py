@@ -116,12 +116,19 @@ def plotnm(item):
     else:
         return item
 
+@register.filter
+def order_seg(items,attr):
+    return items
+    #if (attr =='dicom_derived_all:segmentation'):
+    #    return sorted(items, key=lambda k: k['display_value'])
+    #else:
+    #    return items
 
 @register.filter
 def order_quant(items, attr):
     item_order=['Diameter','Glycolysis_Within_First_Quarter_of_Intensity_Range','Glycolysis_Within_Second_Quarter_of_Intensity_Range','Glycolysis_Within_Third_Quarter_of_Intensity_Range','Glycolysis_Within_Fourth_Quarter_of_Intensity_Range', 'Percent_Within_First_Quarter_of_Intensity_Range', 'Percent_Within_Second_Quarter_of_Intensity_Range','Percent_Within_Third_Quarter_of_Intensity_Range', 'Percent_Within_Fourth_Quarter_of_Intensity_Range', 'SUVbw', 'Standardized_Added_Metabolic_Activity', 'Standardized_Added_Metabolic_Activity_Background','Surface_area_of_mesh', 'Total_Lesion_Glycolysis', 'Volume']
     if (attr == 'dicom_derived_all:segmentation') or (attr == 'dicom_derived_all:qualitative'):
-        return(items)
+        return sorted(items, key=lambda k: k['name'])
     else:
         sort_order = []
         for ordinal in item_order:

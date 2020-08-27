@@ -6,7 +6,6 @@ require.config({
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
         jquerydt: 'libs/jquery.dataTables.min',
-        plotly: 'libs/plotly-latest.min',
         base: 'base'
     },
     shim: {
@@ -17,8 +16,8 @@ require.config({
 });
 
 
-require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
-    function($, jqueryui, bootstrap, plotly, jquerydt) {
+require(['jquery', 'jquerydt','jqueryui', 'bootstrap', 'base'],
+    function($, jqueryui, bootstrap, jquerydt ) {
 
         window.filterObj = {};
         window.projIdSel = [];
@@ -95,13 +94,12 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             if (reset) {
                 strt = $('#' + slideDiv).slider("option", "min");
                 end = $('#' + slideDiv).slider("option", "max");
-
-                vals = [strt, end];
-
-                $('#' + slideDiv).find('.ui-slider-handle').each( function(index){
-                        $(this).find('.slide_tooltip').text( vals[index].toString() );
-                });
             }
+
+             vals = [strt, end];
+            $('#' + slideDiv).find('.ui-slider-handle').each( function(index){
+                $(this).find('.slide_tooltip').text( vals[index].toString() );
+            });
 
             $('#' + slideDiv).slider("values", "0", strt);
             $('#' + slideDiv).slider("values", "1", end);
@@ -136,7 +134,11 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 } else {
                     attVal = [parseFloat(strt), parseFloat(end)];
                 }
-                window.filterObj[filtAtt] = attVal
+                //$(this).find('.slide_tooltip').text( ui.values[index].toString() );
+                if (!(filtAtt in window.filterObj)){
+                    window.filterObj[filtAtt] = new Object();
+                }
+                window.filterObj[filtAtt]['rng'] = attVal;
             }
             if (updateNow) {
                 mkFiltText();
@@ -1076,41 +1078,6 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             return newId;
         }
 
-
-        var resolveRelatedPlotsCatWCountsRng = function (plotData, plotId, lbl, pHeader) {
-            phA = new Array();
-            ctA = new Array();
-
-            for (i = 0; i < pHeader.length; i++) {
-                var key = pHeader[i][0];
-                var nm = pHeader[i][1];
-                var ct = 0;
-                if (plotData.hasOwnProperty(key)) {
-                    ct = plotData[key];
-                }
-                phA.push(nm)
-                ctA.push(ct)
-            }
-
-            var pdata = [
-                {
-                    x: phA,
-                    y: ctA,
-                    type: 'bar'
-                }
-            ];
-
-            plotLayout.title = lbl
-            Plotly.newPlot(plotId, pdata, plotLayout, {displayModeBar: false});
-
-            /* document.getElementById(plotId).on('plotly_click', function (data) {
-                 alert('here');
-             }); */
-
-
-        };
-
-
         window.updateSearchScope = function (searchElem) {
             var project_scope = searchElem.selectedOptions[0].value;
             //document.getElementById('selected_project').innerHTML=project_scope;
@@ -1443,127 +1410,266 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
             });
         };
 
-        var plotCategoricalData = function (plotId, lbl, plotData, isPie, showLbl) {
-            var layout = new Object();
-            xdata = new Array();
-            ydata = new Array();
-            var plotCats = 0;
 
-            for (var i = 0; i < plotData.dataCnt.length; i++) {
-                if (plotData.dataCnt[i] > 0) {
-                    ydata.push(plotData.dataCnt[i]);
-                    xdata.push(plotData.dataLabel[i]);
-                    plotCats++;
+        var manageUpdateFromPlot = function(plotId, label){
+            var listId = plotId.replace('_chart','_list');
+            var filterId = plotId.replace('_chart','');
+
+            var isSlider = $('#'+filterId).find('#'+filterId+'_slide').length>0 ? true : false;
+            if (isSlider) {
+
+                maxx =$('#'+filterId).data('attr-max').toString();
+
+                var selArr = label.split(' To ');
+                var strt = parseInt((selArr[0] === '*') ? '0' : selArr[0]);
+                var end = parseInt((selArr[1] === '*') ? maxx : selArr[1]);
+                setSlider(filterId+"_slide", false, strt, end, true,true);
+
                 }
-            }
-            var data = new Object();
-            var textinfo = ""
-            if (showLbl && (plotCats > 0)) {
-                textinfo = 'label';
-            } else {
-                textinfo = 'none';
-            }
-
-            if (isPie || (plotCats === 0)) {
-                layout = pieLayout;
-                data = [{
-                    values: ydata,
-                    labels: xdata,
-                    //marker: {colors:['rgb(256,256,256)']},
-                    type: 'pie',
-                    textposition: 'inside',
-                    textinfo: textinfo,
-                    //textinfo: textinfo,
-                    sort: false
-                }];
-            } else {
-                layout = plotLayout;
-                if (showLbl) {
-                    delete layout.xaxis;
-                } else {
-                    layout.xaxis = {tickvals: []};
-                }
-                data = [
-                    {
-                        x: xdata,
-                        y: ydata,
-                        type: 'bar'
-                    }
-
-                ];
-            }
-
-            layout.title = lbl.toUpperCase().replace(/_/g, " ");
-            delete layout.annotations;
-            if (plotCats === 0) {
-                data[0].values = [0];
-                data[0].labels = [''];
-                data[0].marker = {colors: ['rgb(256,256,256)']};
-                layout.annotations = [{text: 'No Data', showarrow: false, font: {size: 18}}];
-            }
-
-            Plotly.newPlot(plotId, data, layout, {displayModeBar: false});
-
-            document.getElementById(plotId).on('plotly_click', function (data, plotId) {
-                var chartid = new Object();
-                if (isPie) {
-                    chartid = data.event.path[7].id;
-                } else {
-                    chartid = data.event.path[6].id;
-                }
-
-                var filterId = chartid.replace("_chart", "");
-                var isSlider = $('#'+filterId).find('#'+filterId+'_slide').length>0 ? true : false;
-                if (isSlider) {
-                    //var sel = data.points[0].x;
-                    var sel = new Object();
-                    if (isPie) {
-                        sel = data.points[0].label;
+            else{
+                var inputList = $('#' + listId).find(':input');
+                for (var i = 0; i < inputList.length; i++) {
+                    var curLabel = $(inputList[i]).parent().children()[1].innerHTML;
+                    if (label === curLabel) {
+                        inputList[i].checked = true;
                     } else {
-                        sel = data.points[0].x;
+                        inputList[i].checked = false;
                     }
-                    var selArr = sel.split(' To ');
-                    var strt = parseInt((selArr[0] === '*') ? '0' : selArr[0]);
-                    var end = parseInt((selArr[1] === '*') ? '120' : selArr[1]);
-                    setSlider(filterId+"_slide", false, strt, end, true,true);
 
-                } else {
-                    //alert(String(data.event.path[6].id));
-                    var index;
-                    var label;
-                    if (isPie) {
-                        label = data.points[0].label;
+                    if (i < inputList.length - 1) {
+                        handleFilterSelectionUpdate(inputList[i], false, false);
                     } else {
-                        index = data.points[0].pointIndex;
+                        handleFilterSelectionUpdate(inputList[i], true, true);
                     }
-                    var listId = filterId + '_list';
-                    var inputList = $('#' + listId).find(':input');
-                    for (var i = 0; i < inputList.length; i++) {
-                        if (isPie) {
-                            var curLabel = $(inputList[i]).parent().children()[1].innerHTML;
-                            if (label === curLabel) {
-                                inputList[i].checked = true;
-                            } else {
-                                inputList[i].checked = false;
-                            }
-                        } else {
-                            if (i === index) {
-                                inputList[i].checked = true;
-                            } else {
-                                inputList[i].checked = false;
-                            }
-                        }
-                        if (i<inputList.length-1) {
-                            handleFilterSelectionUpdate(inputList[i], false, false);
-                        }
-                        else{
-                            handleFilterSelectionUpdate(inputList[i], true, true);
-                        }
-                    }
-                    //handleFilterSelectionUpdate(filterId);
                 }
+            }
+        }
+
+        var plotCategoricalData = function (plotId, lbl, plotData, isPie, showLbl){
+
+            var width = 240;
+            var height = 260;
+            var margin = 50;
+
+            var radius = Math.min(width, height) / 2 - margin;
+            var tooltip2 = d3.select("#"+plotId).append("div").style("opacity", 1).style("position","absolute");
+
+
+
+            // append the svg object to the div called 'my_dataviz'
+          var svg = d3.select("#"+plotId)
+             .select("svg")
+             .attr("width", width)
+             .attr("height", height).style("text-anchor","middle");
+
+          svg.selectAll("*").remove();
+
+          titlePart = svg.append("text").attr("text-anchor","middle").attr("font-size", "14px").attr("fill","#2A537A");
+          var title1="";
+          var title2="";
+          if (lbl.includes('Quarter')){
+                var titA = lbl.split('Quarter');
+                title1=titA[0]+' Quarter';
+                title2=titA[1];
+          }
+          else if(lbl.includes('(')){
+               var titA = lbl.split('(');
+                title1=titA[0];
+                title2='('+titA[1];
+          }
+          else{
+              title1=lbl;
+          }
+
+          if (lbl.includes('Activity Background')){
+              titlePart.append("tspan").attr("x",95).attr("y",30).attr("dx",0).attr("dy",0).text(title1);
+              titlePart.append("tspan").attr("x",95).attr("y",30).attr("dx",0).attr("dy",20).text(title2);
+          }
+          else {
+              titlePart.append("tspan").attr("x", 120).attr("y", 30).attr("dx", 0).attr("dy", 0).text(title1);
+              titlePart.append("tspan").attr("x", 120).attr("y", 30).attr("dx", 0).attr("dy", 20).text(title2);
+          }
+          /*
+          .attr("transform", "translate("+margin+",0)")
+          .attr("x", 50)
+          .attr("y", 30)
+          .attr("font-size", "24px")
+          .text(lbl);*/
+
+
+          var pieg=svg.append("g")
+             .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+
+
+
+            var data = new Object;
+            rng= new Array();
+            spcing = 1.0/parseFloat(plotData.dataCnt.length);
+            var tot=0;
+         for (i=0;i<plotData.dataCnt.length;i++) {
+             var pkey = plotData.dataLabel[i];
+             var cnt = plotData.dataCnt[i];
+             data[pkey]=cnt;
+             tot+=cnt;
+             rng.push(parseFloat(i)*parseFloat(spcing));
+         }
+         $('#'+plotId).data('total',tot.toString());
+         //var data = {a: 9, b: 20, c:30, d:8, e:12};
+
+         // set the color scale
+          var color = d3.scaleOrdinal()
+           .domain(plotData.dataLabel)
+           .range(d3.schemeCategory10);
+
+        /* var color = d3.scaleOrdinal()
+           .domain(data)
+           .range(rng); */
+
+         // Compute the position of each group on the pie:
+        var pie = d3.pie()
+        .value(function(d) {return d.value; }).sort(null);
+        var data_ready = pie(d3.entries(data));
+
+
+
+        // create a tooltip
+
+
+        // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+        pieg
+        .selectAll('whatever')
+        .data(data_ready)
+        .enter()
+        .append('path')
+        .attr('d', d3.arc()
+        .innerRadius(0)
+        .outerRadius(radius)
+        )
+        .attr('fill', function(d){ return(
+            color(d.data.key)  )
+         })
+        .attr("stroke", "black")
+        .style("stroke-width", "0px")
+        .style("opacity", 0.7)
+            .on("mousemove",function(d){
+
+                var tot=parseFloat($('#'+plotId).data('total'));
+                var frac = parseInt(parseFloat(d.data.value)/tot*100);
+                var i=1;
+              var bb=this.getBBox();
+
+              txtbx.attr("x",bb.x+parseInt(bb.width*0.5));
+              txtbx.attr("y",bb.y+15+parseInt(bb.height*0.5));
+              txtbx.selectAll('*').attr("x",bb.x+parseInt(bb.width*0.5));
+              txtbx.selectAll('*').attr("y",bb.y+15+parseInt(bb.height*0.5));
+
+              tspans=txtbx.node().childNodes;
+              tspans[0].textContent = d.data.key;
+              tspans[1].textContent = d.data.value;
+              tspans[2].textContent = frac.toString()+"%";
+
+              rect.attr("x",bb.x-5+parseInt(bb.width*0.5));
+              rect.attr("y",bb.y+parseInt(bb.height*0.5));
+
+              var txbb=txtbx.node().getBBox()
+              rect.attr("width",txbb.width+10);
+              rect.attr("height",txbb.height+10);
+              rect.attr("fill",color(d.data.key));
+
+              rect.attr("opacity",1);
+              txtbx.attr("opacity",1);
+
+            })
+            .on("mouseleave",function(d){
+                rect.attr("opacity",0);
+                txtbx.attr("opacity",0);
+             })
+            .on("click",function(d){
+                manageUpdateFromPlot(plotId, d.data.key);
             });
-        };
+         /* .append("svg:title")
+                .text(function(d) {
+                    var tot=parseFloat($('#'+plotId).data('total'));
+                    var frac = parseInt(parseFloat(d.data.value)/tot*100);
+                    var ret = d.data.key+'\n'+d.data.value.toString()+'\n'+frac+'%';
+                    return ret;
+                });*/
+
+        //var txtbx=pieg.append("text").attr("x","0px").attr("y","0px").attr("text-anchor","middle").text("hello there");
+        var rect=pieg.append("rect");
+        rect.attr("opacity",0);
+        var txtbx=pieg.append("text").attr("x","0px").attr("y","10px").attr('text-anchor','start');
+        txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",0);
+        txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",20);
+        txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",40);
+        txtbx.attr("opacity",0);
+
+          //rect.append("rect").attr("x","-30px").attr("y","-30px").attr("width","100px").attr("height","100px").attr("fill","blue");
+
+
+        }
+
+
+         var plotCategoricalDataBar = function (plotId, lbl, plotData, isPie, showLbl){
+            var nData = new Array();
+            for (i=0;i<plotData.dataCnt.length;i++){
+                nData.push({'cat': plotData.dataLabel[i], 'cnt': plotData.dataCnt[i]});
+            }
+
+
+            var svg = d3.select('#'+plotId).select("svg"),
+            marginL = 20,
+            marginR = 40,
+            marginT = 50,
+            marginB = 100;
+        width = svg.attr("width") - marginL - marginR;
+        height = svg.attr("height") - marginT - marginB;
+
+        svg.append("text")
+       .attr("transform", "translate("+marginL+",0)")
+       .attr("x", 50)
+       .attr("y", 30)
+       .attr("font-size", "24px")
+       .text(lbl);
+
+
+        var xScale = d3.scaleBand().range([0, width]).padding(0.1).domain( nData.map(function(d){return d.cat}));
+        var yScale = d3.scaleLinear().range([height, 0]).domain([0, d3.max(nData, function(d){ return d.cnt} )]);
+
+        var g = svg.append("g").attr("transform", "translate(" + marginL + "," + marginT + ")");
+
+
+        g.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(xScale)).selectAll("text")
+            .attr("transform", "rotate(45)")
+            .style("text-anchor", "start");
+
+        g.append("g")
+            .call(d3.axisLeft(yScale));
+
+
+        g.selectAll(".d3bar")
+            .data(nData)
+            .enter().append("rect")
+            .attr("class", "d3bar")
+            .attr("x", function (d) {
+                return xScale(d.cat)
+            })
+            .attr("y", function (d) {
+                return yScale(d.cnt)
+            })
+            .attr("width", xScale.bandwidth())
+            .attr("height", function (d) {
+                return height - yScale(d.cnt);
+            });
+
+        }
+
+
+
+
 
         var findFilterCats = function (id, wCheckBox) {
             filterCats = new Array();
@@ -1621,12 +1727,14 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
                 filterData = parseFilterForCounts(filterCat);
                 plotId = filterCat + "_chart";
                 var lbl='';
+                lbl = $('#' + filterCat + '_heading').children()[0].innerText;
+                /*
                 if ($('#' + filterCat).data('plotnm')){
                     lbl = $('#' + filterCat).data('plotnm');
                 }
                 else {
                     lbl = $('#' + filterCat + '_heading').children()[0].innerText;
-                }
+                } */
                 plotCategoricalData(plotId, lbl, filterData, isPie, showLbl);
             }
 
@@ -2174,7 +2282,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','plotly', 'base'],
 
 
 
-            mkSlider('age_at_diagnosis',parseInt($('#age_at_diagnosis').data('attr-min')),parseInt($('#age_at_diagnosis').data('attr-max')),1,true,true, 'tcga_clinical.');
+            mkSlider('age_at_diagnosis',0,parseInt($('#age_at_diagnosis').data('attr-max')),1,true,true, 'tcga_clinical.');
 
             addSliders('quantitative');
 
