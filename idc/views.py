@@ -405,6 +405,7 @@ def explore_data_page(request):
         context['order']['derived_set']=['dicom_derived_all:segmentation','dicom_derived_all:qualitative','dicom_derived_all:quantitative']
         return render(request, 'idc/explore.html', context)
 
+
 # @login_required
 # def ohif_test_page(request):
 #     request.session['last_path']=request.get_full_path()

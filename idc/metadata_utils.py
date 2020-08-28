@@ -16,6 +16,7 @@
 
 import logging
 import re
+import copy
 from idc_collections.models import DataSource, Attribute, Attribute_Display_Values, Program, DataVersion, DataSourceJoin, DataSetType
 from solr_helpers import *
 import time
@@ -108,7 +109,7 @@ def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record
             search_child_records = filter_attrs['sources'][source.id]['attrs'].get_attr_set_types().get_child_record_searches()
         joined_origin = False
         solr_query = build_solr_query(
-            filters,
+            copy.deepcopy(filters),
             with_tags_for_ex=True,
             search_child_records_by=search_child_records
         ) if filters else None
@@ -134,9 +135,12 @@ def get_metadata_solr(filters, fields, sources, counts_only, collapse_on, record
                                     joined_origin = True
                                 # DataSource join pairs are unique, so, this should only produce a single record
                                 source_join = DataSourceJoin.objects.get(from_src__in=[ds.id,source.id], to_src__in=[ds.id,source.id])
-                                query_set.append(("{!join %s}" % "from={} fromIndex={} to={}".format(
+                                joined_query = ("{!join %s}" % "from={} fromIndex={} to={}".format(
                                     source_join.get_col(ds.name), ds.name, source_join.get_col(source.name)
-                                )) + solr_query['queries'][attr])
+                                )) + solr_query['queries'][attr]
+                                if ds.has_data_type(DataSetType.ANCILLARY_DATA) and not source.has_data_type(DataSetType.ANCILLARY_DATA):
+                                    joined_query = 'has_related:"False" OR _query_:"%s"' % joined_query.replace("\"","\\\"")
+                                query_set.append(joined_query)
                 else:
                     logger.warning("[WARNING] Attribute {} not found in data sources {}".format(attr_name, ", ".join(list(sources.values_list('name',flat=True)))))
 
