@@ -364,8 +364,9 @@ def main():
                     "analysis_artifacts": line[10],
                     "description": re.sub(r' style="[^"]+"', '', (re.sub(r'<div [^>]+>',"<p>", line[11]).replace("</div>","</p>"))),
                     "collection_type": line[12],
-                    "supporting_data": line[13],
+                    "tcia_collection_id": line[13],
                     "date_updated": line[14],
+                    "nbia_collection_id": line[15]
                 },
                 "program": line[-1],
                 "data_versions": [{"ver": "r9", "name": "GDC Data Release 9"},
