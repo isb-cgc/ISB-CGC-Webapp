@@ -6,6 +6,7 @@ require.config({
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
         jquerydt: 'libs/jquery.dataTables.min',
+        //d3: 'libs/d3.v5.min',
         base: 'base'
     },
     shim: {
@@ -16,7 +17,7 @@ require.config({
 });
 
 
-require(['jquery', 'jquerydt','jqueryui', 'bootstrap', 'base'],
+require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
     function($, jqueryui, bootstrap, jquerydt ) {
 
         window.filterObj = {};

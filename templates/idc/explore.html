@@ -23,7 +23,8 @@
 {% block header %}
     <link type="text/css" rel="stylesheet" href="{% static 'css/search.css' %}">
     <link type="text/css" rel="stylesheet" href="{% static 'css/jquery-ui.min.css' %}">
-    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <!-- <script src="https://d3js.org/d3.v5.min.js"></script> -->
+    <!-- <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script> -->
 {% endblock %}
 
 
@@ -618,9 +619,10 @@
 {% endblock %}
 
 {% block js_file %}
-
+    <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
     {{ block.super }}
     <script type="text/javascript" src="{% static 'js/explore.js' %}"></script>
+
     <script>
         var collection_tooltips = {{ collection_tooltips|safe }};
     </script>
