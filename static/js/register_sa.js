@@ -315,4 +315,19 @@ require([
         hide_verification();
         $('#verify-sa').submit();
     });
+
+    $('.dataset-list :checkbox').change(function()
+    {
+        var cnt_checked = $(".dataset-list input[type='checkbox']:checked").length;
+        if (cnt_checked > datasets_limit)
+        {
+            $('.dataset-limit-note').show();
+            $('.verify-sa-btn').prop( "disabled", true);
+        }
+        else
+        {
+            $('.dataset-limit-note').hide();
+            $('.verify-sa-btn').prop( "disabled", false);
+        }
+    });
 });

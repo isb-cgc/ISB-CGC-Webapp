@@ -2,45 +2,82 @@
     margin-left: 20px;
     margin-right: 20px;
     width: 98vw;
+    overflow: hidden;
 }
 
+.line-path {
+    fill: none;
+    stroke-width: 3;
+}
 
-/*.grid-container {*/
-/*    display: flex;*/
-/*    width: 100%;*/
-/*    !*align-items: stretch;*!*/
-/*    border: solid black;*/
-/*}*/
+.legend {
+    font-size: 12px;
+    font-family: "proxima-nova", Arial, sans-serif;
+}
 
-/*.grid-container {*/
-/*    !*border: solid green;*!*/
-/*    width: 96vw;*/
-/*    height: 95%;*/
-/*    display: flex;*/
-/*    transition: 1s ease;*/
-/*    position: absolute;*/
-/*    left: 0;*/
-/*}*/
+.title {
+    fill: #404040;
+    font-size: 19px;
+    font-weight: normal;
+    font-family: "proxima-nova", Arial, sans-serif;
+}
 
-/*#content {*/
-/*    !*height: 500px;*!*/
-/*    !*min-width: 100%;*!*/
-/*    !*max-width: 30%;*!*/
-/*    !*width: 100%;*!*/
-/*    height: 100%;*/
-/*    background-color: white;*/
-/*}*/
+.x-axis, .y-axis {
+    color: dimgrey;
+    font-size: 12px;
+}
+
+.label {
+    fill: dimgrey;
+    font-size: 14px;
+    text-anchor: middle;
+    text-align: center;
+}
+
+thead th {
+    font-weight: 600;
+    color: #404040;
+}
+
+.venntooltip {
+    font-size: 14px;
+    position: absolute;
+    text-align: center;
+    width: 100px;
+    height: 30px;
+    background: white;
+    color: #404040;
+    box-shadow: 3px 3px 10px #999;
+    padding: 2px;
+    border: 0;
+    border-radius: 2px;
+    opacity: 0;
+}
+
+#venn-diagram {
+    margin-left: auto;
+    margin-top: 50px;
+}
+
+[data-venn-sets="S1"] {
+    fill: #ff8c00;
+}
+
+[data-venn-sets="S2"] {
+    fill: #8a89a6;
+}
+
+[data-venn-sets="S1_S2"] {
+    fill: #ff8c00;
+}
 
 #content {
-    /*border: solid salmon;*/
-    overflow: hidden;
+    overflow: auto;
     height: 100%;
     background-color: white;
-    /*border: solid #2b537b;*/
 }
 
 #label-comp-tab {
-    /*border: solid springgreen;*/
     position: absolute;
     left: 0;
     top: 38px;
@@ -52,23 +89,14 @@
 #sidebar {
     width: 390px;
     float: left;
-    /*border: solid crimson;*/
     height: 100%;
-    /*min-width: 25%;*/
-    /*max-width: 25%;*/
-    /*height: 100%;*/
     background: #f8f8f8;
-    /*background-color: white;*/
-    /*color: black;*/
     transition: .8s ease;
-    /*border: solid red;*/
-    /*border: solid #2b537b;*/
-
 }
 
 #sidebar-title {
     font-size: 16px;
-    font-weight: lighter;
+    font-weight: 600;
 }
 
 #sidebar.active {
@@ -77,33 +105,19 @@
 
 #sidebar .sidebar-header {
     padding: 1.15rem;
-    /*background: #f7f7f7;*/
-    /*margin-top: 16px;*/
-    /*margin: 0px 0 10px 0px;*/
-    background-color: #2b537b;
-
-    /*font-weight: normal;*/
+    background-color: white;
     text-align: center;
-    color: white;
-    /*text-size: 10px;*/
-
+    color: #2b537b;
 }
 
 #sidebarCollapse {
     position: absolute;
-    margin: 14px 0px 350px;
+    margin: 14px 0 350px;
     left: 5px;
-
-}
-
-#venn-text {
-    text-align: center;
-    margin-top: 200px;
 }
 
 #save-but {
     margin-top: 10px;
-
 }
 
 .compare-desc {
@@ -119,154 +133,51 @@
     #sidebar.active {
         margin-left: 0;
     }
-
-    /*#main-canvas.active {*/
-    /*    margin-left: 300px;*/
-    /*}*/
 }
-
-
-/*.sidebar {*/
-/*    width: 27vw;*/
-/*    height: 100%;*/
-/*    background: #f7f7f7;*/
-/*    transition: 1s ease;*/
-/*    position: relative;*/
-/*}*/
-
-/*#menubar .nav {*/
-/*    position: absolute;*/
-/*}*/
-
-/*.comp-body-content {*/
-/*    width: 73%;*/
-/*    height: 100%;*/
-/*    background-color: white;*/
-/*    transition: 1s ease;*/
-/*}*/
-
-/*#label-comp-tab {*/
-/*    border: solid red;*/
-/*    width: 94vw;*/
-/*    !*margin-left: 5px;*!*/
-/*    !*margin-right: 5px;*!*/
-/*    !*position: absolute;*!*/
-/*    !*left: 0;*!*/
-/*margin: 0 auto;*/
-
-/*}*/
 
 .tab-content {
     padding: 5px 10px;
-    height: 150vw;
-    /*border: solid blue;*/
-    /*display: flex;*/
+    height: 100%;
+    overflow: auto;
 }
-
 
 #panel {
-    width: 96vw;
-    height: 200vw;
-    margin-left: 10px;
-    margin-right: 10px;
+    width: 92vw;
+    height: 100%;
+    margin-left: 3vw;
+    margin-right: 5vw;
     position: absolute;
-    /*border: solid black;*/
+    overflow: auto;
 }
-
-/*.compare-desc {*/
-/*    border: solid red;*/
-/*    !*margin: 0;*!*/
-/*}*/
 
 .worksheet-header {
     margin-left: 10px;
     margin-right: 5px;
 }
 
-/*.svg {*/
-/*    border: solid black;*/
-/*}*/
-
-#main-canvas {
+#svg-container {
     margin-top: 15px;
     margin-left: 200px;
     margin-right: 200px;
 }
 
-#gender-canvas {
+.survival {
     margin-left: 5px;
-    box-shadow: 2px 2px 10px #999;
-    border-radius: 5px;
-    /*background-color: #f8f8f8;*/
-    background-color: white;
-}
-
-#vital-canvas {
-    margin-left: 5px;
-    margin-top: 20px;
-    box-shadow: 2px 2px 10px #999;
+    margin-bottom: 30px;
+    box-shadow: 3px 3px 10px #999;
     border-radius: 5px;
     background-color: white;
 }
 
-#age-canvas {
+.gender, .vital, .age {
     margin-left: 5px;
-    margin-top: 20px;
-    box-shadow: 2px 2px 10px #999;
+    margin-bottom: 30px;
+    box-shadow: 3px 3px 10px #999;
     border-radius: 5px;
     background-color: white;
 }
-
-/*#sidebar-but {*/
-/*    position: absolute;*/
-/*    border: none;*/
-/*    height: 40px;*/
-/*    width: 40px;*/
-/*    border-radius: 50%;*/
-/*    box-shadow: 0px 1px 4px 1px rgba(0, 0, 0, .3);*/
-/*    left: 100%;*/
-/*    top: 2rem;*/
-/*    transform: translateX(-50%);*/
-/*    cursor: pointer;*/
-/*}*/
-
-/*.comp-body-content_large {*/
-/*    width: 100%;*/
-/*}*/
-
-/*.sidebar_small {*/
-/*    width: 0%;*/
-/*}*/
-
-/*.card_small {*/
-/*    width: 0%;*/
-/*}*/
-
-/*#sidebar-but {*/
-
-/*    margin: 50px 330px 350px;*/
-/*    position: absolute;*/
-/*    border: none;*/
-/*    height: 30px;*/
-/*    width: 30px;*/
-/*    border-radius: 50%;*/
-/*    box-shadow: 0px 1px 4px 1px rgba(0, 0, 0, .3);*/
-/*    left: 4.4%;*/
-/*    background-color: #fee9d5;*/
-/*}*/
-
-
-/*#dropdown-label {*/
-/*    !*background-color: floralwhite;*!*/
-
-/*    background-color: #fee9d5;*/
-/*    border-radius: 2px;*/
-/*    padding-right: 10px;*/
-
-/*}*/
 
 #panel .tab-content {
-    /*background-color: cornsilk;*/
     padding: 5px 15px;
 }
 
@@ -279,64 +190,15 @@
     width: 100%;
 }
 
-/*#comp-tab {*/
-/*    !*background-color: #fee9d5;*!*/
-/*}*/
-
-/*#panel .nav-tabs_excel > li.active > a,*/
-/*#panel .nav-tabs_excel > li.active > a:focus,*/
-/*#panel .nav-tabs_excel > li.active > a:hover {*/
-/*    background-color: oldlace;*/
-
-/*}*/
-
-
-/*#panel .nav-tabs_excel > li.active > a {*/
-/*    display: block;*/
-/*}*/
-
-/*#comp-tab {*/
-/*    background-color: oldlace;*/
-/*}*/
-
-/*#diff-tab {*/
-/*    background-color: white;*/
-/*}*/
-
-/*.fa-caret-down {*/
-/*    padding-left: 3px;*/
-/*}*/
-
-
 #labels-card {
-    /*display: flex;*/
-
-    /*width: 22rem;*/
-    /*height: 100px;*/
-    /*!*papadding: 10px;*!*/
-    /*!*margin: 150px 65px;*!*/
-    /*   overflow: hidden;*/
     width: 23.5rem;
     papadding: 60px;
-    margin: 10px 20px 350px;
-
+    margin: 10px 80px 350px;
 }
 
 #sel-labels {
-    /*padding: 32px;*/
-    /*!*background-color: #f6f6f6;*!*/
-    /*!*background-color: #f8f8f8;*!*/
-    /*!*background-color: floralwhite;*!*/
-    /*!*background-color: #fee9d5;*!*/
-    /*height: 250px;*/
-    /*background-color: white;*/
-    /*text-align: left;*/
-    /*box-shadow: 2px 2px 10px #999;*/
-    /*border-radius: 5px;*/
-    /*overflow: hidden;*/
     padding: 20px;
     background-color: white;
-    /*background-color: #fee9d5;*/
     text-align: left;
     box-shadow: 2px 2px 10px #999;
     border-radius: 5px;
@@ -356,22 +218,22 @@
     position: relative;
 }
 
-/*#sel-labels .form-group .btn {*/
-/*    font-size: 14px;*/
-/*    font-family: Arial;*/
-/*    font-weight: 400;*/
-/*    background-color: #F9661A;*/
-/*    padding: 8px;*/
-/*    border: none;*/
-/*    display: block;*/
-/*    width: 13rem;*/
-/*    margin: 0 0 15px 0;*/
-/*    top: 10px;*/
-/*}*/
+#sel-labels .form-group .btn {
+    font-size: 14px;
+    font-family: Arial;
+    font-weight: 400;
+    background-color: orange;
+    padding: 8px;
+    border: none;
+    display: block;
+    width: 7rem;
+    margin: 0 0 15px 0;
+    top: 10px;
+}
 
 /*#sel-labels .form-group .btn:focus,*/
 /*#sel-labels .form-group .btn:hover {*/
-/*    box-shadow: -1px 1px 10px #505050 inset;*/
+/*    box-shadow: -1px 1px 10px orange inset;*/
 /*}*/
 
 #sel-labels .form-check .custom-control-label {
@@ -379,5 +241,4 @@
     font-weight: normal;
     font-size: 15px;
 }
-
 
