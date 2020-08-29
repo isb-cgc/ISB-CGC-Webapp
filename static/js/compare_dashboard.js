@@ -1,54 +1,3 @@
-//
-// require.config({
-//     baseUrl: STATIC_FILES_URL + 'js/',
-//     paths: {
-//         // jquery: 'libs/jquery-1.11.1.min',
-//         // bootstrap: 'libs/bootstrap.min',
-//         // jqueryui: 'libs/jquery-ui.min',
-//         // session_security: 'session_security/script',
-//         // underscore: 'libs/underscore-min',
-//         // assetscore: 'libs/assets.core',
-//         // assetsresponsive: 'libs/assets.responsive',
-//         d3: 'libs/d3.min',
-//         d3tip: 'libs/d3-tip',
-//         science: 'libs/science.min',
-//         stats: 'libs/science.stats.min',
-//         vizhelpers: 'helpers/vis_helpers',
-//         select2: 'libs/select2.min'
-//     },
-//     shim: {
-//         // 'bootstrap': ['jquery'],
-//         // 'jqueryui': ['jquery'],
-//         // 'session_security': ['jquery'],
-//         // 'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-//         // 'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
-//         'select2': ['jquery']
-//     }
-// });
-//
-
-
-// require.config({
-//     baseUrl: STATIC_FILES_URL+'js/',
-//     paths: {
-//         jquery: 'libs/jquery-1.11.1.min',
-//         bootstrap: 'libs/bootstrap.min',
-//         jqueryui: 'libs/jquery-ui.min',
-//         session_security: 'session_security/script',
-//         underscore: 'libs/underscore-min',
-//         tablesorter:'libs/jquery.tablesorter.min',
-//         base: 'base'
-//     },
-//     shim: {
-//         'bootstrap': ['jquery'],
-//         'jqueryui': ['jquery'],
-//         'session_security': ['jquery'],
-//         'tablesorter': ['jquery'],
-//         'base': ['jquery'],
-//     }
-// });
-
-
 require([
     'jquery',
     'base',
@@ -58,58 +7,62 @@ require([
 ], function ($, base) {
 
 
+    // These lists are sample set of data to be used for testing charts/graphs/tables functionality
+    //They are not real data
+    //Real data from bq should be fetched and replaced when they are ready
+    const cohort_names = ['GBM', 'LUAD'];
+
     const survival_data = [
-        {rate: 1, year: 0.010951403148528400, label: 'GBM'},
-        {rate: 1, year: 0.03285420944558520, label: 'GBM'},
-        {rate: 0.6501834973218500, year: 1.1800136892539400, label: 'GBM'},
-        {rate: 0.4051506741231060, year: 1.7987679671457900, label: 'GBM'},
-        {rate: 0.3060732678088450, year: 2.0177960301163600, label: 'GBM'},
-        {rate: 0.2040488452058970, year: 3.5236139630390100, label: 'GBM'},
-        {rate: 0.2040488452058970, year: 4.112251882272420, label: 'GBM'},
-        {rate: 0.16323907616471800, year: 5.519507186858320, label: 'GBM'},
-        {rate: 0.054413025388239200, year: 6.2559890485968500, label: 'GBM'},
-        {rate: 1, year: 0.024640657084188900, label: 'LUAD'},
-        {rate: 0.9555555555555560, year: 0.5913757700205340, label: 'LUAD'},
-        {rate: 0.7544291961763230, year: 1.3305954825462000, label: 'LUAD'},
-        {rate: 0.6199439916405430, year: 1.894592744695410, label: 'LUAD'},
-        {rate: 0.6199439916405430, year: 2.0342231348391500, label: 'LUAD'},
-        {rate: 0.5007239932481310, year: 4.91170431211499, label: 'LUAD'},
-        {rate: 0.5007239932481310, year: 5.075975359342920, label: 'LUAD'},
-        {rate: 0.5007239932481310, year: 7.5044490075290900, label: 'LUAD'}
+        {rate: 1, year: 0.010951403148528400, label: 'S1'},
+        {rate: 1, year: 0.03285420944558520, label: 'S1'},
+        {rate: 0.6501834973218500, year: 1.1800136892539400, label: 'S1'},
+        {rate: 0.4051506741231060, year: 1.7987679671457900, label: 'S1'},
+        {rate: 0.3060732678088450, year: 2.0177960301163600, label: 'S1'},
+        {rate: 0.2040488452058970, year: 3.5236139630390100, label: 'S1'},
+        {rate: 0.2040488452058970, year: 4.112251882272420, label: 'S1'},
+        {rate: 0.16323907616471800, year: 5.519507186858320, label: 'S1'},
+        {rate: 0.054413025388239200, year: 6.2559890485968500, label: 'S1'},
+        {rate: 1, year: 0.024640657084188900, label: 'S2'},
+        {rate: 0.9555555555555560, year: 0.5913757700205340, label: 'S2'},
+        {rate: 0.7544291961763230, year: 1.3305954825462000, label: 'S2'},
+        {rate: 0.6199439916405430, year: 1.894592744695410, label: 'S2'},
+        {rate: 0.6199439916405430, year: 2.0342231348391500, label: 'S2'},
+        {rate: 0.5007239932481310, year: 4.91170431211499, label: 'S2'},
+        {rate: 0.5007239932481310, year: 5.075975359342920, label: 'S2'},
+        {rate: 0.5007239932481310, year: 7.5044490075290900, label: 'S2'}
     ];
 
-
     const gender_data = [
-        {name: 'Male', LUAD: 242, GBM: 366},
-        {name: 'Female', LUAD: 280, GBM: 230},
-        {name: 'None', LUAD: 63, GBM: 21}
+        {name: 'Male', S2: 242, S1: 366},
+        {name: 'Female', S2: 280, S1: 230},
+        {name: 'None', S2: 63, S1: 21}
     ];
 
     const vital_data = [
-        {name: 'Alive', LUAD: 334, GBM: 103},
-        {name: 'Dead', LUAD: 188, GBM: 491},
-        {name: 'None', LUAD: 63, GBM: 23}
+        {name: 'Alive', S2: 334, S1: 103},
+        {name: 'Dead', S2: 188, S1: 491},
+        {name: 'None', S2: 63, S1: 23}
     ];
 
     const age_data = [
-        {name: '0-9', LUAD: 0, GBM: 0},
-        {name: '10-19', LUAD: 0, GBM: 6},
-        {name: '20-29', LUAD: 0, GBM: 19},
-        {name: '30-39', LUAD: 3, GBM: 42},
-        {name: '40-49', LUAD: 30, GBM: 80},
-        {name: '50-59', LUAD: 106, GBM: 161},
-        {name: '60-69', LUAD: 170, GBM: 160},
-        {name: '70-79', LUAD: 162, GBM: 104},
-        {name: '80+', LUAD: 32, GBM: 24},
-        {name: 'None', LUAD: 82, GBM: 21}
+        {name: '0-9', S2: 0, S1: 0},
+        {name: '10-19', S2: 0, S1: 6},
+        {name: '20-29', S2: 0, S1: 19},
+        {name: '30-39', S2: 3, S1: 42},
+        {name: '40-49', S2: 30, S1: 80},
+        {name: '50-59', S2: 106, S1: 161},
+        {name: '60-69', S2: 170, S1: 160},
+        {name: '70-79', S2: 162, S1: 104},
+        {name: '80+', S2: 32, S1: 24},
+        {name: 'None', S2: 82, S1: 21}
     ];
 
     const sets = [
-        {sets: ["S1"], figure: 44.91, label: "S1", size: 34.53},
-        {sets: ["S2"], figure: 34.53, label: "S2", size: 34.53},
-        {sets: ["S1", "S2"], figure: 6.05, label: "S1&S2", size: 6.05},
+        {sets: ["S1"], figure: 399, label: "S1", size: 35},
+        {sets: ["S2"], figure: 605, label: "S2", size: 35},
+        {sets: ["S1", "S2"], figure: 60, label: "S1&S2", size: 6},
     ];
-
+//End of data
 
     //svg
     const gender_svg = d3.select('#gender-canvas');
@@ -117,11 +70,9 @@ require([
     const age_svg = d3.select('#age-canvas');
     const survival_svg = d3.select('#surv-analysis');
 
-
     const width = 580;
     const height = 350;
     const margin = ({top: 65, right: 50, bottom: 40, left: 70});
-    const color = d3.scaleOrdinal().range(["#8a89a6", "#ff8c00"]);
 
 
     const gender_title = "Gender";
@@ -129,8 +80,9 @@ require([
     const age_title = "Age at Diagnosis";
     const survival_title = "Survival Analysis";
 
-
+    //This is the function for survival analysis multiline chart
     const line_chart = (data, svg, chart_title) => {
+        const color = d3.scaleOrdinal().range(["#ff8c00", "#8a89a6",]);
         const x = d3.scaleLinear()
             .domain([0, d3.max(data, function (d) {
                 return d.year;
@@ -182,7 +134,7 @@ require([
             let s1_cases = 0;
             let s2_cases = 0;
             survival_data.forEach(function (obj) {
-                if (obj.key.localeCompare("GBM") === 0) {
+                if (obj.key.localeCompare("S1") === 0) {
                     obj.values.forEach(function (item) {
                         s1_cases += item.rate * 100;
                     })
@@ -216,15 +168,14 @@ require([
                 .attr("transform", "translate(" + x(dataNest[0].values[dataNest[0].values.length - 1].year) + "," + y(dataNest[0].values[dataNest[0].values.length - 1].rate) + ")")
                 .attr("class", "legend")
                 .style("fill", dataNest[0].color)
-                .text("S1:" + dataNest[0].key);
+                .text(dataNest[0].key + ": " + cohort_names[0]);
 
             //Add label to the curve
             svg.append("text")
                 .attr("transform", "translate(" + x(dataNest[dataNest.length - 1].values[dataNest[dataNest.length - 1].values.length - 1].year) + "," + y(dataNest[dataNest.length - 1].values[dataNest[dataNest.length - 1].values.length - 1].rate) + ")")
                 .attr("class", "legend")
                 .style("fill", dataNest[dataNest.length - 1].color)
-                .text("S2:" + dataNest[dataNest.length - 1].key);
-
+                .text(dataNest[dataNest.length - 1].key + ": " + cohort_names[1]);
         });
 
         svg.append("text")
@@ -245,7 +196,9 @@ require([
         survival_table(dataNest);
     };
 
+    //This is the function for bar charts of gender, age, and vital status
     const bar_chart = (data, svg, chart_title) => {
+        const color = d3.scaleOrdinal().range(["#8a89a6", "#ff8c00"]);
         const groupName = Object.keys(data[0])[0]; //name
         const tag = "Cases";
         const keys = Object.keys(data[0]);
@@ -264,7 +217,6 @@ require([
         const y = d3.scaleLinear()
             .domain([0, d3.max(data, d => d3.max(keys, key => d[key]))]).nice()
             .rangeRound([height - margin.bottom, margin.top]);
-
 
         const legend = svg => {
             const g = svg
@@ -341,24 +293,25 @@ require([
     const gender_table = gender_data => {
         $('#gender-table').find("tbody tr").remove();
         gender_data.forEach(function (obj) {
-            $('#gender-table tr:last').after("<tr><td>" + obj.name + "</td><td>" + obj.GBM + "</td><td>" + obj.LUAD + "</td></tr>");
+            $('#gender-table tr:last').after("<tr><td>" + obj.name + "</td><td>" + obj.S1 + "</td><td>" + obj.S2 + "</td></tr>");
         });
     };
 
     const vital_table = vital_data => {
         $('#vital-table').find("tbody tr").remove();
         vital_data.forEach(function (obj) {
-            $('#vital-table tr:last').after("<tr><td>" + obj.name + "</td><td>" + obj.GBM + "</td><td>" + obj.LUAD + "</td></tr>");
+            $('#vital-table tr:last').after("<tr><td>" + obj.name + "</td><td>" + obj.S1 + "</td><td>" + obj.S2 + "</td></tr>");
         });
     };
 
     const age_table = age_data => {
         $('#age-table').find("tbody tr").remove();
         age_data.forEach(function (obj) {
-            $('#age-table tr:last').after("<tr><td>" + obj.name + "</td><td>" + obj.GBM + "</td><td>" + obj.LUAD + "</td></tr>");
+            $('#age-table tr:last').after("<tr><td>" + obj.name + "</td><td>" + obj.S1 + "</td><td>" + obj.S2 + "</td></tr>");
         });
     };
 
+    //This is the function for venn diagram
     const venn_diagram = sets => {
         const chart = venn.VennDiagram()
             .width(390)
@@ -382,9 +335,8 @@ require([
 
                 // Display a tooltip with the current size
                 tooltip.transition().duration(20).style("opacity", 1);
-                tooltip.text(d.label + ": " + d.figure + "%");
+                tooltip.text(d.label + ": " + d.figure);
 
-                // highlight the current path
                 // highlight the current path
                 const selection = d3.select(this).transition("tooltip").duration(400);
                 selection.select("path")
@@ -400,15 +352,15 @@ require([
 
             .on("mouseout", function (d, i) {
                 tooltip.transition().duration(2000).style("opacity", 0);
-                var selection = d3.select(this).transition("tooltip").duration(400);
+                let selection = d3.select(this).transition("tooltip").duration(400);
                 selection.select("path")
                     .style("stroke-width", 3)
                     .style("fill-opacity", d.sets.length === 1 ? .8 : 0)
                     .style("stroke-opacity", 1);
             });
-
     };
 
+    //rendering functions
     bar_chart(gender_data, gender_svg, gender_title);
     gender_table(gender_data);
     bar_chart(vital_data, vital_svg, vital_title);
@@ -422,18 +374,11 @@ require([
         $('#sidebarCollapse').on('click', function () {
             $('#sidebar').toggleClass('active');
         });
-
         $("tr:odd").css({
             "background-color": "#f8f8f8",
             "color": "#404040"
         });
-
-        $("tr:even").css({
-            "color": "#404040"
-        });
     });
-
-
 });
 
 

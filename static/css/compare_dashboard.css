@@ -71,6 +71,13 @@ thead th {
     fill: #ff8c00;
 }
 
+.save-link {
+    position: absolute;
+    margin-left: 150px;
+    margin-top: 70px;
+    text-decoration: underline;
+}
+
 #content {
     overflow: auto;
     height: 100%;
@@ -218,18 +225,18 @@ thead th {
     position: relative;
 }
 
-#sel-labels .form-group .btn {
-    font-size: 14px;
-    font-family: Arial;
-    font-weight: 400;
-    background-color: orange;
-    padding: 8px;
-    border: none;
-    display: block;
-    width: 7rem;
-    margin: 0 0 15px 0;
-    top: 10px;
-}
+/*#sel-labels .form-group .btn {*/
+/*    font-size: 14px;*/
+/*    font-family: Arial;*/
+/*    font-weight: 400;*/
+/*    background-color: orange;*/
+/*    padding: 8px;*/
+/*    border: none;*/
+/*    display: block;*/
+/*    width: 7rem;*/
+/*    margin: 0 0 15px 0;*/
+/*    top: 10px;*/
+/*}*/
 
 /*#sel-labels .form-group .btn:focus,*/
 /*#sel-labels .form-group .btn:hover {*/

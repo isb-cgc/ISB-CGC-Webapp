@@ -514,8 +514,7 @@ require([
             alert("Please select only two cohorts.");
             return;
         }
-        console.log(sel_cohort_ids);
-
+        //console.log(sel_cohort_ids);
         if (sel_cohort_ids.length > 0) {
             var csrftoken = $.getCookie('csrftoken');
             $.ajax({
