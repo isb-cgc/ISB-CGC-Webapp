@@ -495,9 +495,11 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
             var filtName = nm.join('.') + '_btw';
             $('#' + divName).append('<div id="' + slideName + '"></div>  <input id="' + inpName + '" type="text" value="' + strtInp + '" style="display:none"> <button style="display:inline-block;" onclick=\'setSlider("' + slideName + '",true,0,0,' + String(isInt) + ', true)\'>Reset</button>');
 
-            // if (wNone){
-             //   $('#' + divName).append( '<input type="checkbox" onchange="addNone(this, \''+parStr+'\')"> None' );
-          //  }
+            /*
+             if (wNone){
+                $('#' + divName).append( '<input type="checkbox" onchange="addNone(this, \''+parStr+'\')"> None' );
+            }
+             */
 
             $('#' + slideName).slider({
                 values: [min, max],

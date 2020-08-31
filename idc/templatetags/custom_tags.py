@@ -116,13 +116,15 @@ def plotnm(item):
     else:
         return item
 
+
+// these attributes are not returned in order right now
 @register.filter
 def order_seg(items,attr):
-    return items
-    #if (attr =='dicom_derived_all:segmentation'):
-    #    return sorted(items, key=lambda k: k['display_value'])
-    #else:
-    #    return items
+    #return items
+    if (attr =='dicom_derived_all:segmentation'):
+        return sorted(items, key=lambda k: str(k['value']) if (k['display_value'] is None) else str(k['display_value']) )
+    else:
+        return items
 
 @register.filter
 def order_quant(items, attr):

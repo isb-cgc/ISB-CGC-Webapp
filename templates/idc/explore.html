@@ -214,12 +214,14 @@
                                             </div>
                                             <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body"
                                                  {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"{% endif %}>
+                                                {% comment %}
                                                 {% if attr.name == "Modality" %}
                                                 <span style="background-color:lightgrey">Filter for cases with:<br>
                                                 <input type="radio" id="modality_and" name="modality_sel"> any selected Modality<br>
                                                     <input type="radio" id="modality_and" name="modality_sel"> all selected Modalities
                                                 </span>
                                                 {% endif %}
+                                                {% endcomment %}
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                    {% for val in attr.values %}
                                                        {% with val.display_value|get_display_val:val.value as display_value %}
