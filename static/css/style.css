@@ -1,6 +1,7 @@
 @import url("./font-awesome.min.css");
 @import url("./vendor.css");
 @import url("./sapiens.css");
+@import url("./gdc-fonts.css");
 @import url("./tippy-light.css");
 @import url("./bootstrap-tokenfield.min.css");
 /********************************************
@@ -46,7 +47,7 @@ ul, ol {
   -moz-osx-font-smoothing: grayscale; }
 
 .main-content {
-  margin-top: 69px; }
+  margin-top: 60px; }
 
 .table-list li:after, .table-list_warning li:after, .worksheet-header:after, .worksheet-body:after {
   visibility: hidden;
@@ -850,6 +851,7 @@ body {
 
 .navbar-container {
   padding-bottom: 0px;
+  box-shadow: 0px 1px 3px #1c4c5a96;
 }
 
 .navbar-header a {
@@ -2966,24 +2968,29 @@ html {
   margin-left: 20px;
   border-radius: 5px;
   color: #fff;
-  width: 200px;
+  width: 175px;
   text-align: left;
-  font-size: 1.4em;
+  font-size: 1.2em;
   font-weight: 500;
 }
 
-#landing .buttons img {
-  height: 25px;
-  filter: brightness(400%);
-}
-
-#landing .buttons .img-container {
+#landing .buttons span {
   border-radius: 5px;
   background-color: rgba(255,255,255,0.3);
+  min-width: 40px;
+  font-size: 1.3em;
   display: inline-block;
-  padding: 5px 10px 5px 10px;
-  margin-right: 10px;
-  justify-content: center;
+  text-align: center;
+  padding-bottom: 3px;
+}
+
+#landing .buttons span i {
+  vertical-align: middle;
+}
+
+#landing .buttons a.btn {
+  padding: 3px;
+  vertical-align: middle;
 }
 
 #landing .btn-collex {
@@ -4093,6 +4100,15 @@ html {
   padding-top: 180px;
   font-size: 25px;
   text-align: center; }
+
+
+#cohorts-list div.page-action-group {
+  background: none;
+}
+
+#save-cohort-btn {
+  margin-top: 15px;
+}
 
 .collex-table th {
   background-color: #e4d8f9;
