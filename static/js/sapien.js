@@ -140,7 +140,15 @@ require([
         .attr("transform", "translate("+(barStartOffset-2)+","+(plotHeight)+")")
         .call(d3.axisBottom(x).tickSizeOuter(-plotHeight).tickFormat((interval,i) => {
           return [10,100,1000].indexOf(interval) >= 0 ? interval : " ";
-         }));
+         }))
+        ;
+
+  svg.append('g').attr('id', 'xAxisLabels')
+        .attr("transform", "translate("+(barStartOffset-2)+",0)")
+        .call(d3.axisTop(x).tickSize(0).tickFormat((interval,i) => {
+          return " ";
+         }))
+        ;
 
   // Primary Site Labels
   svg

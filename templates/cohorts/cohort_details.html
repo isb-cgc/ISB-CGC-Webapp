@@ -34,18 +34,13 @@
 
 {% block page_header %}
     <div class="pf-heading">
-        <div class="container" style="display: block;">
-            <ol class="breadcrumb">
-                <li><a href="/dashboard/">Your Dashboard</a></li>
-                <li><a href="/explore/">Explore</a></li>
-                <li id="previous" style="display:none"><a href="#" onclick="javascript:selectHistoricFilter(-1)">Previous Filter</a></li>
-                <li id="next" style="display:none"><a href="#" onclick="javascript:selectHistoricFilter(1)">Next Filter</a></li>
-            </ol>
-
-            <h1 class="page-header pull-left" role="heading" aria-level="1">Explore Image Data</h1>
-            <button id="copy-to-explorer" class="btn btn-primary pull-right" data-toggle="modal" title="Copy this cohort's filters to the data explorer.">
-                Copy Filters to Data Explorer
+        <div class="container-fluid">
+            <h3 class="pull-left" role="heading" aria-level="1">Explore Image Data</h3>
+            {% if DEV_TIER %}
+            <button id="save-cohort-btn" class="btn btn-primary pull-right" data-toggle="modal" data-target="#save-cohort-modal" disabled="disabled">
+                Save Changes
             </button>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
@@ -63,16 +58,16 @@
 
 <div class="container" style="display:block">
     <div class ="row">
+
         <div class="tab-content data-tab-content">
             <input id="number_ajax" type="hidden" value="0">
-            <div class="spinner" style="display:none"><i class="fa fa-spinner fa-spin spin" style="font-family :'FontAwesome' !important"></i></div>
+            <div class="spinner" style="display: none;"><i class="fa fa-spinner fa-spin spin" style="font-family :'FontAwesome' !important"></i></div>
             <div id="lh_panel" class="tab-pane data-tab active flex_div" role="tabpanel">
                 <div  class="col-lg-3 col-md-3 main_cols">
                 <div class="filter-panel panel data-tab-content-panel lh">
-                            <a data-toggle="collapse" aria-label="hideit" onclick="hidePanel()" ><i class="show fa fa-angle-double-left" style="font-family :'FontAwesome' !important"></i></a>
-                    </div>
-
-                    <div class="filter-panel panel data-tab-content-panel">
+                    <a data-toggle="collapse" aria-label="hideit" onclick="hidePanel()" ><i class="show fa fa-angle-double-left" style="font-family :'FontAwesome' !important"></i></a>
+                </div>
+                    <div class="search-scope filter-panel panel data-tab-content-panel">
                         <div class="tab-panel panel-default">
                             <div class="panel-heading clearfix">
                                 <h4 class="panel-title">Search Scope</h4>
@@ -91,40 +86,34 @@
                                              {% for progK, progV in programs.items|dictsort:"0.lower" %}
                                                  {% if progK != "All" and progK != "None" %}
                                                  <li class="list-group-item">
-                                                      {% if progV.projects and progV.projects.items|length == 1 %}
+                                                     {% if progV.projects and progV.projects.items|length == 1 %}
                                                            {% for proj, projK in progV.projects.items %}
-
                                                                <div id="{{ proj }}_heading" class="list-group-item__heading">
-                                                                   <input disabled="disabled" type="checkbox" value="{{ proj }}">
-                                                                   <span class="value">{{ proj|upper }}</span> <span class="float-right case_count count">{{ projK }}</span>
+                                                                   <input class="collection_value" type="checkbox" value="{{ proj }}">
+                                                                   <span class="collection_name value">{{ proj|upper }}</span> <span class="float-right case_count count">{{ projK }}</span>
                                                                </div>
                                                             <div id="{{ proj }}" class="collapse list-group-item__body">
                                                            {% endfor %}
-
-                                                      {% else %}
-
+                                                     {% else %}
                                                      <div id="{{ progK }}_heading" class="list-group-item__heading">
-                                                         <input disabled="disabled" type="checkbox" value="{{ progK }}">
-                                                            <a role="button" data-toggle="collapse" href="#{{ progK }}" aria-expanded="false" aria-controls="{{ progK }}">
-                                                                 <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>
-                                                             </a>
-
-                                                         <span class="value">{{ progK|upper }}</span> <span class="float-right case_count count">{{ progV.val }}</span>
-                                                         </div>
-                                                      <div id="{{ progK }}" class="collapse list-group-item__body">
+                                                         <input type="checkbox" value="{{ progK }}">
+                                                         <a role="button" data-toggle="collapse" href="#{{ progK }}" aria-expanded="false" aria-controls="{{ progK }}">
+                                                             <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>
+                                                         </a>
+                                                         <span class="value">
+                                                             {{ progK|upper }}
+                                                         </span>
+                                                         <span class="float-right case_count count">{{ progV.val }}</span>
+                                                     </div>
+                                                     <div id="{{ progK }}" class="collapse list-group-item__body">
                                                      {% endif %}
-
-
-
-
-
                                                           {% if progV.projects and progV.projects.items|length > 1 %}
                                                            <ul id="{{ progK }}_proj_list" class="search-checkbox-list" style="list-style: none;">
                                                            {% for proj, projK in progV.projects.items %}
                                                               <li class="checkbox {% if foloopr.counter >= 6 %} extra-values{% endif %}">
                                                                 <label>
-                                                                  <input disabled="disabled" type="checkbox" value="{{ proj }}">
-                                                                    <span class="value">{{ proj|upper }} </span> <span class="float-right case_count count plotit">{{ projK }}</span>
+                                                                  <input class="collection_value" type="checkbox" value="{{ proj }}">
+                                                                    <span class="collection_name value">{{ proj|upper }} </span> <span class="float-right case_count count plotit">{{ projK }}</span>
                                                                  </label>
                                                                </li>
                                                             {% endfor %}
@@ -164,6 +153,7 @@
                         </div>
                     </div>
 
+                    {% if DEV_TIER %}
                     <div class="tabpanel data-tab-content-panel">
                         <div class="panel panel-default">
                             <div class="panel-heading clearfix"><h4 class="panel-title">Data Source</h4></div>
@@ -175,10 +165,11 @@
                             </div>
                          </div>
                     </div>
-                    <div class="filter-panel" role="tabpanel">
+                    {% endif %}
+                    <div class="search-configuration filter-panel search-con" role="tabpanel">
                         <div class="tabpanel panel-default" role="tabpanel">
                             <div class="panel-heading clearfix"><h4 class="panel-title">Search Configuration</h4>
-                                <span class="greyout" style="background-color:lightgrey"><br><input id="hide-zeros" type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</span>
+                                <span ><br><input id="hide-zeros" type="checkbox" value="hide-zeros" onchange="hideAtt()"> Hide attributes with 0 cases</span>
 
                             </div>
 
@@ -209,19 +200,20 @@
                                                     <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
                                                 </a>
                                             </div>
-                                            <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body">
+                                            <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body"
+                                                 {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"{% endif %}>
                                                 {% if attr.name == "Modality" %}
                                                 <span style="background-color:lightgrey">Filter for cases with:<br>
-                                                <input disabled="disabled" type="radio" id="modality_and" name="modality_sel"> any selected Modality<br>
-                                                    <input disabled="disabled" type="radio" id="modality_and" name="modality_sel"> all selected Modalities
+                                                <input type="radio" id="modality_and" name="modality_sel"> any selected Modality<br>
+                                                    <input type="radio" id="modality_and" name="modality_sel"> all selected Modalities
                                                 </span>
                                                 {% endif %}
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                    {% for val in attr.values %}
                                                        {% with val.display_value|get_display_val:val.value as display_value %}
-                                                    <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
+                                                        <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
                                                            <label>
-                                                               <input disabled="disabled" type="checkbox" value="{{ val.value }}" data-filter-attr-id="{{ attr.id }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
+                                                               <input type="checkbox" value="{{ val.value }}" data-filter-attr-id="{{ attr.id }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
                                                                 <span class="value">{{ display_value }}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
                                                             </label>
                                                         </li>
@@ -249,39 +241,36 @@
 
                                 <ul class="list-group" role="tablist" aria-multiselectable="true">
                                       {% for attr_setK, attr_setV in set_attributes.derived_set.items|check_for_order:"derived" %}
-
                                          {% if 'attributes' in attr_setV %}
-
                                             <li class="list-group-item">
                                                    <div id="{{ attr_setV.name }}_heading" class="list-group-item__heading">
                                                          <a role="button" data-toggle="collapse" href="#{{ attr_setV.name }}" aria-expanded="false" aria-controls="{{ attr_setV.name }}">
                                                          <i class="fa fa-caret-right" style="font-family :'FontAwesome' !important"></i> <i class="fa fa-caret-down" style="font-family :'FontAwesome' !important"></i>{{ attr_setV.display_name }}
                                                         </a>
                                                   </div>
-
                                                  <div id="{{ attr_setV.name }}" class="collapse list-group-item__body in">
-
                                                   <ul class="list-group" role="tablist" aria-multiselectable="true">
                                                   {% for attr in attr_setV.attributes %}
                                                        <li class="list-group-item">
                                                           <div id="{{ attr.name }}_heading" class="list-group-item__heading">
-                                                <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
-                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}
-                                                </a>
-                                            </div>
-                                                          <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse">
-                                                <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
-                                                    {% for val in attr.values %}
-                                                        {% with val.display_value|get_display_val:val.value as display_value %}
-                                                        <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
-                                                            <label>
-                                                                 <input disabled="disabled" type="checkbox" value="{{ val.value }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
-                                                                    <span class="value">{{ display_value }}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
-                                                             </label>
-                                                          </li>
-                                                        {% endwith %}
-                                                     {% endfor %}
-                                                    </ul>
+                                                            <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
+                                                                <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}
+                                                            </a>
+                                                           </div>
+                                                           <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse"
+                                                        {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"{% endif %}>
+                                                            <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
+                                                            {% for val in attr.values %}
+                                                                {% with val.display_value|get_display_val:val.value as display_value %}
+                                                                <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
+                                                                    <label>
+                                                                        <input type="checkbox" value="{{ val.value }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
+                                                                        <span class="value">{{ display_value }}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
+                                                                    </label>
+                                                                </li>
+                                                                {% endwith %}
+                                                            {% endfor %}
+                                                            </ul>
                                                     <p style="display: block;" >
                                                     {% if attr.values|length > 5 %}
                                                         <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
@@ -292,7 +281,7 @@
                                                              <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
                                                              -->
                                                               </p>
-                                               </div>
+                                                    </div>
                                                        </li>
 
                                                   {% endfor %}
@@ -300,8 +289,6 @@
                                                </div>
                                            </li>
                                          {% endif %}
-
-
                                      {% endfor %}
                                 </ul>
                                 </div>
@@ -324,12 +311,13 @@
                                                          <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
                                                      </a>
                                                  </div>
-                                                 <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse" aria-expanded="false">
+                                                 <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse" aria-expanded="false"
+                                                 {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"{% endif %}>
                                                      <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                      {% for val in attr.values %}
                                                          <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
                                                              <label>
-                                                                 <input disabled="disabled" type="checkbox" value="{{ val.value }}">
+                                                                 <input type="checkbox" value="{{ val.value }}">
                                                                     <span class="value">{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
                                                              </label>
                                                           </li>
@@ -370,6 +358,7 @@
                          <div class="panel-heading clearfix"><h4 class="panel-title">Filter Definition</h4><a class="pull-right clear-filters" role="button" id="5-data-clear-filters">Clear All</a></div>
                          <div class="panel-body">
                              <div id ="search_def"><span class="placeholder">&nbsp;</span></div>
+                             <div id="search_def_warn" style="display:none">Note: TCGA.* filters only apply to TCGA collections (IN PROGRESS)</div>
                          </div>
                     </div>
                 </div>
@@ -472,22 +461,17 @@
                         <input id="goto-page-no-inp" type="number" class="goto-page-number" min="1" max="1">
                         <div class="goto-page-button dataTables_button">Go</div>
                     </div>
-                               <div class="dataTables_goto_page">
-                        <a class="prev-page paginate_button dataTables_button">Previous</a>
-                        <span class="paginate_button_space"><a class="dataTables_button paginate_button numeric_button current">1</a></span>
-                        <a class="next-page paginate_button dataTables_button">Next</a>
+                               <div class="dataTables_goto_page" style="width:50%; text-align:center">
+                        <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
+                        <span class="paginate_button_space" ><a class="dataTables_button paginate_button numeric_button current">1</a></span>
+                        <a class="next-page paginate_button dataTables_button" style="float:right">Next</a>
                        </div>
                 </div>
-
-
                             <table id="proj_table" class="table table-striped">
                                 <thead id="projects_table_head">
                                     <tr>
                                         <th class='text_data'>Collection Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'>Total # of Cases<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'># of Cases(this cohort)<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
                                    <!-- <th>Collection Name </th><th>Total # of Patients</th><th># of Patients(this cohort)</th> -->
-
-
-
                                     </tr>
                                 </thead>
                                 <tbody id="projects_table" class="set_height">
@@ -527,10 +511,10 @@
                         <input id="goto-page-no-inp" type="number" class="goto-page-number" min="1" max="1">
                         <div class="goto-page-button dataTables_button">Go</div>
                     </div>
-                               <div class="dataTables_goto_page">
-                        <a class="prev-page paginate_button dataTables_button">Previous</a>
+                               <div class="dataTables_goto_page" style="width:50%; text-align:center">
+                        <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
                         <span class="paginate_button_space"><a class="dataTables_button paginate_button numeric_button current">1</a></span>
-                        <a class="next-page paginate_button dataTables_button">Next</a>
+                        <a class="next-page paginate_button dataTables_button" style="float:right">Next</a>
                        </div>
 
 
@@ -538,7 +522,7 @@
                                <table class="table table-striped" >
                               <thead id="studies_table_head">
                              <tr>
-                                 <th class='text_data'>Project Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Case Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Study Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                 <th class='text_data'>Project Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Case Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Study Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class="text_data">Open Viewer</th>
                              </tr>
                               </thead>
 
@@ -572,16 +556,16 @@
                                     <input id="goto-page-no-inp" type="number" class="goto-page-number" min="1" max="1">
                                     <div class="goto-page-button dataTables_button">Go</div>
                                 </div>
-                                <div class="dataTables_goto_page">
-                                    <a class="prev-page paginate_button dataTables_button">Previous</a>
-                                    <span class="paginate_button_space"><a class="dataTables_button paginate_button numeric_button current">1</a></span>
-                                    <a class="next-page paginate_button dataTables_button">Next</a>
+                                <div class="dataTables_goto_page" style="width:50%; text-align:center">
+                                    <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
+                                    <span class="paginate_button_space" ><a class="dataTables_button paginate_button numeric_button current">1</a></span>
+                                    <a class="next-page paginate_button dataTables_button" style="float:right">Next</a>
                                </div>
                             </div>
                              <table class = "table table-striped">
                                 <thead id="series_table_head">
                                     <tr>
-                                        <th>Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Series Number<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Modality<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Body Part Examined<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Series Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                        <th>Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Series Number<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Modality<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Body Part Examined<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Series Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class="text_data">Open Viewer</th>
                                     </tr>
                                 </thead>
                                 <tbody id="series_table" class="set_height"></tbody>
@@ -594,7 +578,8 @@
         </div>
     </div>
 </div>
-</div>
+
+{% include "cohorts/save-cohort-modal.html" %}
 
 {% endblock %}
 
@@ -602,4 +587,7 @@
 
     {{ block.super }}
     <script type="text/javascript" src="{% static 'js/explore.js' %}"></script>
+    <script>
+        var collection_tooltips = {{ collection_tooltips|safe }};
+    </script>
 {% endblock %}

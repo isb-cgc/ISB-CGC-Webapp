@@ -484,9 +484,4 @@ require([
         $(this).find('button[type="submit"]').attr('disabled','disabled');
     });
 
-    // If this is a Data Source/Cohorts load for a worksheet, we need to add the pre-checked cohorts,
-    // if any, to the various form entities
-    $('input.cohort:checked').each(function(){
-        $('#cohort-apply-to-workbook').append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
-    });
 });
