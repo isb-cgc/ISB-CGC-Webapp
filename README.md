@@ -80,6 +80,3 @@ Or from the command line, you can do this by doing the following:
  2. Type `vagrant ssh` to login to the virtual machine
  3. Change directory to the `www` directory (`/home/vagrant/www/` is the full path)
  4. Run `pip3 install -r requirements.txt --upgrade -t lib/`
-
- ** FORCE **
-
