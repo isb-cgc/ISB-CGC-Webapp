@@ -16,10 +16,8 @@ From there perform the following steps...
  2. Copy the `sample.env` file to a file named `.env` in `secure_files/idc`. The setup process **requires** this name and this path.
  3. Fill out the `.env` file with the proper values
    * For most **development** environments, `MYSQL_ROOT_PASSWORD` and `DATABASE_PASSWORD` can be the same, and `DATABASE_USER` can be `root`
-   * `GCLOUD_PROJECT_ID` is available after creating a project in the [Google Cloud Dashboard](https://console.developers.google.com/)
-   * `OAUTH2_CLIENT_ID` and `OAUTH2_CLIENT_SECRET` can also be obtained in the Google Cloud Dashboard by going to API & Auth > Credentials > Add New > OAuth 2.0 Client > Web Application
-   * Be sure when developing locally that you have 127.0.0.1 in the list of allowed domains for the OAuth 2.0 key
-   * You must set `GOOGLE_APPLICATION_CREDENTIALS` to some existing file, e.g. `GOOGLE_APPLICATION_CREDENTIALS=../parentDir/secure_files/idc/my-service-account-key.json`. If not, Django will not start up cleanly.
+   * `GCLOUD_PROJECT_ID`, `OAUTH2_CLIENT_SECRET`, `OAUTH2_CLIENT_ID`, and the application credentials file will be obtained from one of the other developers as part of 
+   an initial set of starter files.
 
 ## Configuring PyCharm
 
@@ -33,6 +31,8 @@ PyCharm Pro can be used to run your Web Application as a native Django applicati
  4. Click Add Remote
  5. Select Vagrant (if it asks to start the machine, say yes)
  6. Set the Python interpreter path to `/home/vagrant/www/shell/python-su.sh` and click Ok
+   * Be sure you are **not** using `/user/bin/python3.X` or similar.
+   * The remote interpreter script brings in the PythonPath when launched.
  7. Click Ok to save
  10. Go to **Run > Edit Configurations**
  11. If there is not a Django Configuration, add one
@@ -42,6 +42,7 @@ PyCharm Pro can be used to run your Web Application as a native Django applicati
  15. Click `...` next to the `Environment variables:`, box and add the following values:
      `SECURE_LOCAL_PATH = ../parentDir/secure_files/idc/` (you **MUST** have the trailing `/`)
      `PYTHONPATH = /home/vagrant/www:/home/vagrant/www/lib:/home/vagrant/www/IDC-Common`
+     `VM_PYTHONPATH = /home/vagrant/www:/home/vagrant/www/lib:/home/vagrant/www/IDC-Common`
      `DJANGO_SETTINGS_MODULE = idc.settings`
      `PYTHONUNBUFFERED = 1`
  16. Click ok to save
@@ -79,6 +80,3 @@ Or from the command line, you can do this by doing the following:
  2. Type `vagrant ssh` to login to the virtual machine
  3. Change directory to the `www` directory (`/home/vagrant/www/` is the full path)
  4. Run `pip3 install -r requirements.txt --upgrade -t lib/`
-
- ** FORCE **
-
