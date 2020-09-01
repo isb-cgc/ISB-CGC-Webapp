@@ -55,7 +55,6 @@
 
                         <div id="datasets-select-div">
                             Which dataset(s) would you like to use?
-                            <p class="dataset-limit-note" hidden>*You can only register up to {{ datasets_limit }} datasets at one time. Try multiple requests for more datasets.</p>
                             <ul class="dataset-list">
                                 {% for dataset in authorized_datasets %}
                                     <li class="checkbox">
@@ -198,7 +197,4 @@
 {% block js_file %}
 	{{ block.super }}
 	<script src="{% static 'js/register_sa.js' %}"></script>
-    <script type="text/javascript">
-    var datasets_limit = {{ datasets_limit|safe }};
-    </script>
 {% endblock %}
