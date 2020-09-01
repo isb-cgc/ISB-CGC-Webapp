@@ -117,7 +117,7 @@ def plotnm(item):
         return item
 
 
-// these attributes are not returned in order right now
+# these attributes are not returned in order right now
 @register.filter
 def order_seg(items,attr):
     #return items
