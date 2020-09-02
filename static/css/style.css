@@ -1769,211 +1769,8 @@ section .min-max {
     visibility: visible;
     display: inline-block; }
 
-#genes_list .panel-body, #variable_list .panel-body {
-  margin-bottom: 50px; }
-
-#variable_list .dropdown-menu li > span {
-  padding: 3px 10px; }
-  #variable_list .dropdown-menu li > span.disabled {
-    pointer-events: auto;
-    color: #676767;
-    cursor: not-allowed; }
-
-#variable_edit li.program-tab {
-  width: 20%;
-  text-align: center; }
-  #variable_edit li.program-tab a {
-    padding: 10px 9px;
-    display: block; }
-
-#variable_edit .user-data-panel .panel-body {
-  overflow: hidden;
-  position: relative;
-  height: 110px; }
-
-#variable_edit .user-data-panel .spinner {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0px;
-  left: 0px;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 10; }
-  #variable_edit .user-data-panel .spinner i {
-    position: absolute;
-    left: 45%;
-    top: 15%;
-    margin: auto;
-    font-size: 75px; }
-
-.varfave-ver-display {
-  margin-top: 15px;
-  font-size: 14px; }
-  .varfave-ver-display span {
-    font-weight: 600; }
-
 .datasets-select-div {
   margin-top: 10px; }
-
-.worksheet {
-  position: relative;
-  overflow: hidden;
-  margin: 0 -10px -5px -10px; }
-  .worksheet .resubmit-button {
-    margin-top: 10px; }
-  .worksheet .panel.plot {
-    box-shadow: none;
-    margin: 0;
-    overflow-y: auto;
-    overflow-x: hidden; }
-  .worksheet .panel-heading div, .worksheet .panel-footing div {
-    padding: 5px; }
-  .worksheet .panel-heading .bq-tables, .worksheet .panel-footing .bq-tables {
-    margin: 0 10px; }
-    .worksheet .panel-heading .bq-tables ul, .worksheet .panel-footing .bq-tables ul {
-      background-color: #F8F8F8;
-      border-radius: 3px;
-      padding: 7px 10px; }
-      .worksheet .panel-heading .bq-tables ul li, .worksheet .panel-footing .bq-tables ul li {
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap; }
-  .worksheet .panel-heading .options-bar, .worksheet .panel-footing .options-bar {
-    float: left;
-    width: 50%;
-    margin-bottom: 10px; }
-  .worksheet .panel-heading .alert, .worksheet .panel-footing .alert {
-    clear: both; }
-  .worksheet .fly-out {
-    position: absolute;
-    visibility: hidden;
-    top: 16px;
-    border: none;
-    border-left: 1px solid #d9d9d9;
-    width: 250px;
-    min-height: 1200px; }
-    .worksheet .fly-out.comment-flyout [class*='flyout-'] {
-      position: relative; }
-    .worksheet .fly-out.comment-flyout .flyout-body {
-      height: 350px;
-      top: 0;
-      bottom: 0; }
-    .worksheet .fly-out.open {
-      visibility: visible; }
-  .worksheet-header {
-    padding: 10px 15px; }
-  .worksheet-body {
-    border-top: 1px solid #e6e6e6; }
-  .worksheet-nav {
-    padding: 10px 15px;
-    float: left;
-    width: 20%;
-    background: #ebebeb;
-    min-height: 1200px;
-    max-height: 1200px;
-    position: relative;
-    -webkit-transition: width 0.45s ease-in-out;
-    transition: width 0.45s ease-in-out; }
-    .worksheet-nav * {
-      opacity: 1;
-      -webkit-transition: opacity 0.45s ease-in-out;
-      transition: opacity 0.45s ease-in-out; }
-    .worksheet-nav.closed {
-      width: 0;
-      -webkit-transition: width 0.45s ease-in-out;
-      transition: width 0.45s ease-in-out;
-      overflow-x: hidden;
-      overflow-y: hidden; }
-      .worksheet-nav.closed * {
-        opacity: 0;
-        z-index: -1;
-        overflow-x: hidden;
-        -webkit-transition: opacity 0.45s ease-in-out;
-        transition: opacity 0.45s ease-in-out; }
-    .worksheet-nav-toggle {
-      background-color: #fff;
-      position: absolute;
-      left: -16px;
-      top: 5px;
-      cursor: pointer; }
-      .worksheet-nav-toggle:after {
-        content: '';
-        width: 0;
-        height: 0;
-        border-style: solid;
-        border-width: 0 16px 12px 0;
-        border-color: transparent rgba(0, 0, 0, 0.1) transparent transparent;
-        position: absolute;
-        top: 100%;
-        right: 0; }
-      .worksheet-nav-toggle a {
-        display: block;
-        width: 16px;
-        height: 24px;
-        padding: 5px; }
-        .worksheet-nav-toggle a:hover {
-          text-decoration: none; }
-      .worksheet-nav-toggle .fa-caret-right {
-        display: none; }
-      .worksheet-nav-toggle.open .fa-caret-right {
-        display: inline-block; }
-      .worksheet-nav-toggle.open .fa-caret-left {
-        display: none; }
-    .worksheet-nav h4 {
-      color: #2A537A; }
-    .worksheet-nav .list {
-      width: 100%; }
-      .worksheet-nav .list .sublist-item {
-        padding-left: 10px;
-        padding-top: 3px; }
-        .worksheet-nav .list .sublist-item:hover {
-          background-color: #cccccc;
-          border-width: 1px;
-          border-radius: 5px; }
-          .worksheet-nav .list .sublist-item:hover .workbook-remove-item {
-            visibility: visible; }
-    .worksheet-nav .list-item__heading {
-      font-size: 14px;
-      font-weight: 700; }
-      .worksheet-nav .list-item__heading i {
-        font-size: 12px;
-        font-weight: 400;
-        opacity: 0.8;
-        margin-top: 5px; }
-    .worksheet-nav .workbook-remove-item {
-      visibility: hidden;
-      border: none;
-      background: none;
-      float: right; }
-      .worksheet-nav .workbook-remove-item:hover {
-        color: #a94442; }
-  .worksheet-content {
-    float: left;
-    width: 80%;
-    padding: 10px 15px;
-    position: relative;
-    -webkit-transition: width 0.45s ease-in-out;
-    transition: width 0.45s ease-in-out; }
-    .worksheet-content.open {
-      width: calc(100% - 40px);
-      -webkit-transition: width 0.45s ease-in-out;
-      transition: width 0.45s ease-in-out; }
-  .worksheet ul.no-bullet {
-    list-style: none;
-    margin-left: -15px; }
-  .worksheet .alert-dismissable {
-    margin-top: 8px; }
-
-.workbook-build {
-  width: 100px;
-  margin-bottom: 15px;
-  height: 28px;
-  padding: 2px 5px; }
-
-.workbook-build-display, .workbook-ver-display {
-  font-size: 16px; }
-  .workbook-build-display span, .workbook-ver-display span {
-    font-weight: 600; }
 
 #cohort-details .filter-label, #cohort-filelist .filter-label {
   display: -webkit-inline-box;
@@ -3285,11 +3082,14 @@ html {
     text-align: center;
     margin: 20px 0px; }
     #user-details .row .panel {
+      border: 3px solid #716784;
+      border-radius: 7px;
+      box-shadow: none;
       display: inline-block;
-      margin: 0px 0px;
-      width: 315px;
+      margin: 10px 0px 20px 0px;
       text-align: left;
-      vertical-align: top; }
+      vertical-align: top;
+      min-width: 90%;}
       #user-details .row .panel:nth-child(2) {
         margin: 0px 15px; }
     #user-details .row a {
@@ -3322,102 +3122,14 @@ html {
     text-align: left; }
   #user-details .alert-dismissible p {
     text-align: left; }
+  #user-details .panel-heading {
+    background: #716784;
+    color: #fff;
+  }
+  #user-details .panel-body {
+    margin-top: 10px;
+  }
 
-#user-gcp-list .table .table {
-  background-color: transparent; }
-
-#user-gcp-list i.fa-check {
-  color: #C9DD03; }
-
-#register-gcp, #user-register-sa, #user-adjust-sa {
-  margin-bottom: 30px; }
-  #register-gcp i.fa-check, #user-register-sa i.fa-check, #user-adjust-sa i.fa-check {
-    color: #C9DD03; }
-  #register-gcp .text-note, #user-register-sa .text-note, #user-adjust-sa .text-note {
-    color: #676767;
-    font-size: .9em;
-    font-style: italic; }
-  #register-gcp .verify-register-sa-div > div, #user-register-sa .verify-register-sa-div > div, #user-adjust-sa .verify-register-sa-div > div {
-    padding: 10px 0; }
-  #register-gcp .verify-register-sa-div .verification-success:before, #user-register-sa .verify-register-sa-div .verification-success:before, #user-adjust-sa .verify-register-sa-div .verification-success:before {
-    content: "\f058";
-    color: #76b876;
-    float: left;
-    font-family: FontAwesome;
-    padding: 0 5px; }
-  #register-gcp .verify-register-sa-div .verification-fail:before, #user-register-sa .verify-register-sa-div .verification-fail:before, #user-adjust-sa .verify-register-sa-div .verification-fail:before {
-    content: "\f06a";
-    color: #D32F2F;
-    float: left;
-    font-family: FontAwesome;
-    padding: 0 5px; }
-  #register-gcp .verify-register-sa-div .register-sa-verification-success, #user-register-sa .verify-register-sa-div .register-sa-verification-success, #user-adjust-sa .verify-register-sa-div .register-sa-verification-success {
-    border-radius: 1px;
-    padding: 10px;
-    border: 1px solid #76b876; }
-  #register-gcp .verify-register-sa-div .register-sa-verification-fail, #user-register-sa .verify-register-sa-div .register-sa-verification-fail, #user-adjust-sa .verify-register-sa-div .register-sa-verification-fail {
-    border-radius: 1px;
-    padding: 10px;
-    border: 1px solid #D32F2F; }
-
-#register-gcp ul, #user-register-sa ul, #user-adjust-sa ul {
-  list-style: none;
-  padding-left: -15px; }
-  #register-gcp ul li, #user-register-sa ul li, #user-adjust-sa ul li {
-    margin: 5px 0px; }
-    #register-gcp ul li img, #user-register-sa ul li img, #user-adjust-sa ul li img {
-      display: block; }
-  #register-gcp ul.dataset-list, #user-register-sa ul.dataset-list, #user-adjust-sa ul.dataset-list {
-    list-style: none;
-    padding: 0px; }
-
-#register-gcp img {
-  border: 1px solid darkgray; }
-
-#register-gcp ol > li {
-  margin-top: 30px !important; }
-  #register-gcp ol > li > div {
-    margin-left: 15px; }
-
-#register-gcp div.instructions {
-  margin-top: 15px;
-  margin-bottom: 15px;
-  padding: 15px;
-  border-radius: 2px;
-  border: 1px solid #ccc;
-  background: #f5f5f5; }
-
-#register-gcp .verify {
-  margin-top: 15px;
-  display: block; }
-
-#register-gcp label {
-  font-weight: 500; }
-
-#register-gcp #verify-gcp-id {
-  display: inline-block;
-  width: 550px; }
-
-#register-gcp ol {
-  margin-bottom: 20px; }
-
-#register-gcp div.instruction_button {
-  display: inline-block;
-  margin-bottom: 15px; }
-  #register-gcp div.instruction_button.instructions_show:before {
-    content: "\f102";
-    float: left;
-    font-family: FontAwesome; }
-  #register-gcp div.instruction_button.instructions_show:after {
-    content: "Show Instructions";
-    margin-left: 5px; }
-  #register-gcp div.instruction_button.instructions_hide:before {
-    content: "\f103";
-    float: left;
-    font-family: FontAwesome; }
-  #register-gcp div.instruction_button.instructions_hide:after {
-    content: "Hide Instructions";
-    margin-left: 5px; }
 
 #datasets-select-div, #datasets-adjust-div {
   padding: 10px 0; }
@@ -4242,6 +3954,11 @@ tr.selected_grey .ohif img {
   background: #ebbcac;
   font-weight: bold;
   margin-bottom: 15px;
+}
+
+#user-details .account-management-panel a {
+  font-weight: 600;
+  text-decoration: none;
 }
 
 
