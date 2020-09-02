@@ -177,7 +177,7 @@ body {
 .bar-charts-div {
     display: block;
     width: 100%;
-    height: 200px;
+    height: 240px;
     overflow: hidden
 }
 
@@ -192,8 +192,9 @@ body {
 
 .bar-chart {
    display: inline-block;
+    position:relative;
     width: 240px;
-    height: 200px
+    height: 240px
 }
 
 /* th, tb,tr,td {
@@ -250,4 +251,8 @@ table {
 
 .search-checkbox-list .list-group-item:last-child {
     border-top: 1px solid #d9d9d9;
+}
+
+svg {
+    overflow:visible;
 }
