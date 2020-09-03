@@ -47,7 +47,7 @@ ul, ol {
   -moz-osx-font-smoothing: grayscale; }
 
 .main-content {
-  margin-top: 60px; }
+  margin-top: 55px; }
 
 .table-list li:after, .table-list_warning li:after, .worksheet-header:after, .worksheet-body:after {
   visibility: hidden;

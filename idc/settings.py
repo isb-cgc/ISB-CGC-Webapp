@@ -403,6 +403,12 @@ LOGGING = {
     },
 }
 
+# Force allauth to only use https
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+# ...but not if this is a local dev build
+if IS_DEV:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+
 ##########################
 #  Start django-allauth  #
 ##########################
@@ -467,16 +473,11 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = bool(os.environ.get('ACCOUNT_USERNAME_REQUIRED', 'False') == 'True')
 ACCOUNT_EMAIL_VERIFICATION = os.environ.get('ACCOUNT_EMAIL_VERIFICATION', 'mandatory').lower()
-ACCOUNT_EMAIL_SUBJECT_PREFIX = "Welcome to Imaging Data Commons "
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Imaging Data Commons] "
 ACCOUNTS_PASSWORD_EXPIRATION = os.environ.get('ACCOUNTS_PASSWORD_EXPIRATION',120) # Max password age in days
 ACCOUNTS_PASSWORD_HISTORY = os.environ.get('ACCOUNTS_PASSWORD_HISTORY', 5) # Max password history kept
 ACCOUNTS_ALLOWANCES = list(set(os.environ.get('ACCOUNTS_ALLOWANCES','').split(',')))
 
-# Force allauth to only use https
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
-# ...but not if this is a local dev build
-if IS_DEV:
-    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 ##########################
 #   End django-allauth   #
 ##########################
@@ -547,8 +548,10 @@ SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS
 #   Start django-finalware   #
 ##############################
 #
-# This should only be done on a local system which is running against its own VM. Deployed systems will already have
-# a site superuser so this would simply overwrite that user. Don't enable this in production!
+# This should only be done on a local system which is running against its own VM, or during CircleCI testing.
+# Deployed systems will already have a site superuser so this would simply overwrite that user.
+# NEVER ENABLE this in production!
+#
 if (IS_DEV and CONNECTION_IS_LOCAL) or IS_CIRCLE:
     INSTALLED_APPS += (
         'finalware',)
@@ -556,6 +559,7 @@ if (IS_DEV and CONNECTION_IS_LOCAL) or IS_CIRCLE:
     SITE_SUPERUSER_USERNAME = os.environ.get('SUPERUSER_USERNAME', '')
     SITE_SUPERUSER_EMAIL = ''
     SITE_SUPERUSER_PASSWORD = os.environ.get('SUPERUSER_PASSWORD')
+#
 ############################
 #   End django-finalware   #
 ############################
@@ -582,7 +586,7 @@ SITE_GOOGLE_ANALYTICS_TRACKING_ID = os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKI
 MAX_FILE_LIST_REQUEST = 65000
 MAX_BQ_RECORD_RESULT = int(os.environ.get('MAX_BQ_RECORD_RESULT', '1000'))
 
-# Rough max file size to allow for eg. barcode list upload, to revent triggering RequestDataTooBig
+# Rough max file size to allow for eg. barcode list upload, to prevent triggering RequestDataTooBig
 FILE_SIZE_UPLOAD_MAX = 1950000
 
 #################################
@@ -600,7 +604,7 @@ SOLR_CERT           = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCA
 DEFAULT_FETCH_COUNT = os.environ.get('DEFAULT_FETCH_COUNT', 10)
 
 
-# Explicitly check for known items
+# Explicitly check for known problems in descrpitions and names provided by users
 BLACKLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
 
 if DEBUG and DEBUG_TOOLBAR:
@@ -622,11 +626,15 @@ if DEBUG and DEBUG_TOOLBAR:
     ]
     SHOW_TOOLBAR_CALLBACK = True
     INTERNAL_IPS = (os.environ.get('INTERNAL_IP', ''),)
-#OHIF_SETTINGS
 
-APPEND_SLASH = False
+##################
+# OHIF_SETTINGS
+##################
+#
 # default is to add trailing '/' to urls ie /callback becomes /callback/. Ohif does not like /callback/ !
+APPEND_SLASH = False
 
 DICOM_STORE_PATH=os.environ.get('DICOM_STORE_PATH','')
 
+# Log the version of our app
 print("[STATUS] Application Version is {}".format(APP_VERSION))
