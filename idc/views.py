@@ -32,9 +32,9 @@ from django.contrib import messages
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
 from idc_collections.models import Program, Attribute_Display_Values, DataSource, DataVersion, Collection, DataSetType
+from idc_collections.collex_metadata_utils import get_collex_metadata
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
-from .metadata_utils import get_collex_metadata
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
@@ -215,6 +215,8 @@ def explore_data_page(request):
         with_derived and data_types.extend(DataSetType.DERIVED_DATA)
         data_sets = DataSetType.objects.filter(data_type__in=data_types)
         sources = data_sets.get_data_sources().filter(source_type=source, id__in=versions.get_data_sources().filter(source_type=source).values_list("id",flat=True)).distinct()
+
+        print("Sources requested in view: {}".format(sources))
 
         source_attrs = sources.get_source_attrs(for_ui=True, with_set_map=True)
 

@@ -7,7 +7,8 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         jquerydt: 'libs/jquery.dataTables.min',
         //d3: 'libs/d3.v5.min',
-        base: 'base'
+        base: 'base',
+        underscore: 'libs/underscore-min'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -17,8 +18,8 @@ require.config({
 });
 
 
-require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
-    function($, jqueryui, bootstrap, jquerydt ) {
+require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
+    function($, _, jqueryui, bootstrap, jquerydt ) {
 
         window.filterObj = {};
         window.projIdSel = [];
@@ -1402,7 +1403,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
                     } else {
                         $('#previous').hide();
                     }
-                    
+
                      */
                     changeAjax(false);
                 },
@@ -2277,13 +2278,9 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
             filterItemBindings('search_orig_set');
             filterItemBindings('search_derived_set');
             filterItemBindings('search_related_set');
-
-
             tableSortBindings('projects_table_head');
             tableSortBindings('studies_table_head');
             tableSortBindings('series_table_head');
-
-
 
             mkSlider('age_at_diagnosis',0,parseInt($('#age_at_diagnosis').data('attr-max')),1,true,true, 'tcga_clinical.');
 
@@ -2311,10 +2308,16 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
              });
 
             //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
-
         }
     );
 
-
-
+     $(window).on('load', function(){
+        if(cohort_filters) {
+            _.each(cohort_filters, function(val, key){
+                console.debug(val,key);
+            });
+            updateFacetsData(true);
+        }
+    });
 });
+
