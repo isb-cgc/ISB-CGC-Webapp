@@ -1298,6 +1298,8 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
             url = encodeURI(url);
 
+            let deferred = $.Deferred();
+
             $.ajax({
                 url: url,
                 dataType: 'json',
@@ -1334,8 +1336,6 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                         updateFilterSelections(derivedAttrs[i], {});
                     }
                     createPlots('search_derived_set');
-
-
 
                     if (data.hasOwnProperty('related_set')) {
                         $('#search_related_set').removeClass('disabled');
@@ -1406,12 +1406,14 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
                      */
                     changeAjax(false);
+                    deferred.resolve();
                 },
                 error: function () {
                     changeAjax(false);
                     console.log("problem getting data");
                 }
             });
+            return deferred.promise();
         };
 
 
@@ -2301,16 +2303,21 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
         }
     );
 
+     let cohort_loaded = false;
+     let load_done = null;
      $(window).on('load', function(){
-        if(cohort_filters) {
+        let uncollapse = [];
+        if(cohort_filters && !cohort_loaded) {
             _.each(cohort_filters, function(group){
                 _.each(group['filters'], function(filter){
+                    $('div.list-group-item__body[data-attr-id="'+filter['id']+'"]').collapse('show');
                     _.each(filter['values'], function(val){
                         $('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]').prop("checked",true);
                         checkFilters($('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]'));
                     });
                 });
             });
+            cohort_loaded = true;
             mkFiltText();
             updateFacetsData(true);
         }
