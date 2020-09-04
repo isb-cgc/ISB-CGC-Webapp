@@ -2956,6 +2956,11 @@ html {
   margin-bottom: 5px;
 }
 
+.site-footer .acknowledgement {
+  color: #c8c8c8;
+  font-size: 0.9em;
+}
+
 #landing .summary-contents div {
   display: inline-block;
   text-align: left;
