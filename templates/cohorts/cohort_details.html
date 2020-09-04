@@ -65,7 +65,7 @@
                         <p>{{ cohort.description }}</p>
                     </div>
                     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                        <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal" data-target="#download-manifest" title="Download this cohort's manifest.">
+                        <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal" data-target="#download-manifest" disabled title="Download this cohort's manifest.">
                             Download Cohort Manifest
                         </button>
                     </div>
@@ -630,8 +630,7 @@
     <script type="text/javascript" src="{% static 'js/cohorts/cohort-details.js' %}"></script>
     <script>
         var cohort_filters = {{ cohort_filters|safe }};
-    </script>
-    <script>
+        var is_cohort = true;
         var collection_tooltips = {{ collection_tooltips|safe }};
     </script>
 {% endblock %}

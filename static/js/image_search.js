@@ -476,13 +476,10 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
         var mkSlider = function (divName, min, max, step, isInt, wNone, parStr) {
              var tooltip = $('<div class="slide_tooltip" />').text('stuff').css({
-                   position: 'absolute',
-                   top: -25,
-                   left: 0,
-                    }).hide();
-
-
-
+               position: 'absolute',
+               top: -25,
+               left: 0,
+                }).hide();
             var slideName = divName + '_slide';
             var inpName = divName + '_input';
             var strtInp = min + '-' + max;
@@ -508,12 +505,12 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 min: min,
                 max: max,
                 range: true,
+                disabled: is_cohort,
                 slide: function (event, ui) {
                      $('#' + inpName).val(ui.values[0] + "-" + ui.values[1]);
                     $(this).parent().find('.ui-slider-handle').each( function(index){
                         $(this).find('.slide_tooltip').text( ui.values[index].toString() );
                     });
-
                 },
 
                 stop: function (event, ui) {
@@ -1592,7 +1589,9 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 txtbx.attr("opacity",0);
              })
             .on("click",function(d){
-                manageUpdateFromPlot(plotId, d.data.key);
+                if(!is_cohort) {
+                    manageUpdateFromPlot(plotId, d.data.key);
+                }
             });
          /* .append("svg:title")
                 .text(function(d) {
@@ -2307,7 +2306,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
      let load_done = null;
      $(window).on('load', function(){
         let uncollapse = [];
-        if(cohort_filters && !cohort_loaded) {
+        if(is_cohort && !cohort_loaded) {
             _.each(cohort_filters, function(group){
                 _.each(group['filters'], function(filter){
                     $('div.list-group-item__body[data-attr-id="'+filter['id']+'"]').collapse('show');
@@ -2320,6 +2319,9 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             cohort_loaded = true;
             mkFiltText();
             updateFacetsData(true);
+
+            $('input[type="checkbox"]').prop("disabled","disabled");
+            $('input#hide-zeros').prop("disabled","");
         }
     });
 });
