@@ -1250,7 +1250,8 @@ a.skip-nav {
         -webkit-transform: translateY(-50%);
                 transform: translateY(-50%); }
   .list-group .list-group-item__body {
-    padding-bottom: 10px; }
+    padding-bottom: 10px;
+    padding-left: 10px;}
   .list-group .list-group-item .search_enter .search_input {
     display: inline-block;
     width: 260px;
@@ -1960,7 +1961,8 @@ section .min-max {
 #cohort-details .filter-panel .checks, #cohort-filelist .filter-panel .checks {
   float: right;
   display: block;
-  width: 60%; }
+  text-align: right;
+  min-width: 20%; }
 
 #cohort-details .filter-panel .tabpanel, #cohort-filelist .filter-panel .tabpanel {
   border-top-left-radius: 3px;
