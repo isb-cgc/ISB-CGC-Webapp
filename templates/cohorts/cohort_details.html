@@ -602,6 +602,7 @@
                 </div>
             </div>
         </div>
+        </div>
     </div>
 </div>
 
@@ -615,7 +616,9 @@
     <script type="text/javascript" src="{% static 'js/explore.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/cohorts/cohort-details.js' %}"></script>
     <script>
-        var collection_tooltips = {{ collection_tooltips|safe }};
         var cohort_filters = {{ cohort_filters|safe }};
+    </script>
+    <script>
+        var collection_tooltips = {{ collection_tooltips|safe }};
     </script>
 {% endblock %}

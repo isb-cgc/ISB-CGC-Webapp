@@ -216,8 +216,6 @@ def explore_data_page(request):
         data_sets = DataSetType.objects.filter(data_type__in=data_types)
         sources = data_sets.get_data_sources().filter(source_type=source, id__in=versions.get_data_sources().filter(source_type=source).values_list("id",flat=True)).distinct()
 
-        print("Sources requested in view: {}".format(sources))
-
         source_attrs = sources.get_source_attrs(for_ui=True, with_set_map=True)
 
         # For now we're only allowing TCGA+ispy1+lidc-idri+qin_headneck
