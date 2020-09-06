@@ -2961,6 +2961,12 @@ html {
   font-size: 0.9em;
 }
 
+.quota-body {
+  padding-top: 250px;
+  padding-bottom: 250px;
+  background-image: linear-gradient(to bottom right,#6294c9,#83c5d7,#6294c9);
+}
+
 #landing .summary-contents div {
   display: inline-block;
   text-align: left;
