@@ -1250,8 +1250,7 @@ a.skip-nav {
         -webkit-transform: translateY(-50%);
                 transform: translateY(-50%); }
   .list-group .list-group-item__body {
-    padding-bottom: 10px;
-    padding-left: 10px;}
+    padding-bottom: 10px; }
   .list-group .list-group-item .search_enter .search_input {
     display: inline-block;
     width: 260px;
