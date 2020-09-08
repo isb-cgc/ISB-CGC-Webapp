@@ -47,7 +47,7 @@ ul, ol {
   -moz-osx-font-smoothing: grayscale; }
 
 .main-content {
-  margin-top: 60px; }
+  margin-top: 55px; }
 
 .table-list li:after, .table-list_warning li:after, .worksheet-header:after, .worksheet-body:after {
   visibility: hidden;
@@ -1962,7 +1962,8 @@ section .min-max {
 #cohort-details .filter-panel .checks, #cohort-filelist .filter-panel .checks {
   float: right;
   display: block;
-  width: 60%; }
+  text-align: right;
+  min-width: 20%; }
 
 #cohort-details .filter-panel .tabpanel, #cohort-filelist .filter-panel .tabpanel {
   border-top-left-radius: 3px;

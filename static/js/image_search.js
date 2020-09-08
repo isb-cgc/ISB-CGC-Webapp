@@ -7,7 +7,8 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         jquerydt: 'libs/jquery.dataTables.min',
         //d3: 'libs/d3.v5.min',
-        base: 'base'
+        base: 'base',
+        underscore: 'libs/underscore-min'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -17,8 +18,8 @@ require.config({
 });
 
 
-require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
-    function($, jqueryui, bootstrap, jquerydt ) {
+require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
+    function($, _, jqueryui, bootstrap, jquerydt ) {
 
         window.filterObj = {};
         window.projIdSel = [];
@@ -475,13 +476,10 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
 
         var mkSlider = function (divName, min, max, step, isInt, wNone, parStr) {
              var tooltip = $('<div class="slide_tooltip" />').text('stuff').css({
-                   position: 'absolute',
-                   top: -25,
-                   left: 0,
-                    }).hide();
-
-
-
+               position: 'absolute',
+               top: -25,
+               left: 0,
+                }).hide();
             var slideName = divName + '_slide';
             var inpName = divName + '_input';
             var strtInp = min + '-' + max;
@@ -507,12 +505,12 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
                 min: min,
                 max: max,
                 range: true,
+                disabled: is_cohort,
                 slide: function (event, ui) {
                      $('#' + inpName).val(ui.values[0] + "-" + ui.values[1]);
                     $(this).parent().find('.ui-slider-handle').each( function(index){
                         $(this).find('.slide_tooltip').text( ui.values[index].toString() );
                     });
-
                 },
 
                 stop: function (event, ui) {
@@ -1297,6 +1295,8 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
 
             url = encodeURI(url);
 
+            let deferred = $.Deferred();
+
             $.ajax({
                 url: url,
                 dataType: 'json',
@@ -1333,8 +1333,6 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
                         updateFilterSelections(derivedAttrs[i], {});
                     }
                     createPlots('search_derived_set');
-
-
 
                     if (data.hasOwnProperty('related_set')) {
                         $('#search_related_set').removeClass('disabled');
@@ -1402,15 +1400,17 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
                     } else {
                         $('#previous').hide();
                     }
-                    
+
                      */
                     changeAjax(false);
+                    deferred.resolve();
                 },
                 error: function () {
                     changeAjax(false);
                     console.log("problem getting data");
                 }
             });
+            return deferred.promise();
         };
 
 
@@ -1589,7 +1589,9 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
                 txtbx.attr("opacity",0);
              })
             .on("click",function(d){
-                manageUpdateFromPlot(plotId, d.data.key);
+                if(!is_cohort) {
+                    manageUpdateFromPlot(plotId, d.data.key);
+                }
             });
          /* .append("svg:title")
                 .text(function(d) {
@@ -1860,7 +1862,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
                     updateFilters(filterCats[i], '', true);
                 }
             }
-        }
+        };
 
         var checkTcga = function(){
              if ( !('Program' in window.filterObj) ){
@@ -1873,7 +1875,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
                     $('#tcga_heading').parent().find('input:checkbox').prop('indeterminate',false);
                 }
 
-        }
+        };
 
         var resetTcgaFilters = function(){
             if ( ('Program' in window.filterObj) && (window.filterObj['Program'].indexOf('tcga')<0 )){
@@ -1886,156 +1888,146 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
                     }
                 }
             }
-        }
+        };
+
+
+        var checkFilters = function(filterElem) {
+            var checked = $(filterElem)[0].checked;
+            var neighbours =$(filterElem).parentsUntil('.list-group-item__body','ul').children().children().children('input:checkbox');
+            var neighboursCk = $(filterElem).parentsUntil('.list-group-item__body','ul').children().children().children(':checked');
+            var allChecked= false;
+            var noneChecked = false;
+            if (neighboursCk.length===0){
+                noneChecked = true;
+            }
+
+            if (neighbours.length === neighboursCk.length){
+                allChecked = true;
+            }
+
+            var filterCats= $(filterElem).parentsUntil('.tab-pane','.list-group-item, .checkbox');
+            var j = 1;
+
+            var curCat='';
+            var lastCat='';
+            numCheckBoxes=0;
+            for (var i=0;i<filterCats.length;i++){
+                ind = filterCats.length-1-i;
+                filterCat=filterCats[ind];
+                hasCheckBox=false;
+                if (filterCat.classList.contains('checkbox')){
+                     checkBox =$(filterCat).find('input:checkbox')[0];
+                     filtnm=checkBox.value;
+                     hasCheckBox = true;
+                     numCheckBoxes++;
+                }
+                else {
+                    filtnm=$(filterCat).children('.list-group-item__body')[0].id;
+                    if  ($(filterCat).children('.list-group-item__heading').children('input:checkbox').length>0) {
+                       hasCheckBox = true;
+                       numCheckBoxes++;
+                    }
+                   checkBox = $(filterCat).children('.list-group-item__heading').children('input:checkbox')[0];
+                }
+
+                if ( hasCheckBox && (ind ===1) && !(allChecked) && !(noneChecked)){
+                    checkBox.indeterminate = true;
+                    checkBox.checked = false;
+                }
+                else if (hasCheckBox){
+                    checkBox.indeterminate = false;
+                }
+
+                if ( (checked) && (filtnm ==='tcga_clinical')){
+                    checkTcga();
+                }
+
+                if ((checked) && (curCat.length>0) && hasCheckBox  ){
+                    if (!(checkBox.indeterminate)) {
+                        checkBox.checked = true;
+                    }
+
+                    if (!(filterObj.hasOwnProperty(curCat))){
+                        filterObj[curCat] = new Array();
+                    }
+                    if (filterObj[curCat].indexOf(filtnm)<0){
+                        filterObj[curCat].push(filtnm)
+                    }
+                    if ((ind ===0) && (curCat.startsWith('Program'))){
+                       resetTcgaFilters();
+                    }
+
+                    /* if ( allChecked && (i === (filterCats.length-1)) && (numCheckBoxes>1)) {
+                        delete filterObj[curCat];
+                    }*/
+
+                }
+
+                if (!checked && ( (ind===0) || ( (ind===1) && hasCheckBox && noneChecked)) ){
+                   checkBox.checked = false;
+                   //checkBox.indeterminate =  false;
+                   if ( filterObj.hasOwnProperty(curCat) && (filterObj[curCat].indexOf(filtnm)>-1) ){
+                        pos = filterObj[curCat].indexOf(filtnm);
+                        filterObj[curCat].splice(pos,1);
+                        if (Object.keys(filterObj[curCat]).length===0){
+                             delete filterObj[curCat];
+                        }
+                   }
+
+                   if ((ind ===0) && (curCat.startsWith('Program'))){
+                       resetTcgaFilters();
+                    }
+                   if (curCat.length>0){
+                     curCat+="."
+                     }
+                    lastCat = curCat;
+                    curCat+=filtnm;
+                    //$(filterElem).find('input:checkbox').checked=false;
+                    if ($(filterElem).parent().hasClass('list-group-item__heading')){
+                          chkList=$(filterElem).parent().siblings().filter('.list-group-item__body').find('input:checkbox');
+                          for (var ind=0; ind<chkList.length;ind++){
+                              chkList[ind].checked=false;
+                          }
+                    }
+                    for (var ckey in filterObj){
+                        if (ckey.startsWith(curCat)){
+                           delete filterObj[curCat];
+                       }
+                   }
+                }
+                if (curCat.length>0){
+                    curCat+="."
+                }
+                curCat+=filtnm;
+
+            }
+            var childBoxes=$(filterElem).parent().siblings().find('input:checkbox');
+            if (checked && (childBoxes.length>0)) {
+                filterObj[curCat] = new Array();
+                childBoxes.each(function(){
+                   this.checked=true;
+                   filterObj[curCat].push(this.value);
+                });
+                //$(filterElem).parent().siblings().find('input:checkbox').prop('checked',true);
+            } else {
+                delete filterObj[curCat];
+                $(childBoxes).prop('checked',false);
+            }
+
+        };
 
         var handleFilterSelectionUpdate = function(filterElem, mkFilt, doUpdate) {
+            checkFilters(filterElem);
 
-
-        var checked = $(filterElem)[0].checked;
-
-        var neighbours =$(filterElem).parentsUntil('.list-group-item__body','ul').children().children().children('input:checkbox');
-        var neighboursCk = $(filterElem).parentsUntil('.list-group-item__body','ul').children().children().children(':checked');
-        var allChecked= false;
-        var noneChecked = false;
-        if (neighboursCk.length===0){
-            noneChecked = true;
-        }
-
-        if (neighbours.length === neighboursCk.length){
-            allChecked = true;
-        }
-
-        var filterCats= $(filterElem).parentsUntil('.tab-pane','.list-group-item, .checkbox');
-        var j = 1;
-
-        var curCat='';
-        var lastCat='';
-        numCheckBoxes=0;
-        for (var i=0;i<filterCats.length;i++){
-            ind = filterCats.length-1-i;
-            filterCat=filterCats[ind];
-            hasCheckBox=false;
-            if (filterCat.classList.contains('checkbox')){
-                 checkBox =$(filterCat).find('input:checkbox')[0];
-                 filtnm=checkBox.value;
-                 hasCheckBox = true;
-                 numCheckBoxes++;
+            if (mkFilt) {
+                mkFiltText();
             }
-            else {
-                filtnm=$(filterCat).children('.list-group-item__body')[0].id;
-                if  ($(filterCat).children('.list-group-item__heading').children('input:checkbox').length>0) {
-                   hasCheckBox = true;
-                   numCheckBoxes++;
-                }
-               checkBox = $(filterCat).children('.list-group-item__heading').children('input:checkbox')[0];
+            if (doUpdate){
+                updateFacetsData(true);
             }
+        };
 
-            if ( hasCheckBox && (ind ===1) && !(allChecked) && !(noneChecked)){
-                checkBox.indeterminate = true;
-                checkBox.checked = false;
-            }
-            else if (hasCheckBox){
-                checkBox.indeterminate = false;
-            }
-
-            if ( (checked) && (filtnm ==='tcga_clinical')){
-                checkTcga();
-            }
-
-
-
-            if ((checked) && (curCat.length>0) && hasCheckBox  ){
-                if (!(checkBox.indeterminate)) {
-                    checkBox.checked = true;
-                }
-
-                if (!(filterObj.hasOwnProperty(curCat))){
-                    filterObj[curCat] = new Array();
-                }
-                if (filterObj[curCat].indexOf(filtnm)<0){
-                    filterObj[curCat].push(filtnm)
-                }
-                if ((ind ===0) && (curCat.startsWith('Program'))){
-                   resetTcgaFilters();
-                }
-
-                /* if ( allChecked && (i === (filterCats.length-1)) && (numCheckBoxes>1)) {
-                    delete filterObj[curCat];
-                }*/
-
-            }
-
-            if (!checked && ( (ind===0) || ( (ind===1) && hasCheckBox && noneChecked)) ){
-               checkBox.checked = false;
-               //checkBox.indeterminate =  false;
-               if ( filterObj.hasOwnProperty(curCat) && (filterObj[curCat].indexOf(filtnm)>-1) ){
-                    pos = filterObj[curCat].indexOf(filtnm);
-                    filterObj[curCat].splice(pos,1);
-                    if (Object.keys(filterObj[curCat]).length===0){
-                         delete filterObj[curCat];
-                    }
-               }
-
-               if ((ind ===0) && (curCat.startsWith('Program'))){
-                   resetTcgaFilters();
-                }
-
-
-               if (curCat.length>0){
-                 curCat+="."
-                 }
-                lastCat = curCat;
-                curCat+=filtnm;
-                //$(filterElem).find('input:checkbox').checked=false;
-                if ($(filterElem).parent().hasClass('list-group-item__heading')){
-                      chkList=$(filterElem).parent().siblings().filter('.list-group-item__body').find('input:checkbox');
-                      for (var ind=0; ind<chkList.length;ind++){
-                          chkList[ind].checked=false;
-                      }
-                }
-
-                for (var ckey in filterObj){
-                    if (ckey.startsWith(curCat)){
-                       delete filterObj[curCat];
-                   }
-               }
-            }
-            if (curCat.length>0){
-                curCat+="."
-            }
-            curCat+=filtnm;
-
-        }
-        var childBoxes=$(filterElem).parent().siblings().find('input:checkbox');
-        if (checked && (childBoxes.length>0)) {
-            filterObj[curCat] = new Array();
-            childBoxes.each(function(){
-               this.checked=true;
-               filterObj[curCat].push(this.value);
-            });
-            //$(filterElem).parent().siblings().find('input:checkbox').prop('checked',true);
-
-        }
-        else {
-            delete filterObj[curCat];
-            $(childBoxes).prop('checked',false);
-        }
-
-
-
-        if (mkFilt) {
-            mkFiltText();
-        }
-        if (doUpdate){
-            updateFacetsData(true);
-        }
-
-
-    }
-
-
-
-
+////////
 
         var tableSortBindings = function (filterId) {
             $('#' + filterId).find('.fa-caret-up, .fa-caret-down').on('click', function () {
@@ -2277,13 +2269,9 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
             filterItemBindings('search_orig_set');
             filterItemBindings('search_derived_set');
             filterItemBindings('search_related_set');
-
-
             tableSortBindings('projects_table_head');
             tableSortBindings('studies_table_head');
             tableSortBindings('series_table_head');
-
-
 
             mkSlider('age_at_diagnosis',0,parseInt($('#age_at_diagnosis').data('attr-max')),1,true,true, 'tcga_clinical.');
 
@@ -2311,10 +2299,30 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
              });
 
             //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
-
         }
     );
 
+     let cohort_loaded = false;
+     let load_done = null;
+     $(window).on('load', function(){
+        let uncollapse = [];
+        if(is_cohort && !cohort_loaded) {
+            _.each(cohort_filters, function(group){
+                _.each(group['filters'], function(filter){
+                    $('div.list-group-item__body[data-attr-id="'+filter['id']+'"]').collapse('show');
+                    _.each(filter['values'], function(val){
+                        $('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]').prop("checked",true);
+                        checkFilters($('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]'));
+                    });
+                });
+            });
+            cohort_loaded = true;
+            mkFiltText();
+            updateFacetsData(true);
 
-
+            $('input[type="checkbox"]').prop("disabled","disabled");
+            $('input#hide-zeros').prop("disabled","");
+        }
+    });
 });
+
