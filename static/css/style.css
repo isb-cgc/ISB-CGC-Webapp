@@ -1250,7 +1250,9 @@ a.skip-nav {
         -webkit-transform: translateY(-50%);
                 transform: translateY(-50%); }
   .list-group .list-group-item__body {
-    padding-bottom: 10px; }
+    color: #2A537A;
+    padding: 0 0 10px 35px;
+    position: relative;}
   .list-group .list-group-item .search_enter .search_input {
     display: inline-block;
     width: 260px;
@@ -2954,6 +2956,17 @@ html {
 .site-footer p {
   padding: 0;
   margin-bottom: 5px;
+}
+
+.site-footer .acknowledgement {
+  color: #c8c8c8;
+  font-size: 0.9em;
+}
+
+.quota-body {
+  padding-top: 250px;
+  padding-bottom: 250px;
+  background-image: linear-gradient(to bottom right,#6294c9,#83c5d7,#6294c9);
 }
 
 #landing .summary-contents div {
