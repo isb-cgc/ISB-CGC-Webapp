@@ -412,8 +412,8 @@
                                 <div class="panel-body original-graphs graph-set">
                                      {% for attr in set_attributes.origin_set.All.attributes %}
                                          {% if attr.name != 'collection_id' %}
-                                         <div id="{{ attr.name  }}_chart" class="bar-chart">
-                                             <svg width="240" height="200"></svg>
+                                         <div id="{{ attr.name  }}_chart" class="bar-chart" >
+                                             <svg width="240" height="200" ></svg>
                                          </div>
                                          {% endif %}
                                     {%  endfor %}
@@ -438,8 +438,8 @@
                                                  {% endif %}
 
                                                     {% for attr in attr_setV.attributes|order_quant:attr_setK %}
-                                                        <div id="{{ attr.name  }}_chart" class="bar-chart">
-                                                            <svg width="240" height="200"></svg>
+                                                        <div id="{{ attr.name  }}_chart" class="bar-chart" >
+                                                            <svg width="240" height="200" ></svg>
                                                         </div>
 
                                                     {%  endfor %}
@@ -454,19 +454,35 @@
 
 
                             </div>
+
+
                             <div id = "results_related_set" role="tabpanel" class="tab-pane panel">
+
                                  <div class="panel-body bar-charts-div related-graphs graph-set">
+                                 <span class="span-related">
                                     {% for attr in set_attributes.related_set.All.attributes %}
+
                                         <div id="{{ attr.name }}_chart" class="bar-chart">
                                             <svg width="240" height="200"></svg>
                                         </div>
+                                        {% if forloop.counter == 3 %}
+                                            </span><span class="span-related-overflow">
+                                        {% endif %}
+
                                     {%  endfor %}
+
+
+                                 </span>
                                 </div>
 
                                 <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="showMoreGraphs('related-graphs','800px')">Show More</button></div>
                                 <div class="less-graphs" style="display: none; width:100%"><button class="btn btn-link" role="button" onclick="showLessGraphs('related-graphs','200px')">Show Less</button></div>
 
+
+
+
                             </div>
+
                         </div>
                     </div>
                 </div>

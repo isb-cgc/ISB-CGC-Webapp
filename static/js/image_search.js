@@ -814,7 +814,7 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
 
             var fieldStr = JSON.stringify(fields);
             var orderDocStr = JSON.stringify(order_docs);
-            let url = '/explore/?counts_only=False&is_json=True&with_clinical=False&collapse_on=' + collapse_on + '&filters=' + filterStr + '&fields=' + fieldStr + '&order_docs=' + orderDocStr;
+            let url = '/explore/?counts_only=False&is_json=True&with_clinical=True&collapse_on=' + collapse_on + '&filters=' + filterStr + '&fields=' + fieldStr + '&order_docs=' + orderDocStr;
             url = encodeURI(url);
 
             $.ajax({
@@ -1449,167 +1449,135 @@ require(['jquery', 'jquerydt','jqueryui', 'bootstrap','base'],
         }
 
         var plotCategoricalData = function (plotId, lbl, plotData, isPie, showLbl){
-
-            var width = 240;
+            var width = 300;
             var height = 260;
+            var shifty = 30;
             var margin = 50;
-
             var radius = Math.min(width, height) / 2 - margin;
-            var tooltip2 = d3.select("#"+plotId).append("div").style("opacity", 1).style("position","absolute");
-
-
+            var radiusB = 1.2*radius;
 
             // append the svg object to the div called 'my_dataviz'
-          var svg = d3.select("#"+plotId)
+            var svg = d3.select("#"+plotId)
              .select("svg")
              .attr("width", width)
              .attr("height", height).style("text-anchor","middle");
 
-          svg.selectAll("*").remove();
+            svg.selectAll("*").remove();
 
-          titlePart = svg.append("text").attr("text-anchor","middle").attr("font-size", "14px").attr("fill","#2A537A");
-          var title1="";
-          var title2="";
-          if (lbl.includes('Quarter')){
+            titlePart = svg.append("text").attr("text-anchor","middle").attr("font-size", "14px").attr("fill","#2A537A");
+            var title0="";
+            var title1="";
+            var title2="";
+
+            if (lbl.includes('Quarter')){
                 var titA = lbl.split('Quarter');
                 title1=titA[0]+' Quarter';
                 title2=titA[1];
-          }
-          else if(lbl.includes('(')){
+            }
+            else if(lbl.includes('Background')){
+                var titA = lbl.split('Activity');
+                var titB = titA[1].split('(');
+                title0 = titA[0];
+                title1= 'Activity '+titB[0];
+                title2= '('+titB[1];
+            }
+
+            else if(lbl.includes('(')){
                var titA = lbl.split('(');
-                title1=titA[0];
-                title2='('+titA[1];
-          }
-          else{
-              title1=lbl;
-          }
-
-          if (lbl.includes('Activity Background')){
-              titlePart.append("tspan").attr("x",95).attr("y",30).attr("dx",0).attr("dy",0).text(title1);
-              titlePart.append("tspan").attr("x",95).attr("y",30).attr("dx",0).attr("dy",20).text(title2);
-          }
-          else {
-              titlePart.append("tspan").attr("x", 120).attr("y", 30).attr("dx", 0).attr("dy", 0).text(title1);
-              titlePart.append("tspan").attr("x", 120).attr("y", 30).attr("dx", 0).attr("dy", 20).text(title2);
-          }
-          /*
-          .attr("transform", "translate("+margin+",0)")
-          .attr("x", 50)
-          .attr("y", 30)
-          .attr("font-size", "24px")
-          .text(lbl);*/
+               title1=titA[0];
+               title2='('+titA[1];
+             }
+            else{
+              title2=lbl;
+             }
 
 
-          var pieg=svg.append("g")
-             .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+            titlePart.append("tspan").attr("x",140).attr("y",15).attr("dx",0).attr("dy",0).text(title0);
+            titlePart.append("tspan").attr("x", 140).attr("y", 15).attr("dx", 0).attr("dy", 20).text(title1);
+            titlePart.append("tspan").attr("x", 140).attr("y", 15).attr("dx", 0).attr("dy", 40).text(title2);
 
 
-
-
+             var pieg=svg.append("g")
+             .attr("transform", "translate(" + width / 2 + "," + (height / 2 + shifty) + ")");
             var data = new Object;
-            rng= new Array();
-            spcing = 1.0/parseFloat(plotData.dataCnt.length);
-            var tot=0;
-         for (i=0;i<plotData.dataCnt.length;i++) {
-             var pkey = plotData.dataLabel[i];
-             var cnt = plotData.dataCnt[i];
-             data[pkey]=cnt;
-             tot+=cnt;
-             rng.push(parseFloat(i)*parseFloat(spcing));
-         }
-         $('#'+plotId).data('total',tot.toString());
-         //var data = {a: 9, b: 20, c:30, d:8, e:12};
+             rng= new Array();
+             spcing = 1.0/parseFloat(plotData.dataCnt.length);
+             var tot=0;
 
-         // set the color scale
-          var color = d3.scaleOrdinal()
+             for (i=0;i<plotData.dataCnt.length;i++) {
+               var pkey = plotData.dataLabel[i];
+               var cnt = plotData.dataCnt[i];
+               data[pkey]=cnt;
+               tot+=cnt;
+               rng.push(parseFloat(i)*parseFloat(spcing));
+             }
+             $('#'+plotId).data('total',tot.toString());
+
+           // set the color scale
+           var color = d3.scaleOrdinal()
            .domain(plotData.dataLabel)
            .range(d3.schemeCategory10);
 
-        /* var color = d3.scaleOrdinal()
-           .domain(data)
-           .range(rng); */
+           // Compute the position of each group on the pie:
+          var pie = d3.pie()
+          .value(function(d) {return d.value; }).sort(null);
+          var data_ready = pie(d3.entries(data));
 
-         // Compute the position of each group on the pie:
-        var pie = d3.pie()
-        .value(function(d) {return d.value; }).sort(null);
-        var data_ready = pie(d3.entries(data));
-
-
-
-        // create a tooltip
-
-
-        // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
-        pieg
-        .selectAll('whatever')
-        .data(data_ready)
-        .enter()
-        .append('path')
-        .attr('d', d3.arc()
-        .innerRadius(0)
-        .outerRadius(radius)
-        )
-        .attr('fill', function(d){ return(
+         // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+          pieg
+          .selectAll('whatever')
+          .data(data_ready)
+          .enter()
+          .append('path')
+          .attr('d', d3.arc()
+          .innerRadius(0)
+          .outerRadius(radius)
+          )
+          .attr('fill', function(d){ return(
             color(d.data.key)  )
-         })
-        .attr("stroke", "black")
-        .style("stroke-width", "0px")
-        .style("opacity", 0.7)
-            .on("mousemove",function(d){
-
+           })
+          .attr("stroke", "black")
+          .style("stroke-width", "0px")
+          .style("opacity", 0.7)
+              .on("mousemove",function(d){
                 var tot=parseFloat($('#'+plotId).data('total'));
                 var frac = parseInt(parseFloat(d.data.value)/tot*100);
                 var i=1;
-              var bb=this.getBBox();
+                var xpos = d3.mouse(this)[0];
+                var ypos = d3.mouse(this)[1];
+               txtbx.attr("x",xpos);
+               txtbx.attr("y",ypos+30);
+               txtbx.selectAll('*').attr("x",xpos);
+               txtbx.selectAll('*').attr("y",ypos+30);
+               tspans=txtbx.node().childNodes;
+               tspans[0].textContent = d.data.key;
+               tspans[1].textContent = d.data.value;
+               tspans[2].textContent = frac.toString()+"%";
+               txtbx.attr("opacity",1);
 
-              txtbx.attr("x",bb.x+parseInt(bb.width*0.5));
-              txtbx.attr("y",bb.y+15+parseInt(bb.height*0.5));
-              txtbx.selectAll('*').attr("x",bb.x+parseInt(bb.width*0.5));
-              txtbx.selectAll('*').attr("y",bb.y+15+parseInt(bb.height*0.5));
-
-              tspans=txtbx.node().childNodes;
-              tspans[0].textContent = d.data.key;
-              tspans[1].textContent = d.data.value;
-              tspans[2].textContent = frac.toString()+"%";
-
-              rect.attr("x",bb.x-5+parseInt(bb.width*0.5));
-              rect.attr("y",bb.y+parseInt(bb.height*0.5));
-
-              var txbb=txtbx.node().getBBox()
-              rect.attr("width",txbb.width+10);
-              rect.attr("height",txbb.height+10);
-              rect.attr("fill",color(d.data.key));
-
-              rect.attr("opacity",1);
-              txtbx.attr("opacity",1);
+                d3.select(this).attr('d', d3.arc()
+               .innerRadius(0)
+               .outerRadius(radiusB)
+               );
 
             })
-            .on("mouseleave",function(d){
-                rect.attr("opacity",0);
+             .on("mouseleave",function(d){
+                d3.select(this).attr('d', d3.arc()
+               .innerRadius(0)
+               .outerRadius(radius)
+               );
+
                 txtbx.attr("opacity",0);
              })
             .on("click",function(d){
                 manageUpdateFromPlot(plotId, d.data.key);
             });
-         /* .append("svg:title")
-                .text(function(d) {
-                    var tot=parseFloat($('#'+plotId).data('total'));
-                    var frac = parseInt(parseFloat(d.data.value)/tot*100);
-                    var ret = d.data.key+'\n'+d.data.value.toString()+'\n'+frac+'%';
-                    return ret;
-                });*/
 
-        //var txtbx=pieg.append("text").attr("x","0px").attr("y","0px").attr("text-anchor","middle").text("hello there");
-        var rect=pieg.append("rect");
-        rect.attr("opacity",0);
         var txtbx=pieg.append("text").attr("x","0px").attr("y","10px").attr('text-anchor','start');
         txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",0);
         txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",20);
         txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",40);
         txtbx.attr("opacity",0);
-
-          //rect.append("rect").attr("x","-30px").attr("y","-30px").attr("width","100px").attr("height","100px").attr("fill","blue");
-
 
         }
 
