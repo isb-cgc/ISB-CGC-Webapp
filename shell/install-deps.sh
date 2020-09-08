@@ -55,10 +55,11 @@ if [ -z "${CI}" ]; then
 
     # Set Python 3.7 as the python3 version
     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1
+
+    apt-get install -y --force-yes python3.7-venv python3.7-distutils python3.7-dev
 fi
 
-# On CircleCI some of these won't be needed as they'll be in the image.
-apt-get install -y --force-yes python3.7-venv python3.7-distutils python3.7-dev python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
+apt-get install -y --force-yes python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
 apt-get install -y --force-yes mysql-client
 
 echo "Dependencies Installed"

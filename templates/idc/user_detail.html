@@ -37,47 +37,68 @@
     {% endif %}
     <h4>Welcome {% if not local_account %}{{ user_details.first_name }} {{ user_details.last_name }}{% else %}{{ user_details.email }}{% endif %}!</h4>
     <div class="row">
-        <div class="panel panel-default user-panel">
-            <div class="panel-heading">
-                <h5>
-                    Personal Details
-                </h5>
-            </div>
-            <div class="panel-body">
-                <table class="user-info" role="presentation">
-                    <tr>
-                    {% if not local_account %}
-                        <td>Name</td>
-                        <td>{{ user_details.first_name }} {{ user_details.last_name }}</td>
-                    {% else %}
-                        <td>User Name</td>
-                        <td>{{ user_details.username }}</td>
-                    {% endif %}
-                    </tr>
-                    <tr>
-                        <td>Email</td>
-                        <td>{{ user_details.email }}</td>
-                    </tr>
-                    <tr>
-                        <td>Last Login</td>
-                        <td id="last_login">{{ user_details.last_login }}</td>
-                    </tr>
-                </table>
+        <div class="col-lg-4 col-md-4 col-sm-12">
+            <div class="panel panel-default user-panel">
+                <div class="panel-heading">
+                    <h5>
+                        Personal Details
+                    </h5>
+                </div>
+                <div class="panel-body">
+                    <table class="user-info" role="presentation">
+                        <tr>
+                        {% if not local_account %}
+                            <td>Name</td>
+                            <td>{{ user_details.first_name }} {{ user_details.last_name }}</td>
+                        {% else %}
+                            <td>User Name</td>
+                            <td>{{ user_details.username }}</td>
+                        {% endif %}
+                        </tr>
+                        <tr>
+                            <td>Email</td>
+                            <td>{{ user_details.email }}</td>
+                        </tr>
+                        <tr>
+                            <td>Last Login</td>
+                            <td id="last_login">{{ user_details.last_login }}</td>
+                        </tr>
+                    </table>
+                </div>
             </div>
         </div>
-
-        <div class="panel panel-default gcp-panel">
-            <div class="panel-heading">
-                <h5>
-                    Google Cloud Platform
-                </h5>
+        <div class="col-lg-4 col-md-4 col-sm-12">
+            <div class="panel panel-default gcp-panel">
+                <div class="panel-heading">
+                    <h5>
+                        Google Cloud Platform
+                    </h5>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        Apply for "cloud credits" and your own Google Cloud project by submitting a request <a href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/request-gcp" target="_blank">here</a>.
+                    </p>
+                    <p>Go to the <a href="http://console.cloud.google.com" target="_blank">Google Cloud Console</a>.</p>
+                </div>
             </div>
-            <div class="panel-body">
-                <p>
-                    Apply for "cloud credits" and your own Google Cloud project by submitting a request <a href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/request-gcp" target="_blank">here</a>.
-                </p>
-
-                <p>Go to the <a href="http://console.cloud.google.com" target="_blank">Google Cloud Console</a>.</p>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-12">
+            <div class="panel panel-default account-management-panel">
+                <div class="panel-heading">
+                    <h5>
+                        Account Management
+                    </h5>
+                </div>
+                <div class="panel-body">
+                    {% if local_account %}
+                    <p>
+                        <a href="{% url 'account_change_password' %}" target="_blank">Change Your Password</a>
+                    </p>
+                    {% endif %}
+                    <p>
+                        <a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out">Sign Out <i class="fa fa-sign-out"></i></a>
+                    </p>
+                </div>
             </div>
         </div>
     </div>

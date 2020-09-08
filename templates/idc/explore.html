@@ -37,6 +37,7 @@
 {% block page_header %}
     <div class="pf-heading">
         <div class="container-fluid">
+{# THIS NEEDS TO BE MOVED OR REFORMATTED TO PROPERLY FLOW WITH THE REST OF THE PAGE HEADER #}
 {#            <ol class="breadcrumb">#}
 {#                <li id="previous" style="display:none"><a href="#" onclick="javascript:selectHistoricFilter(-1)">Previous Filter</a></li>#}
 {#                <li id="next" style="display:none"><a href="#" onclick="javascript:selectHistoricFilter(1)">Next Filter</a></li>#}
@@ -44,18 +45,17 @@
 
             <h3 class="pull-left" role="heading" aria-level="1">Explore Image Data</h3>
         {% if DEV_TIER %}
-            <button id="save-cohort-btn" class="btn btn-primary pull-right" data-toggle="modal" data-target="#save-cohort-modal" title="{% if request.user.is_authenticated %}Please select at least one filter.{% else %}Please log in to save this cohort.{% endif %}" disabled="disabled">
+            <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal" data-target="#save-cohort-modal" title="{% if request.user.is_authenticated %}Please select at least one filter.{% else %}Please log in to save this cohort.{% endif %}" disabled="disabled">
                 {% if request.user.is_authenticated %}Save As New Cohort{% else %}Log in to Save{% endif %}
             </button>
         {% else %}
-            <button id="disabled-chort-save-btn" class="btn btn-primary pull-right" data-toggle="modal" title="Cohort saving is currently disabled." disabled="disabled">
+            <button id="disabled-chort-save-btn" class="btn btn-special pull-right" data-toggle="modal" title="Cohort saving is currently disabled." disabled="disabled">
                 {% if request.user.is_authenticated %}Save As New Cohort{% else %}Log in to Save{% endif %}
             </button>
         {% endif %}
         </div>
     </div>
 {% endblock %}
-
 
 {% block content %}
 
@@ -67,9 +67,8 @@
 </script>
 
 
-<div class="container" style="display:block">
+<div class="container-fluid">
     <div class ="row">
-
         <div class="tab-content data-tab-content">
             <input id="number_ajax" type="hidden" value="0">
             <div class="spinner" style="display: none;"><i class="fa fa-spinner fa-spin spin" style="font-family :'FontAwesome' !important"></i></div>
@@ -93,7 +92,7 @@
                                              <i class="fa fa-caret-right" style="font-family :&#39;FontAwesome&#39; !important"></i> <i class="fa fa-caret-down" style="font-family :&#39;FontAwesome&#39; !important"></i>COLLECTION
                                          </a>
                                      </div>
-                                     <div id="Program" class="collapse list-group-item__body filter-panel">
+                                     <div id="Program" class="collapse filter-panel">
                                          <ul id="Program_list" class="search-checkbox-list" style="list-style: none;">
                                              {% for progK, progV in programs.items|dictsort:"0.lower" %}
                                                  {% if progK != "All" and progK != "None" %}
@@ -643,5 +642,6 @@
 
     <script>
         var collection_tooltips = {{ collection_tooltips|safe }};
+        var is_cohort = false;
     </script>
 {% endblock %}

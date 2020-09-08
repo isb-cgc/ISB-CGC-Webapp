@@ -30,5 +30,8 @@ djangorestframework==3.11.0
 # django-axes==5.5.0
 # If you are seeing an error about django-debug-toolbar not being installed,
 # the problem is almost certainly that your developer .env wasn't found
-# django-debug-toolbar should **only** be installed on local develpoer builds, so do
+# django-debug-toolbar should **only** be installed on local developer builds, so do
 # not add it to this file.
+
+# If you are seeing an error about setuptools, the error is likely in your
+# VM's build. Do not correct it with changes to requirements.txt
