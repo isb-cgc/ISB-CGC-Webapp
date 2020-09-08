@@ -38,9 +38,6 @@
     <div class="pf-heading">
         <div class="container-fluid">
             <h3 class="pull-left" role="heading" aria-level="1">Cohort Details: {{ cohort.name }}</h3>
-            <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal" data-target="#download-manifest" title="Download this cohort's manifest.">
-                Download Cohort Manifest
-            </button>
         </div>
     </div>
 {% endblock %}
@@ -56,18 +53,36 @@
 </script>
 
 
-<div class="container" style="display:block">
+<div class="container-fluid">
+    {% if cohort %}
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                        <h3>{{ cohort.name }}</h3>
+                        <h4>Description</h4>
+                        <p>{{ cohort.description }}</p>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                        <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal" data-target="#download-manifest" disabled title="Download this cohort's manifest.">
+                            Download Cohort Manifest
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     <div class ="row">
-
         <div class="tab-content data-tab-content">
             <input id="number_ajax" type="hidden" value="0">
             <div class="spinner" style="display: none;"><i class="fa fa-spinner fa-spin spin" style="font-family :'FontAwesome' !important"></i></div>
             <div id="lh_panel" class="tab-pane data-tab active flex_div" role="tabpanel">
                 <div  class="col-lg-3 col-md-3 main_cols">
                 <div class="filter-panel panel data-tab-content-panel lh">
-                            <a data-toggle="collapse" aria-label="hideit" onclick="hidePanel()" ><i class="show fa fa-angle-double-left" style="font-family :'FontAwesome' !important"></i></a>
-                    </div>
-
+                    <a data-toggle="collapse" aria-label="hideit" onclick="hidePanel()" ><i class="show fa fa-angle-double-left" style="font-family :'FontAwesome' !important"></i></a>
+                </div>
                     <div class="search-scope filter-panel panel data-tab-content-panel">
                         <div class="tab-panel panel-default">
                             <div class="panel-heading clearfix">
@@ -194,7 +209,7 @@
                                 <div id = "search_orig_set" role="tabpanel" class="tab-pane active">
                                     {% for attr in set_attributes.origin_set.All.attributes %}
                                     {% if attr.name != "collection_id" %}
-                                     <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                     <ul class="list-group" role="tablist" data-attr-id="{{ attr.id }}" aria-multiselectable="true">
                                          <li class="list-group-item">
                                             <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                 <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
@@ -242,79 +257,76 @@
 
                                 <div id = "search_derived_set" role="tabpanel" class="tab-pane">
 
-                                <ul class="list-group" role="tablist" aria-multiselectable="true">
-                                      {% for attr_setK, attr_setV in set_attributes.derived_set.items|check_for_order:"derived" %}
+                                    <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                          {% for attr_setK, attr_setV in set_attributes.derived_set.items|check_for_order:"derived" %}
+                                             {% if 'attributes' in attr_setV %}
+                                                <li class="list-group-item">
+                                                       <div id="{{ attr_setV.name }}_heading" class="list-group-item__heading">
+                                                             <a role="button" data-toggle="collapse" href="#{{ attr_setV.name }}" aria-expanded="false" aria-controls="{{ attr_setV.name }}">
+                                                             <i class="fa fa-caret-right" style="font-family :'FontAwesome' !important"></i> <i class="fa fa-caret-down" style="font-family :'FontAwesome' !important"></i>{{ attr_setV.display_name }}
+                                                            </a>
+                                                      </div>
 
-                                         {% if 'attributes' in attr_setV %}
+                                                     <div id="{{ attr_setV.name }}" class="collapse list-group-item__body in">
 
-                                            <li class="list-group-item">
-                                                   <div id="{{ attr_setV.name }}_heading" class="list-group-item__heading">
-                                                         <a role="button" data-toggle="collapse" href="#{{ attr_setV.name }}" aria-expanded="false" aria-controls="{{ attr_setV.name }}">
-                                                         <i class="fa fa-caret-right" style="font-family :'FontAwesome' !important"></i> <i class="fa fa-caret-down" style="font-family :'FontAwesome' !important"></i>{{ attr_setV.display_name }}
-                                                        </a>
-                                                  </div>
+                                                      <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                                      {% for attr in attr_setV.attributes|order_quant:attr_setK %}
+                                                           <li class="list-group-item">
+                                                              <div id="{{ attr.name }}_heading" class="list-group-item__heading">
+                                                    <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
+                                                        <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}
+                                                    </a>
+                                                </div>
+                                                   <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}"  data-plotnm="{{ attr.name|plotnm }}"   class="collapse list-group-item__body collapse"
+                                                     {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"{% endif %}>
+                                                    <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
 
-                                                 <div id="{{ attr_setV.name }}" class="collapse list-group-item__body in">
+                                                        {% for val in attr.values|order_seg:attr_setK %}
+                                                            {% with val.display_value|get_display_val:val.value as display_value %}
+                                                            <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
+                                                                <label>
+                                                                     <input type="checkbox" value="{{ val.value }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
+                                                                        <span class="value">{{ display_value }}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
+                                                                 </label>
+                                                              </li>
+                                                            {% endwith %}
+                                                         {% endfor %}
+                                                        </ul>
+                                                        <p style="display: block;" >
+                                                        {% if attr.values|length > 5 %}
+                                                            <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                            <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                        {% endif %}
+                                                              <!--
+                                                                  <p class="hide-zeros" style="display: block;"><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
+                                                                 <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
+                                                                 -->
+                                                                  </p>
+                                                   </div>
+                                                           </li>
 
-                                                  <ul class="list-group" role="tablist" aria-multiselectable="true">
-                                                  {% for attr in attr_setV.attributes|order_quant:attr_setK %}
-                                                       <li class="list-group-item">
-                                                          <div id="{{ attr.name }}_heading" class="list-group-item__heading">
-                                                <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
-                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}
-                                                </a>
-                                            </div>
-                                               <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}"  data-plotnm="{{ attr.name|plotnm }}"   class="collapse list-group-item__body collapse"
-                                                 {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"{% endif %}>
-                                                <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
-
-                                                    {% for val in attr.values|order_seg:attr_setK %}
-                                                        {% with val.display_value|get_display_val:val.value as display_value %}
-                                                        <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
-                                                            <label>
-                                                                 <input type="checkbox" value="{{ val.value }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
-                                                                    <span class="value">{{ display_value }}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
-                                                             </label>
-                                                          </li>
-                                                        {% endwith %}
-                                                     {% endfor %}
-                                                    </ul>
-                                                    <p style="display: block;" >
-                                                    {% if attr.values|length > 5 %}
-                                                        <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                        <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                    {% endif %}
-                                                          <!--
-                                                              <p class="hide-zeros" style="display: block;"><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
-                                                             <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
-                                                             -->
-                                                              </p>
-                                               </div>
-                                                       </li>
-
-                                                  {% endfor %}
-                                                   </ul>
-                                               </div>
-                                           </li>
-                                         {% endif %}
+                                                      {% endfor %}
+                                                       </ul>
+                                                   </div>
+                                               </li>
+                                             {% endif %}
 
 
-                                     {% endfor %}
-                                </ul>
+                                         {% endfor %}
+                                    </ul>
                                 </div>
 
                                 <div id = "search_related_set" role="tabpanel" class="tab-pane">
                                     <ul class="list-group" role="tablist" aria-multiselectable="true">
                                     <li class="list-group-item">
                                       <div id="tcga_clinical_heading" class="list-group-item__heading">
-                                                         <a role="button" data-toggle="collapse" href="#tcga_clinical" aria-expanded="false" aria-controls="tcga_clinical" class="">
-                                                         <i class="fa fa-caret-right" style="font-family :'FontAwesome' !important"></i> <i class="fa fa-caret-down" style="font-family :'FontAwesome' !important"></i>TCGA
-                                                        </a>
+                                         <a role="button" data-toggle="collapse" href="#tcga_clinical" aria-expanded="false" aria-controls="tcga_clinical" class="">
+                                         <i class="fa fa-caret-right" style="font-family :'FontAwesome' !important"></i> <i class="fa fa-caret-down" style="font-family :'FontAwesome' !important"></i>TCGA
+                                        </a>
                                       </div>
                                       <div id="tcga_clinical" class="collapse list-group-item__body collapse in" aria-expanded="false" style>
-
                                                {% for attr in set_attributes.related_set.All.attributes %}
-                                                <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                                <ul class="list-group" data-attr-id="{{ attr.id }}" role="tablist" aria-multiselectable="true">
                                                    <li class="list-group-item">
                                                  <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                      <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
@@ -602,6 +614,7 @@
                 </div>
             </div>
         </div>
+        </div>
     </div>
 </div>
 
@@ -615,7 +628,8 @@
     <script type="text/javascript" src="{% static 'js/explore.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/cohorts/cohort-details.js' %}"></script>
     <script>
-        var collection_tooltips = {{ collection_tooltips|safe }};
         var cohort_filters = {{ cohort_filters|safe }};
+        var is_cohort = true;
+        var collection_tooltips = {{ collection_tooltips|safe }};
     </script>
 {% endblock %}
