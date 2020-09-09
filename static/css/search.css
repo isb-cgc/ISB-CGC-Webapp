@@ -217,6 +217,13 @@ tr.selected_grey td  a {
     color: #fff;
 }
 
+td.greyout   {
+    background-color: #333; color: #fff;
+
+}
+
+
+
 tbody.set_height {
     max-height: 200px;       /* Just for the demo          */
     //overflow-y: scroll;

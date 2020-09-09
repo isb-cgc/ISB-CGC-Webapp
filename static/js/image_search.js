@@ -860,10 +860,15 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                             var hrefSeriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
                             var seriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
 
-                            newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td><td class="ohif"><a  href="' + fetchUrlSeries + '" target="_blank"><img style="width:100%;max-height:100%;" src="'+STATIC_FILES_URL+'img/ohif.png"></a></td></tr>';
-
-                        } else {
-
+                            newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td>';
+                            if ((modality ==='SEG') || (modality ==='SR')){
+                            newHtml += '<td class="ohif greyout tooltip_ex"><span class="tooltiptext_ex">Viewer is only available for series with an imaging modality</span><a   href="/" onclick="return false;"><img style="width:100%;max-height:100%;" src="' + STATIC_FILES_URL + 'img/ohif.png"></a></td></tr>';
+                            }
+                            else {
+                            newHtml += '<td class="ohif"><a   href="' + fetchUrlSeries + '" target="_blank"><img style="width:100%;max-height:100%;" src="' + STATIC_FILES_URL + 'img/ohif.png"></a></td></tr>';
+                            }
+                        }
+                          else{
                             var studyDescription = curData.StudyDescription;
                             //var studyDate = curData.StudyDate;
                             var rowId = 'study_' + studyId.replace(/\./g, '-');
