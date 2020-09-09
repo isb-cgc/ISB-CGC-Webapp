@@ -879,10 +879,10 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                                 }
                                 newSelStudies[projectId].push(studyId);
 
-                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head selected_grey" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td><td class="ohif"><a  href="' + fetchUrl + '" target="_blank"><img  style="width:100%;max-height:100%;"  src="'+STATIC_FILES_URL+'img/ohif.png"></a></td></tr>'
+                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head selected_grey" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td><td class="ohif"><a  href="' + fetchUrl + '" target="_blank"><img src="'+STATIC_FILES_URL+'img/ohif_sm.png"></a></td></tr>'
 
                             } else {
-                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td><td class="ohif"><a  href="' + fetchUrl + '" target="_blank"><img style="width:100%;max-height:100%;"  src="'+STATIC_FILES_URL+'img/ohif.png"></a></td></tr>'
+                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td><td class="ohif"><a  href="' + fetchUrl + '" target="_blank"><img src="'+STATIC_FILES_URL+'img/ohif_sm.png"></a></td></tr>'
                             }
                         }
                         //var rowId='study_'+projectId+'_'+patientIndex[patientId].toString()+"_"+studyIndex[studyId].toString();
