@@ -294,15 +294,9 @@ def main():
         },
         {
             "full_name": "I-SPY TRIAL",
-            "short_name": "ISPY1",
+            "short_name": "ISPY",
             "public": True
-        },
-        {
-            "full_name": "Non-Small-Cell Lung Carcinoma Radiomics",
-            "short_name": "NSCLC",
-            "public": True
-        },
-        {
+        },{
             "full_name": "Lung Image Database Consortium",
             "short_name": "LIDC",
             "public": True
@@ -316,14 +310,15 @@ def main():
 
         add_data_versions([
             {"name": "GDC Data Release 9", "ver": "r9", "progs":["TCGA"]},
-            {"name": "TCIA Image Data", "ver": "1","progs":["TCGA", "NSCLC", "ISPY1", "QIN", "LIDC"]},
+            {"name": "TCIA Image Data", "ver": "1","progs":["TCGA", "ISPY", "QIN", "LIDC"]},
             {"name": "TCIA Derived Data", "ver": "1", "progs":["LIDC"]},
+            {"name": "IDC Version 1", "ver": "1", "progs":["TCGA", "ISPY", "QIN", "LIDC"]},
         ])
 
-        add_data_source(['dicom_derived_all'], ["TCIA Image Data", "TCIA Derived Data"],["TCGA", "NSCLC", "ISPY1", "QIN", "LIDC"], ["IDC Source Data", "Derived Data"], DataSource.SOLR)
+        add_data_source(['dicom_derived_all'], ["TCIA Image Data", "TCIA Derived Data"],["TCGA", "ISPY", "QIN", "LIDC"], ["IDC Source Data", "Derived Data"], DataSource.SOLR)
         add_data_source(['tcga_clin', 'tcga_bios'], ["GDC Data Release 9"],["TCGA"], ["Clinical, Biospecimen, and Mutation Data"], DataSource.SOLR)
 
-        add_data_source(["idc-dev.metadata.dicom_mvp"], ["TCIA Image Data"],["TCGA", "NSCLC", "ISPY1", "QIN", "LIDC"], ["IDC Source Data"], DataSource.BIGQUERY)
+        add_data_source(["idc-dev.metadata.dicom_mvp"], ["TCIA Image Data"],["TCGA", "ISPY", "QIN", "LIDC"], ["IDC Source Data"], DataSource.BIGQUERY)
         add_data_source(['isb-cgc.TCGA_bioclin_v0.Biospecimen', 'isb-cgc.TCGA_bioclin_v0.Clinical'], ["GDC Data Release 9"],["TCGA"], ["Clinical, Biospecimen, and Mutation Data"], DataSource.BIGQUERY)
         add_data_source(["idc-dev.metadata.segmentations"], ["TCIA Derived Data"],["LIDC"], ["Derived Data"], DataSource.BIGQUERY)
         add_data_source(["idc-dev.metadata.qualitative_measurements"], ["TCIA Derived Data"],["LIDC"], ["Derived Data"], DataSource.BIGQUERY)
@@ -352,28 +347,35 @@ def main():
             collex = {
                 'data': {
                     "collection_id": line[0],
-                    "status": line[1],
-                    "date_updated": line[2],
-                    "access": line[3],
-                    "image_types": line[4],
+                    "name": line[1],
+                    "collections": line[2],
+                    "image_types": line[3],
+                    "supporting_data": line[4],
                     "subject_count": line[5],
-                    "description": re.sub(r' style="[^"]+"', '', (re.sub(r'<div [^>]+>',"<p>", line[6]).replace("</div>","</p>"))),
-                    "location": line[7],
+                    "doi": line[6],
+                    "cancer_type": line[7],
                     "species": line[8],
-                    "supporting_data": line[9],
-                    "cancer_type": line[10],
-                    "doi": line[11],
-                    "tcia_collection_id": line[12],
-                    "nbia_collection_id": line[13]
+                    "location": line[9],
+                    "analysis_artifacts": line[10],
+                    "description": re.sub(r' style="[^"]+"', '', (re.sub(r'<div [^>]+>',"<p>", line[11]).replace("</div>","</p>"))),
+                    "collection_type": line[12],
+                    "tcia_collection_id": line[13],
+                    "date_updated": line[14],
+                    "nbia_collection_id": line[15]
                 },
-                "program": line[-1],
-                "data_versions": [{"ver": "r9", "name": "GDC Data Release 9"},
-                                  {"ver": "1", "name": "TCIA Image Data"}]
+                "data_versions": [{"ver": "1", "name": "TCIA Image Data"}]
             }
             if 'lidc' in line[0]:
                 collex['data_versions'].append({"ver": "1", "name": "TCIA Derived Data"})
+                collex['progs'] = ["LIDC"]
             if 'tcga' in line[0]:
+                collex['data_versions'].append({"ver": "r9", "name": "GDC Data Release 9"})
                 collex['progs'] = ["TCGA"]
+            if 'ispy' in line[0]:
+                collex['progs'] = ["ISPY"]
+            if 'qin' in line[0]:
+                collex['progs'] = ["QIN"]
+
             collection_set.append(collex)
 
         add_collections(collection_set)

@@ -65,6 +65,7 @@ top: 100%; /* At the bottom of the tooltip */
 
 .graph-set {
     display: flex;
+    overflow:visible;
     flex-wrap: wrap;
     justify-content: space-around;
     justify-content: space-between;
@@ -113,6 +114,10 @@ html {
 
 body {
   overflow: hidden;
+}
+
+.checkbox-disabled {
+    disabled:true;
 }
 
 
@@ -177,23 +182,29 @@ body {
 .bar-charts-div {
     display: block;
     width: 100%;
-    height: 200px;
-    overflow: hidden
+    height: 100%;
+    overflow: visible
 }
 
 .bar-charts-div-derived {
     display: block;
     width: 100%;
     height: 100%;
-    overflow: hidden
+    overflow: visible
 }
 
 
 
 .bar-chart {
    display: inline-block;
-    width: 240px;
-    height: 200px
+    position:relative;
+    width: 300px;
+    height: 260px;
+    overflow:visible;
+}
+
+.span-related-overflow {
+    display: none;
 }
 
 /* th, tb,tr,td {
@@ -205,6 +216,13 @@ tr.selected_grey td, i.selected_grey {
 tr.selected_grey td  a {
     color: #fff;
 }
+
+td.greyout   {
+    background-color: #333; color: #fff;
+
+}
+
+
 
 tbody.set_height {
     max-height: 200px;       /* Just for the demo          */
@@ -229,16 +247,16 @@ tr {
     width: 33.33%;
     word-wrap: break-word; }
 #studies_table_head th {
-    width: 25%;
+    width: 20%;
     word-break: break-word; }
 #series_table_head th, #series_table td {
     width: 16.667%;
     word-break: break-word;
     max-width: 16.667%; }
 #studies_table td {
-    width: 25%;
+    width: 20%;
     word-break: break-word;
-    max-width: 25%; }
+    max-width: 20%; }
 
 table {
   table-layout: fixed;
@@ -250,4 +268,8 @@ table {
 
 .search-checkbox-list .list-group-item:last-child {
     border-top: 1px solid #d9d9d9;
+}
+
+svg {
+    overflow:visible;
 }

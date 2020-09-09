@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% comment %}
+
+   Copyright 2019, Institute for Systems Biology
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+{% endcomment %}
+
+{% block content %}
+    <div>
+        <div class="quota-body">
+            <div class="center">
+                <h1 class="center"><span>Daily Imaging Data Quota Exceeded</span></h1>
+                <p>Users are restricted to a quota of {{ quota }} GB per day of medical imaging files. You have reached your daily quota. Your quota will be reset at midnight GMT.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js_file %}
+{% endblock %}

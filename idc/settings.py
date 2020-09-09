@@ -55,6 +55,8 @@ CONNECTION_IS_LOCAL     = (os.environ.get('DATABASE_HOST', '127.0.0.1') == 'loca
 IS_CIRCLE               = (os.environ.get('CI', None) is not None)
 DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') and CONNECTION_IS_LOCAL)
 
+IMG_QUOTA = os.environ.get('IMG_QUOTA', '137')
+
 print("[STATUS] DEBUG mode is {}".format(str(DEBUG)), file=sys.stdout)
 
 RESTRICT_ACCESS          = (os.environ.get('RESTRICT_ACCESS', 'True') == 'True')
@@ -83,9 +85,7 @@ BIGQUERY_DATA_PROJECT_ID       = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLO
 CRON_MODULE             = os.environ.get('CRON_MODULE')
 
 # Log Names
-SERVICE_ACCOUNT_LOG_NAME      = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev_logging')
 WEBAPP_LOGIN_LOG_NAME         = os.environ.get('WEBAPP_LOGIN_LOG_NAME', 'local_dev_logging')
-GCP_ACTIVITY_LOG_NAME         = os.environ.get('GCP_ACTIVITY_LOG_NAME', 'local_dev_logging')
 
 BASE_URL                = os.environ.get('BASE_URL', 'https://idc-dev.appspot.com')
 BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-idc-dev.appspot.com')
@@ -191,7 +191,6 @@ class BigQueryCohortStorageSettings(object):
 
 def GET_BQ_COHORT_SETTINGS():
     return BigQueryCohortStorageSettings(BIGQUERY_COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
-
 
 USE_CLOUD_STORAGE              = bool(os.environ.get('USE_CLOUD_STORAGE', 'False') == 'True')
 
@@ -312,7 +311,7 @@ INSTALLED_APPS = (
     'cohorts',
     'idc_collections',
     'offline',
-    'adminrestrict',
+    'adminrestrict'
 )
 
 #############################
@@ -404,6 +403,12 @@ LOGGING = {
     },
 }
 
+# Force allauth to only use https
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+# ...but not if this is a local dev build
+if IS_DEV:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+
 ##########################
 #  Start django-allauth  #
 ##########################
@@ -464,14 +469,15 @@ SOCIALACCOUNT_PROVIDERS = \
         }
     }
 
-ACCOUNT_EMAIL_REQUIRED = bool(os.environ.get('ACCOUNT_EMAIL_REQUIRED', 'True') == 'True')
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = bool(os.environ.get('ACCOUNT_USERNAME_REQUIRED', 'False') == 'True')
 ACCOUNT_EMAIL_VERIFICATION = os.environ.get('ACCOUNT_EMAIL_VERIFICATION', 'mandatory').lower()
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Imaging Data Commons] "
+ACCOUNTS_PASSWORD_EXPIRATION = os.environ.get('ACCOUNTS_PASSWORD_EXPIRATION',120) # Max password age in days
+ACCOUNTS_PASSWORD_HISTORY = os.environ.get('ACCOUNTS_PASSWORD_HISTORY', 5) # Max password history kept
+ACCOUNTS_ALLOWANCES = list(set(os.environ.get('ACCOUNTS_ALLOWANCES','').split(',')))
 
-# Force allauth to only use https
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
-# ...but not if this is a local dev build
-if IS_DEV:
-    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 ##########################
 #   End django-allauth   #
 ##########################
@@ -488,6 +494,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'idc.validators.PasswordComplexityValidator',
+        'OPTIONS': {
+            'min_length': 16,
+            'special_char_list': '!@#$%^&*+:;?'
+        }
+    },
+    {
+        'NAME': 'idc.validators.PasswordReuseValidator'
     }
 ]
 
@@ -532,8 +548,10 @@ SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS
 #   Start django-finalware   #
 ##############################
 #
-# This should only be done on a local system which is running against its own VM. Deployed systems will already have
-# a site superuser so this would simply overwrite that user. Don't enable this in production!
+# This should only be done on a local system which is running against its own VM, or during CircleCI testing.
+# Deployed systems will already have a site superuser so this would simply overwrite that user.
+# NEVER ENABLE this in production!
+#
 if (IS_DEV and CONNECTION_IS_LOCAL) or IS_CIRCLE:
     INSTALLED_APPS += (
         'finalware',)
@@ -541,6 +559,7 @@ if (IS_DEV and CONNECTION_IS_LOCAL) or IS_CIRCLE:
     SITE_SUPERUSER_USERNAME = os.environ.get('SUPERUSER_USERNAME', '')
     SITE_SUPERUSER_EMAIL = ''
     SITE_SUPERUSER_PASSWORD = os.environ.get('SUPERUSER_PASSWORD')
+#
 ############################
 #   End django-finalware   #
 ############################
@@ -567,7 +586,7 @@ SITE_GOOGLE_ANALYTICS_TRACKING_ID = os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKI
 MAX_FILE_LIST_REQUEST = 65000
 MAX_BQ_RECORD_RESULT = int(os.environ.get('MAX_BQ_RECORD_RESULT', '1000'))
 
-# Rough max file size to allow for eg. barcode list upload, to revent triggering RequestDataTooBig
+# Rough max file size to allow for eg. barcode list upload, to prevent triggering RequestDataTooBig
 FILE_SIZE_UPLOAD_MAX = 1950000
 
 #################################
@@ -585,7 +604,7 @@ SOLR_CERT           = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCA
 DEFAULT_FETCH_COUNT = os.environ.get('DEFAULT_FETCH_COUNT', 10)
 
 
-# Explicitly check for known items
+# Explicitly check for known problems in descrpitions and names provided by users
 BLACKLIST_RE = r'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
 
 if DEBUG and DEBUG_TOOLBAR:
@@ -607,11 +626,15 @@ if DEBUG and DEBUG_TOOLBAR:
     ]
     SHOW_TOOLBAR_CALLBACK = True
     INTERNAL_IPS = (os.environ.get('INTERNAL_IP', ''),)
-#OHIF_SETTINGS
 
-APPEND_SLASH = False
+##################
+# OHIF_SETTINGS
+##################
+#
 # default is to add trailing '/' to urls ie /callback becomes /callback/. Ohif does not like /callback/ !
+APPEND_SLASH = False
 
 DICOM_STORE_PATH=os.environ.get('DICOM_STORE_PATH','')
 
+# Log the version of our app
 print("[STATUS] Application Version is {}".format(APP_VERSION))

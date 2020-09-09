@@ -54,6 +54,7 @@ simple_number_sort = [
 # If an attribute has a specific order, list it here; these should be the *values* not the display strings
 VALUE_SPECIFIC_ORDERS = {
     'derived':['dicom_derived_all:segmentation','dicom_derived_all:qualitative','dicom_derived_all:quantitative'],
+    #'dicom_derived_all:quantitative':
 
     'bmi': ['underweight', 'normal weight', 'overweight', 'obese', 'None', ],
     'hpv_status': ['Positive', 'Negative', 'None', ],
@@ -106,6 +107,37 @@ def quick_js_bracket_replace(matchobj):
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+@register.filter
+def plotnm(item):
+    plotnmDic={'Glycolysis_Within_First_Quarter_of_Intensity_Range': 'Glycolysis <br>(1st Q. Int. Range)', 'Glycolysis_Within_Second_Quarter_of_Intensity_Range':'Glycolysis (2nd Q. Int. Range)', 'Glycolysis_Within_Third_Quarter_of_Intensity_Range':'Glycolysis (3rd Q. Int. Range)','Glycolysis_Within_Fourth_Quarter_of_Intensity_Range':'Glycolysis (4th Q. Int. Range)', 'Percent_Within_First_Quarter_of_Intensity_Range':'% in 1st Q. Int. Range','Percent_Within_Second_Quarter_of_Intensity_Range':'% in 2nd Q. Int. Range','Percent_Within_Third_Quarter_of_Intensity_Range':'% in 3rd Q. Int. Range', 'Percent_Within_Fourth_Quarter_of_Intensity_Range':'% in 4th Q. Int. Range'}
+    if item in plotnmDic:
+        return plotnmDic[item]
+    else:
+        return item
+
+
+# these attributes are not returned in order right now
+@register.filter
+def order_seg(items,attr):
+    #return items
+    if (attr =='dicom_derived_all:segmentation'):
+        return sorted(items, key=lambda k: str(k['value']) if (k['display_value'] is None) else str(k['display_value']) )
+    else:
+        return items
+
+@register.filter
+def order_quant(items, attr):
+    item_order=['Diameter','Glycolysis_Within_First_Quarter_of_Intensity_Range','Glycolysis_Within_Second_Quarter_of_Intensity_Range','Glycolysis_Within_Third_Quarter_of_Intensity_Range','Glycolysis_Within_Fourth_Quarter_of_Intensity_Range', 'Percent_Within_First_Quarter_of_Intensity_Range', 'Percent_Within_Second_Quarter_of_Intensity_Range','Percent_Within_Third_Quarter_of_Intensity_Range', 'Percent_Within_Fourth_Quarter_of_Intensity_Range', 'SUVbw', 'Standardized_Added_Metabolic_Activity', 'Standardized_Added_Metabolic_Activity_Background','Surface_area_of_mesh', 'Total_Lesion_Glycolysis', 'Volume']
+    if (attr == 'dicom_derived_all:segmentation') or (attr == 'dicom_derived_all:qualitative'):
+        return sorted(items, key=lambda k: k['name'])
+    else:
+        sort_order = []
+        for ordinal in item_order:
+            for item in items:
+                if item['name'] == ordinal:
+                    sort_order.append(item)
+        return(sort_order)
 
 @register.filter
 def check_for_order(items, attr):

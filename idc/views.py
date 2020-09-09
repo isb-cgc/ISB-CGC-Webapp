@@ -32,9 +32,9 @@ from django.contrib import messages
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
 from idc_collections.models import Program, Attribute_Display_Values, DataSource, DataVersion, Collection, DataSetType
+from idc_collections.collex_metadata_utils import get_collex_metadata
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
-from .metadata_utils import get_collex_metadata
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
@@ -45,7 +45,36 @@ WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 # The site's homepage
 @never_cache
 def landing_page(request):
-    return render(request, 'idc/landing.html', {'request': request, })
+    collex = Collection.objects.filter(active=True, subject_count__gt=6).values()
+
+    sapien_counts = {}
+
+    changes = {
+        'Renal': 'Kidney',
+        'Head-Neck': 'Head and Neck',
+        'Colon': 'Colorectal',
+        'Rectum': 'Colorectal'
+    }
+
+    for collection in collex:
+        loc = collection['location']
+        if collection['location'] in changes:
+            loc = changes[collection['location']]
+        if loc not in sapien_counts:
+            sapien_counts[loc] = 0
+        sapien_counts[loc] += collection['subject_count']
+
+    ex_tooltips = {
+        '1.3.6.1.4.1.14519.5.2.1.6279.6001.224985459390356936417021464571': '<p>Patient ID: LIDC-IDRI-0834</p><p>Modality: CT</p>',
+        '1.3.6.1.4.1.14519.5.2.1.1706.4001.149500105036523046215258942545': '<p>Patient ID: TCGA-02-0006</p><p>Modality: MR</p>',
+        '1.3.6.1.4.1.14519.5.2.1.2744.7002.950936925946327395356711739684': '<p>Patient ID: QIN-HEADNECK-01-0228</p><p>Modality: PET</p>'
+    }
+
+    return render(request, 'idc/landing.html', {
+        'request': request,
+        'case_counts': [{'site': x, 'cases':sapien_counts[x], 'fileCount':0 } for x in sapien_counts.keys()],
+        'example_tooltips': ex_tooltips
+    })
 
 # Displays the privacy policy
 @never_cache
@@ -151,6 +180,10 @@ def health_check(request, match):
 def help_page(request):
     return render(request, 'idc/help.html',{'request': request})
 
+def quota_page(request):
+    return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
+
+
 # Data exploration and cohort creation page
 @login_required
 def explore_data_page(request):
@@ -218,7 +251,7 @@ def explore_data_page(request):
 
         start = time.time()
         source_metadata = get_collex_metadata(
-            filters, fields, record_limit=1000, counts_only=counts_only, with_ancillary = with_related,
+            filters, fields, record_limit=2000, counts_only=counts_only, with_ancillary = with_related,
             collapse_on = collapse_on, order_docs = order_docs, sources = sources, versions = versions
         )
         stop = time.time()
@@ -371,6 +404,7 @@ def explore_data_page(request):
         context['order']={}
         context['order']['derived_set']=['dicom_derived_all:segmentation','dicom_derived_all:qualitative','dicom_derived_all:quantitative']
         return render(request, 'idc/explore.html', context)
+
 
 # @login_required
 # def ohif_test_page(request):
