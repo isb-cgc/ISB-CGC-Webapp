@@ -258,16 +258,16 @@ tr {
     word-break: break-word;
     max-width: 20%; }
 
-#studies_table td.ohif {
+#series_table td.ohif, #studies_table td.ohif {
   vertical-align: middle;
   padding: 0 8px 0 8px;
 }
 
-#studies_table td.ohif img {
+#series_table td.ohif img, #studies_table td.ohif img {
   filter: brightness(0%);
 }
 
-#studies_table tr.selected_grey td.ohif img {
+#series_table tr.selected_grey td.ohif img, #studies_table tr.selected_grey td.ohif img {
   filter: brightness(100%);
 }
 

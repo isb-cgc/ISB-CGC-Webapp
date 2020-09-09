@@ -153,9 +153,17 @@ def user_detail(request, user_id):
 
 @receiver(user_login_failed)
 def user_login_failed_callback(sender, credentials, **kwargs):
-    logger.warning('[WEBAPP LOGIN] Login FAILED for: {credentials}'.format(
-        credentials=credentials
-    ))
+    try:
+        # Write log entry
+        st_logger = StackDriverLogger.build_from_django_settings()
+        log_name = WEBAPP_LOGIN_LOG_NAME
+        st_logger.write_text_log_entry(
+            log_name,
+            '[WEBAPP LOGIN] Login FAILED for: {credentials}'.format(credentials=credentials)
+        )
+
+    except Exception as e:
+        logger.exception(e)
 
 # Extended login view so we can track user logins, redirects to data exploration page
 def extended_login_view(request):
