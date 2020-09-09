@@ -673,4 +673,4 @@ if DEBUG and DEBUG_TOOLBAR:
 ##########################
 # OAUTH PLATFORM         #
 ##########################
-IDP        = os.environ.get('IDP', 'iTrust')
+IDP        = os.environ.get('IDP', 'shibboleth')
