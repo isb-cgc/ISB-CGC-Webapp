@@ -3836,7 +3836,7 @@ html {
   background: none;
 }
 
-#save-cohort-btn {
+#save-cohort-btn, #download-manifest {
   margin-top: 15px;
 }
 
