@@ -390,12 +390,12 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             if (showMore) {
                 $('.' + id).parent().find('.more-graphs').hide();
                 $('.' + id).parent().find('.less-graphs').show();
-                $('.' + id).find('.span-related-overflow').show();
+                $('.' + id).find('.chart-overflow').removeClass('hide-chart');
             }
             else {
                 $('.' + id).parent().find('.more-graphs').show();
                 $('.' + id).parent().find('.less-graphs').hide();
-                $('.' + id).find('.span-related-overflow').hide();
+                $('.' + id).find('.chart-overflow').addClass('hide-chart')
             }
 
         }
@@ -861,8 +861,8 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                             var seriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
 
                             newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td>';
-                            if ((modality ==='SEG') || (modality ==='SR')){
-                            newHtml += '<td class="ohif greyout tooltip_ex"><span class="tooltiptext_ex">Viewer is only available for series with an imaging modality</span><a   href="/" onclick="return false;"><img style="width:100%;max-height:100%;" src="' + STATIC_FILES_URL + 'img/ohif.png"></a></td></tr>';
+                            if ((modality ==='SEG') || (modality ==='RTSTRUCT')){
+                            newHtml += '<td class="ohif greyout tooltip_ex"><span class="tooltiptext_ex">Please open at the study level to see this series</span><a   href="/" onclick="return false;"><img style="width:100%;max-height:100%;" src="' + STATIC_FILES_URL + 'img/ohif.png"></a></td></tr>';
                             }
                             else {
                             newHtml += '<td class="ohif"><a   href="' + fetchUrlSeries + '" target="_blank"><img style="width:100%;max-height:100%;" src="' + STATIC_FILES_URL + 'img/ohif.png"></a></td></tr>';

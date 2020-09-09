@@ -67,8 +67,9 @@ top: 100%; /* At the bottom of the tooltip */
     display: flex;
     overflow:visible;
     flex-wrap: wrap;
-    justify-content: space-around;
-    justify-content: space-between;
+    #justify-content: space-around;
+    #justify-content: space-between;
+    justify-content: center;
     padding-top: 10px !important;
 }
 
@@ -203,9 +204,13 @@ body {
     overflow:visible;
 }
 
-.span-related-overflow {
+.bar-chart.hide-chart{
     display: none;
 }
+
+
+
+
 
 /* th, tb,tr,td {
     border: 1px solid black; } */

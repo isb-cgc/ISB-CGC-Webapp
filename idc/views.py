@@ -198,6 +198,7 @@ def explore_data_page(request):
         source = req.get('data_source_type', DataSource.SOLR)
         versions = json.loads(req.get('versions', '[]'))
         filters = json.loads(req.get('filters', '{}'))
+
         fields = json.loads(req.get('fields', '[]'))
         order_docs = json.loads(req.get('order_docs', '[]'))
         counts_only = (req.get('counts_only', "False").lower() == "true")
@@ -403,6 +404,7 @@ def explore_data_page(request):
     else:
         context['order']={}
         context['order']['derived_set']=['dicom_derived_all:segmentation','dicom_derived_all:qualitative','dicom_derived_all:quantitative']
+
         return render(request, 'idc/explore.html', context)
 
 

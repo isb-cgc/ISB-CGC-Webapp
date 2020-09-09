@@ -281,9 +281,9 @@
                                                     {% for val in attr.values|order_seg:attr_setK %}
                                                         {% with val.display_value|get_display_val:val.value as display_value %}
                                                         <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
-                                                            <label>
+                                                            <label class="tooltip_ex">
                                                                 {% if display_value == 'None' %}
-                                                                    <span class="tooltip_ex">
+                                                                    <span >
                                                                      <input type="checkbox" disabled="true" class="checkbox-disabled" value="{{ val.value }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
                                                                          <span class="tooltiptext_ex">Filtering on the 'None' attribute is not currently supported within derived data.</span>
                                                                     </span>
@@ -339,6 +339,7 @@
                                                          <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
                                                      </a>
                                                  </div>
+
                                                  <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse" aria-expanded="false"
                                                  {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"{% endif %}>
                                                      <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
@@ -465,21 +466,25 @@
 
                             <div id = "results_related_set" role="tabpanel" class="tab-pane panel">
 
-                                 <div class="panel-body bar-charts-div related-graphs graph-set">
-                                 <span class="span-related">
+                                 <div class="panel-body graph-set related-graphs">
+
                                     {% for attr in set_attributes.related_set.All.attributes %}
 
-                                        <div id="{{ attr.name }}_chart" class="bar-chart">
-                                            <svg width="240" height="200"></svg>
-                                        </div>
-                                        {% if forloop.counter == 3 %}
-                                            </span><span class="span-related-overflow">
+                                        {% if forloop.counter <= 3 %}
+                                           <div id="{{ attr.name }}_chart" class="bar-chart" >
+                                              <svg width="240" height="200"></svg>
+                                           </div>
+
+                                        {% else %}
+                                           <div id="{{ attr.name }}_chart" class="bar-chart chart-overflow hide-chart" >
+                                              <svg width="240" height="200"></svg>
+                                           </div>
+
                                         {% endif %}
+
 
                                     {%  endfor %}
 
-
-                                 </span>
                                 </div>
 
                                 <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="toggleGraphOverFlow('related-graphs',true)">Show More</button></div>
