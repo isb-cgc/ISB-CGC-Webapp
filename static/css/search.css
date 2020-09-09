@@ -65,6 +65,7 @@ top: 100%; /* At the bottom of the tooltip */
 
 .graph-set {
     display: flex;
+    overflow:visible;
     flex-wrap: wrap;
     justify-content: space-around;
     justify-content: space-between;
@@ -113,6 +114,10 @@ html {
 
 body {
   overflow: hidden;
+}
+
+.checkbox-disabled {
+    disabled:true;
 }
 
 
@@ -177,15 +182,15 @@ body {
 .bar-charts-div {
     display: block;
     width: 100%;
-    height: 240px;
-    overflow: hidden
+    height: 100%;
+    overflow: visible
 }
 
 .bar-charts-div-derived {
     display: block;
     width: 100%;
     height: 100%;
-    overflow: hidden
+    overflow: visible
 }
 
 
@@ -193,8 +198,13 @@ body {
 .bar-chart {
    display: inline-block;
     position:relative;
-    width: 240px;
-    height: 240px
+    width: 300px;
+    height: 260px;
+    overflow:visible;
+}
+
+.span-related-overflow {
+    display: none;
 }
 
 /* th, tb,tr,td {
@@ -206,6 +216,13 @@ tr.selected_grey td, i.selected_grey {
 tr.selected_grey td  a {
     color: #fff;
 }
+
+td.greyout   {
+    background-color: #333; color: #fff;
+
+}
+
+
 
 tbody.set_height {
     max-height: 200px;       /* Just for the demo          */
