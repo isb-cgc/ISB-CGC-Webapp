@@ -1,0 +1,556 @@
+{% load custom_tags %}
+
+<div class="container-fluid">
+    <div class ="row">
+        <div class="tab-content data-tab-content">
+            <input id="number_ajax" type="hidden" value="0">
+            <div class="spinner" style="display: none;"><i class="fa fa-spinner fa-spin spin" style="font-family :'FontAwesome' !important"></i></div>
+            <div id="lh_panel" class="tab-pane data-tab active flex_div" role="tabpanel">
+                <div  class="col-lg-3 col-md-3 main_cols">
+                <div class="filter-panel panel data-tab-content-panel lh">
+                    <a data-toggle="collapse" aria-label="hideit" onclick="hidePanel()" ><i class="show fa fa-angle-double-left" style="font-family :'FontAwesome' !important"></i></a>
+                </div>
+                    <div class="search-scope filter-panel panel data-tab-content-panel">
+                        <div class="tab-panel panel-default">
+                            <div class="panel-heading clearfix">
+                                <h4 class="panel-title">Search Scope</h4>
+                            </div>
+                            <div class="tab-content">
+                            <div id="program_set" class="tab-pane active" role="tabpanel">
+                             <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                 <li class="list-group-item">
+                                     <div id="Program_heading" class="list-group-item__heading">
+                                         <a role="button" data-toggle="collapse" href="#Program" aria-expanded="false" aria-controls="Program">
+                                             <i class="fa fa-caret-right" style="font-family: FontAwesome !important"></i> <i class="fa fa-caret-down" style="font-family: FontAwesome !important"></i>COLLECTION
+                                         </a>
+                                     </div>
+                                     <div id="Program" class="collapse filter-panel collection-list">
+                                         <ul id="Program_list" class="search-checkbox-list" style="list-style: none;">
+                                             {% for progK, progV in programs.items|dictsort:"0.lower" %}
+                                                 {% if progK != "All" and progK != "None" %}
+                                                 <li class="list-group-item">
+                                                     {% if progV.projects and progV.projects.items|length == 1 %}
+                                                           {% for proj, projK in progV.projects.items %}
+                                                               <div id="{{ proj }}_heading" class="list-group-item__heading">
+                                                                   <input class="collection_value" type="checkbox" value="{{ proj }}">
+                                                                   <span class="collection_name value">{{ proj|upper }}</span> <span class="float-right case_count count">{{ projK }}</span>
+                                                               </div>
+                                                            <div id="{{ proj }}" class="collapse list-group-item__body">
+                                                           {% endfor %}
+                                                     {% else %}
+                                                     <div id="{{ progK }}_heading" class="list-group-item__heading">
+                                                         <input type="checkbox" value="{{ progK }}">
+                                                         <a role="button" data-toggle="collapse" href="#{{ progK }}" aria-expanded="false" aria-controls="{{ progK }}">
+                                                             <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>
+                                                         </a>
+                                                         <span class="value">
+                                                             {{ progK|upper }}
+                                                         </span>
+                                                         <span class="float-right case_count count">{{ progV.val }}</span>
+                                                     </div>
+                                                     <div id="{{ progK }}" class="collapse list-group-item__body">
+                                                     {% endif %}
+                                                          {% if progV.projects and progV.projects.items|length > 1 %}
+                                                           <ul id="{{ progK }}_proj_list" class="search-checkbox-list" style="list-style: none;">
+                                                           {% for proj, projK in progV.projects.items %}
+                                                              <li class="checkbox {% if foloopr.counter >= 6 %} extra-values{% endif %}">
+                                                                <label>
+                                                                  <input class="collection_value" type="checkbox" value="{{ proj }}">
+                                                                    <span class="collection_name value">{{ proj|upper }} </span> <span class="float-right case_count count plotit">{{ projK }}</span>
+                                                                 </label>
+                                                               </li>
+                                                            {% endfor %}
+                                                            </ul>
+                                                              <div style="display: block;" ></div>
+                                                              <p class="more-checks" style="display: block;"><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                              <p class="less-checks" style="display: none;" class="notDisp"> <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                              <!--
+                                                              <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
+                                                              <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
+                                                              -->
+                                                          {% endif %}
+
+                                                          </div>
+                                                 </li>
+                                                {% endif %}
+                                             {% endfor %}
+
+                                         </ul>
+                                     {%  comment %}
+                                         <!-- <div style="display: block;" > -->
+                                               <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                               <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                         <!-- </div> -->
+                                    {%  endcomment %}
+                                        <!--
+                                        <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
+                                         <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
+                                        -->
+                                     </div>
+
+
+                                 </li>
+                             </ul>
+                         </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if DEV_TIER %}
+                    <div class="tabpanel data-tab-content-panel" style="display:none">
+                        <div class="panel panel-default">
+                            <div class="panel-heading clearfix"><h4 class="panel-title">Data Source</h4></div>
+                            <div class="panel-body">
+                                <select id="data_source_type">
+                                    <option selected value="S"> Solr (Lucene)</option>
+                                    <option value="B"> BigQuery</option>
+                                </select>
+                            </div>
+                         </div>
+                    </div>
+                    {% endif %}
+                    <div class="search-configuration filter-panel search-con" role="tabpanel">
+                        <div class="tabpanel panel-default" role="tabpanel">
+                            <div class="panel-heading clearfix"><h4 class="panel-title">Search Configuration</h4>
+                                <span ><br><input id="hide-zeros" type="checkbox" value="hide-zeros" onchange="hideAtt()"> Hide attributes with 0 cases</span>
+
+                            </div>
+
+                            <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
+                                <li id = "search_orig" role="presentation" class="filter-tab active"><a href="#search_orig_set" role="tab" data-toggle="tab" title="orig" aria-expanded="true">Original</a></li>
+                                {% if set_attributes.derived_set is None %}
+                                     <li id = "search_derived" role="presentation" class="filter-tab disabled"><a href="#search_derived_set" role="tab" data-toggle="tab" title="derived" aria-expanded="false">Derived</a></li>
+                                {% else %}
+                                    <li id = "search_derived" role="presentation" class="filter-tab"><a href="#search_derived_set" role="tab" data-toggle="tab" title="derived" aria-expanded="false">Derived</a></li>
+
+                                {%  endif %}
+
+                                 {% if set_attributes.related_set is None %}
+                                     <li id = "search_related" role="presentation" class="filter-tab disabled"><a href="#search_related_set" role="tab" data-toggle="tab" title="related" aria-expanded="false">Related</a></li>
+                                {% else %}
+                                    <li id = "search_related" role="presentation" class="filter-tab"><a href="#search_related_set" role="tab" data-toggle="tab" title="related" aria-expanded="false">Related</a></li>
+
+                                {%  endif %}
+                            </ul>
+                            <div class="tab-content">
+                                <div id = "search_orig_set" role="tabpanel" class="tab-pane active">
+                                    {% for attr in set_attributes.origin_set.All.attributes %}
+                                    {% if attr.name != "collection_id" %}
+                                     <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                         <li class="list-group-item">
+                                            <div id="{{ attr.name }}_heading" class="list-group-item__heading">
+                                                <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
+                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
+                                                </a>
+                                            </div>
+                                            <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body"
+                                                 {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"{% endif %}>
+                                                {% comment %}
+                                                {% if attr.name == "Modality" %}
+                                                <span style="background-color:lightgrey">Filter for cases with:<br>
+                                                <input type="radio" id="modality_and" name="modality_sel"> any selected Modality<br>
+                                                    <input type="radio" id="modality_and" name="modality_sel"> all selected Modalities
+                                                </span>
+                                                {% endif %}
+                                                {% endcomment %}
+                                                <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
+                                                   {% for val in attr.values %}
+                                                       {% with val.display_value|get_display_val:val.value as display_value %}
+                                                        <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
+                                                           <label>
+                                                               <input type="checkbox" value="{{ val.value }}" data-filter-attr-id="{{ attr.id }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
+                                                                <span class="value">{{ display_value }}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
+                                                            </label>
+                                                        </li>
+                                                       {% endwith %}
+                                                    {% endfor %}
+                                                </ul>
+                                                <p style="display: block;" >
+                                                   {% if attr.values|length > 5 %}
+                                                        <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                        <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                    {% endif %}
+                                                   <!--
+                                                    <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
+                                                    <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
+                                                   -->
+                                                </p>
+                                            </div>
+                                         </li>
+                                     </ul>
+                                    {% endif %}
+                                {%  endfor %}
+                                </div>
+
+                                <div id = "search_derived_set" role="tabpanel" class="tab-pane">
+
+                                <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                      {% for attr_setK, attr_setV in set_attributes.derived_set.items|check_for_order:"derived" %}
+
+                                         {% if 'attributes' in attr_setV %}
+
+                                            <li class="list-group-item">
+                                                   <div id="{{ attr_setV.name }}_heading" class="list-group-item__heading">
+                                                         <a role="button" data-toggle="collapse" href="#{{ attr_setV.name }}" aria-expanded="false" aria-controls="{{ attr_setV.name }}">
+                                                         <i class="fa fa-caret-right" style="font-family :'FontAwesome' !important"></i> <i class="fa fa-caret-down" style="font-family :'FontAwesome' !important"></i>{{ attr_setV.display_name }}
+                                                        </a>
+                                                  </div>
+
+                                                 <div id="{{ attr_setV.name }}" class="collapse list-group-item__body in">
+
+                                                  <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                                  {% for attr in attr_setV.attributes|order_quant:attr_setK %}
+                                                       <li class="list-group-item">
+                                                          <div id="{{ attr.name }}_heading" class="list-group-item__heading">
+                                                <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
+                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}
+                                                </a>
+                                            </div>
+                                               <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}"  data-plotnm="{{ attr.name|plotnm }}"   class="collapse list-group-item__body collapse"
+                                                 {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"{% endif %}>
+                                                <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
+
+                                                    {% for val in attr.values|order_seg:attr_setK %}
+                                                        {% with val.display_value|get_display_val:val.value as display_value %}
+                                                        <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
+                                                            <label>
+                                                                {% if display_value == 'None' %}
+                                                                    <span class="tooltip_ex">
+                                                                     <input type="checkbox" disabled="true" class="checkbox-disabled" value="{{ val.value }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
+                                                                         <span class="tooltiptext_ex">Filtering on the 'None' attribute is not currently supported within derived data.</span>
+                                                                    </span>
+                                                                {% else %}
+                                                                    <input type="checkbox" value="{{ val.value }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
+                                                                {% endif %}
+
+                                                                 <span class="value">{{ display_value }}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
+                                                             </label>
+                                                          </li>
+                                                        {% endwith %}
+                                                     {% endfor %}
+                                                    </ul>
+                                                    <p style="display: block;" >
+                                                    {% if attr.values|length > 5 %}
+                                                        <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                        <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                    {% endif %}
+                                                          <!--
+                                                              <p class="hide-zeros" style="display: block;"><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
+                                                             <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
+                                                             -->
+                                                              </p>
+                                               </div>
+                                                       </li>
+
+                                                  {% endfor %}
+                                                   </ul>
+                                               </div>
+                                           </li>
+                                         {% endif %}
+
+
+                                     {% endfor %}
+                                </ul>
+                                </div>
+
+                                <div id = "search_related_set" role="tabpanel" class="tab-pane">
+                                    <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                    <li class="list-group-item">
+                                      <div id="tcga_clinical_heading" class="list-group-item__heading">
+                                                         <a role="button" data-toggle="collapse" href="#tcga_clinical" aria-expanded="false" aria-controls="tcga_clinical" class="">
+                                                         <i class="fa fa-caret-right" style="font-family :'FontAwesome' !important"></i> <i class="fa fa-caret-down" style="font-family :'FontAwesome' !important"></i>TCGA
+                                                        </a>
+                                      </div>
+                                      <div id="tcga_clinical" class="collapse list-group-item__body collapse in" aria-expanded="false" style>
+
+                                               {% for attr in set_attributes.related_set.All.attributes %}
+                                                <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                                   <li class="list-group-item">
+                                                 <div id="{{ attr.name }}_heading" class="list-group-item__heading">
+                                                     <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
+                                                         <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
+                                                     </a>
+                                                 </div>
+                                                 <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse" aria-expanded="false"
+                                                 {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"{% endif %}>
+                                                     <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
+                                                     {% for val in attr.values %}
+                                                         <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
+                                                             <label>
+                                                                 <input type="checkbox" value="{{ val.value }}">
+                                                                    <span class="value">{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
+                                                             </label>
+                                                          </li>
+                                                     {% endfor %}
+                                                    </ul>
+                                                    <p style="display: block;" >
+                                                    {% if attr.values|length > 5 %}
+                                                        <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                        <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                    {% endif %}
+                                                         <!--
+                                                         <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
+                                                         <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
+                                                         -->
+                                                    </p>
+                                               </div>
+                                            </li>
+                                                </ul>
+                                               {%  endfor %}
+
+                                      </div>
+                                    </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div id="rh_panel" class="col-lg-9 col-md-9 main_cols" >
+               <div id="show_lh" class="filter-panel panel data-tab-content-panel rh hidden">
+                            <a data-toggle="collapse" aria-label="showit" onclick="showPanel()" ><i class="show fa fa-angle-double-right" style="font-family :'FontAwesome' !important"></i></a>
+                    </div>
+
+                <div class="tabpanel data-tab-content-panel">
+                     <div class="panel panel-default">
+                         <div class="panel-heading clearfix"><h4 class="panel-title">Filter Definition</h4>
+                             {% if not cohort_filters %}
+                             <a class="pull-right clear-filters" role="button" id="5-data-clear-filters">Clear All</a>
+                             {% else %}
+                             <a class="pull-right btn btn-secondary" role="button" href={% url 'explore_data' %}>Return to Data Explorer</a>
+                             {% endif %}
+                         </div>
+                         <div class="panel-body">
+                             <div id ="search_def"><span class="placeholder">&nbsp;</span></div>
+                             <div id="search_def_warn" style="display:none">Note: TCGA.* filters only apply to TCGA collections (IN PROGRESS)</div>
+                         </div>
+                    </div>
+                </div>
+                <div class="vert">
+                    <div class="filter-panel panel" role="tabpanel">
+                    <div class="tabpanel panel-default" role="tabpanel">
+                        <div class="panel-heading clearfix"><h4 class="panel-title">Search Results</h4><br>
+
+                            <div style="display:none">
+                            <label>Chart Type:</label>
+                            <select id="plot_type" onchange="updatePlots(this)">
+                                <option  selected value="pie" >Pie</option>
+                                <option value="bar" >Bar</option>
+                            </select>
+                            <label><input id="plot_label" type="checkbox" onchange="updatePlots(this)"> Add labels?</label>
+                            </div>
+                        </div>
+
+                        <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
+                            <li id = "results_orig" role="presentation" class="filter-tab active"><a href="#results_orig_set" role="tab" data-toggle="tab" title="orig" aria-expanded="true">Original</a></li>
+                            {% if set_attributes.derived_set is None %}
+                                 <li id = "results_derived" role="presentation" class="filter-tab disabled"><a href="#results_derived_set" role="tab" data-toggle="tab" title="derived" aria-expanded="false">Derived</a></li>
+                            {% else %}
+                                  <li id = "results_derived" role="presentation" class="filter-tab"><a href="#results_derived_set" role="tab" data-toggle="tab" title="derived" aria-expanded="false">Derived</a></li>
+                            {% endif %}
+                            <li id = "results_related" role="presentation" class="filter-tab"><a href="#results_related_set" role="tab" data-toggle="tab" title="related" aria-expanded="false">Related</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div id = "results_orig_set" role="tabpanel" class="tab-pane active panel">
+                                <div class="panel-body original-graphs graph-set">
+                                     {% for attr in set_attributes.origin_set.All.attributes %}
+                                         {% if attr.name != 'collection_id' %}
+                                         <div id="{{ attr.name  }}_chart" class="bar-chart" >
+                                             <svg width="240" height="200" ></svg>
+                                         </div>
+                                         {% endif %}
+                                    {%  endfor %}
+                                </div>
+                            </div>
+
+                            <div id = "results_derived_set" role="tabpanel" class="tab-pane panel">
+                                <div class="panel-body bar-charts-div-derived derived-graphs">
+                                    {% for attr_setK, attr_setV in set_attributes.derived_set.items|check_for_order:"derived" %}
+                                        {% if 'attributes' in attr_setV %}
+
+                                            <div class="tab-pane">
+                                                <div style="text-align:center" class="panel-heading clearfix"><h3 style="text-align:center" class="panel-title">{{ attr_setV.display_name }}</h3></div>
+
+                                                {% if forloop.counter > 1 %}
+                                                    <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="showGraphs(this)">Show</button></div>
+                                                   <div class="less-graphs" style="display: none; width:100%"><button class="btn btn-link" role="button" onclick="hideGraphs(this)">Hide</button></div>
+
+                                                    <div class="panel-body  graph-set" style="display:none">
+                                                 {% else %}
+                                                    <div class="panel-body  graph-set">
+                                                 {% endif %}
+
+                                                    {% for attr in attr_setV.attributes|order_quant:attr_setK %}
+                                                        <div id="{{ attr.name  }}_chart" class="bar-chart" >
+                                                            <svg width="240" height="200" ></svg>
+                                                        </div>
+
+                                                    {%  endfor %}
+                                                   </div>
+                                            </div>
+                                       {% endif %}
+                                 {% endfor %}
+                                </div>
+                            </div>
+                            <div id = "results_related_set" role="tabpanel" class="tab-pane panel">
+                                 <div class="panel-body bar-charts-div related-graphs graph-set">
+                                 <span class="span-related">
+                                    {% for attr in set_attributes.related_set.All.attributes %}
+                                        <div id="{{ attr.name }}_chart" class="bar-chart">
+                                            <svg width="240" height="200"></svg>
+                                        </div>
+                                        {% if forloop.counter == 3 %}
+                                            </span><span class="span-related-overflow">
+                                        {% endif %}
+                                    {%  endfor %}
+                                 </span>
+                                </div>
+                                <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="toggleGraphOverFlow('related-graphs',true)">Show More</button></div>
+                                <div class="less-graphs" style="display: none; width:100%"><button class="btn btn-link" role="button" onclick="toggleGraphOverFlow('related-graphs',false)">Show Less</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                    <div class="tabpanel data-tab-content-panel table-panel">
+                    <div class="panel panel-default">
+                         <div class="panel-heading clearfix"><h4 class="panel-title">Collections</h4></div>
+                         <div id = "projects_panel" class="panel-body">
+                             <div class="dataTables_info">
+                                 <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">23</span> entries</span>
+                                 <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
+                             </div>
+                         <div>
+                      <div class="dataTables_length files-per-page">
+                        <label>Show</label>
+                        <select class="files-per-page-select" data-fpp="10">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                        <label>entries</label>
+                    </div>
+                   <div class="dataTables_goto_page" data-curpage="1">
+                        <label for="goto-page-no">Page</label>
+                        <input id="goto-page-no-inp" type="number" class="goto-page-number" min="1" max="1">
+                        <div class="goto-page-button dataTables_button">Go</div>
+                    </div>
+                       <div class="dataTables_goto_page" style="width:50%; text-align:center">
+                           <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
+                           <span class="paginate_button_space" ><a class="dataTables_button paginate_button numeric_button current">1</a></span>
+                           <a class="next-page paginate_button dataTables_button" style="float:right">Next</a>
+                       </div>
+                </div>
+                             <table id="proj_table" class="table table-striped">
+                                <thead id="projects_table_head">
+                                    <tr>
+                                        <th class='text_data'>Collection Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'>Total # of Cases<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'># of Cases(this cohort)<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                   <!-- <th>Collection Name </th><th>Total # of Patients</th><th># of Patients(this cohort)</th> -->
+                                    </tr>
+                                </thead>
+                                <tbody id="projects_table" class="set_height">
+                                {% for coll, cnt in collections.items|dictsort:"0.lower" %}
+                                      {% if coll != "All" %}
+                                          <tr id="project_row_{{ coll }}" class="text_head" onclick="(toggleProj(this,'{{ coll }}'))"><td>{{ coll }}</td><td>{{ cnt }}</td><td id="patient_col_{{ coll }}" class="projects_table_num_cohort">{{ cnt }}</td> </tr>
+                                      {% endif %}
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                         </div>
+                     </div>
+                </div>
+                    <div class="tabpanel data-tab-content-panel table-panel">
+                     <div class="panel panel-default">
+                         <div class="panel-heading clearfix"><h4 class="panel-title">Selected Studies</h4></div>
+                         <div class="panel-body">
+
+                         <div class="dataTables_info">
+                    <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">0</span> entries</span>
+                    <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
+                         </div>
+                       <div>
+
+                          <div class="dataTables_length files-per-page">
+                        <label>Show</label>
+                        <select class="files-per-page-select" data-fpp="10">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                        <label>entries</label>
+                    </div>
+
+                              <div class="dataTables_goto_page" data-curpage="1">
+                        <label for="goto-page-no">Page</label>
+                        <input id="goto-page-no-inp" type="number" class="goto-page-number" min="1" max="1">
+                        <div class="goto-page-button dataTables_button">Go</div>
+                    </div>
+                               <div class="dataTables_goto_page" style="width:50%; text-align:center">
+                        <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
+                        <span class="paginate_button_space"><a class="dataTables_button paginate_button numeric_button current">1</a></span>
+                        <a class="next-page paginate_button dataTables_button" style="float:right">Next</a>
+                       </div>
+
+
+                       </div>
+                               <table class="table table-striped" >
+                              <thead id="studies_table_head">
+                             <tr>
+                                 <th class='text_data'>Project Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Case Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='text_data'>Study Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class="text_data">Open Viewer</th>
+                             </tr>
+                              </thead>
+
+                             <tbody  id="studies_table" class="set_height" data-rowpos="">
+
+                              </tbody>
+                          </table >
+                         </div>
+                     </div>
+                </div>
+                    <div class="tabpanel data-tab-content-panel table-panel">
+                     <div class="panel panel-default">
+                         <div class="panel-heading clearfix"><h4 class="panel-title">Selected Series</h4></div>
+                         <div class="panel-body">
+                            <div class="dataTables_info">
+                                <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">0</span> entries</span>
+                                <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
+                            </div>
+                            <div>
+                                <div class="dataTables_length files-per-page">
+                                    <label>Show</label>
+                                    <select class="files-per-page-select" data-fpp="10">
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                    </select>
+                                    <label>entries</label>
+                                </div>
+                                <div class="dataTables_goto_page" data-curpage="1">
+                                    <label for="goto-page-no">Page</label>
+                                    <input id="goto-page-no-inp" type="number" class="goto-page-number" min="1" max="1">
+                                    <div class="goto-page-button dataTables_button">Go</div>
+                                </div>
+                                <div class="dataTables_goto_page" style="width:50%; text-align:center">
+                                    <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
+                                    <span class="paginate_button_space" ><a class="dataTables_button paginate_button numeric_button current">1</a></span>
+                                    <a class="next-page paginate_button dataTables_button" style="float:right">Next</a>
+                               </div>
+                            </div>
+                             <table class = "table table-striped">
+                                <thead id="series_table_head">
+                                    <tr>
+                                        <th>Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Series Number<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Modality<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Body Part Examined<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Series Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class="text_data">Open Viewer</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="series_table" class="set_height"></tbody>
+                             </table>
+                         </div>
+                     </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
