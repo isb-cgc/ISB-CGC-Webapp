@@ -92,7 +92,7 @@
                                              <i class="fa fa-caret-right" style="font-family :&#39;FontAwesome&#39; !important"></i> <i class="fa fa-caret-down" style="font-family :&#39;FontAwesome&#39; !important"></i>COLLECTION
                                          </a>
                                      </div>
-                                     <div id="Program" class="collapse filter-panel collection-list list-group-item__body">
+                                     <div id="Program" class="collapse filter-panel collection-list">
                                          <ul id="Program_list" class="search-checkbox-list" style="list-style: none;">
                                              {% for progK, progV in programs.items|dictsort:"0.lower" %}
                                                  {% if progK != "All" and progK != "None" %}
@@ -482,8 +482,8 @@
                                  </span>
                                 </div>
 
-                                <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="showMoreGraphs('related-graphs','800px')">Show More</button></div>
-                                <div class="less-graphs" style="display: none; width:100%"><button class="btn btn-link" role="button" onclick="showLessGraphs('related-graphs','200px')">Show Less</button></div>
+                                <div  class="more-graphs" style="display: block;width:100%"><button class="btn btn-link" role="button" onclick="toggleGraphOverFlow('related-graphs',true)">Show More</button></div>
+                                <div class="less-graphs" style="display: none; width:100%"><button class="btn btn-link" role="button" onclick="toggleGraphOverFlow('related-graphs',false)">Show Less</button></div>
 
 
 

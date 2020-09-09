@@ -386,6 +386,20 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             $(selectElem).parent().hide();
         }
 
+        window.toggleGraphOverFlow = function(id, showMore){
+            if (showMore) {
+                $('.' + id).parent().find('.more-graphs').hide();
+                $('.' + id).parent().find('.less-graphs').show();
+                $('.' + id).find('.span-related-overflow').show();
+            }
+            else {
+                $('.' + id).parent().find('.more-graphs').show();
+                $('.' + id).parent().find('.less-graphs').hide();
+                $('.' + id).find('.span-related-overflow').hide();
+            }
+
+        }
+
         window.showMoreGraphs = function (graphClass, height) {
             $('.'+graphClass).parent().find('.more-graphs').hide();
             $('.'+graphClass).parent().find('.less-graphs').show();
