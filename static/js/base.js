@@ -190,7 +190,7 @@ require([
         });
     });
 
-    if(!warningSeen) {
+    if(!warningSeen && showWarning) {
         $('#gov_warning').modal('show');
     }
 
@@ -208,7 +208,6 @@ define(['jquery', 'utils'], function($, utils) {
 
     return {
         blacklist: /<script>|<\/script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|<iframe>|<\/iframe>/ig,
-        barcode_file_whitelist: /[^A-Za-z0-9\-,\t_\."'\s\(\)\/;:]/g,
         // From http://www.regular-expressions.info/email.html
         email: /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/,
         showJsMessage: utils.showJsMessage,
@@ -216,53 +215,6 @@ define(['jquery', 'utils'], function($, utils) {
         // at document load time
         setReloadMsg: function(type,text) {
             sessionStorage.setItem("reloadMsg",JSON.stringify({type: type, text: text}));
-        },
-        gdcSchema: {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "project": {
-                        "type": "object",
-                        "properties": {
-                            "project_id": {"type":"string"}
-                        },
-                        "required": ["project_id"]
-                    },
-                    "demographic": {
-                        "type": "object",
-                        "properties": {
-                            "gender": {"enum": [
-                                "female",
-                                "male",
-                                "unknown",
-                                "unspecified",
-                                "not reported"
-                            ]},
-                            "ethnicity": {"enum": [
-                                "hispanic or latino",
-                                "not hispanic or latino",
-                                "Unknown",
-                                "not reported",
-                                "not allowed to collect"
-                            ]},
-                            "race": {"enum": [
-                                "white",
-                                "american indian or alaska native",
-                                "black or african american",
-                                "asian",
-                                "native hawaiian or other pacific islander",
-                                "other",
-                                "Unknown",
-                                "not reported",
-                                "not allowed to collect"
-                            ]}
-                        }
-                    },
-                    "submitter_id": {"type":"string"}
-                },
-                "required": ["project","submitter_id"]
-            }
         },
         blockResubmit: utils.blockResubmit
     };
