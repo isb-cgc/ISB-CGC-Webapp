@@ -258,6 +258,19 @@ tr {
     word-break: break-word;
     max-width: 20%; }
 
+#studies_table td.ohif {
+  vertical-align: middle;
+  padding: 0 8px 0 8px;
+}
+
+#studies_table td.ohif img {
+  filter: brightness(0%);
+}
+
+#studies_table tr.selected_grey td.ohif img {
+  filter: brightness(100%);
+}
+
 table {
   table-layout: fixed;
   width: 100%; }
