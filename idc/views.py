@@ -35,6 +35,8 @@ from idc_collections.models import Program, Attribute_Display_Values, DataSource
 from idc_collections.collex_metadata_utils import get_collex_metadata
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
+from django.contrib.auth.signals import user_login_failed
+from django.dispatch import receiver
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
@@ -149,6 +151,19 @@ def user_detail(request, user_id):
     else:
         return render(request, '403.html')
 
+@receiver(user_login_failed)
+def user_login_failed_callback(sender, credentials, **kwargs):
+    try:
+        # Write log entry
+        st_logger = StackDriverLogger.build_from_django_settings()
+        log_name = WEBAPP_LOGIN_LOG_NAME
+        st_logger.write_text_log_entry(
+            log_name,
+            '[WEBAPP LOGIN] Login FAILED for: {credentials}'.format(credentials=credentials)
+        )
+
+    except Exception as e:
+        logger.exception(e)
 
 # Extended login view so we can track user logins, redirects to data exploration page
 def extended_login_view(request):

@@ -130,8 +130,14 @@
 #human-body-root #Breast {
   height: 40px;
   width: 40px;
-  top: 137px;
+  top: 127px;
   left: 207px;
+}
+#human-body-root #Chest {
+  height: 40px;
+  width: 100px;
+  top: 110px;
+  left: 156px;
 }
 #human-body-root #Kidney {
   height: 21px;
