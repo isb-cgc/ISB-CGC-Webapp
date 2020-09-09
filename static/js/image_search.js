@@ -862,10 +862,10 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
                             newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td>';
                             if ((modality ==='SEG') || (modality ==='SR')){
-                            newHtml += '<td class="ohif greyout tooltip_ex"><span class="tooltiptext_ex">Viewer is only available for series with an imaging modality</span><a   href="/" onclick="return false;"><img style="width:100%;max-height:100%;" src="' + STATIC_FILES_URL + 'img/ohif_sm.png"></a></td></tr>';
+                            newHtml += '<td class="ohif greyout tooltip_ex"><span class="tooltiptext_ex">Viewer is only available for series with an imaging modality</span><a   href="/" onclick="return false;"><img src="' + STATIC_FILES_URL + 'img/ohif_sm.png"></a></td></tr>';
                             }
                             else {
-                            newHtml += '<td class="ohif"><a   href="' + fetchUrlSeries + '" target="_blank"><img style="width:100%;max-height:100%;" src="' + STATIC_FILES_URL + 'img/ohif_sm.png"></a></td></tr>';
+                            newHtml += '<td class="ohif"><a   href="' + fetchUrlSeries + '" target="_blank"><img src="' + STATIC_FILES_URL + 'img/ohif_sm.png"></a></td></tr>';
                             }
                         }
                           else{
@@ -879,10 +879,10 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                                 }
                                 newSelStudies[projectId].push(studyId);
 
-                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head selected_grey" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td><td class="ohif"><a  href="' + fetchUrl + '" target="_blank"><img  style="width:100%;max-height:100%;"  src="'+STATIC_FILES_URL+'img/ohif.png"></a></td></tr>'
+                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head selected_grey" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td><td class="ohif"><a  href="' + fetchUrl + '" target="_blank"><img src="'+STATIC_FILES_URL+'img/ohif_sm.png"></a></td></tr>'
 
                             } else {
-                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td><td class="ohif"><a  href="' + fetchUrl + '" target="_blank"><img style="width:100%;max-height:100%;"  src="'+STATIC_FILES_URL+'img/ohif.png"></a></td></tr>'
+                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td><td class="ohif"><a  href="' + fetchUrl + '" target="_blank"><img src="'+STATIC_FILES_URL+'img/ohif_sm.png"></a></td></tr>'
                             }
                         }
                         //var rowId='study_'+projectId+'_'+patientIndex[patientId].toString()+"_"+studyIndex[studyId].toString();
