@@ -1193,11 +1193,25 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                         reformDic[listId][item]=new Object();
                         reformDic[listId][item]['count'] = progDic[item]['val'];
                     }
-                    else if (('projects' in progDic[item]) && Object.keys(progDic[item]['projects']).length == 1 ){
+
+                    else if (item === 'tcga'){
+                        reformDic[listId][item]=new Object();
+                        reformDic[listId][item]['count'] = progDic[item]['val'];
+                        reformDic[item] =  new Object();
+                        for (project in progDic[item]['projects']){
+                            reformDic[item][project]=new Object();
+                            reformDic[item][project]['count']=progDic[item]['projects'][project];
+                        }
+
+                    }
+
+                    //else if (('projects' in progDic[item]) && Object.keys(progDic[item]['projects']).length == 1 ){
+                     else{
                         nm = Object.keys(progDic[item]['projects'])[0];
                         reformDic[listId][nm]=new Object();
                         reformDic[listId][nm]['count'] = progDic[item]['val'];
                     }
+                     /*
 
                     else {
                         reformDic[listId][item]=new Object();
@@ -1208,6 +1222,8 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                             reformDic[item][project]['count']=progDic[item]['projects'][project];
                         }
                     }
+
+                      */
                 }
             }
             updateFilterSelections('program_set', reformDic);
@@ -1880,6 +1896,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             var lastCat='';
             numCheckBoxes=0;
             for (var i=0;i<filterCats.length;i++){
+                var filtnm='';
                 ind = filterCats.length-1-i;
                 filterCat=filterCats[ind];
                 hasCheckBox=false;
@@ -1890,13 +1907,14 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                      numCheckBoxes++;
                 }
                 else {
-                    filtnm=$(filterCat).children('.list-group-item__body')[0].id;
+                    filtnm=$(filterCat).children('.list-group-item__body, .collection-list')[0].id;
                     if  ($(filterCat).children('.list-group-item__heading').children('input:checkbox').length>0) {
                        hasCheckBox = true;
                        numCheckBoxes++;
                     }
                    checkBox = $(filterCat).children('.list-group-item__heading').children('input:checkbox')[0];
                 }
+
 
                 if ( hasCheckBox && (ind ===1) && !(allChecked) && !(noneChecked)){
                     checkBox.indeterminate = true;

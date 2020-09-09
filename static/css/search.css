@@ -116,6 +116,10 @@ body {
   overflow: hidden;
 }
 
+.checkbox-disabled {
+    disabled:true;
+}
+
 
 .tooltip_ex .tooltiptext_ex {
     visibility: hidden;
