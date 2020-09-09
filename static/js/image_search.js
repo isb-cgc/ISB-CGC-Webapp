@@ -846,7 +846,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                             var hrefSeriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
                             var seriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
 
-                            newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td><td class="ohif"><a  href="' + fetchUrlSeries + '" target="_blank"><img style="width:100%;max-height:100%;" src="'+STATIC_FILES_URL+'img/ohif.png"></a></td></tr>';
+                            newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td><td class="ohif"><a  href="' + fetchUrlSeries + '" target="_blank"><img src="'+STATIC_FILES_URL+'img/ohif_sm.png"></a></td></tr>';
 
                         } else {
 
@@ -860,10 +860,10 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                                 }
                                 newSelStudies[projectId].push(studyId);
 
-                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head selected_grey" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td><td class="ohif"><a  href="' + fetchUrl + '" target="_blank"><img  style="width:100%;max-height:100%;"  src="'+STATIC_FILES_URL+'img/ohif.png"></a></td></tr>'
+                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head selected_grey" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td><td class="ohif"><a  href="' + fetchUrl + '" target="_blank"><img src="'+STATIC_FILES_URL+'img/ohif_sm.png"></a></td></tr>'
 
                             } else {
-                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td><td class="ohif"><a  href="' + fetchUrl + '" target="_blank"><img style="width:100%;max-height:100%;"  src="'+STATIC_FILES_URL+'img/ohif.png"></a></td></tr>'
+                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))"><td class="col1">' + projectId + '</td><td class="col1">' + patientId + '</td><td class="col2 tooltip_ex">' + hrefTxt + '</td><td class="col1">' + studyDescription + '</td><td class="ohif"><a  href="' + fetchUrl + '" target="_blank"><img src="'+STATIC_FILES_URL+'img/ohif_sm.png"></a></td></tr>'
                             }
                         }
                         //var rowId='study_'+projectId+'_'+patientIndex[patientId].toString()+"_"+studyIndex[studyId].toString();
@@ -987,18 +987,14 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 atEnd = true;
             }
 
-
             if ((curIndex > -1) && (lastInd > -1)) {
                 var totalHeight = displayedRows[lastInd].offsetTop + displayedRows[lastInd].offsetHeight - displayedRows[curIndex].offsetTop;
                 tableElem.css('max-height', totalHeight.toString() + 'px');
 
             }
-
             if (mvScroll) {
-                    tableElem[0].scrollTop = rowPos[curIndex];
+                tableElem[0].scrollTop = rowPos[curIndex];
             }
-
-
             tableElemGm = tableElem.parent().parent();
             tableElemGm.find('.showing')[0].innerHTML = (curIndex + 1).toString() + " to " + (lastInd + 1).toString();
             tableElemGm.find('.goto-page-number')[0].max = numPages;
@@ -1920,8 +1916,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                      filtnm=checkBox.value;
                      hasCheckBox = true;
                      numCheckBoxes++;
-                }
-                else {
+                } else {
                     filtnm=$(filterCat).children('.list-group-item__body')[0].id;
                     if  ($(filterCat).children('.list-group-item__heading').children('input:checkbox').length>0) {
                        hasCheckBox = true;
@@ -2322,6 +2317,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
             $('input[type="checkbox"]').prop("disabled","disabled");
             $('input#hide-zeros').prop("disabled","");
+            $('#hide-zeros').triggerHandler('click');
         }
     });
 });
