@@ -6,38 +6,59 @@
 
 {% block head_title %}{% trans "Sign In" %}{% endblock %}
 
-{% block page_header %}
-<div class="container">
-    <h1 class="page-header">{% trans "Sign In" %}</h1>
-</div>
-{% endblock %}
+{% block page_header %}{% endblock %}
+
+{% block page_name %}sign-in{% endblock %}
 
 {% block content %}
 
-    <div class="row">
-        <div class="col-lg-12">
+    <div class="col-lg-12">
+        <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2"></div>
+        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-8">
+        <form class="login" method="POST" action="{% url 'account_login' %}">
             <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3>Log in with Google</h3>
-                    <a href="{% provider_login_url 'google' %}" title="Google Sign In"><img src="{% static 'img/btn_google_signin_dark_normal_web.png' %}" /></a>
-                </div>
-                <div class="panel-heading"><h4>- OR -</h4></div>
                 <div class="panel-body">
-                    <h3>Log in with IDC</h3>
-                    <h4><i>{% blocktrans %}If you have not created an account yet, then please <a href="{{ signup_url }}"><b>sign up</b></a> first.{% endblocktrans %}</i></h4>
-                    <form class="login" method="POST" action="{% url 'account_login' %}">
+                    <a class="btn btn-primary google-sign-in" href="{% provider_login_url 'google' %}">
+                        <img class="icon-small" alt="G" src="{%  static 'img/google_icon_sm.png' %}" />
+                        <span>Sign in with Google</span>
+                    </a>
+                </div>
+                <div class="panel-body panel-or">
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5"><hr /></div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 text-center"><h4> OR </h4></div>
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5"><hr /></div>
+                </div>
+                <div class="panel-body idc-login">
+                    <h3><img class="icon-small" alt="IDC" src="{%  static 'img/idclogo.png' %}" /> Imaging Data Commons</h3>
                       {% csrf_token %}
                       {{ form.as_p }}
                       {% if redirect_field_value %}
                       <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
                       {% endif %}
                       <button class="primaryAction btn btn-primary" type="submit">{% trans "Sign In" %}</button>
-                      <a class="btn btn-special" href="{{ signup_url }}">{% trans "Sign Up" %}</a>
-                      <a class="btn btn-default secondaryAction" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a>
-                    </form>
                 </div>
             </div>
+        <div class="panel panel-default">
+            <div class="panel-body sign-up">
+                <p>
+                Forgot your password?
+                </p>
+                <p><a class="btn btn-default secondaryAction" href="{% url 'account_reset_password' %}">{% trans "Password Reset" %}</a></p>
+            </div>
         </div>
+        <div class="panel panel-default">
+            <div class="panel-body sign-up">
+                <p>
+                Don't have an account with IDC?
+                </p>
+                <p>
+                    <a class="btn btn-special" href="{{ signup_url }}">{% trans "Sign Up" %}</a>
+                </p>
+            </div>
+        </div>
+        </form>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2"></div>
     </div>
 
 {% endblock %}

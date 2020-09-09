@@ -72,9 +72,7 @@ BIGQUERY_DATA_PROJECT_ID  = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PR
 CRON_MODULE             = os.environ.get('CRON_MODULE')
 
 # Log Names
-SERVICE_ACCOUNT_LOG_NAME = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev_logging')
 WEBAPP_LOGIN_LOG_NAME = os.environ.get('WEBAPP_LOGIN_LOG_NAME', 'local_dev_logging')
-GCP_ACTIVITY_LOG_NAME = os.environ.get('GCP_ACTIVITY_LOG_NAME', 'local_dev_logging')
 
 BASE_URL                = os.environ.get('BASE_URL', 'https://mvm-dot-idc.appspot.com')
 BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://mvm-api-dot-idc.appspot.com')

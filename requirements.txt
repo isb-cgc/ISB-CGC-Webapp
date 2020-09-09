@@ -1,7 +1,7 @@
 requests==2.20.0
 django==2.2.13
 PyYAML==4.2b1
-mysqlclient==1.3.13
+mysqlclient==2.0.1
 WebOb==1.5.0
 ecdsa==0.13.3
 google-api-python-client==1.6.1
@@ -27,7 +27,11 @@ google-cloud-storage==1.18.0
 django-session-security==2.6.5
 django-anymail[mailgun]
 djangorestframework==3.11.0
+# django-axes==5.5.0
 # If you are seeing an error about django-debug-toolbar not being installed,
 # the problem is almost certainly that your developer .env wasn't found
-# django-debug-toolbar should **only** be installed on local develpoer builds, so do
+# django-debug-toolbar should **only** be installed on local developer builds, so do
 # not add it to this file.
+
+# If you are seeing an error about setuptools, the error is likely in your
+# VM's build. Do not correct it with changes to requirements.txt

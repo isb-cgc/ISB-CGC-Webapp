@@ -23,6 +23,8 @@ fi
 # model has changed names it will cause various load failures
 find . -type f -name '*.pyc' -delete
 
+apt-get update -qq
+
 # Install and update apt-get info
 echo "Preparing System..."
 apt-get -y --force-yes install software-properties-common
@@ -42,8 +44,24 @@ apt-get install ca-certificates
 
 # Install apt-get dependencies
 echo "Installing Dependencies..."
-apt-get install -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev python3-mysqldb python3-dev libpython3-dev git ruby g++ curl dos2unix python3.5
+apt-get install -y --force-yes unzip libffi-dev libssl-dev git ruby g++ curl dos2unix
+
+# CircleCI provides a Python 3.7 image, but locally, we have to do that ourselves.
+if [ -z "${CI}" ]; then
+    # Update to Python 3.7
+    add-apt-repository ppa:deadsnakes/ppa
+    apt update
+    apt install -y --force-yes python3.7
+
+    # Set Python 3.7 as the python3 version
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1
+
+    apt-get install -y --force-yes python3.7-venv python3.7-distutils python3.7-dev
+fi
+
+apt-get install -y --force-yes python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
 apt-get install -y --force-yes mysql-client
+
 echo "Dependencies Installed"
 
 # If this is local development, clean out lib for a re-structuring 

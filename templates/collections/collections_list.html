@@ -11,50 +11,47 @@
 {% block page_name %}collection_list{% endblock %}
 
 {% block page_header %}
-<div class="container">
-    <ol class="breadcrumb">
-        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-    </ol>
-    <h1 class="page-header pull-left">Collections</h1>
+<div class="container-fluid">
+    <h3 class="pull-left">Collections</h3>
 </div>
 {% endblock %}
 {% block content %}
-<div class="container">
+<div class="container-fluid">
     <div class ="row">
         <div  class="col-lg-12 col-md-12 collex-panel">
             <div class="panel panel-default" role="panel panel-default" id="collections-list">
                 <div class="panel-body">
                 <table id="collections-table" class="table collex-table sortable_table table-striped table-hover">
                     <thead>
+                        <th></th>
                         <th class="id-col">ID</th>
                         <th class="cancer-type-col">Cancer Type</th>
                         <th class="image-type-col">Image Types</th>
                         <th class="subject-col">Subject Count</th>
                         <th class="locations-col">Locations</th>
-                        <th class="description-col">Description</th>
                         <th class="doi-col">DOI</th>
                         <th class="supporting-data-col">Supporting Data</th>
                     </thead>
                     <colgroup>
-                        <col style="width: 8%">
+                        <col style="width: 4%">
+                        <col style="width: 12%">
                         <col style="width: 13%">
-                        <col style="width: 10%">
+                        <col style="width: 8%">
                         <col style="width: 8%">
                         <col style="width: 9%">
-                        <col style="width: 30%">
                         <col style="width: 9%">
                         <col style="width: 9%">
                     </colgroup>
                     <tbody>
                         {% for collection in active_collections %}
                         <tr>
+                            <td class="details-control" data-collex-id="{{ collection.collection_id }}" title="Click to display collection description."><i class="fa fa-plus-circle show-button"> </i><i class="fa fa-minus-circle hide-button"> </i></td>
                             <td>{{ collection.tcia_collection_id }}</td>
                             <td>{{ collection.cancer_type }}</td>
                             <td>{{ collection.image_types }}</td>
                             <td>{{ collection.subject_count }}</td>
                             <td>{{ collection.location }}</td>
-                            <td>{{ collection.description|safe }}</td>
-                            <td>{{ collection.doi }}</td>
+                            <td><a href="https://doi.org/{{ collection.doi }}" target="_blank">{{ collection.doi }}</a></td>
                             <td>{{ collection.supporting_data }}</td>
                         </tr>
                         {% endfor %}
@@ -70,4 +67,7 @@
 {% block js_file %}
 	{{ block.super }}
 	<script src="{% static 'js/collections_list.js' %}"></script>
+    <script>
+        var collection_descs = {{ active_collection_descs|safe }};
+    </script>
 {% endblock %}

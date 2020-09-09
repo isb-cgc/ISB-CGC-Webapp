@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2017, Institute for Systems Biology
+ * Copyright 2020, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,24 +25,46 @@ require.config({
         underscore: 'libs/underscore-min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
-        base: 'base'
+        base: 'base',
+        sapien: 'sapien'
     },
     shim: {
+        '@popperjs/core': {
+          exports: "@popperjs/core"
+        },
+        'tippy': {
+          exports: 'tippy',
+            deps: ['@popperjs/core']
+        },
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui']
+        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
+        'sapien': {
+            exports: 'Sapien'
+        },
+        tippy: 'libs/tippy-bundle.umd.min',
+        '@popperjs/core': 'libs/popper.min'
     }
 });
 
 require([
     'jquery',
+    'sapien',
     'jqueryui',
     'bootstrap',
     'assetscore'
     ,'assetsresponsive',
     'base'
-], function($, jqueryui, bootstrap) {
+], function($, Sapien, jqueryui, bootstrap) {
     A11y.Core();
 
+    $('.img-example').on('click',function(){
+        if(!$(this).hasClass('selected')) {
+            $('.'+$('.img-example.selected').data('display-target')).hide();
+            $('.img-example.selected').toggleClass('selected');
+            $(this).toggleClass('selected');
+            $('.'+$(this).data('display-target')).show();
+        }
+    });
 });
