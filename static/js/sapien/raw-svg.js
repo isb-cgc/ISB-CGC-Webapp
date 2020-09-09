@@ -89,7 +89,7 @@ define(['jquery'], function($) {
         <g transform="matrix(0.5,0,0,0.5,-257.22,-125.825)">
             <g transform="matrix(2,0,0,2,0,0)">
                 <g id="ALL-organs-screened">
-                	<!--Head and Neck-->
+                	<!-- Head and Neck -->
                     <g>
                         <g opacity="0.25">
                             <clipPath id="_clip1">
@@ -102,7 +102,7 @@ define(['jquery'], function($) {
                             </g>
                         </g>
                     </g>
-                    <!-- Brain-->
+                    <!-- Brain -->
                     <g>
                         <g opacity="0.25">
                             <g>
@@ -116,7 +116,7 @@ define(['jquery'], function($) {
                             </g>
                         </g>
                     </g>
-                    <!--Esophagus-->
+                    <!-- Esophagus -->
                     <g>
                         <g opacity="0.25">
                             <g>
@@ -131,7 +131,7 @@ define(['jquery'], function($) {
                             </g>
                         </g>
                     </g>
-                    <!-- Breast-->
+                    <!-- Breast -->
                     <g>
                         <g opacity="0.25">
                             <g>
@@ -160,7 +160,7 @@ define(['jquery'], function($) {
                             </g>
                         </g>
                     </g>
-                   <!--Kidney-->
+                   <!-- Kidney -->
                     <g>
                         <g opacity="0.25">
                             <clipPath id="_clip10">
@@ -171,7 +171,7 @@ define(['jquery'], function($) {
                             </g>
                         </g>
                     </g>
-                    <!-- Colorectal-->
+                    <!-- Colorectal -->
                     <g>
                         <g opacity="0.25">
                             <clipPath id="_clip11">
@@ -182,7 +182,7 @@ define(['jquery'], function($) {
                             </g>
                         </g>
                     </g>
-                    <!-- Bladder-->
+                    <!-- Bladder -->
                     <g>
                         <g opacity="0.25">
                             <clipPath id="_clip12">
@@ -193,7 +193,7 @@ define(['jquery'], function($) {
                             </g>
                         </g>
                     </g>
-                    <!-- Cervix-->
+                    <!-- Cervix -->
                     <g>
                         <g opacity="0.25">
                             <g>
@@ -208,7 +208,7 @@ define(['jquery'], function($) {
                             </g>
                         </g>
                     </g>
-                    <!-- Ovary-->
+                    <!-- Ovary -->
                     <g>
                         <g opacity="0.25">
                             <g>
@@ -222,7 +222,7 @@ define(['jquery'], function($) {
                             </g>
                         </g>
                     </g>
-                    <!-- Lung-->
+                    <!-- Lung -->
                     <g>
                         <g opacity="0.25">
                             <clipPath id="_clip34">
