@@ -1617,6 +1617,13 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
         txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",40);
         txtbx.attr("opacity",0);
 
+        if (tot===0){
+            txtbx.attr('text-anchor','middle');
+            tspans=txtbx.node().childNodes;
+            tspans[0].textContent = "No Data Available";
+            txtbx.attr("opacity",1);
+        }
+
         }
 
 
