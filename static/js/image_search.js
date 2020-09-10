@@ -1536,22 +1536,25 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
              var pieg=svg.append("g")
              .attr("transform", "translate(" + width / 2 + "," + (height / 2 + shifty) + ")");
             var data = new Object;
-             rng= new Array();
-             spcing = 1.0/parseFloat(plotData.dataCnt.length);
+             var nonZeroLabels= new Array();
+             //spcing = 1.0/parseFloat(plotData.dataCnt.length);
              var tot=0;
 
-             for (i=0;i<plotData.dataCnt.length;i++) {
+              for (i=0;i<plotData.dataCnt.length;i++) {
                var pkey = plotData.dataLabel[i];
                var cnt = plotData.dataCnt[i];
                data[pkey]=cnt;
                tot+=cnt;
-               rng.push(parseFloat(i)*parseFloat(spcing));
+               if (cnt>0){
+                   nonZeroLabels.push(pkey);
+               }
+               //rng.push(parseFloat(i)*parseFloat(spcing));
              }
              $('#'+plotId).data('total',tot.toString());
 
            // set the color scale
            var color = d3.scaleOrdinal()
-           .domain(plotData.dataLabel)
+           .domain(nonZeroLabels)
            .range(d3.schemeCategory10);
 
            // Compute the position of each group on the pie:
