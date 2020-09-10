@@ -52,8 +52,8 @@
                                                      {% endif %}
                                                           {% if progV.projects and progV.projects.items|length > 1 %}
                                                            <ul id="{{ progK }}_proj_list" class="search-checkbox-list" style="list-style: none;">
-                                                           {% for proj, projK in progV.projects.items %}
-                                                              <li class="checkbox {% if foloopr.counter >= 6 %} extra-values{% endif %}">
+                                                           {% for proj, projK in progV.projects.items|dictsort:"0.lower" %}
+                                                              <li class="checkbox {% if forloop.counter >= 6 %} extra-values{% endif %}">
                                                                 <label>
                                                                   <input class="collection_value" type="checkbox" value="{{ proj }}">
                                                                     <span class="collection_name value">{{ proj|upper }} </span> <span class="float-right case_count count plotit">{{ projK }}</span>
@@ -324,7 +324,7 @@
                          </div>
                          <div class="panel-body">
                              <div id ="search_def"><span class="placeholder">&nbsp;</span></div>
-                             <div id="search_def_warn" style="display:none">Note: TCGA.* filters only apply to TCGA collections (IN PROGRESS)</div>
+                             <div id="search_def_warn" style="display:none">Note: TCGA.* filters only apply to TCGA collections</div>
                          </div>
                     </div>
                 </div>

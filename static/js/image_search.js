@@ -1682,7 +1682,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
         var findFilterCats = function (id, wCheckBox) {
             filterCats = new Array();
-            listElems = $('#' + id).find('.list-group-item__body');
+            listElems = $('#' + id).find('.list-group-item__body, .collection-list');
             if (wCheckBox){
                 listElems = listElems.children('.search-checkbox-list').parent()
             }
