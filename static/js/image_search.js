@@ -2337,7 +2337,10 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             updateFacetsData(true);
 
             $('input[type="checkbox"]').prop("disabled","disabled");
+            $('div.ui-slider').siblings('button').prop('disabled','disabled');
             $('input#hide-zeros').prop("disabled","");
+            $('input#hide-zeros').prop("checked",true);
+            $('input#hide-zeros').triggerHandler('change');
         }
     });
 });
