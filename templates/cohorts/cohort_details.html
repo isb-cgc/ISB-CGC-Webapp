@@ -64,13 +64,13 @@
 {% endblock %}
 
 {% block js_file %}
-    <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
-    {{ block.super }}
-    <script type="text/javascript" src="{% static 'js/explore.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/cohorts/cohort-details.js' %}"></script>
     <script>
         var cohort_filters = {{ cohort_filters|safe }};
         var is_cohort = true;
         var collection_tooltips = {{ collection_tooltips|safe }};
     </script>
+    <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'js/explore.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/cohorts/cohort-details.js' %}"></script>
 {% endblock %}

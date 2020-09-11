@@ -66,21 +66,19 @@
    window.collection = {{ collections|tojson|safe }};
 </script>
 
-
 {% include "idc/explore_data_core.html" %}
-
 
 {% include "cohorts/save-cohort-modal.html" %}
 
 {% endblock %}
 
 {% block js_file %}
-    <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
-    {{ block.super }}
-    <script type="text/javascript" src="{% static 'js/explore.js' %}"></script>
-
     <script>
+        var filters_for_load = {{ filters|safe }};
         var collection_tooltips = {{ collection_tooltips|safe }};
         var is_cohort = false;
     </script>
+    <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'js/explore.js' %}"></script>
 {% endblock %}
