@@ -390,12 +390,12 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             if (showMore) {
                 $('.' + id).parent().find('.more-graphs').hide();
                 $('.' + id).parent().find('.less-graphs').show();
-                $('.' + id).find('.span-related-overflow').show();
+                $('.' + id).find('.chart-overflow').removeClass('hide-chart');
             }
             else {
                 $('.' + id).parent().find('.more-graphs').show();
                 $('.' + id).parent().find('.less-graphs').hide();
-                $('.' + id).find('.span-related-overflow').hide();
+                $('.' + id).find('.chart-overflow').addClass('hide-chart')
             }
 
         }
@@ -861,8 +861,9 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                             var seriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
 
                             newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td>';
-                            if ((modality ==='SEG') || (modality ==='SR')){
-                            newHtml += '<td class="ohif greyout tooltip_ex"><span class="tooltiptext_ex">Viewer is only available for series with an imaging modality</span><a   href="/" onclick="return false;"><img src="' + STATIC_FILES_URL + 'img/ohif_sm.png"></a></td></tr>';
+                            if ((modality ==='SEG') || (modality ==='RTSTRUCT')){
+                            newHtml += '<td class="ohif greyout tooltip_ex"><span class="tooltiptext_ex">Please open at the study level to see this series</span><a   href="/" onclick="return false;"><img style="width:100%;max-height:100%;" src="' + STATIC_FILES_URL + 'img/ohif.png"></a></td></tr>';
+
                             }
                             else {
                             newHtml += '<td class="ohif"><a   href="' + fetchUrlSeries + '" target="_blank"><img src="' + STATIC_FILES_URL + 'img/ohif_sm.png"></a></td></tr>';
@@ -1535,22 +1536,25 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
              var pieg=svg.append("g")
              .attr("transform", "translate(" + width / 2 + "," + (height / 2 + shifty) + ")");
             var data = new Object;
-             rng= new Array();
-             spcing = 1.0/parseFloat(plotData.dataCnt.length);
+             var nonZeroLabels= new Array();
+             //spcing = 1.0/parseFloat(plotData.dataCnt.length);
              var tot=0;
 
-             for (i=0;i<plotData.dataCnt.length;i++) {
+              for (i=0;i<plotData.dataCnt.length;i++) {
                var pkey = plotData.dataLabel[i];
                var cnt = plotData.dataCnt[i];
                data[pkey]=cnt;
                tot+=cnt;
-               rng.push(parseFloat(i)*parseFloat(spcing));
+               if (cnt>0){
+                   nonZeroLabels.push(pkey);
+               }
+               //rng.push(parseFloat(i)*parseFloat(spcing));
              }
              $('#'+plotId).data('total',tot.toString());
 
            // set the color scale
            var color = d3.scaleOrdinal()
-           .domain(plotData.dataLabel)
+           .domain(nonZeroLabels)
            .range(d3.schemeCategory10);
 
            // Compute the position of each group on the pie:
@@ -1615,6 +1619,13 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
         txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",20);
         txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",40);
         txtbx.attr("opacity",0);
+
+        if (tot===0){
+            txtbx.attr('text-anchor','middle');
+            tspans=txtbx.node().childNodes;
+            tspans[0].textContent = "No Data Available";
+            txtbx.attr("opacity",1);
+        }
 
         }
 
@@ -1681,7 +1692,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
         var findFilterCats = function (id, wCheckBox) {
             filterCats = new Array();
-            listElems = $('#' + id).find('.list-group-item__body');
+            listElems = $('#' + id).find('.list-group-item__body, .collection-list');
             if (wCheckBox){
                 listElems = listElems.children('.search-checkbox-list').parent()
             }
