@@ -25,33 +25,39 @@
                     <thead>
                         <th></th>
                         <th class="id-col">ID</th>
+                        <th class="collex-type-col">Collection Type</th>
                         <th class="cancer-type-col">Cancer Type</th>
                         <th class="image-type-col">Image Types</th>
                         <th class="subject-col">Subject Count</th>
                         <th class="locations-col">Locations</th>
-                        <th class="doi-col">DOI</th>
                         <th class="supporting-data-col">Supporting Data</th>
                     </thead>
                     <colgroup>
-                        <col style="width: 4%">
+                        <col style="width: 3%">
                         <col style="width: 12%">
+                        <col style="width: 8%">
                         <col style="width: 13%">
                         <col style="width: 8%">
                         <col style="width: 8%">
-                        <col style="width: 9%">
                         <col style="width: 9%">
                         <col style="width: 9%">
                     </colgroup>
                     <tbody>
                         {% for collection in active_collections %}
                         <tr>
-                            <td class="details-control" data-collex-id="{{ collection.collection_id }}" title="Click to display collection description."><i class="fa fa-plus-circle show-button"> </i><i class="fa fa-minus-circle hide-button"> </i></td>
-                            <td>{{ collection.tcia_collection_id }}</td>
+                            <td class="details-control" data-doi="{{ collection.doi }}" data-collex-id="{{ collection.collection_id }}" title="Click to display collection description."><i class="fa fa-plus-circle show-button"> </i><i class="fa fa-minus-circle hide-button"> </i></td>
+                            <td>
+                            {% if collection.get_collection_type == 'Analysis' %}
+                                {{ collection.collections }}
+                            {% else %}
+                                {{ collection.tcia_collection_id }}
+                            {% endif %}
+                            </td>
+                            <td>{{ collection.get_collection_type }}</td>
                             <td>{{ collection.cancer_type }}</td>
                             <td>{{ collection.image_types }}</td>
                             <td>{{ collection.subject_count }}</td>
                             <td>{{ collection.location }}</td>
-                            <td><a href="https://doi.org/{{ collection.doi }}" target="_blank">{{ collection.doi }}</a></td>
                             <td>{{ collection.supporting_data }}</td>
                         </tr>
                         {% endfor %}
