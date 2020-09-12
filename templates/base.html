@@ -163,6 +163,8 @@
         var expireAfter = {{ request|expire_after|unlocalize }};
         var confirmFormDiscard = "{% trans 'You have unsaved changes in a form of this page.' %}";
         var returnToUrl = '{% url 'landing_page' %}';
+
+        var showWarning = false;
     </script>
     {% endlocalize %}
 {% endif %}

@@ -2332,19 +2332,19 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
         updateFacetsData(true);
      };
 
-     let cohort_loaded = false;
+     var cohort_loaded = false;
      $(window).on('load', function(){
-        if((is_cohort && !cohort_loaded) || (filters_for_load) /* TODO: check for localStorage key of saved filters from a login */) {
-            load_filters(cohort_filters || filters_for_load/* || sessionFilters */);
-            if(is_cohort) {
-                cohort_loaded = true;
-                $('input[type="checkbox"]').prop("disabled","disabled");
-                $('div.ui-slider').siblings('button').prop('disabled','disabled');
-                $('input#hide-zeros').prop("disabled","");
-                $('input#hide-zeros').prop("checked",true);
-                $('input#hide-zeros').triggerHandler('change');
-            }
-        }
+        if(is_cohort) {
+            !cohort_loaded && load_filters(cohort_filters);
+            cohort_loaded = true;
+            $('input[type="checkbox"]').prop("disabled","disabled");
+            $('div.ui-slider').siblings('button').prop('disabled','disabled');
+            $('input#hide-zeros').prop("disabled","");
+            $('input#hide-zeros').prop("checked",true);
+            $('input#hide-zeros').triggerHandler('change');
+        } else if(Object.keys(filters_for_load).length > 0) {
+            load_filters(filters_for_load);
+        } /* TODO: check for localStorage key of saved filters from a login */
     });
 });
 
