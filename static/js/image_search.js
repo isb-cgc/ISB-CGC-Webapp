@@ -2318,30 +2318,33 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
         }
     );
 
-     let cohort_loaded = false;
-     let load_done = null;
-     $(window).on('load', function(){
-        let uncollapse = [];
-        if(is_cohort && !cohort_loaded) {
-            _.each(cohort_filters, function(group){
-                _.each(group['filters'], function(filter){
-                    $('div.list-group-item__body[data-attr-id="'+filter['id']+'"]').collapse('show');
-                    _.each(filter['values'], function(val){
-                        $('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]').prop("checked",true);
-                        checkFilters($('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]'));
-                    });
+     let load_filters = function(filters) {
+        _.each(filters, function(group){
+            _.each(group['filters'], function(filter){
+                $('div.list-group-item__body[data-attr-id="'+filter['id']+'"]').collapse('show');
+                _.each(filter['values'], function(val){
+                    $('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]').prop("checked",true);
+                    checkFilters($('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]'));
                 });
             });
-            cohort_loaded = true;
-            mkFiltText();
-            updateFacetsData(true);
+        });
+        mkFiltText();
+        updateFacetsData(true);
+     };
 
+     var cohort_loaded = false;
+     $(window).on('load', function(){
+        if(is_cohort) {
+            !cohort_loaded && load_filters(cohort_filters);
+            cohort_loaded = true;
             $('input[type="checkbox"]').prop("disabled","disabled");
             $('div.ui-slider').siblings('button').prop('disabled','disabled');
             $('input#hide-zeros').prop("disabled","");
             $('input#hide-zeros').prop("checked",true);
             $('input#hide-zeros').triggerHandler('change');
-        }
+        } else if(Object.keys(filters_for_load).length > 0) {
+            load_filters(filters_for_load);
+        } /* TODO: check for localStorage key of saved filters from a login */
     });
 });
 
