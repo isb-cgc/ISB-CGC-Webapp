@@ -924,6 +924,10 @@ nav, .site-header {
     .navbar-link a:hover, .navbar-link a:focus {
       color: #1f5261; }
 
+.navbar-signin {
+  padding-top: 6px;
+}
+
 nav.subnav li.has-drop-down__more ul.drop {
   overflow-y: auto;
   /* Allow for a slightly taller subnav dropdown if the screen is tall enough */ }
