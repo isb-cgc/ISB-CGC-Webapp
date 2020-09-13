@@ -88,7 +88,6 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             $('#rh_panel').addClass('col-md-9');
         }
 
-
         window.setSlider = function (slideDiv, reset, strt, end, isInt, updateNow) {
             //var slideDiv = divName + "_slide";
             var divName = slideDiv.replace("_slide","");
@@ -1456,16 +1455,16 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
             var isSlider = $('#'+filterId).find('#'+filterId+'_slide').length>0 ? true : false;
             if (isSlider) {
+                maxx = $('#'+filterId).data('attr-max').toString();
+                if(label == 'None') {
 
-                maxx =$('#'+filterId).data('attr-max').toString();
-
-                var selArr = label.split(' To ');
-                var strt = parseInt((selArr[0] === '*') ? '0' : selArr[0]);
-                var end = parseInt((selArr[1] === '*') ? maxx : selArr[1]);
-                setSlider(filterId+"_slide", false, strt, end, true,true);
-
+                } else {
+                    var selArr = label.split(' To ');
+                    var strt = parseInt((selArr[0] === '*') ? '0' : selArr[0]);
+                    var end = parseInt((selArr[1] === '*') ? maxx : selArr[1]);
+                    setSlider(filterId+"_slide", false, strt, end, true,true);
                 }
-            else{
+            } else {
                 var inputList = $('#' + listId).find(':input');
                 for (var i = 0; i < inputList.length; i++) {
                     var curLabel = $(inputList[i]).parent().children()[1].innerHTML;
