@@ -216,11 +216,11 @@
                                                             <label class="tooltip_ex">
                                                                 {% if display_value == 'None' %}
                                                                     <span>
-                                                                     <input type="checkbox" disabled="true" class="checkbox-disabled" value="{{ val.value }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
+                                                                     <input type="checkbox" disabled="true" class="checkbox-disabled" value="{{ val.value }}" data-filter-attr-id="{{ attr.id }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
                                                                          <span class="tooltiptext_ex">Filtering on the 'None' attribute is not currently supported within derived data.</span>
                                                                     </span>
                                                                 {% else %}
-                                                                    <input type="checkbox" value="{{ val.value }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
+                                                                    <input type="checkbox" value="{{ val.value }}" data-filter-attr-id="{{ attr.id }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
                                                                 {% endif %}
 
                                                                  <span class="value">{{ display_value }}</span> <span class="float-right case_count count plotit">{{ val.count }}</span>
