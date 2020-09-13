@@ -1253,6 +1253,10 @@ a.skip-nav {
     color: #2A537A;
     padding: 0 0 10px 15px;
     position: relative;}
+  .list-group .list-group-sub-item__body{
+    color: #2A537A;
+    padding: 0 0 10px 30px;
+    position: relative;}
   .list-group .list-group-item .search_enter .search_input {
     display: inline-block;
     width: 260px;
