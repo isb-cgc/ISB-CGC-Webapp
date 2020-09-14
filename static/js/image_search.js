@@ -1691,7 +1691,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
         var findFilterCats = function (id, wCheckBox) {
             filterCats = new Array();
-            listElems = $('#' + id).find('.list-group-item__body, .collection-list');
+            listElems = $('#' + id).find('.list-group-item__body, .collection-list, .list-group-sub-item__body');
             if (wCheckBox){
                 listElems = listElems.children('.search-checkbox-list').parent()
             }
@@ -1906,8 +1906,8 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
         var checkFilters = function(filterElem) {
             var checked = $(filterElem)[0].checked;
-            var neighbours =$(filterElem).parentsUntil('.list-group-item__body','ul').children().children().children('input:checkbox');
-            var neighboursCk = $(filterElem).parentsUntil('.list-group-item__body','ul').children().children().children(':checked');
+            var neighbours =$(filterElem).parentsUntil('.list-group-item__body, .list-group-sub-item__body','ul').children().children().children('input:checkbox');
+            var neighboursCk = $(filterElem).parentsUntil('.list-group-item__body, .list-group-sub-item__body','ul').children().children().children(':checked');
             var allChecked= false;
             var noneChecked = false;
             if (neighboursCk.length===0){
@@ -1936,7 +1936,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                      numCheckBoxes++;
                 }
                 else {
-                    filtnm=$(filterCat).children('.list-group-item__body, .collection-list')[0].id;
+                    filtnm=$(filterCat).children('.list-group-item__body, .collection-list, .list-group-sub-item__body')[0].id;
                     if  ($(filterCat).children('.list-group-item__heading').children('input:checkbox').length>0) {
                        hasCheckBox = true;
                        numCheckBoxes++;
