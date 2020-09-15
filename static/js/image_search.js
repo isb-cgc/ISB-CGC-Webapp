@@ -492,13 +492,13 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
              var tooltipL = $('<div class="slide_tooltip tooltipL" />').text('stuff').css({
                position: 'absolute',
                top: -25,
-               left: -10,
+               left: -5,
                 }).hide();
 
              var tooltipR = $('<div class="slide_tooltip tooltipR" />').text('stuff').css({
                position: 'absolute',
                top: -25,
-               right: -10,
+               right: -5,
                 }).hide();
 
 
@@ -532,10 +532,11 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 slide: function (event, ui) {
                       $('#' + inpName).val(ui.values[0] + "-" + ui.values[1]);
 
-                     $(this).parent().find('.ui-slider-handle').each( function(index){
-                        $(this).find('.slide_tooltip').text( ui.values[index].toString() );
+                     $(this).find('.slide_tooltip').each( function(index){
+                        $(this).text( ui.values[index].toString() );
+                        $(this).show();
                     });
-                    $(this).find('.slide_tooltip').show();
+
                 },
 
 
@@ -583,12 +584,12 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 );
 
 
-             $('#' + slideName).find(".ui-slider-handle").each(function(index){
+             $('#' + slideName).find(".slide_tooltip").each(function(index){
                         if (index ==0) {
-                            $(this).find('.slide_tooltip').text(min.toString());
+                            $(this).text(min.toString());
                         }
                         else{
-                            $(this).find('.slide_tooltip').text(max.toString());
+                            $(this).text(max.toString());
                         }
                    });
 
@@ -1702,11 +1703,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 return height - yScale(d.cnt);
             });
 
-        }
-
-
-
-
+        };
 
         var findFilterCats = function (id, wCheckBox) {
             filterCats = new Array();
@@ -1957,7 +1954,9 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                      numCheckBoxes++;
                 }
                 else {
-                    filtnm=$(filterCat).children('.list-group-item__body, .collection-list, .list-group-sub-item__body')[0].id;
+
+                    filtnm=$(filterCat).children('.list-group-sub-item__body, .list-group-item__body, .collection-list')[0].id;
+
                     if  ($(filterCat).children('.list-group-item__heading').children('input:checkbox').length>0) {
                        hasCheckBox = true;
                        numCheckBoxes++;

@@ -43,7 +43,7 @@ require([
     'cohortfilelist',
 ], function ($, tippy, base, imagesearch, d3, cohortfilelist) {
 
-    $('.filter-panel li.checkbox').on('change', 'input', function() {
+    $('.filter-panel li.checkbox, #program_set').on('change', 'input', function() {
         if($('#search_def p').length > 0) {
             $('#save-cohort-btn').prop('disabled','');
             if(user_is_auth) {
@@ -60,6 +60,13 @@ require([
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('#save-cohort-modal').on('show.bs.modal', function() {
         var filters = {};
+        $('#program_set input:checked').each(function(){
+            $('#selected-filters-prog-set').append('<span>'+$(this).data('filter-display-attr')+': '+$(this).data('filter-display-val')+'</span>');
+            if(!filters[$(this).data('filter-attr-id')]) {
+                filters[$(this).data('filter-attr-id')] = [];
+            }
+            filters[$(this).data('filter-attr-id')].push($(this).prop('value'));
+        });
         $('#search_orig_set .search-checkbox-list input:checked').each(function(){
             $('#selected-filters-orig-set').append('<span>'+$(this).data('filter-display-attr')+': '+$(this).data('filter-display-val')+'</span>');
             if(!filters[$(this).data('filter-attr-id')]) {
