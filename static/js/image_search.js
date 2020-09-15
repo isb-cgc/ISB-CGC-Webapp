@@ -142,6 +142,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 window.filterObj[filtAtt]['rng'] = attVal;
             }
             if (updateNow) {
+                updatePlotBinsForSliders(slideDiv);
                 mkFiltText();
                 updateFacetsData(true);
             }
@@ -447,7 +448,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             var val = $('#' + inpName)[0].value;
             var valArr = val.split('-');
             var strtInd = parseInt(valArr[0]);
-            var endInd = parseInt(valArr[1]);
+            var endInd = parseInt(valArr[1])-1;
 
             var wNone = false;
             if ( ($('#'+slideName).parent().children("input:checkbox").length>0) ){
@@ -466,19 +467,19 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                          }
 
                      }
-                     if ( ((valArr[0]==='*') || (endInd<= valArr[0])) && ((valArr[1]==='*') || (strtInd>= valArr[1])) ){
-                         $(this).parent().children('.case-count').addClass('plotit');
+                     if ( ((valArr[0]==='*') || (endInd>= valArr[0])) && ((valArr[1]==='*') || (strtInd< valArr[1])) ){
+                         $(this).parent().children('.plot_count').addClass('plotit');
                      }
                      else{
-                         $(this).parent().children('.case-count').removeClass('plotit');
+                         $(this).parent().children('.plot_count').removeClass('plotit');
                      }
                  }
                  else if (val.includes('None')){
                      if (wNone){
-                         $(this).parent().children('.case-count').addClass('plotit');
+                         $(this).parent().children('.plot_count').addClass('plotit');
                      }
                      else{
-                         $(this).parent().children('.case-count').removeClass('plotit');
+                         $(this).parent().children('.plot_count').removeClass('plotit');
                      }
                  }
 
@@ -488,11 +489,20 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
         }
 
         var mkSlider = function (divName, min, max, step, isInt, wNone, parStr) {
-             var tooltip = $('<div class="slide_tooltip" />').text('stuff').css({
+             var tooltipL = $('<div class="slide_tooltip tooltipL" />').text('stuff').css({
                position: 'absolute',
                top: -25,
-               left: 0,
+               left: -10,
                 }).hide();
+
+             var tooltipR = $('<div class="slide_tooltip tooltipR" />').text('stuff').css({
+               position: 'absolute',
+               top: -25,
+               right: -10,
+                }).hide();
+
+
+
             var slideName = divName + '_slide';
             var inpName = divName + '_input';
             var strtInp = min + '-' + max;
@@ -520,11 +530,15 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 range: true,
                 disabled: is_cohort,
                 slide: function (event, ui) {
-                     $('#' + inpName).val(ui.values[0] + "-" + ui.values[1]);
-                    $(this).parent().find('.ui-slider-handle').each( function(index){
+                      $('#' + inpName).val(ui.values[0] + "-" + ui.values[1]);
+
+                     $(this).parent().find('.ui-slider-handle').each( function(index){
                         $(this).find('.slide_tooltip').text( ui.values[index].toString() );
                     });
+                    $(this).find('.slide_tooltip').show();
                 },
+
+
 
                 stop: function (event, ui) {
                     //   updateSliderSelection(inpDiv, displaySet, header, attributeName, isInt);
@@ -548,13 +562,18 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                     if (filtName.startsWith('tcga_clinical')) {
                         checkTcga();
                     }
-                    updatePlotBinsForSliders(slideName);
+                     updatePlotBinsForSliders(slideName);
                     mkFiltText();
                     updateFacetsData(true);
 
                 }
-            }).find('.ui-slider-handle').append(tooltip).hover(
+            }).find('.ui-slider-range').append(tooltipL).append(tooltipR);
+
+            //$('#' + slideName).find('.ui-slider-range').append(tooltipR);
+
+            $('#' + slideName).hover(
                     function(){
+                        //$(this).removeClass("ui-state-active");
                        $(this).parent().find('.slide_tooltip').show();
                     }
                   ,
@@ -564,7 +583,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 );
 
 
-            $('#' + slideName).find(".ui-slider-handle").each(function(index){
+             $('#' + slideName).find(".ui-slider-handle").each(function(index){
                         if (index ==0) {
                             $(this).find('.slide_tooltip').text(min.toString());
                         }
@@ -1759,6 +1778,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
         }
 
         var updateFilters = function (filterCat, dic, dataFetched) {
+            var hasSlider = ( $('#'+filterCat+'_slide').length>0 );
             var allListItems=$('#'+filterCat).children('ul').children('li');
             var allFilters=allListItems.children().children('input:checkbox');
             var checkedFilters=allListItems.children().children('input:checked');
@@ -1827,11 +1847,12 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                     $(elem).parent().parent().hide();
                 }
 
-
-                if (checked || allUnchecked) {
-                    $(spans.get(1)).addClass('plotit');
-                } else {
-                    $(spans.get(1)).removeClass('plotit');
+                if (!hasSlider) {
+                    if (checked || allUnchecked) {
+                        $(spans.get(1)).addClass('plotit');
+                    } else {
+                        $(spans.get(1)).removeClass('plotit');
+                    }
                 }
             }
 

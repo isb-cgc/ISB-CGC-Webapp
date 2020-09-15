@@ -928,6 +928,12 @@ nav, .site-header {
   padding-top: 6px;
 }
 
+.partners-div img {
+  height: 80px;
+  padding: 10px; }
+.partners-div img.gcp-logo {
+    padding: 20px; }
+
 nav.subnav li.has-drop-down__more ul.drop {
   overflow-y: auto;
   /* Allow for a slightly taller subnav dropdown if the screen is tall enough */ }
