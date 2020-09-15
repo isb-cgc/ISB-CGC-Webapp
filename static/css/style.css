@@ -2829,8 +2829,8 @@ html {
 
 
 #landing .modality.option2 div {
-  background-color: rgb(133, 122, 156);
-  color: #e3dfe2;
+  background-color: rgb(204 220 227);
+  color: #4b616b;
 }
 
 #landing .modality.option1 div {
@@ -2840,8 +2840,8 @@ html {
 
 #landing .option2 .modality-panel {
   padding: 5px 20px;
-  border: 3px solid #593a78;
-    border-radius: 4px 4px 0px 0px;
+  border: 1px solid #4b616b;
+    border-radius: 3px 3px 0px 0px;
   justify-content: end;
   margin-top: 55px;
 }
@@ -2898,7 +2898,7 @@ html {
     text-transform: none !important;
     color: #000;
     padding-top: 0;
-    margin-top: -3px;
+    margin-top: -1px;
 }
 
 .option1 #modality-nav-tabs li {
@@ -2921,9 +2921,13 @@ html {
 }
 
 .option2 #modality-nav-tabs li {
-    border: 3px solid #593a78;
-    border-radius: 0px 0px 4px 4px;
+    border: 1px solid #4b616b;
+    border-radius: 0px 0px 3px 3px;
     border-top: none;
+}
+
+.option2 #modality-nav-tabs li.active a:after {
+    background-color: #7d4c84;
 }
 
 #modality-nav-tabs:before {
@@ -2947,7 +2951,7 @@ html {
 }
 
 .option2 #modality-nav-tabs li.active {
-    background-color: rgb(133, 122, 156);
+    background-color: rgb(204 220 227);
 }
 
 .option1 #modality-nav-tabs li.active {
@@ -2957,14 +2961,12 @@ html {
 }
 
 .option2 #modality-nav-tabs li.active>a {
-    color: #fff;
+    color: #4b616b;
 }
 
 #landing .modality-panel img.example {
-  height: 95%;
-  width: 95%;
-  max-width: 440px;
-  max-height: 363px;
+  width: 440px;
+  height: 363px;
   border: 2px solid black;
 }
 .site-footer {

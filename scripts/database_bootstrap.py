@@ -104,7 +104,6 @@ def new_attribute(name, displ_name, type, display_default, cross_collex=False, u
                 'categories': []
             }
 
-
 def add_data_sets(sets_set):
     for dss in sets_set:
         try:
@@ -115,7 +114,6 @@ def add_data_sets(sets_set):
         except Exception as e:
             logger.error("[ERROR] Data Version {} may not have been added!".format(dss['name']))
             logger.exception(e)
-
 
 def add_data_versions(dv_set):
     for dv in dv_set:
@@ -136,8 +134,8 @@ def add_data_versions(dv_set):
             logger.error("[ERROR] Data Version {} may not have been added!".format(dv['name']))
             logger.exception(e)
 
-
 def add_programs(program_set):
+    results = {}
     for prog in program_set:
         try:
             obj, created = Program.objects.update_or_create(
@@ -146,9 +144,13 @@ def add_programs(program_set):
 
             print("Program created:")
             print(obj)
+
+            results[obj.short_name] = obj
+
         except Exception as e:
             logger.error("[ERROR] Program {} may not have been added!".format(prog['short_name']))
             logger.exception(e)
+    return results
 
 def add_data_source(source_set, versions, programs, data_sets, source_type):
     for source in source_set:
@@ -215,7 +217,6 @@ def add_collections(collection_set):
     collex_list = []
     try:
         for collex in collection_set:
-
             collex_list.append(
                 Collection(
                     **collex['data'],
@@ -227,15 +228,6 @@ def add_collections(collection_set):
 
         for collex in collection_set:
             obj = Collection.objects.get(collection_id=collex['data']['collection_id'])
-
-            if len(collex.get('progs',[])):
-                progs = Program.objects.filter(
-                    short_name__in=collex['progs'], owner=collex['owner'] if 'owner' in collex else idc_superuser,
-                    active=True)
-                collex_to_prog = []
-                for prog in progs:
-                    collex_to_prog.append(Collection.program.through(collection_id=obj.id, program_id=prog.id))
-                Collection.program.through.objects.bulk_create(collex_to_prog)
 
             if len(collex.get('data_versions',[])):
                 collex_to_dv = []
@@ -300,7 +292,7 @@ def add_attributes(attr_set):
 def main():
 
     try:
-        add_programs([{
+        programs = add_programs([{
             "full_name": "The Cancer Genome Atlas",
             "short_name": "TCGA",
             "public": True
@@ -387,14 +379,14 @@ def main():
             }
             if 'lidc' in line[0]:
                 collex['data_versions'].append({"ver": "1", "name": "TCIA Derived Data"})
-                collex['progs'] = ["LIDC"]
+                collex['data']["program"] = programs["LIDC"]
             if 'tcga' in line[0]:
                 collex['data_versions'].append({"ver": "r9", "name": "GDC Data Release 9"})
-                collex['progs'] = ["TCGA"]
+                collex['data']["program"] = programs["TCGA"]
             if 'ispy' in line[0]:
-                collex['progs'] = ["ISPY"]
+                collex['data']["program"] = programs["ISPY"]
             if 'qin' in line[0]:
-                collex['progs'] = ["QIN"]
+                collex['data']["program"] = programs["QIN"]
 
             collection_set.append(collex)
 
