@@ -20,8 +20,8 @@
             position: absolute
             width: 100%
             height: 100%
-            top: 0px
-            left: 0px
+            top: 0
+            left: 0
             background: rgba(0,0,0,.5)
             z-index: 10
             i
@@ -83,7 +83,7 @@
             &:first-child
                 border-left: none
         .label
-            margin: 5px 0px 0px 0px
+            margin: 5px 0 0 0
             background-color: $token-bg-color
             &:hover
                 background-color: $token-bg-color-hover
@@ -93,7 +93,7 @@
         padding: 0
         .revision-prog-filter-set
             height: 100%
-            padding: 0px 8px !important
+            padding: 0 8px !important
         .prog-filter-set
             border-left: 2px solid $isb-primary
             h5
@@ -135,23 +135,23 @@
                 z-index: 20
 
     #one-cohort-type-per-create-warn
-        margin: 0px 15px 15px 15px
+        margin: 0 15px 15px 15px
 
     .vertical-shim
         visibility: hidden
         height: 40px
 
     .menu-bar h3
-        margin-top: 0px
+        margin-top: 0
 
     .menu-bar a.btn, .menu-bar .dropdown
         float: right
     .total-samples
-        margin-top: 0px
+        margin-top: 0
 
     .tab-content
         padding: 0
-    ul
+
     .nav-tabs
         li
             border: none
@@ -164,6 +164,8 @@
                 width: (100% / 4)
             &.filter-tab
                 width: (100% / 3)
+            &.filter-tab-2
+                width: (100% / 2)
             &:first-child a
                 border-top-left-radius: 3px
             &:last-child a
@@ -193,13 +195,13 @@
             box-shadow: $box-shadow
 
         .tab-content
-            padding: 0px
+            padding: 0
             .panel-group
-                margin: 0px
+                margin: 0
             .panel
-                margin: 0px
+                margin: 0
                 border: none
-                border-radius: 0px
+                border-radius: 0
                 border-bottom: $border
                 .panel-heading
                     font-size: 13px
@@ -208,7 +210,7 @@
                     i
                         width: 10px
                 .panel-body
-                    padding: 0px 10px
+                    padding: 0 10px
                     ul
                         list-style: none
                         padding-left: 10px
@@ -221,14 +223,14 @@
         .list-group
             h5
                 margin-bottom: 3px
-                margin-top: 0px
+                margin-top: 0
             ul
                 list-style: none
-                padding: 0px
+                padding: 0
             .panel
-                margin: 0px
+                margin: 0
                 .panel-body
-                    padding: 0px 15px 0px 15px
+                    padding: 0 15px 0 15px
             .panel-collapse
                 max-height: 100px
             .sel-gene
@@ -243,10 +245,10 @@
                     display: none
 
             .alert
-                margin: 10px 0px 10px 0px
+                margin: 10px 0 10px 0
         .molecular-accordion
             .list-item__heading
-                padding: 10px 0px 10px 0px
+                padding: 10px 0 10px 0
             .list-item
                 border: none
             .spec-molecular-attrs
@@ -269,8 +271,8 @@
             position: absolute
             width: 100%
             height: 100%
-            top: 0px
-            left: 0px
+            top: 0
+            left: 0
             background: rgba(0,0,0,.5)
             z-index: 10
             i
@@ -282,7 +284,7 @@
 
         .tree-graph-clinical .tree-graph
             display: inline-block
-            margin: 0px 14px 10px 14px
+            margin: 0 14px 10px 14px
             width: 151px
             padding: 5px
             .graph-title
@@ -308,7 +310,7 @@
             position: absolute
             width: 100%
             height: 100%
-            left: 0px
+            left: 0
             background: rgba(0,0,0,.5)
             z-index: 10
             i
@@ -331,10 +333,10 @@
             span.total-values
                 font-weight: 700
         ul
-            padding: 5px 0px 0px 20px
+            padding: 5px 0 0 20px
 
         .inline-detail:last-child
-                padding-right: 0px
+                padding-right: 0
 
     #create-cohort-form .form-control-static span
         display: inline-block
@@ -438,29 +440,29 @@
     .search-checkbox-list
         label
             width: 100%
-    .sample_count, .case_count, .file_count
+    .sample_count, .case_count, .file_count, .prog_count, .node_count
         background-color: #bababa
         color: white
         border-radius: 10px
         font-size: .8em
         padding: 2px 5px
         text-align: right
-
-    .sample_count
         &:after
-            content: 'sample(s)'
+            text-transform: none
             font-size: 0.9em
             padding-left: 5px
-    .case_count
-        &:after
-            content: 'case(s)'
-            font-size: 0.9em
-            padding-left: 5px
-    .file_count
-        &:after
-            content: 'file(s)'
-            font-size: 0.9em
-            padding-left: 5px
+    .prog_count, .node_count
+        background-color: #98B8B8
+    .node_count:after
+        content: 'node(s)'
+    .sample_count:after
+        content: 'sample(s)'
+    .prog_count:after
+        content: 'program(s)'
+    .case_count:after
+        content: 'case(s)'
+    .file_count:after
+        content: 'file(s)'
 
 #cohort-filelist
     #placeholder
@@ -469,9 +471,9 @@
             position: relative
             overflow: hidden
     .page-action-group
-        margin-top: 0px
+        margin-top: 0
     .menu-bar h3
-        margin-top: 0px
+        margin-top: 0
 
     .menu-bar a.btn, .menu-bar .dropdown
         float: right
@@ -572,7 +574,7 @@
             opacity: 1
             transition: opacity 0.45s ease-in-out
         &.closed
-            width: 0px
+            width: 0
             padding: 0
             transition: width 0.45s ease-in-out
             *
@@ -644,11 +646,11 @@
     text-overflow: ellipsis
     overflow: hidden
 .bq-label
-    padding-left: 0px
+    padding-left: 0
     margin: 10px 0 0 0
 
 #file-upload-btn
-    padding-left: 0px
+    padding-left: 0
 
 #upload-file, #enter-barcodes
     ul
@@ -765,9 +767,9 @@ span.code
     .container
         width: 90%
     >.container
-        padding: 0px
+        padding: 0
     >.container>.row
-        margin: 0px 15px 0px 15px
+        margin: 0 15px 0 15px
 
     .load-spinner
         margin-top: 12px !important
@@ -786,7 +788,7 @@ span.code
         width: 100%
         height: 65%
         top: 18%
-        left: 0px
+        left: 0
         background: rgba(255,255,255,.5)
         z-index: 10
         div
