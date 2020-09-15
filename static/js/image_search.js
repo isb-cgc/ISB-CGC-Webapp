@@ -1683,11 +1683,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 return height - yScale(d.cnt);
             });
 
-        }
-
-
-
-
+        };
 
         var findFilterCats = function (id, wCheckBox) {
             filterCats = new Array();
@@ -1936,7 +1932,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                      numCheckBoxes++;
                 }
                 else {
-                    filtnm=$(filterCat).children('.list-group-item__body, .collection-list')[0].id;
+                    filtnm=$(filterCat).children('.list-group-sub-item__body, .list-group-item__body, .collection-list')[0].id;
                     if  ($(filterCat).children('.list-group-item__heading').children('input:checkbox').length>0) {
                        hasCheckBox = true;
                        numCheckBoxes++;
