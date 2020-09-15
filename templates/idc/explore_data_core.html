@@ -32,14 +32,14 @@
                                                      {% if progV.projects and progV.projects.items|length == 1 %}
                                                            {% for proj, projK in progV.projects.items %}
                                                                <div id="{{ proj }}_heading" class="list-group-item__heading">
-                                                                   <input class="collection_value" type="checkbox" value="{{ proj }}">
+                                                                   <input data-filter-attr-id="{{ progV.collex_attr_id }}" class="collection_value" type="checkbox" value="{{ proj }}">
                                                                    <span class="collection_name value">{{ proj|upper }}</span> <span class="float-right case_count count">{{ projK }}</span>
                                                                </div>
                                                             <div id="{{ proj }}" class="collapse list-group-sub-item__body">
                                                            {% endfor %}
                                                      {% else %}
                                                      <div id="{{ progK }}_heading" class="list-group-item__heading">
-                                                         <input type="checkbox" value="{{ progK }}">
+                                                         <input data-filter-attr-id="{{ progV.prog_attr_id }}" type="checkbox" value="{{ progK }}">
                                                          <a role="button" data-toggle="collapse" href="#{{ progK }}" aria-expanded="false" aria-controls="{{ progK }}">
                                                              <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>
                                                          </a>
@@ -55,7 +55,7 @@
                                                            {% for proj, projK in progV.projects.items|dictsort:"0.lower" %}
                                                               <li class="checkbox {% if forloop.counter >= 6 %} extra-values{% endif %}">
                                                                 <label>
-                                                                  <input class="collection_value" type="checkbox" value="{{ proj }}">
+                                                                  <input data-filter-attr-id="{{ progV.collex_attr_id }}" class="collection_value" type="checkbox" value="{{ proj }}">
                                                                     <span class="collection_name value">{{ proj|upper }} </span> <span class="float-right case_count count plotit">{{ projK }}</span>
                                                                  </label>
                                                                </li>
