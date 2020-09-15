@@ -44,6 +44,7 @@ logger = logging.getLogger('main_logger')
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 
+
 # The site's homepage
 @never_cache
 def landing_page(request):
@@ -74,18 +75,25 @@ def landing_page(request):
 
     return render(request, 'idc/landing.html', {
         'request': request,
-        'case_counts': [{'site': x, 'cases':sapien_counts[x], 'fileCount':0 } for x in sapien_counts.keys()],
+        'case_counts': [{'site': x, 'cases': sapien_counts[x], 'fileCount': 0} for x in sapien_counts.keys()],
         'example_tooltips': ex_tooltips
     })
+
 
 # Displays the privacy policy
 @never_cache
 def privacy_policy(request):
     return render(request, 'idc/privacy.html', {'request': request, })
 
+
+def collaborators(request):
+    return render(request, 'idc/collaborators.html', {'request': request, })
+
+
 # Returns css_test page used to test css for general ui elements
 def css_test(request):
     return render(request, 'idc/css_test.html', {'request': request})
+
 
 # View for testing methods manually
 @login_required
@@ -96,7 +104,8 @@ def test_methods(request):
         filters = {"vital_status": ["Alive"], "disease_code": ["READ", "BRCA"]}
         # These are the actual data fields to display in the expanding table; again this is just an example
         # set that should be properly supplied in the reuqest
-        fields = ["BodyPartExamined", "Modality", "StudyDescription", "StudyInstanceUID", "SeriesInstanceUID", "case_barcode", "disease_code", "sample_type"]
+        fields = ["BodyPartExamined", "Modality", "StudyDescription", "StudyInstanceUID", "SeriesInstanceUID",
+                  "case_barcode", "disease_code", "sample_type"]
 
         # get_collex_metadata will eventually branch into 'from BQ' and 'from Solr' depending on if there's a request
         # for a version which isn't current, or for a user cohort
@@ -115,10 +124,11 @@ def test_methods(request):
 
     return render(request, 'idc/explore.html', {'request': request, 'context': context})
 
+
 # User details page
 @login_required
 def user_detail(request, user_id):
-    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
+    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
 
     if int(request.user.id) == int(user_id):
 
@@ -151,6 +161,7 @@ def user_detail(request, user_id):
     else:
         return render(request, '403.html')
 
+
 @receiver(user_login_failed)
 def user_login_failed_callback(sender, credentials, **kwargs):
     try:
@@ -165,9 +176,9 @@ def user_login_failed_callback(sender, credentials, **kwargs):
     except Exception as e:
         logger.exception(e)
 
+
 # Extended login view so we can track user logins, redirects to data exploration page
 def extended_login_view(request):
-
     try:
         # Write log entry
         st_logger = StackDriverLogger.build_from_django_settings()
@@ -175,7 +186,8 @@ def extended_login_view(request):
         user = User.objects.get(id=request.user.id)
         st_logger.write_text_log_entry(
             log_name,
-            "[WEBAPP LOGIN] User {} logged in to the web application at {}".format(user.email, datetime.datetime.utcnow())
+            "[WEBAPP LOGIN] User {} logged in to the web application at {}".format(user.email,
+                                                                                   datetime.datetime.utcnow())
         )
 
     except Exception as e:
@@ -191,9 +203,11 @@ def extended_login_view(request):
 def health_check(request, match):
     return HttpResponse('')
 
+
 # Returns the basic help page (will direct to contact info and readthedocs
 def help_page(request):
-    return render(request, 'idc/help.html',{'request': request})
+    return render(request, 'idc/help.html', {'request': request})
+
 
 def quota_page(request):
     return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
@@ -222,12 +236,14 @@ def explore_data_page(request):
         collapse_on = req.get('collapse_on', 'SeriesInstanceUID')
         is_json = (req.get('is_json', "False").lower() == "true")
 
-        context = build_explorer_context(is_dicofdic, source, versions, filters, fields, order_docs, counts_only, with_related, with_derived, collapse_on, is_json)
+        context = build_explorer_context(is_dicofdic, source, versions, filters, fields, order_docs, counts_only,
+                                         with_related, with_derived, collapse_on, is_json)
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
         logger.exception(e)
-        messages.error(request, "Encountered an error when attempting to load the page - please contact the administrator.")
+        messages.error(request,
+                       "Encountered an error when attempting to load the page - please contact the administrator.")
 
     if is_json:
         # In the case of is_json=True, the 'context' is simply attr_by_source
@@ -236,23 +252,26 @@ def explore_data_page(request):
         # These are filters to be loaded *after* a page render
         context['filters_for_load'] = json.loads(req.get('filters_for_load', '{}'))
 
-        context['order']={'derived_set': ['dicom_derived_all:segmentation','dicom_derived_all:qualitative','dicom_derived_all:quantitative']};
+        context['order'] = {'derived_set': ['dicom_derived_all:segmentation', 'dicom_derived_all:qualitative',
+                                            'dicom_derived_all:quantitative']};
         return render(request, 'idc/explore.html', context)
+
 
 # Callback for recording the user's agreement to the warning popup
 def warn_page(request):
-    request.session['seenWarning']=True;
+    request.session['seenWarning'] = True;
     return JsonResponse({'warning_status': 'SEEN'}, status=200)
+
 
 # About page
 def about_page(request):
-    return render(request, 'idc/about.html',{'request': request})
+    return render(request, 'idc/about.html', {'request': request})
+
 
 # User dashboard, where saved cohorts (and, in the future, uploaded/indexed data) are listed
 @login_required
 def dashboard_page(request):
-
-    context = {'request'  : request}
+    context = {'request': request}
 
     try:
         # Cohort List
