@@ -114,6 +114,12 @@ require([
 
                 },
                 {
+                    'name': 'projectId',
+                    'data': 'tableReference.projectId',
+                    'visible': false,
+                    'className': 'colvis-toggle'
+                },
+                {
                     'name': 'datasetId',
                     'data': 'tableReference.datasetId',
                     'visible': false,
