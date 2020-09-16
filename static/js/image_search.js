@@ -1780,7 +1780,9 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             var allFilters=allListItems.children().children('input:checkbox');
             var checkedFilters=allListItems.children().children('input:checked');
             var showZeros = true;
-            if ( ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').length>0)  && ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros')[0].checked)){
+            var isSearchConf = ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').length>0);
+
+            if ( isSearchConf  && ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros')[0].checked)){
                 showZeros = false;
             }
 
@@ -1865,7 +1867,16 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             }
 
             else {
-                 $('#' + filterCat).children('.more-checks').show();
+                var numMore;
+                var allListItems
+                if (showZeros){
+                    numMore = allListItems.length-5;
+                }
+                else{
+                    numMore = allListItems.filter('.zeroed').length-5;
+                }
+                $('#' + filterCat).children('.more-checks').show();
+                $('#' + filterCat).children('.more-checks').children('.show-more')[0].innerText="show "+numMore.toString()+" more";
                 $('#' + filterCat).children('.less-checks').hide();
             }
 
