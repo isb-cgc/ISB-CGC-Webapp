@@ -42,7 +42,7 @@ django.setup()
 
 from idc_collections.models import Program, Collection, Attribute, Attribute_Ranges, \
     Attribute_Display_Values, DataSource, DataSourceJoin, DataVersion, DataSetType, \
-    Attribute_Set_Type, Attribute_Display_Category
+    Attribute_Set_Type, Attribute_Display_Category, ImagingDataCommonsVersion
 
 from django.contrib.auth.models import User
 idc_superuser = User.objects.get(username="idc")
@@ -116,23 +116,27 @@ def add_data_sets(sets_set):
             logger.exception(e)
 
 def add_data_versions(dv_set):
-    for dv in dv_set:
-        try:
+    idc_dev, created = ImagingDataCommonsVersion.objects.update_or_create(name="Imaging Data Commons Data Release", version_number="1.0")
+    ver_to_idc = []
+    try:
+        for dv in dv_set:
             obj, created = DataVersion.objects.update_or_create(name=dv['name'], version=dv['ver'])
 
             progs = Program.objects.filter(name__in=dv['progs'])
             ver_to_prog = []
-
             for prog in progs:
                 ver_to_prog.append(DataVersion.programs.through(dataversion_id=obj.id, program_id=prog.id))
 
-            DataVersion.programs.through.objects.bulk_create(ver_to_prog)
+            ver_to_idc.append(DataVersion.idc_versions.through(dataversion_id=obj.id, imagingdatacommonsversion_id=idc_dev.id))
 
-            print("Data Version created:")
-            print(obj)
-        except Exception as e:
-            logger.error("[ERROR] Data Version {} may not have been added!".format(dv['name']))
-            logger.exception(e)
+        DataVersion.programs.through.objects.bulk_create(ver_to_prog)
+        DataVersion.idc_versions.through.objects.bulk_create(ver_to_idc)
+
+        logger.info("[STATUS] Data Versions loaded:")
+        logger.info("{}".format(DataVersion.objects.all()))
+    except Exception as e:
+        logger.error("[ERROR] Data Versions may not have been added!")
+        logger.exception(e)
 
 def add_programs(program_set):
     results = {}
@@ -322,7 +326,6 @@ def main():
             {"name": "GDC Data Release 9", "ver": "r9", "progs":["TCGA"]},
             {"name": "TCIA Image Data", "ver": "1","progs":["TCGA", "ISPY", "QIN", "LIDC"]},
             {"name": "TCIA Derived Data", "ver": "1", "progs":["LIDC"]},
-            {"name": "IDC Version 1", "ver": "1", "progs":["TCGA", "ISPY", "QIN", "LIDC"]},
         ])
 
         add_data_source([SOLR_INDEX['dicom_derived']], ["TCIA Image Data", "TCIA Derived Data"],["TCGA", "ISPY", "QIN", "LIDC"], ["IDC Source Data", "Derived Data"], DataSource.SOLR)
