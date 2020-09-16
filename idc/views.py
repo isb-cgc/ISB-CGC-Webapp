@@ -31,7 +31,7 @@ from django.contrib import messages
 
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
-from idc_collections.models import Program, DataSource, Collection
+from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion
 from idc_collections.collex_metadata_utils import build_explorer_context
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
@@ -251,9 +251,9 @@ def explore_data_page(request):
     else:
         # These are filters to be loaded *after* a page render
         context['filters_for_load'] = json.loads(req.get('filters_for_load', '{}'))
-
         context['order'] = {'derived_set': ['dicom_derived_all:segmentation', 'dicom_derived_all:qualitative',
-                                            'dicom_derived_all:quantitative']};
+                                            'dicom_derived_all:quantitative']}
+
         return render(request, 'idc/explore.html', context)
 
 

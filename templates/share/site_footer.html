@@ -1,12 +1,13 @@
 {% load staticfiles %}
 {% load idc_collections_custom_tags %}
 
+{% with data_release=""|get_idc_version %}
         <div class="row site-footer">
             <div class="about col-lg-12 col-md-12 col-sm-12">
                 <div class="about panel-body">
                     <p><a href="{% url 'privacy' %}">Privacy Policy</a> | <a href="{% url 'collaborators' %}">Collaborators</a></p>
                     <p><i><b>Application Version:</b> {{ APP_VERSION }}</i></p>
-                    <p>Data Release 1.0 - September 21, 2020</p>
+                    <p>{{ data_release.name }} Version {{ data_release.version_number }} - {{ data_release.date_active|date:"F d, Y" }}</p>
                     <p>Data hosted by IDC is subject to the <a href="https://wiki.cancerimagingarchive.net/x/c4hF">TCIA Data Usage License and Citation Requirements</a></p>
                     <br>
                     <div class="acknowledgement">
@@ -15,3 +16,4 @@
                 </div>
             </div>
         </div>
+{% endwith %}
