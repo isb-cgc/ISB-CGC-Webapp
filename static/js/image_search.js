@@ -141,6 +141,8 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 }
                 window.filterObj[filtAtt]['rng'] = attVal;
             }
+
+
             if (updateNow) {
                 updatePlotBinsForSliders(slideDiv);
                 mkFiltText();
@@ -543,6 +545,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
                 stop: function (event, ui) {
                     //   updateSliderSelection(inpDiv, displaySet, header, attributeName, isInt);
+
 
                     var val = $('#' + inpName)[0].value;
                     var valArr = val.split('-');
@@ -1358,6 +1361,18 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 type: 'get',
                 contentType: 'application/x-www-form-urlencoded',
                 success: function (data) {
+                    if ($('#search_def p').length>0){
+                      $('#save-cohort-btn').prop('disabled','');
+                      if(user_is_auth) {
+                        $('#save-cohort-btn').prop('title','');
+                        }
+                   }
+                    else{
+                       $('#save-cohort-btn').prop('disabled','disabled');
+                        if(user_is_auth) {
+                            $('#save-cohort-btn').prop('title','Please select at least one filter.');
+                        }
+                    }
                     //updateCollectionTotals(data.total, data.origin_set.attributes.collection_id);
                     updateCollectionTotals('Program', data.programs);
                     //updateFilterSelections('search_orig_set', data.origin_set.All.attributes);
