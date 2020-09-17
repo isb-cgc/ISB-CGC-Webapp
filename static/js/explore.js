@@ -117,4 +117,66 @@ require([
         allowHTML: true,
         interactive: true
     });
+
+    var ANONYMOUS_FILTERS = {};
+
+    var save_anonymous_filters = function()
+    {
+        // Collect all selected filters and save to session storage
+        var filters = [];
+        $('.search-checkbox-list input:checked').each(function() {
+            var $this = $(this);
+            var value = {
+                'attr_id': $this.data('data-filter-attr-id'),
+                'value_id'  : $this.data('value'),
+            };
+            filters.push(value);
+        });
+
+        var filterStr = JSON.stringify(filters);
+        sessionStorage.setItem('anonymous_filters', filterStr);
+    };
+
+    var load_anonymous_filters = function()
+    {
+        // Load anonymous filters from session storage and clear it, so it is not always there
+        var str = sessionStorage.getItem('anonymous_filters');
+        ANONYMOUS_FILTERS = JSON.parse(str);
+        sessionStorage.removeItem('anonymous_filters');
+    };
+
+    var apply_anonymous_filters = function()
+    {
+        // Check if anonymous filter exist, then find all checkbox and check them
+        if (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS.length > 0) {
+            for (i = 0; i < ANONYMOUS_FILTERS.length; ++i) {
+                var aFilter = ANONYMOUS_FILTERS[i];
+
+                var attr_id = aFilter.attr_id.toString();
+                var value_id = aFilter.value_id.toString();
+
+                apply_anonymous_checkbox_filter(attr_id, value_id);
+            }
+        }
+    };
+
+    var apply_anonymous_checkbox_filter = function(attr_id, value_id)
+    {
+        var checkbox = $('input[data-filter-attr-id=attr_id][value=value_id]');
+
+        if (checkbox !== null) {
+            // Set checked and trigger change to update other related data
+            checkbox.prop("checked", true);
+            checkbox.trigger('change', [Boolean(i !== (ANONYMOUS_FILTERS.length-1))]);
+        }
+    };
+
+    load_anonymous_filters();
+    apply_anonymous_filters();
+
+    $('#log-in-to-save-btn').on('click', function()
+    {
+        // $.setCookie('login_from','new_cohort','/');
+        save_anonymous_filters();
+    });
 });

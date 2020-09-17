@@ -49,7 +49,8 @@
                 {% if request.user.is_authenticated %}Save As New Cohort{% else %}Log in to Save{% endif %}
             </button>
         {% else %}
-            <button id="disabled-chort-save-btn" class="btn btn-special pull-right" data-toggle="modal" title="Cohort saving is currently disabled." disabled="disabled">
+            <button id="log-in-to-save-btn" href="{% url 'explore_data' %}"
+                    class="btn btn-special pull-right" data-toggle="modal" title="Cohort saving is currently disabled." disabled="disabled">
                 {% if request.user.is_authenticated %}Save As New Cohort{% else %}Log in to Save{% endif %}
             </button>
         {% endif %}
