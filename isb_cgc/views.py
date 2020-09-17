@@ -435,7 +435,6 @@ def get_image_data(request, file_uuid):
 
 
 def get_tbl_preview(request, proj_id, dataset_id, table_id):
-    logger.info('==get_tbl_preview==')
     status = 200
     MAX_ROW = 8
     if not proj_id or not dataset_id or not table_id:
@@ -445,19 +444,14 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
         }
     else:
         try:
-            logger.info('==get_tbl_preview2==')
             bq_service = get_bigquery_service()
-            logger.info('==get_tbl_preview3==')
             dataset = bq_service.datasets().get(projectId=proj_id, datasetId=dataset_id).execute()
-            logger.info('==get_tbl_preview4==')
             is_public = False
             for access_entry in dataset['access']:
-                logger.info('==get_tbl_preview== checking access_entry')
                 # print(access_entry)
                 if access_entry.get('role') == 'READER' and access_entry.get('specialGroup') == 'allAuthenticatedUsers':
                     is_public = True
                     break
-            logger.info('==get_tbl_preview==is_public {}'.format(is_public))
             if is_public:
                 tbl_data=bq_service.tables().get(projectId=proj_id, datasetId=dataset_id, tableId=table_id).execute()
                 if tbl_data.get('type') == 'VIEW' and tbl_data.get('view') and tbl_data.get('view').get('query'):
