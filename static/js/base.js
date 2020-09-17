@@ -143,10 +143,9 @@ require([
 
     $('#cohort-table').tablesorter({
         headers: {
-            0: {sorter:false},
-            7: {sorter: 'fullDate'}
+            0: {sorter:false}
         },
-        sortList: [[7,1]]
+        sortList: [[1]]
     });
 
     $(document).ready(function(){
