@@ -2313,7 +2313,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
         }
     );
 
-     let load_filters = function(filters) {
+     var load_filters = function(filters) {
         _.each(filters, function(group){
             _.each(group['filters'], function(filter){
                 $('div.list-group-item__body[data-attr-id="'+filter['id']+'"]').collapse('show');
