@@ -445,10 +445,12 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
         }
     else:
         try:
-            bq_service = get_bigquery_service()
-            dataset = bq_service.datasets().get(projectId=proj_id, datasetId=dataset_id).execute()
-            is_public = False
             logger.info('==get_tbl_preview2==')
+            bq_service = get_bigquery_service()
+            logger.info('==get_tbl_preview3==')
+            dataset = bq_service.datasets().get(projectId=proj_id, datasetId=dataset_id).execute()
+            logger.info('==get_tbl_preview4==')
+            is_public = False
             for access_entry in dataset['access']:
                 logger.info('==get_tbl_preview== checking access_entry')
                 # print(access_entry)
