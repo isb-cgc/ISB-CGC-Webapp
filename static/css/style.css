@@ -976,7 +976,6 @@ a.skip-nav {
 #user-login .dropdown {
   display: inline-block;
   vertical-align: middle;
-  font-size: xx-large;
   margin-right: 15px; }
   #user-login .dropdown > a:hover, #user-login .dropdown > a:focus {
     background-color: #fff;
