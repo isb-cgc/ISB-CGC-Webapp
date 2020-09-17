@@ -908,7 +908,7 @@ nav, .site-header {
     padding: 0 !important; }
   .navbar-item__text {
     display: inline-block;
-    font-size: 16px;
+    font-size: 14px;
     vertical-align: middle; }
     .navbar-item__text:hover {
       text-decoration: none; }
@@ -2971,7 +2971,8 @@ html {
 
 #landing .modality-panel img.example {
   width: 440px;
-  height: 363px;
+  max-width: 100%;
+  height: auto;
   border: 2px solid black;
 }
 .site-footer {
