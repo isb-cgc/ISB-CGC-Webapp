@@ -1,5 +1,6 @@
 {% load custom_tags %}
 
+
 <div class="container-fluid">
     <div class ="row">
         <div class="tab-content data-tab-content">
@@ -13,7 +14,9 @@
                     <div class="data-version panel data-tab-content-panel">
                         <div class="tab-panel panel-default">
                             <div class="panel-heading clearfix">
+                                {% with data_release=""|get_idc_version %}
                                 <h4 class="panel-title">{{ data_release.name }} Version {{ data_release.version_number }}</h4>
+                                {% endwith %}
                             </div>
                         </div>
                     </div>

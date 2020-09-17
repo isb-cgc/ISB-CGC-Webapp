@@ -44,13 +44,11 @@
                 <table id="cohort-table" class="table table-striped tablesorter cohort-table">
                     <thead><tr>
                         <th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>
-                        <th class="name-col">Cohort Name</th>
-                        <th class="case-col"># Cases</th>
-                        <th class="sample-col"># Samples</th>
+                        <th class="id-col">Cohort ID</th>
+                        <th class="name-col">Name</th>
+                        <th class="desc-col">Description</th>
                         <th class="owner-col">Ownership</th>
                         <th class="share-col">Shared With</th>
-                        <th class="id-col">Cohort ID</th>
-                        <th class="date-col">Last Modified</th>
                     </tr></thead>
                     <tbody>
                     {% for cohort in cohorts %}
@@ -59,9 +57,11 @@
                             <td class="checkbox-col">
                                 <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} class="cohort" type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>
                             </td>
+                            <td class="id-col">
+                                {{ cohort.id }}
+                            </td>
                             <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</a></td>
-                            <td class="case-col">{{ cohort.case_size }}</td>
-                            <td class="sample-col"> {{ cohort.sample_size }} </td>
+                            <td class="desc-col">{% if cohort.description %}{{ cohort.description }}{% else %}N/A{% endif %}</td>
                             <td class="owner-col">
                                 {% if cohort.perm == 'Owner' %}
                                     You
@@ -76,11 +76,6 @@
                                     You
                                 {% endif %}
                             </td>
-                            <td class="id-col">
-                                {{ cohort.id }}
-                            </td>
-                        {#  <td class="date-col">{{ cohort.date_created|date:'M d, Y, g:i a' }}</td> #}
-                            <td class="date-col">N/A</td>
                         </tr>
                     {% endif %}
                     {% endfor %}

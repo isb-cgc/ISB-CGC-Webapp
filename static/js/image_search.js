@@ -2,7 +2,7 @@
 require.config({
     baseUrl: STATIC_FILES_URL + 'js/',
     paths: {
-        jquery: 'libs/jquery-1.11.1.min',
+        jquery: 'libs/jquery-3.5.1',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
         jquerydt: 'libs/jquery.dataTables.min',
@@ -2313,7 +2313,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
         }
     );
 
-     let load_filters = function(filters) {
+     var load_filters = function(filters) {
         _.each(filters, function(group){
             _.each(group['filters'], function(filter){
                 $('div.list-group-item__body[data-attr-id="'+filter['id']+'"]').collapse('show');
