@@ -1236,7 +1236,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                         reformDic[listId][item]['count'] = progDic[item]['val'];
                     }
 
-                    else if (item === 'tcga'){
+                    else if (item.toLowerCase() === 'tcga'){
                         reformDic[listId][item]=new Object();
                         reformDic[listId][item]['count'] = progDic[item]['val'];
                         reformDic[item] =  new Object();
@@ -1833,8 +1833,10 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                     cnt = oldCnt;
                 }
 
-                spans.get(1).innerHTML = cnt;
-
+                spans.filter('.case_count')[0].innerHtml = cnt;
+                if (spans.filter('.plot_count').length>0) {
+                    spans.filter('.plot_count')[0].innerHtml = cnt;
+                }
 
                 if ( (cnt>0) || checked)  {
                     $(elem).parent().parent().removeClass('zeroed');
@@ -1863,9 +1865,9 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
                 if (!hasSlider) {
                     if (checked || allUnchecked) {
-                        $(spans.get(1)).addClass('plotit');
+                        $(spans.filter('.plot_count')).addClass('plotit');
                     } else {
-                        $(spans.get(1)).removeClass('plotit');
+                        $(spans.filter('.plot_count')).removeClass('plotit');
                     }
                 }
             }
