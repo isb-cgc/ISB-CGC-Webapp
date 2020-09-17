@@ -449,11 +449,21 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
             is_public = False
             for access_entry in dataset['access']:
                 # print(access_entry)
-                if access_entry['role'] == 'READER' and access_entry['specialGroup'] == 'allAuthenticatedUsers':
+                if access_entry.get('role') == 'READER' and access_entry.get('specialGroup') == 'allAuthenticatedUsers':
                     is_public = True
                     break
             if is_public:
-                response = bq_service.tabledata().list(projectId=proj_id, datasetId=dataset_id, tableId=table_id,
+                tbl_data=bq_service.tables().get(projectId=proj_id, datasetId=dataset_id, tableId=table_id).execute()
+                if tbl_data.get('type') == 'VIEW' and tbl_data.get('view') and tbl_data.get('view').get('query'):
+                    view_query_template = '''#standardSql
+                            {query_stmt}
+                            LIMIT {max}'''
+                    view_query = view_query_template.format(query_stmt=tbl_data['view']['query'], max=MAX_ROW)
+                    response = bq_service.jobs().query(
+                        projectId=settings.BIGQUERY_PROJECT_ID,
+                        body={ 'query': view_query  }).execute()
+                else:
+                    response = bq_service.tabledata().list(projectId=proj_id, datasetId=dataset_id, tableId=table_id,
                                                        maxResults=MAX_ROW).execute()
                 if response and int(response['totalRows']) > 0:
                     result = {
