@@ -1268,7 +1268,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                       */
                 }
             }
-            updateFilterSelections('program_set', reformDic);
+            updateFilterSelections('program_set', {'unfilt':reformDic});
         }
         var updateCollectionTotals_old = function (listId, progDic) {
             //dic.val dic.projects
@@ -1361,6 +1361,8 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 type: 'get',
                 contentType: 'application/x-www-form-urlencoded',
                 success: function (data) {
+
+                    var isFiltered = true;
                     if ($('#search_def p').length>0){
                       $('#save-cohort-btn').prop('disabled','');
                       if(user_is_auth) {
@@ -1368,6 +1370,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                         }
                    }
                     else{
+                        isFiltered = false;
                        $('#save-cohort-btn').prop('disabled','disabled');
                         if(user_is_auth) {
                             $('#save-cohort-btn').prop('title','Please select at least one filter.');
@@ -1377,18 +1380,35 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                     updateCollectionTotals('Program', data.programs);
                     //updateFilterSelections('search_orig_set', data.origin_set.All.attributes);
 
-                    updateFilterSelections('search_orig_set', data.origin_set.All.attributes);
+                    dicofdic= {'unfilt': data.origin_set.All.attributes, 'filt':''}
+                    if (isFiltered){
+                        dicofdic['filt']=data.filtered_counts.origin_set.All.attributes;
+                    }
+                    else {
+                        dicofdic['filt']=data.origin_set.All.attributes;
+                    }
+
+                    updateFilterSelections('search_orig_set', dicofdic);
                     createPlots('search_orig_set');
 
                     var derivedAttrs = Array.from($('#search_derived_set').children('.list-group').children('.list-group-item').children('.list-group-item__body').map( function() {return this.id;}  ));
 
-                    if (data.hasOwnProperty('derived_set')) {
+                     if (data.hasOwnProperty('derived_set')) {
                         $('#search_derived_set').removeClass('disabled');
                         for (facetSet in data.derived_set){
                             if ('attributes' in data.derived_set[facetSet]){
-                                updateFilterSelections(data.derived_set[facetSet].name, data.derived_set[facetSet].attributes);
+
+                                dicofdic = {'unfilt': data.derived_set[facetSet].attributes, 'filt': ''}
+                                if (isFiltered){
+                                    dicofdic['filt'] = data.filtered_counts.derived_set[facetSet].attributes;
+                                }
+                                else{
+                                    dicofdic['filt'] = data.derived_set[facetSet].attributes;
+                                }
+                                updateFilterSelections(data.derived_set[facetSet].name, dicofdic);
                                 var derivedAttrIndex = derivedAttrs.indexOf(data.derived_set[facetSet].name);
-                                if (derivedAttrIndex>-1){
+
+                                if (derivedAttrIndex>-1) {
                                     derivedAttrs.splice(derivedAttrIndex,1);
                                 }
                             }
@@ -1402,11 +1422,23 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                     for (var i=0; i< derivedAttrs.length;i++) {
                         updateFilterSelections(derivedAttrs[i], {});
                     }
+
+
+
+
                     createPlots('search_derived_set');
 
                     if (data.hasOwnProperty('related_set')) {
                         $('#search_related_set').removeClass('disabled');
-                        updateFilterSelections('search_related_set', data.related_set.All.attributes);
+                        dicofdic = {'filt':data.related_set.All.attributes, 'unfilt':''  }
+                        if (isFiltered){
+                            dicofdic['unfilt'] = data.filtered_counts.related_set.All.attributes;
+                        }
+                        else{
+                            dicofdic['unfilt'] = data.related_set.All.attributes;
+                        }
+
+                        updateFilterSelections('search_related_set', dicofdic);
                         //createPlots('tcga_clinical');
                     }
                     else{
@@ -1415,6 +1447,8 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                     }
 
                     createPlots('search_related_set');
+
+
                     var collFilt = new Array();
                     if ('collection_id' in parsedFiltObj){
                         collFilt=parsedFiltObj['collection_id'];
@@ -1821,31 +1855,45 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
                 var spans = $(elem).parent().find('span');
                 var lbl = spans.get(0).innerHTML;
-                var oldCnt = parseInt(spans.get(1).innerHTML);
-                var cnt=''
-                if (dataFetched && dic.hasOwnProperty(val) ){
-                    cnt = String(dic[val].count)
+
+                var oldCntUf = parseInt(spans.filter('.case_count')[0].innerHTML);
+                var cntUf=0
+                if (dataFetched && dic.hasOwnProperty('unfilt') && dic['unfilt'].hasOwnProperty(val)) {
+                    cntUf = dic['unfilt'][val].count
                 }
                 else if (dataFetched){
-                    cnt = String('0');
+                    cntUf = 0;
                 }
                 else{
-                    cnt = oldCnt;
+                    cntUf = oldCntUf;
                 }
 
-                spans.filter('.case_count')[0].innerHtml = cnt;
+                spans.filter('.case_count')[0].innerHTML = cntUf.toString();
+
                 if (spans.filter('.plot_count').length>0) {
-                    spans.filter('.plot_count')[0].innerHtml = cnt;
+                    var oldCntF = parseInt(spans.filter('.plot_count')[0].innerHTML);
+                    var cntF = 0
+                    if (dataFetched && dic.hasOwnProperty('filt') && dic['filt'].hasOwnProperty(val)) {
+                        cntF = dic['filt'][val].count
+                    } else if (dataFetched) {
+                        cntF = 0;
+                    } else {
+                        cntF = oldCntF;
+                    }
+
+                    spans.filter('.plot_count')[0].innerHTML = cntF.toString();
                 }
 
-                if ( (cnt>0) || checked)  {
+
+
+                if ( (cntUf>0) || checked)  {
                     $(elem).parent().parent().removeClass('zeroed');
                 }
                 else {
                     $(elem).parent().parent().addClass('zeroed');
                 }
 
-                if ( (cnt>0) || checked || showZeros) {
+                if ( (cntUf>0) || checked || showZeros) {
                       numAttrAvail++;
                 }
 
@@ -1856,20 +1904,22 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                     $(elem).parent().parent().removeClass('extra-values');
                 }
 
-                if ( ( (cnt>0) || checked || showZeros ) && (showExtras || (numAttrAvail<6)) ) {
+                if ( ( (cntUf>0) || checked || showZeros ) && (showExtras || (numAttrAvail<6)) ) {
                       $(elem).parent().parent().show();
                 }
                 else {
                     $(elem).parent().parent().hide();
                 }
 
-                if (!hasSlider) {
+               /* if (!hasSlider) {
                     if (checked || allUnchecked) {
                         $(spans.filter('.plot_count')).addClass('plotit');
                     } else {
                         $(spans.filter('.plot_count')).removeClass('plotit');
                     }
                 }
+
+                */
             }
 
 
@@ -1915,11 +1965,17 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             filterCats = findFilterCats(id,false);
             for (i = 0; i < filterCats.length; i++) {
                 cat = filterCats[i]
-                if (dicofdic.hasOwnProperty(cat)) {
-                    updateFilters(filterCats[i], dicofdic[cat], true);
-                } else {
-                    updateFilters(filterCats[i], '', true);
+                filtDic={'unfilt':'', 'filt':''}
+
+                if ( (dicofdic.hasOwnProperty('unfilt')) &&  (dicofdic['unfilt'].hasOwnProperty(cat)))
+                {
+                    filtDic['unfilt']=dicofdic['unfilt'][cat]
                 }
+                if ( (dicofdic.hasOwnProperty('filt')) && (dicofdic['filt'].hasOwnProperty(cat))  )
+                {
+                    filtDic['filt']=dicofdic['filt'][cat]
+                }
+                updateFilters(filterCats[i], filtDic, true);
             }
         };
 
