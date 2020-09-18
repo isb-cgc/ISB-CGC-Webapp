@@ -2,7 +2,7 @@
 require.config({
     baseUrl: STATIC_FILES_URL + 'js/',
     paths: {
-        jquery: 'libs/jquery-1.11.1.min',
+        jquery: 'libs/jquery-3.5.1',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
         jquerydt: 'libs/jquery.dataTables.min',
@@ -2037,7 +2037,8 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                      hasCheckBox = true;
                      numCheckBoxes++;
                 }
-                else {
+                else
+               {
 
                     filtnm=$(filterCat).children('.list-group-sub-item__body, .list-group-item__body, .collection-list')[0].id;
 
@@ -2048,12 +2049,10 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                    checkBox = $(filterCat).children('.list-group-item__heading').children('input:checkbox')[0];
                 }
 
-
                 if ( hasCheckBox && (ind ===1) && !(allChecked) && !(noneChecked)){
                     checkBox.indeterminate = true;
                     checkBox.checked = false;
-                }
-                else if (hasCheckBox){
+                } else if (hasCheckBox){
                     checkBox.indeterminate = false;
                 }
 
@@ -2065,7 +2064,6 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                     if (!(checkBox.indeterminate)) {
                         checkBox.checked = true;
                     }
-
                     if (!(filterObj.hasOwnProperty(curCat))){
                         filterObj[curCat] = new Array();
                     }
@@ -2075,11 +2073,9 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                     if ((ind ===0) && (curCat.startsWith('Program'))){
                        resetTcgaFilters();
                     }
-
                     /* if ( allChecked && (i === (filterCats.length-1)) && (numCheckBoxes>1)) {
                         delete filterObj[curCat];
                     }*/
-
                 }
 
                 if (!checked && ( (ind===0) || ( (ind===1) && hasCheckBox && noneChecked)) ){
@@ -2118,8 +2114,8 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                     curCat+="."
                 }
                 curCat+=filtnm;
-
             }
+
             var childBoxes=$(filterElem).parent().siblings().find('input:checkbox');
             if (checked && (childBoxes.length>0)) {
                 filterObj[curCat] = new Array();
@@ -2137,7 +2133,6 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
         var handleFilterSelectionUpdate = function(filterElem, mkFilt, doUpdate) {
             checkFilters(filterElem);
-
             if (mkFilt) {
                 mkFiltText();
             }
@@ -2145,8 +2140,6 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 updateFacetsData(true);
             }
         };
-
-////////
 
         var tableSortBindings = function (filterId) {
             $('#' + filterId).find('.fa-caret-up, .fa-caret-down').on('click', function () {
@@ -2160,10 +2153,8 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 var curInd = $(this).parent().parent().index();
                 var tbl = $(this).parentsUntil('div').filter('table');
                 sortTable(tbl, curInd, asc);
-                //alert('here');
-
             });
-        }
+        };
 
         var sortTable = function (tbl, curInd, asc) {
             var thd = $(tbl).find('thead').find('th')[curInd];
@@ -2421,7 +2412,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
         }
     );
 
-     let load_filters = function(filters) {
+     var load_filters = function(filters) {
         _.each(filters, function(group){
             _.each(group['filters'], function(filter){
                 $('div.list-group-item__body[data-attr-id="'+filter['id']+'"]').collapse('show');
@@ -2432,19 +2423,21 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             });
         });
         mkFiltText();
-        updateFacetsData(true);
+        return updateFacetsData(true).promise();
      };
 
      var cohort_loaded = false;
      $(window).on('load', function(){
-        if(is_cohort) {
-            !cohort_loaded && load_filters(cohort_filters);
-            cohort_loaded = true;
-            $('input[type="checkbox"]').prop("disabled","disabled");
-            $('div.ui-slider').siblings('button').prop('disabled','disabled');
-            $('input#hide-zeros').prop("disabled","");
-            $('input#hide-zeros').prop("checked",true);
-            $('input#hide-zeros').triggerHandler('change');
+        if(is_cohort && !cohort_loaded) {
+             var loadPending = load_filters(cohort_filters);
+             loadPending.done(function(){
+                cohort_loaded = true;
+                $('input[type="checkbox"]').prop("disabled","disabled");
+                $('div.ui-slider').siblings('button').prop('disabled','disabled');
+                $('input#hide-zeros').prop("disabled","");
+                $('input#hide-zeros').prop("checked",true);
+                $('input#hide-zeros').triggerHandler('change');
+             });
         } else if(Object.keys(filters_for_load).length > 0) {
             load_filters(filters_for_load);
         } /* TODO: check for localStorage key of saved filters from a login */
