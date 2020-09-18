@@ -41,21 +41,7 @@
                         <a href="{% url 'cohort_list' %}" title="View Your Cohorts"><i class="fa fa-archive"></i> Cohorts</a>
                     </li>
                     {% endif %}
-                    <!--
-                    <li class="navbar-link navbar-item">
-                        <div class="dropdown">
-                            <a role="button class=dropdown-toggle navbar-item__text" id="help-dropdown" data-toggle="dropdown" aria-label="Help Dropdown" aria-expanded="true">
-                                Feedback <i class="fa fa-caret-down"></i>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-label="user-dropdown">
-                                <li role="menuitem"><a href="" target="_blank">Send Feedback</a></li>
-                                <li role="menuitem"><a href="https://github.com/ImagingDataCommons/IDC-Webapp/issues/new" target="_blank">Submit Github Issue</a></li>
-                            </ul>
-                        </div>
-                    </li>
-                    -->
-            </ul>
-
+                </ul>
                 <ul class="nav navbar-nav navbar-right">
                 {% if user.is_authenticated %}
                     <li id="user-login" class="navbar-item navbar-signin">
@@ -81,7 +67,7 @@
                 {% else %}
                     <li class="navbar-item inline-block navbar-signin">
                         <div class="dropdown">
-                            <a id="sign-in-dropdown" class="dropdown-toggle navbar-item__text"
+                            <a id="sign-in-dropdown" class="sign-in-dropdown dropdown-toggle navbar-item__text"
                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fa fa-sign-in"></i><p class="navbar-label">Sign In</p></a>
                             <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-labelledby="sign-in-dropdown">
