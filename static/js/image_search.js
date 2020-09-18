@@ -1430,12 +1430,12 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
                     if (data.hasOwnProperty('related_set')) {
                         $('#search_related_set').removeClass('disabled');
-                        dicofdic = {'filt':data.related_set.All.attributes, 'unfilt':''  }
+                        dicofdic = {'unfilt':data.related_set.All.attributes, 'filt':''  }
                         if (isFiltered){
-                            dicofdic['unfilt'] = data.filtered_counts.related_set.All.attributes;
+                            dicofdic['filt'] = data.filtered_counts.related_set.All.attributes;
                         }
                         else{
-                            dicofdic['unfilt'] = data.related_set.All.attributes;
+                            dicofdic['filt'] = data.related_set.All.attributes;
                         }
 
                         updateFilterSelections('search_related_set', dicofdic);
