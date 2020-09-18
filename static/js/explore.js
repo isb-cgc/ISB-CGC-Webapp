@@ -127,8 +127,8 @@ require([
         $('.search-checkbox-list input:checked').each(function() {
             var $this = $(this);
             var value = {
-                'attr_id': $this.data('data-filter-attr-id'),
-                'value_id'  : $this.data('value'),
+                'attr_id': $this.data('filterAttrId'),
+                'display_value'  : $this.data('filterDisplayVal'),
             };
             filters.push(value);
         });
@@ -153,30 +153,37 @@ require([
                 var aFilter = ANONYMOUS_FILTERS[i];
 
                 var attr_id = aFilter.attr_id.toString();
-                var value_id = aFilter.value_id.toString();
+                var display_value = aFilter.display_value.toString();
 
-                apply_anonymous_checkbox_filter(attr_id, value_id);
+                apply_anonymous_checkbox_filter(attr_id, display_value);
             }
         }
     };
 
-    var apply_anonymous_checkbox_filter = function(attr_id, value_id)
+    var apply_anonymous_checkbox_filter = function(attr_id, display_value)
     {
-        var checkbox = $('input[data-filter-attr-id=attr_id][value=value_id]');
+        var checkbox = $("input[data-filter-attr-id=" + attr_id + "][data-filter-display-val=" + display_value + "]")
 
         if (checkbox !== null) {
             // Set checked and trigger change to update other related data
             checkbox.prop("checked", true);
-            checkbox.trigger('change', [Boolean(i !== (ANONYMOUS_FILTERS.length-1))]);
+            checkbox.trigger('click', [Boolean(i === (ANONYMOUS_FILTERS.length-1))]);
         }
     };
 
     load_anonymous_filters();
     apply_anonymous_filters();
 
-    $('#log-in-to-save-btn').on('click', function()
+    $('#save-cohort-btn').on('click', function()
     {
         // $.setCookie('login_from','new_cohort','/');
         save_anonymous_filters();
+    });
+
+    $('#test-load-filter-btn').on('click', function()
+    {
+        // $.setCookie('login_from','new_cohort','/');
+        load_anonymous_filters();
+        apply_anonymous_filters();
     });
 });

@@ -45,13 +45,20 @@
 
             <h3 class="pull-left" role="heading" aria-level="1">Explore Image Data</h3>
         {% if DEV_TIER %}
-            <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal" data-target="#save-cohort-modal" title="{% if request.user.is_authenticated %}Please select at least one filter.{% else %}Please log in to save this cohort.{% endif %}" disabled="disabled">
-                {% if request.user.is_authenticated %}Save As New Cohort{% else %}Log in to Save{% endif %}
-            </button>
+            {% if request.user.is_authenticated %}
+                <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal" data-target="#save-cohort-modal" title="Please select at least one filter." disabled="disabled">
+                    Save As New Cohort
+                </button>
+            {% else %}
+                <button id="test-load-filter-btn"> Load Filters </button>
+                <button id="save-cohort-btn" class="btn btn-special pull-right" title="Please log in to save this cohort." disabled="disabled">
+{#                    onclick="location.href='{% url 'account_login' %}'">#}
+                    Log in to Save
+                </button>
+            {% endif %}
         {% else %}
-            <button id="log-in-to-save-btn" href="{% url 'explore_data' %}"
-                    class="btn btn-special pull-right" data-toggle="modal" title="Cohort saving is currently disabled." disabled="disabled">
-                {% if request.user.is_authenticated %}Save As New Cohort{% else %}Log in to Save{% endif %}
+            <button id="log-in-to-save-btn" class="btn btn-special pull-right" data-toggle="modal" title="Cohort saving is currently disabled." disabled="disabled">
+                Save As New Cohort
             </button>
         {% endif %}
         </div>
