@@ -2092,8 +2092,8 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
 
         var filterItemBindings = function (filterId) {
-            $('#' + filterId).find('input:checkbox').on('click', function (e, doFacetUpdate = true) {
-                handleFilterSelectionUpdate(this, true, doFacetUpdate);
+            $('#' + filterId).find('input:checkbox').on('click', function () {
+                handleFilterSelectionUpdate(this, true, true );
             });
 
             /*
@@ -2330,7 +2330,106 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
              });
         } else if(Object.keys(filters_for_load).length > 0) {
             load_filters(filters_for_load);
-        } /* TODO: check for localStorage key of saved filters from a login */
+        } else
+        {
+            /* TODO: check for localStorage key of saved filters from a login */
+            load_anonymous_filters();
+            if (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS.length > 0) {
+                load_filters(ANONYMOUS_FILTERS);
+            }
+        }
+    });
+
+    var ANONYMOUS_FILTERS = {};
+
+    var save_anonymous_filters = function()
+    {
+        var groups = [];
+        var filters = [];
+        $('.list-group-item__body').each(function() {
+            var $group = $(this);
+            var my_id = $group.data('attrId');
+            var checkboxes = $group.find("input:checked");
+            if (checkboxes.length > 0)
+            {
+                var values = [];
+                checkboxes.each(function() {
+                    var $checkbox = $(this);
+                    var my_value = $checkbox[0].value;
+                    values.push(my_value);
+                });
+                filters.push({
+                    'id': my_id,
+                    'values': values,
+                });
+            }
+        });
+
+        // // Collect all selected filters and save to session storage
+        // var groups = [];
+        // var filters = [];
+        // var curr_id = "";
+        // var values = [];
+        // $('.search-checkbox-list input:checked').each(function() {
+        //     var $this = $(this);
+        //     var my_id = $this.data('filterAttrId');
+        //     var my_value = $this[0].value;
+        //     if (my_id !== curr_id) {
+        //         if (curr_id !== "")
+        //         {
+        //             filters.push({
+        //                 'id': curr_id,
+        //                 'values': values,
+        //             });
+        //         }
+        //         curr_id = my_id;
+        //         values = [];
+        //         values.push(my_value);
+        //     }
+        //     else {
+        //         values.push(my_value);
+        //     }
+        // });
+        //
+        // if (curr_id !== "")
+        // {
+        //     filters.push({
+        //         'id': curr_id,
+        //         'values': values,
+        //     });
+        // }
+
+        groups.push({'filters': filters});
+
+        var filterStr = JSON.stringify(groups);
+        sessionStorage.setItem('anonymous_filters', filterStr);
+    };
+
+    var load_anonymous_filters = function()
+    {
+        // Load anonymous filters from session storage and clear it, so it is not always there
+        var str = sessionStorage.getItem('anonymous_filters');
+        ANONYMOUS_FILTERS = JSON.parse(str);
+        sessionStorage.removeItem('anonymous_filters');
+    };
+
+    $('#save-cohort-btn').on('click', function()
+    {
+        console.log("Saving filters.......");
+        save_anonymous_filters();
+    });
+
+    $('#test-load-filter-btn').on('click', function()
+    {
+        load_anonymous_filters();
+        if (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS.length > 0) {
+            load_filters(ANONYMOUS_FILTERS)
+        }
+    });
+
+    $('#test-save-filter-btn').on('click', function()
+    {
+        save_anonymous_filters();
     });
 });
 

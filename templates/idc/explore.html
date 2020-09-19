@@ -51,8 +51,9 @@
                 </button>
             {% else %}
                 <button id="test-load-filter-btn"> Load Filters </button>
-                <button id="save-cohort-btn" class="btn btn-special pull-right" title="Please log in to save this cohort." disabled="disabled">
-{#                    onclick="location.href='{% url 'account_login' %}'">#}
+                 <button id="test-save-filter-btn"> Save Filters </button>
+                <button id="save-cohort-btn" class="btn btn-special pull-right" title="Please log in to save this cohort." disabled="disabled"
+                    onclick="location.href='{% url 'account_login' %}'">
                     Log in to Save
                 </button>
             {% endif %}
