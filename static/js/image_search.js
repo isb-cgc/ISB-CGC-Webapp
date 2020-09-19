@@ -1983,17 +1983,17 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
              if ( !('Program' in window.filterObj) ){
                     window.filterObj['Program'] = new Array();
                 }
-                if (window.filterObj['Program'].indexOf('tcga')<0) {
-                    window.filterObj['Program'].push('tcga');
-                    window.filterObj['Program.tcga'] = ['tcga_blca','tcga_brca','tcga_cesc','tcga_coad','tcga_esca','tcga_gbm','tcga_hnsc','tcga_kich','tcga_kirc','tcga_kirp','tcga_lgg','tcga_lihc','tcga_luad','tcga_lusc','tcga_ov','tcga_prad','tcga_read','tcga_sarc','tcga_stad','tcga_thca','tcga_ucec'];
-                    $('#tcga_heading').parent().find('input:checkbox').prop('checked',true);
-                    $('#tcga_heading').parent().find('input:checkbox').prop('indeterminate',false);
+                if (window.filterObj['Program'].indexOf('TCGA')<0) {
+                    window.filterObj['Program'].push('TCGA');
+                    window.filterObj['Program.TCGA'] = ['tcga_blca','tcga_brca','tcga_cesc','tcga_coad','tcga_esca','tcga_gbm','tcga_hnsc','tcga_kich','tcga_kirc','tcga_kirp','tcga_lgg','tcga_lihc','tcga_luad','tcga_lusc','tcga_ov','tcga_prad','tcga_read','tcga_sarc','tcga_stad','tcga_thca','tcga_ucec'];
+                    $('#TCGA_heading').parent().find('input:checkbox').prop('checked',true);
+                    $('#TCGA_heading').parent().find('input:checkbox').prop('indeterminate',false);
                 }
 
         };
 
         var resetTcgaFilters = function(){
-            if ( ('Program' in window.filterObj) && (window.filterObj['Program'].indexOf('tcga')<0 )){
+            if ( ('Program' in window.filterObj) && (window.filterObj['Program'].indexOf('TCGA')<0 )){
                 $('#tcga_clinical').find('input:checkbox').prop('checked',false);
                 setSlider('age_at_diagnosis_slide',true,0,0,true, false);
                 var attKey =  Object.keys(window.filterObj);
