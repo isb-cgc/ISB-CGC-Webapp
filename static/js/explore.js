@@ -43,7 +43,7 @@ require([
     'cohortfilelist',
 ], function ($, tippy, base, imagesearch, d3, cohortfilelist) {
 
-    $('.filter-panel li.checkbox, #program_set').on('change', 'input', function() {
+    /*$('.filter-panel li.checkbox, #program_set').on('change', 'input', function() {
         if($('#search_def p').length > 0) {
             $('#save-cohort-btn').prop('disabled','');
             if(user_is_auth) {
@@ -55,7 +55,7 @@ require([
                 $('#save-cohort-btn').prop('title','Please select at least one filter.');
             }
         }
-    });
+    }); */
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('#save-cohort-modal').on('show.bs.modal', function() {

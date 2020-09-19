@@ -2975,6 +2975,11 @@ html {
   height: auto;
   border: 2px solid black;
 }
+
+.dropdown .sign-in-dropdown {
+  padding-top: 4px;
+}
+
 .site-footer {
   background-color: #003a55;
   text-align: center;
