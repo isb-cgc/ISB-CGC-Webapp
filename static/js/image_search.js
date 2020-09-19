@@ -2459,22 +2459,25 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
         $('.list-group-item__body').each(function() {
             var $group = $(this);
             var my_id = $group.data('attrId');
-            var checkboxes = $group.find("input:checked");
-            if (checkboxes.length > 0)
+            if (my_id != null)
             {
-                var values = [];
-                checkboxes.each(function() {
-                    var $checkbox = $(this);
-                    var my_value = $checkbox[0].value;
-                    values.push(my_value);
-                });
-                filters.push({
-                    'id': my_id,
-                    'values': values,
-                });
+                var checkboxes = $group.find("input:checked");
+                if (checkboxes.length > 0)
+                {
+                    var values = [];
+                    checkboxes.each(function() {
+                        var $checkbox = $(this);
+                        var my_value = $checkbox[0].value;
+                        values.push(my_value);
+                    });
+                    filters.push({
+                        'id': my_id,
+                        'values': values,
+                    });
+                }
             }
         });
-
+        
         // // Collect all selected filters and save to session storage
         // var groups = [];
         // var filters = [];
