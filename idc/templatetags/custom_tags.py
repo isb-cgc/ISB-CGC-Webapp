@@ -28,7 +28,7 @@ from django import template
 from cohorts.models import Cohort, Cohort_Perms
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
-from idc_collections.models import Program
+from idc_collections.models import Program, ImagingDataCommonsVersion
 from django.db.models import Q
 from functools import reduce
 import logging
@@ -116,6 +116,10 @@ def plotnm(item):
     else:
         return item
 
+
+@register.filter
+def get_idc_version(reasons):
+    return ImagingDataCommonsVersion.objects.get(active=True)
 
 # these attributes are not returned in order right now
 @register.filter

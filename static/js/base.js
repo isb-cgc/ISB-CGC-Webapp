@@ -19,7 +19,7 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        jquery: 'libs/jquery-1.11.1.min',
+        jquery: 'libs/jquery-3.5.1',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security/script',
@@ -143,10 +143,9 @@ require([
 
     $('#cohort-table').tablesorter({
         headers: {
-            0: {sorter:false},
-            7: {sorter: 'fullDate'}
+            0: {sorter:false}
         },
-        sortList: [[7,1]]
+        sortList: [[1]]
     });
 
     $(document).ready(function(){

@@ -19,7 +19,7 @@
 require.config({
     baseUrl: STATIC_FILES_URL + 'js/',
     paths: {
-        jquery: 'libs/jquery-1.11.1.min',
+        jquery: 'libs/jquery-3.5.1',
         jqueryui: 'libs/jquery-ui.min',
         underscore: 'libs/underscore-min',
         base: 'base',
@@ -68,6 +68,7 @@ require([
       Thymus: 'rgb(61, 223, 204)',
       Thyroid: 'rgb(224, 75, 123)',
       Uterus: 'rgb(245, 97, 154)',
+      Chest: 'rgb(0, 233, 255)',
     };
 
     let data = case_counts.sort(function(a,b){
