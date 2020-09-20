@@ -2203,7 +2203,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
         var filterItemBindings = function (filterId) {
         $('#' + filterId).find('input:checkbox').on('click', function () {
-            handleFilterSelectionUpdate(this, true, true );
+            handleFilterSelectionUpdate(this, true, true);
         });
 
         /*
@@ -2310,7 +2310,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
         });
 
 
-        }
+    }
 
         var clearFilter = function (filterElem) {
             if (filterElem.classList.contains('all')){
