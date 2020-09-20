@@ -2426,6 +2426,22 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
         return updateFacetsData(true).promise();
      };
 
+     var load_sliders = function(sliders, do_update)
+     {
+        _.each(sliders, function(slider) {
+            var slider_id = slider.id;
+            var left_val = slider.left_val;
+            var right_val = slider.right_val;
+            setSlider(slider_id, false, left_val, right_val, true, false);
+            updatePlotBinsForSliders(slider_id);
+        });
+
+        if (do_update) {
+            mkFiltText();
+            updateFacetsData(true).promise();
+        }
+     };
+
      var cohort_loaded = false;
      $(window).on('load', function(){
         if(is_cohort && !cohort_loaded) {
@@ -2442,19 +2458,28 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             load_filters(filters_for_load);
         } else
         {
-            /* TODO: check for localStorage key of saved filters from a login */
-            load_anonymous_filters();
-            if (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS.length > 0) {
+            // check for localStorage key of saved filters from a login
+            load_anonymous_selection_data();
+            var has_sliders = (ANONYMOUS_SLIDERS !== null && ANONYMOUS_SLIDERS.length > 0);
+            var has_filters = (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS[0]['filters'].length > 0);
+            if (has_sliders) {
+                load_sliders(ANONYMOUS_SLIDERS, !has_filters);
+            }
+            if (has_filters)
+            {
                 load_filters(ANONYMOUS_FILTERS);
             }
         }
     });
 
     var ANONYMOUS_FILTERS = {};
+    var ANONYMOUS_SLIDERS = {};
 
-    var save_anonymous_filters = function()
+    var save_anonymous_selection_data = function()
     {
         var groups = [];
+
+        // Get all checked filters
         var filters = [];
         $('.list-group-item__body').each(function() {
             var $group = $(this);
@@ -2477,72 +2502,68 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 }
             }
         });
-        
-        // // Collect all selected filters and save to session storage
-        // var groups = [];
-        // var filters = [];
-        // var curr_id = "";
-        // var values = [];
-        // $('.search-checkbox-list input:checked').each(function() {
-        //     var $this = $(this);
-        //     var my_id = $this.data('filterAttrId');
-        //     var my_value = $this[0].value;
-        //     if (my_id !== curr_id) {
-        //         if (curr_id !== "")
-        //         {
-        //             filters.push({
-        //                 'id': curr_id,
-        //                 'values': values,
-        //             });
-        //         }
-        //         curr_id = my_id;
-        //         values = [];
-        //         values.push(my_value);
-        //     }
-        //     else {
-        //         values.push(my_value);
-        //     }
-        // });
-        //
-        // if (curr_id !== "")
-        // {
-        //     filters.push({
-        //         'id': curr_id,
-        //         'values': values,
-        //     });
-        // }
 
         groups.push({'filters': filters});
-
         var filterStr = JSON.stringify(groups);
         sessionStorage.setItem('anonymous_filters', filterStr);
+
+        // Get all sliders with not default value
+        var sliders = [];
+        $('.ui-slider').each(function() {
+            $this = $(this);
+            var slider_id = $this[0].id;
+            var left_val = $this.slider("values", 0);
+            var right_val = $this.slider("values", 1);
+            var min = $this.slider("option", "min");
+            var max = $this.slider("option", "max");
+            if (left_val !== min || right_val !== max)
+            {
+                sliders.push({
+                   'id': slider_id,
+                    'left_val': left_val,
+                    'right_val': right_val,
+                });
+            }
+        });
+        var sliderStr = JSON.stringify(sliders);
+        sessionStorage.setItem('anonymous_sliders', sliderStr);
     };
 
-    var load_anonymous_filters = function()
+    var load_anonymous_selection_data = function()
     {
         // Load anonymous filters from session storage and clear it, so it is not always there
-        var str = sessionStorage.getItem('anonymous_filters');
-        ANONYMOUS_FILTERS = JSON.parse(str);
+        var filter_str = sessionStorage.getItem('anonymous_filters');
+        ANONYMOUS_FILTERS = JSON.parse(filter_str);
         sessionStorage.removeItem('anonymous_filters');
+
+        var slider_str = sessionStorage.getItem('anonymous_sliders');
+        ANONYMOUS_SLIDERS = JSON.parse(slider_str);
+        sessionStorage.removeItem('anonymous_sliders');
     };
 
     $('#save-cohort-btn').on('click', function()
     {
         console.log("Saving filters.......");
-        save_anonymous_filters();
+        save_anonymous_selection_data();
     });
 
     $('#test-load-filter-btn').on('click', function()
     {
-        load_anonymous_filters();
-        if (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS.length > 0) {
-            load_filters(ANONYMOUS_FILTERS)
+        load_anonymous_selection_data();
+        var has_sliders = (ANONYMOUS_SLIDERS !== null && ANONYMOUS_SLIDERS.length > 0);
+        var has_filters = (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS[0]['filters'].length > 0);
+        if (has_sliders) {
+            load_sliders(ANONYMOUS_SLIDERS, !has_filters);
+        }
+        if (has_filters)
+        {
+            load_filters(ANONYMOUS_FILTERS);
         }
     });
 
     $('#test-save-filter-btn').on('click', function()
     {
-        save_anonymous_filters();
+        save_anonymous_selection_data();
     });
 });
 
