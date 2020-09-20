@@ -2543,26 +2543,6 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
     $('#save-cohort-btn').on('click', function()
     {
-        console.log("Saving filters.......");
-        save_anonymous_selection_data();
-    });
-
-    $('#test-load-filter-btn').on('click', function()
-    {
-        load_anonymous_selection_data();
-        var has_sliders = (ANONYMOUS_SLIDERS !== null && ANONYMOUS_SLIDERS.length > 0);
-        var has_filters = (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS[0]['filters'].length > 0);
-        if (has_sliders) {
-            load_sliders(ANONYMOUS_SLIDERS, !has_filters);
-        }
-        if (has_filters)
-        {
-            load_filters(ANONYMOUS_FILTERS);
-        }
-    });
-
-    $('#test-save-filter-btn').on('click', function()
-    {
         save_anonymous_selection_data();
     });
 });

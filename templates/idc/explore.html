@@ -43,23 +43,15 @@
 {#                <li id="next" style="display:none"><a href="#" onclick="javascript:selectHistoricFilter(1)">Next Filter</a></li>#}
 {#            </ol>#}
 
-            <h3 class="pull-left" role="heading" aria-level="1">Explore Image Data</h3>
-        {% if DEV_TIER %}
-            {% if request.user.is_authenticated %}
-                <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal" data-target="#save-cohort-modal" title="Please select at least one filter." disabled="disabled">
-                    Save As New Cohort
-                </button>
-            {% else %}
-                <button id="test-load-filter-btn"> Load Filters </button>
-                 <button id="test-save-filter-btn"> Save Filters </button>
-                <button id="save-cohort-btn" class="btn btn-special pull-right" title="Please log in to save this cohort." disabled="disabled"
-                    onclick="location.href='{% url 'account_login' %}'">
-                    Log in to Save
-                </button>
-            {% endif %}
-        {% else %}
-            <button id="log-in-to-save-btn" class="btn btn-special pull-right" data-toggle="modal" title="Cohort saving is currently disabled." disabled="disabled">
+        <h3 class="pull-left" role="heading" aria-level="1">Explore Image Data</h3>
+        {% if request.user.is_authenticated %}
+            <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal" data-target="#save-cohort-modal" title="Please select at least one filter." disabled="disabled">
                 Save As New Cohort
+            </button>
+        {% else %}
+            <button id="save-cohort-btn" class="btn btn-special pull-right" title="Please log in to save this cohort." disabled="disabled"
+                onclick="location.href='{% url 'account_login' %}'">
+                Log in to Save
             </button>
         {% endif %}
         </div>
