@@ -87,7 +87,31 @@ require([
     $('#save-cohort-modal').on('hide.bs.modal', function() {
         $('#save-cohort-modal .selected-filters p').remove();
         $('input[name="selected-filters"]').prop('value', '');
+        $('#saving-cohort').css('display','none');
+        $(this).find('input[type="submit"]').prop("disabled","");
     });
+
+
+    $('#save-cohort-form, #apply-edits-form').on('submit', function(e) {
+
+        $('#unallowed-chars-alert').hide();
+
+        var name = $('#save-cohort-name').val() || $('#edit-cohort-name').val();
+        var desc = $('#save-cohort-desc').val() || $('#edit-cohort-desc').val();
+
+        var unallowed = (name.match(base.blacklist) || []).concat(desc ? desc.match(base.blacklist) : []);
+
+        if(unallowed.length > 0) {
+            $('.unallowed-chars').text(unallowed.join(", "));
+            $('#unallowed-chars-alert').show();
+            e.preventDefault();
+            return false;
+        }
+
+        $(this).find('input[type="submit"]').attr("disabled","disabled");
+        $('#saving-cohort').css('display','inline-block');
+    });
+
 
     tippy('.collection_name', {
         content: function(reference) {
