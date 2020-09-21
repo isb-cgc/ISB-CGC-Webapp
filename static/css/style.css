@@ -2980,6 +2980,36 @@ html {
   padding-top: 4px;
 }
 
+.cohort-filter-display {
+  padding-right: 8px;
+}
+
+.cohort-filter-display .attr {
+  font-weight: 600;
+  padding-right: 8px;
+}
+
+.cohort-filter-display .val {
+  padding-right: 8px;
+  display: inline-block;
+}
+
+.selected-filters h5 {
+  background: #d9e2ff;
+  border-top: 2px solid darkslateblue;
+  padding: 2px;
+}
+
+#save-cohort-form .form-control {
+  margin-bottom: 10px;
+}
+
+.sel-filters-heading {
+  font-size: larger;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
 .site-footer {
   background-color: #003a55;
   text-align: center;
