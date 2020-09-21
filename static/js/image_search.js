@@ -2432,7 +2432,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
      $(window).on('load', function(){
          console.debug("Fired window.onload");
          if(is_cohort && !cohort_loaded) {
-             console("Unloaded cohort found, loading...");
+             console.debug("Unloaded cohort found, loading...");
              var loadPending = load_filters(cohort_filters);
              loadPending.done(function(){
                  console.debug("Load pending complete.");
@@ -2445,7 +2445,6 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
              });
         } else if(Object.keys(filters_for_load).length > 0) {
              console.debug("Saw filters for load, loading...");
-
              var loadPending = load_filters(filters_for_load);
              loadPending.done(function() {
                  console.debug("Filter load complete.");
