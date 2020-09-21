@@ -11,6 +11,10 @@
     bottom: .5em;
 }
 
+.plot_count {
+    display:none;
+}
+
 .ui-slider {
     display:inline-block;
     width:70%;
