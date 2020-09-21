@@ -287,9 +287,9 @@
                                     <ul class="list-group" role="tablist" aria-multiselectable="true">
                                     <li class="list-group-item">
                                       <div id="tcga_clinical_heading" class="list-group-item__heading">
-                                                         <a role="button" data-toggle="collapse" href="#tcga_clinical" aria-expanded="false" aria-controls="tcga_clinical" class="">
-                                                         <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>TCGA
-                                                        </a>
+                                         <a role="button" data-toggle="collapse" href="#tcga_clinical" aria-expanded="false" aria-controls="tcga_clinical" class="">
+                                         <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>TCGA
+                                        </a>
                                       </div>
                                       <div id="tcga_clinical" class="collapse list-group-item__body collapse in" aria-expanded="false" style>
 
@@ -307,7 +307,11 @@
                                                      {% for val in attr.values %}
                                                          <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
                                                              <label>
-                                                                 <input type="checkbox" value="{{ val.value }}">
+                                                                 <input type="checkbox"
+                                                                        data-filter-attr-id="{{ attr.id }}"
+                                                                        data-filter-display-val="{{ val.value }}"
+                                                                        data-filter-display-attr="{{ attr.display_name }}"
+                                                                        value="{{ val.value }}" >
                                                                     <span class="value">{% if val.display_value %}{{ val.display_value }}{% else %}{{ val.value|format_val }}{% endif %}</span> <span class="float-right plot_count count plotit">{{ val.count }}</span><span class="float-right case_count count">{{ val.count }}</span>
                                                              </label>
                                                           </li>
@@ -462,7 +466,7 @@
                         </div>
                     </div>
                 </div>
-                    <div class="tabpanel data-tab-content-panel table-panel">
+                <div class="tabpanel data-tab-content-panel table-panel">
                     <div class="panel panel-default">
                          <div class="panel-heading clearfix"><h4 class="panel-title">Collections</h4></div>
                          <div id = "projects_panel" class="panel-body">

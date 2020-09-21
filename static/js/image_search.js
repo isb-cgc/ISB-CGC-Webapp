@@ -1368,12 +1368,13 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                       if(user_is_auth) {
                         $('#save-cohort-btn').prop('title','');
                         }
-                   }
-                    else{
+                   } else {
                         isFiltered = false;
                        $('#save-cohort-btn').prop('disabled','disabled');
                         if(user_is_auth) {
                             $('#save-cohort-btn').prop('title','Please select at least one filter.');
+                        } else {
+                            $('#save-cohort-btn').prop('title','Log in to save a cohort.');
                         }
                     }
                     //updateCollectionTotals(data.total, data.origin_set.attributes.collection_id);
