@@ -930,15 +930,15 @@ nav, .site-header {
 
 .partners-div
 {
-  padding-top: 213px;
-  padding-bottom: 213px;
+  padding-top: 50px;
+  padding-bottom: 150px;
   text-align: center;
 }
 .partners-div img {
-  height: 110px;
+  height: 100px;
   padding: 30px; }
 .partners-div img.gcp-logo {
-    padding: 30px; }
+    padding: 35px; }
 
 nav.subnav li.has-drop-down__more ul.drop {
   overflow-y: auto;
