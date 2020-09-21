@@ -1368,12 +1368,13 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                       if(user_is_auth) {
                         $('#save-cohort-btn').prop('title','');
                         }
-                   }
-                    else{
+                   } else {
                         isFiltered = false;
                        $('#save-cohort-btn').prop('disabled','disabled');
                         if(user_is_auth) {
                             $('#save-cohort-btn').prop('title','Please select at least one filter.');
+                        } else {
+                            $('#save-cohort-btn').prop('title','Log in to save a cohort.');
                         }
                     }
                     //updateCollectionTotals(data.total, data.origin_set.attributes.collection_id);
@@ -2422,24 +2423,32 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 });
             });
         });
+        console.debug("Making filter text...");
         mkFiltText();
         return updateFacetsData(true).promise();
      };
 
      var cohort_loaded = false;
      $(window).on('load', function(){
-        if(is_cohort && !cohort_loaded) {
+         console.debug("Fired window.onload");
+         if(is_cohort && !cohort_loaded) {
+             console.debug("Unloaded cohort found, loading...");
              var loadPending = load_filters(cohort_filters);
              loadPending.done(function(){
-                cohort_loaded = true;
-                $('input[type="checkbox"]').prop("disabled","disabled");
-                $('div.ui-slider').siblings('button').prop('disabled','disabled');
-                $('input#hide-zeros').prop("disabled","");
-                $('input#hide-zeros').prop("checked",true);
-                $('input#hide-zeros').triggerHandler('change');
+                 console.debug("Load pending complete.");
+                 cohort_loaded = true;
+                 $('input[type="checkbox"]').prop("disabled","disabled");
+                 $('div.ui-slider').siblings('button').prop('disabled','disabled');
+                 $('input#hide-zeros').prop("disabled","");
+                 $('input#hide-zeros').prop("checked",true);
+                 $('input#hide-zeros').triggerHandler('change');
              });
         } else if(Object.keys(filters_for_load).length > 0) {
-            load_filters(filters_for_load);
+             console.debug("Saw filters for load, loading...");
+             var loadPending = load_filters(filters_for_load);
+             loadPending.done(function() {
+                 console.debug("Filter load complete.");
+             });
         } /* TODO: check for localStorage key of saved filters from a login */
     });
 });
