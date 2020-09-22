@@ -2428,6 +2428,22 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
         return updateFacetsData(true).promise();
      };
 
+     var load_sliders = function(sliders, do_update)
+     {
+        _.each(sliders, function(slider) {
+            var slider_id = slider.id;
+            var left_val = slider.left_val;
+            var right_val = slider.right_val;
+            setSlider(slider_id, false, left_val, right_val, true, false);
+            updatePlotBinsForSliders(slider_id);
+        });
+
+        if (do_update) {
+            mkFiltText();
+            updateFacetsData(true).promise();
+        }
+     };
+
      var cohort_loaded = false;
      $(window).on('load', function(){
          console.debug("Fired window.onload");
@@ -2444,12 +2460,100 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                  $('input#hide-zeros').triggerHandler('change');
              });
         } else if(Object.keys(filters_for_load).length > 0) {
-             console.debug("Saw filters for load, loading...");
-             var loadPending = load_filters(filters_for_load);
-             loadPending.done(function() {
-                 console.debug("Filter load complete.");
-             });
-        } /* TODO: check for localStorage key of saved filters from a login */
+            var loadPending = load_filters(filters_for_load);
+            loadPending.done(function(){
+                console.debug("External filter load done.");
+            });
+        } else {
+            // check for localStorage key of saved filters from a login
+            load_anonymous_selection_data();
+            var has_sliders = (ANONYMOUS_SLIDERS !== null && ANONYMOUS_SLIDERS.length > 0);
+            var has_filters = (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS[0]['filters'].length > 0);
+            if (has_sliders) {
+                let loadPending = load_sliders(ANONYMOUS_SLIDERS, !has_filters);
+                loadPending.done(function(){
+                    console.debug("Sliders loaded from anonymous login.");
+                });
+            }
+            if (has_filters) {
+                let loadPending = load_filters(ANONYMOUS_FILTERS);
+                loadPending.done(function(){
+                    console.debug("Filters loaded from anonymous login.");
+                });
+            }
+        }
+    });
+
+    var ANONYMOUS_FILTERS = {};
+    var ANONYMOUS_SLIDERS = {};
+
+    var save_anonymous_selection_data = function() {
+        var groups = [];
+
+        // Get all checked filters
+        var filters = [];
+        $('.list-group-item__body').each(function() {
+            var $group = $(this);
+            var my_id = $group.data('attrId');
+            if (my_id != null)
+            {
+                var checkboxes = $group.find("input:checked");
+                if (checkboxes.length > 0)
+                {
+                    var values = [];
+                    checkboxes.each(function() {
+                        var $checkbox = $(this);
+                        var my_value = $checkbox[0].value;
+                        values.push(my_value);
+                    });
+                    filters.push({
+                        'id': my_id,
+                        'values': values,
+                    });
+                }
+            }
+        });
+
+        groups.push({'filters': filters});
+        var filterStr = JSON.stringify(groups);
+        sessionStorage.setItem('anonymous_filters', filterStr);
+
+        // Get all sliders with not default value
+        var sliders = [];
+        $('.ui-slider').each(function() {
+            var $this = $(this);
+            var slider_id = $this[0].id;
+            var left_val = $this.slider("values", 0);
+            var right_val = $this.slider("values", 1);
+            var min = $this.slider("option", "min");
+            var max = $this.slider("option", "max");
+            if (left_val !== min || right_val !== max) {
+                sliders.push({
+                   'id': slider_id,
+                    'left_val': left_val,
+                    'right_val': right_val,
+                });
+            }
+        });
+        var sliderStr = JSON.stringify(sliders);
+        sessionStorage.setItem('anonymous_sliders', sliderStr);
+    };
+
+    var load_anonymous_selection_data = function() {
+        // Load anonymous filters from session storage and clear it, so it is not always there
+        var filter_str = sessionStorage.getItem('anonymous_filters');
+        ANONYMOUS_FILTERS = JSON.parse(filter_str);
+        sessionStorage.removeItem('anonymous_filters');
+
+        var slider_str = sessionStorage.getItem('anonymous_sliders');
+        ANONYMOUS_SLIDERS = JSON.parse(slider_str);
+        sessionStorage.removeItem('anonymous_sliders');
+    };
+
+    $('#save-cohort-btn').on('click', function() {
+        if(!user_is_auth) {
+            save_anonymous_selection_data();
+        }
     });
 });
 
