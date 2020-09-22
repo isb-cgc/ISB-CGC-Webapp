@@ -35,17 +35,17 @@
 
     {% block header %}{% endblock %}
 
-{#    {% if SITE_GOOGLE_ANALYTICS %}#}
-{#        <!-- Global site tag (gtag.js) - Google Analytics -->#}
-{#        <script async src="https://www.googletagmanager.com/gtag/js?id={{ SITE_GOOGLE_ANALYTICS_TRACKING_ID }}"></script>#}
-{#        <script>#}
-{#          window.dataLayer = window.dataLayer || [];#}
-{#          function gtag(){dataLayer.push(arguments);}#}
-{#          gtag('js', new Date());#}
-{##}
-{#          gtag('config', '{{ SITE_GOOGLE_ANALYTICS_TRACKING_ID }}');#}
-{#        </script>#}
-{#    {%  endif %}#}
+    {% if SITE_GOOGLE_ANALYTICS %}
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ SITE_GOOGLE_ANALYTICS_TRACKING_ID }}"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', '{{ SITE_GOOGLE_ANALYTICS_TRACKING_ID }}');
+        </script>
+    {%  endif %}
     <script>
         var STATIC_FILES_URL = '{{ STATIC_FILES_URL }}';
         var BASE_URL = '{{ BASE_URL }}' || "";
