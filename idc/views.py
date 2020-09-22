@@ -68,9 +68,9 @@ def landing_page(request):
         sapien_counts[loc] += collection['subject_count']
 
     ex_tooltips = {
-        '1.3.6.1.4.1.14519.5.2.1.6279.6001.224985459390356936417021464571': '<p>Patient ID: LIDC-IDRI-0834</p><p>Modality: CT</p>',
-        '1.3.6.1.4.1.14519.5.2.1.1706.4001.149500105036523046215258942545': '<p>Patient ID: TCGA-02-0006</p><p>Modality: MR</p>',
-        '1.3.6.1.4.1.14519.5.2.1.2744.7002.950936925946327395356711739684': '<p>Patient ID: QIN-HEADNECK-01-0228</p><p>Modality: PET</p>'
+        '1.3.6.1.4.1.14519.5.2.1.6279.6001.224985459390356936417021464571?seriesInstanceUID=1.2.276.0.7230010.3.1.3.0.57823.1553343864.578877,1.3.6.1.4.1.14519.5.2.1.6279.6001.273525289046256012743471155680': '<p>Patient ID: LIDC-IDRI-0834</p><p>Modality: CT</p>',
+        '1.3.6.1.4.1.14519.5.2.1.1706.4001.149500105036523046215258942545?seriesInstanceUID=1.3.6.1.4.1.14519.5.2.1.1706.4001.315980779833795710131738723922': '<p>Patient ID: TCGA-02-0006</p><p>Modality: MR</p>',
+        '1.3.6.1.4.1.14519.5.2.1.2744.7002.950936925946327395356711739684?seriesInstanceUID=1.3.6.1.4.1.14519.5.2.1.2744.7002.746890305525203600008140092112,1.3.6.1.4.1.14519.5.2.1.2744.7002.304930022156956249911027532702': '<p>Patient ID: QIN-HEADNECK-01-0228</p><p>Modality: PET</p>'
     }
 
     return render(request, 'idc/landing.html', {
@@ -214,7 +214,6 @@ def quota_page(request):
 
 
 # Data exploration and cohort creation page
-@login_required
 def explore_data_page(request):
     attr_by_source = {}
     attr_sets = {}
