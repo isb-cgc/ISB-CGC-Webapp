@@ -2,11 +2,11 @@
 {% load staticfiles %}
 
 {% block title %}
-    IDC|Collaborators
+    IDC|Team and Collaborators
 {% endblock %}
 
 {% block description %}
-    IDC Collaborators
+    IDC Team and Collaborators
 {% endblock %}
 
 {% block link_page_name %}collaborators{% endblock %}
@@ -14,7 +14,7 @@
 
 {% block page_header %}
 <div class="container-fluid">
-    <h1 class="page-header">Collaborators</h1>
+    <h1 class="page-header">Team and Collaborators</h1>
 </div>
 {% endblock %}
 
@@ -22,6 +22,7 @@
 <div class="row">
     <div class="col-lg-12">
         <div class="partners-div">
+            <h4>Team</h4>
             <a href="https://www.massgeneralbrigham.org/" target="_blank">
                 <img src="{% static 'img/mgb_logo.svg' %}" alt="Mass General Brigham, Inc."/>
             </a>
@@ -35,9 +36,6 @@
             <a href="https://www.mevis.fraunhofer.de/" target="_blank">
                 <img src="{% static 'img/fraunhofer_logo.png' %}" alt="Fraunhofer MEVIS"/>
             </a>
-            <a href="https://cloud.google.com/" target="_blank">
-                <img class="gcp-logo" src="{% static 'img/gcp-logo.svg' %}" alt="Google Cloud Platform"/>
-            </a>
             <a href="https://isomics.com/" target="_blank">
                 <img src="{% static 'img/isomics_logo.png' %}" alt="Isomics, Inc."/>
             </a>
@@ -46,6 +44,11 @@
             </a>
             <a href="https://radicalimaging.com/" target="_blank">
                 <img src="{% static 'img/radical_logo.jpg' %}" alt="Radical Imaging LLC"/>
+            </a>
+            <br><br><br><br>
+            <h4>Collaborators</h4>
+            <a href="https://cloud.google.com/" target="_blank">
+                <img class="gcp-logo" src="{% static 'img/gcp-logo.svg' %}" alt="Google Cloud Platform"/>
             </a>
         </div>
     </div>

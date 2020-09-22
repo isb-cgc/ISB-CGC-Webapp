@@ -490,7 +490,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
         }
 
-        var mkSlider = function (divName, min, max, step, isInt, wNone, parStr) {
+        var mkSlider = function (divName, min, max, step, isInt, wNone, parStr, attr_id, attr_name) {
              var tooltipL = $('<div class="slide_tooltip tooltipL" />').text('stuff').css({
                position: 'absolute',
                top: -25,
@@ -541,12 +541,8 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
                 },
 
-
-
                 stop: function (event, ui) {
                     //   updateSliderSelection(inpDiv, displaySet, header, attributeName, isInt);
-
-
                     var val = $('#' + inpName)[0].value;
                     var valArr = val.split('-');
                     var attVal = [];
@@ -596,12 +592,13 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                         }
                    });
 
-
+            $('#' + slideName).data("filter-attr-id",attr_id);
+            $('#' + slideName).data("filter-display-attr",attr_name);
 
             $('#'+ divName+'_list').addClass('hide');
             $('#'+ divName).find('.more-checks').addClass('hide');
             $('#'+ divName).find('.less-checks').addClass('hide');
-             $('#'+ divName).find('.hide-zeros').addClass('hide');
+            $('#'+ divName).find('.hide-zeros').addClass('hide');
         };
 
         var editProjectsTableAfterFilter = function (tableId, collFilt, collectionsData) {
@@ -882,7 +879,12 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                             var hrefSeriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
                             var seriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
 
-                            newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td>';
+                            newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head">' +
+                                '<td class="col1 tooltip_ex study-id">' + hrefTxt + '</td>' +
+                                '<td class="series-number">' + seriesNumber + '</td>' +
+                                '<td class="col1 modality">' + modality + '</td>' +
+                                '<td class="col1 body-part-examined">' + bodyPartExamined + '</td>' +
+                                '<td class="series-description">' + seriesDescription + '</td>';
                             if ((modality ==='SEG') || (modality ==='RTSTRUCT')){
                             newHtml += '<td class="ohif greyout tooltip_ex"><span class="tooltiptext_ex">Please open at the study level to see this series</span><a   href="/" onclick="return false;"><img src="' + STATIC_FILES_URL + 'img/ohif_sm.png"></a></td></tr>';
 
@@ -2334,24 +2336,24 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
      }
 
      var addSliders = function(id){
-            $('#'+id).find('.list-group-item__body').each(function(){
-                $(this).find('.more-checks').addClass('hide');
-                $(this).find('.less-checks').addClass('hide');
-                //var min = Math.ceil($(this).data('attr-min') * 1000)/1000;
-                //var min = Math.floor($(this).data('attr-min'));
-                var min = 0;
-                var max = Math.floor($(this).data('attr-max'));
-                if (this.id.startsWith('Glycolysis') ){
-                    min = 0;
-                    max = 300;
-                }
-                else if (this.id.startsWith('Percent') ){
-                    min = 0;
-                    max = 100;
-                }
-                //var max = Math.ceil($(this).data('attr-max') * 1000)/1000;
-                mkSlider($(this).prop('id'),min, max,1,true,false,'');
-            });
+        $('#'+id).find('.list-group-item__body').each(function(){
+            $(this).find('.more-checks').addClass('hide');
+            $(this).find('.less-checks').addClass('hide');
+            //var min = Math.ceil($(this).data('attr-min') * 1000)/1000;
+            //var min = Math.floor($(this).data('attr-min'));
+            var min = 0;
+            var max = Math.floor($(this).data('attr-max'));
+            if (this.id.startsWith('Glycolysis') ){
+                min = 0;
+                max = 300;
+            }
+            else if (this.id.startsWith('Percent') ){
+                min = 0;
+                max = 100;
+            }
+            //var max = Math.ceil($(this).data('attr-max') * 1000)/1000;
+            mkSlider($(this).prop('id'),min, max,1,true,false,'', $(this).data('filter-attr-id'), $(this).data('filter-display-attr'));
+        });
      };
 
 
@@ -2384,7 +2386,8 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             tableSortBindings('studies_table_head');
             tableSortBindings('series_table_head');
 
-            mkSlider('age_at_diagnosis',0,parseInt($('#age_at_diagnosis').data('attr-max')),1,true,true, 'tcga_clinical.');
+            mkSlider('age_at_diagnosis',0, parseInt($('#age_at_diagnosis').data('attr-max')),1,true,true, 'tcga_clinical.',
+                $('#age_at_diagnosis').data('filter-attr-id'), $('#age_at_diagnosis').data('filter-display-attr'));
 
             addSliders('quantitative');
 
@@ -2414,27 +2417,36 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
     );
 
      var load_filters = function(filters) {
+         var sliders = [];
         _.each(filters, function(group){
             _.each(group['filters'], function(filter){
-                $('div.list-group-item__body[data-attr-id="'+filter['id']+'"]').collapse('show');
-                _.each(filter['values'], function(val){
-                    $('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]').prop("checked",true);
-                    checkFilters($('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]'));
-                });
+                $('div.list-group-item__body[data-filter-attr-id="'+filter['id']+'"]').collapse('show');
+                if($('div.list-group-item__body[data-filter-attr-id="'+filter['id']+'"]').children('.ui-slider').length > 0) {
+                    sliders.push({
+                        'id':$('div.list-group-item__body[data-filter-attr-id="'+filter['id']+'"]').children('.ui-slider')[0].id,
+                        'left_val': filter['values'][0].indexOf(".") >= 0 ? parseFloat(filter['values'][0]) : parseInt(filter['values'][0]),
+                        'right_val': filter['values'][1].indexOf(".") >= 0 ? parseFloat(filter['values'][1]) : parseInt(filter['values'][1]),
+                    })
+                } else {
+                    _.each(filter['values'], function(val){
+                        $('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]').prop("checked",true);
+                        checkFilters($('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]'));
+                    });
+                }
             });
         });
+        if(sliders.length > 0) {
+            load_sliders(sliders, false);
+        }
         console.debug("Making filter text...");
         mkFiltText();
         return updateFacetsData(true).promise();
      };
 
-     var load_sliders = function(sliders, do_update)
-     {
+     var load_sliders = function(sliders, do_update) {
         _.each(sliders, function(slider) {
-            var slider_id = slider.id;
-            var left_val = slider.left_val;
-            var right_val = slider.right_val;
-            setSlider(slider_id, false, left_val, right_val, true, false);
+            var slider_id = slider['id'];
+            setSlider(slider_id, false, slider['left_val'], slider['right_val'], true, false);
             updatePlotBinsForSliders(slider_id);
         });
 
