@@ -44,15 +44,15 @@
 {#            </ol>#}
 
             <h3 class="pull-left" role="heading" aria-level="1">Explore Image Data</h3>
-        {% if DEV_TIER %}
-            <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal" data-target="#save-cohort-modal" title="{% if request.user.is_authenticated %}Please select at least one filter.{% else %}Please log in to save this cohort.{% endif %}" disabled="disabled">
-                {% if request.user.is_authenticated %}Save As New Cohort{% else %}Log in to Save{% endif %}
+            {% if request.user.is_authenticated %}
+            <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal" data-target="#save-cohort-modal"
+                title="Select at least one filter." disabled="disabled"> Save As New Cohort
             </button>
-        {% else %}
-            <button id="disabled-chort-save-btn" class="btn btn-special pull-right" data-toggle="modal" title="Cohort saving is currently disabled." disabled="disabled">
-                {% if request.user.is_authenticated %}Save As New Cohort{% else %}Log in to Save{% endif %}
+            {% else %}
+            <button id="save-cohort-btn" class="btn btn-special pull-right" onclick="location.href='{% url 'account_login' %}'"
+                title="Select at least one filter." disabled="disabled"> Log in to Save
             </button>
-        {% endif %}
+            {% endif %}
         </div>
     </div>
 {% endblock %}
@@ -78,6 +78,7 @@
         var collection_tooltips = {{ collection_tooltips|safe }};
         var is_cohort = false;
         var showWarning = true;
+        var user_is_auth = {% if request.user.is_authenticated %} true {% else %} false {% endif %};
     </script>
     <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
     {{ block.super }}

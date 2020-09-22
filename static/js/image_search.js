@@ -1368,12 +1368,13 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                       if(user_is_auth) {
                         $('#save-cohort-btn').prop('title','');
                         }
-                   }
-                    else{
+                   } else {
                         isFiltered = false;
                        $('#save-cohort-btn').prop('disabled','disabled');
                         if(user_is_auth) {
                             $('#save-cohort-btn').prop('title','Please select at least one filter.');
+                        } else {
+                            $('#save-cohort-btn').prop('title','Log in to save a cohort.');
                         }
                     }
                     //updateCollectionTotals(data.total, data.origin_set.attributes.collection_id);
@@ -1983,17 +1984,17 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
              if ( !('Program' in window.filterObj) ){
                     window.filterObj['Program'] = new Array();
                 }
-                if (window.filterObj['Program'].indexOf('tcga')<0) {
-                    window.filterObj['Program'].push('tcga');
-                    window.filterObj['Program.tcga'] = ['tcga_blca','tcga_brca','tcga_cesc','tcga_coad','tcga_esca','tcga_gbm','tcga_hnsc','tcga_kich','tcga_kirc','tcga_kirp','tcga_lgg','tcga_lihc','tcga_luad','tcga_lusc','tcga_ov','tcga_prad','tcga_read','tcga_sarc','tcga_stad','tcga_thca','tcga_ucec'];
-                    $('#tcga_heading').parent().find('input:checkbox').prop('checked',true);
-                    $('#tcga_heading').parent().find('input:checkbox').prop('indeterminate',false);
+                if (window.filterObj['Program'].indexOf('TCGA')<0) {
+                    window.filterObj['Program'].push('TCGA');
+                    window.filterObj['Program.TCGA'] = ['tcga_blca','tcga_brca','tcga_cesc','tcga_coad','tcga_esca','tcga_gbm','tcga_hnsc','tcga_kich','tcga_kirc','tcga_kirp','tcga_lgg','tcga_lihc','tcga_luad','tcga_lusc','tcga_ov','tcga_prad','tcga_read','tcga_sarc','tcga_stad','tcga_thca','tcga_ucec'];
+                    $('#TCGA_heading').parent().find('input:checkbox').prop('checked',true);
+                    $('#TCGA_heading').parent().find('input:checkbox').prop('indeterminate',false);
                 }
 
         };
 
         var resetTcgaFilters = function(){
-            if ( ('Program' in window.filterObj) && (window.filterObj['Program'].indexOf('tcga')<0 )){
+            if ( ('Program' in window.filterObj) && (window.filterObj['Program'].indexOf('TCGA')<0 )){
                 $('#tcga_clinical').find('input:checkbox').prop('checked',false);
                 setSlider('age_at_diagnosis_slide',true,0,0,true, false);
                 var attKey =  Object.keys(window.filterObj);
@@ -2422,25 +2423,137 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 });
             });
         });
+        console.debug("Making filter text...");
         mkFiltText();
         return updateFacetsData(true).promise();
      };
 
+     var load_sliders = function(sliders, do_update)
+     {
+        _.each(sliders, function(slider) {
+            var slider_id = slider.id;
+            var left_val = slider.left_val;
+            var right_val = slider.right_val;
+            setSlider(slider_id, false, left_val, right_val, true, false);
+            updatePlotBinsForSliders(slider_id);
+        });
+
+        if (do_update) {
+            mkFiltText();
+            updateFacetsData(true).promise();
+        }
+     };
+
      var cohort_loaded = false;
      $(window).on('load', function(){
-        if(is_cohort && !cohort_loaded) {
+         console.debug("Fired window.onload");
+         if(is_cohort && !cohort_loaded) {
+             console.debug("Unloaded cohort found, loading...");
              var loadPending = load_filters(cohort_filters);
              loadPending.done(function(){
-                cohort_loaded = true;
-                $('input[type="checkbox"]').prop("disabled","disabled");
-                $('div.ui-slider').siblings('button').prop('disabled','disabled');
-                $('input#hide-zeros').prop("disabled","");
-                $('input#hide-zeros').prop("checked",true);
-                $('input#hide-zeros').triggerHandler('change');
+                 console.debug("Load pending complete.");
+                 cohort_loaded = true;
+                 $('input[type="checkbox"]').prop("disabled","disabled");
+                 $('div.ui-slider').siblings('button').prop('disabled','disabled');
+                 $('input#hide-zeros').prop("disabled","");
+                 $('input#hide-zeros').prop("checked",true);
+                 $('input#hide-zeros').triggerHandler('change');
              });
         } else if(Object.keys(filters_for_load).length > 0) {
-            load_filters(filters_for_load);
-        } /* TODO: check for localStorage key of saved filters from a login */
+            var loadPending = load_filters(filters_for_load);
+            loadPending.done(function(){
+                console.debug("External filter load done.");
+            });
+        } else {
+            // check for localStorage key of saved filters from a login
+            load_anonymous_selection_data();
+            var has_sliders = (ANONYMOUS_SLIDERS !== null && ANONYMOUS_SLIDERS.length > 0);
+            var has_filters = (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS[0]['filters'].length > 0);
+            if (has_sliders) {
+                let loadPending = load_sliders(ANONYMOUS_SLIDERS, !has_filters);
+                loadPending.done(function(){
+                    console.debug("Sliders loaded from anonymous login.");
+                });
+            }
+            if (has_filters) {
+                let loadPending = load_filters(ANONYMOUS_FILTERS);
+                loadPending.done(function(){
+                    console.debug("Filters loaded from anonymous login.");
+                });
+            }
+        }
+    });
+
+    var ANONYMOUS_FILTERS = {};
+    var ANONYMOUS_SLIDERS = {};
+
+    var save_anonymous_selection_data = function() {
+        var groups = [];
+
+        // Get all checked filters
+        var filters = [];
+        $('.list-group-item__body').each(function() {
+            var $group = $(this);
+            var my_id = $group.data('attrId');
+            if (my_id != null)
+            {
+                var checkboxes = $group.find("input:checked");
+                if (checkboxes.length > 0)
+                {
+                    var values = [];
+                    checkboxes.each(function() {
+                        var $checkbox = $(this);
+                        var my_value = $checkbox[0].value;
+                        values.push(my_value);
+                    });
+                    filters.push({
+                        'id': my_id,
+                        'values': values,
+                    });
+                }
+            }
+        });
+
+        groups.push({'filters': filters});
+        var filterStr = JSON.stringify(groups);
+        sessionStorage.setItem('anonymous_filters', filterStr);
+
+        // Get all sliders with not default value
+        var sliders = [];
+        $('.ui-slider').each(function() {
+            var $this = $(this);
+            var slider_id = $this[0].id;
+            var left_val = $this.slider("values", 0);
+            var right_val = $this.slider("values", 1);
+            var min = $this.slider("option", "min");
+            var max = $this.slider("option", "max");
+            if (left_val !== min || right_val !== max) {
+                sliders.push({
+                   'id': slider_id,
+                    'left_val': left_val,
+                    'right_val': right_val,
+                });
+            }
+        });
+        var sliderStr = JSON.stringify(sliders);
+        sessionStorage.setItem('anonymous_sliders', sliderStr);
+    };
+
+    var load_anonymous_selection_data = function() {
+        // Load anonymous filters from session storage and clear it, so it is not always there
+        var filter_str = sessionStorage.getItem('anonymous_filters');
+        ANONYMOUS_FILTERS = JSON.parse(filter_str);
+        sessionStorage.removeItem('anonymous_filters');
+
+        var slider_str = sessionStorage.getItem('anonymous_sliders');
+        ANONYMOUS_SLIDERS = JSON.parse(slider_str);
+        sessionStorage.removeItem('anonymous_sliders');
+    };
+
+    $('#save-cohort-btn').on('click', function() {
+        if(!user_is_auth) {
+            save_anonymous_selection_data();
+        }
     });
 });
 
