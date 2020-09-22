@@ -43,51 +43,37 @@ require([
     'cohortfilelist',
 ], function ($, tippy, base, imagesearch, d3, cohortfilelist) {
 
-    /*$('.filter-panel li.checkbox, #program_set').on('change', 'input', function() {
-        if($('#search_def p').length > 0) {
-            $('#save-cohort-btn').prop('disabled','');
-            if(user_is_auth) {
-                $('#save-cohort-btn').prop('title','');
-            }
-        } else {
-            $('#save-cohort-btn').prop('disabled','disabled');
-            if(user_is_auth) {
-                $('#save-cohort-btn').prop('title','Please select at least one filter.');
-            }
-        }
-    }); */
-
-    // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('#save-cohort-modal').on('show.bs.modal', function() {
         var filters = {};
-        $('#program_set input:checked').each(function(){
-            $('#selected-filters-prog-set').append('<span>'+$(this).data('filter-display-attr')+': '+$(this).data('filter-display-val')+'</span>');
+        $('#program_set input:checked, ' +
+            '#search_orig_set .search-checkbox-list input:checked, ' +
+            '#search_related_set .search-checkbox-list input:checked, ' +
+            '#search_derived_set .search-checkbox-list input:checked').each(function(){
+
+            let modal_filter_block = '';
+            if($(this).parents('#program_set').length > 0) {
+                modal_filter_block = '#selected-filters-prog-set';
+            } else if($(this).parents('#search_orig_set').length > 0) {
+                modal_filter_block = '#selected-filters-orig-set';
+            } else if($(this).parents('#search_related_set').length > 0) {
+                modal_filter_block = '#selected-filters-rel-set';
+            } else if($(this).parents('#search_derived_set').length > 0) {
+                modal_filter_block = '#selected-filters-der-set';
+            }
+
+            if($(`${modal_filter_block} p.`+$(this).data('filter-attr-id')).length <= 0) {
+                $(`${modal_filter_block}`).append('<p class="cohort-filter-display '+$(this).data('filter-attr-id')
+                    +'"><span class="attr">'+$(this).data('filter-display-attr')+':</span></p>');
+            }
+             $(`${modal_filter_block} p.`+$(this).data('filter-attr-id')).append(
+                 '<span class="val">'+$(this).data('filter-display-val')+'</span>'
+             );
             if(!filters[$(this).data('filter-attr-id')]) {
                 filters[$(this).data('filter-attr-id')] = [];
             }
             filters[$(this).data('filter-attr-id')].push($(this).prop('value'));
         });
-        $('#search_orig_set .search-checkbox-list input:checked').each(function(){
-            $('#selected-filters-orig-set').append('<span>'+$(this).data('filter-display-attr')+': '+$(this).data('filter-display-val')+'</span>');
-            if(!filters[$(this).data('filter-attr-id')]) {
-                filters[$(this).data('filter-attr-id')] = [];
-            }
-            filters[$(this).data('filter-attr-id')].push($(this).prop('value'));
-        });
-        $('#search_related_set .search-checkbox-list input:checked').each(function(){
-            $('#selected-filters-rel-set').append('<span>'+$(this).data('filter-display-attr')+': '+$(this).data('filter-display-val')+'</span>');
-            if(!filters[$(this).data('filter-attr-id')]) {
-                filters[$(this).data('filter-attr-id')] = [];
-            }
-            filters[$(this).data('filter-attr-id')].push($(this).prop('value'));
-        });
-        $('#search_derived_set .search-checkbox-list input:checked').each(function(){
-            $('#selected-filters-der-set').append('<span>'+$(this).data('filter-display-attr')+': '+$(this).data('filter-display-val')+'</span>');
-            if(!filters[$(this).data('filter-attr-id')]) {
-                filters[$(this).data('filter-attr-id')] = [];
-            }
-            filters[$(this).data('filter-attr-id')].push($(this).prop('value'));
-        });
+
         $('#save-cohort-modal .selected-filters').each(function(){
             if($(this).find('span').length <= 0) {
                 $(this).hide();
@@ -99,9 +85,33 @@ require([
     });
 
     $('#save-cohort-modal').on('hide.bs.modal', function() {
-        $('#save-cohort-modal .selected-filters span').remove();
+        $('#save-cohort-modal .selected-filters p').remove();
         $('input[name="selected-filters"]').prop('value', '');
+        $('#saving-cohort').css('display','none');
+        $(this).find('input[type="submit"]').prop("disabled","");
     });
+
+
+    $('#save-cohort-form, #apply-edits-form').on('submit', function(e) {
+
+        $('#unallowed-chars-alert').hide();
+
+        var name = $('#save-cohort-name').val() || $('#edit-cohort-name').val();
+        var desc = $('#save-cohort-desc').val() || $('#edit-cohort-desc').val();
+
+        var unallowed = (name.match(base.blacklist) || []).concat(desc ? desc.match(base.blacklist) : []);
+
+        if(unallowed.length > 0) {
+            $('.unallowed-chars').text(unallowed.join(", "));
+            $('#unallowed-chars-alert').show();
+            e.preventDefault();
+            return false;
+        }
+
+        $(this).find('input[type="submit"]').attr("disabled","disabled");
+        $('#saving-cohort').css('display','inline-block');
+    });
+
 
     tippy('.collection_name', {
         content: function(reference) {

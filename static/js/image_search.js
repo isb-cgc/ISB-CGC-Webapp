@@ -1368,12 +1368,13 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                       if(user_is_auth) {
                         $('#save-cohort-btn').prop('title','');
                         }
-                   }
-                    else{
+                   } else {
                         isFiltered = false;
                        $('#save-cohort-btn').prop('disabled','disabled');
                         if(user_is_auth) {
                             $('#save-cohort-btn').prop('title','Please select at least one filter.');
+                        } else {
+                            $('#save-cohort-btn').prop('title','Log in to save a cohort.');
                         }
                     }
                     //updateCollectionTotals(data.total, data.origin_set.attributes.collection_id);
@@ -1983,17 +1984,17 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
              if ( !('Program' in window.filterObj) ){
                     window.filterObj['Program'] = new Array();
                 }
-                if (window.filterObj['Program'].indexOf('tcga')<0) {
-                    window.filterObj['Program'].push('tcga');
-                    window.filterObj['Program.tcga'] = ['tcga_blca','tcga_brca','tcga_cesc','tcga_coad','tcga_esca','tcga_gbm','tcga_hnsc','tcga_kich','tcga_kirc','tcga_kirp','tcga_lgg','tcga_lihc','tcga_luad','tcga_lusc','tcga_ov','tcga_prad','tcga_read','tcga_sarc','tcga_stad','tcga_thca','tcga_ucec'];
-                    $('#tcga_heading').parent().find('input:checkbox').prop('checked',true);
-                    $('#tcga_heading').parent().find('input:checkbox').prop('indeterminate',false);
+                if (window.filterObj['Program'].indexOf('TCGA')<0) {
+                    window.filterObj['Program'].push('TCGA');
+                    window.filterObj['Program.TCGA'] = ['tcga_blca','tcga_brca','tcga_cesc','tcga_coad','tcga_esca','tcga_gbm','tcga_hnsc','tcga_kich','tcga_kirc','tcga_kirp','tcga_lgg','tcga_lihc','tcga_luad','tcga_lusc','tcga_ov','tcga_prad','tcga_read','tcga_sarc','tcga_stad','tcga_thca','tcga_ucec'];
+                    $('#TCGA_heading').parent().find('input:checkbox').prop('checked',true);
+                    $('#TCGA_heading').parent().find('input:checkbox').prop('indeterminate',false);
                 }
 
         };
 
         var resetTcgaFilters = function(){
-            if ( ('Program' in window.filterObj) && (window.filterObj['Program'].indexOf('tcga')<0 )){
+            if ( ('Program' in window.filterObj) && (window.filterObj['Program'].indexOf('TCGA')<0 )){
                 $('#tcga_clinical').find('input:checkbox').prop('checked',false);
                 setSlider('age_at_diagnosis_slide',true,0,0,true, false);
                 var attKey =  Object.keys(window.filterObj);
@@ -2422,24 +2423,32 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 });
             });
         });
+        console.debug("Making filter text...");
         mkFiltText();
         return updateFacetsData(true).promise();
      };
 
      var cohort_loaded = false;
      $(window).on('load', function(){
-        if(is_cohort && !cohort_loaded) {
+         console.debug("Fired window.onload");
+         if(is_cohort && !cohort_loaded) {
+             console.debug("Unloaded cohort found, loading...");
              var loadPending = load_filters(cohort_filters);
              loadPending.done(function(){
-                cohort_loaded = true;
-                $('input[type="checkbox"]').prop("disabled","disabled");
-                $('div.ui-slider').siblings('button').prop('disabled','disabled');
-                $('input#hide-zeros').prop("disabled","");
-                $('input#hide-zeros').prop("checked",true);
-                $('input#hide-zeros').triggerHandler('change');
+                 console.debug("Load pending complete.");
+                 cohort_loaded = true;
+                 $('input[type="checkbox"]').prop("disabled","disabled");
+                 $('div.ui-slider').siblings('button').prop('disabled','disabled');
+                 $('input#hide-zeros').prop("disabled","");
+                 $('input#hide-zeros').prop("checked",true);
+                 $('input#hide-zeros').triggerHandler('change');
              });
         } else if(Object.keys(filters_for_load).length > 0) {
-            load_filters(filters_for_load);
+             console.debug("Saw filters for load, loading...");
+             var loadPending = load_filters(filters_for_load);
+             loadPending.done(function() {
+                 console.debug("Filter load complete.");
+             });
         } /* TODO: check for localStorage key of saved filters from a login */
     });
 });
