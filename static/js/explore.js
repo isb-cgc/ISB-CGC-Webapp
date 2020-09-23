@@ -42,6 +42,7 @@ require([
     'tablesorter',
     'cohortfilelist',
 ], function ($, tippy, base, imagesearch, d3, cohortfilelist) {
+    var saving_cohort = false;
 
     $('#save-cohort-modal').on('show.bs.modal', function() {
         var filters = {};
@@ -113,17 +114,21 @@ require([
         $('input[name="selected-filters"]').prop('value', JSON.stringify(filters));
     });
 
-    $('#save-cohort-modal').on('hide.bs.modal', function() {
+    $('#save-cohort-modal').on('hide.bs.modal', function(e) {
+        if(saving_cohort) {
+            e.preventDefault();
+            return false;
+        }
         $('#save-cohort-modal .selected-filters p').remove();
         $('input[name="selected-filters"]').prop('value', '');
         $('#saving-cohort').css('display','none');
         $(this).find('input[type="submit"]').prop("disabled","");
     });
 
-
     $('#save-cohort-form, #apply-edits-form').on('submit', function(e) {
 
         $('#unallowed-chars-alert').hide();
+        $('#name-too-long-alert-modal').hide();
 
         var name = $('#save-cohort-name').val() || $('#edit-cohort-name').val();
         var desc = $('#save-cohort-desc').val() || $('#edit-cohort-desc').val();
@@ -137,8 +142,15 @@ require([
             return false;
         }
 
+        if(name.length > 255) {
+            $('#name-too-long-alert-modal').show();
+            e.preventDefault();
+            return false;
+        }
+
         $(this).find('input[type="submit"]').attr("disabled","disabled");
         $('#saving-cohort').css('display','inline-block');
+        saving_cohort = true;
     });
 
 
