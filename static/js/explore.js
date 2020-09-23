@@ -151,6 +151,7 @@ require([
         $(this).find('input[type="submit"]').attr("disabled","disabled");
         $('#saving-cohort').css('display','inline-block');
         saving_cohort = true;
+        $('#save-cohort-modal').prop("saving", "saving");
     });
 
 
