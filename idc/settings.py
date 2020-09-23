@@ -584,7 +584,7 @@ SITE_GOOGLE_ANALYTICS_TRACKING_ID = os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKI
 # equal just under the 32M limit. If each individual listing is ever lengthened or shortened this
 # number should be adjusted
 MAX_FILE_LIST_REQUEST = 65000
-MAX_BQ_RECORD_RESULT = int(os.environ.get('MAX_BQ_RECORD_RESULT', '1000'))
+MAX_BQ_RECORD_RESULT = int(os.environ.get('MAX_BQ_RECORD_RESULT', '5000'))
 
 # Rough max file size to allow for eg. barcode list upload, to prevent triggering RequestDataTooBig
 FILE_SIZE_UPLOAD_MAX = 1950000
