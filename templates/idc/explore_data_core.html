@@ -170,7 +170,11 @@
                                                 </a>
                                             </div>
                                             <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body"
-                                                 {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"{% endif %}>
+
+                                                 {% if attr.min_max %}
+                                                          data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"
+
+                                                 {% endif %}>
                                                 {% comment %}
                                                 {% if attr.name == "Modality" %}
                                                 <span style="background-color:lightgrey">Filter for cases with:<br>
@@ -235,8 +239,18 @@
                                                 </a>
                                             </div>
                                                <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}"  data-plotnm="{{ attr.name|plotnm }}"   class="collapse list-group-item__body collapse"
-                                                 {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"{% endif %}>
-                                                <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
+                                                    data-attr-min="0"
+                                                       {% if attr.min_max %}
+                                                           {% if attr.name|startsWith:'Glycolysis' %}
+                                                                data-attr-max="300"
+                                                           {% elif attr.name|startsWith:'Percent' %}
+                                                                data-attr-max="100"
+                                                           {% else %}
+                                                               data-attr-max="{{ attr.min_max.max|ceiling }}"
+                                                           {% endif %}
+                                                       {% endif %}
+                                               >
+                                                   <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
 
                                                     {% for val in attr.values|order_seg:attr_setK %}
                                                         {% with val.display_value|get_display_val:val.value as display_value %}

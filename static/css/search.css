@@ -31,10 +31,10 @@
 }
 
 
-.slide_tooltip::after {
+.slide_tooltipT::after {
 content: " ";
 position: absolute;
-top: 100%; /* At the bottom of the tooltip */
+top: 90%; /* At the bottom of the tooltip */
   left: 50%;
   margin-left: -5px;
   border-width: 5px;
@@ -42,6 +42,20 @@ top: 100%; /* At the bottom of the tooltip */
   border-color: black transparent transparent transparent;
 
 }
+
+.slide_tooltipB::before {
+content: " ";
+position: absolute;
+bottom: 95%; /* At the top of the tooltip */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+    transform:rotate(180deg);
+
+}
+
 
 .main_cols{
     display:inline-block;
