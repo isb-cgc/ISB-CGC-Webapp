@@ -23,6 +23,7 @@ import string
 import json
 import re
 import textwrap
+import math
 
 from django import template
 from cohorts.models import Cohort, Cohort_Perms
@@ -115,6 +116,21 @@ def plotnm(item):
         return plotnmDic[item]
     else:
         return item
+
+
+@register.filter
+def ceiling(item):
+    return math.ceil(item)
+
+
+
+
+@register.filter
+def startsWith(item, strtStr):
+    if item.startswith(strtStr):
+        return True
+    else:
+        return False
 
 
 @register.filter
