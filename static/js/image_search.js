@@ -491,39 +491,40 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
         }
 
-        var mkSlider = function (divName, min, max, step, isInt, wNone, parStr) {
-             var tooltipL = $('<div class="slide_tooltip slide_tooltipT tooltipL" />').text('stuff').css({
+
+        var mkSlider = function (divName, min, max, step, isInt, wNone, parStr, attr_id, attr_name) {
+
+            var tooltipL = $('<div class="slide_tooltip tooltipL slide_tooltipT" />').text('stuff').css({
                position: 'absolute',
                top: -25,
                left: -5,
-                });
-                 //.hide();
+                }).hide();
 
              var tooltipR = $('<div class="slide_tooltip slide_tooltipB tooltipR" />').text('stuff').css({
                position: 'absolute',
                top: 20,
                right: -5,
-                });
-                 //.hide();
+                }).hide();
 
-              var labelMin = $('<div />').text(min).css({
-               position: 'absolute',
-               top:-5,
-               left: -22,
-                });
-                 //.hide();
 
-            var labelMax = $('<div />').text(max).css({
-               position: 'absolute',
-               top: -5,
-               right: -34,
+              var labelMin = $('<div class="labelMin"/>').text(min).css({
+                  position: 'absolute',
+                  top:-7,
+                  left: -22,
                 });
-                 //.hide();
+
+
+            var labelMax = $('<div class="labelMax" />').text(max);
+
+            labelMax.css({
+                position: 'absolute',
+                top: -7,
+                right: -14-8*max.toString().length,
+                });
 
 
 
             var slideName = divName + '_slide';
-
 
             var inpName = divName + '_input';
             var strtInp = min + '-' + max;
@@ -535,8 +536,9 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             }
             nm.push(divName);
             var filtName = nm.join('.') + '_btw';
-            $('#' + divName).append('<div id="' + slideName + '"></div>  <input id="' + inpName + '" type="text" value="' + strtInp + '" style="display:none"> <button class="reset"" style="display:block;margin-top:18px" onclick=\'setSlider("' + slideName + '",true,0,0,' + String(isInt) + ', true)\'>Reset</button>');
 
+            $('#' + divName).append('<div id="' + slideName + '"></div>  <input id="' + inpName + '" type="text" value="' + strtInp + '" style="display:none"> <button class="reset"" style="display:block;margin-top:18px" onclick=\'setSlider("' + slideName + '",true,0,0,' + String(isInt) + ', true)\'>Reset</button>');
+             $('#'+slideName).append(labelMin);
             /*
              if (wNone){
                 $('#' + divName).append( '<input type="checkbox" onchange="addNone(this, \''+parStr+'\')"> None' );
@@ -560,18 +562,11 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
                 },
 
-
-
                 stop: function (event, ui) {
-                    //   updateSliderSelection(inpDiv, displaySet, header, attributeName, isInt);
-
-
                     var val = $('#' + inpName)[0].value;
                     var valArr = val.split('-');
                     var attVal = [];
                     if (isInt) {
-                        //attVal = [parseInt(valArr[0]), parseInt(valArr[1])];
-                        // edge effect
                         attVal = [parseInt(valArr[0]), parseInt(valArr[1]) - 1];
                     } else {
                         attVal = [parseFloat(valArr[0]), parseFloat(valArr[1])];
@@ -585,16 +580,14 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                     if (filtName.startsWith('tcga_clinical')) {
                         checkTcga();
                     }
-                     //updatePlotBinsForSliders(slideName);
                     mkFiltText();
                     updateFacetsData(true);
 
                 }
             }).find('.ui-slider-range').append(tooltipL).append(tooltipR);
 
-            //$('#' + slideName).find('.ui-slider-range').append(tooltipR);
 
-            /* $('#' + slideName).hover(
+             $('#' + slideName).hover(
                     function(){
                         //$(this).removeClass("ui-state-active");
                        $(this).parent().find('.slide_tooltip').show();
@@ -603,7 +596,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                     function(){
                        $(this).parent().find('.slide_tooltip').hide();
                     }
-                ); */
+                );
 
 
              $('#' + slideName).find(".slide_tooltip").each(function(index){
@@ -618,12 +611,17 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
              $('#'+slideName).data('min',min);
             $('#'+slideName).data('max',max);
 
-            $('#'+slideName).append(labelMin).append(labelMax);
+
+            $('#' + slideName).data("filter-attr-id",attr_id);
+            $('#' + slideName).data("filter-display-attr",attr_name);
+
+            $('#'+slideName).append(labelMax);
+
 
             $('#'+ divName+'_list').addClass('hide');
             $('#'+ divName).find('.more-checks').addClass('hide');
             $('#'+ divName).find('.less-checks').addClass('hide');
-             $('#'+ divName).find('.hide-zeros').addClass('hide');
+            $('#'+ divName).find('.hide-zeros').addClass('hide');
         };
 
         var editProjectsTableAfterFilter = function (tableId, collFilt, collectionsData) {
@@ -904,7 +902,12 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                             var hrefSeriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
                             var seriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
 
-                            newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head"><td class="col1 tooltip_ex">' + hrefTxt + '</td><td>' + seriesNumber + '</td><td class="col1">' + modality + '</td><td class="col1">' + bodyPartExamined + '</td><td>' + seriesDescription + '</td>';
+                            newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head">' +
+                                '<td class="col1 tooltip_ex study-id">' + hrefTxt + '</td>' +
+                                '<td class="series-number">' + seriesNumber + '</td>' +
+                                '<td class="col1 modality">' + modality + '</td>' +
+                                '<td class="col1 body-part-examined">' + bodyPartExamined + '</td>' +
+                                '<td class="series-description">' + seriesDescription + '</td>';
                             if ((modality ==='SEG') || (modality ==='RTSTRUCT')){
                             newHtml += '<td class="ohif greyout tooltip_ex"><span class="tooltiptext_ex">Please open at the study level to see this series</span><a   href="/" onclick="return false;"><img src="' + STATIC_FILES_URL + 'img/ohif_sm.png"></a></td></tr>';
 
@@ -2366,16 +2369,25 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
      }
 
      var addSliders = function(id){
-            $('#'+id).find('.list-group-item__body').each(function(){
-                $(this).find('.more-checks').addClass('hide');
-                $(this).find('.less-checks').addClass('hide');
-                //var min = Math.ceil($(this).data('attr-min') * 1000)/1000;
-                //var min = Math.floor($(this).data('attr-min'));
-                var min = 0;
-                var max = Math.floor($(this).data('attr-max'));
 
-                mkSlider($(this).prop('id'),min, max,1,true,false,'');
-            });
+        $('#'+id).find('.list-group-item__body').each(function(){
+            $(this).find('.more-checks').addClass('hide');
+            $(this).find('.less-checks').addClass('hide');
+            //var min = Math.ceil($(this).data('attr-min') * 1000)/1000;
+            //var min = Math.floor($(this).data('attr-min'));
+            var min = 0;
+            var max = Math.floor($(this).data('attr-max'));
+            /* if (this.id.startsWith('Glycolysis') ){
+                min = 0;
+                max = 300;
+            }
+            else if (this.id.startsWith('Percent') ){
+                min = 0;
+                max = 100;
+            } */
+            //var max = Math.ceil($(this).data('attr-max') * 1000)/1000;
+            mkSlider($(this).prop('id'),min, max,1,true,false,'', $(this).data('filter-attr-id'), $(this).data('filter-display-attr'));
+        });
      };
 
 
@@ -2406,7 +2418,8 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             tableSortBindings('studies_table_head');
             tableSortBindings('series_table_head');
 
-            mkSlider('age_at_diagnosis',0,parseInt($('#age_at_diagnosis').data('attr-max')),1,true,true, 'tcga_clinical.');
+            mkSlider('age_at_diagnosis',0, parseInt($('#age_at_diagnosis').data('attr-max')),1,true,true, 'tcga_clinical.',
+                $('#age_at_diagnosis').data('filter-attr-id'), $('#age_at_diagnosis').data('filter-display-attr'));
 
             addSliders('quantitative');
 
@@ -2440,18 +2453,43 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
     );
 
      var load_filters = function(filters) {
+         var sliders = [];
         _.each(filters, function(group){
             _.each(group['filters'], function(filter){
-                $('div.list-group-item__body[data-attr-id="'+filter['id']+'"]').collapse('show');
-                _.each(filter['values'], function(val){
-                    $('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]').prop("checked",true);
-                    checkFilters($('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]'));
-                });
+                $('div.list-group-item__body[data-filter-attr-id="'+filter['id']+'"]').collapse('show');
+                if($('div.list-group-item__body[data-filter-attr-id="'+filter['id']+'"]').children('.ui-slider').length > 0) {
+                    sliders.push({
+                        'id':$('div.list-group-item__body[data-filter-attr-id="'+filter['id']+'"]').children('.ui-slider')[0].id,
+                        'left_val': filter['values'][0].indexOf(".") >= 0 ? parseFloat(filter['values'][0]) : parseInt(filter['values'][0]),
+                        'right_val': filter['values'][1].indexOf(".") >= 0 ? parseFloat(filter['values'][1]) : parseInt(filter['values'][1]),
+                    })
+                } else {
+                    _.each(filter['values'], function(val){
+                        $('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]').prop("checked",true);
+                        checkFilters($('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]'));
+                    });
+                }
             });
         });
+        if(sliders.length > 0) {
+            load_sliders(sliders, false);
+        }
         console.debug("Making filter text...");
         mkFiltText();
         return updateFacetsData(true).promise();
+     };
+
+     var load_sliders = function(sliders, do_update) {
+        _.each(sliders, function(slider) {
+            var slider_id = slider['id'];
+            setSlider(slider_id, false, slider['left_val'], slider['right_val'], true, false);
+            updatePlotBinsForSliders(slider_id);
+        });
+
+        if (do_update) {
+            mkFiltText();
+            updateFacetsData(true).promise();
+        }
      };
 
      var cohort_loaded = false;
@@ -2470,12 +2508,100 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                  $('input#hide-zeros').triggerHandler('change');
              });
         } else if(Object.keys(filters_for_load).length > 0) {
-             console.debug("Saw filters for load, loading...");
-             var loadPending = load_filters(filters_for_load);
-             loadPending.done(function() {
-                 console.debug("Filter load complete.");
-             });
-        } /* TODO: check for localStorage key of saved filters from a login */
+            var loadPending = load_filters(filters_for_load);
+            loadPending.done(function(){
+                console.debug("External filter load done.");
+            });
+        } else {
+            // check for localStorage key of saved filters from a login
+            load_anonymous_selection_data();
+            var has_sliders = (ANONYMOUS_SLIDERS !== null && ANONYMOUS_SLIDERS.length > 0);
+            var has_filters = (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS[0]['filters'].length > 0);
+            if (has_sliders) {
+                let loadPending = load_sliders(ANONYMOUS_SLIDERS, !has_filters);
+                loadPending.done(function(){
+                    console.debug("Sliders loaded from anonymous login.");
+                });
+            }
+            if (has_filters) {
+                let loadPending = load_filters(ANONYMOUS_FILTERS);
+                loadPending.done(function(){
+                    console.debug("Filters loaded from anonymous login.");
+                });
+            }
+        }
+    });
+
+    var ANONYMOUS_FILTERS = {};
+    var ANONYMOUS_SLIDERS = {};
+
+    var save_anonymous_selection_data = function() {
+        var groups = [];
+
+        // Get all checked filters
+        var filters = [];
+        $('.list-group-item__body').each(function() {
+            var $group = $(this);
+            var my_id = $group.data('attrId');
+            if (my_id != null)
+            {
+                var checkboxes = $group.find("input:checked");
+                if (checkboxes.length > 0)
+                {
+                    var values = [];
+                    checkboxes.each(function() {
+                        var $checkbox = $(this);
+                        var my_value = $checkbox[0].value;
+                        values.push(my_value);
+                    });
+                    filters.push({
+                        'id': my_id,
+                        'values': values,
+                    });
+                }
+            }
+        });
+
+        groups.push({'filters': filters});
+        var filterStr = JSON.stringify(groups);
+        sessionStorage.setItem('anonymous_filters', filterStr);
+
+        // Get all sliders with not default value
+        var sliders = [];
+        $('.ui-slider').each(function() {
+            var $this = $(this);
+            var slider_id = $this[0].id;
+            var left_val = $this.slider("values", 0);
+            var right_val = $this.slider("values", 1);
+            var min = $this.slider("option", "min");
+            var max = $this.slider("option", "max");
+            if (left_val !== min || right_val !== max) {
+                sliders.push({
+                   'id': slider_id,
+                    'left_val': left_val,
+                    'right_val': right_val,
+                });
+            }
+        });
+        var sliderStr = JSON.stringify(sliders);
+        sessionStorage.setItem('anonymous_sliders', sliderStr);
+    };
+
+    var load_anonymous_selection_data = function() {
+        // Load anonymous filters from session storage and clear it, so it is not always there
+        var filter_str = sessionStorage.getItem('anonymous_filters');
+        ANONYMOUS_FILTERS = JSON.parse(filter_str);
+        sessionStorage.removeItem('anonymous_filters');
+
+        var slider_str = sessionStorage.getItem('anonymous_sliders');
+        ANONYMOUS_SLIDERS = JSON.parse(slider_str);
+        sessionStorage.removeItem('anonymous_sliders');
+    };
+
+    $('#save-cohort-btn').on('click', function() {
+        if(!user_is_auth) {
+            save_anonymous_selection_data();
+        }
     });
 });
 

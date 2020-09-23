@@ -238,20 +238,10 @@
                                                     <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}
                                                 </a>
                                             </div>
-                                               <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}"  data-plotnm="{{ attr.name|plotnm }}"   class="collapse list-group-item__body collapse"
-                                                    data-attr-min="0"
-                                                       {% if attr.min_max %}
-                                                           {% if attr.name|startsWith:'Glycolysis' %}
-                                                                data-attr-max="300"
-                                                           {% elif attr.name|startsWith:'Percent' %}
-                                                                data-attr-max="100"
-                                                           {% else %}
-                                                               data-attr-max="{{ attr.min_max.max|ceiling }}"
-                                                           {% endif %}
-                                                       {% endif %}
-                                               >
-                                                   <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
 
+                                               <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}" data-filter-display-attr="{{ attr.display_name }}"  data-plotnm="{{ attr.name|plotnm }}"   class="collapse list-group-item__body collapse"
+                                                 {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max|ceiling }}"{% endif %}>
+                                                <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                     {% for val in attr.values|order_seg:attr_setK %}
                                                         {% with val.display_value|get_display_val:val.value as display_value %}
                                                         <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
@@ -315,8 +305,9 @@
                                                          <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
                                                      </a>
                                                  </div>
-                                                 <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse" aria-expanded="false"
-                                                 {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"{% endif %}>
+                                                 <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse" aria-expanded="false"
+                                                 {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-filter-display-attr="{{ attr.display_name }}"
+                                                      data-attr-max="{{ attr.min_max.max }}"{% endif %}>
                                                      <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                      {% for val in attr.values %}
                                                          <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
@@ -607,7 +598,12 @@
                              <table class = "table table-striped">
                                 <thead id="series_table_head">
                                     <tr>
-                                        <th>Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Series Number<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Modality<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Body Part Examined<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th>Series Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class="text_data">Open Viewer</th>
+                                        <th class="study-id">Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                        <th class="series-number">Series Number<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                        <th class="modality">Modality<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                        <th class="body-part-examined">Body Part Examined<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                        <th class="series-description">Series Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                        <th class="text_data">Open Viewer</th>
                                     </tr>
                                 </thead>
                                 <tbody id="series_table" class="set_height"></tbody>
