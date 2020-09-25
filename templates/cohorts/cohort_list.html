@@ -50,6 +50,14 @@
                         <th class="owner-col">Ownership</th>
                         <th class="share-col">Shared With</th>
                     </tr></thead>
+                    <colgroup>
+                        <col style="width: 3%">
+                        <col style="width: 8%">
+                        <col style="width: 21%">
+                        <col style="width: 24%">
+                        <col style="width: 8%">
+                        <col style="width: 8%">
+                    </colgroup>
                     <tbody>
                     {% for cohort in cohorts %}
                     {% if cohort.owner.is_superuser == False %}
