@@ -220,11 +220,11 @@ def main(config):
             for proj in config['projects']:
                 program = Program.objects.get(name=proj['program'], owner=isb_superuser, active=True, is_public=True)
                 try:
-                    obj = Program.objects.get(name=proj['name'], owner=isb_superuser, active=True, is_public=True, program=program)
-                    logger.info("[STATUS] Program {} found.".format(prog))
+                    obj = Project.objects.get(name=proj['name'], owner=isb_superuser, active=True, is_public=True, program=program)
+                    logger.info("[STATUS] Project {} found - skipping.".format(proj['name']))
                 except ObjectDoesNotExist:
-                    logger.info("[STATUS] Program {} not found - creating.".format(prog))
-                    obj = Program.objects.update_or_create(name=prog['name'], owner=isb_superuser, active=True, is_public=True, program=program)
+                    logger.info("[STATUS] Project {} not found - creating.".format(proj['name']))
+                    obj = Project.objects.update_or_create(name=proj['name'], owner=isb_superuser, active=True, is_public=True, program=program)
 
         if 'versions' in config:
             add_data_versions(config['versions'])
