@@ -34,7 +34,7 @@ import django
 django.setup()
 
 from google_helpers.bigquery.bq_support import BigQuerySupport
-from projects.models import Program, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataVersion
+from projects.models import Program, Project, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataVersion
 from django.contrib.auth.models import User
 
 isb_superuser = User.objects.get(username="isb")
@@ -211,10 +211,20 @@ def main(config):
             for prog in config['programs']:
                 try:
                     obj = Program.objects.get(name=prog['name'], owner=isb_superuser, active=True, is_public=True)
-                    logger.info("[STATUS] Program {} found.".format(prog))
+                    logger.info("[STATUS] Program {} found - skipping creation.".format(prog))
                 except ObjectDoesNotExist:
                     logger.info("[STATUS] Program {} not found - creating.".format(prog))
                     obj = Program.objects.update_or_create(name=prog['name'], owner=isb_superuser, active=True, is_public=True)
+
+        if 'projects' in config:
+            for proj in config['projects']:
+                program = Program.objects.get(name=proj['program'], owner=isb_superuser, active=True, is_public=True)
+                try:
+                    obj = Project.objects.get(name=proj['name'], owner=isb_superuser, active=True, is_public=True, program=program)
+                    logger.info("[STATUS] Project {} found - skipping.".format(proj['name']))
+                except ObjectDoesNotExist:
+                    logger.info("[STATUS] Project {} not found - creating.".format(proj['name']))
+                    obj = Project.objects.update_or_create(name=proj['name'], owner=isb_superuser, active=True, is_public=True, program=program)
 
         if 'versions' in config:
             add_data_versions(config['versions'])
@@ -244,12 +254,13 @@ def main(config):
 
         for table in config['bq_tables']:
             table_name = table['name'].split(".")
+            solr_name = table.get('solr_name',table_name[-1])
             add_bq_tables([table['name']], table['version'], table['version_type'], table['programs'])
-            add_solr_collex([table_name[-1]], table['version'], table['version_type'], table['programs'])
+            add_solr_collex(solr_name, table['version'], table['version_type'], table['programs'])
 
             schema = BigQuerySupport.get_table_schema(table_name[0], table_name[1], table_name[2])
 
-            solr_schema[table_name[-1]] = []
+            solr_schema[solr_name] = []
 
             for field in schema:
                 if field['name'] not in attr_set:
@@ -266,7 +277,7 @@ def main(config):
                     }
                 attr = attr_set[field['name']]
                 attr['bq_tables'].append(table['name'])
-                attr['solr_collex'].append(table_name[-1])
+                attr['solr_collex'].append(solr_name)
 
                 if attr['name'] in display_vals:
                     if 'preformatted_values' in display_vals[attr['name']]:
