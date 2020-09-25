@@ -1141,14 +1141,20 @@ a.skip-nav {
   color: #000;
   font-weight: 500; }
 
-.table tbody .name-col {
-  max-width: 500px;
+.table tbody .name-col,.table tbody .desc-col  {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden; }
   .table tbody .name-col a {
     display: inline-block;
-    width: 100%; }
+    width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden; }
+
+#cohort-table {
+  table-layout: fixed;
+}
 
 @media screen and (max-width: 1199px) {
   #gene-list-table .name-col, #gene-list-table .name-col a, #var-list-table .name-col, #var-list-table .name-col a {
