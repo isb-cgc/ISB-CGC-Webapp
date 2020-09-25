@@ -123,7 +123,7 @@
                     </div>
                     <div>
                         <label>Reference Genome</label>
-                        <select class="form-control bq-select" data-column-name="referenceGenome">reference_genome
+                        <select class="form-control bq-select" data-column-name="referenceGenome">
                             {% for option in reference_genome.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
@@ -159,18 +159,30 @@
                     <div>
                         <label>Access</label>
                         <select id="dataAccess" class="form-control bq-select" data-column-name="dataAccess">
-                            <option value="" selected>All</option>
+                            <option value="" selected>ALL</option>
                             <option value="open">Open Access</option>
                             <option value="controlled">Controlled Access</option>
                         </select>
                     </div>
                     <div id="advSearch0" class="adv-div collapse">
                         <div>
-                            <label>Dataset ID</label>
+                            <label>BQ Project ID</label>
+                            <select class="form-control bq-select" data-column-name="projectId">
+                                {% for option in project_id.options %}
+                                    {% if option.value == '' %}
+                                        <option value="{{ option.value }}" selected>{{ option.label }}</option>
+                                    {% else %}
+                                        <option value="^{{ option.value }}$">{{ option.label }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label>BQ Dataset ID</label>
                             <input type="text" class="form-control bq-filter" data-column-name="datasetId">
                         </div>
                         <div>
-                            <label>Table ID</label>
+                            <label>BQ Table ID</label>
                             <input type="text" class="form-control bq-filter" data-column-name="tableId">
                         </div>
                         <div>
@@ -213,6 +225,7 @@
                         <th style="width:3%;"></th>
                         <th style="width:17%;">Name</th>
                         <th></th>
+                        <th>Project ID</th>
                         <th style="width:15%;">Dataset ID</th>
                         <th style="width:15%;">Table ID</th>
                         <th>Full ID</th>
