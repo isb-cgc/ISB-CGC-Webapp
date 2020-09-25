@@ -98,8 +98,9 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             }
 
              vals = [strt, end];
-            $('#' + slideDiv).find('.ui-slider-handle').each( function(index){
-                $(this).find('.slide_tooltip').text( vals[index].toString() );
+
+            $('#' + slideDiv).find(".slide_tooltip").each(function(index){
+                $(this).text(vals[index].toString());
             });
 
             $('#' + slideDiv).slider("values", "0", strt);
@@ -144,7 +145,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
 
             if (updateNow) {
-                updatePlotBinsForSliders(slideDiv);
+                //updatePlotBinsForSliders(slideDiv);
                 mkFiltText();
                 updateFacetsData(true);
             }
@@ -438,7 +439,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 checkTcga();
             }
             var slideNm = $(elem).parent()[0].id+"_slide";
-            updatePlotBinsForSliders(slideNm);
+            //updatePlotBinsForSliders(slideNm);
             mkFiltText();
             updateFacetsData(true);
         }
@@ -469,12 +470,12 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                          }
 
                      }
-                     if ( ((valArr[0]==='*') || (endInd>= valArr[0])) && ((valArr[1]==='*') || (strtInd< valArr[1])) ){
+                     /* if ( ((valArr[0]==='*') || (endInd>= valArr[0])) && ((valArr[1]==='*') || (strtInd< valArr[1])) ){
                          $(this).parent().children('.plot_count').addClass('plotit');
                      }
                      else{
                          $(this).parent().children('.plot_count').removeClass('plotit');
-                     }
+                     } */
                  }
                  else if (val.includes('None')){
                      if (wNone){
@@ -490,22 +491,41 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
         }
 
+
         var mkSlider = function (divName, min, max, step, isInt, wNone, parStr, attr_id, attr_name) {
-             var tooltipL = $('<div class="slide_tooltip tooltipL" />').text('stuff').css({
+
+            var tooltipL = $('<div class="slide_tooltip tooltipL slide_tooltipT" />').text('stuff').css({
                position: 'absolute',
                top: -25,
                left: -5,
                 }).hide();
 
-             var tooltipR = $('<div class="slide_tooltip tooltipR" />').text('stuff').css({
+             var tooltipR = $('<div class="slide_tooltip slide_tooltipB tooltipR" />').text('stuff').css({
                position: 'absolute',
-               top: -25,
+               top: 20,
                right: -5,
                 }).hide();
 
 
+              var labelMin = $('<div class="labelMin"/>').text(min).css({
+                  position: 'absolute',
+                  top:-7,
+                  left: -22,
+                });
+
+
+            var labelMax = $('<div class="labelMax" />').text(max);
+
+            labelMax.css({
+                position: 'absolute',
+                top: -7,
+                right: -14-8*max.toString().length,
+                });
+
+
 
             var slideName = divName + '_slide';
+
             var inpName = divName + '_input';
             var strtInp = min + '-' + max;
             var nm=new Array();
@@ -516,8 +536,9 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             }
             nm.push(divName);
             var filtName = nm.join('.') + '_btw';
-            $('#' + divName).append('<div id="' + slideName + '"></div>  <input id="' + inpName + '" type="text" value="' + strtInp + '" style="display:none"> <button style="display:inline-block;" onclick=\'setSlider("' + slideName + '",true,0,0,' + String(isInt) + ', true)\'>Reset</button>');
 
+            $('#' + divName).append('<div id="' + slideName + '"></div>  <input id="' + inpName + '" type="text" value="' + strtInp + '" style="display:none"> <button class="reset"" style="display:block;margin-top:18px" onclick=\'setSlider("' + slideName + '",true,0,0,' + String(isInt) + ', true)\'>Reset</button>');
+             $('#'+slideName).append(labelMin);
             /*
              if (wNone){
                 $('#' + divName).append( '<input type="checkbox" onchange="addNone(this, \''+parStr+'\')"> None' );
@@ -542,13 +563,10 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 },
 
                 stop: function (event, ui) {
-                    //   updateSliderSelection(inpDiv, displaySet, header, attributeName, isInt);
                     var val = $('#' + inpName)[0].value;
                     var valArr = val.split('-');
                     var attVal = [];
                     if (isInt) {
-                        //attVal = [parseInt(valArr[0]), parseInt(valArr[1])];
-                        // edge effect
                         attVal = [parseInt(valArr[0]), parseInt(valArr[1]) - 1];
                     } else {
                         attVal = [parseFloat(valArr[0]), parseFloat(valArr[1])];
@@ -562,16 +580,14 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                     if (filtName.startsWith('tcga_clinical')) {
                         checkTcga();
                     }
-                     updatePlotBinsForSliders(slideName);
                     mkFiltText();
                     updateFacetsData(true);
 
                 }
             }).find('.ui-slider-range').append(tooltipL).append(tooltipR);
 
-            //$('#' + slideName).find('.ui-slider-range').append(tooltipR);
 
-            $('#' + slideName).hover(
+             $('#' + slideName).hover(
                     function(){
                         //$(this).removeClass("ui-state-active");
                        $(this).parent().find('.slide_tooltip').show();
@@ -592,8 +608,15 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                         }
                    });
 
+             $('#'+slideName).data('min',min);
+            $('#'+slideName).data('max',max);
+
+
             $('#' + slideName).data("filter-attr-id",attr_id);
             $('#' + slideName).data("filter-display-attr",attr_name);
+
+            $('#'+slideName).append(labelMax);
+
 
             $('#'+ divName+'_list').addClass('hide');
             $('#'+ divName).find('.more-checks').addClass('hide');
@@ -1527,7 +1550,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
             var isSlider = $('#'+filterId).find('#'+filterId+'_slide').length>0 ? true : false;
             if (isSlider) {
-                maxx = $('#'+filterId).data('attr-max').toString();
+                var maxx=$('#' + filterId).data('attr-max');
                 if(label == 'None') {
 
                 } else {
@@ -1562,6 +1585,14 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             var margin = 50;
             var radius = Math.min(width, height) / 2 - margin;
             var radiusB = 1.2*radius;
+            var mx =0;
+            var mn =0;
+
+            var filterId=plotId.replace("_chart","");
+            if ( $('#'+filterId).data('attr-max') ) {
+                //var mn = $('#' + slideId).data('min');
+                var mx = $('#' + filterId).data('attr-max');
+            }
 
             // append the svg object to the div called 'my_dataviz'
             var svg = d3.select("#"+plotId)
@@ -1660,7 +1691,9 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                txtbx.selectAll('*').attr("x",xpos);
                txtbx.selectAll('*').attr("y",ypos+30);
                tspans=txtbx.node().childNodes;
-               tspans[0].textContent = d.data.key;
+
+
+               tspans[0].textContent = d.data.key.replace('* To',mn.toString()+' To').replace('To *', 'To '+mx.toString());
                tspans[1].textContent = d.data.value;
                tspans[2].textContent = frac.toString()+"%";
                txtbx.attr("opacity",1);
@@ -2336,6 +2369,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
      }
 
      var addSliders = function(id){
+
         $('#'+id).find('.list-group-item__body').each(function(){
             $(this).find('.more-checks').addClass('hide');
             $(this).find('.less-checks').addClass('hide');
@@ -2343,14 +2377,14 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             //var min = Math.floor($(this).data('attr-min'));
             var min = 0;
             var max = Math.floor($(this).data('attr-max'));
-            if (this.id.startsWith('Glycolysis') ){
+            /* if (this.id.startsWith('Glycolysis') ){
                 min = 0;
                 max = 300;
             }
             else if (this.id.startsWith('Percent') ){
                 min = 0;
                 max = 100;
-            }
+            } */
             //var max = Math.ceil($(this).data('attr-max') * 1000)/1000;
             mkSlider($(this).prop('id'),min, max,1,true,false,'', $(this).data('filter-attr-id'), $(this).data('filter-display-attr'));
         });
@@ -2372,9 +2406,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             //histObj.filterObj.collection_id = window.tcgaColls;
             window.filtHistory = new Array();
             window.filtHistory.push(histObj);
-            createPlots('search_orig_set');
-            createPlots('search_derived_set');
-            createPlots('tcga_clinical');
+
            /* addFilterBindings('search_orig_set');
             addFilterBindings('search_related_set');*/
 
@@ -2390,6 +2422,10 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 $('#age_at_diagnosis').data('filter-attr-id'), $('#age_at_diagnosis').data('filter-display-attr'));
 
             addSliders('quantitative');
+
+            createPlots('search_orig_set');
+            createPlots('search_derived_set');
+            createPlots('tcga_clinical');
 
             var numCol = $('#projects_table').children('tr').length
             $('#projects_panel').find('.total-file-count')[0].innerHTML = numCol.toString();
