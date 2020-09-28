@@ -909,11 +909,11 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                                 '<td class="col1 body-part-examined">' + bodyPartExamined + '</td>' +
                                 '<td class="series-description">' + seriesDescription + '</td>';
                             if ((modality ==='SEG') || (modality ==='RTSTRUCT')){
-                            newHtml += '<td class="ohif greyout tooltip_ex"><span class="tooltiptext_ex">Please open at the study level to see this series</span><a   href="/" onclick="return false;"><i class="fa fa-folder-open-o"></i></td></tr>';
+                            newHtml += '<td class="ohif tooltip_ex"><span class="tooltiptext_ex">Please open at the study level to see this series</span><a   href="/" onclick="return false;"><i class="fa fa-eye-slash"></i></td></tr>';
 
                             }
                             else {
-                            newHtml += '<td class="ohif"><a   href="' + fetchUrlSeries + '" target="_blank"><i class="fa fa-folder-open-o"></i></td></tr>';
+                            newHtml += '<td class="ohif"><a   href="' + fetchUrlSeries + '" target="_blank"><i class="fa fa-eye"></i></td></tr>';
                             }
                         }
                           else{
