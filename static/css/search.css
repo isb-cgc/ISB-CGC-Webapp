@@ -325,33 +325,6 @@ tr {
     width:10%;
 }
 
-/*#series_table td.study-id {*/
-/*    width: 17%;*/
-/*}*/
-/*#series_table td.series-number {*/
-/*    width:14%;*/
-/*}*/
-/*#series_table td.modality {*/
-/*    width:10%;*/
-/*}*/
-/*#series_table td.body-part-examined {*/
-/*    width:16%;*/
-/*}*/
-/*#series_table td.series-description {*/
-/*    width:35%;*/
-/*}*/
-/*#series_table td.text_data {*/
-/*    width:8%;*/
-/*}*/
-
-
-/*
-#studies_table td {
-    width: 20%;
-    word-break: break-word;
-    max-width: 20%; }
- */
-
 #series_table td.ohif, #studies_table td.ohif {
   vertical-align: middle;
   padding: 0 8px 0 8px;
