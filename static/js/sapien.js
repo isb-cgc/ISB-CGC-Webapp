@@ -83,7 +83,25 @@ require([
         return 1;
     });
 
-    let clickHandler = null;
+    let clickHandler = function(id)
+    {
+        var groups = [];
+        var filters = [];
+        var values = [];
+        values.push(id.site);
+        filters.push(
+        {
+            'id': '128',
+            'values': values,
+        });
+        groups.push({'filters': filters});
+        var filterStr = JSON.stringify(groups);
+
+        let url = '/explore/?filters_for_load=' + filterStr;
+        url = encodeURI(url);
+
+        window.location.href = url;
+    };
 
     let mouseOutHandler = null;
 
