@@ -165,6 +165,7 @@ require([
 
         },
         theme: 'light',
+        placement: 'right-end',
         arrow: false,
         allowHTML: true,
         interactive: true

@@ -44,7 +44,7 @@
                                                                    <input class="collection_value" type="checkbox" value="{{ progK }}">
                                                                    <span class="collection_name value">{{ progK|upper }} </span> <span class="float-right case_count count">{{ progV.val }}</span>
                                                                </div>
-                                                         <div id="{{ progK }}" class="collapse list-group-sub-item__body">
+                                                         <div id="{{ progK }}" data-filter-attr-id="{{ progV.collex_attr_id }}" class="collapse list-group-sub-item__body">
 
                                                      {% elif progV.projects and progV.projects.items|length == 1 %}
                                                            {% for proj, projK in progV.projects.items %}
@@ -55,7 +55,7 @@
                                                                           type="checkbox" value="{{ proj }}">
                                                                    <span class="collection_name value">{{ proj|upper }}</span> <span class="float-right case_count count">{{ projK }}</span>
                                                                </div>
-                                                            <div id="{{ proj }}" class="collapse list-group-sub-item__body">
+                                                            <div id="{{ proj }}" data-filter-attr-id="{{ progV.collex_attr_id }}" class="collapse list-group-sub-item__body">
                                                            {% endfor %}
                                                      {% else %}
                                                      <div id="{{ progK }}_heading" class="list-group-item__heading">
@@ -70,7 +70,7 @@
                                                          </span>
                                                          <span class="float-right case_count count">{{ progV.val }}</span>
                                                      </div>
-                                                     <div id="{{ progK }}" class="collapse list-group-sub-item__body">
+                                                     <div id="{{ progK }}" data-filter-attr-id="{{ progV.collex_attr_id }}" class="collapse list-group-sub-item__body">
                                                      {% endif %}
                                                           {% if progV.projects and progV.projects.items|length > 1 %}
                                                            <ul id="{{ progK }}_proj_list" class="search-checkbox-list" style="list-style: none;">
@@ -161,7 +161,7 @@
                                 {%  endif %}
                             </ul>
                             <div class="tab-content">
-                                <div id = "search_orig_set" role="tabpanel" class="tab-pane active">
+                                <div id = "search_orig_set" role="tabpanel" class="tab-pane search-set active">
                                     {% for attr in set_attributes.origin_set.All.attributes %}
                                     {% if attr.name != "collection_id" %}
                                      <ul class="list-group" role="tablist" aria-multiselectable="true">
@@ -171,7 +171,7 @@
                                                     <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
                                                 </a>
                                             </div>
-                                            <div id="{{ attr.name }}" data-attr-id="{{ attr.id }}" class="collapse list-group-item__body"
+                                            <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}" class="collapse list-group-item__body"
 
                                                  {% if attr.min_max %}
                                                           data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"
@@ -216,7 +216,7 @@
                                 {%  endfor %}
                                 </div>
 
-                                <div id = "search_derived_set" role="tabpanel" class="tab-pane">
+                                <div id = "search_derived_set" role="tabpanel" class="tab-pane search-set">
 
                                 <ul class="list-group" role="tablist" aria-multiselectable="true">
                                       {% for attr_setK, attr_setV in set_attributes.derived_set.items|check_for_order:"derived" %}
@@ -289,7 +289,7 @@
                                 </ul>
                                 </div>
 
-                                <div id = "search_related_set" role="tabpanel" class="tab-pane">
+                                <div id = "search_related_set" role="tabpanel" class="tab-pane search-set">
                                     <ul class="list-group" role="tablist" aria-multiselectable="true">
                                     <li class="list-group-item">
                                       <div id="tcga_clinical_heading" class="list-group-item__heading">
