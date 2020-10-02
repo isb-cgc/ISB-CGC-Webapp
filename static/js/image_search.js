@@ -455,7 +455,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
             var wNone = false;
             if ( ($('#'+slideName).parent().children("input:checkbox").length>0) ){
-                wNone = $('#'+slideName).parent().children("input:checkbox")[0].checked;
+                wNone = $('#'+slideName).parent().children("input:checkbox").prop('checked');
             }
             var i=0;
 
@@ -1868,7 +1868,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             var showZeros = true;
             var isSearchConf = ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').length>0);
 
-            if ( isSearchConf  && ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros')[0].checked)){
+            if ( isSearchConf  && ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').prop('checked'))){
                 showZeros = false;
             }
 
@@ -1888,7 +1888,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             for (var i = 0; i < allFilters.length; i++) {
                 var elem = allFilters.get(i);
                 var val = $(elem)[0].value;
-                var checked = $(elem)[0].checked;
+                var checked = $(elem).prop('checked');
 
                 var spans = $(elem).parent().find('span');
                 var lbl = spans.get(0).innerHTML;
@@ -2044,7 +2044,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
 
         var checkFilters = function(filterElem) {
-            var checked = $(filterElem)[0].checked;
+            var checked = $(filterElem).prop('checked');
             var neighbours =$(filterElem).parentsUntil('.list-group-item__body, .list-group-sub-item__body','ul').children().children().children('input:checkbox');
             var neighboursCk = $(filterElem).parentsUntil('.list-group-item__body, .list-group-sub-item__body','ul').children().children().children(':checked');
             var allChecked= false;
@@ -2239,115 +2239,104 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
 
         var filterItemBindings = function (filterId) {
-        $('#' + filterId).find('input:checkbox').on('click', function () {
-            handleFilterSelectionUpdate(this, true, true);
-        });
+            $('#' + filterId).find('input:checkbox').on('click', function () {
+                handleFilterSelectionUpdate(this, true, true);
+            });
 
-        /*
-        $('#' + filterId).find('.hide-zeros-a').on('click', function () {
-            $(this).parent().parent().children('.show-zeros').show();
-            $(this).parent().parent().children('.show-zeros').removeClass('notDisp');
-            $(this).parent().parent().children('.hide-zeros').addClass('notDisp');
-            $(this).parent().hide();
-            var filterCat =$(this).parent().parent()[0].id;
-            updateFilters(filterCat, {}, false);
-        });
-
-
-        $('#' + filterId).find('.show-zeros-a').on('click', function () {
-            $(this).parent().parent().children('.hide-zeros').show();
-            $(this).parent().parent().children('.hide-zeros').removeClass('notDisp');
-            $(this).parent().parent().children('.show-zeros').addClass('notDisp');
-            $(this).parent().hide();
-            var filterCat =$(this).parent().parent()[0].id;
-            updateFilters(filterCat, {}, false);
-
-        });
-
-         */
+            /*
+            $('#' + filterId).find('.hide-zeros-a').on('click', function () {
+                $(this).parent().parent().children('.show-zeros').show();
+                $(this).parent().parent().children('.show-zeros').removeClass('notDisp');
+                $(this).parent().parent().children('.hide-zeros').addClass('notDisp');
+                $(this).parent().hide();
+                var filterCat =$(this).parent().parent()[0].id;
+                updateFilters(filterCat, {}, false);
+            });
 
 
-        $('#' + filterId).find('.show-more').on('click', function () {
+            $('#' + filterId).find('.show-zeros-a').on('click', function () {
+                $(this).parent().parent().children('.hide-zeros').show();
+                $(this).parent().parent().children('.hide-zeros').removeClass('notDisp');
+                $(this).parent().parent().children('.show-zeros').addClass('notDisp');
+                $(this).parent().hide();
+                var filterCat =$(this).parent().parent()[0].id;
+                updateFilters(filterCat, {}, false);
 
-            $(this).parent().parent().find('.less-checks').show();
-            $(this).parent().parent().find('.less-checks').removeClass('notDisp');
-            $(this).parent().parent().find('.more-checks').addClass('notDisp');
-            $(this).parent().hide();
-            var extras = $(this).parent().parent().children('.search-checkbox-list').children('.extra-values')
+            });
 
-            if ( ($('#'+filterId).closest('.search-configuration').find('#hide-zeros').length>0)  && ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros')[0].checked)){
-                extras=extras.not('.zeroed');
-            }
+             */
+
+            $('#' + filterId).find('.show-more').on('click', function () {
+
+                $(this).parent().parent().find('.less-checks').show();
+                $(this).parent().parent().find('.less-checks').removeClass('notDisp');
+                $(this).parent().parent().find('.more-checks').addClass('notDisp');
+                $(this).parent().hide();
+                var extras = $(this).parent().parent().children('.search-checkbox-list').children('.extra-values')
+
+                if ( ($('#'+filterId).closest('.search-configuration').find('#hide-zeros').length>0)  && ($('#'+filterId).closest('.search-configuration').find('#hide-zeros').prop('checked'))){
+                    extras=extras.not('.zeroed');
+                }
                 extras.show();
+            });
 
-        });
+            $('#' + filterId).find('.show-less').on('click', function () {
+                $(this).parent().parent().find('.more-checks').show();
+                $(this).parent().parent().find('.more-checks').removeClass('notDisp');
+                $(this).parent().parent().find('.less-checks').addClass('notDisp');
+                $(this).parent().hide();
+                $(this).parent().parent().children('.search-checkbox-list').children('.extra-values').hide();
+            });
 
+            $('#' + filterId).find('.check-all').on('click', function () {
+                //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
+                var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body').children('ul').children();
+                for (var ind =0;ind<filterElems.length;ind++)
+                {
+                    var ckElem = new Object();
+                    if ($(filterElems[ind]).children().filter('.list-group-item__heading').length>0){
+                        ckElem = $(filterElems[ind]).children().filter('.list-group-item__heading').children().filter('input:checkbox')[0];
+                    }
+                    else{
+                       ckElem=$(filterElems[ind]).children().filter('label').children().filter('input:checkbox')[0];
+                    }
 
-        $('#' + filterId).find('.show-less').on('click', function () {
-
-            $(this).parent().parent().find('.more-checks').show();
-            $(this).parent().parent().find('.more-checks').removeClass('notDisp');
-            $(this).parent().parent().find('.less-checks').addClass('notDisp');
-            $(this).parent().hide();
-            $(this).parent().parent().children('.search-checkbox-list').children('.extra-values').hide();
-
-
-        });
-
-
-        $('#' + filterId).find('.check-all').on('click', function () {
-            //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
-            var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body').children('ul').children();
-            for (var ind =0;ind<filterElems.length;ind++)
-            {
-                var ckElem = new Object();
-                if ($(filterElems[ind]).children().filter('.list-group-item__heading').length>0){
-                    ckElem = $(filterElems[ind]).children().filter('.list-group-item__heading').children().filter('input:checkbox')[0];
+                    ckElem.checked= true;
+                  //$(filterElem).prop('checked') = true;
+                  if (ind<filterElems.length-1) {
+                      handleFilterSelectionUpdate(ckElem, false, false);
+                  }
+                  else{
+                      handleFilterSelectionUpdate(ckElem, true, true);
+                  }
                 }
-                else{
-                   ckElem=$(filterElems[ind]).children().filter('label').children().filter('input:checkbox')[0];
+            });
+
+            $('#' + filterId).find('.uncheck-all').on('click', function () {
+                 //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
+                var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body').children('ul').children();
+                for (var ind =0;ind<filterElems.length;ind++)
+                {
+                    var ckElem = new Object();
+                    if ($(filterElems[ind]).children().filter('.list-group-item__heading').length>0){
+                        ckElem = $(filterElems[ind]).children().filter('.list-group-item__heading').children().filter('input:checkbox')[0];
+                    }
+                    else{
+                       ckElem=$(filterElems[ind]).children().filter('label').children().filter('input:checkbox')[0];
+                    }
+
+                  ckElem.checked = false;
+                    if (ind<filterElems.length-1) {
+                      handleFilterSelectionUpdate(ckElem, false, false);
+                  }
+                  else{
+                      handleFilterSelectionUpdate(ckElem, true, true);
+                  }
+
                 }
 
-                ckElem.checked= true;
-              //$(filterElem)[0].checked = true;
-              if (ind<filterElems.length-1) {
-                  handleFilterSelectionUpdate(ckElem, false, false);
-              }
-              else{
-                  handleFilterSelectionUpdate(ckElem, true, true);
-              }
-            }
-        });
-
-
-
-        $('#' + filterId).find('.uncheck-all').on('click', function () {
-             //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
-            var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body').children('ul').children();
-            for (var ind =0;ind<filterElems.length;ind++)
-            {
-                var ckElem = new Object();
-                if ($(filterElems[ind]).children().filter('.list-group-item__heading').length>0){
-                    ckElem = $(filterElems[ind]).children().filter('.list-group-item__heading').children().filter('input:checkbox')[0];
-                }
-                else{
-                   ckElem=$(filterElems[ind]).children().filter('label').children().filter('input:checkbox')[0];
-                }
-
-              ckElem.checked = false;
-                if (ind<filterElems.length-1) {
-                  handleFilterSelectionUpdate(ckElem, false, false);
-              }
-              else{
-                  handleFilterSelectionUpdate(ckElem, true, true);
-              }
-
-            }
-
-        });
-
-
-    }
+            });
+        };
 
         var clearFilter = function (filterElem) {
             if (filterElem.classList.contains('all')){
