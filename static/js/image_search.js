@@ -455,7 +455,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
             var wNone = false;
             if ( ($('#'+slideName).parent().children("input:checkbox").length>0) ){
-                wNone = $('#'+slideName).parent().children("input:checkbox")[0].checked;
+                wNone = $('#'+slideName).parent().children("input:checkbox").prop('checked');
             }
             var i=0;
 
@@ -1868,7 +1868,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             var showZeros = true;
             var isSearchConf = ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').length>0);
 
-            if ( isSearchConf  && ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros')[0].checked)){
+            if ( isSearchConf  && ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').prop('checked'))){
                 showZeros = false;
             }
 
@@ -1888,7 +1888,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             for (var i = 0; i < allFilters.length; i++) {
                 var elem = allFilters.get(i);
                 var val = $(elem)[0].value;
-                var checked = $(elem)[0].checked;
+                var checked = $(elem).prop('checked');
 
                 var spans = $(elem).parent().find('span');
                 var lbl = spans.get(0).innerHTML;
@@ -2044,7 +2044,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
 
         var checkFilters = function(filterElem) {
-            var checked = $(filterElem)[0].checked;
+            var checked = $(filterElem).prop('checked');
             var neighbours =$(filterElem).parentsUntil('.list-group-item__body, .list-group-sub-item__body','ul').children().children().children('input:checkbox');
             var neighboursCk = $(filterElem).parentsUntil('.list-group-item__body, .list-group-sub-item__body','ul').children().children().children(':checked');
             var allChecked= false;
@@ -2275,7 +2275,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             $(this).parent().hide();
             var extras = $(this).parent().parent().children('.search-checkbox-list').children('.extra-values')
 
-            if ( ($('#'+filterId).closest('.search-configuration').find('#hide-zeros').length>0)  && ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros')[0].checked)){
+            if ( ($('#'+filterId).closest('.search-configuration').find('#hide-zeros').length>0)  && ($('#'+filterId).closest('.search-configuration').find('#hide-zeros').prop('checked'))){
                 extras=extras.not('.zeroed');
             }
                 extras.show();
@@ -2309,7 +2309,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 }
 
                 ckElem.checked= true;
-              //$(filterElem)[0].checked = true;
+              //$(filterElem).prop('checked') = true;
               if (ind<filterElems.length-1) {
                   handleFilterSelectionUpdate(ckElem, false, false);
               }
