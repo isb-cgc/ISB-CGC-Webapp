@@ -1396,20 +1396,18 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 type: 'get',
                 contentType: 'application/x-www-form-urlencoded',
                 success: function (data) {
-
-                    var isFiltered = true;
-                    if ($('#search_def p').length>0){
-                      $('#save-cohort-btn').prop('disabled','');
-                      if(user_is_auth) {
-                        $('#save-cohort-btn').prop('title','');
-                        }
-                   } else {
-                        isFiltered = false;
-                       $('#save-cohort-btn').prop('disabled','disabled');
+                    var isFiltered = Boolean($('#search_def p').length>0);
+                    if (isFiltered && data.total > 0){
+                        $('#save-cohort-btn').prop('disabled','');
                         if(user_is_auth) {
-                            $('#save-cohort-btn').prop('title','Please select at least one filter.');
+                            $('#save-cohort-btn').prop('title','');
+                        }
+                    } else {
+                        $('#save-cohort-btn').prop('disabled','disabled');
+                        if(user_is_auth) {
+                            $('#save-cohort-btn').prop('title',data.total > 0 ? 'Please select at least one filter.' : 'There are no cases in this cohort.');
                         } else {
-                            $('#save-cohort-btn').prop('title','Log in to save a cohort.');
+                            $('#save-cohort-btn').prop('title','Log in to save.');
                         }
                     }
                     //updateCollectionTotals(data.total, data.origin_set.attributes.collection_id);
@@ -1419,8 +1417,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                     dicofdic= {'unfilt': data.origin_set.All.attributes, 'filt':''}
                     if (isFiltered){
                         dicofdic['filt']=data.filtered_counts.origin_set.All.attributes;
-                    }
-                    else {
+                    } else {
                         dicofdic['filt']=data.origin_set.All.attributes;
                     }
 
@@ -1449,18 +1446,13 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                                 }
                             }
                         }
-                    }
-                    else{
+                    } else{
                         $('#search_derived_set').addClass('disabled');
                     }
-
 
                     for (var i=0; i< derivedAttrs.length;i++) {
                         updateFilterSelections(derivedAttrs[i], {});
                     }
-
-
-
 
                     createPlots('search_derived_set');
 
@@ -1483,7 +1475,6 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                     }
 
                     createPlots('search_related_set');
-
 
                     var collFilt = new Array();
                     if ('collection_id' in parsedFiltObj){
@@ -2466,8 +2457,12 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
          var sliders = [];
         _.each(filters, function(group){
             _.each(group['filters'], function(filter){
-                $('div.list-group-item__body[data-filter-attr-id="'+filter['id']+'"]').collapse('show');
-                if($('div.list-group-item__body[data-filter-attr-id="'+filter['id']+'"]').children('.ui-slider').length > 0) {
+                let selector = 'div.list-group-item__body[data-filter-attr-id="'+filter['id']+'"], '+'div.list-group-sub-item__body[data-filter-attr-id="'+filter['id']+'"]';
+                $(selector).collapse('show');
+                $(selector).find('.show-more').triggerHandler('click');
+                $(selector).parents('.collection-list').collapse('show');
+                $(selector).parents('.tab-pane.search-set').length > 0 && $('a[href="#'+$(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
+                if($(selector).children('.ui-slider').length > 0) {
                     sliders.push({
                         'id':$('div.list-group-item__body[data-filter-attr-id="'+filter['id']+'"]').children('.ui-slider')[0].id,
                         'left_val': filter['values'][0].indexOf(".") >= 0 ? parseFloat(filter['values'][0]) : parseInt(filter['values'][0]),
