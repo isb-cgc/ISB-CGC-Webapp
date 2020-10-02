@@ -95,6 +95,10 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             if (reset) {
                 strt = $('#' + slideDiv).slider("option", "min");
                 end = $('#' + slideDiv).slider("option", "max");
+                $('#' + slideDiv).removeClass('used');
+            }
+            else{
+                $('#' + slideDiv).addClass('used');
             }
 
              vals = [strt, end];
@@ -421,9 +425,9 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
             if (elem.checked){
                 if (!(id in window.filterObj)) {
-                    window.filterObj[id] = new Object();
+                    window.filterObj[id] = new Array();
                 }
-                window.filterObj[id]['none'] = true;
+                window.filterObj[id]['none'] = true;_
             }
 
             else{
@@ -539,11 +543,11 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
             $('#' + divName).append('<div id="' + slideName + '"></div>  <input id="' + inpName + '" type="text" value="' + strtInp + '" style="display:none"> <button class="reset"" style="display:block;margin-top:18px" onclick=\'setSlider("' + slideName + '",true,0,0,' + String(isInt) + ', true)\'>Reset</button>');
              $('#'+slideName).append(labelMin);
-            /*
+
              if (wNone){
                 $('#' + divName).append( '<input type="checkbox" onchange="addNone(this, \''+parStr+'\')"> None' );
             }
-             */
+
 
             $('#' + slideName).slider({
                 values: [min, max],
@@ -563,6 +567,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                 },
 
                 stop: function (event, ui) {
+                    $('#' + slideName).addClass('used');
                     var val = $('#' + inpName)[0].value;
                     var valArr = val.split('-');
                     var attVal = [];
@@ -1357,13 +1362,21 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                     nmA = ckey.split('.');
                     nm=nmA[nmA.length-1];
                     if (nm.endsWith('_btw')){
-                        if ('rng' in window.filterObj[ckey]){
+
+                        if (  ('rng' in window.filterObj[ckey]) && ('none' in window.filterObj[ckey]) ){
+                            filtObj[nm] = [window.filterObj[ckey]['rng'],'None']
+                        }
+
+                        else if ('rng' in window.filterObj[ckey]){
                             filtObj[nm] = window.filterObj[ckey]['rng']
                         }
-                        if ('none' in window.filterObj[ckey]){
+                        else if ('none' in window.filterObj[ckey]){
                             noneKey=nm.replace('_btw','');
-                            filtObj[noneKey]='None';
+                            filtObj[noneKey]=['None'];
                         }
+
+
+
                     }
                     else {
                         filtObj[nm] = window.filterObj[ckey];
@@ -1382,8 +1395,8 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             var url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True&data_source_type=' + ($("#data_source_type option:selected").val() || 'S');
             var parsedFiltObj=parseFilterObj();
             if (Object.keys(parsedFiltObj).length > 0) {
-
-                url += '&filters=' + JSON.stringify(parsedFiltObj);
+                 url += '&filters=' + JSON.stringify(parsedFiltObj);
+                 //url += '&filters='+JSON.stringify({"age_at_diagnosis":['None' ]});
             }
 
             url = encodeURI(url);
@@ -1871,6 +1884,40 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
         var updateFilters = function (filterCat, dic, dataFetched) {
             var hasSlider = ( $('#'+filterCat+'_slide').length>0 );
+
+            /*
+            if (hasSlider){
+                min=0;
+                max=0;
+                if (dic['filt'].hasOwnProperty('min_max') && (dic['filt']['min_max'].hasOwnProperty('min')) ) {
+                    min = Math.floor(dic['filt']['min_max']['min']);
+                    max = Math.ceil(dic['filt']['min_max']['max']);
+                }
+
+
+
+                $('#'+filterCat+'_slide').slider('option','min',min);
+                $('#'+filterCat+'_slide').slider('option','max', max);
+
+                vals = $('#'+filterCat+'_slide').slider('option','values');
+                if ( (vals[0] < min) || !( $('#'+filterCat+'_slide').hasClass('used')   )){
+                    vals[0] = min;
+                }
+                if ((vals[1]> max) || !(  $('#'+filterCat+'_slide').hasClass('used')  )){
+                    vals[1] = max;
+                }
+                $('#'+filterCat+'_slide').slider('option','values', vals);
+                $('#'+filterCat+'_slide').find('.tooltipL').text(vals[0]);
+                $('#'+filterCat+'_slide').find('.tooltipR').text(vals[1]);
+                $('#'+filterCat+'_input').val(vals[0]+'-'+vals[1]);
+
+                $('#'+filterCat+'_slide').find('.labelMin').text(min);
+                $('#'+filterCat+'_slide').find('.labelMax').text(max);
+
+
+            }
+            */
+
             var allListItems=$('#'+filterCat).children('ul').children('li');
             var allFilters=allListItems.children().children('input:checkbox');
             var checkedFilters=allListItems.children().children('input:checked');

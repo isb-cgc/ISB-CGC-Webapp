@@ -138,7 +138,7 @@
                     <div class="search-configuration filter-panel search-con" role="tabpanel">
                         <div class="tabpanel panel-default" role="tabpanel">
                             <div class="panel-heading clearfix"><h4 class="panel-title">Search Configuration  <div  class="tooltip_info" style="float:right">&#9432;
-                                <div class="tooltiptext_info">Each facet count is the number of cases within the given facet calculated by applying the defined filter with the facet added to the filter definition (if otherwise absent).</div>
+                                <div class="tooltiptext_info"> The panel below reports the number of unique cases (or patients) for each attribute within a cohort constructed by adding the given attribute (when absent) to the defined filter.</div>
                             </div> </h4>
                                 <br><span ><input id="hide-zeros" type="checkbox" value="hide-zeros" onchange="hideAtt()"> Hide attributes with 0 cases</span>
 
@@ -387,7 +387,9 @@
                     <div class="filter-panel panel" role="tabpanel">
                     <div class="tabpanel panel-default" role="tabpanel">
                         <div class="panel-heading clearfix"><h4 class="panel-title">Search Results  <div  class="tooltip_info" style="float:right">&#9432;
-                                <div class="tooltiptext_info tooltip_rhs">Each facet count is the number of cases within the given facet calculated by applying the defined filter. For some facet categories a case may apply to several facets within the category. Hence some facets not included in the filter may have positive case counts.</div>
+                                <div class="tooltiptext_info tooltip_rhs">Each chart below reports the number of cases (or patients) for all attributes
+                                    within a given attribute category for the cohort constructed by the defined filter. For certain categories (i.e. Modality) some cases may apply to several attributes within the category.
+                                    Hence some attributes that seem to be excluded in the filter definition may have positive case counts.</div>
                             </div></h4>
 
                             <div style="display:none">
