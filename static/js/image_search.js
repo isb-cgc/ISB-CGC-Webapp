@@ -2459,6 +2459,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             _.each(group['filters'], function(filter){
                 let selector = 'div.list-group-item__body[data-filter-attr-id="'+filter['id']+'"], '+'div.list-group-sub-item__body[data-filter-attr-id="'+filter['id']+'"]';
                 $(selector).collapse('show');
+                $(selector).find('.show-more').triggerHandler('click');
                 $(selector).parents('.collection-list').collapse('show');
                 $(selector).parents('.tab-pane.search-set').length > 0 && $('a[href="#'+$(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
                 if($(selector).children('.ui-slider').length > 0) {
