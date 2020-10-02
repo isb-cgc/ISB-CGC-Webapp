@@ -157,6 +157,7 @@ body {
     text-align: center;
     border-radius: 6px;
     padding: 5px 0;
+    margin-left: 17px;
     position: absolute;
     z-index: 1; }
 
@@ -288,11 +289,11 @@ tr {
 }
 #studies_table_head th.study-description,
 #studies_table td.study-description {
-    width:39%;
+    width:36%;
 }
 #studies_table_head th.open-viewer,
 #studies_table td.open-viewer {
-    width:10%;
+    width:13%;
 }
 
 
@@ -306,7 +307,7 @@ tr {
 #series_table_head th.series-number,
 #series_table td.series-number
 {
-    width: 14%;
+    width: 11%;
 }
 #series_table_head th.modality,
 #series_table td.modality {
@@ -322,7 +323,7 @@ tr {
 }
 #series_table_head th.text_data,
 #series_table td.text_data {
-    width:10%;
+    width:13%;
 }
 
 #series_table td.ohif, #studies_table td.ohif {
