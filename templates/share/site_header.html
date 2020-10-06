@@ -68,12 +68,7 @@
                     <li class="navbar-item inline-block navbar-signin">
                         <div class="dropdown">
                             <a id="sign-in-dropdown" class="sign-in-dropdown dropdown-toggle navbar-item__text"
-                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fa fa-sign-in"></i><p class="navbar-label">Sign In</p></a>
-                            <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-labelledby="sign-in-dropdown">
-                                <li><a class="login-link" href="{% provider_login_url 'google' %}" title="Google Sign In"><i class="fa fa-sign-in"></i> via Google</a></li>
-                                <li><a class="login-link" href="{% url 'account_login' %}" title="IDC Sign In"><i class="fa fa-sign-in"></i> via IDC</a></li>
-                            </ul>
+                               href="{% url 'account_login' %}" title="Sign In"><i class="fa fa-sign-in"></i><p class="navbar-label">Sign In</p></a>
                         </div>
                     </li>
                 {% endif %}
