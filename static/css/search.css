@@ -164,6 +164,28 @@ body {
 .tooltip_ex:hover .tooltiptext_ex {
     visibility: visible; }
 
+
+
+.tooltip_info .tooltiptext_info {
+    visibility: hidden;
+    width: 500px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1; }
+
+.tooltip_info:hover .tooltiptext_info {
+    visibility: visible; }
+
+.tooltip_rhs {
+    right: 20px;
+}
+
+
+
 .spinner {
     position: fixed;
     width: 100%;
