@@ -419,7 +419,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             $('.'+graphClass).animate({height: height}, 800);
         };
 
-        window.addNone = function(elem, parStr)
+        window.addNone = function(elem, parStr, updateNow)
         {
             var id = parStr+$(elem).parent()[0].id+"_btw";
 
@@ -445,7 +445,10 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             var slideNm = $(elem).parent()[0].id+"_slide";
             //updatePlotBinsForSliders(slideNm);
             mkFiltText();
-            updateFacetsData(true);
+
+            if (updateNow) {
+                updateFacetsData(true);
+            }
         }
 
         var updatePlotBinsForSliders =  function(slideName){
@@ -502,13 +505,13 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                position: 'absolute',
                top: -25,
                left: -5,
-                }).hide();
+                });
 
              var tooltipR = $('<div class="slide_tooltip slide_tooltipB tooltipR" />').text('stuff').css({
                position: 'absolute',
                top: 20,
                right: -5,
-                }).hide();
+                });
 
 
               var labelMin = $('<div class="labelMin"/>').text(min).css({
@@ -541,11 +544,11 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             nm.push(divName);
             var filtName = nm.join('.') + '_btw';
 
-            $('#' + divName).append('<div id="' + slideName + '"></div>  <input id="' + inpName + '" type="text" value="' + strtInp + '" style="display:none"> <button class="reset"" style="display:block;margin-top:18px" onclick=\'setSlider("' + slideName + '",true,0,0,' + String(isInt) + ', true)\'>Reset</button>');
+            $('#' + divName).append('<div id="' + slideName + '"></div>  <input id="' + inpName + '" type="text" value="' + strtInp + '" style="display:none"> <button class="reset"" style="display:block;margin-top:18px" onclick=\'setSlider("' + slideName + '",true,0,0,' + String(isInt) + ', true)\'>Clear Slider</button>');
              $('#'+slideName).append(labelMin);
 
              if (wNone){
-                $('#' + divName).append( '<input type="checkbox" onchange="addNone(this, \''+parStr+'\')"> None' );
+                $('#' + divName).append( '<input type="checkbox" data-attr-par="'+parStr+'" class="noneBut" onchange="addNone(this, \''+parStr+'\', true)"> None' );
             }
 
 
@@ -561,7 +564,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
 
                      $(this).find('.slide_tooltip').each( function(index){
                         $(this).text( ui.values[index].toString() );
-                        $(this).show();
+
                     });
 
                 },
@@ -595,11 +598,11 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
              $('#' + slideName).hover(
                     function(){
                         //$(this).removeClass("ui-state-active");
-                       $(this).parent().find('.slide_tooltip').show();
+                       $(this).parent().find('.slide_tooltip');
                     }
                   ,
                     function(){
-                       $(this).parent().find('.slide_tooltip').hide();
+                       $(this).parent().find('.slide_tooltip');
                     }
                 );
 
@@ -1565,9 +1568,26 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             var isSlider = $('#'+filterId).find('#'+filterId+'_slide').length>0 ? true : false;
             if (isSlider) {
                 var maxx=$('#' + filterId).data('attr-max');
-                if(label == 'None') {
+                var minx=$('#' + filterId).data('attr-min');
 
-                } else {
+
+                if ($('#'+filterId).find('.noneBut').length>0) {
+                    var inpElem = $('#'+filterId).find('.noneBut')[0];
+                }
+
+                if(label == 'None') {
+                    setSlider(filterId+"_slide", true, 0, maxx, true,false);
+                     //var inpElem = $('#'+filterId).find('.noneBut')[0];
+                     inpElem.checked=true;
+                     var parStr = $(inpElem).data("attr-par");
+                    window.addNone(inpElem,parStr,true);
+                }
+                else {
+                    if (! (typeof(inpElem)==="undefined")){
+                        inpElem.checked=false;
+                        var parStr = $(inpElem).data("attr-par");
+                        window.addNone(inpElem,parStr,false);
+                    }
                     var selArr = label.split(' To ');
                     var strt = parseInt((selArr[0] === '*') ? '0' : selArr[0]);
                     var end = parseInt((selArr[1] === '*') ? maxx : selArr[1]);
