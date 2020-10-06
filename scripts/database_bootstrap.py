@@ -58,7 +58,22 @@ ranges_needed = {
     'year_of_diagnosis': 'year',
     'days_to_birth': 'by_negative_3k',
     'year_of_initial_pathologic_diagnosis': 'year',
-    'age_at_diagnosis': None
+    'age_at_diagnosis': None,
+    'SUVbw': 'SUVbw',
+    'Volume': 'Volume',
+    'Diameter': 'Diameter',
+    'Surface_area_of_mesh': 'Surface_area_of_mesh',
+    'Total_Lesion_Glycolysis': 'Total_Lesion_Glycolysis',
+    'Standardized_Added_Metabolic_Activity': 'Standardized_Added_Metabolic_Activity',
+    'Percent_Within_First_Quarter_of_Intensity_Range': 'Percent_Within_First_Quarter_of_Intensity_Range',
+    'Percent_Within_Third_Quarter_of_Intensity_Range': 'Percent_Within_Third_Quarter_of_Intensity_Range',
+    'Percent_Within_Fourth_Quarter_of_Intensity_Range': 'Percent_Within_Fourth_Quarter_of_Intensity_Range',
+    'Percent_Within_Second_Quarter_of_Intensity_Range': 'Percent_Within_Second_Quarter_of_Intensity_Range',
+    'Standardized_Added_Metabolic_Activity_Background': 'Standardized_Added_Metabolic_Activity_Background',
+    'Glycolysis_Within_First_Quarter_of_Intensity_Range': 'Glycolysis_Within_First_Quarter_of_Intensity_Range',
+    'Glycolysis_Within_Third_Quarter_of_Intensity_Range': 'Glycolysis_Within_Third_Quarter_of_Intensity_Range',
+    'Glycolysis_Within_Fourth_Quarter_of_Intensity_Range': 'Glycolysis_Within_Fourth_Quarter_of_Intensity_Range',
+    'Glycolysis_Within_Second_Quarter_of_Intensity_Range': 'Glycolysis_Within_Second_Quarter_of_Intensity_Range'
 }
 
 ranges = {
@@ -69,7 +84,22 @@ ranges = {
     'by_500': [{'first': "500", "last": "6000", "gap": "500", "include_lower": False, "unbounded": True,
                              "include_upper": True, 'type': 'I'}],
     'year': [{'first': "1976", "last": "2015", "gap": "5", "include_lower": True, "unbounded": False,
-                             "include_upper": False, 'type': 'I'}]
+                             "include_upper": False, 'type': 'I'}],
+    'SUVbw': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '3', 'last': '12', 'gap': '1'}],
+    'Volume': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '10', 'last': '28000', 'gap': '2800'}],
+    'Diameter': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '6', 'last': '55', 'gap': '6'}],
+    'Surface_area_of_mesh': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '150', 'last': '4500', 'gap': '435'}],
+    'Total_Lesion_Glycolysis': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '78', 'last': '698', 'gap': '78'}],
+    'Standardized_Added_Metabolic_Activity': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '56', 'last': '502', 'gap': '56'}],
+    'Percent_Within_First_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '10', 'last': '90', 'gap': '10'}],
+    'Percent_Within_Third_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '10', 'last': '90', 'gap': '10'}],
+    'Percent_Within_Fourth_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '10', 'last': '90', 'gap': '10'}],
+    'Percent_Within_Second_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '10', 'last': '90', 'gap': '10'}],
+    'Standardized_Added_Metabolic_Activity_Background': [{'type': 'F', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '0.5', 'last': '5', 'gap': '0.5'}],
+    'Glycolysis_Within_First_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '28', 'last': '251', 'gap': '28'}],
+    'Glycolysis_Within_Third_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '25', 'last': '225', 'gap': '25'}],
+    'Glycolysis_Within_Fourth_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '19', 'last': '170', 'gap': '19'}],
+    'Glycolysis_Within_Second_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '25', 'last': '227', 'gap': '25'}]
 }
 
 BQ_PROJ_DATASET = 'idc-dev-etl.idc_tcia_views_mvp_wave0'
@@ -576,8 +606,11 @@ def main():
 
             attr = all_attrs[line_split[0]]
 
-            if attr['type'] == Attribute.CONTINUOUS_NUMERIC:
-                attr['range'] = []
+            if attr['type'] == Attribute.CONTINUOUS_NUMERIC and 'range' not in attr:
+                if attr['name'] in ranges_needed:
+                    attr['range'] = ranges.get(ranges_needed.get(attr['name'], ''), [])
+                else:
+                    attr['range'] = []
 
             attr['solr_collex'].append(SOLR_INDEX['dicom_derived'])
             attr['bq_tables'].append(BQ_TABLES['quan'])
