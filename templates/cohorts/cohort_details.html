@@ -63,6 +63,19 @@
     {% include "idc/explore_data_core.html" %}
 {% endwith %}
 
+    <!-- Download In Progress Modal -->
+<div class="modal fade" id="download-in-progress" tabindex="-1" role="dialog" data-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"></div>
+            <div class="modal-body">
+                <p><i class="fa fa-cog fa-spin"></i> Preparing manifest for download...</p>
+            </div>
+            <div class="modal-footer"></div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block js_file %}
