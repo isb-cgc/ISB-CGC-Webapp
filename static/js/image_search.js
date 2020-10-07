@@ -837,8 +837,6 @@ require([
             resetTableControls($('#' + seriesTableId), true, newScrollInd)
         }
 
-        study_id_tooltips = new Map();
-
         window.addStudyOrSeries = function (projectIdArr, studyIdArr, tableId, refresh) {
 
             changeAjax(true);
@@ -892,8 +890,6 @@ require([
                 type: 'get',
                 contentType: 'application/x-www-form-urlencoded',
                 success: function (data) {
-                    study_id_tooltips.clear();
-
                     //nstart = new Date().getTime();
                     for (i = 0; i < data['origin_set']['docs'].length; i++) {
                         var curData = data['origin_set']['docs'][i];
@@ -908,7 +904,7 @@ require([
                         var newHtml = '';
                         if (isSeries) {
                             var seriesId = curData.SeriesInstanceUID;
-                            // var ppSeriesId = pretty_print_id(seriesId);
+                            var ppSeriesId = pretty_print_id(seriesId);
                             var seriesNumber = String(curData.SeriesNumber);
                             var seriesDescription = curData.SeriesDescription;
                             var bodyPartExamined = curData.BodyPartExamined;
@@ -916,8 +912,8 @@ require([
                             var rowId = 'series_' + seriesId.replace(/\./g, '-')
                             var studyClass = 'study_' + studyId.replace(/\./g, '-');
                             var fetchUrlSeries = fetchUrl + '?SeriesInstanceUID=' + seriesId;
-                            // var hrefSeriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
-                            // var seriesTxt =     ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
+                            var hrefSeriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
+                            var seriesTxt =     ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
 
                             newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head">' +
                                 '<td class="col1 study-id study-id-col" data-study-id="'+studyId+'">' + hrefTxt + '</td>' +
