@@ -2876,7 +2876,6 @@ fieldset[disabled] a.btn {
   fieldset[disabled] .btn-default.focus,
   fieldset[disabled] .btn-default:active,
   fieldset[disabled] .btn-default.active {
-    background-color: transparent;
     border-color: #F7991B; }
   .btn-default .badge {
     color: transparent;

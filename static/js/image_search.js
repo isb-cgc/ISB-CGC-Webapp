@@ -893,7 +893,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                         var studyId = curData.StudyInstanceUID;
                         var ppStudyId = pretty_print_id(studyId);
                         var fetchUrl = DICOM_STORE_PATH + studyId;
-                        var hrefTxt = ppStudyId + '</a><span class="tooltiptext_ex">' + studyId + '</span>';
+                        var hrefTxt = ppStudyId + '</a>';
                         //var hrefTxt =  ppStudyId + '<span class="tooltiptext_ex">' + studyId + '</span>';
                         var pclass = 'project_' + projectId;
                         var newHtml = '';
@@ -911,7 +911,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                             var seriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
 
                             newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head">' +
-                                '<td class="col1 tooltip_ex study-id">' + hrefTxt + '</td>' +
+                                '<td class="col1 study-id study-id-col" data-study-id="'+studyId+'">' + hrefTxt + '</td>' +
                                 '<td class="series-number">' + seriesNumber + '</td>' +
                                 '<td class="col1 modality">' + modality + '</td>' +
                                 '<td class="col1 body-part-examined">' + bodyPartExamined + '</td>' +
@@ -938,7 +938,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                                 newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head selected_grey" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))">' +
                                     '<td class="col1 project-name">' + projectId + '</td>' +
                                     '<td class="col1 case-id">' + patientId +
-                                    '</td><td class="col2 tooltip_ex study-id">' + hrefTxt + '</td>' +
+                                    '</td><td class="col2 study-id study-id-col" data-study-id="'+studyId+'">' + hrefTxt + '</td>' +
                                     '<td class="col1 study-description">' + studyDescription + '</td>' +
                                     '<td class="ohif open-viewer"><a  href="' + fetchUrl + '" target="_blank"><i class="fa fa-eye"></i></a></td></tr>'
 
@@ -946,7 +946,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                                 newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))">' +
                                     '<td class="col1 project-name">' + projectId + '</td>' +
                                     '<td class="col1 case-id">' + patientId + '</td>' +
-                                    '<td class="col2 tooltip_ex study-id">' + hrefTxt + '</td>' +
+                                    '<td class="col2 study-id study-id-col" data-study-id="'+studyId+'">' + hrefTxt + '</td>' +
                                     '<td class="col1 study-description">' + studyDescription + '</td>' +
                                     '<td class="ohif open-viewer"><a  href="' + fetchUrl + '" target="_blank"><i class="fa fa-eye"></i></a></td></tr>'
                             }

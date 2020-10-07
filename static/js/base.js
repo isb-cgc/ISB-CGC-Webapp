@@ -207,6 +207,10 @@ define(['jquery', 'utils'], function($, utils) {
         }
     });
 
+    $.getCookie = utils.getCookie;
+    $.setCookie = utils.setCookie;
+    $.removeCookie = utils.removeCookie;
+
     return {
         blacklist: /<script>|<\/script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|<iframe>|<\/iframe>/ig,
         // From http://www.regular-expressions.info/email.html
@@ -216,6 +220,12 @@ define(['jquery', 'utils'], function($, utils) {
         // at document load time
         setReloadMsg: function(type,text) {
             sessionStorage.setItem("reloadMsg",JSON.stringify({type: type, text: text}));
+        },
+        setCookie: function(name,val,expires_in,path) {
+            utils.setCookie(name,val,expires_in,path);
+        },
+        removeCookie: function(name, path) {
+            utils.removeCookie(name, path);
         },
         blockResubmit: utils.blockResubmit
     };
