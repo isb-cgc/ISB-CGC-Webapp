@@ -8,34 +8,24 @@ require.config({
         jquerydt: 'libs/jquery.dataTables.min',
         //d3: 'libs/d3.v5.min',
         base: 'base',
-        underscore: 'libs/underscore-min',
-        tippy: 'libs/tippy-bundle.umd.min',
-        '@popperjs/core': 'libs/popper.min'
+        underscore: 'libs/underscore-min'
     },
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
-        'jquerydt': ['jquery'],
-        '@popperjs/core': {
-            exports: "@popperjs/core"
-        },
-        'tippy': {
-            exports: 'tippy',
-            deps: ['@popperjs/core']
-        },
+        'jquerydt': ['jquery']
     }
 });
 
 
 require([
     'jquery',
-    'tippy',
     'underscore',
     'jquerydt',
     'jqueryui',
     'bootstrap',
     'base'
-], function($, tippy, jqueryui, bootstrap, jquerydt ) {
+], function($, _, jqueryui, bootstrap, jquerydt ) {
 
         window.filterObj = {};
         window.projIdSel = [];
@@ -936,7 +926,7 @@ require([
                                 '<td class="col1 body-part-examined">' + bodyPartExamined + '</td>' +
                                 '<td class="series-description">' + seriesDescription + '</td>';
                             if ((modality ==='SEG') || (modality ==='RTSTRUCT')){
-                                newHtml += '<td class="ohif open-viewer no-viewer-tooltip"><a href="/" onclick="return false;"><i class="fa fa-eye-slash"></i></td></tr>';
+                                newHtml += '<td class="ohif open-viewer"><a href="/" onclick="return false;"><i class="fa fa-eye-slash no-viewer-tooltip"></i></td></tr>';
 
                             }
                             else {
@@ -977,36 +967,6 @@ require([
                         $('#' + tableId).append(newHtml);
 
                     }
-
-                    tippy('.study-id', {
-                        content: function(reference) {
-                            console.log("Ref text " + $(reference).text());
-                            let tooltip = study_id_tooltips.get($(reference).text());
-                            console.log("Tooltip " + tooltip);
-                            if(tooltip) {
-                                return tooltip;
-                            }
-                            else {
-                                return '';
-                            }
-                        },
-                        theme: 'light',
-                        placement: 'right-end',
-                        arrow: false,
-                        allowHTML: true,
-                        interactive: true,
-                        maxWidth: 200
-                    });
-
-                    tippy('.no-viewer-tooltip', {
-                        content: 'Please open at the study level to see this series',
-                        theme: 'light',
-                        placement: 'right',
-                        arrow: false,
-                        allowHTML: true,
-                        interactive: true,
-                        maxWidth: 130
-                    });
 
                     //newScrollInd = findScrollInd(tableId);
                     resetTableControls($('#' + tableId), false, 0);
