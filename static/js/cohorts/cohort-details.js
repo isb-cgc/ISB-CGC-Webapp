@@ -38,12 +38,28 @@ require.config({
 require([
     'jquery',
     'jqueryui',
+    'base',
     'bootstrap',
     'assetscore'
     ,'assetsresponsive',
-    'base'
-], function($, jqueryui, bootstrap) {
+], function($, jqueryui, base, bootstrap) {
     A11y.Core();
 
+    var downloadToken = new Date().getTime();
+    $('#download-manifest').prop("href", $('#download-manifest').prop("href") + "?downloadToken="+downloadToken);
+    $('#download-manifest').data('downloadToken',downloadToken);
+
+    $('#download-manifest').on('click', function() {
+        var self=$(this);
+
+        self.attr('disabled','disabled');
+
+        $('#download-in-progress').modal('show');
+
+        base.blockResubmit(function() {
+            self.removeAttr('disabled');
+            $('#download-in-progress').modal('hide');
+        },downloadToken, 'downloadToken');
+    });
 
 });
