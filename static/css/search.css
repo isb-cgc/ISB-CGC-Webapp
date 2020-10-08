@@ -343,8 +343,8 @@ tr {
 #series_table td.series-description {
     width:32%;
 }
-#series_table_head th.text_data,
-#series_table td.text_data {
+#series_table_head th.open-viewer,
+#series_table td.open-viewer {
     width:13%;
 }
 

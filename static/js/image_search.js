@@ -18,8 +18,14 @@ require.config({
 });
 
 
-require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
-    function($, _, jqueryui, bootstrap, jquerydt ) {
+require([
+    'jquery',
+    'underscore',
+    'jquerydt',
+    'jqueryui',
+    'bootstrap',
+    'base'
+], function($, _, jqueryui, bootstrap, jquerydt ) {
 
         window.filterObj = {};
         window.projIdSel = [];
@@ -831,7 +837,6 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
             resetTableControls($('#' + seriesTableId), true, newScrollInd)
         }
 
-
         window.addStudyOrSeries = function (projectIdArr, studyIdArr, tableId, refresh) {
 
             changeAjax(true);
@@ -908,7 +913,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                             var studyClass = 'study_' + studyId.replace(/\./g, '-');
                             var fetchUrlSeries = fetchUrl + '?SeriesInstanceUID=' + seriesId;
                             var hrefSeriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
-                            var seriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
+                            var seriesTxt =     ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
 
                             newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head">' +
                                 '<td class="col1 study-id study-id-col" data-study-id="'+studyId+'">' + hrefTxt + '</td>' +
@@ -917,11 +922,11 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                                 '<td class="col1 body-part-examined">' + bodyPartExamined + '</td>' +
                                 '<td class="series-description">' + seriesDescription + '</td>';
                             if ((modality ==='SEG') || (modality ==='RTSTRUCT')){
-                            newHtml += '<td class="ohif tooltip_ex"><span class="tooltiptext_ex">Please open at the study level to see this series</span><a   href="/" onclick="return false;"><i class="fa fa-eye-slash"></i></td></tr>';
+                                newHtml += '<td class="ohif open-viewer"><a href="/" onclick="return false;"><i class="fa fa-eye-slash no-viewer-tooltip"></i></td></tr>';
 
                             }
                             else {
-                            newHtml += '<td class="ohif"><a   href="' + fetchUrlSeries + '" target="_blank"><i class="fa fa-eye"></i></td></tr>';
+                                newHtml += '<td class="ohif open-viewer"><a href="' + fetchUrlSeries + '" target="_blank"><i class="fa fa-eye"></i></td></tr>';
                             }
                         }
                           else{
@@ -958,6 +963,7 @@ require(['jquery', 'underscore', 'jquerydt','jqueryui', 'bootstrap','base'],
                         $('#' + tableId).append(newHtml);
 
                     }
+
                     //newScrollInd = findScrollInd(tableId);
                     resetTableControls($('#' + tableId), false, 0);
 
