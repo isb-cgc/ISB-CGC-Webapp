@@ -85,8 +85,8 @@
         <div class="row">
             {% block content %}{% endblock %}
         </div>
-        <!-- The landing page has a special layout, so it has its own footer include -->
-        {% if request.path != '/' %}
+        <!-- The landing page and collections page has a special layout, so it has its own footer include -->
+        {% if request.path != '/' and request.path != '/collections/' %}
             {% include 'share/site_footer.html'  %}
         {% endif %}
     </div>
