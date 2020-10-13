@@ -1699,6 +1699,18 @@ require([
            .domain(nonZeroLabels)
            .range(d3.schemeCategory10);
 
+           // don't color last pie slice the same as first
+           var colorPie = function(lbl){
+             var col="";
+               if ( (nonZeroLabels.length>1) & (lbl === nonZeroLabels[nonZeroLabels.length-1]) && (color(nonZeroLabels[0])===color(lbl))  ){
+                        col=color(nonZeroLabels[5]);
+               }
+               else{
+                   col=color(lbl);
+               }
+               return col;
+           }
+
            // Compute the position of each group on the pie:
           var pie = d3.pie()
           .value(function(d) {return d.value; }).sort(null);
@@ -1715,7 +1727,7 @@ require([
           .outerRadius(radius)
           )
           .attr('fill', function(d){ return(
-            color(d.data.key)  )
+            colorPie(d.data.key)  )
            })
           .attr("stroke", "black")
           .style("stroke-width", "0px")
@@ -2449,7 +2461,7 @@ require([
                 max = 100;
             } */
             //var max = Math.ceil($(this).data('attr-max') * 1000)/1000;
-            mkSlider($(this).prop('id'),min, max,1,true,false,'', $(this).data('filter-attr-id'), $(this).data('filter-display-attr'));
+           // mkSlider($(this).prop('id'),min, max,1,true,true,'', $(this).data('filter-attr-id'), $(this).data('filter-display-attr'));
         });
      };
 
@@ -2481,8 +2493,8 @@ require([
             tableSortBindings('studies_table_head');
             tableSortBindings('series_table_head');
 
-            mkSlider('age_at_diagnosis',0, parseInt($('#age_at_diagnosis').data('attr-max')),1,true,true, 'tcga_clinical.',
-                $('#age_at_diagnosis').data('filter-attr-id'), $('#age_at_diagnosis').data('filter-display-attr'));
+            /* mkSlider('age_at_diagnosis',0, parseInt($('#age_at_diagnosis').data('attr-max')),1,true,true, 'tcga_clinical.',
+                $('#age_at_diagnosis').data('filter-attr-id'), $('#age_at_diagnosis').data('filter-display-attr')); */
 
             addSliders('quantitative');
 
