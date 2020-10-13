@@ -18,7 +18,7 @@
 {% block content %}
 <div class="container-fluid">
     <div class ="row">
-        <div  class="col-lg-12 col-md-12 collex-panel">
+        <div class="col-lg-12 col-md-12 collex-panel hidden">
             <div class="panel panel-default" role="panel panel-default" id="collections-list">
                 <div class="panel-body">
                 <table id="collections-table" class="table collex-table sortable_table table-striped table-hover">
@@ -65,6 +65,8 @@
                 </table>
                 </div>
             </div>
+             <!-- Include footer here instead of base.html so it can be hidden by default -->
+            {% include 'share/site_footer.html'  %}
         </div>
     </div>
 </div>
