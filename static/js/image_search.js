@@ -1420,12 +1420,12 @@ require([
                 success: function (data) {
                     var isFiltered = Boolean($('#search_def p').length>0);
                     if (isFiltered && data.total > 0){
-                        $('#save-cohort-btn').attr('disabled',false);
+                        $('#save-cohort-btn').prop('disabled','');
                         if(user_is_auth) {
                             $('#save-cohort-btn').prop('title','');
                         }
                     } else {
-                        $('#save-cohort-btn').attr('disabled',true);
+                        $('#save-cohort-btn').prop('disabled','disabled');
                         if(user_is_auth) {
                             $('#save-cohort-btn').prop('title',data.total > 0 ? 'Please select at least one filter.' : 'There are no cases in this cohort.');
                         } else {
