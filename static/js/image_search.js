@@ -1420,12 +1420,12 @@ require([
                 success: function (data) {
                     var isFiltered = Boolean($('#search_def p').length>0);
                     if (isFiltered && data.total > 0){
-                        $('#save-cohort-btn').prop('disabled','');
+                        $('#save-cohort-btn').attr('disabled',false);
                         if(user_is_auth) {
                             $('#save-cohort-btn').prop('title','');
                         }
                     } else {
-                        $('#save-cohort-btn').prop('disabled','disabled');
+                        $('#save-cohort-btn').attr('disabled',true);
                         if(user_is_auth) {
                             $('#save-cohort-btn').prop('title',data.total > 0 ? 'Please select at least one filter.' : 'There are no cases in this cohort.');
                         } else {
@@ -2453,68 +2453,6 @@ require([
         });
      };
 
-
-     $(document).ready(function () {
-
-           // $('#proj_table').DataTable();
-           // window.filterObj.collection_id = window.tcgaColls;
-            window.selItems = new Object();
-            window.selItems.selStudies = new Object();
-            window.selItems.selProjects = new Array();
-            window.histIndex  = 0;
-            window.histMaxLength = 6;
-            histObj = new Object();
-            histObj.selItems = JSON.parse(JSON.stringify(window.selItems));
-            histObj.filterObj = JSON.parse(JSON.stringify(window.filterObj));
-            //histObj.filterObj.collection_id = window.tcgaColls;
-            window.filtHistory = new Array();
-            window.filtHistory.push(histObj);
-
-           /* addFilterBindings('search_orig_set');
-            addFilterBindings('search_related_set');*/
-
-            filterItemBindings('program_set');
-            filterItemBindings('search_orig_set');
-            filterItemBindings('search_derived_set');
-            filterItemBindings('search_related_set');
-            tableSortBindings('projects_table_head');
-            tableSortBindings('studies_table_head');
-            tableSortBindings('series_table_head');
-
-            mkSlider('age_at_diagnosis',0, parseInt($('#age_at_diagnosis').data('attr-max')),1,true,true, 'tcga_clinical.',
-                $('#age_at_diagnosis').data('filter-attr-id'), $('#age_at_diagnosis').data('filter-display-attr'));
-
-            addSliders('quantitative');
-
-            createPlots('search_orig_set');
-            createPlots('search_derived_set');
-            createPlots('tcga_clinical');
-
-            var numCol = $('#projects_table').children('tr').length
-            $('#projects_panel').find('.total-file-count')[0].innerHTML = numCol.toString();
-             $('#projects_panel').find('.goto-page-number')[0].max=3;
-
-            window.resetTableControls ($('#projects_table'), false, 0);
-            window.resetTableControls ($('#studies_table'), false, 0);
-            window.resetTableControls ($('#series_table'), false, 0);
-
-             $('.clear-filters').on('click', function () {
-                   $('input:checkbox').not('#hide-zeros').prop('checked',false);
-                   $('input:checkbox').not('#hide-zeros').prop('indeterminate',false);
-                   window.filterObj = new Object();
-                   $('.ui-slider').each(function(){
-                       setSlider(this.id,true,0,0,true, false);
-                   })
-                   $('#search_def_warn').hide();
-
-                   mkFiltText();
-                   updateFacetsData(true);
-             });
-
-            //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
-        }
-    );
-
      var load_filters = function(filters) {
          var sliders = [];
         _.each(filters, function(group){
@@ -2558,46 +2496,6 @@ require([
             updateFacetsData(true).promise();
         }
      };
-
-     var cohort_loaded = false;
-     $(window).on('load', function(){
-         console.debug("Fired window.onload");
-         if(is_cohort && !cohort_loaded) {
-             console.debug("Unloaded cohort found, loading...");
-             var loadPending = load_filters(cohort_filters);
-             loadPending.done(function(){
-                 console.debug("Load pending complete.");
-                 cohort_loaded = true;
-                 $('input[type="checkbox"]').prop("disabled","disabled");
-                 $('div.ui-slider').siblings('button').prop('disabled','disabled');
-                 $('input#hide-zeros').prop("disabled","");
-                 $('input#hide-zeros').prop("checked",true);
-                 $('input#hide-zeros').triggerHandler('change');
-             });
-        } else if(Object.keys(filters_for_load).length > 0) {
-            var loadPending = load_filters(filters_for_load);
-            loadPending.done(function(){
-                console.debug("External filter load done.");
-            });
-        } else {
-            // check for localStorage key of saved filters from a login
-            load_anonymous_selection_data();
-            var has_sliders = (ANONYMOUS_SLIDERS !== null && ANONYMOUS_SLIDERS.length > 0);
-            var has_filters = (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS[0]['filters'].length > 0);
-            if (has_sliders) {
-                let loadPending = load_sliders(ANONYMOUS_SLIDERS, !has_filters);
-                loadPending.done(function(){
-                    console.debug("Sliders loaded from anonymous login.");
-                });
-            }
-            if (has_filters) {
-                let loadPending = load_filters(ANONYMOUS_FILTERS);
-                loadPending.done(function(){
-                    console.debug("Filters loaded from anonymous login.");
-                });
-            }
-        }
-    });
 
     var ANONYMOUS_FILTERS = {};
     var ANONYMOUS_SLIDERS = {};
@@ -2670,5 +2568,106 @@ require([
             save_anonymous_selection_data();
         }
     });
-});
 
+     var cohort_loaded = false;
+     function load_preset_filters() {
+         if (is_cohort && !cohort_loaded) {
+             console.debug("Unloaded cohort found, loading...");
+             var loadPending = load_filters(cohort_filters);
+             loadPending.done(function () {
+                 console.debug("Load pending complete.");
+                 cohort_loaded = true;
+                 $('input[type="checkbox"]').prop("disabled", "disabled");
+                 $('div.ui-slider').siblings('button').prop('disabled', 'disabled');
+                 $('input#hide-zeros').prop("disabled", "");
+                 $('input#hide-zeros').prop("checked", true);
+                 $('input#hide-zeros').triggerHandler('change');
+             });
+         } else if (Object.keys(filters_for_load).length > 0) {
+             var loadPending = load_filters(filters_for_load);
+             loadPending.done(function () {
+                 console.debug("External filter load done.");
+             });
+         } else {
+             // check for localStorage key of saved filters from a login
+             load_anonymous_selection_data();
+             var has_sliders = (ANONYMOUS_SLIDERS !== null && ANONYMOUS_SLIDERS.length > 0);
+             var has_filters = (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS[0]['filters'].length > 0);
+             if (has_sliders) {
+                 let loadPending = load_sliders(ANONYMOUS_SLIDERS, !has_filters);
+                 loadPending.done(function () {
+                     console.debug("Sliders loaded from anonymous login.");
+                 });
+             }
+             if (has_filters) {
+                 let loadPending = load_filters(ANONYMOUS_FILTERS);
+                 loadPending.done(function () {
+                     console.debug("Filters loaded from anonymous login.");
+                 });
+             }
+         }
+     }
+
+     $(document).ready(function () {
+
+           // $('#proj_table').DataTable();
+           // window.filterObj.collection_id = window.tcgaColls;
+            window.selItems = new Object();
+            window.selItems.selStudies = new Object();
+            window.selItems.selProjects = new Array();
+            window.histIndex  = 0;
+            window.histMaxLength = 6;
+            histObj = new Object();
+            histObj.selItems = JSON.parse(JSON.stringify(window.selItems));
+            histObj.filterObj = JSON.parse(JSON.stringify(window.filterObj));
+            //histObj.filterObj.collection_id = window.tcgaColls;
+            window.filtHistory = new Array();
+            window.filtHistory.push(histObj);
+
+           /* addFilterBindings('search_orig_set');
+            addFilterBindings('search_related_set');*/
+
+            filterItemBindings('program_set');
+            filterItemBindings('search_orig_set');
+            filterItemBindings('search_derived_set');
+            filterItemBindings('search_related_set');
+            tableSortBindings('projects_table_head');
+            tableSortBindings('studies_table_head');
+            tableSortBindings('series_table_head');
+
+            mkSlider('age_at_diagnosis',0, parseInt($('#age_at_diagnosis').data('attr-max')),1,true,true, 'tcga_clinical.',
+                $('#age_at_diagnosis').data('filter-attr-id'), $('#age_at_diagnosis').data('filter-display-attr'));
+
+            addSliders('quantitative');
+
+            createPlots('search_orig_set');
+            createPlots('search_derived_set');
+            createPlots('tcga_clinical');
+
+            var numCol = $('#projects_table').children('tr').length
+            $('#projects_panel').find('.total-file-count')[0].innerHTML = numCol.toString();
+             $('#projects_panel').find('.goto-page-number')[0].max=3;
+
+            window.resetTableControls ($('#projects_table'), false, 0);
+            window.resetTableControls ($('#studies_table'), false, 0);
+            window.resetTableControls ($('#series_table'), false, 0);
+
+             $('.clear-filters').on('click', function () {
+                   $('input:checkbox').not('#hide-zeros').prop('checked',false);
+                   $('input:checkbox').not('#hide-zeros').prop('indeterminate',false);
+                   window.filterObj = new Object();
+                   $('.ui-slider').each(function(){
+                       setSlider(this.id,true,0,0,true, false);
+                   })
+                   $('#search_def_warn').hide();
+
+                   mkFiltText();
+                   updateFacetsData(true);
+             });
+
+            //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
+
+            load_preset_filters();
+        }
+    );
+});
