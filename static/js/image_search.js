@@ -2507,7 +2507,7 @@ require([
         var filters = [];
         $('.list-group-item__body').each(function() {
             var $group = $(this);
-            var my_id = $group.data('attrId');
+            var my_id = $group.data('filter-attr-id');
             if (my_id != null)
             {
                 var checkboxes = $group.find("input:checked");
@@ -2567,6 +2567,7 @@ require([
         if(!user_is_auth) {
             save_anonymous_selection_data();
         }
+        location.href=$(this).data('uri');
     });
 
      var cohort_loaded = false;
