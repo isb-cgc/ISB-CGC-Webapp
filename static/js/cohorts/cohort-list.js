@@ -22,6 +22,7 @@ require.config({
         jquery: 'libs/jquery-3.5.1',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
+        'datatables.net': 'libs/jquery.dataTables.min',
         underscore: 'libs/underscore-min',
         tablesorter:'libs/jquery.tablesorter.min',
         base: 'base'
@@ -29,6 +30,7 @@ require.config({
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
+        'datatables.net': ['jquery'],
         'tablesorter': ['jquery'],
         'base': ['jquery'],
     }
@@ -36,11 +38,41 @@ require.config({
 
 require([
     'jquery',
+    'datatables.net',
     'base',
     'jqueryui',
     'bootstrap',
     'tablesorter'
 ], function($,base) {
+    var cohort_list_table = $('#cohort-table').DataTable({
+        "dom": '<"dataTables_controls"ilpf>rt<"bottom"><"clear">',
+        "order": [[ 2, "desc" ]],
+        "columns": [
+            { "orderable": false },
+            { "orderable": false },
+            null,
+            null,
+            null,
+            null
+        ]
+    });
+
+    $('#cohort-table tbody').on('click', 'td.details-control', function () {
+        var tr = $(this).parents('tr');
+        var row = cohort_list_table.row(tr);
+
+        if (row.child.isShown()) {
+            // This row is already open - close it
+            row.child.hide();
+            tr.removeClass('shown');
+            $(this).prop('title', 'Click to display cohort description.');
+        } else {
+            $(this).prop('title', 'Click to hide cohort description.');
+            var desc = tr.attr('data-description');
+            (row.child() && row.child().length) ? row.child.show() : row.child($(`<tr><td></td><td colspan="5"><p>`+desc+`</p></td></tr>`)).show();
+            tr.addClass('shown');
+        }
+    });
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {

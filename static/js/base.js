@@ -141,13 +141,6 @@ require([
         type: 'numeric'
     });
 
-    $('#cohort-table').tablesorter({
-        headers: {
-            0: {sorter:false}
-        },
-        sortList: [[1]]
-    });
-
     $(document).ready(function(){
         if(sessionStorage.getItem("reloadMsg")) {
             var msg = JSON.parse(sessionStorage.getItem("reloadMsg"));
