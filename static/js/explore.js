@@ -207,4 +207,23 @@ require([
         maxWidth: 300
     });
 
+    tippy.delegate('.series-table', {
+        content: function(reference) {
+            return $(reference).data('study-id');
+        },
+        theme: 'dark',
+        placement: 'right',
+        arrow: false,
+        target: '.study-id-col',
+        maxWidth: 300
+    });
+
+    tippy.delegate('.series-table', {
+        content: 'Please open at the study level to see this series',
+        theme: 'dark',
+        placement: 'right',
+        arrow: false,
+        target: '.no-viewer-tooltip',
+        maxWidth: 130
+    });
 });

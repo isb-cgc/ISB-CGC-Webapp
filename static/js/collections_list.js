@@ -38,4 +38,8 @@ require(['jquery', 'datatables.net','jqueryui', 'bootstrap', 'base'],
                 tr.addClass('shown');
             }
         });
+
+        $(window).on('load', function(){
+            $('.collex-panel').removeClass('hidden');
+        });
 });

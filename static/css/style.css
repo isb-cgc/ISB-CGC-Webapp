@@ -1156,6 +1156,11 @@ a.skip-nav {
   table-layout: fixed;
 }
 
+.cohort-table th {
+  background-color: #e4d8f9;
+  border-top: 1px solid #ddd;
+}
+
 @media screen and (max-width: 1199px) {
   #gene-list-table .name-col, #gene-list-table .name-col a, #var-list-table .name-col, #var-list-table .name-col a {
     max-width: 600px; } }
@@ -3906,7 +3911,6 @@ html {
 #save-cohort-btn.disabled, #download-manifest.disabled {
 
 }
-
 .collex-table th {
   background-color: #e4d8f9;
   border-top: 1px solid #ddd;

@@ -45,12 +45,13 @@
 
             <h3 class="pull-left" role="heading" aria-level="1">Explore Image Data</h3>
             {% if request.user.is_authenticated %}
-            <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal" data-target="#save-cohort-modal"
+            <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal"
+                data-target="#save-cohort-modal"
                 title="Select at least one filter." disabled="disabled"> Save As New Cohort
             </button>
             {% else %}
-            <button id="save-cohort-btn" class="btn btn-special pull-right" onclick="location.href='{% url 'account_login' %}'"
-                title="Select at least one filter." disabled="disabled"> Log in to Save
+            <button id="save-cohort-btn" class="btn btn-special pull-right" title="Select at least one filter."
+                disabled="disabled" data-uri="{% url 'account_login' %}"> Log in to Save
             </button>
             {% endif %}
         </div>
