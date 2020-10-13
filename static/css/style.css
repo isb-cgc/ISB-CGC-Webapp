@@ -4026,8 +4026,8 @@ form.login hr {
   margin-top: 10px;
 }
 
-#save-cohort-modal .modal-backdrop {
-  padding-right: 0; !important
+body.modal, body.modal-open {
+  padding-right: 0px !important;
 }
 
 #sign-in ul.errorlist, #sign-up ul.errorlist, #password-change ul.errorlist {
