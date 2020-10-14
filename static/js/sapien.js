@@ -53,7 +53,7 @@ require([
       Eye: 'rgb(233, 110, 31)',
       'Head and Neck': 'rgb(240, 142, 26)',
       Kidney: 'rgb(38, 193, 86)',
-      Liver: 'rgb(67, 221, 207)',
+      Liver: 'rgb(233,121,136)',
       Lung: 'rgb(158, 9, 219)',
       'Lymph Nodes': 'rgb(222, 61, 211)',
       'Nervous System': 'rgb(27, 114, 246)',

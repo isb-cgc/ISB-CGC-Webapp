@@ -39,7 +39,7 @@ require(['jquery', 'datatables.net','jqueryui', 'bootstrap', 'base'],
             }
         });
 
-        $(window).on('load', function(){
+        $(document).ready(function () {
             $('.collex-panel').removeClass('hidden');
         });
 });
