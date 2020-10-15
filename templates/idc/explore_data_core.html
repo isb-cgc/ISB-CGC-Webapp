@@ -14,9 +14,13 @@
                     <div class="data-version panel data-tab-content-panel">
                         <div class="tab-panel panel-default">
                             <div class="panel-heading clearfix">
-                                {% with data_release=""|get_idc_version %}
-                                <h4 class="panel-title">{{ data_release.name }} Version {{ data_release.version_number }}</h4>
-                                {% endwith %}
+                                {% if is_cohort %}
+                                    <h4 class="panel-title">{{ cohort_version }}</h4>
+                                {% else %}
+                                    {% with data_release=""|get_idc_version %}
+                                    <h4 class="panel-title">{{ data_release.name }} Version {{ data_release.version_number }}</h4>
+                                    {% endwith %}
+                                {% endif %}
                             </div>
                         </div>
                     </div>
