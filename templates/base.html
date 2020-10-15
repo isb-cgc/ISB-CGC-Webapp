@@ -168,6 +168,12 @@
     </script>
     {% endlocalize %}
 {% endif %}
+
+<!-- Additional includes brought in by specific child templates -->
+{% block modal_includes %}
+
+{% endblock %}
+
 {% block js_file %}
     <script src="{% static 'js/libs/require.js' %}"></script>
 {% endblock %}
