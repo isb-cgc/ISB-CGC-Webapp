@@ -53,6 +53,7 @@ require([
             null,
             null,
             null,
+            null,
             null
         ]
     });
@@ -69,7 +70,7 @@ require([
         } else {
             $(this).prop('title', 'Click to hide cohort description.');
             var desc = tr.attr('data-description');
-            (row.child() && row.child().length) ? row.child.show() : row.child($(`<tr><td></td><td colspan="5"><p>`+desc+`</p></td></tr>`)).show();
+            (row.child() && row.child().length) ? row.child.show() : row.child($(`<tr><td></td><td colspan="6"><p>`+desc+`</p></td></tr>`)).show();
             tr.addClass('shown');
         }
     });

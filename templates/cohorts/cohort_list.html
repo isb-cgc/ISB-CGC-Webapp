@@ -49,14 +49,16 @@
                         <th class="name-col">Name</th>
                         <th class="owner-col">Ownership</th>
                         <th class="share-col">Shared With</th>
+                        <th class="version-col">Data Version</th>
                     </thead>
                     <colgroup>
                         <col style="width: 3%">
                         <col style="width: 8%">
                         <col style="width: 11%">
-                        <col style="width: 36%">
+                        <col style="width: 30%">
                         <col style="width: 12%">
                         <col style="width: 10%">
+                        <col style="width: 30%">
                     </colgroup>
                     <tbody>
                     {% for cohort in cohorts %}
@@ -82,6 +84,13 @@
                                 {% else %}
                                     You
                                 {% endif %}
+                            </td>
+                            <td class="version-col">
+                                {% for cohort_version in cohort_versions %}
+                                  {% if cohort_version.id == cohort.id %}
+                                      {{ cohort_version.version }}
+                                  {% endif %}
+                               {% endfor %}
                             </td>
                         </tr>
                     {% endif %}
@@ -225,13 +234,14 @@
         </div>
     </div>
 
-    <script type="text/javascript">
-    var cohort_list = {{ cohorts_listing|safe }};
-    var shared_users = {{ shared_users|safe }};
-    </script>
 {% endblock %}
 
 {% block js_file %}
+    <script type="text/javascript">
+        var cohort_list = {{ cohorts_listing|safe }};
+        var shared_users = {{ shared_users|safe }};
+        var cohort_versions = {{ cohort_versions|safe }};
+    </script>
 	{{ block.super }}
 	<script src="{% static 'js/cohorts/cohort-list.js' %}"></script>
 {% endblock %}

@@ -172,18 +172,16 @@ require([
     });
 
     tippy('.tooltip_filter_info',{
-        content: 'Each chart below reports the number of cases (or patients) for all attributes within a given attribute '+
-            'category for the cohort constructed by the defined filter. For certain categories (i.e. Modality) some '+
-            'cases may apply to several attributes within the category. Hence some attributes that seem to be excluded '+
-            'in the filter definition may have positive case counts.',
+        content: 'Each chart below reports the number of cases (or patients) for all values within a given attribute. '+
+            'For certain attributes (e.g. Modality) several distinct values may apply to the same case.',
         theme: 'light',
         placement: 'right-end',
         arrow: false
     });
 
     tippy('.tooltip_chart_info',{
-        content: 'The panel below reports the number of unique cases (or patients) for each attribute within a cohort '+
-            'constructed by adding the given attribute (when absent) to the defined filter.',
+        content: 'Counts shown below are the number of cases (or patients) for each attribute value. Counts for each attribute (e.g. Modality) '+
+            'are unchanged by the values (e.g. PET) selected (checked) for that attribute. They only change based on the values selected for all other attributes.',
         theme: 'light',
         placement: 'right-end',
         arrow: false
