@@ -41,9 +41,12 @@
                 <h3 class="pull-left" role="heading" aria-level="1">Cohort Name: {{ cohort.name }}</h3>
             </div>
             <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                <a id="download-manifest" class="btn btn-default pull-right" title="Download this cohort's manifest." href="{% url 'cohort_manifest' cohort.id %}">
-                    Download Cohort Manifest
-                </a>
+                <div class="cohort-manifest pull-right">
+                    <div class="manifest-size-warning"><i class="fa fa-warning"></i></div>
+                    <a id="download-manifest" class="btn btn-default pull-right" title="Download this cohort's manifest." href="{% url 'cohort_manifest' cohort.id %}">
+                        Download Cohort Manifest
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -83,6 +86,7 @@
         var cohort_filters = {{ cohort_filters|safe }};
         var is_cohort = true;
         var collection_tooltips = {{ collection_tooltips|safe }};
+        var cohort_version = "{{ cohort_version|safe }}";
     </script>
     <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
     {{ block.super }}

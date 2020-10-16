@@ -24,7 +24,7 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>{% block title %}IDC{% endblock %}</title>
-    <meta name="description" content="{% block description %}Imaging Data Commons{% endblock %}">
+    <meta name="description" content="{% block description %}NCI Imaging Data Commons{% endblock %}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     {% block extra_css_libs %}{% endblock %}
@@ -111,7 +111,7 @@
                 possible evidence of criminal activity, NIH may provide that evidence to law enforcement officials</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary">OK</button>
+                <button type="button" class="btn btn-primary btn-warn">OK</button>
             </div>
         </div>
     </div>
@@ -168,6 +168,12 @@
     </script>
     {% endlocalize %}
 {% endif %}
+
+<!-- Additional includes brought in by specific child templates -->
+{% block modal_includes %}
+
+{% endblock %}
+
 {% block js_file %}
     <script src="{% static 'js/libs/require.js' %}"></script>
 {% endblock %}
