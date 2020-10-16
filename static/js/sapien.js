@@ -88,11 +88,8 @@ require([
         var groups = [];
         var filters = [];
         var values = [];
-        if (id.site === "Head and Neck"){
-            values.push("Head-Neck");
-        }else {
-            values.push(id.site);
-        }
+        id.site === "Head and Neck"? values.push("Head-Neck") : values.push(id.site);
+        id.site === "Colorectal"? values.push("Colon") : values.push(id.site);
         filters.push(
         {
             'id': '128',
