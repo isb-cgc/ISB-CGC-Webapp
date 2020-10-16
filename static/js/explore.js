@@ -10,7 +10,6 @@ require.config({
         imagesearch: 'image_search',
         cohortfilelist: 'cohort_filelist',
         tippy: 'libs/tippy-bundle.umd.min',
-        //d3: 'libs/d3.v5.min',
         '@popperjs/core': 'libs/popper.min'
     },
     shim: {
@@ -26,8 +25,7 @@ require.config({
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'tablesorter': ['jquery'],
-        'base': ['jquery'],
-        //'imagesearch':['d3'],
+        'base': ['jquery']
 
     }
 });
