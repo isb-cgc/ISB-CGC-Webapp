@@ -3904,13 +3904,25 @@ html {
   background: none;
 }
 
-#save-cohort-btn, #download-manifest {
+#save-cohort-btn {
   margin-top: 12px;
 }
 
-#save-cohort-btn.disabled, #download-manifest.disabled {
-
+.cohort-manifest {
+  margin-top: 8px;
 }
+
+.manifest-size-warning {
+  display: inline-block;
+}
+
+.cohort-manifest i {
+  margin-right: 15px;
+  color: #ecf609;
+  font-size: 22px;
+  margin-top: 12px;
+}
+
 .collex-table th {
   background-color: #e4d8f9;
   border-top: 1px solid #ddd;
@@ -4024,6 +4036,10 @@ form.login hr {
 .sign-up p {
   margin-bottom: 0px;
   margin-top: 10px;
+}
+
+body.modal, body.modal-open {
+  padding-right: 0px !important;
 }
 
 #sign-in ul.errorlist, #sign-up ul.errorlist, #password-change ul.errorlist {

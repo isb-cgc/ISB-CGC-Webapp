@@ -25,13 +25,22 @@ require.config({
         underscore: 'libs/underscore-min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
-        base: 'base'
+        base: 'base',
+        tippy: 'libs/tippy-bundle.umd.min',
+        '@popperjs/core': 'libs/popper.min'
     },
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui']
+        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
+        '@popperjs/core': {
+          exports: "@popperjs/core"
+        },
+        'tippy': {
+          exports: 'tippy',
+            deps: ['@popperjs/core']
+        }
     }
 });
 
@@ -39,10 +48,11 @@ require([
     'jquery',
     'jqueryui',
     'base',
+    'tippy',
     'bootstrap',
     'assetscore'
     ,'assetsresponsive',
-], function($, jqueryui, base, bootstrap) {
+], function($, jqueryui, base, tippy, bootstrap) {
     A11y.Core();
 
     var downloadToken = new Date().getTime();
@@ -62,4 +72,11 @@ require([
         },downloadToken, 'downloadToken');
     });
 
+    tippy('.manifest-size-warning',{
+        content: 'Your cohort is too large to be downloaded in its entirety, and will be truncated at 65,000 records ' +
+        'ordered by PatientID, StudyID, SeriesID, and InstanceID.',
+        theme: 'light',
+        placement: 'left',
+        arrow: false
+    });
 });

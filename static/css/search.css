@@ -303,7 +303,7 @@ tr {
     word-wrap: break-word; }
 
 
-#studies_table_head th studies_table td {
+#studies_table_head th, #studies_table td {
     word-break: break-word; }
 #studies_table_head th.project-name, th.case-id, th.study-id,
 #studies_table td.project-name, td.case-id, td.study-id {
