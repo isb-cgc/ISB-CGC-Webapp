@@ -2444,7 +2444,6 @@ require([
      }
 
      var addSliders = function(id){
-
         $('#'+id).find('.list-group-item__body').each(function(){
             $(this).find('.more-checks').addClass('hide');
             $(this).find('.less-checks').addClass('hide');
@@ -2461,7 +2460,7 @@ require([
                 max = 100;
             } */
             //var max = Math.ceil($(this).data('attr-max') * 1000)/1000;
-            mkSlider($(this).prop('id'),min, max,1,true,true,'', $(this).data('filter-attr-id'), $(this).data('filter-display-attr'));
+            mkSlider($(this).prop('id'),min, max,1,true,false,'', $(this).data('filter-attr-id'), $(this).data('filter-display-attr'));
         });
      };
 
