@@ -170,8 +170,7 @@ require([
     });
 
     tippy('.tooltip_filter_info',{
-        content: 'Each chart below reports the number of cases (or patients) for all values within a given attribute. '+
-            'For certain attributes (e.g. Modality) several distinct values may apply to the same case.',
+        content: 'Each chart below reports the number of cases (or patients) for all values within a given attribute, given the currently defined filter set. Once a case is selected, all series for that case, including those that do not meet the search criteria, are included. For example, cases selected based on the presence of CT modality may also contain PET modality, and thus counts for both values will appear in the chart, and the manifest.',
         theme: 'light',
         placement: 'right-end',
         arrow: false
