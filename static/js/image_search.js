@@ -1464,7 +1464,10 @@ require([
                             if ('attributes' in data.derived_set[facetSet]){
 
                                 dicofdic = {'unfilt': data.derived_set[facetSet].attributes, 'filt': ''}
-                                if (isFiltered){
+                                if (isFiltered && data.filtered_counts.hasOwnProperty('derived_set')
+                                    && data.filtered_counts.derived_set.hasOwnProperty(facetSet)
+                                    && data.filtered_counts.derived_set[facetSet].hasOwnProperty('attributes')
+                                ) {
                                     dicofdic['filt'] = data.filtered_counts.derived_set[facetSet].attributes;
                                 }
                                 else{
