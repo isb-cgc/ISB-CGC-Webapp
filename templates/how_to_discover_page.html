@@ -1,0 +1,316 @@
+{% load l10n %}
+{% load staticfiles %}
+<!doctype html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <meta name="theme-color" content="#4F7DC9">
+    <meta charset="UTF-8">
+    <title>Cancer Data Discovery in the Cloud through ISB-CGC</title>
+    <link rel="stylesheet"
+          href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+    <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+    <style>
+        .success {
+            color: #1e8e3e;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+<google-codelab codelab-gaid=""
+                id="cancer-data-discovery-in-the-cloud-through-isb-cgc"
+                title="Cancer Data Discovery in the Cloud through ISB-CGC"
+                environment="web"
+                feedback-link="">
+
+    <google-codelab-step label="Introduction" duration="0">
+        <p class="image-container"><img style="width: 273.50px" src="{% static 'img/code_lab/7322854d1a26fd9a.png' %}"></p>
+        <p>ISB-CGC, one of the National Cancer Institute&#39;s Cloud Resources uniquely hosts cancer data including
+            somatic mutations, copy number variations, gene and, protein expressions, etc. from widely used cancer
+            datasets including TCGA, TARGET and many more in Google BigQuery. <br></p>
+        <p>Google BigQuery (BQ) is a massively-parallel analytics engine ideal for tabular data. ISB-CGC makes the data
+            scattered over tens of thousands of tab-delimited files across public cancer data repositories hosted by the
+            National Cancer Institute easily accessible and query-able in the form of BigQuery tables. </p>
+        <ul>
+            <li>Users can explore and learn more about the ISB-CGC hosted BigQuery tables via an interactive<a
+                    href="https://isb-cgc.appspot.com/bq_meta_search/" target="_blank"> BigQuery Table Search User
+                Interface</a>. Users can find tables of interest based on category, reference genome build, data type
+                and free-form text search.<br></li>
+            <li>Using SQL in the Google BigQuery Console, in Juypter notebooks or in R, users with Google Cloud Platform
+                (GCP) projects can analyze patient, biospecimen, and molecular data for many cancer programs such as
+                TCGA, TARGET, CCLE, GTEx all in ISB-CGC&#39;s BigQuery tables.
+            </li>
+        </ul>
+        <p>In this codelabs, </p>
+        <ul>
+            <li>You will analyze gene expression and protein abundance differences between two types of TCGA kidney
+                cancers, <strong>Kidney Renal Papillary Carcinoma (TCGA-KIRP)</strong> and <strong>Kidney Chromophobe
+                    (TCGA-KICH)</strong>.
+            </li>
+            <li>You will build a cohort of patients with these cancer types and extract their respective gene expression
+                and protein abundance data using ISB-CGC TCGA Google BigQuery tables.
+            </li>
+            <li>Connecting Google BigQuery tables within R for data analysis and visualization</li>
+        </ul>
+        <h2 is-upgraded>What you&#39;ll learn:<br></h2>
+        <ul>
+            <li><strong>How to explore the ISB-CGC BigQuery Table Search User Interface <br></strong></li>
+            <li><strong>How to build and run queries in the Google BigQuery Console<br></strong></li>
+            <li><strong>How to link to R notebooks for data analysis and visualization<br></strong></li>
+            <li><strong>How to use Bioconductor packages on data in ISB-CGC BigQuery tables</strong></li>
+        </ul>
+
+
+    </google-codelab-step>
+
+    <google-codelab-step label="Getting Started" duration="0">
+        <p>A Google Cloud Platform (GCP) Project is required to access and query the data in BigQuery. </p>
+        <ul>
+            <li><strong>To create a new project, follow these two steps:</strong></li>
+        </ul>
+        <ol type="1" start="1">
+            <li>If you don&#39;t already have a Google Account (Gmail or Google Apps), <a
+                    href="https://accounts.google.com/SignUp" target="_blank">create one</a>.<br></li>
+            <li>Sign-in to Google Cloud Platform console (<a href="http://console.cloud.google.com/" target="_blank">console.cloud.google.com</a>)
+                and create a new project.
+            </li>
+        </ol>
+        <p class="image-container"><img src="{% static 'img/code_lab/6a4a66a705f899a.png' %}" style="width: 599.69px"></p>
+        <p class="image-container"><img style="width: 622.42px" src="{% static 'img/code_lab/a8467188b0654303.jpeg' %}"></p>
+        <ul>
+            <li><strong>Search for BigQuery in the Google Cloud Platform console</strong></li>
+        </ul>
+        <p class="image-container"><img style="width: 611.50px" src="{% static 'img/code_lab/d52c0f4ce42e6e7e.png' %}"></p>
+        <ul>
+            <li><strong>Connect to ISB-CGC&#39;s cancer data tables in Google BigQuery<br></strong>Once on the BigQuery
+                page, you will see an &#34;Add Data&#34; box with a &#34;Pin a Project&#34; option. Click on &#34;Pin a
+                Project&#34;
+            </li>
+        </ul>
+        <p class="image-container"><img style="width: 624.00px" src="{% static 'img/code_lab/b94279356a0e689c.png' %}"></p>
+        <p>Enter &#34;isb-cgc&#34; then click &#34;pin&#34;.</p>
+        <p class="image-container"><img style="width: 624.00px" src="{% static 'img/code_lab/dc2700493257b14f.png' %}"></p>
+        <p>You will now see the isb-cgc open access BigQuery tables on the left-hand side pinned to your project. </p>
+        <p class="image-container"><img style="width: 624.00px" src="{% static 'img/code_lab/5b3637a1b1f4b0e5.png' %}"></p>
+
+
+    </google-codelab-step>
+
+    <google-codelab-step label="Exploring ISB-CGC BigQuery Tables" duration="0">
+        <p>No login or special Google Cloud Platform privileges is required to access the ISB-CGC BigQuery Table
+            Search. </p>
+        <p>Navigate to the ISB-CGC homepage: <a href="https://isb-cgc.org/" target="_blank">https://isb-cgc.org</a> and
+            click on the <strong>Launch</strong> icon in the <strong>BigQuery Table Search</strong> box.</p>
+        <p class="image-container"><img style="width: 674.67px" src="{% static 'img/code_lab/1c9030455aa3bfdc.jpeg' %}"></p>
+        <p>We want to build a cohort of TCGA patients for which both gene expression and protein abundance data exists.
+            Let&#39;s search for ISB-CGC hosted BigQuery tables that contain information for TCGA gene expression,
+            protein expression and clinical data. <br></p>
+        <ol type="1" start="1">
+            <li>Enter <strong>TCGA</strong> in the <strong>Program</strong> filter and <strong>Clinical Data</strong>,
+                <strong>Gene Expression</strong>, and <strong>Protein Expression</strong> in the <strong>Data
+                    Type</strong> filter. <br></li>
+            <li>To see the table schema of the clinical table, click on the (+) icon.</li>
+        </ol>
+        <p class="image-container"><img style="width: 624.00px" src="{% static 'img/code_lab/36daa299ba5afcd1.png' %}"></p>
+        <p>Navigate to the Google Cloud Platform (GCP) BigQuery Console by clicking on the &#34;open&#34; button under
+            the table preview or on the &#34;magnifying glass&#34; icon on the right hand side of the Table Search
+            row.</p>
+        <aside class="special"><p><strong>Tip: </strong>To learn more about the different filter options to search for
+            BigQuery tables, see the <a
+                    href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/BigQueryTableSearchUI.html"
+                    target="_blank">documentation page.</a></p>
+        </aside>
+
+
+    </google-codelab-step>
+
+    <google-codelab-step label="Query Cancer Data in the Cloud" duration="0">
+        <p>On the GCP BigQuery Console we can preview the table, look at the schema , and perform queries. The image
+            below shows the preview of the contents of the TCGA Clinical BigQuery table.</p>
+        <p class="image-container"><img style="width: 624.00px" src="{% static 'img/code_lab/b656d42c7372ed8e.png' %}"></p>
+        <p>Here&#39;s a short SQL query (that completes in 0.3 seconds) which identifies how many patients there are
+            with TCGA kidney cancers. Enter this SQL query in the Query Editor and click <strong>Run</strong>:</p>
+        <pre><code>SELECT distinct (case_barcode)
+FROM `isb-cgc.TCGA_bioclin_v0.clinical_v1`
+WHERE project_short_name LIKE &#34;TCGA-KI%&#34;</code></pre>
+        <p>Try some queries on your own</p>
+        <p>Building a cohort based on clinical variables.</p>
+        <pre><code>SELECT
+  distinct(case_barcode)
+FROM
+  `isb-cgc.TCGA_bioclin_v0.clinical_v1`
+WHERE
+  project_short_name LIKE &#34;TCGA-KI%&#34;
+  AND primary_therapy_outcome_success = &#39;Complete Remission/Response&#39;
+  AND vital_status = &#39;Alive&#39;</code></pre>
+        <p>Compute basic statistics such as average and standard deviations.</p>
+        <pre><code>SELECT
+  AVG(age_at_diagnosis) as mean_age_at_dx,
+  STDDEV_SAMP(age_at_diagnosis) as stddev_age_at_dx
+FROM
+  `isb-cgc.TCGA_bioclin_v0.clinical_v1`
+WHERE
+  project_short_name LIKE &#34;TCGA-KI%&#34;
+  AND primary_therapy_outcome_success = &#39;Complete Remission/Response&#39;
+  AND vital_status = &#39;Alive&#39;
+  AND age_at_diagnosis is not NULL</code></pre>
+        <p>Joining tables to access variant data for our cohort.</p>
+        <pre><code>SELECT
+  clin_table.case_barcode,
+  var_table.Hugo_Symbol,
+  var_table.Variant_Type,
+  var_table.Variant_Classification,
+  var_table.SIFT,
+  var_table.PolyPhen
+FROM
+  `isb-cgc.TCGA_bioclin_v0.clinical_v1` as clin_table
+JOIN
+  `isb-cgc.TCGA_hg38_data_v0.Somatic_Mutation` as var_table
+ON
+  clin_table.case_barcode = var_table.case_barcode
+  AND clin_table.project_short_name = var_table.project_short_name 
+WHERE
+  clin_table.project_short_name LIKE &#34;TCGA-KI%&#34;
+  AND clin_table.primary_therapy_outcome_success = 
+        &#39;Complete Remission/Response&#39;
+  AND clin_table.vital_status = &#39;Alive&#39;
+  AND var_table.Hugo_Symbol = &#39;VHL&#39;</code></pre>
+        <p>After performing the queries, you can download the data or generate basic plots. Let&#39;s try to generate
+            basic plots in R. </p>
+
+
+    </google-codelab-step>
+
+    <google-codelab-step label="Access data in BigQuery from R" duration="0">
+        <p>It is really simple to access data in BigQuery tables from R using: </p>
+        <ul>
+            <li>R or RStudio installed locally on your machine</li>
+            <li><a href="https://rstudio.cloud/" target="_blank">RStudio Cloud</a> (limited free version great for data
+                exploration)
+            </li>
+            <li>R notebook on a virtual machine (VM) within the <a href="https://cloud.google.com/ai-platform"
+                                                                   target="_blank">Google Cloud AI Platform </a>(requires
+                a Google Cloud Platform project with a billing account associated with it)
+            </li>
+        </ul>
+        <aside class="special"><p><strong>Tip: </strong>One major benefit of working with R through the Google Cloud is
+            that data transfer is free (no cost, $$$) as long as the VM-notebook is located in the same region as cloud
+            data storage (buckets). Data transfer and package installation is also extremely fast. </p>
+            <p>Contact us for cloud credits to get started!</p>
+        </aside>
+        <p>In this demo example, we will be running an R notebook through RStudio Cloud, but we provide screenshots
+            below for how to access the R notebook through the Google Cloud AI Platform. </p>
+        <p>To use Google Cloud AI Platform Notebooks, from the Google Cloud Platform Navigation menu (on the left),
+            select AI Platform -&gt; Notebooks under the Artificial Intelligence section.</p>
+        <p class="image-container"><img style="width: 624.00px" src="{% static 'img/code_lab/218450acbc1b8303.png' %}"></p>
+        <p>Notebooks can be created in both R or Python. We&#39;ll create our notebook in R.</p>
+        <p class="image-container"><img style="width: 624.00px" src="{% static 'img/code_lab/421054db83fde17a.png' %}"></p>
+        <p>The Google Cloud AI platform R notebook environment looks very similar to other Jupyter notebook
+            environments. Users can create interactive R notebooks or simpler R console notebooks.</p>
+        <p>Let&#39;s get started with the demo! </p>
+        <p>Sign into RStudio Cloud with your Google ID. </p>
+        <h3 is-upgraded>Enter or copy each block into the R terminal. Click Run after each block to see the
+            results.</h3>
+        <pre><code>install.packages(&#34;bigrquery&#34;)
+library(bigrquery)
+project &lt;- &#34;your project&#34; #Replace with your project name</code></pre>
+        <pre><code># Query the clinical table for our cohort.
+# Retrieve Age at Diagnosis and Clinical Stage for Kidney Cancer data.
+sql &lt;- &#34;Select case_barcode, age_at_diagnosis, project_short_name, clinical_stage
+        from `isb-cgc.TCGA_bioclin_v0.Clinical` as clin
+        where project_short_name like &#39;TCGA-KIR%&#39;&#34;
+
+clinical_tbl &lt;- bq_project_query (project, query = sql) #Put data in temporary BQ table
+clinical_data &lt;- bq_table_download(clinical_tbl) #Put data into a dataframe
+head(clinical_data)</code></pre>
+        <p class="image-container"><img style="width: 374.50px" src="{% static 'img/code_lab/3775ed434fc752d3.png' %}"></p>
+        <pre><code># Plot two histograms of age of diagnosis data of our cohort.
+layout(matrix(1:2, 2, 1))
+hist(clinical_data[clinical_data$project_short_name == &#34;TCGA-KIRP&#34;,]$age_at_diagnosis,
+    xlim=c(15,100), ylim=c(0,40), breaks=seq(15,100,2),
+    col=&#34;#FFCC66&#34;, main=&#39;TCGA-KIRP&#39;, xlab=&#39;Age at diagnosis (years)&#39;)
+
+hist(clinical_data[clinical_data$project_short_name == &#34;TCGA-KIRC&#34;,]$age_at_diagnosis,
+    xlim=c(15,100), ylim=c(0,40), breaks=seq(15,100,2),
+    col=&#34;#99CCFF&#34;, main=&#39;TCGA-KICH&#39;, xlab=&#39;Age at diagnosis (years)&#39;)</code></pre>
+        <p class="image-container"><img style="width: 420.00px" src="{% static 'img/code_lab/5a1cdb3e807370a6.png' %}"></p>
+
+
+    </google-codelab-step>
+
+    <google-codelab-step label="Using Bioconductor packages on data in Google BigQuery" duration="0">
+        <pre><code># analyze and visualize Mutation Annotation Format (MAF) data.
+if (!requireNamespace(&#34;BiocManager&#34;, quietly = TRUE))
+    install.packages(&#34;BiocManager&#34;)
+BiocManager::install(&#34;maftools&#34;)
+library(&#34;maftools&#34;)</code></pre>
+        <pre><code># Use BigQuery to load TCGA somatic mutation data for our cancers of interest.
+sql_kirc&lt;-&#34;SELECT Hugo_Symbol, Chromosome, Start_Position, End_Position, Reference_Allele, Tumor_Seq_Allele2, Variant_Classification, Variant_Type, sample_barcode_tumor  FROM 
+`isb-cgc.TCGA_hg38_data_v0.Somatic_Mutation` WHERE project_short_name = &#39;TCGA-KIRC&#39;&#34;
+
+sql_kirp&lt;-&#34;SELECT Hugo_Symbol, Chromosome, Start_Position, End_Position, Reference_Allele, Tumor_Seq_Allele2, Variant_Classification, Variant_Type, sample_barcode_tumor FROM
+`isb-cgc.TCGA_hg38_data_v0.Somatic_Mutation` WHERE project_short_name = &#39;TCGA-KIRP&#39;&#34;
+
+#Put data into a dataframe
+maf_kirc &lt;- bq_table_download(bq_project_query (project, query = sql_kirc)) 
+maf_kirp &lt;- bq_table_download(bq_project_query (project, query = sql_kirp)) 
+
+#Rename column 9 to the field name required by maftools.
+colnames(maf_kirc)[9] &lt;- &#34;Tumor_Sample_Barcode&#34;
+colnames(maf_kirp)[9] &lt;- &#34;Tumor_Sample_Barcode&#34;
+
+head(maf_kirc)
+head(maf_kirp)</code></pre>
+        <pre><code># Convert data frames to maftools objects.
+kirc &lt;- read.maf(maf_kirc)
+kirp &lt;- read.maf(maf_kirp)
+# Leverage maftools plotting functionality.
+plotmafSummary(maf = kirp, rmOutlier = TRUE, addStat = &#39;median&#39;, dashboard = TRUE, titvRaw = FALSE)
+plotmafSummary(maf = kirc, rmOutlier = TRUE, addStat = &#39;median&#39;, dashboard = TRUE, titvRaw = FALSE)</code></pre>
+        <pre><code>oncoplot(maf = kirp, top = 10)
+oncoplot(maf = kirc, top = 10)</code></pre>
+
+
+    </google-codelab-step>
+
+    <google-codelab-step label="More Resources" duration="0">
+        <p>Congratulations, you&#39;ve queried cancer data on the cloud using BigQuery! </p>
+        <h2 is-upgraded><strong>What&#39;s next?</strong></h2>
+        <ul>
+            <li>Learn more about what ISB-CGC has to offer: <a
+                    href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/index.html" target="_blank">Documentation
+                Page</a></li>
+            <li><a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html"
+                   target="_blank">General Notebooks</a></li>
+            <li>
+                <a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/RegulomeExplorerNotebooks.html"
+                   target="_blank">Statistical Notebooks</a></li>
+            <li><a href="https://isb-cgc.appspot.com/programmatic_access/" target="_blank">Pipelines</a></li>
+            <li>Learn more syntax <a
+                    href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/progapi/bigqueryGUI/GettingStartedWithGoogleBigQuery.html"
+                    target="_blank">SQL Syntax</a></li>
+            <li>Find more tables: <a
+                    href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/BigQueryTableSearchUI.html"
+                    target="_blank">BigQuery Table Search User Interface</a></li>
+        </ul>
+
+
+    </google-codelab-step>
+
+</google-codelab>
+
+<script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+<script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+<script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+<script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+<script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>
