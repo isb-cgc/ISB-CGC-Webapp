@@ -79,4 +79,51 @@ require([
         placement: 'left',
         arrow: false
     });
+
+     $('#export-manifest-form').on('submit', function(e) {
+        var checked_fields = [];
+        $('.field-checkbox').each(function()
+        {
+            var cb = $(this)[0];
+            if (cb.checked)
+            {
+                checked_fields.push(cb.value);
+            }
+        });
+
+        var checked_columns = [];
+        $('.column-checkbox').each(function()
+        {
+           var cb = $(this)[0];
+           if (cb.checked)
+           {
+               checked_columns.push(cb.value);
+           }
+        });
+
+        var url = BASE_URL + '/cohorts/download_manifest/' + cohort_id + '/';
+         $.ajax({
+            type: 'POST',
+            url: url,
+            dataType: 'json',
+            data: {header_fields: JSON.stringify(checked_fields),
+                columns: JSON.stringify(checked_columns)},
+            success: function (data) {
+                // if(data.result) {
+                //     var msgs = [];
+                //     if(data.result.msg) {
+                //         msgs.push(data.result.msg);
+                //     }
+                //     if(data.result.note) {
+                //         msgs.push(data.result.note)
+                //     }
+                //     base.setReloadMsg('info',msgs);
+                // }
+                // window.location.reload(true);
+            },
+            error: function (e) {
+                console.error('Failed to download manifest' + JSON.parse(e.responseText).msg);
+            }
+        })
+    });
 });
