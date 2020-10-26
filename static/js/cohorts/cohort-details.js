@@ -81,6 +81,25 @@ require([
     });
 
      $('#export-manifest-form').on('submit', function(e) {
+        // $('#unallowed-chars-alert').hide();
+        // $('#name-too-long-alert-modal').hide();
+        //
+        // var name = $('#export-manifest-name').val();
+        // var unallowed = (name.match(base.blacklist));
+        //
+        // if(unallowed.length > 0) {
+        //     $('.unallowed-chars').text(unallowed.join(", "));
+        //     $('#unallowed-chars-alert').show();
+        //     e.preventDefault();
+        //     return false;
+        // }
+        //
+        // if(name.length > 255) {
+        //     $('#name-too-long-alert-modal').show();
+        //     e.preventDefault();
+        //     return false;
+        // }
+
         var checked_fields = [];
         $('.field-checkbox').each(function()
         {
@@ -102,28 +121,36 @@ require([
         });
 
         var url = BASE_URL + '/cohorts/download_manifest/' + cohort_id + '/';
-         $.ajax({
-            type: 'POST',
-            url: url,
-            dataType: 'json',
-            data: {header_fields: JSON.stringify(checked_fields),
-                columns: JSON.stringify(checked_columns)},
-            success: function (data) {
-                // if(data.result) {
-                //     var msgs = [];
-                //     if(data.result.msg) {
-                //         msgs.push(data.result.msg);
-                //     }
-                //     if(data.result.note) {
-                //         msgs.push(data.result.note)
-                //     }
-                //     base.setReloadMsg('info',msgs);
-                // }
-                // window.location.reload(true);
-            },
-            error: function (e) {
-                console.error('Failed to download manifest' + JSON.parse(e.responseText).msg);
-            }
-        })
+        // url += ("?cohort_name=" + name);
+        url += ("?header_fields=" + JSON.stringify(checked_fields));
+        url += ("?columns=" + JSON.stringify(checked_columns));
+
+        window.location.href = url;
+        //
+        //  $.ajax({
+        //     type: 'GET',
+        //     url: url,
+        //     dataType: 'json',
+        //     data: {
+        //         cohort_name: JSON.stringify(name),
+        //         header_fields: JSON.stringify(checked_fields),
+        //         columns: JSON.stringify(checked_columns),},
+        //     success: function (data) {
+        //         // if(data.result) {
+        //         //     var msgs = [];
+        //         //     if(data.result.msg) {
+        //         //         msgs.push(data.result.msg);
+        //         //     }
+        //         //     if(data.result.note) {
+        //         //         msgs.push(data.result.note)
+        //         //     }
+        //         //     base.setReloadMsg('info',msgs);
+        //         // }
+        //         // window.location.reload(true);
+        //     },
+        //     error: function (e) {
+        //         console.error('Failed to download manifest' + JSON.parse(e.responseText).msg);
+        //     }
+        // })
     });
 });
