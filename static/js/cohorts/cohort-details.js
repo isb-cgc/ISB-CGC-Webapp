@@ -56,31 +56,36 @@ require([
     A11y.Core();
 
     var downloadToken = new Date().getTime();
-    $('#download-manifest').prop("href", $('#download-manifest').prop("href") + "?downloadToken="+downloadToken);
-    $('#download-manifest').data('downloadToken',downloadToken);
+    // $('#download-manifest').data('downloadToken',downloadToken);
 
-    $('#download-manifest').on('click', function() {
-        var self=$(this);
+    $('#download-csv').on('click', function() {
+        download_manifest("csv")
+    });
 
-        self.attr('disabled','disabled');
+    $('#download-tsv').on('click', function() {
+        download_manifest("tsv")
+    });
+
+    $('#download-json').on('click', function() {
+        download_manifest("json")
+    });
+
+    var download_manifest = function(file_type) {
+        $('#export-manifest-form').submit();
+
+        $('#download-csv').attr('disabled','disabled');
+        $('#download-tsv').attr('disabled','disabled');
+        $('#download-json').attr('disabled','disabled');
 
         $('#download-in-progress').modal('show');
 
         base.blockResubmit(function() {
-            self.removeAttr('disabled');
+            $('#download-csv').removeAttr('disabled');
+            $('#download-tsv').removeAttr('disabled');
+            $('#download-json').removeAttr('disabled');
             $('#download-in-progress').modal('hide');
         },downloadToken, 'downloadToken');
-    });
 
-    tippy('.manifest-size-warning',{
-        content: 'Your cohort is too large to be downloaded in its entirety, and will be truncated at 65,000 records ' +
-        'ordered by PatientID, StudyID, SeriesID, and InstanceID.',
-        theme: 'light',
-        placement: 'left',
-        arrow: false
-    });
-
-     $('#export-manifest-form').on('submit', function(e) {
         // $('#unallowed-chars-alert').hide();
         // $('#name-too-long-alert-modal').hide();
         //
@@ -120,37 +125,20 @@ require([
            }
         });
 
-        var url = BASE_URL + '/cohorts/download_manifest/' + cohort_id + '/';
-        // url += ("?cohort_name=" + name);
-        url += ("?header_fields=" + JSON.stringify(checked_fields));
-        url += ("?columns=" + JSON.stringify(checked_columns));
+        var url = BASE_URL + '/cohorts/download_manifest/' + '1' + '/';
+        url += ("?file_type=" + file_type);
+        url += ("&header_fields=" + JSON.stringify(checked_fields));
+        url += ("&columns=" + JSON.stringify(checked_columns));
+        url += ("&downloadToken=" + downloadToken);
 
-        window.location.href = url;
-        //
-        //  $.ajax({
-        //     type: 'GET',
-        //     url: url,
-        //     dataType: 'json',
-        //     data: {
-        //         cohort_name: JSON.stringify(name),
-        //         header_fields: JSON.stringify(checked_fields),
-        //         columns: JSON.stringify(checked_columns),},
-        //     success: function (data) {
-        //         // if(data.result) {
-        //         //     var msgs = [];
-        //         //     if(data.result.msg) {
-        //         //         msgs.push(data.result.msg);
-        //         //     }
-        //         //     if(data.result.note) {
-        //         //         msgs.push(data.result.note)
-        //         //     }
-        //         //     base.setReloadMsg('info',msgs);
-        //         // }
-        //         // window.location.reload(true);
-        //     },
-        //     error: function (e) {
-        //         console.error('Failed to download manifest' + JSON.parse(e.responseText).msg);
-        //     }
-        // })
+        location.href = url;
+    };
+
+    tippy('.manifest-size-warning',{
+        content: 'Your cohort is too large to be downloaded in its entirety, and will be truncated at 65,000 records ' +
+        'ordered by PatientID, StudyID, SeriesID, and InstanceID.',
+        theme: 'light',
+        placement: 'left',
+        arrow: false
     });
 });

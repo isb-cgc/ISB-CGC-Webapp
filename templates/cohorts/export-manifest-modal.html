@@ -113,12 +113,15 @@
 
                     <div class="modal-footer">
                         {% csrf_token %}
-                        <a id="download-manifest" class="btn btn-default pull-right" title="Download this cohort's manifest.">
-                            Download Cohort Manifest
+                        <a id="download-csv" class="btn btn-primary" title="Download this cohort's manifest in CSV format.">
+                            Download CSV
                         </a>
-                        <input type="submit" value="Download CSV" class="btn btn-primary" />
-{#                        <input type="submit" value="Download TSV" class="btn btn-primary" />#}
-{#                        <input type="submit" value="Download JSON" class="btn btn-primary" />#}
+                        <a id="download-tsv" class="btn btn-primary" title="Download this cohort's manifest in TSV format.">
+                            Download TSV
+                        </a>
+                        <a id="download-json" class="btn btn-primary" title="Download this cohort's manifest in JSON format.">
+                            Download JSON
+                        </a>
                         <div id="saving-cohort" class="collapse" style="display: none;">
                             <i class="fa fa-circle-o-notch fa-spin"></i>  Saving Cohort...
                         </div>
