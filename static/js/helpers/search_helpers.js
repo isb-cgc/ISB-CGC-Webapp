@@ -72,12 +72,13 @@ function($, tree_graph, stack_bar_chart) {
             sample_type: 'Sample Type',
             age_at_diagnosis: 'Age at Diagnosis'
         },
-        'BEATAML':{
+        'BEATAML1.0':{
             project_short_name: 'Project',
             disease_type: 'Disease Type',
             vital_status: 'Vital Status',
             gender: 'Gender',
-            ethnicity: 'Race'
+            ethnicity: 'Race',
+            age_at_diagnosis: 'Age at Diagnosis'
         }
     };
 
