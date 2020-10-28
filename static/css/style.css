@@ -3912,6 +3912,12 @@ html {
   margin-top: 8px;
 }
 
+.export-manifest-group__heading a {
+      color: #2A537A;
+      font-weight: 500; }
+      .export-manifest-group__heading a:hover, .export-manifest-group__heading a:focus, .export-manifest-group__heading a:active, .export-manifest-group__heading a:visited {
+        text-decoration: none; }
+
 .manifest-size-warning {
   display: inline-block;
 }

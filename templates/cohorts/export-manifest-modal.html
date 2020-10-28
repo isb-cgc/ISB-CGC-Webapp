@@ -1,132 +1,129 @@
-    <!-- Export Manifest Modal -->
-    <div class="modal fade" id="export-manifest-modal" tabindex="-1" role="dialog" aria-labelledby="exportManifestModal" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="exportManifestModal">Export Cohort Manifest</h4>
-                    <div class="modal-js-messages" id="export-manifest-modal-js-messages">
-                        <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
-                            <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            Your manifest file's name contains invalid characters (<span class="unallowed-chars"></span>). Please remove them before exporting.
+<!-- Export Manifest Modal -->
+<div class="modal fade" id="export-manifest-modal" tabindex="-1" role="dialog" aria-labelledby="exportManifestModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="exportManifestModal">Export Cohort Manifest</h4>
+                <div class="modal-js-messages" id="export-manifest-modal-js-messages">
+                    <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+                        <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        Your manifest file's name contains invalid characters (<span class="unallowed-chars"></span>). Please remove them before exporting.
+                    </div>
+                    <div id="name-too-long-alert-modal" class="alert alert-warning alert-dismissable" style="display: none;">
+                        <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        Your manifest file's name must be no more than 255 characters long.
+                    </div>
+                </div>
+            </div>
+
+            <form id="export-manifest-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <!-- Name -->
+                        <div>
+                            <label for="export-manifest-name">Name</label>
+                            <input class="form-control" type="text" id="export-manifest-name" name="name" required />
                         </div>
-                        <div id="name-too-long-alert-modal" class="alert alert-warning alert-dismissable" style="display: none;">
-                            <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            Your manifest file's name must be no more than 255 characters long.
+                        <br>
+
+                        <!-- Header Fields -->
+                        <div class="export-manifest-group__heading">
+                            <a role="button" data-toggle="collapse" href="#header-fields" aria-expanded="false" aria-controls="header-fields" class="collapsed">
+                                <i class="fa fa-caret-right"></i> Header Fields
+                            </a>
+                        </div>
+                        <div id="header-fields" class="collapse">
+                            <li class="checkbox"><label>
+                                <input class="field-checkbox" type="checkbox" value="cohort_name" checked>
+                                <span class="value">Cohort Name</span>
+                            </label></li>
+
+                            <li class="checkbox"><label>
+                                <input class="field-checkbox" type="checkbox" value="user_email" checked>
+                                <span class="value">User Email</span>
+                            </label></li>
+
+                            <li class="checkbox"><label>
+                                <input class="field-checkbox" type="checkbox" value="cohort_filters" checked>
+                                <span class="value">Cohort Filters</span>
+                            </label></li>
+
+                            <li class="checkbox"><label>
+                                <input class="field-checkbox" type="checkbox" value="timestamp" checked>
+                                <span class="value">Date Generated</span>
+                            </label></li>
+
+                            <li class="checkbox"><label>
+                                <input class="field-checkbox" type="checkbox" value="total_records" checked>
+                                <span class="value">Total Records</span>
+                            </label></li>
+                        </div>
+                        <br>
+
+                        <!-- Columns -->
+                        <div class="export-manifest-group__heading">
+                            <a role="button" data-toggle="collapse" href="#columns" aria-expanded="false" aria-controls="header-fields" class="collapsed">
+                                <i class="fa fa-caret-right"></i> Columns
+                            </a>
+                        </div>
+                        <div id="columns" class="collapse">
+                            <li class="checkbox"><label>
+                                <input class="column-checkbox" type="checkbox" value="PatientID" checked>
+                                <span class="value">Patient ID</span>
+                            </label></li>
+
+                            <li class="checkbox"><label>
+                                <input class="column-checkbox" type="checkbox" value="collection_id" checked>
+                                <span class="value">Collection ID</span>
+                            </label></li>
+
+                            <li class="checkbox"><label>
+                                <input class="column-checkbox" type="checkbox" value="StudyInstanceUID" checked>
+                                <span class="value">Study Instance UID</span>
+                            </label></li>
+
+                            <li class="checkbox"><label>
+                                <input class="column-checkbox" type="checkbox" value="SeriesInstanceUID" checked>
+                                <span class="value">Series Instance UID</span>
+                            </label></li>
+
+                            <li class="checkbox"><label>
+                                <input class="column-checkbox" type="checkbox" value="SOPInstanceUID" checked>
+                                <span class="value">SOP Instance UID</span>
+                            </label></li>
+
+                            <li class="checkbox"><label>
+                                <input class="column-checkbox" type="checkbox" value="source_DOI" checked>
+                                <span class="value">Source DOI</span>
+                            </label></li>
+
+                            <li class="checkbox"><label>
+                                <input class="column-checkbox" type="checkbox" value="crdc_instance_uuid" checked>
+                                <span class="value">CRDC Instance UUID</span>
+                            </label></li>
+
+                            <li class="checkbox"><label>
+                                <input class="column-checkbox" type="checkbox" value="gcs_path" checked>
+                                <span class="value">GCS Path</span>
+                            </label></li>
                         </div>
                     </div>
                 </div>
-{#                <form id="export-manifest-form" method="POST" action="{% url 'export_manifest' %}">#}
-                    <form id="export-manifest-form">
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <!-- Name -->
-                            <div>
-                                <label for="export-manifest-name">Name</label>
-                                <input class="form-control" type="text" id="export-manifest-name" name="name" required />
-                            </div>
-                            <br>
 
-                            <!-- Header Fields -->
-                            <div class="list-group-item__heading">
-                                <a role="button" data-toggle="collapse" href="#header-fields" aria-expanded="false" aria-controls="header-fields" class="collapsed">
-                                    <i class="fa fa-caret-right"></i> Header Fields
-                                </a>
-                            </div>
-                            <div id="header-fields" class="collapse">
-                                <li class="checkbox"><label>
-                                    <input class="field-checkbox" type="checkbox" value="cohort_name" checked>
-                                    <span class="value">Cohort Name</span>
-                                </label></li>
-
-                                <li class="checkbox"><label>
-                                    <input class="field-checkbox" type="checkbox" value="user_email" checked>
-                                    <span class="value">User Email</span>
-                                </label></li>
-
-                                <li class="checkbox"><label>
-                                    <input class="field-checkbox" type="checkbox" value="cohort_filters" checked>
-                                    <span class="value">Cohort Filters</span>
-                                </label></li>
-
-                                <li class="checkbox"><label>
-                                    <input class="field-checkbox" type="checkbox" value="timestamp" checked>
-                                    <span class="value">Date Generated</span>
-                                </label></li>
-
-                                <li class="checkbox"><label>
-                                    <input class="field-checkbox" type="checkbox" value="total_records" checked>
-                                    <span class="value">Total Records</span>
-                                </label></li>
-                            </div>
-                            <br>
-
-                            <!-- Columns -->
-                            <div class="list-group-item__heading">
-                                <a role="button" data-toggle="collapse" href="#columns" aria-expanded="false" aria-controls="header-fields" class="collapsed">
-                                    <i class="fa fa-caret-right"></i> Columns
-                                </a>
-                            </div>
-                            <div id="columns" class="collapse">
-                                <li class="checkbox"><label>
-                                    <input class="column-checkbox" type="checkbox" value="PatientID" checked>
-                                    <span class="value">Patient ID</span>
-                                </label></li>
-
-                                <li class="checkbox"><label>
-                                    <input class="column-checkbox" type="checkbox" value="collection_id" checked>
-                                    <span class="value">Collection ID</span>
-                                </label></li>
-
-                                <li class="checkbox"><label>
-                                    <input class="column-checkbox" type="checkbox" value="StudyInstanceUID" checked>
-                                    <span class="value">Study Instance UID</span>
-                                </label></li>
-
-                                <li class="checkbox"><label>
-                                    <input class="column-checkbox" type="checkbox" value="SeriesInstanceUID" checked>
-                                    <span class="value">Series Instance UID</span>
-                                </label></li>
-
-                                <li class="checkbox"><label>
-                                    <input class="column-checkbox" type="checkbox" value="SOPInstanceUID" checked>
-                                    <span class="value">SOP Instance UID</span>
-                                </label></li>
-
-                                <li class="checkbox"><label>
-                                    <input class="column-checkbox" type="checkbox" value="source_DOI" checked>
-                                    <span class="value">Source DOI</span>
-                                </label></li>
-
-                                <li class="checkbox"><label>
-                                    <input class="column-checkbox" type="checkbox" value="crdc_instance_uuid" checked>
-                                    <span class="value">CRDC Instance UUID</span>
-                                </label></li>
-
-                                <li class="checkbox"><label>
-                                    <input class="column-checkbox" type="checkbox" value="gcs_path" checked>
-                                    <span class="value">GCS Path</span>
-                                </label></li>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <a id="download-csv" class="btn btn-primary" title="Download this cohort's manifest in CSV format.">
-                            Download CSV
-                        </a>
-                        <a id="download-tsv" class="btn btn-primary" title="Download this cohort's manifest in TSV format.">
-                            Download TSV
-                        </a>
-                        <a id="download-json" class="btn btn-primary" title="Download this cohort's manifest in JSON format.">
-                            Download JSON
-                        </a>
-                        <div id="saving-cohort" class="collapse" style="display: none;">
-                            <i class="fa fa-circle-o-notch fa-spin"></i>  Saving Cohort...
-                        </div>
-                    </div>
-                </form>
-            </div>
+                <div class="modal-footer">
+                    {% csrf_token %}
+                    <a id="download-csv" class="btn btn-primary" title="Download this cohort's manifest in CSV format.">
+                        Download CSV
+                    </a>
+                    <a id="download-tsv" class="btn btn-primary" title="Download this cohort's manifest in TSV format.">
+                        Download TSV
+                    </a>
+                    <a id="download-json" class="btn btn-primary" title="Download this cohort's manifest in JSON format.">
+                        Download JSON
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
+</div>

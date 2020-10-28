@@ -55,22 +55,48 @@ require([
 ], function($, jqueryui, base, tippy, bootstrap) {
     A11y.Core();
 
-    var downloadToken = new Date().getTime();
+        var downloadToken = new Date().getTime();
     // $('#download-manifest').data('downloadToken',downloadToken);
 
-    $('#download-csv').on('click', function() {
-        download_manifest("csv")
+    $('#download-csv').on('click', function(e) {
+        download_manifest("csv", e)
     });
 
-    $('#download-tsv').on('click', function() {
-        download_manifest("tsv")
+    $('#download-tsv').on('click', function(e) {
+        download_manifest("tsv", e)
     });
 
-    $('#download-json').on('click', function() {
-        download_manifest("json")
+    $('#download-json').on('click', function(e) {
+        download_manifest("json", e)
     });
 
-    var download_manifest = function(file_type) {
+    var download_manifest = function(file_type, e) {
+
+        $('#unallowed-chars-alert').hide();
+        $('#name-too-long-alert-modal').hide();
+
+        var name = $('#export-manifest-name').val();
+        var unallowed = (name.match(base.blacklist) || []);
+
+        if (name.length == 0) {
+            $('#export-manifest-name')[0].focus();
+            e.preventDefault();
+            return false;
+        }
+
+        if(unallowed.length > 0) {
+            $('.unallowed-chars').text(unallowed.join(", "));
+            $('#unallowed-chars-alert').show();
+            e.preventDefault();
+            return false;
+        }
+
+        if(name.length > 255) {
+            $('#name-too-long-alert-modal').show();
+            e.preventDefault();
+            return false;
+        }
+
         $('#export-manifest-form').submit();
 
         $('#download-csv').attr('disabled','disabled');
@@ -86,24 +112,6 @@ require([
             $('#download-in-progress').modal('hide');
         },downloadToken, 'downloadToken');
 
-        // $('#unallowed-chars-alert').hide();
-        // $('#name-too-long-alert-modal').hide();
-        //
-        // var name = $('#export-manifest-name').val();
-        // var unallowed = (name.match(base.blacklist));
-        //
-        // if(unallowed.length > 0) {
-        //     $('.unallowed-chars').text(unallowed.join(", "));
-        //     $('#unallowed-chars-alert').show();
-        //     e.preventDefault();
-        //     return false;
-        // }
-        //
-        // if(name.length > 255) {
-        //     $('#name-too-long-alert-modal').show();
-        //     e.preventDefault();
-        //     return false;
-        // }
 
         var checked_fields = [];
         $('.field-checkbox').each(function()
@@ -125,8 +133,9 @@ require([
            }
         });
 
-        var url = BASE_URL + '/cohorts/download_manifest/' + '1' + '/';
+        var url = BASE_URL + '/cohorts/download_manifest/' + cohort_id + '/';
         url += ("?file_type=" + file_type);
+        url += ("&file_name=" + name);
         url += ("&header_fields=" + JSON.stringify(checked_fields));
         url += ("&columns=" + JSON.stringify(checked_columns));
         url += ("&downloadToken=" + downloadToken);
