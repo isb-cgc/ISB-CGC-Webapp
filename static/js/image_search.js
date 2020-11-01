@@ -2605,6 +2605,11 @@ require([
                  console.debug("Load pending complete.");
                  cohort_loaded = true;
                  $('input[type="checkbox"]').prop("disabled", "disabled");
+
+                 // Do not disable checkboxes for export manifest dialog
+                 $('.field-checkbox').removeAttr('disabled');
+                 $('.column-checkbox').removeAttr('disabled');
+
                  $('div.ui-slider').siblings('button').prop('disabled', 'disabled');
                  $('input#hide-zeros').prop("disabled", "");
                  $('input#hide-zeros').prop("checked", true);
