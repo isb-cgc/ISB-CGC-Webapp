@@ -61,10 +61,10 @@ require([
 
     $('.img-example').on('click',function(){
         if(!$(this).hasClass('selected')) {
-            $('.'+ $('.img-example.selected').data('display-target')).hide();
+            $('.'+$('.img-example.selected').data('display-target')).hide();
             $('.img-example.selected').toggleClass('selected');
             $(this).toggleClass('selected');
-            $('.'+ $(this).data('display-target')).show();
+            $('.'+$(this).data('display-target')).show();
         }
     });
 });
