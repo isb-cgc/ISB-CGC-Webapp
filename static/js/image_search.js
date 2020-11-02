@@ -98,6 +98,8 @@ require([
 
         window.setSlider = function (slideDiv, reset, strt, end, isInt, updateNow) {
             //var slideDiv = divName + "_slide";
+            var max = $('#' + slideDiv).slider("option", "max");
+
             var divName = slideDiv.replace("_slide","");
 
             if (reset) {
@@ -131,7 +133,7 @@ require([
                 nm.push(filterCats[ind].id);
             }
             nm.push(divName);
-            filtAtt = nm.join('.')+ '_btw';
+            filtAtt = nm.join('.')+ '_rng';
             if (reset) {
                 if (  (window.filterObj.hasOwnProperty(filtAtt)) && (window.filterObj[filtAtt].hasOwnProperty('rng')) ) {
                     delete window.filterObj[filtAtt]['rng'];
@@ -144,7 +146,7 @@ require([
                 if (isInt) {
                     attVal = [parseInt(strt), parseInt(end)];
                     // edge effect
-                    attVal = [parseInt(strt), parseInt(end) - 1];
+                    attVal = [parseInt(strt), parseInt(end) ];
                 } else {
                     attVal = [parseFloat(strt), parseFloat(end)];
                 }
@@ -153,6 +155,12 @@ require([
                     window.filterObj[filtAtt] = new Object();
                 }
                 window.filterObj[filtAtt]['rng'] = attVal;
+                if (end<max){
+                    window.filterObj[filtAtt]['type']='lte';
+                }
+                else{
+                    window.filterObj[filtAtt]['type']='btw';
+                }
             }
 
 
@@ -185,7 +193,7 @@ require([
                          }
                      }
                 }
-                else if (curKey.endsWith('_btw')) {
+                else if (curKey.endsWith('_rng')) {
                     var realKey=curKey.substring(0, curKey.length-4).split('.').pop();
                     var disp = $('#'+realKey+'_heading').children()[0].innerText;
                     if (curKey.startsWith('tcga_clinical')){
@@ -195,7 +203,7 @@ require([
 
                     var fStr='';
                     if ('rng' in filterObj[curKey]){
-                        fStr += filterObj[curKey]['rng'][0].toString()+'-'+(filterObj[curKey]['rng'][1] + 1).toString();
+                        fStr += filterObj[curKey]['rng'][0].toString()+'-'+(filterObj[curKey]['rng'][1] ).toString();
                     }
                     if (('rng' in filterObj[curKey]) && ('none' in filterObj[curKey])){
                         fStr+=', ';
@@ -283,7 +291,7 @@ require([
                      }
                 }
                 else{
-                     if (curKey.endsWith('_btw')) {
+                     if (curKey.endsWith('_rng')) {
                         var realKey=curKey.substring(0, curKey.length-4).split('.').pop();
                         var disp = $('#'+realKey+'_heading').children()[0].innerText;
                         var fStr='';
@@ -429,7 +437,7 @@ require([
 
         window.addNone = function(elem, parStr, updateNow)
         {
-            var id = parStr+$(elem).parent()[0].id+"_btw";
+            var id = parStr+$(elem).parent()[0].id+"_rng";
 
             if (elem.checked){
                 if (!(id in window.filterObj)) {
@@ -506,6 +514,37 @@ require([
 
         }
 
+        var setFromSlider = function(divName, filtName, min, max){
+            var slideName = divName + '_slide';
+            var inpName = divName + '_input';
+            $('#' + slideName).addClass('used');
+                    var val = $('#' + inpName)[0].value;
+                    var valArr = val.split('-');
+                    var attVal = [];
+                    if (isInt) {
+                        attVal = [parseInt(valArr[0]), parseInt(valArr[1]) ];
+                    } else {
+                        attVal = [parseFloat(valArr[0]), parseFloat(valArr[1])];
+                    }
+
+                    if (!( filtName in window.filterObj )) {
+                        window.filterObj[filtName] = new Object();
+                    }
+                    window.filterObj[filtName]['rng'] = attVal;
+                    if (valArr[1]<max){
+                        window.filterObj[filtName]['type']='_lte'
+                    }
+                    else{
+                        window.filterObj[filtName]['type']='_bte'
+                    }
+
+                    if (filtName.startsWith('tcga_clinical')) {
+                        checkTcga();
+                    }
+                    mkFiltText();
+                    updateFacetsData(true);
+
+        }
 
         var mkSlider = function (divName, min, max, step, isInt, wNone, parStr, attr_id, attr_name) {
 
@@ -550,7 +589,8 @@ require([
                 nm.push(filterCats[ind].id);
             }
             nm.push(divName);
-            var filtName = nm.join('.') + '_btw';
+            var filtName = nm.join('.') + '_rng';
+            //var filtName = nm;
 
             $('#' + divName).append('<div id="' + slideName + '"></div>  <input id="' + inpName + '" type="text" value="' + strtInp + '" style="display:none"> <button class="reset"" style="display:block;margin-top:18px" onclick=\'setSlider("' + slideName + '",true,0,0,' + String(isInt) + ', true)\'>Clear Slider</button>');
              $('#'+slideName).append(labelMin);
@@ -578,12 +618,19 @@ require([
                 },
 
                 stop: function (event, ui) {
+                    //setFromSlider(divName, filtName, min, max);
+                    $('#' + slideName).addClass('used');
+                    var val = $('#' + inpName)[0].value;
+                    var valArr = val.split('-');
+
+                    window.setSlider(slideName, false, valArr[0], valArr[1], isInt, true);
+                    /*
                     $('#' + slideName).addClass('used');
                     var val = $('#' + inpName)[0].value;
                     var valArr = val.split('-');
                     var attVal = [];
                     if (isInt) {
-                        attVal = [parseInt(valArr[0]), parseInt(valArr[1]) - 1];
+                        attVal = [parseInt(valArr[0]), parseInt(valArr[1]) ];
                     } else {
                         attVal = [parseFloat(valArr[0]), parseFloat(valArr[1])];
                     }
@@ -598,7 +645,7 @@ require([
                     }
                     mkFiltText();
                     updateFacetsData(true);
-
+                    */
                 }
             }).find('.ui-slider-range').append(tooltipL).append(tooltipR);
 
@@ -1372,7 +1419,7 @@ require([
                 else{
                     nmA = ckey.split('.');
                     nm=nmA[nmA.length-1];
-                    if (nm.endsWith('_btw')){
+                    if (nm.endsWith('_rng')){
 
                         if (  ('rng' in window.filterObj[ckey]) && ('none' in window.filterObj[ckey]) ){
                             filtObj[nm] = [window.filterObj[ckey]['rng'],'None']
@@ -1382,7 +1429,7 @@ require([
                             filtObj[nm] = window.filterObj[ckey]['rng']
                         }
                         else if ('none' in window.filterObj[ckey]){
-                            noneKey=nm.replace('_btw','');
+                            noneKey=nm.replace('_rng','');
                             filtObj[noneKey]=['None'];
                         }
 
@@ -2463,7 +2510,7 @@ require([
             //var min = Math.ceil($(this).data('attr-min') * 1000)/1000;
             //var min = Math.floor($(this).data('attr-min'));
             var min = 0;
-            var max = Math.floor($(this).data('attr-max'));
+            var max = Math.ceil($(this).data('attr-max'));
             /* if (this.id.startsWith('Glycolysis') ){
                 min = 0;
                 max = 300;
