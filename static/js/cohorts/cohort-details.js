@@ -64,7 +64,6 @@ require([
     });
 
     var downloadToken = new Date().getTime();
-    // $('#download-manifest').data('downloadToken',downloadToken);
 
     $('#download-csv').on('click', function(e) {
         download_manifest("csv", $(this), e)
