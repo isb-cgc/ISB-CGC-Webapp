@@ -52,11 +52,11 @@ require([
     'jquery',
     'sapien',
     'jqueryui',
-    'base',
     'bootstrap',
     'assetscore'
-    ,'assetsresponsive'
-], function($, Sapien, jqueryui, base, bootstrap) {
+    ,'assetsresponsive',
+    'base'
+], function($, Sapien, jqueryui, bootstrap) {
     A11y.Core();
 
     $('.img-example').on('click',function(){
