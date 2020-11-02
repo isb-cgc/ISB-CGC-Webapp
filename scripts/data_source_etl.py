@@ -20,6 +20,7 @@ from builtins import str
 import logging
 import json
 import traceback
+import requests
 import os
 import re
 from os.path import join, dirname, exists
@@ -71,6 +72,11 @@ SOLR_TYPES = {
     "INTEGER": "plong",
     "DATE": "pdate"
 }
+
+SOLR_URI = settings.SOLR_URI
+SOLR_LOGIN = settings.SOLR_LOGIN
+SOLR_PASSWORD = settings.SOLR_PASSWORD
+SOLR_CERT = settings.SOLR_CERT
 
 def add_data_versions(dv_set):
     for dv in dv_set:
@@ -308,11 +314,24 @@ def main(config):
             schema_outfile.close()
 
             # add core to Solr
-            # add schema to core
-            # query-to-file the table
-            # pull file to local
-            # POST to Solr core
+            # sudo -u solr /opt/bitnami/solr/bin/solr create -c <solr_name>  -s 2 -rf 2
+            core_uri = "{}/solr/admin/cores?action=CREATE&name={}".format(settings.SOLR_URI,solr_name)
+            core_create = requests.post(core_uri, auth=(SOLR_LOGIN, SOLR_PASSWORD), verify=SOLR_CERT)
 
+            # add schema to core
+            schema_uri = "{}/solr/{}/schema".format(settings.SOLR_URI,solr_name)
+            schema_load = requests.post(schema_uri, data=json.dumps({"add-field": solr_schema[table_name[2]]}), headers={'Content-type': 'application/json'}, auth=(SOLR_LOGIN, SOLR_PASSWORD), verify=SOLR_CERT)
+
+            # query-to-file the table
+            # OR
+            # export from BQ console into GCS
+
+            # pull file to local
+            # gsutil cp gs://<BUCKET>/<CSV export> ./
+
+            # POST to Solr core
+            index_uri = "{}/solr/{}/update?commit=yes".format(settings.SOLR_URI,solr_name)
+            index_load = requests.post(index_uri, files={'file': open('export.csv', 'rb')}, headers={'Content-type': 'application/csv'}, auth=(SOLR_LOGIN, SOLR_PASSWORD), verify=SOLR_CERT)
 
         add_attributes([attr_set[x] for x in attr_set])
 
