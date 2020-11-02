@@ -30,9 +30,6 @@
             <div class="col-lg-12 col-md-12 col-sm-12 buttons-col">
                 <a class="btn btn-explore" href="{% url 'explore_data' %}"><span><i class="fa fa-eye"></i></span> Exploration</a>
                 <a class="btn btn-collex" href="{% url 'collections' %}"><span><i class="fa fa-th-list"></i></span> Collections</a>
-                 <button id="export-manifest" class="btn btn-special pull-right" data-toggle="modal"
-                        data-target="#export-manifest-modal"> Export Cohort Manifest
-                     </button>
             </div>
             </div>
         </div>
@@ -107,8 +104,21 @@
             </div>
         </div>
         {% include 'share/site_footer.html'  %}
-        {% include "cohorts/export-manifest-modal.html" %}
     </div>
+
+    <!-- Download In Progress Modal -->
+    <div class="modal fade" id="download-in-progress" tabindex="-1" role="dialog" data-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"></div>
+                <div class="modal-body">
+                    <p><i class="fa fa-cog fa-spin"></i> Preparing manifest for download...</p>
+                </div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
 
 {% block js_file %}
