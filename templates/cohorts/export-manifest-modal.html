@@ -27,7 +27,7 @@
                         <!-- Name -->
                         <div>
                             <label for="export-manifest-name">Name</label>
-                            <input class="form-control" type="text" id="export-manifest-name" name="name" required />
+                            <input class="form-control" type="text" id="export-manifest-name" name="name" value="{{ cohort.name }}_{{ cohort.id }}_{% now "Ymd_Gis" %}" required />
                         </div>
                         <br>
 
@@ -109,7 +109,7 @@
 
                             <li class="checkbox"><label>
                                 <input class="column-checkbox" type="checkbox" value="gcs_path" checked>
-                                <span class="value">GCS Path</span>
+                                <span class="value">GCS URL </span>
                             </label></li>
                         </div>
                     </div>
