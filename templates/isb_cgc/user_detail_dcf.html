@@ -253,6 +253,7 @@
                     <form id="link-nih-account" method="GET" action="{% url 'dcf_login' %}">
                         {% csrf_token %}
                         <div class="modal-footer">
+                            <input type="hidden" name="idp" value="{{ idp }}" />
                             <input type="submit" value="Go to DCF" class="btn btn-primary"/>
                             <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                         </div>
