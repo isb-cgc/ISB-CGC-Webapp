@@ -271,7 +271,41 @@ INSERT INTO `BEATAML_metadata_attrs`(`attribute`,`code`,`spec`) VALUES ('disease
 INSERT INTO `BEATAML_metadata_attrs`(`attribute`,`code`,`spec`) VALUES ('program_name', 'C', 'CLIN');
 
 
+INSERT INTO `projects_public_data_tables`
+(
+`build`,
+`data_table`,
+`program_id`,
+`bq_dataset`)
+VALUES
+(
+'HG38',
+'BEATAML_metadata_data_HG38_r24',
+295,
+'BEATAML_hg38_data_v0');
+
+
+INSERT INTO `projects_public_metadata_tables`
+(`samples_table`, `attr_table`, `clin_table`, `biospec_table`, `sample_data_availability_table`, `sample_data_type_availability_table`, `data_tables_id`, `program_id`, `projects_table`, `biospec_bq_table`, `bq_dataset`, `clin_bq_table`)
+VALUES
+( 'BEATAML_metadata_samples',
+'BEATAML_metadata_attrs',
+'BEATAML_metadata_clinical',
+'BEATAML_metadata_biospecimen',
+'BEATAML_metadata_sample_data_availability',
+'BEATAML_metadata_data_type_availability',
+6,
+295,
+'BEATAML_metadata_project',
+'beataml_biospecimen_r25',
+'BEATAML1_0_bioclin_v0',
+'beataml_clin_r25');
+
+-- mysqldump -u root -p dev BEATAML_metadata_samples > beataml_metadata_samples.sql
+-- mysqldump -u root -p dev BEATAML_metadata_data_HG38_r24 > beataml_metadata_hg38_r24.sql
+
 -- IMPORT BEATAML_metadata_data_HG38_r24 DATA: 1) FROM METADATA_HG38_R24.CSV FILE REPLACE ALL ', ' TO '% '   2) IMPORT CSV FILE TO BEATAML_metadata_data_HG38_r24: deselect project_short_name_suffix  3) REPLACE BACK ALL '% ' TO ', '
 -- IMPORT BEATAML_metadata_samples DATA: 1) FROM BIOSPECIMEN.CSV FILE
 ---
---INSERT INTO `projects_attribute_ranges` (`type`, `include_lower`, `include_upper`, `unbounded`, `first`, `last`, `gap`, `attribute_id`, `unit`) VALUES ('1', '1', '0', '1', '10', '80', '10', '<age_at_index attribute id>', '1');
+--INSERT INTO `projects_attribute_ranges` (`type`, `include_lower`, `include_upper`, `unbounded`, `first`, `last`, `gap`, `attribute_id`, `unit`) VALUES ('I', '1', '0', '1', '10', '80', '10', '<age_at_index attribute id>', '1');
+
