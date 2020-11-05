@@ -97,6 +97,10 @@ require([
     };
 
         window.setSlider = function (slideDiv, reset, strt, end, isInt, updateNow) {
+             parStr=$('#'+slideDiv).data("attr-par");
+             if (parStr.startsWith('tcga_clinical') && !(reset)){
+                checkTcga();
+            }
             //var slideDiv = divName + "_slide";
             var max = $('#' + slideDiv).slider("option", "max");
 
@@ -137,7 +141,10 @@ require([
             if (reset) {
                 if (  (window.filterObj.hasOwnProperty(filtAtt)) && (window.filterObj[filtAtt].hasOwnProperty('rng')) ) {
                     delete window.filterObj[filtAtt]['rng'];
-                    if (!( 'none' in window.filterObj[filtAtt])){
+                    if ( 'none' in window.filterObj[filtAtt]){
+                        window.filterObj[filtAtt]['type']='none';
+                    }
+                    else{
                         delete window.filterObj[filtAtt];
                     }
                 }
@@ -145,8 +152,7 @@ require([
                 var attVal = [];
                 if (isInt) {
                     attVal = [parseInt(strt), parseInt(end)];
-                    // edge effect
-                    attVal = [parseInt(strt), parseInt(end) ];
+
                 } else {
                     attVal = [parseFloat(strt), parseFloat(end)];
                 }
@@ -155,11 +161,11 @@ require([
                     window.filterObj[filtAtt] = new Object();
                 }
                 window.filterObj[filtAtt]['rng'] = attVal;
-                if (end<max){
-                    window.filterObj[filtAtt]['type']='lte';
+                if (end<max) {
+                    window.filterObj[filtAtt]['type'] = 'ebtw';
                 }
                 else{
-                    window.filterObj[filtAtt]['type']='btw';
+                    window.filterObj[filtAtt]['type'] = 'ebtwe';
                 }
             }
 
@@ -442,6 +448,7 @@ require([
             if (elem.checked){
                 if (!(id in window.filterObj)) {
                     window.filterObj[id] = new Array();
+                    window.filterObj[id]['type']='none';
                 }
                 window.filterObj[id]['none'] = true;_
             }
@@ -592,11 +599,11 @@ require([
             var filtName = nm.join('.') + '_rng';
             //var filtName = nm;
 
-            $('#' + divName).append('<div id="' + slideName + '"></div>  <input id="' + inpName + '" type="text" value="' + strtInp + '" style="display:none"> <button class="reset"" style="display:block;margin-top:18px" onclick=\'setSlider("' + slideName + '",true,0,0,' + String(isInt) + ', true)\'>Clear Slider</button>');
+            $('#' + divName).append('<div id="' + slideName + '" data-attr-par="'+parStr+'"></div>  <input id="' + inpName + '" type="text" value="' + strtInp + '" style="display:none"> <button class="reset"" style="display:block;margin-top:18px" onclick=\'setSlider("' + slideName + '",true,0,0,' + String(isInt) + ', true,"'+parStr+'")\'>Clear Slider</button>');
              $('#'+slideName).append(labelMin);
 
              if (wNone){
-                $('#' + divName).append( '<input type="checkbox" data-attr-par="'+parStr+'" class="noneBut" onchange="addNone(this, \''+parStr+'\', true)"> None' );
+                $('#' + divName).append( '<input type="checkbox"  class="noneBut" onchange="addNone(this, \''+parStr+'\', true)"> None' );
             }
 
 
@@ -917,9 +924,10 @@ require([
            }
             curFilterObj.collection_id = projectIdArr;
 
+            //curFilterObj={"Diameter_btw":[51,'*']}
 
             var filterStr = JSON.stringify(curFilterObj);
-            var fields = ["collection_id", "PatientID", "StudyInstanceUID", "StudyDescription", "StudyDate"];
+            var fields = ["Diameter","collection_id", "PatientID", "StudyInstanceUID", "StudyDescription", "StudyDate"];
             var collapse_on = 'StudyInstanceUID'
             var order_docs = ["collection_id", "PatientID", "StudyInstanceUID"];
             if (isSeries) {
@@ -970,7 +978,7 @@ require([
                                 '<td class="col1 modality">' + modality + '</td>' +
                                 '<td class="col1 body-part-examined">' + bodyPartExamined + '</td>' +
                                 '<td class="series-description">' + seriesDescription + '</td>';
-                            if ((modality ==='SEG') || (modality ==='RTSTRUCT')){
+                            if ((modality ==='SEG') || (modality ==='RTSTRUCT') || (modality==='RTPLAN' ) || (modality==='RWV' ) ){
                                 newHtml += '<td class="ohif open-viewer"><a href="/" onclick="return false;"><i class="fa fa-eye-slash no-viewer-tooltip"></i></td></tr>';
 
                             }
@@ -1420,7 +1428,12 @@ require([
                     nmA = ckey.split('.');
                     nm=nmA[nmA.length-1];
                     if (nm.endsWith('_rng')){
-
+                        if (window.filterObj[ckey].type==='none'){
+                            nm=nm.replace('_rng','');
+                        }
+                        else {
+                            nm = nm.replace('_rng', '_' + window.filterObj[ckey].type);
+                        }
                         if (  ('rng' in window.filterObj[ckey]) && ('none' in window.filterObj[ckey]) ){
                             filtObj[nm] = [window.filterObj[ckey]['rng'],'None']
                         }
@@ -1516,6 +1529,10 @@ require([
                                     && data.filtered_counts.derived_set[facetSet].hasOwnProperty('attributes')
                                 ) {
                                     dicofdic['filt'] = data.filtered_counts.derived_set[facetSet].attributes;
+                                }
+                                else if (isFiltered)
+                                    {
+                                    dicofdic['filt'] = {};
                                 }
                                 else{
                                     dicofdic['filt'] = data.derived_set[facetSet].attributes;
@@ -1636,17 +1653,20 @@ require([
                 var maxx=$('#' + filterId).data('attr-max');
                 var minx=$('#' + filterId).data('attr-min');
 
+                var parStr = $('#'+filterId).find('#'+filterId+'_slide').data('attr-par');
 
-                if ($('#'+filterId).find('.noneBut').length>0) {
-                    var inpElem = $('#'+filterId).find('.noneBut')[0];
-                }
 
                 if(label == 'None') {
-                    setSlider(filterId+"_slide", true, 0, maxx, true,false);
+
                      //var inpElem = $('#'+filterId).find('.noneBut')[0];
-                     inpElem.checked=true;
-                     var parStr = $(inpElem).data("attr-par");
-                    window.addNone(inpElem,parStr,true);
+                     if ($('#'+filterId).find('.noneBut').length>0) {
+                       var inpElem = $('#'+filterId).find('.noneBut')[0];
+                       inpElem.checked=true;
+                       window.addNone(inpElem,parStr,false);
+                     }
+                    setSlider(filterId+"_slide", true, 0, maxx, true,true);
+
+
                 }
                 else {
                     if (! (typeof(inpElem)==="undefined")){
