@@ -21,7 +21,7 @@ from django.urls import path
 from django.contrib import admin
 from django.conf import settings
 
-from . import views
+from . import views, views_api
 
 admin.autodiscover()
 
@@ -32,6 +32,7 @@ urlpatterns = [
     url(r'^test_methods/', views.test_methods, name='test_methods'),
     url(r'^style_guide/', views.css_test),
     url(r'^users/(?P<user_id>\d+)/$', views.user_detail, name='user_detail'),
+    url(r'^users/api/', views_api.user_detail, name='user_detail_api'),
     url(r'^cohorts/', include('cohorts.urls')),
     path('admin/', admin.site.urls),
     url(r'^accounts/', include('accounts.urls')),
