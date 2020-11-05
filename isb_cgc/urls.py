@@ -73,6 +73,7 @@ urlpatterns = [
     url(r'^extended_login/$', views.extended_login_view, name='extended_login'),
     url(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),
     url(r'^how_to_discover/', views.how_to_discover_page, name='how_to_discover'),
+    url(r'^contact_us/', views.contact_us, name='contact_us'),
     url(r'^bq_meta_search/', views.bq_meta_search, name='bq_meta_search'),
     url(r'^bq_meta_data/', views.bq_meta_data, name='bq_meta_data'),
     url(r'^programmatic_access/', views.programmatic_access_page, name='programmatic_access'),

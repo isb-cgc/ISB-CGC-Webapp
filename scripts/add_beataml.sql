@@ -301,6 +301,68 @@ VALUES
 'BEATAML1_0_bioclin_v0',
 'beataml_clin_r25');
 
+
+
+INSERT INTO `attr_value_display`
+(`attr_name`,
+`value_name`,
+`display_string`,
+`preformatted`,
+`program_id`)
+VALUES
+('program_name', NULL, 'Program', '1', 295);
+
+
+
+
+
+delete from projects_attribute_data_sources
+where id in( 760, 770, 772, 784, 808,822,834)
+;
+select pads.id from projects_attribute_data_sources pads, projects_attribute pa
+where
+pa.id = pads.attribute_id
+and pads.datasource_id in(
+
+SELECT
+-- *
+datasource_id
+FROM projects_datasource_programs pdp, projects_datasource pds
+where pdp.program_id = 4
+
+and pdp.datasource_id = pds.id
+and pds.version_id = 8
+and pds.source_type = 'S'
+
+)
+and pa.name not in
+('program_name',
+'project_short_name',
+'vital_status',
+'gender',
+'age_at_diagnosis',
+'race',
+'ethnicity',
+'progression_or_recurrence',
+'primary_diagnosis',
+'category',
+'age_at_index',
+'tissue_or_organ_of_origin',
+'disease_type',
+'morphology',
+'primary_site',
+'tumor_stage',
+'classification',
+'case_barcode',
+'case_gdc_id',
+'annotation_id',
+'diagnosis_id',
+'demographic_id',
+'age_at_diagnosis_days'
+)
+)
+
+;
 -- mysqldump -u root -p dev BEATAML_metadata_samples > beataml_metadata_samples.sql
 -- mysqldump -u root -p dev BEATAML_metadata_data_HG38_r24 > beataml_metadata_hg38_r24.sql
 
