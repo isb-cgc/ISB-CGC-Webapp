@@ -43,9 +43,14 @@
             <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
                 <div class="cohort-manifest pull-right">
                     <div class="manifest-size-warning"><i class="fa fa-warning"></i></div>
+                 <button id="export-manifest" class="btn btn-special pull-right" data-toggle="modal"
+                        data-target="#export-manifest-modal"> Export Cohort Manifest
+                 </button>
+                    <!--
                     <a id="download-manifest" class="btn btn-default pull-right" title="Download this cohort's manifest." href="{% url 'cohort_manifest' cohort.id %}">
                         Download Cohort Manifest
                     </a>
+                    -->
                 </div>
             </div>
         </div>
@@ -64,6 +69,7 @@
 
 {% with is_cohort=True %}
     {% include "idc/explore_data_core.html" %}
+    {% include "cohorts/export-manifest-modal.html" %}
 {% endwith %}
 
     <!-- Download In Progress Modal -->
@@ -87,6 +93,7 @@
         var is_cohort = true;
         var collection_tooltips = {{ collection_tooltips|safe }};
         var cohort_version = "{{ cohort_version|safe }}";
+        var cohort_id = "{{ cohort_id|safe }}";
     </script>
     <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
     {{ block.super }}
