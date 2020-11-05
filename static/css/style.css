@@ -3239,21 +3239,21 @@ html {
   #gcp-detail ul li span.remove {
     float: right; }
 
-#landing .banner-section {
+.banner-section {
   padding: 0; }
-  #landing .banner-section a {
+  .banner-section a {
     text-decoration: underline; }
-  #landing .banner-section a, #landing .banner-section button.close {
+  .banner-section a, .banner-section button.close {
     color: #fdcfa3; }
-    #landing .banner-section a:hover, #landing .banner-section button.close:hover{
+    .banner-section a:hover, .banner-section button.close:hover{
       color: #bed2e4; }
-#landing .banner-section .alert {
+.banner-section .alert {
   text-align: center;
-  background-color: #457C9B;
+  background-color: #1891D5;
   color: white;
   margin: 0;
   padding: 0 20px; }
-#landing .banner-section .alert-dismissible button.close {
+.banner-section .alert-dismissible button.close {
   padding: 0 20px; }
 
 /********************************************
