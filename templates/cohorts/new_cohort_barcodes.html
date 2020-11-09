@@ -97,8 +97,10 @@
                                     <a name="tcsv-format"></a><h5>CSV/TSV Barcode Files</h5>
                                     <p>All entries must be either a valid <span class="code">case barcode</span> <b><i>or</i></b>
                                         <span class="code">sample barcode</span>. When a case barcode is provided, all
-                                        samples from that case will be included in the cohort. Make a separate entry per
-                                        sample if only specific samples from a case should be added to the cohort.</p>
+                                        samples from that case will be included in the cohort. You must add <code>BEATAML1.0-</code>
+                                        prior to the case barcode (e.g. <code>BEATAML1.0-1001</code>) when providing BEATAML 1.0 case
+                                        barcodes. Make a separate entry per sample if only specific samples from a case
+                                        should be added to the cohort.</p>
                                     <p>Barcode sets may be in tab-, comma-, or newline-separated format. Values may be
                                         placed in single or double quotes, and can be on a single line or on multiple
                                         lines.</p>
@@ -249,8 +251,10 @@ TARGET-10-CAAABF-60.11C</pre>
                                         space.</p>
                                     <p>All entries must be either a valid <span class="code">case barcode</span> <b><i>or</i></b>
                                         <span class="code">sample barcode</span>. When a case barcode is provided, all
-                                        samples from that case will be included in the cohort. Make a separate entry per
-                                        sample if only specific samples from a case should be added to the cohort.</p>
+                                        samples from that case will be included in the cohort. You must add <code>BEATAML1.0-</code>
+                                        prior to the case barcode (e.g. <code>BEATAML1.0-1001</code>) when providing BEATAML 1.0 case
+                                        barcodes. Make a separate entry per sample if only specific samples from a case
+                                        should be added to the cohort.</p>
                                     <p>Barcode sets must be in tab-, comma-, or newline-separated format, and there
                                         should be no headers. Values may be placed in single or double quotes, and can
                                         be in a single or multiple lines.</p>

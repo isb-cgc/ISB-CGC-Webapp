@@ -244,7 +244,8 @@ require([
                     }
                 },
                 complete: function(xhr, status) {
-                   reject_load = false;
+                    $('#all-build, #igv-build').val('HG38').trigger('change');
+                    reject_load = false;
                 }
             })
         }
@@ -263,7 +264,7 @@ require([
 
     function update_download_link(active_tab, file_list_total) {
         var tab_selector = '#'+active_tab+'-files';
-        var build = $(tab_selector).find('.build :selected').val() || "HG19";
+        var build = $(tab_selector).find('.build :selected').val() || "HG38";
 
         if(file_list_total <= 0) {
             // Can't download/export something that isn't there
@@ -337,7 +338,8 @@ require([
     var update_table = function (active_tab, do_filter_count) {
         do_filter_count = (do_filter_count === undefined || do_filter_count === null ? true : do_filter_count);
         var tab_selector = '#'+active_tab+'-files';
-        var build = $(tab_selector).find('.build :selected').val() || "HG19";
+        var build = $(tab_selector).find('.build :selected').val() || "HG38";
+        // var build = $(tab_selector).find('.build :selected').val() || "HG19";
         if(active_tab == 'igv'){
             $('#igv-build').attr('value',build);
         }
@@ -552,7 +554,8 @@ require([
             var self=$(this);
 
             if(self.is(':checked')) {
-                var build = $(tab_selector).find('.build :selected').val() || "HG19";
+                var build = $(tab_selector).find('.build :selected').val() || "HG38";
+                // var build = $(tab_selector).find('.build :selected').val() || "HG19";
                 selIgvFiles[self.attr('data-type')][self.attr('value')] = {
                     'label': self.attr('token-label') + ' ['+build+']',
                     'program': self.attr('program'),
@@ -638,7 +641,8 @@ require([
     });
 
     function search_case_barcode(tab, search_input_val){
-        var build = $('#'+tab+'-files').find('.build :selected').val() || "HG19";
+        var build = $('#'+tab+'-files').find('.build :selected').val() || "HG38";
+        // var build = $('#'+tab+'-files').find('.build :selected').val() || "HG19";
         if(!tab_case_barcode[tab] || Object.keys(tab_case_barcode[tab][build]).length == 0
                                                         || search_input_val.trim() != tab_case_barcode[tab][build]) {
             tab_case_barcode[tab][build] = search_input_val.trim();
@@ -729,7 +733,8 @@ require([
     function update_filters(checked) {
         var type_tab = checked.parents('.data-tab.active')[0];
         var active_tab = $(type_tab).data('file-type');
-        var build = $('#'+active_tab+'-files').find('.build :selected').val() || "HG19";
+        var build = $('#'+active_tab+'-files').find('.build :selected').val() || "HG38";
+        // var build = $('#'+active_tab+'-files').find('.build :selected').val() || "HG19";
         SELECTED_FILTERS[active_tab][build] = {};
 
         $(type_tab).find('div[data-filter-build="'+build+'"] input[type="checkbox"]:checked').each(function(){
@@ -796,7 +801,8 @@ require([
 
         // ...and replace it with a new one
         update_displays_thread = setTimeout(function(){
-            var build = $('#'+active_tab+'-files').find('.build :selected').val() || "HG19";
+            // var build = $('#'+active_tab+'-files').find('.build :selected').val() || "HG19";
+            var build = $('#'+active_tab+'-files').find('.build :selected').val() || "HG38";
             var files_per_page = tab_files_per_page[active_tab];
             var url = ajax_update_url[active_tab] +
                 '?files_per_page=' +files_per_page +

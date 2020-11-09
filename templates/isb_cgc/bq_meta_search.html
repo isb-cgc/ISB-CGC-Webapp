@@ -166,7 +166,7 @@
                     </div>
                     <div id="advSearch0" class="adv-div collapse">
                         <div>
-                            <label>BQ Project ID</label>
+                            <label>BQ Project</label>
                             <select class="form-control bq-select" data-column-name="projectId">
                                 {% for option in project_id.options %}
                                     {% if option.value == '' %}
@@ -178,11 +178,11 @@
                             </select>
                         </div>
                         <div>
-                            <label>BQ Dataset ID</label>
+                            <label>BQ Dataset</label>
                             <input type="text" class="form-control bq-filter" data-column-name="datasetId">
                         </div>
                         <div>
-                            <label>BQ Table ID</label>
+                            <label>BQ Table</label>
                             <input type="text" class="form-control bq-filter" data-column-name="tableId">
                         </div>
                         <div>
@@ -225,9 +225,9 @@
                         <th style="width:3%;"></th>
                         <th style="width:17%;">Name</th>
                         <th></th>
-                        <th>Project ID</th>
-                        <th style="width:15%;">Dataset ID</th>
-                        <th style="width:15%;">Table ID</th>
+                        <th style="width:15%;">BQ Project</th>
+                        <th style="width:15%;">BQ Dataset</th>
+                        <th style="width:15%;">BQ Table</th>
                         <th>Full ID</th>
                         <th style="width:8%;">Program</th>
                         <th style="width:8%;">Category</th>
