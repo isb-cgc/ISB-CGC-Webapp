@@ -53,6 +53,15 @@ def main():
         disease_code = Attribute.objects.get(name="disease_code", active=True)
         proj_short_name = Attribute.objects.get(name="project_short_name", active=True)
 
+        tips = Attribute_Tooltips.objects.all()
+
+        extent_tooltips = {}
+
+        for tip in tips:
+            if not tip.attribute.id in extent_tooltips:
+                extent_tooltips[tip.attribute.id] = []
+            extent_tooltips[tip.attribute.id].append(tip.value)
+
         tooltips_by_val = { x.name: {'tip': x.description, 'obj':disease_code} for x in projects if x.name not in ['ALL-P1','ALL-P2']}
         tooltips_by_val['ALL'] = {'tip':'Acute Lymphoblastic Leukemia', 'obj': disease_code}
         tooltips_by_val.update({"{}-{}".format(x.program.name,x.name): {'tip': x.description, 'obj':proj_short_name} for x in projects})
@@ -60,9 +69,16 @@ def main():
         tooltips = []
 
         for val in tooltips_by_val:
-            tooltips.append(Attribute_Tooltips(value=val, tooltip=tooltips_by_val[val]['tip'], attribute=tooltips_by_val[val]['obj']))
+            if not tooltips_by_val[val]['tip']:
+                raise Exception("Tooltip cannot be null: {}".format(val))
+            if  val not in extent_tooltips.get(tooltips_by_val[val]['obj'].id,[]):
+                tooltips.append(Attribute_Tooltips(value=val, tooltip=tooltips_by_val[val]['tip'], attribute=tooltips_by_val[val]['obj']))
 
-        Attribute_Tooltips.objects.bulk_create(tooltips)
+        if len(tooltips):
+            print("[STATUS] Adding {} new tooltips.".format(str(len(tooltips))))
+            Attribute_Tooltips.objects.bulk_create(tooltips)
+        else:
+            print("[STATUS] - No new tooltips available.")
 
     except Exception as e:
         logging.exception(e)
