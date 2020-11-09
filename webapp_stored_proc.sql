@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.7.17, for Win64 (x86_64)
 --
--- Host: 35.238.114.160    Database: data_migration
+-- Host:     Database:
 -- ------------------------------------------------------
 -- Server version	5.7.25-google-log
 
@@ -16,7 +16,7 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Dumping routines for database 'data_migration'
+-- Dumping routines for database ''
 --
 /*!50003 DROP PROCEDURE IF EXISTS `get_isbcgc_project_set` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
