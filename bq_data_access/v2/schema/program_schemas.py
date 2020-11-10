@@ -1178,5 +1178,199 @@ TABLE_TO_SCHEMA_MAP = {
             "name": "min_percent_tumor_nuclei",
             "type": "FLOAT"
         }
+    ],
+    "{}:BEATAML1_0_bioclin_v0.beataml_clin_r25".format(settings.BIGQUERY_DATA_PROJECT_ID): [
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "disease_type"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "morphology"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "status"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "demographic_id"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "diagnosis_id"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "tumor_grade"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "case_gdc_id"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "primary_site"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "project_id"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "vital_status"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "notes"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "last_known_disease_status"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "ethnicity"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "case_barcode"
+        },
+        {
+            "type": "INTEGER",
+            "mode": "NULLABLE",
+            "name": "age_at_index"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "annotation_id"
+        },
+        {
+            "type": "INTEGER",
+            "mode": "NULLABLE",
+            "name": "age_at_diagnosis"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "primary_diagnosis"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "tissue_or_organ_of_origin"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "name"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "gender"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "site_of_resection_or_biopsy"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "race"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "progression_or_recurrence"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "category"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "tumor_stage"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "classification"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "project_short_name"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "disease_code"
+        },
+        {
+            "type": "STRING",
+            "mode": "NULLABLE",
+            "name": "program_name"
+        },
+        {
+            "type": "INTEGER",
+            "mode": "NULLABLE",
+            "name": "age_at_diagnosis_days"
+        }
+    ],
+    "{}:BEATAML1_0_bioclin_v0.beataml_biospecimen_r25".format(settings.BIGQUERY_DATA_PROJECT_ID): [
+        {
+            "mode": "NULLABLE",
+            "name": "proj",
+            "type": "STRING"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "case_gdc_id",
+            "type": "STRING"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "case_barcode",
+            "type": "STRING"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "sample_gdc_id",
+            "type": "STRING",
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "sample_barcode",
+            "type": "STRING",
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "program_name",
+            "type": "STRING",
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "project_short_name",
+            "type": "STRING",
+        }
     ]
 }

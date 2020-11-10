@@ -51,7 +51,8 @@ ranges_needed = {
     'year_of_diagnosis': 'year',
     'days_to_birth': 'by_negative_3k',
     'year_of_initial_pathologic_diagnosis': 'year',
-    'age_at_diagnosis': None
+    'age_at_diagnosis': None,
+    'age_at_index': None
 }
 
 ranges = {
@@ -224,13 +225,13 @@ def main(config):
 
         if 'projects' in config:
             for proj in config['projects']:
-                program = Program.objects.get(name=proj['program'], owner=isb_superuser, active=True, is_public=True)
+                program = Program.objects.get(name=proj['program'], owner=isb_superuser, active=True)
                 try:
-                    obj = Project.objects.get(name=proj['name'], owner=isb_superuser, active=True, is_public=True, program=program)
+                    obj = Project.objects.get(name=proj['name'], owner=isb_superuser, active=True, program=program)
                     logger.info("[STATUS] Project {} found - skipping.".format(proj['name']))
                 except ObjectDoesNotExist:
                     logger.info("[STATUS] Project {} not found - creating.".format(proj['name']))
-                    obj = Project.objects.update_or_create(name=proj['name'], owner=isb_superuser, active=True, is_public=True, program=program)
+                    obj = Project.objects.update_or_create(name=proj['name'], description=proj['description'], owner=isb_superuser, active=True, program=program)
 
         if 'versions' in config:
             add_data_versions(config['versions'])
@@ -262,7 +263,7 @@ def main(config):
             table_name = table['name'].split(".")
             solr_name = table.get('solr_name',table_name[-1])
             add_bq_tables([table['name']], table['version'], table['version_type'], table['programs'])
-            add_solr_collex(solr_name, table['version'], table['version_type'], table['programs'])
+            add_solr_collex([solr_name], table['version'], table['version_type'], table['programs'])
 
             schema = BigQuerySupport.get_table_schema(table_name[0], table_name[1], table_name[2])
 

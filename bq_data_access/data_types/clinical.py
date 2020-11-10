@@ -42,6 +42,18 @@ BIGQUERY_CONFIG = {
             "biospecimen_table_id": "{}:TCGA_bioclin_v0.Biospecimen".format(settings.BIGQUERY_DATA_PROJECT_ID),
             "internal_table_id": "tcga_biospecimen",
             "program": "tcga"
-        }
+        },
+{
+            "table_id": "{}:BEATAML1_0_bioclin_v0.beataml_clin_r25".format(settings.BIGQUERY_DATA_PROJECT_ID),
+            "biospecimen_table_id": "{}:BEATAML1_0_bioclin_v0.beataml_biospecimen_r25".format(settings.BIGQUERY_DATA_PROJECT_ID),
+            "internal_table_id": "beataml_clinical",
+            "program": "beataml1.0"
+        },
+        {
+            "table_id": "{}:BEATAML1_0_bioclin_v0.beataml_biospecimen_r25".format(settings.BIGQUERY_DATA_PROJECT_ID),
+            "biospecimen_table_id": "{}:BEATAML1_0_bioclin_v0.beataml_biospecimen_r25".format(settings.BIGQUERY_DATA_PROJECT_ID),
+            "internal_table_id": "beataml_biospecimen",
+            "program": "beataml1.0"
+        },
     ]
 }
