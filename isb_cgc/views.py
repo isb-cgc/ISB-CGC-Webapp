@@ -688,6 +688,9 @@ def vid_tutorials_page(request):
 def how_to_discover_page(request):
     return render(request, 'how_to_discover_page.html')
 
+def contact_us(request):
+    return render(request, 'isb_cgc/contact_us.html')
+
 
 def bq_meta_search(request):
     bq_filter_file_name = 'bq_meta_filters.json'

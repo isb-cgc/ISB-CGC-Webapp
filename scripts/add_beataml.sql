@@ -97,7 +97,7 @@ CREATE TABLE `BEATAML_metadata_clinical` (
 ) ENGINE=InnoDB AUTO_INCREMENT=951 DEFAULT CHARSET=utf8;
 
 
-CREATE TABLE `BEATAML_metadata_data_HG38_r24` (
+CREATE TABLE `BEATAML_metadata_data_HG38_r26` (
   `file_gdc_id` varchar(36) DEFAULT NULL,
   `case_gdc_id` varchar(36) DEFAULT NULL,
   `case_barcode` varchar(35) NOT NULL,
@@ -204,7 +204,6 @@ CREATE TABLE `BEATAML_metadata_samples` (
   `morphology` varchar(30) DEFAULT NULL,
   `tumor_grade` varchar(30) DEFAULT NULL,
   `primary_site` varchar(80) DEFAULT NULL,
-  `project_id` varchar(40) DEFAULT NULL,
   `project_short_name` varchar(40) DEFAULT NULL,
   `vital_status` varchar(10) DEFAULT NULL,
   `last_known_disease_status` varchar(20) DEFAULT NULL,
@@ -213,7 +212,6 @@ CREATE TABLE `BEATAML_metadata_samples` (
   `age_at_diagnosis` int(11) DEFAULT NULL,
   `primary_diagnosis` varchar(100) DEFAULT NULL,
   `tissue_or_organ_of_origin` varchar(30) DEFAULT NULL,
-  `name` varchar(100) DEFAULT NULL,
   `gender` varchar(10) DEFAULT NULL,
   `site_of_resection_or_biopsy` varchar(30) DEFAULT NULL,
   `race` varchar(30) DEFAULT NULL,
@@ -225,13 +223,12 @@ CREATE TABLE `BEATAML_metadata_samples` (
   KEY `BEATAML_metadata_samples2` (`case_barcode`),
   KEY `BEATAML_metadata_samples3` (`sample_gdc_id`),
   KEY `BEATAML_metadata_samples4` (`sample_barcode`),
-  KEY `BEATAML_metadata_samples25` (`program_name`),
-  KEY `BEATAML_metadata_samples5` (`disease_type`),
-  KEY `BEATAML_metadata_samples6` (`disease_code`),
-  KEY `BEATAML_metadata_samples7` (`morphology`),
-  KEY `BEATAML_metadata_samples8` (`tumor_grade`),
-  KEY `BEATAML_metadata_samples9` (`primary_site`),
-  KEY `BEATAML_metadata_samples10` (`project_id`),
+  KEY `BEATAML_metadata_samples5` (`program_name`),
+  KEY `BEATAML_metadata_samples6` (`disease_type`),
+  KEY `BEATAML_metadata_samples7` (`disease_code`),
+  KEY `BEATAML_metadata_samples8` (`morphology`),
+  KEY `BEATAML_metadata_samples9` (`tumor_grade`),
+  KEY `BEATAML_metadata_samples10` (`primary_site`),
   KEY `BEATAML_metadata_samples11` (`project_short_name`),
   KEY `BEATAML_metadata_samples12` (`vital_status`),
   KEY `BEATAML_metadata_samples13` (`last_known_disease_status`),
@@ -240,12 +237,11 @@ CREATE TABLE `BEATAML_metadata_samples` (
   KEY `BEATAML_metadata_samples16` (`age_at_diagnosis`),
   KEY `BEATAML_metadata_samples17` (`primary_diagnosis`),
   KEY `BEATAML_metadata_samples18` (`tissue_or_organ_of_origin`),
-  KEY `BEATAML_metadata_samples19` (`name`),
-  KEY `BEATAML_metadata_samples20` (`gender`),
-  KEY `BEATAML_metadata_samples21` (`site_of_resection_or_biopsy`),
-  KEY `BEATAML_metadata_samples22` (`race`),
-  KEY `BEATAML_metadata_samples23` (`progression_or_recurrence`),
-  KEY `BEATAML_metadata_samples24` (`tumor_stage`)
+  KEY `BEATAML_metadata_samples19` (`gender`),
+  KEY `BEATAML_metadata_samples20` (`site_of_resection_or_biopsy`),
+  KEY `BEATAML_metadata_samples21` (`race`),
+  KEY `BEATAML_metadata_samples22` (`progression_or_recurrence`),
+  KEY `BEATAML_metadata_samples23` (`tumor_stage`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1365 DEFAULT CHARSET=utf8;
 
 
@@ -271,6 +267,11 @@ INSERT INTO `BEATAML_metadata_attrs`(`attribute`,`code`,`spec`) VALUES ('disease
 INSERT INTO `BEATAML_metadata_attrs`(`attribute`,`code`,`spec`) VALUES ('program_name', 'C', 'CLIN');
 
 
+
+
+
+--
+
 INSERT INTO `projects_public_data_tables`
 (
 `build`,
@@ -280,8 +281,8 @@ INSERT INTO `projects_public_data_tables`
 VALUES
 (
 'HG38',
-'BEATAML_metadata_data_HG38_r24',
-295,
+'BEATAML_metadata_data_HG38_r26',
+--program_id,
 'BEATAML_hg38_data_v0');
 
 
@@ -297,15 +298,83 @@ VALUES
 6,
 295,
 'BEATAML_metadata_project',
-'beataml_biospecimen_r25',
+'beataml_biospecimen_r26',
 'BEATAML1_0_bioclin_v0',
 'beataml_clin_r25');
 
+
+
+INSERT INTO `attr_value_display`
+(`attr_name`,
+`value_name`,
+`display_string`,
+`preformatted`,
+`program_id`)
+VALUES
+('program_name', NULL, 'Program', '1', 295);
+
+
+
+
+
+delete from projects_attribute_data_sources
+where id in( 760, 770, 772, 784, 808,822,834)
+;
+select pads.id from projects_attribute_data_sources pads, projects_attribute pa
+where
+pa.id = pads.attribute_id
+and pads.datasource_id in(
+
+SELECT
+-- *
+datasource_id
+FROM projects_datasource_programs pdp, projects_datasource pds
+where pdp.program_id = 4
+
+and pdp.datasource_id = pds.id
+and pds.version_id = 8
+and pds.source_type = 'S'
+
+)
+and pa.name not in
+('program_name',
+'project_short_name',
+'vital_status',
+'gender',
+'age_at_diagnosis',
+'race',
+'ethnicity',
+'progression_or_recurrence',
+'primary_diagnosis',
+'category',
+'age_at_index',
+'tissue_or_organ_of_origin',
+'disease_type',
+'morphology',
+'primary_site',
+'tumor_stage',
+'classification',
+'case_barcode',
+'case_gdc_id',
+'annotation_id',
+'diagnosis_id',
+'demographic_id',
+'age_at_diagnosis_days'
+)
+)
+
+;
 -- mysqldump -u root -p dev BEATAML_metadata_samples > beataml_metadata_samples.sql
 -- mysqldump -u root -p dev BEATAML_metadata_data_HG38_r24 > beataml_metadata_hg38_r24.sql
 
 -- IMPORT BEATAML_metadata_data_HG38_r24 DATA: 1) FROM METADATA_HG38_R24.CSV FILE REPLACE ALL ', ' TO '% '   2) IMPORT CSV FILE TO BEATAML_metadata_data_HG38_r24: deselect project_short_name_suffix  3) REPLACE BACK ALL '% ' TO ', '
 -- IMPORT BEATAML_metadata_samples DATA: 1) FROM BIOSPECIMEN.CSV FILE
 ---
+BEATAML_metadata_data_HG38_r26
+Bone Marrow, Post-treatment
+Bone Marrow% Post-treatment
+Blood Derived Cancer - Peripheral Blood, Post-treatment
+Blood Derived Cancer - Peripheral Blood% Post-treatment
 --INSERT INTO `projects_attribute_ranges` (`type`, `include_lower`, `include_upper`, `unbounded`, `first`, `last`, `gap`, `attribute_id`, `unit`) VALUES ('I', '1', '0', '1', '10', '80', '10', '<age_at_index attribute id>', '1');
+INSERT INTO `projects_attribute_ranges` (`type`, `include_lower`, `include_upper`, `unbounded`, `first`, `last`, `gap`, `attribute_id`, `unit`) VALUES ('I', '1', '0', '1', '10', '80', '10', '281', '1');
 

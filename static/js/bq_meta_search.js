@@ -739,7 +739,7 @@ require([
                 $('#gcp-open-modal').modal('show');
             }
             else{
-                $('#gcp-open-btn span').trigger('click');
+                $('#gcp-open-btn')[0].click();
             }
 
         });
