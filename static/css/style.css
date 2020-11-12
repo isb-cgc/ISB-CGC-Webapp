@@ -3239,6 +3239,23 @@ html {
   #gcp-detail ul li span.remove {
     float: right; }
 
+.banner-section {
+  padding: 0; }
+  .banner-section a {
+    text-decoration: underline; }
+  .banner-section a, .banner-section button.close {
+    color: #fdcfa3; }
+    .banner-section a:hover, .banner-section button.close:hover{
+      color: #bed2e4; }
+.banner-section .alert {
+  text-align: center;
+  background-color: #1891D5;
+  color: white;
+  margin: 0;
+  padding: 0 20px; }
+.banner-section .alert-dismissible button.close {
+  padding: 0 20px; }
+
 /********************************************
  * Visualizations Styles
  *******************************************/
@@ -3911,6 +3928,12 @@ html {
 .cohort-manifest {
   margin-top: 8px;
 }
+
+.export-manifest-group__heading a {
+      color: #2A537A;
+      font-weight: 500; }
+      .export-manifest-group__heading a:hover, .export-manifest-group__heading a:focus, .export-manifest-group__heading a:active, .export-manifest-group__heading a:visited {
+        text-decoration: none; }
 
 .manifest-size-warning {
   display: inline-block;
