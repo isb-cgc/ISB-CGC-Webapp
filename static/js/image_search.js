@@ -2598,6 +2598,30 @@ require([
 
         // Get all checked filters
         var filters = [];
+
+        // For collection list
+        $('.collection-list').each(function() {
+            var $group = $(this);
+
+            var checkboxes = $group.find("input:checked");
+            if (checkboxes.length > 0)
+            {
+                var values = [];
+                var my_id = "";
+                checkboxes.each(function() {
+                    var $checkbox = $(this);
+                    var my_value = $checkbox[0].value;
+                    my_id = $checkbox.data('filter-attr-id');
+                    values.push(my_value);
+                });
+                filters.push({
+                    'id': my_id,
+                    'values': values,
+                });
+            }
+        });
+
+        // For other list item groups
         $('.list-group-item__body').each(function() {
             var $group = $(this);
             var my_id = $group.data('filter-attr-id');
