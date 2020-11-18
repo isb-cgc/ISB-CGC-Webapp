@@ -2258,7 +2258,7 @@ require([
                     checkBox.indeterminate = false;
                 }
 
-                if ( (checked) && (filtnm ==='tcga_clinical')){
+                if ( (checked) && (filtnm ==='tcga_clinical') && !is_cohort){
                     checkTcga();
                 }
 
@@ -2551,9 +2551,9 @@ require([
         _.each(filters, function(group){
             _.each(group['filters'], function(filter){
                 let selector = 'div.list-group-item__body[data-filter-attr-id="'+filter['id']+'"], '+'div.list-group-sub-item__body[data-filter-attr-id="'+filter['id']+'"]';
+                $(selector).parents('.collection-list').collapse('show');
                 $(selector).collapse('show');
                 $(selector).find('.show-more').triggerHandler('click');
-                $(selector).parents('.collection-list').collapse('show');
                 $(selector).parents('.tab-pane.search-set').length > 0 && $('a[href="#'+$(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
                 if($(selector).children('.ui-slider').length > 0) {
                     sliders.push({
@@ -2572,7 +2572,6 @@ require([
         if(sliders.length > 0) {
             load_sliders(sliders, false);
         }
-        console.debug("Making filter text...");
         mkFiltText();
         return updateFacetsData(true).promise();
      };
