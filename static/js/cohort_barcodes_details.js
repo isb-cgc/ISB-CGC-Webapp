@@ -66,7 +66,7 @@ require([
             return validator.errors;
         }
         return null;
-    };
+    }
 
     // Given a block of barcodes in non-GDC format, determine how to divide them into individual entries
     function parseBarcodeEntries(content) {
@@ -111,7 +111,7 @@ require([
             entries = nl_split_entries;
         }
         return entries;
-    };
+    }
 
     function validateEntries(barcodes,preFormatted) {
 
