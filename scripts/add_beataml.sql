@@ -283,7 +283,7 @@ VALUES
 'HG38',
 'BEATAML_metadata_data_HG38_r26',
 --program_id,
-'BEATAML_hg38_data_v0');
+'BEATAML1_0_hg38_data_v0');
 
 
 INSERT INTO `projects_public_metadata_tables`
@@ -320,61 +320,63 @@ VALUES
 delete from projects_attribute_data_sources
 where id in( 760, 770, 772, 784, 808,822,834)
 ;
-select pads.id from projects_attribute_data_sources pads, projects_attribute pa
-where
-pa.id = pads.attribute_id
-and pads.datasource_id in(
 
-SELECT
--- *
-datasource_id
-FROM projects_datasource_programs pdp, projects_datasource pds
-where pdp.program_id = 4
 
-and pdp.datasource_id = pds.id
-and pds.version_id = 8
-and pds.source_type = 'S'
+-- select pads.id name from projects_attribute_data_sources pads, projects_attribute pa
+-- where
+-- pa.id = pads.attribute_id
+-- and pa.default_ui_display = 1
+-- -- and pa.active =1
+-- and pads.datasource_id in(
+-- SELECT
+-- -- *
+-- datasource_id
+-- FROM projects_datasource_programs pdp
+-- , projects_datasource pds
+-- where pdp.program_id = 188
+-- and pdp.datasource_id = pds.id
+--  and pds.version_id = 8
+--  and pds.source_type = 'S'
+--
+-- )
+-- and pa.name not in
+-- ('program_name',
+-- 'project_short_name',
+-- 'vital_status',
+-- 'gender',
+-- 'age_at_diagnosis',
+-- 'race',
+-- 'ethnicity',
+-- 'progression_or_recurrence',
+-- 'primary_diagnosis',
+-- 'category',
+-- 'age_at_index',
+-- 'tissue_or_organ_of_origin',
+-- 'disease_type',
+-- 'morphology',
+-- 'primary_site',
+-- 'tumor_stage',
+-- 'classification',
+-- 'case_barcode',
+-- 'case_gdc_id',
+-- 'annotation_id',
+-- 'diagnosis_id',
+-- 'demographic_id',
+-- 'age_at_diagnosis_days'
+-- )
+-- )
 
-)
-and pa.name not in
-('program_name',
-'project_short_name',
-'vital_status',
-'gender',
-'age_at_diagnosis',
-'race',
-'ethnicity',
-'progression_or_recurrence',
-'primary_diagnosis',
-'category',
-'age_at_index',
-'tissue_or_organ_of_origin',
-'disease_type',
-'morphology',
-'primary_site',
-'tumor_stage',
-'classification',
-'case_barcode',
-'case_gdc_id',
-'annotation_id',
-'diagnosis_id',
-'demographic_id',
-'age_at_diagnosis_days'
-)
-)
-
-;
 -- mysqldump -u root -p dev BEATAML_metadata_samples > beataml_metadata_samples.sql
 -- mysqldump -u root -p dev BEATAML_metadata_data_HG38_r24 > beataml_metadata_hg38_r24.sql
 
 -- IMPORT BEATAML_metadata_data_HG38_r24 DATA: 1) FROM METADATA_HG38_R24.CSV FILE REPLACE ALL ', ' TO '% '   2) IMPORT CSV FILE TO BEATAML_metadata_data_HG38_r24: deselect project_short_name_suffix  3) REPLACE BACK ALL '% ' TO ', '
 -- IMPORT BEATAML_metadata_samples DATA: 1) FROM BIOSPECIMEN.CSV FILE
 ---
-BEATAML_metadata_data_HG38_r26
-Bone Marrow, Post-treatment
-Bone Marrow% Post-treatment
-Blood Derived Cancer - Peripheral Blood, Post-treatment
-Blood Derived Cancer - Peripheral Blood% Post-treatment
+-- BEATAML_metadata_data_HG38_r26
+-- Bone Marrow, Post-treatment
+-- Bone Marrow% Post-treatment
+-- Blood Derived Cancer - Peripheral Blood, Post-treatment
+-- Blood Derived Cancer - Peripheral Blood% Post-treatment
 --INSERT INTO `projects_attribute_ranges` (`type`, `include_lower`, `include_upper`, `unbounded`, `first`, `last`, `gap`, `attribute_id`, `unit`) VALUES ('I', '1', '0', '1', '10', '80', '10', '<age_at_index attribute id>', '1');
 INSERT INTO `projects_attribute_ranges` (`type`, `include_lower`, `include_upper`, `unbounded`, `first`, `last`, `gap`, `attribute_id`, `unit`) VALUES ('I', '1', '0', '1', '10', '80', '10', '281', '1');
 
