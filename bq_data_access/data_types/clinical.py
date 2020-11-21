@@ -43,9 +43,9 @@ BIGQUERY_CONFIG = {
             "internal_table_id": "tcga_biospecimen",
             "program": "tcga"
         },
-{
+        {
             "table_id": "{}:BEATAML1_0_bioclin_v0.r26_BEATAML1_0_clinical".format(settings.BIGQUERY_DATA_PROJECT_ID),
-            "biospecimen_table_id": "{}:BEATAML1_0_bioclin_v0.r26_BEATAML1_0_clinical".format(settings.BIGQUERY_DATA_PROJECT_ID),
+            "biospecimen_table_id": "{}:BEATAML1_0_bioclin_v0.r26_BEATAML1_0_biospecimen_ref".format(settings.BIGQUERY_DATA_PROJECT_ID),
             "internal_table_id": "beataml_clinical",
             "program": "beataml1.0"
         },
