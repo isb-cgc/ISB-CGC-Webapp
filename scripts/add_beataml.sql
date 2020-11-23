@@ -380,3 +380,5 @@ where id in( 760, 770, 772, 784, 808,822,834)
 --INSERT INTO `projects_attribute_ranges` (`type`, `include_lower`, `include_upper`, `unbounded`, `first`, `last`, `gap`, `attribute_id`, `unit`) VALUES ('I', '1', '0', '1', '10', '80', '10', '<age_at_index attribute id>', '1');
 INSERT INTO `projects_attribute_ranges` (`type`, `include_lower`, `include_upper`, `unbounded`, `first`, `last`, `gap`, `attribute_id`, `unit`) VALUES ('I', '1', '0', '1', '10', '80', '10', '281', '1');
 
+-- update TABLE_TO_SCHEMA_MAP at program_schemas.py
+-- BIGQUERY_CONFIG update
