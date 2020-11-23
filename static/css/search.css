@@ -303,6 +303,12 @@ tr {
     word-wrap: break-word; }
 
 
+#cases_table td, #cases_table_head th {
+    width: 25%;
+    word-wrap: break-word; }
+
+
+
 #studies_table_head th, #studies_table td {
     word-break: break-word; }
 #studies_table_head th.project-name, th.case-id, th.study-id,
