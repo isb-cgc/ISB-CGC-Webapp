@@ -77,6 +77,11 @@ require([
         download_manifest("json", $(this), e)
     });
 
+    $('.files input').on('change', function() {
+       alert($('input[name=file_type]:checked', '.files').val());
+
+    });
+
     var download_manifest = function(file_type, clicked_button, e) {
         $('#unallowed-chars-alert').hide();
         $('#name-too-long-alert-modal').hide();

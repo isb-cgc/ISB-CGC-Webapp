@@ -112,20 +112,37 @@
                                 <span class="value">GCS URL </span>
                             </label></li>
                         </div>
-                    </div>
-                </div>
+                        <br>
 
-                <div class="modal-footer">
-                    {% csrf_token %}
-                    <a id="download-csv" class="btn btn-primary" title="Download this cohort's manifest in CSV format.">
-                        Download CSV
-                    </a>
-                    <a id="download-tsv" class="btn btn-primary " title="Download this cohort's manifest in TSV format.">
-                        Download TSV
-                    </a>
-                    <a id="download-json" class="btn btn-primary " title="Download this cohort's manifest in JSON format.">
-                        Download JSON
-                    </a>
+                        <!-- Export Option -->
+                        <div class="export-option">
+                            <span class="value"><input type="radio" name="colorRadio" value="file-manifest" checked> Files</span>
+                            <span style="margin-left:10px" class="value"><input type="radio" name="colorRadio" value="bq-manifest"> BigQuery</span>
+                        </div>
+                        <br>
+
+                        <div id="bq-manifest">
+                            <a id="get-bq-table" class="btn btn-primary" title="Get BQ Table of this manifest.">
+                               Get BQ Table
+                            </a>
+                        </div>
+                        <div id="file-manifest">
+                            <select class="form-control">
+                            </select>
+                            <br>
+
+                            {% csrf_token %}
+                            <a id="download-csv" class="btn btn-primary" title="Download this cohort's manifest in CSV format.">
+                                Download CSV
+                            </a>
+                            <a id="download-tsv" class="btn btn-primary " title="Download this cohort's manifest in TSV format.">
+                                Download TSV
+                            </a>
+                            <a id="download-json" class="btn btn-primary " title="Download this cohort's manifest in JSON format.">
+                                Download JSON
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>

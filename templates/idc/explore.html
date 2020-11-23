@@ -61,6 +61,9 @@
 
             <h3 class="pull-left" role="heading" aria-level="1">Explore Image Data</h3>
             {% if request.user.is_authenticated %}
+            <button id="load-btn"
+            title="Select at least one filter."> Load
+            </button>
             <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal"
                 data-target="#save-cohort-modal"
                 title="Select at least one filter." disabled="disabled"> Save As New Cohort
@@ -69,6 +72,14 @@
             <button id="save-cohort-btn" class="btn btn-special pull-right" title="Select at least one filter."
                 disabled="disabled" data-uri="{% url 'account_login' %}"> Log in to Save
             </button>
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+            <div class="cohort-manifest pull-right">
+                <div class="manifest-size-warning"><i class="fa fa-warning"></i></div>
+             <button id="export-manifest" class="btn btn-special pull-right" data-toggle="modal"
+                    data-target="#export-manifest-modal"> Export Cohort Manifest
+             </button>
+            </div>
+            </div>
             {% endif %}
         </div>
     </div>
@@ -84,6 +95,7 @@
 </script>
 
 {% include "idc/explore_data_core.html" %}
+{% include "cohorts/export-manifest-modal.html" %}
 
 {% endblock %}
 
@@ -100,6 +112,7 @@
         var is_cohort = false;
         var showWarning = true;
         var user_is_auth = {% if request.user.is_authenticated %} true {% else %} false {% endif %};
+        var manifest_count = "{{ manifest_count|safe }}";
     </script>
     <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
     {{ block.super }}

@@ -214,7 +214,7 @@ def quota_page(request):
 
 
 # Data exploration and cohort creation page
-@login_required
+# @login_required
 def explore_data_page(request):
     attr_by_source = {}
     attr_sets = {}
