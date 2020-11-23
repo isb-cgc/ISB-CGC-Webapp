@@ -235,9 +235,10 @@ def explore_data_page(request):
         with_derived = (req.get('with_derived', "True").lower() == "true")
         collapse_on = req.get('collapse_on', 'SeriesInstanceUID')
         is_json = (req.get('is_json', "False").lower() == "true")
+        uniques = json.loads(req.get('uniques', '[]'))
 
         context = build_explorer_context(is_dicofdic, source, versions, filters, fields, order_docs, counts_only,
-                                         with_related, with_derived, collapse_on, is_json)
+                                         with_related, with_derived, collapse_on, is_json, uniques=uniques)
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")

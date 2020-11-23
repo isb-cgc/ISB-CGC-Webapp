@@ -25,6 +25,24 @@
 {% block body_class %}landing{% endblock %}
 {% block content %}
     <div class="landing-content-div container-fluid">
+        <div class="banner-section row">
+            <div class="alert alert-dismissible show" role="alert">
+                <div class="row ">
+                    <div class="col-xs-1"></div>
+                    <div class="col-xs-10">
+                        <strong>Get started today!</strong>
+                        <strong> Contact us about setting up your own Google Cloud Platform Project with <a
+                                href="https://learn.canceridc.dev/introduction/requesting-gcp-cloud-credits"
+                                target="_blank">free cloud credits</a></strong>
+                    </div>
+                    <div class="col-xs-1">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="buttons row">
             <div class="container-fluid">
             <div class="col-lg-12 col-md-12 col-sm-12 buttons-col">
@@ -96,10 +114,10 @@
             </div>
             <div class="summary col-lg-8 col-md-12 col-sm-12">
                 <div class="summary-contents panel-body">
-                    <div class="summary-block col-lg-3 col-md-3 col-sm-3"><div class="img-container"><img src="{% static 'img/collex_icon_2.png' %}" alt="" /></div> <div>27<br/> Collections</div></div>
-                    <div class="summary-block col-lg-3 col-md-3 col-sm-3"><div class="img-container"><img src="{% static 'img/cases_icon.png' %}" alt="" /></div> <div>3,230<br/> Cases</div></div>
-                    <div class="summary-block col-lg-3 col-md-3 col-sm-3"><div class="img-container"><img src="{% static 'img/volume_icon.png' %}" alt="" /></div> <div>1.03 TB<br/> Data Volume</div></div>
-                    <div class="summary-block col-lg-3 col-md-3 col-sm-3"><div class="img-container"><img src="{% static 'img/img_series_icon.png' %}" alt="" /></div> <div>49,818<br/> Image Series</div></div>
+                    <div class="summary-block col-lg-3 col-md-3 col-sm-3"><div class="img-container"><img src="{% static 'img/collex_icon_2.png' %}" alt="" /></div> <div>28<br/> Collections</div></div>
+                    <div class="summary-block col-lg-3 col-md-3 col-sm-3"><div class="img-container"><img src="{% static 'img/cases_icon.png' %}" alt="" /></div> <div>3,652<br/> Cases</div></div>
+                    <div class="summary-block col-lg-3 col-md-3 col-sm-3"><div class="img-container"><img src="{% static 'img/volume_icon.png' %}" alt="" /></div> <div>1.04 TB<br/> Data Volume</div></div>
+                    <div class="summary-block col-lg-3 col-md-3 col-sm-3"><div class="img-container"><img src="{% static 'img/img_series_icon.png' %}" alt="" /></div> <div>51,247<br/> Image Series</div></div>
                 </div>
             </div>
         </div>
