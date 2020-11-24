@@ -1,5 +1,5 @@
 ###
-# Copyright 2015-2019, Institute for Systems Biology
+# Copyright 2015-2020, Institute for Systems Biology
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -88,7 +88,10 @@ def workbook_create_with_cohort(request):
 
 @login_required
 def workbook_create_with_cohort_list(request):
-    body_unicode = request.body.decode('utf-8')
+
+    body_unicode = request.body
+    if type(body_unicode) is bytes:
+        body_unicode = body_unicode.decode('utf-8')
     body = json.loads(body_unicode)
     cohort_ids = body['cohorts']
     if len(cohort_ids) > 0:
@@ -475,22 +478,7 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
                                        user=request.user)
             result['message'] = "variables have been deleted from workbook"
         else:
-            body_unicode = request.body.decode('utf-8')
-            body = json.loads(body_unicode)
             variables = []
-            # from Edit Page
-            if "variables" in body:
-                json_response = True
-                name = body['name']
-                variable_list = body['variables']
-                variable_favorite_result = VariableFavorite.create(name=name,
-                                                                   variables=variable_list,
-                                                                   user=request.user)
-
-                model = VariableFavorite.objects.get(id=variable_favorite_result['id'])
-                messages.info(request, 'The variable favorite list \"' + escape(
-                    model.name) + '\" was created and added to your worksheet')
-                variables = model.get_variables()
 
             # from Details Page or list page
             if request.POST.get("variable_list_id"):
@@ -502,19 +490,21 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
                 except ObjectDoesNotExist:
                     result['error'] = "variable favorite does not exist"
 
-            body_unicode = request.body.decode('utf-8')
-            body = json.loads(body_unicode)
-
             # from Select Page
-            if "var_favorites" in body:
-                variable_fav_list = body['var_favorites']
-                json_response = True
-                for fav in variable_fav_list:
-                    try:
-                        fav = VariableFavorite.objects.get(id=fav['id'])
-                        variables = fav.get_variables()
-                    except ObjectDoesNotExist:
-                        result['error'] = "variable favorite does not exist"
+            else:
+                body_unicode = request.body
+                if type(body_unicode) is bytes:
+                    body_unicode = body_unicode.decode('utf-8')
+                body = json.loads(body_unicode)
+                if "var_favorites" in body:
+                    variable_fav_list = body['var_favorites']
+                    json_response = True
+                    for fav in variable_fav_list:
+                        try:
+                            fav = VariableFavorite.objects.get(id=fav['id'])
+                            variables = fav.get_variables()
+                        except ObjectDoesNotExist:
+                            result['error'] = "variable favorite does not exist"
 
             if len(variables) > 0:
                 if workbook_id == 0:
@@ -561,7 +551,7 @@ def worksheet_gene_delete(request, workbook_id=0, worksheet_id=0, gene_id=0):
 
 @login_required
 def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
-    command = request.path.rsplit('/', 1)[1];
+    command = request.path.rsplit('/', 1)[1]
     json_response = False
     result = {}
 
@@ -605,7 +595,10 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
                 except ObjectDoesNotExist:
                     None
             try:
-                body_unicode = request.body.decode('utf-8')
+
+                body_unicode = request.body
+                if type(body_unicode) is bytes:
+                    body_unicode = body_unicode.decode('utf-8')
                 body = json.loads(body_unicode)
 
                 # from Gene List Page
