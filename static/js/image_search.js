@@ -719,8 +719,14 @@ require([
                 } else {
                     var projIndex = window.selItems.selProjects.indexOf(projId);
                     if (projIndex !==-1) window.selItems.selProjects.splice(projIndex,1);
-                    if (window.selItems.selStudies.hasOwnProperty(projId)) {
-                        delete window.selItems.selStudies[projId];
+                    if (window.selItems.selCases.hasOwnProperty(projId)) {
+                           selCases= window.selItems.selCases[projId];
+                           for (j=0;j<selCases.length;j++){
+                               var selCase = selCases[j];
+                               delete window.selItems.selStudies[selCase];
+                           }
+
+                        delete window.selItems.selCases[projId];
                     }
                     curRow.classList.add('hide');
                     curRow.classList.remove("selected_grey");
@@ -757,7 +763,12 @@ require([
             tableElem.innerHTML = newInnerHTML;
         };
 
-        var resetSeriesAndStudiesTables = function (studyId, seriesId) {
+        var resetCasesAndStudiesAndSeriesTables = function (caseId, studyId, seriesId) {
+
+            tableElem = document.getElementById(caseId);
+            //var newInnerHTML = '<tr><th>Project Name</th><th>Patient Id</th><th>Study Id</th><th>Study Description</th></tr>';
+            tableElem.innerHTML = '';
+            window.resetTableControls ($('#'+caseId), false, 0);
 
             tableElem = document.getElementById(studyId);
             //var newInnerHTML = '<tr><th>Project Name</th><th>Patient Id</th><th>Study Id</th><th>Study Description</th></tr>';
@@ -783,40 +794,93 @@ require([
                 if (projPos > -1) {
                     window.selItems.selProjects.splice(projPos, 1);
                 }
-                if (projectId in window.selItems.selStudies) {
-                    delete window.selItems.selStudies[projectId];
+
+                if (projectId in window.selItems.selCases) {
+                    var selCases = window.selItems.selCases[projectId];
+                    for (var i=0;i<selCases.length;i++){
+                        var selCase = selCases[i];
+                        if (selCase in window.selItems.selStudies){
+                            delete window.selItems.selStudies[selCase];
+                        }
+                    }
+                    delete window.selItems.selCases[projectId];
                 }
-                removeStudiesAndSeries(projectId, "studies_table", "series_table")
+                removeCasesAndStudiesAndSeries(projectId, "cases_table","studies_table", "series_table");
 
             } else {
                 if (!(window.event.shiftKey)) {
                     $(projRow).parent().find('tr').removeClass("selected_grey");
                     window.selItems.selProjects = [];
+                    window.selItems.selCases ={};
                     window.selItems.selStudies = {};
-                    window.clearAllStudiesAndSeries("studies_table", "series_table");
+
+                    window.clearAllCasesAndStudiesAndSeries("cases_table","studies_table", "series_table");
 
                 }
                 $(projRow).addClass("selected_grey");
                 window.selItems.selProjects.push(projectId);
-                addStudyOrSeries([projectId], [], "studies_table", false);
+                addCases([projectId],"cases_table", false);
             }
         }
 
-        window.toggleStudy = function (studyRow, studyId, projectId) {
+        window.toggleCase = function (caseRow, caseId) {
+
+           var projectId = $(caseRow).find(".project-name").text();
+            if (caseRow.classList.contains("selected_grey")) {
+                $(caseRow).removeClass("selected_grey");
+
+                if (projectId in window.selItems.selCases) {
+                    var casePos = window.selItems.selCases[projectId].indexOf(caseId);
+                    if (casePos > -1) {
+                        window.selItems.selCases[projectId].splice(casePos, 1);
+                    }
+                    if (window.selItems.selCases[projectId].length===0){
+                        delete window.selItems.selCases[projectId];
+                    }
+                }
+                if (caseId in window.selItems.selStudies) {
+                    delete window.selItems.selStudies[caseId];
+                }
+
+
+                removeStudiesAndSeries(caseId,"case","studies_table", "series_table");
+
+            } else {
+                if (!(window.event.shiftKey)) {
+                    $(caseRow).parent().find('tr').removeClass("selected_grey");
+                    window.selItems.selCases = {};
+                    window.selItems.selStudies = {};
+                    window.clearAllStudiesAndSeries("studies_table", "series_table");
+
+                }
+                $(caseRow).addClass("selected_grey");
+                if (!(window.selItems.selCases.hasOwnProperty(projectId))){
+                    window.selItems.selCases[projectId] = new Array();
+                }
+                window.selItems.selCases[projectId].push(caseId);
+                //addCase([caseId],"cases_table", false);
+                addStudyOrSeries([projectId], [caseId],[], 'studies_table', false);
+            }
+        }
+
+
+        window.toggleStudy = function (studyRow, studyId, caseId, projectId) {
 
             if (studyRow.classList.contains("selected_grey")) {
                 $(studyRow).removeClass("selected_grey");
                 removeSeries(studyRow.id, "series_table");
-                if (window.selItems.selStudies.hasOwnProperty(projectId)) {
 
-                    studyPos = window.selItems.selStudies[projectId].indexOf(studyId);
+                if (window.selItems.selStudies.hasOwnProperty(caseId)) {
+
+                    studyPos = window.selItems.selStudies[caseId].indexOf(studyId);
                     if (studyPos > -1) {
-                        window.selItems.selStudies[projectId].splice(studyPos, 1);
-                        if (window.selItems.selStudies[projectId].length == 0) {
-                            delete window.selItems.selStudies[projectId];
+                        window.selItems.selStudies[caseId].splice(studyPos, 1);
+                        if (window.selItems.selStudies[caseId].length == 0) {
+                            delete window.selItems.selStudies[caseId];
                         }
                     }
                 }
+
             } else {
                 if (!(window.event.shiftKey)) {
                     $(studyRow).parent().find('tr').removeClass("selected_grey");
@@ -824,13 +888,13 @@ require([
                     window.clearAllSeries("series_table");
                 }
 
-                if (!(window.selItems.selStudies.hasOwnProperty(projectId))) {
-                    window.selItems.selStudies[projectId] = new Array();
+                if (!(window.selItems.selStudies.hasOwnProperty(caseId))) {
+                    window.selItems.selStudies[caseId] = new Array();
                 }
-                window.selItems.selStudies[projectId].push(studyId);
+                window.selItems.selStudies[caseId].push(studyId);
 
                 $(studyRow).addClass("selected_grey");
-                addStudyOrSeries([projectId], [studyId], "series_table", false);
+                addStudyOrSeries([projectId], [caseId],[studyId], "series_table", false);
             }
         };
 
@@ -845,14 +909,18 @@ require([
             window.clearAllSeries(seriesTableId);
         };
 
-        window.removeStudiesAndSeries = function (projectId, studyTableId, seriesTableId) {
-            var pclass = "project_" + projectId;
-            var scrollPos = document.getElementById(studyTableId).scrollTop;
-            var studiesTable = document.getElementById(studyTableId);
-            //var remainingTrs = $('#' + studyTableId).find('tr').not('.project_' + projectId)
+        window.clearAllCasesAndStudiesAndSeries = function (caseTableId,studyTableId, seriesTableId) {
+            $('#' + caseTableId).find('tr').remove();
+            resetTableControls($('#' + caseTableId), true, 0);
+            window.clearAllStudiesAndSeries(studyTableId,seriesTableId);
+        };
 
-            var scrollPos = document.getElementById(studyTableId).scrollTop;
-            var remainingTrs = $('#' + studyTableId).find('tr').not('.project_' + projectId);
+
+
+        removeRowsFromTable = function(tableId,selId,selType){
+            var table = document.getElementById(tableId);
+            var scrollPos = table.scrollTop;
+            var remainingTrs = $('#' + tableId).find('tr').not('.'+selType+'_' + selId);
             var newScrollInd = Array.from(remainingTrs.map(function () {
                 return ((this.offsetTop <= scrollPos) ? 0 : 1)
             })).indexOf(1);
@@ -865,13 +933,34 @@ require([
                 }
             }
 
-            $('#' + studyTableId).find('.project_' + projectId).remove();
-            if (window.selItems.selStudies.hasOwnProperty(projectId)) {
-                delete window.selItems.selStudies[projectId];
-            }
-            resetTableControls($('#' + studyTableId), true, newScrollInd);
+            $('#' + tableId).find('.'+selType+'_' + selId).remove();
 
-            removeSeries(pclass, seriesTableId);
+        }
+
+        window.removeCasesAndStudiesAndSeries = function (projectId, caseTableId,studyTableId, seriesTableId) {
+             removeRowsFromTable(caseTableId, projectId, 'project');
+             if (window.selItems.selCases.hasOwnProperty(projectId)){
+                 var selCases = window.selItems.selCases[projectId]
+                 for (var i=0;i<selCases.length;i++){
+                     selCase = selCases[i];
+                     if (window.selItems.selStudies.hasOwnProperty(selCase)){
+                         delete window.selItems.selStudies[selCase];
+                     }
+                 }
+             }
+
+             removeStudiesAndSeries(projectId,'project', studyTableId, seriesTableId);
+
+        }
+
+        window.removeStudiesAndSeries = function (selId, selType, studyTableId, seriesTableId) {
+            //var pclass = "project_" + projectId;
+            removeRowsFromTable(studyTableId, selId, selType)
+            if ((selType==="case") && (window.selItems.selStudies.hasOwnProperty(selId))){
+                delete window.selItems.selStudies[selId];
+            }
+
+            removeRowsFromTable(seriesTableId,selId,selType);
         }
 
         window.removeSeries = function (selClass, seriesTableId) {
@@ -893,7 +982,127 @@ require([
             resetTableControls($('#' + seriesTableId), true, newScrollInd)
         }
 
-        window.addStudyOrSeries = function (projectIdArr, studyIdArr, tableId, refresh) {
+        window.addCases = function(projectIdArr, casetableId, refresh){
+            changeAjax(true);
+            var curSelCasesDic = new Object();
+            var newSelCases = new Object();
+
+            if (refresh) {
+                for (projectId in window.selItems.selCases) {
+                    curSelCasesDic[projectId] = new Object();
+                    for (var i = 0; i < window.selItems.selCases[projectId].length; i++) {
+                        var curCase = window.selItems.selCases[projectId][i];
+                        curSelCasesDic[projectId][curCase] = 1;
+                    }
+                }
+            }
+
+
+
+            curFilterObj = JSON.parse(JSON.stringify(parseFilterObj()));
+            curFilterObj.collection_id = projectIdArr;
+
+            var filterStr = JSON.stringify(curFilterObj);
+            var fields = ["collection_id", "PatientID","StudyInstanceUID","SeriesInstanceUID"];
+            var collapse_on = 'PatientID'
+            var order_docs = ["collection_id", "PatientID"];
+            var fieldStr = JSON.stringify(fields);
+            var orderDocStr = JSON.stringify(order_docs);
+            var uniques = JSON.stringify(["PatientID","StudyInstanceUID","SeriesInstanceUID"]);
+            let url = '/explore/?counts_only=False&is_json=True&with_clinical=True&collapse_on=' + collapse_on + '&filters=' + filterStr + '&fields=' + fieldStr + '&order_docs=' + orderDocStr+'&uniques='+uniques;
+            url = encodeURI(url);
+            $.ajax({
+                url: url,
+                dataType: 'json',
+                type: 'get',
+                contentType: 'application/x-www-form-urlencoded',
+                success: function (data) {
+
+                    studyDic = new Object();
+                    if (data.hasOwnProperty('uniques') && data['uniques'].hasOwnProperty('unique_StudyInstanceUID') && data['uniques']['unique_StudyInstanceUID']['buckets']){
+                        for (i=0;i<data['uniques']['unique_StudyInstanceUID']['buckets'].length;i++){
+                            curSet= data['uniques']['unique_StudyInstanceUID']['buckets'][i];
+                            if (curSet.hasOwnProperty('val') && curSet.hasOwnProperty('unique_count')){
+                                studyDic[curSet['val']]=curSet['unique_count']
+                            }
+                        }
+
+                    }
+                    seriesDic = new Object();
+                    if (data.hasOwnProperty('uniques') && data['uniques'].hasOwnProperty('unique_SeriesInstanceUID') && data['uniques']['unique_SeriesInstanceUID']['buckets']){
+                        for (i=0;i<data['uniques']['unique_SeriesInstanceUID']['buckets'].length;i++){
+                            curSet= data['uniques']['unique_SeriesInstanceUID']['buckets'][i];
+                            if (curSet.hasOwnProperty('val') && curSet.hasOwnProperty('unique_count')){
+                                seriesDic[curSet['val']]=curSet['unique_count']
+                            }
+                        }
+
+                    }
+
+                    for (i = 0; i < data['origin_set']['docs'].length; i++) {
+                        var curData = data['origin_set']['docs'][i];
+                        var projectId = curData.collection_id;
+                        var patientId = curData.PatientID;
+                        var numStudy=0;
+                        if (studyDic.hasOwnProperty(patientId)){
+                            numStudy=studyDic[patientId];
+                        }
+                        var numSeries=0;
+                        if (seriesDic.hasOwnProperty(patientId)){
+                            numSeries=seriesDic[patientId];
+                        }
+
+
+                        var pclass = 'project_' + projectId;
+                        var newHtml = '';
+                        var rowId = 'case_' + patientId.replace(/\./g, '-');
+
+                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleCase(this,\'' + patientId + '\',\'' + projectId + '\'))">' +
+                                   '<td class="col1 project-name">' + projectId + '</td>' +
+                                    '<td class="col1 case-id">' + patientId +'</td>' +
+                                    '<td class="col1">' + numStudy.toString() + '</td>' +
+                                    '<td class="col1 ">' + numSeries.toString() + '</td>' +
+                                    '</tr>';
+
+
+
+                        $('#' + casetableId).append(newHtml);
+
+                        if (refresh && (curSelCasesDic.hasOwnProperty(projectId)) && (curSelCasesDic[projectId].hasOwnProperty(patientId)) ){
+                            $('#' + casetableId).find('#'+rowId).addClass("selected_grey");
+                            if ( !(newSelCases.hasOwnProperty(projectId))){
+                                newSelCases[projectId] = new Array();
+                            }
+                           newSelCases[projectId].push(patientId);
+                        }
+
+                    }
+
+                    changeAjax(false);
+                    resetTableControls($('#' + casetableId), false, 0);
+
+                    if (refresh){
+                        window.selItems.selCases = newSelCases;
+                        var caseArr = new Array();
+                        for (projId in window.selItems.selCases) {
+                        caseArr.push.apply(caseArr, window.selItems.selCases[projId]);
+                        }
+                        if (caseArr.length > 0) {
+                              addStudyOrSeries(window.selItems.selProjects, caseArr,[], "studies_table", true);
+                        }
+                    }
+
+
+                },
+                error: function () {
+                    changeAjax(false);
+                    console.log("problem getting data");
+                }
+            });
+
+        }
+
+        window.addStudyOrSeries = function (projectIdArr, caseIdArr, studyIdArr, tableId, refresh) {
 
             changeAjax(true);
             var curSelStudiesDic = new Object();
@@ -903,15 +1112,20 @@ require([
             if (studyIdArr.length > 0) {
                 //curFilterObj.StudyInstanceUID = studyIdArr;
                 isSeries = true;
-            } else if (refresh) {
-                for (projId in window.selItems.selStudies) {
-                    curSelStudiesDic[projId] = new Object();
-                    for (var i = 0; i < window.selItems.selStudies[projId].length; i++) {
-                        var curStudy = window.selItems.selStudies[projId][i];
-                        curSelStudiesDic[projId][curStudy] = 1;
+            }
+
+
+            else if (refresh) {
+                for (caseId in window.selItems.selStudies) {
+                    curSelStudiesDic[caseId] = new Object();
+                    for (var i = 0; i < window.selItems.selStudies[caseId].length; i++) {
+                        var curStudy = window.selItems.selStudies[caseId][i];
+                        curSelStudiesDic[caseId][curStudy] = 1;
                     }
                 }
             }
+
+
 
            var curFilterObj = new Object();
            if (isSeries){
@@ -923,11 +1137,12 @@ require([
                curFilterObj = JSON.parse(JSON.stringify(parseFilterObj()));
            }
             curFilterObj.collection_id = projectIdArr;
+            curFilterObj.PatientID = caseIdArr;
 
             //curFilterObj={"Diameter_btw":[51,'*']}
 
             var filterStr = JSON.stringify(curFilterObj);
-            var fields = ["Diameter","collection_id", "PatientID", "StudyInstanceUID", "StudyDescription", "StudyDate"];
+            var fields = ["collection_id", "PatientID", "StudyInstanceUID", "StudyDescription", "StudyDate"];
             var collapse_on = 'StudyInstanceUID'
             var order_docs = ["collection_id", "PatientID", "StudyInstanceUID"];
             if (isSeries) {
@@ -938,15 +1153,36 @@ require([
 
             var fieldStr = JSON.stringify(fields);
             var orderDocStr = JSON.stringify(order_docs);
-            let url = '/explore/?counts_only=False&is_json=True&with_clinical=True&collapse_on=' + collapse_on + '&filters=' + filterStr + '&fields=' + fieldStr + '&order_docs=' + orderDocStr;
-            url = encodeURI(url);
 
+
+
+            let url = '/explore/?counts_only=False&is_json=True&with_clinical=True&collapse_on=' + collapse_on + '&filters=' + filterStr + '&fields=' + fieldStr + '&order_docs=' + orderDocStr;
+            if (!isSeries){
+                var uniques = JSON.stringify(["StudyInstanceUID","SeriesInstanceUID"]);
+                url+='&uniques='+uniques;
+            }
+
+            url = encodeURI(url);
             $.ajax({
                 url: url,
                 dataType: 'json',
                 type: 'get',
                 contentType: 'application/x-www-form-urlencoded',
                 success: function (data) {
+
+                    if (!isSeries) {
+                        seriesDic = new Object();
+                        if (data.hasOwnProperty('uniques') && data['uniques'].hasOwnProperty('unique_SeriesInstanceUID') && data['uniques']['unique_SeriesInstanceUID']['buckets']) {
+                            for (i = 0; i < data['uniques']['unique_SeriesInstanceUID']['buckets'].length; i++) {
+                                curSet = data['uniques']['unique_SeriesInstanceUID']['buckets'][i];
+                                if (curSet.hasOwnProperty('val') && curSet.hasOwnProperty('unique_count')) {
+                                    seriesDic[curSet['val']] = curSet['unique_count']
+                                }
+                            }
+
+                        }
+                    }
+
                     //nstart = new Date().getTime();
                     for (i = 0; i < data['origin_set']['docs'].length; i++) {
                         var curData = data['origin_set']['docs'][i];
@@ -958,6 +1194,7 @@ require([
                         var hrefTxt = ppStudyId + '</a>';
                         //var hrefTxt =  ppStudyId + '<span class="tooltiptext_ex">' + studyId + '</span>';
                         var pclass = 'project_' + projectId;
+                        var cclass = 'case_' + patientId;
                         var newHtml = '';
                         if (isSeries) {
                             var seriesId = curData.SeriesInstanceUID;
@@ -972,7 +1209,7 @@ require([
                             var hrefSeriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
                             var seriesTxt =     ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
 
-                            newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + studyClass + ' text_head">' +
+                            newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + cclass + ' ' + studyClass + ' text_head">' +
                                 '<td class="col1 study-id study-id-col" data-study-id="'+studyId+'">' + hrefTxt + '</td>' +
                                 '<td class="series-number">' + seriesNumber + '</td>' +
                                 '<td class="col1 modality">' + modality + '</td>' +
@@ -986,38 +1223,36 @@ require([
                                 newHtml += '<td class="ohif open-viewer"><a href="' + fetchUrlSeries + '" target="_blank"><i class="fa fa-eye"></i></td></tr>';
                             }
                         }
-                          else{
+
+                        else{
                             var studyDescription = curData.StudyDescription;
                             //var studyDate = curData.StudyDate;
                             var rowId = 'study_' + studyId.replace(/\./g, '-');
 
-                            if (refresh && (projectId in curSelStudiesDic) && (studyId in curSelStudiesDic[projId])) {
-                                if (!(projectId in newSelStudies)) {
-                                    newSelStudies[projectId] = new Array();
-                                }
-                                newSelStudies[projectId].push(studyId);
+                            var numSeries=0;
+                            if (seriesDic.hasOwnProperty(studyId)){
+                                numSeries=seriesDic[studyId];
+                           }
 
-                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head selected_grey" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))">' +
-                                    '<td class="col1 project-name">' + projectId + '</td>' +
-                                    '<td class="col1 case-id">' + patientId +
-                                    '</td><td class="col2 study-id study-id-col" data-study-id="'+studyId+'">' + hrefTxt + '</td>' +
-                                    '<td class="col1 study-description">' + studyDescription + '</td>' +
-                                    '<td class="ohif open-viewer"><a  href="' + fetchUrl + '" target="_blank"><i class="fa fa-eye"></i></a></td></tr>'
+                            newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + cclass +' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + patientId + '\',\''+projectId + '\'))">' +
+                                //'<td class="col1 project-name">' + projectId + '</td>' +
+                                 '<td class="col1 case-id">' + patientId + '</td>'+
+                                '<td class="col2 study-id study-id-col" data-study-id="'+studyId+'">' + hrefTxt + '</td>' +
+                                '<td class="col1 study-description">' + studyDescription + '</td>' +
+                                '<td class="col1 ">' + numSeries.toString() + '</td>'+
+                                '<td class="ohif open-viewer"><a  href="' + fetchUrl + '" target="_blank"><i class="fa fa-eye"></i></a></td></tr>'
 
-                            } else {
-                                newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + projectId + '\'))">' +
-                                    '<td class="col1 project-name">' + projectId + '</td>' +
-                                    '<td class="col1 case-id">' + patientId + '</td>' +
-                                    '<td class="col2 study-id study-id-col" data-study-id="'+studyId+'">' + hrefTxt + '</td>' +
-                                    '<td class="col1 study-description">' + studyDescription + '</td>' +
-                                    '<td class="ohif open-viewer"><a  href="' + fetchUrl + '" target="_blank"><i class="fa fa-eye"></i></a></td></tr>'
-                            }
                         }
-                        //var rowId='study_'+projectId+'_'+patientIndex[patientId].toString()+"_"+studyIndex[studyId].toString();
 
-
-                        //document.getElementById(tableId).innerHTML += newHtml;
                         $('#' + tableId).append(newHtml);
+                        if ( !isSeries && refresh && (patientId in curSelStudiesDic) && (studyId in curSelStudiesDic[patientId])) {
+                            $('#' + tableId).find('#'+ rowId).addClass("selected_grey");
+                            if (!(patientId in newSelStudies)) {
+                                newSelStudies[patientId] = new Array();
+                            }
+                            newSelStudies[patientId].push(studyId);
+                        }
+
 
                     }
 
@@ -1027,8 +1262,15 @@ require([
                     /* nend = new Date().getTime();
                     diff = nend - nstart;
                     alert(diff); */
-                    if (refresh && !isSeries) {
+                     if (refresh && !isSeries) {
                         window.selItems.selStudies = newSelStudies;
+                        var studyArr = new Array();
+                        for (caseId in window.selItems.selStudies) {
+                             studyArr.push.apply(studyArr, window.selItems.selStudies[caseId]);
+                        }
+                        if (studyArr.length > 0) {
+                              addStudyOrSeries(projectIdArr, caseIdArr,studyArr, "series_table", true);
+                        }
                     }
                     changeAjax(false);
                 },
@@ -1595,17 +1837,21 @@ require([
                     }
 
                     editProjectsTableAfterFilter('projects_table', collFilt,data.origin_set.All.attributes.collection_id);
-                    resetSeriesAndStudiesTables('series_table', 'studies_table');
-                    var studyArr = new Array();
-                    for (projId in window.selItems.selStudies) {
-                        studyArr.push.apply(studyArr, window.selItems.selStudies[projId]);
+                    resetCasesAndStudiesAndSeriesTables('cases_table','studies_table','series_table' );
+
+                    if (window.selItems.selProjects.length > 0) {
+                        addCases(window.selItems.selProjects,  "cases_table", true);
                     }
+
+
+
+                    /*
                     if (window.selItems.selProjects.length > 0) {
                         addStudyOrSeries(window.selItems.selProjects, [], "studies_table", true);
                     }
                     if (studyArr.length > 0) {
                         addStudyOrSeries(window.selItems.selProjects, studyArr, "series_table", true);
-                    }
+                    } */
 
                     if (newFilt) {
                         histObj = new Object();
@@ -2737,6 +2983,7 @@ require([
            // window.filterObj.collection_id = window.tcgaColls;
             window.selItems = new Object();
             window.selItems.selStudies = new Object();
+            window.selItems.selCases = new Object();
             window.selItems.selProjects = new Array();
             window.histIndex  = 0;
             window.histMaxLength = 6;
@@ -2754,8 +3001,9 @@ require([
             filterItemBindings('search_orig_set');
             filterItemBindings('search_derived_set');
             filterItemBindings('search_related_set');
+
             tableSortBindings('projects_table_head');
-            tableSortBindings('studies_table_head');
+            tableSortBindings('cases_table_head');
             tableSortBindings('series_table_head');
 
             mkSlider('age_at_diagnosis',0, parseInt($('#age_at_diagnosis').data('attr-max')),1,true,true, 'tcga_clinical.', $('#age_at_diagnosis').data('filter-attr-id'), $('#age_at_diagnosis').data('filter-display-attr'));
@@ -2771,6 +3019,7 @@ require([
              $('#projects_panel').find('.goto-page-number')[0].max=3;
 
             window.resetTableControls ($('#projects_table'), false, 0);
+            window.resetTableControls ($('#cases_table'), false, 0);
             window.resetTableControls ($('#studies_table'), false, 0);
             window.resetTableControls ($('#series_table'), false, 0);
 
