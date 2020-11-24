@@ -675,7 +675,7 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
                 var = Worksheet_plot.objects.get(id=plot_id).delete()
                 result['message'] = "This plot has been deleted from workbook."
             else:
-                body_unicode = request.body.decode('utf-8')
+                body_unicode = request.body
                 body = json.loads(body_unicode)
 
                 if "attrs" in body:
@@ -740,7 +740,7 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
 @login_required
 def worksheet_cohorts(request, workbook_id=0, worksheet_id=0, cohort_id=0):
     command = request.path.rsplit('/', 1)[1]
-    body_unicode = request.body.decode('utf-8')
+    body_unicode = request.body
     body = json.loads(body_unicode)
     cohorts = body['cohorts']
     if request.method == "POST":
