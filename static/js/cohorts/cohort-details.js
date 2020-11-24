@@ -77,10 +77,30 @@ require([
         download_manifest("json", $(this), e)
     });
 
-    $('.files input').on('change', function() {
-       alert($('input[name=file_type]:checked', '.files').val());
-
+    $('.export-option input[type="radio"]').click(function(){
+        update_export_option($(this).attr("value"));
     });
+
+    var update_export_option = function(export_option) {
+        $('#bq-manifest').hide();
+        $('#file-manifest').hide();
+        $('#' + export_option).show();
+    };
+
+    var setup_file_part_select_box = function() {
+        var num_parts = (manifest_count / 65000);
+        var select_box = $('#file-part-select-box');
+        for (let i = 0; i < num_parts; ++i)
+        {
+            select_box.append($('<option/>', {
+                value: i,
+                text : "File Part " + i
+            }));
+        }
+    };
+
+    setup_file_part_select_box();
+    update_export_option("file-manifest");
 
     var download_manifest = function(file_type, clicked_button, e) {
         $('#unallowed-chars-alert').hide();
@@ -149,9 +169,12 @@ require([
            }
         });
 
-        var url = BASE_URL + '/cohorts/download_manifest/' + cohort_id + '/';
+        var selected_file_part = $('#file-part-select-box').children("option:selected").val();
+
+        var url = BASE_URL + '/cohorts/download_manifest/2/';
         url += ("?file_type=" + file_type);
         url += ("&file_name=" + name);
+        url += ("&file_part=" + selected_file_part);
         url += ("&header_fields=" + JSON.stringify(checked_fields));
         url += ("&columns=" + JSON.stringify(checked_columns));
         url += ("&downloadToken=" + downloadToken);
