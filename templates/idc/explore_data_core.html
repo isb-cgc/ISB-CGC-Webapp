@@ -145,7 +145,7 @@
                                 <h4 class="panel-title">Search Configuration
                                     <div  class="tooltip_chart_info" style="float:right"><i class="fa fa-info-circle"></i></div>
                                 </h4>
-                                <br><span><input id="hide-zeros" type="checkbox" value="hide-zeros" onchange="hideAtt()"> Hide attributes with 0 cases</span>
+                                <br><span><input id="hide-zeros" type="checkbox" value="hide-zeros" onchange="hideAtt(this)"> Hide attributes with 0 cases</span>
                             </div>
 
                             <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
@@ -178,7 +178,9 @@
                                             <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}" class="collapse list-group-item__body"
 
                                                  {% if attr.min_max %}
-                                                          data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max }}"
+                                                          data-min="{{ attr.min_max.min }}" data-max="{{ attr.min_max.max }}"
+                                                           data-curmin="{{ attr.min_max.min }}" data-curmax="{{ attr.min_max.max }}"
+                                                           data-curminrng="{{ attr.min_max.min }}" data-curmaxrng="{{ attr.min_max.max }}"
 
                                                  {% endif %}>
                                                 {% comment %}
@@ -246,7 +248,11 @@
                                             </div>
 
                                                <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}" data-filter-display-attr="{{ attr.display_name }}"  data-plotnm="{{ attr.name|plotnm }}"   class="collapse list-group-item__body collapse"
-                                                 {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-attr-max="{{ attr.min_max.max|ceiling }}"{% endif %}>
+                                                 {% if attr.min_max %}
+                                                    data-min="{{ attr.min_max.min }}" data-max="{{ attr.min_max.max|ceiling }}"
+                                                    data-curmin="{{ attr.min_max.min }}" data-curmax="{{ attr.min_max.max|ceiling }}"
+                                                    data-curminrng="{{ attr.min_max.min }}" data-curmaxrng="{{ attr.min_max.max|ceiling }}"
+                                                 {% endif %}>
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                     {% for val in attr.values|order_seg:attr_setK %}
                                                         {% with val.display_value|get_display_val:val.value as display_value %}
@@ -309,8 +315,12 @@
                                                      </a>
                                                  </div>
                                                  <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse" aria-expanded="false"
-                                                 {% if attr.min_max %} data-attr-min="{{ attr.min_max.min }}" data-filter-display-attr="{{ attr.display_name }}"
-                                                      data-attr-max="{{ attr.min_max.max }}"{% endif %}>
+                                                 {% if attr.min_max %}
+                                                      data-min="{{ attr.min_max.min }}" data-filter-display-attr="{{ attr.display_name }}"
+                                                      data-max="{{ attr.min_max.max|ceiling }}"
+                                                      data-curmin="{{ attr.min_max.min }}" data-curmax="{{ attr.min_max.max|ceiling }}"
+                                                      data-curminrng="{{ attr.min_max.min }}" data-curmaxrng="{{ attr.min_max.max|ceiling }}"
+                                                 {% endif %}>
                                                      <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                      {% for val in attr.values %}
                                                          <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
