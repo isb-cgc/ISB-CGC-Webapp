@@ -127,8 +127,14 @@
                             </a>
                         </div>
                         <div id="file-manifest">
-                            <select id="file-part-select-box" class="form-control">
-                            </select>
+                            <div id="file-part-select-box">
+                                <select class="form-control">
+                                </select>
+                                <br>
+                            </div>
+
+                            <span><input id="include-header-checkbox" type="checkbox" checked> Include header fields (CSV and TSV only)</span>
+                            <br>
                             <br>
 
                             {% csrf_token %}

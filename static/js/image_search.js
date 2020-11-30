@@ -1723,11 +1723,29 @@ require([
                 contentType: 'application/x-www-form-urlencoded',
                 success: function (data) {
                     var isFiltered = Boolean($('#search_def p').length>0);
-                    if(is_cohort) {
+                    if (is_cohort) {
                         if(data.total > 65000) {
                             $('.manifest-size-warning').show();
                         } else {
                             $('.manifest-size-warning').hide();
+                        }
+
+                        var select_box_div = $('#file-part-select-box');
+                        var select_box = select_box_div.find('select');
+                        if (data.file_parts_count > 1)
+                        {
+                            select_box_div.show();
+                            for (let i = 0; i < data.file_parts_count; ++i)
+                            {
+                                select_box.append($('<option/>', {
+                                    value: i,
+                                    text : "File Part " + (i + 1)
+                                }));
+                            }
+                        }
+                        else
+                        {
+                            select_box_div.hide();
                         }
                     } else {
                         if (isFiltered && data.total > 0){
@@ -2945,6 +2963,7 @@ require([
                  // Do not disable checkboxes for export manifest dialog
                  $('.field-checkbox').removeAttr('disabled');
                  $('.column-checkbox').removeAttr('disabled');
+                 $('#include-header-checkbox').removeAttr('disabled');
 
                  $('div.ui-slider').siblings('button').prop('disabled', 'disabled');
                  $('input#hide-zeros').prop("disabled", "");
