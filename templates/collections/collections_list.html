@@ -31,6 +31,7 @@
                         <th class="subject-col">Subject Count</th>
                         <th class="locations-col">Locations</th>
                         <th class="supporting-data-col">Supporting Data</th>
+
                     </thead>
                     <colgroup>
                         <col style="width: 3%">
@@ -41,17 +42,20 @@
                         <col style="width: 8%">
                         <col style="width: 9%">
                         <col style="width: 9%">
+
                     </colgroup>
                     <tbody>
                         {% for collection in active_collections %}
                         <tr>
                             <td class="details-control" data-doi="{{ collection.doi }}" data-collex-id="{{ collection.collection_id }}" title="Click to display collection description."><i class="fa fa-plus-circle show-button"> </i><i class="fa fa-minus-circle hide-button"> </i></td>
-                            <td>
+                            <td class="collection-explore" data-collex-id="{{ collection.collection_id }}">
+                                <a role="button" >
                             {% if collection.get_collection_type == 'Analysis' %}
                                 {{ collection.collections }}
                             {% else %}
                                 {{ collection.tcia_collection_id }}
                             {% endif %}
+                                </a>
                             </td>
                             <td>{{ collection.get_collection_type }}</td>
                             <td>{{ collection.cancer_type }}</td>

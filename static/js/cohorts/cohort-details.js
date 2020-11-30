@@ -57,10 +57,12 @@ require([
 
     tippy('.manifest-size-warning',{
         content: 'Your cohort is too large to be downloaded in its entirety, and will be truncated at 65,000 records ' +
-        'ordered by PatientID, StudyID, SeriesID, and InstanceID.',
+        'ordered by PatientID, CollectionID, StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID, SourceDOI, ' +
+            'CRDCInstanceUUID, and GCSPath.',
         theme: 'light',
         placement: 'left',
-        arrow: false
+        arrow: false,
+        maxWidth: 400
     });
 
     var downloadToken = new Date().getTime();
@@ -76,6 +78,18 @@ require([
     $('#download-json').on('click', function(e) {
         download_manifest("json", $(this), e)
     });
+
+    $('.export-option input[type="radio"]').click(function(){
+        update_export_option($(this).attr("value"));
+    });
+
+    var update_export_option = function(export_option) {
+        $('#bq-manifest').hide();
+        $('#file-manifest').hide();
+        $('#' + export_option).show();
+    };
+
+    update_export_option("file-manifest");
 
     var download_manifest = function(file_type, clicked_button, e) {
         $('#unallowed-chars-alert').hide();
@@ -144,12 +158,23 @@ require([
            }
         });
 
+        var include_header = $('#include-header-checkbox')[0].checked;
+
         var url = BASE_URL + '/cohorts/download_manifest/' + cohort_id + '/';
         url += ("?file_type=" + file_type);
+        url += ("&include_header=" + include_header);
         url += ("&file_name=" + name);
         url += ("&header_fields=" + JSON.stringify(checked_fields));
         url += ("&columns=" + JSON.stringify(checked_columns));
         url += ("&downloadToken=" + downloadToken);
+
+        var select_box_div = $('#file-part-select-box');
+        var select_box = select_box_div.find('select');
+        if (select_box_div.is(":visible"))
+        {
+            var selected_file_part = select_box.children("option:selected").val();
+            url += ("&file_part=" + selected_file_part);
+        }
 
         location.href = url;
     };
