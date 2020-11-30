@@ -2996,8 +2996,6 @@ require([
      }
 
      $(document).ready(function () {
-           // console.log(manifest_count);
-
            // $('#proj_table').DataTable();
            // window.filterObj.collection_id = window.tcgaColls;
             window.selItems = new Object();
