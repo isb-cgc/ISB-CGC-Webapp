@@ -81,5 +81,26 @@ require(['jquery', 'datatables.net','jqueryui', 'bootstrap', 'base'],
 
         $(document).ready(function () {
             $('.collex-panel').removeClass('hidden');
+
+            $('.collection-explore').each(function() {
+                var collection_id = $(this).attr('data-collex-id');
+                if (collection_id == "10.7937/K9/TCIA.2015.1BUVFJR7")
+                {
+                    $(this).html('<a role="button">' +
+                        'LIDC-IDRI, </a>' +
+                        '<span class="gray-out-text"">*Lung Phantom, QIN LUNG CT, RIDER Lung CT</span>');
+                }
+                else if (collection_id == "10.7937/TCIA.2019.wgllssg1")
+                {
+                    $(this).html('<a role="button">' +
+                        'TCGA-BRCA, ISPY1, </a>' +
+                        '<span class="gray-out-text"">*BREAST-DIAGNOSIS, Breast-MRI-NACT-Pilot</span>');
+                }
+            });
+
+            var table_bottom = $('#collections-table_wrapper').find('.bottom');
+            table_bottom.html('<span class="gray-out-text">' +
+                    '* Gray text collections are part of the analysis, ' +
+                    'but not currently hosted by IDC.');
         });
 });
