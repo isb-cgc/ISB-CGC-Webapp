@@ -57,10 +57,12 @@ require([
 
     tippy('.manifest-size-warning',{
         content: 'Your cohort is too large to be downloaded in its entirety, and will be truncated at 65,000 records ' +
-        'ordered by PatientID, StudyID, SeriesID, and InstanceID.',
+        'ordered by PatientID, CollectionID, StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID, SourceDOI, ' +
+            'CRDCInstanceUUID, and GCSPath.',
         theme: 'light',
         placement: 'left',
-        arrow: false
+        arrow: false,
+        maxWidth: 400
     });
 
     var downloadToken = new Date().getTime();
