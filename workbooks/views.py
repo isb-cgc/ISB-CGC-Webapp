@@ -496,15 +496,28 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
                 if type(body_unicode) is bytes:
                     body_unicode = body_unicode.decode('utf-8')
                 body = json.loads(body_unicode)
+                json_response = True
                 if "var_favorites" in body:
                     variable_fav_list = body['var_favorites']
-                    json_response = True
+
                     for fav in variable_fav_list:
                         try:
                             fav = VariableFavorite.objects.get(id=fav['id'])
                             variables = fav.get_variables()
                         except ObjectDoesNotExist:
                             result['error'] = "variable favorite does not exist"
+                # from Edit Page
+                elif "variables" in body:
+                    name = body['name']
+                    variable_list = body['variables']
+                    variable_favorite_result = VariableFavorite.create(name=name,
+                                                                       variables=variable_list,
+                                                                       user=request.user)
+
+                    model = VariableFavorite.objects.get(id=variable_favorite_result['id'])
+                    messages.info(request, 'The variable favorite list \"' + escape(
+                        model.name) + '\" was created and added to your worksheet')
+                    variables = model.get_variables()
 
             if len(variables) > 0:
                 if workbook_id == 0:
