@@ -21,13 +21,13 @@
                 </div>
             </div>
 
-            <form id="export-manifest-form">
+            <form id="export-manifest-form" method="get" action="{% url 'cohort_manifest' cohort_id %}">
                 <div class="modal-body">
                     <div class="form-group">
                         <!-- Name -->
                         <div>
                             <label for="export-manifest-name">Name</label>
-                            <input class="form-control" type="text" id="export-manifest-name" name="name" value="{{ cohort.name }}_{{ cohort.id }}_{% now "Ymd_Gis" %}" required />
+                            <input class="form-control" type="text" id="export-manifest-name" name="file_name" value="{{ cohort.name }}_{{ cohort.id }}_{% now "Ymd_Gis" %}" required />
                         </div>
                         <br>
 
@@ -61,7 +61,7 @@
                             <li class="checkbox"><label>
                                 <input class="field-checkbox" type="checkbox" value="total_records" checked>
                                 <span class="value">Total Records</span>
-                            </label></li>
+                            </label></li>0
                         </div>
                         <br>
 
@@ -108,7 +108,7 @@
                             </label></li>
 
                             <li class="checkbox"><label>
-                                <input class="column-checkbox" type="checkbox" value="gcs_path" checked>
+                                <input class="column-checkbox" type="checkbox" value="gcs_url" checked>
                                 <span class="value">GCS URL </span>
                             </label></li>
                         </div>
@@ -116,16 +116,18 @@
 
                         <!-- Export Option -->
                         <div class="export-option">
-                            <span class="value"><input type="radio" name="colorRadio" value="file-manifest" checked> Files</span>
-                            <span style="margin-left:10px" class="value"><input type="radio" name="colorRadio" value="bq-manifest"> BigQuery</span>
+                            <span class="value"><input type="radio" name="manifest-type" value="file-manifest" checked> Files</span>
+                            <span style="margin-left:10px" class="value" {% if not is_social %}title="Export to BigQuery is only available with a Google Account."{% endif %}>
+                                <input type="radio" name="manifest-type" value="bq-manifest" {% if not is_social %}disabled{% endif %}> BigQuery</span>
                         </div>
                         <br>
-
+                        {% if is_social %}
                         <div id="bq-manifest">
                             <a id="get-bq-table" class="btn btn-primary" title="Get BQ Table of this manifest.">
                                Get BQ Table
                             </a>
                         </div>
+                        {% endif %}
                         <div id="file-manifest">
                             <div id="file-part-select-box">
                                 <select class="form-control">
@@ -150,6 +152,12 @@
                         </div>
                     </div>
                 </div>
+                <input type="hidden" name="downloadToken">
+                <input type="hidden" name="file_type">
+                <input type="hidden" name="file_part">
+                <input type="hidden" name="columns">
+                <input type="hidden" name="header_fields">
+                <input type="hidden" name="include_header">
             </form>
         </div>
     </div>
