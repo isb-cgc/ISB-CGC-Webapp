@@ -132,12 +132,15 @@ require([
 
         $('#manifest-in-progress').modal('show');
 
-        base.blockResubmit(function() {
-            $('#download-csv').removeAttr('disabled');
-            $('#download-tsv').removeAttr('disabled');
-            $('#download-json').removeAttr('disabled');
-            $('#manifest-in-progress').modal('hide');
-        },downloadToken, 'downloadToken');
+        if(manifest_type == 'file-manifest') {
+            base.blockResubmit(function () {
+                $('#download-csv').removeAttr('disabled');
+                $('#download-tsv').removeAttr('disabled');
+                $('#download-json').removeAttr('disabled');
+                $('#get-bq-table').removeAttr('disabled');
+                $('#manifest-in-progress').modal('hide');
+            }, downloadToken, 'downloadToken');
+        }
 
         var checked_fields = [];
         $('.field-checkbox').each(function()
@@ -187,6 +190,7 @@ require([
                     }
                 },
                 error: function (xhr) {
+                    console.log(xhr);
                     var responseJSON = $.parseJSON(xhr.responseText);
                     // If we received a redirect, honor that
                     if(responseJSON.redirect) {
@@ -197,6 +201,9 @@ require([
                     }
                 },
                 complete: function(xhr, status) {
+                    $('#manifest-in-progress').modal('hide');
+                    $('#get-bq-table').removeAttr('disabled');
+                    $('#export-manifest-modal').modal('hide');
                     $('#export-manifest-form')[0].reset();
                 }
             });
