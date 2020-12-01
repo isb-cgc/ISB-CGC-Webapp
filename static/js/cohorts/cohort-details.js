@@ -65,6 +65,13 @@ require([
         maxWidth: 400
     });
 
+    var enable_buttons = function() {
+        $('#download-csv').removeAttr('disabled');
+        $('#download-tsv').removeAttr('disabled');
+        $('#download-json').removeAttr('disabled');
+        $('#get-bq-table').removeAttr('disabled');
+    };
+
     var downloadToken = new Date().getTime();
 
     $('#download-csv').on('click', function(e) {
@@ -134,10 +141,7 @@ require([
 
         if(manifest_type == 'file-manifest') {
             base.blockResubmit(function () {
-                $('#download-csv').removeAttr('disabled');
-                $('#download-tsv').removeAttr('disabled');
-                $('#download-json').removeAttr('disabled');
-                $('#get-bq-table').removeAttr('disabled');
+                enable_buttons();
                 $('#manifest-in-progress').modal('hide');
             }, downloadToken, 'downloadToken');
         }
@@ -190,7 +194,6 @@ require([
                     }
                 },
                 error: function (xhr) {
-                    console.log(xhr);
                     var responseJSON = $.parseJSON(xhr.responseText);
                     // If we received a redirect, honor that
                     if(responseJSON.redirect) {
@@ -202,8 +205,9 @@ require([
                 },
                 complete: function(xhr, status) {
                     $('#manifest-in-progress').modal('hide');
-                    $('#get-bq-table').removeAttr('disabled');
+                    enable_buttons();
                     $('#export-manifest-modal').modal('hide');
+                    $('input[name="manifest-type"][value="file-manifest"]').triggerHandler('click');
                     $('#export-manifest-form')[0].reset();
                 }
             });
