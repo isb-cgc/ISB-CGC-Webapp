@@ -46,11 +46,6 @@
                  <button id="export-manifest" class="btn btn-special pull-right" data-toggle="modal"
                         data-target="#export-manifest-modal"> Export Cohort Manifest
                  </button>
-                    <!--
-                    <a id="download-manifest" class="btn btn-default pull-right" title="Download this cohort's manifest." href="{% url 'cohort_manifest' cohort.id %}">
-                        Download Cohort Manifest
-                    </a>
-                    -->
                 </div>
             </div>
         </div>
@@ -68,17 +63,17 @@
 </script>
 
 {% with is_cohort=True %}
-    {% include "idc/explore_data_core.html" %}
     {% include "cohorts/export-manifest-modal.html" %}
+    {% include "idc/explore_data_core.html" %}
 {% endwith %}
 
     <!-- Download In Progress Modal -->
-<div class="modal fade" id="download-in-progress" tabindex="-1" role="dialog" data-backdrop="static" aria-hidden="true">
+<div class="modal fade" id="manifest-in-progress" tabindex="-1" role="dialog" data-backdrop="static" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header"></div>
             <div class="modal-body">
-                <p><i class="fa fa-cog fa-spin"></i> Preparing manifest for download...</p>
+                <p><i class="fa fa-cog fa-spin"></i> Preparing cohort manifest...</p>
             </div>
             <div class="modal-footer"></div>
         </div>
