@@ -2850,7 +2850,7 @@ require([
                         //$(this).removeClass('isActive');
                     }
                     else if (isActive){
-                        if (curmin === 'NA'){
+                        if (curmin === 'NA') {
                                 min = lower;
                         }
                         else {
@@ -2860,7 +2860,7 @@ require([
                                 max = upper;
                         }
                         else {
-                            max = Math.max(upper, Math.floor(curmax));
+                            max = Math.max(upper, Math.ceil(curmax));
                         }
 
                     }
