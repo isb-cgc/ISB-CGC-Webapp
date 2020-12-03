@@ -81,7 +81,6 @@ GCLOUD_PROJECT_NUMBER          = os.environ.get('GCLOUD_PROJECT_NUMBER', '')
 BIGQUERY_PROJECT_ID            = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PROJECT_ID)
 BIGQUERY_DATA_PROJECT_ID       = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
 BIGQUERY_USER_MANIFEST_DATASET = os.environ.get('BIGQUERY_USER_MANIFEST_DATASET', 'dev_user_dataset')
-BIGQUERY_PIVOT_TABLE           = os.environ.get('BIGQUERY_PIVOT_TABLE', 'idc-dev.metadata.dicom_pivot_wave1')
 
 # Deployment module
 CRON_MODULE             = os.environ.get('CRON_MODULE')
