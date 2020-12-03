@@ -71,6 +71,14 @@ function($, tree_graph, stack_bar_chart) {
             gender: 'Gender',
             sample_type: 'Sample Type',
             age_at_diagnosis: 'Age at Diagnosis'
+        },
+        'BEATAML1.0':{
+            project_short_name: 'Project',
+            disease_type: 'Disease Type',
+            vital_status: 'Vital Status',
+            gender: 'Gender',
+            ethnicity: 'Race',
+            age_at_diagnosis: 'Age at Diagnosis'
         }
     };
 
@@ -163,6 +171,7 @@ function($, tree_graph, stack_bar_chart) {
             var startReq = new Date().getTime();
 
             if(filter_panel_load) {
+
                 var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
                 clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
 

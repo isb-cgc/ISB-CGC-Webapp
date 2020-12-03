@@ -114,6 +114,12 @@ require([
 
                 },
                 {
+                    'name': 'projectId',
+                    'data': 'tableReference.projectId',
+                    'visible': false,
+                    'className': 'colvis-toggle'
+                },
+                {
                     'name': 'datasetId',
                     'data': 'tableReference.datasetId',
                     'visible': false,
@@ -359,15 +365,16 @@ require([
 
         $('.bq-select').on('change', function () {
             var column_name = $(this).attr('data-column-name');
+            var term = $(this).val();
             if($(this).prop('multiple')){
                 var regex_term = '';
-                $.each($(this).val(),function(index, value){
+                $.each(term, function(index, value){
                     regex_term += (index > 0 ? '|' : '') + '\\b' + value + '\\b(?!-)';
                 });
                 columnSearch(column_name, regex_term, true, false);
             }
             else{
-                columnSearch(column_name, $(this).val(), false, false);
+                columnSearch(column_name, term, term.startsWith('^'), false);
             }
         });
 
@@ -732,7 +739,7 @@ require([
                 $('#gcp-open-modal').modal('show');
             }
             else{
-                $('#gcp-open-btn span').trigger('click');
+                $('#gcp-open-btn')[0].click();
             }
 
         });
