@@ -123,6 +123,11 @@ def ceiling(item):
     return math.ceil(item)
 
 
+@register.filter
+def floor(item):
+    return math.floor(item)
+
+
 
 
 @register.filter
