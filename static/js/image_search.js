@@ -1756,12 +1756,26 @@ require([
                         if (data.file_parts_count > 1)
                         {
                             select_box_div.show();
-                            for (let i = 0; i < data.file_parts_count; ++i)
+                            for (let i = 0; i < data.display_file_parts_count; ++i)
                             {
                                 select_box.append($('<option/>', {
                                     value: i,
                                     text : "File Part " + (i + 1)
                                 }));
+                            }
+
+                            var file_limit_message = $('#file-part-limit-reached-message');
+                            if (data.display_file_parts_count < data.file_parts_count)
+                            {
+                                file_limit_message.show();
+                                file_limit_message.html(
+                                    '<span>* This cohort\'s manifest has reached the limit of ' +
+                                    data.display_file_parts_count + ' file parts.' +
+                                    ' Please use the BigQuery option to access all ' + data.file_parts_count + ' parts.</span>');
+                            }
+                            else
+                            {
+                                file_limit_message.hide();
                             }
                         }
                         else
