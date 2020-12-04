@@ -2866,7 +2866,7 @@ require([
                     }
                     else{
                             min = Math.floor(curmin);
-                            max = Math.floor(curmax);
+                            max = Math.ceil(curmax);
                             lower=min;
                             upper=max;
                             //$(this).attr('data-curminrng', lower);
