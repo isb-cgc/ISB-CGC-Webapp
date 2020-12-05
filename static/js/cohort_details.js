@@ -682,7 +682,7 @@ require([
             },
             error: function() {
                 console.error('Failed to save comment.')
-                form.reset()
+                form.reset();
                 savingComment = false;
             }
         });
