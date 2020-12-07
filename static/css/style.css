@@ -2622,6 +2622,10 @@ span.code {
   #export-to-bq-modal .spinner i, #export-to-gcs-modal .spinner i {
     font-size: 20px; }
 
+#file-part-limit-reached-message {
+  color: #8a6d3b;
+}
+
 #data-upload-group .checkbox .sub-checkbox {
   margin-left: 45px; }
   #data-upload-group .checkbox .sub-checkbox select {
