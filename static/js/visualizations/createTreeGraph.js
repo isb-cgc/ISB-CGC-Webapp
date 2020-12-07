@@ -43,7 +43,8 @@ function($, d3, d3tip, vis_helpers) {
             var children = [];
             for (var i in data) {
                 // For Issue 2018 we build a standardized tag that identifies check boxes:
-                var click_targ = (prog_id + "-" + clin_attr_key + "-" + data[i]['value']).replace(/\s+/g, '_').toUpperCase();
+                //replace white spaces with undescore, and escape dot character for jQuery selction to work with ids with dots in them.
+                var click_targ = (prog_id + "-" + clin_attr_key + "-" + data[i]['value']).replace(/\s+/g, '_').replace(/\.+/g, '\\.').toUpperCase();
                 children.push({name:(data[i]['displ_name'] || data[i]['value'].toString().replace(/_/g, ' ')), count: data[i]['count'], click_targ: click_targ});
             }
             return {children: children, name: attribute};
