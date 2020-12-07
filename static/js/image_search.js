@@ -1764,18 +1764,17 @@ require([
                                 }));
                             }
 
-                            var file_limit_message = $('#file-part-limit-reached-message');
                             if (data.display_file_parts_count < data.file_parts_count)
                             {
-                                file_limit_message.show();
-                                file_limit_message.html(
-                                    '<span>* This cohort\'s manifest has reached the limit of ' +
-                                    data.display_file_parts_count + ' file parts.' +
-                                    ' Please use the BigQuery option to access all ' + data.file_parts_count + ' parts.</span>');
+                                $('#file-export-option').prop('title', 'Export to files is only available for smaller manifest');
+                                $('#file-export-option input').prop('disabled', 'disabled');
+                                $('#file-export-option input').prop('checked', false);
+                                $('#bq-export-option input').prop('checked', true).trigger("click");
                             }
                             else
                             {
-                                file_limit_message.hide();
+                                $('#file-export-option').prop('title', '');
+                                $('#file-export-option input').prop('disabled', '');
                             }
                         }
                         else
