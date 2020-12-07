@@ -55,16 +55,6 @@ require([
 ], function($, jqueryui, base, tippy, bootstrap) {
     A11y.Core();
 
-    tippy('.manifest-size-warning',{
-        content: 'Your cohort is too large to be downloaded in its entirety, and will be truncated at 65,000 records ' +
-        'ordered by PatientID, CollectionID, StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID, SourceDOI, ' +
-            'CRDCInstanceUUID, and GCS_URL.',
-        theme: 'light',
-        placement: 'left',
-        arrow: false,
-        maxWidth: 400
-    });
-
     var enable_buttons = function() {
         $('#download-csv').removeAttr('disabled');
         $('#download-tsv').removeAttr('disabled');
