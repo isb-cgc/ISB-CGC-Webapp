@@ -1745,41 +1745,26 @@ require([
                 success: function (data) {
                     var isFiltered = Boolean($('#search_def p').length>0);
                     if (is_cohort) {
-                        if(data.total > 65000) {
-                            $('.manifest-size-warning').show();
+                        if (data.file_parts_count > data.display_file_parts_count) {
+                            $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
+                            $('#file-manifest-max-exceeded').show();
+                            $('#file-export-option input').prop('disabled', 'disabled');
+                            $('#file-export-option input').prop('checked', false);
+                            $('#bq-export-option input').prop('checked', true).trigger("click");
                         } else {
-                            $('.manifest-size-warning').hide();
-                        }
-
-                        var select_box_div = $('#file-part-select-box');
-                        var select_box = select_box_div.find('select');
-                        if (data.file_parts_count > 1)
-                        {
-                            select_box_div.show();
-                            for (let i = 0; i < data.display_file_parts_count; ++i)
-                            {
-                                select_box.append($('<option/>', {
-                                    value: i,
-                                    text : "File Part " + (i + 1)
-                                }));
+                            var select_box_div = $('#file-part-select-box');
+                            var select_box = select_box_div.find('select');
+                            if (data.file_parts_count > 1) {
+                                select_box_div.show();
+                                for (let i = 0; i < data.display_file_parts_count; ++i) {
+                                    select_box.append($('<option/>', {
+                                        value: i,
+                                        text : "File Part " + (i + 1)
+                                    }));
+                                }
+                            } else {
+                                select_box_div.hide();
                             }
-
-                            if (data.display_file_parts_count < data.file_parts_count)
-                            {
-                                $('#file-export-option').prop('title', 'Export to files is only available for smaller manifest');
-                                $('#file-export-option input').prop('disabled', 'disabled');
-                                $('#file-export-option input').prop('checked', false);
-                                $('#bq-export-option input').prop('checked', true).trigger("click");
-                            }
-                            else
-                            {
-                                $('#file-export-option').prop('title', '');
-                                $('#file-export-option input').prop('disabled', '');
-                            }
-                        }
-                        else
-                        {
-                            select_box_div.hide();
                         }
                     } else {
                         if (isFiltered && data.total > 0){
