@@ -1222,7 +1222,7 @@ TABLE_TO_SCHEMA_MAP = {
         },
         {
             "type": "STRING",
-            "name": "tumor_stagae",
+            "name": "tumor_stage",
             "mode": "NULLABLE"
         },
         {
