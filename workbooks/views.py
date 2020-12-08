@@ -139,6 +139,8 @@ def workbook_create_with_program(request):
 def workbook_create_with_variables(request):
     json_data = request.POST.get('json_data')
     if json_data:
+        if type(json_data) is bytes:
+            json_data = json_data.decode('utf-8')
         data = json.loads(json_data)
         # TODO: Refactor so that user can create using multiple variable lists
         var_list_id = data['variable_list_id'][0]
@@ -682,6 +684,8 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
                 result['message'] = "This plot has been deleted from workbook."
             else:
                 body_unicode = request.body
+                if type(body_unicode) is bytes:
+                    body_unicode = body_unicode.decode('utf-8')
                 body = json.loads(body_unicode)
 
                 if "attrs" in body:
@@ -747,6 +751,8 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
 def worksheet_cohorts(request, workbook_id=0, worksheet_id=0, cohort_id=0):
     command = request.path.rsplit('/', 1)[1]
     body_unicode = request.body
+    if type(body_unicode) is bytes:
+        body_unicode = body_unicode.decode('utf-8')
     body = json.loads(body_unicode)
     cohorts = body['cohorts']
     if request.method == "POST":
