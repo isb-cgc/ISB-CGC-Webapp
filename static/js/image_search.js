@@ -1737,6 +1737,7 @@ require([
                             $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
                             $('#file-export-option input').prop('disabled', 'disabled');
                             $('#file-export-option input').prop('checked', false);
+                            $('#file-manifest').hide();
                             if(!user_is_social) {
                                 $('#need-social-account').show();
                             } else {
@@ -1744,6 +1745,9 @@ require([
                                 $('#bq-export-option input').prop('checked', true).trigger("click");
                             }
                         } else {
+                            $('#file-manifest-max-exceeded').hide();
+                            $('#file-manifest').show();
+
                             var select_box_div = $('#file-part-select-box');
                             var select_box = select_box_div.find('select');
                             if (data.file_parts_count > 1) {
