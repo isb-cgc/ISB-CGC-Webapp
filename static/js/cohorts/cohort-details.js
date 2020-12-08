@@ -220,12 +220,14 @@ require([
             $('#download-csv').attr('disabled', 'disabled');
             $('#download-tsv').attr('disabled', 'disabled');
             $('#download-json').attr('disabled', 'disabled');
+            $('#get-bq-table').attr('disabled', 'disabled');
         }
         else
         {
             $('#download-csv').removeAttr('disabled');
             $('#download-tsv').removeAttr('disabled');
             $('#download-json').removeAttr('disabled');
+            $('#get-bq-table').removeAttr('disabled');
         }
 
         if (num_selected_column == 0) {
