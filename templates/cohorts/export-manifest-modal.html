@@ -18,6 +18,10 @@
                         <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                         At least one column needs to be selected to export manifest file.
                     </div>
+                    <div id="file-manifest-max-exceeded" class="alert alert-warning alert-dismissable" style="display: none;">
+                        <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        Your manifest is too large to be downloaded. Please use our BigQuery export option. (This requires a Google Account login.)
+                    </div>
                 </div>
             </div>
 
@@ -116,8 +120,8 @@
 
                         <!-- Export Option -->
                         <div class="export-option">
-                            <span class="value"><input type="radio" name="manifest-type" value="file-manifest" checked> Files</span>
-                            <span style="margin-left:10px" class="value" {% if not is_social %}title="Export to BigQuery is only available with a Google Account."{% endif %}>
+                            <span id="file-export-option" title="" class="value"><input type="radio" name="manifest-type" value="file-manifest" checked> Files</span>
+                            <span id="bq-export-option" style="margin-left:10px" class="value" {% if not is_social %}title="Export to BigQuery is only available with a Google Account."{% endif %}>
                                 <input type="radio" name="manifest-type" value="bq-manifest" {% if not is_social %}disabled{% endif %}> BigQuery</span>
                         </div>
                         <br>
@@ -132,9 +136,6 @@
                             <div id="file-part-select-box">
                                 <select class="form-control">
                                 </select>
-                                <br>
-                                <div id="file-part-limit-reached-message">
-                                </div>
                                 <br>
                             </div>
 

@@ -55,23 +55,6 @@ require([
 ], function($, jqueryui, base, tippy, bootstrap) {
     A11y.Core();
 
-    tippy('.manifest-size-warning',{
-        content: 'Your cohort is too large to be downloaded in its entirety, and will be truncated at 65,000 records ' +
-        'ordered by PatientID, CollectionID, StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID, SourceDOI, ' +
-            'CRDCInstanceUUID, and GCS_URL.',
-        theme: 'light',
-        placement: 'left',
-        arrow: false,
-        maxWidth: 400
-    });
-
-    var enable_buttons = function() {
-        $('#download-csv').removeAttr('disabled');
-        $('#download-tsv').removeAttr('disabled');
-        $('#download-json').removeAttr('disabled');
-        $('#get-bq-table').removeAttr('disabled');
-    };
-
     var downloadToken = new Date().getTime();
 
     $('#download-csv').on('click', function(e) {
@@ -141,7 +124,7 @@ require([
 
         if(manifest_type == 'file-manifest') {
             base.blockResubmit(function () {
-                enable_buttons();
+                update_download_manifest_buttons();
                 $('#manifest-in-progress').modal('hide');
             }, downloadToken, 'downloadToken');
         }
@@ -204,11 +187,11 @@ require([
                     }
                 },
                 complete: function(xhr, status) {
+                    update_download_manifest_buttons();
                     $('#manifest-in-progress').modal('hide');
-                    enable_buttons();
                     $('#export-manifest-modal').modal('hide');
-                    $('input[name="manifest-type"][value="file-manifest"]').triggerHandler('click');
                     $('#export-manifest-form')[0].reset();
+                    $('#bq-export-option input').prop('checked', true).trigger("click");
                 }
             });
         }
@@ -230,12 +213,14 @@ require([
             $('#download-csv').attr('disabled', 'disabled');
             $('#download-tsv').attr('disabled', 'disabled');
             $('#download-json').attr('disabled', 'disabled');
+            $('#get-bq-table').attr('disabled', 'disabled');
         }
         else
         {
             $('#download-csv').removeAttr('disabled');
             $('#download-tsv').removeAttr('disabled');
             $('#download-json').removeAttr('disabled');
+            $('#get-bq-table').removeAttr('disabled');
         }
 
         if (num_selected_column == 0) {
