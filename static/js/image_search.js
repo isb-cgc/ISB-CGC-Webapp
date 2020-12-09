@@ -1669,50 +1669,38 @@ require([
             filtObj = new Object();
             for (ckey in window.filterObj){
                 if (ckey ==='Program'){
-
                     for (ind=0;ind<window.filterObj[ckey].length;ind++){
                         program = window.filterObj[ckey][ind];
                         if (program in window.projSets){
                             if (!('Program.'+program in window.filterObj)){
                                collObj= collObj.concat(window.projSets[program]);
                             }
-                        }
-                        else {
+                        } else {
                             collObj.push(program);
                         }
                     }
-                }
-                else if (ckey.startsWith('Program.')){
+                } else if (ckey.startsWith('Program.')){
                      for (ind=0;ind<window.filterObj[ckey].length;ind++){
                          collObj.push(window.filterObj[ckey][ind]);
                      }
-                }
-                else{
+                } else {
                     nmA = ckey.split('.');
                     nm=nmA[nmA.length-1];
                     if (nm.endsWith('_rng')){
                         if (window.filterObj[ckey].type==='none'){
                             nm=nm.replace('_rng','');
-                        }
-                        else {
+                        } else {
                             nm = nm.replace('_rng', '_' + window.filterObj[ckey].type);
                         }
                         if (  ('rng' in window.filterObj[ckey]) && ('none' in window.filterObj[ckey]) ){
                             filtObj[nm] = [window.filterObj[ckey]['rng'],'None']
-                        }
-
-                        else if ('rng' in window.filterObj[ckey]){
+                        } else if ('rng' in window.filterObj[ckey]){
                             filtObj[nm] = window.filterObj[ckey]['rng']
-                        }
-                        else if ('none' in window.filterObj[ckey]){
+                        } else if ('none' in window.filterObj[ckey]){
                             noneKey=nm.replace('_rng','');
                             filtObj[noneKey]=['None'];
                         }
-
-
-
-                    }
-                    else {
+                    } else {
                         filtObj[nm] = window.filterObj[ckey];
                     }
                 }
@@ -1749,11 +1737,13 @@ require([
                             $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
                             $('#file-export-option input').prop('disabled', 'disabled');
                             $('#file-export-option input').prop('checked', false);
-
-                            $('#bq-export-option input').prop('checked', true).trigger("click");
-
-                            $('#file-manifest-max-exceeded').show();
                             $('#file-manifest').hide();
+                            if(!user_is_social) {
+                                $('#need-social-account').show();
+                            } else {
+                                $('#file-manifest-max-exceeded').show();
+                                $('#bq-export-option input').prop('checked', true).trigger("click");
+                            }
                         } else {
                             $('#file-manifest-max-exceeded').hide();
                             $('#file-manifest').show();
@@ -2546,12 +2536,8 @@ require([
                      filtnm=checkBox.value;
                      hasCheckBox = true;
                      numCheckBoxes++;
-                }
-                else
-               {
-
+                } else {
                     filtnm=$(filterCat).children('.list-group-sub-item__body, .list-group-item__body, .collection-list')[0].id;
-
                     if  ($(filterCat).children('.list-group-item__heading').children('input:checkbox').length>0) {
                        hasCheckBox = true;
                        numCheckBoxes++;
@@ -2681,35 +2667,26 @@ require([
 
                 if (item1 ===item2){
                     if ( isSeries && (curInd===0)){
-
                         var seriesNuma = parseInt( $(a).children()[1].innerText  );
                         var seriesNumb = parseInt( $(b).children()[1].innerText  );
-
                         if (seriesNuma === seriesNumb){
                             return 0;
-                        }
-                        else if (((seriesNuma > seriesNumb) )){
+                        } else if (((seriesNuma > seriesNumb) )){
                             return 1;
-                        }
-                        else {
+                        } else {
                             return -1;
                         }
-                    }
-                   else{
+                    } else {
                        return 0;
                     }
-                }
-
-                else if (((item1 > item2) && asc) || ((item2 > item1) && !asc)) {
+                } else if (((item1 > item2) && asc) || ((item2 > item1) && !asc)) {
                     return 1;
-                }
-                else {
+                } else {
                     return -1
                 }
             });
             $(tbl).find('tbody').append(rowSet);
-        }
-
+        };
 
         var filterItemBindings = function (filterId) {
             $('#' + filterId).find('input:checkbox').on('click', function () {
@@ -2822,16 +2799,16 @@ require([
 
             }
 
-        }
+        };
 
      var addFilterBindings = function(id){
          var filterCats = findFilterCats(id,false);
          for (var i=0;i<filterCats.length;i++){
              filterItemBindings(filterCats[i]);
         }
-     }
+     };
 
-     var addSliders = function(id,initialized,hideZeros, parStr){
+    var addSliders = function(id,initialized,hideZeros, parStr){
         $('#'+id).find('.list-group-item__body.isQuant').each(function() {
             $(this).find('.more-checks').addClass('hide');
             $(this).find('.less-checks').addClass('hide');
@@ -2846,7 +2823,6 @@ require([
             var isActive = $(this).hasClass('isActive');
             var wNone = $(this).hasClass('wNone');
             var checked = ($(this).find('.noneBut').length>0) ? $(this).find('.noneBut').find(':input')[0].checked : false;
-
 
             if (!initialized) {
                 var slideDivId = $(this).prop('id') + '_slide';
@@ -2865,51 +2841,39 @@ require([
                         addSlider = false;
                         $(this).removeClass('hasSlider');
                         //$(this).removeClass('isActive');
-                    }
-                    else if (isActive){
+                    } else if (isActive){
                         if (curmin === 'NA') {
                                 min = lower;
-                        }
-                        else {
+                        } else {
                             min = Math.min(lower, Math.floor(curmin));
                         }
                         if (curmax === 'NA'){
                                 max = upper;
-                        }
-                        else {
+                        } else {
                             max = Math.max(upper, Math.ceil(curmax));
                         }
-
-                    }
-                    else{
+                    } else {
                             min = Math.floor(curmin);
                             max = Math.ceil(curmax);
                             lower=min;
                             upper=max;
                             //$(this).attr('data-curminrng', lower);
                             //$(this).attr('data-curmaxrng', upper);
-                        }
                     }
-
-                else if (!isActive){
+                } else if (!isActive){
                     lower=min;
                     upper=max;
                     //$(this).attr('data-curminrng', lower);
                     //$(this).attr('data-curmaxrng', upper);
                 }
-
-
             }
-
 
             if (addSlider) {
                 $(this).addClass('hasSlider');
                 mkSlider($(this).prop('id'), min, max, 1, true, wNone, parStr, $(this).data('filter-attr-id'), $(this).data('filter-display-attr'), lower, upper, isActive,checked);
-            }
-            else{
+            } else{
                 $(this).removeClass('hasSlider');
                 //$(this).removeClass('isActive');
-
             }
         });
      };
@@ -2971,10 +2935,8 @@ require([
         // For collection list
         $('.collection-list').each(function() {
             var $group = $(this);
-
             var checkboxes = $group.find("input:checked");
-            if (checkboxes.length > 0)
-            {
+            if (checkboxes.length > 0) {
                 var values = [];
                 var my_id = "";
                 checkboxes.each(function() {
@@ -3059,7 +3021,6 @@ require([
      var cohort_loaded = false;
      function load_preset_filters() {
          if (is_cohort && !cohort_loaded) {
-             console.debug("Unloaded cohort found, loading...");
              var loadPending = load_filters(cohort_filters);
              loadPending.done(function () {
                  console.debug("Load pending complete.");
@@ -3079,7 +3040,7 @@ require([
          } else if (Object.keys(filters_for_load).length > 0) {
              var loadPending = load_filters(filters_for_load);
              loadPending.done(function () {
-                 console.debug("External filter load done.");
+                 //console.debug("External filter load done.");
              });
          } else {
              // check for localStorage key of saved filters from a login
@@ -3089,7 +3050,7 @@ require([
              if (has_sliders) {
                  let loadPending = load_sliders(ANONYMOUS_SLIDERS, !has_filters);
                  loadPending.done(function () {
-                     console.debug("Sliders loaded from anonymous login.");
+                     //console.debug("Sliders loaded from anonymous login.");
                  });
              }
              if (has_filters) {
