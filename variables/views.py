@@ -30,7 +30,7 @@ from bq_data_access.v2.feature_search.util import SearchableFieldHelper as Searc
 from bq_data_access.v2.feature_search.clinical_schema_utils import ClinicalColumnFeatureSupport
 from .models import VariableFavorite
 from workbooks.models import Workbook, Worksheet
-from projects.models import Program
+from projects.models import Program, DataSource, DataVersion
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.conf import settings
@@ -265,7 +265,7 @@ def initialize_variable_selection_page(request,
         program_attrs = {}
 
         for prog in public_programs:
-            program_attrs[prog.id] = fetch_program_attr(prog.id)
+            program_attrs[prog.id] = fetch_program_attr(prog.id, source_type=DataSource.BIGQUERY, data_type_list=[DataVersion.BIOSPECIMEN_DATA, DataVersion.CLINICAL_DATA],for_faceting=False)
             attr_codes = ClinicalColumnFeatureSupport.get_features_ids_for_column_names(list(program_attrs[prog.id].keys()))
             if 'not_found_columns' in attr_codes:
                 new_keys = [x for x in list(program_attrs[prog.id].keys()) if x not in attr_codes['not_found_columns']]
@@ -343,7 +343,9 @@ def variable_fav_copy(request, variable_fav_id):
 @login_required
 def variable_fav_save(request, variable_fav_id=0):
     try:
-        body_unicode = request.body.decode('utf-8')
+        body_unicode = request.body
+        if type(body_unicode) is bytes:
+            body_unicode = body_unicode.decode('utf-8')
         data = json.loads(body_unicode)
         result = {}
 
