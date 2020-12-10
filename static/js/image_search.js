@@ -2740,7 +2740,7 @@ require([
 
             $('#' + filterId).find('.check-all').on('click', function () {
                 //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
-                var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body').children('ul').children();
+                var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body, .list-group-sub-item__body').children('ul').children();
                 for (var ind =0;ind<filterElems.length;ind++)
                 {
                     var ckElem = new Object();
@@ -2764,7 +2764,7 @@ require([
 
             $('#' + filterId).find('.uncheck-all').on('click', function () {
                  //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
-                var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body').children('ul').children();
+                var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body,.list-group-sub-item__body').children('ul').children();
                 for (var ind =0;ind<filterElems.length;ind++)
                 {
                     var ckElem = new Object();
