@@ -21,8 +21,8 @@ api_version: 1
 
 resources:
   cpu: 4
-  memory_gb: 20
-  disk_size_gb: 40
+  memory_gb: 16
+  disk_size_gb: 30
 
 builtins:
 - appstats: on
