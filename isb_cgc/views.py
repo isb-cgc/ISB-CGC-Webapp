@@ -715,6 +715,7 @@ def workflow_page(request):
 @login_required
 def dashboard_page(request):
     context = {}
+    display_count = 6
     try:
         # Cohort List
         isb_superuser = User.objects.get(is_staff=True, is_superuser=True, is_active=True)
@@ -722,19 +723,22 @@ def dashboard_page(request):
                                                                                                               flat=True)
         cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(
             cohort__id__in=public_cohorts)))
-        cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
+        cohorts_count = Cohort.objects.filter(id__in=cohort_perms, active=True).count()
+        cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')[:display_count]
 
         # Program List
         ownedPrograms = request.user.program_set.filter(active=True)
         sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
         programs = ownedPrograms | sharedPrograms
-        programs = programs.distinct().order_by('-last_date_saved')
+        programs_count = programs.distinct().count()
+        programs = programs.distinct().order_by('-last_date_saved')[:display_count]
 
         # Workbook List
         userWorkbooks = request.user.workbook_set.filter(active=True)
         sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
         workbooks = userWorkbooks | sharedWorkbooks
-        workbooks = workbooks.distinct().order_by('-last_date_saved')
+        workbooks_count = workbooks.distinct().count()
+        workbooks = workbooks.distinct().order_by('-last_date_saved')[:display_count]
 
         # # Notebook VM Instance
         # user_instances = request.user.instance_set.filter(active=True)
@@ -771,18 +775,25 @@ def dashboard_page(request):
         # }
 
         # Gene & miRNA Favorites
-        genefaves = request.user.genefavorite_set.filter(active=True)
+        genefaves = request.user.genefavorite_set.filter(active=True).order_by('-last_date_saved')[:display_count]
+        genefaves_count = request.user.genefavorite_set.filter(active=True).count()
 
         # Variable Favorites
-        varfaves = request.user.variablefavorite_set.filter(active=True)
+        varfaves = request.user.variablefavorite_set.filter(active=True).order_by('-last_date_saved')[:display_count]
+        varfaves_count = request.user.variablefavorite_set.filter(active=True).count()
 
         context = {
             'request': request,
             'cohorts': cohorts,
+            'cohorts_count': cohorts_count,
             'programs': programs,
+            'programs_count': programs_count,
             'workbooks': workbooks,
+            'workbooks_count': workbooks_count,
             'genefaves': genefaves,
+            'genefaves_count': genefaves_count,
             'varfaves': varfaves,
+            'varfaves_count': varfaves_count,
             # 'optinstatus': opt_in_status
             # 'notebook_vm': notebook_vm,
             # 'gcp_list': gcp_list,
