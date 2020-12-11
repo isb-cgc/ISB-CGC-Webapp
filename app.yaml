@@ -20,9 +20,9 @@ service: default
 api_version: 1
 
 resources:
-  cpu: 4
-  memory_gb: 20
-  disk_size_gb: 40
+  cpu: 2
+  memory_gb: 8
+  disk_size_gb: 20
 
 builtins:
 - appstats: on
