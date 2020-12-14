@@ -9,7 +9,7 @@
         </div>
 
         <div class="row">
-            <div class="col-sm-3">
+            <div class="col-sm-2">
                 <h3>FOLLOW US</h3>
                 <ul>
                     <li>
@@ -57,10 +57,28 @@
                     <li>
                         <a href="{% url 'collaborators' %}">Team and Collaborators</a>
                     </li>
+                    <li>
+                        <a>Contact Us</a>
+                    </li>
                 </ul>
             </div>
 
-            <div class="col-sm-6 site_info">
+             <div class="col-sm-2">
+                <h3>POLICIES</h3>
+                <ul>
+                    <li>
+                        <a href="https://www.cancer.gov/policies/accessibility" title="">Accessibility</a>
+                    </li>
+                    <li>
+                        <a href="https://www.cancer.gov/policies/disclaimer" title="">Disclaimer</a>
+                    </li>
+                    <li>
+                        <a href="https://www.cancer.gov/policies/foia" title="">FOIA</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-sm-5 site_info">
                 <p><i><b>Pilot Application Version:</b> {{ APP_VERSION }}</i></p>
                 <p>{{ data_release.name }} Version {{ data_release.version_number }}
                     - {{ data_release.date_active|date:"F d, Y" }}</p>
