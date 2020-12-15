@@ -3040,9 +3040,9 @@ html {
   margin-bottom: 5px;
 }
 
-.site-footer .acknowledgement {
+.site-footer .site_info .acknowledgement {
   color: #c8c8c8;
-  font-size: 0.7em;
+  font-size: 0.8em;
 }
 
 .site-footer .social-media-item {
