@@ -2403,7 +2403,20 @@ require([
                 */
             }
 
-
+            if (numAttrAvail==0 && (allFilters.length>0)){
+                $('#' + filterCat+'_heading').find('.fa').attr('style','display:none');
+                $('#' + filterCat+'_heading').find('a').attr('aria-disabled','true');
+               $('#' + filterCat+'_heading').addClass('greyout');
+                //$('#' + filterCat).hide();a
+                if ($('#' + filterCat+'_heading').children('a').attr('aria-expanded') === 'true'){
+                    $('#' + filterCat+'_heading').children('a').click();
+                }
+            }
+            else if ((numAttrAvail>0) && (allFilters.length>0) && ($('#' + filterCat+'_heading').hasClass('greyout'))){
+                $('#' + filterCat+'_heading').removeClass('greyout');
+                $('#' + filterCat+'_heading').find('a').removeAttr('aria-disabled');
+                $('#' + filterCat+'_heading').find('.fa').attr("style","font-family :'FontAwesome' !important");
+            }
             if ( numAttrAvail < 6)  {
                     $('#' + filterCat).children('.more-checks').hide();
                     $('#' + filterCat).children('.less-checks').hide();
@@ -2727,7 +2740,7 @@ require([
 
             $('#' + filterId).find('.check-all').on('click', function () {
                 //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
-                var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body').children('ul').children();
+                var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body, .list-group-sub-item__body').children('ul').children();
                 for (var ind =0;ind<filterElems.length;ind++)
                 {
                     var ckElem = new Object();
@@ -2751,7 +2764,7 @@ require([
 
             $('#' + filterId).find('.uncheck-all').on('click', function () {
                  //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
-                var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body').children('ul').children();
+                var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body,.list-group-sub-item__body').children('ul').children();
                 for (var ind =0;ind<filterElems.length;ind++)
                 {
                     var ckElem = new Object();
