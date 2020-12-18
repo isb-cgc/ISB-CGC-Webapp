@@ -586,7 +586,7 @@ SITE_GOOGLE_ANALYTICS_TRACKING_ID = os.environ.get('SITE_GOOGLE_ANALYTICS_TRACKI
 # Google App Engine has a response size limit of 32M. ~65k entries from the cohort_filelist view will
 # equal just under the 32M limit. If each individual listing is ever lengthened or shortened this
 # number should be adjusted
-MAX_FILE_LIST_REQUEST = 65000
+MAX_FILE_LIST_REQUEST = int(os.environ.get('MAX_FILE_LIST_REQUEST', '65000'))
 MAX_BQ_RECORD_RESULT = int(os.environ.get('MAX_BQ_RECORD_RESULT', '5000'))
 
 # Rough max file size to allow for eg. barcode list upload, to prevent triggering RequestDataTooBig
