@@ -1,0 +1,7 @@
+{% if long_running %}
+Your manifest job is still exporting. Please wait five minutes to allow the export to complete. Once finished, table
+{% else %}
+Your manifest job has finished exporting. Table
+{% endif %}
+<a href="{{ table_uri }}" _target="blank">{{ full_table_id }}</a> will be available for seven (7) days, accessible via
+your {{ email }} Google Account at <a href="{{ table_uri }}" _target="blank">{{ table_uri }}</a>

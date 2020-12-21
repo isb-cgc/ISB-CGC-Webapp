@@ -1565,6 +1565,10 @@ a.skip-nav {
     background-color: #F8F8F8;
     border-color: #D32F2F; }
 
+.alert a {
+  font-weight: 600;
+}
+
 .modal-js-messages > .alert {
   border-width: 2px;
   border-style: solid;
