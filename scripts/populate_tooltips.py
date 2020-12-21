@@ -38,7 +38,7 @@ PREFORMATTED_CLIN_ATTR = []
 import django
 django.setup()
 
-from idc_collections.models import Program, Project, Attribute, Attribute_Tooltips, DataSource, DataVersion
+from idc_collections.models import Collection, Attribute, Attribute_Tooltips, DataSource, DataVersion
 
 from django.contrib.auth.models import User
 idc_superuser = User.objects.get(username="idc")
@@ -49,9 +49,8 @@ logger = logging.getLogger('main_logger')
 def main():
 
     try:
-        projects = Project.objects.select_related('program').filter(owner=idc_superuser,active=True,program__is_public=True)
-        disease_code = Attribute.objects.get(name="disease_code", active=True)
-        proj_short_name = Attribute.objects.get(name="project_short_name", active=True)
+        collections = Collection.objects.filter(owner=idc_superuser, active=True)
+        collection_id = Attribute.objects.get(name="collection_id", active=True)
 
         tips = Attribute_Tooltips.objects.all()
 
@@ -62,16 +61,14 @@ def main():
                 extent_tooltips[tip.attribute.id] = []
             extent_tooltips[tip.attribute.id].append(tip.value)
 
-        tooltips_by_val = { x.name: {'tip': x.description, 'obj':disease_code} for x in projects if x.name not in ['ALL-P1','ALL-P2']}
-        tooltips_by_val['ALL'] = {'tip':'Acute Lymphoblastic Leukemia', 'obj': disease_code}
-        tooltips_by_val.update({"{}-{}".format(x.program.name,x.name): {'tip': x.description, 'obj':proj_short_name} for x in projects})
+        tooltips_by_val = { x.name: {'tip': x.description, 'obj':collection_id} for x in collections }
 
         tooltips = []
 
         for val in tooltips_by_val:
             if not tooltips_by_val[val]['tip']:
-                raise Exception("Tooltip cannot be null: {}".format(val))
-            if  val not in extent_tooltips.get(tooltips_by_val[val]['obj'].id,[]):
+                continue
+            if val not in extent_tooltips.get(tooltips_by_val[val]['obj'].id,[]):
                 tooltips.append(Attribute_Tooltips(value=val, tooltip=tooltips_by_val[val]['tip'], attribute=tooltips_by_val[val]['obj']))
 
         if len(tooltips):
