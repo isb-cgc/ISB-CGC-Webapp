@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load custom_tags %}
 {% load staticfiles %}
+{% load socialaccount %}
 {% load tz %}
 {% comment %}
 
@@ -90,9 +91,17 @@
                     </h5>
                 </div>
                 <div class="panel-body">
-                    {% if local_account %}
+                    {% if unconnected_local_account %}
                     <p>
                         <a href="{% url 'account_change_password' %}" target="_blank">Change Your Password</a>
+                    </p>
+                    <p>
+                        <a href="{% provider_login_url "google" process="connect" %}">Connect a Google Account</a>
+                    </p>
+                    {% endif %}
+                    {% if social_account %}
+                    <p>
+                        <a href="{% url "connections" %}">Manage Google Account Connections</a>
                     </p>
                     {% endif %}
                     <p>
