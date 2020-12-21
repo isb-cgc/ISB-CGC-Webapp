@@ -106,6 +106,15 @@ bottom: 95%; /* At the top of the tooltip */
     background-style: grey;
 }
 
+.list-group-item__heading.greyout {
+    background-color: #777777;
+    #line-height: 4;
+    #background-style: grey;
+}
+
+
+
+
 
 .fa-stack {
   text-align: center;
@@ -133,7 +142,7 @@ bottom: 95%; /* At the top of the tooltip */
 .search-con {
   overflow-y: auto;
     overflow-x:hidden;
-  max-height: 1000px;
+  max-height: 2000px;
 }
 
 html {
