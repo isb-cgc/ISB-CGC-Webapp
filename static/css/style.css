@@ -870,6 +870,10 @@ nav, .site-header {
   vertical-align: middle;
 }
 
+.site-header .navbar-item .external-link-icon {
+  font-size: 15px;
+}
+
 .site-header nav .navbar-right .dropdown-menu i {
   font-size: inherit;
 }
@@ -3034,6 +3038,7 @@ html {
   text-align: center;
   font-size: 1.2em;
 }
+
 .site-footer p {
   padding: 0;
   margin-bottom: 5px;
@@ -3042,6 +3047,28 @@ html {
 .site-footer .acknowledgement {
   color: #c8c8c8;
   font-size: 0.9em;
+}
+
+.site-footer .social-media-item {
+    text-decoration: none;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.site-footer .social-media-item a:hover, a:focus {
+    text-decoration: none;
+}
+
+.site-footer .social-media-item .social-media-icon {
+    font-size: 28px;
+    text-decoration: none;
+    padding: 5px;
+    vertical-align: middle;
+}
+
+.site-footer .social-media-item .external-link-icon {
+    font-size: 15px;
+    color: #d0d0d0;
 }
 
 .quota-body {
