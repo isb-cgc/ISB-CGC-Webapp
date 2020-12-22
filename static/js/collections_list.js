@@ -18,7 +18,8 @@ require.config({
 require(['jquery', 'datatables.net','jqueryui', 'bootstrap', 'base'],
     function($) {
         var collex_data_table = $('#collections-table').DataTable({
-            "dom": '<"dataTables_controls"ilpf>rt<"bottom"><"clear">'
+            "dom": '<"dataTables_controls"i<>lpf>rt<"bottom"><"clear">',
+            "pageLength": 100
         });
 
         $('#collections-table tbody').on('click', 'td.details-control', function () {

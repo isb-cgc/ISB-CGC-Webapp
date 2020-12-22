@@ -103,7 +103,7 @@ define(['jquery'], function($) {
         // Simple method for displaying an alert-<type> message at a given selector or DOM element location.
         //
         // type: One of the accepted alert types (danger, error, info, warning)
-        // text: Content of the alert, added via jQuery.text() (and so escaped)
+        // text: Content of the message
         // withEmpty: Truthy boolean for indicating if the element represented by rootSelector should first be emptied
         // rootSelector: text selector or DOM element which will be the parent of the alert; defaults to #js-messages
         //  (the DIV present on all pages which shows document-level JS messages)
