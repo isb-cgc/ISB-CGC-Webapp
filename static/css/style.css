@@ -870,7 +870,7 @@ nav, .site-header {
   vertical-align: middle;
 }
 
-.site-header .navbar-item .external-link i{
+.site-header .navbar-item .external-link-icon {
   font-size: 15px;
 }
 
@@ -3059,14 +3059,14 @@ html {
     text-decoration: none;
 }
 
-.site-footer .social-media-item i{
+.site-footer .social-media-item .social-media-icon {
     font-size: 28px;
     text-decoration: none;
     padding: 5px;
     vertical-align: middle;
 }
 
-.site-footer .social-media-item .external-link i{
+.site-footer .social-media-item .external-link-icon {
     font-size: 15px;
     color: #d0d0d0;
 }
