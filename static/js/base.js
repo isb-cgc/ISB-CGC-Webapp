@@ -187,12 +187,12 @@ require([
     }
 
     $('.external-link').on('click', function(){
-        let url = $(this).attr('href');
+        let url = $(this).attr('url');
         $('#go-to-external-link').attr('href', url);
     });
 
     $('#go-to-external-link').on('click', function() {
-       $('#external-web-warning').modal('hide');
+        $('#external-web-warning').modal('hide');
     });
 });
 
