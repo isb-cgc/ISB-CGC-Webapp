@@ -47,7 +47,6 @@ logger = logging.getLogger('main_logger')
 
 
 def main():
-
     try:
         collections = Collection.objects.filter(owner=idc_superuser, active=True)
         collection_id = Attribute.objects.get(name="collection_id", active=True)
@@ -59,9 +58,9 @@ def main():
         for tip in tips:
             if not tip.attribute.id in extent_tooltips:
                 extent_tooltips[tip.attribute.id] = []
-            extent_tooltips[tip.attribute.id].append(tip.value)
+            extent_tooltips[tip.attribute.id].append(tip.collection_id)
 
-        tooltips_by_val = { x.name: {'tip': x.description, 'obj':collection_id} for x in collections }
+        tooltips_by_val = { x.collection_id: {'tip': x.description, 'obj':collection_id} for x in collections }
 
         tooltips = []
 
@@ -69,7 +68,7 @@ def main():
             if not tooltips_by_val[val]['tip']:
                 continue
             if val not in extent_tooltips.get(tooltips_by_val[val]['obj'].id,[]):
-                tooltips.append(Attribute_Tooltips(value=val, tooltip=tooltips_by_val[val]['tip'], attribute=tooltips_by_val[val]['obj']))
+                tooltips.append(Attribute_Tooltips(collection_id=val, tooltip=tooltips_by_val[val]['tip'], attribute=tooltips_by_val[val]['obj']))
 
         if len(tooltips):
             print("[STATUS] Adding {} new tooltips.".format(str(len(tooltips))))
