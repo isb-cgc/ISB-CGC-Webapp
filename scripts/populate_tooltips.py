@@ -58,9 +58,9 @@ def main():
         for tip in tips:
             if not tip.attribute.id in extent_tooltips:
                 extent_tooltips[tip.attribute.id] = []
-            extent_tooltips[tip.attribute.id].append(tip.collection_id)
+            extent_tooltips[tip.attribute.id].append(tip.tooltip_id)
 
-        tooltips_by_val = { x.collection_id: {'tip': x.description, 'obj':collection_id} for x in collections }
+        tooltips_by_val = {x.collection_id: {'tip': x.description, 'obj': collection_id} for x in collections}
 
         tooltips = []
 
@@ -68,7 +68,8 @@ def main():
             if not tooltips_by_val[val]['tip']:
                 continue
             if val not in extent_tooltips.get(tooltips_by_val[val]['obj'].id,[]):
-                tooltips.append(Attribute_Tooltips(collection_id=val, tooltip=tooltips_by_val[val]['tip'], attribute=tooltips_by_val[val]['obj']))
+                tooltips.append(Attribute_Tooltips(tooltip_id=val, tooltip=tooltips_by_val[val]['tip'],
+                                                   attribute=tooltips_by_val[val]['obj']))
 
         if len(tooltips):
             print("[STATUS] Adding {} new tooltips.".format(str(len(tooltips))))
