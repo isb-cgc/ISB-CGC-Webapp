@@ -29,11 +29,7 @@ import sys
 import time
 from copy import deepcopy
 
-# from isb_cgc import secret_settings, settings
-
 PREFORMATTED_CLIN_ATTR = []
-
-# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "isb_cgc.settings")
 
 import django
 django.setup()
@@ -48,6 +44,7 @@ logger = logging.getLogger('main_logger')
 
 def main():
     try:
+        # populate collection tooltips
         collections = Collection.objects.filter(owner=idc_superuser, active=True)
         collection_id = Attribute.objects.get(name="collection_id", active=True)
 
