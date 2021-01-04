@@ -156,7 +156,8 @@ def user_detail(request, user_id):
                       {'request': request,
                        'user': user,
                        'user_details': user_details,
-                       'local_account': bool(social_account is None)
+                       'unconnected_local_account': bool(social_account is None),
+                       'social_account': bool(social_account is not None)
                        })
     else:
         return render(request, '403.html')
