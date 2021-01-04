@@ -8,223 +8,310 @@
     <nav class="container">
         <div class="row">
             <div class="col-lg-12">
-            <div class="nav navbar-left">
-                <ul class="">
-                    <li class="navbar-item">
-                        {% if user.is_authenticated %}
-                             <a href="{% url 'dashboard' %}" title="Dashboard" >
-                        {%  else %}
-                            <a href="{% url 'landing_page' %}" title="Home Page" >
-                        {%  endif %}
-                        <img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/><span class="navbar-item">ISB-CGC</span></a>
-                    </li>
-                    {% if request.path != '/' %}
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                            data-target="#main-navbar-collapse" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="{% url 'landing_page' %}" title="Home Page">
+                        <img src="{% static 'img/isblogo.png' %}" alt="ISB Logo"
+                             loading="lazy">
+                        <span>ISB-CGC</span>
+                    </a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-navbar-collapse">
+
+                <ul class="nav navbar-nav navbar-left">
+                    {% if user.is_authenticated %}
                         <li class="navbar-link navbar-item">
-                            <a href="{% url 'landing_page' %}">Home Page</a>
+                            <a href="{% url 'dashboard' %}">Dashboard</a>
                         </li>
                     {% endif %}
+
                     <li class="navbar-link navbar-item">
-                        <a href="{% url 'bq_meta_search' %}">BigQuery Table Search<span class="badge" style="font-size:12px;height:18px;width:40px;margin-left:0;margin-top:-3px;background-color:#4cc2d6;">New</span></a>
+                        <div class="dropdown">
+                            <a role="button" class="dropdown-toggle navbar-item__text" id="db-dropdown"
+                               data-toggle="dropdown" aria-label="Data Browsers Dropdown" aria-expanded="true">
+                                Data Browsers <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-label="db-dropdown">
+                                <li role="menuitem"><a href="{% url 'bq_meta_search' %}">BigQuery Table Search</a>
+                                </li>
+                                <li role="menuitem"><a href="/cohorts/filelist/">Cancer Data File Browser</a></li>
+                                <li role="menuitem"><a href="https://mitelmandatabase.isb-cgc.org" target="_blank">Chromosomal
+                                    Aberrations & Gene Fusions DB
+                                </a></li>
+                            </ul>
+                        </div>
                     </li>
                     <li class="navbar-link navbar-item">
-                            <a href="{% url 'cohort' %}">Data Explorer<span class="badge" style="font-size:12px;height:18px;width:40px;margin-left:0;margin-top:-3px;background-color:#4cc2d6;">New</span></a>
+                        <div class="dropdown">
+                            <a role="button" class="dropdown-toggle navbar-item__text" id="res-dropdown"
+                               data-toggle="dropdown" aria-label="Resource Dropdown" aria-expanded="true">
+                                Resources<span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-label="res-dropdown">
+                                <li role="menuitem"><a href="{% url 'cohort' %}">Cohort Builder / Data Explorer</a></li>
+                                <li role="menuitem">
+                                    <a href="{% url 'programmatic_access' %}">
+                                        Pipelines and APIs</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li>
+                                    <div class="dropdown-header"><strong>
+                                        Notebooks
+                                    </strong></div>
+                                </li>
+                                <li role="menuitem"><a
+                                        href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/RegulomeExplorerNotebooks.html"
+                                        target="_blank">Statistical
+                                </a></li>
+                                <li role="menuitem"><a
+                                        href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html"
+                                        target="_blank">Community
+                                </a></li>
+                                <li role="menuitem"><a
+                                        href="https://github.com/isb-cgc/Community-Notebooks"
+                                        target="_blank">GitHub Repo
+                                </a></li>
+                                <li role="separator" class="divider"></li>
+                                <li role="menuitem"><a
+                                        {% if user.is_authenticated %}
+                                            href="{% url 'user_detail' user.id %}"
+                                        {% else %}
+                                            href="{% url 'user_detail_login' %}"
+                                        {% endif %}
+                                        target="_blank">Controlled Access Data
+                                </a></li>
+
+                            </ul>
+                        </div>
                     </li>
 
                     <li class="navbar-link navbar-item">
                         <a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a>
                     </li>
                     <li class="navbar-link navbar-item">
-                        <a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html#community-notebooks" target="_blank">Community Notebooks</a>
+                        <a href="{% url 'about_page' %}">About</a>
                     </li>
                     <li class="navbar-link navbar-item">
                         <div class="dropdown">
-                            <a role="button class=dropdown-toggle navbar-item__text" id="need-help-dropdown" data-toggle="dropdown" aria-label="Need Help Dropdown" aria-expanded="true">
-                                Need Help? <i class="fa fa-caret-down"></i>
+                            <a role="button" class="dropdown-toggle navbar-item__text" id="help-dropdown"
+                               data-toggle="dropdown" aria-label="Help Dropdown" aria-expanded="true">
+                                Help <span class="caret"></span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-label="user-dropdown">
-                                <li role="menuitem"><a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowToGetStartedonISB-CGC.html" target="_blank">How To Get Started</a></li>
-                                <li role="menuitem"><a href="{% url 'vid_tutorials' %}" target="_blank">Video Tutorials</a></li>
-                                <li role="menuitem"><a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html#i-m-a-novice-how-do-i" target="_blank">Getting Started Notebooks</a></li>
-                                <li role="menuitem"><a href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/feedback" target="_blank">We'd Love Your Feedback</a></li>
-                                <li role="menuitem"><a href="https://github.com/isb-cgc/ISB-CGC-Webapp/issues/new" target="_blank">Submit Github Issue</a></li>
+                            <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-label="help-dropdown">
+                                <li role="menuitem"><a
+                                        href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowToGetStartedonISB-CGC.html"
+                                        target="_blank">How To Get Started</a></li>
+                                <li role="menuitem"><a href="{% url 'how_to_discover' %}" target="_blank">How to Discover Cancer Data Through ISB-CGC</a></li>
+                                <li role="menuitem"><a href="{% url 'vid_tutorials' %}" target="_blank">Video
+                                    Tutorials</a></li>
+                                <li role="menuitem"><a
+                                        href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html#i-m-a-novice-how-do-i"
+                                        target="_blank">Getting Started Notebooks</a></li>
+                                <li role="menuitem"><a
+                                        href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/feedback"
+                                        target="_blank">We'd Love Your Feedback</a></li>
+                                <li role="menuitem"><a href="https://github.com/isb-cgc/ISB-CGC-Webapp/issues/new"
+                                                       target="_blank">Submit GitHub Issue</a></li>
+                                <li role="menuitem"><a href="{% url 'contact_us' %}" target="_blank">Contact Us</a></li>
                             </ul>
                         </div>
                     </li>
+                    {#                </div><div class="inline-block float-right">#}
                 </ul>
-            </div>
-
-
-            <div class="nav navbar-right">
-                {% if user.is_authenticated %}
-                    <div id="user-login" class="navbar-item">
-                        <a class="avatar-link" href="{% url 'user_detail' user.id %}">
-                            <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="32" height="32" alt="Avatar Link to User Details">
-                        </a>
-
-                        <div class="dropdown">
-                            <a role="button" class="dropdown-toggle navbar-item__text" id="user-dropdown" data-toggle="dropdown" aria-label="User Dropdown" aria-expanded="true">
-                                {{ user.first_name }} <i class="fa fa-caret-down"></i>
+                <ul class="nav navbar-nav navbar-right">
+                    {% if user.is_authenticated %}
+                        <li id="user-login" class="navbar-item">
+                            <a class="avatar-link" href="{% url 'user_detail' user.id %}">
+                                <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="32" height="32"
+                                     alt="Avatar Link to User Details">
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-label="user-dropdown">
-                                <li role="menuitem"><a href="{% url 'user_detail' user.id %}">Account Details <i class="fa fa-cog"></i></a></li>
-                                <li role="menuitem"><a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out">Sign Out <i class="fa fa-sign-out"></i></a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="navbar-item">
-                        <a type="button" class="navbar-item__text lines-button x collapsed" data-toggle="collapse" data-target="#subnav" aria-expanded="false" aria-controls="subnav">
-                            <span class="lines"></span>
-                            Menu
-                        </a>
-                    </div>
-                {% else %}
-                    <div id="user-login" class="navbar-form inline-block">
-                        <!-- same thing as /accounts/login-->
-                        <a class="login-link" href="{% url 'account_login' %}" title="Sign In"><i class="fa fa-sign-in"></i> Sign In</a>
-                    </div>
-                {% endif %}
-            </div>
+
+                            <div class="dropdown">
+                                <a role="button" class="dropdown-toggle navbar-item__text" id="user-dropdown"
+                                   data-toggle="dropdown" aria-label="User Dropdown" aria-expanded="true">
+                                    {{ user.first_name }} <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-label="user-dropdown">
+                                    <li role="menuitem"><a href="{% url 'user_detail' user.id %}">Account Details <i
+                                            class="fa fa-cog"></i></a></li>
+                                    <li role="menuitem"><a href="#logout-modal" data-toggle="modal"
+                                                           data-target="#logout-modal" title="Sign Out">Sign Out <i
+                                            class="fa fa-sign-out"></i></a></li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="navbar-item">
+                            <a type="button" class="navbar-item__text lines-button x collapsed" data-toggle="collapse"
+                               data-target="#subnav" aria-expanded="false" aria-controls="subnav">
+                                <span class="lines"></span>
+                                Menu
+                            </a>
+                        </li>
+                    {% else %}
+                        <li id="user-login" class="inline-block navbar-item">
+                            <a class="login-link" href="{% url 'account_login' %}" title="Sign In"><i
+                                    class="fa fa-sign-in"></i> Sign In</a>
+                        </li>
+                    {% endif %}
+                </ul>
+
+                </div>
             </div>
         </div>
     </nav>
     {% if user.is_authenticated %}
-    <nav class="nav subnav collapse" role="navigation" id="subnav">
-        <ul class="container">
-            {% if user.is_authenticated %}
-            <li>
-                <a href="{% url 'dashboard' %}">DASHBOARD</a>
-            </li>
-            {%  endif %}
-            <li class="menu-item has-drop-down">
-                <a>WORKBOOKS <i class="fa fa-caret-down"></i></a>
-                <ul class="sub-menu drop">
-                    <li class="menu-item"><a href="{% url 'workbooks' %}">Saved Workbooks ( {% user_workbook_count %} )</a></li>
-                    <li class="menu-item">
-                        <form action="{% url 'workbook_create' %}" method="POST">
-                            {% csrf_token %}
-                            <button type="submit">Create a New Workbook</button>
-                        </form>
-                    </li>
-{#                    <li class="menu-item"><a href="{% url 'workbook_samples' %}">Sample Workbooks</a></li>#}
-                </ul>
-            </li>
-            {% if USER_DATA_ON %}
-            <li class="menu-item has-drop-down">
-                <a>PROGRAMS <i class="fa fa-caret-down"></i></a>
-                <ul class="sub-menu drop">
-                    <li class="menu-item"><a href="{% url 'programs' %}">Saved Programs ( {% user_program_count %} )</a></li>
-                    <li class="menu-item"><a href="{% url 'program_upload' %}">Upload Program Data</a></li>
-                    <li class="menu-item"><a href="{% url 'public_programs' %}">Public Program ( {% public_program_count %} )</a></li>
-                </ul>
-            </li>
-            {% endif %}
-            <li class="menu-item has-drop-down">
-                <a>ANALYSES <i class="fa fa-caret-down"></i></a>
-                <ul class="sub-menu drop">
-                    <li class="menu-item">
-                        <strong>Start New Workbook With ...</strong>
-                        <ul class="item-list">
-                            <li class="menu-item">
-                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="analysis" value="Bar Chart">
-                                    <button type="submit">Bar Chart</button>
-                                </form>
-                            </li>
-                            <li class="menu-item">
-                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="analysis" value="Histogram">
-                                    <button type="submit">Histogram </button>
-                                </form>
-                            </li>
-                            <li class="menu-item">
-                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="analysis" value="Scatter Plot">
-                                    <button type="submit">Scatter Plot</button>
-                                </form>
-                            </li>
-                            <li class="menu-item">
-                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="analysis" value="Violin Plot">
-                                    <button type="submit">Violin Plot</button>
-                                </form>
-                            </li>
-{#                            <li class="menu-item">#}
-{#                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">#}
-{#                                    {% csrf_token %}#}
-{#                                    <input type="hidden" name="analysis" value="Violin Plot with axis swap">#}
-{#                                    <button type="submit">Violin Plot with axis swap</button>#}
-{#                                </form>#}
-{#                            </li>#}
-                            <li class="menu-item">
-                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="analysis" value="Cubby Hole Plot">
-                                    <button type="submit">Cubby Hole</button>
-                                </form>
-                            </li>
-                            <li class="menu-item">
-                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="analysis" value="SeqPeek">
-                                    <button type="submit">SeqPeek</button>
-                                </form>
-                            </li>
-                            <li class="menu-item">
-                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="analysis" value="OncoPrint">
-                                    <button type="submit">OncoPrint</button>
-                                </form>
-                            </li>
-                            <li class="menu-item">
-                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="analysis" value="OncoGrid">
-                                    <button type="submit">OncoGrid</button>
-                                </form>
-                            </li>
+        <nav class="nav subnav collapse center" role="navigation" id="subnav">
+            <ul class="container">
+
+                <li class="menu-item has-drop-down">
+                    <a>WORKBOOKS <span class="caret"></span></a>
+                    <ul class="sub-menu drop">
+                        <li class="menu-item"><a href="{% url 'workbooks' %}">Saved Workbooks
+                            <span class="badge">{% user_workbook_count %}</span></a></li>
+                        <li class="menu-item">
+                            <form action="{% url 'workbook_create' %}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit">Create a New Workbook</button>
+                            </form>
+                        </li>
+                        {#                    <li class="menu-item"><a href="{% url 'workbook_samples' %}">Sample Workbooks</a></li>#}
+                    </ul>
+                </li>
+                {% if USER_DATA_ON %}
+                    <li class="menu-item has-drop-down">
+                        <a>PROGRAMS <span class="caret"></span></a>
+                        <ul class="sub-menu drop">
+                            <li class="menu-item"><a href="{% url 'programs' %}">Saved Programs
+                                <span class="badge">{% user_program_count %}</span></a></li>
+                            <li class="menu-item"><a href="{% url 'program_upload' %}">Upload Program Data</a></li>
+                            <li class="menu-item"><a href="{% url 'public_programs' %}">Public Program
+                                <span class="badge">{% public_program_count %}</span></a></li>
                         </ul>
                     </li>
-                    <li class="menu-item"><a href="{% url 'sample_analyses' %}">Browse All Analyses</a></li>
-                </ul>
-            </li>
-            <li class="menu-item has-drop-down">
-                {% with genefaves_count=user.genefavorite_set.all|active|count %}
-                <a>GENES & miRNAs <i class="fa fa-caret-down"></i></a>
-                <ul class="sub-menu drop genes-mirnas">
-                    <li class="menu-item"><a href="{% url 'genes' %}">Manage Gene & miRNA Favorites ( {{ genefaves_count }} )</a></li>
-                    <li class="menu-item"><a href="{% url 'gene_fav_create' %}">Create Gene & miRNA Favorites</a></li>
-                    <li class="menu-item"><a href="{% url 'gene_select_for_new_workbook' %}">Select Genes & miRNAs for a New Workbook</a></li>
-                </ul>
-                {% endwith %}
-            </li>
-            <li class="menu-item has-drop-down">
-                <a>VARIABLES <i class="fa fa-caret-down"></i></a>
-                <ul class="sub-menu drop">
-                    <li class="menu-item"><a href="{% url 'variables' %}">Manage Variable Favorites Lists ( {{ user.variablefavorite_set.all|active|count }} )</a></li>
-                    <li class="menu-item"><a href="{% url 'variable_fav_create' %}">Create Variable Favorites List</a></li>
-                    <li class="menu-item"><a href="{% url 'variable_select_for_new_workbook' %}">Select Variables for a New Workbook</a></li>
-                </ul>
-            </li>
-            <li class="menu-item has-drop-down">
-                <a>COHORTS <i class="fa fa-caret-down"></i></a>
-                <ul class="sub-menu drop">
-                    <li class="menu-item"><a href="{% url 'cohort_list' %}">Manage Saved Cohorts ( {{ user.cohort_perms_set.all|active:'cohort'|cohort_owner_permission|count }} )</a></li>
-                    <li class="menu-item"><a href="{% url 'public_cohort_list' %}">Public Cohorts ( {% public_cohort_count %} )</a></li>
-                    <li class="menu-item has-drop-down__more"> Create a New Cohort
-                        <ul class="drop">
-                            <li class="menu-item"><a href="{% url 'cohort' %}">Filters</a></li>
-                            <li class="menu-item"><a href="{% url 'cohort_barcodes' %}">Barcodes</a></li>
+                {% endif %}
+                <li class="menu-item has-drop-down">
+                    <a>ANALYSES <span class="caret"></span></a>
+                    <ul class="sub-menu drop">
+                        <li class="menu-item">
+                            <strong>Start New Workbook With ...</strong>
+                            <ul class="item-list">
+                                <li class="menu-item">
+                                    <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="analysis" value="Bar Chart">
+                                        <button type="submit">Bar Chart</button>
+                                    </form>
+                                </li>
+                                <li class="menu-item">
+                                    <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="analysis" value="Histogram">
+                                        <button type="submit">Histogram</button>
+                                    </form>
+                                </li>
+                                <li class="menu-item">
+                                    <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="analysis" value="Scatter Plot">
+                                        <button type="submit">Scatter Plot</button>
+                                    </form>
+                                </li>
+                                <li class="menu-item">
+                                    <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="analysis" value="Violin Plot">
+                                        <button type="submit">Violin Plot</button>
+                                    </form>
+                                </li>
+                                {#                            <li class="menu-item">#}
+                                {#                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">#}
+                                {#                                    {% csrf_token %}#}
+                                {#                                    <input type="hidden" name="analysis" value="Violin Plot with axis swap">#}
+                                {#                                    <button type="submit">Violin Plot with axis swap</button>#}
+                                {#                                </form>#}
+                                {#                            </li>#}
+                                <li class="menu-item">
+                                    <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="analysis" value="Cubby Hole Plot">
+                                        <button type="submit">Cubby Hole</button>
+                                    </form>
+                                </li>
+                                <li class="menu-item">
+                                    <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="analysis" value="SeqPeek">
+                                        <button type="submit">SeqPeek</button>
+                                    </form>
+                                </li>
+                                <li class="menu-item">
+                                    <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="analysis" value="OncoPrint">
+                                        <button type="submit">OncoPrint</button>
+                                    </form>
+                                </li>
+                                <li class="menu-item">
+                                    <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="analysis" value="OncoGrid">
+                                        <button type="submit">OncoGrid</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="menu-item"><a href="{% url 'sample_analyses' %}">Browse All Analyses</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item has-drop-down">
+                    {% with genefaves_count=user.genefavorite_set.all|active|count %}
+                        <a>GENES & miRNAs <span class="caret"></span></a>
+                        <ul class="sub-menu drop genes-mirnas">
+                            <li class="menu-item"><a href="{% url 'genes' %}">Manage Gene & miRNA Favorites
+                                <span class="badge">{{ genefaves_count }}</span></a></li>
+                            <li class="menu-item"><a href="{% url 'gene_fav_create' %}">Create Gene & miRNA
+                                Favorites</a></li>
+                            <li class="menu-item"><a href="{% url 'gene_select_for_new_workbook' %}">Select Genes &
+                                miRNAs for a New Workbook</a></li>
                         </ul>
-                    </li>
-                    <li class="menu-item"><a href="{% url 'cohort_select_for_new_workbook' %}">Select Cohort for a New Workbook</a></li>
-                </ul>
-            </li>
-        </ul>
-    </nav>
+                    {% endwith %}
+                </li>
+                <li class="menu-item has-drop-down">
+                    <a>VARIABLES <span class="caret"></span></a>
+                    <ul class="sub-menu drop">
+                        <li class="menu-item"><a href="{% url 'variables' %}">Manage Variable Favorites Lists
+                            <span class="badge">{{ user.variablefavorite_set.all|active|count }}</span></a></li>
+                        <li class="menu-item"><a href="{% url 'variable_fav_create' %}">Create Variable Favorites
+                            List</a></li>
+                        <li class="menu-item"><a href="{% url 'variable_select_for_new_workbook' %}">Select Variables
+                            for a New Workbook</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item has-drop-down">
+                    <a>COHORTS <span class="caret"></span></a>
+                    <ul class="sub-menu drop">
+                        <li class="menu-item"><a href="{% url 'cohort_list' %}">Manage Saved Cohorts
+                            <span class="badge">
+                                {{ user.cohort_perms_set.all|active:'cohort'|cohort_owner_permission|count }}</span></a>
+                        </li>
+                        <li class="menu-item"><a href="{% url 'public_cohort_list' %}">Public Cohorts
+                            <span class="badge">{% public_cohort_count %}</span></a></li>
+                        <li class="menu-item has-drop-down__more"><span>Create a New Cohort</span>
+                            <ul class="drop">
+                                <li class="menu-item"><a href="{% url 'cohort' %}">Filters</a></li>
+                                <li class="menu-item"><a href="{% url 'cohort_barcodes' %}">Barcodes</a></li>
+                            </ul>
+                        </li>
+                        <li class="menu-item"><a href="{% url 'cohort_select_for_new_workbook' %}">Select Cohort for a
+                            New Workbook</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
     {% endif %}
 </header>

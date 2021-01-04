@@ -20,6 +20,7 @@ from builtins import str
 import logging
 import json
 import traceback
+import requests
 import os
 import re
 from os.path import join, dirname, exists
@@ -34,14 +35,36 @@ import django
 django.setup()
 
 from google_helpers.bigquery.bq_support import BigQuerySupport
-from projects.models import Program, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataVersion
+from projects.models import Program, Project, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataVersion
 from django.contrib.auth.models import User
 
 isb_superuser = User.objects.get(username="isb")
 
 logger = logging.getLogger('main_logger')
 
-ranges_needed = ['wbc_at_diagnosis', 'event_free_survival', 'days_to_death', 'days_to_last_known_alive', 'days_to_last_followup', 'age_at_diagnosis', 'year_of_diagnosis']
+ranges_needed = {
+    'wbc_at_diagnosis': 'by_200',
+    'event_free_survival_time_in_days': 'by_500',
+    'days_to_death': 'by_500',
+    'days_to_last_known_alive': 'by_500',
+    'days_to_last_followup': 'by_500',
+    'year_of_diagnosis': 'year',
+    'days_to_birth': 'by_negative_3k',
+    'year_of_initial_pathologic_diagnosis': 'year',
+    'age_at_diagnosis': None,
+    'age_at_index': None
+}
+
+ranges = {
+    'by_200': [{'first': "200", "last": "1400", "gap": "200", "include_lower": True, "unbounded": True,
+                             "include_upper": True, 'type': 'F', 'unit': '0.01'}],
+    'by_negative_3k': [{'first': "-15000", "last": "-5000", "gap": "3000", "include_lower": True, "unbounded": True,
+                             "include_upper": False, 'type': 'I'}],
+    'by_500': [{'first': "500", "last": "6000", "gap": "500", "include_lower": False, "unbounded": True,
+                             "include_upper": True, 'type': 'I'}],
+    'year': [{'first': "1976", "last": "2015", "gap": "5", "include_lower": True, "unbounded": False,
+                             "include_upper": False, 'type': 'I'}]
+}
 
 SOLR_TYPES = {
     'STRING': "string",
@@ -49,6 +72,11 @@ SOLR_TYPES = {
     "INTEGER": "plong",
     "DATE": "pdate"
 }
+
+SOLR_URI = settings.SOLR_URI
+SOLR_LOGIN = settings.SOLR_LOGIN
+SOLR_PASSWORD = settings.SOLR_PASSWORD
+SOLR_CERT = settings.SOLR_CERT
 
 def add_data_versions(dv_set):
     for dv in dv_set:
@@ -190,10 +218,20 @@ def main(config):
             for prog in config['programs']:
                 try:
                     obj = Program.objects.get(name=prog['name'], owner=isb_superuser, active=True, is_public=True)
-                    logger.info("[STATUS] Program {} found.".format(prog))
+                    logger.info("[STATUS] Program {} found - skipping creation.".format(prog))
                 except ObjectDoesNotExist:
                     logger.info("[STATUS] Program {} not found - creating.".format(prog))
                     obj = Program.objects.update_or_create(name=prog['name'], owner=isb_superuser, active=True, is_public=True)
+
+        if 'projects' in config:
+            for proj in config['projects']:
+                program = Program.objects.get(name=proj['program'], owner=isb_superuser, active=True)
+                try:
+                    obj = Project.objects.get(name=proj['name'], owner=isb_superuser, active=True, program=program)
+                    logger.info("[STATUS] Project {} found - skipping.".format(proj['name']))
+                except ObjectDoesNotExist:
+                    logger.info("[STATUS] Project {} not found - creating.".format(proj['name']))
+                    obj = Project.objects.update_or_create(name=proj['name'], description=proj['description'], owner=isb_superuser, active=True, program=program)
 
         if 'versions' in config:
             add_data_versions(config['versions'])
@@ -223,12 +261,13 @@ def main(config):
 
         for table in config['bq_tables']:
             table_name = table['name'].split(".")
+            solr_name = table.get('solr_name',table_name[-1])
             add_bq_tables([table['name']], table['version'], table['version_type'], table['programs'])
-            add_solr_collex([table_name[-1]], table['version'], table['version_type'], table['programs'])
+            add_solr_collex([solr_name], table['version'], table['version_type'], table['programs'])
 
             schema = BigQuerySupport.get_table_schema(table_name[0], table_name[1], table_name[2])
 
-            solr_schema[table_name[-1]] = []
+            solr_schema[solr_name] = []
 
             for field in schema:
                 if field['name'] not in attr_set:
@@ -245,7 +284,7 @@ def main(config):
                     }
                 attr = attr_set[field['name']]
                 attr['bq_tables'].append(table['name'])
-                attr['solr_collex'].append(table_name[-1])
+                attr['solr_collex'].append(solr_name)
 
                 if attr['name'] in display_vals:
                     if 'preformatted_values' in display_vals[attr['name']]:
@@ -263,9 +302,9 @@ def main(config):
 
                 if 'range' not in attr:
                     if attr['name'].lower() in ranges_needed:
-                        attr['range'] = []
+                        attr['range'] = ranges.get(ranges_needed.get(attr['name'], ''), [])
 
-                solr_schema[table_name[2]].append({
+                solr_schema[solr_name].append({
                     "name": field['name'], "type": SOLR_TYPES[field['type']], "multiValued": False, "stored": True
                 })
 
@@ -275,11 +314,24 @@ def main(config):
             schema_outfile.close()
 
             # add core to Solr
-            # add schema to core
-            # query-to-file the table
-            # pull file to local
-            # POST to Solr core
+            # sudo -u solr /opt/bitnami/solr/bin/solr create -c <solr_name>  -s 2 -rf 2
+            core_uri = "{}/solr/admin/cores?action=CREATE&name={}".format(settings.SOLR_URI,solr_name)
+            core_create = requests.post(core_uri, auth=(SOLR_LOGIN, SOLR_PASSWORD), verify=SOLR_CERT)
 
+            # add schema to core
+            schema_uri = "{}/solr/{}/schema".format(settings.SOLR_URI,solr_name)
+            schema_load = requests.post(schema_uri, data=json.dumps({"add-field": solr_schema[table_name[2]]}), headers={'Content-type': 'application/json'}, auth=(SOLR_LOGIN, SOLR_PASSWORD), verify=SOLR_CERT)
+
+            # query-to-file the table
+            # OR
+            # export from BQ console into GCS
+
+            # pull file to local
+            # gsutil cp gs://<BUCKET>/<CSV export> ./
+
+            # POST to Solr core
+            index_uri = "{}/solr/{}/update?commit=yes".format(settings.SOLR_URI,solr_name)
+            index_load = requests.post(index_uri, files={'file': open('export.csv', 'rb')}, headers={'Content-type': 'application/csv'}, auth=(SOLR_LOGIN, SOLR_PASSWORD), verify=SOLR_CERT)
 
         add_attributes([attr_set[x] for x in attr_set])
 
@@ -289,19 +341,20 @@ def main(config):
 
 if __name__ == "__main__":
     cmd_line_parser = ArgumentParser(description="Extract a data source from BigQuery and ETL it into Solr")
-    cmd_line_parser.add_argument('-j', '--json-conf', type=str, default='', help="JSON settings file")
+    cmd_line_parser.add_argument('-j', '--json-config-file', type=str, default='', help="JSON settings file")
 
     args = cmd_line_parser.parse_args()
 
-    if not len(args.json_conf):
+    if not len(args.json_config_file):
         print("[ERROR] You must supply a JSON settings file!")
+        cmd_line_parser.print_help()
         exit(1)
 
-    if not exists(join(dirname(__file__),args.json_conf)):
-        print("[ERROR] JSON config file {} not found.".format(args.json_conf))
+    if not exists(join(dirname(__file__),args.json_config_file)):
+        print("[ERROR] JSON config file {} not found.".format(args.json_config_file))
         exit(1)
 
-    f = open(join(dirname(__file__),args.json_conf), "r")
+    f = open(join(dirname(__file__),args.json_config_file), "r")
     settings = json.load(f)
 
     main(settings)

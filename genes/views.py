@@ -24,7 +24,7 @@ logger = logging.getLogger('main_logger')
 # returns a json object keyed on each gene symbol with values of whether or not they are valid
 @csrf_protect
 def check_gene_list_validity(request):
-    body_unicode = request.body.decode('utf-8')
+    body_unicode = request.body
     body = json.loads(body_unicode)
     gene_list = body['genes-list']
     response = {

@@ -54,18 +54,18 @@
                                                     <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
                                                         <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="igv-{{ attr_build }}-{{ attr.name }}-{{ v.value }}"
                                                                data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
-                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
-                                                         <span class="count">({{ v.count }})</span>
+                                                        {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
+                                                         <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
                                                     </label>
                                                 </li>
                                             {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                 <li class="extra-values checkbox" style="display:none;">
                                                     <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
                                                         <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="igv-{{ attr_build }}-{{ attr.name}}-{{ v.value }}"
                                                                data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
-                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
-                                                         <span class="count">({{ v.count }})</span>
+                                                        {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
+                                                         <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
                                                     </label>
                                                 </li>
                                             {% else %}
@@ -73,14 +73,14 @@
                                                     <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
                                                         <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="igv-{{ attr_build }}-{{ attr.name }}-{{ v.value }}"
                                                                data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
-                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
-                                                         <span class="count">({{ v.count }})</span>
+                                                        {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
+                                                         <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
                                                     </label>
                                                 </li>
                                             {% endif %}
                                         {% endfor %}
                                         {% if num_more > 0 %}
-                                            <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                            <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                         {% endif %}
                                     {% endwith %}
                                 </ul>
@@ -118,7 +118,7 @@
         </div>
         <div class="filelist-panel panel">
             <div class="panel-heading">
-                <h4>File Listing</h4>
+                <h4>Sample File Listing</h4>
                 <div class="page-action-group pull-right">
                     <ul>
                         <li class="menu-item">
@@ -139,7 +139,7 @@
             </div>
             <div class="panel-body">
                 <div class="dataTables_info">
-                    <span class="file-page-count">Showing <span class="showing">25</span> of <span class="total-file-count"></span> entries</span>
+                    <span class="file-page-count">Showing <span class="showing">25</span> of <span class="total-file-count"></span> sample files</span>
                     <span class="no-file-page-count" style="display: none;">Showing 0 files.</span>
                     <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
                 </div>
@@ -178,6 +178,7 @@
                         <tr>
                             <th class="col-program" columnId="col-program">Program</th>
                             <th class="col-barcode" columnId="col-barcode">Case Barcode</th>
+                            <th class="col-sbarcode" columnId="col-sbarcode">Sample Barcode</th>
                             <th class="col-filename"columnId="col-filename">File Name</th>
                             <th class="col-diseasecode" columnId="col-diseasecode">Disease Code</th>
                             <th class="col-exp-strategy" columnId="col-exp-strategy">Exp. Strategy</th>
@@ -191,12 +192,13 @@
                     </thead>
                     <colgroup>
                         <col style="width: 9%">
-                        <col style="width: 12%">
-                        <col style="width: 19%">
+                        <col style="width: 10%">
+                        <col style="width: 7%">
+                        <col style="width: 15%">
                         <col style="width: 9%">
                         <col style="width: 9%">
                         <col style="width: 8%">
-                        <col style="width: 11%">
+                        <col style="width: 10%">
                         <col style="width: 7%">
                         <col style="width: 7%">
                         <col style="width: 5%">

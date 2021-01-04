@@ -152,6 +152,10 @@ def css_test(request):
 '''
 Returns page that has user details
 '''
+@login_required
+def user_detail_login(request):
+    user_id = request.user.id
+    return user_detail(request, user_id)
 
 
 @login_required
@@ -182,7 +186,7 @@ def user_detail(request, user_id):
             'user_opt_in_status': user_opt_in_status
         }
 
-        user_details['gcp_list'] = len(GoogleProject.objects.filter(user=user))
+        user_details['gcp_list'] = len(GoogleProject.objects.filter(user=user, active=1))
 
         forced_logout = 'dcfForcedLogout' in request.session
         nih_details = get_nih_user_details(user_id, forced_logout)
@@ -444,11 +448,21 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
             is_public = False
             for access_entry in dataset['access']:
                 # print(access_entry)
-                if access_entry['role'] == 'READER' and access_entry['specialGroup'] == 'allAuthenticatedUsers':
+                if access_entry.get('role') == 'READER' and access_entry.get('specialGroup') == 'allAuthenticatedUsers':
                     is_public = True
                     break
             if is_public:
-                response = bq_service.tabledata().list(projectId=proj_id, datasetId=dataset_id, tableId=table_id,
+                tbl_data=bq_service.tables().get(projectId=proj_id, datasetId=dataset_id, tableId=table_id).execute()
+                if tbl_data.get('type') == 'VIEW' and tbl_data.get('view') and tbl_data.get('view').get('query'):
+                    view_query_template = '''#standardSql
+                            {query_stmt}
+                            LIMIT {max}'''
+                    view_query = view_query_template.format(query_stmt=tbl_data['view']['query'], max=MAX_ROW)
+                    response = bq_service.jobs().query(
+                        projectId=settings.BIGQUERY_PROJECT_ID,
+                        body={ 'query': view_query  }).execute()
+                else:
+                    response = bq_service.tabledata().list(projectId=proj_id, datasetId=dataset_id, tableId=table_id,
                                                        maxResults=MAX_ROW).execute()
                 if response and int(response['totalRows']) > 0:
                     result = {
@@ -670,6 +684,12 @@ def about_page(request):
 def vid_tutorials_page(request):
     return render(request, 'isb_cgc/video_tutorials.html')
 
+def how_to_discover_page(request):
+    return render(request, 'how_to_discover_page.html')
+
+def contact_us(request):
+    return render(request, 'isb_cgc/contact_us.html')
+
 
 def bq_meta_search(request):
     bq_filter_file_name = 'bq_meta_filters.json'
@@ -684,10 +704,17 @@ def bq_meta_data(request):
     bq_meta_data = requests.get(bq_meta_data_file_path).json()
     return JsonResponse(bq_meta_data, safe=False)
 
+def programmatic_access_page(request):
+    return render(request, 'isb_cgc/programmatic_access.html')
+
+def workflow_page(request):
+    return render(request, 'isb_cgc/workflow.html')
+
 
 @login_required
 def dashboard_page(request):
     context = {}
+    display_count = 6
     try:
         # Cohort List
         isb_superuser = User.objects.get(is_staff=True, is_superuser=True, is_active=True)
@@ -695,19 +722,22 @@ def dashboard_page(request):
                                                                                                               flat=True)
         cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(
             cohort__id__in=public_cohorts)))
-        cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
+        cohorts_count = Cohort.objects.filter(id__in=cohort_perms, active=True).count()
+        cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')[:display_count]
 
         # Program List
         ownedPrograms = request.user.program_set.filter(active=True)
         sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
         programs = ownedPrograms | sharedPrograms
-        programs = programs.distinct().order_by('-last_date_saved')
+        programs_count = programs.distinct().count()
+        programs = programs.distinct().order_by('-last_date_saved')[:display_count]
 
         # Workbook List
         userWorkbooks = request.user.workbook_set.filter(active=True)
         sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
         workbooks = userWorkbooks | sharedWorkbooks
-        workbooks = workbooks.distinct().order_by('-last_date_saved')
+        workbooks_count = workbooks.distinct().count()
+        workbooks = workbooks.distinct().order_by('-last_date_saved')[:display_count]
 
         # # Notebook VM Instance
         # user_instances = request.user.instance_set.filter(active=True)
@@ -744,18 +774,25 @@ def dashboard_page(request):
         # }
 
         # Gene & miRNA Favorites
-        genefaves = request.user.genefavorite_set.filter(active=True)
+        genefaves = request.user.genefavorite_set.filter(active=True).order_by('-last_date_saved')[:display_count]
+        genefaves_count = request.user.genefavorite_set.filter(active=True).count()
 
         # Variable Favorites
-        varfaves = request.user.variablefavorite_set.filter(active=True)
+        varfaves = request.user.variablefavorite_set.filter(active=True).order_by('-last_date_saved')[:display_count]
+        varfaves_count = request.user.variablefavorite_set.filter(active=True).count()
 
         context = {
             'request': request,
             'cohorts': cohorts,
+            'cohorts_count': cohorts_count,
             'programs': programs,
+            'programs_count': programs_count,
             'workbooks': workbooks,
+            'workbooks_count': workbooks_count,
             'genefaves': genefaves,
+            'genefaves_count': genefaves_count,
             'varfaves': varfaves,
+            'varfaves_count': varfaves_count,
             # 'optinstatus': opt_in_status
             # 'notebook_vm': notebook_vm,
             # 'gcp_list': gcp_list,

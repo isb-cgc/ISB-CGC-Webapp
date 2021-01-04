@@ -9,231 +9,303 @@
 {% block page_name %}variable_edit{% endblock %}
 
 {% block page_header %}
-{# TODO if page is access via adding a list to a workbook, attach a warning if the user navigates from this page without applying the workbook list #}
-<div class="container">
-    <ol class="breadcrumb">
+    {# TODO if page is access via adding a list to a workbook, attach a warning if the user navigates from this page without applying the workbook list #}
+    <div class="container">
+        <ol class="breadcrumb">
+            {% if workbook %}
+                <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+                <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
+                <li><a href="{% url 'workbook_detail' workbook.id %}">{{ workbook.name }}</a></li>
+                <li><a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Saved Variable
+                    Favorites</a></li>
+            {% elif new_workbook %}
+                <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            {% else %}
+                <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+                <li><a href="{% url 'variables' %}">Saved Variable Favorites</a></li>
+            {% endif %}
+        </ol>
+        {% csrf_token %}
         {% if workbook %}
-            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
-            <li><a href="{% url 'workbook_detail' workbook.id %}">{{ workbook.name }}</a></li>
-            <li><a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Saved Variable Favorites</a></li>
-        {% elif new_workbook %}
-            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-        {% else %}
-            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-            <li><a href="{% url 'variables' %}">Saved Variable Favorites</a></li>
-        {% endif %}
-    </ol>
-    {% csrf_token %}
-    {% if workbook %}
-        <h1 class="page-header">Data Source | Variables</h1>
-        <div class="page-action-group">
-            <button id="apply_to_worksheet" workbook_id="{{ workbook.id }}" worksheet_id="{{ worksheet.id }}" class="btn btn-primary">Apply to Worksheet</button>
-            <a href="{% url 'workbook_detail' workbook.id %}" class="btn btn-link">Back to Workbook</a>
-        </div>
-    {% else  %}
-        {% if existing_variable_list %}
-            <div class="clearfix">
-                <h1 class="page-header pull-left">Edit Variable Favorite</h1>
-                <ul class="page-action-group pull-right" role="menubar">
-                    <li role="menuitem"><button class="btn btn-primary" variable_id="{{ existing_variable_list.id }}" id="edit_favorite_list" >Save Changes</button></li>
-                    <li role="menuitem"><a class="btn btn-link" href="{% url 'variable_fav_detail' existing_variable_list.id %}">Cancel</a></li>
-                </ul>
-            </div>
-        {% elif new_workbook %}
             <h1 class="page-header">Data Source | Variables</h1>
-            <ul class="page-action-group">
-                <button id="select_then_create_new_workbook" class="btn btn-primary">Create New Workbook with Selected Variables</button>
-                <a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>
-            </ul>
+            <div class="page-action-group">
+                <button id="apply_to_worksheet" workbook_id="{{ workbook.id }}" worksheet_id="{{ worksheet.id }}"
+                        class="btn btn-primary">Apply to Worksheet
+                </button>
+                <a href="{% url 'workbook_detail' workbook.id %}" class="btn btn-link">Back to Workbook</a>
+            </div>
         {% else %}
-            <h1 class="page-header pull-left">Create Variable Favorite</h1>
-            <ul class="page-action-group pull-right">
-                <li><button class="btn btn-primary" id="create_favorite_list">Save As Favorite</button></li>
-                <li><a class="btn btn-link" href="{% url 'variables' %}">Cancel</a></li>
-            </ul>
+            {% if existing_variable_list %}
+                <div class="clearfix">
+                    <h1 class="page-header pull-left">Edit Variable Favorite</h1>
+                    <ul class="page-action-group pull-right" role="menubar">
+                        <li role="menuitem">
+                            <button class="btn btn-primary" variable_id="{{ existing_variable_list.id }}"
+                                    id="edit_favorite_list">Save Changes
+                            </button>
+                        </li>
+                        <li role="menuitem"><a class="btn btn-link"
+                                               href="{% url 'variable_fav_detail' existing_variable_list.id %}">Cancel</a>
+                        </li>
+                    </ul>
+                </div>
+            {% elif new_workbook %}
+                <h1 class="page-header">Data Source | Variables</h1>
+                <ul class="page-action-group">
+                    <button id="select_then_create_new_workbook" class="btn btn-primary">Create New Workbook with
+                        Selected Variables
+                    </button>
+                    <a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>
+                </ul>
+            {% else %}
+                <h1 class="page-header pull-left">Create Variable Favorite</h1>
+                <ul class="page-action-group pull-right">
+                    <li>
+                        <button class="btn btn-primary" id="create_favorite_list">Save As Favorite</button>
+                    </li>
+                    <li><a class="btn btn-link" href="{% url 'variables' %}">Cancel</a></li>
+                </ul>
+            {% endif %}
         {% endif %}
-    {% endif %}
-</div>
+    </div>
 {% endblock %}
 {% block content %}
-{% csrf_token %}
-    <div class="row">
-        <section class="col-lg-12">
-            <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
-                <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                Your variable list's name contains invalid characters (<span class="unallowed-chars"></span>). Please choose another name.
-            </div>
-             <div class="panel form-group panel-default">
-                {% if existing_variable_list %}
-                    <div class="panel-heading">
-                        <label for="variable_list_name_input" class="panel-title">Name of Favorite (Required)</label>
-                    </div>
-                    <div class="panel-body">
-                        <input type="text" id="variable_list_name_input" placeholder="My new favorite variable" class="form-control" value="{{ existing_variable_list.name }}" required>
-                    </div>
-                {% else %}
-                    <div class="panel-heading">
-                        <label for="variable_list_name_input" class="panel-title">Name of Favorite (Required)</label>
-                    </div>
-                    <div class="panel-body">
-                        <input type="text" id="variable_list_name_input" placeholder="My new favorite variable" class="form-control" value="" required>
-                    </div>
-                {% endif %}
-             </div>
-        </section>
-    </div>
-    <div class="row">
-        <div class="col-lg-6">
-            <div class="panel panel-default">
-                <ul class="nav nav-tabs" role="tablist">
-                    {% with public_programs|first as first_prog %}
-                        {% for program in public_programs %}
-                             <li role="presentation" class="program-tab{% if program.id == first_prog.id %} active{% endif %}"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }}</a></li>
-                        {% endfor %}
-                        <li role="presentation" class="program-tab {% if favorite_list|length <= 0 %}disabled{% endif %}"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab" titles="Favorites">Favorites ({{ favorite_list | length }})</a></li>
-                        <li role="presentation" class="program-tab {% if not has_user_data %}disabled{% endif %}"><a href="#0-data" role="tab" class="user-vars-tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
-                    {% endwith %}
-                </ul>
-            </div>
+    {% csrf_token %}
+    <div class="container">
+        <div class="row">
+            <section class="col-lg-12">
+                <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+                    <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span
+                            class="sr-only">Close</span></button>
+                    Your variable list's name contains invalid characters (<span class="unallowed-chars"></span>).
+                    Please choose another name.
+                </div>
+                <div class="panel form-group panel-default">
+                    {% if existing_variable_list %}
+                        <div class="panel-heading">
+                            <label for="variable_list_name_input" class="panel-title">Name of Favorite
+                                (Required)</label>
+                        </div>
+                        <div class="panel-body">
+                            <input type="text" id="variable_list_name_input" placeholder="My new favorite variable"
+                                   class="form-control" value="{{ existing_variable_list.name }}" required>
+                        </div>
+                    {% else %}
+                        <div class="panel-heading">
+                            <label for="variable_list_name_input" class="panel-title">Name of Favorite
+                                (Required)</label>
+                        </div>
+                        <div class="panel-body">
+                            <input type="text" id="variable_list_name_input" placeholder="My new favorite variable"
+                                   class="form-control" value="" required>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-lg-6" id="filter-panel">
-        <section class="panel panel-default">
-            <div class="panel-body">
-                <div class="row">
-                    <div class="tab-content data-tab-content">
+        <div class="row">
+            <div class="col-lg-7">
+                <div class="panel panel-default">
+                    <ul class="nav nav-tabs" role="tablist">
                         {% with public_programs|first as first_prog %}
                             {% for program in public_programs %}
-                                <div id="{{ program.id }}-data" class="tab-pane filter-panel {% if program.id == first_prog.id %}active{% endif %}" role="tabpanel">
-                                    <div class="tabpanel" role="tabpanel">
-                                        <div class="tabpanel" role="tabpanel">
-                                        <ul class="nav nav-tabs" role="tablist">
-                                            <li role="presentation" class="active"><a href="#{{ program.id }}-common" aria-controls="common" role="tab" data-toggle="tab">Common</a></li>
-                                            <li role="presentation"><a href="#{{ program.id }}-clinical" aria-controls="clinical" role="tab" data-toggle="tab">Clinical Search</a></li>
-                                        </ul>
-
-                                        <!-- Tab panes -->
-                                        <div class="tab-content">
-                                            <div role="tabpanel" class="tab-pane active filter-panel" id="{{ program.id }}-common">
-                                                <ul class="list-group" id="{{ program.id }}-common-accordion" role="tablist" aria-multiselectable="true">
-                                                    {% for attr in program.id|get_prog_attr:program_attrs %}
-                                                        <li class="list-group-item checkbox">
-                                                            <div id="heading-{{ attr.name }}" class="list-group-item__heading">
-                                                                <label>
-                                                                    <input aria-label="Feature Search" class="variable-toggle-checkbox" value="{{ attr.name }}" data-code="{{ attr.data_code }}" type="checkbox" var_type="{{ attr.type }}" name="elements-selected" data-text-label="{{ attr.displ_name }}">
-                                                                    {{ attr.displ_name }}
-                                                                </label>
-                                                            </div>
-                                                        </li>
-                                                    {% endfor %}
-                                                </ul>
-                                            </div>
-                                            <div role="tabpanel" class="tab-pane filter-panel" id="{{ program.id }}-clinical">
-                                                <ul class="list-group clinical-accordion" id="{{ program.id }}-clinical-accordion" data-field="CLIN" role="tablist" aria-multiselectable="true">
-                                                    <li class="list-group-item">
-                                                        {% for type in datatype_list %}
-                                                            {% if type.datatype == 'CLIN' %}
-                                                                <div class="form-group search-field {{ type.datatype }}-options ">
-                                                                    <div class="search-term feature-search">
-                                                                        <label for="{{ type.datatype }}-search-term-select-{{ program.id }}">Feature Search</label>
-                                                                        <select id="{{ type.datatype }}-search-term-select-{{ program.id }}" class="form-control search-term-field"></select>
-                                                                    </div>
-                                                                </div>
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    </div>
-                                </div>
+                                <li role="presentation"
+                                    class="program-tab{% if program.id == first_prog.id %} active{% endif %}"><a
+                                        href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data"
+                                        data-program-id="{{ program.id }}">{{ program.name }}</a></li>
                             {% endfor %}
+                            <li role="presentation"
+                                class="program-tab {% if favorite_list|length <= 0 %}disabled{% endif %}"><a
+                                    href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab"
+                                    titles="Favorites">Favorites ({{ favorite_list | length }})</a></li>
+                            <li role="presentation" class="program-tab {% if not has_user_data %}disabled{% endif %}"><a
+                                    href="#0-data" role="tab" class="user-vars-tab" data-toggle="tab" title="User Data"
+                                    data-program-id="0">User Data</a></li>
                         {% endwith %}
-                        <div role="tabpanel" class="tab-pane filter-panel" id="favorites">
-                            <ul class="list-group" id="favorites-accordion" role="tablist" aria-multiselectable="true">
-                                {% for fav in favorite_list %}
-                                    {% if fav.version == 'v2' %}
-                                        <li class="list-group-item">
-                                        <div id="heading-{{ fav.id }}" data-field="{{ fav.name }}" class="list-group-item__heading">
-                                            <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ fav.id }}" aria-expanded="false" aria-controls="collapse-{{ fav.id }}">
-                                                <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ fav.name }}
-                                            </a>
-                                        </div>
-
-                                        <div id="collapse-{{ fav.id }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ fav.id }}">
-                                            <ul class="search-checkbox-list" id="clin-accordion" role="tablist" aria-multiselectable="true">
-                                                {% for var in fav.variable_set.all %}
-                                                    <li class="checkbox">
-                                                        <div id="heading-{{ var.id }}">
-                                                            <label>
-                                                                <input aria-label="{{ var.name }}" class="variable-toggle-checkbox" type="checkbox" value="{{ var.code }}" var_type="{{ var.type }}" data-code="{{ var.code }}" name="elements-selected" data-text-label="{{ var.name }}" {% if var.feature %}data-feature-id="{{ var.feature.id }}"{% endif %}>
-                                                                {{ var.name }}
-                                                            </label>
-                                                        </div>
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
-                                        </div>
-                                    </li>
-                                    {% endif %}
-                                {% endfor %}
-                            </ul>
-                            <div class="tab-content">
-                                <a href="{% url 'variables' %}">Manage Saved Favorites ({{ full_favorite_list_count }})</a>
-                            </div>
-                        </div>
-                        <div id="0-data" class="tab-pane filter-panel user-data-panel" role="tabpanel">
-                            <div class="panel-body">
-                                <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
-                            </div>
-                        </div>
-                    </div>
+                    </ul>
                 </div>
             </div>
-        </section>
-    </div>
-        <div class="col-lg-6">
-        <section class="panel">
-            <form action="">
-                <div class="form-group selected-filters panel-default">
-                    <div class="panel-heading clearfix">
-                        <label class="panel-title pull-left">Selected Variables</label>
-                        <p class="pull-right"><a role="button" id="clear-filters">Clear All</a></p>
-                    </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-7" id="filter-panel">
+                <section class="panel panel-default">
                     <div class="panel-body">
-                        {% if existing_variable_list %}
-                            {% for variable in existing_variable_list.variable_set.all %}
-                                <span class="selected-variable"  data-type="{{ variable.type }}" data-name="{{ variable.name }}" data-code="{{ variable.code }}" data-feature-id="{{ variable.feature_id }}">
+                        <div class="row">
+                            <div class="tab-content data-tab-content">
+                                {% with public_programs|first as first_prog %}
+                                    {% for program in public_programs %}
+                                        <div id="{{ program.id }}-data"
+                                             class="tab-pane filter-panel {% if program.id == first_prog.id %}active{% endif %}"
+                                             role="tabpanel">
+                                            <div class="tabpanel" role="tabpanel">
+                                                <div class="tabpanel" role="tabpanel">
+                                                    <ul class="nav nav-tabs" role="tablist">
+                                                        <li role="presentation" class="active"><a
+                                                                href="#{{ program.id }}-common" aria-controls="common"
+                                                                role="tab" data-toggle="tab">Common</a></li>
+                                                        <li role="presentation"><a href="#{{ program.id }}-clinical"
+                                                                                   aria-controls="clinical" role="tab"
+                                                                                   data-toggle="tab">Clinical Search</a>
+                                                        </li>
+                                                    </ul>
+
+                                                    <!-- Tab panes -->
+                                                    <div class="tab-content">
+                                                        <div role="tabpanel" class="tab-pane active filter-panel"
+                                                             id="{{ program.id }}-common">
+                                                            <ul class="list-group"
+                                                                id="{{ program.id }}-common-accordion" role="tablist"
+                                                                aria-multiselectable="true">
+                                                                {% for attr in program.id|get_prog_attr:program_attrs %}
+                                                                    <li class="list-group-item checkbox">
+                                                                        <div id="heading-{{ attr.name }}"
+                                                                             class="list-group-item__heading">
+                                                                            <label>
+                                                                                <input aria-label="Feature Search"
+                                                                                       class="variable-toggle-checkbox"
+                                                                                       value="{{ attr.name }}"
+                                                                                       data-code="{{ attr.data_code }}"
+                                                                                       type="checkbox"
+                                                                                       var_type="{{ attr.type }}"
+                                                                                       name="elements-selected"
+                                                                                       data-text-label="{{ attr.displ_name }}">
+                                                                                {{ attr.displ_name }}
+                                                                            </label>
+                                                                        </div>
+                                                                    </li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </div>
+                                                        <div role="tabpanel" class="tab-pane filter-panel"
+                                                             id="{{ program.id }}-clinical">
+                                                            <ul class="list-group clinical-accordion"
+                                                                id="{{ program.id }}-clinical-accordion"
+                                                                data-field="CLIN" role="tablist"
+                                                                aria-multiselectable="true">
+                                                                <li class="list-group-item">
+                                                                    {% for type in datatype_list %}
+                                                                        {% if type.datatype == 'CLIN' %}
+                                                                            <div class="form-group search-field {{ type.datatype }}-options ">
+                                                                                <div class="search-term feature-search">
+                                                                                    <label for="{{ type.datatype }}-search-term-select-{{ program.id }}">Feature
+                                                                                        Search</label>
+                                                                                    <select id="{{ type.datatype }}-search-term-select-{{ program.id }}"
+                                                                                            class="form-control search-term-field"></select>
+                                                                                </div>
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% endwith %}
+                                <div role="tabpanel" class="tab-pane filter-panel" id="favorites">
+                                    <ul class="list-group" id="favorites-accordion" role="tablist"
+                                        aria-multiselectable="true">
+                                        {% for fav in favorite_list %}
+                                            {% if fav.version == 'v2' %}
+                                                <li class="list-group-item">
+                                                    <div id="heading-{{ fav.id }}" data-field="{{ fav.name }}"
+                                                         class="list-group-item__heading">
+                                                        <a role="button" data-toggle="collapse"
+                                                           data-parent="#clin-accordion" href="#collapse-{{ fav.id }}"
+                                                           aria-expanded="false" aria-controls="collapse-{{ fav.id }}">
+                                                            <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"
+                                                                                                style="display:none;"></i> {{ fav.name }}
+                                                        </a>
+                                                    </div>
+
+                                                    <div id="collapse-{{ fav.id }}"
+                                                         class="list-group-item__body collapse" role="tabpanel"
+                                                         aria-labelledby="heading-{{ fav.id }}">
+                                                        <ul class="search-checkbox-list" id="clin-accordion"
+                                                            role="tablist" aria-multiselectable="true">
+                                                            {% for var in fav.variable_set.all %}
+                                                                <li class="checkbox">
+                                                                    <div id="heading-{{ var.id }}">
+                                                                        <label>
+                                                                            <input aria-label="{{ var.name }}"
+                                                                                   class="variable-toggle-checkbox"
+                                                                                   type="checkbox"
+                                                                                   value="{{ var.code }}"
+                                                                                   var_type="{{ var.type }}"
+                                                                                   data-code="{{ var.code }}"
+                                                                                   name="elements-selected"
+                                                                                   data-text-label="{{ var.name }}"
+                                                                                   {% if var.feature %}data-feature-id="{{ var.feature.id }}"{% endif %}>
+                                                                            {{ var.name }}
+                                                                        </label>
+                                                                    </div>
+                                                                </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                    <div class="tab-content">
+                                        <a href="{% url 'variables' %}">Manage Saved Favorites
+                                            ({{ full_favorite_list_count }})</a>
+                                    </div>
+                                </div>
+                                <div id="0-data" class="tab-pane filter-panel user-data-panel" role="tabpanel">
+                                    <div class="panel-body">
+                                        <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="col-lg-5">
+                <section class="panel">
+                    <form action="">
+                        <div class="form-group selected-filters panel-default">
+                            <div class="panel-heading clearfix">
+                                <label class="panel-title pull-left">Selected Variables</label>
+                                <p class="pull-right"><a role="button" id="clear-filters">Clear All</a></p>
+                            </div>
+                            <div class="panel-body">
+                                {% if existing_variable_list %}
+                                    {% for variable in existing_variable_list.variable_set.all %}
+                                        <span class="selected-variable" data-type="{{ variable.type }}"
+                                              data-name="{{ variable.name }}" data-code="{{ variable.code }}"
+                                              data-feature-id="{{ variable.feature_id }}">
                                     <a class="delete-x filter-label label label-default">
                                         {{ variable.name }}
                                         <i class="fa fa-times"></i>
                                     </a>
                                 </span>
-                            {% endfor %}
-                        {% else %}
-                            <p class="help-block">Select your favorite variables from the left panel.</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </form>
-        </section>
-    </div>
-    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="help-block">Select your favorite variables from the left panel.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </div>
 
-    <!-- Hidden form for creating a workbook from the variable list -->
-    <form id="create-workbook" method="POST" action="" style="display:none;">
-        {% csrf_token %}
-    </form>
+        <!-- Hidden form for creating a workbook from the variable list -->
+        <form id="create-workbook" method="POST" action="" style="display:none;">
+            {% csrf_token %}
+        </form>
+    </div>
     <script type="text/javascript">
-    var base_api_url    = '{{ base_api_url|safe }}';
-    var cohort_id       = undefined;
+        var base_api_url = '{{ base_api_url|safe }}';
+        var cohort_id = undefined;
     </script>
 {% endblock %}
 
 {% block js_file %}
-	{{ block.super }}
-	<script src="{% static 'js/variables/variables.js' %}"></script>
+    {{ block.super }}
+    <script src="{% static 'js/variables/variables.js' %}"></script>
 {% endblock %}
