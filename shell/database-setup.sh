@@ -102,7 +102,7 @@ if [ -n "$CI" ]; then
     python3 ${HOMEROOT}/scripts/add_alldata_cohort.py -o cloudsql -p True
 else
     # ...but we do if we're doing a local build
-    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py -f $GCLOUD_PROJECT_ID -o all -p True -a True
+    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py -f $GCLOUD_PROJECT_ID -o all -p True
 fi
 
 echo "Running development dataset setup"

@@ -54,7 +54,8 @@ ranges_needed = {
     'year_of_diagnosis': 'year',
     'days_to_birth': 'by_negative_3k',
     'year_of_initial_pathologic_diagnosis': 'year',
-    'age_at_diagnosis': None
+    'age_at_diagnosis': None,
+    'age_at_index': None
 }
 
 ranges = {

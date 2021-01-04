@@ -11,7 +11,7 @@
 {% endblock %}
 {% block page_name %}bq-meta-searcher{% endblock %}
 {% block page_header %}
-    <div class="bq-banner alert alert-dismissible text-center alert-warning" style="margin-top:2px;padding: 3px 10px;margin-bottom: 0;" role="alert">
+    <div class="bq-banner alert alert-dismissible text-center alert-warning" role="alert">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
                 aria-hidden="true">&times;</span></button>
         <strong>ISB-CGC is now starting to migrate our BigQuery tables to a new project: isb-cgc-bq.</strong><br>You
@@ -21,43 +21,53 @@
         ISB-CGC BigQuery Projects</a>.
     </div>
     <div class="bq-header-container container">
-        <h1 class="page-header">BigQuery Table Search</h1>
-        <ul class="nav">
-            <li class="navbar-item">
-                <a class="nav-link"
-                   href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/BigQuery.html"
-                   target="_blank">ISB-CGC BigQuery Documentation<i class="fa fa-external-link" aria-hidden="true"></i></a>
-            </li>
-            <li class="navbar-item">
-                <a class="nav-link"
-                   href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/progapi/bigqueryGUI/LinkingBigQueryToIsb-cgcProject.html"
-                   target="_blank">ISB-CGC BigQuery Access Info<i class="fa fa-external-link" aria-hidden="true"></i></a>
-            </li>
-{#            <li class="navbar-item">#}
-{#                <a class="nav-link"#}
-{#                   href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html"#}
-{#                   target="_blank">ISB-CGC Notebooks<i class="fa fa-external-link" aria-hidden="true"></i></a>#}
-{#            </li>#}
-            <li class="navbar-item">
-                <a class="nav-link"
-                   href="https://console.cloud.google.com/bigquery"
-                   target="_blank">Google BigQuery Console<i class="fa fa-external-link" aria-hidden="true"></i></a>
-            </li>
-            <li class="navbar-item">
-                <a class="nav-link"
-                   href="https://cloud.google.com/bigquery/what-is-bigquery"
-                   target="_blank">About BigQuery<i class="fa fa-external-link" aria-hidden="true"></i></a>
-            </li>
-            <li class="navbar-item">
-                <a class="nav-link"
-                   href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/ReleaseNotes/BigQueryTableSearchReleaseNotes.html"
-                   target="_blank">Release Notes<i class="fa fa-external-link" aria-hidden="true"></i></a>
-            </li>
-        </ul>
-        <div class="col-lg-12 col-md-12 col-sm-12">
-            <p><strong>Explore and learn more about available ISB-CGC BigQuery tables with this search feature.</strong>
-            </p>
-            <p>Find tables of interest based on category, reference genome build, data type and free-form text search.</p>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <h1 class="page-header">BigQuery Table Search</h1>
+                <ul class="nav">
+                    <li class="navbar-item">
+                        <a class="nav-link"
+                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/BigQuery.html"
+                           target="_blank">ISB-CGC BigQuery Documentation<i class="fa fa-external-link"
+                                                                            aria-hidden="true"></i></a>
+                    </li>
+                    <li class="navbar-item">
+                        <a class="nav-link"
+                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/progapi/bigqueryGUI/LinkingBigQueryToIsb-cgcProject.html"
+                           target="_blank">ISB-CGC BigQuery Access Info<i class="fa fa-external-link"
+                                                                          aria-hidden="true"></i></a>
+                    </li>
+                    {#            <li class="navbar-item">#}
+                    {#                <a class="nav-link"#}
+                    {#                   href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html"#}
+                    {#                   target="_blank">ISB-CGC Notebooks<i class="fa fa-external-link" aria-hidden="true"></i></a>#}
+                    {#            </li>#}
+                    <li class="navbar-item">
+                        <a class="nav-link"
+                           href="https://console.cloud.google.com/bigquery"
+                           target="_blank">Google BigQuery Console<i class="fa fa-external-link" aria-hidden="true"></i></a>
+                    </li>
+                    <li class="navbar-item">
+                        <a class="nav-link"
+                           href="https://cloud.google.com/bigquery/what-is-bigquery"
+                           target="_blank">About BigQuery<i class="fa fa-external-link" aria-hidden="true"></i></a>
+                    </li>
+                    <li class="navbar-item">
+                        <a class="nav-link"
+                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/ReleaseNotes/BigQueryTableSearchReleaseNotes.html"
+                           target="_blank">Release Notes<i class="fa fa-external-link" aria-hidden="true"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <p><strong>Explore and learn more about available ISB-CGC BigQuery tables with this search
+                    feature.</strong>
+                </p>
+                <p>Find tables of interest based on category, reference genome build, data type and free-form text
+                    search.</p>
+            </div>
         </div>
     </div>
 
@@ -113,7 +123,7 @@
                     </div>
                     <div>
                         <label>Reference Genome</label>
-                        <select class="form-control bq-select" data-column-name="referenceGenome">reference_genome
+                        <select class="form-control bq-select" data-column-name="referenceGenome">
                             {% for option in reference_genome.options %}
                                 <option value="{{ option.value }}">{{ option.label }}</option>
                             {% endfor %}
@@ -149,18 +159,30 @@
                     <div>
                         <label>Access</label>
                         <select id="dataAccess" class="form-control bq-select" data-column-name="dataAccess">
-                            <option value="" selected>All</option>
+                            <option value="" selected>ALL</option>
                             <option value="open">Open Access</option>
                             <option value="controlled">Controlled Access</option>
                         </select>
                     </div>
                     <div id="advSearch0" class="adv-div collapse">
                         <div>
-                            <label>Dataset ID</label>
+                            <label>BQ Project</label>
+                            <select class="form-control bq-select" data-column-name="projectId">
+                                {% for option in project_id.options %}
+                                    {% if option.value == '' %}
+                                        <option value="{{ option.value }}" selected>{{ option.label }}</option>
+                                    {% else %}
+                                        <option value="^{{ option.value }}$">{{ option.label }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label>BQ Dataset</label>
                             <input type="text" class="form-control bq-filter" data-column-name="datasetId">
                         </div>
                         <div>
-                            <label>Table ID</label>
+                            <label>BQ Table</label>
                             <input type="text" class="form-control bq-filter" data-column-name="tableId">
                         </div>
                         <div>
@@ -203,8 +225,9 @@
                         <th style="width:3%;"></th>
                         <th style="width:17%;">Name</th>
                         <th></th>
-                        <th style="width:15%;">Dataset ID</th>
-                        <th style="width:15%;">Table ID</th>
+                        <th style="width:15%;">BQ Project</th>
+                        <th style="width:15%;">BQ Dataset</th>
+                        <th style="width:15%;">BQ Table</th>
                         <th>Full ID</th>
                         <th style="width:8%;">Program</th>
                         <th style="width:8%;">Category</th>
@@ -272,8 +295,8 @@
                         </label>
                     </div>
                     <div>
-                        <a id="gcp-open-btn" class="btn submit-btn" href="" target="_blank" class="btn btn-primary"
-                        ><span>OK</span></a>
+                        <a id="gcp-open-btn" href="" target="_blank" class="btn btn-primary submit-btn"
+                        >OK</a>
                         <button type="button" class="btn" data-dismiss="modal">Cancel</button>
                     </div>
                 </div>
