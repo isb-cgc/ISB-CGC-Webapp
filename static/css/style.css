@@ -3036,7 +3036,7 @@ html {
 .site-footer {
   background-color: #003a55;
   text-align: center;
-  font-size: 1.2em;
+  font-size: 1em;
 }
 
 .site-footer p {
@@ -3069,6 +3069,14 @@ html {
 .site-footer .social-media-item .external-link-icon {
     font-size: 15px;
     color: #d0d0d0;
+}
+
+.site-footer .row {
+  padding-bottom: 8px;
+}
+
+.site-footer .row:first-child {
+  padding-top: 10px;
 }
 
 .quota-body {
