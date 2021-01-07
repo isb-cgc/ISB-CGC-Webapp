@@ -495,7 +495,6 @@
                          <div id = "projects_panel" class="panel-body">
                              <div class="dataTables_info">
                                  <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">24</span> entries</span>
-                                 <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
                              </div>
                          <div>
                       <div class="dataTables_length files-per-page">
@@ -507,12 +506,9 @@
                         </select>
                         <label>entries</label>
                     </div>
-                   <div class="dataTables_goto_page" data-curpage="1">
-                        <label for="goto-page-no">Page</label>
-                        <input id="goto-page-no-inp" type="number" class="goto-page-number" min="1" max="1">
-                        <div class="goto-page-button dataTables_button">Go</div>
-                    </div>
-                       <div class="dataTables_goto_page" style="width:50%; text-align:center">
+
+
+                       <div class="dataTables_goto_page goto-page-number" style="width:50%; text-align:center" data-curpage="1" data-min="1" data-max="1">
                            <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
                            <span class="paginate_button_space" ><a class="dataTables_button paginate_button numeric_button current">1</a></span>
                            <a class="next-page paginate_button dataTables_button" style="float:right">Next</a>
@@ -522,7 +518,6 @@
                                 <thead id="projects_table_head">
                                     <tr>
                                         <th class='text_data'>Collection Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'>Total # of Cases<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'># of Cases(this cohort)<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                   <!-- <th>Collection Name </th><th>Total # of Patients</th><th># of Patients(this cohort)</th> -->
                                     </tr>
                                 </thead>
                                 <tbody id="projects_table" class="set_height">
@@ -540,7 +535,7 @@
                     <div class="tabpanel data-tab-content-panel table-panel">
                     <div class="panel panel-default">
                          <div class="panel-heading clearfix"><h4 class="panel-title">Selected Cases</h4></div>
-                         <div id = "projects_panel" class="panel-body">
+                         <div id = "cases_panel" class="panel-body">
                              <div class="dataTables_info">
                                  <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">23</span> entries</span>
                                  <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
@@ -555,16 +550,15 @@
                         </select>
                         <label>entries</label>
                     </div>
-                   <div class="dataTables_goto_page" data-curpage="1">
-                        <label for="goto-page-no">Page</label>
-                        <input id="goto-page-no-inp" type="number" class="goto-page-number" min="1" max="1">
-                        <div class="goto-page-button dataTables_button">Go</div>
-                    </div>
-                       <div class="dataTables_goto_page" style="width:50%; text-align:center">
+
+
+                        <div class="dataTables_goto_page goto-page-number" style="width:50%; text-align:center" data-curpage="1" data-min="1" data-max="1">
                            <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
                            <span class="paginate_button_space" ><a class="dataTables_button paginate_button numeric_button current">1</a></span>
                            <a class="next-page paginate_button dataTables_button" style="float:right">Next</a>
                        </div>
+
+
                 </div>
                              <table id="case_table" class="table table-striped">
                                 <thead id="cases_table_head">
@@ -589,7 +583,7 @@
 
                          <div class="dataTables_info">
                     <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">0</span> entries</span>
-                    <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
+
                          </div>
                        <div>
 
@@ -603,16 +597,13 @@
                         <label>entries</label>
                     </div>
 
-                              <div class="dataTables_goto_page" data-curpage="1">
-                        <label for="goto-page-no">Page</label>
-                        <input id="goto-page-no-inp" type="number" class="goto-page-number" min="1" max="1">
-                        <div class="goto-page-button dataTables_button">Go</div>
-                    </div>
-                               <div class="dataTables_goto_page" style="width:50%; text-align:center">
-                        <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
-                        <span class="paginate_button_space"><a class="dataTables_button paginate_button numeric_button current">1</a></span>
-                        <a class="next-page paginate_button dataTables_button" style="float:right">Next</a>
+
+                        <div class="dataTables_goto_page goto-page-number" style="width:50%; text-align:center" data-curpage="1" data-min="1" data-max="1">
+                           <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
+                           <span class="paginate_button_space" ><a class="dataTables_button paginate_button numeric_button current">1</a></span>
+                           <a class="next-page paginate_button dataTables_button" style="float:right">Next</a>
                        </div>
+
 
 
                        </div>
@@ -643,7 +634,7 @@
                          <div class="panel-body">
                             <div class="dataTables_info">
                                 <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">0</span> entries</span>
-                                <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
+
                             </div>
                             <div>
                                 <div class="dataTables_length files-per-page">
@@ -655,16 +646,13 @@
                                     </select>
                                     <label>entries</label>
                                 </div>
-                                <div class="dataTables_goto_page" data-curpage="1">
-                                    <label for="goto-page-no">Page</label>
-                                    <input id="goto-page-no-inp" type="number" class="goto-page-number" min="1" max="1">
-                                    <div class="goto-page-button dataTables_button">Go</div>
-                                </div>
-                                <div class="dataTables_goto_page" style="width:50%; text-align:center">
-                                    <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
+
+
+                                 <div class="dataTables_goto_page goto-page-number" style="width:50%; text-align:center" data-curpage="1" data-min="1" data-max="1">
+                                     <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
                                     <span class="paginate_button_space" ><a class="dataTables_button paginate_button numeric_button current">1</a></span>
                                     <a class="next-page paginate_button dataTables_button" style="float:right">Next</a>
-                               </div>
+                                 </div>
                             </div>
                              <table class = "table table-striped series-table">
                                 <thead id="series_table_head">
