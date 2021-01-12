@@ -145,18 +145,9 @@ bottom: 95%; /* At the top of the tooltip */
   max-height: 2000px;
 }
 
-html {
-  overflow-y: scroll;
-}
-
-body {
-  overflow: hidden;
-}
-
 .checkbox-disabled {
     disabled:true;
 }
-
 
 .tooltip_ex .tooltiptext_ex {
     visibility: hidden;
