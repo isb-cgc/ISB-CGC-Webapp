@@ -21,7 +21,7 @@ pexpect==4.0.1
 jsonschema==2.6.0
 oauth2client==3.0.0
 pyjwt==1.6.1
-cryptography==2.4.2
+cryptography==3.3.1
 future==0.17.1
 google-cloud-storage==1.18.0
 django-session-security==2.6.5
