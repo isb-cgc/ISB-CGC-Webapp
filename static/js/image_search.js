@@ -3027,9 +3027,12 @@ require([
                  cohort_loaded = true;
                  $('input[type="checkbox"]').prop("disabled", "disabled");
 
-                 // Do not disable checkboxes for export manifest dialog
-                 $('.field-checkbox').removeAttr('disabled');
-                 $('.column-checkbox').removeAttr('disabled');
+                 // Re-enable checkboxes for export manifest dialog, unless not using social login
+                 if (user_is_social)
+                 {
+                     $('.field-checkbox').removeAttr('disabled');
+                     $('.column-checkbox').removeAttr('disabled');
+                 }
                  $('#include-header-checkbox').removeAttr('disabled');
 
                  $('div.ui-slider').siblings('button').prop('disabled', 'disabled');
