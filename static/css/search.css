@@ -11,6 +11,17 @@
     bottom: .5em;
 }
 
+
+.prev-page{
+    float:left;
+    margin-left:0px;
+}
+.next-page{
+    float:right;
+    margin-right:200px;
+}
+
+
 .plot_count {
     display:none;
 }

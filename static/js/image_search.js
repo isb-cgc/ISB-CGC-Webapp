@@ -955,6 +955,7 @@ require([
             }
 
             $('#' + tableId).find('.'+selType+'_' + selId).remove();
+            resetTableControls($('#' + tableId), true, newScrollInd)
 
         }
 
@@ -3088,6 +3089,7 @@ require([
             filterItemBindings('search_related_set');
 
             tableSortBindings('projects_table_head');
+            tableSortBindings('studies_table_head')
             tableSortBindings('cases_table_head');
             tableSortBindings('series_table_head');
             max= Math.ceil(parseInt($('#age_at_diagnosis').data('data-max')));
