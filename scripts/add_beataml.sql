@@ -244,6 +244,49 @@ CREATE TABLE `BEATAML_metadata_samples` (
   KEY `BEATAML_metadata_samples23` (`tumor_stage`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1365 DEFAULT CHARSET=utf8;
 
+-- INSERT PROGRAM BEATAML1.0
+-- INSERT INTO  `projects_program` (`name`, `description`, `active`, `is_public`, `owner_id`) VALUES ('BEATAML1.0', NULL, '1', '1', '1');
+
+-- retrieve program id
+SELECT id INTO @prog_id
+FROM projects_program where name = 'BEATAML1.0' LIMIT 1;
+
+-- INSERT PROJECTS
+-- INSERT INTO `projects_project` (`name`, `description`, `active`,  extends_id, owner_id, program_id) VALUES ('COHORT', 'Functional Genomic Landscape of Acute Myeloid Leukemia', '1',  NULL, '1', @prog_id);
+-- INSERT INTO `projects_project` (`name`, `description`, `active`,  extends_id, owner_id, program_id) VALUES ('CRENOLANIB', 'Clinical Resistance to Crenolanib in Acute Myeloid Leukemia Due to Diverse Molecular Mechanisms', '1', NULL, '1', @prog_id);
+
+-- INSERT VERSIONS
+-- INSERT INTO `projects_dataversion` (`version`, `data_type`, `name`, `active`)
+-- VALUES ('r26', 'B', 'GDC Release 26 Biospecimen Data', '1');
+
+-- INSERT INTO `projects_dataversion` (`version`, `data_type`, `name`, `active`)
+-- VALUES ('r26', 'C', 'GDC Release 26 Clinical Data', '1');
+
+-- RETRIEVE DATA VERSION IDS FOR BIO, CLINICAL, AND FILE TYPE
+-- SELECT id INTO @bio_ver_id
+-- FROM projects_dataversion WHERE version = 'r26' AND data_type = 'B' AND active=1 LIMIT 1;
+
+-- SELECT id INTO @clin_ver_id
+-- FROM projects_dataversion WHERE version = 'r26' AND data_type = 'C' AND active=1 LIMIT 1;
+
+SELECT id INTO @file_ver_id
+FROM projects_dataversion WHERE version = 'r9' AND data_type = 'F' AND active=1 LIMIT 1;
+
+-- INSERT INTO `projects_dataversion_programs` (`dataversion_id`, `program_id`)
+-- values (@bio_ver_id, @prog_id);
+
+-- INSERT INTO `projects_dataversion_programs` (`dataversion_id`, `program_id`)
+-- values (@clin_ver_id, @prog_id);
+
+INSERT INTO `projects_dataversion_programs` (`dataversion_id`, `program_id`)
+values (@file_ver_id, @prog_id);
+
+SELECT ('program_name', 'project_short_name', 'case_gdc_id', 'case_barcode', 'sample_gdc_id', 'sample_barcode')
+
+
+
+
+
 
 INSERT INTO `BEATAML_metadata_project` (`project_short_name`, `name`, `program_name`, `primary_site`, `dbgap_accession_number`, `endpoint_type`) VALUES ('BEATAML1.0-COHORT', 'Functional Genomic Landscape of Acute Myeloid Leukemia', 'BEATAML 1.0', 'Hematopoietic and reticuloendothelial systems', 'phs001657', 'current');
 INSERT INTO `BEATAML_metadata_project` (`project_short_name`, `name`, `program_name`, `primary_site`, `dbgap_accession_number`, `endpoint_type`) VALUES ('BEATAML1.0-CRENOLANIB', 'Clinical Resistance to Crenolanib in Acute Myeloid Leukemia Due to Diverse Molecular Mechanisms', 'BEATAML 1.0', 'Hematopoietic and reticuloendothelial systems', 'phs001628', 'current');
@@ -267,9 +310,7 @@ INSERT INTO `BEATAML_metadata_attrs`(`attribute`,`code`,`spec`) VALUES ('disease
 INSERT INTO `BEATAML_metadata_attrs`(`attribute`,`code`,`spec`) VALUES ('program_name', 'C', 'CLIN');
 
 
--- retrieve program id
-SELECT id INTO @prog_id
-FROM projects_program where name = 'BEATAML1.0' LIMIT 1;
+
 
 INSERT INTO `projects_public_data_tables`
 (
