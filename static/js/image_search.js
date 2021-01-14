@@ -3052,9 +3052,13 @@ require([
              var has_filters = (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS[0]['filters'].length > 0);
              if (has_sliders) {
                  let loadPending = load_sliders(ANONYMOUS_SLIDERS, !has_filters);
-                 loadPending.done(function () {
+                 if (has_filters) {
                      //console.debug("Sliders loaded from anonymous login.");
-                 });
+                 } else {
+                    loadPending.done(function () {
+                     //console.debug("Sliders loaded from anonymous login.");
+                    });
+                 }
              }
              if (has_filters) {
                  let loadPending = load_filters(ANONYMOUS_FILTERS);
