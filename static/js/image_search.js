@@ -3029,9 +3029,12 @@ require([
                  cohort_loaded = true;
                  $('input[type="checkbox"]').prop("disabled", "disabled");
 
-                 // Do not disable checkboxes for export manifest dialog
-                 $('.field-checkbox').removeAttr('disabled');
-                 $('.column-checkbox').removeAttr('disabled');
+                 // Re-enable checkboxes for export manifest dialog, unless not using social login
+                 if (user_is_social)
+                 {
+                     $('.field-checkbox').removeAttr('disabled');
+                     $('.column-checkbox').removeAttr('disabled');
+                 }
                  $('#include-header-checkbox').removeAttr('disabled');
 
                  $('div.ui-slider').siblings('button').prop('disabled', 'disabled');
@@ -3051,9 +3054,13 @@ require([
              var has_filters = (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS[0]['filters'].length > 0);
              if (has_sliders) {
                  let loadPending = load_sliders(ANONYMOUS_SLIDERS, !has_filters);
-                 loadPending.done(function () {
+                 if (has_filters) {
                      //console.debug("Sliders loaded from anonymous login.");
-                 });
+                 } else {
+                    loadPending.done(function () {
+                     //console.debug("Sliders loaded from anonymous login.");
+                    });
+                 }
              }
              if (has_filters) {
                  let loadPending = load_filters(ANONYMOUS_FILTERS);
