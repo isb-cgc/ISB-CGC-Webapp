@@ -168,6 +168,14 @@ require([
         allowHTML: true,
         interactive: true
     });
+    const temp='<html><strong>now</strong></html>';
+    tippy('.explainer', {
+        interactive: true,
+        allowHTML:true,
+        content: 'As some attributes have non mutually exclusive values the charts may contain non zero counts for these values even when they are not selected in the left hand panel. See <a href="https://learn.canceridc.dev/portal/data-exploration-and-cohorts#count-clarification-of-categorization" target="_blank">here</a> for a detailed explanation.'
+        //interactive:true
+
+    });
 
     tippy('.tooltip_filter_info',{
         content: 'Each chart below reports the number of cases (or patients) for all values within a given attribute, given the currently defined filter set. Once a case is selected, all series for that case, including those that do not meet the search criteria, are included. For example, cases selected based on the presence of CT modality may also contain PET modality, and thus counts for both values will appear in the chart, and the manifest.',

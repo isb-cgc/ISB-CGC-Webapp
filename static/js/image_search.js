@@ -955,6 +955,7 @@ require([
             }
 
             $('#' + tableId).find('.'+selType+'_' + selId).remove();
+            resetTableControls($('#' + tableId), true, newScrollInd)
 
         }
 
@@ -1412,7 +1413,7 @@ require([
 
             tableElemGm = tableElem.parent().parent();
             tableElemGm.find('.showing')[0].innerHTML = (curIndex + 1).toString() + " to " + (lastInd + 1).toString();
-            tableElemGm.find('.goto-page-number')[0].max = numPages;
+            tableElemGm.find('.goto-page-number').data('max',numPages.toString());
             if (atEnd) {
                 currentPage = numPages;
             }
@@ -1712,6 +1713,7 @@ require([
         };
 
         var updateFacetsData = function (newFilt) {
+
             changeAjax(true);
 
             var url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True&data_source_type=' + ($("#data_source_type option:selected").val() || 'S');
@@ -3087,6 +3089,7 @@ require([
             filterItemBindings('search_related_set');
 
             tableSortBindings('projects_table_head');
+            tableSortBindings('studies_table_head')
             tableSortBindings('cases_table_head');
             tableSortBindings('series_table_head');
             max= Math.ceil(parseInt($('#age_at_diagnosis').data('data-max')));
@@ -3110,7 +3113,7 @@ require([
 
             var numCol = $('#projects_table').children('tr').length
             $('#projects_panel').find('.total-file-count')[0].innerHTML = numCol.toString();
-             $('#projects_panel').find('.goto-page-number')[0].max=3;
+             $('#projects_panel').find('.goto-page-number').data('max','3');
 
             window.resetTableControls ($('#projects_table'), false, 0);
             window.resetTableControls ($('#cases_table'), false, 0);
