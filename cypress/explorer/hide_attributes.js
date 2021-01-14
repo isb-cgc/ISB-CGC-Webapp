@@ -1,17 +1,9 @@
+import { login } from '../util/utils.js'
+
 describe('Tests hide attributes functionality', () => {
 
  before(() => {
-     cy.server();
-     cy.route('Get', 'http://localhost:8085/').as('explore');
-     cy.visit('http://localhost:8085/') ;
-     cy.get('.btn-warn').click();
-     cy.viewport(1300,800);
-     cy.get('#sign-in-dropdown').click();
-     cy.get('#id_login').type(Cypress.env("idcuser"));
-     cy.get('#id_password').type(Cypress.env("idcpassword"));
-     cy.get('.primaryAction').click();
-     cy.wait(1000);
-     cy.visit('http://localhost:8085/explore/')
+     login()
  })
 
   beforeEach(() =>{
@@ -24,7 +16,7 @@ describe('Tests hide attributes functionality', () => {
   it ('Opens Collections and Selects TCGA',() =>{
     
     cy.server();
-    cy.route('GET','http://localhost:8085/explore/*').as('getExplore');
+    cy.route('GET','/explore/*').as('getExplore');
     cy.viewport(1000,1000);
     cy.wait(1000)
     cy.get('#Program_heading').find('a').click();
