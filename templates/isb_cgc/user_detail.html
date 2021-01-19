@@ -27,6 +27,22 @@
 {% block link_page_name %}user-details{% endblock %}
 {% block page_name %}user-details{% endblock %}
 
+{% block page_header %}
+    {% if idp == 'ras' %}
+        <div class="row">
+            <div class="banner alert alert-dismissible text-center alert-warning" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <i class="fa fa-exclamation-circle" aria-hidden="true"></i> For data access, you will now be asked to
+                use <strong>NIH Researcher Auth Service (RAS)</strong> to associate your NIH identity with your Google Account.
+                Read more at:
+                <a target="_blank" href="https://datascience.nih.gov/researcher-auth-service-initiative">
+                    Researcher Auth Service Initiative</a>.
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
     <div class="row">
         <div class="col-lg-4">

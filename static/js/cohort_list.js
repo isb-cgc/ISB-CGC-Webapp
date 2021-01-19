@@ -97,11 +97,16 @@ require([
 
         $('.cohort-table tr:not(:first) input[type="checkbox"]:checked').length == 0 && $('#cohort-apply-to-workbook .btn').prop('disabled', 'disabled');
         $('.cohort-table tr:not(:first) input[type="checkbox"]:checked').length > 0 && $('#cohort-apply-to-workbook .btn').removeAttr('disabled');
-    }
+    };
 
     $('.select-all').on('change', function() {
         var checked = $(this).is(':checked');
         var formApply = $('#cohort-apply-to-workbook');
+
+        formApply.find('input[name=\'cohorts\']').remove();
+        $('.selected-cohorts').empty();
+        $('#selected-ids').empty();
+
         if (checked) {
             // Create tokens for Set Ops modal
             $(this).parents('table').find('tr:not(:first) input[type="checkbox"]').each(function() {
@@ -118,10 +123,6 @@ require([
                 // Add all values to the form
                 formApply.append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
             });
-        } else {
-            formApply.empty();
-            $('.selected-cohorts').empty();
-            $('#selected-ids').empty();
         }
 
         // Sets all checkboxes to the state of the select-all

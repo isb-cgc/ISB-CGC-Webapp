@@ -13,7 +13,7 @@ debug = settings.DEBUG
 
 @login_required
 def notebook_vm_command(request):
-    body_unicode = request.body.decode('utf-8')
+    body_unicode = request.body
     body = json.loads(body_unicode)
     vm_user = body['user']
     vm_header = re.sub(r'[^A-Za-z0-9]+', '', vm_user.lower())

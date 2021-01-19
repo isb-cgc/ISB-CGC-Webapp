@@ -21,7 +21,7 @@ pexpect==4.0.1
 jsonschema==2.6.0
 oauth2client==3.0.0
 pyjwt==1.6.1
-cryptography==2.4.2
+cryptography==3.2
 future==0.17.1
 google-cloud-storage==1.18.0
 django-session-security==2.6.5
@@ -29,5 +29,5 @@ django-anymail[mailgun]
 djangorestframework==3.11.0
 # If you are seeing an error about django-debug-toolbar not being installed,
 # the problem is almost certainly that your developer .env wasn't found
-# django-debug-toolbar should **only** be installed on local develpoer builds, so do
+# django-debug-toolbar should **only** be installed on local developer builds, so do
 # not add it to this file.

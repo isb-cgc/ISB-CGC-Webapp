@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    ISB-CGC|Contact Us
+{% endblock %}
+
+{% block description %}
+    Contact ISB-CGC
+{% endblock %}
+
+{% block link_page_name %}contact_us{% endblock %}
+{% block page_name %}contact_us{% endblock %}
+
+{% block page_header %}
+    {% if request.user.is_authenticated %}
+        <div class="container">
+            <ol class="breadcrumb">
+                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            </ol>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row ">
+            <div class="col-lg-12">
+                <h3>We'd love to hear from you</h3>
+                <div>Whether you have a question about features, data, or anything else, please email us at <a href="mailto:feedback@isb-cgc.org" target="_top">feedback@isb-cgc.org</a>.</div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
