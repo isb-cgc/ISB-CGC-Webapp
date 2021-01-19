@@ -245,47 +245,115 @@ CREATE TABLE `BEATAML_metadata_samples` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1365 DEFAULT CHARSET=utf8;
 
 -- INSERT PROGRAM BEATAML1.0
--- INSERT INTO  `projects_program` (`name`, `description`, `active`, `is_public`, `owner_id`) VALUES ('BEATAML1.0', NULL, '1', '1', '1');
+INSERT INTO  `projects_program` (`name`, `description`, `active`, `is_public`, `owner_id`) VALUES ('BEATAML1.0', NULL, '1', '1', '1');
 
 -- retrieve program id
 SELECT id INTO @prog_id
 FROM projects_program where name = 'BEATAML1.0' LIMIT 1;
 
 -- INSERT PROJECTS
--- INSERT INTO `projects_project` (`name`, `description`, `active`,  extends_id, owner_id, program_id) VALUES ('COHORT', 'Functional Genomic Landscape of Acute Myeloid Leukemia', '1',  NULL, '1', @prog_id);
--- INSERT INTO `projects_project` (`name`, `description`, `active`,  extends_id, owner_id, program_id) VALUES ('CRENOLANIB', 'Clinical Resistance to Crenolanib in Acute Myeloid Leukemia Due to Diverse Molecular Mechanisms', '1', NULL, '1', @prog_id);
+INSERT INTO `projects_project` (`name`, `description`, `active`,  extends_id, owner_id, program_id) VALUES ('COHORT', 'Functional Genomic Landscape of Acute Myeloid Leukemia', '1',  NULL, '1', @prog_id);
+INSERT INTO `projects_project` (`name`, `description`, `active`,  extends_id, owner_id, program_id) VALUES ('CRENOLANIB', 'Clinical Resistance to Crenolanib in Acute Myeloid Leukemia Due to Diverse Molecular Mechanisms', '1', NULL, '1', @prog_id);
 
 -- INSERT VERSIONS
--- INSERT INTO `projects_dataversion` (`version`, `data_type`, `name`, `active`)
--- VALUES ('r26', 'B', 'GDC Release 26 Biospecimen Data', '1');
+INSERT INTO `projects_dataversion` (`version`, `data_type`, `name`, `active`)
+VALUES ('r26', 'B', 'GDC Release 26 Biospecimen Data', '1');
 
--- INSERT INTO `projects_dataversion` (`version`, `data_type`, `name`, `active`)
--- VALUES ('r26', 'C', 'GDC Release 26 Clinical Data', '1');
+INSERT INTO `projects_dataversion` (`version`, `data_type`, `name`, `active`)
+VALUES ('r26', 'C', 'GDC Release 26 Clinical Data', '1');
 
 -- RETRIEVE DATA VERSION IDS FOR BIO, CLINICAL, AND FILE TYPE
--- SELECT id INTO @bio_ver_id
--- FROM projects_dataversion WHERE version = 'r26' AND data_type = 'B' AND active=1 LIMIT 1;
+SELECT id INTO @bio_ver_id
+FROM projects_dataversion WHERE version = 'r26' AND data_type = 'B' AND active=1 LIMIT 1;
 
--- SELECT id INTO @clin_ver_id
--- FROM projects_dataversion WHERE version = 'r26' AND data_type = 'C' AND active=1 LIMIT 1;
+SELECT id INTO @clin_ver_id
+FROM projects_dataversion WHERE version = 'r26' AND data_type = 'C' AND active=1 LIMIT 1;
 
 SELECT id INTO @file_ver_id
 FROM projects_dataversion WHERE version = 'r9' AND data_type = 'F' AND active=1 LIMIT 1;
 
--- INSERT INTO `projects_dataversion_programs` (`dataversion_id`, `program_id`)
--- values (@bio_ver_id, @prog_id);
+INSERT INTO `projects_dataversion_programs` (`dataversion_id`, `program_id`)
+values (@bio_ver_id, @prog_id);
 
--- INSERT INTO `projects_dataversion_programs` (`dataversion_id`, `program_id`)
--- values (@clin_ver_id, @prog_id);
+INSERT INTO `projects_dataversion_programs` (`dataversion_id`, `program_id`)
+values (@clin_ver_id, @prog_id);
 
 INSERT INTO `projects_dataversion_programs` (`dataversion_id`, `program_id`)
 values (@file_ver_id, @prog_id);
 
-SELECT ('program_name', 'project_short_name', 'case_gdc_id', 'case_barcode', 'sample_gdc_id', 'sample_barcode')
+
+INSERT INTO `projects_datasource` ('name', 'shared_id_col', 'source_type', 'version_id')
+values ('isb-cgc-test.BEATAML1_0_bioclin_v0.r26_BEATAML1_0_biospecimen_ref', 'case_barcode', 'B', @bio_ver_id);
+
+INSERT INTO `projects_datasource` ('name', 'shared_id_col', 'source_type', 'version_id')
+values ('beataml10_bio_r25_v1', 'case_barcode', 'S', @bio_ver_id);
+
+INSERT INTO `projects_datasource` ('name', 'shared_id_col', 'source_type', 'version_id')
+values ('isb-cgc-test.BEATAML1_0_bioclin_v0.r26_BEATAML1_0_clinical', 'case_barcode', 'B', @clin_ver_id);
+
+INSERT INTO `projects_datasource` ('name', 'shared_id_col', 'source_type', 'version_id')
+values ('beataml10_clin_r25_v3', 'case_barcode', 'S', @clin_ver_id);
+
+INSERT INTO `projects_datasource` ('name', 'shared_id_col', 'source_type', 'version_id')
+values ('isb-cgc-test.BEATAML1_0_hg38_data_v0.beataml_metadata_data_hg38_r26', 'case_barcode', 'B', @file_ver_id);
 
 
+-- retrieve BEATAML's BQ and Solr data source IDs for bio, clinical, file types
+SELECT id INTO @bio_bq_src_id
+FROM projects_datasource
+WHERE version_id = @bio_ver_id
+AND source_type = 'B'
+AND name = 'isb-cgc-test.BEATAML1_0_bioclin_v0.r26_BEATAML1_0_biospecimen_ref' LIMIT 1;
 
+SELECT id INTO @bio_solr_src_id
+FROM projects_datasource
+WHERE version_id = @bio_ver_id
+AND source_type = 'S'
+AND name = 'beataml10_bio_r25_v1' LIMIT 1;
 
+SELECT id INTO @clin_bq_src_id
+FROM projects_datasource
+WHERE version_id = @clin_ver_id
+AND source_type = 'B'
+AND name = 'isb-cgc-test.BEATAML1_0_bioclin_v0.r26_BEATAML1_0_clinical' LIMIT 1;
+
+SELECT id INTO @clin_solr_src_id
+FROM projects_datasource
+WHERE version_id = @clin_ver_id
+AND source_type = 'S'
+AND name = 'beataml10_clin_r25_v3' LIMIT 1;
+
+SELECT id INTO @file_bq_src_id
+FROM projects_datasource
+WHERE version_id = @file_ver_id
+AND source_type = 'B'
+AND name = 'isb-cgc-test.BEATAML1_0_hg38_data_v0.beataml_metadata_data_hg38_r26' LIMIT 1;
+
+SELECT id INTO @file_solr_src_id
+FROM projects_datasource
+WHERE version_id = @file_ver_id
+AND source_type = 'S'
+AND name = 'files_hg38' LIMIT 1;
+
+-- populate projects_datasource_programs records for BEATAML program
+
+INSERT INTO `projects_datasource_programs` (`datasource_id`, `program_id`)
+VALUES (@bio_bq_src_id, @prog_id);
+
+INSERT INTO `projects_datasource_programs` (`datasource_id`, `program_id`)
+VALUES (@bio_solr_src_id, @prog_id);
+
+INSERT INTO `projects_datasource_programs` (`datasource_id`, `program_id`)
+VALUES (@clin_bq_src_id, @prog_id);
+
+INSERT INTO `projects_datasource_programs` (`datasource_id`, `program_id`)
+VALUES (@clin_solr_src_id, @prog_id);
+
+INSERT INTO `projects_datasource_programs` (`datasource_id`, `program_id`)
+VALUES (@file_bq_src_id, @prog_id);
+
+INSERT INTO `projects_datasource_programs` (`datasource_id`, `program_id`)
+VALUES (@file_solr_src_id, @prog_id);
 
 
 INSERT INTO `BEATAML_metadata_project` (`project_short_name`, `name`, `program_name`, `primary_site`, `dbgap_accession_number`, `endpoint_type`) VALUES ('BEATAML1.0-COHORT', 'Functional Genomic Landscape of Acute Myeloid Leukemia', 'BEATAML 1.0', 'Hematopoietic and reticuloendothelial systems', 'phs001657', 'current');
@@ -367,11 +435,6 @@ INSERT INTO `projects_attribute_ranges`
 VALUES ('I', '1', '0', '1', '10', '80', '10', @age_at_index_attr_id, '1');
 
 
---retrieve BEATAML clinical version ID
-SELECT pdv.id INTO @ver_id FROM data_migration.projects_dataversion_programs pdp, projects_dataversion pdv
-WHERE pdp.program_id = @prog_id
-AND pdp.dataversion_id = pdv.id
-AND pdv.data_type = 'C';
 
 
 delete from projects_attribute_data_sources
@@ -387,7 +450,7 @@ where id in (
         FROM projects_datasource_programs pdp, projects_datasource pds
         where pdp.program_id = @prog_id
         and pdp.datasource_id = pds.id
-        and pds.version_id = @ver_id
+        and pds.version_id = @clin_ver_id
         and pds.source_type = 'S'
       )
       and pa.name not in
