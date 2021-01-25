@@ -512,7 +512,6 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
     return JsonResponse(result, status=status)
 
 
-@login_required
 def dicom(request, study_uid=None):
     template = 'isb_cgc/dicom.html'
 
@@ -590,7 +589,6 @@ def test_solr_data(request):
 
     return JsonResponse({'result': results}, status=status)
 
-@login_required
 def camic(request, file_uuid=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     context = {}
@@ -637,7 +635,6 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     return render(request, 'isb_cgc/igv.html', context)
 
 
-@login_required
 def path_report(request, report_file=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     context = {}
