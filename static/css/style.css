@@ -9,6 +9,23 @@
  *******************************************/
 @import url("https://fonts.googleapis.com/css?family=Lato:300,400,700&subset=latin,latin-ext");
 @import url("https://fonts.googleapis.com/css?family=Montserrat:300,700&subset=latin,latin-ext");
+
+#landing .container {
+  width: 100%;
+}
+
+@media (min-width: 1400px) {
+  .container {
+    width: 1370px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .container {
+    width: 1560px;
+  }
+}
+
 html, body, ul, ol {
   margin: 0px;
   padding: 0px; }
