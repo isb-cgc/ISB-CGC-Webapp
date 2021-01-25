@@ -245,15 +245,15 @@ CREATE TABLE `BEATAML_metadata_samples` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1365 DEFAULT CHARSET=utf8;
 
 --INSERT PROGRAM BEATAML1.0
-INSERT INTO  `projects_program` (`name`, `description`, `active`, `is_public`, `owner_id`) VALUES ('BEATAML1.0', NULL, '1', '1', '1');
+INSERT INTO  `projects_program` (`name`, `description`, `active`, `last_date_saved`, `is_public`, `owner_id`) VALUES ('BEATAML1.0', NULL, '1', current_timestamp() ,'1', '1');
 
 -- retrieve program id
 SELECT id INTO @prog_id
 FROM projects_program where name = 'BEATAML1.0' LIMIT 1;
 
 -- INSERT PROJECTS
-INSERT INTO `projects_project` (`name`, `description`, `active`,  extends_id, owner_id, program_id) VALUES ('COHORT', 'Functional Genomic Landscape of Acute Myeloid Leukemia', '1',  NULL, '1', @prog_id);
-INSERT INTO `projects_project` (`name`, `description`, `active`,  extends_id, owner_id, program_id) VALUES ('CRENOLANIB', 'Clinical Resistance to Crenolanib in Acute Myeloid Leukemia Due to Diverse Molecular Mechanisms', '1', NULL, '1', @prog_id);
+INSERT INTO `projects_project` (`name`, `description`, `active`,  `last_date_saved`, extends_id, owner_id, program_id) VALUES ('COHORT', 'Functional Genomic Landscape of Acute Myeloid Leukemia', '1',  current_timestamp(), NULL, '1', @prog_id);
+INSERT INTO `projects_project` (`name`, `description`, `active`,  `last_date_saved`, extends_id, owner_id, program_id) VALUES ('CRENOLANIB', 'Clinical Resistance to Crenolanib in Acute Myeloid Leukemia Due to Diverse Molecular Mechanisms', '1', current_timestamp(), NULL, '1', @prog_id);
 
 -- INSERT VERSIONS
 INSERT INTO `projects_dataversion` (`version`, `data_type`, `name`, `active`)
@@ -1029,7 +1029,11 @@ INSERT INTO `projects_attribute_ranges`
 (`type`, `include_lower`, `include_upper`, `unbounded`, `first`, `last`, `gap`, `attribute_id`, `unit`)
 VALUES ('I', '1', '0', '1', '10', '80', '10', @age_at_index_attr_id, '1');
 
+--deactivate some tcia image attributes
 
+UPDATE FROM test.projects_attribute
+SET active = 0
+WHERE name in ('collection_id', 'Species');
 
 
 -- delete from projects_attribute_data_sources
