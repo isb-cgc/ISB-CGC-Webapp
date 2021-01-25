@@ -21,11 +21,8 @@ import logging
 logger = logging.getLogger('main_logger')
 
 class AppInfo(models.Model):
+    id = models.AutoField(primary_key=True, null=False, blank=False)
     app_version = models.CharField(max_length=32, null=False, blank=False, default="1.0.0")
     app_name = models.CharField(max_length=128, null=False, blank=True)
     app_date = models.DateField(auto_now_add=True, null=False, blank=False)
     active = models.BooleanField(default=True, null=False, blank=False)
-
-
-
-
