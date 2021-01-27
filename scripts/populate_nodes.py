@@ -56,11 +56,11 @@ def main():
         node_sources = []
         for node in NODE_LIST:
             obj, created = DataNode.objects.update_or_create(name=NODE_LIST[node]['name'],short_name=node)
-            sources = DataSource.objects.get(name__in=NODE_LIST[node]['sources'])
+            sources = DataSource.objects.filter(name__in=NODE_LIST[node]['sources']).distinct()
             for source in sources:
                 node_sources.append(DataNode.data_sources.through(datanode_id=obj.id, datasource_id=source.id))
 
-            DataNode.data_sources.through.objects.bulk_create(node_sources)
+        DataNode.data_sources.through.objects.bulk_create(node_sources)
 
     except Exception as e:
         logging.exception(e)
