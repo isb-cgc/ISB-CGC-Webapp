@@ -179,6 +179,8 @@ function($, tree_graph, stack_bar_chart) {
                 $('.user-data-trees .spinner').hide();
                 $('.parallel-sets .spinner').hide();
 
+                context.show_hide_zero_counts();
+
                 return $.Deferred().resolve();
             } else {
                 $('.cohort-info .total-values').hide();
@@ -214,6 +216,8 @@ function($, tree_graph, stack_bar_chart) {
                         }
 
                         context.update_filter_counts(case_counts, null, program_id);
+
+                        context.show_hide_zero_counts();
 
                         var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(case_counts, clin_tree_attr) : case_counts;
                         clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
@@ -303,6 +307,21 @@ function($, tree_graph, stack_bar_chart) {
 
             url += 'mut_filter_combine='+$('.mut-filter-combine :selected').val();
             return url;
+        },
+
+        show_hide_zero_counts: function() {
+            $('.search-checkbox-list li span').each(function() {
+               var $this = $(this);
+               var hide_zero_count_filters = $('#hide-zeros').prop('checked');
+               if (hide_zero_count_filters && $this.text() == "0")
+               {
+                   $this.parent().parent().hide();
+               }
+               else
+               {
+                    $this.parent().parent().show();
+               }
+            });
         },
 
         update_filter_counts: function(case_counts, data_counts, program_id) {
