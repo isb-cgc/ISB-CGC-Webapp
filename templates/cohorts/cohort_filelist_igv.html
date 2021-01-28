@@ -108,7 +108,7 @@
                 <div id="tokenfield-holder-igv">
                     <!-- "IGV selected files tokenizer" -->
                     <textarea name="selected-files-igv" class="form-control tokenfield" id="selected-files-igv" placeholder="Select files" aria-label="Hidden Selected Files"></textarea>
-                    <form id="view-igv" method="POST" action="{% url 'igv' %}" target="_blank">
+                    <form id="view-igv" method="POST" action="{% url 'igv' %}" target="_blank" rel=“noreferrer”>
                         <input type="text" class="hidden_form_value" id="checked_list_input" name="checked_list" data-type="checked_list" aria-label="Hidden Checked List">
                         <input type="text" class="hidden_form_value" id="igv-form-build" name="build" value="{{ build }}" aria-label="Hidden IGV Build">
                         {% csrf_token %}

@@ -44,7 +44,7 @@
 
         <div class="text-right"><a class="sm_btn" data-toggle="modal" data-target="#link-nih-account-modal">
         <i class="fa fa-link" aria-hidden="true"></i>Associate with {% if idp == 'ras' %}RAS{% else %}eRA{% endif %} Account</a></div>
-        <div class="text-right"><a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank"><i
+        <div class="text-right"><a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank" rel=“noreferrer”><i
                 class="fa fa-book" aria-hidden="true"></i>Learn More</a></div>
         {#        <div><a data-toggle="modal" data-target="#link-nih-account-modal">Associate with eRA Commons Account</a></div>#}
 
@@ -90,7 +90,7 @@
             dataset whitelists.
         </div>
         <div class="text-right">
-            <a  href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank"><i
+            <a  href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank" rel=“noreferrer”><i
                 class="fa fa-book" aria-hidden="true"></i>Learn How to Apply for dbGaP Access</a>
         </div>
         <div><label><i class="fa fa-clock-o" aria-hidden="true"></i>Access Valid Until:</label></div>
@@ -122,12 +122,12 @@
                     <tr>
                         <td>
                             <a href="https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id={{ dataset.whitelist_id }}"
-                               target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i>{{ dataset.name }}
+                               target="_blank" rel=“noreferrer”><i class="fa fa-external-link" aria-hidden="true"></i>{{ dataset.name }}
                             </a></td>
                         <td>{% if not dataset.public %} {{ dataset.whitelist_id }}{% endif %}</td>
                         <td>{% if dataset.duca_id %}
                             <a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc={{ dataset.duca_id }}"
-                               target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i>View</a>{% endif %}
+                               target="_blank" rel=“noreferrer”><i class="fa fa-external-link" aria-hidden="true"></i>View</a>{% endif %}
                         </td>
                     </tr>
                 {% endfor %}
