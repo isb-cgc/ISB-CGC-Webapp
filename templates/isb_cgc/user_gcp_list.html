@@ -68,7 +68,7 @@
                                         </ul>
                                         </div>
                                     </td>
-                                    <td><a href="{% url 'gcp_detail' user.id project.id %}">{{ project.project_name }}</a> <a target="_BLANK" href="https://console.cloud.google.com/home/dashboard?project={{ project.project_id }}"><i class="fa fa-external-link"></i></a></td>
+                                    <td><a href="{% url 'gcp_detail' user.id project.id %}">{{ project.project_name }}</a> <a target="_blank" rel=“noreferrer” href="https://console.cloud.google.com/home/dashboard?project={{ project.project_id }}"><i class="fa fa-external-link"></i></a></td>
                                     <td>{{ project.project_id }}</td>
 {#                                    <td>{% if project.big_query_dataset %}{{ project.big_query_dataset }}{% else %}N/A{% endif %}</td>#}
 
