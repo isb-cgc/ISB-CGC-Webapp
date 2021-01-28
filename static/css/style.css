@@ -4069,9 +4069,15 @@ tr.shown td.details-control i.hide-button {
   font-size: larger;
 }
 
-.signup .panel-default:first-child, .login .panel-default:first-child, .password_reset .panel-default:first-child{
+.signup .panel-default:first-child, .login .panel-default:first-child, .password_reset .panel-default:first-child,
+.connections .panel-default:first-child, .social-sign-up .panel-default:first-child {
   padding-top: 10px;
   margin-top: 50px;
+}
+
+.signup .panel-default:last-child, .login .panel-default:last-child, .password_reset .panel-default:last-child,
+.connections .panel-default:last-child, .social-sign-up .panel-default:last-child {
+  margin-bottom: 50px;
 }
 
 #id_remember {
@@ -4129,13 +4135,19 @@ body.modal, body.modal-open {
   padding-right: 0px !important;
 }
 
-#sign-in ul.errorlist, #sign-up ul.errorlist, #password-change ul.errorlist {
+#sign-in ul.errorlist, #sign-up ul.errorlist, #password-change ul.errorlist, .connections ul.errorlist,
+.social-sign-up ul.errorlist {
   padding: 5px;
   border: 3px solid #f6441a;
   color: #8f1f12;
   background: #ebbcac;
   font-weight: bold;
   margin-bottom: 15px;
+}
+
+#errorMsg p {
+  padding: 5px 0 0 0;
+  margin: 0px;
 }
 
 #user-details .account-management-panel a {
