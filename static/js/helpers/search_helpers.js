@@ -167,11 +167,9 @@ function($, tree_graph, stack_bar_chart) {
 
             $('button[data-target="#apply-filters-modal"]').prop('disabled',true);
             $('#apply-filters-form input[type="submit"]').prop('disabled',true);
-            
             var startReq = new Date().getTime();
 
             if(filter_panel_load) {
-
                 var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
                 clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
 
@@ -180,7 +178,7 @@ function($, tree_graph, stack_bar_chart) {
                 $('.parallel-sets .spinner').hide();
 
                 context.show_hide_zero_counts();
-
+                $('#hide-zeros').on('change', context.show_hide_zero_counts);
                 return $.Deferred().resolve();
             } else {
                 $('.cohort-info .total-values').hide();
