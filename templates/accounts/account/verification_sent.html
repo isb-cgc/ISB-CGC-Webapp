@@ -10,7 +10,7 @@
             <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2"></div>
             <div class="col-lg-4 col-md-4 col-sm-6 col-xs-8">
                 <div class="panel panel-default">
-                    <form action="/accounts/email/" class="email_list" method="post">
+                    <form action="{% url 'account_email' %}" class="email_list" method="post">
                     {% csrf_token %}
                         <div class="panel-heading"><h3>{% trans "Verify Your E-mail Address" %}</h3></div>
                         <div class="panel-body">
@@ -18,8 +18,7 @@
                             <p>If you do not receive the e-mail within a few minutes, check your spam folder. Registration confirmation e-mails are often flagged as potential spam.</p>
                             <hr/>
                             <h4>E-mail hasn't arrived and isn't in your spam folder?</h4>
-                            <p><button class="btn btn-primary" type="submit">Re-send Verification Email</button></p>
-                            <p>You'll be returned to the sign in page, and can sign in once you've clicked the link in the verification email.</p>
+                            <p>If you <b><a href="{% url 'account_login' %}">attempt to sign in</a></b> using the password you specified when registering, your verification email will be re-sent.</p>
                             <p>If the verification email still doesn't come through, <b><a href="mailto:support@canceridc.dev">contact us</a></b>
                                 from your account's registered email address for assistance.</p>
                         </div>

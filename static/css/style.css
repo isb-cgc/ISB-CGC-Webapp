@@ -4074,7 +4074,7 @@ tr.shown td.details-control i.hide-button {
   margin-top: 50px;
 }
 
-accounts-col .panel-default:last-child {
+.accounts-col .panel-default:last-child {
   margin-bottom: 50px;
 }
 
@@ -4110,7 +4110,7 @@ accounts-col .panel-default:last-child {
   border: 2px solid #1a344c !important;
 }
 
-.signup input, .login input, .password_reset input, #password-change input, .password_set input {
+.signup input, .login input, .password_reset input, #password-change input, .password_set input, .email-verify input {
   width: 100%;
   border-radius: 3px;
   padding: 12px;

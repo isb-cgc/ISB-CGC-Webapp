@@ -22,7 +22,7 @@
                                         {% for emailaddress in user.emailaddress_set.all %}
                                             <div class="ctrlHolder">
                                                 <input id="email_radio_{{forloop.counter}}" type="hidden" name="email" checked="checked" value="{{emailaddress.email}}"/>
-                                                <b>{{ emailaddress.email }}</b> 
+                                                <b>{{ emailaddress.email }}</b>
                                                 {% if not emailaddress.verified %}
                                                     <button class="secondaryAction btn btn-primary" type="submit" name="action_send" >{% trans 'Re-send Verification' %}</button>
                                                 {% endif %}
