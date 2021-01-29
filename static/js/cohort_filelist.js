@@ -220,6 +220,8 @@ require([
 
                     update_download_link(active_tab, total_files);
                     update_table_display(active_tab, {'total_file_count': total_files, 'file_list': file_listing});
+                    var selected_build = $(tab_selector).find('.build :selected').val();
+                    build_total_files[selected_build] = total_files;
 
                     $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
                     $(tab_selector).addClass('active');
@@ -339,7 +341,6 @@ require([
         do_filter_count = (do_filter_count === undefined || do_filter_count === null ? true : do_filter_count);
         var tab_selector = '#'+active_tab+'-files';
         var build = $(tab_selector).find('.build :selected').val() || "HG38";
-        // var build = $(tab_selector).find('.build :selected').val() || "HG19";
         if(active_tab == 'igv'){
             $('#igv-build').attr('value',build);
         }
@@ -555,7 +556,6 @@ require([
 
             if(self.is(':checked')) {
                 var build = $(tab_selector).find('.build :selected').val() || "HG38";
-                // var build = $(tab_selector).find('.build :selected').val() || "HG19";
                 selIgvFiles[self.attr('data-type')][self.attr('value')] = {
                     'label': self.attr('token-label') + ' ['+build+']',
                     'program': self.attr('program'),
@@ -642,7 +642,6 @@ require([
 
     function search_case_barcode(tab, search_input_val){
         var build = $('#'+tab+'-files').find('.build :selected').val() || "HG38";
-        // var build = $('#'+tab+'-files').find('.build :selected').val() || "HG19";
         if(!tab_case_barcode[tab] || Object.keys(tab_case_barcode[tab][build]).length == 0
                                                         || search_input_val.trim() != tab_case_barcode[tab][build]) {
             tab_case_barcode[tab][build] = search_input_val.trim();
@@ -734,7 +733,6 @@ require([
         var type_tab = checked.parents('.data-tab.active')[0];
         var active_tab = $(type_tab).data('file-type');
         var build = $('#'+active_tab+'-files').find('.build :selected').val() || "HG38";
-        // var build = $('#'+active_tab+'-files').find('.build :selected').val() || "HG19";
         SELECTED_FILTERS[active_tab][build] = {};
 
         $(type_tab).find('div[data-filter-build="'+build+'"] input[type="checkbox"]:checked').each(function(){
@@ -801,7 +799,6 @@ require([
 
         // ...and replace it with a new one
         update_displays_thread = setTimeout(function(){
-            // var build = $('#'+active_tab+'-files').find('.build :selected').val() || "HG19";
             var build = $('#'+active_tab+'-files').find('.build :selected').val() || "HG38";
             var files_per_page = tab_files_per_page[active_tab];
             var url = ajax_update_url[active_tab] +
@@ -820,6 +817,15 @@ require([
                 type: 'GET',
                 url: url,
                 success: function(data) {
+                    if(build_total_files[build] == undefined && !url.includes('&filters=')){ //if initial panel loading
+                        build_total_files[build] = data.total_file_count;
+                        if (build == 'HG38' && build_total_files['HG38'] == 0 && build_total_files['HG19'] != 0){
+                            $('#all-build, #igv-build').find('option[value="HG38"]').attr('disabled','disabled');
+                            $('#all-build, #igv-build').val('HG19').trigger('change');
+                            $('#'+active_tab+'-files').find('.filelist-panel .spinner i').addClass('hidden');
+                            return;
+                        }
+                    }
                     for(var i=0; i <  data.metadata_data_attr.length; i++){
                         var this_attr = data.metadata_data_attr[i];
                         for(var j=0; j < this_attr.values.length; j++) {
