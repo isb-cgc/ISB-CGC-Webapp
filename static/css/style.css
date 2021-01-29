@@ -4069,15 +4069,18 @@ tr.shown td.details-control i.hide-button {
   font-size: larger;
 }
 
-.signup .panel-default:first-child, .login .panel-default:first-child, .password_reset .panel-default:first-child,
-.connections .panel-default:first-child, .social-sign-up .panel-default:first-child {
+.accounts-col .panel-default:first-child {
   padding-top: 10px;
   margin-top: 50px;
 }
 
-.signup .panel-default:last-child, .login .panel-default:last-child, .password_reset .panel-default:last-child,
-.connections .panel-default:last-child, .social-sign-up .panel-default:last-child {
+accounts-col .panel-default:last-child {
   margin-bottom: 50px;
+}
+
+.email-verify hr {
+    border: 2px solid #466a8d;
+    border-radius: 2px;
 }
 
 #id_remember {
@@ -4107,7 +4110,7 @@ tr.shown td.details-control i.hide-button {
   border: 2px solid #1a344c !important;
 }
 
-.signup input, .login input, .password_reset input, #password-change input {
+.signup input, .login input, .password_reset input, #password-change input, .password_set input {
   width: 100%;
   border-radius: 3px;
   padding: 12px;
@@ -4135,8 +4138,7 @@ body.modal, body.modal-open {
   padding-right: 0px !important;
 }
 
-#sign-in ul.errorlist, #sign-up ul.errorlist, #password-change ul.errorlist, .connections ul.errorlist,
-.social-sign-up ul.errorlist {
+ul.errorlist {
   padding: 5px;
   border: 3px solid #f6441a;
   color: #8f1f12;

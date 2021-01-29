@@ -12,20 +12,20 @@
         <div class="row">
         <div class="col-lg-12">
             <div class="col-lg-4 col-md-4 col-sm-1"></div>
-            <div class="col-lg-4 connections">
+            <div class="col-lg-4 connections accounts-col">
             <div class="panel panel-default">
                 <div class="panel-heading"><h4>{% trans "Account Connections" %}</h4></div>
                 <div class="panel-body">
                     {% if form.non_field_errors %}
-                        <div id="errorMsg">
+                        <div id="errorMsg" class="space-bottom-20">
                             {{form.non_field_errors}}
-                            <p>Please <a href="{% url 'account_set_password' %}">set a password</a> on your local account
+                            <p>Please <b><a href="{% url 'account_set_password' %}">set a password</a></b> on your local account
                                 before disconnecting it from your social account.</p>
                         </div>
                     {% endif %}
 
                     {% if form.accounts %}
-                    <p>Your account is currently connect to the following social account(s):</p>
+                        <p><b>Your account is currently connect to the following social account(s):</b></p>
 
                     <form method="post" action="{% url 'socialaccount_connections' %}">
                     {% csrf_token %}
