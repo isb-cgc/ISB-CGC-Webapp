@@ -177,8 +177,11 @@ function($, tree_graph, stack_bar_chart) {
                 $('.user-data-trees .spinner').hide();
                 $('.parallel-sets .spinner').hide();
 
-                context.show_hide_zero_counts();
-                $('#hide-zeros').on('change', context.show_hide_zero_counts);
+                context.update_zero_case_filters_all();
+                $('.hide-zeros').on('change', function()
+                {
+                    context.update_zero_case_filters($(this));
+                });
                 return $.Deferred().resolve();
             } else {
                 $('.cohort-info .total-values').hide();
@@ -215,7 +218,7 @@ function($, tree_graph, stack_bar_chart) {
 
                         context.update_filter_counts(case_counts, null, program_id);
 
-                        context.show_hide_zero_counts();
+                        context.update_zero_case_filters_all();
 
                         var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(case_counts, clin_tree_attr) : case_counts;
                         clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
@@ -307,18 +310,47 @@ function($, tree_graph, stack_bar_chart) {
             return url;
         },
 
-        show_hide_zero_counts: function() {
-            $('.search-checkbox-list li span').each(function() {
-               var $this = $(this);
-               var hide_zero_count_filters = $('#hide-zeros').prop('checked');
-               if (hide_zero_count_filters && $this.text() == "0")
-               {
-                   $this.parent().parent().hide();
-               }
-               else
-               {
-                    $this.parent().parent().show();
-               }
+        update_zero_case_filters: function(hide_zero_case_checkbox) {
+            if (!hide_zero_case_checkbox)
+                return;
+
+            var should_hide = hide_zero_case_checkbox.prop('checked');
+            var parent_filter_panel = hide_zero_case_checkbox.parent().parent();
+            parent_filter_panel.find('.search-checkbox-list').each(function() {
+               var filter_list = $(this);
+               var num_filter_shown = 0;
+               filter_list.find('li').each(function() {
+                   var filter = $(this);
+                   filter.removeClass("extra-values");
+                   var is_zero_case = (filter.find('span').text() == "0");
+                   if (!is_zero_case || !should_hide) {
+                       filter.show();
+                       num_filter_shown++;
+                   } else {
+                       filter.hide();
+                   }
+               });
+
+               var num_extra = num_filter_shown - 6;
+               var show_more_text = num_extra > 0 ? num_extra + " more" : "0 more";
+               filter_list.find('.show-more').text(show_more_text);
+
+               var filter_count = 0;
+               filter_list.find('li').each(function() {
+                   var filter = $(this);
+                   if (filter.is(':visible') && filter_count >= 6) {
+                       filter.addClass("extra-values");
+                       filter.hide();
+                   }
+                   filter_count++;
+               });
+            });
+        },
+
+        update_zero_case_filters_all: function() {
+            var context = this;
+            $('.hide-zeros').each(function() {
+                context.update_zero_case_filters($(this));
             });
         },
 

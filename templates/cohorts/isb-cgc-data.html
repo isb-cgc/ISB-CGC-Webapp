@@ -2,7 +2,7 @@
 <div id="{{ program.id }}-data" class="tab-pane data-tab" role="tabpanel">
     <div id="{{ program.id }}-data-filter-panel" class="col-lg-3 filter-panel" role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %} data-prog-id="{{ program.id }}" data-prog-displ-name="{{ program.name }}">
         <div class="tabpanel" role="tabpanel">
-            <span><input id="hide-zeros" class = "list-group-item__heading" type="checkbox" value="hide-zeros" onchange="hideAtt(this)"> Hide attributes with 0 cases</span>
+            <span><input class = "hide-zeros list-group-item__heading" type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</span>
             <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
                 <li role="presentation" class="filter-tab active"><a href="#clinical-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Case Filters">Case</a></li>
                 <li role="presentation" class="filter-tab {% if data_types.keys|length <= 0 %}disabled{% endif %}"><a href="#data-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Data Type Filters">Data</a></li>
