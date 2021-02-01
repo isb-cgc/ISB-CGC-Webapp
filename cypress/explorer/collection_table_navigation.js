@@ -22,7 +22,7 @@ describe('Tests table navigation functionality', () => {
     
     cy.get('#projects_panel').find('.next-page').click({force:true});
      
-   /*
+   
     cy.get('#projects_panel').find('.dataTables_info').should(($div) => {
        expect($div.text().trim()).equal('Showing 11 to 20 of 25 entries');
      })
@@ -31,7 +31,7 @@ describe('Tests table navigation functionality', () => {
        expect($div.text().trim()).equal('Showing 21 to 25 of 25 entries');
      })
 
-   */
+   
   })
 
 })

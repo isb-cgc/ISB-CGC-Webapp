@@ -11,6 +11,22 @@
     bottom: .5em;
 }
 
+.notDisp{
+    display:none;
+}
+
+.multiSel{
+  border-style: dashed;
+  animation: border-dance 4s infinite linear;
+}
+@keyframes border-dance {
+  0% {
+    background-position: 0px 0px, 300px 116px, 0px 150px, 216px 0px;
+  }
+  100% {
+    background-position: 300px 0px, 0px 116px, 0px 0px, 216px 150px;
+  }
+}
 
 .prev-page{
     float:left;

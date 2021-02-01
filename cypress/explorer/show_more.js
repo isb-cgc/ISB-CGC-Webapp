@@ -61,14 +61,16 @@ describe('Tests show more functionality', () => {
      cy.get('@checkboxes').not('.extra-values').as('notExtras');
      cy.get('@notExtras').its('length').should('be.lt',6);
      cy.get('@notExtras').each( ($not,index1) => {
-         cy.get($not).scrollIntoView().should('be.visible');
+         //cy.get($not).scrollIntoView().should('be.visible');
+        cy.get($not).scrollIntoView().should('not.have.class','notDisp');
 
        })
 
      cy.get('@checkboxes').filter('.extra-values').as('extras');
      cy.get('@extras').each( ($is,index1) => {
        //cy.get($is).scrollIntoView();
-       cy.get($is).should('not.be.visible');      
+       //cy.get($is).should('not.be.visible');
+      cy.get($is).should('have.class','notDisp');      
 
      }) 
 
@@ -79,7 +81,7 @@ describe('Tests show more functionality', () => {
 
      //cy.get('@checkboxes').filter('.extra-values').as('extras');
      cy.get('@extras').each( ($is,index1) => {
-       cy.get($is).scrollIntoView().should('be.visible');
+       cy.get($is).scrollIntoView().should('not.have.class','notDisp');
 
      })
 
@@ -112,7 +114,8 @@ describe('Tests show more functionality', () => {
             cy.get('@checkboxes').not('.extra-values').as('notExtras');
             cy.get('@notExtras').its('length').should('be.lt',6);
             cy.get('@notExtras').each( ($not,index2) => {
-                cy.get($not).scrollIntoView().should('be.visible');
+                //cy.get($not).scrollIntoView().should('be.visible');
+             cy.get($not).scrollIntoView().should('not.have.class','notDisp');
              }) 
 
              if ( (index0 ===0) || !(index1 ===1)) { 
@@ -120,12 +123,13 @@ describe('Tests show more functionality', () => {
 
                 cy.get('@extravalues').each( ($is,index2) => {
                   //cy.get($is).scrollIntoView();
-                  cy.get($is).should('not.be.visible');
+                  cy.get($is).should('have.class','notDisp');
                })
                cy.get($el).children('.list-group-item__body').children('.more-checks').children('a').click({force:true});
              
                 cy.get('@extravalues').each( ($is,index2) => {
-                  cy.get($is).scrollIntoView().should('be.visible');
+                  //cy.get($is).scrollIntoView().should('not.have.class','notDisp');
+                   cy.get($is).scrollIntoView();
                })
 
                  
@@ -133,7 +137,7 @@ describe('Tests show more functionality', () => {
 
                 cy.get('@extravalues').each( ($is,index2) => {
                   //cy.get($is).scrollIntoView();
-                  cy.get($is).should('not.be.visible');
+                  cy.get($is).should('have.class', 'notDisp');
                })
 
               
@@ -170,21 +174,21 @@ describe('Tests show more functionality', () => {
        cy.get('@checkboxes').not('.extra-values').as('notExtras');
        cy.get('@notExtras').its('length').should('be.lt',6);
        cy.get('@notExtras').each( ($not,index1) => {
-          cy.get($not).scrollIntoView().should('be.visible');
+          cy.get($not).scrollIntoView().should('not.have.class','notDisp');
           //cy.get($not).should('be.visible');
 
         })
 
          cy.get('@checkboxes').filter('.extra-values').as('extras');
          cy.get('@extras').each( ($is,index1) => {
-         cy.get($is).should('not.be.visible');
+         cy.get($is).should('have.class','notDisp');
 
         })
 
        cy.get($el).children('.list-group-item').children('.list-group-item__body').children('.more-checks').children('a').click({force:true});
 
        cy.get('@extras').each( ($is,index1) => {
-          cy.get($is).scrollIntoView().should('be.visible');
+          cy.get($is).scrollIntoView().should('not.have.class','notDisp');
          //cy.get($is).should('be.visible');
 
        })
@@ -193,7 +197,7 @@ describe('Tests show more functionality', () => {
 
        cy.get('@extras').each( ($is,index1) => {
           //cy.get($is).scrollIntoView();
-         cy.get($is).should('not.be.visible');
+         cy.get($is).should('have.class','notDisp');
 
        })
 
@@ -208,7 +212,7 @@ describe('Tests show more functionality', () => {
 
   }) 
 
-  
+ 
 
 })
 

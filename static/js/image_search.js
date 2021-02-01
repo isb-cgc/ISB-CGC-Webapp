@@ -777,7 +777,7 @@ require([
                     var numPatientsStr = "0";
                 }
                 var description = 'NA';
-                var newProjectRow = '<tr id="project_row_' + idStr + '" class="text_head" onclick="(toggleProj(this, \'' + idStr + '\'))"><td>' + idStr + '</td><td>' + numPatientsStr + '</td><td id="' + patientIdStr + '" class="projects_table_num_cohort">' + numPatientsStr + '</td> </tr>';
+                var newProjectRow = '<tr id="project_row_' + idStr + '" class="text_head" onclick="(toggleRows(this, \'' + idStr + '\', \'projects\', \'project_row_\'))"><td>' + idStr + '</td><td>' + numPatientsStr + '</td><td id="' + patientIdStr + '" class="projects_table_num_cohort">' + numPatientsStr + '</td> </tr>';
                 newInnerHTML += newProjectRow;
 
             }
@@ -802,122 +802,117 @@ require([
             window.resetTableControls ($('#'+seriesId), false, 0);
         }
 
-        window.toggleProj = function (projRow, projectId) {
-
-            var num_cohort = parseInt($(projRow).find(".projects_table_num_cohort")[0].innerHTML)
-            if (num_cohort === 0) {
-                alert('no patients for this project in the selected cohort')
-                return;
+        var clearStagingMultiSel = function(){
+            $('body').find('tr').removeClass('multiSel')
+        }
+        window.toggleRows = function (row, rowId, type,prefix) {
+            var multSel = ($(row).parent().children('.multiSel').length>0) ? true : false;
+            if ( (!multSel) && (window.event.shiftKey)){
+                $(row).addClass('multiSel')
             }
-            if (projRow.classList.contains("selected_grey")) {
-                $(projRow).removeClass("selected_grey");
-                projPos = window.selItems.selProjects.indexOf(projectId)
-                if (projPos > -1) {
-                    window.selItems.selProjects.splice(projPos, 1);
+            else {
+                var addRow = true;
+                if ($(row).hasClass('selected_grey')){
+                    addRow =  false;
                 }
+                var firstSel= multSel ? $(row).parent().children('.multiSel')[0]: row;
+                var fSelInd = $(firstSel).index();
+                var lSelInd = $(row).index();
+                mn=Math.min(fSelInd,lSelInd);
+                mx=Math.max(fSelInd,lSelInd);
+                selRows=$(row).parent().children().slice(mn,mx+1);
+                var curArr = new Array();
+                var projArr =  new Array();
+                var selDic = new Object();
+                var caseArr =  new Array();
+                var studyArr =  new Array();
 
-                if (projectId in window.selItems.selCases) {
-                    var selCases = window.selItems.selCases[projectId];
-                    for (var i=0;i<selCases.length;i++){
-                        var selCase = selCases[i];
-                        if (selCase in window.selItems.selStudies){
-                            delete window.selItems.selStudies[selCase];
-                        }
+                var numArr=0;
+                $(selRows).each( function(index){
+                    var curId = $(this)[0].id.substring(prefix.length);
+                    if (type==='studies'){
+
+                        curId=curId.replaceAll('-','.');
                     }
-                    delete window.selItems.selCases[projectId];
+
+                    if  ( addRow && !($(this).hasClass('selected_grey')) ) {
+                        //$(this).addClass('selected_grey');
+                        curArr.push(curId);
+                        numArr+= parseInt($(this).find('.projects_table_num_cohort, .numcases')[0].innerHTML);
+                        if (type==='cases') {
+                            var projectId = $(row).find(".project-name").text();
+                            if (!(projectId in selDic)){
+                                projArr.push(projectId);
+                                selDic[projectId]= new Array();
+                            }
+                            selDic[projectId].push(curId);
+                        }
+
+                        else if (type==='studies'){
+                            var projectId =$(row).attr('data-projectid');
+                            if (projArr.indexOf(projectId)<0){
+                                projArr.push(projectId);
+                            }
+                            var caseId= $(row).find(".case-id").text();
+                            if (!(caseId in selDic)){
+                                caseArr.push(caseId);
+                                selDic[caseId]= new Array();
+                            }
+                            selDic[caseId].push(curId);
+
+                        }
+
+
+                    }
+                    else if ( !addRow && $(this).hasClass('selected_grey')){
+                        $(this).removeClass('selected_grey');
+                        if (type === 'projects') {
+                            removeCasesAndStudiesAndSeries(curId, "cases_table", "studies_table", "series_table");
+                        }
+                        else if (type ==='cases') {
+                            var projectId = $(row).find(".project-name").text();
+                            removeStudiesAndSeries(curId, "case", "studies_table", "series_table", projectId);
+                        }
+                        else if (type ==='studies'){
+                            var caseId= $(row).find(".case-id").text();
+                            if ((window.selItems.selStudies.hasOwnProperty(caseId)) && (window.selItems.selStudies[caseId].indexOf(curId) >-1) ){
+                                var ind=window.selItems.selStudies[caseId].indexOf(curId);
+                                window.selItems.selStudies[caseId].splice(ind);
+                                if (window.selItems.selStudies[caseId].length===0){
+                                    delete window.selItems.selStudies[caseId];
+                                }
+                            }
+                            removeRowsFromTable("series_table", curId, 'study');
+                        }
+
+                    }
+                })
+                if (addRow){
+                    if (numArr < 2000){
+                        $(selRows).addClass('selected_grey');
+                        if (type ==='projects') {
+                            addCases(curArr, "cases_table", false);
+                        }
+                        if (type==='cases'){
+                            addStudyOrSeries(projArr, curArr,[], 'studies_table', false, selDic, false);
+                        }
+                        if (type==='studies'){
+                            addStudyOrSeries(projArr, caseArr, curArr, 'series_table', false, selDic, true);
+                        }
+
+                    }
+                    else{
+                        alert('Sorry only 2000 or less rows can be fetched at once. You have selected '+numArr.toString()+' rows.')
+                    }
                 }
-                removeCasesAndStudiesAndSeries(projectId, "cases_table","studies_table", "series_table");
 
-            } else {
-                if (!(window.event.shiftKey)) {
-                    $(projRow).parent().find('tr').removeClass("selected_grey");
-                    window.selItems.selProjects = [];
-                    window.selItems.selCases ={};
-                    window.selItems.selStudies = {};
-
-                    window.clearAllCasesAndStudiesAndSeries("cases_table","studies_table", "series_table");
-
-                }
-                $(projRow).addClass("selected_grey");
-                window.selItems.selProjects.push(projectId);
-                addCases([projectId],"cases_table", false);
             }
+
         }
 
-        window.toggleCase = function (caseRow, caseId) {
-
-           var projectId = $(caseRow).find(".project-name").text();
-            if (caseRow.classList.contains("selected_grey")) {
-                $(caseRow).removeClass("selected_grey");
-
-                if (projectId in window.selItems.selCases) {
-                    var casePos = window.selItems.selCases[projectId].indexOf(caseId);
-                    if (casePos > -1) {
-                        window.selItems.selCases[projectId].splice(casePos, 1);
-                    }
-                    if (window.selItems.selCases[projectId].length===0){
-                        delete window.selItems.selCases[projectId];
-                    }
-                }
-                if (caseId in window.selItems.selStudies) {
-                    delete window.selItems.selStudies[caseId];
-                }
 
 
-                removeStudiesAndSeries(caseId,"case","studies_table", "series_table");
 
-            } else {
-                if (!(window.event.shiftKey)) {
-                    $(caseRow).parent().find('tr').removeClass("selected_grey");
-                    window.selItems.selCases = {};
-                    window.selItems.selStudies = {};
-                    window.clearAllStudiesAndSeries("studies_table", "series_table");
-
-                }
-                $(caseRow).addClass("selected_grey");
-                if (!(window.selItems.selCases.hasOwnProperty(projectId))){
-                    window.selItems.selCases[projectId] = new Array();
-                }
-                window.selItems.selCases[projectId].push(caseId);
-                //addCase([caseId],"cases_table", false);
-                addStudyOrSeries([projectId], [caseId],[], 'studies_table', false);
-            }
-        }
-
-
-        window.toggleStudy = function (studyRow, studyId, caseId, projectId) {
-
-            if (studyRow.classList.contains("selected_grey")) {
-                $(studyRow).removeClass("selected_grey");
-                removeSeries(studyRow.id, "series_table");
-
-                if (window.selItems.selStudies.hasOwnProperty(caseId)) {
-
-                    studyPos = window.selItems.selStudies[caseId].indexOf(studyId);
-                    if (studyPos > -1) {
-                        window.selItems.selStudies[caseId].splice(studyPos, 1);
-                        if (window.selItems.selStudies[caseId].length == 0) {
-                            delete window.selItems.selStudies[caseId];
-                        }
-                    }
-                }
-
-            } else {
-                if (!(window.event.shiftKey)) {
-                    $(studyRow).parent().find('tr').removeClass("selected_grey");
-                    window.selItems.selStudies = {};
-                    window.clearAllSeries("series_table");
-                }
-
-                if (!(window.selItems.selStudies.hasOwnProperty(caseId))) {
-                    window.selItems.selStudies[caseId] = new Array();
-                }
-                window.selItems.selStudies[caseId].push(studyId);
-
-                $(studyRow).addClass("selected_grey");
-                addStudyOrSeries([projectId], [caseId],[studyId], "series_table", false);
-            }
-        };
 
         window.clearAllSeries = function (seriesTableId) {
             $('#' + seriesTableId).find('tr').remove();
@@ -941,6 +936,9 @@ require([
         removeRowsFromTable = function(tableId,selId,selType){
             var table = document.getElementById(tableId);
             var scrollPos = table.scrollTop;
+            if (selType ==='study'){
+                selId=selId.replaceAll('.','-');
+            }
             var remainingTrs = $('#' + tableId).find('tr').not('.'+selType+'_' + selId);
             var newScrollInd = Array.from(remainingTrs.map(function () {
                 return ((this.offsetTop <= scrollPos) ? 0 : 1)
@@ -960,26 +958,39 @@ require([
         }
 
         window.removeCasesAndStudiesAndSeries = function (projectId, caseTableId,studyTableId, seriesTableId) {
-             removeRowsFromTable(caseTableId, projectId, 'project');
-             if (window.selItems.selCases.hasOwnProperty(projectId)){
-                 var selCases = window.selItems.selCases[projectId]
-                 for (var i=0;i<selCases.length;i++){
-                     selCase = selCases[i];
-                     if (window.selItems.selStudies.hasOwnProperty(selCase)){
-                         delete window.selItems.selStudies[selCase];
-                     }
-                 }
-             }
+            removeRowsFromTable(caseTableId, projectId, 'project');
+            projPos = window.selItems.selProjects.indexOf(projectId)
+            if (projPos > -1) {
+                window.selItems.selProjects.splice(projPos, 1);
+            }
 
-             removeStudiesAndSeries(projectId,'project', studyTableId, seriesTableId);
+            if (projectId in window.selItems.selCases) {
+                var selCases = window.selItems.selCases[projectId];
+                    for (var i=0;i<selCases.length;i++){
+                        var selCase = selCases[i];
+                        if (selCase in window.selItems.selStudies){
+                            delete window.selItems.selStudies[selCase];
+                        }
+                    }
+                    delete window.selItems.selCases[projectId];
+                }
+
+             removeStudiesAndSeries(projectId,'project', studyTableId, seriesTableId, projectId);
 
         }
 
-        window.removeStudiesAndSeries = function (selId, selType, studyTableId, seriesTableId) {
+        window.removeStudiesAndSeries = function (selId, selType, studyTableId, seriesTableId, projectId) {
             //var pclass = "project_" + projectId;
             removeRowsFromTable(studyTableId, selId, selType)
             if ((selType==="case") && (window.selItems.selStudies.hasOwnProperty(selId))){
                 delete window.selItems.selStudies[selId];
+            }
+            if ( (window.selItems.selCases.hasOwnProperty(projectId)) && (window.selItems.selCases[projectId].indexOf(selId)>-1) ){
+                   var ind = window.selItems.selCases[projectId].indexOf(selId);
+                   window.selItems.selCases[projectId].splice(ind);
+                   if (window.selItems.selCases[projectId].length===0){
+                       delete window.selItems.selCases[projectId];
+                   }
             }
 
             removeRowsFromTable(seriesTableId,selId,selType);
@@ -1004,12 +1015,13 @@ require([
             resetTableControls($('#' + seriesTableId), true, newScrollInd)
         }
 
-        window.addCases = function(projectIdArr, casetableId, refresh){
+        window.addCases = function(projectIdArr, casetableId, refreshAfterFilter){
+
             changeAjax(true);
             var curSelCasesDic = new Object();
             var newSelCases = new Object();
 
-            if (refresh) {
+            if (refreshAfterFilter) {
                 for (projectId in window.selItems.selCases) {
                     curSelCasesDic[projectId] = new Object();
                     for (var i = 0; i < window.selItems.selCases[projectId].length; i++) {
@@ -1018,9 +1030,11 @@ require([
                     }
                 }
             }
-
-
-
+            else {
+                for (i in projectIdArr) {
+                    window.selItems.selProjects.push(projectIdArr[i]);
+                }
+            }
             curFilterObj = JSON.parse(JSON.stringify(parseFilterObj()));
             curFilterObj.collection_id = projectIdArr;
 
@@ -1079,18 +1093,18 @@ require([
                         var newHtml = '';
                         var rowId = 'case_' + patientId.replace(/\./g, '-');
 
-                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleCase(this,\'' + patientId + '\',\'' + projectId + '\'))">' +
+                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleRows(this, \'' + patientId.replace(/\\./g, '-') + '\', \'cases\', \'case_\'))">' +
                                    '<td class="col1 project-name">' + projectId + '</td>' +
                                     '<td class="col1 case-id">' + patientId +'</td>' +
                                     '<td class="col1">' + numStudy.toString() + '</td>' +
-                                    '<td class="col1 ">' + numSeries.toString() + '</td>' +
+                                    '<td class="col1 numcases">' + numSeries.toString() + '</td>' +
                                     '</tr>';
 
 
 
                         $('#' + casetableId).append(newHtml);
 
-                        if (refresh && (curSelCasesDic.hasOwnProperty(projectId)) && (curSelCasesDic[projectId].hasOwnProperty(patientId)) ){
+                        if (refreshAfterFilter && (curSelCasesDic.hasOwnProperty(projectId)) && (curSelCasesDic[projectId].hasOwnProperty(patientId)) ){
                             $('#' + casetableId).find('#'+rowId).addClass("selected_grey");
                             if ( !(newSelCases.hasOwnProperty(projectId))){
                                 newSelCases[projectId] = new Array();
@@ -1103,14 +1117,14 @@ require([
                     changeAjax(false);
                     resetTableControls($('#' + casetableId), false, 0);
 
-                    if (refresh){
+                    if (refreshAfterFilter){
                         window.selItems.selCases = newSelCases;
                         var caseArr = new Array();
                         for (projId in window.selItems.selCases) {
                         caseArr.push.apply(caseArr, window.selItems.selCases[projId]);
                         }
                         if (caseArr.length > 0) {
-                              addStudyOrSeries(window.selItems.selProjects, caseArr,[], "studies_table", true);
+                              addStudyOrSeries(window.selItems.selProjects, caseArr,[], "studies_table", true, {},false);
                         }
                     }
 
@@ -1124,20 +1138,30 @@ require([
 
         }
 
-        window.addStudyOrSeries = function (projectIdArr, caseIdArr, studyIdArr, tableId, refresh) {
+        addToSelItems = function(selDic, cat){
+            for (item in selDic){
+                if (!(item in window.selItems[cat])){
+                    window.selItems[cat][item]= new Array();
+                }
+                for (var i=0;i<selDic[item].length;i++) {
+                    var id = selDic[item][i];
+
+                    if (window.selItems[cat][item].indexOf(id)<0){
+                        window.selItems[cat][item].push(id);
+                    }
+                }
+                window.selItems[cat][item].sort();
+            }
+        }
+
+        window.addStudyOrSeries = function (projectIdArr, caseIdArr, studyIdArr, tableId, refreshAfterFilter, newSelItems, isSeries) {
 
             changeAjax(true);
             var curSelStudiesDic = new Object();
             var newSelStudies = new Object();
-            var isSeries = false;
-
-            if (studyIdArr.length > 0) {
-                //curFilterObj.StudyInstanceUID = studyIdArr;
-                isSeries = true;
-            }
 
 
-            else if (refresh) {
+            if (refreshAfterFilter) {
                 for (caseId in window.selItems.selStudies) {
                     curSelStudiesDic[caseId] = new Object();
                     for (var i = 0; i < window.selItems.selStudies[caseId].length; i++) {
@@ -1146,8 +1170,12 @@ require([
                     }
                 }
             }
-
-
+             if ( !(refreshAfterFilter) && isSeries){
+                addToSelItems(newSelItems, 'selStudies');
+            }
+            if ( !(refreshAfterFilter) && !isSeries){
+                 addToSelItems(newSelItems, 'selCases');
+            }
 
            var curFilterObj = new Object();
            if (isSeries){
@@ -1231,7 +1259,7 @@ require([
                             var hrefSeriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
                             var seriesTxt =     ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
 
-                            newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + cclass + ' ' + studyClass + ' text_head">' +
+                            newHtml = '<tr id="' + rowId + '" data-projectid="'+projectId+'" data-caseid="'+patientId+'" class="' + pclass + ' ' + cclass + ' ' + studyClass + ' text_head">' +
                                 '<td class="col1 study-id study-id-col" data-study-id="'+studyId+'">' + hrefTxt + '</td>' +
                                 '<td class="series-number">' + seriesNumber + '</td>' +
                                 '<td class="col1 modality">' + modality + '</td>' +
@@ -1256,18 +1284,18 @@ require([
                                 numSeries=seriesDic[studyId];
                            }
 
-                            newHtml = '<tr id="' + rowId + '" class="' + pclass + ' ' + cclass +' text_head" onclick="(toggleStudy(this,\'' + studyId + '\',\'' + patientId + '\',\''+projectId + '\'))">' +
+                            newHtml = '<tr id="' + rowId + '" data-projectid="'+ projectId +'" class="' + pclass + ' ' + cclass +' text_head" onclick="(toggleRows(this, \'' + studyId + '\', \'studies\', \'study_\'))">' +
                                 //'<td class="col1 project-name">' + projectId + '</td>' +
                                  '<td class="col1 case-id">' + patientId + '</td>'+
                                 '<td class="col2 study-id study-id-col" data-study-id="'+studyId+'">' + hrefTxt + '</td>' +
                                 '<td class="col1 study-description">' + studyDescription + '</td>' +
-                                '<td class="col1 ">' + numSeries.toString() + '</td>'+
+                                '<td class="col1 numcases">' + numSeries.toString() + '</td>'+
                                 '<td class="ohif open-viewer"><a  href="' + fetchUrl + '" target="_blank"><i class="fa fa-eye"></i></a></td></tr>'
 
                         }
 
                         $('#' + tableId).append(newHtml);
-                        if ( !isSeries && refresh && (patientId in curSelStudiesDic) && (studyId in curSelStudiesDic[patientId])) {
+                        if ( !isSeries && refreshAfterFilter && (patientId in curSelStudiesDic) && (studyId in curSelStudiesDic[patientId])) {
                             $('#' + tableId).find('#'+ rowId).addClass("selected_grey");
                             if (!(patientId in newSelStudies)) {
                                 newSelStudies[patientId] = new Array();
@@ -1284,14 +1312,14 @@ require([
                     /* nend = new Date().getTime();
                     diff = nend - nstart;
                     alert(diff); */
-                     if (refresh && !isSeries) {
+                     if (refreshAfterFilter && !isSeries) {
                         window.selItems.selStudies = newSelStudies;
                         var studyArr = new Array();
                         for (caseId in window.selItems.selStudies) {
                              studyArr.push.apply(studyArr, window.selItems.selStudies[caseId]);
                         }
                         if (studyArr.length > 0) {
-                              addStudyOrSeries(projectIdArr, caseIdArr,studyArr, "series_table", true);
+                              addStudyOrSeries(projectIdArr, caseIdArr,studyArr, "series_table", true, {}, true);
                         }
                     }
                     changeAjax(false);
@@ -1884,14 +1912,6 @@ require([
                      }
 
 
-                    /*
-                    if (window.selItems.selProjects.length > 0) {
-                        addStudyOrSeries(window.selItems.selProjects, [], "studies_table", true);
-                    }
-                    if (studyArr.length > 0) {
-                        addStudyOrSeries(window.selItems.selProjects, studyArr, "series_table", true);
-                    } */
-
                     if (newFilt) {
                         histObj = new Object();
                         histObj.selItems = JSON.parse(JSON.stringify(window.selItems));
@@ -2280,19 +2300,9 @@ require([
         var updateFilters = function (filterCat, dic, dataFetched) {
             var showZeros = true;
             var isSearchConf = ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').length>0);
-
             if ( isSearchConf  && ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').prop('checked'))){
                 showZeros = false;
             }
-
-            /*
-
-            if ( ($('#' + filterCat).children('.hide-zeros').length>0) &&  ($('#' + filterCat).children('.hide-zeros').hasClass("notDisp")) ){
-                showZeros = false;
-            }
-
-             */
-
             if (  $('#'+filterCat).hasClass('isQuant') && dataFetched){
                 if (dic.hasOwnProperty('unfilt') && dic['filt'].hasOwnProperty('min_max') ){
                     if (dic['unfilt']['min_max'].hasOwnProperty('min')) {
@@ -2308,37 +2318,26 @@ require([
                         $('#'+filterCat).attr('data-curmax','NA');
                     }
                 }
-
                 else{
                     $('#'+filterCat).attr('data-curmin','NA');
                     $('#'+filterCat).attr('data-curmax','NA');
                 }
-
-
              }
-
-
-
             var allListItems=$('#'+filterCat).children('ul').children('li');
             var allFilters=allListItems.children().children('input:checkbox');
             var checkedFilters=allListItems.children().children('input:checked');
-
             var showExtras = false;
             if ( ($('#' + filterCat).children('.more-checks').length>0) && $('#' + filterCat).children('.more-checks').hasClass("notDisp")) {
                 showExtras = true;
             }
-
-            var allUnchecked = ((checkedFilters.length == 0) ? true : false)
+            //var allUnchecked = ((checkedFilters.length == 0) ? true : false)
             var numAttrAvail = 0;
-
             for (var i = 0; i < allFilters.length; i++) {
                 var elem = allFilters.get(i);
                 var val = $(elem)[0].value;
                 var checked = $(elem).prop('checked');
-
                 var spans = $(elem).parent().find('span');
-                var lbl = spans.get(0).innerHTML;
-
+                //var lbl = spans.get(0).innerHTML;
                 var oldCntUf = parseInt(spans.filter('.case_count')[0].innerHTML);
                 var cntUf=0
                 if (dataFetched && dic.hasOwnProperty('unfilt') && dic['unfilt'].hasOwnProperty(val)) {
@@ -2350,9 +2349,7 @@ require([
                 else{
                     cntUf = oldCntUf;
                 }
-
                 spans.filter('.case_count')[0].innerHTML = cntUf.toString();
-
                 if (spans.filter('.plot_count').length>0) {
                     var oldCntF = parseInt(spans.filter('.plot_count')[0].innerHTML);
                     var cntF = 0
@@ -2366,21 +2363,19 @@ require([
 
                     spans.filter('.plot_count')[0].innerHTML = cntF.toString();
                 }
-
-
-
+                var isZero
                 if ( (cntUf>0) || checked)  {
                     $(elem).parent().parent().removeClass('zeroed');
+                    isZero=false;
                 }
                 else {
                     $(elem).parent().parent().addClass('zeroed');
+                    isZero=true;
                 }
-
                 if ( (cntUf>0) || checked || showZeros) {
                       numAttrAvail++;
                 }
-
-                if ( (numAttrAvail>5) ) {
+                if ( (numAttrAvail>5) && (!isZero || showZeros)  ) {
                     $(elem).parent().parent().addClass('extra-values');
                 }
                 else {
@@ -2388,21 +2383,12 @@ require([
                 }
 
                 if ( ( (cntUf>0) || checked || showZeros ) && (showExtras || (numAttrAvail<6)) ) {
-                      $(elem).parent().parent().show();
+                      $(elem).parent().parent().removeClass('notDisp');
                 }
                 else {
-                    $(elem).parent().parent().hide();
+                    $(elem).parent().parent().addClass('notDisp');
                 }
 
-               /* if (!hasSlider) {
-                    if (checked || allUnchecked) {
-                        $(spans.filter('.plot_count')).addClass('plotit');
-                    } else {
-                        $(spans.filter('.plot_count')).removeClass('plotit');
-                    }
-                }
-
-                */
             }
 
             if (numAttrAvail==0 && (allFilters.length>0)){
@@ -2419,6 +2405,7 @@ require([
                 $('#' + filterCat+'_heading').find('a').removeAttr('aria-disabled');
                 $('#' + filterCat+'_heading').find('.fa').attr("style","font-family :'FontAwesome' !important");
             }
+
             if ( numAttrAvail < 6)  {
                     $('#' + filterCat).children('.more-checks').hide();
                     $('#' + filterCat).children('.less-checks').hide();
@@ -2430,14 +2417,15 @@ require([
             }
 
             else {
-                var numMore;
-                var allListItems
-                if (showZeros){
+                //var numMore;
+                //var allListItems
+                numMore = allListItems.filter('.extra-values').length;
+                /*if (showZeros){
                     numMore = Math.max(allListItems.length-5,0);
                 }
                 else{
                     numMore = Math.max(allListItems.filter('.zeroed').length-5,0);
-                }
+                } */
                 $('#' + filterCat).children('.more-checks').show();
                 if ($('#' + filterCat).children('.more-checks').children('.show-more').length>0){
                     $('#' + filterCat).children('.more-checks').children('.show-more')[0].innerText="show "+numMore.toString()+" more";
@@ -2639,6 +2627,7 @@ require([
             }
         };
 
+
         var tableSortBindings = function (filterId) {
             $('#' + filterId).find('.fa-caret-up, .fa-caret-down').on('click', function () {
                 var sorter = this;
@@ -2695,28 +2684,7 @@ require([
                 handleFilterSelectionUpdate(this, true, true);
             });
 
-            /*
-            $('#' + filterId).find('.hide-zeros-a').on('click', function () {
-                $(this).parent().parent().children('.show-zeros').show();
-                $(this).parent().parent().children('.show-zeros').removeClass('notDisp');
-                $(this).parent().parent().children('.hide-zeros').addClass('notDisp');
-                $(this).parent().hide();
-                var filterCat =$(this).parent().parent()[0].id;
-                updateFilters(filterCat, {}, false);
-            });
 
-
-            $('#' + filterId).find('.show-zeros-a').on('click', function () {
-                $(this).parent().parent().children('.hide-zeros').show();
-                $(this).parent().parent().children('.hide-zeros').removeClass('notDisp');
-                $(this).parent().parent().children('.show-zeros').addClass('notDisp');
-                $(this).parent().hide();
-                var filterCat =$(this).parent().parent()[0].id;
-                updateFilters(filterCat, {}, false);
-
-            });
-
-             */
 
             $('#' + filterId).find('.show-more').on('click', function () {
 
@@ -2729,7 +2697,7 @@ require([
                 if ( ($('#'+filterId).closest('.search-configuration').find('#hide-zeros').length>0)  && ($('#'+filterId).closest('.search-configuration').find('#hide-zeros').prop('checked'))){
                     extras=extras.not('.zeroed');
                 }
-                extras.show();
+                extras.removeClass('notDisp');
             });
 
             $('#' + filterId).find('.show-less').on('click', function () {
@@ -2737,7 +2705,7 @@ require([
                 $(this).parent().parent().find('.more-checks').removeClass('notDisp');
                 $(this).parent().parent().find('.less-checks').addClass('notDisp');
                 $(this).parent().hide();
-                $(this).parent().parent().children('.search-checkbox-list').children('.extra-values').hide();
+                $(this).parent().parent().children('.search-checkbox-list').children('.extra-values').addClass('notDisp');
             });
 
             $('#' + filterId).find('.check-all').on('click', function () {
@@ -3099,6 +3067,23 @@ require([
             tableSortBindings('studies_table_head')
             tableSortBindings('cases_table_head');
             tableSortBindings('series_table_head');
+
+            shftP= $.Event("keyup");
+            //shift key code
+            shftP.which =  16;
+            $('body').keyup( function(e){
+                //if (e.shiftKey)
+               //alert('lifted shiftkey');
+               clearStagingMultiSel();
+            }).trigger(shftP);
+
+            $('body').mouseenter( function(e){
+                if (!(window.event.shiftKey)){
+                    //alert('enter no shift key');
+                    clearStagingMultiSel();
+                }
+            })
+
             max= Math.ceil(parseInt($('#age_at_diagnosis').data('data-max')));
             min= Math.floor(parseInt($('#age_at_diagnosis').data('data-min')));
 
