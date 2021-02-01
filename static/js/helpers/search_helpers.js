@@ -178,7 +178,7 @@ function($, tree_graph, stack_bar_chart) {
                 $('.parallel-sets .spinner').hide();
 
                 context.update_zero_case_filters_all();
-                $('.hide-zeros').on('change', function()
+                $('.hide-zeros input').on('change', function()
                 {
                     context.update_zero_case_filters($(this));
                 });
@@ -318,38 +318,53 @@ function($, tree_graph, stack_bar_chart) {
             var parent_filter_panel = hide_zero_case_checkbox.parent().parent();
             parent_filter_panel.find('.search-checkbox-list').each(function() {
                var filter_list = $(this);
-               var num_filter_shown = 0;
+               var num_filter_to_show = 0;
                filter_list.find('li').each(function() {
                    var filter = $(this);
-                   filter.removeClass("extra-values");
                    var is_zero_case = (filter.find('span').text() == "0");
                    if (!is_zero_case || !should_hide) {
-                       filter.show();
-                       num_filter_shown++;
-                   } else {
-                       filter.hide();
+                       num_filter_to_show++;
                    }
                });
 
-               var num_extra = num_filter_shown - 6;
+               var num_extra = num_filter_to_show - 6;
                var show_more_text = num_extra > 0 ? num_extra + " more" : "0 more";
-               filter_list.find('.show-more').text(show_more_text);
+               if (num_filter_to_show == 0)
+               {
+                   filter_list.find('more-checks').hide();
+               }
+               else
+               {
+                   filter_list.find('more-checks').show();
+                   filter_list.find('.show-more').text(show_more_text);
+               }
 
-               var filter_count = 0;
+               var visible_filter_count = 0;
                filter_list.find('li').each(function() {
                    var filter = $(this);
-                   if (filter.is(':visible') && filter_count >= 6) {
-                       filter.addClass("extra-values");
+                   var is_zero_case = (filter.find('span').text() == "0");
+                   filter.removeClass("extra-values");
+                   filter.removeClass("visible-filter");
+                   if (is_zero_case && should_hide) {
                        filter.hide();
+                   } else {
+                       filter.addClass("visible-filter");
+                       if (visible_filter_count >= 6) {
+                           filter.addClass("extra-values");
+                           filter.hide();
+                       }
+                       else {
+                           filter.show();
+                       }
+                       visible_filter_count++;
                    }
-                   filter_count++;
                });
             });
         },
 
         update_zero_case_filters_all: function() {
             var context = this;
-            $('.hide-zeros').each(function() {
+            $('.hide-zeros input').each(function() {
                 context.update_zero_case_filters($(this));
             });
         },

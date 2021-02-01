@@ -2,7 +2,7 @@
 <div id="{{ program.id }}-data" class="tab-pane data-tab" role="tabpanel">
     <div id="{{ program.id }}-data-filter-panel" class="col-lg-3 filter-panel" role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %} data-prog-id="{{ program.id }}" data-prog-displ-name="{{ program.name }}">
         <div class="tabpanel" role="tabpanel">
-            <span><input class = "hide-zeros list-group-item__heading" type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</span>
+            <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
             <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
                 <li role="presentation" class="filter-tab active"><a href="#clinical-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Case Filters">Case</a></li>
                 <li role="presentation" class="filter-tab {% if data_types.keys|length <= 0 %}disabled{% endif %}"><a href="#data-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Data Type Filters">Data</a></li>
@@ -39,7 +39,6 @@
                                                             </label>
                                                         </li>
                                                     {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                        <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                         <li class="extra-values checkbox" style="display:none;">
                                                             <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
@@ -64,6 +63,7 @@
                                                     {% endif %}
                                                 {% endfor %}
                                                 {% if num_more > 0 %}
+                                                    <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                     <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                 {% endif %}
                                             {% endwith %}

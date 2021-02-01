@@ -1260,6 +1260,12 @@ a#user-dropdown:hover {
 .extra-values {
   display: none; }
 
+.hide-zeros {
+  color: #2A537A;
+  padding: 10px 0px 10px 15px;
+  background: #ffffff;
+}
+
 .table-list a:hover, .table-list a:active, .table-list_warning a:hover, .table-list_warning a:active {
   text-decoration: none; }
 
