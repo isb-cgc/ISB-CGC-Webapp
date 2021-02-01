@@ -1,12 +1,9 @@
 {% load staticfiles %}
 {% load idc_collections_custom_tags %}
 
-{% with data_release=""|get_idc_version %}
+{% with idc_info=""|get_idc_version %}
 
     <footer class="row container-fluid site-footer">
-        <div class="row">
-            <br>
-        </div>
         <div class="row">
             <a href="/">Site Home</a>
             &nbsp; &nbsp; | &nbsp; &nbsp;
@@ -27,13 +24,10 @@
             &nbsp; &nbsp; | &nbsp; &nbsp;
             <a href="https://www.cancer.gov/policies/foia" target="_blank">FOIA</a>
         </div>
-
-        <br>
-
         <div class="row">
             <p><i><b>Pilot Application Version:</b> {{ APP_VERSION }}</i></p>
-            <p>{{ data_release.name }} Version {{ data_release.version_number }}
-                - {{ data_release.date_active|date:"F d, Y" }}</p>
+            <p>{{ idc_info.name }} Version {{ idc_info.version_number }}
+                - {{ idc_info.date_active|date:"F d, Y" }}</p>
             <p>Data hosted by IDC is subject to the <a href="https://wiki.cancerimagingarchive.net/x/c4hF" target="_blank">TCIA Data
                 Usage License and Citation Requirements</a></p>
             <p class="acknowledgement">
@@ -41,9 +35,6 @@
                     Biomedical Research under Task Order HHSN26100071 from NCI.</i>
             </p>
         </div>
-
-        <br>
-
         <div class="row">
             <span class="social-media-item">
                 <a class="external-link" href="" url="https://www.youtube.com/channel/UCQxuVp3_3aTJZBA4zZLMQtQ"
@@ -69,7 +60,6 @@
                 </a>
             </span>
         </div>
-        <br>
         <div class="row">
             <a href="https://www.hhs.gov/" target="_blank">U.S. Department of Health and Human Services</a>
             &nbsp; &nbsp; | &nbsp; &nbsp;
@@ -79,8 +69,7 @@
             &nbsp; &nbsp; | &nbsp; &nbsp;
             <a href="https://www.usa.gov/" target="_blank">USA.gov</a>
         </div>
-        <br>
-        <div class="row" class="mat-toolbar-row" style="height:35px; font-size: 12px !important">
+        <div class="row mat-toolbar-row">
             NIH... Turning Discovery Into Health ®
         </div>
     </footer>

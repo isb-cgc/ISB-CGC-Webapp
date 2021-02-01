@@ -33,6 +33,7 @@ from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
 from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion
 from idc_collections.collex_metadata_utils import build_explorer_context
+from .models import AppInfo
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.signals import user_login_failed
@@ -49,6 +50,8 @@ WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 @never_cache
 def landing_page(request):
     collex = Collection.objects.filter(active=True, subject_count__gt=6, collection_type=Collection.ORIGINAL_COLLEX).values()
+    #app_info = AppInfo.objects.get(active=True)
+    idc_info = ImagingDataCommonsVersion.objects.get(active=True)
 
     sapien_counts = {}
 
@@ -76,7 +79,9 @@ def landing_page(request):
     return render(request, 'idc/landing.html', {
         'request': request,
         'case_counts': [{'site': x, 'cases': sapien_counts[x], 'fileCount': 0} for x in sapien_counts.keys()],
-        'example_tooltips': ex_tooltips
+        'example_tooltips': ex_tooltips,
+        #'app_info': app_info,
+        'idc_info': idc_info
     })
 
 

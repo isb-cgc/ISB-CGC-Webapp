@@ -6,16 +6,27 @@
 
 {% block content %}
     <div class="row">
-        <div class="col-lg-12 col-md-12 col-sm-12">
+        <div class="col-lg-12 col-md-12 col-sm-12 accounts-col email-verify">
             <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2"></div>
             <div class="col-lg-4 col-md-4 col-sm-6 col-xs-8">
                 <div class="panel panel-default">
-                    <div class="panel-heading"><h3>{% trans "Verify Your E-mail Address" %}</h3></div>
-                    <div class="panel-body">
-                        <p>{% blocktrans %}We have sent an e-mail to you for verification. Follow the link provided to finalize the signup process.{% endblocktrans %}</p>
-                        <p>If you do not receive the e-mail within a few minutes, check your spam folder. Registration confirmation e-mails are often flagged as potential spam.</p>
-                        <p>If the e-mail hasn't arrived and isn't in your spam folder, please contact us for assistance.</p>
-                    </div>
+                    <form action="{% url 'account_email' %}" class="email_list" method="post">
+                    {% csrf_token %}
+                        <div class="panel-heading"><h3>{% trans "Verify Your E-mail Address" %}</h3></div>
+                        <div class="panel-body">
+                            <p>{% blocktrans %}We have sent an e-mail to you for verification. Follow the link provided to finalize the signup process.{% endblocktrans %}</p>
+                            <p>If you do not receive the e-mail within a few minutes, check your spam folder. Registration confirmation e-mails are often flagged as potential spam.</p>
+                            <hr/>
+                            <h4>E-mail hasn't arrived and isn't in your spam folder?</h4>
+                            <p>If you <b><a href="{% url 'account_login' %}">attempt to sign in</a></b> using the password
+                                you specified when registering, your verification email will be re-sent.</p>
+                            <p><b>Please Note:</b> Verification e-mails will only be sent once every three (3) minutes. Additional
+                                attempts to log in to send the message more frequently than this will not result in additional
+                                e-mails.</p>
+                            <p>If the verification e-mail still doesn't come through, <b><a href="mailto:support@canceridc.dev">contact us</a></b>
+                                from your account's registered email address for assistance.</p>
+                        </div>
+                    </form>
                 </div>
             </div>
             <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2"></div>
