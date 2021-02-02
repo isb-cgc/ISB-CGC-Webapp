@@ -706,6 +706,11 @@ require([
         $('#'+this_tab+'-files').find('.filter-build-panel').hide();
         $('#'+this_tab+'-filter-panel-'+$(this).find(':selected').val()).show();
 
+        $('.hide-zeros input').off('change');
+        $('.hide-zeros input').on('change', function() {
+            update_zero_case_filters($(this));
+        });
+
         if(this_tab == 'igv') {
             // Remove any selected files not from this build
             var new_build = $('#'+this_tab+'-files').find('.build :selected').val();
@@ -826,6 +831,7 @@ require([
                             return;
                         }
                     }
+
                     for(var i=0; i <  data.metadata_data_attr.length; i++){
                         var this_attr = data.metadata_data_attr[i];
                         for(var j=0; j < this_attr.values.length; j++) {
@@ -838,6 +844,8 @@ require([
                     }
                     update_download_link(active_tab, data.total_file_count);
                     update_table_display(active_tab, data);
+
+                    update_zero_case_filters_all();
                 },
                 error: function() {
 
@@ -851,6 +859,60 @@ require([
             },SUBSEQUENT_DELAY);
     };
 
+    var update_zero_case_filters = function(hide_zero_case_checkbox) {
+        if (!hide_zero_case_checkbox)
+            return;
+
+        var should_hide = hide_zero_case_checkbox.prop('checked');
+        var parent_filter_panel = hide_zero_case_checkbox.parent().parent();
+        parent_filter_panel.find('.search-checkbox-list').each(function() {
+            var filter_list = $(this);
+            var num_filter_to_show = 0;
+            filter_list.find('li').each(function () {
+                var filter = $(this);
+                var is_zero_case = (filter.find('span').text() == "0");
+                if (!is_zero_case || !should_hide) {
+                    num_filter_to_show++;
+                }
+            });
+
+            var num_extra = num_filter_to_show - 6;
+            var show_more_text = num_extra > 0 ? num_extra + " more" : "0 more";
+            if (num_filter_to_show == 0) {
+                filter_list.find('more-checks').hide();
+            } else {
+                filter_list.find('more-checks').show();
+                filter_list.find('.show-more').text(show_more_text);
+            }
+
+            var visible_filter_count = 0;
+            filter_list.find('li').each(function () {
+                var filter = $(this);
+                var is_zero_case = (filter.find('span').text() == "0");
+                filter.removeClass("extra-values");
+                filter.removeClass("visible-filter");
+                if (is_zero_case && should_hide) {
+                    filter.hide();
+                } else {
+                    filter.addClass("visible-filter");
+                    if (visible_filter_count >= 6) {
+                        filter.addClass("extra-values");
+                        filter.hide();
+                    } else {
+                        filter.show();
+                    }
+                    visible_filter_count++;
+                }
+            });
+        });
+    };
+
+    var update_zero_case_filters_all = function() {
+        $('.hide-zeros input').each(function() {
+            update_zero_case_filters($(this));
+        });
+    };
+
     $('.data-tab-content').on('change','.filter-panel input[type="checkbox"]',function(){
         update_filters($(this));
         update_displays($('ul.nav-tabs-files li.active a').data('file-type'));
@@ -858,7 +920,14 @@ require([
 
     // Click events for 'Check All/Uncheck All' in filter categories
     $('.data-tab-content').on('click', '.check-all', function(){
-        $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',true);
+        $(this).parent().parent().siblings('.checkbox').each(function(){
+            var filter = $(this);
+            if (filter.hasClass("visible-filter")) {
+                var checkbox = filter.find('input');
+                checkbox.prop('checked', true);
+            }
+        });
+
         update_filters($($(this).parent().parent().siblings('.checkbox').find('input')[0]));
         update_displays($('ul.nav-tabs-files li.active a').data('file-type'));
     });
