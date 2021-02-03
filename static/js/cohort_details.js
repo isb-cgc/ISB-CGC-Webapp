@@ -927,9 +927,13 @@ require([
 
         // Click events for 'Check All/Uncheck All' in filter categories
         $(program_data_selector + ' .check-all').on('click',function(){
-            $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',true);
-            $(this).parent().parent().siblings('.checkbox').find('input').each(function(){
-                $(this).triggerHandler('change');
+            $(this).parent().parent().siblings('.checkbox').each(function(){
+                var filter = $(this);
+                if (filter.hasClass("visible-filter")) {
+                    var checkbox = filter.find('input');
+                    checkbox.prop('checked', true);
+                    checkbox.triggerHandler('change');
+                }
             });
         });
         $(program_data_selector + ' .uncheck-all').on('click',function(){

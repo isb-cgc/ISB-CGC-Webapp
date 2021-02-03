@@ -253,79 +253,6 @@ def extended_login_view(request):
 
 
 '''
-Returns page users see after signing in
-'''
-
-
-@login_required
-def user_landing(request):
-    directory_service, http_auth = get_directory_resource()
-    user_email = User.objects.get(id=request.user.id).email
-    # add user to isb-cgc-open if they are not already on the group
-    try:
-        body = {
-            "email": user_email,
-            "role": "MEMBER"
-        }
-        directory_service.members().insert(
-            groupKey=OPEN_ACL_GOOGLE_GROUP,
-            body=body
-        ).execute(http=http_auth)
-
-    except HttpError as e:
-        logger.info(e)
-
-    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
-    # check to see if user has read access to 'All TCGA Data' cohort
-    isb_superuser = User.objects.get(is_staff=True,is_superuser=True,is_active=True)
-    superuser_perm = Cohort_Perms.objects.get(user=isb_superuser)
-    user_all_data_perm = Cohort_Perms.objects.filter(user=request.user, cohort=superuser_perm.cohort)
-    if not user_all_data_perm:
-        Cohort_Perms.objects.create(user=request.user, cohort=superuser_perm.cohort, perm=Cohort_Perms.READER)
-
-    # add_data_cohort = Cohort.objects.filter(name='All TCGA Data')
-
-    users = User.objects.filter(is_superuser=0)
-    cohort_perms = Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True)
-    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved').annotate(
-        num_cases=Count('samples__case_barcode'))
-
-    for item in cohorts:
-        item.perm = item.get_perm(request).get_perm_display()
-        item.owner = item.get_owner()
-        # print local_zone.localize(item.last_date_saved)
-
-    # viz_perms = Viz_Perms.objects.filter(user=request.user).values_list('visualization', flat=True)
-    visualizations = SavedViz.objects.generic_viz_only(request).order_by('-last_date_saved')
-    for item in visualizations:
-        item.perm = item.get_perm(request).get_perm_display()
-        item.owner = item.get_owner()
-
-    seqpeek_viz = SavedViz.objects.seqpeek_only(request).order_by('-last_date_saved')
-    for item in seqpeek_viz:
-        item.perm = item.get_perm(request).get_perm_display()
-        item.owner = item.get_owner()
-
-    # Used for autocomplete listing
-    cohort_listing = Cohort.objects.filter(id__in=cohort_perms, active=True).values('id', 'name')
-    for cohort in cohort_listing:
-        cohort['value'] = int(cohort['id'])
-        cohort['label'] = cohort['name'].encode('utf8')
-        del cohort['id']
-        del cohort['name']
-
-    return render(request, 'isb_cgc/user_landing.html', {'request': request,
-                                                         'cohorts': cohorts,
-                                                         'user_list': users,
-                                                         'cohorts_listing': cohort_listing,
-                                                         'visualizations': visualizations,
-                                                         'seqpeek_list': seqpeek_viz,
-                                                         'base_url': settings.BASE_URL,
-                                                         'base_api_url': settings.BASE_API_URL
-                                                         })
-
-
-'''
 DEPRECATED - Returns Results from text search
 '''
 
@@ -512,7 +439,6 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
     return JsonResponse(result, status=status)
 
 
-@login_required
 def dicom(request, study_uid=None):
     template = 'isb_cgc/dicom.html'
 
@@ -590,7 +516,6 @@ def test_solr_data(request):
 
     return JsonResponse({'result': results}, status=status)
 
-@login_required
 def camic(request, file_uuid=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     context = {}
@@ -637,7 +562,6 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     return render(request, 'isb_cgc/igv.html', context)
 
 
-@login_required
 def path_report(request, report_file=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     context = {}
@@ -715,26 +639,31 @@ def workflow_page(request):
 @login_required
 def dashboard_page(request):
     context = {}
+    display_count = 6
     try:
         # Cohort List
         isb_superuser = User.objects.get(is_staff=True, is_superuser=True, is_active=True)
         public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser, perm=Cohort_Perms.OWNER).values_list('cohort',
                                                                                                               flat=True)
-        cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(
-            cohort__id__in=public_cohorts)))
-        cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
+
+        cohort_perms = Cohort_Perms.objects.select_related('cohort').filter(user=request.user, cohort__active=True).exclude(
+            cohort__id__in=public_cohorts)
+        cohorts_count = cohort_perms.count()
+        cohorts = Cohort.objects.filter(id__in=cohort_perms.values_list('cohort__id',flat=True), active=True).order_by('-last_date_saved')[:display_count]
 
         # Program List
         ownedPrograms = request.user.program_set.filter(active=True)
         sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
         programs = ownedPrograms | sharedPrograms
-        programs = programs.distinct().order_by('-last_date_saved')
+        programs_count = programs.distinct().count()
+        programs = programs.distinct().order_by('-last_date_saved')[:display_count]
 
         # Workbook List
         userWorkbooks = request.user.workbook_set.filter(active=True)
         sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
         workbooks = userWorkbooks | sharedWorkbooks
-        workbooks = workbooks.distinct().order_by('-last_date_saved')
+        workbooks_count = workbooks.distinct().count()
+        workbooks = workbooks.distinct().order_by('-last_date_saved')[:display_count]
 
         # # Notebook VM Instance
         # user_instances = request.user.instance_set.filter(active=True)
@@ -771,18 +700,25 @@ def dashboard_page(request):
         # }
 
         # Gene & miRNA Favorites
-        genefaves = request.user.genefavorite_set.filter(active=True)
+        genefaves = request.user.genefavorite_set.filter(active=True).order_by('-last_date_saved')[:display_count]
+        genefaves_count = request.user.genefavorite_set.filter(active=True).count()
 
         # Variable Favorites
-        varfaves = request.user.variablefavorite_set.filter(active=True)
+        varfaves = request.user.variablefavorite_set.filter(active=True).order_by('-last_date_saved')[:display_count]
+        varfaves_count = request.user.variablefavorite_set.filter(active=True).count()
 
         context = {
             'request': request,
             'cohorts': cohorts,
+            'cohorts_count': cohorts_count,
             'programs': programs,
+            'programs_count': programs_count,
             'workbooks': workbooks,
+            'workbooks_count': workbooks_count,
             'genefaves': genefaves,
+            'genefaves_count': genefaves_count,
             'varfaves': varfaves,
+            'varfaves_count': varfaves_count,
             # 'optinstatus': opt_in_status
             # 'notebook_vm': notebook_vm,
             # 'gcp_list': gcp_list,
