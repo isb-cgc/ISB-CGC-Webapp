@@ -1,2 +1,8 @@
-!#/bin/sh
-echo 'hi'
+#!/bin/sh
+
+cd ../cypress_test
+
+
+./node_modules/cypress/bin/cypress_test run
+#echo 'hi'
+#exit -1 
