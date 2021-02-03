@@ -99,13 +99,13 @@ describe('Tests hide attributes functionality', () => {
        // cy.get('#search_derived_set').find('.case_count').filter(':visible').as('searchCnts');
        cy.get('#hide-zeros').as('hideZeros');
        cy.get('@hideZeros').click({force:true});
-      cy.get('#search_derived_set').find('.list-group-item__body').find('.list-group-item__heading').as('derivedHeadings');
+      cy.get('#search_derived_set').find('.list-group-item__body').find('.list-group-item__heading').find('.attDisp').as('derivedHeadings');
       cy.get('@derivedHeadings').its('length').should('equal',27);
        //cy.get('@derivedHeadings').its('length').as('dlen')
      //expect(cy.get('@dlen')).to.equal(27);    
 
-      cy.get('@derivedHeadings').filter('.greyout').should('exist');
-      cy.get('@derivedHeadings').filter('.greyout').as('greyout');
+      cy.get('@derivedHeadings').filter('.greyText').should('exist');
+      cy.get('@derivedHeadings').filter('.greyText').as('greyout');
       cy.get('@greyout').its('length').should('equal',27);
 
 
