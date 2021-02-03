@@ -1800,6 +1800,9 @@ require([
                             }
                         } else {
                             $('#save-cohort-btn').prop('disabled','disabled');
+                            if (data.total<=0){
+                                window.alert('There are no cases matching the selected set of filters.')
+                            }
                             if(user_is_auth) {
                                 $('#save-cohort-btn').prop('title',data.total > 0 ? 'Please select at least one filter.' : 'There are no cases in this cohort.');
                             } else {
@@ -2284,7 +2287,7 @@ require([
                 filterData = parseFilterForCounts(filterCat);
                 plotId = filterCat + "_chart";
                 var lbl='';
-                lbl = $('#' + filterCat + '_heading').children()[0].innerText;
+                lbl = $('#' + filterCat + '_heading').children('a').children('.attDisp')[0].innerText;
                 /*
                 if ($('#' + filterCat).data('plotnm')){
                     lbl = $('#' + filterCat).data('plotnm');
@@ -2325,6 +2328,10 @@ require([
              }
             var allListItems=$('#'+filterCat).children('ul').children('li');
             var allFilters=allListItems.children().children('input:checkbox');
+            var hasFilters=true;
+            if (allFilters.length===0){
+                hasFilters = false;
+            }
             var checkedFilters=allListItems.children().children('input:checked');
             var showExtras = false;
             if ( ($('#' + filterCat).children('.more-checks').length>0) && $('#' + filterCat).children('.more-checks').hasClass("notDisp")) {
@@ -2332,6 +2339,7 @@ require([
             }
             //var allUnchecked = ((checkedFilters.length == 0) ? true : false)
             var numAttrAvail = 0;
+            var numNonZero = 0;
             for (var i = 0; i < allFilters.length; i++) {
                 var elem = allFilters.get(i);
                 var val = $(elem)[0].value;
@@ -2365,6 +2373,9 @@ require([
                 }
                 var isZero
                 if ( (cntUf>0) || checked)  {
+                    if (cntUf>0){
+                        numNonZero++;
+                    }
                     $(elem).parent().parent().removeClass('zeroed');
                     isZero=false;
                 }
@@ -2391,55 +2402,42 @@ require([
 
             }
 
-            if (numAttrAvail==0 && (allFilters.length>0)){
-                $('#' + filterCat+'_heading').find('.fa').attr('style','display:none');
-                $('#' + filterCat+'_heading').find('a').attr('aria-disabled','true');
-               $('#' + filterCat+'_heading').addClass('greyout');
-                //$('#' + filterCat).hide();a
-                if ($('#' + filterCat+'_heading').children('a').attr('aria-expanded') === 'true'){
-                    $('#' + filterCat+'_heading').children('a').click();
-                }
-            }
-            else if ((numAttrAvail>0) && (allFilters.length>0) && ($('#' + filterCat+'_heading').hasClass('greyout'))){
-                $('#' + filterCat+'_heading').removeClass('greyout');
-                $('#' + filterCat+'_heading').find('a').removeAttr('aria-disabled');
-                $('#' + filterCat+'_heading').find('.fa').attr("style","font-family :'FontAwesome' !important");
-            }
+            if (hasFilters){
+                if (numNonZero===0){
+                    $('#' + filterCat+'_heading').children('a').children().addClass('greyText');
+                    $('#' + filterCat+'_heading').children('a').children('.noCase').removeClass('notDisp');
 
-            if ( numAttrAvail < 6)  {
+                }
+                else {
+                    $('#' + filterCat+'_heading').children('a').children().removeClass('greyText');
+                    $('#' + filterCat+'_heading').children('a').children('.noCase').addClass('notDisp');
+
+                }
+
+                if ( numAttrAvail < 6)  {
+                       $('#' + filterCat).children('.more-checks').hide();
+                        $('#' + filterCat).children('.less-checks').hide();
+
+                    }
+                else if (showExtras) {
                     $('#' + filterCat).children('.more-checks').hide();
+                    $('#' + filterCat).children('.less-checks').show();
+                }
+
+                else {
+                    numMore = allListItems.filter('.extra-values').length;
+                    $('#' + filterCat).children('.more-checks').show();
+                    if ($('#' + filterCat).children('.more-checks').children('.show-more').length>0){
+                        $('#' + filterCat).children('.more-checks').children('.show-more')[0].innerText="show "+numMore.toString()+" more";
+                    }
+
                     $('#' + filterCat).children('.less-checks').hide();
-
                 }
-            else if (showExtras) {
-                $('#' + filterCat).children('.more-checks').hide();
-                $('#' + filterCat).children('.less-checks').show();
             }
-
-            else {
-                //var numMore;
-                //var allListItems
-                numMore = allListItems.filter('.extra-values').length;
-                /*if (showZeros){
-                    numMore = Math.max(allListItems.length-5,0);
-                }
-                else{
-                    numMore = Math.max(allListItems.filter('.zeroed').length-5,0);
-                } */
-                $('#' + filterCat).children('.more-checks').show();
-                if ($('#' + filterCat).children('.more-checks').children('.show-more').length>0){
-                    $('#' + filterCat).children('.more-checks').children('.show-more')[0].innerText="show "+numMore.toString()+" more";
-                }
-
-                $('#' + filterCat).children('.less-checks').hide();
-            }
-
-
 
         }
 
-        window.hideAtt = function(hideElem){
-
+        setAllFilterElements = function(hideEmpty){
             var filtSet = ["search_orig_set","segmentation","quantitative","qualitative","tcga_clinical"];
             for (var i=0;i<filtSet.length;i++) {
                 filterCats = findFilterCats(filtSet[i], false);
@@ -2447,8 +2445,12 @@ require([
                         updateFilters(filterCats[j],{},false);
                 }
             }
-            addSliders('quantitative', false, hideElem.checked,'');
-            addSliders('tcga_clinical',false, hideElem.checked,'tcga_clinical.');
+            addSliders('quantitative', false, hideEmpty,'');
+            addSliders('tcga_clinical',false, hideEmpty,'tcga_clinical.');
+        }
+
+        window.hideAtt = function(hideElem){
+            setAllFilterElements(hideElem.checked);
         }
 
         var updateFilterSelections = function (id, dicofdic) {

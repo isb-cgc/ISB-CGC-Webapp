@@ -43,6 +43,8 @@ ALPHANUM_SORT = [
 
 ]
 
+DISPLAY_SORT = ['SOPClassUID']
+
 simple_number_sort = [
     '0 to 200', '200.01 to 400', '400.01 to 600', '600.01 to 800', '800.01 to 1000', '1000.01 to 1200', '1200.01 to 1400', '1400.01+',
     '0 to 4', '5 to 9', '10 to 14', '15 to 19', '20 to 24', '25 to 29', '30 to 34', '35 to 39', 'Over 40',
@@ -179,12 +181,12 @@ def check_for_order(items, attr):
                 if curValue == ordinal:
                     ordered_items.append(item)
         return ordered_items
-    elif attr in ALPHANUM_SORT:
+    elif attr in DISPLAY_SORT:
         # If they should be sorted alphanumerically based on the value
-        return sorted(items, key=lambda k: k['value'])
+        return sorted(items, key=lambda k: str(k['display_value']) )
     else:
         # Otherwise, sort them by count, descending
-        return sorted(items, key=lambda k: k['count'], reverse=True)
+        return sorted(items, key=lambda k: k['value'])
 
 @register.filter
 def format_val(this_val):

@@ -11,6 +11,10 @@
     bottom: .5em;
 }
 
+.greyText {
+   color:#808080;
+}
+
 .notDisp{
     display:none;
 }

@@ -146,7 +146,7 @@
                                 <h4 class="panel-title">Search Configuration
                                     <div  class="tooltip_chart_info" style="float:right"><i class="fa fa-info-circle"></i></div>
                                 </h4>
-                                <br><span><input id="hide-zeros" type="checkbox" value="hide-zeros" onchange="hideAtt(this)"> Hide attributes with 0 cases</span>
+                                <br><span><input id="hide-zeros" type="checkbox" value="hide-zeros" onchange="hideAtt(this)"> Hide attribute values with 0 cases</span>
                             </div>
 
                             <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
@@ -173,7 +173,7 @@
                                          <li class="list-group-item">
                                             <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                 <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
-                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
+                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> <span class="attDisp">{{ attr.display_name }}</span> <span class="notDisp noCase"> (0 cases)</span>
                                                 </a>
                                             </div>
                                             <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}" class="collapse list-group-item__body"
@@ -193,7 +193,7 @@
                                                 {% endif %}
                                                 {% endcomment %}
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
-                                                   {% for val in attr.values %}
+                                                   {% for val in attr.values|check_for_order:attr.name %}
                                                        {% with val.display_value|get_display_val:val.value as display_value %}
                                                         <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if val.count == 0 %} zeroed {% endif %}">
                                                            <label>
@@ -244,7 +244,7 @@
                                                        <li class="list-group-item">
                                                           <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                 <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
-                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}
+                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> <span class="attDisp">{{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}</span> <span class=" noCase"> (0 cases)</span>
                                                 </a>
                                             </div>
 
@@ -312,7 +312,7 @@
                                                    <li class="list-group-item">
                                                  <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                      <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
-                                                         <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
+                                                         <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> <span class="attDisp">{{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}</span> <span class=" noCase"> (0 cases)</span>
                                                      </a>
                                                  </div>
                                                  <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse" aria-expanded="false"
