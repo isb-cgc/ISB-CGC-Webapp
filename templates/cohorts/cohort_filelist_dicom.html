@@ -8,6 +8,7 @@
                 </select>
             </div>
         </div>
+        <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
         <div class="panel panel-default filter-panel">
             {% for attr_build, vals in metadata_data_attr.items %}
                 {% if attr_build == 'HG19' %}
@@ -59,7 +60,6 @@
                                                         </label>
                                                     </li>
                                                 {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                    <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                     <li class="extra-values checkbox" style="display:none;">
                                                         <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
                                                             <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="dicom-HG19-{{ attr.name}}-{{ v.value }}"
@@ -80,6 +80,7 @@
                                                 {% endif %}
                                             {% endfor %}
                                             {% if num_more > 0 %}
+                                                <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                 <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                             {% endif %}
                                         {% endwith %}
@@ -142,7 +143,7 @@
                     </div>
                     <div class="dataTables_paginate">
                         <a class="prev-page paginate_button dataTables_button disabled">Previous</a>
-                        <span class="paginate_button_space"/>
+                        <span class="paginate_button_space"></span>
                         <a class="next-page paginate_button dataTables_button">Next</a>
                     </div>
                 </div>
