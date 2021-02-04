@@ -246,8 +246,7 @@ def explore_data_page(request):
         offset = int(req.get('offset', '0'))
 
         context = build_explorer_context(is_dicofdic, source, versions, filters, fields, order_docs, counts_only,
-                                         with_related, with_derived, collapse_on, is_json, uniques=uniques,
-                                         record_limit=record_limit, offset=offset)
+                                         with_related, with_derived, collapse_on, is_json, uniques=uniques)
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
