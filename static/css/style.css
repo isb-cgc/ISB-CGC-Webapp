@@ -1357,8 +1357,7 @@ a.skip-nav {
   list-style: disc;
   padding-left: 2.5em; }
 
-.extra-values {
-  display: none; }
+
 
 .table-list a:hover, .table-list a:active, .table-list_warning a:hover, .table-list_warning a:active {
   text-decoration: none; }

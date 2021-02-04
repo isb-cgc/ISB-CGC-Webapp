@@ -1,18 +1,11 @@
+import { login } from '../util/utils.js'
+
+
 describe('Tests show more functionality', () => {
 
 
  before(() => {
-     cy.server();
-     cy.route('Get', 'http://localhost:8085/').as('explore');
-     cy.visit('http://localhost:8085/') ;
-     cy.get('.btn-warn').click();
-     cy.viewport(1300,800);
-     cy.get('#sign-in-dropdown').click();
-     cy.get('#id_login').type(Cypress.env("idcuser"));
-     cy.get('#id_password').type(Cypress.env("idcpassword"));
-     cy.get('.primaryAction').click();
-     cy.wait(1000);
-     cy.visit('http://localhost:8085/explore/')
+     login()
 
  })
 
@@ -23,14 +16,9 @@ describe('Tests show more functionality', () => {
 
 
   it ('Opens Collections',() =>{
-    //cy.visit('http://localhost:8085/explore/');
-    //cy.get('.btn-warn').click();
-    //cy.wait(500);
     cy.viewport(1000,1000);
     cy.wait(1000);
     cy.get('#Program_heading').scrollIntoView().find('a').click();
-    //cy.get('#Program_heading').find('a').click({force:true});
-    //cy.wait(500); 
     cy.get('#Program_list').should('be.visible');
     cy.get('#TCGA_heading').children('a').click( {force : true});
     cy.get('#TCGA').find('.search-checkbox-list').children('.checkbox').as('checkboxes');
@@ -39,9 +27,9 @@ describe('Tests show more functionality', () => {
     cy.get('@notExtras').its('length').should('be.lt',6);
     
     cy.get('@notExtras').each( ($el,index) => {
-         cy.get($el).should('be.visible');
+    cy.get($el).should('be.visible');
 
-       })
+    })
 
      cy.get('@checkboxes').filter('.extra-values').as('extras');
 
@@ -73,14 +61,16 @@ describe('Tests show more functionality', () => {
      cy.get('@checkboxes').not('.extra-values').as('notExtras');
      cy.get('@notExtras').its('length').should('be.lt',6);
      cy.get('@notExtras').each( ($not,index1) => {
-         cy.get($not).scrollIntoView().should('be.visible');
+         //cy.get($not).scrollIntoView().should('be.visible');
+        cy.get($not).scrollIntoView().should('not.have.class','notDisp');
 
        })
 
      cy.get('@checkboxes').filter('.extra-values').as('extras');
      cy.get('@extras').each( ($is,index1) => {
        //cy.get($is).scrollIntoView();
-       cy.get($is).should('not.be.visible');      
+       //cy.get($is).should('not.be.visible');
+      cy.get($is).should('have.class','notDisp');      
 
      }) 
 
@@ -91,7 +81,7 @@ describe('Tests show more functionality', () => {
 
      //cy.get('@checkboxes').filter('.extra-values').as('extras');
      cy.get('@extras').each( ($is,index1) => {
-       cy.get($is).scrollIntoView().should('be.visible');
+       cy.get($is).scrollIntoView().should('not.have.class','notDisp');
 
      })
 
@@ -124,7 +114,8 @@ describe('Tests show more functionality', () => {
             cy.get('@checkboxes').not('.extra-values').as('notExtras');
             cy.get('@notExtras').its('length').should('be.lt',6);
             cy.get('@notExtras').each( ($not,index2) => {
-                cy.get($not).scrollIntoView().should('be.visible');
+                //cy.get($not).scrollIntoView().should('be.visible');
+             cy.get($not).scrollIntoView().should('not.have.class','notDisp');
              }) 
 
              if ( (index0 ===0) || !(index1 ===1)) { 
@@ -132,12 +123,13 @@ describe('Tests show more functionality', () => {
 
                 cy.get('@extravalues').each( ($is,index2) => {
                   //cy.get($is).scrollIntoView();
-                  cy.get($is).should('not.be.visible');
+                  cy.get($is).should('have.class','notDisp');
                })
                cy.get($el).children('.list-group-item__body').children('.more-checks').children('a').click({force:true});
              
                 cy.get('@extravalues').each( ($is,index2) => {
-                  cy.get($is).scrollIntoView().should('be.visible');
+                  //cy.get($is).scrollIntoView().should('not.have.class','notDisp');
+                   cy.get($is).scrollIntoView();
                })
 
                  
@@ -145,7 +137,7 @@ describe('Tests show more functionality', () => {
 
                 cy.get('@extravalues').each( ($is,index2) => {
                   //cy.get($is).scrollIntoView();
-                  cy.get($is).should('not.be.visible');
+                  cy.get($is).should('have.class', 'notDisp');
                })
 
               
@@ -182,21 +174,21 @@ describe('Tests show more functionality', () => {
        cy.get('@checkboxes').not('.extra-values').as('notExtras');
        cy.get('@notExtras').its('length').should('be.lt',6);
        cy.get('@notExtras').each( ($not,index1) => {
-          cy.get($not).scrollIntoView().should('be.visible');
+          cy.get($not).scrollIntoView().should('not.have.class','notDisp');
           //cy.get($not).should('be.visible');
 
         })
 
          cy.get('@checkboxes').filter('.extra-values').as('extras');
          cy.get('@extras').each( ($is,index1) => {
-         cy.get($is).should('not.be.visible');
+         cy.get($is).should('have.class','notDisp');
 
         })
 
        cy.get($el).children('.list-group-item').children('.list-group-item__body').children('.more-checks').children('a').click({force:true});
 
        cy.get('@extras').each( ($is,index1) => {
-          cy.get($is).scrollIntoView().should('be.visible');
+          cy.get($is).scrollIntoView().should('not.have.class','notDisp');
          //cy.get($is).should('be.visible');
 
        })
@@ -205,7 +197,7 @@ describe('Tests show more functionality', () => {
 
        cy.get('@extras').each( ($is,index1) => {
           //cy.get($is).scrollIntoView();
-         cy.get($is).should('not.be.visible');
+         cy.get($is).should('have.class','notDisp');
 
        })
 
@@ -220,7 +212,7 @@ describe('Tests show more functionality', () => {
 
   }) 
 
-  
+ 
 
 })
 

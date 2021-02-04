@@ -1,17 +1,9 @@
+import { login } from '../util/utils.js'
+
 describe('Tests hide attributes functionality', () => {
 
  before(() => {
-     cy.server();
-     cy.route('Get', 'http://localhost:8085/').as('explore');
-     cy.visit('http://localhost:8085/') ;
-     cy.get('.btn-warn').click();
-     cy.viewport(1300,800);
-     cy.get('#sign-in-dropdown').click();
-     cy.get('#id_login').type(Cypress.env("idcuser"));
-     cy.get('#id_password').type(Cypress.env("idcpassword"));
-     cy.get('.primaryAction').click();
-     cy.wait(1000);
-     cy.visit('http://localhost:8085/explore/')
+     login()
  })
 
   beforeEach(() =>{
@@ -24,7 +16,7 @@ describe('Tests hide attributes functionality', () => {
   it ('Opens Collections and Selects TCGA',() =>{
     
     cy.server();
-    cy.route('GET','http://localhost:8085/explore/*').as('getExplore');
+    cy.route('GET','/explore/*').as('getExplore');
     cy.viewport(1000,1000);
     cy.wait(1000)
     cy.get('#Program_heading').find('a').click();
@@ -107,13 +99,13 @@ describe('Tests hide attributes functionality', () => {
        // cy.get('#search_derived_set').find('.case_count').filter(':visible').as('searchCnts');
        cy.get('#hide-zeros').as('hideZeros');
        cy.get('@hideZeros').click({force:true});
-      cy.get('#search_derived_set').find('.list-group-item__body').find('.list-group-item__heading').as('derivedHeadings');
+      cy.get('#search_derived_set').find('.list-group-item__body').find('.list-group-item__heading').find('.attDisp').as('derivedHeadings');
       cy.get('@derivedHeadings').its('length').should('equal',27);
        //cy.get('@derivedHeadings').its('length').as('dlen')
      //expect(cy.get('@dlen')).to.equal(27);    
 
-      cy.get('@derivedHeadings').filter('.greyout').should('exist');
-      cy.get('@derivedHeadings').filter('.greyout').as('greyout');
+      cy.get('@derivedHeadings').filter('.greyText').should('exist');
+      cy.get('@derivedHeadings').filter('.greyText').as('greyout');
       cy.get('@greyout').its('length').should('equal',27);
 
 
