@@ -165,7 +165,10 @@ def user_detail(request, user_id):
     if int(request.user.id) == int(user_id):
 
         user = User.objects.get(id=user_id)
-        social_account = SocialAccount.objects.get(user_id=user_id, provider='google')
+        try:
+            social_account = SocialAccount.objects.get(user_id=user_id, provider='google')
+        except ObjectDoesNotExist as e:
+            social_account = None
 
         user_status_obj = UserOptInStatus.objects.filter(user=user).first()
         if user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.YES:
@@ -178,7 +181,7 @@ def user_detail(request, user_id):
         user_details = {
             'date_joined': user.date_joined,
             'email': user.email,
-            'extra_data': social_account.extra_data,
+            'extra_data': social_account.extra_data if social_account else None,
             'first_name': user.first_name,
             'id': user.id,
             'last_login': user.last_login,
