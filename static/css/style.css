@@ -1086,7 +1086,9 @@ a#user-dropdown:hover {
   overflow: hidden; }
   .table tbody .name-col a {
     display: inline-block;
-    width: 100%; }
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden; }
 
 @media screen and (max-width: 1199px) {
   #gene-list-table .name-col, #gene-list-table .name-col a, #var-list-table .name-col, #var-list-table .name-col a {
