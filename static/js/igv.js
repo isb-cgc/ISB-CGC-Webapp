@@ -19,29 +19,27 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
-        underscore: 'libs/underscore-min',
+        // jquery: 'libs/jquery-1.11.1.min',
+        // bootstrap: 'libs/bootstrap.min',
+        // jqueryui: 'libs/jquery-ui.min',
+        // session_security: 'session_security/script',
+        // underscore: 'libs/underscore-min',
         igv_lib: 'libs/igv'
     },
     shim: {
-        'session_security': ['jquery'],
-        'bootstrap': ['jquery'],
-        'jqueryui': ['jquery'],
+        // 'session_security': ['jquery'],
+        // 'bootstrap': ['jquery'],
+        // 'jqueryui': ['jquery'],
         'igv_lib': ['jquery', 'jqueryui']
     }
 });
 
 require([
-
     'jquery',
     'jqueryui',
     'session_security',
     'bootstrap',
     'igv_lib'
-
 ], function($, jqueryui, session_security, bs, igv_lib) {
     var browser;
     var tracks = [];

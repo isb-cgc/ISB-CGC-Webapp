@@ -27,12 +27,18 @@
 
 {% block page_header %}
     <div class="container">
-        <ol class="breadcrumb">
-            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-            <li><a href="{% url 'cohort_list' %}">Saved Cohorts</a></li>
-            <li><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></li>
-        </ol>
-        <h3 class="page-header">File Browser: <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></h3>
+        {% if cohort %}
+            <ol class="breadcrumb">
+                <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+                <li><a href="{% url 'cohort_list' %}">Saved Cohorts</a></li>
+                <li><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></li>
+            </ol>
+        {% endif %}
+        <h3 class="page-header">Cancer Data File Browser
+            {% if cohort %}
+                : <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
+            {% endif %}
+        </h3>
         <div id="file-list-warning" class="alert alert-warning alert-dismissable" style="display: none;">
             <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
             The maximum number of files which can be downloaded in a list is <span class="file-list-limit">#</span>. Your selections currently total
@@ -42,27 +48,29 @@
 {% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-sm-12 col-md-12 col-lg-12">
-            <div class="panel panel-default">
-                <ul class="nav nav-tabs nav-tabs-files" role="tablist">
-                    <li role="presentation" class="file-browser-tab active"><a href="#all-files" role="tab" data-toggle="tab" title="Browse All Files" data-file-type="all">All Files</a></li>
-                    <li role="presentation" class="file-browser-tab"><a href="#igv-files" role="tab" data-toggle="tab" title="Browse IGV Files" data-file-type="igv">IGV</a></li>
-                    <li role="presentation" class="file-browser-tab"><a href="#camic-files" role="tab" data-toggle="tab" title="Browse Pathology Image Files" data-file-type="camic">Pathology Images</a></li>
-                    <li role="presentation" class="file-browser-tab"><a href="#pdf-files" role="tab" data-toggle="tab" title="Browse Pathology Report Files" data-file-type="pdf">Pathology Reports</a></li>
-                    <li role="presentation" class="file-browser-tab"><a href="#dicom-files" role="tab" data-toggle="tab" title="Browse Radiology Image Files" data-file-type="dicom">Radiology Images</a></li>
-                </ul>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 col-md-12 col-lg-12">
+                <div class="panel panel-default">
+                    <ul class="nav nav-tabs nav-tabs-files" role="tablist">
+                        <li role="presentation" class="file-browser-tab active"><a href="#all-files" role="tab" data-toggle="tab" title="Browse All Files" data-file-type="all">All Files</a></li>
+                        <li role="presentation" class="file-browser-tab"><a href="#camic-files" role="tab" data-toggle="tab" title="Browse Pathology Image Files" data-file-type="camic">Pathology Images</a></li>
+                        <li role="presentation" class="file-browser-tab"><a href="#pdf-files" role="tab" data-toggle="tab" title="Browse Pathology Report Files" data-file-type="pdf">Pathology Reports</a></li>
+                        <li role="presentation" class="file-browser-tab"><a href="#dicom-files" role="tab" data-toggle="tab" title="Browse Radiology Image Files" data-file-type="dicom">Radiology Images</a></li>
+                        <li role="presentation" class="file-browser-tab {% if user.is_anonymous %} disabled {% endif %}"><a href="#igv-files" role="tab" data-toggle="tab" title="Browse IGV Files" data-file-type="igv">IGV</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="tab-content data-tab-content">
-            <div id="placeholder" class="tab-pane active file-browser-tab" role="tabpanel">
-                <div class="col-md-12 data-tab-content-panel spinner-panel">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
+        <div class="row">
+            <div class="tab-content data-tab-content">
+                <div id="placeholder" class="tab-pane active file-browser-tab" role="tabpanel">
+                    <div class="col-md-12 data-tab-content-panel spinner-panel">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -70,14 +78,14 @@
         </div>
     </div>
 
-    {% if not has_user_data %}
+    {% if not user.is_anonymous and not has_user_data %}
         <!-- Export File Manifest Modals -->
         {% include "cohorts/bq_export_modal.html" with export_type="File Manifest" export_url=export_url %}
         {% include "cohorts/gcs_export_modal.html" with export_type="File Manifest" export_url=export_url %}
     {% endif %}
 
     <script type="text/javascript">
-    var cohort_id = {{ cohort.id }};
+    var cohort_id = {% if cohort %} {{ cohort.id }} {% else %} null {% endif %};
     var tab_page ={
         'all': 1
         ,'igv': 1
@@ -122,6 +130,7 @@
         'igv': [
             ['Program', 1],
             ['Case Barcode', 1],
+            ['Sample Barcode', 1],
             ['File Name', 1],
             ['Disease Code', 1],
             ['Exp. Strategy', 1],
@@ -182,20 +191,31 @@
 
     var tab_columns = {
         'all': ['program', 'case', 'filename', 'disease_code', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize'],
-        'igv': ['program', 'case', 'filename', 'disease_code', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize', 'file_viewer'],
+        'igv': ['program', 'case', 'sample', 'filename', 'disease_code', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize', 'file_viewer'],
         'camic': ['program', 'case', 'camic_filename', 'disease_code', 'thumbnail', 'datatype', 'dataformat', 'filesize'],
         'dicom': ['program', 'case', 'disease_code', 'project_short_name', 'study_desc', 'study_uid'],
         'pdf': ['program', 'case', 'pdf_filename', 'disease_code', 'datacat', 'datatype', 'dataformat', 'filesize']
     };
 
     var download_url = '{{ download_url }}';
-    var ajax_update_url = {
-        'all': '{% url 'cohort_filelist_ajax_panel' cohort.id 'all' %}'
-        ,'igv': '{% url 'cohort_filelist_ajax_panel' cohort.id 'igv' %}'
-        ,'camic':'{% url 'cohort_filelist_ajax_panel' cohort.id 'camic' %}'
-        ,'dicom':'{% url 'cohort_filelist_ajax_panel' cohort.id 'dicom' %}'
-        ,'pdf':'{% url 'cohort_filelist_ajax_panel' cohort.id 'pdf' %}'
-    };
+
+    {% if cohort %}
+        var ajax_update_url = {
+            'all': '{% url 'cohort_filelist_ajax_panel' cohort.id 'all' %}'
+            ,'igv': '{% url 'cohort_filelist_ajax_panel' cohort.id 'igv' %}'
+            ,'camic':'{% url 'cohort_filelist_ajax_panel' cohort.id 'camic' %}'
+            ,'dicom':'{% url 'cohort_filelist_ajax_panel' cohort.id 'dicom' %}'
+            ,'pdf':'{% url 'cohort_filelist_ajax_panel' cohort.id 'pdf' %}'
+        };
+    {% else %}
+        var ajax_update_url = {
+            'all': '{% url 'filelist_ajax_panel' 'all' %}'
+            ,'igv': '{% url 'filelist_ajax_panel' 'igv' %}'
+            ,'camic':'{% url 'filelist_ajax_panel' 'camic' %}'
+            ,'dicom':'{% url 'filelist_ajax_panel' 'dicom' %}'
+            ,'pdf':'{% url 'filelist_ajax_panel' 'pdf' %}'
+        };
+    {% endif %}
 
     var DICOM_URL = {% url 'dicom' %};
     var CAMIC_URL = {% url 'camic' %};
@@ -205,9 +225,12 @@
     var FILE_LIST_MAX = '{{  file_list_max }}';
     var IMG_THUMBS_URL = '{{ img_thumbs_url }}';
     var HAS_USER_DATA = {% if has_user_data %}true{% else %}false{% endif %};
-    var request_user_id = {{ user.id }};
+    var request_user_id = {% if user.is_anonymous %} null {% else %} {{ user.id }} {% endif %};
     var programs_this_cohort = {{ programs_this_cohort|tojson|safe }};
     </script>
 {% endblock %}
 
-{% block js_file %}{% static 'js/cohort_filelist.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/cohort_filelist.js' %}"></script>
+{% endblock %}

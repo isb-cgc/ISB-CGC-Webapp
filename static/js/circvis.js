@@ -19,19 +19,18 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
-        underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
+        // jquery: 'libs/jquery-1.11.1.min',
+        // bootstrap: 'libs/bootstrap.min',
+        // jqueryui: 'libs/jquery-ui.min',
+        // session_security: 'session_security/script',
+        // underscore: 'libs/underscore-min',
+        // assetscore: 'libs/assets.core',
+        // assetsresponsive: 'libs/assets.responsive',
         d3: 'libs/d3.min',
         d3tip: 'libs/d3-tip',
         science: 'libs/science.min',
         stats: 'libs/science.stats.min',
         vizhelpers: 'helpers/vis_helpers',
-
         vq: 'circviz/vq',
         vqcircviz: 'circviz/vq.circvis',
         circviz_config: 'circviz/circvis_configure',
@@ -40,17 +39,17 @@ require.config({
 
     },
     shim: {
-        'bootstrap': ['jquery'],
-        'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
+        // 'bootstrap': ['jquery'],
+        // 'jqueryui': ['jquery'],
+        // 'session_security': ['jquery'],
+        // 'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
+        // 'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'vq': ['jquery', 'underscore', 'd3'],
         'vqcircviz': ['vq'],
         'circviz_genome': ['vq'],
         'circviz_config': ['vq', 'circviz_genome'],
         'circviz_datagen': ['vq', 'circviz_genome'],
-        'underscore': {exports: '_'}
+        // 'underscore': {exports: '_'}
     }
 });
 

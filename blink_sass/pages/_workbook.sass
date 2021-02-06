@@ -41,6 +41,13 @@
     border-left: 1px solid darken($white, 15%)
     width: 250px
     min-height: 1200px
+    &.comment-flyout
+      [class*='flyout-']
+        position: relative
+      .flyout-body
+        height: 350px
+        top: 0
+        bottom: 0
     &.open
       visibility: visible
 
@@ -157,6 +164,18 @@
   ul.no-bullet
     list-style: none
     margin-left: -15px
+    li.plot-ready-check
+      &:before
+        font-family: FontAwesome
+        content: '\f18e'
+        display: inline-block
+        width: 12px
+        color: #ce7907
+      &.check-off:before
+        content: '\f05d'
+        color: #3c763d
+
+
 
   .alert-dismissable
     margin-top: 8px

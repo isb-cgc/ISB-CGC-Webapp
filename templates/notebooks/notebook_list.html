@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% load notebook_custom_tags %}
+{% block title %}Notebooks | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}notebook_list{% endblock %}
+{% block page_name %}notebook_list{% endblock %}
+
+{% block page_header %}
+    <div class="container">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+        </ol>
+        <h1 class="page-header pull-left">{% if is_public_list %} Public {% else %}Saved {% endif %}Notebooks</h1>
+        {% if not is_public_list %}
+            <form id="create-notebook" method="POST" action="{% url 'notebook_create' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary pull-right"><i class="fa fa-plus"></i>Create Notebook
+                </button>
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                {% if notebooks %}
+                    {% if is_public_list %}
+                        <form id="nb-keyword-search-form" method="POST" action="{% url 'notebooks_public' %}">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <input type="text" name="nb-keywords" class="nb-keyword-field form-control"
+                                       placeholder="Keywords">
+                                <span class="input-group-btn">
+                                    <button id="nb-keyword-search-btn" class="btn btn-default"
+                                            type="submit">Search</button>
+                                </span>
+                            </div>
+                        </form>
+                    {% endif %}
+                    <table id="notebook-table" class="table table-striped tablesorter">
+                        <thead>
+                        <th></th>
+                        <th class="name-col">Name</th>
+                        <th>Ownership</th>
+                        <th>Last Updated</th>
+                        </thead>
+                        <tbody>
+                        {% for notebook in notebooks %}
+                            <tr>
+                                <td class="control-col">
+                                    <div class="dropdown">
+                                        <a data-toggle="dropdown" role="button" aria-haspopup="true"
+                                           aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            {% if notebook.owner.id == user.id %}
+                                                <li><a data-toggle="modal"
+                                                       data-target="#edit-notebook-details-modal-{{ notebook.id }}">Edit</a>
+                                                </li>
+                                                <li><a data-toggle="modal"
+                                                       data-target="#copy-notebook-modal-{{ notebook.id }}">Duplicate</a>
+                                                </li>
+                                                <li><a data-toggle="modal"
+                                                       data-target="#delete-notebook-modal-{{ notebook.id }}">Delete</a>
+                                                </li>
+                                            {% elif notebook|isin_notebooklist:user %}
+                                                    <li><a data-toggle="modal"
+                                                           data-target="#remove-notebook-modal-{{ notebook.id }}">Remove
+                                                        from My List</a>
+                                                    </li>
+                                                    <li><a data-toggle="modal"
+                                                       data-target="#copy-notebook-modal-{{ notebook.id }}">Duplicate</a>
+                                                    </li>
+                                            {% else %}
+                                                    <li><a data-toggle="modal"
+                                                           data-target="#add-notebook-modal-{{ notebook.id }}">Add to My
+                                                        List</a>
+                                                    </li>
+                                            {% endif %}
+
+{#                                            {% if notebook.is_public %}#}
+{#                                                {% if notebook|isin_notebooklist:user %}#}
+{#                                                    <li><a data-toggle="modal"#}
+{#                                                           data-target="#remove-notebook-modal-{{ notebook.id }}">Remove#}
+{#                                                        from My List</a>#}
+{#                                                    </li>#}
+{#                                                {% else %}#}
+{#                                                    <li><a data-toggle="modal"#}
+{#                                                           data-target="#add-notebook-modal-{{ notebook.id }}">Add to My#}
+{#                                                        List</a>#}
+{#                                                    </li>#}
+{#                                                {% endif %}#}
+{##}
+{#                                            {% else %}#}
+
+{#                                            {% endif %}#}
+                                        </ul>
+                                    </div>
+                                </td>
+                                <td class="name-col">
+                                    {% if is_public_list %}
+                                        <a href="{% url 'notebook_detail_public' notebook.id %}"
+                                           title="{{ notebook.name|title|wrap_text }}">{{ notebook.name }}
+                                            <span class="badge" style="margin: 0 5px;">Public</span>
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'notebook_detail' notebook.id %}"
+                                           title="{{ notebook.name|title|wrap_text }}">{{ notebook.name }}
+                                            {% if notebook.is_public %}
+                                                <span class="badge" style="margin: 0 5px;">Public</span>
+                                            {% endif %}
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td>{% if notebook.owner.id == user.id %}
+                                    You
+                                {% else %}
+                                    {{ notebook.owner.first_name }} {{ notebook.owner.last_name }}
+                                {% endif %}</td>
+
+                                <td> {{ notebook.last_date_saved|date:'M d, Y, g:i a' }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    {% for notebook in notebooks %}
+                        {% include 'notebooks/notebook_modals.html' %}
+                    {% endfor %}
+                {% else %}
+                    <br>
+                    <p class="center">
+                        {% if is_public_list %}
+                            No Public Notebook is available.
+                        {% else %}
+                            You don't have any saved notebooks yet.
+                        {% endif %}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/notebooks.js' %}"></script>
+{% endblock %}

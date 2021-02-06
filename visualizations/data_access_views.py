@@ -1,22 +1,21 @@
 # noinspection PyPackageRequirements
-"""
+###
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
 
-Copyright 2017, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
-
+from builtins import str
 import json
 import logging
 import math
@@ -134,7 +133,7 @@ def get_pairwise_result(feature_array):
 
         if outputs is not None:
             results = {'result_vectors': [], 'filter_messages': []}
-            for row_label, row in outputs.items():
+            for row_label, row in list(outputs.items()):
                 if type(row) is dict:
                     results['result_vectors'].append({'feature_1':                 row['feature_A'],
                                                       'feature_2':                 row['feature_B'],
@@ -147,7 +146,7 @@ def get_pairwise_result(feature_array):
                                                       'n_B':                       int(row['n_B']),
                                                       'p_B':                       float(row['p_B']),
                                                       'exclusion_rules':           row['exclusion_rules']})
-                elif type(row) is unicode:
+                elif type(row) is str:
                     results['filter_messages'].append({'filter_message': row[0]})
     except Exception as e:
         outputs = None
@@ -268,7 +267,7 @@ def get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, 
                 elif type(logTransform['xBase']) is int:
                     xdata['value'] = str(math.log((float(xdata['value']) + 1), logTransform['xBase']))
                 else:
-                    logger.warn(
+                    logger.warning(
                         "[WARNING] No valid log base was supplied - log transformation will not be applied!"
                     )
 

@@ -115,9 +115,9 @@
                 <dl>
                     <dt>Created</dt>
                     <dd>{{ project.last_date_saved|date:'M d, Y, g:i a' }}</dd>
-                    <dt>Number of Files</dt>
-                    <dd>{{ project.get_file_count }}</dd>
                     {% if not program.is_public %}
+                        <dt>Number of Files</dt>
+                        <dd>{{ project.get_file_count }}</dd>
                         <dt>Cloud Storage Bucket Name</dt>
                         <dd>{{ project.user_data_tables_set.all.0.google_bucket.bucket_name }}</dd>
                         <dt>BigQuery Data Table(s)</dt>
@@ -144,4 +144,7 @@
 </script>
 {% endblock %}
 
-{% block js_file %}{% static 'js/program_details.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/program_details.js' %}"></script>
+{% endblock %}

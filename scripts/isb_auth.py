@@ -1,47 +1,48 @@
-'''
-Copyright 2015, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-Authenticates user for accessing the ISB-CGC Endpoint APIs.
-
-May be run from the command line or in scripts/ipython.
-
-The credentials file can be copied to any machine from which you want
-to access the API.
-
-1. Command Line
-   python ./isb_auth.py          saves the user's credentials;
-                      OPTIONAL:
-                         -v       for verbose (returns token!)
-                         -s FILE  sets credentials file [default: ~/.isb_credentials]
-                         -u       URL-only: for use over terminal connections;
-                                  gives user a URL to paste into their browser,
-                                  and asks for an auth code in return
-
-2. Python
-    import isb_auth
-    isb_auth.get_credentials()
-
-    # optional: to store credentials in a different location
-    from oauth2client.file import Storage
-    import isb_auth
-    import os
-
-    storage_file = os.path.join(os.path.expanduser("~"), "{USER_CREDENTIALS_FILE_NAME}")
-    storage = Storage(storage_file)
-    isb_auth.get_credentials(storage=storage)
-'''
+#
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Authenticates user for accessing the ISB-CGC Endpoint APIs.
+#
+# May be run from the command line or in scripts/ipython.
+#
+# The credentials file can be copied to any machine from which you want
+# to access the API.
+#
+# 1. Command Line
+#    python ./isb_auth.py          saves the user's credentials;
+#                       OPTIONAL:
+#                          -v       for verbose (returns token!)
+#                          -s FILE  sets credentials file [default: ~/.isb_credentials]
+#                          -u       URL-only: for use over terminal connections;
+#                                   gives user a URL to paste into their browser,
+#                                   and asks for an auth code in return
+#
+# 2. Python
+#     import isb_auth
+#     isb_auth.get_credentials()
+#
+#     # optional: to store credentials in a different location
+#     from oauth2client.file import Storage
+#     import isb_auth
+#     import os
+#
+#     storage_file = os.path.join(os.path.expanduser("~"), "{USER_CREDENTIALS_FILE_NAME}")
+#     storage = Storage(storage_file)
+#     isb_auth.get_credentials(storage=storage)
+#
+from __future__ import print_function
 
 from argparse import ArgumentParser
 import os
@@ -52,10 +53,10 @@ from oauth2client.file import Storage
 
 VERBOSE = False
 # for native application - same as settings.INSTALLED_APP_CLIENT_ID
-CLIENT_ID = '907668440978-0ol0griu70qkeb6k3gnn2vipfa5mgl60.apps.googleusercontent.com'
+CLIENT_ID = '586186890913-atr969tu3lf7u574khjjplb45fgpq1bg.apps.googleusercontent.com'
 # NOTE: this is NOT actually a 'secret' -- we're using the 'installed
 # application' OAuth pattern here
-CLIENT_SECRET = 'To_WJH7-1V-TofhNGcEqmEYi'
+CLIENT_SECRET = 'XeBxiK7NQ0yvAkAnRIKufkFE'
 
 EMAIL_SCOPE = 'https://www.googleapis.com/auth/userinfo.email'
 DEFAULT_STORAGE_FILE = os.path.join(os.path.expanduser("~"), '.isb_credentials')
@@ -63,7 +64,7 @@ DEFAULT_STORAGE_FILE = os.path.join(os.path.expanduser("~"), '.isb_credentials')
 
 def maybe_print(msg):
     if VERBOSE:
-        print msg
+        print(msg)
 
 
 def get_credentials(storage=None, oauth_flow_args=[]):

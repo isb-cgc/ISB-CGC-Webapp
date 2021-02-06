@@ -1,21 +1,22 @@
-"""
+#
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+from __future__ import print_function
 
-Copyright 2015, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
-
+from builtins import map
+from builtins import str
 import logging
 import datetime
 from django.contrib.auth.models import User
@@ -82,7 +83,7 @@ def sanitize_normalize_tumor_type(tumor_type_list):
 
 
 def get_track_id_list(param):
-    return map(str, param)
+    return list(map(str, param))
 
 
 def build_data_uri(hugo_symbol, cohort_id_array):
@@ -125,11 +126,11 @@ def seqpeek(request, id=0):
     return render(request, 'seqpeek/seqpeek.html', context)
 
 def save_seqpeek(request):
-    redirect_url = '/user_landing/'
+    redirect_url = '/dashboard/'
 
     if request.method == 'POST':
         params = request.POST
-        print params
+        print(params)
         name = str(params.get('name', None))
         viz_id = params.get('viz_id', None)
         if viz_id:
@@ -140,18 +141,18 @@ def save_seqpeek(request):
 
         # Update or create plots associated to visualizations
         plots = {}
-        for key in params.keys():
+        for key in list(params.keys()):
             if 'plot' in key:
                 plot, index, attr = key.split('-')
                 index = int(index)
                 attr = str(attr)
-                if index in plots.keys():
+                if index in list(plots.keys()):
                     plots[index][attr] = params[key].encode('utf-8')
                 else:
                     plots[index] = {}
                     plots[index][attr] = params[key].encode('utf-8')
 
-        for key in plots.keys():
+        for key in list(plots.keys()):
             cohort_ids = plots[key]['cohort_ids'].split(',')
             cohorts = Cohort.objects.filter(id__in=cohort_ids)
 

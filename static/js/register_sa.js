@@ -16,20 +16,20 @@
  *
  */
 
-require.config({
-    baseUrl: STATIC_FILES_URL+'js/',
-    paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
-        underscore: 'libs/underscore-min',
-    },
-    shim: {
-        'bootstrap': ['jquery'],
-        'session_security': ['jquery'],
-    }
-});
+// require.config({
+//     baseUrl: STATIC_FILES_URL+'js/',
+//     paths: {
+//         jquery: 'libs/jquery-1.11.1.min',
+//         bootstrap: 'libs/bootstrap.min',
+//         jqueryui: 'libs/jquery-ui.min',
+//         session_security: 'session_security/script',
+//         underscore: 'libs/underscore-min',
+//     },
+//     shim: {
+//         'bootstrap': ['jquery'],
+//         'session_security': ['jquery'],
+//     }
+// });
 
 require([
     'jquery',
@@ -315,5 +315,4 @@ require([
         hide_verification();
         $('#verify-sa').submit();
     });
-
 });

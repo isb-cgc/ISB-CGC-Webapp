@@ -1,5 +1,6 @@
 .main-content
-    margin-top: 55px
+    margin-top: $nav-height - 30px
+    //margin-top: $nav-height
 
 %clearfix
     &:after
@@ -44,34 +45,34 @@ h1, h2, h3, h4, h5, h6
 // * Navbar Styles
 // *******************************************/
 
-nav
-    background-color: #FFF
-
+//nav
+//    background-color: #FFF
+//
 .navbar
-    margin-bottom: 0px
-    padding-bottom: 0px
-    height: 56px
-
-.navbar-nav
-    .search-item .input-group
-        margin-top: 10px
-        margin-left: 41px
-        i
-            padding: 3px
-
-    li a:hover
-        background-color: #fff
+    border-bottom: 1px solid lightgrey
+    .icon-bar
+        background-color: #888
+//
+//.navbar-nav
+//    .search-item .input-group
+//        margin-top: 10px
+//        margin-left: 41px
+//        i
+//            padding: 3px
+//
+//    li a:hover
+//        background-color: #fff
 
 #secondary-nav
     background-color: #fff
-    border-bottom: 1px solid $border-color
-    box-shadow: 0px 1px 2px $border-color
-    top: 55px
+    //border-bottom: 1px solid $border-color
+    //box-shadow: 0px 1px 2px $border-color
+    //top: 50px
     z-index: 101
     .dropdown > a
         cursor: pointer
         font-size: 30px
-        padding: 0px 5px
+        padding: 0 5px
 
     .menu-items-right
         text-align: right
@@ -96,7 +97,10 @@ nav
 
 .container-fluid
     padding-bottom: 15px
-
+    //.row
+    //    margin: 0
+//.alert
+//    margin: 0 -15px
 
 /********************************************
  * Class to hide labels for screen readers
@@ -319,6 +323,8 @@ nav
     margin-left: 5px
 .space-right-5
     margin-right: 5px
+.padding-left-0
+    padding-left: 0
 .img-fluid
     width: 100%
 /********************************************

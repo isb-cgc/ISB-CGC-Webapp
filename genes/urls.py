@@ -1,6 +1,7 @@
+from __future__ import absolute_import
 from django.conf.urls import url
 
-import views
+from . import views
 
 urlpatterns = [
     url(r'^$',                                  views.gene_fav_list,        name='genes'),
@@ -19,5 +20,5 @@ urlpatterns = [
     url(r'^(?P<gene_fav_id>\d+)/workbook/(?P<workbook_id>\d+)/worksheet/(?P<worksheet_id>\d+)$',  views.gene_fav_detail,  name="gene_detail_for_existing_workbook"),
 
     url(r'^is_valid/$',                         views.check_gene_list_validity,     name='is_valid'),
-    url(r'^suggest/(?P<string>\S+).json',       views.suggest_gene_symbols,         name='suggest')
+    url(r'^suggest/(?P<string>\S+)',            views.suggest_gene_symbols,         name='suggest')
 ]

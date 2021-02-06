@@ -26,6 +26,8 @@
         </div>
         <div class="panel-body">
             {% if variable_list %}
+                {% include "isb_cgc/pagination.html" %}
+
                 <table id="var-list-table" class="table table-stripe tablesorter">
                     <thead>
                         <tr>
@@ -38,10 +40,10 @@
                     </thead>
                     <tbody>
                         {% for favorite in variable_list %}
-                            <tr>
+                            <tr class="page-item">
                                 <td class="control-col">
                                     <div class="dropdown">
-                                        <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                        <a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
                                         <ul class="dropdown-menu">
                                             <li>{% if favorite.version == 'v2' %}<a href="{% url 'variable_fav_edit' favorite.id %}">Edit</a>
                                                 {% else %}<span title="Version 1 Variable lists cannot be edited due to changes in variable names." class="disabled" disabled>Edit</span>{% endif %}</li>
@@ -70,6 +72,11 @@
         </div>
     </section>
 </div>
+
 {% endblock %}
 
-{% block js_file %}{% static 'js/form_utils.js' %}{% endblock %}
+
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/form_utils.js' %}"></script>
+{% endblock %}

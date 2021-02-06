@@ -1,21 +1,20 @@
-"""
+###
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
 
-Copyright 2017, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
-
+from builtins import str
 import json
 import logging
 import traceback
@@ -102,8 +101,7 @@ def get_public_program_name_set_for_cohorts(cohort_id_array):
     Returns:
         Set of program names in lower case.
     """
-    superuser_username = django_settings.SITE_SUPERUSER_USERNAME
-    superuser = User.objects.get(username=superuser_username, is_staff=True, is_superuser=True)
+    superuser = User.objects.get(is_staff=True, is_superuser=True, is_active=True)
     program_set = set()
     result = Cohort.objects.filter(id__in=cohort_id_array)
 
@@ -204,7 +202,7 @@ def data_access_for_plot(request):
             # TODO Use jsonschema to validate logTransform object
             logTransform = json.loads(request.GET.get('log_transform', None))
         except Exception as e:
-            logger.warn("[WARNING] Log transform parameter not supplied")
+            logger.warning("[WARNING] Log transform parameter not supplied")
             logTransform = None
 
         cohort_id_array = request.GET.getlist('cohort_id', None)
@@ -306,6 +304,6 @@ def data_access_for_plot(request):
     except Exception as e:
         logger.error("[ERROR] In data access for plot: ")
         logger.exception(e)
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({'message': '[{}] Unable to generate a plot- please revise the plot settings.'.format(str(e))})
 
 

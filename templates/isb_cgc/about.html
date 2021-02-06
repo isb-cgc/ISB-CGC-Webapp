@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    ISB-CGC|About
+{% endblock %}
+
+{% block description %}
+    About ISB-CGC
+{% endblock %}
+
+{% block link_page_name %}about{% endblock %}
+{% block page_name %}about{% endblock %}
+
+{% block page_header %}
+    {% if request.user.is_authenticated %}
+        <div class="container">
+            <ol class="breadcrumb">
+                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            </ol>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <h2>About Us</h2>
+                <p>The ISB Cancer Gateway in the Cloud (ISB-CGC) is a platform that serves as a
+                    large-scale
+                    repository and provides the computational infrastructure necessary to carry out cancer research at unprecedented scales.</p>
+                <p>Please use a <a
+                        href="https://accounts.google.com/signup/v2/webcreateaccount?hl=en&flowName=GlifWebSignIn&flowEntry=SignUp&nogm=true"
+                        target="_blank" rel=“noreferrer”>Google registered email account</a> to log into this system.</p>
+                {% if version %}
+                    <br/>
+                    Last deployed to version {{ version.version }} on {{ version.date }}
+                {% endif %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <h2>Partners</h2>
+                <div class="partners-div">
+                    <a href="https://cloud.google.com/" target="_blank" rel=“noreferrer”>
+                        <img class="gcp-logo" src="{% static 'img/gcp-logo.svg' %}" alt="Google Cloud Platform"/>
+                    </a>
+                    <a href="https://gdit.com/" target="_blank" rel=“noreferrer”>
+                        <img src="{% static 'img/gdit_logo.png' %}"
+                             alt="General Dynamics Information Technology, Inc."/>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <h2>How to Cite Us</h2>
+                <p>Please cite the original ISB-CGC paper when you use the ISB-CGC platform.
+                <div class='cite-text'>
+                    Sheila M. Reynolds, Michael Miller, Phyliss Lee, et al. <br/>
+                    The ISB Cancer Genomics Cloud: A Flexible Cloud-Based Platform for Cancer Genomics
+                    Research<br/>
+                    <a href="http://cancerres.aacrjournals.org/content/77/21/e7.long" target="_blank" rel=“noreferrer”><i>Cancer
+                        Res</i> 2017 Nov;77(21): e7–10.</a>
+                </div>
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <h2>Privacy Policy</h2>
+                <p><a href="{% url 'privacy' %}" target="_blank" rel=“noreferrer”>Our privacy policy can be found here.</a>
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <h2>Funding</h2>
+                <p>ISB-CGC is a component of the <a href="https://datacommons.cancer.gov/" target="_blank" rel=“noreferrer”>NCI
+                    Cancer Research Data Commons</a> and has been funded in whole or in part with Federal funds
+                    from the National Cancer Institute, National Institutes of Health, Department of Health and
+                    Human Services, under Contract No. HHSN261201400008C and ID/IQ Agreement No. 17X146 under
+                    Contract No. HHSN261201500003I. The content of this publication does not necessarily reflect the
+                    views or policies of the Department of
+                    Health and Human Services, nor does mention of trade names, commercial products, or organizations
+                    imply endorsement by the U.S. Government.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <h2>Warning Notice</h2>
+                <p>You are accessing a U.S. Government (National Institute of Health (NIH), National Cancer
+                    Institute (NCI) and Institute for Systems Biology ISB) website / application which may
+                    contain
+                    information that must be protected under the U. S. Privacy Act or other sensitive
+                    information
+                    which is intended for authorized Scientific or Research use only. Network activity and
+                    Application usage is monitored to maintain system security, availability, and to ensure
+                    appropriate and legitimate usage, there is no right or expectation to privacy on this
+                    website /
+                    system. Unauthorized attempts to upload information, change information, or use of this
+                    website
+                    for other than its intended purpose may result in disciplinary action, civil, and/or
+                    criminal
+                    penalties. Any individual or system that accesses this website should have no
+                    expectation of
+                    privacy regarding any communications or data processed by this website. Anyone accessing
+                    this
+                    website expressly consents to monitoring of their actions and all communication or data
+                    transiting or stored on or related to this website and is advised that if such
+                    monitoring
+                    reveals possible evidence of criminal activity, NIH may provide that evidence to law
+                    enforcement
+                    officials.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

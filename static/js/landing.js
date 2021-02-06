@@ -16,54 +16,43 @@
  *
  */
 
-require.config({
-    baseUrl: STATIC_FILES_URL + 'js/',
-    paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
-        underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
-        d3: 'libs/d3.min',
-        d3tip: 'libs/d3-tip',
-        base: 'base'
-    },
-    shim: {
-        'bootstrap': ['jquery'],
-        'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui']
-    }
-});
+// require.config({
+//     baseUrl: STATIC_FILES_URL + 'js/',
+//     paths: {
+//         jquery: 'libs/jquery-1.11.1.min',
+//         bootstrap: 'libs/bootstrap.min',
+//         jqueryui: 'libs/jquery-ui.min',
+//         assetscore: 'libs/assets.core',
+//         assetsresponsive: 'libs/assets.responsive',
+//         underscore: 'libs/underscore-min',
+//         base: 'base',
+//         session_security: 'session_security/script'
+//     },
+//     shim: {
+//         'bootstrap': ['jquery'],
+//         'jqueryui': ['jquery'],
+//         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
+//         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
+//         'session_security': ['jquery'],
+//         'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
+//     }
+// });
 
 require([
-    /*
-    'jquery',
-    'jqueryui',
-    'bootstrap',
-    'session_security',
-    'd3',
-    'd3tip',
-    'visualizations/createTreeGraph',
-    'helpers/vis_helpers',
-    */
-    'assetscore'
-    /*
-    ,'assetsresponsive',
-    'base'
-    */
-], function(/* $, jqueryui, bootstrap, session_security, d3, d3tip, treegraph, vis_helpers */) {
+    'jquery'
+    ,'base'
+    ,'session_security',
+    ,'jqueryui'
+    ,'bootstrap'
+    ,'assetscore'
+    ,'assetsresponsive'
+], function($) {
     A11y.Core();
-
+    console.debug("[STATUS] Loading landing.js at "+(new Date()));
     //pause video when scrolling to other videos
     $(".carousel-control, .carousel-indicators li:not(.active)").click(function () {
         $('.tutorial-vid').each(function() {
             this.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
         });
     });
-
-
 });

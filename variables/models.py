@@ -1,3 +1,4 @@
+from builtins import str
 from django.contrib.auth.models import User
 from django.db import models
 from projects.models import User_Feature_Definitions
@@ -9,7 +10,7 @@ class FavoriteManager(models.Manager):
 class VariableFavorite(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.TextField(null=True)
-    user = models.ForeignKey(User, null=False, blank=False)
+    user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
     active = models.BooleanField(default=True)
     last_date_saved = models.DateTimeField(auto_now=True)
     version = models.CharField(max_length=5, blank=False, null=True)
@@ -113,8 +114,8 @@ class VariableFavorite(models.Model):
         return {'message' : "variable favorite has been deleted"}
 
 class VariableFavorite_Last_View(models.Model):
-    variablefavorite = models.ForeignKey(VariableFavorite, blank=False)
-    user = models.ForeignKey(User, null=False, blank=False)
+    variablefavorite = models.ForeignKey(VariableFavorite, blank=False, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
     last_view = models.DateTimeField(auto_now=True)
 
 class VariableManager(models.Manager):
@@ -124,7 +125,7 @@ class Variable(models.Model):
     id                 = models.AutoField(primary_key=True)
     name               = models.TextField(null=False, blank=False)
     type               = models.CharField(max_length=20, null=True, blank=True)
-    variable_favorite  = models.ForeignKey(VariableFavorite, blank=False)
+    variable_favorite  = models.ForeignKey(VariableFavorite, blank=False, on_delete=models.CASCADE)
     code               = models.CharField(max_length=2024, blank=False)
-    feature            = models.ForeignKey(User_Feature_Definitions, null=True, blank=True)
+    feature            = models.ForeignKey(User_Feature_Definitions, null=True, blank=True, on_delete=models.CASCADE)
     objects            = VariableManager()

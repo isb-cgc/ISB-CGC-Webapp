@@ -1,24 +1,119 @@
-version: 2
+version: 2.1
+commands:
+  deployment_setup:
+    steps:
+      - run:
+          name: "Set the Tier"
+          command: |
+            TIER=DEV
+            if [[ ${CIRCLE_BRANCH} =~ isb-cgc-(prod|uat|test).* ]]; then
+              TIER=$(awk -F- '{print toupper($3)}' \<<< ${CIRCLE_BRANCH})
+            fi
+            echo "export TIER=${TIER}" >> $BASH_ENV
+            echo "Tier was identified as ${TIER} for branch ${CIRCLE_BRANCH}"
+      - run:
+          name: "Assign Project-level vars"
+          command: |
+            if [ ! -f deployment.key.json ]; then
+              echo "Deployment JSON keyfile not found - loading from CircleCI."
+              KEY=${DEPLOYMENT_KEY_ISB_CGC_DEV}
+            else
+              echo "Deployment JSON keyfile found."
+              KEY="NA"
+            fi
+            CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC_DEV}
+            PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC_DEV}
+            BUCKET=${DEPLOYMENT_BUCKET_ISB_CGC_DEV}
+            if [[ ${TIER} == "PROD" ]]; then
+              CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC}
+              PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC}
+              BUCKET="${DEPLOYMENT_BUCKET_ISB_CGC}/${TIER,,}"
+              KEY=${DEPLOYMENT_KEY_ISB_CGC}
+            elif [[ ${TIER} == "UAT" ]]; then
+              KEY=${DEPLOYMENT_KEY_ISB_CGC_UAT}
+              CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC_UAT}
+              PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC_UAT}
+              BUCKET=${DEPLOYMENT_BUCKET_ISB_CGC_UAT}
+            elif [[ ${TIER} == "TEST" ]]; then
+              KEY=${DEPLOYMENT_KEY_ISB_CGC_TEST}
+              CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_ISB_CGC_TEST}
+              PROJECT_ID=${DEPLOYMENT_PROJECT_ID_ISB_CGC_TEST}
+              BUCKET=${DEPLOYMENT_BUCKET_ISB_CGC_TEST}
+            elif [[ ${TIER} == "DEV" ]]; then
+              echo "Using default deployment configuration for tier ${TIER}"
+            else
+              echo "[ERROR] - Unrecognized tier: ${TIER} - exitng."
+              exit 1
+            fi
+
+            echo "export DEPLOYMENT_KEY=\"${KEY}\"" >> $BASH_ENV
+            echo "export DEPLOYMENT_CLIENT_EMAIL=${CLIENT_EMAIL}" >> $BASH_ENV
+            echo "export DEPLOYMENT_PROJECT_ID=${PROJECT_ID}" >> $BASH_ENV
+            echo "export DEPLOYMENT_BUCKET=${BUCKET}" >> $BASH_ENV
+
+            echo "Project settings assigned:"
+            echo "Deployment client: ${CLIENT_EMAIL}"
+            echo "Deployment project: ${PROJECT_ID}"
+            echo "Deployment bucket: gs://${BUCKET}"
+
+  deployment_config:
+    steps:
+      - run:
+          name: "Set tier-specific configuration file"
+          command: |
+            sudo -E /bin/bash ./shell/pull_config.sh
+            xargs -a deployment_config.txt -I{} echo "export {}" >> $BASH_ENV
+            # Set up test/deployment database values
+            echo "export MYSQL_ROOT_PASSWORD_BUILD=isb" >> $BASH_ENV
+            echo "export DATABASE_NAME_BUILD=build_database" >> $BASH_ENV
+            echo "export DATABASE_PASSWORD_BUILD=isb" >> $BASH_ENV
+            echo "export DATABASE_USER_BUILD=django-user" >> $BASH_ENV
+            echo "export DATABASE_HOST_BUILD=127.0.0.1" >> $BASH_ENV
+
+  auth:
+    steps:
+      - run:
+          name: "Service Account Auth and Project Settings"
+          command: |
+            sudo -E /bin/bash ./shell/gcloud_authenticate.sh
+
+  install_cloud_sdk:
+    steps:
+      - run:
+          name: "Install CloudSDK"
+          command: |
+            echo "export CLOUDSDK_CORE_DISABLE_PROMPTS=1" >> $BASH_ENV
+            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+            sudo apt-get update && sudo apt-get -y install google-cloud-sdk
+
+  run_tests:
+    steps:
+      - run:
+          name: "Run Tests"
+          command: |
+            sudo -E /bin/bash ./shell/run_tests.sh
+
 jobs:
   build_job:
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
-    name: Building Deployment Container
     working_directory: ~/ISB-CGC-Webapp
     docker:
-      - image: circleci/python:2.7.15-stretch
+      - image: circleci/python:3.7.0-stretch
       - image: circleci/mysql:5.7
         environment:
           MYSQL_ROOT_HOST: "%"
           MYSQL_USER: ubuntu
           MYSQL_PASSWORD: "isb"
           MYSQL_ROOT_PASSWORD: "isb"
+          MYSQL_DATABASE: "build_database"
     steps:
       - checkout
       - run:
           name: Set Python Path
           command: |
-            echo "export PYTHONPATH=/home/circleci/${CIRCLE_PROJECT_REPONAME}:/home/circleci/${CIRCLE_PROJECT_REPONAME}/lib" >> $BASH_ENV
+            echo "export PYTHONPATH=/home/circleci/${CIRCLE_PROJECT_REPONAME}:/home/circleci/${CIRCLE_PROJECT_REPONAME}/lib:/usr/lib/google-cloud-sdk/platform/google_appengine" >> $BASH_ENV
       - restore_cache:
           keys:
             - isb-cgc-webapp-lib-{{ checksum "requirements.txt" }}
@@ -33,34 +128,31 @@ jobs:
           key: isb-cgc-webapp-lib-{{ checksum "requirements.txt" }}
           paths:
             - ./lib
-      - save_cache:
-          key: isb-cgc-webapp-google-deps-{{ checksum "./shell/install-deps.sh" }}
-          paths:
-            - ./google-cloud-sdk
-            - ./google_appengine
+      - deployment_setup
+      - auth
+      - deployment_config
       - run:
-          name: Auth, Staging, and Database testing
+          name: Staging and Database testing
           command: |
-            sudo -E /bin/sh ./shell/gcloud_authenticate.sh
             sudo -E /bin/bash ./shell/gcloud-pull-staging-files.sh
             sudo -E /bin/bash ./shell/database-setup.sh
       - save_cache:
-          key: isb-cgc-webapp-{{ epoch }}
+          key: isb-cgc-webapp-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
           paths:
             - ./adminrestrict
             - ./.git
-            - ./demo
             - ./genes
             - ./seqpeek
             - ./shell
             - ./tasks
             - ./variables
+#            - ./notebooks
             - ./workbooks
             - ./analysis
             - ./bq_data_access
             - ./etc
             - ./static
-            - ./GenespotRE
+            - ./isb_cgc
             - ./offline
             - ./scripts
             - ./session_security
@@ -68,8 +160,6 @@ jobs:
             - ./visualizations
             - ./ISB-CGC-Common
             - ./Dockerfile
-            - ./main.py
-            - ./appengine_config.py
             - ./.dockerignore
             - ./app.yaml
             - ./gunicorn.conf.py
@@ -77,27 +167,27 @@ jobs:
             - ./txt
             - ./json
             - ./.env
+            - ./solr-ssl.pem
 
   deploy_job:
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
-    name: Deploy to AppEngine Flex
-    docker:
-      - image: circleci/python:2.7.14
     working_directory: ~/ISB-CGC-Webapp
+    docker:
+      - image: circleci/python:3.7.0-stretch
     steps:
       - restore_cache:
           keys:
-            - isb-cgc-webapp-
-      - restore_cache:
-          keys:
-            - isb-cgc-webapp-google-deps-
+            - isb-cgc-webapp-{{ .Branch }}-{{ .Revision }}-
+      - install_cloud_sdk
+      - deployment_setup
+      - auth
+      - deployment_config
       - deploy:
           command: |
             sudo -E rm -rf ./lib
-            sudo -E /bin/bash ./shell/gcloud_authenticate.sh
             sudo -E /bin/bash ./shell/unpack_for_deployment.sh
-            sudo -E ./google-cloud-sdk/bin/gcloud app deploy --verbosity=debug ./app.yaml --quiet
+            sudo -E gcloud app deploy --verbosity=debug ./app.yaml --quiet
 workflows:
   version: 2
   build_and_deploy:
@@ -108,4 +198,8 @@ workflows:
             - build_job
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - isb-cgc-test
+                - isb-cgc-uat
+                - isb-cgc-prod

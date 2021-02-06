@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /bq_meta_search/
+Disallow: /cohorts/new_cohort/

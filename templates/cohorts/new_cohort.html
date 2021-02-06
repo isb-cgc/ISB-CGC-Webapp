@@ -26,136 +26,185 @@
 {% block page_name %}cohort-details{% endblock %}
 
 {% block page_header %}
-<link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}" />
+    <link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}"/>
 
-<div class="container">
-    {% if workbook %}
-        <ol class="breadcrumb">
-            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
-            <li><a href="{% url 'worksheet_display' workbook.id worksheet.id%}">{{ workbook.name }}</a></li>
-        </ol>
-    {% else %}
-        <ol class="breadcrumb">
-            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-            <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
-        </ol>
-    {% endif %}
-    <h1 class="page-header pull-left">Create Cohort - Filters</h1>
-    {% if workbook %}
-        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal" title="Please select at least one filter." disabled>Apply to Worksheet</button>
-    {% elif create_workbook %}
-        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal" title="Please select at least one filter." disabled>Apply to new Worksheet</button>
-    {% else %}
-        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal" title="Please select at least one filter." disabled>Save As New Cohort</button>
-    {% endif %}
-</div>
+    <div class="container">
+        {% if workbook %}
+            <ol class="breadcrumb">
+                <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+                <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
+                <li><a href="{% url 'worksheet_display' workbook.id worksheet.id %}">{{ workbook.name }}</a></li>
+            </ol>
+        {% else %}
+            <ol class="breadcrumb">
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+                    <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
+                {% else %}
+                    <br>
+                {% endif %}
+            </ol>
+        {% endif %}
+        <h1 class="page-header pull-left">Create Cohort - Filters</h1>
+        {% if workbook %}
+            <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal"
+                    title="Please select at least one filter." disabled>Apply to Worksheet
+            </button>
+        {% elif create_workbook %}
+            <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal"
+                    title="Please select at least one filter." disabled>Apply to new Worksheet
+            </button>
+        {% else %}
+            {% if user.is_authenticated %}
+                <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal"
+                        title="Please select at least one filter." disabled> Save As New Cohort
+                </button>
+            {% else %}
+                <button class="btn btn-primary pull-right" id="log-in-to-save-btn"
+                        title="Please select at least one filter." onclick="location.href='{% url 'account_login' %}'"
+                        disabled>Log In to Save New Cohort
+                </button>
+            {% endif %}
+        {% endif %}
+    </div>
 
 {% endblock %}
 
 {% block content %}
-
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="panel panel-default">
-                <div id="url-len-max-alert" class="alert alert-warning alert-dismissable" style="display: none;">
-                    <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                    You have selected too many filters. The current counts shown will not be accurate until one or more filter options are removed.
-                </div>
-                <div id="at-least-one-filter-alert" class="alert alert-warning alert-dismissable" style="display: none;">
-                    <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                    You must choose at least one filter to include samples in your cohort.
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div id="url-len-max-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+                        <button type="button" class="close" data-hide="alert"><span
+                                aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        You have selected too many filters. The current counts shown will not be accurate until one or
+                        more filter options are removed.
+                    </div>
+                    <div id="at-least-one-filter-alert" class="alert alert-warning alert-dismissable"
+                         style="display: none;">
+                        <button type="button" class="close" data-hide="alert"><span
+                                aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        You must choose at least one filter to include samples in your cohort.
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row cgc-user-data-type-tabs">
-        <div class="col-sm-12 col-md-12 col-lg-12">
-            <div class="panel panel-default">
-                <ul class="nav nav-tabs nav-tabs-data" role="tablist">
-                    {% for program in programs %}
-                    <li role="presentation" class="{% if forloop.first %}active{% endif %} program-tab"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
-                    {% endfor %}
-                    <li role="presentation" class="program-tab"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
-                </ul>
+        <div class="row cgc-user-data-type-tabs">
+            <div class="col-sm-12 col-md-12 col-lg-12">
+                <div class="panel panel-default">
+                    <ul class="nav nav-tabs nav-tabs-data" role="tablist">
+                        {% for program in programs %}
+                            <li role="presentation" class="{% if forloop.first %}active{% endif %} program-tab"><a
+                                    href="#{{ program.id }}-data" class="program-tab-btn" role="tab" data-toggle="tab"
+                                    title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a>
+                            </li>
+                        {% endfor %}
+                        {% if user.is_authenticated %}
+                            <li role="presentation" class="program-tab"><a href="#0-data" role="tab" data-toggle="tab"
+                                                                           title="User Data" data-program-id="0">User
+                                Data</a></li>
+                        {% else %}
+                            <li role="presentation" class="program-tab disabled"><a href="#0-data" role="tab"
+                                                                                    data-toggle="tab" title="User Data"
+                                                                                    data-program-id="0" disabled>User
+                                Data</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="tab-content data-tab-content">
-            <div id="placeholder" class="tab-pane active data-tab" role="tabpanel">
-                <div class="col-md-12 data-tab-content-panel spinner-panel">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
+        <div class="row">
+            <div class="tab-content data-tab-content">
+                <div id="placeholder" class="tab-pane active data-tab" role="tabpanel">
+                    <div class="col-md-12 data-tab-content-panel spinner-panel">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Create Cohort Modal -->
-    <div class="modal fade" id="create-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="createCohortModal" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="createCohortModal">Create Cohort</h4>
-                    <div class="modal-js-messages" id="create-cohort-modal-js-messages">
-                        <div id="multi-prog-cohort-create-warn" class="alert alert-warning alert-dismissable" style="display: none;">
-                            <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            Your cohort contains samples from multiple programs. Please note that filters will only apply to samples from the program indicated
-                            by the tab they were chosen on - they will not apply to samples from other programs in this cohort.
-                        </div>
-                        <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
-                            <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            Your cohort's name contains invalid characters (<span class="unallowed-chars"></span>). Please choose another name.
-                        </div>
-                        <div id="at-least-one-filter-alert-modal" class="alert alert-warning alert-dismissable" style="display: none;">
-                            <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            You must choose at least one filter to include samples in your cohort.
+        <!-- Create Cohort Modal -->
+        <div class="modal fade" id="create-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="createCohortModal"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="createCohortModal">Create Cohort</h4>
+                        <div class="modal-js-messages" id="create-cohort-modal-js-messages">
+                            <div id="multi-prog-cohort-create-warn" class="alert alert-warning alert-dismissable"
+                                 style="display: none;">
+                                <button type="button" class="close" data-hide="alert"><span
+                                        aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                Your cohort contains samples from multiple programs. Please note that filters will only
+                                apply to samples from the program indicated
+                                by the tab they were chosen on - they will not apply to samples from other programs in
+                                this cohort.
+                            </div>
+                            <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable"
+                                 style="display: none;">
+                                <button type="button" class="close" data-hide="alert"><span
+                                        aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                Your cohort's name contains invalid characters (<span class="unallowed-chars"></span>).
+                                Please choose another name.
+                            </div>
+                            <div id="at-least-one-filter-alert-modal" class="alert alert-warning alert-dismissable"
+                                 style="display: none;">
+                                <button type="button" class="close" data-hide="alert"><span
+                                        aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                You must choose at least one filter to include samples in your cohort.
+                            </div>
                         </div>
                     </div>
-                </div>
-                {% if workbook and worksheet %}
-                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort_for_existing_workbook' %}" >
-                    <input type="hidden" value="{{ worksheet.id }}" name="worksheet_id" />
-                    <input type="hidden" value="{{ workbook.id }}" name="workbook_id" />
-                {% elif create_workbook %}
-                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort_for_new_workbook' %}" >
-                {% else %}
-                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
-                {% endif %}
+                    {% if workbook and worksheet %}
+                        <form id="create-cohort-form" method="POST"
+                              action="{% url 'save_cohort_for_existing_workbook' %}">
+                        <input type="hidden" value="{{ worksheet.id }}" name="worksheet_id"/>
+                        <input type="hidden" value="{{ workbook.id }}" name="workbook_id"/>
+                    {% elif create_workbook %}
+                        <form id="create-cohort-form" method="POST" action="{% url 'save_cohort_for_new_workbook' %}">
+                    {% else %}
+                        <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
+                    {% endif %}
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="create-cohort-name">Name:</label>
-                            <input class="form-control" type="text" id="create-cohort-name" name="name" required />
+                            <input class="form-control" type="text" id="create-cohort-name" name="name" required/>
                         </div>
                         <div class="form-group">
                             <h5>Selected Filters:</h5>
                             <p id="selected-filters" class="form-control-static"></p>
                         </div>
                     </div>
-                    <input type="hidden" name="mut_filter_combine" value="AND" />
+                    <input type="hidden" name="mut_filter_combine" value="AND"/>
                     <div class="modal-footer">
                         {% csrf_token %}
-                        <input type="submit" value="Create Cohort" class="btn btn-primary" />
+                        <input type="submit" value="Create Cohort" class="btn btn-primary"/>
                         <div id="saving-cohort" class="collapse" style="display: none;">
-                            <i class="fa fa-circle-o-notch fa-spin"></i>  Saving Cohort...
+                            <i class="fa fa-circle-o-notch fa-spin"></i> Saving Cohort...
                         </div>
                     </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
     <script type="text/javascript">
-    var base_url = '{{ base_url|safe }}';
-    var cohort_id = undefined;
+        var base_url = '{{ base_url|safe }}';
+        var cohort_id = undefined;
     </script>
 {% endblock %}
 
-{% block js_file %}{% static 'js/cohort_details.js' %}{% endblock %}
+{% block js_file %}
+    {{ block.super }}
+    <script src="{% static 'js/cohort_details.js' %}"></script>
+{% endblock %}

@@ -1,4 +1,9 @@
+from __future__ import absolute_import
 
+from builtins import str
+from builtins import map
+from past.builtins import basestring
+from builtins import object
 import json
 import collections
 import datetime
@@ -10,12 +15,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils import formats
 
-from models import SavedViz, Plot, Plot_Cohorts, Viz_Perms, Plot_Comments
+from .models import SavedViz, Plot, Plot_Cohorts, Viz_Perms, Plot_Comments
 from cohorts.models import Cohort, Cohort_Perms, Samples
-from plot_enums import PlotEnums
+from .plot_enums import PlotEnums
 
 # This factory generates the data objects needed for every visualization
 class PlotFactory(object):
@@ -23,7 +28,7 @@ class PlotFactory(object):
     def _decode_list(cls, data):
         rv = []
         for item in data:
-            if isinstance(item, unicode):
+            if isinstance(item, str):
                 item = item.encode('utf-8')
             elif isinstance(item, list):
                 item = cls._decode_list(item)
@@ -35,10 +40,10 @@ class PlotFactory(object):
     @classmethod
     def _decode_dict(cls, data):
         rv = {}
-        for key, value in data.iteritems():
-            if isinstance(key, unicode):
+        for key, value in list(data.items()):
+            if isinstance(key, str):
                 key = key.encode('utf-8')
-            if isinstance(value, unicode):
+            if isinstance(value, str):
                 value = value.encode('utf-8')
             elif isinstance(value, list):
                 value = cls._decode_list(value)
@@ -52,9 +57,9 @@ class PlotFactory(object):
         if isinstance(data, basestring):
             return str(data)
         elif isinstance(data, collections.Mapping):
-            return dict(map(cls.convert, data.iteritems()))
+            return dict(list(map(cls.convert, iter(list(data.items())))))
         elif isinstance(data, collections.Iterable):
-            return type(data)(map(cls.convert, data))
+            return type(data)(list(map(cls.convert, data)))
         else:
             return data
 

@@ -46,7 +46,7 @@
                         <tr class="row-{% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}" data-program-id="{{ program.id }}">
                             <td class="control-col">
                                 <div class="dropdown">
-                                    <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-arrow"><i class="fa fa-caret-down"></i></a>
+                                    <a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-arrow"><i class="fa fa-caret-down"></i></a>
                                     <ul class="dropdown-menu">
                                         <li><a href="{% url 'program_detail' program.id %}">Edit</a> </li>
                                         <li><a role="button" data-toggle="modal" data-target="#delete-program-modal-{{ program.id }}">Delete</a></li>
@@ -160,4 +160,7 @@
 </div>
 {% endblock %}
 
-{% block js_file %}{% static 'js/program_list.js' %}{% endblock %}
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/program_list.js' %}"></script>
+{% endblock %}

@@ -2,7 +2,7 @@
 
 Hello,
 
-{{ shared_by.first_name }} {{ shared_by.last_name }} wanted to share a {{ type|lower }} with you and has invited you to join them on the ISB Cancer Genomics Cloud site. There, you can check out the {{ item.name }} {{ type|lower }} and much more.
+{{ shared_by.first_name }} {{ shared_by.last_name }} wanted to share a {{ type|lower }} with you and has invited you to join them on the ISB Cancer Gateway in the Cloud (ISB-CGC) site. There, you can check out the {{ item.name }} {{ type|lower }} and much more.
 
 To view the {{ type|lower }}, simply copy the following url into your browser: {{ shared_url }}
 
@@ -11,4 +11,4 @@ Here's a quick description of {{ item.name }}
     {{ item.description }}
 {% endif %}
 
-Copyright 2015 Institute of Systems Biology
+Copyright 2020 ISB

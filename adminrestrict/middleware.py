@@ -2,6 +2,7 @@
 adminrestrict middleware
 """
 
+from builtins import object
 __author__ = "Robert Romano (rromano@gmail.com)"
 __copyright__ = "Copyright 2014 Robert C. Romano"
 
@@ -10,7 +11,7 @@ import socket
 import re
 
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseForbidden
 
 from adminrestrict.models import AllowedIP

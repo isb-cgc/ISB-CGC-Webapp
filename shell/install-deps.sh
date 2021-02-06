@@ -3,17 +3,31 @@ if [ -n "$CI" ]; then
     export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
 
     # Clone dependencies
-    git clone -b master https://github.com/isb-cgc/ISB-CGC-Common.git
-
-    # Remove .pyc files; these can sometimes stick around and if a
-    # model has changed names it will cause various load failures
-    find . -type f -name '*.pyc' -delete
-
+    COMMON_BRANCH=master
+    if [[ ${CIRCLE_BRANCH} =~ isb-cgc-(prod|uat|test).* ]]; then
+        COMMON_BRANCH=$(awk -F- '{print $1"-"$2"-"$3}' <<< ${CIRCLE_BRANCH})
+    fi
+    echo "Cloning ISB-CGC-Common branch ${COMMON_BRANCH}..."
+    git clone -b ${COMMON_BRANCH} https://github.com/isb-cgc/ISB-CGC-Common.git
 else
-    export $(cat /home/vagrant/parentDir/secure_files/.env | grep -v ^# | xargs) 2> /dev/null
+    if ( "/home/vagrant/www/shell/get_env.sh" ) ; then
+        export $(cat ${ENV_FILE_PATH} | grep -v ^# | xargs) 2> /dev/null
+        # Confirm some relevant values to ensure we found a valid .env
+        if [ -z "${SECURE_LOCAL_PATH}" ] || [ "${SECURE_LOCAL_PATH}" == "" ] ; then
+            echo "[ERROR] SECURE_LOCAL_PATH not found, but this is a VM build! Something might be wrong with your .env file"
+            echo "or your secure_files directory."
+            exit 1
+        fi
+    else
+        exit 1
+    fi
     export HOME=/home/vagrant
     export HOMEROOT=/home/vagrant/www
 fi
+
+# Remove .pyc files; these can sometimes stick around and if a
+# model has changed names it will cause various load failures
+find . -type f -name '*.pyc' -delete
 
 # Install and update apt-get info
 echo "Preparing System..."
@@ -30,15 +44,12 @@ if [ -n "$CI" ]; then
 fi
 
 apt-get update -qq
+apt-get install ca-certificates
 
 # Install apt-get dependencies
 echo "Installing Dependencies..."
-if [ -n "$CI" ]; then
-    apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev python2.7-dev git ruby g++ dos2unix
-    apt-get install -y mysql-client
-else
-    apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev mysql-client-5.7 python2.7 python-dev git ruby g++ dos2unix
-fi
+apt-get install -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev python3-mysqldb python3-dev libpython3-dev git ruby g++ curl dos2unix python3.5
+apt-get install -y --force-yes mysql-client
 echo "Dependencies Installed"
 
 # If this is local development, clean out lib for a re-structuring 
@@ -50,21 +61,21 @@ if [ -z "${CI}" ]; then
 fi
 
 # Install PIP + Dependencies
-echo "Installing pip..."
-curl --silent https://bootstrap.pypa.io/get-pip.py | python
+echo "Installing pip3..."
+curl --silent https://bootstrap.pypa.io/get-pip.py | python3
 
 # Install our primary python libraries
 # If we're not on CircleCI, or we are but the lib directory isn't there (cache miss), install lib
 if [ -z "${CI}" ] || [ ! -d "lib" ]; then
     echo "Installing Python Libraries..."
-    pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
+    pip3 install -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
 else
     echo "Using restored cache for Python Libraries"
 fi
 
 if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
     echo "Installing Django Debug Toolbar for local dev..."
-    pip install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
+    pip3 install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
 fi
 
 echo "Libraries Installed"
@@ -72,27 +83,15 @@ echo "Libraries Installed"
 # Install SASS
 gem install sass
 
-# Install Google App Engine
-# If we're not on CircleCI or we are but google_appengine isn't there, install it
-if [ -z "${CI}" ] || [ ! -d "google_appengine" ]; then
-    echo "Installing Google App Engine..."
-    wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.69.zip -O ${HOME}/google_appengine.zip
-    unzip -n -qq ${HOME}/google_appengine.zip -d $HOME
-    export PATH=$PATH:${HOME}/google_appengine/
-    echo "Google App Engine Installed"
-else
-    echo "Using restored cache for Google App Engine."
-fi
-
 # Install Google Cloud SDK
 # If we're not on CircleCI or we are but google-cloud-sdk isn't there, install it
-if [ -z "${CI}" ] || [ ! -d "google-cloud-sdk" ]; then
+if [ -z "${CI}" ] || [ ! -d "/usr/lib/google-cloud-sdk" ]; then
     echo "Installing Google Cloud SDK..."
     export CLOUDSDK_CORE_DISABLE_PROMPTS=1
-    curl https://sdk.cloud.google.com | bash
-    export PATH=$PATH:${HOME}/google-cloud-sdk/bin
-    echo 'export PATH=$PATH:${HOME}/google-cloud-sdk/bin' | tee -a ${HOME}/.bash_profile
+    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+    apt-get install apt-transport-https ca-certificates
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+    apt-get update && apt-get -y install google-cloud-sdk
+    apt-get -y install google-cloud-sdk-app-engine-python
     echo "Google Cloud SDK Installed"
-else
-    echo "Using restored cache for Google Cloud SDK."
 fi

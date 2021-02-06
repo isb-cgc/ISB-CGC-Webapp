@@ -1,0 +1,316 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block extra_css_libs %}
+{% endblock %}
+
+{% block title %}
+    ISB-CGC|BigQuery Table Searcher
+{% endblock %}
+{% block description %}
+    BigQuery Table Search
+{% endblock %}
+{% block page_name %}bq-meta-searcher{% endblock %}
+{% block page_header %}
+    <div class="bq-banner alert alert-dismissible text-center alert-warning" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                aria-hidden="true">&times;</span></button>
+        <strong>ISB-CGC is now starting to migrate our BigQuery tables to a new project: isb-cgc-bq.</strong><br>You
+        might want to pin <<i class="fa fa-thumb-tack" aria-hidden="true"></i>> that project too in your Google BigQuery
+        console, along with <strong>isb-cgc</strong>. Read more at:
+        <a target="_blank" rel=“noreferrer” href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/BigQuery/ISBCGC-BQ-Projects.html">
+        ISB-CGC BigQuery Projects</a>.
+    </div>
+    <div class="bq-header-container container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <h1 class="page-header">BigQuery Table Search</h1>
+                <ul class="nav">
+                    <li class="navbar-item">
+                        <a class="nav-link"
+                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/BigQuery.html"
+                           target="_blank" rel=“noreferrer”>ISB-CGC BigQuery Documentation<i class="fa fa-external-link"
+                                                                            aria-hidden="true"></i></a>
+                    </li>
+                    <li class="navbar-item">
+                        <a class="nav-link"
+                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/progapi/bigqueryGUI/LinkingBigQueryToIsb-cgcProject.html"
+                           target="_blank" rel=“noreferrer”>ISB-CGC BigQuery Access Info<i class="fa fa-external-link"
+                                                                          aria-hidden="true"></i></a>
+                    </li>
+                    {#            <li class="navbar-item">#}
+                    {#                <a class="nav-link"#}
+                    {#                   href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html"#}
+                    {#                   target="_blank" rel=“noreferrer”>ISB-CGC Notebooks<i class="fa fa-external-link" aria-hidden="true"></i></a>#}
+                    {#            </li>#}
+                    <li class="navbar-item">
+                        <a class="nav-link"
+                           href="https://console.cloud.google.com/bigquery"
+                           target="_blank" rel=“noreferrer”>Google BigQuery Console<i class="fa fa-external-link" aria-hidden="true"></i></a>
+                    </li>
+                    <li class="navbar-item">
+                        <a class="nav-link"
+                           href="https://cloud.google.com/bigquery/what-is-bigquery"
+                           target="_blank" rel=“noreferrer”>About BigQuery<i class="fa fa-external-link" aria-hidden="true"></i></a>
+                    </li>
+                    <li class="navbar-item">
+                        <a class="nav-link"
+                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/ReleaseNotes/BigQueryTableSearchReleaseNotes.html"
+                           target="_blank" rel=“noreferrer”>Release Notes<i class="fa fa-external-link" aria-hidden="true"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <p><strong>Explore and learn more about available ISB-CGC BigQuery tables with this search
+                    feature.</strong>
+                </p>
+                <p>Find tables of interest based on category, reference genome build, data type and free-form text
+                    search.</p>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block content %}
+    <div class="spinner">
+        <i class="fa fa-spinner fa-spin"></i>
+    </div>
+    <div class="custom-width-20">
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <form id="bq-meta-form">
+                    <div>
+                        <label>Status</label>
+                        <select id="status" class="form-control bq-select" data-column-name="status">
+                            {% for option in status.options %}
+                                <option value="{{ option.value }}">{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label>Name</label>
+                        <input type="text" class="form-control bq-filter" data-column-name="friendlyName">
+                    </div>
+                    <div>
+                        <label>Program</label>
+                        <select multiple data-placeholder="Choose Programs..."
+                                class="autocomplete_select_box form-control bq-select" data-column-name="program">
+                            {% for option in program.options %}
+                                <option value="{{ option.value }}">{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="checkbox-div">
+                        <label>Category</label>
+                        {% for option in category.options %}
+                            <div class="row">
+                                <div class="col-sm-1">
+                                    <input type="checkbox" class="bq-checkbox" name="cat_{{ forloop.counter0 }}"
+                                           id="cat_chbx_{{ forloop.counter0 }}"
+                                           value="{{ option.value }}" data-column-name="category">
+                                </div>
+                                <div class="col-sm-11">
+                                    <label class="label-filter"
+                                           for="cat_chbx_{{ forloop.counter0 }}">{{ option.label }}</label>
+                                    <i class="fa fa-info-circle" data-placement="bottom"
+                                       title="{{ option.description }}"></i>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <label>Reference Genome</label>
+                        <select class="form-control bq-select" data-column-name="referenceGenome">
+                            {% for option in reference_genome.options %}
+                                <option value="{{ option.value }}">{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label>Source</label>
+                        <select multiple data-placeholder="Choose Sources..."
+                                class="autocomplete_select_box form-control bq-select" data-column-name="source">
+                            {% for option in source.options %}
+                                <option value="{{ option.value }}">{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label>Data Type</label>
+                        <select multiple data-placeholder="Choose Data Types..."
+                                class="autocomplete_select_box form-control bq-select" data-column-name="dataType">
+                            {% for option in data_type.options %}
+                                <option value="{{ option.value }}">{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label>Experimental Strategy</label>
+                        <select multiple data-placeholder="Choose Experimental Strategy..."
+                                class="autocomplete_select_box form-control bq-select" data-column-name="expStrat">
+                            {% for option in experimental_strategy.options %}
+                                <option value="{{ option.value }}">{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label>Access</label>
+                        <select id="dataAccess" class="form-control bq-select" data-column-name="dataAccess">
+                            <option value="" selected>ALL</option>
+                            <option value="open">Open Access</option>
+                            <option value="controlled">Controlled Access</option>
+                        </select>
+                    </div>
+                    <div id="advSearch0" class="adv-div collapse">
+                        <div>
+                            <label>BQ Project</label>
+                            <select class="form-control bq-select" data-column-name="projectId">
+                                {% for option in project_id.options %}
+                                    {% if option.value == '' %}
+                                        <option value="{{ option.value }}" selected>{{ option.label }}</option>
+                                    {% else %}
+                                        <option value="^{{ option.value }}$">{{ option.label }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label>BQ Dataset</label>
+                            <input type="text" class="form-control bq-filter" data-column-name="datasetId">
+                        </div>
+                        <div>
+                            <label>BQ Table</label>
+                            <input type="text" class="form-control bq-filter" data-column-name="tableId">
+                        </div>
+                        <div>
+                            <label>Table Description</label>
+                            <input type="text" class="form-control bq-filter" data-column-name="description">
+                        </div>
+                        <div>
+                            <label>Labels</label>
+                            <input type="text" class="form-control bq-filter" data-column-name="labels">
+                        </div>
+                        <div>
+                            <label>Field Name</label>
+                            <input type="text" class="form-control bq-filter" data-column-name="fields">
+                        </div>
+                    </div>
+                    <br>
+                    <div>
+                        <button type="button"
+                                class="btn reset-btn">Reset All Filters
+                        </button>
+                    </div>
+                    <div>
+                        <button type="button" data-target="#advSearch0" data-toggle="collapse"
+                                class="btn collapsed adv-toggle-btn">Show
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="custom-width-80">
+        <div class="panel panel-default">
+
+            <div class="panel-body">
+                <table id="bqmeta" class="table table-striped" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th style="width:3%;"></th>
+                        <th style="width:17%;">Name</th>
+                        <th></th>
+                        <th style="width:15%;">BQ Project</th>
+                        <th style="width:15%;">BQ Dataset</th>
+                        <th style="width:15%;">BQ Table</th>
+                        <th>Full ID</th>
+                        <th style="width:8%;">Program</th>
+                        <th style="width:8%;">Category</th>
+                        <th>Reference Genome</th>
+                        <th>Source</th>
+                        <th>Data Type</th>
+                        <th title="Experimental Strategy">Exp. Strategy</th>
+
+                        <th style="width:9%;">Status</th>
+                        <th style="width:8%;">Rows</th>
+                        <th style="width:8%;">Created</th>
+                        <th style="width:7%;">Preview</th>
+                        <th style="width:7%;">Description</th>
+                        <th>Labels</th>
+                        <th>Fields</th>
+                        <th style="width:3%;">Open</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="panel-footer">
+                <strong>Have feedback or corrections? Please email us at
+                    <a target="_blank" rel=“noreferrer” href="mailto:feedback%40isb-cgc.org">feedback<span>@</span>isb-cgc<span>.</span>org</a>.
+                </strong>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="gcp-open-modal" tabindex="-1" role="dialog" aria-labelledby="gcp-open-modal-title" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="gcp-open-modal-title">Before you go...</h4>
+                </div>
+                <div class="modal-body">
+                    <p>You will now be sent to the <b>BigQuery Google Cloud Platform Console</b>.</p>
+                    <p>In order to view the table you will need to:</p>
+                    <p>
+                        <ul>
+                            <li>Be logged in with a Google account</li>
+                            <li>Choose a <b>project</b> associated with your Google account.
+                                <br>
+                                Creating a project is easy - See
+                                <a target="_blank" rel=“noreferrer” href="https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project">
+                                    How to Create a Project</a>.
+                            </li>
+                        </ul>
+                    </p>
+                    <p>Consider using
+                        <a target="_blank" rel=“noreferrer” href="https://cloud.google.com/free/docs/gcp-free-tier">
+                            Google Cloud Platform Free-Tier
+                        </a> and run queries at no cost!
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <div class="checkbox">
+                        <label>
+                            <input id="do-not-show-cb" type="checkbox"> Do not show this again.
+                        </label>
+                    </div>
+                    <div>
+                        <a id="gcp-open-btn" href="" target="_blank" rel=“noreferrer” class="btn btn-primary submit-btn"
+                        >OK</a>
+                        <button type="button" class="btn" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var gcp_modal_disabled = ('{{ user.is_authenticated}}' === 'True');
+        {#var user_is_authenticated = ('{{ user.is_authenticated}}' === 'True');#}
+        {#var user_is_ca_authorized = false;#}
+    </script>
+{% endblock %}
+
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/bq_meta_search.js' %}"></script>
+{% endblock %}

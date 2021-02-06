@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% load tz %}
+{% comment %}
+
+   Copyright 2020, Institute for Systems Biology
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+{% endcomment %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block link_page_name %}user-details{% endblock %}
+{% block page_name %}user-details{% endblock %}
+
+{% block page_header %}
+    {% if idp == 'ras' %}
+        <div class="row">
+            <div class="banner alert alert-dismissible text-center alert-warning" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <i class="fa fa-exclamation-circle" aria-hidden="true"></i> For data access, you will now be asked to
+                use <strong>NIH Researcher Auth Service (RAS)</strong> to associate your NIH identity with your Google Account.
+                Read more at:
+                <a target="_blank" rel=“noreferrer” href="https://datascience.nih.gov/researcher-auth-service-initiative">
+                    Researcher Auth Service Initiative</a>.
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="panel panel-default user-panel">
+                <div class="panel-heading">
+                    <img src="{{ user_details.extra_data.picture }}" class="avatar" alt="User Avatar"/>
+                    <h5>
+                        <i class="fa fa-user" aria-hidden="true"></i>
+                        Personal Details
+                    </h5>
+                </div>
+                <div class="panel-body">
+                    <table class="user-info" role="presentation">
+                        <tr>
+                            <td>Name</td>
+                            <td>{{ user_details.first_name }} {{ user_details.last_name }}</td>
+                        </tr>
+                        <tr>
+                            <td>Email</td>
+                            <td>{{ user_details.email }}</td>
+                        </tr>
+                        <tr>
+                            <td>Last Login</td>
+                            <td id="last_login">{{ user_details.last_login }}</td>
+                        </tr>
+                        <tr>
+                            <td>Subscription</td>
+                            <td> {{ user_details.user_opt_in_status }}
+                                <a style="margin-left: 5px;" href="{% url 'opt_in_form_reg_user' %}"><i
+                                        class="fa fa-pencil" aria-hidden="true"></i>Edit</a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="panel panel-default data-panel">
+                <div class="panel-heading">
+                    <h5><i class="fa fa-unlock-alt" aria-hidden="true"></i>
+                        Data Access
+
+                        <a class="float-right" href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/Gaining-Access-To-Controlled-Access-Data.html#accessing-controlled-data"
+                            target="_blank" rel=“noreferrer”>
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                        </a>
+                    </h5>
+
+
+                </div>
+                <div class="panel-body">
+                    {% include 'isb_cgc/user_detail_dcf.html' %}
+                    {% block dcf_content %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="panel panel-default gcp-panel">
+                <div class="panel-heading">
+                    <h5>
+                        <i class="fa fa-cloud" aria-hidden="true"></i> Google Cloud Platform
+                        <a class="float-right" href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowToGetStartedonISB-CGC.html#google-cloud-project-setup-and-data-access"
+                            target="_blank" rel=“noreferrer”><i class=" fa fa-info-circle" aria-hidden="true"></i>
+                        </a>
+                    </h5>
+
+                </div>
+                <div class="panel-body">
+                    {% if True %}
+                        <label>Google Cloud Credits</label>
+                        <div>
+                            Apply for <strong>Cloud Credits</strong> and your own <strong>Google Cloud Project</strong> by submitting a request.
+
+                        </div>
+                        <div class="text-right">
+                            <a class="sm_btn"
+                                href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/request-gcp"
+                                target="_blank" rel=“noreferrer”><i class="fa fa-credit-card" aria-hidden="true"></i>Request Credits</a>
+                        </div>
+                        <label>Google Cloud Console</label>
+                        <div>Access a user friendly, integrated Google Cloud Platform management console</div>
+                        <div class="text-right">
+                            <a class="sm_btn" href="http://console.cloud.google.com"
+                               target="_blank" rel=“noreferrer”><i class="fa fa-arrow-circle-o-right"
+                                                  aria-hidden="true"></i>Visit</a>
+                        </div>
+                        <label>Google Cloud Projects</label>
+                            {% if user_details.gcp_list == 0 %}
+                                <div>Utilize your own Google Cloud Projects resources by registering them here.</div>
+                                <div class="text-right">
+                                    <a class="sm_btn" href="{% url 'register_gcp' user.id %}"><i
+                                            class="fa fa-check-square-o" aria-hidden="true"></i>Register</a>
+                                </div>
+                            {% else %}
+                                <div>You have {{ user_details.gcp_list }} registered Google Cloud Project(s)</div>
+                                <div class="text-right">
+                                    <a class="sm_btn" href="{% url 'user_gcp_list' user.id %}"><i
+                                            class="fa fa-arrow-circle-o-right" aria-hidden="true"></i>View
+                                    </a>
+                                </div>
+                            {% endif %}
+
+                    {% else %}
+                        <p><i class="fa fa-check-circle"></i> Connected to Google Cloud Platform</p>
+                        <hr>
+                        <p>
+                            User Google Cloud Platform to run custom pipelines or visualize your own datasets.
+                        </p>
+
+                        <!-- Button trigger modal -->
+                        {#                    <a class="more-credits-modal" data-toggle="modal" data-target="#more-credits-modal">#}
+                        {#                        Request Credits#}
+                        {#                    </a>#}
+
+                        <a href="#">Run a Custom Pipeline</a>
+                        {#                    <a href="#">Upload Your Own Datasets</a>#}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+    {#    <div class="modal fade" id="more-credits-modal" tabindex="-1" role="dialog" aria-labelledby="MoreCreditLabel" aria-hidden="true">#}
+    {#        <div class="modal-dialog">#}
+    {#            <div class="modal-content">#}
+    {#                <div class="modal-header">#}
+    {#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
+    {#                    <h4 class="modal-title" id="MoreCreditLabel">Request Additional Google Cloud Platform Credits</h4>#}
+    {#                </div>#}
+    {#                <form id="request-credits" method="POST" action="#" class="form-horizontal">#}
+    {#                    <div class="modal-body">#}
+    {#                        <div class="form-group">#}
+    {#                            <label for="name" class="col-sm-3 control-label">Name</label>#}
+    {#                            <div class="col-sm-9">#}
+    {#                                <input type="text" class="form-control" name="name" id="name" placeholder="Name" value="{{ user_details.first_name }} {{ user_details.last_name }}"/>#}
+    {#                            </div>#}
+    {#                        </div>#}
+    {#                        <div class="form-group">#}
+    {#                            <label for="email" class="col-sm-3 control-label">Email Address</label>#}
+    {#                            <div class="col-sm-9">#}
+    {#                                <input type="text" class="form-control" name="email" id="email" placeholder="email@example.com" value="{{ user_details.email }}"/>#}
+    {#                            </div>#}
+    {#                        </div>#}
+    {#                        <div class="form-group">#}
+    {#                            <label for="credits" class="col-sm-3 control-label">Credits Requested</label>#}
+    {#                            <div class="col-sm-9">#}
+    {#                                <div class="btn-group" role="group">#}
+    {#                                    <button type="button" class="btn btn-primary" value="1000">$1000</button>#}
+    {#                                    <button type="button" class="btn btn-primary" value="2000">$2000</button>#}
+    {#                                    <button type="button" class="btn btn-primary" value="5000">$5000</button>#}
+    {#                                </div>#}
+    {#                                <input type="hidden" name="credits" value=""/>#}
+    {#                            </div>#}
+    {#                        </div>#}
+    {#                        <div class="form-group">#}
+    {#                            <label for="project-details" class="col-sm-3 control-label">Project Details</label>#}
+    {#                            <div class="col-sm-9">#}
+    {#                                <textarea class="form-control" name="project-details" id="project-details" rows="3" placeholder="Explain your project and why you need additional Google Cloud Platform Credits..."></textarea>#}
+    {#                            </div>#}
+    {#                        </div>#}
+    {#                    </div>#}
+    {#                    <div class="modal-footer">#}
+    {#                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>#}
+    {#                        {% csrf_token %}#}
+    {#                        <input type="submit" value="Submit Request" class="btn btn-primary" />#}
+    {#                    </div>#}
+    {#                </form>#}
+    {#            </div>#}
+    {#        </div>#}
+    {#    </div>#}
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="bucket-contents-modal" tabindex="-1" role="dialog" aria-labelledby="ControlledDataTitle"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="ControlledDataTitle">Contents of isb-cgc-mock-cntl Bucket:</h4>
+                </div>
+                <ul>
+                    {% for item in object_list %}
+                        <li>
+                            {{ item.name }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var last_login_client_time = new Date("{{ user_details.last_login|safe }}".replace(" ", "T"));
+        document.getElementById('last_login').innerHTML = last_login_client_time;
+    </script>
+{% endblock %}
+
+{% block js_file %}
+    {{ block.super }}
+    <script src="{% static 'js/user_details.js' %}"></script>
+{% endblock %}

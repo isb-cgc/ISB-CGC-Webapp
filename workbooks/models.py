@@ -1,18 +1,18 @@
-"""
-Copyright 2017, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+###
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
 
 import ast
 
@@ -42,10 +42,9 @@ class Workbook(models.Model):
     last_date_saved = models.DateTimeField(auto_now=True)
     objects = WorkbookManager()
     is_public = models.BooleanField(default=False)
-    owner = models.ForeignKey(User)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     active = models.BooleanField(default=True)
     shared = models.ManyToManyField(Shared_Resource)
-    is_public = models.BooleanField(default=False)
     build = models.CharField(max_length=10, null=True)
 
     @classmethod
@@ -180,8 +179,8 @@ class Workbook(models.Model):
 
 
 class Workbook_Last_View(models.Model):
-    workbook = models.ForeignKey(Workbook, blank=False)
-    user = models.ForeignKey(User, null=False, blank=False)
+    workbook = models.ForeignKey(Workbook, blank=False, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
     test = models.DateTimeField(auto_now_add=True, null=True)
     last_view = models.DateTimeField(auto_now=True)
 
@@ -194,8 +193,8 @@ class Workbook_Perms(models.Model):
         (OWNER, 'Owner')
     )
 
-    workbook = models.ForeignKey(Workbook, null=False, blank=False)
-    user = models.ForeignKey(User, null=False, blank=True)
+    workbook = models.ForeignKey(Workbook, null=False, blank=False, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=False, blank=True, on_delete=models.CASCADE)
     perm = models.CharField(max_length=10, choices=PERMISSIONS, default=READER)
 
 class WorksheetManager(models.Manager):
@@ -205,7 +204,7 @@ class Worksheet(models.Model):
     id              = models.AutoField(primary_key=True)
     name            = models.CharField(max_length=2024, blank=False)
     description     = models.CharField(max_length=2024, null=False)
-    workbook        = models.ForeignKey(Workbook, null=False, blank=False)
+    workbook        = models.ForeignKey(Workbook, null=False, blank=False, on_delete=models.CASCADE)
     last_date_saved = models.DateTimeField(auto_now=True)
     date_created    = models.DateTimeField(auto_now_add=True)
     objects         = WorksheetManager()
@@ -307,7 +306,7 @@ class Worksheet(models.Model):
         self.worksheet_cohort_set.get(cohort=cohort).destroy()
 
     def get_active_plot(self):
-        active_set_list = self.worksheet_plot_set.filter(active=True).values()
+        active_set_list = list(self.worksheet_plot_set.filter(active=True).values())
         if len(active_set_list) > 0 :
             return Worksheet_plot.get_deep_plot(id=active_set_list[0]['id'])
         return None
@@ -332,10 +331,10 @@ class Worksheet_Cohort_Manager(models.Manager):
 
 class Worksheet_cohort(models.Model):
     id              = models.AutoField(primary_key=True)
-    worksheet       = models.ForeignKey(Worksheet, null=False, blank=False)
+    worksheet       = models.ForeignKey(Worksheet, null=False, blank=False, on_delete=models.CASCADE)
     date_created    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
-    cohort          = models.ForeignKey(Cohort)
+    cohort          = models.ForeignKey(Cohort, on_delete=models.CASCADE)
     objects         = Worksheet_Cohort_Manager()
 
     @classmethod
@@ -403,7 +402,7 @@ class Worksheet_Gene_Manager(models.Manager):
 
 class Worksheet_gene(models.Model):
     id              = models.AutoField(primary_key=True)
-    worksheet       = models.ForeignKey(Worksheet, null=False, blank=False)
+    worksheet       = models.ForeignKey(Worksheet, null=False, blank=False, on_delete=models.CASCADE)
     date_created    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
     gene            = models.CharField(max_length=2024, blank=False)
@@ -472,11 +471,11 @@ class Worksheet_variable(models.Model):
     id              = models.AutoField(primary_key=True)
     date_created    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
-    worksheet       = models.ForeignKey(Worksheet, null=False, blank=False)
+    worksheet       = models.ForeignKey(Worksheet, null=False, blank=False, on_delete=models.CASCADE)
     name            = models.CharField(max_length=2024, blank=False)
     type            = models.CharField(max_length=1024, blank=True, null=True)
     url_code        = models.CharField(max_length=2024, blank=False)
-    feature         = models.ForeignKey(User_Feature_Definitions, null=True, blank=True) #only used for user generated variable
+    feature         = models.ForeignKey(User_Feature_Definitions, null=True, blank=True, on_delete=models.CASCADE) #only used for user generated variable
     objects         = Worksheet_Variable_Manager()
 
     @classmethod
@@ -561,8 +560,8 @@ class Worksheet_Comment_Manager(models.Manager):
 
 class Worksheet_comment(models.Model):
     id              = models.AutoField(primary_key=True)
-    worksheet       = models.ForeignKey(Worksheet, blank=False)
-    user            = models.ForeignKey(User, null=False, blank=False)
+    worksheet       = models.ForeignKey(Worksheet, blank=False, on_delete=models.CASCADE)
+    user            = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
     date_created    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
     content         = models.CharField(max_length=2024, null=False)
@@ -591,7 +590,7 @@ class Worksheet_plot(models.Model):
     date_created    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
     type            = models.CharField(max_length=1024, null=True)
-    worksheet       = models.ForeignKey(Worksheet, blank=False, null=True)
+    worksheet       = models.ForeignKey(Worksheet, blank=False, null=True, on_delete=models.CASCADE)
     active          = models.BooleanField(default=True)
     settings_json   = models.TextField(blank=True, null=True)
 
@@ -632,8 +631,8 @@ class Worksheet_plot_cohort(models.Model):
     id              = models.AutoField(primary_key=True)
     date_created    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
-    plot            = models.ForeignKey(Worksheet_plot, blank=True, null=True, related_name="worksheet_plot")
-    cohort          = models.ForeignKey(Worksheet_cohort, blank=True, null=True, related_name="worksheet_plot_cohorts")
+    plot            = models.ForeignKey(Worksheet_plot, blank=True, null=True, related_name="worksheet_plot", on_delete=models.CASCADE)
+    cohort          = models.ForeignKey(Worksheet_cohort, blank=True, null=True, related_name="worksheet_plot_cohorts", on_delete=models.CASCADE)
     objects         = Worksheet_Plot_Cohort_Manager()
 
     def toJSON(self):

@@ -109,6 +109,15 @@
     .curr-filter-panel
         padding: 0
         margin-bottom: 15px
+    .gradient-overlay
+        position: relative
+        &:after
+            position: absolute
+            top: 0
+            height: 100%
+            width: 100%
+            content: ""
+            background: linear-gradient(to top, rgba(255,255,255, 1) 15%, rgba(255,255,255, 0) 80%)
 
     .details-panel
         overflow: hidden
@@ -149,10 +158,8 @@
             background-color: #fff
             text-align: center
             font-size: 12.7px
-            &.file-browser-tab
+            &.file-browser-tab, &.program-tab
                 width: (100% / 5)
-            &.program-tab
-                width: (100% / 4)
             &.filter-tab
                 width: (100% / 3)
             &:first-child a
@@ -175,7 +182,7 @@
         .checks
             float: right
             display: block
-            width: 55%
+            width: 65%
         .tabpanel
             border-top-left-radius: 3px
             border-top-right-radius: 3px
@@ -426,7 +433,32 @@
             display: inline-block
         span:hover
             background-color: darken(#ceeaff, 10%)
+    .search-checkbox-list
+        label
+            width: 100%
+    .sample_count, .case_count, .file_count
+        background-color: #bababa
+        color: white
+        border-radius: 10px
+        font-size: .8em
+        padding: 2px 5px
+        text-align: right
 
+    .sample_count
+        &:after
+            content: 'sample(s)'
+            font-size: 0.9em
+            padding-left: 5px
+    .case_count
+        &:after
+            content: 'case(s)'
+            font-size: 0.9em
+            padding-left: 5px
+    .file_count
+        &:after
+            content: 'file(s)'
+            font-size: 0.9em
+            padding-left: 5px
 
 #cohort-filelist
     #placeholder

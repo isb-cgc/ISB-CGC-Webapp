@@ -16,25 +16,25 @@
  *
  */
 
-require.config({
-    baseUrl: STATIC_FILES_URL+'js/',
-    paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
-        underscore: 'libs/underscore-min',
-        tablesorter:'libs/jquery.tablesorter.min',
-        base: 'base'
-    },
-    shim: {
-        'bootstrap': ['jquery'],
-        'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
-        'tablesorter': ['jquery'],
-        'base': ['jquery'],
-    }
-});
+// require.config({
+//     baseUrl: STATIC_FILES_URL+'js/',
+//     paths: {
+//         jquery: 'libs/jquery-1.11.1.min',
+//         bootstrap: 'libs/bootstrap.min',
+//         jqueryui: 'libs/jquery-ui.min',
+//         session_security: 'session_security/script',
+//         underscore: 'libs/underscore-min',
+//         tablesorter:'libs/jquery.tablesorter.min',
+//         base: 'base'
+//     },
+//     shim: {
+//         'bootstrap': ['jquery'],
+//         'jqueryui': ['jquery'],
+//         'session_security': ['jquery'],
+//         'tablesorter': ['jquery'],
+//         'base': ['jquery'],
+//     }
+// });
 
 require([
     'jquery',
@@ -97,11 +97,16 @@ require([
 
         $('.cohort-table tr:not(:first) input[type="checkbox"]:checked').length == 0 && $('#cohort-apply-to-workbook .btn').prop('disabled', 'disabled');
         $('.cohort-table tr:not(:first) input[type="checkbox"]:checked').length > 0 && $('#cohort-apply-to-workbook .btn').removeAttr('disabled');
-    }
+    };
 
     $('.select-all').on('change', function() {
         var checked = $(this).is(':checked');
         var formApply = $('#cohort-apply-to-workbook');
+
+        formApply.find('input[name=\'cohorts\']').remove();
+        $('.selected-cohorts').empty();
+        $('#selected-ids').empty();
+
         if (checked) {
             // Create tokens for Set Ops modal
             $(this).parents('table').find('tr:not(:first) input[type="checkbox"]').each(function() {
@@ -118,10 +123,6 @@ require([
                 // Add all values to the form
                 formApply.append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
             });
-        } else {
-            formApply.empty();
-            $('.selected-cohorts').empty();
-            $('#selected-ids').empty();
         }
 
         // Sets all checkboxes to the state of the select-all
@@ -134,10 +135,10 @@ require([
 
     var checkbox_change_callback = function() {
         var tablename = '#' + $(this).closest('table')[0].id;
-        // If no checkboxes are selected
-        if ($(tablename+' tr:not(:first) input[type="checkbox"]:checked').length == 0) {
-            $(tablename+' .select-all').prop('checked', false);
-        }
+
+        var checkbox_length = $(tablename+' tr:not(:first) input[type="checkbox"]').length;
+        var checked_length = $(tablename+' tr:not(:first) input[type="checkbox"]:checked').length;
+        $(tablename+' .select-all').prop('checked', checkbox_length == checked_length);
 
         toggle_buttons();
 
@@ -210,12 +211,13 @@ require([
         var users = [];
         var user_map = {};
         var that = this;
-        $('#cohorts-list tr:not(:first) input:checked').each(function(){
+
+        $('#cohorts-list tr:not(:first) input:checked').each(function() {
             var cohort = $(this).val();
             var tempt = shared_users[$(this).val()];
-            if(tempt){
-                JSON.parse(tempt).forEach(function(user){
-                    if(!user_map[user.pk]){
+            if (tempt) {
+                JSON.parse(tempt).forEach(function (user) {
+                    if (!user_map[user.pk]) {
                         user_map[user.pk] = user.fields;
                         user.fields.shared_cohorts = [cohort];
                         user.fields.id = user.pk;
@@ -226,6 +228,7 @@ require([
                 })
             }
         });
+
         var table = $(that).find('table');
         if(users.length){
             table.append('<thead><th>Name</th><th>Email</th><th></th></thead>')
@@ -492,4 +495,5 @@ require([
     $('input.cohort:checked').each(function(){
         $('#cohort-apply-to-workbook').append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
     });
+
 });

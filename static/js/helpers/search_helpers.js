@@ -44,11 +44,10 @@ var TRANSLATION_DICT = {
     '1':                        'Mutant'
 };
 
-define(['jquery', 'tree_graph', 'stack_bar_chart', 'draw_parsets'],
-function($, tree_graph, stack_bar_chart, draw_parsets) {
+define(['jquery', 'tree_graph', 'stack_bar_chart'],
+function($, tree_graph, stack_bar_chart) {
     
     var tree_graph_obj = Object.create(tree_graph, {});
-    var parsets_obj = Object.create(draw_parsets, {});
 
     var PROG_CLIN_TREES = {
         'TCGA': {
@@ -72,12 +71,26 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             gender: 'Gender',
             sample_type: 'Sample Type',
             age_at_diagnosis: 'Age at Diagnosis'
+        },
+        'BEATAML1.0':{
+            project_short_name: 'Project',
+            disease_type: 'Disease Type',
+            vital_status: 'Vital Status',
+            gender: 'Gender',
+            ethnicity: 'Race',
+            age_at_diagnosis: 'Age at Diagnosis'
         }
     };
 
     var user_data_attr = {
         user_program: 'Program',
         user_project: 'Project'
+    };
+
+    var format_num_with_commas = function(num) {
+        if(isNaN(num))
+            num = 0;
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     };
 
     return  {
@@ -154,50 +167,21 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
             $('button[data-target="#apply-filters-modal"]').prop('disabled',true);
             $('#apply-filters-form input[type="submit"]').prop('disabled',true);
-            
             var startReq = new Date().getTime();
 
             if(filter_panel_load) {
                 var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
                 clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
 
-                if (metadata_counts.hasOwnProperty('data_avail')) {
-                    var features = [
-                        'cnvrPlatform',
-                        'DNAseq_data',
-                        'methPlatform',
-                        'gexpPlatform',
-                        'mirnPlatform',
-                        'rppaPlatform'
-                    ];
-                    var plot_features = [
-                        context.get_readable_name(features[0]),
-                        context.get_readable_name(features[1]),
-                        context.get_readable_name(features[2]),
-                        context.get_readable_name(features[3]),
-                        context.get_readable_name(features[4]),
-                        context.get_readable_name(features[5])
-                    ];
-                    for (var i = 0; i < metadata_counts['data_avail'].length; i++) {
-                        var new_item = {};
-                        for (var j = 0; j < features.length; j++) {
-                            var item = metadata_counts['data_avail'][i];
-                            new_item[plot_features[j]] = context.get_readable_name(item[features[j]]);
-                        }
-                        metadata_counts['data_avail'][i] = new_item;
-                    }
-
-                    if(cohort_id) {
-                        parsets_obj.draw_parsets(metadata_counts, plot_features, program_id);
-                    }
-                } else {
-                    console.debug(metadata_counts);
-                }
-
                 $('.clinical-trees .spinner').hide();
                 $('.user-data-trees .spinner').hide();
                 $('.parallel-sets .spinner').hide();
 
+                context.update_zero_case_filters_all();
+                $('.hide-zeros input').on('change', function()
+                {
+                    context.update_zero_case_filters($(this));
+                });
                 return $.Deferred().resolve();
             } else {
                 $('.cohort-info .total-values').hide();
@@ -221,19 +205,20 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                         metadata_counts = results;
                         var stopReq = new Date().getTime();
                         console.debug("[BENCHMARKING] Time for response in update_counts_parsets: "+(stopReq-startReq)+ "ms");
-                        case_counts = results['count'];
-                        data_counts = results['data_counts'];
+                        case_counts = results['counts'];
 
 
-                        $('#p-'+program_id+'-data-total-samples').html(metadata_counts['total']);
-                        $('#p-'+program_id+'-data-total-participants').html(metadata_counts['cases']);
+                        $('#p-'+program_id+'-data-total-samples').html(format_num_with_commas(metadata_counts['samples']));
+                        $('#p-'+program_id+'-data-total-participants').html(format_num_with_commas(metadata_counts['cases']));
 
                         if(cohort_id){
-                            $('#c-'+cohort_id+'-data-total-samples').html(metadata_counts['cohort-total']);
-                            $('#c-'+cohort_id+'-data-total-participants').html(metadata_counts['cohort-cases']);
+                            $('#c-'+cohort_id+'-data-total-samples').html(format_num_with_commas(metadata_counts['cohort-total']));
+                            $('#c-'+cohort_id+'-data-total-participants').html(format_num_with_commas(metadata_counts['cohort-cases']));
                         }
 
-                        context.update_filter_counts(case_counts, data_counts, program_id);
+                        context.update_filter_counts(case_counts, null, program_id);
+
+                        context.update_zero_case_filters_all();
 
                         var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(case_counts, clin_tree_attr) : case_counts;
                         clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
@@ -262,10 +247,6 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                                     new_item[plot_features[j]] = context.get_readable_name(item[features[j]]);
                                 }
                                 metadata_counts['data_avail'][i] = new_item;
-                            }
-
-                            if(cohort_id) {
-                                parsets_obj.draw_parsets(results, plot_features, program_id);
                             }
                         } else {
                             console.debug(results);
@@ -329,6 +310,65 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             return url;
         },
 
+        update_zero_case_filters: function(hide_zero_case_checkbox) {
+            if (!hide_zero_case_checkbox)
+                return;
+
+            var should_hide = hide_zero_case_checkbox.prop('checked');
+            var parent_filter_panel = hide_zero_case_checkbox.parent().parent();
+            parent_filter_panel.find('.search-checkbox-list').each(function() {
+               var filter_list = $(this);
+               var num_filter_to_show = 0;
+               filter_list.find('li').each(function() {
+                   var filter = $(this);
+                   var is_zero_case = (filter.find('span').text() == "0");
+                   if (!is_zero_case || !should_hide) {
+                       num_filter_to_show++;
+                   }
+               });
+
+               var num_extra = num_filter_to_show - 6;
+               var show_more_text = num_extra > 0 ? num_extra + " more" : "0 more";
+               if (num_filter_to_show == 0)
+               {
+                   filter_list.find('more-checks').hide();
+               }
+               else
+               {
+                   filter_list.find('more-checks').show();
+                   filter_list.find('.show-more').text(show_more_text);
+               }
+
+               var visible_filter_count = 0;
+               filter_list.find('li').each(function() {
+                   var filter = $(this);
+                   var is_zero_case = (filter.find('span').text() == "0");
+                   filter.removeClass("extra-values");
+                   filter.removeClass("visible-filter");
+                   if (is_zero_case && should_hide) {
+                       filter.hide();
+                   } else {
+                       filter.addClass("visible-filter");
+                       if (visible_filter_count >= 6) {
+                           filter.addClass("extra-values");
+                           filter.hide();
+                       }
+                       else {
+                           filter.show();
+                       }
+                       visible_filter_count++;
+                   }
+               });
+            });
+        },
+
+        update_zero_case_filters_all: function() {
+            var context = this;
+            $('.hide-zeros input').each(function() {
+                context.update_zero_case_filters($(this));
+            });
+        },
+
         update_filter_counts: function(case_counts, data_counts, program_id) {
 
             counts_by_name = {};
@@ -338,27 +378,12 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                 counts_by_name[obj.name] = {
                     values: {},
                     total: obj.total
-                }
+                };
                 var values = counts_by_name[obj.name].values;
                 obj.values.map(function(val){
                     values[val.value] = val.count;
                 });
             });
-
-            // User data (program_id === 0) doesn't have data type information at this time
-            if(program_id > 0) {
-                data_counts.map(function(obj){
-                    counts_by_name[obj.name] = {
-                        values: {},
-                        total: obj.total
-                    }
-                    var values = counts_by_name[obj.name].values;
-                    obj.values.map(function(val){
-                        values[val.value] = val.count;
-                    });
-                });
-            }
-
 
             $('#'+program_id+'-data-filter-panel li.list-group-item div.cohort-feature-select-block').each(function() {
                 var $this = $(this),
@@ -370,17 +395,13 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                             value = $that.data('value-name'),
                             id = $that.data('value-id'),
                             displ_name = ($that.data('value-displ-name') == 'NA' ? 'None' : $that.data('value-displ-name')),
-                            new_count = '';
+                            new_count = '0';
                         if (counts_by_name[attr]) {
                             if (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name] || counts_by_name[attr].values[id]) {
-                                new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name] || counts_by_name[attr].values[id]) + ')';
+                                new_count = (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name] || counts_by_name[attr].values[id]);
                             }
                         }
-                        // All entries which were not returned are assumed to be zero
-                        if (new_count == '') {
-                            new_count = '(0)';
-                        }
-                        $that.siblings('span').html(new_count);
+                        $that.siblings('span').html(format_num_with_commas(new_count));
                     });
                 }
             });

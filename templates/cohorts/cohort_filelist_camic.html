@@ -8,86 +8,89 @@
                 </select>
             </div>
         </div>
+        <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
         <div class="panel panel-default filter-panel">
             {% for attr_build, vals in metadata_data_attr.items %}
-            <div class="panel-body tab-content filter-build-panel" data-filter-build="HG19" id="camic-filter-panel-HG19" {% if build != attr_build %}style="display: none;"{% endif %}>
-                <ul class="list-group" id="metadata-data-accordian-camic" role="tablist" aria-multiselectable="true">
-                    <li class="list-group-item">
-                        <div id="heading-camic-HG19-case-id" class="list-group-item__heading">
-                            <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all"
-                               href="#collapse-camic-HG19-case-id" aria-expanded="false"
-                               aria-controls="collapse-camic-HG19-case-id">
-                                <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> CASE
-                            </a>
-                        </div>
-                        <div id="collapse-camic-HG19-case-id"
-                             class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
-                             data-feature-type="donor"
-                             aria-labelledby="heading-camic-HG19-case-id" data-feature-name="case-id"
-                             data-feature-displ-name="CASE ID">
-                            <div class="search_enter">
-                                <div class="search_input">
-                                    <input class="case-barcode-search-text" type="search" aria-label="Case Barcode" placeholder="Case Barcode"
-                                           value="">
-                                    <a class="case-barcode-search-clear-btn search_clear_btn"><i class="fa fa-times-circle"></i></a>
-                                    <a class="case-barcode-search-btn search_btn"><i class="fa fa-search"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                    {% for attr in vals %}
+                {% if attr_build == 'HG19' %}
+                <div class="panel-body tab-content filter-build-panel" data-filter-build="HG19" id="camic-filter-panel-HG19" {% if build != attr_build %}style="display: none;"{% endif %}>
+                    <ul class="list-group" id="metadata-data-accordian-camic" role="tablist" aria-multiselectable="true">
                         <li class="list-group-item">
-                            <div id="heading-camic-HG19-{{attr.name}}" class="list-group-item__heading">
-                                <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-camic" href="#collapse-camic-HG19-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-camic-HG19-{{ attr.name }}">
-                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
+                            <div id="heading-camic-HG19-case-id" class="list-group-item__heading">
+                                <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all"
+                                   href="#collapse-camic-HG19-case-id" aria-expanded="false"
+                                   aria-controls="collapse-camic-HG19-case-id">
+                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> CASE
                                 </a>
                             </div>
-                            <div id="collapse-camic-HG19-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
-                                 aria-labelledby="heading-camic-HG19-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}">
-                                <ul class="search-checkbox-list" id="camic-{{ attr.name }}">
-                                    {% with attr.values|how_many_more:6 as num_more %}
-                                        {% for v in attr.values|check_for_order:attr.name %}
-                                            {% if forloop.counter0 < 6 %}
-                                                <li class="checkbox">
-                                                    <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="camic-HG19-{{ attr.name }}-{{ v.value }}"
-                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
-                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
-                                                         <span class="count">({{ v.count }})</span>
-                                                    </label>
-                                                </li>
-                                            {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                <li class="extra-values checkbox" style="display:none;">
-                                                    <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="camic-HG19-{{ attr.name}}-{{ v.value }}"
-                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
-                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
-                                                         <span class="count">({{ v.count }})</span>
-                                                    </label>
-                                                </li>
-                                            {% else %}
-                                                <li class="extra-values checkbox" style="display:none;">
-                                                    <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="camic-HG19-{{ attr.name }}-{{ v.value }}"
-                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
-                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
-                                                         <span class="count">({{ v.count }})</span>
-                                                    </label>
-                                                </li>
-                                            {% endif %}
-                                        {% endfor %}
-                                        {% if num_more > 0 %}
-                                            <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                        {% endif %}
-                                    {% endwith %}
-                                </ul>
+                            <div id="collapse-camic-HG19-case-id"
+                                 class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
+                                 data-feature-type="donor"
+                                 aria-labelledby="heading-camic-HG19-case-id" data-feature-name="case-id"
+                                 data-feature-displ-name="CASE ID">
+                                <div class="search_enter">
+                                    <div class="search_input">
+                                        <input class="case-barcode-search-text" type="search" aria-label="Case Barcode" placeholder="Case Barcode"
+                                               value="">
+                                        <a class="case-barcode-search-clear-btn search_clear_btn"><i class="fa fa-times-circle"></i></a>
+                                        <a class="case-barcode-search-btn search_btn"><i class="fa fa-search"></i>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </li>
-                    {% endfor %}
-                </ul>
-            </div>
+                        {% for attr in vals %}
+                            <li class="list-group-item">
+                                <div id="heading-camic-HG19-{{ attr.name }}" class="list-group-item__heading">
+                                    <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-camic" href="#collapse-camic-HG19-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-camic-HG19-{{ attr.name }}">
+                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
+                                    </a>
+                                </div>
+                                <div id="collapse-camic-HG19-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
+                                     aria-labelledby="heading-camic-HG19-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}">
+                                    <ul class="search-checkbox-list" id="camic-{{ attr.name }}">
+                                        {% with attr.values|how_many_more:6 as num_more %}
+                                            {% for v in attr.values|check_for_order:attr.name %}
+                                                {% if forloop.counter0 < 6 %}
+                                                    <li class="checkbox">
+                                                        <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
+                                                            <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="camic-HG19-{{ attr.name }}-{{ v.value }}"
+                                                                   data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                            {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
+                                                             <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
+                                                        </label>
+                                                    </li>
+                                                {% elif forloop.counter0 == 6 and num_more > 0 %}
+                                                    <li class="extra-values checkbox" style="display:none;">
+                                                        <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
+                                                            <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="camic-HG19-{{ attr.name}}-{{ v.value }}"
+                                                                   data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                            {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
+                                                             <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
+                                                        </label>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="extra-values checkbox" style="display:none;">
+                                                        <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
+                                                            <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="camic-HG19-{{ attr.name }}-{{ v.value }}"
+                                                                   data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                            {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
+                                                             <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
+                                                        </label>
+                                                    </li>
+                                                {% endif %}
+                                            {% endfor %}
+                                            {% if num_more > 0 %}
+                                                <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </ul>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
             {% endfor %}
         </div>
     </div>
@@ -111,8 +114,8 @@
                         </li>
                         <li class="menu-item">
                             <div class="filelist-obtain">
-                                <button class="btn btn-info export-btn" data-toggle="modal" {% if has_user_data %}disabled {% endif %}data-target="#export-to-bq-modal" title="{% if has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a BigQuery table{% endif %}">BigQuery</button>
-                                <button class="btn btn-info export-btn" data-toggle="modal" {% if has_user_data %}disabled {% endif %}data-target="#export-to-gcs-modal" title="{% if has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a GCS bucket{% endif %}">GCS</button>
+                                <button class="btn btn-info export-btn" data-toggle="modal" {% if has_user_data or user.is_anonymous %} disabled {% endif %} data-target="#export-to-bq-modal" title="{% if user.is_anonymous %} Log-in to export this file manifest to a BigQuery table {% elif has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a BigQuery table{% endif %}">BigQuery</button>
+                                <button class="btn btn-info export-btn" data-toggle="modal" {% if has_user_data or user.is_anonymous %} disabled {% endif %} data-target="#export-to-gcs-modal" title="{% if user.is_anonymous %} Log-in to export this file manifest to a GCS bucket {% elif has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a GCS bucket{% endif %}">GCS</button>
                             </div>
                         </li>
                     </ul>
@@ -141,7 +144,7 @@
                     </div>
                     <div class="dataTables_paginate">
                         <a class="prev-page paginate_button dataTables_button disabled">Previous</a>
-                        <span class="paginate_button_space"/>
+                        <span class="paginate_button_space"></span>
                         <a class="next-page paginate_button dataTables_button">Next</a>
                     </div>
                 </div>

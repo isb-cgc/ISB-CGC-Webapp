@@ -1,21 +1,20 @@
-"""
+###
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
 
-Copyright 2017, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
-
+from builtins import str
 import logging
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -75,21 +74,20 @@ def oncogrid_view_data(request):
         # get gene list
         gene_data_query, gene_bq_tables = create_oncogrid_bq_statement(GENE_TRACK_TYPE, genomic_build, project_set,
                                                                            cohort_ids, gene_list, None)
+
+
         gene_data_list, observation_data_list, obs_donors = get_gene_data_list(gene_data_query)
 
-        # get donor list
-        donor_data_query, donor_bq_tables = create_oncogrid_bq_statement(DONOR_TRACK_TYPE, genomic_build, project_set,
-                                                                         None, None, obs_donors)
-        donor_data_list, donor_track_count_max = get_donor_data_list(donor_data_query)
-
-        bq_tables = list(set(donor_bq_tables + gene_bq_tables))
-
-        if len(observation_data_list):
+        if len(observation_data_list) > 0:
+            # get donor list
+            donor_data_query, donor_bq_tables = create_oncogrid_bq_statement(DONOR_TRACK_TYPE, genomic_build, project_set,
+                                                                             None, None, obs_donors)
+            donor_data_list, donor_track_count_max = get_donor_data_list(donor_data_query)
+            bq_tables = list(set(donor_bq_tables + gene_bq_tables))
             return JsonResponse({
                 'donor_data_list': donor_data_list,
                 'gene_data_list': gene_data_list,
                 'observation_data_list': observation_data_list,
-                # 'obs_donors': obs_donors,
                 'bq_tables': bq_tables,
                 'donor_track_count_max': donor_track_count_max
             })
@@ -133,8 +131,8 @@ def get_donor_data_list(bq_statement):
             age_at_diagnosis = row['f'][6]['v']
             days_to_death = row['f'][7]['v']
             data_category = row['f'][8]['v']
-            score = row['f'][9]['v']
-            if not donors.has_key(case_barcode):
+            score = int(row['f'][9]['v'])
+            if case_barcode not in donors:
                 donors[case_barcode] = {
                     'case_code': project_short_name + ' / ' + case_barcode,
                     'gender': gender if gender != None else 'Not Reported',
@@ -145,7 +143,7 @@ def get_donor_data_list(bq_statement):
                     'days_to_death': days_to_death if days_to_death != None else 'Not Reported',
                     'data_category': {},
                 }
-            if not donors[case_barcode]['data_category'].has_key(data_category):
+            if data_category not in donors[case_barcode]['data_category']:
                 donors[case_barcode]['data_category'][data_category] = {
                     'score': score,
                 }
@@ -181,7 +179,9 @@ def get_donor_data_list(bq_statement):
                 donor_track_count_max['days_to_death'] = max(int(donor_track_count_max['days_to_death']), int(donor_data['days_to_death']))
 
             for data_category_key in donors[case_barcode_key]['data_category']:
-                if data_category_key.lower() == 'clinical':
+                if data_category_key is None:
+                    break
+                elif data_category_key.lower() == 'clinical':
                     donor_data['clinical'] = donors[case_barcode_key]['data_category'][data_category_key]['score']
                     donor_track_count_max['clinical'] = max(donor_track_count_max['clinical'], donor_data['clinical'])
                 elif data_category_key.lower() == 'biospecimen':
@@ -217,17 +217,17 @@ def get_gene_data_list(bq_statement):
             case_barcode = row['f'][2]['v']
             variant_classification = row['f'][3]['v']
             is_cgc = str(row['f'][4]['v'])
-            if not genes_mut_data.has_key(hugo_symbol):
+            if hugo_symbol not in genes_mut_data:
                 genes_mut_data[hugo_symbol] = {
                     'case_barcode': {},
                 }
-            if not genes_mut_data[hugo_symbol]['case_barcode'].has_key(case_barcode):
+            if case_barcode not in genes_mut_data[hugo_symbol]['case_barcode']:
                 genes_mut_data[hugo_symbol]['case_barcode'][case_barcode] = {
                     'case_code': project_short_name +' / '+case_barcode,
                     'variant_classification': {},
                     'is_cgc': is_cgc
                 }
-            if not genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['variant_classification'].has_key(variant_classification):
+            if variant_classification not in genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['variant_classification']:
                 genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['variant_classification'][variant_classification] = {
                     'name': variant_classification
                 }
@@ -381,5 +381,6 @@ def create_oncogrid_bq_statement(type, genomic_build, project_set, cohort_ids, g
         filter_clause2 = filter_clause2
     )
 
+    # print(bq_statement)
     return bq_statement, [somatic_mut_table, metadata_data_table, bioclinic_clin_table]
 

@@ -1,0 +1,323 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% load tz %}
+{% comment %}
+
+   Copyright 2016, Institute for Systems Biology
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+{% endcomment %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block link_page_name %}gcp-detail{% endblock %}
+{% block page_name %}gcp-detail{% endblock %}
+
+{% block page_header %}
+    <div class="container">
+        <h1 class="page-header pull-left"><a href="{% url 'user_gcp_list' user.id %}" aria-label="Back" role="link"><i class="fa fa-chevron-left"></i></a> {{ gcp.project_name }} ({{ gcp.project_id }})</h1>
+        <div class="pull-right refresh-project">
+            <a class="refresh-project btn btn-primary" data-toggle="modal" role="button" data-user-id="{{ request.user.id }}" data-project-gcp-id="{{ gcp.project_id }}" data-project-name="{{ gcp.project_name }}" data-target="#refresh-project-modal" >Refresh Project</a></li>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            {% if is_linked %}
+            <div class="col-sm-12 col-md-12 col-lg-12">
+
+                <section class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            Service Accounts
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        <table class="table" role="presentation">
+                            <thead>
+                            <tr>
+                                <th>Service Account</th>
+                                <th>Authorized Controlled-Access Datasets</th>
+                                <th>Current Access Expires</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for svc_act in sa_list  %}
+                                <tr>
+                                    <td>{{ svc_act.name }}</td>
+                                    <td>{% if svc_act.num_auth == 0 %}None{% else %}{{ svc_act.auth_dataset_names }}{% endif %}</td>
+                                    <td>{% if svc_act.is_expired %}{{ svc_act.expiration_date}}{% else %}{{ svc_act.expiration_date|date:'M d, Y, g:i a' }}{% endif %}</td>
+                                    <td>
+                                        {% if not svc_act.is_expired %}
+                                            <a title="Refresh this Service Account" aria-label="Refresh SA" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ svc_act.esc_name }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
+                                        {% endif %}
+                                        <a title="Delete this Service Account" aria-label="Delete SA" data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ svc_act.esc_name }}"><i class="fa fa-trash"></i></a>
+                                        <a title="Adjust Datasets for this Service Account" aria-label="Adjust Datasets for SA" role="button" href="{% url 'adjust_sa' user.id %}?sa_name={{ svc_act.name }}"><i class="fa fa-plus-square"></i></a>
+                                    </td>
+                                </tr>
+                            <!-- Refresh Service Account Modal -->
+                            <!-- TODO: this should be using the user_gcp_list_modals template instead -->
+                            <div class="modal fade" id="refresh-sa-modal-{{ svc_act.esc_name  }}" tabindex="-1" role="dialog" aria-labelledby="refresh-sa-header" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            <h4 id="refresh-sa-header" class="modal-title">Refresh this Service Account?</h4>
+                                        </div>
+                                        <form id="refresh-sa" method="POST" action="{% url 'register_sa' user.id %}">
+                                            <div class="modal-body">
+                                                {% csrf_token %}
+                                                <p>
+                                                    <em>Note</em>: By refreshing this Service Account, you are extending its access to the specified dataset.
+                                                </p>
+                                                <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />
+                                                <input type="hidden" name="user_sa" value="{{ svc_act.name }}" />
+                                                <input type="hidden" name="datasets" value="{{ svc_act.auth_dataset_ids }}" />
+                                                <input type="hidden" name="is_refresh" value="true" />
+                                            </div>
+                                            <div class="modal-footer">
+                                                <input type="submit" value="Refresh" class="btn btn-primary" />
+                                                <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Delete Service Account Modal -->
+                            <div class="modal fade" id="delete-sa-modal-{{ svc_act.esc_name }}" tabindex="-1" role="dialog" aria-labelledby="delete-sa-header" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            <h4 id="delete-sa-header" class="modal-title">Unregister this Service Account?</h4>
+                                        </div>
+                                        <form id="delete-sa" method="POST" action="{% url 'delete_sa' user.id svc_act.name %}">
+                                            <div class="modal-body">
+                                                {% csrf_token %}
+                                                <p>
+                                                    <em>Note</em>: By unregistering this Service Account, you are only revoking its access to controlled datasets.
+                                                </p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <input type="submit" value="Unregister" class="btn btn-primary" />
+                                                <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                        <a href="{% url 'register_sa' user.id %}?gcp_id={{ gcp.project_id }}" class="btn btn-link">Register Service Account</a>
+                    </div>
+                </section>
+            </div>
+            {% endif %}
+
+            <div class="col-md-6 col-lg-6">
+                <section class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            Cloud Storage Buckets
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        {% if gcp.bucket_set.all|length > 0 %}
+                        <ul class="table-list">
+                            {% for bucket in gcp.bucket_set.all %}
+                            <li>{{ bucket.bucket_name }}<span class="remove"><a data-toggle="modal" role="button" data-target="#remove-bucket-modal-{{ bucket.id }}"><i class="fa fa-times"></i></a></span></li>
+
+                            <!-- Remove Bucket Modal -->
+                            <div class="modal fade" id="remove-bucket-modal-{{ bucket.id }}" tabindex="-1" role="dialog" aria-labelledby="remove-bucket-header" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            <h4 id="remove-bucket-header" class="modal-title">Unregister Bucket</h4>
+                                        </div>
+                                        <form id="remove-bucket" method="POST" action="{% url 'delete_bucket' user.id bucket.id %}">
+                                            <div class="modal-body">
+                                                {% csrf_token %}
+                                                <p>
+                                                    Are you sure you would like to unregister this bucket?
+                                                </p>
+
+                                                <input type="hidden" name="gcp_id" value="{{ gcp.id }}" />
+                                            </div>
+                                            <div class="modal-footer">
+                                                <input type="submit" value="Unregister" class="btn btn-primary" />
+                                                <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                        <a data-toggle="modal" role="button" data-target="#register-bucket-modal" class="btn btn-link">Register Cloud Storage Bucket</a>
+                    </div>
+                </section>
+            </div>
+
+            <div class="col-md-6 col-lg-6">
+                <section class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            BigQuery Datasets
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        {% if gcp.bqdataset_set.all|length > 0 %}
+                        <ul class="table-list">
+                            {% for dataset in gcp.bqdataset_set.all %}
+                            <li>{{ dataset.dataset_name }}<span class="remove"><a data-toggle="modal" role="button" data-target="#remove-bqdataset-modal-{{ dataset.id }}"><i class="fa fa-times"></i></a></span></li>
+
+                            <!-- Remove Dataset Modal -->
+                            <div class="modal fade" id="remove-bqdataset-modal-{{ dataset.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-bqdataset-header" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            <h4 id="delete-bqdataset-header" class="modal-title">Unregister BigQuery Dataset</h4>
+                                        </div>
+                                        <form id="delete-bqdataset" method="POST" action="{% url 'delete_bqdataset' user.id dataset.id %}">
+                                            <div class="modal-body">
+                                                {% csrf_token %}
+                                                <p>
+                                                    Are you sure you would like to unregister this BigQuery dataset?
+                                                </p>
+
+                                                <input type="hidden" name="gcp_id" value="{{ gcp.id }}" />
+                                            </div>
+                                            <div class="modal-footer">
+                                                <input type="submit" value="Unregister" class="btn btn-primary" />
+                                                <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </ul>
+
+                        {% endif %}
+                        <a data-toggle="modal" role="button" data-target="#register-bqdataset-modal" class="btn btn-link">Register BigQuery Dataset</a>
+                    </div>
+                </section>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Refresh Google Cloud Project Modal -->
+    <div class="modal fade" id="refresh-project-modal" tabindex="-1" role="dialog" aria-labelledby="refresh-project-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 id="refresh-project-header" class="modal-title">Refresh the Google Cloud Project "{{ gcp.project_name }}"?</h4>
+                </div>
+                <form id="refresh-project" method="POST" action="{% url 'register_gcp' user.id %}">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <p>
+                            Refreshing this project will update the Web Application users associated with it.
+                        </p>
+                        <input type="hidden" name="is_refresh" value="true" />
+                        <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />
+                        <input type="hidden" name="detail" value="true" />
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" value="Refresh" class="btn btn-primary" />
+                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Bucket Modal -->
+    <div class="modal fade" id="register-bucket-modal" tabindex="-1" role="dialog" aria-labelledby="register-bucket" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 id="register-bucket" class="modal-title">Register Bucket</h4>
+                </div>
+                <form id="register-bucket" method="POST" action="{% url 'register_bucket' user.id gcp.id %}">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <p>
+                            By registering this bucket, you are allowing the ISB-CGC project to write to the bucket. Please ensure that the ISB-CGC service account has the proper permissions on this bucket.
+                            <br>
+                            Note: You must register a bucket that already exists in this Google Cloud Project. A new bucket will not be created.
+                        </p>
+
+                        <label for="bucket_name_input">Bucket Name:</label>
+                        <input type="text" name="bucket_name" id="bucket_name_input" class="form-control" required/>
+                        <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" value="Register" class="btn btn-primary" />
+                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register BQ Dataset Modal -->
+    <div class="modal fade" id="register-bqdataset-modal" tabindex="-1" role="dialog" aria-labelledby="register-bqdataset-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 id="register-bqdataset-header" class="modal-title">Register BigQuery Dataset</h4>
+                </div>
+                <form id="register-bqdataset" method="POST" action="{% url 'register_bqdataset' user.id gcp.id %}">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <p>
+                            By registering this BigQuery dataset, you are allowing the ISB-CGC project to write to the dataset. Please ensure that the ISB-CGC service account has the proper permissions on this BigQuery dataset.
+                            <br>
+                            Note: You must register a dataset that already exists in this Google Cloud Project. A new dataset will not be created.
+                        </p>
+
+                        <label for="bqdataset_name_input">Dataset Name:</label>
+                        <input type="text" name="bqdataset_name" id="bqdataset_name_input" class="form-control" required />
+                        <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" value="Register" class="btn btn-primary" />
+                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block js_file %}
+	{{ block.super }}
+	<script src="{% static 'js/register_gcp.js' %}"></script>
+{% endblock %}

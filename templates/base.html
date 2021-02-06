@@ -24,7 +24,7 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>{% block title %}ISB-CGC{% endblock %}</title>
-    <meta name="description" content="{% block description %}ISB-CGC project to visualize genome data{% endblock %}">
+    <meta name="description" content="{% block description %}ISB-CGC Cancer Gateway in the Cloud{% endblock %}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     {% block extra_css_libs %}{% endblock %}
@@ -46,7 +46,7 @@
         </script>
     {%  endif %}
     <script>
-        var STATIC_FILES_URL = '{{ STATIC_FILES_URL }}';
+        var STATIC_FILES_URL = {% if STATIC_FILES_URL %}'{{ STATIC_FILES_URL }}'{% else %}'{% static '' %}'{% endif %};
         var BASE_URL = '{{ BASE_URL }}' || "";
         var STORAGE_URI = '{{ STORAGE_URI }}';
     </script>
@@ -55,15 +55,15 @@
 <!--Include site main header-->
 {% include 'share/site_header.html'  %}
 
-<div id="secondary-nav" class="navbar-fixed-top">
-    {% block secondary_nav %}{% endblock %}
-</div>
+{#<div id="secondary-nav" class="navbar-fixed-top">#}
+{#    {% block secondary_nav %}{% endblock %}#}
+{#</div>#}
 
 <main id="{% block page_name %}content{% endblock %}" class="main-content">
     <div class="page-heading">
         {% block page_header %}{% endblock %}
     </div>
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-lg-12">
                 {% if messages %}
@@ -107,6 +107,35 @@
         </div>
     </div>
 </div>
+
+    <!-- Opt in dialog Modal -->
+<div class="ajax-form-modal modal fade" id="opt-in-pop-up-modal" tabindex="-1" role="dialog"
+         aria-labelledby="opt-in-modal-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+{#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" id = "close-opt-in-btn">#}
+{#                        <span aria-hidden="true">x</span></button>#}
+                    <h4 class="modal-title" id="opt-in-modal-header">Join Our Community</h4>
+                </div>
+                <div class="modal-body">
+                    <p  align="justify" class="modal-title" id="opt-in-modal-header">
+                        Let us keep you updated with our cloud-resources! <br>
+                        Would you like to subscribe to our mailing list? </p>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Yes" data-dismiss="modal" class="btn btn-primary" id="opt-in-yes-btn"/>
+                    <input type="submit" value="No" data-dismiss="modal" class="btn btn-secondary" id="opt-in-no-btn"/>
+                    <button type="button" class="btn btn-link pull-right" data-dismiss="modal" id="opt-in-ask-later-btn">Ask me later</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    var user_is_auth = {% if request.user.is_authenticated %}true{% else %}false{% endif %};
+</script>
+
 {% load session_security_tags %}
 {% load i18n l10n %}
 {% load static from staticfiles %}
@@ -127,7 +156,11 @@
     </script>
     {% endlocalize %}
 {% endif %}
-<script data-main="{% block js_file %}{% endblock %}" src="{% static 'js/libs/require.js' %}"></script>
+
+{% block js_file %}
+    <script src="{% static 'js/libs/require.js' %}"></script>
+    <script src="{% static 'js/base.js' %}"></script>
+{% endblock %}
 
 </body>
 </html>

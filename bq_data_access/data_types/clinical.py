@@ -1,20 +1,18 @@
-"""
-
-Copyright 2017, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
+###
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
 
 from django.conf import settings
 
@@ -44,6 +42,18 @@ BIGQUERY_CONFIG = {
             "biospecimen_table_id": "{}:TCGA_bioclin_v0.Biospecimen".format(settings.BIGQUERY_DATA_PROJECT_ID),
             "internal_table_id": "tcga_biospecimen",
             "program": "tcga"
-        }
+        },
+        {
+            "table_id": "{}:BEATAML1_0_bioclin_v0.r26_BEATAML1_0_clinical".format(settings.BIGQUERY_DATA_PROJECT_ID),
+            "biospecimen_table_id": "{}:BEATAML1_0_bioclin_v0.r26_BEATAML1_0_biospecimen_ref".format(settings.BIGQUERY_DATA_PROJECT_ID),
+            "internal_table_id": "beataml_clinical",
+            "program": "beataml1.0"
+        },
+        {
+            "table_id": "{}:BEATAML1_0_bioclin_v0.r26_BEATAML1_0_biospecimen_ref".format(settings.BIGQUERY_DATA_PROJECT_ID),
+            "biospecimen_table_id": "{}:BEATAML1_0_bioclin_v0.r26_BEATAML1_0_biospecimen_ref".format(settings.BIGQUERY_DATA_PROJECT_ID),
+            "internal_table_id": "beataml_biospecimen",
+            "program": "beataml1.0"
+        },
     ]
 }

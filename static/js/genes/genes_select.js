@@ -1,20 +1,3 @@
-require.config({
-    baseUrl: STATIC_FILES_URL+'js/',
-    paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
-        underscore: 'libs/underscore-min',
-        base: 'base'
-    },
-    shim: {
-        'bootstrap': ['jquery'],
-        'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
-        'underscore': {exports: '_'},
-    }
-});
 
 require([
     'jquery',
@@ -22,7 +5,6 @@ require([
     'bootstrap',
     'session_security',
     'underscore',
-    'base',
 ], function($, jqueryui, bootstrap, session_security, _) {
     'use strict';
 
@@ -38,7 +20,7 @@ require([
         var worksheet_id = $('#worksheet_id').val();
 
         if(gene_lists.length > 0){
-            var csrftoken = get_cookie('csrftoken');
+            var csrftoken = $.getCookie('csrftoken');
             $.ajax({
                 type        : 'POST',
                 dataType    :'json',
@@ -72,7 +54,7 @@ require([
         var worksheet_id = $('#worksheet_id').val();
 
         if(gene_lists.length > 0){
-            var csrftoken = get_cookie('csrftoken');
+            var csrftoken = $.getCookie('csrftoken');
             $.ajax({
                 type        : 'POST',
                 dataType    :'json',
@@ -92,26 +74,4 @@ require([
             });
         }
     });
-
-    /*
-        Used for getting the CORS token for submitting data
-     */
-    function get_cookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie != '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
-});/**
- * Created by rossbohner on 12/30/15.
- */
+});

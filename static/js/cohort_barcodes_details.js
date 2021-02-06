@@ -19,21 +19,23 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
-        underscore: 'libs/underscore-min',
+        // jquery: 'libs/jquery-1.11.1.min',
+        // bootstrap: 'libs/bootstrap.min',
+        // jqueryui: 'libs/jquery-ui.min',
+        // session_security: 'session_security/script',
+        // underscore: 'libs/underscore-min',
         ajv: 'libs/ajv.bundle',
-        base: 'base',
-        dataTables:'libs/jquery.dataTables.min'
+        // base: 'base',
+        // dataTables:'libs/jquery.dataTables.min'
+        'datatables.net': ['libs/jquery.dataTables.min']
     },
     shim: {
-        'bootstrap': ['jquery'],
-        'jqueryui': ['jquery'],
-        'session_security': ['jquery'],
-        'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore'],
-        'dataTables':['jquery']
+        // 'bootstrap': ['jquery'],
+        // 'jqueryui': ['jquery'],
+        // 'session_security': ['jquery'],
+        // 'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore'],
+        // 'dataTables':['jquery']
+        'datatables.net': ['jquery'],
     }
 });
 
@@ -45,29 +47,14 @@ require([
     'underscore',
     'base',
     'ajv',
-    'dataTables'
+    // 'dataTables'
+    'datatables.net'
+
 ], function ($, jqueryui, bootstrap, session_security, _, base, ajv) {
 
     var BARCODE_LENGTH_MAX = 45;
     var savingChanges = false;
     var validated_barcodes = null;
-
-    // Used for getting the CORS token for submitting data
-    function get_cookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie != '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
 
     function validateJson(json) {
         var jv = new ajv();
@@ -79,7 +66,7 @@ require([
             return validator.errors;
         }
         return null;
-    };
+    }
 
     // Given a block of barcodes in non-GDC format, determine how to divide them into individual entries
     function parseBarcodeEntries(content) {
@@ -124,7 +111,7 @@ require([
             entries = nl_split_entries;
         }
         return entries;
-    };
+    }
 
     function validateEntries(barcodes,preFormatted) {
 
@@ -142,10 +129,10 @@ require([
                     isGdcTsv = true;
                     var header_cols = barcodes[0].split(/\s*\t\s*/);
                     for (var i = 0; i < header_cols.length; i++) {
-                        if (header_cols[i] == 'Case ID') {
+                        if (header_cols[i] === 'Case ID') {
                             case_id_col = i;
                         }
-                        if (header_cols[i] == 'Project') {
+                        if (header_cols[i] === 'Project') {
                             proj_col = i;
                         }
                     }
@@ -155,7 +142,6 @@ require([
                     return barcode !== "";
                 }).map(function (barcode) {
                     // Split the entry into its values
-                    barcode = barcode.trim();
                     var entry_split = null;
                     if (isGdcTsv) {
                         entry_split = barcode.split(/\s*\t\s*/);
@@ -183,25 +169,37 @@ require([
                                 // this is probably a CCLE case barcode, otherwise
                                 // we can easily identify it. Default to CCLE in such
                                 // cases.
-                                var program = "CCLE";
+                                var program = "";
                                 var case_barcode = "", sample_barcode = "";
-                                if (PROGRAM_PREFIXES[barcode_split[0]]) {
-                                    program = barcode_split[0];
+                                if (PROGRAM_PREFIXES[barcode_split[0].toUpperCase()]) {
+                                    program = barcode_split[0].toUpperCase();
                                 }
-                                if (program == 'CCLE') {
+                                if (program === '') {
                                     if (barcode.startsWith("CCLE-")) {
                                         sample_barcode = barcode;
-                                    } else {
+                                        program = 'CCLE';
+                                    }
+                                    else if(barcode.toUpperCase().startsWith("CR") || barcode.toUpperCase().startsWith("BA")){
+                                        sample_barcode = barcode;
+                                        program = 'BEATAML1.0';
+                                    }
+                                    else{
                                         case_barcode = barcode;
+                                        program = 'CCLE';
                                     }
                                 } else {
-                                    if (barcode_split.length == 3) {
-                                        case_barcode = barcode;
+                                    if (program === 'BEATAML1.0') {
+                                        case_barcode = barcode_split[1];
                                     }
-                                    if (barcode_split.length < 3 || barcode_split.length >= 4) {
-                                        // Assume any 4-length barcode OR unfamiliar barcode format to be a sample barcode;
-                                        // worst case scenario it simply won't be found.
-                                        sample_barcode = barcode;
+                                    else {
+                                        if (barcode_split.length === 3) {
+                                            case_barcode = barcode;
+                                        }
+                                        if (barcode_split.length < 3 || barcode_split.length >= 4) {
+                                            // Assume any 4-length barcode OR unfamiliar barcode format to be a sample barcode;
+                                            // worst case scenario it simply won't be found.
+                                            sample_barcode = barcode;
+                                        }
                                     }
                                 }
                                 result.valid_entries.push(case_barcode + "{}" + sample_barcode + "{}" + program);
@@ -217,7 +215,7 @@ require([
         // Any entries which were valid during the initial parse must now be checked against the database
         if(result.valid_entries) {
             var deferred = $.Deferred();
-            var csrftoken = get_cookie('csrftoken');
+            var csrftoken = $.getCookie('csrftoken');
             $.ajax({
                 type        : 'POST',
                 dataType    :'json',
@@ -299,7 +297,9 @@ require([
             },function(result){
                 $('.verify-pending').hide();
                 // We only reach this point if no entries are valid, so show an error message as well.
-                base.showJsMessage("error","None of the supplied barcode entries were valid. Please double-check the format of your entries.",true);
+                // base.showJsMessage("error","None of the supplied barcode entries were valid. Please double-check the format of your entries.",true);
+                base.showJsMessage("error","We were not able to validate any of the supplied barcode entries. Please review the format of your entries. If you are listing case barcodes for BEATAML1.0, please add `BEATAML1.0-` before the case barcode.",true);
+
                 showEntries(result,$('#enter-barcodes'));
                 fileUploadField.val("");
                 $('#enter-barcodes .save-cohort button').attr('disabled','disabled');
@@ -427,7 +427,7 @@ require([
                             $('#file-upload-btn').removeAttr('disabled');
                         },function(result){
                             // We only reach this point if no entries are valid, so show an error message as well.
-                            base.showJsMessage("error","None of the supplied barcode entries were valid. Please double-check the format of your entries.",true);
+                            base.showJsMessage("error","We were not able to validate any of the supplied barcode entries. Please review the format of your entries. If you are listing case barcodes for BEATAML1.0, please add `BEATAML1.0-` before the case barcode.",true);
                             showEntries(result,$('#upload-file'));
                             fileUploadField.val("");
                             $('#upload-file .save-cohort button').attr('disabled','disabled');

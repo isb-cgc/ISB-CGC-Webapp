@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% comment %}
+
+   Copyright 2015, Institute for Systems Biology
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+{% endcomment %}
+
+{% block content %}
+    <div class="container">
+        <h2 class="page-header">Typography</h2>
+        <div>
+            <h1>The quick brown fox jumped over the lazy dog</h1>
+            <h2>The quick brown fox jumped over the lazy dog</h2>
+            <h3>The quick brown fox jumped over the lazy dog</h3>
+            <h4>The quick brown fox jumped over the lazy dog</h4>
+            <h5>The quick brown fox jumped over the lazy dog</h5>
+            <p>Lorem ipsum dolor sit amet, __consectetur__ adipiscing elit. Cras imperdiet nec erat ac condimentum. Nulla vel rutrum ligula. Sed hendrerit interdum orci a posuere. Vivamus ut velit aliquet, mollis purus eget, iaculis nisl. Proin posuere malesuada ante. Proin auctor orci eros, ac molestie lorem dictum nec. Vestibulum sit amet erat est. Morbi luctus sed elit ac luctus. </p>
+        </div>
+    </div>
+    <br>
+    <div class="container">
+        <h2 class="page-header">Buttons</h2>
+        <div class="space-bottom-10">
+            <button type="button" class="btn btn-default">Default</button>
+            <button type="button" class="btn btn-primary">Primary</button>
+            <button type="button" class="btn btn-info">Info</button>
+            <button type="button" class="btn btn-warning">Warning</button>
+            <button type="button" class="btn btn-success">Success</button>
+            <button type="button" class="btn btn-danger">Danger</button>
+        </div>
+        <h4 class="space-top-10">Button Group</h4>
+        <div class="btn-group space-bottom-10">
+            <button type="button" class="btn btn-primary">Left</button>
+            <button type="button" class="btn btn-primary">Middle</button>
+            <button type="button" class="btn btn-primary">Right</button>
+        </div>
+        <h4 class="space-top-10">Drop Down</h4>
+        <div class="dropdown space-bottom-10">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdowntest" data-toggle="dropdown" aria-expanded="true">
+                Dropdown Menu <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdowntest">
+                <li class="dropdown-header">Title</li>
+                <li><a href="#">Action</a></li>
+                <li class="disabled"><a href="#">Disabled</a></li>
+                <li><a href="#">Less Action</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Separate</a></li>
+            </ul>
+        </div>
+        <br>
+        <h4 class="space-top-10">Page button group</h4>
+        <ul class="page-action-group">
+            <li role="menuitem"><a class="btn btn-primary" href="">New Workbook</a></li>
+            <li class="separator"></li>
+            <li role="menuitem"><a class="btn btn-info" href="">Edit</a></li>
+            <li role="menuitem"><a class="btn btn-info" href="">Delete</a></li>
+            <li role="menuitem"><a href="" class="btn btn-link">Cancel</a></li>
+        </ul>
+    </div>
+    <br>
+    <div class="container">
+        <h2 class="page-header">Panels</h2>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h5 class="panel-title">Default panel with heading</h5>
+            </div>
+            <div class="panel-body">
+                <p>Lorem ipsum dolor sit amet, __consectetur__ adipiscing elit. Cras imperdiet nec erat ac condimentum.</p>
+            </div>
+        </div>
+        <div class="panel panel-primary">
+            <div class="panel-heading clearfix">
+                <h5 class="panel-title pull-left">Primary panel with heading and footer</h5>
+                <div class="dropdown pull-right">
+                    <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-gear"></i></a>
+                    <ul class="dropdown-menu">
+                        <li role="menuitem"><a href="">New Workbook</a></li>
+                        <li role="menuitem"><a href="">Edit Details</a></li>
+                        <li role="menuitem"><a href="" role="button">Delete</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="panel-body">
+                <p>Lorem ipsum dolor sit amet, __consectetur__ adipiscing elit. Cras imperdiet nec erat ac condimentum.</p>
+            </div>
+            <div class="panel-footer">
+                <button class="btn btn-primary">Do Something</button>
+            </div>
+        </div>
+        <h4 class="space-top-10">Panel with Status Message</h4>
+        <div class="panel panel-primary">
+            <div class="panel-heading clearfix">
+                <h5 class="panel-title pull-left">Primary panel with status messages</h5>
+                <div class="dropdown pull-right">
+                    <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-gear"></i></a>
+                    <ul class="dropdown-menu">
+                        <li role="menuitem"><a href="">New Workbook</a></li>
+                        <li role="menuitem"><a href="">Edit Details</a></li>
+                        <li role="menuitem"><a href="" role="button">Delete</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="message message-error alert fade in">
+                    <p>This is an error message</p>
+                    <a class="close" data-dismiss="alert"><i class="fa fa-times"></i></a>
+                </div>
+                <div class="message message-info alert fade in">
+                    <p>This is an information message</p>
+                    <a class="close" data-dismiss="alert"><i class="fa fa-times"></i></a>
+                </div>
+                <div class="message message-success alert fade in">
+                    <p>This is a success message</p>
+                    <a class="close" data-dismiss="alert"><i class="fa fa-times"></i></a>
+                </div>
+                <p>Lorem ipsum dolor sit amet, __consectetur__ adipiscing elit. Cras imperdiet nec erat ac condimentum.</p>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <h2 class="page-header">Table</h2>
+        <table class="table table-striped space-top-10">
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Source</th>
+                <th>Visibility</th>
+                <th>Column</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>2</td>
+                <td>3</td>
+                <td>4</td>
+                <td>5</td>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>2</td>
+                <td>3</td>
+                <td>4</td>
+                <td>5</td>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>2</td>
+                <td>3</td>
+                <td>4</td>
+                <td>5</td>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>2</td>
+                <td>3</td>
+                <td>4</td>
+                <td>5</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="container">
+        <h2 class="page-header">Navigation</h2>
+        <h4 class="space-top-10">Breadcrumb</h4>
+        <ol class="breadcrumb space-top-5">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Library</a></li>
+            <li class="active">Home</li>
+        </ol>
+        <h4 class="space-top-10">Tabs</h4>
+        <div class="panel">
+            <ul class="nav nav-tabs">
+                <li class="active"><a href="#home" data-toggle="tab">Home</a></li>
+                <li><a href="#profile" data-toggle="tab">Profile</a></li>
+                <li><a href="#messages" data-toggle="tab">Messages</a></li>
+                <li><a href="#settings" data-toggle="tab">Settings</a></li>
+            </ul>
+
+            <div class="tab-content space-top-10">
+                <div class="tab-pane active" id="home">Home</div>
+                <div class="tab-pane" id="profile">Profile</div>
+                <div class="tab-pane" id="messages">Messages</div>
+                <div class="tab-pane" id="settings">Settings</div>
+                <div class="tab-pane" id="righty">Righty</div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="space-top-10 container">
+        <h2 class="page-header">Alerts</h2>
+        <div class="alert alert-success alert-dismissable">
+            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        Success!</div>
+        <div class="alert alert-info alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            Information!</div>
+        <div class="alert alert-warning alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            Warning!</div>
+        <div class="alert alert-danger alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            Danger!</div>
+    </div>
+    <div class="space-top-10 container">
+        <h2 class="page-header">Modal</h2>
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+          Modal Launch
+        </button>
+    </div>
+
+    <div class="space-top-10 container">
+        <h2 class="page-header">Form</h2>
+        <div class="form-group">
+            <label>Text Input</label>
+            <input type="text" placeholder="Text Input" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Token field</label>
+
+        </div>
+    </div>
+
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+          </div>
+          <div class="modal-body">
+            ...
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}

@@ -30,17 +30,6 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
         // The samples found in the selected value buckets; this is used to produce the JSON which
         // is submitted by the form
         var selectedSamples = null;
-
-        // If you want to override the tip coming in from the create call,
-        // do it here
-        var tip = d3tip()
-            .attr('class', 'd3-tip')
-            .direction('n')
-            .offset([0, 0])
-            .html(function (d) {
-                return d.value + ': ' + d.count;
-            });
-
         var selex_active = false;
         var zoom_status = {
             translation: null,
@@ -49,40 +38,52 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
 
         return {
 
-            dataCounts: function (data, x_attr) {
-                var counts = {};
+            dataCounts: function (data, x_attr, bySample) {
+                var val_set = {};
                 var results = [];
 
-                for (var i = 0; i < data.length; i++) {
-                    var val = data[i][x_attr];
-                    if (!counts[val]) {
-                        counts[val] = 0;
+                data.map(function(d){
+                    var val = d[x_attr];
+                    var sample_id = d['sample_id'];
+                    var case_id = d['case_id'];
+                    if (!val_set[val]) {
+                        val_set[val] = {};
                     }
-                    counts[val] += 1;
 
+                    if(bySample){
+                        val_set[val][sample_id] = 1;
+                    }
+                    else if(!val_set[val][case_id]){
+                        val_set[val][case_id] = 1
+                    }
                     if (!sampleSet[val]) {
-                        sampleSet[val] = {
-                            samples: {},
-                            cases: new Set([])
-                        };
+                        sampleSet[val] = {};
                     }
-
-                    sampleSet[val].samples['{' + data[i]['sample_id'] + '}{' + data[i]['case_id'] + '}'] = {
-                        sample: data[i]['sample_id'],
-                        case: data[i]['case_id'],
-                        project: data[i]['project']
+                    sampleSet[val]['{' + sample_id + '}{' + case_id + '}'] = {
+                        sample: sample_id,
+                        case: case_id,
+                        project: d['project']
                     };
-                    sampleSet[val].cases.add(data[i]['case_id']);
-                }
+                });
 
-                for (var key in counts) {
-                    results.push({'value': key, 'count': counts[key]});
+                for (var key in val_set) {
+                    results.push({'value': key, 'count': Object.keys(val_set[key]).length});
                 }
 
                 return results;
             },
-            createBarGraph: function (svg, raw_Data, width, height, bar_width, x_attr, xLabel, margin, legend) {
-                var data = this.dataCounts(raw_Data, x_attr);
+            createBarGraph: function (svg, raw_Data, width, height, bar_width, x_attr, xLabel, margin, bySample) {
+                // If you want to override the tip coming in from the create call,
+                // do it here
+                var tip = d3tip()
+                    .attr('class', 'd3-tip')
+                    .direction('n')
+                    .offset([0, 0])
+                    .html(function (d) {
+                        return d.value + ': ' + d.count + (bySample ? ' sample' : ' case') + (d.count > 1 ? 's':'');
+                    });
+
+                var data = this.dataCounts(raw_Data, x_attr, bySample);
                 var plot_width = (bar_width + 5) * data.length;
                 var view_plot_width = plot_width < width - margin.left - margin.right ? width - margin.left - margin.right : plot_width;
 
@@ -214,11 +215,11 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                             && (x($(this).attr('value')) + $(this).attr('width') / 2) <= x3(e[1]);
                     });
 
-                    if (Object.keys(oldSet).length !== $('rect.plot-bar.selected').length) {
+                    if (Object.keys(oldSet).length !== $('.worksheet.active rect.plot-bar.selected').length) {
                         reCalc = true;
                     }
 
-                    $('rect.plot-bar.selected').each(function () {
+                    $('.worksheet.active rect.plot-bar.selected').each(function () {
                         if (!oldSet[$(this).attr('value')]) {
                             reCalc = true;
                         }
@@ -239,7 +240,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 var brushend = function () {
                     if (brush.empty()) {
                         svg.selectAll(".hidden").classed("hidden", false);
-                        $('.save-cohort-card').hide();
+                        $('.worksheet.active .save-cohort-card').hide();
                     }
                 };
 
@@ -247,7 +248,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     .x(x2)
                     .on('brushstart', function (d) {
                         var e = brush.extent();
-                        if(!e){
+                        if(e){
                             selectedValues = {};
                             selectedSamples = null;
                             sample_form_update(e, true);
@@ -277,7 +278,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 svg.append('text')
                     .attr('class', 'y label axis-label')
                     .attr('text-anchor', 'middle')
-                    .text('Number of Samples')
+                    .text('Number of '+ (bySample ? 'Samples' : 'Cases'))
                     .attr('transform', 'rotate(-90) translate(' + (-height - margin.top + margin.bottom) / 2 + ', 20)');
 
                 var check_selection_state = function (obj) {
@@ -302,13 +303,12 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                         zoom_status.translation && zoom.translate(zoom_status.translation);
                         zoom_status.translation = null;
 
-                        var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                         // Clear selections
-                        $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
-                        $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Cases: ' + 0);
-                        $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', "");
+                        $('.worksheet.active .plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
+                        $('.worksheet.active .plot').find('.selected-patients-count').html('Number of Cases: ' + 0);
+                        $('.worksheet.active .save-cohort-form input[name="samples"]').attr('value', "");
                         svg.selectAll('.selected').classed('selected', false);
-                        $('.save-cohort-card').hide();
+                        $('.worksheet.active .save-cohort-card').hide();
                         selectedValues = {};
                         selectedSamples = null;
                         // Remove brush event listener plot area - comment out if we want to enable selection carry-over
@@ -324,22 +324,21 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                         var case_set = {};
                         selectedSamples = {};
                         _.each(Object.keys(selectedValues), function (val) {
-                            _.each(Object.keys(sampleSet[val]['samples']), function (sample) {
-                                selectedSamples[sample] = sampleSet[val]['samples'][sample];
-                                case_set[sampleSet[val]['samples'][sample]['case']] = 1;
+                            _.each(Object.keys(sampleSet[val]), function (sample) {
+                                selectedSamples[sample] = sampleSet[val][sample];
+                                case_set[sampleSet[val][sample]['case']] = 1;
                             });
                         });
 
-                        $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + Object.keys(selectedSamples).length);
-                        $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Cases: ' + Object.keys(case_set).length);
-                        $('.save-cohort-card').find('.btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
+                        $('.worksheet.active .plot').find('.selected-samples-count').html('Number of Samples: ' + Object.keys(selectedSamples).length);
+                        $('.worksheet.active .plot').find('.selected-patients-count').html('Number of Cases: ' + Object.keys(case_set).length);
+                        $('.worksheet.active .save-cohort-card').find('.btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
                     }
 
                     if (extent) {
-                        var leftVal = Math.min((x3(extent[1]) + 20), (width - $('.save-cohort-card').width()));
-                        $('.save-cohort-card').show()
+                        var leftVal = Math.min((x3(extent[1]) + 20), (width - $('.worksheet.active .save-cohort-card').width()));
+                        $('.worksheet.active .save-cohort-card').show()
                             .attr('style', 'position:relative; top: -' + height + 'px; left:' + leftVal + 'px;');
-
                     }
 
                 }
@@ -353,15 +352,14 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     check_selection_state(bool);
                 }
 
-                $('.save-cohort-card').find('.btn').on('click', function (e) {
+                $('.worksheet.active .save-cohort-card').find('.btn').on('click', function (e) {
                     if (Object.keys(selectedValues).length > 0) {
                         var selected_sample_set = [];
                         _.each(Object.keys(selectedSamples), function (sample) {
                             selected_sample_set.push(selectedSamples[sample]);
                         });
 
-                        var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
-                        $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
+                        $('.worksheet.active .save-cohort-form input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
                     }
                 });
 

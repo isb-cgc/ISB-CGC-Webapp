@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import str
+from past.utils import old_div
 import requests
 import os
 import logging
@@ -5,7 +8,7 @@ import datetime
 
 logger = logging.getLogger('main_logger')
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "GenespotRE.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "isb_cgc.settings")
 
 import django
 django.setup()
@@ -14,7 +17,7 @@ from cohorts.metadata_helpers import get_sql_connection
 from projects.models import Public_Data_Tables, Program
 from google_helpers.bigquery.gcs_path_support import BigQueryGcsPathSupport, BigQuerySupport
 
-from GenespotRE import settings
+from isb_cgc import settings
 
 db = None
 cursor = None
@@ -106,7 +109,7 @@ try:
             cursor.execute(count_query_base_cloudsql.format(data_table=table.data_table))
             uuid_count = cursor.fetchall()[0][0]
 
-            expected_iter = (uuid_count/100 + (1 if uuid_count % 100 > 0 else 0))
+            expected_iter = (old_div(uuid_count,100) + (1 if uuid_count % 100 > 0 else 0))
 
             logger.info("Expected calls: {}".format(str(expected_iter)))
 

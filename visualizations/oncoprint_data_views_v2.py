@@ -1,21 +1,20 @@
-"""
+###
+# Copyright 2015-2019, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
 
-Copyright 2017, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-"""
-
+from builtins import str
 import logging
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -80,6 +79,7 @@ def oncoprint_view_data(request):
                           FROM `{cohort_table}`
                           WHERE cohort_id IN ({cohort_id_list})
                           AND (project_id IS NULL{project_clause})
+                          AND case_barcode LIKE 'TCGA-%'
                           GROUP BY case_barcode
                     ) cs
                     LEFT JOIN (
@@ -169,29 +169,6 @@ def oncoprint_view_data(request):
 
         plot_data = []
         genes_with_no_cnvr = []
-        # Build the CNVR features
-        for gene in gene_array:
-            feature = build_feature_ids(
-                "CNVR", {'value_field': 'segment_mean', 'gene_name': gene, 'genomic_build': genomic_build}
-            )
-            if not feature or not len(feature):
-                logger.warn("[WARNING] No internal feature ID found for CNVR, gene {}, build {}.".format(gene,genomic_build))
-                genes_with_no_cnvr.append(gene)
-                continue
-
-            feature = feature[0]['internal_feature_id']
-
-            fvb = FeatureVectorBigQueryBuilder.build_from_django_settings(BigQueryServiceSupport.build_from_django_settings())
-            data = get_merged_feature_vectors(fvb, feature, None, None, cohort_id_array, None, projects_this_program_set, program_set=program_set)['items']
-
-            if data and len(data):
-                for item in data:
-                    # 01A are tumor samples, which is what we want
-                    if item['sample_id'].split('-')[-1] == '01A':
-                        seg_mean = float(item['x'])
-                        if seg_mean > 0.112 or seg_mean < -0.112:
-                            cnvr_result = "AMP" if seg_mean > 1 else "GAIN" if seg_mean > 0.62 else "HOMDEL" if seg_mean < -1 else "HETLOSS"
-                            plot_data.append("{}\t{}\t{}\t{}".format(item['case_id'],gene,cnvr_result,"CNA"))
 
         attempts = 0
         job_is_done = BigQuerySupport.check_job_is_done(somatic_mut_query_job)
@@ -208,6 +185,30 @@ def oncoprint_view_data(request):
             for row in results:
                 if row['f'][1]['v']:
                     plot_data.append("{}\t{}\t{}\t{}".format(str(row['f'][0]['v']),str(row['f'][1]['v']),str(row['f'][2]['v']),str(row['f'][3]['v'])))
+
+            # Build the CNVR features
+            for gene in gene_array:
+                feature = build_feature_ids(
+                    "CNVR", {'value_field': 'segment_mean', 'gene_name': gene, 'genomic_build': genomic_build}
+                )
+                if not feature or not len(feature):
+                    logger.warn("[WARNING] No internal feature ID found for CNVR, gene {}, build {}.".format(gene,genomic_build))
+                    genes_with_no_cnvr.append(gene)
+                    continue
+
+                feature = feature[0]['internal_feature_id']
+
+                fvb = FeatureVectorBigQueryBuilder.build_from_django_settings(BigQueryServiceSupport.build_from_django_settings())
+                data = get_merged_feature_vectors(fvb, feature, None, None, cohort_id_array, None, projects_this_program_set, program_set=program_set)['items']
+
+                if data and len(data):
+                    for item in data:
+                        # 01A are tumor samples, which is what we want
+                        if item['sample_id'].split('-')[-1] == '01A':
+                            seg_mean = float(item['x'])
+                            if seg_mean > 0.112 or seg_mean < -0.112:
+                                cnvr_result = "AMP" if seg_mean > 1 else "GAIN" if seg_mean > 0.62 else "HOMDEL" if seg_mean < -1 else "HETLOSS"
+                                plot_data.append("{}\t{}\t{}\t{}".format(item['case_id'],gene,cnvr_result,"CNA"))
 
         if len(plot_data):
             plot_message = \
