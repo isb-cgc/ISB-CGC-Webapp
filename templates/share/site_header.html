@@ -124,6 +124,13 @@
                     {#                </div><div class="inline-block float-right">#}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
+                    <li class="navbar-item">
+                        <marquee direction="left" style="margin:auto;width:350px;overflow:hidden;">
+                            YOUR FEEDBACK IS IMPORTANT TO US
+                            <strong><a href="https://www.surveymonkey.com/r/Q3XYKPY" target="_blank" rel=“noreferrer”>
+                                CLICK HERE TO TAKE A SURVEY</a></strong>
+                        </marquee>
+                    </li>
                     {% if user.is_authenticated %}
                         <li id="user-login" class="navbar-item">
                             <a class="avatar-link" href="{% url 'user_detail' user.id %}">
