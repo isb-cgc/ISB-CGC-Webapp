@@ -148,7 +148,7 @@ cbio.download = (function() {
 	{
 		var form = '<form id="global_file_download_form"' +
 		           'style="display:inline-block"' +
-		           'action="" method="post" target="_blank">' +
+		           'action="" method="post" target="_blank" rel="noreferrer">' +
 		           '</form>';
 
 		// only initialize if the form doesn't exist

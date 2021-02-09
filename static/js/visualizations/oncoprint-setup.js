@@ -104,11 +104,11 @@ var utils = {
 var tooltip_utils = {
     'sampleViewAnchorTag': function (study_id, sample_id) {
 	var href = cbio.util.getLinkToSampleView(study_id, sample_id);
-	return '<a href="' + href + '" target="_blank">' + sample_id + '</a>';
+	return '<a href="' + href + '" target="_blank" rel="noreferrer">' + sample_id + '</a>';
     },
     'patientViewAnchorTag': function(study_id, patient_id) {
 	var href = cbio.util.getLinkToPatientView(study_id, patient_id);
-	return '<a href="' + href + '" target="_blank">' + patient_id + '</a>';
+	return '<a href="' + href + '" target="_blank" rel="noreferrer">' + patient_id + '</a>';
     },
     'makeGenePanelPopupLink': function(gene_panel_id) {
 	var anchor = $('<a href="#" oncontextmenu="return false;">'+gene_panel_id+'</a>');

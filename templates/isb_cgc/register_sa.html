@@ -60,7 +60,7 @@
                                     <li class="checkbox">
                                         <label>
                                             <input type="checkbox" name="datasets" value="{{ dataset.whitelist_id }}">
-                                            <a href="https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id={{ dataset.whitelist_id }}" target="_BLANK">{{ dataset.name }}{% if not dataset.public %} [{{ dataset.whitelist_id }}]{% endif %}</a>
+                                            <a href="https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id={{ dataset.whitelist_id }}" target="_blank" rel=“noreferrer”>{{ dataset.name }}{% if not dataset.public %} [{{ dataset.whitelist_id }}]{% endif %}</a>
                                         </label>
                                     </li>
                                 {% endfor %}

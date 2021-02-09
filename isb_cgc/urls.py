@@ -29,7 +29,6 @@ urlpatterns = [
 
     url(r'^$', views.domain_redirect, name='landing_page'),
     url(r'robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain"), name='robots'),
-    url(r'^user_landing/$', views.user_landing, name='user_landing'),
     url(r'^search_cohorts_viz/$', views.search_cohorts_viz, name='search_cohorts_viz'),
     url(r'^style_guide/', views.css_test),
     url(r'^users/$', views.user_detail_login, name='user_detail_login'),

@@ -543,7 +543,6 @@ DCF_GOOGLE_SA_MONITOR_URL                = os.environ.get('DCF_GOOGLE_SA_MONITOR
 DCF_GOOGLE_SA_URL                        = os.environ.get('DCF_GOOGLE_SA_URL', '')
 DCF_TOKEN_REFRESH_WINDOW_SECONDS         = int(os.environ.get('DCF_TOKEN_REFRESH_WINDOW_SECONDS', 86400))
 DCF_LOGIN_EXPIRATION_SECONDS             = int(os.environ.get('DCF_LOGIN_EXPIRATION_SECONDS', 86400))
-DCF_GOOGLE_SA_REGISTER_DATASETS_LIMIT    = int(os.environ.get('DCF_GOOGLE_SA_REGISTER_DATASETS_LIMIT', 6))
 
 ##############################
 #   Start django-finalware   #

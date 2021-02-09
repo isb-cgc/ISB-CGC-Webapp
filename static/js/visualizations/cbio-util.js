@@ -823,7 +823,7 @@ cbio.util = (function() {
             var collapseStudyName = studies.map(function(study) {
                 // Remove html tags in study.description in case title of <a> not work
                 return '<a href="' + window.cbioURL + 'study?id=' + study.id + '" title="' +
-                    study.description.replace(/(<([^>]+)>)/ig, '') + '" target="_blank">' +
+                    study.description.replace(/(<([^>]+)>)/ig, '') + '" target="_blank" rel="noreferrer">' +
                     study.name + '</a>';
             }).join("<br />");
             addFoldableDescription(descriptionSelector, collapseStudyName)
@@ -838,7 +838,7 @@ cbio.util = (function() {
                 '<div class="panel-heading">' +
                 '<h4 class="panel-title"><span role="button" data-toggle="collapse" ' +
                 'data-target="#' + study.id + '-collapse-content" class="collapsed">' +
-                study.name + '</span><a target="_blank" href="' + window.cbioURL + 'study?id=' + study.id + '"><i class="fa fa-external-link" aria-hidden="true"></i></a></h4></div>' +
+                study.name + '</span><a target="_blank" rel="noreferrer" href="' + window.cbioURL + 'study?id=' + study.id + '"><i class="fa fa-external-link" aria-hidden="true"></i></a></h4></div>' +
                 '<div id="' + study.id + '-collapse-content" ' +
                 'class="panel-collapse collapse">' +
                 '<div class="panel-body">' + study.description.replace(/\r?\n/g, '<br/>') + '</div></div></div>');
@@ -868,7 +868,7 @@ cbio.util = (function() {
         return studies.map(function(study) {
             // Remove html tags in study.description in case title of <a> not work
             return '<a href="' + window.cbioURL + 'study?id=' + study.id + '" title="' +
-                study.description.replace(/(<([^>]+)>)/ig, '') + '" target="_blank">' +
+                study.description.replace(/(<([^>]+)>)/ig, '') + '" target="_blank" rel="noreferrer">' +
                 study.name + '</a>';
         }).join("<br />");
     }

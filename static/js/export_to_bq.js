@@ -171,13 +171,13 @@ require([
                 if (link_to_bqr) {
                     responseJSON.msg = responseJSON.msg.replace(
                         "register at least one dataset",
-                        '<a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/program_data_upload.html#registering-cloud-storage-buckets-and-bigquery-datasets-a-pre-requisite-for-using-your-own-data-in-isb-cgc" target="_BLANK">register at least one dataset</a>'
+                        '<a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/program_data_upload.html#registering-cloud-storage-buckets-and-bigquery-datasets-a-pre-requisite-for-using-your-own-data-in-isb-cgc" target="_blank" rel="noreferrer">register at least one dataset</a>'
                     );
                 }
                 if (link_to_gcpr) {
                     responseJSON.msg = responseJSON.msg.replace(
                         "register at least one project",
-                        '<a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/Gaining-Access-To-Controlled-Access-Data.html#requirements-for-registering-a-google-cloud-project-service-account" target="_BLANK">register at least one project</a>'
+                        '<a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/Gaining-Access-To-Controlled-Access-Data.html#requirements-for-registering-a-google-cloud-project-service-account" target="_blank" rel="noreferrer">register at least one project</a>'
                     );
                 }
                 base.showJsMessage('error', responseJSON.msg, true, "#export-to-bq-js-messages");
