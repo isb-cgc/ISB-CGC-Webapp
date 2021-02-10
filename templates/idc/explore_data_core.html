@@ -80,7 +80,7 @@
                                                           {% if progV.projects and progV.projects.items|length > 1 %}
                                                            <ul id="{{ progK }}_proj_list" class="search-checkbox-list" style="list-style: none;">
                                                            {% for proj, projK in progV.projects.items|dictsort:"0.lower" %}
-                                                              <li class="checkbox {% if forloop.counter >= 6 %} extra-values{% endif %}">
+                                                              <li class="checkbox {% if forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if projK == 0 %} zeroed {% endif %}">
                                                                 <label>
                                                                   <input data-filter-attr-id="{{ progV.collex_attr_id }}"
                                                                          data-filter-display-attr="Collection" data-filter-display-val="{{ proj|upper }}"
@@ -146,7 +146,7 @@
                                 <h4 class="panel-title">Search Configuration
                                     <div  class="tooltip_chart_info" style="float:right"><i class="fa fa-info-circle"></i></div>
                                 </h4>
-                                <br><span><input id="hide-zeros" type="checkbox" value="hide-zeros" onchange="hideAtt(this)"> Hide attributes with 0 cases</span>
+                                <br><span><input id="hide-zeros" type="checkbox" value="hide-zeros" onchange="hideAtt(this)"> Hide attribute values with 0 cases</span>
                             </div>
 
                             <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
@@ -173,7 +173,7 @@
                                          <li class="list-group-item">
                                             <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                 <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
-                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
+                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> <span class="attDisp">{{ attr.display_name }}</span> <span class="notDisp noCase"> (0 cases)</span>
                                                 </a>
                                             </div>
                                             <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}" class="collapse list-group-item__body"
@@ -193,9 +193,9 @@
                                                 {% endif %}
                                                 {% endcomment %}
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
-                                                   {% for val in attr.values %}
+                                                   {% for val in attr.values|check_for_order:attr.name %}
                                                        {% with val.display_value|get_display_val:val.value as display_value %}
-                                                        <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
+                                                        <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if val.count == 0 %} zeroed {% endif %}">
                                                            <label>
                                                                <input type="checkbox" value="{{ val.value }}" data-filter-attr-id="{{ attr.id }}" data-filter-display-attr="{{ attr.display_name }}" data-filter-display-val="{{ display_value }}">
                                                                 <span class="value">{{ display_value }}</span> <span class="float-right plot_count count plotit">{{ val.count }}</span> <span class="float-right case_count count">{{ val.count }}</span>
@@ -244,7 +244,7 @@
                                                        <li class="list-group-item">
                                                           <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                 <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
-                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}
+                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> <span class="attDisp">{{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}</span> <span class=" noCase"> (0 cases)</span>
                                                 </a>
                                             </div>
 
@@ -257,7 +257,7 @@
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                     {% for val in attr.values|order_seg:attr_setK %}
                                                         {% with val.display_value|get_display_val:val.value as display_value %}
-                                                        <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
+                                                        <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if val.count == 0 %} zeroed {% endif %}">
                                                             <label class="tooltip_ex{% if display_value == 'None' %} checkbox-none{% endif %}">
                                                                 <input type="checkbox"
                                                                     {% if display_value == 'None' %} disabled="true" class="checkbox-disabled "{% endif %}
@@ -312,7 +312,7 @@
                                                    <li class="list-group-item">
                                                  <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                      <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
-                                                         <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> {{ attr.display_name }}
+                                                         <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> <span class="attDisp">{{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}</span> <span class=" noCase"> (0 cases)</span>
                                                      </a>
                                                  </div>
                                                  <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse" aria-expanded="false"
@@ -324,7 +324,7 @@
                                                  {% endif %}>
                                                      <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                      {% for val in attr.values %}
-                                                         <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values{% endif %}">
+                                                         <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values notDisp{% endif %}  {% if val.count == 0 %} zeroed {% endif %}">
                                                              <label>
                                                                  <input type="checkbox"
                                                                         data-filter-attr-id="{{ attr.id }}"
@@ -527,7 +527,7 @@
                                 <tbody id="projects_table" class="set_height">
                                 {% for coll, cnt in collections.items|dictsort:"0.lower" %}
                                       {% if coll != "All" %}
-                                          <tr id="project_row_{{ coll }}" class="text_head" onclick="(toggleProj(this,'{{ coll }}'))"><td>{{ coll }}</td><td>{{ cnt }}</td><td id="patient_col_{{ coll }}" class="projects_table_num_cohort">{{ cnt }}</td> </tr>
+                                          <tr id="project_row_{{ coll }}" class="text_head" onclick="(toggleRows(this,'{{ coll }}', 'projects', 'project_row_'))"><td>{{ coll }}</td><td>{{ cnt }}</td><td id="patient_col_{{ coll }}" class="projects_table_num_cohort">{{ cnt }}</td> </tr>
                                       {% endif %}
                                 {% endfor %}
                                 </tbody>
