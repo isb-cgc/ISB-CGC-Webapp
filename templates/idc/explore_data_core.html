@@ -95,6 +95,13 @@
                                                               <p class="more-checks" style="display: block;"><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                               <p class="less-checks" style="display: none;" class="notDisp"> <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                               {% endwith %}
+
+                                                              {% else %}
+                                                                  <p class="more-checks" style="display: block;"><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                                 <p class="less-checks" style="display: none;" class="notDisp"> <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+
+
+                                                                   <!-- <p class="more-checks" style="display:block;"><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p> -->
                                                               <!--
                                                               <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
                                                               <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
@@ -210,6 +217,9 @@
                                                         <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                         <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                        {% endwith %}
+
+                                                    {% else %}
+                                                       <p><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                    {% endif %}
                                                    <!--
                                                     <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
@@ -244,7 +254,7 @@
                                                        <li class="list-group-item">
                                                           <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                 <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
-                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> <span class="attDisp">{{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}</span> <span class=" noCase"> (0 cases)</span>
+                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> <span class="attDisp">{{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}</span> <span class="notDisp noCase"> (0 cases)</span>
                                                 </a>
                                             </div>
 
@@ -277,6 +287,8 @@
                                                         <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                         <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                         {% endwith %}
+                                                     {% else %}
+                                                       <p><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                     {% endif %}
                                                           <!--
                                                               <p class="hide-zeros" style="display: block;"><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
@@ -312,7 +324,7 @@
                                                    <li class="list-group-item">
                                                  <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                      <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
-                                                         <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> <span class="attDisp">{{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}</span> <span class=" noCase"> (0 cases)</span>
+                                                         <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> <span class="attDisp">{{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}</span> <span class="notDisp noCase"> (0 TCGA cases)</span>
                                                      </a>
                                                  </div>
                                                  <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse" aria-expanded="false"
@@ -343,6 +355,10 @@
                                                         <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                         <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                         {% endwith %}
+                                                     {% else %}
+
+                                                        <p class="check-uncheck" style="display: block;" >  <span class="checks2"> <a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+
                                                     {% endif %}
                                                          <!--
                                                          <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>

@@ -2023,6 +2023,12 @@ section .min-max {
   text-align: right;
   min-width: 20%; }
 
+#cohort-details .filter-panel .checks2, #cohort-filelist .filter-panel .checks2 {
+  #float: right;
+  display: block;
+  text-align: right;
+  min-width: 20%; }
+
 #cohort-details .filter-panel .tabpanel, #cohort-filelist .filter-panel .tabpanel {
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
