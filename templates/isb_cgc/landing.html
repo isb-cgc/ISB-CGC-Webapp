@@ -45,6 +45,20 @@
 
                 </div>
             </div>
+            <div class="alert alert-dismissible show temp-alert" role="alert">
+                <div class="row ">
+                    <div class="col-xs-1"></div>
+                    <div class="col-xs-10">
+                        YOUR FEEDBACK IS IMPORTANT TO US
+                        <strong><a href="https://www.surveymonkey.com/r/Q3XYKPY" target="_blank" rel=“noreferrer”>PLEASE TAKE A SURVEY</a></strong>
+                    </div>
+                    <div class="col-xs-1">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="header-div container-fluid">
             <div class="row ">
@@ -76,8 +90,10 @@
                             <div class="panel-heading row">
                                 <div class="col-xs-9"><h4>BigQuery Table Search</h4></div>
                                 <div class="col-xs-3 padding-left-0">
+                                    <a target="_blank" rel=“noreferrer”
+                                           href="{% url 'bq_meta_search' %}">
                                     <img src="{% static 'img/bq-icon.png' %}" class="img-fluid"
-                                         alt="bq table icon">
+                                         alt="bq table icon"></a>
                                 </div>
                             </div>
                             <div class="panel-body">
@@ -114,8 +130,11 @@
                             <div class="panel-heading row">
                                 <div class="col-xs-9"><h4>Cancer Data File Browser</h4></div>
                                 <div class="col-xs-3 padding-left-0">
-                                    <img src="{% static 'img/de-icon.png' %}" class="img-fluid"
-                                         alt="data explorer icon">
+                                    <a target="_blank" rel=“noreferrer”
+                                       href="/cohorts/filelist/">
+                                        <img src="{% static 'img/de-icon.png' %}" class="img-fluid"
+                                             alt="data explorer icon">
+                                    </a>
                                 </div>
                             </div>
                             <div class="panel-body">
@@ -151,8 +170,11 @@
                             <div class="panel-heading row">
                                 <div class="col-xs-9"><h4>Chromosomal Aberrations & Gene Fusions DB</h4></div>
                                 <div class="col-xs-3 padding-left-0">
-                                    <img src="{% static 'img/md-icon.png' %}" class="img-fluid"
-                                         alt="database icon">
+                                    <a target="_blank" rel=“noreferrer”
+                                       href="https://mitelmandatabase.isb-cgc.org">
+                                        <img src="{% static 'img/md-icon.png' %}" class="img-fluid"
+                                             alt="database icon">
+                                    </a>
                                 </div>
                             </div>
                             <div class="panel-body">
@@ -202,8 +224,11 @@
                             <div class="panel-heading row">
                                 <div class="col-xs-9"><h4>Cohort Builder / Data Explorer</h4></div>
                                 <div class="col-xs-3 padding-left-0">
-                                    <img src="{% static 'img/ca-icon.png' %}" class="img-fluid"
+                                    <a target="_blank" rel=“noreferrer”
+                                           href="{% url 'cohort' %}">
+                                        <img src="{% static 'img/ca-icon.png' %}" class="img-fluid"
                                          alt="bq table icon">
+                                    </a>
                                 </div>
                             </div>
                             <div class="panel-body">
@@ -239,8 +264,11 @@
                             <div class="panel-heading row">
                                 <div class="col-xs-9"><h4>Pipelines and APIs</h4></div>
                                 <div class="col-xs-3 padding-left-0">
-                                    <img src="{% static 'img/api-icon.png' %}" class="img-fluid"
-                                         alt="bq table icon">
+                                    <a target="_blank" rel=“noreferrer”
+                                           href="{% url 'programmatic_access' %}">
+                                        <img src="{% static 'img/api-icon.png' %}" class="img-fluid"
+                                             alt="bq table icon">
+                                    </a>
                                 </div>
                             </div>
                             <div class="panel-body">
@@ -275,8 +303,11 @@
                             <div class="panel-heading row">
                                 <div class="col-xs-9"><h4>Notebooks</h4></div>
                                 <div class="col-xs-3 padding-left-0">
-                                    <img src="{% static 'img/nb-icon.png' %}" class="img-fluid"
-                                         alt="bq table icon">
+                                    <a target="_blank" rel=“noreferrer”
+                                       href="https://github.com/isb-cgc/Community-Notebooks">
+                                        <img src="{% static 'img/nb-icon.png' %}" class="img-fluid"
+                                             alt="bq table icon">
+                                    </a>
                                 </div>
                             </div>
                             <div class="panel-body">
@@ -317,8 +348,16 @@
                             <div class="panel-heading row">
                                 <div class="col-xs-9"><h4>Controlled Access Data</h4></div>
                                 <div class="col-xs-3 padding-left-0">
-                                    <img src="{% static 'img/cad-icon.png' %}" class="img-fluid"
-                                         alt="bq table icon">
+                                    <a target="_blank" rel=“noreferrer”
+                                            {% if user.is_authenticated %}
+                                       href="{% url 'user_detail' user.id %}"
+                                            {% else %}
+                                       href="{% url 'user_detail_login' %}"
+                                            {% endif %}
+                                    >
+                                        <img src="{% static 'img/cad-icon.png' %}" class="img-fluid"
+                                             alt="bq table icon">
+                                    </a>
                                 </div>
                             </div>
                             <div class="panel-body">

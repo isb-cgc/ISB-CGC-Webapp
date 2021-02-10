@@ -112,9 +112,9 @@
                                 <li role="menuitem"><a
                                         href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html#i-m-a-novice-how-do-i"
                                         target="_blank" rel=“noreferrer”>Getting Started Notebooks</a></li>
-                                <li role="menuitem"><a
-                                        href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/feedback"
-                                        target="_blank" rel=“noreferrer”>We'd Love Your Feedback</a></li>
+{#                                <li role="menuitem"><a#}
+{#                                        href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/feedback"#}
+{#                                        target="_blank" rel=“noreferrer”>We'd Love Your Feedback</a></li>#}
                                 <li role="menuitem"><a href="https://github.com/isb-cgc/ISB-CGC-Webapp/issues/new"
                                                        target="_blank" rel=“noreferrer”>Submit GitHub Issue</a></li>
                                 <li role="menuitem"><a href="{% url 'contact_us' %}" target="_blank" rel=“noreferrer”>Contact Us</a></li>
@@ -124,13 +124,6 @@
                     {#                </div><div class="inline-block float-right">#}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li class="navbar-item">
-                        <marquee direction="left" style="margin:auto;width:350px;overflow:hidden;">
-                            YOUR FEEDBACK IS IMPORTANT TO US
-                            <strong><a href="https://www.surveymonkey.com/r/Q3XYKPY" target="_blank" rel=“noreferrer”>
-                                CLICK HERE TO TAKE A SURVEY</a></strong>
-                        </marquee>
-                    </li>
                     {% if user.is_authenticated %}
                         <li id="user-login" class="navbar-item">
                             <a class="avatar-link" href="{% url 'user_detail' user.id %}">
