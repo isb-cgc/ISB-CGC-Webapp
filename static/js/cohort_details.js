@@ -1262,7 +1262,13 @@ require([
             type    :'GET',
             url     : BASE_URL + '/cohorts/nodes/',
             success :   function (data) {
-                console.log(data);
+                var data_content_div = $('div.data-content');
+                data_content_div.append(data);
+
+                // bind_widgets(program_data_selector, load_program_id);
+                    update_displays(null,true);
+
+                // set_mode();
             },
             error: function () {
 

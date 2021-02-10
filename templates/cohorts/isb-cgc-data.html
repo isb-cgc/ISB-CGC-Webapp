@@ -8,167 +8,168 @@
                 <li role="presentation" class="filter-tab {% if data_types.keys|length <= 0 %}disabled{% endif %}"><a href="#data-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Data Type Filters">Data</a></li>
                 <li role="presentation" class="filter-tab {% if molecular_attr.keys|length <= 0 %}disabled{% endif %}"><a class="molecular-filters" href="#p-{{ program.id }}-molecular-filters" role="tab" data-toggle="tab" title="Molecular Filters">Molec.</a></li>
             </ul>
-            <div class="tab-content">
-                <!-- case filters tab -->
-                <div role="tabpanel" class="tab-pane active" id="clinical-filters-{{ program.id }}">
-                    <ul class="list-group" id="clin-accordion-{{ program.id }}" role="tablist" aria-multiselectable="true">
-                        {% for attr in clin_attr|get_sorted_items %}
-                            {% if attr_counts|list_contains_name:attr.name %}
-                                <li class="list-group-item">
-                                    <div id="{{ program.id }}-heading-{{attr.name}}" class="list-group-item__heading">
-                                        <a role="button" data-toggle="collapse" data-parent="#clin-accordion-{{ program.id }}" href="#{{ program.id }}-collapse-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-{{ attr.name }}">
-                                            <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
-                                        </a>
-                                    </div>
-
-                                    <div id="{{ program.id }}-collapse-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
-                                         aria-labelledby="{{ program.id }}-heading-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}"
-                                         data-feature-id="{% if attr_counts|get_named_item:attr.name|get_item:'id' %}{{ attr_counts|get_named_item:attr.name|get_item:'id' }}{% endif %}">
-                                        <ul class="search-checkbox-list" id="{{ program.id }}-{{ attr.name }}">
-                                            {% with attr_counts|get_named_item:attr.name|get_item:'values'|how_many_more:6 as num_more %}
-                                                {% for v in attr_counts|get_named_item:attr.name|get_item:'values'|check_for_order:attr.name %}
-                                                    {% if forloop.counter0 < 6 %}
-                                                        <li class="checkbox">
-                                                            <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
-                                                                       id="{% if v.full_id %}{{ program.id }}-{{ v.full_id }}{% endif %}"
-                                                                       data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
-                                                                       data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
-                                                                {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
-                                                                <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>
-                                                            </label>
-                                                        </li>
-                                                    {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                        <li class="extra-values checkbox" style="display:none;">
-                                                            <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
-                                                                       id="{% if v.full_id %}{{ program.id }}-{{ v.full_id }}{% endif %}"
-                                                                       data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
-                                                                       data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
-                                                                {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
-                                                                <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>
-                                                            </label>
-                                                        </li>
-                                                    {% else %}
-                                                        <li class="extra-values checkbox" style="display:none;">
-                                                            <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
-                                                                       id="{% if v.full_id %}{{ program.id }}-{{ v.full_id }}{% endif %}"
-                                                                       data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
-                                                                       data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
-                                                                {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
-                                                                 <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>
-                                                            </label>
-                                                        </li>
-                                                    {% endif %}
-                                                {% endfor %}
-                                                {% if num_more > 0 %}
-                                                    <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                    <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                {% endif %}
-                                            {% endwith %}
-                                        </ul>
-                                    </div>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
-                </div>
+        </div>
+{#            <div class="tab-content">#}
+{#                <!-- case filters tab -->#}
+{#                <div role="tabpanel" class="tab-pane active" id="clinical-filters-{{ program.id }}">#}
+{#                    <ul class="list-group" id="clin-accordion-{{ program.id }}" role="tablist" aria-multiselectable="true">#}
+{#                        {% for attr in clin_attr|get_sorted_items %}#}
+{#                            {% if attr_counts|list_contains_name:attr.name %}#}
+{#                                <li class="list-group-item">#}
+{#                                    <div id="{{ program.id }}-heading-{{attr.name}}" class="list-group-item__heading">#}
+{#                                        <a role="button" data-toggle="collapse" data-parent="#clin-accordion-{{ program.id }}" href="#{{ program.id }}-collapse-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-{{ attr.name }}">#}
+{#                                            <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}#}
+{#                                        </a>#}
+{#                                    </div>#}
+{##}
+{#                                    <div id="{{ program.id }}-collapse-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"#}
+{#                                         aria-labelledby="{{ program.id }}-heading-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}"#}
+{#                                         data-feature-id="{% if attr_counts|get_named_item:attr.name|get_item:'id' %}{{ attr_counts|get_named_item:attr.name|get_item:'id' }}{% endif %}">#}
+{#                                        <ul class="search-checkbox-list" id="{{ program.id }}-{{ attr.name }}">#}
+{#                                            {% with attr_counts|get_named_item:attr.name|get_item:'values'|how_many_more:6 as num_more %}#}
+{#                                                {% for v in attr_counts|get_named_item:attr.name|get_item:'values'|check_for_order:attr.name %}#}
+{#                                                    {% if forloop.counter0 < 6 %}#}
+{#                                                        <li class="checkbox">#}
+{#                                                            <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>#}
+{#                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"#}
+{#                                                                       id="{% if v.full_id %}{{ program.id }}-{{ v.full_id }}{% endif %}"#}
+{#                                                                       data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"#}
+{#                                                                       data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">#}
+{#                                                                {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}#}
+{#                                                                <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>#}
+{#                                                            </label>#}
+{#                                                        </li>#}
+{#                                                    {% elif forloop.counter0 == 6 and num_more > 0 %}#}
+{#                                                        <li class="extra-values checkbox" style="display:none;">#}
+{#                                                            <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>#}
+{#                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"#}
+{#                                                                       id="{% if v.full_id %}{{ program.id }}-{{ v.full_id }}{% endif %}"#}
+{#                                                                       data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"#}
+{#                                                                       data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">#}
+{#                                                                {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}#}
+{#                                                                <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>#}
+{#                                                            </label>#}
+{#                                                        </li>#}
+{#                                                    {% else %}#}
+{#                                                        <li class="extra-values checkbox" style="display:none;">#}
+{#                                                            <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>#}
+{#                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"#}
+{#                                                                       id="{% if v.full_id %}{{ program.id }}-{{ v.full_id }}{% endif %}"#}
+{#                                                                       data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"#}
+{#                                                                       data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">#}
+{#                                                                {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}#}
+{#                                                                 <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>#}
+{#                                                            </label>#}
+{#                                                        </li>#}
+{#                                                    {% endif %}#}
+{#                                                {% endfor %}#}
+{#                                                {% if num_more > 0 %}#}
+{#                                                    <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>#}
+{#                                                    <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>#}
+{#                                                {% endif %}#}
+{#                                            {% endwith %}#}
+{#                                        </ul>#}
+{#                                    </div>#}
+{#                                </li>#}
+{#                            {% endif %}#}
+{#                        {% endfor %}#}
+{#                    </ul>#}
+{#                </div>#}
 {#              <!-- data filters tab -->#}
-                <div role="tabpanel" class="tab-pane" id="data-filters-{{ program.id }}">
-                    <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
-                        {% for attr in data_types|get_sorted_items %}
-                            {% if attr_counts|list_contains_name:attr.name %}
-                                <li class="list-group-item">
-                                <div class="list-group-item__heading" role="tab" id="{{ program.id }}-heading-{{ attr.name }}">
-                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#{{ program.id }}-collapse-{{ attr.name }}"
-                                       aria-expanded="false" aria-controls="collapse-{{ attr.name }}" {% if 'mRNA' in attr.name or 'miRNA' in attr.name %}style="text-transform:none!important"{% endif %}>
-                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name|check_special_casing }}
-                <li role="presentation" class="filter-tab-2 active">
-                    <a href="#node-filter" role="tab" data-toggle="tab" title="Node Filters">Nodes</a>
-                </li>
-                <li role="presentation" class="filter-tab-2">
-                    <a href="#program-filter" role="tab" data-toggle="tab" title="Program Filters">Programs</a>
-                </li>
-            </ul>
-            <div class="tab-content">
-                <div role="tabpanel" class="tab-pane active" id="node-filter">
-                    <ul class="list-group" id="node-accordion" role="tablist" aria-multiselectable="true">
-                        {% for node in nodes %}
-                            <li class="list-group-item">
-                                <div id="node-heading-{{ node.name }}" class="list-group-item__heading">
-                                    <a role="button" data-toggle="collapse"
-                                       data-parent="#node-accordion"
-                                       href="#node-collapse-{{ node.name }}" aria-expanded="false"
-                                       aria-controls="node-collapse-{{ node.name }}"
-                                       title="{{ node.full_name }}">
-                                        <i class="fa fa-caret-right"></i><i
-                                            class="fa fa-caret-down"></i> {{ node.name }}
-                                        <span class="float-right prog_count count">{{ node.programs|length }}</span>
-                                    </a>
-                                </div>
-                                <div id="node-collapse-{{ node.name }}"
-                                     class="list-group-item__body collapse cohort-feature-select-block"
-                                     role="tabpanel"
-                                     aria-labelledby="node-heading-{{ node.name }}">
-                                    <ul class="search-checkbox-list" id="node-{{ node.name }}">
-                                        {% for prog in node.programs %}
-                                            <li class="checkbox">
-                                                <label>
-                                                    <input type="checkbox" name="elements-selected"
-                                                           data-prog-id="{{ prog.id }}"
-                                                           data-node-id="{{ node.id }}">{{ prog.name }}
-                                                </label>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                <div role="tabpanel" class="tab-pane" id="program-filter">
-                    <ul class="list-group" id="prog-accordion" role="tablist" aria-multiselectable="true">
-                        {% for program in programs %}
-                            <li class="list-group-item">
-                                <div id="program-heading-{{ program.name }}" class="list-group-item__heading">
-                                    <a role="button" data-toggle="collapse"
-                                       data-parent="#program-accordion"
-                                       href="#program-collapse-{{ program.name }}" aria-expanded="false"
-                                       aria-controls="program-collapse-{{ program.name }}"
-                                       title="{{ program.full_name }}">
-                                        <i class="fa fa-caret-right"></i><i
-                                            class="fa fa-caret-down"></i> {{ program.name }}
-                                        <span class="float-right node_count count">{{ program.nodes|length }}</span>
-                                    </a>
-                                </div>
-                                <div id="program-collapse-{{ program.name }}"
-                                     class="list-group-item__body collapse cohort-feature-select-block"
-                                     role="tabpanel"
-                                     aria-labelledby="program-heading-{{ program.name }}"
+{#                <div role="tabpanel" class="tab-pane" id="data-filters-{{ program.id }}">#}
+{#                    <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">#}
+{#                        {% for attr in data_types|get_sorted_items %}#}
+{#                            {% if attr_counts|list_contains_name:attr.name %}#}
+{#                                <li class="list-group-item">#}
+{#                                <div class="list-group-item__heading" role="tab" id="{{ program.id }}-heading-{{ attr.name }}">#}
+{#                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#{{ program.id }}-collapse-{{ attr.name }}"#}
+{#                                       aria-expanded="false" aria-controls="collapse-{{ attr.name }}" {% if 'mRNA' in attr.name or 'miRNA' in attr.name %}style="text-transform:none!important"{% endif %}>#}
+{#                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name|check_special_casing }}#}
+{#                <li role="presentation" class="filter-tab-2 active">#}
+{#                    <a href="#node-filter" role="tab" data-toggle="tab" title="Node Filters">Nodes</a>#}
+{#                </li>#}
+{#                <li role="presentation" class="filter-tab-2">#}
+{#                    <a href="#program-filter" role="tab" data-toggle="tab" title="Program Filters">Programs</a>#}
+{#                </li>#}
+{#            </ul>#}
+{#            <div class="tab-content">#}
+{#                <div role="tabpanel" class="tab-pane active" id="node-filter">#}
+{#                    <ul class="list-group" id="node-accordion" role="tablist" aria-multiselectable="true">#}
+{#                        {% for node in nodes %}#}
+{#                            <li class="list-group-item">#}
+{#                                <div id="node-heading-{{ node.name }}" class="list-group-item__heading">#}
+{#                                    <a role="button" data-toggle="collapse"#}
+{#                                       data-parent="#node-accordion"#}
+{#                                       href="#node-collapse-{{ node.name }}" aria-expanded="false"#}
+{#                                       aria-controls="node-collapse-{{ node.name }}"#}
+{#                                       title="{{ node.full_name }}">#}
+{#                                        <i class="fa fa-caret-right"></i><i#}
+{#                                            class="fa fa-caret-down"></i> {{ node.name }}#}
+{#                                        <span class="float-right prog_count count">{{ node.programs|length }}</span>#}
+{#                                    </a>#}
+{#                                </div>#}
+{#                                <div id="node-collapse-{{ node.name }}"#}
+{#                                     class="list-group-item__body collapse cohort-feature-select-block"#}
+{#                                     role="tabpanel"#}
+{#                                     aria-labelledby="node-heading-{{ node.name }}">#}
+{#                                    <ul class="search-checkbox-list" id="node-{{ node.name }}">#}
+{#                                        {% for prog in node.programs %}#}
+{#                                            <li class="checkbox">#}
+{#                                                <label>#}
+{#                                                    <input type="checkbox" name="elements-selected"#}
+{#                                                           data-prog-id="{{ prog.id }}"#}
+{#                                                           data-node-id="{{ node.id }}">{{ prog.name }}#}
+{#                                                </label>#}
+{#                                            </li>#}
+{#                                        {% endfor %}#}
+{#                                    </ul>#}
+{#                                </div>#}
+{#                            </li>#}
+{#                        {% endfor %}#}
+{#                    </ul>#}
+{#                </div>#}
+{#                <div role="tabpanel" class="tab-pane" id="program-filter">#}
+{#                    <ul class="list-group" id="prog-accordion" role="tablist" aria-multiselectable="true">#}
+{#                        {% for program in programs %}#}
+{#                            <li class="list-group-item">#}
+{#                                <div id="program-heading-{{ program.name }}" class="list-group-item__heading">#}
+{#                                    <a role="button" data-toggle="collapse"#}
+{#                                       data-parent="#program-accordion"#}
+{#                                       href="#program-collapse-{{ program.name }}" aria-expanded="false"#}
+{#                                       aria-controls="program-collapse-{{ program.name }}"#}
+{#                                       title="{{ program.full_name }}">#}
+{#                                        <i class="fa fa-caret-right"></i><i#}
+{#                                            class="fa fa-caret-down"></i> {{ program.name }}#}
+{#                                        <span class="float-right node_count count">{{ program.nodes|length }}</span>#}
+{#                                    </a>#}
+{#                                </div>#}
+{#                                <div id="program-collapse-{{ program.name }}"#}
+{#                                     class="list-group-item__body collapse cohort-feature-select-block"#}
+{#                                     role="tabpanel"#}
+{#                                     aria-labelledby="program-heading-{{ program.name }}"#}
                                         {#                                     data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}"#}
                                         {#                                     data-feature-type="datatype" data-feature-id="data_type"#}
-                                >
-                                    <ul class="search-checkbox-list" id="program-{{ program.name }}">
-                                        {% for node in program.nodes %}
+{#                                >#}
+{#                                    <ul class="search-checkbox-list" id="program-{{ program.name }}">#}
+{#                                        {% for node in program.nodes %}#}
                                             {#                                        {% for v in attr_counts|get_named_item:attr.name|get_item:'values' %}#}
-                                            <li class="checkbox">
-                                                <label>
-                                                    <input type="checkbox" name="elements-selected"
-                                                           data-value-name="{{ node.name }}"
-                                                           data-value-displ-name="{{ node.name }}">{{ node.name }}
+{#                                            <li class="checkbox">#}
+{#                                                <label>#}
+{#                                                    <input type="checkbox" name="elements-selected"#}
+{#                                                           data-value-name="{{ node.name }}"#}
+{#                                                           data-value-displ-name="{{ node.name }}">{{ node.name }}#}
                                                     {#                                                                                                                <span class="float-right node_count count">{{ v.count|format_num_with_commmas }}</span>#}
-
-                                                </label>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
+{##}
+{#                                                </label>#}
+{#                                            </li>#}
+{#                                        {% endfor %}#}
+{#                                    </ul>#}
+{#                                </div>#}
+{#                            </li>#}
+{#                        {% endfor %}#}
+{#                    </ul>#}
+{#                </div>#}
+{#            </div>#}
             {#                <div class="panel panel-default">#}
             {#                    <ul class="nav nav-tabs nav-tabs-data" role="tablist">#}
             {#                        {% for program in programs %}#}
@@ -189,15 +190,15 @@
             {#                        {% endif %}#}
             {#                    </ul>#}
             {#                </div>#}
-        </div>
-        <div class="spinner-panel">
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
-                </div>
-            </div>
-        </div>
-    </div>
+{#        </div>#}
+{#        <div class="spinner-panel">#}
+{#            <div class="panel panel-default">#}
+{#                <div class="panel-body">#}
+{#                    <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
 
 
 {#        <div class="col-lg-9 tab-content data-tab-content">#}
@@ -486,8 +487,8 @@
     {#            </div>#}
     {#            <div class="more-graphs"><button class="btn btn-link" role="button">Show More</button></div>#}
     {#            <div class="less-graphs" style="display: none;"><button class="btn btn-link" role="button">Show Less</button></div>#}
-    {#        </div>#}
-    {#    </div>#}
+{#            </div>#}
+    </div>
 </div>
 <script type="text/javascript">
     {#var total_samples = {{ total_samples|safe }};#}
