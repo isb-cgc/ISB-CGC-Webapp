@@ -9,6 +9,7 @@
                 </select>
             </div>
         </div>
+        <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
         <div class="panel panel-default filter-panel">
             {% for attr_build, vals in metadata_data_attr.items %}
             <div class="panel-body tab-content filter-build-panel" data-filter-build="{{ attr_build }}" id="igv-filter-panel-{{ attr_build }}" {% if build != attr_build %}style="display: none;"{% endif %}>
@@ -59,7 +60,6 @@
                                                     </label>
                                                 </li>
                                             {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                 <li class="extra-values checkbox" style="display:none;">
                                                     <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
                                                         <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="igv-{{ attr_build }}-{{ attr.name}}-{{ v.value }}"
@@ -80,6 +80,7 @@
                                             {% endif %}
                                         {% endfor %}
                                         {% if num_more > 0 %}
+                                            <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                             <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                         {% endif %}
                                     {% endwith %}
@@ -108,7 +109,7 @@
                 <div id="tokenfield-holder-igv">
                     <!-- "IGV selected files tokenizer" -->
                     <textarea name="selected-files-igv" class="form-control tokenfield" id="selected-files-igv" placeholder="Select files" aria-label="Hidden Selected Files"></textarea>
-                    <form id="view-igv" method="POST" action="{% url 'igv' %}" target="_blank">
+                    <form id="view-igv" method="POST" action="{% url 'igv' %}" target="_blank" rel=“noreferrer”>
                         <input type="text" class="hidden_form_value" id="checked_list_input" name="checked_list" data-type="checked_list" aria-label="Hidden Checked List">
                         <input type="text" class="hidden_form_value" id="igv-form-build" name="build" value="{{ build }}" aria-label="Hidden IGV Build">
                         {% csrf_token %}
@@ -214,4 +215,5 @@
 <script type="text/javascript">
     var total_files = {{ total_file_count|safe }};
     var file_listing = {{ file_list|tojson|safe }};
+    var build_total_files = { 'HG19': undefined, 'HG38': undefined };
 </script>
