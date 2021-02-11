@@ -878,11 +878,11 @@ require([
 
             var num_extra = num_filter_to_show - 6;
             var show_more_text = num_extra > 0 ? num_extra + " more" : "0 more";
-            if (num_filter_to_show == 0) {
-                filter_list.find('more-checks').hide();
+            filter_list.find('.show-more').text(show_more_text);
+            if (num_filter_to_show == 0 || num_extra <= 0) {
+                filter_list.find('.more-checks').hide();
             } else {
-                filter_list.find('more-checks').show();
-                filter_list.find('.show-more').text(show_more_text);
+                filter_list.find('.more-checks').show();
             }
 
             var visible_filter_count = 0;
