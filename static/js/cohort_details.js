@@ -76,7 +76,7 @@ require([
     //
     // var savingComment = false;
     // var savingChanges = false;
-    // var mode = (cohort_id ? 'VIEWING' : 'EDITING');
+    var mode = (cohort_id ? 'VIEWING' : 'EDITING');
     // var SUBSEQUENT_DELAY = 600;
     // var update_displays_thread = null;
     //
@@ -535,35 +535,35 @@ require([
     //     (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
     // });
     //
-    // var set_mode = function(from_click) {
-    //
-    //     switch(mode){
-    //         case 'EDITING':
-    //             $('.data-tab-content-panel:not(.spinner-panel)').removeClass('col-md-12').addClass('col-md-9');
-    //             $('.filter-panel').show();
-    //             $('.selected-filters').show();
-    //             cohort_id && $('.page-header').hide();
-    //             $('input[name="cohort-name"]').show();
-    //             $('#default-cohort-menu').hide();
-    //             $('#edit-cohort-menu').show();
-    //             if(from_click) {
-    //                 //showHideMoreGraphButton();
-    //                 $('#multi-categorical').prop('scrollLeft',150);
-    //             }
-    //             break;
-    //
-    //         case 'VIEWING':
-    //             $('.data-tab-content-panel').removeClass('col-md-9').addClass('col-md-12');
-    //             $('.filter-panel').hide();
-    //             $('.selected-filters').hide();
-    //             $('.page-header').show();
-    //             $('input[name="cohort-name"]').hide();
-    //             $('#default-cohort-menu').show();
-    //             $('#edit-cohort-menu').hide();
-    //             break;
-    //     }
-    // };
-    //
+    var set_mode = function(from_click) {
+
+        switch(mode){
+            case 'EDITING':
+                $('.data-content-panel:not(.spinner-panel)').removeClass('col-md-12').addClass('col-md-9');
+                $('.filter-panel').show();
+                // $('.selected-filters').show();
+                // cohort_id && $('.page-header').hide();
+                // $('input[name="cohort-name"]').show();
+                // $('#default-cohort-menu').hide();
+                // $('#edit-cohort-menu').show();
+                // if(from_click) {
+                //     //showHideMoreGraphButton();
+                //     $('#multi-categorical').prop('scrollLeft',150);
+                // }
+                break;
+
+            case 'VIEWING':
+                $('.data-content-panel').removeClass('col-md-9').addClass('col-md-12');
+                // $('.filter-panel').hide();
+                // $('.selected-filters').hide();
+                // $('.page-header').show();
+                // $('input[name="cohort-name"]').hide();
+                // $('#default-cohort-menu').show();
+                // $('#edit-cohort-menu').hide();
+                break;
+        }
+    };
+
     // // cohort_details: show and hide the filter panel for editing an extant cohort
     // $('#edit-cohort-btn').on('click', function() {
     //     mode = "EDITING";
@@ -1254,7 +1254,7 @@ require([
 
     var reject_load = false;
 
-    var filter_panel_load = function(cohort, load_program_id) {
+    var filter_panel_load = function(cohort) {
         if (reject_load) {
             return;
         }
@@ -1262,16 +1262,17 @@ require([
             type    :'GET',
             url     : BASE_URL + '/cohorts/nodes/',
             success :   function (data) {
-                var data_content_div = $('div.data-content');
+                var data_content_div = $('div.data-content-div');
                 data_content_div.append(data);
 
                 // bind_widgets(program_data_selector, load_program_id);
-                    update_displays(null,true);
+                //     update_displays(null,true);
 
-                // set_mode();
+                set_mode();
+                $('#placeholder').hide();
             },
             error: function () {
-
+                console.log('Failed to load node panel');
             }
         });
         // var active_node_program_list = $('#node-filter input:checked').map(function(){
