@@ -8,8 +8,8 @@
                 </select>
             </div>
         </div>
-        <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
         <div class="panel panel-default filter-panel">
+            <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
             {% for attr_build, vals in metadata_data_attr.items %}
                 {% if attr_build == 'HG19' %}
                 <div class="panel-body tab-content filter-build-panel" data-filter-build="HG19" id="dicom-filter-panel-HG19">

@@ -9,8 +9,8 @@
                 </select>
             </div>
         </div>
-        <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
         <div class="panel filter-panel panel-default">
+            <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
             {% for attr_build, vals in metadata_data_attr.items %}
             <div class="panel-body tab-content filter-build-panel" data-filter-build="{{ attr_build }}" id="all-filter-panel-{{ attr_build }}" {% if build != attr_build %}style="display: none;"{% endif %}>
                 <ul class="list-group" id="metadata-data-accordian-all" role="tablist" aria-multiselectable="true">
