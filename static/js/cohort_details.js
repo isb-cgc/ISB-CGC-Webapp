@@ -1252,44 +1252,44 @@ require([
     // Fix for Issue #1950. While user is waiting for cohort data request, we prevent them from clicking on
     // another tab and starting another request.
 
-    var reject_load = false;
+    // var reject_load = false;
 
     var filter_panel_load = function(cohort) {
-        if (reject_load) {
-            return;
+        // if (reject_load) {
+        //     return;
+        // }
+        var program_data_selector ='#public-data';
+        if ($(program_data_selector).length === 0) {
+            // reject_load = true;
+            $('#placeholder').show();
+            $.ajax({
+                type: 'GET',
+                url: BASE_URL + '/cohorts/nodes/',
+                success: function (data) {
+                    var data_content_div = $('div.data-content-div');
+                    data_content_div.append(data);
+                    // bind_widgets(program_data_selector, load_program_id);
+                    //     update_displays(null,true);
+                    set_mode();
+                    $('#placeholder').hide();
+                },
+                error: function () {
+                    console.log('Failed to load node panel');
+                },
+                complete: function(xhr, status) {
+                    // reject_load = false;
+                }
+            });
         }
-        $.ajax({
-            type    :'GET',
-            url     : BASE_URL + '/cohorts/nodes/',
-            success :   function (data) {
-                var data_content_div = $('div.data-content-div');
-                data_content_div.append(data);
 
-                // bind_widgets(program_data_selector, load_program_id);
-                //     update_displays(null,true);
 
-                set_mode();
-                $('#placeholder').hide();
-            },
-            error: function () {
-                console.log('Failed to load node panel');
-            }
-        });
-        // var active_node_program_list = $('#node-filter input:checked').map(function(){
-        //     var nodeId = this.dataset.nodeId;
-        //     var progId = this.dataset.progId;
-        //     return { 'node_id': nodeId, 'prog_id': progId };
-        // });
-        //
-        //
-        // var program_data_selector ='#'+load_program_id+'-data';
+
         // if ($(program_data_selector).length === 0) {
         //     reject_load = true;
         // //     $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
         //     $('#placeholder').addClass('active');
         //     $('#placeholder').show();
         //     var data_content_div = $('div.data-content-div');
-        //     // var data_tab_content_div = $('div.data-tab-content');
         //     // var get_panel_url = BASE_URL + '/cohorts/' + (cohort ? cohort+'/' : '') + 'filter_panel/';
         //     var get_panel_url = BASE_URL + '/cohorts/' + (cohort ? cohort+'/' : '') + 'filter_panel/' + load_program_id +'/';
         //
@@ -1347,8 +1347,8 @@ require([
         //             // }
         //         }
         //     })
-        // }
-    };
+        };
+    // };
     //
     // // Check to see if we need 'Show More' buttons for details and filter panels (we may not)
     // var max_height = 0;
