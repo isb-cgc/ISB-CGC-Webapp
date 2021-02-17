@@ -9,6 +9,23 @@
  *******************************************/
 @import url("https://fonts.googleapis.com/css?family=Lato:300,400,700&subset=latin,latin-ext");
 @import url("https://fonts.googleapis.com/css?family=Montserrat:300,700&subset=latin,latin-ext");
+
+#landing .container {
+  width: 100%;
+}
+
+@media (min-width: 1400px) {
+  .container {
+    width: 1370px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .container {
+    width: 1560px;
+  }
+}
+
 html, body, ul, ol {
   margin: 0px;
   padding: 0px; }
@@ -1340,8 +1357,7 @@ a.skip-nav {
   list-style: disc;
   padding-left: 2.5em; }
 
-.extra-values {
-  display: none; }
+
 
 .table-list a:hover, .table-list a:active, .table-list_warning a:hover, .table-list_warning a:active {
   text-decoration: none; }
@@ -2003,6 +2019,12 @@ section .min-max {
 
 #cohort-details .filter-panel .checks, #cohort-filelist .filter-panel .checks {
   float: right;
+  display: block;
+  text-align: right;
+  min-width: 20%; }
+
+#cohort-details .filter-panel .checks2, #cohort-filelist .filter-panel .checks2 {
+  #float: right;
   display: block;
   text-align: right;
   min-width: 20%; }
@@ -2798,7 +2820,7 @@ html {
 }
 
 #landing .sapiens {
-  margin-top: 40px;
+  margin-top: 20px;
 }
 
 #landing .buttons {
@@ -2871,14 +2893,14 @@ html {
   border: 1px solid #4b616b;
     border-radius: 3px 3px 0px 0px;
   justify-content: end;
-  margin-top: 55px;
+  margin-top: 35px;
 }
 
 #landing .option1 .modality-panel {
   padding: 5px 20px;
   position: relative;
   z-index:300;
-  margin-top: 55px;
+  margin-top: 35px;
   box-shadow: 0px 8px 0px #fff, 0px 0px 5px #000000;
 }
 
@@ -3036,7 +3058,7 @@ html {
 .site-footer {
   background-color: #003a55;
   text-align: center;
-  font-size: 1.2em;
+  font-size: 1em;
 }
 
 .site-footer p {
@@ -3069,6 +3091,14 @@ html {
 .site-footer .social-media-item .external-link-icon {
     font-size: 15px;
     color: #d0d0d0;
+}
+
+.site-footer .row {
+  padding-bottom: 8px;
+}
+
+.site-footer .row:first-child {
+  padding-top: 15px;
 }
 
 .quota-body {
@@ -4044,9 +4074,18 @@ tr.shown td.details-control i.hide-button {
   font-size: larger;
 }
 
-.signup .panel-default:first-child, .login .panel-default:first-child, .password_reset .panel-default:first-child{
+.accounts-col .panel-default:first-child {
   padding-top: 10px;
   margin-top: 50px;
+}
+
+.accounts-col .panel-default:last-child {
+  margin-bottom: 50px;
+}
+
+.email-verify hr {
+    border: 2px solid #466a8d;
+    border-radius: 2px;
 }
 
 #id_remember {
@@ -4076,7 +4115,7 @@ tr.shown td.details-control i.hide-button {
   border: 2px solid #1a344c !important;
 }
 
-.signup input, .login input, .password_reset input, #password-change input {
+.signup input, .login input, .password_reset input, #password-change input, .password_set input, .email-verify input {
   width: 100%;
   border-radius: 3px;
   padding: 12px;
@@ -4104,13 +4143,18 @@ body.modal, body.modal-open {
   padding-right: 0px !important;
 }
 
-#sign-in ul.errorlist, #sign-up ul.errorlist, #password-change ul.errorlist {
+ul.errorlist {
   padding: 5px;
   border: 3px solid #f6441a;
   color: #8f1f12;
   background: #ebbcac;
   font-weight: bold;
   margin-bottom: 15px;
+}
+
+#errorMsg p {
+  padding: 5px 0 0 0;
+  margin: 0px;
 }
 
 #user-details .account-management-panel a {

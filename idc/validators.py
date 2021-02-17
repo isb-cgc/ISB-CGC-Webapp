@@ -79,5 +79,5 @@ class PasswordComplexityValidator:
     def get_help_text(self):
         return _(
             "Your password must contain at least one each of the following: a lower-case letter, an upper-case letter, "
-            + "a number, and a special character from the set '%(special_chars)s'." % self.special_char_list
+            + ("a number, and a special character from the set '%s'." % self.special_char_list)
         )

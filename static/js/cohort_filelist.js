@@ -73,7 +73,7 @@ require([
         if (page_no_input == "")
             return;
         var page = parseInt(page_no_input);
-        var max_page_no = parseInt($(this).siblings('.goto-page-number').attr('max'));
+        var max_page_no = parseInt($(this).siblings('.goto-page-number').data('max'));
         if (page > 0 && page <= max_page_no) {
             changePage(this, page);
         }
@@ -93,7 +93,7 @@ require([
 
         $('.dataTables_goto_page').on('click', '.next-page', function () {
              curPage = $(this).parent().data('curpage');
-             var max_page_no = parseInt($(this).parent().parent().find('.goto-page-number').attr('max'));
+             var max_page_no = parseInt($(this).parent().parent().find('.goto-page-number').data('max'));
              if(curPage<max_page_no){
                  changePage(this,(curPage+1));
              }

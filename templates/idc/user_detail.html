@@ -29,14 +29,14 @@
 {% block page_name %}user-details{% endblock %}
 
 {% block content %}
-    {% if not local_account %}
+    {% if not unconnected_local_account %}
     <img src="{{ user_details.extra_data.picture }}" class="avatar space-top-10" alt="User Avatar"/>
     {% else %}
         <div class="user-detail">
             <i class="fa fa-user space-top-10 basic-avatar" alt="User Avatar"/> </i>
         </div>
     {% endif %}
-    <h4>Welcome {% if not local_account %}{{ user_details.first_name }} {{ user_details.last_name }}{% else %}{{ user_details.email }}{% endif %}!</h4>
+    <h4>Welcome {% if not unconnected_local_account %}{{ user_details.first_name }} {{ user_details.last_name }}{% else %}{{ user_details.email }}{% endif %}!</h4>
     <div class="row">
         <div class="col-lg-4 col-md-4 col-sm-12">
             <div class="panel panel-default user-panel">
@@ -48,7 +48,7 @@
                 <div class="panel-body">
                     <table class="user-info" role="presentation">
                         <tr>
-                        {% if not local_account %}
+                        {% if not unconnected_local_account %}
                             <td>Name</td>
                             <td>{{ user_details.first_name }} {{ user_details.last_name }}</td>
                         {% else %}
@@ -101,7 +101,7 @@
                     {% endif %}
                     {% if social_account %}
                     <p>
-                        <a href="{% url "connections" %}">Manage Google Account Connections</a>
+                        <a href="{% url 'socialaccount_connections' %}">Manage Google Account Connections</a>
                     </p>
                     {% endif %}
                     <p>
