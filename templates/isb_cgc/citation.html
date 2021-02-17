@@ -1,0 +1,19 @@
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <h2>About Us</h2>
+                <p>The ISB Cancer Gateway in the Cloud (ISB-CGC) is a platform that serves as a
+                    large-scale
+                    repository and provides the computational infrastructure necessary to carry out cancer research at unprecedented scales.</p>
+                <p>Please use a <a
+                        href="https://accounts.google.com/signup/v2/webcreateaccount?hl=en&flowName=GlifWebSignIn&flowEntry=SignUp&nogm=true"
+                        target="_blank" rel=“noreferrer”>Google registered email account</a> to log into this system.</p>
+                {% if version %}
+                    <br/>
+                    Last deployed to version {{ version.version }} on {{ version.date }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{%  endblock %}
