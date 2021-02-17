@@ -11,6 +11,37 @@
     bottom: .5em;
 }
 
+.greyText {
+   color:#808080;
+}
+
+.notDisp{
+    display:none;
+}
+
+.multiSel{
+  border-style: dashed;
+  animation: border-dance 4s infinite linear;
+}
+@keyframes border-dance {
+  0% {
+    background-position: 0px 0px, 300px 116px, 0px 150px, 216px 0px;
+  }
+  100% {
+    background-position: 300px 0px, 0px 116px, 0px 0px, 216px 150px;
+  }
+}
+
+.prev-page{
+    float:left;
+    margin-left:0px;
+}
+.next-page{
+    float:right;
+    margin-right:200px;
+}
+
+
 .plot_count {
     display:none;
 }
@@ -145,18 +176,9 @@ bottom: 95%; /* At the top of the tooltip */
   max-height: 2000px;
 }
 
-html {
-  overflow-y: scroll;
-}
-
-body {
-  overflow: hidden;
-}
-
 .checkbox-disabled {
     disabled:true;
 }
-
 
 .tooltip_ex .tooltiptext_ex {
     visibility: hidden;
