@@ -917,11 +917,13 @@ require([
         $(program_data_selector + ' .show-more').on('click', function() {
             $(this).parent().siblings('li.extra-values').show();
             $(this).parent().siblings('.less-checks').show();
+            $(this).parent().siblings('.less-checks').addClass('more-expanded');
             $(this).parent().hide();
         });
         $(program_data_selector + ' .show-less').on('click', function() {
             $(this).parent().siblings('li.extra-values').hide();
             $(this).parent().siblings('.more-checks').show();
+            $(this).parent().removeClass('more-expanded');
             $(this).parent().hide();
         });
 
