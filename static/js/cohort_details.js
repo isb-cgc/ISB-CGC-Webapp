@@ -886,7 +886,158 @@ require([
     //     $(this).html($(this).text().replace(/\[/g,"<span>").replace(/\]/g,"</span>"));
     // });
 
+    // Generic form submission used by default
+    $('.ajax-form-modal').find('form').on('submit', function (e) {
+        $this.find('.btn').addClass('btn-disabled').attr('disabled', true);
+    });
 
+    // $('#create-cohort-modal form').on('submit', function() {
+    //     save_changes_btn.prop('disabled', 'disabled');
+    //     save_changes_btn_modal.prop('disabled', 'disabled');
+    // });
+    //
+    // $('a[data-target="#share-cohort-modal"]').on('click',function(){
+    //     $('#share-cohort-modal a[data-target="#shared-pane"]').tab('show');
+    // });
+    //
+    // $('button[data-target="#share-cohort-modal"]').on('click',function(){
+    //     $('#share-cohort-modal a[data-target="#share-cohort-pane"]').tab('show');
+    // });
+    //
+    // // Share with user click
+    // $('#share-cohort-form').on('submit', function(e){
+    //     e.preventDefault();
+    //     e.stopPropagation();
+    //
+    //     var invalid_emails = [];
+    //
+    //     var $this=$(this);
+    //
+    //     var escaped_email_input = $("<div>").text($('#share-share_users').val()).html();
+    //     var emails = escaped_email_input.split(/\s*,\s*/);
+    //     for(var i=0; i < emails.length; i++) {
+    //         if(!emails[i].match(base.email)) {
+    //             invalid_emails.push(emails[i]);
+    //         }
+    //     }
+    //     if(invalid_emails.length > 0) {
+    //         var msg = "The following email addresses appear to be invalid: "+(invalid_emails.join("; "));
+    //         base.showJsMessage('danger',
+    //             msg,
+    //             true,'#share-cohort-js-messages');
+    //         return false;
+    //     } else {
+    //         $('#share-cohort-js-messages').empty();
+    //     }
+    //
+    //     var cohort_id = $(this).data('cohort-id');
+    //
+    //     var url = base_url + '/cohorts/share_cohort/' + cohort_id + "/";
+    //
+    //     $(this).find('.btn-primary').addClass('btn-disabled').attr('disabled', true);
+    //
+    //     var csrftoken = $.getCookie('csrftoken');
+    //     $.ajax({
+    //         type        :'POST',
+    //         url         : url,
+    //         dataType    :'json',
+    //         data        : $(this).serialize(),
+    //         beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+    //         success : function (data) {
+    //             if(data.status && data.status == 'error') {
+    //                 if(data.result && data.result.msg) {
+    //                     base.showJsMessage('error',data.result.msg,true,'#share-cohort-js-messages');
+    //                 }
+    //             } else if(data.status && data.status == 'success') {
+    //                 if(data.result) {
+    //                     var msgs = [];
+    //                     if(data.result.msg) {
+    //                         msgs.push(data.result.msg);
+    //                     }
+    //                     if(data.result.note) {
+    //                         msgs.push(data.result.note)
+    //                     }
+    //                     base.setReloadMsg('info',msgs);
+    //                 }
+    //                 $this.closest('.modal').modal('hide');
+    //                 if($this.data('redirect')) {
+    //                     window.location = $this.data('redirect');
+    //                 } else {
+    //                     window.location.reload();
+    //                 }
+    //             }
+    //         },
+    //         error: function (xhr) {
+    //             $this.closest('.modal').modal('hide');
+    //             base.showJsMessage('error',xhr.responseJSON.message,true);
+    //         },
+    //     }).always(function () {
+    //         $this.find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
+    //     });
+    //     // We don't want this form submission to automatically trigger a reload
+    //     return false;
+    // });
+    //
+    // // Any time the share workbook modal is closed, clear out the messages and re-enable the buttons
+    // $('#share-cohort-modal button.btn-cancel,#share-cohort-modal button.close').on('click',function(){
+    //     $('#share-cohort-js-messages').empty();
+    //     $(this).parents('#share-cohort-modal').find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
+    // });
+    //
+    // // Remove shared user
+    // $('.remove-shared-user').on('click', function() {
+    //     var user_id = $(this).attr('data-user-id');
+    //     var url = base_url + '/cohorts/unshare_cohort/' + cohort_id + '/';
+    //     var csrftoken = $.getCookie('csrftoken');
+    //     var button = $(this);
+    //     $.ajax({
+    //         type        :'POST',
+    //         url         : url,
+    //         dataType    :'json',
+    //         data        : {user_id: user_id},
+    //         beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+    //         success : function (data) {
+    //             button.parents('tr').remove();
+    //             // If that was the last user this cohort was shared with, update the table's display
+    //             if(button.parents('tbody tr').length <= 0) {
+    //                 $('#shared-pane .modal-body table').empty();
+    //                 $('#shared-pane .modal-body table').append('<p class="center">This cohort is not currently shared with any users.</p>')
+    //             }
+    //             var count = parseInt($($('.share-count')[0]).html());
+    //             $('.share-count').each(function() {
+    //                $(this).html(count-1);
+    //             });
+    //         },
+    //         error: function (xhr) {
+    //             var responseJSON = $.parseJSON(xhr.responseText);
+    //             base.showJsMessage(responseJSON.level || 'error',responseJSON.msg || responseJSON.message,true);
+    //         }
+    //     })
+    // });
+    //
+    // // Disable the comment button if there's no content in the comment
+    // $('.save-comment-btn').prop('disabled', true);
+    // $('#comment-content').keyup(function() {
+    //     $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
+    // });
+    //
+    // save_changes_btn.prop('disabled', true);
+    // save_changes_btn_modal.prop('disabled', true);
+    //
+    // $('#edit-cohort-name').keyup(function() {
+    //     check_for_changes();
+    // });
+    //
+    // // Disable Duplicate Cohort button once clicked
+    // $('.clone-cohort-btn').on('click', function() {
+    //     $(this).addClass('disabled');
+    // });
+    //
+    // $('li.applied-filter').each(function(index,elem){
+    //     $(this).html($(this).text().replace(/\[/g,"<span>").replace(/\]/g,"</span>"));
+    // });
+    //
+    //
     // var bind_widgets = function(program_data_selector,activeDataTab) {
     //
     //     $(program_data_selector + ' .search-checkbox-list input[type="checkbox"]').on('change', filter_change_callback);
@@ -917,11 +1068,13 @@ require([
     //     $(program_data_selector + ' .show-more').on('click', function() {
     //         $(this).parent().siblings('li.extra-values').show();
     //         $(this).parent().siblings('.less-checks').show();
+    //         $(this).parent().siblings('.less-checks').addClass('more-expanded');
     //         $(this).parent().hide();
     //     });
     //     $(program_data_selector + ' .show-less').on('click', function() {
     //         $(this).parent().siblings('li.extra-values').hide();
     //         $(this).parent().siblings('.more-checks').show();
+    //         $(this).parent().removeClass('more-expanded');
     //         $(this).parent().hide();
     //     });
     //
@@ -1272,6 +1425,8 @@ require([
                     //     update_displays(null,true);
                     set_mode();
                     $('#placeholder').hide();
+
+                    apply_anonymous_filters(load_program_id);
                 },
                 error: function () {
                     console.log('Failed to load node panel');

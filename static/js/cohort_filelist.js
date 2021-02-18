@@ -693,11 +693,13 @@ require([
     $('.data-tab-content').on('click', '.show-more', function() {
         $(this).parent().siblings('li.extra-values').show();
         $(this).parent().siblings('.less-checks').show();
+        $(this).parent().siblings('.less-checks').addClass('more-expanded');
         $(this).parent().hide();
     });
     $('.data-tab-content').on('click', '.show-less', function() {
         $(this).parent().siblings('li.extra-values').hide();
         $(this).parent().siblings('.more-checks').show();
+        $(this).parent().removeClass('more-expanded');
         $(this).parent().hide();
     });
 
@@ -879,9 +881,12 @@ require([
             var num_extra = num_filter_to_show - 6;
             var show_more_text = num_extra > 0 ? num_extra + " more" : "0 more";
             filter_list.find('.show-more').text(show_more_text);
+
+            var is_expanded = filter_list.find('.less-checks').hasClass("more-expanded");
             if (num_filter_to_show == 0 || num_extra <= 0) {
                 filter_list.find('.more-checks').hide();
-            } else {
+                filter_list.find('.less-checks').hide();
+            } else if (!is_expanded) {
                 filter_list.find('.more-checks').show();
             }
 
@@ -897,7 +902,10 @@ require([
                     filter.addClass("visible-filter");
                     if (visible_filter_count >= 6) {
                         filter.addClass("extra-values");
-                        filter.hide();
+                        if (!is_expanded)
+                        {
+                            filter.hide();
+                        }
                     } else {
                         filter.show();
                     }
