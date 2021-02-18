@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2017, Institute for Systems Biology
+ * Copyright 2021, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,116 +74,116 @@ require([
     //
     // var UPDATE_PENDING = false;
     //
-    // var savingComment = false;
-    // var savingChanges = false;
+    var savingComment = false;
+    var savingChanges = false;
     var mode = (cohort_id ? 'VIEWING' : 'EDITING');
     // var SUBSEQUENT_DELAY = 600;
     // var update_displays_thread = null;
-    //
-    // var original_title = $('#edit-cohort-name').val();
-    //
-    // //create bloodhound typeahead engine for gene suggestions
-    // var gene_suggestions = new Bloodhound({
-    //     datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
-    //     queryTokenizer: Bloodhound.tokenizers.whitespace,
-    //     prefetch : BASE_URL + '/genes/suggest/a',
-    //     remote: {
-    //         url: BASE_URL + '/genes/suggest/%QUERY',
-    //         wildcard: '%QUERY'
-    //     },
-    //     prepare: function (query, settings) {
-    //         var csrftoken = $.getCookie('csrftoken');
-    //         settings.url = settings.url + '&q=' + query;
-    //         settings.headers = {
-    //           "X-CSRFToken": csrftoken
-    //         };
-    //         return settings;
-    //     }
-    // });
-    // gene_suggestions.initialize();
-    //
-    // function createTokenizer(geneListField, geneFavs, program_selector, activeProgram) {
-    //
-    //     // be aware bootstrap tokenfield requires 'value' as the datem attribute field : https://github.com/sliptree/bootstrap-tokenfield/issues/189
-    //     geneListField.tokenfield({
-    //         typeahead : [
-    //             {
-    //                 hint: false
-    //             }, {
-    //                 source: gene_suggestions.ttAdapter(),
-    //                 display: 'value'
-    //             }
-    //         ],
-    //         delimiter : " ",
-    //         minLength: 2-1,         // Bug #289 in bootstrap-tokenfield, submitted, remove -1 if it gets fixed and we update
-    //         limit: 1,
-    //         tokens: geneFavs
-    //     }).on('tokenfield:createtoken', function (event) {
-    //         // All gene names must in uppercase
-    //         event.attrs.value = event.attrs.value.toUpperCase();
-    //         event.attrs.label = event.attrs.label.toUpperCase();
-    //     }).on('tokenfield:createdtoken', function (event) {
-    //         // Check whether user entered a valid gene name
-    //         validate_genes([event.attrs.value], function validCallback(result){
-    //             if(!result[event.attrs.value]){
-    //                 $(event.relatedTarget).addClass('invalid error');
-    //                 $('.helper-text__invalid').show();
-    //             }
-    //             if ($('div.token.invalid.error').length < 1) {
-    //                 $('.helper-text__invalid').hide();
-    //             }
-    //         });
-    //         $('#p-'+activeProgram+'-paste-in-genes-tokenfield').attr('placeholder',"");
-    //         $('#p-'+activeProgram+'-paste-in-genes-tokenfield').attr('disabled','disabled');
-    //
-    //         check_for_filter_build(geneListField);
-    //
-    //     }).on('tokenfield:removedtoken', function(event) {
-    //         $('#p-'+activeProgram+'-paste-in-genes-tokenfield').attr('placeholder',"Enter a gene's name");
-    //         $('#p-'+activeProgram+'-paste-in-genes-tokenfield').removeAttr('disabled');
-    //         if ($('div.token.invalid.error').length < 1) {
-    //             $('.helper-text__invalid').hide();
-    //         }
-    //
-    //         $(program_selector+' .build-mol-filter').attr("disabled","disabled");
-    //
-    //     }).on('tokenfield:edittoken',function(e){
-    //         e.preventDefault();
-    //         return false;
-    //     });
-    // }
-    //
-    // function validate_genes(list, cb){
-    //     if(list.length > 0){
-    //         var csrftoken = $.getCookie('csrftoken');
-    //         $.ajax({
-    //             type        : 'POST',
-    //             dataType    :'json',
-    //             url         : BASE_URL + '/genes/is_valid/',
-    //             data        : JSON.stringify({'genes-list' : list}),
-    //             beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
-    //             success : function (data) {
-    //                 if(!data.error) {
-    //                     cb(data.results);
-    //                 }
-    //             },
-    //             error: function () {
-    //                 console.log('Failed to check for valid genes');
-    //             }
-    //         });
-    //     }
-    // }
-    //
-    // // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
-    // $('.modal').on('hide.bs.modal', function() {
-    //     var form = $(this).find('form')[0];
-    //     if(form){
-    //         form.reset();
-    //     }
-    // });
-    //
-    // var search_helper_obj = Object.create(search_helpers, {});
-    //
+
+    var original_title = $('#edit-cohort-name').val();
+
+    //create bloodhound typeahead engine for gene suggestions
+    var gene_suggestions = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        prefetch : BASE_URL + '/genes/suggest/a',
+        remote: {
+            url: BASE_URL + '/genes/suggest/%QUERY',
+            wildcard: '%QUERY'
+        },
+        prepare: function (query, settings) {
+            var csrftoken = $.getCookie('csrftoken');
+            settings.url = settings.url + '&q=' + query;
+            settings.headers = {
+              "X-CSRFToken": csrftoken
+            };
+            return settings;
+        }
+    });
+    gene_suggestions.initialize();
+
+    function createTokenizer(geneListField, geneFavs){
+
+        // be aware bootstrap tokenfield requires 'value' as the datem attribute field : https://github.com/sliptree/bootstrap-tokenfield/issues/189
+        geneListField.tokenfield({
+            typeahead : [
+                {
+                    hint: false
+                }, {
+                    source: gene_suggestions.ttAdapter(),
+                    display: 'value'
+                }
+            ],
+            delimiter : " ",
+            minLength: 2-1,         // Bug #289 in bootstrap-tokenfield, submitted, remove -1 if it gets fixed and we update
+            limit: 1,
+            tokens: geneFavs
+        }).on('tokenfield:createtoken', function (event) {
+            // All gene names must in uppercase
+            event.attrs.value = event.attrs.value.toUpperCase();
+            event.attrs.label = event.attrs.label.toUpperCase();
+        }).on('tokenfield:createdtoken', function (event) {
+            // Check whether user entered a valid gene name
+            validate_genes([event.attrs.value], function validCallback(result){
+                if(!result[event.attrs.value]){
+                    $(event.relatedTarget).addClass('invalid error');
+                    $('.helper-text__invalid').show();
+                }
+                if ($('div.token.invalid.error').length < 1) {
+                    $('.helper-text__invalid').hide();
+                }
+            });
+            $('#p-public-paste-in-genes-tokenfield').attr('placeholder',"");
+            $('#p-public-paste-in-genes-tokenfield').attr('disabled','disabled');
+
+            check_for_filter_build(geneListField);
+
+        }).on('tokenfield:removedtoken', function(event) {
+            $('#p-public-paste-in-genes-tokenfield').attr('placeholder',"Enter a gene's name");
+            $('#p-public-paste-in-genes-tokenfield').removeAttr('disabled');
+            if ($('div.token.invalid.error').length < 1) {
+                $('.helper-text__invalid').hide();
+            }
+
+            $('.build-mol-filter').attr("disabled","disabled");
+
+        }).on('tokenfield:edittoken',function(e){
+            e.preventDefault();
+            return false;
+        });
+    }
+
+    function validate_genes(list, cb){
+        if(list.length > 0){
+            var csrftoken = $.getCookie('csrftoken');
+            $.ajax({
+                type        : 'POST',
+                dataType    :'json',
+                url         : BASE_URL + '/genes/is_valid/',
+                data        : JSON.stringify({'genes-list' : list}),
+                beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+                success : function (data) {
+                    if(!data.error) {
+                        cb(data.results);
+                    }
+                },
+                error: function () {
+                    console.log('Failed to check for valid genes');
+                }
+            });
+        }
+    }
+
+    // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
+    $('.modal').on('hide.bs.modal', function() {
+        var form = $(this).find('form')[0];
+        if(form){
+            form.reset();
+        }
+    });
+
+    var search_helper_obj = Object.create(search_helpers, {});
+
     // var UPDATE_QUEUE = [];
     //
     // function enqueueUpdate(withoutCheckChanges,for_panel_load, alternate_prog_id){
@@ -224,63 +224,63 @@ require([
     //     },SUBSEQUENT_DELAY);
     // };
     //
-    // var check_for_filter_build = function(element) {
-    //     if((element.parents('.list').find('.mutation-category-selector').val() === 'nonsilent'
-    //         || element.parents('.list').find('.mutation-category-selector').val() === 'any'
-    //         || (element.parents('.list').find('.mutation-category-selector').val() === 'indv-selex'
-    //         && element.parents('.list').find('.spec-molecular-attrs input').is(':checked')))
-    //         && element.parents('.list').find('.sel-gene .token-label').length > 0) {
-    //
-    //         element.parents('.list').find('.build-mol-filter').removeAttr('disabled');
-    //     } else {
-    //         element.parents('.list').find('.build-mol-filter').attr('disabled', 'disabled');
-    //     }
-    // };
-    //
-    // var clear_mol_filters = function(btn) {
-    //     btn.siblings('.build-mol-filter').attr('disabled','disabled');
-    //     btn.parents('.list').find('.mutation-build').val('HG19');
-    //     btn.parents('.list').find('.mutation-build').trigger('change');
-    //     btn.parents('.list').find('.sel-gene a.close').click();
-    //     btn.parents('.list').find('.mutation-category-selector').val("label");
-    //     btn.parents('.list').find('.spec-molecular-attrs input').prop("checked",false);
-    //     btn.parents('.list').find('.inversion-checkbox').prop('checked',false);
-    //     btn.parents('.list').find('.spec-molecular-attrs ul').hide();
-    // };
-    //
-    // $('.tab-content').on('change', '.mutation-build', function(e){
-    //     $(this).siblings().find('.bq-table-display').text($(this).find(':selected').data('bq-table'));
-    //     $(this).siblings().find('.bq-table-display').attr('title',$(this).find(':selected').data('bq-table'));
-    // });
-    //
-    // // Clears the current filter build (note this does NOT clear the filter
-    // // from the Selected Filters, it's just to undue any pending settings)
-    // $('.tab-content').on('click', '.clear-mol-filter', function(){
-    //     clear_mol_filters($(this));
-    // });
-    //
-    // $('.tab-content').on('change', '.mutation-category-selector', function(){
-    //     if($(this).find(':selected').val() == 'indv-selex') {
-    //         $(this).parents('.list').find('.spec-molecular-attrs ul').show();
-    //     } else {
-    //         $(this).parents('.list').find('.spec-molecular-attrs ul').hide();
-    //     }
-    //     check_for_filter_build($(this));
-    // });
-    //
-    // $('.tab-content').on('change', '.spec-molecular-attrs input',function(){
-    //     check_for_filter_build($(this));
-    // });
-    //
-    // $('.tab-content').on('change', '.mut-filter-combine',function(){
-    //     var comb = $(this).find(':selected').val();
-    //     var not_comb = $(this).find(':not(:selected)').val();
-    //     $('input[name="mut_filter_combine"]').val(comb.toUpperCase());
-    //     $('span.mol-filter').toggleClass('filter-combine-'+comb);
-    //     $('span.mol-filter').toggleClass('filter-combine-'+not_comb);
-    //     update_displays();
-    // });
-    //
+    var check_for_filter_build = function(element) {
+        if((element.parents('.list').find('.mutation-category-selector').val() === 'nonsilent'
+            || element.parents('.list').find('.mutation-category-selector').val() === 'any'
+            || (element.parents('.list').find('.mutation-category-selector').val() === 'indv-selex'
+            && element.parents('.list').find('.spec-molecular-attrs input').is(':checked')))
+            && element.parents('.list').find('.sel-gene .token-label').length > 0) {
+
+            element.parents('.list').find('.build-mol-filter').removeAttr('disabled');
+        } else {
+            element.parents('.list').find('.build-mol-filter').attr('disabled', 'disabled');
+        }
+    };
+
+    var clear_mol_filters = function(btn) {
+        btn.siblings('.build-mol-filter').attr('disabled','disabled');
+        btn.parents('.list').find('.mutation-build').val('HG19');
+        btn.parents('.list').find('.mutation-build').trigger('change');
+        btn.parents('.list').find('.sel-gene a.close').click();
+        btn.parents('.list').find('.mutation-category-selector').val("label");
+        btn.parents('.list').find('.spec-molecular-attrs input').prop("checked",false);
+        btn.parents('.list').find('.inversion-checkbox').prop('checked',false);
+        btn.parents('.list').find('.spec-molecular-attrs ul').hide();
+    };
+
+    $('.tab-content').on('change', '.mutation-build', function(e){
+        $(this).siblings().find('.bq-table-display').text($(this).find(':selected').data('bq-table'));
+        $(this).siblings().find('.bq-table-display').attr('title',$(this).find(':selected').data('bq-table'));
+    });
+
+    // Clears the current filter build (note this does NOT clear the filter
+    // from the Selected Filters, it's just to undue any pending settings)
+    $('.tab-content').on('click', '.clear-mol-filter', function(){
+        clear_mol_filters($(this));
+    });
+
+    $('.tab-content').on('change', '.mutation-category-selector', function(){
+        if($(this).find(':selected').val() == 'indv-selex') {
+            $(this).parents('.list').find('.spec-molecular-attrs ul').show();
+        } else {
+            $(this).parents('.list').find('.spec-molecular-attrs ul').hide();
+        }
+        check_for_filter_build($(this));
+    });
+
+    $('.tab-content').on('change', '.spec-molecular-attrs input',function(){
+        check_for_filter_build($(this));
+    });
+
+    $('.tab-content').on('change', '.mut-filter-combine',function(){
+        var comb = $(this).find(':selected').val();
+        var not_comb = $(this).find(':not(:selected)').val();
+        $('input[name="mut_filter_combine"]').val(comb.toUpperCase());
+        $('span.mol-filter').toggleClass('filter-combine-'+comb);
+        $('span.mol-filter').toggleClass('filter-combine-'+not_comb);
+        // update_displays();
+    });
+
     // $('.tab-content').on('click', '.build-mol-filter', function(){
     //     var activeDataTab = $('.data-tab.active').attr('id');
     //     var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
@@ -1349,25 +1349,25 @@ require([
         //     })
         };
     // };
-    //
-    // // Check to see if we need 'Show More' buttons for details and filter panels (we may not)
-    // var max_height = 0;
-    // $('.prog-filter-set').each(function(){
-    //     var this_div = $(this);
-    //     if(this_div.outerHeight() > max_height) {
-    //         max_height = this_div.outerHeight();
-    //     }
-    // });
-    // $('.prog-filter-set').each(function(){
-    //     if($(this).outerHeight() < max_height) {
-    //         $(this).css('height', '100%');
-    //     }
-    // });
-    // if(max_height < $('.curr-filter-panel').innerHeight()){
-    //     $('.curr-filter-panel').css('height','105px').toggleClass('gradient-overlay', false);
-    //     $('.more-filters').hide();
-    // }
-    //
+
+    // Check to see if we need 'Show More' buttons for details and filter panels (we may not)
+    var max_height = 0;
+    $('.prog-filter-set').each(function(){
+        var this_div = $(this);
+        if(this_div.outerHeight() > max_height) {
+            max_height = this_div.outerHeight();
+        }
+    });
+    $('.prog-filter-set').each(function(){
+        if($(this).outerHeight() < max_height) {
+            $(this).css('height', '100%');
+        }
+    });
+    if(max_height < $('.curr-filter-panel').innerHeight()){
+        $('.curr-filter-panel').css('height','105px').toggleClass('gradient-overlay', false);
+        $('.more-filters').hide();
+    }
+
     // // Detect tab change. This fires when the tab is shown. But
     // // we need to stop the tab from responding to clicks for Issue
     // // #1950 fix, so we introduce the next function...
@@ -1386,12 +1386,12 @@ require([
     //     }
     // });
     //
-    // $('#log-in-to-save-btn').on('click', function()
-    // {
-    //     $.setCookie('login_from','new_cohort','/');
-    //     save_anonymous_filters();
-    // });
-    //
+    $('#log-in-to-save-btn').on('click', function()
+    {
+        $.setCookie('login_from','new_cohort','/');
+        save_anonymous_filters();
+    });
+
     filter_panel_load(cohort_id);
 });
 
