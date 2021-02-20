@@ -17,6 +17,7 @@
 from __future__ import print_function
 
 from mendeley import Mendeley
+import json
 
 def test():
     client_id = 9526
@@ -56,8 +57,8 @@ def test():
     groups = session.groups.iter()
     for g in groups:
         if i == selected_index:
-           group_id = g.id
-           break
+            group_id = g.id
+            break
         i = i + 1
 
     if group_id == '':
@@ -66,10 +67,59 @@ def test():
     # Get all the documents in the group
     target_group = session.groups.get(group_id)
     docs = target_group.documents.iter()
-    for d in docs:
-        print(d.title)
+
+    # Write documents to json
+    json_result = ""
+
+    for doc in docs:
+        this_row = {}
+        this_row['title'] = doc.title
+        this_row['id'] = doc.id
+
+        if doc.identifiers:
+            identifiers = ""
+            iden_len = len(doc.identifiers)
+            i = 0
+            for key, value in doc.identifiers.items():
+                identifiers += "{}: {}".format(key, value)
+                if i != iden_len - 1:
+                    identifiers += ", "
+                i = i + 1
+            this_row['identifiers'] = identifiers
+        else:
+            this_row['identifiers'] = doc.identifiers
+
+        if doc.authors:
+            author_names = ""
+            for author in doc.authors[:-1]:
+                author_names += "{} {}, ".format(author.first_name, author.last_name)
+            author_names += "{} {}".format(doc.authors[-1].first_name, doc.authors[-1].last_name)
+            this_row['authors'] = author_names
+        else:
+            this_row['authors'] = doc.authors
+
+        this_row['source'] = doc.source
+        this_row['type'] = doc.type
+        this_row['year'] = doc.year
+
+        if doc.keywords:
+            keywords = ""
+            for keyword in doc.keywords[:-1]:
+                keywords += "{}, ".format(keyword)
+            keywords += doc.keywords[-1]
+            this_row['keywords'] = keywords
+        else:
+            this_row['keywords'] = doc.keywords
+
+        json_row = json.dumps(this_row) + "\n"
+        print(json_row)
+        json_result += json_row
+
+    # Write JSON file to GCP bucket
+
 
     print("something")
+
 
 
 if __name__ == "__main__":

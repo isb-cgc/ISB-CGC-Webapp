@@ -605,8 +605,9 @@ def help_page(request):
 def about_page(request):
     return render(request, 'isb_cgc/about.html')
 
+
 def citation_page(request):
-    return render(request,'isb-cgc/citation.html')
+    return render(request, 'isb_cgc/citation.html')
 
 def vid_tutorials_page(request):
     return render(request, 'isb_cgc/video_tutorials.html')
