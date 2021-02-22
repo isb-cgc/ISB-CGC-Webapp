@@ -19,6 +19,8 @@ from __future__ import print_function
 from mendeley import Mendeley
 import json
 
+MENDELEY_PAPERS_FILE = "mendeley_papers.json"
+
 def test():
     client_id = 9526
     client_secret = "AmIvWP7FRxeLHX7n"
@@ -91,9 +93,16 @@ def test():
 
         if doc.authors:
             author_names = ""
+            count = 0
             for author in doc.authors[:-1]:
+                if count >= 3:
+                    break
+                count += 1
                 author_names += "{} {}, ".format(author.first_name, author.last_name)
-            author_names += "{} {}".format(doc.authors[-1].first_name, doc.authors[-1].last_name)
+            if count < 3:
+                author_names += "{} {}".format(doc.authors[-1].first_name, doc.authors[-1].last_name)
+            else:
+                author_names += "et al."
             this_row['authors'] = author_names
         else:
             this_row['authors'] = doc.authors
@@ -116,11 +125,12 @@ def test():
         json_result += json_row
 
     # Write JSON file to GCP bucket
+    with open(MENDELEY_PAPERS_FILE, 'w') as outfile:
+        outfile.write(json_result)
+        outfile.close()
 
-
-    print("something")
-
-
+    print("Papers generated, please upload to GCP bucket to update: "
+          "webapp-static-files-isb-cgc-dev/static/publications/mendeley_papers.json")
 
 if __name__ == "__main__":
     test()

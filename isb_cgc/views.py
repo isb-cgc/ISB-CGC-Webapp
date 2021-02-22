@@ -66,6 +66,7 @@ OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 BQ_ECOSYS_BUCKET = settings.BQ_ECOSYS_STATIC_URL
+CITATIONS_BUCKET = settings.CITATIONS_STATIC_URL
 IDP = settings.IDP
 
 def _needs_redirect(request):
@@ -606,8 +607,11 @@ def about_page(request):
     return render(request, 'isb_cgc/about.html')
 
 
-def citation_page(request):
-    return render(request, 'isb_cgc/citation.html')
+def citations_page(request):
+    citations_file_name = 'mendeley_papers.json'
+    citations_file_path = CITATIONS_BUCKET + citations_file_name
+    citations = requests.get(citations_file_path).json()
+    return render(request, 'isb_cgc/citations.html', citations)
 
 def vid_tutorials_page(request):
     return render(request, 'isb_cgc/video_tutorials.html')
@@ -637,7 +641,6 @@ def programmatic_access_page(request):
 
 def workflow_page(request):
     return render(request, 'isb_cgc/workflow.html')
-
 
 @login_required
 def dashboard_page(request):
