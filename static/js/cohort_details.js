@@ -1257,7 +1257,7 @@ require([
     //     return false;
     // });
     //
-    // var ANONYMOUS_FILTERS = {};
+    var ANONYMOUS_FILTERS = {};
     // var MUTATION_FILTER_COMBINE = "and";
 
     // var save_anonymous_filters = function()
@@ -1282,61 +1282,61 @@ require([
     // };
 
     // var load_tabs_queue = [];
-    // var load_anonymous_filters = function()
-    // {
-    //     // Load anonymous filters from session storage and clear it, so it is not always there
-    //     var str = sessionStorage.getItem('anonymous_filters');
-    //     ANONYMOUS_FILTERS = JSON.parse(str);
-    //     sessionStorage.removeItem('anonymous_filters');
-    //
-    //     // Find out the tabs need to load to support anonymous filters
-    //     if (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS.length > 0) {
-    //         for (i = 0; i < ANONYMOUS_FILTERS.length; ++i) {
-    //             var program_id = ANONYMOUS_FILTERS[i].program.id;
-    //             if (!load_tabs_queue.includes(program_id))
-    //             {
-    //                 load_tabs_queue.push(program_id);
-    //             }
-    //         }
-    //
-    //         MUTATION_FILTER_COMBINE = sessionStorage.getItem('mutation_filter_combine');
-    //     }
-    // };
+    var load_anonymous_filters = function()
+    {
+        // Load anonymous filters from session storage and clear it, so it is not always there
+        var str = sessionStorage.getItem('anonymous_filters');
+        ANONYMOUS_FILTERS = JSON.parse(str);
+        sessionStorage.removeItem('anonymous_filters');
 
-    // var apply_anonymous_filters = function(active_program_id)
-    // {
-    //     // Check if anonymous filter exist, then find all checkbox and check them
-    //     if (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS.length > 0) {
-    //         var has_mut_filter = false;
-    //         for (i = 0; i < ANONYMOUS_FILTERS.length; ++i) {
-    //             var aFilter = ANONYMOUS_FILTERS[i];
-    //             if (aFilter.program.id !== active_program_id)
-    //                 continue;
-    //
-    //             var programId = aFilter.program.id.toString();
-    //             var featureId = aFilter.feature.id.toString();
-    //             var valueId = aFilter.value.id.toString();
-    //
-    //             if (featureId.startsWith("MUT:"))
-    //             {
-    //                 // molecule filters...
-    //                 apply_anonymous_molec_filter(programId, featureId, valueId);
-    //                 has_mut_filter = true;
-    //             }
-    //             else
-    //             {
-    //                 // case and data_type filters
-    //                 apply_anonymous_checkbox_filter(programId, featureId, valueId);
-    //             }
-    //         }
-    //
-    //         if (has_mut_filter)
-    //         {
-    //             $('#p-2-mut-filter-combine').val(MUTATION_FILTER_COMBINE);
-    //             $('.mut-filter-combine').trigger('change');
-    //         }
-    //     }
-    // };
+        // Find out the tabs need to load to support anonymous filters
+        if (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS.length > 0) {
+            for (i = 0; i < ANONYMOUS_FILTERS.length; ++i) {
+                var program_id = ANONYMOUS_FILTERS[i].program.id;
+                if (!load_tabs_queue.includes(program_id))
+                {
+                    load_tabs_queue.push(program_id);
+                }
+            }
+
+            MUTATION_FILTER_COMBINE = sessionStorage.getItem('mutation_filter_combine');
+        }
+    };
+
+    var apply_anonymous_filters = function()
+    {
+        // Check if anonymous filter exist, then find all checkbox and check them
+        if (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS.length > 0) {
+            var has_mut_filter = false;
+            for (i = 0; i < ANONYMOUS_FILTERS.length; ++i) {
+                var aFilter = ANONYMOUS_FILTERS[i];
+                if (aFilter.program.id !== active_program_id)
+                    continue;
+
+                var programId = aFilter.program.id.toString();
+                var featureId = aFilter.feature.id.toString();
+                var valueId = aFilter.value.id.toString();
+
+                if (featureId.startsWith("MUT:"))
+                {
+                    // molecule filters...
+                    apply_anonymous_molec_filter(programId, featureId, valueId);
+                    has_mut_filter = true;
+                }
+                else
+                {
+                    // case and data_type filters
+                    apply_anonymous_checkbox_filter(programId, featureId, valueId);
+                }
+            }
+
+            if (has_mut_filter)
+            {
+                $('#p-2-mut-filter-combine').val(MUTATION_FILTER_COMBINE);
+                $('.mut-filter-combine').trigger('change');
+            }
+        }
+    };
 
     // var apply_anonymous_checkbox_filter = function(programId, featureId, valueId)
     // {
