@@ -41,7 +41,7 @@
             our users to quickly analyze data from thousands of patients in ISB-CGC curated BigQuery tables. </p>
         <ul>
             <li>Users can explore and learn more about the ISB-CGC hosted BigQuery tables via an interactive<a
-                    href="https://isb-cgc.appspot.com/bq_meta_search/" target="_blank"> BigQuery Table Search User
+                    href="https://isb-cgc.appspot.com/bq_meta_search/" target="_blank" rel=“noreferrer”> BigQuery Table Search User
                 Interface</a>. Users can find tables of interest based on category, reference genome build, data type
                 and free-form text search.<br></li>
             <li>Users with Google Cloud Platform (GCP) projects can analyze patient, biospecimen, and molecular data
@@ -78,8 +78,8 @@
         <p><strong>To create a new project, follow these steps:</strong></p>
         <ul>
             <li>If you don&#39;t already have a Google Account (Gmail or Google Apps), <a
-                    href="https://accounts.google.com/SignUp" target="_blank">create one</a>.<br></li>
-            <li>Sign-in to Google Cloud Platform console (<a href="http://console.cloud.google.com/" target="_blank">console.cloud.google.com</a>)
+                    href="https://accounts.google.com/SignUp" target="_blank" rel=“noreferrer”>create one</a>.<br></li>
+            <li>Sign-in to Google Cloud Platform console (<a href="http://console.cloud.google.com/" target="_blank" rel=“noreferrer”>console.cloud.google.com</a>)
                 to create a new project.<br></li>
         </ul>
         <p><strong>Click on &#34;Select a project&#34; dropdown and click on New Project </strong></p>
@@ -110,7 +110,7 @@
     <google-codelab-step label="Exploring ISB-CGC BigQuery Tables" duration="0">
         <p>No login or special Google Cloud Platform privileges are required to access the ISB-CGC BigQuery Table
             Search. </p>
-        <p>Navigate to the ISB-CGC homepage: <a href="https://isb-cgc.org/" target="_blank">https://isb-cgc.org</a> and
+        <p>Navigate to the ISB-CGC homepage: <a href="https://isb-cgc.org/" target="_blank" rel=“noreferrer”>https://isb-cgc.org</a> and
             click on the <strong>Launch</strong> icon in the <strong>BigQuery Table Search</strong> box.</p>
         <p class="image-container"><img style="width: 760.73px" src="{% static 'img/code_lab/cfbe74f88dc01867.png' %}">
         </p>
@@ -126,7 +126,7 @@
         <aside class="special"><p><strong>Tip: </strong>To learn more about the different filter options available to
             search for BigQuery tables, see our <a
                     href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/BigQueryTableSearchUI.html"
-                    target="_blank">documentation page.</a></p>
+                    target="_blank" rel=“noreferrer”>documentation page.</a></p>
         </aside>
         <ol type="1" start="2">
             <li>To see the table schema of the clinical table, click on the (+) icon.</li>
@@ -209,11 +209,11 @@ WHERE
         <p>It is really simple to access data in BigQuery tables from R through: </p>
         <ul>
             <li>R or RStudio installed locally on your machine</li>
-            <li><a href="https://rstudio.cloud/" target="_blank">RStudio Cloud</a> (limited free version great for data
+            <li><a href="https://rstudio.cloud/" target="_blank" rel=“noreferrer”>RStudio Cloud</a> (limited free version great for data
                 exploration)
             </li>
             <li>R notebook on a virtual machine (VM) within the <a href="https://cloud.google.com/ai-platform"
-                                                                   target="_blank">Google Cloud AI Platform </a>(requires
+                                                                   target="_blank" rel=“noreferrer”>Google Cloud AI Platform </a>(requires
                 a Google Cloud Platform project with a billing account associated with it)
             </li>
         </ul>
@@ -224,7 +224,7 @@ WHERE
             <p>Contact us for cloud credits to try out using R or Jupyter notebooks using the AI Platform!</p>
         </aside>
         <p><strong>Navigate to the RStudio Cloud webpage: </strong><a href="https://rstudio.cloud"
-                                                                      target="_blank"><strong>https://rstudio.cloud</strong></a>
+                                                                      target="_blank" rel=“noreferrer”><strong>https://rstudio.cloud</strong></a>
         </p>
         <p class="image-container"><img style="width: 742.50px" src="{% static 'img/code_lab/ea98993edb6f4e42.png' %}">
         </p>
@@ -241,7 +241,7 @@ WHERE
         <p class="image-container"><img style="width: 744.50px" src="{% static 'img/code_lab/6cc0a4dcc954c5eb.png' %}">
         </p>
         <p>The <strong>bigrquery</strong> package is designed to work with data stored in Google BigQuery tables. More
-            information about the package can be found here: <a href="https://bigrquery.r-dbi.org/" target="_blank">https://bigrquery.r-dbi.org/</a>
+            information about the package can be found here: <a href="https://bigrquery.r-dbi.org/" target="_blank" rel=“noreferrer”>https://bigrquery.r-dbi.org/</a>
         </p>
         <p>Enter each block of code below into the RStudio Cloud terminal. </p>
         <p>Install the required bigrquery package and enter in your newly created Google Cloud Platform project ID</p>
@@ -425,24 +425,24 @@ plotmafSummary(maf = kich, rmOutlier = TRUE, addStat = &#39;median&#39;, dashboa
         <h2 is-upgraded><strong>What&#39;s next?</strong></h2>
         <ul>
             <li>Learn more about what ISB-CGC has to offer at our <a href="https://isb-cgc.appspot.com/"
-                                                                     target="_blank">homepage</a> and <a
-                    href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/index.html" target="_blank">documentation
+                                                                     target="_blank" rel=“noreferrer”>homepage</a> and <a
+                    href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/index.html" target="_blank" rel=“noreferrer”>documentation
                 page</a></li>
             <li>
                 <a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowtoRequestCloudCredits.html"
-                   target="_blank">Requesting Cloud Credits</a></li>
+                   target="_blank" rel=“noreferrer”>Requesting Cloud Credits</a></li>
             <li><a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html"
-                   target="_blank">General Jupyter Notebooks</a></li>
+                   target="_blank" rel=“noreferrer”>General Jupyter Notebooks</a></li>
             <li>
                 <a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/RegulomeExplorerNotebooks.html"
-                   target="_blank">Statistical Notebooks</a></li>
-            <li><a href="https://isb-cgc.appspot.com/programmatic_access/" target="_blank">Pipelines</a></li>
-            <li><a href="https://cloud.google.com/ai-platform/docs" target="_blank">Google Cloud AI Platform for R or
+                   target="_blank" rel=“noreferrer”>Statistical Notebooks</a></li>
+            <li><a href="https://isb-cgc.appspot.com/programmatic_access/" target="_blank" rel=“noreferrer”>Pipelines</a></li>
+            <li><a href="https://cloud.google.com/ai-platform/docs" target="_blank" rel=“noreferrer”>Google Cloud AI Platform for R or
                 Python Notebooks</a></li>
             <li>
                 <a href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/progapi/bigqueryGUI/GettingStartedWithGoogleBigQuery.html"
-                   target="_blank">SQL syntax examples</a></li>
-            <li><a href="https://isb-cgc.appspot.com/bq_meta_search/" target="_blank">Explore ISB-CGC BigQuery
+                   target="_blank" rel=“noreferrer”>SQL syntax examples</a></li>
+            <li><a href="https://isb-cgc.appspot.com/bq_meta_search/" target="_blank" rel=“noreferrer”>Explore ISB-CGC BigQuery
                 tables</a></li>
             <li>Publishing or presenting results derived from using our platform? Don&#39;t forget to cite us!</li>
         </ul>
