@@ -126,7 +126,7 @@ def seqpeek(request, id=0):
     return render(request, 'seqpeek/seqpeek.html', context)
 
 def save_seqpeek(request):
-    redirect_url = '/user_landing/'
+    redirect_url = '/dashboard/'
 
     if request.method == 'POST':
         params = request.POST

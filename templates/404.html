@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% comment %}
 
-   Copyright 2015, Institute for Systems Biology
+   Copyright 2021, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,9 +17,33 @@
 
 {% endcomment %}
 
+{% block title %}
+    ISB-CGC | 404 - Page Not Found
+{% endblock %}
 
-{% block title %}Page not found{% endblock %}
+{% block description %}
+    404 Page Not Found
+{% endblock %}
+
+{% block link_page_name %}404{% endblock %}
+{% block page_name %}404{% endblock %}
+
+{% block page_header %}
+    {% if request.user.is_authenticated %}
+        <div class="container">
+            <ol class="breadcrumb">
+                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            </ol>
+        </div>
+    {% endif %}
+{% endblock %}
 
 {% block content %}
-<h4>404: The page you requested could not be found.</h4>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <h4>404: The page you requested could not be found.</h4>
+            </div>
+        </div>
+    </div>
 {% endblock %}
