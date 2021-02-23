@@ -330,9 +330,12 @@ function($, tree_graph, stack_bar_chart) {
                var num_extra = num_filter_to_show - 6;
                var show_more_text = num_extra > 0 ? num_extra + " more" : "0 more";
                filter_list.find('.show-more').text(show_more_text);
+
+               var is_expanded = filter_list.find('.less-checks').hasClass("more-expanded");
                if (num_filter_to_show == 0 || num_extra <= 0) {
                    filter_list.find('.more-checks').hide();
-               } else {
+                   filter_list.find('.less-checks').hide();
+               } else if (!is_expanded) {
                    filter_list.find('.more-checks').show();
                }
 
@@ -348,7 +351,10 @@ function($, tree_graph, stack_bar_chart) {
                        filter.addClass("visible-filter");
                        if (visible_filter_count >= 6) {
                            filter.addClass("extra-values");
-                           filter.hide();
+                           if (!is_expanded)
+                           {
+                               filter.hide();
+                           }
                        }
                        else {
                            filter.show();
