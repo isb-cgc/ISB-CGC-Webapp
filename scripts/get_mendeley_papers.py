@@ -71,12 +71,13 @@ def test():
     docs = target_group.documents.iter()
 
     # Write documents to json
-    json_result = ""
+    json_papers = {}
+    papers_array = []
 
     for doc in docs:
-        this_row = {}
-        this_row['title'] = doc.title
-        this_row['id'] = doc.id
+        this_paper = {}
+        this_paper['title'] = doc.title
+        this_paper['id'] = doc.id
 
         if doc.identifiers:
             identifiers = ""
@@ -87,9 +88,9 @@ def test():
                 if i != iden_len - 1:
                     identifiers += ", "
                 i = i + 1
-            this_row['identifiers'] = identifiers
+            this_paper['identifiers'] = identifiers
         else:
-            this_row['identifiers'] = doc.identifiers
+            this_paper['identifiers'] = doc.identifiers
 
         if doc.authors:
             author_names = ""
@@ -103,33 +104,35 @@ def test():
                 author_names += "{} {}".format(doc.authors[-1].first_name, doc.authors[-1].last_name)
             else:
                 author_names += "et al."
-            this_row['authors'] = author_names
+            this_paper['authors'] = author_names
         else:
-            this_row['authors'] = doc.authors
+            this_paper['authors'] = doc.authors
 
-        this_row['source'] = doc.source
-        this_row['type'] = doc.type
-        this_row['year'] = doc.year
+        this_paper['source'] = doc.source
+        this_paper['type'] = doc.type
+        this_paper['year'] = doc.year
 
         if doc.keywords:
             keywords = ""
             for keyword in doc.keywords[:-1]:
                 keywords += "{}, ".format(keyword)
             keywords += doc.keywords[-1]
-            this_row['keywords'] = keywords
+            this_paper['keywords'] = keywords
         else:
-            this_row['keywords'] = doc.keywords
+            this_paper['keywords'] = doc.keywords
 
-        json_row = json.dumps(this_row) + "\n"
-        print(json_row)
-        json_result += json_row
+        papers_array.append(this_paper)
+
+    json_papers['papers'] = papers_array
 
     # Write JSON file to GCP bucket
-    with open(MENDELEY_PAPERS_FILE, 'w') as outfile:
-        outfile.write(json_result)
-        outfile.close()
+    f = open(MENDELEY_PAPERS_FILE, 'r+')
+    f.truncate(0)
 
-    print("Papers generated, please upload to GCP bucket to update: "
+    f = open(MENDELEY_PAPERS_FILE, 'w')
+    json.dump(json_papers, f, indent=4)
+
+    print(str(len(papers_array)) + " papers generated, please upload to GCP bucket to update: "
           "webapp-static-files-isb-cgc-dev/static/publications/mendeley_papers.json")
 
 if __name__ == "__main__":

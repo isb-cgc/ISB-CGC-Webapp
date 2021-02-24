@@ -3339,6 +3339,16 @@ span.code {
   border-color: grey;
   padding: 10px; }
 
+#citations ul, #citations ol {
+  list-style: decimal; }
+
+#citations li {
+  margin-bottom: 4px; }
+
+#citations h2 {
+  font-size: 20px;
+  margin-top: 20px; }
+
 #user-details .banner {
   margin: 0;
   border: 4px solid #71a0ce;
