@@ -25,6 +25,8 @@ logger = logging.getLogger('main_logger')
 @csrf_protect
 def check_gene_list_validity(request):
     body_unicode = request.body
+    if type(body_unicode) is bytes:
+        body_unicode = body_unicode.decode('utf-8')
     body = json.loads(body_unicode)
     gene_list = body['genes-list']
     response = {

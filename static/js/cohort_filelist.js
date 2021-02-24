@@ -197,7 +197,8 @@ require([
         }
         var active_tab = $('ul.nav-tabs-files li.active a').data('file-type');
         var tab_selector ='#'+active_tab+'-files';
-        if ($(tab_selector).length == 0) {
+        if (!$(tab_selector).length) {
+            var selected_build = $(tab_selector).find('.build :selected').val();
             reject_load = true;
             $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
             $('#placeholder').addClass('active');
@@ -211,7 +212,6 @@ require([
                 get_panel_url = BASE_URL + '/cohorts/filelist/panel/' + active_tab + '/';
             }
 
-
             $.ajax({
                 type        :'GET',
                 url         : get_panel_url,
@@ -220,7 +220,7 @@ require([
 
                     update_download_link(active_tab, total_files);
                     update_table_display(active_tab, {'total_file_count': total_files, 'file_list': file_listing});
-                    var selected_build = $(tab_selector).find('.build :selected').val();
+
                     build_total_files[selected_build] = total_files;
 
                     $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
@@ -246,7 +246,15 @@ require([
                     }
                 },
                 complete: function(xhr, status) {
-                    $('#all-build, #igv-build').val('HG38').trigger('change');
+                    // if total HG38 file counts is zero, set the default build value to HG19 and disable HG38 option in the ALL or IGV tabs.
+                    if (active_tab === 'all' || active_tab === 'igv'){
+                        var active_build_option = '#'+ active_tab + '-build';
+                        if(selected_build === 'HG38' && $(active_build_option).find('option[value="HG38"]:disabled').length) {
+                            $(active_build_option).val('HG19').trigger('change');
+                        }else{
+                            $(active_build_option).val('HG38').trigger('change');
+                        }
+                    }
                     reject_load = false;
                 }
             })
@@ -824,12 +832,13 @@ require([
                 type: 'GET',
                 url: url,
                 success: function(data) {
-                    if(build_total_files[build] == undefined && !url.includes('&filters=')){ //if initial panel loading
+                    if ((active_tab == 'all' || active_tab == 'igv') && build_total_files[build] == undefined && !url.includes('&filters=')) { //if initial panel loading
                         build_total_files[build] = data.total_file_count;
-                        if (build == 'HG38' && build_total_files['HG38'] == 0 && build_total_files['HG19'] != 0){
-                            $('#all-build, #igv-build').find('option[value="HG38"]').attr('disabled','disabled');
+                        //if HG38 total file counts are zero set the default build to HG19, disable HG38 Build option for ALL and IGV tabs
+                        if (build == 'HG38' && build_total_files['HG38'] == 0 && build_total_files['HG19'] != 0) {
+                            $('#all-build, #igv-build').find('option[value="HG38"]').attr('disabled', 'disabled');
                             $('#all-build, #igv-build').val('HG19').trigger('change');
-                            $('#'+active_tab+'-files').find('.filelist-panel .spinner i').addClass('hidden');
+                            $('#' + active_tab + '-files').find('.filelist-panel .spinner i').addClass('hidden');
                             return;
                         }
                     }
