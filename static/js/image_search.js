@@ -819,7 +819,7 @@ require([
                         curArr.push(curId);
                         numArr+= parseInt($(this).find('.projects_table_num_cohort, .numcases')[0].innerHTML);
                         if (type==='cases') {
-                            var projectId = $(row).find(".project-name").text();
+                            var projectId = $(this).find(".project-name").text();
                             if (!(projectId in selDic)){
                                 projArr.push(projectId);
                                 selDic[projectId]= new Array();
@@ -828,11 +828,11 @@ require([
                         }
 
                         else if (type==='studies'){
-                            var projectId =$(row).attr('data-projectid');
+                            var projectId =$(this).attr('data-projectid');
                             if (projArr.indexOf(projectId)<0){
                                 projArr.push(projectId);
                             }
-                            var caseId= $(row).find(".case-id").text();
+                            var caseId= $(this).find(".case-id").text();
                             if (!(caseId in selDic)){
                                 caseArr.push(caseId);
                                 selDic[caseId]= new Array();
@@ -2306,7 +2306,15 @@ require([
                 }
              }
             var allListItems=$('#'+filterCat).children('ul').children('li');
-            var allFilters=allListItems.children().children('input:checkbox');
+            var allFiltersDiv=allListItems.children().children('input:checkbox').parent().parent();
+
+            var orderFiltDiv =allListItems.sort(
+            function (a,b){
+                return (  parseFloat($(a).children().children('input:checkbox').find('.case_count').text()) < parseFloat($(b).children().children('input:checkbox').find('.case_count').text()))
+
+            });
+            var allFilters = allFiltersDiv.children().children('input:checkbox');
+
             var hasFilters=true;
             if (allFilters.length===0){
                 hasFilters = false;
@@ -2410,7 +2418,14 @@ require([
                     $('#' + filterCat).children('.more-checks').show();
                     $('#' + filterCat).children('.check-uncheck').show();
                     if ($('#' + filterCat).children('.more-checks').children('.show-more').length>0){
-                        $('#' + filterCat).children('.more-checks').children('.show-more')[0].innerText="show "+numMore.toString()+" more";
+                        $('#' + filterCat).children('.more-checks').children('.show-more')[0].innerText = "show " + numMore.toString() + " more";
+
+                        if (numMore>0){
+                            $('#' + filterCat).children('.more-checks').children('.show-more').removeClass('notVis');
+                        }
+                        else{
+                            $('#' + filterCat).children('.more-checks').children('.show-more').addClass('notVis');
+                        }
                     }
 
                     $('#' + filterCat).children('.less-checks').hide();
@@ -2837,24 +2852,42 @@ require([
      var load_filters = function(filters) {
          var sliders = [];
         _.each(filters, function(group){
-            _.each(group['filters'], function(filter){
-                let selector = 'div.list-group-item__body[data-filter-attr-id="'+filter['id']+'"], '+'div.list-group-sub-item__body[data-filter-attr-id="'+filter['id']+'"]';
+            _.each(group['filters'], function(filter) {
+                let selector = 'div.list-group-item__body[data-filter-attr-id="' + filter['id'] + '"], ' + 'div.list-group-sub-item__body[data-filter-attr-id="' + filter['id'] + '"]';
                 $(selector).parents('.collection-list').collapse('show');
-                $(selector).collapse('show');
-                $(selector).find('.show-more').triggerHandler('click');
-                $(selector).parents('.tab-pane.search-set').length > 0 && $('a[href="#'+$(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
-                if($(selector).children('.ui-slider').length > 0) {
-                    sliders.push({
-                        'id':$('div.list-group-item__body[data-filter-attr-id="'+filter['id']+'"]').children('.ui-slider')[0].id,
-                        'left_val': filter['values'][0].indexOf(".") >= 0 ? parseFloat(filter['values'][0]) : parseInt(filter['values'][0]),
-                        'right_val': filter['values'][1].indexOf(".") >= 0 ? parseFloat(filter['values'][1]) : parseInt(filter['values'][1]),
-                    })
-                } else {
-                    _.each(filter['values'], function(val){
-                        $('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]').prop("checked",true);
-                        checkFilters($('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]'));
-                    });
-                }
+
+                $(selector).each(function(index, selEle)
+                {
+                    /*if ($(selEle).find('ul, .ui-slider').length>0) {
+                        $(selEle).collapse('show');
+                        $(selEle).find('.show-more').triggerHandler('click');
+                        $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
+                    }*/
+                    var attValueFoundInside= false;
+                    if ($(selEle).children('.ui-slider').length > 0) {
+                        attValueFoundInside= true;
+                       sliders.push({
+                           'id': $('div.list-group-item__body[data-filter-attr-id="' + filter['id'] + '"]').children('.ui-slider')[0].id,
+                           'left_val': filter['values'][0].indexOf(".") >= 0 ? parseFloat(filter['values'][0]) : parseInt(filter['values'][0]),
+                           'right_val': filter['values'][1].indexOf(".") >= 0 ? parseFloat(filter['values'][1]) : parseInt(filter['values'][1]),
+                       })
+                     } else {
+                       _.each(filter['values'], function (val) {
+                           if ($(selEle).find('input[data-filter-attr-id="' + filter['id'] + '"][value="' + val + '"]').length>0) {
+                               attValueFoundInside = true;
+                           }
+                           $('input[data-filter-attr-id="' + filter['id'] + '"][value="' + val + '"]').prop("checked", true);
+                           checkFilters($('input[data-filter-attr-id="' + filter['id'] + '"][value="' + val + '"]'));
+
+                      });
+                  }
+                    if (attValueFoundInside){
+                        $(selEle).collapse('show');
+                        $(selEle).find('.show-more').triggerHandler('click');
+                        $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
+                    }
+
+               });
             });
         });
         if(sliders.length > 0) {
