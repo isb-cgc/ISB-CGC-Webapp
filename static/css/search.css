@@ -19,6 +19,10 @@
     display:none;
 }
 
+.notVis{
+    visibility:hidden;
+}
+
 .multiSel{
   border-style: dashed;
   animation: border-dance 4s infinite linear;

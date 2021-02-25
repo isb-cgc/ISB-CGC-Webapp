@@ -100,6 +100,10 @@ def css_test(request):
     return render(request, 'idc/css_test.html', {'request': request})
 
 
+#def test(request):
+#    return render(request, 'idc/test.html', {'request': request})
+
+
 # View for testing methods manually
 @login_required
 def test_methods(request):
