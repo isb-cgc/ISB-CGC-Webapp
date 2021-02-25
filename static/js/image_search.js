@@ -101,7 +101,7 @@ require([
 
              parStr=$('#'+slideDiv).data("attr-par");
              if (parStr.startsWith('tcga_clinical') && !(reset)){
-                checkTcga();
+                //checkTcga();
             }
             //var slideDiv = divName + "_slide";
             var max = $('#' + slideDiv).slider("option", "max");
@@ -207,7 +207,7 @@ require([
                 }
                 else if (curKey.endsWith('_rng')) {
                     var realKey=curKey.substring(0, curKey.length-4).split('.').pop();
-                    var disp = $('#'+realKey+'_heading').children()[0].innerText;
+                    var disp = $('#'+realKey+'_heading').children().children('.attDisp')[0].innerText;
                     if (curKey.startsWith('tcga_clinical')){
                         disp='tcga.'+disp;
                         hasTcga = true;
@@ -229,7 +229,7 @@ require([
                 } else {
                     var realKey=curKey.split('.').pop();
 
-                    var disp = $('#'+realKey+'_heading').children()[0].innerText;;
+                    var disp = $('#'+realKey+'_heading').children().children('.attDisp')[0].innerText;
                     if (curKey.startsWith('tcga_clinical')){
                         disp='tcga.'+disp;
                         hasTcga = true;
@@ -471,7 +471,7 @@ require([
             }
 
             if (parStr.startsWith('tcga_clinical')){
-                checkTcga();
+                //checkTcga();
             }
             var slideNm = $(elem).parent()[0].id+"_slide";
             //updatePlotBinsForSliders(slideNm);
@@ -554,7 +554,7 @@ require([
                     }
 
                     if (filtName.startsWith('tcga_clinical')) {
-                        checkTcga();
+                        //checkTcga();
                     }
                     mkFiltText();
                     updateFacetsData(true);
@@ -652,28 +652,7 @@ require([
                     var valArr = val.split('-');
 
                     window.setSlider(slideName, false, valArr[0], valArr[1], isInt, true);
-                    /*
-                    $('#' + slideName).addClass('used');
-                    var val = $('#' + inpName)[0].value;
-                    var valArr = val.split('-');
-                    var attVal = [];
-                    if (isInt) {
-                        attVal = [parseInt(valArr[0]), parseInt(valArr[1]) ];
-                    } else {
-                        attVal = [parseFloat(valArr[0]), parseFloat(valArr[1])];
-                    }
 
-                    if (!( filtName in window.filterObj )) {
-                        window.filterObj[filtName] = new Object();
-                    }
-                    window.filterObj[filtName]['rng'] = attVal;
-
-                    if (filtName.startsWith('tcga_clinical')) {
-                        checkTcga();
-                    }
-                    mkFiltText();
-                    updateFacetsData(true);
-                    */
                 }
             }).find('.ui-slider-range').append(tooltipL).append(tooltipR);
 
@@ -840,7 +819,7 @@ require([
                         curArr.push(curId);
                         numArr+= parseInt($(this).find('.projects_table_num_cohort, .numcases')[0].innerHTML);
                         if (type==='cases') {
-                            var projectId = $(row).find(".project-name").text();
+                            var projectId = $(this).find(".project-name").text();
                             if (!(projectId in selDic)){
                                 projArr.push(projectId);
                                 selDic[projectId]= new Array();
@@ -849,11 +828,11 @@ require([
                         }
 
                         else if (type==='studies'){
-                            var projectId =$(row).attr('data-projectid');
+                            var projectId =$(this).attr('data-projectid');
                             if (projArr.indexOf(projectId)<0){
                                 projArr.push(projectId);
                             }
-                            var caseId= $(row).find(".case-id").text();
+                            var caseId= $(this).find(".case-id").text();
                             if (!(caseId in selDic)){
                                 caseArr.push(caseId);
                                 selDic[caseId]= new Array();
@@ -2327,7 +2306,15 @@ require([
                 }
              }
             var allListItems=$('#'+filterCat).children('ul').children('li');
-            var allFilters=allListItems.children().children('input:checkbox');
+            var allFiltersDiv=allListItems.children().children('input:checkbox').parent().parent();
+
+            var orderFiltDiv =allListItems.sort(
+            function (a,b){
+                return (  parseFloat($(a).children().children('input:checkbox').find('.case_count').text()) < parseFloat($(b).children().children('input:checkbox').find('.case_count').text()))
+
+            });
+            var allFilters = allFiltersDiv.children().children('input:checkbox');
+
             var hasFilters=true;
             if (allFilters.length===0){
                 hasFilters = false;
@@ -2414,21 +2401,31 @@ require([
 
                 }
 
-                if ( numAttrAvail < 6)  {
+                if ( numAttrAvail < 1)  {
                        $('#' + filterCat).children('.more-checks').hide();
                         $('#' + filterCat).children('.less-checks').hide();
+                        $('#' + filterCat).children('.check-uncheck').hide();
 
                     }
                 else if (showExtras) {
                     $('#' + filterCat).children('.more-checks').hide();
                     $('#' + filterCat).children('.less-checks').show();
+                    $('#' + filterCat).children('.check-uncheck').show();
                 }
 
                 else {
                     numMore = allListItems.filter('.extra-values').length;
                     $('#' + filterCat).children('.more-checks').show();
+                    $('#' + filterCat).children('.check-uncheck').show();
                     if ($('#' + filterCat).children('.more-checks').children('.show-more').length>0){
-                        $('#' + filterCat).children('.more-checks').children('.show-more')[0].innerText="show "+numMore.toString()+" more";
+                        $('#' + filterCat).children('.more-checks').children('.show-more')[0].innerText = "show " + numMore.toString() + " more";
+
+                        if (numMore>0){
+                            $('#' + filterCat).children('.more-checks').children('.show-more').removeClass('notVis');
+                        }
+                        else{
+                            $('#' + filterCat).children('.more-checks').children('.show-more').addClass('notVis');
+                        }
                     }
 
                     $('#' + filterCat).children('.less-checks').hide();
@@ -2545,7 +2542,7 @@ require([
                 }
 
                 if ( (checked) && (filtnm ==='tcga_clinical') && !is_cohort){
-                    checkTcga();
+                    //checkTcga();
                 }
 
                 if ((checked) && (curCat.length>0) && hasCheckBox  ){
@@ -2559,7 +2556,7 @@ require([
                         filterObj[curCat].push(filtnm)
                     }
                     if ((ind ===0) && (curCat.startsWith('Program'))){
-                       resetTcgaFilters();
+                       //resetTcgaFilters();
                     }
                     /* if ( allChecked && (i === (filterCats.length-1)) && (numCheckBoxes>1)) {
                         delete filterObj[curCat];
@@ -2578,7 +2575,7 @@ require([
                    }
 
                    if ((ind ===0) && (curCat.startsWith('Program'))){
-                       resetTcgaFilters();
+                       //resetTcgaFilters();
                     }
                    if (curCat.length>0){
                      curCat+="."
@@ -2855,24 +2852,42 @@ require([
      var load_filters = function(filters) {
          var sliders = [];
         _.each(filters, function(group){
-            _.each(group['filters'], function(filter){
-                let selector = 'div.list-group-item__body[data-filter-attr-id="'+filter['id']+'"], '+'div.list-group-sub-item__body[data-filter-attr-id="'+filter['id']+'"]';
+            _.each(group['filters'], function(filter) {
+                let selector = 'div.list-group-item__body[data-filter-attr-id="' + filter['id'] + '"], ' + 'div.list-group-sub-item__body[data-filter-attr-id="' + filter['id'] + '"]';
                 $(selector).parents('.collection-list').collapse('show');
-                $(selector).collapse('show');
-                $(selector).find('.show-more').triggerHandler('click');
-                $(selector).parents('.tab-pane.search-set').length > 0 && $('a[href="#'+$(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
-                if($(selector).children('.ui-slider').length > 0) {
-                    sliders.push({
-                        'id':$('div.list-group-item__body[data-filter-attr-id="'+filter['id']+'"]').children('.ui-slider')[0].id,
-                        'left_val': filter['values'][0].indexOf(".") >= 0 ? parseFloat(filter['values'][0]) : parseInt(filter['values'][0]),
-                        'right_val': filter['values'][1].indexOf(".") >= 0 ? parseFloat(filter['values'][1]) : parseInt(filter['values'][1]),
-                    })
-                } else {
-                    _.each(filter['values'], function(val){
-                        $('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]').prop("checked",true);
-                        checkFilters($('input[data-filter-attr-id="'+filter['id']+'"][value="'+val+'"]'));
-                    });
-                }
+
+                $(selector).each(function(index, selEle)
+                {
+                    /*if ($(selEle).find('ul, .ui-slider').length>0) {
+                        $(selEle).collapse('show');
+                        $(selEle).find('.show-more').triggerHandler('click');
+                        $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
+                    }*/
+                    var attValueFoundInside= false;
+                    if ($(selEle).children('.ui-slider').length > 0) {
+                        attValueFoundInside= true;
+                       sliders.push({
+                           'id': $('div.list-group-item__body[data-filter-attr-id="' + filter['id'] + '"]').children('.ui-slider')[0].id,
+                           'left_val': filter['values'][0].indexOf(".") >= 0 ? parseFloat(filter['values'][0]) : parseInt(filter['values'][0]),
+                           'right_val': filter['values'][1].indexOf(".") >= 0 ? parseFloat(filter['values'][1]) : parseInt(filter['values'][1]),
+                       })
+                     } else {
+                       _.each(filter['values'], function (val) {
+                           if ($(selEle).find('input[data-filter-attr-id="' + filter['id'] + '"][value="' + val + '"]').length>0) {
+                               attValueFoundInside = true;
+                           }
+                           $('input[data-filter-attr-id="' + filter['id'] + '"][value="' + val + '"]').prop("checked", true);
+                           checkFilters($('input[data-filter-attr-id="' + filter['id'] + '"][value="' + val + '"]'));
+
+                      });
+                  }
+                    if (attValueFoundInside){
+                        $(selEle).collapse('show');
+                        $(selEle).find('.show-more').triggerHandler('click');
+                        $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
+                    }
+
+               });
             });
         });
         if(sliders.length > 0) {
@@ -2989,6 +3004,11 @@ require([
             location.href=$(this).data('uri');
         }
     });
+
+    $('#sign-in-dropdown').on('click', function() {
+        save_anonymous_selection_data();
+    });
+
 
      var cohort_loaded = false;
      function load_preset_filters() {
