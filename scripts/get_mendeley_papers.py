@@ -18,6 +18,7 @@ from __future__ import print_function
 
 from mendeley import Mendeley
 import json
+from operator import itemgetter
 
 MENDELEY_PAPERS_FILE = "mendeley_papers.json"
 
@@ -46,11 +47,16 @@ def test():
 
     # List all groups I have access to
     groups = session.groups.iter()
-
+    isb_cgc_papers = {}
     i = 1
     for g in groups:
         print("[{}] {}".format(i, g.name))
         i = i + 1
+        if g.name == 'ISB-CGC':
+            target_group = session.groups.get(g.id)
+            docs = target_group.documents.iter()
+            for doc in docs:
+                isb_cgc_papers.update({doc.title: doc.id})
 
     # Let choose a group
     selected_index = int(input('Select group to get paper from: '))
@@ -62,7 +68,6 @@ def test():
             group_id = g.id
             break
         i = i + 1
-
     if group_id == '':
         quit()
 
@@ -73,11 +78,15 @@ def test():
     # Write documents to json
     json_papers = {}
     papers_array = []
-
     for doc in docs:
         this_paper = {}
+
         this_paper['title'] = doc.title
-        this_paper['id'] = doc.id
+
+        if doc.title in isb_cgc_papers:
+            this_paper['id'] = isb_cgc_papers.get(doc.title)
+        else:
+            this_paper['id'] = doc.id
 
         if doc.identifiers:
             identifiers = ""
@@ -110,7 +119,7 @@ def test():
 
         this_paper['source'] = doc.source
         this_paper['type'] = doc.type
-        this_paper['year'] = doc.year
+        this_paper['year'] = doc.year if doc.year else 0
 
         if doc.keywords:
             keywords = ""
@@ -122,6 +131,9 @@ def test():
             this_paper['keywords'] = doc.keywords
 
         papers_array.append(this_paper)
+
+    # Sort the list by year in reverse order (oldest last)
+    papers_array.sort(key=itemgetter('year'), reverse=True)
 
     json_papers['papers'] = papers_array
 
