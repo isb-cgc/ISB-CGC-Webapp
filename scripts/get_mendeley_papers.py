@@ -23,8 +23,8 @@ from operator import itemgetter
 MENDELEY_PAPERS_FILE = "mendeley_papers.json"
 
 def test():
-    client_id = 9526
-    client_secret = "AmIvWP7FRxeLHX7n"
+    client_id = input("Input your app ID for Mendeley API: \n")
+    client_secret = input("Input your app secret for Mendeley API: \n")
     redirect_uri = "https://isb-cgc.appspot.com/"
 
     # These values should match the ones supplied when registering your application.
