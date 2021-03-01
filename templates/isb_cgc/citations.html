@@ -8,11 +8,11 @@
                     {% for paper in papers %}
                         <li>
                             {{ paper.authors }}
-                            <a href="https://www.mendeley.com/catalogue/{{ paper.id }}/">
-                                {{ paper.title }}. </a>
-                            {% if paper.source %}<i>{{ paper.source }}. </i>{% endif %}
+                            <a target="_blank" rel="noreferrer" href="https://www.mendeley.com/catalogue/{{ paper.id }}/">
+                                {{ paper.title |safe }}</a>.
+                            {% if paper.source %}<i>{{ paper.source |safe }}. </i>{% endif %}
                             {% if paper.year %}{{ paper.year }}. {% endif %}
-                            {% if paper.identifiers %}{{ paper.identifiers }}. {% endif %}
+                            {% if paper.identifiers %}{{ paper.identifiers |safe }}. {% endif %}
                         </li>
                     {% endfor %}
                 </ol>
