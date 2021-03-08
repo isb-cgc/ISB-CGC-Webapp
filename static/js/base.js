@@ -186,7 +186,7 @@ require([
         $('#gov_warning').modal('show');
     }
 
-    $('.external-link').on('click', function(){
+    $('#body').on('click', '.external-link', function(){
         let url = $(this).attr('url');
         $('#go-to-external-link').attr('href', url);
     });
