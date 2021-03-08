@@ -3,5 +3,13 @@ Your manifest job is still exporting. Please wait five minutes to allow the expo
 {% else %}
 Your manifest job has finished exporting. Table
 {% endif %}
-<a class="external-link" data-toggle="modal" href="" data-target="#external-web-warning" url="{{ table_uri }}">{{ full_table_id }} <i class="fa fa-external-link external-link-icon" aria-hidden="true"></i></a> will be available for seven (7) days, accessible via
-your {{ email }} Google Account at <a class="external-link" href="" data-toggle="modal" data-target="#external-web-warning" url="{{ table_uri }}">{{ table_uri }}  <i class="fa fa-external-link external-link-icon" aria-hidden="true"></i></a>
+<b>{{ full_table_id }}</b>
+<a role=button" class="copy-this" content="{{ full_table_id }}" title="Copy table ID to clipboard">
+    ( <i class="fa fa-copy" aria-hidden="true"></i> )
+</a> will be available for seven (7) days, accessible via your {{ email }} Google Account at <br />
+<a class="external-link" data-toggle="modal" data-target="#external-web-warning" url="{{ table_uri }}">
+    {{ table_uri }} <i class="fa fa-external-link external-link-icon" aria-hidden="true"></i>
+</a>
+<a role=button" class="copy-this" content="{{ table_uri }}" title="Copy table URL to clipboard">
+    ( <i class="fa fa-copy" aria-hidden="true"></i> )
+</a>
