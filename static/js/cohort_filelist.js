@@ -116,6 +116,8 @@ require([
          window.resetTableControls(tableElem, true, curIndex);
     };
 
+
+
     // change no of entries per page
     $('.table-panel').on('change', '.files-per-page', function () {
         var old_fpp = $(this).find('.files-per-page-select').data('fpp');

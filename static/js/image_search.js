@@ -941,7 +941,7 @@ require([
             var newScrollInd = Array.from(remainingTrs.map(function () {
                 return ((this.offsetTop <= scrollPos) ? 0 : 1)
             })).indexOf(1);
-            /*
+
             if (newScrollInd > 0) {
                 var scrollB = remainingTrs.get(newScrollInd - 1).offsetTop;
                 var scrollF = remainingTrs.get(newScrollInd).offsetTop;
@@ -949,7 +949,7 @@ require([
                 if ((scrollPos - scrollB) < (scrollF - scrollPos)) {
                     var newScrollInd = newScrollInd + 1;
                 }
-            }*/
+            }
 
             $('#' + tableId).find('.'+selType+'_' + selId).remove();
             resetTableControls($('#' + tableId), true, newScrollInd)
@@ -1308,12 +1308,9 @@ require([
 
                     }
 
-                    //newScrollInd = findScrollInd(tableId);
                     resetTableControls($('#' + tableId), false, 0);
 
-                    /* nend = new Date().getTime();
-                    diff = nend - nstart;
-                    alert(diff); */
+
                      if (refreshAfterFilter && !isSeries) {
                         window.selItems.selStudies = newSelStudies;
                         var studyArr = new Array();
@@ -1358,34 +1355,11 @@ require([
             });
         };
 
-        var findScrollInd = function (tableId) {
-            var scrollPos = document.getElementById(tableId).scrollTop;
-            var remainingTrs = $('#' + studyTableId).find('tr').not('.project_' + projectId);
-            var newScrollInd = remainingTrs.map(function () {
-                return ((this.offsetTop <= scrollPos) ? 0 : 1)
-            }).indexOf(1);
-            if (newScrollInd > 0) {
-                var scrollB = remainingTrs.get(newScrollInd - 1).offsetTop;
-                scrollF = remainingTrs.get(newScrollInd).offsetTop;
-
-                if ((scrollPos - scrollB) < (scrollF - scrollPos)) {
-                    var newScrollInd = newScrollInd + 1;
-
-                }
-            }
-            return newScrollInd;
-        }
-
-        /* $('.table').find('tbody').on('scroll', function () {
-            resetTableControls($(this), false,-1);
-        }); */
-
-
-        var setTableView = function (panelTableElem) {
-            var curPage = $(panelTableElem).find('.dataTables_goto_page').data('curpage');
-            var recordsPP = $(panelTableElem).find('.files-per-page-select').val();
-            var curRecords = $(panelTableElem).find('tbody').find('tr');
-
+        window.resetHeaderCheckBox(table){
+            var displayedRows = table.find('tbody').find('tr').not('.hide');
+            var checkedDisplayedRowschecked =
+            .find('input:checkbox')
+                .is(':checked')
 
         }
 
@@ -3161,7 +3135,7 @@ require([
             $('#projects_panel').find('.total-file-count')[0].innerHTML = numCol.toString();
              $('#projects_panel').find('.goto-page-number').data('max','3');
 
-            window.resetTableControls ($('#projects_table'), false, 0);
+            window.resetTableControls ($('#projects_table'), false,0);
             window.resetTableControls ($('#cases_table'), false, 0);
             window.resetTableControls ($('#studies_table'), false, 0);
             window.resetTableControls ($('#series_table'), false, 0);
