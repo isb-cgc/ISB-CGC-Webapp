@@ -108,6 +108,7 @@ require([
 
     var changePage = function(paginateElem, pageNo){
          var fpp = $(paginateElem).parent().parent().find('.files-per-page-select').data('fpp');
+
          curIndex= fpp*(pageNo-1);
          $(paginateElem).parent().parent().find('.goto-page-number').val("");
          //$(paginateElem).parent().parent().find('.dataTables_goto_page').data('curpage',pageNo);

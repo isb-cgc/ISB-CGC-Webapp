@@ -193,8 +193,8 @@
                                                            data-curminrng="{{ attr.min_max.min|floor }}" data-curmaxrng="{{ attr.min_max.max|ceiling }}"
 
                                                  {% endif %}>
-                                               <div>
-                                                <!-- <span>Sort by: <input type="radio" name="{{ attr.name }}" value="alpha" checked>Alpha<input type="radio" name="{{ attr.name }}" value="num">Num</span> -->
+                                               <div class="sorter">
+                                                 <span>Sort by: <input type="radio" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
                                             </div>
 
                                                 {% comment %}
@@ -543,13 +543,13 @@
                              <table id="proj_table" class="table table-striped">
                                 <thead id="projects_table_head">
                                     <tr>
-                                        <th class='text_data'>Collection Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'>Total # of Cases<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'># of Cases(this cohort)<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                        <th class="ckbx text_data"></th><th class='text_data'>Collection Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'>Total # of Cases<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'># of Cases(this cohort)<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="projects_table" class="set_height">
                                 {% for coll, cnt in collections.items|dictsort:"0.lower" %}
                                       {% if coll != "All" %}
-                                          <tr id="project_row_{{ coll }}" class="text_head" onclick="(toggleRows(this,'{{ coll }}', 'projects', 'project_row_'))"><td>{{ coll }}</td><td>{{ cnt }}</td><td id="patient_col_{{ coll }}" class="projects_table_num_cohort">{{ cnt }}</td> </tr>
+                                          <tr id="project_row_{{ coll }}" class="text_head")"><td class="ckbx text_data"><input type="checkbox" onclick="(toggleRows($(this).parent().parent(),'projects', 'project_row_'))"></td> <td>{{ coll }}</td><td>{{ cnt }}</td><td id="patient_col_{{ coll }}" class="projects_table_num_cohort">{{ cnt }}</td> </tr>
                                       {% endif %}
                                 {% endfor %}
                                 </tbody>
@@ -589,7 +589,7 @@
                              <table id="case_table" class="table table-striped">
                                 <thead id="cases_table_head">
                                     <tr>
-                                        <th class='text_data'>Collection Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'>Case Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'>Total # of Studies<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                        <th class="ckbx text_data"><input type="checkbox" onclick="toggleRows($(this).parent().parent(),'cases','case_')"></th><th class='text_data'>Collection Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'>Case Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'>Total # of Studies<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
 
                                         <th class='numeric_data'>Total # of Series<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
                                         <!-- <th>Collection Name </th><th>Total # of Patients</th><th># of Patients(this cohort)</th> -->
@@ -637,10 +637,9 @@
                               <thead id="studies_table_head">
                              <tr>
                                  <!-- <th class='text_data '>Project Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th> -->
+                                 <th class="ckbx text_data"><input type="checkbox" onclick="toggleRows($(this).parent().parent(), 'studies','study_')"></th>
                                  <th class='text_data case-id'>Case Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-
                                  <th class='text_data study-id'>Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-
                                  <th class='text_data study-description'>Study Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
                                  <th class='text_data study-id'># of Series<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
                                  <th class="text_data open-viewer">View</th>
@@ -683,6 +682,7 @@
                              <table class = "table table-striped series-table">
                                 <thead id="series_table_head">
                                     <tr>
+                                        <th class="ckbx text_data"><input type="checkbox"></th>
                                         <th class="study-id">Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
                                         <th class="series-number">Series Number<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
                                         <th class="modality">Modality<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
