@@ -3178,6 +3178,8 @@ span.code {
   #landing .panel-heading {
     padding: 5px 10px;
     min-height: 77px; }
+    #landing .panel-heading a {
+      text-decoration: none; }
     #landing .panel-heading img {
       padding: 0;
       max-width: 100px; }
