@@ -493,7 +493,7 @@ def genericplot(request, id=0):
 
 @csrf_protect
 def save_viz(request):
-    redirect_url = '/user_landing/'
+    redirect_url = '/dashboard/'
 
     if request.method == 'POST':
         params = request.POST
@@ -541,7 +541,7 @@ def save_viz(request):
 
 @csrf_protect
 def delete_viz(request):
-    redirect_Url = '/user_landing/'
+    redirect_Url = '/dashboard/'
 
     if request.method == 'POST':
         ids = request.POST.getlist('id')
@@ -556,7 +556,7 @@ def delete_viz(request):
 def share_viz(request, id=0):
     user_ids = request.POST.getlist('users')
     users = User.objects.filter(id__in=user_ids)
-    redirect_url = '/user_landing/'
+    redirect_url = '/dashboard/'
     if id == 0:
         viz_ids = request.POST.getlist('viz-ids')
         viz_list = SavedViz.objects.filter(id__in=viz_ids)

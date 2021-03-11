@@ -116,6 +116,7 @@ def _decode_dict(data):
 
 @never_cache
 def landing_page(request):
+    logger.info("[STATUS] Received landing page view request at {}".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
     return render(request, 'isb_cgc/landing.html', {'request': request, })
 
 
@@ -252,79 +253,6 @@ def extended_login_view(request):
         logger.exception(e)
 
     return redirect(reverse(redirect_to))
-
-
-'''
-Returns page users see after signing in
-'''
-
-
-@login_required
-def user_landing(request):
-    directory_service, http_auth = get_directory_resource()
-    user_email = User.objects.get(id=request.user.id).email
-    # add user to isb-cgc-open if they are not already on the group
-    try:
-        body = {
-            "email": user_email,
-            "role": "MEMBER"
-        }
-        directory_service.members().insert(
-            groupKey=OPEN_ACL_GOOGLE_GROUP,
-            body=body
-        ).execute(http=http_auth)
-
-    except HttpError as e:
-        logger.info(e)
-
-    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
-    # check to see if user has read access to 'All TCGA Data' cohort
-    isb_superuser = User.objects.get(is_staff=True,is_superuser=True,is_active=True)
-    superuser_perm = Cohort_Perms.objects.get(user=isb_superuser)
-    user_all_data_perm = Cohort_Perms.objects.filter(user=request.user, cohort=superuser_perm.cohort)
-    if not user_all_data_perm:
-        Cohort_Perms.objects.create(user=request.user, cohort=superuser_perm.cohort, perm=Cohort_Perms.READER)
-
-    # add_data_cohort = Cohort.objects.filter(name='All TCGA Data')
-
-    users = User.objects.filter(is_superuser=0)
-    cohort_perms = Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True)
-    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved').annotate(
-        num_cases=Count('samples__case_barcode'))
-
-    for item in cohorts:
-        item.perm = item.get_perm(request).get_perm_display()
-        item.owner = item.get_owner()
-        # print local_zone.localize(item.last_date_saved)
-
-    # viz_perms = Viz_Perms.objects.filter(user=request.user).values_list('visualization', flat=True)
-    visualizations = SavedViz.objects.generic_viz_only(request).order_by('-last_date_saved')
-    for item in visualizations:
-        item.perm = item.get_perm(request).get_perm_display()
-        item.owner = item.get_owner()
-
-    seqpeek_viz = SavedViz.objects.seqpeek_only(request).order_by('-last_date_saved')
-    for item in seqpeek_viz:
-        item.perm = item.get_perm(request).get_perm_display()
-        item.owner = item.get_owner()
-
-    # Used for autocomplete listing
-    cohort_listing = Cohort.objects.filter(id__in=cohort_perms, active=True).values('id', 'name')
-    for cohort in cohort_listing:
-        cohort['value'] = int(cohort['id'])
-        cohort['label'] = cohort['name'].encode('utf8')
-        del cohort['id']
-        del cohort['name']
-
-    return render(request, 'isb_cgc/user_landing.html', {'request': request,
-                                                         'cohorts': cohorts,
-                                                         'user_list': users,
-                                                         'cohorts_listing': cohort_listing,
-                                                         'visualizations': visualizations,
-                                                         'seqpeek_list': seqpeek_viz,
-                                                         'base_url': settings.BASE_URL,
-                                                         'base_api_url': settings.BASE_API_URL
-                                                         })
 
 
 '''
@@ -514,7 +442,6 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
     return JsonResponse(result, status=status)
 
 
-@login_required
 def dicom(request, study_uid=None):
     template = 'isb_cgc/dicom.html'
 
@@ -592,7 +519,6 @@ def test_solr_data(request):
 
     return JsonResponse({'result': results}, status=status)
 
-@login_required
 def camic(request, file_uuid=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     context = {}
@@ -639,7 +565,6 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     return render(request, 'isb_cgc/igv.html', context)
 
 
-@login_required
 def path_report(request, report_file=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     context = {}
