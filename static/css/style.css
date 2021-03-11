@@ -64,7 +64,7 @@ ul, ol {
   -moz-osx-font-smoothing: grayscale; }
 
 .main-content {
-  margin-top: 55px; }
+  margin-top: 86px; }
 
 .table-list li:after, .table-list_warning li:after, .worksheet-header:after, .worksheet-body:after {
   visibility: hidden;
@@ -2785,7 +2785,7 @@ html {
 
 #landing .landing-content-div {
   position: absolute;
-  top: 57px;
+  top: 86px;
   left: 0;
   width: 100%;
   background-image: linear-gradient(to bottom right,#6294c9,#83c5d7,#6294c9);
