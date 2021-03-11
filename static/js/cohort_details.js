@@ -917,19 +917,25 @@ require([
         $(program_data_selector + ' .show-more').on('click', function() {
             $(this).parent().siblings('li.extra-values').show();
             $(this).parent().siblings('.less-checks').show();
+            $(this).parent().siblings('.less-checks').addClass('more-expanded');
             $(this).parent().hide();
         });
         $(program_data_selector + ' .show-less').on('click', function() {
             $(this).parent().siblings('li.extra-values').hide();
             $(this).parent().siblings('.more-checks').show();
+            $(this).parent().removeClass('more-expanded');
             $(this).parent().hide();
         });
 
         // Click events for 'Check All/Uncheck All' in filter categories
         $(program_data_selector + ' .check-all').on('click',function(){
-            $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',true);
-            $(this).parent().parent().siblings('.checkbox').find('input').each(function(){
-                $(this).triggerHandler('change');
+            $(this).parent().parent().siblings('.checkbox').each(function(){
+                var filter = $(this);
+                if (filter.hasClass("visible-filter")) {
+                    var checkbox = filter.find('input');
+                    checkbox.prop('checked', true);
+                    checkbox.triggerHandler('change');
+                }
             });
         });
         $(program_data_selector + ' .uncheck-all').on('click',function(){
