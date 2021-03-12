@@ -108,12 +108,15 @@ require([
 
     var changePage = function(paginateElem, pageNo){
          var fpp = $(paginateElem).parent().parent().find('.files-per-page-select').data('fpp');
+
          curIndex= fpp*(pageNo-1);
          $(paginateElem).parent().parent().find('.goto-page-number').val("");
          //$(paginateElem).parent().parent().find('.dataTables_goto_page').data('curpage',pageNo);
          var tableElem = $(paginateElem).parent().parent().parent().find('tbody');
          window.resetTableControls(tableElem, true, curIndex);
     };
+
+
 
     // change no of entries per page
     $('.table-panel').on('change', '.files-per-page', function () {
