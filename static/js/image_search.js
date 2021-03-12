@@ -101,7 +101,7 @@ require([
 
              parStr=$('#'+slideDiv).data("attr-par");
              if (parStr.startsWith('tcga_clinical') && !(reset)){
-                //checkTcga();
+                checkTcga();
             }
             //var slideDiv = divName + "_slide";
             var max = $('#' + slideDiv).slider("option", "max");
@@ -471,7 +471,7 @@ require([
             }
 
             if (parStr.startsWith('tcga_clinical')){
-                //checkTcga();
+                checkTcga();
             }
             var slideNm = $(elem).parent()[0].id+"_slide";
             //updatePlotBinsForSliders(slideNm);
@@ -528,38 +528,7 @@ require([
 
 
         }
-
-        var setFromSlider = function(divName, filtName, min, max){
-            var slideName = divName + '_slide';
-            var inpName = divName + '_input';
-            $('#' + slideName).addClass('used');
-                    var val = $('#' + inpName)[0].value;
-                    var valArr = val.split('-');
-                    var attVal = [];
-                    if (isInt) {
-                        attVal = [parseInt(valArr[0]), parseInt(valArr[1]) ];
-                    } else {
-                        attVal = [parseFloat(valArr[0]), parseFloat(valArr[1])];
-                    }
-
-                    if (!( filtName in window.filterObj )) {
-                        window.filterObj[filtName] = new Object();
-                    }
-                    window.filterObj[filtName]['rng'] = attVal;
-                    if (valArr[1]<max){
-                        window.filterObj[filtName]['type']='_lte'
-                    }
-                    else{
-                        window.filterObj[filtName]['type']='_bte'
-                    }
-
-                    if (filtName.startsWith('tcga_clinical')) {
-                        //checkTcga();
-                    }
-                    mkFiltText();
-                    updateFacetsData(true);
-
-        }
+        
 
         var mkSlider = function (divName, min, max, step, isInt, wNone, parStr, attr_id, attr_name, lower, upper, isActive,checked) {
             $('#'+divName).addClass('hasSlider');
@@ -2564,7 +2533,7 @@ require([
                 }
 
                 if ( (checked) && (filtnm ==='tcga_clinical') && !is_cohort){
-                    //checkTcga();
+                    checkTcga();
                 }
 
                 if ((checked) && (curCat.length>0) && hasCheckBox  ){
