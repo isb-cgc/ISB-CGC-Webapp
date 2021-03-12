@@ -39,23 +39,28 @@ function($, d3, d3tip, vis_helpers) {
         });
 
     return {
-        get_treemap_ready: function(data, clin_attr_key, attribute, prog_id) {
+        get_treemap_ready: function(data, clin_attr_key, attribute) {
+        // get_treemap_ready: function(data, clin_attr_key, attribute, prog_id) {
             var children = [];
             for (var i in data) {
                 // For Issue 2018 we build a standardized tag that identifies check boxes:
                 //replace white spaces with undescore, and escape special characters for jQuery's ID selection to work.
-                var click_targ = $.escapeSelector((prog_id + "-" + clin_attr_key + "-" + data[i]['value']).replace(/\s+/g, '_').toUpperCase());
+                var click_targ = "public-" + $.escapeSelector(( clin_attr_key + "-" + data[i]['value']).replace(/\s+/g, '_').toUpperCase());
+                // var click_targ = $.escapeSelector((prog_id + "-" + clin_attr_key + "-" + data[i]['value']).replace(/\s+/g, '_').toUpperCase());
+
                 children.push({name:(data[i]['displ_name'] || data[i]['value'].toString().replace(/_/g, ' ')), count: data[i]['count'], click_targ: click_targ});
             }
             return {children: children, name: attribute};
         },
-        draw_tree: function(data, svg, prog_id, clin_attr_key, attribute, w, h, showtext, tip, pcount) {
+        draw_tree: function(data, svg, clin_attr_key, attribute, w, h, showtext, tip, pcount) {
+        // draw_tree: function(data, svg, prog_id, clin_attr_key, attribute, w, h, showtext, tip, pcount) {
 
             pcount = pcount || 0;
 
             tip = treeTip || tip;
 
-            var node = this.get_treemap_ready(data, clin_attr_key, attribute, prog_id);
+            var node = this.get_treemap_ready(data, clin_attr_key, attribute);
+            // var node = this.get_treemap_ready(data, clin_attr_key, attribute, prog_id);
             var treemap = d3.layout.treemap()
                 .round(false)
                 .size([w, h])
@@ -98,10 +103,12 @@ function($, d3, d3tip, vis_helpers) {
                 .on('mouseover.tip', tip.show)
                 .on('mouseout.tip', tip.hide)
                 .on('click', function(d) {
+                    console.log('CLICKED!');
                     // This function predated the Issue 2018 fix, but the target element was being missed because no id
                     // was provided, and the tag generation here was faulty. Use a prebuilt click targ here that matches the
                     // pattern established in Common/cohorts/metadata_counting.py:
                     var item = $('#' + d.click_targ);
+                    console.log(d.click_targ);
                     var viewOnly = ($('#cohort-mode').length) && ($('#cohort-mode').val() == 'VIEW');
                     if ((item.length > 0) && !viewOnly) {
                         item[0].checked = 'checked';
@@ -111,7 +118,9 @@ function($, d3, d3tip, vis_helpers) {
 
             svg.call(tip);
         },
-        draw_trees: function(data, clin_attr, prog_id, this_tree) {
+        draw_trees: function(data, clin_attr, this_tree) {
+        // draw_trees: function(data, clin_attr, prog_id, this_tree) {
+
 
             var startPlot = new Date().getTime();
 
@@ -149,7 +158,8 @@ function($, d3, d3tip, vis_helpers) {
                     .style("height", h + "px")
                     .append("svg:g")
                     .attr("transform", "translate(.5,.5)");
-                this.draw_tree(tree_data[clin_attr_keys[i]], graph_svg, prog_id, clin_attr_keys[i], clin_attr[clin_attr_keys[i]], w, h, false, treeTip, pcount);
+                this.draw_tree(tree_data[clin_attr_keys[i]], graph_svg, clin_attr_keys[i], clin_attr[clin_attr_keys[i]], w, h, false, treeTip, pcount);
+                // this.draw_tree(tree_data[clin_attr_keys[i]], graph_svg, prog_id, clin_attr_keys[i], clin_attr[clin_attr_keys[i]], w, h, false, treeTip, pcount);
             }
 
             var stopPlot = new Date().getTime();

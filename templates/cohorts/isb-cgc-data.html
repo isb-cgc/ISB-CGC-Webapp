@@ -1,7 +1,7 @@
 {# Public Data Set Filter Template #}
-<div id="public-data" class="panel">
+<div id="public-data" class="data-tab panel tab-content">
     <div id="public-data-filter-panel" class="col-lg-3 filter-panel">
-        <div class="tabpanel" role="tabpanel">
+        <div class="tabpanel data-tab" role="tabpanel">
             <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
                 <li role="presentation" class="filter-tab-2 active"><a id="by-node-tab" href="#node-filters" role="tab"
                                                                        data-toggle="tab" aria-selected="true"
@@ -27,7 +27,8 @@
                                     </a>
                                 </div>
                                 <div id="node-collapse-{{ node.short_name }}"
-                                     class="list-group-item__body cohort-feature-select-block {% if forloop.first %}true{% else %}collapse{% endif %}" role="tabpanel"
+                                     class="list-group-item__body cohort-feature-select-block {% if forloop.first %}true{% else %}collapse{% endif %}"
+                                     role="tabpanel"
                                      data-feature-type="donor"
                                      aria-labelledby="node-heading-{{ node.short_name }}"
                                      data-feature-name="{{ node.name }}" data-feature-displ-name="{{ node.short_name }}"
@@ -41,10 +42,11 @@
                                                            data-value-name="{{ program.name }}"
                                                            id="{{ node.short_name }}-{{ program.name }}"
                                                            data-value-displ-name="{{ program.name }}"
-                                                           data-value-id="{{ prog.id }}"
-                                                    >
+                                                           data-value-id="{{ program.id }}">
                                                     {{ program.name }}
-                                                    {#                                            <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>#}
+{#                                                    <span class="float-right case_count count">#}
+{#                                                        {{ v.count|format_num_with_commmas }}#}
+{#                                                    </span>#}
                                                 </label>
                                             </li>
                                         {% endfor %}
@@ -66,7 +68,7 @@
                                        href="#program-collapse-{{ prog_id }}"
                                        aria-controls="collapse-{{ prog_id }}">
                                         <i class="fa fa-caret-right"></i><i
-                                            class="fa fa-caret-down"></i> {{ prog_val.name }}
+                                            class="fa fa-caret-down"></i>{{ prog_val.name }}
                                     </a>
                                 </div>
                                 <div id="program-collapse-{{ prog_id }}"
@@ -84,8 +86,7 @@
                                                            data-value-name="{{ node.short_name }}"
                                                            id="{{ prog_id }}-{{ node.short_name }}"
                                                            data-value-displ-name="{{ node.short_name }}"
-                                                           data-value-id="{{ node.id }}"
-                                                    >
+                                                           data-value-id="{{ node.id }}">
                                                     {{ node.short_name }}
                                                     {#                                            <span class="float-right case_count count">{{ v.count|format_num_with_commmas }}</span>#}
                                                 </label>
@@ -139,9 +140,7 @@
                                          aria-labelledby="public-heading-{{ attr.name }}"
                                          data-feature-name="{{ attr.name }}"
                                          data-feature-displ-name="{{ attr.displ_name }}"
-                                         data-feature-id="
-
-                                                 {% if attr_counts|get_named_item:attr.name|get_item:'id' %}{{ attr_counts|get_named_item:attr.name|get_item:'id' }}{% endif %}">
+                                         data-feature-id="{% if attr_counts|get_named_item:attr.name|get_item:'id' %}{{ attr_counts|get_named_item:attr.name|get_item:'id' }}{% endif %}">
                                         <ul class="search-checkbox-list" id="public-{{ attr.name }}">
                                             {% with attr_counts|get_named_item:attr.name|get_item:'values'|how_many_more:6 as num_more %}
                                                 {% for v in attr_counts|get_named_item:attr.name|get_item:'values'|check_for_order:attr.name %}
@@ -151,14 +150,9 @@
                                                                 title="{{ v.tooltip }}" {% endif %}>
                                                                 <input type="checkbox" name="elements-selected"
                                                                        data-value-name="{{ v.value }}"
-                                                                       id="
-                                                                                           {% if v.full_id %}public-{{ v.full_id }}{% endif %}"
-                                                                       data-value-displ-name="
-
-                                                                               {% if v.displ_name %}{{ v.displ_name }}{% endif %}"
-                                                                       data-value-id="
-
-                                                                               {% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
+                                                                       id="{% if v.full_id %}public-{{ v.full_id }}{% endif %}"
+                                                                       data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
+                                                                       data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
                                                                 {% if v.value == 'None' %}
                                                                     <em>None</em>{% elif v.displ_name %}
                                                                     {{ v.displ_name|get_readable_name:attr.name }}{% else %}
@@ -178,8 +172,10 @@
                                                                        data-value-name="{{ v.value }}"
                                                                        id="{% if v.full_id %}public-{{ v.full_id }}{% endif %}"
                                                                        data-value-displ-name="
+
                                                                                {% if v.displ_name %}{{ v.displ_name }}{% endif %}"
                                                                        data-value-id="
+
                                                                                {% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
                                                                 {% if v.value == 'None' %}
                                                                     <em>None</em>{% elif v.displ_name %}
@@ -197,8 +193,10 @@
                                                                        id="
                                                                                {% if v.full_id %}public-{{ v.full_id }}{% endif %}"
                                                                        data-value-displ-name="
+
                                                                                {% if v.displ_name %}{{ v.displ_name }}{% endif %}"
                                                                        data-value-id="
+
                                                                                {% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
                                                                 {% if v.value == 'None' %}
                                                                     <em>None</em>
@@ -256,8 +254,7 @@
                                                         <input type="checkbox" name="elements-selected"
                                                                data-value-name="{{ v.value }}"
                                                                data-value-displ-name="{% if v.value == 'None' %}None{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %}"
-                                                               data-value-id="
-                                                                       {% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
+                                                               data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
                                                         {% if v.value == 'None' %}
                                                             <em>None</em>
                                                         {% elif v.displ_name %}
@@ -276,255 +273,272 @@
                         {% endfor %}
                     </ul>
                 </div>
-                            <!-- molecular filters tab -->
-                            {% if molecular_attr.keys|length > 0 %}
-                                <div role="tabpanel" class="tab-pane" id="public-molecular-filters">
-                                    <ul class="list-group molecular-accordion" id="public-molecular-accordion"
-                                        role="tablist" aria-multiselectable="true">
-                                        <li class="list-group-item">
-                                            <div id="p-public-molecular-filter-alert"
-                                                 class="alert alert-warning alert-dismissable molecular-filter-alert"
-                                                 style="display: none;">
-                                                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span
-                                                        class="sr-only">Close</span></button>
-                                                A large amount of data must be processed to use these filters, which can result in some
-                                                delays.
-                                            </div>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <div class="list-item__heading" role="tab" id="p-public-heading-and-or-filters">
-                                                Combine Mutation Filters with...
-                                            </div>
-                                            <div class="list-group-item__body">
-                                                <select id="p-public-mut-filter-combine"
-                                                        class="form-control mut-filter-combine"
-                                                        aria-labelledby="p-public-heading-and-or-filters">
-                                                    <option value="and" title="Filters will be combined using AND" selected>AND (Require
-                                                        all filters)
-                                                    </option>
-                                                    <option value="or" title="Filters will be combined using OR">OR (Require one or more
-                                                        filters)
-                                                    </option>
-                                                </select>
-                                            </div>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <div class="list-group-item__heading" role="tab"
-                                                 id="p-public-heading-gene-mutation-status">
-                                                <a class="collapse-gene-mutation-status" role="button" data-toggle="collapse"
-                                                   data-parent="#data-type-accordion"
-                                                   href="#p-public-collapse-gene-mutation-status" aria-expanded="false"
-                                                   aria-controls="collapse-gene-mutation-status">
-                                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> GENE MUTATION
-                                                    STATUS
-                                                </a>
-                                            </div>
-                                            <div id="p-public-collapse-gene-mutation-status"
-                                                 class="list-group-item__body collapse cohort-feature-select-block gene-mutation-status"
-                                                 role="tabpanel"
-                                                 aria-labelledby="p-public-heading-gene-mutation-status"
-                                                 data-feature-name="gene-mutation-status" data-feature-displ-name="Gene Mutation Status"
-                                                 data-feature-type="molecular">
-                                                <ul class="list">
-                                                    {% if molecular_attr_builds %}
-                                                        <li class="list-item">
-                                                            <button class="btn btn-primary build-mol-filter" disabled
-                                                                    title="Choose a Gene and Mutation Type, then click this button to create the filter.">
-                                                                Build Filter
-                                                            </button>
-                                                            <button class="btn btn-primary clear-mol-filter"
-                                                                    title="Clear the current filter settings (does not delete a filter from your Selected Filters).">
-                                                                Clear
-                                                            </button>
-                                                        </li>
-                                                        <li class="list-item">
-                                                            <label title="Make this filter a 'negative' filter, eg. 'TP53 does not have mutations'">
-                                                                <input class="inversion-checkbox" type="checkbox" name="invert-filter"/>
-                                                                Negative Filter?
-                                                            </label>
-                                                        </li>
-                                                        <li class="list-item">
-                                                            <!-- build selector -->
-                                                            <div class="list-item__heading" role="tab"
-                                                                 id="p-public-heading-sel-build">
-                                                                Genomic Build
-                                                            </div>
-                                                            <div id="p-public-sel-build"
-                                                                 class="list-group-item__body sel-build" role="tabpanel"
-                                                                 aria-labelledby="p-public-heading-sel-build">
-                                                                {% if molecular_attr_builds|length > 1 %}
-                                                                    <select id="p-public-mutation-build"
-                                                                            class="form-control mutation-build"
-                                                                            aria-labelledby="p-public-heading-sel-build">
-                                                                        {% for build in molecular_attr_builds %}
-                                                                            <option value="{{ build.value }}"
-                                                                                    data-bq-table="{{ build.displ_text }}"
-                                                                                    title="BQ table: {{ build.displ_text }}"
-                                                                                    {% if build.value == 'HG19' %}selected{% endif %}>{{ build.value }}</option>
-                                                                        {% endfor %}
-                                                                    </select>
-                                                                    {% for build in molecular_attr_builds %}
-                                                                        {% if build.value == 'HG19' %}
-                                                                            <div class="bq-name">
-                                                                                <span class="label bq-label">BQ Table:</span>
-                                                                                <span class="bq-table-display" title="{{ build.displ_text }}"
-                                                                                    id="p-public-bq-table">
+                <!-- molecular filters tab -->
+                {% if molecular_attr.keys|length > 0 %}
+                    <div role="tabpanel" class="tab-pane" id="public-molecular-filters">
+                        <ul class="list-group molecular-accordion" id="public-molecular-accordion"
+                            role="tablist" aria-multiselectable="true">
+                            <li class="list-group-item">
+                                <div id="p-public-molecular-filter-alert"
+                                     class="alert alert-warning alert-dismissable molecular-filter-alert"
+                                     style="display: none;">
+                                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span
+                                            class="sr-only">Close</span></button>
+                                    A large amount of data must be processed to use these filters, which can result in
+                                    some
+                                    delays.
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="list-item__heading" role="tab" id="p-public-heading-and-or-filters">
+                                    Combine Mutation Filters with...
+                                </div>
+                                <div class="list-group-item__body">
+                                    <select id="p-public-mut-filter-combine"
+                                            class="form-control mut-filter-combine"
+                                            aria-labelledby="p-public-heading-and-or-filters">
+                                        <option value="and" title="Filters will be combined using AND" selected>AND
+                                            (Require
+                                            all filters)
+                                        </option>
+                                        <option value="or" title="Filters will be combined using OR">OR (Require one or
+                                            more
+                                            filters)
+                                        </option>
+                                    </select>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="list-group-item__heading" role="tab"
+                                     id="p-public-heading-gene-mutation-status">
+                                    <a class="collapse-gene-mutation-status" role="button" data-toggle="collapse"
+                                       data-parent="#data-type-accordion"
+                                       href="#p-public-collapse-gene-mutation-status" aria-expanded="false"
+                                       aria-controls="collapse-gene-mutation-status">
+                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> GENE MUTATION
+                                        STATUS
+                                    </a>
+                                </div>
+                                <div id="p-public-collapse-gene-mutation-status"
+                                     class="list-group-item__body collapse cohort-feature-select-block gene-mutation-status"
+                                     role="tabpanel"
+                                     aria-labelledby="p-public-heading-gene-mutation-status"
+                                     data-feature-name="gene-mutation-status"
+                                     data-feature-displ-name="Gene Mutation Status"
+                                     data-feature-type="molecular">
+                                    <ul class="list">
+                                        {% if molecular_attr_builds %}
+                                            <li class="list-item">
+                                                <button class="btn btn-primary build-mol-filter" disabled
+                                                        title="Choose a Gene and Mutation Type, then click this button to create the filter.">
+                                                    Build Filter
+                                                </button>
+                                                <button class="btn btn-primary clear-mol-filter"
+                                                        title="Clear the current filter settings (does not delete a filter from your Selected Filters).">
+                                                    Clear
+                                                </button>
+                                            </li>
+                                            <li class="list-item">
+                                                <label title="Make this filter a 'negative' filter, eg. 'TP53 does not have mutations'">
+                                                    <input class="inversion-checkbox" type="checkbox"
+                                                           name="invert-filter"/>
+                                                    Negative Filter?
+                                                </label>
+                                            </li>
+                                            <li class="list-item">
+                                                <!-- build selector -->
+                                                <div class="list-item__heading" role="tab"
+                                                     id="p-public-heading-sel-build">
+                                                    Genomic Build
+                                                </div>
+                                                <div id="p-public-sel-build"
+                                                     class="list-group-item__body sel-build" role="tabpanel"
+                                                     aria-labelledby="p-public-heading-sel-build">
+                                                    {% if molecular_attr_builds|length > 1 %}
+                                                        <select id="p-public-mutation-build"
+                                                                class="form-control mutation-build"
+                                                                aria-labelledby="p-public-heading-sel-build">
+                                                            {% for build in molecular_attr_builds %}
+                                                                <option value="{{ build.value }}"
+                                                                        data-bq-table="{{ build.displ_text }}"
+                                                                        title="BQ table: {{ build.displ_text }}"
+                                                                        {% if build.value == 'HG19' %}selected{% endif %}>{{ build.value }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        {% for build in molecular_attr_builds %}
+                                                            {% if build.value == 'HG19' %}
+                                                                <div class="bq-name">
+                                                                    <span class="label bq-label">BQ Table:</span>
+                                                                    <span class="bq-table-display"
+                                                                          title="{{ build.displ_text }}"
+                                                                          id="p-public-bq-table">
                                                                                     {{ build.displ_text }}
                                                                                 </span>
-                                                                            </div>
-                                                                        {% endif %}
-                                                                    {% endfor %}
-                                                                {% else %}
-                                                                    <span>{{ molecular_attr_builds.0.value }}</span>
-                                                                    <div class="bq-name"><span class="label bq-label">BQ Table:</span>
-                                                                        <span class="bq-table-display"
-                                                                              title="{{ molecular_attr_builds.0.displ_text }}"
-                                                                              id="p-public-bq-table">{{ molecular_attr_builds.0.displ_text }}</span>
-                                                                    </div>
-                                                                {% endif %}
-                                                            </div>
-                                                        </li>
-                                                    {% endif %}
-                                                    <li class="list-item">
-                                                        <!-- gene selector -->
-                                                        <div class="list-item__heading" role="tab"
-                                                             id="p-public-heading-sel-gene">
-                                                            Gene
+                                                                </div>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <span>{{ molecular_attr_builds.0.value }}</span>
+                                                        <div class="bq-name"><span
+                                                                class="label bq-label">BQ Table:</span>
+                                                            <span class="bq-table-display"
+                                                                  title="{{ molecular_attr_builds.0.displ_text }}"
+                                                                  id="p-public-bq-table">{{ molecular_attr_builds.0.displ_text }}</span>
                                                         </div>
-                                                        <div id="p-public-sel-gene" class="list-group-item__body sel-gene"
-                                                             role="tabpanel" aria-labelledby="p-public-heading-sel-gene">
-                                                            <div id="p-public-tokenfield-holder">
+                                                    {% endif %}
+                                                </div>
+                                            </li>
+                                        {% endif %}
+                                        <li class="list-item">
+                                            <!-- gene selector -->
+                                            <div class="list-item__heading" role="tab"
+                                                 id="p-public-heading-sel-gene">
+                                                Gene
+                                            </div>
+                                            <div id="p-public-sel-gene" class="list-group-item__body sel-gene"
+                                                 role="tabpanel" aria-labelledby="p-public-heading-sel-gene">
+                                                <div id="p-public-tokenfield-holder">
                                                                 <textarea name="genes-list"
                                                                           class="form-control tokenfield paste-in-genes"
                                                                           id="p-public-paste-in-genes"
                                                                           aria-labelledby="p-public-heading-sel-gene"
-                                                                          placeholder="Enter a gene's name" required></textarea>
-                                                            </div>
-                                                            <div class="tokenfield">
-                                                                <p class="helper-text__invalid" style="display: none;"><i
-                                                                        class="fa fa-exclamation-circle"></i> The following <span
-                                                                        class="token invalid">items</span>were not recognized as gene
-                                                                    identifiers. You may either correct or delete these items -- or use
-                                                                    them as-is.</p>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                    <li class="list-item">
-                                                        <!-- Mutation Category Selector -->
-                                                        <div class="list-item__heading" role="tab"
-                                                             id="p-public-heading-sel-molecular-attr-cat">
-                                                            Mutation Type Categories
-                                                        </div>
-                                                        <div id="p-public-sel-molecular-attr-cat"
-                                                             class="list-group-item__body cohort-feature-select-block" role="tabpanel"
-                                                             aria-labelledby="p-public-heading-sel-molecular-attr-cat"
-                                                             data-feature-displ-name="Mutation Category" data-feature-id="category"
-                                                             data-feature-name="mutation-category" data-feature-type="molecular">
-                                                            <select id="p-public-mutation-category"
-                                                                    class="mutation-category-selector form-control"
-                                                                    aria-labelledby="p-public-heading-sel-molecular-attr-cat">
-                                                                <option value="label" disabled selected>-- Select a Category --</option>
-                                                                <option value="any" data-value-displ-name="Any" data-value-name="Any"
-                                                                        data-value-id="any">Any
-                                                                </option>
-                                                                {% for cat in molecular_attr.categories %}
-                                                                    <option value="{{ cat.value }}"
-                                                                            data-value-displ-name="{{ cat.name }}"
-                                                                            data-value-name="{{ cat.name }}"
-                                                                            data-value-id="
-                                                                                    {% if cat.id %}{{ cat.id }}{% else %}{{ cat.value }}{% endif %}">{{ cat.name }}</option>
-                                                                {% endfor %}
-                                                                <option value="indv-selex">Individual Selection</option>
-                                                            </select>
-                                                        </div>
-                                                    </li>
-                                                    <li class="list-item">
-                                                        <!-- Specific Mutation Type Checkboxes -->
-                                                        <div class="list-item__heading" role="tab"
-                                                             id="p-public-heading-spec-molecular-attrs">
-                                                            <span title="Choose the 'Individual Selection' category to enable this section">Individual Mutation Types</span>
-                                                        </div>
-                                                        <span class="heading-note" id="p-public-spec-mol-attr-heading-note">Choose the 'Individual Selection' category to enable</span>
-                                                        <div id="p-public-spec-molecular-attrs"
-                                                             class="list-group-item__body cohort-feature-select-block spec-molecular-attrs"
-                                                             role="tabpanel"
-                                                             aria-labelledby="p-public-heading-spec-molecular-attrs"
-                                                             data-feature-displ-name="Specific Mutation Type"
-                                                             data-feature-name="specific-mutation"
-                                                             data-feature-id="specific" data-feature-type="molecular">
-                                                            <ul class="mol-checkbox-list" id="p-public-{{ attr.value }}"
-                                                                style="display: none;">
-                                                                {% for attr in molecular_attr.attrs %}
-                                                                    <li class="checkbox">
-                                                                        <label>
-                                                                            <input class="mutation-checkbox" type="checkbox"
-                                                                                   name="elements-selected"
-                                                                                   data-value-name="{{ attr.value }}"
-                                                                                   data-value-id="
-                                                                                           {% if attr.id %}{{ attr.id }}{% else %}{{ attr.value }}{% endif %}"
-                                                                                   data-value-displ-name="{{ attr.displ_name }}"
-                                                                                   data-category="{{ attr.category }}">
-                                                                            {{ attr.displ_name }}
-                                                                            <!-- <span class="count">({{ attr.count }})</span> -->
-                                                                        </label>
-                                                                    </li>
-                                                                {% endfor %}
-                                                            </ul>
-                                                        </div>
-                                                    </li>
+                                                                          placeholder="Enter a gene's name"
+                                                                          required></textarea>
+                                                </div>
+                                                <div class="tokenfield">
+                                                    <p class="helper-text__invalid" style="display: none;"><i
+                                                            class="fa fa-exclamation-circle"></i> The following <span
+                                                            class="token invalid">items</span>were not recognized as
+                                                        gene
+                                                        identifiers. You may either correct or delete these items -- or
+                                                        use
+                                                        them as-is.</p>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="list-item">
+                                            <!-- Mutation Category Selector -->
+                                            <div class="list-item__heading" role="tab"
+                                                 id="p-public-heading-sel-molecular-attr-cat">
+                                                Mutation Type Categories
+                                            </div>
+                                            <div id="p-public-sel-molecular-attr-cat"
+                                                 class="list-group-item__body cohort-feature-select-block"
+                                                 role="tabpanel"
+                                                 aria-labelledby="p-public-heading-sel-molecular-attr-cat"
+                                                 data-feature-displ-name="Mutation Category" data-feature-id="category"
+                                                 data-feature-name="mutation-category" data-feature-type="molecular">
+                                                <select id="p-public-mutation-category"
+                                                        class="mutation-category-selector form-control"
+                                                        aria-labelledby="p-public-heading-sel-molecular-attr-cat">
+                                                    <option value="label" disabled selected>-- Select a Category --
+                                                    </option>
+                                                    <option value="any" data-value-displ-name="Any"
+                                                            data-value-name="Any"
+                                                            data-value-id="any">Any
+                                                    </option>
+                                                    {% for cat in molecular_attr.categories %}
+                                                        <option value="{{ cat.value }}"
+                                                                data-value-displ-name="{{ cat.name }}"
+                                                                data-value-name="{{ cat.name }}"
+                                                                data-value-id="
+
+                                                                        {% if cat.id %}{{ cat.id }}{% else %}{{ cat.value }}{% endif %}">{{ cat.name }}</option>
+                                                    {% endfor %}
+                                                    <option value="indv-selex">Individual Selection</option>
+                                                </select>
+                                            </div>
+                                        </li>
+                                        <li class="list-item">
+                                            <!-- Specific Mutation Type Checkboxes -->
+                                            <div class="list-item__heading" role="tab"
+                                                 id="p-public-heading-spec-molecular-attrs">
+                                                <span title="Choose the 'Individual Selection' category to enable this section">Individual Mutation Types</span>
+                                            </div>
+                                            <span class="heading-note" id="p-public-spec-mol-attr-heading-note">Choose the 'Individual Selection' category to enable</span>
+                                            <div id="p-public-spec-molecular-attrs"
+                                                 class="list-group-item__body cohort-feature-select-block spec-molecular-attrs"
+                                                 role="tabpanel"
+                                                 aria-labelledby="p-public-heading-spec-molecular-attrs"
+                                                 data-feature-displ-name="Specific Mutation Type"
+                                                 data-feature-name="specific-mutation"
+                                                 data-feature-id="specific" data-feature-type="molecular">
+                                                <ul class="mol-checkbox-list" id="p-public-{{ attr.value }}"
+                                                    style="display: none;">
+                                                    {% for attr in molecular_attr.attrs %}
+                                                        <li class="checkbox">
+                                                            <label>
+                                                                <input class="mutation-checkbox" type="checkbox"
+                                                                       name="elements-selected"
+                                                                       data-value-name="{{ attr.value }}"
+                                                                       data-value-id="
+
+                                                                               {% if attr.id %}{{ attr.id }}{% else %}{{ attr.value }}{% endif %}"
+                                                                       data-value-displ-name="{{ attr.displ_name }}"
+                                                                       data-category="{{ attr.category }}">
+                                                                {{ attr.displ_name }}
+                                                                <!-- <span class="count">({{ attr.count }})</span> -->
+                                                            </label>
+                                                        </li>
+                                                    {% endfor %}
                                                 </ul>
                                             </div>
                                         </li>
                                     </ul>
                                 </div>
-                            {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
-</div>
 
-<div class="{% if cohort.id %}col-md-12{% else %}col-lg-9{% endif %} data-content-panel">
-    <div class="selected-filters data-selected-filters panel panel-default"
-         {% if cohort.id %}style="display: none;"{% endif %}>
-        <div class="panel-heading clearfix">
-            <h4 class="panel-title pull-left">{% if cohort.id %}New Filters{% else %}Selected Filters{% endif %}</h4>
-            <a class="pull-right clear-filters" role="button" id="data-clear-filters">Clear All</a>
-        </div>
-        <div class="panel-body"></div>
-    </div>
-    <div class="cohort-info panel panel-default">
-        <div class="panel-heading">
-            <h4 class="panel-title">Cohort Details</h4>
-        </div>
-        <div class="panel-body">
-            <div class="row col-md-6">
-                <span class="detail-label">Total Number of Cases:</span>
-                <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                <span class="total-values total-cases"
-                      id="p-data-total-participants">{{ metadata_counts.cases|format_num_with_commmas }}</span>
+    <div class="{% if cohort.id %}col-md-12{% else %}col-lg-9{% endif %} data-content-panel">
+        <div class="selected-filters data-selected-filters panel panel-default"
+             {% if cohort.id %}style="display: none;"{% endif %}>
+            <div class="panel-heading clearfix">
+                <h4 class="panel-title pull-left">{% if cohort.id %}New Filters{% else %}SelectedFilters{% endif %}</h4>
+                <a class="pull-right clear-filters" role="button" id="data-clear-filters">Clear All</a>
             </div>
-            <div class="row col-md-6">
-                <span class="detail-label">Total Number of Samples:</span>
-                <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                <span class="total-values total-samples"
-                      id="p-data-total-samples">{{ metadata_counts.samples|format_num_with_commmas }}</span>
+            <div class="panel-body"></div>
+        </div>
+        {% if not cohort.id %}
+        <div class="cohort-info panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">Cohort Details</h4>
+            </div>
+            <div class="panel-body">
+                <div class="row col-md-6">
+                    <span class="detail-label">Total Number of Cases:</span>
+                    <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                    <span class="total-values total-cases"
+                          id="p-data-total-participants">{{ metadata_counts.cases|format_num_with_commmas }}</span>
+                </div>
+                <div class="row col-md-6">
+                    <span class="detail-label">Total Number of Samples:</span>
+                    <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                    <span class="total-values total-samples"
+                          id="p-data-total-samples">{{ metadata_counts.samples|format_num_with_commmas }}</span>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="clinical-trees panel panel-default">
-        <div class="panel-heading">
-            <h4 class="panel-title">Clinical Features</h4>
-        </div>
-        <div class="panel-body">
-            <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-            <div id="tree-graph-clinical-public" class="tree-graph-clinical"></div>
-{#            <div id="tree-graph-clinical-{{ program.id }}" class="tree-graph-clinical"></div>#}
-        </div>
-        <div class="more-graphs">
-            <button class="btn btn-link" role="button">Show More</button>
-        </div>
-        <div class="less-graphs" style="display: none;">
-            <button class="btn btn-link" role="button">Show Less</button>
+        {% endif %}
+        <div class="clinical-trees panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">Clinical Features</h4>
+            </div>
+            <div class="panel-body">
+                <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                <div id="tree-graph-clinical-public" class="tree-graph-clinical"></div>
+                {#            <div id="tree-graph-clinical-{{ program.id }}" class="tree-graph-clinical"></div>#}
+            </div>
+            <div class="more-graphs">
+                <button class="btn btn-link" role="button">Show More</button>
+            </div>
+            <div class="less-graphs" style="display: none;">
+                <button class="btn btn-link" role="button">Show Less</button>
+            </div>
         </div>
     </div>
 </div>

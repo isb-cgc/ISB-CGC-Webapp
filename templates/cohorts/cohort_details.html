@@ -236,28 +236,29 @@
                     </div>
                 </div>
             {% endif %}
-            <div class="col-sm-12 col-md-12 col-lg-12">
-                <div class="panel panel-default">
-                    <ul class="nav nav-tabs nav-tabs-data" role="tablist">
-                        {% for program in programs %}
-                            <li role="presentation"
-                                class="program-tab{% if not program.id|program_is_in_cohort:programs_this_cohort %} disabled{% elif program|program_is_first_in_cohort:cohort_programs %} active{% endif %}">
-                                <a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data"
-                                   data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
-                        {% endfor %}
-                        <li role="presentation"
-                            class="program-tab {% if only_user_data %}active{% endif %} {% if not has_user_data %}disabled{% endif %}">
-                            <a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User
-                                Data</a></li>
-                    </ul>
-                </div>
-            </div>
+{#            <div class="col-sm-12 col-md-12 col-lg-12">#}
+{#                <div class="panel panel-default">#}
+{#                    <ul class="nav nav-tabs nav-tabs-data" role="tablist">#}
+{#                        {% for program in programs %}#}
+{#                            <li role="presentation"#}
+{#                                class="program-tab{% if not program.id|program_is_in_cohort:programs_this_cohort %} disabled{% elif program|program_is_first_in_cohort:cohort_programs %} active{% endif %}">#}
+{#                                <a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data"#}
+{#                                   data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>#}
+{#                        {% endfor %}#}
+{#                        <li role="presentation"#}
+{#                            class="program-tab {% if only_user_data %}active{% endif %} {% if not has_user_data %}disabled{% endif %}">#}
+{#                            <a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User#}
+{#                                Data</a></li>#}
+{#                    </ul>#}
+{#                </div>#}
+{#            </div>#}
         </div>
 
         <div class="row">
-            <div class="tab-content data-tab-content">
-                <div id="placeholder" class="pane active data-tab" role="tabpanel">
-                    <div class="col-md-12 data-tab-content-panel spinner-panel">
+            <div class="tab-content data-content-div">
+{#                <div id="placeholder" class="pane active data-tab" role="tabpanel">#}
+                <div id="placeholder" class="pane data-tab" role="tabpanel">
+                    <div class="col-md-12 data-content-panel spinner-panel">
                         <div class="panel panel-default">
                             <div class="panel-body">
                                 <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>

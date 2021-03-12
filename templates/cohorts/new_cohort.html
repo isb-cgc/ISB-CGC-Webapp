@@ -4,7 +4,7 @@
 
 {% comment %}
 
-   Copyright 2016, Institute for Systems Biology
+   Copyright 2021, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@
         </div>
 
         <div class="row">
-            <div class="data-content-div">
+            <div class="tab-content data-content-div">
 {#            <div class="tab-content data-tab-content">#}
                 <div id="placeholder" class="tab-pane data-tab" role="tabpanel">
 {#                <div id="placeholder" class="tab-pane active data-tab" role="tabpanel">#}
@@ -118,15 +118,15 @@
                                 aria-hidden="true">&times;</span></button>
                         <h4 class="modal-title" id="createCohortModal">Create Cohort</h4>
                         <div class="modal-js-messages" id="create-cohort-modal-js-messages">
-                            <div id="multi-prog-cohort-create-warn" class="alert alert-warning alert-dismissable"
-                                 style="display: none;">
-                                <button type="button" class="close" data-hide="alert"><span
-                                        aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                Your cohort contains samples from multiple programs. Please note that filters will only
-                                apply to samples from the program indicated
-                                by the tab they were chosen on - they will not apply to samples from other programs in
-                                this cohort.
-                            </div>
+{#                            <div id="multi-prog-cohort-create-warn" class="alert alert-warning alert-dismissable"#}
+{#                                 style="display: none;">#}
+{#                                <button type="button" class="close" data-hide="alert"><span#}
+{#                                        aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>#}
+{#                                Your cohort contains samples from multiple programs. Please note that filters will only#}
+{#                                apply to samples from the program indicated#}
+{#                                by the tab they were chosen on - they will not apply to samples from other programs in#}
+{#                                this cohort.#}
+{#                            </div>#}
                             <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable"
                                  style="display: none;">
                                 <button type="button" class="close" data-hide="alert"><span
