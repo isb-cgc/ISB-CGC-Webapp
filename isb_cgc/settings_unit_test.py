@@ -247,6 +247,8 @@ STATIC_URL = os.environ.get('STATIC_URL', '/static/')
 
 BQ_ECOSYS_STATIC_URL = os.environ.get('BQ_ECOSYS_STATIC_URL', 'https://storage.googleapis.com/webapp-static-files-isb-cgc-dev/bq_ecosys/')
 
+CITATIONS_STATIC_URL = os.environ.get('CITATIONS_STATIC_URL', 'https://storage.googleapis.com/webapp-static-files-isb-cgc-dev/static/citations/')
+
 GCS_STORAGE_URI = os.environ.get('GCS_STORAGE_URI', 'https://storage.googleapis.com/')
 
 # Additional locations of static files
