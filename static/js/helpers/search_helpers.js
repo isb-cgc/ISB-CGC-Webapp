@@ -211,7 +211,7 @@ function($, tree_graph, stack_bar_chart) {
             } else {
                 $('.cohort-info .total-values').hide();
                 $('.cohort-info .spinner').show();
-                var metadata_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, undefined, version, 3);
+                var metadata_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, undefined, version, 2);
                 // var metadata_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, undefined, version, program_id);
 
                 if(metadata_url.length > MAX_URL_LEN) {
