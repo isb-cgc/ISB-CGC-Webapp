@@ -186,7 +186,7 @@ require([
         $('#gov_warning').modal('show');
     }
 
-    $('.external-link').on('click', function(){
+    $('#body').on('click', '.external-link', function(){
         let url = $(this).attr('url');
         $('#go-to-external-link').attr('href', url);
     });
@@ -194,6 +194,18 @@ require([
     $('#go-to-external-link').on('click', function() {
         $('#external-web-warning').modal('hide');
     });
+
+    $('#body').on('click', '.copy-this', function(){
+        let content = $(this).attr('content');
+        navigator.permissions.query({name: "clipboard-write"}).then(result => {
+            if (result.state == "granted" || result.state == "prompt") {
+                navigator.clipboard.writeText(content);
+            } else  {
+                console.debug("Failed to access clipboard!");
+            }
+        });
+    });
+
 });
 
 // Return an object for consts/methods used by most views
