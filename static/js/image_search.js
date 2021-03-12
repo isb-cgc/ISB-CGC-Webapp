@@ -756,7 +756,7 @@ require([
                     var numPatientsStr = "0";
                 }
                 var description = 'NA';
-                var newProjectRow = '<tr id="project_row_' + idStr + '" class="text_head" onclick="(toggleRows(this, \'projects\', \'project_row_\'))"><td>' + idStr + '</td><td>' + numPatientsStr + '</td><td id="' + patientIdStr + '" class="projects_table_num_cohort">' + numPatientsStr + '</td> </tr>';
+                var newProjectRow = '<tr id="project_row_' + idStr + '" class="text_head" onclick="(toggleRows(this, \'projects\', \'project_row_\', false))"><td>' + idStr + '</td><td>' + numPatientsStr + '</td><td id="' + patientIdStr + '" class="projects_table_num_cohort">' + numPatientsStr + '</td> </tr>';
                 newInnerHTML += newProjectRow;
 
             }
@@ -789,7 +789,7 @@ require([
         getSelRows = function(row){
             table = $(row).parent().parent();
             ck = $(row).find('input:checkbox').is(':checked');
-            numPerPg= parseInt(table.parent().find('.files-per-page-select').attr('data-fpp'));
+            numPerPg= parseInt(table.parent().find('.files-per-page-select').data('fpp'));
             curPg= parseInt(table.parent().find('.dataTables_goto_page').data('curpage'));
             fInd=numPerPg*(curPg-1);
             lInd=fInd+numPerPg-1;
@@ -797,23 +797,21 @@ require([
             return [fInd, lInd];
         }
 
-        window.toggleRows = function (row, type,prefix) {
+        window.toggleRows = function (row, type,prefix,justClickedPlus) {
             var justClickedIndex=-1;
             var selRows = new Array();
+            var addRow= true;
 
             if ($(row).parent().is('thead')){
                 selRows= getSelRows(row);
+                addRow = justClickedPlus;
             }
             else{
                 selRows=[$(row).index(),$(row).index()];
-
                 justClickedIndex=selRows[0];
+                addRow = $(row).find('input:checkbox').is(':checked');
             }
 
-            var addRow = $(row).find('input:checkbox').is(':checked');
-            //if ($(row).hasClass('selected_grey')){
-            //        addRow =  false;
-            //}
 
             selRows=$(row).parent().parent().children('tbody').children().slice(selRows[0],selRows[1]+1);
             $(row).parent().children().removeClass('multiSel');
@@ -933,7 +931,7 @@ require([
 
         removeRowsFromTable = function(tableId,selId,selType){
             var table = document.getElementById(tableId);
-            var scrollPos = table.scrollTop;
+            var scrollPos = table.scrollTop+table.offsetTop;
             if (selType ==='study'){
                 selId=selId.replaceAll('.','-');
             }
@@ -941,7 +939,7 @@ require([
             var newScrollInd = Array.from(remainingTrs.map(function () {
                 return ((this.offsetTop <= scrollPos) ? 0 : 1)
             })).indexOf(1);
-
+            /*
             if (newScrollInd > 0) {
                 var scrollB = remainingTrs.get(newScrollInd - 1).offsetTop;
                 var scrollF = remainingTrs.get(newScrollInd).offsetTop;
@@ -950,6 +948,8 @@ require([
                     var newScrollInd = newScrollInd + 1;
                 }
             }
+
+             */
 
             $('#' + tableId).find('.'+selType+'_' + selId).remove();
             resetTableControls($('#' + tableId), true, newScrollInd)
@@ -1092,7 +1092,7 @@ require([
                         var newHtml = '';
                         var rowId = 'case_' + patientId.replace(/\./g, '-');
 
-                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleRows(this, \'cases\', \'case_\'))">' +
+                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleRows(this, \'cases\', \'case_\', false))">' +
                                    '<td class="ckbx"><input type="checkbox"></td>'+
                                    '<td class="col1 project-name">' + projectId + '</td>' +
                                     '<td class="col1 case-id">' + patientId +'</td>' +
@@ -1260,7 +1260,6 @@ require([
                             var seriesTxt =     ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
 
                             newHtml = '<tr id="' + rowId + '" data-projectid="'+projectId+'" data-caseid="'+patientId+'" class="' + pclass + ' ' + cclass + ' ' + studyClass + ' text_head">' +
-                                '<td class="ckbx text_data"><input type="checkbox"></td>' +
                                 '<td class="col1 study-id study-id-col" data-study-id="'+studyId+'">' + hrefTxt + '</td>' +
                                 '<td class="series-number">' + seriesNumber + '</td>' +
                                 '<td class="col1 modality">' + modality + '</td>' +
@@ -1285,7 +1284,7 @@ require([
                                 numSeries=seriesDic[studyId];
                            }
 
-                            newHtml = '<tr id="' + rowId + '" data-projectid="'+ projectId +'" class="' + pclass + ' ' + cclass +' text_head" onclick="(toggleRows(this, \'studies\', \'study_\'))">' +
+                            newHtml = '<tr id="' + rowId + '" data-projectid="'+ projectId +'" class="' + pclass + ' ' + cclass +' text_head" onclick="(toggleRows(this, \'studies\', \'study_\', false))">' +
                                 //'<td class="col1 project-name">' + projectId + '</td>' +
                                 '<td class="ckbx"><input type="checkbox"></td>' +
                                  '<td class="col1 case-id">' + patientId + '</td>'+
@@ -1354,14 +1353,14 @@ require([
                 $('#' + seriesTableId + ' tr:last').after(newHtml);
             });
         };
-
+/*
         window.resetHeaderCheckBox(table){
             var displayedRows = table.find('tbody').find('tr').not('.hide');
             var checkedDisplayedRowschecked =
             .find('input:checkbox')
                 .is(':checked')
 
-        }
+        }*/
 
         window.resetTableControls = function (tableElem, mvScroll, curIndex) {
             var tbodyOff= tableElem[0].offsetTop;
@@ -1425,6 +1424,12 @@ require([
                 currentPage = numPages;
             }
 
+            if (numRecords>0){
+                tableElemGm.find('thead').find('.ckbx').removeClass('notVis');
+            }
+            else{
+                tableElemGm.find('thead').find('.ckbx').addClass('notVis');
+            }
 
             resetPagination(tableElemGm, currentPage, numPages, recordsPP, numRecords);
 
@@ -2271,6 +2276,37 @@ require([
         window.resort = function(filterCat){
             updateFilters(filterCat,{},false);
         }
+
+
+        var updateAttributeValues = function(attributeValList, dic){
+            var allValues = attributeValList.children('li').children().children('input:checkbox');
+            for (var i = 0; i < allValues.length; i++) {
+                var elem = allValues.get(i);
+                var val = $(elem)[0].value;
+                var spans = $(elem).parent().find('span');
+                var cntUf=0;
+                if (dic.hasOwnProperty('unfilt') && dic['unfilt'].hasOwnProperty(val)) {
+                    cntUf = dic['unfilt'][val].count
+                }
+                else {
+                    cntUf = 0;
+                }
+
+                spans.filter('.case_count')[0].innerHTML = cntUf.toString();
+                if (spans.filter('.plot_count').length>0) {
+                    var cntF = 0
+                    if (dic.hasOwnProperty('filt') && dic['filt'].hasOwnProperty(val)) {
+                        cntF = dic['filt'][val].count
+                    } else {
+                        cntF = 0;
+                    }
+
+                    spans.filter('.plot_count')[0].innerHTML = cntF.toString();
+                }
+            }
+
+        }
+
         var updateFilters = function (filterCat, dic, dataFetched) {
 
             var showZeros = true;
@@ -2299,7 +2335,9 @@ require([
                 }
              }
             var filterList=$('#'+filterCat).children('ul');
-            //var allFiltersDiv=allListItems.children().children('input:checkbox').parent().parent();
+            if (dataFetched){
+                updateAttributeValues(filterList, dic);
+            }
 
             var sorter= $('#'+filterCat).children('.sorter').find(":radio").filter(':checked');
             if (sorter.length>0){
@@ -2339,31 +2377,9 @@ require([
                 var checked = $(elem).prop('checked');
                 var spans = $(elem).parent().find('span');
                 //var lbl = spans.get(0).innerHTML;
-                var oldCntUf = parseInt(spans.filter('.case_count')[0].innerHTML);
-                var cntUf=0
-                if (dataFetched && dic.hasOwnProperty('unfilt') && dic['unfilt'].hasOwnProperty(val)) {
-                    cntUf = dic['unfilt'][val].count
-                }
-                else if (dataFetched){
-                    cntUf = 0;
-                }
-                else{
-                    cntUf = oldCntUf;
-                }
-                spans.filter('.case_count')[0].innerHTML = cntUf.toString();
-                if (spans.filter('.plot_count').length>0) {
-                    var oldCntF = parseInt(spans.filter('.plot_count')[0].innerHTML);
-                    var cntF = 0
-                    if (dataFetched && dic.hasOwnProperty('filt') && dic['filt'].hasOwnProperty(val)) {
-                        cntF = dic['filt'][val].count
-                    } else if (dataFetched) {
-                        cntF = 0;
-                    } else {
-                        cntF = oldCntF;
-                    }
+                var cntUf = parseInt(spans.filter('.case_count')[0].innerHTML);
 
-                    spans.filter('.plot_count')[0].innerHTML = cntF.toString();
-                }
+
                 var isZero
                 if ( (cntUf>0) || checked)  {
                     if (cntUf>0){
@@ -2787,6 +2803,7 @@ require([
         $('#'+id).find('.list-group-item__body.isQuant').each(function() {
             $(this).find('.more-checks').addClass('hide');
             $(this).find('.less-checks').addClass('hide');
+            $(this).find('.sorter').addClass('hide');
             //var min = Math.ceil($(this).data('min') * 1000)/1000;
             //var min = Math.floor($(this).data('min'));
 

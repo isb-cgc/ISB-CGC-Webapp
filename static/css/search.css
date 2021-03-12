@@ -335,24 +335,24 @@ tr {
 
 #projects_table td.ckbx, #projects_table_head th.ckbx,
 #cases_table_head th.ckbx, #cases_table td.ckbx,
-#series_table_head th.ckbx, #series_table td.ckbx
+#series_table_head th.ckbx, #series_table td.ckbx,
 #studies_table_head th.ckbx, #studies_table td.ckbx
 {
-    width: 10%;
+    width: 5%;
     word-wrap: break-word;
 }
 
 
 
 #projects_table td, #projects_table_head th {
-    width: 30%;
+    width: 31.33%;
     word-wrap: break-word; }
 
 
 
 
 #cases_table td, #cases_table_head th {
-    width: 22.5%;
+    width: 23.75%;
     word-wrap: break-word; }
 
 
@@ -361,15 +361,15 @@ tr {
     word-break: break-word; }
 #studies_table_head th.project-name, th.case-id, th.study-id,
 #studies_table td.project-name, td.case-id, td.study-id {
-    width: 15%;
+    width: 16%;
 }
 #studies_table_head th.study-description,
 #studies_table td.study-description {
-    width:32%;
+    width:33%;
 }
 #studies_table_head th.open-viewer,
 #studies_table td.open-viewer {
-    width:11%;
+    width:12%;
 }
 
 
@@ -378,28 +378,28 @@ tr {
 }
 #series_table_head th.study-id,
 #series_table td.study-id {
-   width: 16%;
+   width: 17%;
 }
 #series_table_head th.series-number,
 #series_table td.series-number
 {
-    width: 10%;
+    width: 11%;
 }
 #series_table_head th.modality,
 #series_table td.modality {
-    width:8%;
+    width:10%;
 }
 #series_table_head th.body-part-examined,
 #series_table td.body-part-examined {
-    width:15%;
+    width:17%;
 }
 #series_table_head th.series-description,
 #series_table td.series-description {
-    width:30%;
+    width:32%;
 }
 #series_table_head th.open-viewer,
 #series_table td.open-viewer {
-    width:11%;
+    width:13%;
 }
 
 #series_table td.ohif, #studies_table td.ohif {
