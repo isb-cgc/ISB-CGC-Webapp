@@ -673,3 +673,5 @@ if DEBUG and DEBUG_TOOLBAR:
 # OAUTH PLATFORM         #
 ##########################
 IDP        = os.environ.get('IDP', 'fence')
+# RAS TOKEN MAX LIFE 25 DAYS
+DCF_UPSTREAM_EXPIRES_IN_SEC = os.environ.get('DCF_UPSTREAM_EXPIRES_IN_SEC', '1296000')
