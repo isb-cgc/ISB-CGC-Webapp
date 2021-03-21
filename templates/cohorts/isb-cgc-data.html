@@ -1,14 +1,72 @@
 {# Public Data Set Filter Template #}
 <div id="{{ program.id }}-data" class="tab-pane data-tab" role="tabpanel">
     <div id="{{ program.id }}-data-filter-panel" class="col-lg-3 filter-panel" role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %} data-prog-id="{{ program.id }}" data-prog-displ-name="{{ program.name }}">
-        <div class="tabpanel" role="tabpanel">
-            <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
-            <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
-                <li role="presentation" class="filter-tab active"><a href="#clinical-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Case Filters">Case</a></li>
-                <li role="presentation" class="filter-tab {% if data_types.keys|length <= 0 %}disabled{% endif %}"><a href="#data-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Data Type Filters">Data</a></li>
-                <li role="presentation" class="filter-tab {% if molecular_attr.keys|length <= 0 %}disabled{% endif %}"><a class="molecular-filters" href="#p-{{ program.id }}-molecular-filters" role="tab" data-toggle="tab" title="Molecular Filters">Molec.</a></li>
-            </ul>
-            <div class="tab-content">
+        <div>
+            <div class="panel panel-default" role="tabpanel">
+                <div class="panel-heading clearfix">
+                    <h4 class="panel-title pull-left">Select Data Set</h4>
+{#                    <a class="pull-right clear-filters" role="button" id="48-data-clear-filters">Clear All</a>#}
+                </div>
+                <div class="panel-body">
+                    <!-- Two dropdown list Design -->
+                    <!--
+                    <div id="file-part-select-box">
+                        <label>Node</label>
+                        <select class="form-control">
+                            <option value="0">GDC</option>
+                            <option value="1">PDC</option>
+                            <option value="2">IDC</option>
+                        </select>
+                    </div>
+                    <div id="file-part-select-box">
+                        <label>Program</label>
+                        <select class="form-control">
+                            <option value="0">TCGA</option>
+                            <option value="1">CCLE</option>
+                            <option value="2">TARGET</option>
+                        </select>
+                    </div>
+                    -->
+
+                    <!-- Sort by and single list Design -->
+                    <div>
+                        <span>Sort by:
+                            <input type="radio" name="BodyPartExamined" value="node" checked=""
+                                   onclick="">Node
+                            <input type="radio" name="BodyPartExamined" value="program"
+                                   onclick="">Program
+                        </span>
+                    </div>
+                    <br>
+                    <div id="file-part-select-box">
+                        <select class="form-control">
+                            <optgroup label="GDC">
+                                <option value="0">TCGA-GDC</option>
+                                <option value="1">CCLE-GDC</option>
+                                <option value="2">TARGET-GDC</option>
+                                <option value="3">BEATAML-GDC</option>
+                            </optgroup>
+                            <optgroup label="PDC">
+                                <option value="0">TCGA-PDC</option>
+                                <option value="1">CCLE-PDC</option>
+                                <option value="1">TARGET-PDC</option>
+                                <option value="1">BEATAML-PDC</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default" role="tabpanel">
+                <div class="panel-heading clearfix">
+                    <h4 class="panel-title pull-left">Select Filters</h4>
+                </div>
+                <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
+                <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
+                    <li role="presentation" class="filter-tab active"><a href="#clinical-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Case Filters">Case</a></li>
+                    <li role="presentation" class="filter-tab {% if data_types.keys|length <= 0 %}disabled{% endif %}"><a href="#data-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Data Type Filters">Data</a></li>
+                    <li role="presentation" class="filter-tab {% if molecular_attr.keys|length <= 0 %}disabled{% endif %}"><a class="molecular-filters" href="#p-{{ program.id }}-molecular-filters" role="tab" data-toggle="tab" title="Molecular Filters">Molec.</a></li>
+                </ul>
+                <div class="tab-content">
                 <!-- case filters tab -->
                 <div role="tabpanel" class="tab-pane active" id="clinical-filters-{{ program.id }}">
                     <ul class="list-group" id="clin-accordion-{{ program.id }}" role="tablist" aria-multiselectable="true">
@@ -233,6 +291,7 @@
                     </ul>
                 </div>
                 {% endif %}
+                </div>
             </div>
         </div>
     </div>
