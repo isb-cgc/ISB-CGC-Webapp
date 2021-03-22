@@ -1,0 +1,370 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{#{% load tz %}#}
+{% block header %}
+
+    <div id="filter_1">sdwe</div>
+    <script type="text/javascript" src="{% static  'js/libs/jquery-3.5.1.js' %}"></script>
+
+    <link rel="stylesheet" href="{% static  'css/jquery-ui.min.css' %}">
+
+
+    <script type="text/javascript" src="{% static  'js/libs/jquery-ui.min.js' %}"></script>
+
+
+    <script>
+
+          $( function() {
+          $( "#dialog-1" ).dialog();
+          $( "#dialog-1" ).dialog('close');
+         } );
+
+         function selradio(rad){
+             var val = rad.value;
+                var id = $('#hidden')[0].value;
+                 divid = val + id.toString();
+                 $("#dialog-1")[0].innerHTML = filterObj[divid];
+                 var title='';
+                 if (rad.value === 'series') {
+                     title = "Cohort " + id.toString() + " updated by SeriesInstanceUID";
+                 }
+                 else
+                 {
+                     title = "Cohort " + id.toString() + " updated by filter";
+                 }
+
+                 $("#dialog-1").dialog('option','title',title);
+
+        }
+
+
+         function compare(id){
+             $("#dialog-1").dialog('option','title','Compare versions of cohort '+id.toString());
+
+             $("#dialog-1")[0].innerHTML='<div>Compare cohort '+id.toString()+' between its current data version and the latest version by<br>' +
+                 '<input class="version-update" type ="radio" name="version" value="filter" onclick="selradio(this)"> Filter Definition<br> '+
+                     '<input class="version-update" type ="radio" name="version" value="series" onclick="selradio(this)"> SeriesInstanceUID<br> '+
+                     '<input id="hidden" type="hidden" value="'+id.toString()+'">';
+                 "</div>"
+             $( "#dialog-1" ).dialog(open);
+         }
+    </script>
+
+
+
+    <script>
+    var i=1;
+
+     function showOrHide(it) {
+         var curRow =$(it).parent('tr')
+         var nxRow = curRow.next();
+         if (curRow.hasClass('isShown')){
+             curRow.removeClass('isShown');
+             curRow.find('.fa-plus-circle').show();
+             curRow.find('.fa-minus-circle').hide();
+             nxRow.hide();
+         }
+         else{
+             curRow.addClass('isShown');
+             curRow.find('.fa-plus-circle').hide();
+             curRow.find('.fa-minus-circle').show();
+             nxRow.show();
+         }
+     }
+     filterObj = new Object();
+     filterObj['filter1'] = "2 Cases removed, 3 Cases added<br>\n" +
+                            "12 Studies removed, 15 Studies added<br>\n" +
+                            "23 Series removed, 18 Series added<br>\n" +
+                            "Attribute value Modality CTPT is deprecated<br>"+
+                            "View cohort differences <span style='color:blue' onclick='alert(\"This would link to the BQ table\")'>here</span>  <br>"+
+                            "Create updated cohort and view in <a href='/explore_demo/?update=filter1'>explorer</a>"
+
+
+     filterObj['series1'] = "2 Cases removed<br>\n" +
+                             "12 Studies removed<br>\n" +
+                             "23 Series removed<br>"+
+                             "View cohort differences <span style='color:blue' onclick='alert(\"This would link to the BQ table\")'>here</span> <br>"+
+                             "Create updated cohort and view in <a href='/explore_demo/?update=series1'><span style='color:blue'>explorer<span></a>"
+
+
+
+     filterObj['filter2'] = "3 Cases removed, 2 Cases added<br>\n" +
+                            "11 Studies removed, 12 Studies added<br>\n" +
+                            "17 Series removed, 18 Series added<br>\n" +
+                            "Attribute value Modality CTPT is deprecated<br>"+
+                            "View cohort differences <span style='color:blue' onclick='alert(\"This would link to the BQ table\")'>here</span> <br>"+
+                            "Create updated cohort and view in <a href='/explore_demo/?update=filter2'><span style='color:blue'>explorer<span></a>"
+
+     filterObj['series2'] = "3 Cases removed<br>\n" +
+                             "11 Studies removed<br>\n" +
+                             "17 Series removed<br>"+
+                             "View cohort differences <span style='color:blue' onclick='alert(\"This would link to the BQ table\")'>here</span> <br>"+
+                             "Create updated cohort and view in <a href='/explore_demo/?update=series2'><span style='color:blue'>explorer<span></a>"
+
+
+    </script>
+
+
+
+{% endblock %}
+
+{% block title %}
+    Cohorts | IDC
+{% endblock %}
+
+{% block link_page_name %}cohorts-list{% endblock %}
+{% block page_name %}cohorts-list{% endblock %}
+
+{% block page_header %}
+<div class="container-fluid">
+    <h1 class="page-header pull-left">Cohorts</h1>
+</div>
+{% endblock %}
+{% block content %}
+
+     <div id = "dialog-1"
+         title = "Dialog Title goes here..." style="display:none">This my first jQuery UI Dialog!</div>
+
+
+
+<div class="container-fluid">
+    <div class="page-action-group">
+        <li role="menuitem">
+            <button id="delete-cohorts" type="button" class="btn btn-info owner-only" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true" disabled title="Select one or more cohorts.">
+                <i class="fa fa-trash"></i>
+                Delete
+            </button>
+        </li>
+{#            <li role="menuitem">#}
+{#                <button id="cohort-sets" type="button" class="btn btn-info set-ops" data-toggle="modal" data-target="#set-ops-modal" aria-label="set-logic" role="button" aria-expanded="true" disabled title="Select one or more cohorts.">#}
+{#                Set Operations#}
+{#                </button>#}
+{#            </li>#}
+{#        <li role="menuitem">#}
+{#            <button class="btn btn-info owner-only" id="share-cohorts-btn" type="button" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true" disabled title="Select one or more cohorts.">#}
+{#                <i class="fa fa-share-alt"></i>#}
+{#                Share#}
+{#            </button>#}
+{#        </li>#}
+    </div>
+    <div class="panel panel-default">
+
+        <div class="panel-body " id="saved-cohorts-list">
+
+                <table id="cohort-table" class="table table-striped tablesorter cohort-table table-hover">
+                    <thead>
+                        <th></th>
+                        <th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>
+                        <th class="id-col">Cohort ID</th>
+                        <th class="id-col">Parent ID</th>
+                        <th class="name-col">Name</th>
+                        <th class="owner-col">Ownership</th>
+                        <th class="share-col">Shared With</th>
+                        <th class="version-col">Data Version</th>
+                        <th class="version-col">Version Compare</th>
+                    </thead>
+                    <colgroup>
+                        <col style="width: 2%">
+                        <col style="width: 6%">
+                        <col style="width: 6%">
+                        <col style="width: 10%">
+                        <col style="width: 27%">
+                        <col style="width: 10%">
+                        <col style="width: 9%">
+                        <col style="width: 27%">
+                        <col style="width: 6%">
+                    </colgroup>
+                    <tbody>
+                    {% for cohort in cohorts %}
+
+
+                        <tr data-description='{% if cohort.description %}{{ cohort.description }}{% else %}N/A{% endif %}'   {% if cohort.versionId == 0 %} style="border:2px solid red" {% endif %}>
+                            <td class = "details-control" title="Click to display cohort description." onclick="showOrHide(this)"> <i class="fa fa-plus-circle show-button"> </i><i class="fa fa-minus-circle hide-button"> </i> </td>
+                            <td class="checkbox-col"> <input class="cohort" type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>
+                            </td>
+                            <td class="id-col">
+                                {{ cohort.id }}
+                            </td>
+
+                            <td class="id-col">
+                                {{ cohort.parentId }}
+                            </td>
+
+                            <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</a></td>
+                            <td class="owner-col">
+
+                                    You
+
+                            </td>
+                            <td class="share-col">
+
+                                    (0)
+
+                            </td>
+
+                            {% if cohort.versionId == 0 %}
+                               <td class="version-col">
+                                 {{ cohort.version }}
+                               </td>
+
+                              <td>
+                                 <button onclick="compare({{ cohort.id }})">Compare</button>
+                              </td>
+                            {% else %}
+
+                                <td class="version-col" >
+                                 {{ cohort.version }}
+                               </td>
+                                  <td></td>
+                            {% endif %}
+
+
+                        </tr>
+                        <tr style="display:none"><td></td><td colspan="7">{{ cohort.description }}</td></tr>
+
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+        </div>
+    </div>
+</div>
+
+    <!-- Set Operation Modal -->
+    <div class="modal fade" id="set-ops-modal" tabindex="-1" role="dialog" aria-labelledby="union-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="union-header">New Cohorts</h4>
+                </div>
+                <form id="set-op-cohort" method="POST" action="{% url 'set_operation' %}" class="">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="new-cohort-name">Cohort Name</label>
+                            <input type="text" class="form-control" id="new-cohort-name" name="name" placeholder="Enter name for new cohort" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="operation">Set Operation</label>
+                            <div>
+                                <select name="operation" id="operation" class="form-control">
+                                    <option value="union">Union</option>
+                                    <option value="intersect">Intersection</option>
+                                    <option value="complement">Complement</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group set-control">
+                            <label for="selected-ids">Selected Cohorts</label>
+                            <div>
+                                <div class="form-control-static" id="selected-ids">
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group complement-control">
+                            <label for="base-cohort">Base Cohort</label>
+                            <div>
+                                <p class="form-control-static" id="base-id"></p>
+                                <div class="cohort-search-div">
+                                    <a class="add-cohort btn btn-link"><i class="fa fa-plus"></i> Choose Cohort</a>
+                                    <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group complement-control">
+                            <label for="subtract-cohorts">Subtracted Cohorts</label>
+                            <div>
+                                <p class="form-control-static" id="subtract-ids"></p>
+                                <div class="cohort-search-div">
+                                    <a class="add-cohort btn btn-link"><i class="fa fa-plus"></i> Choose Cohort</a>
+                                    <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">Okay</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Cohort Modal -->
+    <div class="modal fade" id="delete-cohorts-modal" tabindex="-1" role="dialog" aria-labelledby="delete-cohort-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="delete-cohort-header">Delete Cohorts</h4>
+                </div>
+                <form id="delete-cohort-form" method="POST" action="{% url 'delete_cohort' %}">
+                    <div class="modal-body">
+                        <label>Are you sure you want to delete cohorts?</label>
+                        <p class="form-control-static selected-cohorts"></p>
+                    </div>
+                    <div class="modal-footer">
+                        {% csrf_token %}
+                        <input type="submit" value="Delete" class="btn btn-primary owner-only" />
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Cohort Modal -->
+    <div class="modal fade" id="share-cohorts-modal" tabindex="-1" role="dialog" aria-labelledby="share-cohort-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Cohort Sharing</h4>
+                    <div class="modal-js-messages" id="share-cohort-js-messages"></div>
+                    <ul class="nav nav-tabs">
+                        <li role="presentation" class="active"><a data-target="#share-pane" data-toggle="tab" id="share-cohort-header">Share Cohort</a></li>
+                        <li role="presentation"><a data-target="#shared-with-pane" data-toggle="tab">Shared With</a></li>
+                    </ul>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="share-pane">
+                        <form id="share-cohort-form">
+                            <div class="modal-body">
+                                <label>Selected Cohorts</label>
+                                <p class="form-control-static selected-cohorts"></p>
+                                <label for="share-share_users">Enter email addresses separated by a comma</label>
+                                <textarea id="share-share_users" class="form-control" name="share_users"></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                {% csrf_token %}
+                                <input type="submit" value="Share Cohort" class="btn btn-primary owner-only" />
+                                <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane" id="shared-with-pane">
+                        <div class="modal-body">
+                            <table class="table table-striped"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block js_file %}
+   <!-- <script type="text/javascript">
+        var cohort_list = {{ cohorts_listing|safe }};
+        var shared_users = {{ shared_users|safe }};
+        var cohort_versions = {{ cohort_versions|safe }};
+    </script> -->
+	{{ block.super }}
+	<!-- <script src="{% static 'js/cohorts/cohort-list.js' %}"></script> -->
+{% endblock %}

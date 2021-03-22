@@ -39,6 +39,8 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.signals import user_login_failed
 from django.dispatch import receiver
 
+from django.utils.html import escape
+
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
 
@@ -132,6 +134,9 @@ def test_methods(request):
         logger.exception(e)
 
     return render(request, 'idc/explore.html', {'request': request, 'context': context})
+
+
+
 
 
 # User details page
