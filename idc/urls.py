@@ -28,7 +28,6 @@ admin.autodiscover()
 
 urlpatterns = [
 
-    url(r'^gw/', demo_views.gw, name='gw'),
     url(r'^$', views.landing_page, name='landing_page'),
     url(r'^quota/', views.quota_page, name='quota_page'),
     url(r'^test_methods/', views.test_methods, name='test_methods'),

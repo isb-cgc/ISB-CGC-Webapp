@@ -135,8 +135,7 @@ def cohort_test(request):
 
     return render(request, 'cohorts/cohort_test.html', {'request': request,'cohorts': cohorts})
 
-def gw(request):
-    return render(request, 'gwtest.html')
+
 
 def explore_demo_page(request):
     attr_by_source = {}
