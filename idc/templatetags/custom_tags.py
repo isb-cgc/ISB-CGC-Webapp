@@ -43,7 +43,7 @@ ALPHANUM_SORT = [
 
 ]
 
-DISPLAY_SORT = ['SOPClassUID']
+DISPLAY_SORT = ['SOPClassUID', 'sample_type']
 
 simple_number_sort = [
     '0 to 200', '200.01 to 400', '400.01 to 600', '600.01 to 800', '800.01 to 1000', '1000.01 to 1200', '1200.01 to 1400', '1400.01+',
@@ -61,7 +61,7 @@ VALUE_SPECIFIC_ORDERS = {
 
     'bmi': ['underweight', 'normal weight', 'overweight', 'obese', 'None', ],
     'hpv_status': ['Positive', 'Negative', 'None', ],
-    'age_at_diagnosis': simple_number_sort,
+    #'age_at_diagnosis': simple_number_sort,
     'year_of_diagnosis': ['1976 to 1980', '1981 to 1985', '1986 to 1990', '1991 to 1995', '1996 to 2000', '2001 to 2005', '2006 to 2010', '2011 to 2015', 'None',],
     'overall_survival': simple_number_sort,
     'event_free_survival': simple_number_sort,
