@@ -39,19 +39,23 @@
                     </div>
                     <br>
                     <div id="file-part-select-box">
+                        <!-- Grouped by node -->
                         <select class="form-control">
-                            <optgroup label="GDC">
-                                <option value="0">TCGA-GDC</option>
-                                <option value="1">CCLE-GDC</option>
-                                <option value="2">TARGET-GDC</option>
-                                <option value="3">BEATAML-GDC</option>
-                            </optgroup>
-                            <optgroup label="PDC">
-                                <option value="0">TCGA-PDC</option>
-                                <option value="1">CCLE-PDC</option>
-                                <option value="1">TARGET-PDC</option>
-                                <option value="1">BEATAML-PDC</option>
-                            </optgroup>
+                            {% for node in nodes %}
+                                <optgroup label="{{ node.name }}"></optgroup>
+                                {% for program in node.programs %}
+                                    <option value="{{ program.name }}">{{ program.name }}-{{ node.short_name }}</option>
+                                {% endfor %}
+                            {% endfor %}
+                        </select>
+                        <!-- Grouped by program -->
+                        <select class="form-control" style='display:none'>
+                            {% for program in all_programs %}
+                                <optgroup label="{{ program.name }}"></optgroup>
+                                {% for node in program.nodes %}
+                                    <option value="{{ node.short_name }}">{{ program.name }}-{{ node.short_name }}</option>
+                                {% endfor %}
+                            {% endfor %}
                         </select>
                     </div>
                 </div>

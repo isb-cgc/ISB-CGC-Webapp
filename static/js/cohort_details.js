@@ -1261,11 +1261,12 @@ require([
             return;
         }
 
-        var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id');
+        // var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id');
 
         if (load_program_id == null)
         {
-            load_program_id = active_program_id;
+            load_program_id = 5;
+            // load_program_id = active_program_id;
         }
 
         var program_data_selector ='#'+load_program_id+'-data';
