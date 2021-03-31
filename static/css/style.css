@@ -3178,6 +3178,8 @@ span.code {
   #landing .panel-heading {
     padding: 5px 10px;
     min-height: 77px; }
+    #landing .panel-heading a {
+      text-decoration: none; }
     #landing .panel-heading img {
       padding: 0;
       max-width: 100px; }
@@ -3338,6 +3340,16 @@ span.code {
   border-width: 1px;
   border-color: grey;
   padding: 10px; }
+
+#citations ul, #citations ol {
+  list-style: decimal; }
+
+#citations li {
+  margin-bottom: 4px; }
+
+#citations h2 {
+  font-size: 20px;
+  margin-top: 20px; }
 
 #user-details .banner {
   margin: 0;
