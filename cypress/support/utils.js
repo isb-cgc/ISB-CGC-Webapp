@@ -1,8 +1,13 @@
 export const localLogin=() =>{
 
-     cy.server();
-     cy.visit('/');
-     cy.get('button').filter('.btn-warn').click();
+     cy.get('button').filter('.btn-warn').its('length').then(res=>
+       {
+         if(res>0){
+             cy.get('button').filter('.btn-warn').click({force:true})
+         }
+     
+      }
+     );
      cy.viewport(1300,800);
      cy.get('#sign-in-dropdown').click();
      cy.get('#id_login').type(Cypress.env("idcuser"));
@@ -12,18 +17,20 @@ export const localLogin=() =>{
 
 }
 
-/Users/george/idc/IDC-WebApp/cypress/util export const visitPage=(url,login) =>{
+export const visitPage=(url,login) =>{
 
-   cy.server()
-   cy.visit(url).then(
-       if (login || Cypress.env('loginNeeded')){
+   cy.server();
+
+   cy.visit(url).then( ()=>
+       {
+         if (login || (Cypress.env('loginNeeded'))==='true'){
            if (Cypress.env('loginType')==='local'){
               localLogin();
+
           }
       }
-
-   );
+    }
+  );
 
 }
-
 
