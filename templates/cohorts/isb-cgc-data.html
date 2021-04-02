@@ -31,12 +31,12 @@
                     <!-- Sort by and single list Design -->
                     <div class = "groupSorter">
                         <span>Sort by:
-                            <input type="radio" name="group" value="node">Node
+                            <input type="radio" name="group" value="node" checked>Node
                             <input type="radio" name="group" value="program">Program
                         </span>
                     </div>
                     <br>
-                    <div id="file-part-select-box">
+                    <div class = "file-part-select-box">
                         <!-- Grouped by node -->
                         <select id="groupByNode" class="form-control">
                             {% for node in all_nodes %}

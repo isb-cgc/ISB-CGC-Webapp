@@ -1273,6 +1273,7 @@ require([
         }
 
         var program_data_selector ='#'+load_program_id+'-data';
+
         if ($(program_data_selector).length == 0) {
             reject_load = true;
             $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
@@ -1286,10 +1287,8 @@ require([
                 url         : get_panel_url,
                 success : function (data) {
                     data_tab_content_div.append(data);
-
                     bind_widgets(program_data_selector, load_program_id);
                     update_displays(null,true);
-
                     set_mode();
 
                     $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
@@ -1297,7 +1296,18 @@ require([
                     $('#placeholder').hide();
 
                     apply_anonymous_filters(load_program_id);
+                    $(document).ready( function() {
+                        $("input[name='group']").on('change', function () {
+                            if ($(this).is(':checked') && $(this).val() === 'node') {
+                                $('#groupByNode').show();
+                            } else if ($(this).is(':checked') && $(this).val() === 'program') {
+                                $('#groupByNode').hide();
+                                $('#groupByProgram').show();
+                            }
+                        });
+                    });
                 },
+
                 error: function () {
                     console.log('Failed to load program panel');
                 },
@@ -1337,32 +1347,6 @@ require([
             })
         }
     };
-/*
-    var radio_buttons = document.getElementsByName("group");
-    var dropdowns = document.getElementsByTagName("select");
-
-    for (var i = 0; i < radio_buttons.length; i++) {
-       radio_buttons[i].addEventListener("change", setDropDown);
-    }
-    function setDropDown() {
-       setDropDownsForNoDisplay();
-       if (this.checked) {
-         setDropDownForDisplay(this.value);
-       }
-     }
-     function setDropDownsForNoDisplay() {
-       for (var i = 0; i < dropdowns.length; i++) {
-         dropdowns[i].classList.add("no-display");
-       }
-     }
-     function setDropDownForDisplay(sortBy) {
-       if (sortBy === "node") {
-         document.getElementById("groupByNode").classList.remove("no-display");
-       } else if (sortBy === "program") {
-         document.getElementById("groupByProgram").classList.remove("no-display");
-       }
-     }
-    */
 
     // Check to see if we need 'Show More' buttons for details and filter panels (we may not)
     var max_height = 0;
