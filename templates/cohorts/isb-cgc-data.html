@@ -29,19 +29,17 @@
                     -->
 
                     <!-- Sort by and single list Design -->
-                    <div>
+                    <div class = "groupSorter">
                         <span>Sort by:
-                            <input type="radio" name="BodyPartExamined" value="node" checked=""
-                                   onclick="">Node
-                            <input type="radio" name="BodyPartExamined" value="program"
-                                   onclick="">Program
+                            <input type="radio" name="group" value="node">Node
+                            <input type="radio" name="group" value="program">Program
                         </span>
                     </div>
                     <br>
                     <div id="file-part-select-box">
                         <!-- Grouped by node -->
-                        <select class="form-control">
-                            {% for node in nodes %}
+                        <select id="groupByNode" class="form-control">
+                            {% for node in all_nodes %}
                                 <optgroup label="{{ node.name }}"></optgroup>
                                 {% for program in node.programs %}
                                     <option value="{{ program.name }}">{{ program.name }}-{{ node.short_name }}</option>
@@ -49,7 +47,7 @@
                             {% endfor %}
                         </select>
                         <!-- Grouped by program -->
-                        <select class="form-control" style='display:none'>
+                        <select id="groupByProgram" class="form-control" style='display:none'>
                             {% for program in all_programs %}
                                 <optgroup label="{{ program.name }}"></optgroup>
                                 {% for node in program.nodes %}

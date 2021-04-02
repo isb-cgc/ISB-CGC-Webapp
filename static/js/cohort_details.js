@@ -1256,17 +1256,20 @@ require([
 
     var reject_load = false;
 
-    var filter_panel_load = function(cohort, load_program_id) {
+    var filter_panel_load = function(cohort, load_node_id, load_program_id) {
         if (reject_load) {
             return;
         }
 
         // var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id');
 
-        if (load_program_id == null)
-        {
-            load_program_id = 5;
+        // if (load_program_id == null) {
             // load_program_id = active_program_id;
+        // }
+
+        if (load_node_id == null || load_program_id == null) {
+            load_node_id = all_nodes[0].id;
+            load_program_id = all_nodes[0].programs[0].id;
         }
 
         var program_data_selector ='#'+load_program_id+'-data';
@@ -1276,7 +1279,7 @@ require([
             $('#placeholder').addClass('active');
             $('#placeholder').show();
             var data_tab_content_div = $('div.data-tab-content');
-            var get_panel_url = BASE_URL + '/cohorts/' + (cohort ? cohort+'/' : '') + 'filter_panel/' + load_program_id +'/';
+            var get_panel_url = BASE_URL + '/cohorts/' + (cohort ? cohort+'/' : '') + 'filter_panel/' + load_node_id + '/' + load_program_id +'/';
 
             $.ajax({
                 type        :'GET',
@@ -1334,6 +1337,32 @@ require([
             })
         }
     };
+/*
+    var radio_buttons = document.getElementsByName("group");
+    var dropdowns = document.getElementsByTagName("select");
+
+    for (var i = 0; i < radio_buttons.length; i++) {
+       radio_buttons[i].addEventListener("change", setDropDown);
+    }
+    function setDropDown() {
+       setDropDownsForNoDisplay();
+       if (this.checked) {
+         setDropDownForDisplay(this.value);
+       }
+     }
+     function setDropDownsForNoDisplay() {
+       for (var i = 0; i < dropdowns.length; i++) {
+         dropdowns[i].classList.add("no-display");
+       }
+     }
+     function setDropDownForDisplay(sortBy) {
+       if (sortBy === "node") {
+         document.getElementById("groupByNode").classList.remove("no-display");
+       } else if (sortBy === "program") {
+         document.getElementById("groupByProgram").classList.remove("no-display");
+       }
+     }
+    */
 
     // Check to see if we need 'Show More' buttons for details and filter panels (we may not)
     var max_height = 0;

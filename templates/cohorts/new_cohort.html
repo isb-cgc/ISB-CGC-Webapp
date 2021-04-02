@@ -201,6 +201,8 @@
     <script type="text/javascript">
         var base_url = '{{ base_url|safe }}';
         var cohort_id = undefined;
+        var all_nodes = {{ all_nodes|tojson|safe }};
+        var all_programs = {{ all_programs|tojson|safe }};
     </script>
 {% endblock %}
 
