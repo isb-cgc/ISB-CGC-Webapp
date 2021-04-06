@@ -30,6 +30,7 @@ import sys
 import time
 from copy import deepcopy
 from itertools import combinations, product
+from django.core.exceptions import ObjectDoesNotExist
 
 from idc import secret_settings, settings
 
@@ -40,7 +41,7 @@ django.setup()
 
 from idc_collections.models import Program, Collection, Attribute, Attribute_Ranges, \
     Attribute_Display_Values, DataSource, DataSourceJoin, DataVersion, DataSetType, \
-    Attribute_Set_Type, Attribute_Display_Category, ImagingDataCommonsVersion
+    Attribute_Set_Type, Attribute_Display_Category, ImagingDataCommonsVersion, Attribute_Tooltips
 
 from django.contrib.auth.models import User
 idc_superuser = User.objects.get(username="idc")
@@ -79,7 +80,7 @@ def add_data_sets(sets_set):
 
 def add_data_versions(idc_version, create_set, associate_set):
     try:
-        idc_dev, created = ImagingDataCommonsVersion.objects.update_or_create(name=idc_version['name'], version_number=idc_version['number'])
+        idc_dev, created = ImagingDataCommonsVersion.objects.update_or_create(**idc_version)
         ver_to_idc = []
         ver_to_prog = []
         for dv in create_set:
@@ -193,9 +194,10 @@ def add_source_joins(froms, from_col, tos=None, to_col=None):
 def load_collections(filename):
     try:
         collection_file = open(filename, "r")
-        collection_set = []
+        new_collection_set = []
+        updated_collection_set = {}
         for line in csv_reader(collection_file):
-            collection_set.append({
+            collex = {
                 'data': {
                     "collection_id": line[0],
                     "name": line[1],
@@ -210,22 +212,37 @@ def load_collections(filename):
                     "analysis_artifacts": line[10],
                     "description": re.sub(r' style="[^"]+"', '', (re.sub(r'<div [^>]+>',"<p>", line[11]).replace("</div>","</p>"))),
                     "collection_type": line[12],
-                    "program": line[13],
                     "date_updated": line[14],
-                    "nbia_collection_id": line[15]
+                    "nbia_collection_id": line[15],
+                    "tcia_collection_id": line[15]
                 },
                 "data_versions": [{"ver": "2.0", "name": "TCIA Image Data"}]
-            })
-        return collection_set
+            }
+            if line[13] and len(line[13]):
+                try:
+                    prog = Program.objects.get(short_name=line[13])
+                    collex['data']['program'] = prog
+                except Exception as e:
+                    logger.info("[STATUS] Program {} not found for collection {} - it will not be added!".format(line[13],line[1]))
+            try:
+                Collection.objects.get(name=line[1])
+                logger.info("[STATUS] Collection {} already exists - it will be updated.".format(line[1]))
+                updated_collection_set[line[1]] = collex
+            except ObjectDoesNotExist:
+                new_collection_set.append(collex)
+
+        add_collections(new_collection_set,updated_collection_set)
+
+        load_tooltips(Collection,"collection_id","description")
     except Exception as e:
         logger.error("[ERROR] While processing collections file {}:".format(filename))
         logger.exception(e)
 
 
-def add_collections(collection_set):
+def add_collections(new,update):
     collex_list = []
     try:
-        for collex in collection_set:
+        for collex in new:
             collex_list.append(
                 Collection(
                     **collex['data'],
@@ -235,8 +252,9 @@ def add_collections(collection_set):
 
         Collection.objects.bulk_create(collex_list)
 
-        for collex in collection_set:
-            obj = Collection.objects.get(collection_id=collex['data']['collection_id'])
+        collex_to_dv = []
+        for collex in new:
+            obj = Collection.objects.get(name=collex['data']['name'])
 
             if len(collex.get('data_versions',[])):
                 collex_to_dv = []
@@ -244,10 +262,21 @@ def add_collections(collection_set):
                 for dv in data_versions:
                     collex_to_dv.append(Collection.data_versions.through(collection_id=obj.id, dataversion_id=dv.id))
 
-                Collection.data_versions.through.objects.bulk_create(collex_to_dv)
+        Collection.data_versions.through.objects.bulk_create(collex_to_dv)
+
+        updated_collex = Collection.objects.filter(name__in=list(update.keys()))
+        fields = None
+
+        for upd in updated_collex:
+            if not fields:
+                fields = list(update[upd.name]['data'].keys())
+            vals = update[upd.name]['data']
+            for key in vals:
+                setattr(upd,key,vals[key])
+        Collection.objects.bulk_update(updated_collex,fields)
 
     except Exception as e:
-        logger.error("[ERROR] Collection {} may not have been added!".format(collex['data']['collection_id']))
+        logger.error("[ERROR] Collection '{}' may not have been added!".format(collex['data']['name']))
         logger.exception(e)
 
 
@@ -360,9 +389,25 @@ def deactivate_data_versions(versions, idc_version):
             dv.save()
         for dv in ImagingDataCommonsVersion.objects.filter(version_number__in=idc_version):
             dv.active=False
-            dv.save
+            dv.save()
     except Exception as e:
         logger.error("[ERROR] While deactivating versions:")
+        logger.exception(e)
+
+
+def load_programs(filename):
+    try:
+        attr_vals_file = open(filename, "r")
+        for line in csv_reader(attr_vals_file):
+            try:
+                Program.objects.get(short_name=line[0])
+                logger.info("[STATUS] Program {} already exists: skipping.".format(line[0]))
+            except ObjectDoesNotExist as e:
+                obj = Program.objects.update_or_create(short_name=line[0],name=line[1],is_public=True,active=True,owner=idc_superuser)
+                logger.info("[STATUS] Program {} added.".format(obj))
+
+    except Exception as e:
+        logger.error("[ERROR] While adding programs:")
         logger.exception(e)
 
 
@@ -375,7 +420,6 @@ def update_attribute(attr,updates):
                 updated_vals["{}:{}".format(attr.id,dv['raw_value'])] = dv['display_value']
             else:
                 new_vals.append(Attribute_Display_Values(raw_value=dv['raw_value'], display_value=dv['display_value'], attribute=attr))
-        print(updated_vals)
 
         if len(updated_vals):
             updates = Attribute_Display_Values.objects.filter(id__in=[x.split(':')[0] for x in updated_vals], raw_value__in=[x.split(':')[1] for x in updated_vals])
@@ -384,6 +428,41 @@ def update_attribute(attr,updates):
                 upd.display_value = update['display_value']
             Attribute_Display_Values.objects.bulk_update(updates, ['display_value'])
         len(new_vals) and Attribute_Display_Values.objects.bulk_create(new_vals)
+
+
+def load_tooltips(SourceObj,attr_name,source_tooltip):
+    try:
+        source_objs = SourceObj.objects.filter(owner=idc_superuser, active=True)
+        attr = Attribute.objects.get(name=attr_name, active=True)
+
+        tips = Attribute_Tooltips.objects.select_related('attribute').filter(attribute=attr)
+
+        extent_tooltips = {}
+
+        for tip in tips:
+            if not tip.attribute.id in extent_tooltips:
+                extent_tooltips[tip.attribute.id] = []
+            extent_tooltips[tip.attribute.id].append(tip.tooltip_id)
+
+        tooltips_by_val = {x[attr_name]: {'tip': x[source_tooltip], 'obj': attr} for x in source_objs.values() if x[attr_name] != '' and x[attr_name] is not None}
+
+        tooltips = []
+
+        for val in tooltips_by_val:
+            if not tooltips_by_val[val]['tip']:
+                continue
+            if val not in extent_tooltips.get(tooltips_by_val[val]['obj'].id,[]):
+                tooltips.append(Attribute_Tooltips(tooltip_id=val, tooltip=tooltips_by_val[val]['tip'],
+                                                   attribute=tooltips_by_val[val]['obj']))
+
+        if len(tooltips):
+            logger.info("[STATUS] Adding {} new tooltips.".format(str(len(tooltips))))
+            Attribute_Tooltips.objects.bulk_create(tooltips)
+        else:
+            logger.info("[STATUS] - No new tooltips available.")
+    except Exception as e:
+        logger.error("[ERROR] While attempting to load tooltips:")
+        logger.exception(e)
 
 
 def load_display_vals(filename):
@@ -415,6 +494,7 @@ def parse_args():
     parser = ArgumentParser()
     parser.add_argument('-c', '--collex-file', type=str, default='', help='List of Collections to update/create')
     parser.add_argument('-v', '--display-vals', type=str, default='', help='List of display values to add/update')
+    parser.add_argument('-p', '--programs-file', type=str, default='', help='List of programs to add/update')
     return parser.parse_args()
 
 def main():
@@ -422,19 +502,17 @@ def main():
     try:
         args = parse_args()
         new_versions = ["TCIA Image Data Wave 2","TCIA Derived Data Wave 2"]
-        new_programs = ["APOLLO","RIDER","VICTRE","MIDRC","ACRIN","CPTAC","PDMR","LCTSC","PROSTATEX","HNSCC","IVYGAP","REMBRANDT"]
 
         set_types = ["IDC Source Data","Derived Data"]
         bioclin_version = ["GDC Data Release 9"]
 
         add_data_versions(
             {'name': "Imaging Data Commons Data Release",
-             'number': "2.0",
-             'date_active': "2021-04-05",
-             'case_count': '',
-             'collex_count': '',
-             'data_volume': '',
-             'series_count': ''
+             'version_number': "2.0",
+             'case_count': 24265,
+             'collex_count': 120,
+             'data_volume': 0,
+             'series_count': 174653
              },
             [{'name': x, 'ver': '2'} for x in new_versions],
             bioclin_version
@@ -493,6 +571,7 @@ def main():
 
         deactivate_data_versions(["TCIA Image Data Wave 1","TCIA Derived Data Wave 1"], ["1.0"])
 
+        len(args.programs_file) and load_programs(args.programs_file)
         len(args.collex_file) and load_collections(args.collex_file)
         if len(args.display_vals):
             dvals = load_display_vals(args.display_vals)

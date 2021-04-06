@@ -20,6 +20,7 @@ import json
 import logging
 import sys
 import datetime
+import re
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -57,13 +58,25 @@ def landing_page(request):
 
     changes = {
         'Renal': 'Kidney',
+        'Head': 'Head and Neck',
         'Head-Neck': 'Head and Neck',
+        'Head-and-Neck': 'Head and Neck',
         'Colon': 'Colorectal',
         'Rectum': 'Colorectal'
     }
 
+    skip = [
+        'Extremities',
+        'Abdomen, Mediastinum',
+        'Abdomen',
+        'Ear',
+        'Pelvis, Prostate, Anus'
+    ]
+
     for collection in collex:
         loc = collection['location']
+        if re.search(r'[Pp]hantom',loc) or re.search('[Vv]arious',loc) or loc in skip:
+            continue
         if collection['location'] in changes:
             loc = changes[collection['location']]
         if loc not in sapien_counts:
