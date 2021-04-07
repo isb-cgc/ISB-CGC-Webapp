@@ -17,20 +17,24 @@ export const localLogin=() =>{
 
 }
 
-export const visitPage=(url,login) =>{
+export const visitPage= function(url,login) {
 
    cy.server();
-
-   cy.visit(url).then( ()=>
-       {
-         if (login || (Cypress.env('loginNeeded'))==='true'){
-           if (Cypress.env('loginType')==='local'){
+   cy.fixture('login_reqs').as('reqs')
+   
+   cy.visit(url).then( function() {
+       var nurl= Cypress.config().baseUrl+url.split('?')[0];
+       cy.log(nurl);
+       cy.log(this.reqs[nurl]);
+       if (this.reqs.hasOwnProperty(nurl) && this.reqs[nurl]){
+          if (Cypress.env('loginType')==='local'){
               localLogin();
-
           }
-      }
     }
-  );
+   
+  });
+
+  
 
 }
 

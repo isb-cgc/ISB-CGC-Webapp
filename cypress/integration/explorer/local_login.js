@@ -1,5 +1,5 @@
 
-import { login } from '../util/utils.js'
+import { visitPage } from '../../support/utils.js'
 
 
 describe('Visit explore', () => {
@@ -7,7 +7,7 @@ describe('Visit explore', () => {
 
   it('Goes to explore', () => {
 
-     login()
+     visitPage('/explore/',true)
 
  }) 
 

@@ -3,24 +3,18 @@ import { visitPage } from '../../support/utils.js'
 describe('Tests hide attributes functionality', () => {
 
  before(() => {
-     visitPage('/explore/',true)
-     cy.fixture('hide_attributes').as('hat')
+     visitPage('/explore/',false)
 
  })
 
   beforeEach(() =>{
     Cypress.Cookies.preserveOnce('sessionid','csrftoken')
+   cy.fixture('hide_attributes').as('hat')
   })
 
 
 
-it ('Is a test', function(){
-    expect('27').to.eq(this.hat.derivedHeadingsLength);
-
-})
-
-
-  it ('Opens Collections and Selects TCGA',() =>{
+  it ('Opens Collections and Selects TCGA',function() {
    
     cy.server();
     cy.route('GET','/explore/*').as('getExplore'); 
@@ -45,7 +39,7 @@ it ('Is a test', function(){
  
   }) 
 
-/*
+
   it ('Selects BodyPart_Abdomen_wTCGA',() =>{
  
     cy.server();
@@ -150,7 +144,7 @@ it ('Is a test', function(){
 
 
   })
-*/
+
 
 })
 
