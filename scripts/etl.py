@@ -130,6 +130,7 @@ def add_data_sources(source_set):
 
 
 def add_data_source(name, count_col, source_type, versions, programs, data_sets):
+    obj = None
     try:
         obj, created = DataSource.objects.update_or_create(
             name=name,
@@ -559,12 +560,18 @@ def main():
             "case_barcode"
         )
 
-        new_attr = new_attribute("Apparent_Diffusion_Coefficient", "Apparent Diffusion Coefficient", Attribute.CONTINUOUS_NUMERIC, True, units="um2/s")
-        new_attr['solr_collex'] = ['dicom_derived_study_v2','dicom_derived_series_v2']
-        new_attr['bq_tables'] = ["idc-dev-etl.idc_v2.dicom_derived_all_pivot"]
-        new_attr['set_types'] = [{'set': DataSetType.DERIVED_DATA, 'child_record_search': None}]
+        new_attr = []
+        new_attr.append(new_attribute("Apparent_Diffusion_Coefficient", "Apparent Diffusion Coefficient", Attribute.CONTINUOUS_NUMERIC, True, units="um2/s"))
+        new_attr[0]['solr_collex'] = ['dicom_derived_study_v2','dicom_derived_series_v2']
+        new_attr[0]['bq_tables'] = ["idc-dev-etl.idc_v2.dicom_derived_all_pivot"]
+        new_attr[0]['set_types'] = [{'set': DataSetType.DERIVED_DATA, 'child_record_search': None}]
 
-        add_attributes([new_attr])
+        new_attr.append(new_attribute("tcia_species", "Species", Attribute.CATEGORICAL, True))
+        new_attr[1]['solr_collex'] = ['dicom_derived_study_v2','dicom_derived_series_v2']
+        new_attr[1]['bq_tables'] = ["idc-dev-etl.idc_v2.dicom_derived_all_pivot"]
+        new_attr[1]['set_types'] = [{'set': DataSetType.IMAGE_DATA, 'child_record_search': None}]
+
+        add_attributes(new_attr)
 
         copy_attrs(["idc-dev.metadata.dicom_pivot_wave1"],["idc-dev-etl.idc_v2.dicom_derived_all_pivot"])
         copy_attrs(["dicom_derived_all"],["dicom_derived_series_v2","dicom_derived_study_v2"])
