@@ -188,74 +188,97 @@ require([
 
          var mkFiltText = function () {
             var hasTcga = false;
+            var tcgaColSelected = false;
+            if ((window.filterObj.hasOwnProperty('Program')) && (window.filterObj.Program.indexOf('TCGA')>-1)){
+                tcgaColSelected = true;
+                $('#tcga_clinical_heading').children('a').removeClass('disabled');
+             }
+
+            else{
+                $('#tcga_clinical_heading').children('a').addClass('disabled');
+                if (!($('#tcga_clinical_heading').children('a')).hasClass('collapsed')){
+                    $('#tcga_clinical_heading').children('a').click();
+                }
+            }
+
             var curKeys = Object.keys(filterObj).sort();
             oStringA = new Array();
-             var collection = new Array();
-            for (i = 0; i < curKeys.length; i++) {
+            var collection = new Array();
 
+            for (i = 0; i < curKeys.length; i++) {
+                var addKey = true;
                 var curKey = curKeys[i];
                 /* if ((curKey === 'collection_id') && (filterObj[curKey] === tcgaColls)) {
                     continue;
                 } */
-                if (curKey.startsWith('Program')){
-                     curArr= filterObj[curKey];
-                     for (var j=0;j<curArr.length;j++){
-                         if ( ! ( ('Program.'+curArr[j]) in filterObj)){
-                             collection.push(curArr[j]);
-                         }
-                     }
-                }
-                else if (curKey.endsWith('_rng')) {
-                    var realKey=curKey.substring(0, curKey.length-4).split('.').pop();
-                    var disp = $('#'+realKey+'_heading').children().children('.attDisp')[0].innerText;
-                    if (curKey.startsWith('tcga_clinical')){
-                        disp='tcga.'+disp;
+                if (curKey.startsWith('Program')) {
+                    curArr = filterObj[curKey];
+                    for (var j = 0; j < curArr.length; j++) {
+                        if (!(('Program.' + curArr[j]) in filterObj)) {
+                            collection.push(curArr[j]);
+                        }
+                    }
+                } else if (curKey.endsWith('_rng')) {
+                    var realKey = curKey.substring(0, curKey.length - 4).split('.').pop();
+                    var disp = $('#' + realKey + '_heading').children().children('.attDisp')[0].innerText;
+                    if (curKey.startsWith('tcga_clinical') && tcgaColSelected) {
+                        disp = 'tcga.' + disp;
                         hasTcga = true;
+                    } else if (curKey.startsWith('tcga_clinical') && !tcgaColSelected) {
+                        addKey = false;
+                        break;
                     }
+                    if (addKey) {
+                        var fStr = '';
+                        if ('rng' in filterObj[curKey]) {
+                            fStr += filterObj[curKey]['rng'][0].toString() + '-' + (filterObj[curKey]['rng'][1]).toString();
+                        }
+                        if (('rng' in filterObj[curKey]) && ('none' in filterObj[curKey])) {
+                            fStr += ', ';
+                        }
+                        if ('none' in filterObj[curKey]) {
+                            fStr += 'None';
+                        }
 
-                    var fStr='';
-                    if ('rng' in filterObj[curKey]){
-                        fStr += filterObj[curKey]['rng'][0].toString()+'-'+(filterObj[curKey]['rng'][1] ).toString();
-                    }
-                    if (('rng' in filterObj[curKey]) && ('none' in filterObj[curKey])){
-                        fStr+=', ';
-                    }
-                    if ('none' in filterObj[curKey]){
-                        fStr+='None';
-                    }
 
-                    var nstr = '<span class="filter-type">'+disp+'</span> IN (<span class="filter-att">' + fStr + '</span>)';
-                    oStringA.push(nstr);
+                        var nstr = '<span class="filter-type">' + disp + '</span> IN (<span class="filter-att">' + fStr + '</span>)';
+                        oStringA.push(nstr);
+                    }
                 } else {
-                    var realKey=curKey.split('.').pop();
+                    var realKey = curKey.split('.').pop();
 
-                    var disp = $('#'+realKey+'_heading').children().children('.attDisp')[0].innerText;
-                    if (curKey.startsWith('tcga_clinical')){
-                        disp='tcga.'+disp;
+                    var disp = $('#' + realKey + '_heading').children().children('.attDisp')[0].innerText;
+                    if (curKey.startsWith('tcga_clinical') && tcgaColSelected) {
+                        disp = 'tcga.' + disp;
                         hasTcga = true;
+                    } else if (curKey.startsWith('tcga_clinical') && !tcgaColSelected) {
+                        addKey = false;
+                        break;
                     }
 
-                    var valueSpans = $('#'+realKey+'_list').children().children().children('input:checked').siblings('.value');
-                    oVals= new Array();
-                    valueSpans.each( function(){oVals.push($(this).text()) });
+                    if (addKey) {
+                        var valueSpans = $('#' + realKey + '_list').children().children().children('input:checked').siblings('.value');
+                        oVals = new Array();
+                        valueSpans.each(function () {
+                            oVals.push($(this).text())
+                        });
 
-                    var oArray = oVals.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
+                        var oArray = oVals.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
+                        nstr = '<span class="filter-type">' + disp + '</span>';
+                        nstr += 'IN (' + oArray.join("") + ')';
+                        oStringA.push(nstr);
 
+                    }
 
-                    //var nstr=disp+": "
-                    //nstr += oArray.join(", &ensp; ");
-                    nstr = '<span class="filter-type">' + disp + '</span>';
-                    nstr += 'IN (' + oArray.join("") + ')';
-                    oStringA.push(nstr);
                 }
-                if (hasTcga){
+
+
+            }
+            if (hasTcga && tcgaColSelected) {
                     $('#search_def_warn').show();
-                }
-                else{
+                } else {
                     $('#search_def_warn').hide();
                 }
-            }
-
             if (collection.length>0){
                 var oArray = collection.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
                 nstr = '<span class="filter-type">Collection</span>';
@@ -1636,6 +1659,10 @@ require([
         };
 
         var parseFilterObj = function (){
+            var hasTcgaCol=false;
+            if ((window.filterObj.hasOwnProperty('Program')) && (window.filterObj.Program.indexOf('TCGA')>-1)){
+                hasTcgaCol=true;
+            }
             collObj=new Array();
             filtObj = new Object();
             for (ckey in window.filterObj){
@@ -1654,7 +1681,7 @@ require([
                      for (ind=0;ind<window.filterObj[ckey].length;ind++){
                          collObj.push(window.filterObj[ckey][ind]);
                      }
-                } else {
+                } else if (!(ckey).startsWith('tcga_clinical') || hasTcgaCol){
                     nmA = ckey.split('.');
                     nm=nmA[nmA.length-1];
                     if (nm.endsWith('_rng')){

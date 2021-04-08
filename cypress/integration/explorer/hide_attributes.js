@@ -1,9 +1,11 @@
-import { login } from '../util/utils.js'
+import { visitPage } from '../../support/utils.js'
 
 describe('Tests hide attributes functionality', () => {
 
  before(() => {
-     login()
+     visitPage('/explore/',true)
+     cy.fixture('hide_attributes').as('hat')
+
  })
 
   beforeEach(() =>{
@@ -12,13 +14,16 @@ describe('Tests hide attributes functionality', () => {
 
 
 
+it ('Is a test', function(){
+    expect('27').to.eq(this.hat.derivedHeadingsLength);
+
+})
+
 
   it ('Opens Collections and Selects TCGA',() =>{
-    
+   
     cy.server();
-    cy.route('GET','/explore/*').as('getExplore');
-    cy.viewport(1000,1000);
-    cy.wait(1000)
+    cy.route('GET','/explore/*').as('getExplore'); 
     cy.get('#Program_heading').find('a').click();
     cy.get('#Program_list').should('be.visible');
     cy.get('#TCGA_heading').children('a').should('be.visible');
@@ -40,11 +45,11 @@ describe('Tests hide attributes functionality', () => {
  
   }) 
 
-
+/*
   it ('Selects BodyPart_Abdomen_wTCGA',() =>{
  
     cy.server();
-    cy.route('GET','http://localhost:8085/explore/*').as('getExplore');
+    cy.route('GET','/explore/*').as('getExplore');
     cy.get('#BodyPartExamined_heading').scrollIntoView().should('be.visible');
     
     //cy.wait(1000);
@@ -71,7 +76,7 @@ describe('Tests hide attributes functionality', () => {
       cy.log('here');
       cy.get($el).find('.list-group-item__heading').find('a').as('nextBut');
       cy.get('@nextBut').scrollIntoView();
-      cy.get('@nextBut').should('be.visible');
+      //cy.get('@nextBut').should('be.visible');
       cy.get('@nextBut').click({force: true});
      }
     );
@@ -93,45 +98,45 @@ describe('Tests hide attributes functionality', () => {
      cy.get('@searchCnts').contains(/^0$/).as('wZeros').should('exist');
   })
 
-    it (' Goes to Derive Tab, hidesZeros, and shows all greyed out tabs' ,() => {
+    it (' Goes to Derive Tab, hidesZeros, and shows all greyed out tabs' ,function() {
        cy.get('#search_derived').scrollIntoView();
        cy.get('#search_derived').children('a').click({force:true});
-       // cy.get('#search_derived_set').find('.case_count').filter(':visible').as('searchCnts');
        cy.get('#hide-zeros').as('hideZeros');
        cy.get('@hideZeros').click({force:true});
       cy.get('#search_derived_set').find('.list-group-item__body').find('.list-group-item__heading').find('.attDisp').as('derivedHeadings');
-      cy.get('@derivedHeadings').its('length').should('equal',27);
-       //cy.get('@derivedHeadings').its('length').as('dlen')
-     //expect(cy.get('@dlen')).to.equal(27);    
+      cy.get('@derivedHeadings').its('length').should('equal',this.hat.derivedHeadingsLength);
 
       cy.get('@derivedHeadings').filter('.greyText').should('exist');
       cy.get('@derivedHeadings').filter('.greyText').as('greyout');
-      cy.get('@greyout').its('length').should('equal',27);
+      cy.get('@greyout').its('length').should('equal',this.hat.derivedHeadingsLength);
 
 
  }) 
 
+  
 
    it ('Hides Attributes w 0 Cases after TCGA, Abdomen Filter in Related Tab',() =>{
 
     cy.get('#hide-zeros').as('hideZeros');
-    //cy.get('@hideZeros').should('not.be.checked');
     cy.get('.search-configuration').find('.case_count').as('caseCounts');
     cy.get('.search-configuration').find('.case_count:visible').should('not.exist');
+
+   
+
     cy.get('#search_related').scrollIntoView();
     cy.get('#search_related').children('a').click({force:true});
-    //cy.get('#tcga_clinical_heading').children('a').click({force:true}); 
-    
+    cy.get('#tcga_clinical_heading').children('a').click({force:true});
+     
 
      cy.get('#tcga_clinical').children('.list-group').each( ($el,index) =>
      {
       cy.log('here');
        cy.get($el).find('.list-group-item__heading').find('a').as('nextBut');
-     // cy.get('@nextBut').scrollIntoView();
-     //cy.get('@nextBut').should('be.visible');
       cy.get('@nextBut').click({force: true}); 
      }
     );
+    
+    
    
     cy.get('#search_related_set').find('.case_count').filter(':visible').as('searchCnts');
     cy.get('@searchCnts').its('length').should('be.gt',0);
@@ -141,8 +146,11 @@ describe('Tests hide attributes functionality', () => {
     cy.get('@searchCnts').contains(/^0$/).as('wZeros');
     cy.get('@wZeros').its('length').should('be.gt',0); 
 
+   
+
 
   })
+*/
 
 })
 

@@ -1,15 +1,15 @@
-import { login } from '../util/utils.js'
-
+import { visitPage } from '../../support/utils.js'
 
 describe('Tests show more functionality', () => {
 
 
  before(() => {
-     login()
+     visitPage('/explore/',true)
 
  })
 
   beforeEach(() =>{
+    
     Cypress.Cookies.preserveOnce('sessionid','csrftoken')
   })
 
