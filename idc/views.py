@@ -20,6 +20,7 @@ import json
 import logging
 import sys
 import datetime
+import re
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -51,7 +52,7 @@ WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 # The site's homepage
 @never_cache
 def landing_page(request):
-    collex = Collection.objects.filter(active=True, subject_count__gt=6, collection_type=Collection.ORIGINAL_COLLEX).values()
+    collex = Collection.objects.filter(active=True, subject_count__gt=6, collection_type=Collection.ORIGINAL_COLLEX, species='Human').values()
     #app_info = AppInfo.objects.get(active=True)
     idc_info = ImagingDataCommonsVersion.objects.get(active=True)
 
@@ -59,13 +60,25 @@ def landing_page(request):
 
     changes = {
         'Renal': 'Kidney',
+        'Head': 'Head and Neck',
         'Head-Neck': 'Head and Neck',
+        'Head-and-Neck': 'Head and Neck',
         'Colon': 'Colorectal',
         'Rectum': 'Colorectal'
     }
 
+    skip = [
+        'Extremities',
+        'Abdomen, Mediastinum',
+        'Abdomen',
+        'Ear',
+        'Pelvis, Prostate, Anus'
+    ]
+
     for collection in collex:
         loc = collection['location']
+        if re.search(r'[Pp]hantom',loc) or re.search('[Vv]arious',loc) or loc in skip:
+            continue
         if collection['location'] in changes:
             loc = changes[collection['location']]
         if loc not in sapien_counts:
@@ -269,8 +282,8 @@ def explore_data_page(request):
     else:
         # These are filters to be loaded *after* a page render
         context['filters_for_load'] = json.loads(req.get('filters_for_load', '{}'))
-        context['order'] = {'derived_set': ['dicom_derived_all:segmentation', 'dicom_derived_all:qualitative',
-                                            'dicom_derived_all:quantitative']}
+        context['order'] = {'derived_set': ['dicom_derived_series_v2:segmentation', 'dicom_derived_series_v2:qualitative',
+                                            'dicom_derived_series_v2:quantitative']}
 
         return render(request, 'idc/explore.html', context)
 
