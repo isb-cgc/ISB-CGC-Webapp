@@ -244,12 +244,12 @@
 
                                             <li class="list-group-item">
                                                    <div id="{{ attr_setV.name }}_heading" class="list-group-item__heading">
-                                                         <a role="button" data-toggle="collapse" href="#{{ attr_setV.name }}" aria-expanded="false" aria-controls="{{ attr_setV.name }}">
+                                                         <a role="button" data-toggle="collapse" href="#{{ attr_setV.name }}" aria-expanded="false" aria-controls="{{ attr_setV.name }}" class="collapsed">
                                                          <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>{{ attr_setV.display_name }}
                                                         </a>
                                                   </div>
 
-                                                 <div id="{{ attr_setV.name }}" class="collapse list-group-item__body in">
+                                                 <div id="{{ attr_setV.name }}" class="collapse list-group-item__body">
 
                                                   <ul class="list-group" role="tablist" aria-multiselectable="true">
                                                   {% for attr in attr_setV.attributes|order_quant:attr_setK %}
@@ -318,18 +318,18 @@
                                     <ul class="list-group" role="tablist" aria-multiselectable="true">
                                     <li class="list-group-item">
                                       <div id="tcga_clinical_heading" class="list-group-item__heading">
-                                         <a role="button" data-toggle="collapse" href="#tcga_clinical" aria-expanded="false" aria-controls="tcga_clinical" class="">
+                                         <a role="button" data-toggle="collapse" href="#tcga_clinical" aria-expanded="false" aria-controls="tcga_clinical" class="collapsed disabled">
                                          <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>TCGA
                                         </a>
                                       </div>
-                                      <div id="tcga_clinical" class="collapse list-group-item__body collapse in" aria-expanded="false" style>
+                                      <div id="tcga_clinical" class="collapse list-group-item__body" aria-expanded="false">
 
                                                {% for attr in set_attributes.related_set.All.attributes %}
                                                 <ul class="list-group" role="tablist" aria-multiselectable="true">
                                                    <li class="list-group-item">
                                                  <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                      <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
-                                                         <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> <span class="attDisp">{{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}</span> <span class="notDisp noCase"> (0 TCGA cases)</span>
+                                                         <i class="fa fa-caret-right" disabled></i> <i class="fa fa-caret-down"disabled></i> <span class="attDisp">{{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}</span> <span class="notDisp noCase"> (0 TCGA cases)</span>
                                                      </a>
                                                  </div>
                                                  <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse" aria-expanded="false"
