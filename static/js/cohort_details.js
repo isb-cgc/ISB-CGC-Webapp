@@ -209,7 +209,7 @@ require([
             return;
         }
 
-        var prog_id = (alternate_prog_id === null || alternate_prog_id === undefined) ? $('ul.nav-tabs-data li.active a').data('program-id') : alternate_prog_id;
+        var prog_id = (alternate_prog_id === null || alternate_prog_id === undefined) ? ACTIVE_PROGRAM_ID : alternate_prog_id;
         (update_displays_thread !== null) && clearTimeout(update_displays_thread);
 
         update_displays_thread = setTimeout(function(){
@@ -1272,6 +1272,8 @@ require([
         }
     };
 
+    var ACTIVE_PROGRAM_ID = 0;
+
     var filter_panel_load = function(cohort, load_program_id=null, load_node_id=null) {
         if (reject_load) {
             return;
@@ -1289,6 +1291,7 @@ require([
 
         if (load_program_id == null) {
             load_program_id = all_nodes[0].programs[0].id;
+            ACTIVE_PROGRAM_ID = load_program_id;
         }
 
         var program_data_selector ='#'+load_program_id+'-data';
@@ -1323,6 +1326,20 @@ require([
                     $('.sort-radio').click(function () {
                         SORT_DATASET_BY = $(this).val();
                         update_select_dataset_ui(program_data_selector);
+                    });
+
+                    $(program_data_selector + ' .dataset-select-box').change(function() {
+                        let selected = $(this).find('option:selected');
+                        let node_id = selected.attr('node-id');
+                        ACTIVE_PROGRAM_ID = selected.attr('program-id');
+                        let new_dataset_selector = '#'+ACTIVE_PROGRAM_ID+'-data';
+                        if ($(new_dataset_selector).length != 0) {
+                            $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
+                            $(new_dataset_selector).addClass('active');
+                            update_select_dataset_ui(new_dataset_selector);
+                        } else {
+                            filter_panel_load(cohort_id, ACTIVE_PROGRAM_ID, node_id);
+                        }
                     });
                 },
 
@@ -1389,8 +1406,8 @@ require([
     // #1950 fix, so we introduce the next function...
 
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id');
-        filter_panel_load(cohort_id, active_program_id);
+        ACTIVE_PROGRAM_ID = $('ul.nav-tabs-data li.active a').data('program-id');
+        filter_panel_load(cohort_id, ACTIVE_PROGRAM_ID);
     });
 
     // Clicking on the tab will have no effect if another tab

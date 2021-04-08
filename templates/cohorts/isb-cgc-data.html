@@ -9,27 +9,6 @@
 {#                    <a class="pull-right clear-filters" role="button" id="48-data-clear-filters">Clear All</a>#}
                 </div>
                 <div class="panel-body">
-                    <!-- Two dropdown list Design -->
-                    <!--
-                    <div id="file-part-select-box">
-                        <label>Node</label>
-                        <select class="form-control">
-                            <option value="0">GDC</option>
-                            <option value="1">PDC</option>
-                            <option value="2">IDC</option>
-                        </select>
-                    </div>
-                    <div id="file-part-select-box">
-                        <label>Program</label>
-                        <select class="form-control">
-                            <option value="0">TCGA</option>
-                            <option value="1">CCLE</option>
-                            <option value="2">TARGET</option>
-                        </select>
-                    </div>
-                    -->
-
-                    <!-- Sort by and single list Design -->
                     <div>
                         <span>Sort by:
                             <input type="radio" class="sort-radio" value="node" checked>Node
@@ -37,22 +16,26 @@
                         </span>
                     </div>
                     <br>
-                    <div class = "file-part-select-box">
+                    <div>
                         <!-- Grouped by node -->
-                        <select class="sort-by-node form-control">
+                        <select class="sort-by-node dataset-select-box form-control">
                             {% for node in all_nodes %}
                                 <optgroup label="{{ node.name }}"></optgroup>
                                 {% for program in node.programs %}
-                                    <option value="{{ program.name }}">{{ program.name }}-{{ node.short_name }}</option>
+                                    <option value="{{ node.short_name }}-{{ program.name }}" node-id="{{ node.id }}" program-id="{{ program.id }}">
+                                        {{ program.name }}-{{ node.short_name }}
+                                    </option>
                                 {% endfor %}
                             {% endfor %}
                         </select>
                         <!-- Grouped by program -->
-                        <select class="sort-by-program form-control" style='display:none'>
+                        <select class="sort-by-program dataset-select-box form-control" style='display:none'>
                             {% for program in all_programs %}
                                 <optgroup label="{{ program.name }}"></optgroup>
                                 {% for node in program.nodes %}
-                                    <option value="{{ node.short_name }}">{{ program.name }}-{{ node.short_name }}</option>
+                                    <option value="{{ node.short_name }}-{{ program.name }}" node-id="{{ node.id }}" program-id="{{ program.id }}">
+                                        {{ program.name }}-{{ node.short_name }}
+                                    </option>
                                 {% endfor %}
                             {% endfor %}
                         </select>
