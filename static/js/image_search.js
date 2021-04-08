@@ -3080,6 +3080,28 @@ require([
          }
      }
 
+     var demoUpdate = function(){
+         var item = location.search.substr(1);
+         tmp=item.split('=');
+         if ((tmp.length===2) && (tmp[0]==='update')){
+             if (tmp[1]==='filter1'){
+                 $('#Modality_list').find('input:checkbox')[0].click();
+
+             }
+             else if (tmp[1]==='series1'){
+                 $('#search_def')[0].innerHTML='<p><span class="filter-type">SeriesInstanceUID</span> IN (<span class="filter-att">12.0.3, 123.45, ... </span>)</p>'
+             }
+
+             else if (tmp[1]==='filter2'){
+                 $('#Program_list').find('input:checkbox')[0].click();
+             }
+             else if (tmp[1]==='series2'){
+                 $('#search_def')[0].innerHTML='<p><span class="filter-type">SeriesInstanceUID</span> IN (<span class="filter-att">15.0.3, 173.45, ... </span>)</p>'
+             }
+
+         }
+     }
+
      $(document).ready(function () {
            // $('#proj_table').DataTable();
            // window.filterObj.collection_id = window.tcgaColls;
@@ -3169,6 +3191,8 @@ require([
             //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
 
             load_preset_filters();
+            demoUpdate();
+
         }
     );
 });
