@@ -1368,9 +1368,7 @@ require([
 
             if (mvScroll){
                 curIndex=(parseInt(curIndex / recordsPP) )*recordsPP;
-            }
-
-            else {
+            } else {
                 var curScrollPos = tableElem[0].scrollTop;
                 curIndex = Array.from(rowPos.map(function () {
                     return ((this <= curScrollPos) ? 0 : 1)
@@ -1383,7 +1381,6 @@ require([
                     curIndex++;
                    }
                }
-
             }
             var lastInd = curIndex + recordsPP - 1;
             var currentPage = parseInt(curIndex / recordsPP) + 1;
@@ -1397,17 +1394,14 @@ require([
                 atEnd = true;
             }
 
-
             if ((curIndex > -1) && (lastInd > -1)) {
                 var totalHeight = displayedRows[lastInd].offsetTop + displayedRows[lastInd].offsetHeight - displayedRows[curIndex].offsetTop;
                 tableElem.css('max-height', totalHeight.toString() + 'px');
-
             }
 
             if (mvScroll) {
                     tableElem[0].scrollTop = rowPos[curIndex];
             }
-
 
             tableElemGm = tableElem.parent().parent();
             tableElemGm.find('.showing')[0].innerHTML = (curIndex + 1).toString() + " to " + (lastInd + 1).toString();
@@ -1418,13 +1412,10 @@ require([
 
             if (numRecords>0){
                 tableElemGm.find('thead').find('.ckbx').removeClass('notVis');
-            }
-            else{
+            } else {
                 tableElemGm.find('thead').find('.ckbx').addClass('notVis');
             }
-
             resetPagination(tableElemGm, currentPage, numPages, recordsPP, numRecords);
-
         }
 
         var resetPagination = function (tableElem, currentPage, numPages, recordsPP, numRecords) {
@@ -1441,7 +1432,6 @@ require([
             } else {
                 $(tableElem).parent().parent().find('.dataTables_goto_page').show();
             }
-
 
             $(tableElem).parent().parent().find('.dataTables_goto_page').data('curpage', currentPage);
             pageElem = $(tableElem).find('.paginate_button_space')[0];
@@ -1487,7 +1477,6 @@ require([
             } else {
                 $('.spinner').show();
             }
-
         }
 
         var pretty_print_id = function (id) {
@@ -1499,8 +1488,6 @@ require([
             var project_scope = searchElem.selectedOptions[0].value;
             mkFiltText();
             updateFacetsData(true);
-
-
         }
 
         var resetFilterAttr = function (filterCat, filtDic) {
@@ -1514,7 +1501,6 @@ require([
                     selElement.checked = false;
                 }
             }
-
         }
     /*
         var resetSearchScope = function (scopeArr, searchId) {
@@ -1552,7 +1538,6 @@ require([
             //document.getElementById(displaySet).innerHTML=newText;
             mkFiltText();
             fetchCountData(false);
-
         };
 
         window.selectHistoricFilter = function (num) {
@@ -1585,7 +1570,6 @@ require([
             resetSearchScope(histObj.filterObj.collection_id, 'project_scope');
             mkFiltText();
             updateFacetsData(false);
-
         }
 
         var updateCollectionTotals = function(listId, progDic){
@@ -1593,13 +1577,10 @@ require([
             reformDic[listId] = new Object();
             for (item in progDic){
                 if ((item !=='All') && (item !=='None')){
-
                     if (! ('projects' in progDic[item]) ) {
                         reformDic[listId][item]=new Object();
                         reformDic[listId][item]['count'] = progDic[item]['val'];
-                    }
-
-                    else if (item.toLowerCase() === 'tcga'){
+                    } else if (item.toLowerCase() === 'tcga'){
                         reformDic[listId][item]=new Object();
                         reformDic[listId][item]['count'] = progDic[item]['val'];
                         reformDic[item] =  new Object();
@@ -1607,7 +1588,6 @@ require([
                             reformDic[item][project]=new Object();
                             reformDic[item][project]['count']=progDic[item]['projects'][project];
                         }
-
                     }
 
                     //else if (('projects' in progDic[item]) && Object.keys(progDic[item]['projects']).length == 1 ){
@@ -1710,9 +1690,7 @@ require([
         };
 
         var updateFacetsData = function (newFilt) {
-
             changeAjax(true);
-
             var url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True&data_source_type=' + ($("#data_source_type option:selected").val() || 'S');
             var parsedFiltObj=parseFilterObj();
             if (Object.keys(parsedFiltObj).length > 0) {
@@ -1721,9 +1699,7 @@ require([
             }
 
             url = encodeURI(url);
-
             let deferred = $.Deferred();
-
             $.ajax({
                 url: url,
                 dataType: 'json',
@@ -1799,7 +1775,6 @@ require([
                         $('#search_derived_set').removeClass('disabled');
                         for (facetSet in data.derived_set){
                             if ('attributes' in data.derived_set[facetSet]){
-
                                 dicofdic = {'unfilt': data.derived_set[facetSet].attributes, 'filt': ''}
                                 if (isFiltered && data.filtered_counts.hasOwnProperty('derived_set')
                                     && data.filtered_counts.derived_set.hasOwnProperty(facetSet)
@@ -1837,11 +1812,9 @@ require([
                         dicofdic = {'unfilt':data.related_set.All.attributes, 'filt':''  }
                         if (isFiltered){
                             dicofdic['filt'] = data.filtered_counts.related_set.All.attributes;
-                        }
-                        else{
+                        } else{
                             dicofdic['filt'] = data.related_set.All.attributes;
                         }
-
                         updateFilterSelections('search_related_set', dicofdic);
                         //createPlots('tcga_clinical');
                     }
@@ -1856,13 +1829,11 @@ require([
                     if ('collection_id' in parsedFiltObj){
                         collFilt=parsedFiltObj['collection_id'];
                         var ind=0;
-                        while (ind <window.selItems.selProjects.length)
-                        {
+                        while (ind <window.selItems.selProjects.length) {
                             proj=window.selItems.selProjects[ind]
                             if (  (collFilt.indexOf(proj)>-1)){
                                 ind++
-                            }
-                            else{
+                            } else{
                                 window.selItems.selProjects.splice(ind,1);
                                 if (proj in window.selItems.selStudies){
                                     delete window.selItems.selStudies[proj];
@@ -1882,7 +1853,6 @@ require([
                          addSliders('quantitative', false, true,'');
                          addSliders('tcga_clinical',false, true,'tcga_clinical.');
                      }
-
 
                     if (newFilt) {
                         histObj = new Object();
@@ -1945,8 +1915,7 @@ require([
                     setSlider(filterId+"_slide", true, 0, maxx, true,true);
                     */
 
-                }
-                else {
+                } else {
                     if (! (typeof(inpElem)==="undefined")){
                         inpElem.checked=false;
                         var parStr = $(inpElem).data("attr-par");
@@ -2009,38 +1978,31 @@ require([
                 var titA = lbl.split('Quarter');
                 title1=titA[0]+' Quarter';
                 title2=titA[1];
-            }
-            else if(lbl.includes('Background')){
+            } else if(lbl.includes('Background')){
                 var titA = lbl.split('Activity');
                 var titB = titA[1].split('(');
                 title0 = titA[0];
                 title1= 'Activity '+titB[0];
                 title2= '('+titB[1];
-            }
-
-            else if(lbl.includes('(')){
+            } else if(lbl.includes('(')){
                var titA = lbl.split('(');
                title1=titA[0];
                title2='('+titA[1];
-             }
-            else{
+             } else {
               title2=lbl;
              }
-
 
             titlePart.append("tspan").attr("x",140).attr("y",15).attr("dx",0).attr("dy",0).text(title0);
             titlePart.append("tspan").attr("x", 140).attr("y", 15).attr("dx", 0).attr("dy", 20).text(title1);
             titlePart.append("tspan").attr("x", 140).attr("y", 15).attr("dx", 0).attr("dy", 40).text(title2);
 
-
-             var pieg=svg.append("g")
-             .attr("transform", "translate(" + width / 2 + "," + (height / 2 + shifty) + ")");
+            var pieg=svg.append("g").attr("transform", "translate(" + width / 2 + "," + (height / 2 + shifty) + ")");
             var data = new Object;
-             var nonZeroLabels= new Array();
-             //spcing = 1.0/parseFloat(plotData.dataCnt.length);
-             var tot=0;
+            var nonZeroLabels= new Array();
+            //spcing = 1.0/parseFloat(plotData.dataCnt.length);
+            var tot=0;
 
-              for (i=0;i<plotData.dataCnt.length;i++) {
+            for (i=0;i<plotData.dataCnt.length;i++) {
                var pkey = plotData.dataLabel[i];
                var cnt = plotData.dataCnt[i];
                data[pkey]=cnt;
@@ -2062,16 +2024,14 @@ require([
              var col="";
                if ( (nonZeroLabels.length>1) & (lbl === nonZeroLabels[nonZeroLabels.length-1]) && (color(nonZeroLabels[0])===color(lbl))  ){
                         col=color(nonZeroLabels[5]);
-               }
-               else{
+               } else {
                    col=color(lbl);
                }
                return col;
            }
 
            // Compute the position of each group on the pie:
-          var pie = d3.pie()
-          .value(function(d) {return d.value; }).sort(null);
+          var pie = d3.pie().value(function(d) {return d.value; }).sort(null);
           var data_ready = pie(d3.entries(data));
 
          // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
@@ -2134,7 +2094,7 @@ require([
         txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",40);
         txtbx.attr("opacity",0);
 
-        if (tot===0){
+        if (tot===0) {
             txtbx.attr('text-anchor','middle');
             tspans=txtbx.node().childNodes;
             tspans[0].textContent = "No Data Available";
@@ -2143,60 +2103,56 @@ require([
 
         }
 
-
-         var plotCategoricalDataBar = function (plotId, lbl, plotData, isPie, showLbl){
+        var plotCategoricalDataBar = function (plotId, lbl, plotData, isPie, showLbl) {
             var nData = new Array();
             for (i=0;i<plotData.dataCnt.length;i++){
                 nData.push({'cat': plotData.dataLabel[i], 'cnt': plotData.dataCnt[i]});
             }
-
 
             var svg = d3.select('#'+plotId).select("svg"),
             marginL = 20,
             marginR = 40,
             marginT = 50,
             marginB = 100;
-        width = svg.attr("width") - marginL - marginR;
-        height = svg.attr("height") - marginT - marginB;
+            width = svg.attr("width") - marginL - marginR;
+            height = svg.attr("height") - marginT - marginB;
 
-        svg.append("text")
-       .attr("transform", "translate("+marginL+",0)")
-       .attr("x", 50)
-       .attr("y", 30)
-       .attr("font-size", "24px")
-       .text(lbl);
-
-
-        var xScale = d3.scaleBand().range([0, width]).padding(0.1).domain( nData.map(function(d){return d.cat}));
-        var yScale = d3.scaleLinear().range([height, 0]).domain([0, d3.max(nData, function(d){ return d.cnt} )]);
-
-        var g = svg.append("g").attr("transform", "translate(" + marginL + "," + marginT + ")");
+            svg.append("text")
+           .attr("transform", "translate("+marginL+",0)")
+           .attr("x", 50)
+           .attr("y", 30)
+           .attr("font-size", "24px")
+           .text(lbl);
 
 
-        g.append("g")
-            .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(xScale)).selectAll("text")
-            .attr("transform", "rotate(45)")
-            .style("text-anchor", "start");
+            var xScale = d3.scaleBand().range([0, width]).padding(0.1).domain( nData.map(function(d){return d.cat}));
+            var yScale = d3.scaleLinear().range([height, 0]).domain([0, d3.max(nData, function(d){ return d.cnt} )]);
 
-        g.append("g")
-            .call(d3.axisLeft(yScale));
+            var g = svg.append("g").attr("transform", "translate(" + marginL + "," + marginT + ")");
 
 
-        g.selectAll(".d3bar")
-            .data(nData)
-            .enter().append("rect")
-            .attr("class", "d3bar")
-            .attr("x", function (d) {
-                return xScale(d.cat)
-            })
-            .attr("y", function (d) {
-                return yScale(d.cnt)
-            })
-            .attr("width", xScale.bandwidth())
-            .attr("height", function (d) {
-                return height - yScale(d.cnt);
-            });
+            g.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale)).selectAll("text")
+                .attr("transform", "rotate(45)")
+                .style("text-anchor", "start");
+
+            g.append("g").call(d3.axisLeft(yScale));
+
+            g.selectAll(".d3bar")
+                .data(nData)
+                .enter().append("rect")
+                .attr("class", "d3bar")
+                .attr("x", function (d) {
+                    return xScale(d.cat)
+                })
+                .attr("y", function (d) {
+                    return yScale(d.cnt)
+                })
+                .attr("width", xScale.bandwidth())
+                .attr("height", function (d) {
+                    return height - yScale(d.cnt);
+                });
 
         };
 
@@ -2237,7 +2193,7 @@ require([
         window.updatePlots = function (selectElem) {
             createPlots('search_orig_set');
             createPlots('search_derived_set');
-             createPlots('search_related_set');
+            createPlots('search_related_set');
         }
 
         var createPlots = function (id) {
@@ -2248,7 +2204,6 @@ require([
                 isPie = false;
             }
             var showLbl = document.getElementById("plot_label").checked
-
 
             var filterCats = findFilterCats(id,true);
             for (var i = 0; i < filterCats.length; i++) {
@@ -2266,13 +2221,11 @@ require([
                 } */
                 plotCategoricalData(plotId, lbl, filterData, isPie, showLbl);
             }
-
         }
 
         window.resort = function(filterCat){
             updateFilters(filterCat,{},false);
         }
-
 
         var updateAttributeValues = function(attributeValList, dic){
             var allValues = attributeValList.children('li').children().children('input:checkbox');
@@ -2300,32 +2253,27 @@ require([
                     spans.filter('.plot_count')[0].innerHTML = cntF.toString();
                 }
             }
-
         }
 
         var updateFilters = function (filterCat, dic, dataFetched) {
-
             var showZeros = true;
             var isSearchConf = ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').length>0);
-            if ( isSearchConf  && ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').prop('checked'))){
+            if (isSearchConf && ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').prop('checked'))){
                 showZeros = false;
             }
             if (  $('#'+filterCat).hasClass('isQuant') && dataFetched){
                 if (dic.hasOwnProperty('unfilt') && dic['filt'].hasOwnProperty('min_max') ){
                     if (dic['unfilt']['min_max'].hasOwnProperty('min')) {
                         $('#' + filterCat).attr('data-curmin', dic['unfilt']['min_max']['min']);
-                    }
-                    else{
+                    } else {
                         $('#'+filterCat).attr('data-curmin','NA');
                     }
                     if (dic['unfilt']['min_max'].hasOwnProperty('max')) {
                         $('#' + filterCat).attr('data-curmax', dic['unfilt']['min_max']['max']);
-                    }
-                    else{
+                    } else {
                         $('#'+filterCat).attr('data-curmax','NA');
                     }
-                }
-                else{
+                } else{
                     $('#'+filterCat).attr('data-curmin','NA');
                     $('#'+filterCat).attr('data-curmax','NA');
                 }
@@ -2350,8 +2298,6 @@ require([
                         }).appendTo(filterList);
                  }
             }
-
-
 
             var allFilters = filterList.children('li').children().children('input:checkbox');
 
@@ -2383,8 +2329,7 @@ require([
                     }
                     $(elem).parent().parent().removeClass('zeroed');
                     isZero=false;
-                }
-                else {
+                } else {
                     $(elem).parent().parent().addClass('zeroed');
                     isZero=true;
                 }
@@ -2393,15 +2338,13 @@ require([
                 }
                 if ( (numAttrAvail>5) && (!isZero || showZeros)  ) {
                     $(elem).parent().parent().addClass('extra-values');
-                }
-                else {
+                } else {
                     $(elem).parent().parent().removeClass('extra-values');
                 }
 
                 if ( ( (cntUf>0) || checked || showZeros ) && (showExtras || (numAttrAvail<6)) ) {
                       $(elem).parent().parent().removeClass('notDisp');
-                }
-                else {
+                } else {
                     $(elem).parent().parent().addClass('notDisp');
                 }
 
@@ -2412,26 +2355,21 @@ require([
                     $('#' + filterCat+'_heading').children('a').children().addClass('greyText');
                     $('#' + filterCat+'_heading').children('a').children('.noCase').removeClass('notDisp');
 
-                }
-                else {
+                } else {
                     $('#' + filterCat+'_heading').children('a').children().removeClass('greyText');
                     $('#' + filterCat+'_heading').children('a').children('.noCase').addClass('notDisp');
-
                 }
 
                 if ( numAttrAvail < 1)  {
-                       $('#' + filterCat).children('.more-checks').hide();
-                        $('#' + filterCat).children('.less-checks').hide();
-                        $('#' + filterCat).children('.check-uncheck').hide();
+                    $('#' + filterCat).children('.more-checks').hide();
+                    $('#' + filterCat).children('.less-checks').hide();
+                    $('#' + filterCat).children('.check-uncheck').hide();
 
-                    }
-                else if (showExtras) {
+                } else if (showExtras) {
                     $('#' + filterCat).children('.more-checks').hide();
                     $('#' + filterCat).children('.less-checks').show();
                     $('#' + filterCat).children('.check-uncheck').show();
-                }
-
-                else {
+                } else {
                     numMore = filterList.children('li').filter('.extra-values').length;
                     $('#' + filterCat).children('.more-checks').show();
                     $('#' + filterCat).children('.check-uncheck').show();
@@ -2440,16 +2378,13 @@ require([
 
                         if (numMore>0){
                             $('#' + filterCat).children('.more-checks').children('.show-more').removeClass('notVis');
-                        }
-                        else{
+                        } else{
                             $('#' + filterCat).children('.more-checks').children('.show-more').addClass('notVis');
                         }
                     }
-
                     $('#' + filterCat).children('.less-checks').hide();
                 }
             }
-
         }
 
         setAllFilterElements = function(hideEmpty){
@@ -2511,7 +2446,6 @@ require([
                 }
             }
         };
-
 
         var checkFilters = function(filterElem) {
             var checked = $(filterElem).prop('checked');
@@ -2631,7 +2565,6 @@ require([
                 delete filterObj[curCat];
                 $(childBoxes).prop('checked',false);
             }
-
         };
 
         var handleFilterSelectionUpdate = function(filterElem, mkFilt, doUpdate) {
@@ -2643,7 +2576,6 @@ require([
                 updateFacetsData(true);
             }
         };
-
 
         var tableSortBindings = function (filterId) {
             $('#' + filterId).find('.fa-caret-up, .fa-caret-down').on('click', function () {
@@ -2701,10 +2633,7 @@ require([
                 handleFilterSelectionUpdate(this, true, true);
             });
 
-
-
             $('#' + filterId).find('.show-more').on('click', function () {
-
                 $(this).parent().parent().find('.less-checks').show();
                 $(this).parent().parent().find('.less-checks').removeClass('notDisp');
                 $(this).parent().parent().find('.more-checks').addClass('notDisp');
@@ -2728,22 +2657,18 @@ require([
             $('#' + filterId).find('.check-all').on('click', function () {
                 //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
                 var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body, .list-group-sub-item__body').children('ul').children();
-                for (var ind =0;ind<filterElems.length;ind++)
-                {
+                for (var ind =0;ind<filterElems.length;ind++) {
                     var ckElem = new Object();
                     if ($(filterElems[ind]).children().filter('.list-group-item__heading').length>0){
                         ckElem = $(filterElems[ind]).children().filter('.list-group-item__heading').children().filter('input:checkbox')[0];
-                    }
-                    else{
+                    } else {
                        ckElem=$(filterElems[ind]).children().filter('label').children().filter('input:checkbox')[0];
                     }
-
                     ckElem.checked= true;
                   //$(filterElem).prop('checked') = true;
                   if (ind<filterElems.length-1) {
                       handleFilterSelectionUpdate(ckElem, false, false);
-                  }
-                  else{
+                  } else {
                       handleFilterSelectionUpdate(ckElem, true, true);
                   }
                 }
@@ -2752,26 +2677,21 @@ require([
             $('#' + filterId).find('.uncheck-all').on('click', function () {
                  //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
                 var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body,.list-group-sub-item__body').children('ul').children();
-                for (var ind =0;ind<filterElems.length;ind++)
-                {
+                for (var ind =0;ind<filterElems.length;ind++) {
                     var ckElem = new Object();
                     if ($(filterElems[ind]).children().filter('.list-group-item__heading').length>0){
                         ckElem = $(filterElems[ind]).children().filter('.list-group-item__heading').children().filter('input:checkbox')[0];
-                    }
-                    else{
+                    } else {
                        ckElem=$(filterElems[ind]).children().filter('label').children().filter('input:checkbox')[0];
                     }
 
                   ckElem.checked = false;
                     if (ind<filterElems.length-1) {
                       handleFilterSelectionUpdate(ckElem, false, false);
-                  }
-                  else{
+                  } else{
                       handleFilterSelectionUpdate(ckElem, true, true);
                   }
-
                 }
-
             });
         };
 
@@ -2785,7 +2705,6 @@ require([
             if (filterElem.classList.contains('all')){
 
             }
-
         };
 
      var addFilterBindings = function(id){
@@ -2865,8 +2784,6 @@ require([
             }
         });
      };
-
-
 
      var load_filters = function(filters) {
          var sliders = [];
@@ -3028,7 +2945,6 @@ require([
         save_anonymous_selection_data();
     });
 
-
      var cohort_loaded = false;
      function load_preset_filters() {
          if (is_cohort && !cohort_loaded) {
@@ -3086,16 +3002,11 @@ require([
          if ((tmp.length===2) && (tmp[0]==='update')){
              if (tmp[1]==='filter1'){
                  $('#Modality_list').find('input:checkbox')[0].click();
-
-             }
-             else if (tmp[1]==='series1'){
+             } else if (tmp[1]==='series1'){
                  $('#search_def')[0].innerHTML='<p><span class="filter-type">SeriesInstanceUID</span> IN (<span class="filter-att">12.0.3, 123.45, ... </span>)</p>'
-             }
-
-             else if (tmp[1]==='filter2'){
+             } else if (tmp[1]==='filter2'){
                  $('#Program_list').find('input:checkbox')[0].click();
-             }
-             else if (tmp[1]==='series2'){
+             } else if (tmp[1]==='series2'){
                  $('#search_def')[0].innerHTML='<p><span class="filter-type">SeriesInstanceUID</span> IN (<span class="filter-att">15.0.3, 173.45, ... </span>)</p>'
              }
 
@@ -3189,10 +3100,8 @@ require([
              });
 
             //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
-
             load_preset_filters();
             demoUpdate();
-
         }
     );
 });
