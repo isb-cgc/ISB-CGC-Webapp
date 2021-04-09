@@ -557,13 +557,15 @@ def igv(request):
     # This is a single GET request, we need to get the full file info from Solr first
     else:
         sources = DataSource.objects.filter(source_type=DataSource.SOLR, version=DataVersion.objects.get(data_type=DataVersion.FILE_DATA, active=True, build=build))
-        gdc_ids = req.get('gdc_ids','').split(',')
+        gdc_ids = list(set(req.get('gdc_ids','').split(',')))
+
         if not len(gdc_ids):
             messages.error(request,"A list of GDC file UUIDs was not provided. Please indicate the files you wish to view.")
         else:
             if len(gdc_ids) > settings.MAX_FILES_IGV:
                 messages.warning(request,"The maximum number of files which can be viewed in IGV at one time is {}.".format(settings.MAX_FILES_IGV) +
                                  " Only the first {} will be displayed.".format(settings.MAX_FILES_IGV))
+                gdc_ids = gdc_ids[:settings.MAX_FILES_IGV]
 
             for source in sources:
                 result = query_solr_and_format_result(
