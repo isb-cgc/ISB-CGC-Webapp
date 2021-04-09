@@ -498,6 +498,7 @@ def parse_args():
     parser.add_argument('-p', '--programs-file', type=str, default='', help='List of programs to add/update')
     return parser.parse_args()
 
+
 def main():
 
     try:
