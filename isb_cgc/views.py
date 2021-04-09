@@ -564,6 +564,7 @@ def igv(request):
             if len(gdc_ids) > settings.MAX_FILES_IGV:
                 messages.warning(request,"The maximum number of files which can be viewed in IGV at one time is {}.".format(settings.MAX_FILES_IGV) +
                                  " Only the first {} will be displayed.".format(settings.MAX_FILES_IGV))
+                gdc_ids = gdc_ids[:settings.MAX_FILES_IGV]
 
             for source in sources:
                 result = query_solr_and_format_result(
