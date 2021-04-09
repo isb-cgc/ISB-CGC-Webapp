@@ -45,7 +45,7 @@ describe('Tests show more functionality', () => {
  it ('Opens Collections',function() {
     cy.viewport(1000,1000);
     cy.wait(1000);
-    cy.get('#Program_heading').scrollIntoView().find('a').click();
+    cy.get('#Program_heading').scrollIntoView().find('a').click({force:true});
     cy.get('#Program_list').should('be.visible');
     cy.get('#TCGA_heading').children('a').click( {force : true});
     cy.get('#TCGA').find('.search-checkbox-list').children('.checkbox').as('checkboxes');
@@ -60,7 +60,7 @@ describe('Tests show more functionality', () => {
          cy.get($el).should('not.be.visible');
      })
 
-    cy.get('#TCGA').find('.show-more').click();
+    cy.get('#TCGA').find('.show-more').click({force:true});
     cy.get('@checkboxes').each( ($el,index) => {
         cy.get($el).should('be.visible');
      })

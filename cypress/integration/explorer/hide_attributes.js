@@ -18,10 +18,10 @@ describe('Tests hide attributes functionality', () => {
    
     cy.server();
     cy.route('GET','/explore/*').as('getExplore'); 
-    cy.get('#Program_heading').find('a').click();
+    cy.get('#Program_heading').find('a').click({force:true});
     cy.get('#Program_list').should('be.visible');
     cy.get('#TCGA_heading').children('a').should('be.visible');
-    cy.get('#TCGA_heading').children('input').click();
+    cy.get('#TCGA_heading').children('input').click({force:true});
     cy.wait('@getExplore');
     cy.get('@getExplore').then( function(xhr){
       expect(xhr.status).to.eq(200);
@@ -54,7 +54,7 @@ describe('Tests hide attributes functionality', () => {
       expect(xhr.status).to.eq(200);
      }) 
 
-    cy.get('#BodyPartExamined_heading').children('a').click(); 
+    cy.get('#BodyPartExamined_heading').children('a').click({force: true} ); 
 
   })
 
@@ -112,14 +112,12 @@ describe('Tests hide attributes functionality', () => {
    it ('Hides Attributes w 0 Cases after TCGA, Abdomen Filter in Related Tab',() =>{
 
     cy.get('#hide-zeros').as('hideZeros');
-    cy.get('.search-configuration').find('.case_count').as('caseCounts');
-    cy.get('.search-configuration').find('.case_count:visible').should('not.exist');
-
-   
+    //cy.get('.search-configuration').find('.case_count:visible').as('caseCounts');
+    //cy.get('.search-configuration').find('.case_count:visible').should('not.exist');
 
     cy.get('#search_related').scrollIntoView();
     cy.get('#search_related').children('a').click({force:true});
-    cy.get('#tcga_clinical_heading').children('a').click({force:true});
+    //cy.get('#tcga_clinical_heading').children('a').click({force:true});
      
 
      cy.get('#tcga_clinical').children('.list-group').each( ($el,index) =>
@@ -132,14 +130,14 @@ describe('Tests hide attributes functionality', () => {
     
     
    
-    cy.get('#search_related_set').find('.case_count').filter(':visible').as('searchCnts');
+    cy.get('#search_related_set').find('.case_count:visible').as('searchCnts');
     cy.get('@searchCnts').its('length').should('be.gt',0);
     cy.get('@searchCnts').contains(/^0$/).as('wZeros').should('not.exist');
     cy.get('@hideZeros').click({force:true});
     cy.get('#search_related_set').find('.case_count').filter(':visible').as('searchCnts');
     cy.get('@searchCnts').contains(/^0$/).as('wZeros');
     cy.get('@wZeros').its('length').should('be.gt',0); 
-
+    
    
 
 
