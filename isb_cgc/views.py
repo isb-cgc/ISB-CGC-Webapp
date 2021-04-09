@@ -557,7 +557,8 @@ def igv(request):
     # This is a single GET request, we need to get the full file info from Solr first
     else:
         sources = DataSource.objects.filter(source_type=DataSource.SOLR, version=DataVersion.objects.get(data_type=DataVersion.FILE_DATA, active=True, build=build))
-        gdc_ids = req.get('gdc_ids','').split(',')
+        gdc_ids = list(set(req.get('gdc_ids','').split(',')))
+
         if not len(gdc_ids):
             messages.error(request,"A list of GDC file UUIDs was not provided. Please indicate the files you wish to view.")
         else:
