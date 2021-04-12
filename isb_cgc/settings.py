@@ -242,6 +242,8 @@ STATIC_URL = os.environ.get('STATIC_URL', '/static/')
 
 BQ_ECOSYS_STATIC_URL = os.environ.get('BQ_ECOSYS_STATIC_URL', 'https://storage.googleapis.com/webapp-static-files-isb-cgc-dev/bq_ecosys/')
 
+CITATIONS_STATIC_URL = os.environ.get('CITATIONS_STATIC_URL', 'https://storage.googleapis.com/webapp-static-files-isb-cgc-dev/static/citations/')
+
 GCS_STORAGE_URI = os.environ.get('GCS_STORAGE_URI', 'https://storage.googleapis.com/')
 
 # Additional locations of static files
@@ -673,3 +675,6 @@ if DEBUG and DEBUG_TOOLBAR:
 # OAUTH PLATFORM         #
 ##########################
 IDP        = os.environ.get('IDP', 'fence')
+# RAS TOKEN MAX LIFE 25 DAYS
+#DCF_UPSTREAM_EXPIRES_IN_SEC = os.environ.get('DCF_UPSTREAM_EXPIRES_IN_SEC', '1296000')
+#DCF_REFRESH_TOKEN_EXPIRES_IN_SEC = os.environ.get('DCF_REFRESH_TOKEN_EXPIRES_IN_SEC', '2592000')

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div id="citations" class="col-lg-12">
+                <h2>Citations</h2>
+                <ol type="1">
+                    {% for paper in papers %}
+                        <li>
+                            {{ paper.authors }}
+                            <a target="_blank" rel="noreferrer" href="https://www.mendeley.com/catalogue/{{ paper.id }}/">
+                                {{ paper.title |safe }}</a>.
+                            {% if paper.source %}<i>{{ paper.source |safe }}. </i>{% endif %}
+                            {% if paper.year %}{{ paper.year }}. {% endif %}
+                            {% if paper.identifiers %}{{ paper.identifiers |safe }}. {% endif %}
+                        </li>
+                    {% endfor %}
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock %}
