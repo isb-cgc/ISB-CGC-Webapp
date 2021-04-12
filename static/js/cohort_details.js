@@ -1264,15 +1264,20 @@ require([
             $(dataset_selector + ' .sort-by-program').hide();
             $(dataset_selector + " .sort-radio[value='node']").prop('checked', true);
             $(dataset_selector + " .sort-radio[value='program']").prop('checked', false);
+            $(dataset_selector + " .sort-by-node option[node-id='" + ACTIVE_NODE_ID
+                + "'][program-id='" + ACTIVE_PROGRAM_ID + "']").prop('selected', true);
         } else if (SORT_DATASET_BY === "program") {
             $(dataset_selector + ' .sort-by-node').hide();
             $(dataset_selector + ' .sort-by-program').show();
             $(dataset_selector + " .sort-radio[value='node']").prop('checked', false);
             $(dataset_selector + " .sort-radio[value='program']").prop('checked', true);
+            $(dataset_selector + " .sort-by-program option[node-id='" + ACTIVE_NODE_ID
+                + "'][program-id='" + ACTIVE_PROGRAM_ID + "']").prop('selected', true);
         }
     };
 
     var ACTIVE_PROGRAM_ID = 0;
+    var ACTIVE_NODE_ID = 0;
 
     var filter_panel_load = function(cohort, load_program_id=null, load_node_id=null) {
         if (reject_load) {
@@ -1287,6 +1292,7 @@ require([
 
         if (load_node_id == null) {
             load_node_id = all_nodes[0].id;
+            ACTIVE_NODE_ID = load_node_id;
         }
 
         if (load_program_id == null) {
@@ -1330,7 +1336,7 @@ require([
 
                     $(program_data_selector + ' .dataset-select-box').change(function() {
                         let selected = $(this).find('option:selected');
-                        let node_id = selected.attr('node-id');
+                        ACTIVE_NODE_ID = selected.attr('node-id');
                         ACTIVE_PROGRAM_ID = selected.attr('program-id');
                         let new_dataset_selector = '#'+ACTIVE_PROGRAM_ID+'-data';
                         if ($(new_dataset_selector).length != 0) {
@@ -1338,7 +1344,7 @@ require([
                             $(new_dataset_selector).addClass('active');
                             update_select_dataset_ui(new_dataset_selector);
                         } else {
-                            filter_panel_load(cohort_id, ACTIVE_PROGRAM_ID, node_id);
+                            filter_panel_load(cohort_id, ACTIVE_PROGRAM_ID, ACTIVE_NODE_ID);
                         }
                     });
                 },

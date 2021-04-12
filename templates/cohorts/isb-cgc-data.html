@@ -3,10 +3,10 @@
     <div id="{{ program.id }}-data-filter-panel" class="col-lg-3 filter-panel" role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %} data-prog-id="{{ program.id }}" data-prog-displ-name="{{ program.name }}">
         <div>
 
+            <!-- Select Dataset Panel -->
             <div class="panel panel-default" role="tabpanel">
-                <div class="panel-heading clearfix">
+                <div class="panel-heading">
                     <h4 class="panel-title pull-left">Select Data Set</h4>
-{#                    <a class="pull-right clear-filters" role="button" id="48-data-clear-filters">Clear All</a>#}
                 </div>
                 <div class="panel-body">
                     <div>
@@ -43,6 +43,7 @@
                 </div>
             </div>
 
+            <!-- Filter Panel -->
             <div class="panel panel-default" role="tabpanel">
                 <div class="panel-heading clearfix">
                     <h4 class="panel-title pull-left">Select Filters</h4>
@@ -283,6 +284,10 @@
         </div>
     </div>
     <div class="{% if cohort.id %}col-md-12{% else %}col-lg-9{% endif %} data-tab-content-panel">
+        <!-- Selected Datasets Info Panel -->
+
+
+        <!-- Selected Filters Panel -->
         <div class="selected-filters {{ program.id }}-data-selected-filters panel panel-default" {% if cohort.id %}style="display: none;"{% endif %}>
             <div class="panel-heading clearfix">
                 <h4 class="panel-title pull-left">{% if cohort.id %}New Filters{% else %}Selected Filters{% endif %}</h4>
@@ -290,6 +295,8 @@
             </div>
             <div class="panel-body"></div>
         </div>
+
+        <!-- Program Details Panel -->
         <div class="cohort-info panel panel-default">
             <div class="panel-heading">
                 <h4 class="panel-title">Program Details</h4>
@@ -307,6 +314,8 @@
                 </div>
             </div>
         </div>
+
+        <!-- Clinical Features Treemap Panel -->
         <div class="clinical-trees panel panel-default">
             <div class="panel-heading">
                 <h4 class="panel-title">Clinical Features</h4>
