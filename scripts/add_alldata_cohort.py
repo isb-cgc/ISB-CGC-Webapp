@@ -634,17 +634,17 @@ def main():
     cmd_line_parser.add_argument('-d', '--dataset', type=str, default=BQ_DATASET, help="BigQuery dataset name")
     cmd_line_parser.add_argument('-t', '--table-name', type=str, default=DEFAULT_COHORT_TABLE, help="BigQuery table name")
     cmd_line_parser.add_argument('-i', '--cohort-id', type=int, help="Cohort ID override to be used for BigQuery")
-    cmd_line_parser.add_argument('-p', '--add-proj-prog', type=bool, help="Bootstrap Django project and program tables")
-    cmd_line_parser.add_argument('-a', '--attr-displ-table', type=bool, default=False,
+    cmd_line_parser.add_argument('-p', '--add-proj-prog', type=str, default='False', help="Bootstrap Django project and program tables")
+    cmd_line_parser.add_argument('-a', '--attr-displ-table', type=str, default='False',
                                  help="Change the program IDs in the metadata attribute display table to this database's programs.")
     cmd_line_parser.add_argument('-o', '--operation', type=str, choices=['all', 'cloudsql', 'bq'], default='all',
                                  help="Operation")
 
     args = cmd_line_parser.parse_args()
 
-    args.add_proj_prog and create_programs_and_projects(False)
+    (args.add_proj_prog == 'True') and create_programs_and_projects(False)
 
-    args.attr_displ_table and update_attr_display_table(False)
+    (args.attr_displ_table == 'True') and update_attr_display_table(False)
 
     project_id = args.project_id
 

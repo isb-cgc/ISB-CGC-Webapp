@@ -97,30 +97,19 @@ mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NA
 echo "Adding Cohort/Site Data and bootstrapping Django project and program tables..."
 python3 ${HOMEROOT}/scripts/add_site_ids.py
 
+# Add in the 'All TCGA' cohort
 if [ -n "$CI" ]; then
     # We don't add the prefab cohorts to BQ if we're in CircleCI
-    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py -o cloudsql -p True
+    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py -o cloudsql -p False
 else
     # ...but we do if we're doing a local build
-    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py -f $GCLOUD_PROJECT_ID -o all -p True
+    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py -f $GCLOUD_PROJECT_ID -o all -p False
 fi
-
-echo "Running development dataset setup"
-python3 ${HOMEROOT}/scripts/dataset_bootstrap.py -u $DATABASE_USER -p $DATABASE_PASSWORD -d $DATABASE_NAME
 
 # We have to use '' around the statement due to the need to use `` around name and key, which are MySQL keywords, so concatenation is needed to
 # preserve expansion of GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET
 echo "Setting Up Social Application Login..."
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e 'BEGIN; INSERT INTO socialaccount_socialapp (provider, `name`, client_id, secret, `key`) VALUES("google", "Google", "'$OAUTH2_CLIENT_ID'", "'$OAUTH2_CLIENT_SECRET'", " "); INSERT INTO socialaccount_socialapp_sites (socialapp_id, site_id) VALUES(1, 2), (1, 3), (1, 4); COMMIT;'
-
-echo "Populating Gene Symbol list..."
-mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/populate_gene_symbols.sql
-
-#echo "Bootstrapping new models..."
-#python3 ${HOMEROOT}/scripts/data_source_bootstrap.py
-
-#echo "ETLing additional models..."
-#python3 ${HOMEROOT}/scripts/data_source_etl.py -j data_sources.json
 
 # Setting up Cron token
 python3 ${HOMEROOT}/scripts/create_api_token.py
