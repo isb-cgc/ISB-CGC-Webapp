@@ -56,6 +56,7 @@ from google_helpers.bigquery.service import get_bigquery_service
 from google_helpers.bigquery.feedback_support import BigQueryFeedbackSupport
 from solr_helpers import query_solr_and_format_result, build_solr_query, build_solr_facets
 from projects.models import Attribute, DataVersion, DataSource
+from solr_helpers import query_solr_and_format_result
 
 import requests
 
@@ -66,6 +67,7 @@ OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 BQ_ECOSYS_BUCKET = settings.BQ_ECOSYS_STATIC_URL
+CITATIONS_BUCKET = settings.CITATIONS_STATIC_URL
 IDP = settings.IDP
 
 def _needs_redirect(request):
@@ -538,21 +540,60 @@ def camic(request, file_uuid=None):
 
 
 @login_required
-def igv(request, sample_barcode=None, readgroupset_id=None):
+def igv(request):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
 
+    req = request.GET or request.POST
+    build = req.get('build','hg38')
+    checked_list = json.loads(req.get('checked_list','{}'))
     readgroupset_list = []
     bam_list = []
 
-    checked_list = json.loads(request.POST.get('checked_list','{}'))
-    build = request.POST.__getitem__('build')
+    # This is a POST request with all the information we already need
+    if len(checked_list):
+        for item in checked_list['gcs_bam']:
+            bam_item = checked_list['gcs_bam'][item]
+            id_barcode = item.split(',')
+            bam_list.append({
+                'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': build, 'program': bam_item['program']
+            })
+    # This is a single GET request, we need to get the full file info from Solr first
+    else:
+        sources = DataSource.objects.filter(source_type=DataSource.SOLR, version=DataVersion.objects.get(data_type=DataVersion.FILE_DATA, active=True, build=build))
+        gdc_ids = list(set(req.get('gdc_ids','').split(',')))
 
-    for item in checked_list['gcs_bam']:
-        bam_item = checked_list['gcs_bam'][item]
-        id_barcode = item.split(',')
-        bam_list.append({
-            'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': build, 'program': bam_item['program']
-        })
+        if not len(gdc_ids):
+            messages.error(request,"A list of GDC file UUIDs was not provided. Please indicate the files you wish to view.")
+        else:
+            if len(gdc_ids) > settings.MAX_FILES_IGV:
+                messages.warning(request,"The maximum number of files which can be viewed in IGV at one time is {}.".format(settings.MAX_FILES_IGV) +
+                                 " Only the first {} will be displayed.".format(settings.MAX_FILES_IGV))
+                gdc_ids = gdc_ids[:settings.MAX_FILES_IGV]
+
+            for source in sources:
+                result = query_solr_and_format_result(
+                    {
+                        'collection': source.name,
+                        'fields': ['sample_barcode','file_gdc_id','file_name_key','index_file_name_key', 'program_name', 'access'],
+                        'query_string': 'file_gdc_id:("{}") AND data_format:("BAM")'.format('" "'.join(gdc_ids)),
+                        'counts_only': False
+                    }
+                )
+                if 'docs' not in result or not len(result['docs']):
+                    messages.error(request,"IGV compatible files corresponding to the following UUIDs were not found: {}.".format(" ".join(gdc_ids))
+                                   + "Note that the default build is HG38; to view HG19 files, you must indicate the build as HG19: &build=hg19")
+                saw_controlled = False
+                for doc in result['docs']:
+                    if doc['access'] == 'controlled':
+                        saw_controlled = True
+                    bam_list.append({
+                        'sample_barcode': doc['sample_barcode'],
+                        'gcs_path': "{};{}".format(doc['file_name_key'],doc['index_file_name_key']),
+                        'build': build,
+                        'program': doc['program_name']
+                    })
+                if saw_controlled:
+                    messages.info(request,"Some of the requested files require approved access to controlled data - if you receive a 403 error, double-check your current login status with DCF.")
 
     context = {
         'readgroupset_list': readgroupset_list,
@@ -609,6 +650,12 @@ def about_page(request):
     return render(request, 'isb_cgc/about.html')
 
 
+def citations_page(request):
+    citations_file_name = 'mendeley_papers.json'
+    citations_file_path = CITATIONS_BUCKET + citations_file_name
+    citations = requests.get(citations_file_path).json()
+    return render(request, 'isb_cgc/citations.html', citations)
+
 def vid_tutorials_page(request):
     return render(request, 'isb_cgc/video_tutorials.html')
 
@@ -637,7 +684,6 @@ def programmatic_access_page(request):
 
 def workflow_page(request):
     return render(request, 'isb_cgc/workflow.html')
-
 
 @login_required
 def dashboard_page(request):

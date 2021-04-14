@@ -33,7 +33,7 @@
                         <strong>Get started today!</strong>
                         <strong> Contact us about setting up your own Google Cloud Platform Project with <a
                                 href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowtoRequestCloudCredits.html"
-                                target="_blank" rel=“noreferrer”>free cloud credits</a><br/>
+                                target="_blank" rel="noreferrer">free cloud credits</a><br/>
                             Check out our step by step guide <a href="{% url 'how_to_discover' %}">How to Discover Cancer Data through ISB-CGC</a><br/>
                         </strong>
                     </div>
@@ -51,7 +51,7 @@
                     <div class="col-xs-1"></div>
                     <div class="col-xs-10">
                         YOUR FEEDBACK IS IMPORTANT TO US
-                        <strong><a href="https://www.surveymonkey.com/r/Q3XYKPY" target="_blank" rel=“noreferrer”>PLEASE TAKE A SURVEY</a></strong>
+                        <strong><a href="https://www.surveymonkey.com/r/Q3XYKPY" target="_blank" rel="noreferrer">PLEASE TAKE A SURVEY</a></strong>
                     </div>
                     <div class="col-xs-1">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -67,7 +67,7 @@
                 <div class="col-lg-8">
 
                     <div class="crdc-div">A RESOURCE OF THE <a href="https://datacommons.cancer.gov/"
-                                                               target="_blank" rel=“noreferrer”>NCI CANCER RESEARCH DATA COMMONS</a>
+                                                               target="_blank" rel="noreferrer">NCI CANCER RESEARCH DATA COMMONS</a>
                     </div>
                     <h1>ISB-CGC</h1>
                     <h2>Cancer Gateway in the Cloud</h2>
@@ -89,9 +89,14 @@
                     <div class="col-lg-3 col-md-12 cards-col">
                         <div class="panel">
                             <div class="panel-heading row">
-                                <div class="col-xs-9"><h4>BigQuery Table Search</h4></div>
+                                <div class="col-xs-9">
+                                     <a target="_blank" rel="noreferrer"
+                                        href="{% url 'bq_meta_search' %}">
+                                        <h4>BigQuery Table Search</h4>
+                                     </a>
+                                </div>
                                 <div class="col-xs-3 padding-left-0">
-                                    <a target="_blank" rel=“noreferrer”
+                                    <a target="_blank" rel="noreferrer"
                                            href="{% url 'bq_meta_search' %}">
                                     <img src="{% static 'img/bq-icon.png' %}" class="img-fluid"
                                          alt="bq table icon"></a>
@@ -106,7 +111,7 @@
                                 <div class="row">
                                     <div class="col-xs-2"></div>
                                     <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel=“noreferrer”
+                                        <a target="_blank" rel="noreferrer"
                                            href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/BigQueryTableSearchUI.html">
                                             <div class="learn-icon landing-icon">
                                             </div>
@@ -115,7 +120,7 @@
 
                                     </div>
                                     <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel=“noreferrer”
+                                        <a target="_blank" rel="noreferrer"
                                            href="{% url 'bq_meta_search' %}">
                                             <div class="launch-icon landing-icon"></div>
                                             <div class="icon-caption">Launch</div>
@@ -129,9 +134,14 @@
                     <div class="col-lg-3 col-md-12 cards-col">
                         <div class="panel">
                             <div class="panel-heading row">
-                                <div class="col-xs-9"><h4>Cancer Data File Browser</h4></div>
+                                <div class="col-xs-9">
+                                    <a target="_blank" rel="noreferrer"
+                                       href="/cohorts/filelist/">
+                                        <h4>Cancer Data File Browser</h4>
+                                    </a>
+                                </div>
                                 <div class="col-xs-3 padding-left-0">
-                                    <a target="_blank" rel=“noreferrer”
+                                    <a target="_blank" rel="noreferrer"
                                        href="/cohorts/filelist/">
                                         <img src="{% static 'img/de-icon.png' %}" class="img-fluid"
                                              alt="data explorer icon">
@@ -147,7 +157,7 @@
                                 <div class="row">
                                     <div class="col-xs-2"></div>
                                     <div class="col-xs-4 text-center">
-                                        <a  target="_blank" rel=“noreferrer”
+                                        <a  target="_blank" rel="noreferrer"
                                            href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/DataBrowser.html">
                                             <div class="learn-icon landing-icon"></div>
                                             <div class="icon-caption">Learn</div>
@@ -155,7 +165,7 @@
 
                                     </div>
                                     <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel=“noreferrer”
+                                        <a target="_blank" rel="noreferrer"
                                            href="/cohorts/filelist/">
                                             <div class="launch-icon landing-icon"></div>
                                             <div class="icon-caption">Launch</div>
@@ -169,9 +179,15 @@
                     <div class="col-lg-3 col-md-12 cards-col">
                         <div class="panel">
                             <div class="panel-heading row">
-                                <div class="col-xs-9"><h4>Chromosomal Aberrations & Gene Fusions DB</h4></div>
+                                <div class="col-xs-9">
+                                    <a target="_blank" rel="noreferrer"
+                                           href="https://mitelmandatabase.isb-cgc.org">
+                                    <h4>Chromosomal Aberrations & Gene Fusions DB</h4>
+                                    </a>
+                                </div>
+
                                 <div class="col-xs-3 padding-left-0">
-                                    <a target="_blank" rel=“noreferrer”
+                                    <a target="_blank" rel="noreferrer"
                                        href="https://mitelmandatabase.isb-cgc.org">
                                         <img src="{% static 'img/md-icon.png' %}" class="img-fluid"
                                              alt="database icon">
@@ -186,7 +202,7 @@
                                 <div class="row">
                                     <div class="col-xs-2"></div>
                                     <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel=“noreferrer”
+                                        <a target="_blank" rel="noreferrer"
                                            href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/data/Mitelman_about.html">
                                             <div class="learn-icon landing-icon"></div>
                                             <div class="icon-caption">Learn</div>
@@ -195,7 +211,7 @@
 
                                     </div>
                                     <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel=“noreferrer”
+                                        <a target="_blank" rel="noreferrer"
                                            href="https://mitelmandatabase.isb-cgc.org">
                                             <div class="launch-icon landing-icon"></div>
                                             <div class="icon-caption">Launch</div>
@@ -223,9 +239,14 @@
                     <div class="col-lg-3 col-md-12 cards-col">
                         <div class="panel">
                             <div class="panel-heading row">
-                                <div class="col-xs-9"><h4>Cohort Builder / Data Explorer</h4></div>
+                                <div class="col-xs-9">
+                                    <a target="_blank" rel="noreferrer"
+                                           href="{% url 'cohort' %}">
+                                        <h4>Cohort Builder / Data Explorer</h4>
+                                    </a>
+                                </div>
                                 <div class="col-xs-3 padding-left-0">
-                                    <a target="_blank" rel=“noreferrer”
+                                    <a target="_blank" rel="noreferrer"
                                            href="{% url 'cohort' %}">
                                         <img src="{% static 'img/ca-icon.png' %}" class="img-fluid"
                                          alt="bq table icon">
@@ -241,7 +262,7 @@
                                 <div class="row">
                                     <div class="col-xs-2"></div>
                                     <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel=“noreferrer”
+                                        <a target="_blank" rel="noreferrer"
                                            href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/DataExplorer.html">
                                              <div class="learn-icon landing-icon" ></div>
                                              <div class="icon-caption">Learn</div>
@@ -249,7 +270,7 @@
 
                                     </div>
                                     <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel=“noreferrer”
+                                        <a target="_blank" rel="noreferrer"
                                            href="{% url 'cohort' %}">
                                             <div class="launch-icon landing-icon" ></div>
                                             <div class="icon-caption">Launch</div>
@@ -263,9 +284,15 @@
                     <div class="col-lg-3 col-md-12 cards-col">
                         <div class="panel">
                             <div class="panel-heading row">
-                                <div class="col-xs-9"><h4>Pipelines and APIs</h4></div>
+                                <div class="col-xs-9">
+                                    <a target="_blank" rel="noreferrer"
+                                        href="{% url 'programmatic_access' %}">
+                                        <h4>Pipelines and APIs</h4>
+                                    </a>
+                                </div>
+
                                 <div class="col-xs-3 padding-left-0">
-                                    <a target="_blank" rel=“noreferrer”
+                                    <a target="_blank" rel="noreferrer"
                                            href="{% url 'programmatic_access' %}">
                                         <img src="{% static 'img/api-icon.png' %}" class="img-fluid"
                                              alt="bq table icon">
@@ -280,14 +307,14 @@
                                 <div class="row">
                                     <div class="col-xs-2"></div>
                                     <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel=“noreferrer”
+                                        <a target="_blank" rel="noreferrer"
                                            href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/ProgrammaticAccess.html">
                                             <div class="learn-icon landing-icon"></div>
                                             <div class="icon-caption">Learn</div>
                                         </a>
                                     </div>
                                     <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel=“noreferrer”
+                                        <a target="_blank" rel="noreferrer"
                                            href="{% url 'programmatic_access' %}">
                                             <div class="launch-icon landing-icon"></div>
                                             <div class="icon-caption">Launch</div>
@@ -302,9 +329,14 @@
                     <div class="col-lg-3 col-md-12 cards-col">
                         <div class="panel">
                             <div class="panel-heading row">
-                                <div class="col-xs-9"><h4>Notebooks</h4></div>
+                                <div class="col-xs-9">
+                                    <a target="_blank" rel="noreferrer"
+                                           href="https://github.com/isb-cgc/Community-Notebooks">
+                                            <h4>Notebooks</h4>
+                                    </a>
+                                </div>
                                 <div class="col-xs-3 padding-left-0">
-                                    <a target="_blank" rel=“noreferrer”
+                                    <a target="_blank" rel="noreferrer"
                                        href="https://github.com/isb-cgc/Community-Notebooks">
                                         <img src="{% static 'img/nb-icon.png' %}" class="img-fluid"
                                              alt="bq table icon">
@@ -319,7 +351,7 @@
                             <div class="panel-footer">
                                 <div class="row">
                                     <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel=“noreferrer”
+                                        <a target="_blank" rel="noreferrer"
                                            href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/RegulomeExplorerNotebooks.html">
                                             <div class="statistical-icon landing-icon"></div>
                                             <div class="icon-caption">Statistical</div>
@@ -327,14 +359,14 @@
 
                                     </div>
                                     <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel=“noreferrer”
+                                        <a target="_blank" rel="noreferrer"
                                            href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html">
                                             <div class="community-icon landing-icon"></div>
                                             <div class="icon-caption">Community</div>
                                         </a>
                                     </div>
                                     <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel=“noreferrer”
+                                        <a target="_blank" rel="noreferrer"
                                            href="https://github.com/isb-cgc/Community-Notebooks">
                                             <div class="github-icon landing-icon"></div>
                                             <div class="icon-caption">GitHub</div>
@@ -347,9 +379,19 @@
                     <div class="col-lg-3 col-md-12 cards-col">
                         <div class="panel">
                             <div class="panel-heading row">
-                                <div class="col-xs-9"><h4>Controlled Access Data</h4></div>
+                                <div class="col-xs-9">
+                                    <a target="_blank" rel="noreferrer"
+                                                {% if user.is_authenticated %}
+                                           href="{% url 'user_detail' user.id %}"
+                                                {% else %}
+                                           href="{% url 'user_detail_login' %}"
+                                                {% endif %}
+                                        >
+                                        <h4>Controlled Access Data</h4>
+                                    </a>
+                                </div>
                                 <div class="col-xs-3 padding-left-0">
-                                    <a target="_blank" rel=“noreferrer”
+                                    <a target="_blank" rel="noreferrer"
                                             {% if user.is_authenticated %}
                                        href="{% url 'user_detail' user.id %}"
                                             {% else %}
@@ -369,14 +411,14 @@
                                 <div class="row">
                                     <div class="col-xs-2"></div>
                                     <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel=“noreferrer”
+                                        <a target="_blank" rel="noreferrer"
                                            href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/Gaining-Access-To-Controlled-Access-Data.html">
                                             <div class="learn-icon landing-icon"></div>
                                             <div class="icon-caption">Learn</div>
                                         </a>
                                     </div>
                                     <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel=“noreferrer”
+                                        <a target="_blank" rel="noreferrer"
                                                 {% if user.is_authenticated %}
                                            href="{% url 'user_detail' user.id %}"
                                                 {% else %}
@@ -400,7 +442,7 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <em>
-                            ISB-CGC is a component of the <a href="https://datacommons.cancer.gov/" target="_blank" rel=“noreferrer”>NCI
+                            ISB-CGC is a component of the <a href="https://datacommons.cancer.gov/" target="_blank" rel="noreferrer">NCI
                             Cancer Research Data Commons</a> and has been funded in whole or in part with Federal funds
                             from the National Cancer Institute, National Institutes of Health, Department of Health and
                             Human Services, under Contract No. HHSN261201400008C and ID/IQ Agreement No. 17X146 under
@@ -423,17 +465,17 @@
                     <div class="col-xs-3 col-md-2 col-lg-1">
                         <div class="row">
                             <div class="col-xs-4 text-center">
-                                <a href="{% url 'vid_tutorials' %}" target="_blank" rel=“noreferrer”>
+                                <a href="{% url 'vid_tutorials' %}" target="_blank" rel="noreferrer">
                                     <i class="fa fa-youtube-play" aria-hidden="true"></i>
                                 </a>
                             </div>
                             <div class="col-xs-4 text-center">
-                                <a href="https://twitter.com/isb_cgc" target="_blank" rel=“noreferrer”>
+                                <a href="https://twitter.com/isb_cgc" target="_blank" rel="noreferrer">
                                     <i class="fa fa-twitter fa-lg"></i>
                                 </a>
                             </div>
                             <div class="col-xs-4 text-center">
-                                <a href="https://github.com/isb-cgc/" target="_blank" rel=“noreferrer”>
+                                <a href="https://github.com/isb-cgc/" target="_blank" rel="noreferrer">
                                     <i class="fa fa-github fa-lg"></i>
                                 </a>
                             </div>
