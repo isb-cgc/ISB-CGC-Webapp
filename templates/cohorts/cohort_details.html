@@ -401,6 +401,8 @@
         var user_data = {{ user_data|tojson|safe }};
         var cohort_programs = {{ cohort_programs|tojson|safe }};
         var request_user_id = {{ user.id }};
+        var all_nodes = {{ all_nodes|tojson|safe }};
+        var all_programs = {{ all_programs|tojson|safe }};
     </script>
 {% endblock %}
 

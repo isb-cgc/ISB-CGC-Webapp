@@ -539,7 +539,7 @@ require([
 
         switch(mode){
             case 'EDITING':
-                $('.data-tab-content-panel:not(.spinner-panel)').removeClass('col-md-12').addClass('col-md-9');
+                // $('.data-tab-content-panel:not(.spinner-panel)').removeClass('col-md-12').addClass('col-md-9');
                 $('.filter-panel').show();
                 $('.selected-filters').show();
                 cohort_id && $('.page-header').hide();
@@ -553,7 +553,7 @@ require([
                 break;
 
             case 'VIEWING':
-                $('.data-tab-content-panel').removeClass('col-md-9').addClass('col-md-12');
+                // $('.data-tab-content-panel').removeClass('col-md-9').addClass('col-md-12');
                 $('.filter-panel').hide();
                 $('.selected-filters').hide();
                 $('.page-header').show();
