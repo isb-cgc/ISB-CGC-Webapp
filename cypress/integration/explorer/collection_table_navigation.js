@@ -7,7 +7,7 @@ describe('Tests table navigation functionality', () => {
 
      cy.fixture('collection_table_navigation').as('nav') 
 
-     visitPage('/explore/',true)
+     visitPage('/explore/')
 
    })
 

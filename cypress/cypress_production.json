@@ -1,0 +1,6 @@
+{
+  "chromeWebSecurity": false,
+  "experimentalNetworkStubbing": true,
+  "baseUrl": "https://portal.imaging.datacommons.cancer.gov"
+
+}

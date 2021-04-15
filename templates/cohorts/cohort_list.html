@@ -3,6 +3,13 @@
 {% load custom_tags %}
 {#{% load tz %}#}
 {% block header %}
+<script type="text/javascript">
+
+function openExport() {
+     $('#export-manifest-modal').modal();
+    //document.getElementById('export-manifest-modal').style='display:block; padding-right: 15 px'
+}
+</script>
 {% endblock %}
 
 {% block title %}
@@ -18,6 +25,19 @@
 </div>
 {% endblock %}
 {% block content %}
+    {% with cohort_id="1" %}
+     {% include "cohorts/test.html" %}
+   {% endwith %}
+
+    <div>
+
+        <div class="cohort-manifest pull-right">
+                 <button id="export-manifest" class="btn btn-special pull-right" data-toggle="modal" data-target="#export-manifest-modal"> Export Cohort Manifest
+                 </button>
+        </div>
+
+
+</div>
 <div class="container-fluid">
     <div class="page-action-group">
         <li role="menuitem">
@@ -46,31 +66,39 @@
                         <th></th>
                         <th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>
                         <th class="id-col">Cohort ID</th>
+
+
                         <th class="name-col">Name</th>
+                        <th class="id-col">Export</th>
                         <th class="owner-col">Ownership</th>
                         <th class="share-col">Shared With</th>
                         <th class="version-col">Data Version</th>
                     </thead>
                     <colgroup>
-                        <col style="width: 3%">
-                        <col style="width: 8%">
-                        <col style="width: 11%">
-                        <col style="width: 30%">
-                        <col style="width: 12%">
+                        <col style="width: 2%">
+                        <col style="width: 7%">
                         <col style="width: 10%">
-                        <col style="width: 30%">
+                        <col style="width: 7%">
+                        <col style="width: 29%">
+                        <col style="width: 11%">
+                        <col style="width: 9%">
+                        <col style="width: 29%">
                     </colgroup>
                     <tbody>
                     {% for cohort in cohorts %}
                     {% if cohort.owner.is_superuser == False %}
-                        <tr data-description='{% if cohort.description %}{{ cohort.description }}{% else %}N/A{% endif %}'>
+                        <tr data-description='{% if cohort.description %}{{ cohort.description }}{% else %}N/A{% endif %}' >
                             <td class = "details-control" title="Click to display cohort description."> <i class="fa fa-plus-circle show-button"> </i><i class="fa fa-minus-circle hide-button"> </i> </td>
                             <td class="checkbox-col"> <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} class="cohort" type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>
                             </td>
                             <td class="id-col">
                                 {{ cohort.id }}
                             </td>
+
                             <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</a></td>
+                            <td class="id-col">
+                                <button onclick="openExport()"></button>
+                            </td>
                             <td class="owner-col">
                                 {% if cohort.perm == 'Owner' %}
                                     You

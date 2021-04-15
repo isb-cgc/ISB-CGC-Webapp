@@ -16,6 +16,14 @@ Cypress.on('uncaught:exception', (err, runnable) => {
     return false
 })
 
+ Cypress.on('window:before:load', (win) => {
+      Object.defineProperty(win, 'self', {
+        get: () => {
+          return window.top
+        }
+      })
+    }) 
+
 
 
 // -- This is a parent command --

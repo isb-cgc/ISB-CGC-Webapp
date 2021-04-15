@@ -28,33 +28,44 @@
                             </div>
                             <div class="tab-content">
                             <div id="program_set" class="tab-pane active" role="tabpanel">
+
+
+
                              <ul class="list-group" role="tablist" aria-multiselectable="true">
                                  <li class="list-group-item">
                                      <div id="Program_heading" class="list-group-item__heading">
                                          <a role="button" data-toggle="collapse" href="#Program" aria-expanded="false" aria-controls="Program">
                                              <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>COLLECTION
-                                         </a> 
+                                         </a>
+
+
                                      </div>
                                      <div id="Program" class="collapse filter-panel collection-list">
+                                     <p><input id="hide-zeros" type="checkbox" value="hide-zeros" onchange="hideColl(this)"> Hide collections with 0 cases</p>
+                                         {% with programs.items|length|add:"-5" as more %}
+                                         <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                         <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                         {% endwith %}
+
                                          <ul id="Program_list" class="search-checkbox-list" style="list-style: none;">
                                              {% for progK, progV in programs.items|dictsort:"0.lower" %}
                                                  {% if progK != "All" and progK != "None" %}
-                                                 <li class="list-group-item">
-                                                    {% if not progV.projects %}
+                                                 <li class="list-group-item  {% if forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if progV.val == 0 %} zeroed {% endif %}">
+                                                    {% comment %} {% if not progV.projects %}
                                                         <div id="{{ progK }}_heading" class="list-group-item__heading">
                                                                    <input class="collection_value" type="checkbox" value="{{ progK }}">
-                                                                   <span class="collection_name value">{{ progK|upper }} </span> <span class="float-right case_count count">{{ progV.val }}</span>
+                                                                   <span id="{{  progK }}" class="collection_name value">{{ progK|upper }} </span> <span class="float-right case_count count">{{ progV.val }}</span>
                                                                </div>
                                                          <div id="{{ progK }}" data-filter-attr-id="{{ progV.collex_attr_id }}" class="collapse list-group-sub-item__body">
-
-                                                     {% elif progV.projects and progV.projects.items|length == 1 %}
-                                                           {% for proj, projK in progV.projects.items %}
-                                                               <div id="{{ proj }}_heading" class="list-group-item__heading">
+                                                     {% endcomment %}
+                                                     {% if progV.projects and progV.projects.items|length == 1 %}
+                                                           {% for proj, projD in progV.projects.items %}
+                                                               <div id="{{ proj }}_heading" class="list-group-item__heading {% if forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if projD.val == 0 %} zeroed {% endif %}">
                                                                    <input data-filter-attr-id="{{ progV.collex_attr_id }}"
                                                                           data-filter-display-attr="Collection" data-filter-display-val="{{ proj|upper }}"
                                                                           class="collection_value"
                                                                           type="checkbox" value="{{ proj }}">
-                                                                   <span class="collection_name value">{{ proj|upper }}</span> <span class="float-right case_count count">{{ projK }}</span>
+                                                                   <span id="{{ proj }}" class="collection_name value">{{ projD.display }}</span> <span class="float-right case_count count">{{ projD.val }}</span>
                                                                </div>
                                                             <div id="{{ proj }}" data-filter-attr-id="{{ progV.collex_attr_id }}" class="collapse list-group-sub-item__body">
                                                            {% endfor %}
@@ -73,35 +84,34 @@
                                                      </div>
                                                      <div id="{{ progK }}" data-filter-attr-id="{{ progV.collex_attr_id }}" class="collapse list-group-sub-item__body">
                                                      {% endif %}
-                                                          {% if progV.projects and progV.projects.items|length > 1 %}
+                                                     {% if progV.projects and progV.projects.items|length > 1 %}
+                                                        {% if progV.projects.items|length > 5 %}
+                                                              {% with progV.projects.items|length|add:"-5" as more %}
+                                                              <p class="more-checks"><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                              <p class="less-checks notDisp"> <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                              {% endwith %}
+                                                          {% else %}
+
+                                                              <p class="check-uncheck"><span class="checks2"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                          {% endif %}
+
+
+
                                                            <ul id="{{ progK }}_proj_list" class="search-checkbox-list" style="list-style: none;">
-                                                           {% for proj, projK in progV.projects.items|dictsort:"0.lower" %}
-                                                              <li class="checkbox {% if forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if projK == 0 %} zeroed {% endif %}">
+                                                           {% for proj, projD in progV.projects.items|dictsort:"0.lower" %}
+                                                              <li class="checkbox {% if forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if projD.val == 0 %} zeroed {% endif %}">
                                                                 <label>
                                                                   <input data-filter-attr-id="{{ progV.collex_attr_id }}"
                                                                          data-filter-display-attr="Collection" data-filter-display-val="{{ proj|upper }}"
                                                                          class="collection_value" type="checkbox" value="{{ proj }}">
-                                                                    <span class="collection_name value">{{ proj|upper }} </span> <span class="float-right case_count count plotit">{{ projK }}</span>
+                                                                    <span id="{{ proj }}" class="collection_name value">{{ projD.display }} </span> <span class="float-right case_count count plotit">{{ projD.val }}</span>
                                                                  </label>
                                                                </li>
                                                             {% endfor %}
                                                             </ul>
-                                                              <div style="display: block;" ></div>
-                                                              {% with progV.projects.items|length|add:"-5" as more %}
-                                                              <p class="more-checks" style="display: block;"><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                              <p class="less-checks" style="display: none;" class="notDisp"> <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                              {% endwith %}
-
-                                                              {% else %}
-                                                                  <p class="more-checks" style="display: block;"><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                                 <p class="less-checks" style="display: none;" class="notDisp"> <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
 
 
-                                                                   <!-- <p class="more-checks" style="display:block;"><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p> -->
-                                                              <!--
-                                                              <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
-                                                              <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
-                                                              -->
+
                                                           {% endif %}
 
                                                           </div>
@@ -110,16 +120,7 @@
                                              {% endfor %}
 
                                          </ul>
-                                     {%  comment %}
-                                         <!-- <div style="display: block;" > -->
-                                               <p class="more-checks" style="display: block;" ><a class="show-more">show more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                               <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                         <!-- </div> -->
-                                    {%  endcomment %}
-                                        <!--
-                                        <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
-                                         <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
-                                        -->
+
                                      </div>
 
 
@@ -193,6 +194,18 @@
                                                  <span>Sort by: <input type="radio" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
                                             </div>
 
+                                            <p style="display: block;" >
+                                                   {% if attr.values|length > 5 %}
+                                                       {% with attr.values|length|add:"-5" as more %}
+                                                        <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                        <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                       {% endwith %}
+
+                                                    {% else %}
+                                                       <p class="check-uncheck"><span class="checks2"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                   {% endif %}
+                                                </p>
+
                                                 {% comment %}
                                                 {% if attr.name == "Modality" %}
                                                 <span style="background-color:lightgrey">Filter for cases with:<br>
@@ -213,21 +226,7 @@
                                                        {% endwith %}
                                                     {% endfor %}
                                                 </ul>
-                                                <p style="display: block;" >
-                                                   {% if attr.values|length > 5 %}
-                                                       {% with attr.values|length|add:"-5" as more %}
-                                                        <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                        <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                       {% endwith %}
 
-                                                    {% else %}
-                                                       <p class="check-uncheck"><span class="checks2"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                   {% endif %}
-                                                   <!--
-                                                    <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
-                                                    <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
-                                                   -->
-                                                </p>
                                             </div>
                                          </li>
                                      </ul>
@@ -269,6 +268,19 @@
                                                <div class="sorter">
                                                  <span>Sort by: <input type="radio" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
                                             </div>
+                                               <p style="display: block;" >
+                                                    {% if attr.values|length > 5 %}
+                                                        {% with attr.values|length|add:"-5" as more %}
+                                                        <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                        <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                        {% endwith %}
+                                                     {% else %}
+                                                       <p class="check-uncheck"><span class="checks2"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                    {% endif %}
+
+                                                   </p>
+
+
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                     {% for val in attr.values|order_seg:attr_setK %}
                                                         {% with val.display_value|get_display_val:val.value as display_value %}
@@ -286,20 +298,8 @@
                                                         {% endwith %}
                                                      {% endfor %}
                                                     </ul>
-                                                    <p style="display: block;" >
-                                                    {% if attr.values|length > 5 %}
-                                                        {% with attr.values|length|add:"-5" as more %}
-                                                        <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                        <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                        {% endwith %}
-                                                     {% else %}
-                                                       <p class="check-uncheck"><span class="checks2"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                    {% endif %}
-                                                          <!--
-                                                              <p class="hide-zeros" style="display: block;"><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
-                                                             <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
-                                                             -->
-                                                              </p>
+
+
                                                </div>
                                                        </li>
 
@@ -344,6 +344,20 @@
                                                        <span>Sort by: <input type="radio" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
                                                     </div>
                                                  {% endif %}
+                                                     <p style="display: block;" >
+                                                    {% if attr.values|length > 5 %}
+                                                        {% with attr.values|length|add:"-5" as more %}
+
+                                                        <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                        <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                        {% endwith %}
+                                                     {% else %}
+
+                                                        <p class="check-uncheck" style="display: block;" >  <span class="checks2"> <a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+
+                                                    {% endif %}
+
+                                                    </p>
                                                      <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                      {% for val in attr.values|check_for_order:attr.name %}
                                                          <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values notDisp{% endif %}  {% if val.count == 0 %} zeroed {% endif %}">
@@ -358,23 +372,7 @@
                                                           </li>
                                                      {% endfor %}
                                                     </ul>
-                                                    <p style="display: block;" >
-                                                    {% if attr.values|length > 5 %}
-                                                        {% with attr.values|length|add:"-5" as more %}
 
-                                                        <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                        <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                        {% endwith %}
-                                                     {% else %}
-
-                                                        <p class="check-uncheck" style="display: block;" >  <span class="checks2"> <a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-
-                                                    {% endif %}
-                                                         <!--
-                                                         <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
-                                                         <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
-                                                         -->
-                                                    </p>
                                                </div>
                                             </li>
                                                 </ul>
@@ -551,11 +549,19 @@
                                     </tr>
                                 </thead>
                                 <tbody id="projects_table" class="set_height">
+                                {% for progK, progV in programs.items|dictsort:"0.lower" %}
+                                     {% for proj, projD in progV.projects.items %}
+                                         <tr id="project_row_{{ proj }}" class="text_head")"><td class="ckbx text_data"><input type="checkbox" onclick="(toggleRows($(this).parent().parent(),'projects', 'project_row_',false))"></td> <td>{{ projD.display }}</td><td>{{ projD.val }}</td><td id="patient_col_{{ proj }}" class="projects_table_num_cohort">{{ projD.val }}</td> </tr>
+                                     {% endfor %}
+
+                                {% endfor %}
+                                {% comment %}
                                 {% for coll, cnt in collections.items|dictsort:"0.lower" %}
                                       {% if coll != "All" %}
                                           <tr id="project_row_{{ coll }}" class="text_head")"><td class="ckbx text_data"><input type="checkbox" onclick="(toggleRows($(this).parent().parent(),'projects', 'project_row_',false))"></td> <td>{{ coll }}</td><td>{{ cnt }}</td><td id="patient_col_{{ coll }}" class="projects_table_num_cohort">{{ cnt }}</td> </tr>
                                       {% endif %}
                                 {% endfor %}
+                                {% endcomment %}
                                 </tbody>
                             </table>
                          </div>

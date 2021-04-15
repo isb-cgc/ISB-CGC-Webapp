@@ -215,7 +215,8 @@ require([
                     curArr = filterObj[curKey];
                     for (var j = 0; j < curArr.length; j++) {
                         if (!(('Program.' + curArr[j]) in filterObj)) {
-                            collection.push(curArr[j]);
+                            var colName=$('#'+curArr[j]).filter('.collection_name')[0].innerText;
+                            collection.push(colName);
                         }
                     }
                 } else if (curKey.endsWith('_rng')) {
@@ -829,7 +830,7 @@ require([
                     curArr.push(curId);
                     numArr+= parseInt($(this).find('.projects_table_num_cohort, .numcases')[0].innerHTML);
                     if (type==='cases') {
-                        var projectId = $(this).find(".project-name").text();
+                        var projectId = $(this).attr('data-projectid');
                         if (!(projectId in selDic)){
                             projArr.push(projectId);
                             selDic[projectId]= new Array();
@@ -1069,6 +1070,7 @@ require([
                     for (i = 0; i < data['origin_set']['docs'].length; i++) {
                         var curData = data['origin_set']['docs'][i];
                         var projectId = curData.collection_id;
+                        var projectNm = $('#'+projectId).filter('.collection_name')[0].innerText;
                         var patientId = curData.PatientID;
                         var numStudy=0;
                         if (studyDic.hasOwnProperty(patientId)){
@@ -1084,9 +1086,9 @@ require([
                         var newHtml = '';
                         var rowId = 'case_' + patientId.replace(/\./g, '-');
 
-                        newHtml = '<tr id="' + rowId + '" class="' + pclass + ' text_head" onclick="(toggleRows(this, \'cases\', \'case_\', false))">' +
+                        newHtml = '<tr id="' + rowId + '" data-projectid="' + projectId + '" class="' + pclass + ' text_head" onclick="(toggleRows(this, \'cases\', \'case_\', false))">' +
                                    '<td class="ckbx"><input type="checkbox"></td>'+
-                                   '<td class="col1 project-name">' + projectId + '</td>' +
+                                   '<td class="col1 project-name">' + projectNm + '</td>' +
                                     '<td class="col1 case-id">' + patientId +'</td>' +
                                     '<td class="col1">' + numStudy.toString() + '</td>' +
                                     '<td class="col1 numcases">' + numSeries.toString() + '</td>' +
@@ -1577,27 +1579,11 @@ require([
             reformDic[listId] = new Object();
             for (item in progDic){
                 if ((item !=='All') && (item !=='None')){
-                    if (! ('projects' in progDic[item]) ) {
-                        reformDic[listId][item]=new Object();
-                        reformDic[listId][item]['count'] = progDic[item]['val'];
-                    } else if (item.toLowerCase() === 'tcga'){
-                        reformDic[listId][item]=new Object();
-                        reformDic[listId][item]['count'] = progDic[item]['val'];
-                        reformDic[item] =  new Object();
-                        for (project in progDic[item]['projects']){
-                            reformDic[item][project]=new Object();
-                            reformDic[item][project]['count']=progDic[item]['projects'][project];
-                        }
+                    if ( Object.keys(progDic[item]['projects']).length===1) {
+                        nitem=Object.keys(progDic[item]['projects'])[0];
+                        reformDic[listId][nitem]=new Object();
+                        reformDic[listId][nitem]['count'] = progDic[item]['val'];
                     }
-
-                    //else if (('projects' in progDic[item]) && Object.keys(progDic[item]['projects']).length == 1 ){
-                     else{
-                        nm = Object.keys(progDic[item]['projects'])[0];
-                        reformDic[listId][nm]=new Object();
-                        reformDic[listId][nm]['count'] = progDic[item]['val'];
-                    }
-                     /*
-
                     else {
                         reformDic[listId][item]=new Object();
                         reformDic[listId][item]['count'] = progDic[item]['val'];
@@ -1608,7 +1594,7 @@ require([
                         }
                     }
 
-                      */
+
                 }
             }
             updateFilterSelections('program_set', {'unfilt':reformDic});
@@ -2257,8 +2243,9 @@ require([
 
         var updateFilters = function (filterCat, dic, dataFetched) {
             var showZeros = true;
-            var isSearchConf = ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').length>0);
-            if (isSearchConf && ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').prop('checked'))){
+            var searchDomain = $('#'+filterCat).closest('.search-configuration, .search-scope');
+            //var isSearchConf = ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').length>0);
+            if ((searchDomain.find('#hide-zeros').length>0) && (searchDomain.find('#hide-zeros').prop('checked'))){
                 showZeros = false;
             }
             if (  $('#'+filterCat).hasClass('isQuant') && dataFetched){
@@ -2387,8 +2374,8 @@ require([
             }
         }
 
-        setAllFilterElements = function(hideEmpty){
-            var filtSet = ["search_orig_set","segmentation","quantitative","qualitative","tcga_clinical"];
+        setAllFilterElements = function(hideEmpty,filtSet){
+            //var filtSet = ["search_orig_set","segmentation","quantitative","qualitative","tcga_clinical"];
             for (var i=0;i<filtSet.length;i++) {
                 filterCats = findFilterCats(filtSet[i], false);
                 for (var j = 0; j < filterCats.length; j++) {
@@ -2399,8 +2386,14 @@ require([
             addSliders('tcga_clinical',false, hideEmpty,'tcga_clinical.');
         }
 
+        window.hideColl = function(hideElem){
+            var filtSet=["program_set"]
+            setAllFilterElements(hideElem.checked,filtSet);
+        }
+
         window.hideAtt = function(hideElem){
-            setAllFilterElements(hideElem.checked);
+            var filtSet = ["search_orig_set","segmentation","quantitative","qualitative","tcga_clinical"];
+            setAllFilterElements(hideElem.checked, filtSet);
         }
 
         var updateFilterSelections = function (id, dicofdic) {
@@ -2629,14 +2622,15 @@ require([
         };
 
         var filterItemBindings = function (filterId) {
-            $('#' + filterId).find('input:checkbox').on('click', function () {
+            $('#' + filterId).find('input:checkbox').not('#hide-zeros').on('click', function () {
                 handleFilterSelectionUpdate(this, true, true);
             });
 
             $('#' + filterId).find('.show-more').on('click', function () {
-                $(this).parent().parent().find('.less-checks').show();
-                $(this).parent().parent().find('.less-checks').removeClass('notDisp');
-                $(this).parent().parent().find('.more-checks').addClass('notDisp');
+                $(this).parent().parent().children('.less-checks').show();
+                $(this).parent().parent().children('.less-checks').removeClass('notDisp');
+                $(this).parent().parent().children('.more-checks').addClass('notDisp');
+
                 $(this).parent().hide();
                 var extras = $(this).parent().parent().children('.search-checkbox-list').children('.extra-values')
 
@@ -2647,16 +2641,20 @@ require([
             });
 
             $('#' + filterId).find('.show-less').on('click', function () {
-                $(this).parent().parent().find('.more-checks').show();
-                $(this).parent().parent().find('.more-checks').removeClass('notDisp');
-                $(this).parent().parent().find('.less-checks').addClass('notDisp');
+                $(this).parent().parent().children('.more-checks').show();
+                $(this).parent().parent().children('.more-checks').removeClass('notDisp');
+                $(this).parent().parent().children('.less-checks').addClass('notDisp');
+
                 $(this).parent().hide();
                 $(this).parent().parent().children('.search-checkbox-list').children('.extra-values').addClass('notDisp');
             });
 
             $('#' + filterId).find('.check-all').on('click', function () {
                 //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
-                var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body, .list-group-sub-item__body').children('ul').children();
+                var filterElems = new Object();
+
+                filterElems = $(this).parentsUntil('.list-group-item, #program_set').filter('.list-group-item__body, .list-group-sub-item__body, #Program').children('ul').children();
+
                 for (var ind =0;ind<filterElems.length;ind++) {
                     var ckElem = new Object();
                     if ($(filterElems[ind]).children().filter('.list-group-item__heading').length>0){
@@ -2676,7 +2674,10 @@ require([
 
             $('#' + filterId).find('.uncheck-all').on('click', function () {
                  //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
-                var filterElems = $(this).parentsUntil('.list-group-item').filter('.list-group-item__body,.list-group-sub-item__body').children('ul').children();
+                var filterElems = new Object();
+
+                filterElems = $(this).parentsUntil('.list-group-item, #program_set').filter('.list-group-item__body, .list-group-sub-item__body, #Program').children('ul').children();
+
                 for (var ind =0;ind<filterElems.length;ind++) {
                     var ckElem = new Object();
                     if ($(filterElems[ind]).children().filter('.list-group-item__heading').length>0){
@@ -3013,7 +3014,7 @@ require([
          }
      }
 
-     $(document).ready(function () {
+      $(document).ready(function () {
            // $('#proj_table').DataTable();
            // window.filterObj.collection_id = window.tcgaColls;
             window.selItems = new Object();
@@ -3029,8 +3030,7 @@ require([
             window.filtHistory = new Array();
             window.filtHistory.push(histObj);
 
-           /* addFilterBindings('search_orig_set');
-            addFilterBindings('search_related_set');*/
+
 
             filterItemBindings('program_set');
             filterItemBindings('search_orig_set');
