@@ -1590,7 +1590,7 @@ require([
                         reformDic[item] =  new Object();
                         for (project in progDic[item]['projects']){
                             reformDic[item][project]=new Object();
-                            reformDic[item][project]['count']=progDic[item]['projects'][project];
+                            reformDic[item][project]['count']=progDic[item]['projects'][project]['val'];
                         }
                     }
 
