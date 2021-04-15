@@ -99,7 +99,7 @@
 
                                                            <ul id="{{ progK }}_proj_list" class="search-checkbox-list" style="list-style: none;">
                                                            {% for proj, projD in progV.projects.items|dictsort:"0.lower" %}
-                                                              <li class="checkbox {% if forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if projK == 0 %} zeroed {% endif %}">
+                                                              <li class="checkbox {% if forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if projD.val == 0 %} zeroed {% endif %}">
                                                                 <label>
                                                                   <input data-filter-attr-id="{{ progV.collex_attr_id }}"
                                                                          data-filter-display-attr="Collection" data-filter-display-val="{{ proj|upper }}"
@@ -268,6 +268,17 @@
                                                <div class="sorter">
                                                  <span>Sort by: <input type="radio" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
                                             </div>
+                                               <p style="display: block;" >
+                                                    {% if attr.values|length > 5 %}
+                                                        {% with attr.values|length|add:"-5" as more %}
+                                                        <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                        <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                        {% endwith %}
+                                                     {% else %}
+                                                       <p class="check-uncheck"><span class="checks2"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                    {% endif %}
+
+                                                   </p>
 
 
                                                 <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
@@ -287,20 +298,7 @@
                                                         {% endwith %}
                                                      {% endfor %}
                                                     </ul>
-                                               <p style="display: block;" >
-                                                    {% if attr.values|length > 5 %}
-                                                        {% with attr.values|length|add:"-5" as more %}
-                                                        <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                        <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                        {% endwith %}
-                                                     {% else %}
-                                                       <p class="check-uncheck"><span class="checks2"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                    {% endif %}
-                                                          <!--
-                                                              <p class="hide-zeros" style="display: block;"><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
-                                                             <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
-                                                             -->
-                                                              </p>
+
 
                                                </div>
                                                        </li>
@@ -346,6 +344,20 @@
                                                        <span>Sort by: <input type="radio" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
                                                     </div>
                                                  {% endif %}
+                                                     <p style="display: block;" >
+                                                    {% if attr.values|length > 5 %}
+                                                        {% with attr.values|length|add:"-5" as more %}
+
+                                                        <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                        <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                        {% endwith %}
+                                                     {% else %}
+
+                                                        <p class="check-uncheck" style="display: block;" >  <span class="checks2"> <a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+
+                                                    {% endif %}
+
+                                                    </p>
                                                      <ul id="{{ attr.name }}_list" class="search-checkbox-list" style="list-style: none;">
                                                      {% for val in attr.values|check_for_order:attr.name %}
                                                          <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values notDisp{% endif %}  {% if val.count == 0 %} zeroed {% endif %}">
@@ -360,23 +372,7 @@
                                                           </li>
                                                      {% endfor %}
                                                     </ul>
-                                                    <p style="display: block;" >
-                                                    {% if attr.values|length > 5 %}
-                                                        {% with attr.values|length|add:"-5" as more %}
 
-                                                        <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                        <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-                                                        {% endwith %}
-                                                     {% else %}
-
-                                                        <p class="check-uncheck" style="display: block;" >  <span class="checks2"> <a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
-
-                                                    {% endif %}
-                                                         <!--
-                                                         <p class="hide-zeros" style="display: block;" ><a class="hide-zeros-a">Hide values with 0 cases</a><span class="checks"></p>
-                                                         <p class="show-zeros" style="display: none;" class="notDisp"> <a class="show-zeros-a">Show values with 0 cases</a><span class="checks"></p>
-                                                         -->
-                                                    </p>
                                                </div>
                                             </li>
                                                 </ul>
