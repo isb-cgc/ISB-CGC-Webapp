@@ -22,7 +22,9 @@
                             {% for node in all_nodes %}
                                 <optgroup label="{{ node.name }}"></optgroup>
                                 {% for program in node.programs %}
-                                    {% if not cohort.id or program.id|program_is_in_cohort:programs_this_cohort %}
+                                    <!-- Do not show it in dropdown if it is in cohort detail and the program is not in this cohort -->
+                                    {% if cohort.id and not program.id|program_is_in_cohort:programs_this_cohort %}
+                                    {% else %}
                                         <option value="{{ node.short_name }}-{{ program.name }}" node-id="{{ node.id }}" program-id="{{ program.id }}">
                                             {{ program.name }}-{{ node.short_name }}
                                         </option>
@@ -33,7 +35,8 @@
                         <!-- Grouped by program -->
                         <select class="sort-by-program dataset-select-box form-control" style='display:none'>
                             {% for program in all_programs %}
-                                {% if not cohort.id or program.id|program_is_in_cohort:programs_this_cohort %}
+                                {% if cohort.id and not program.id|program_is_in_cohort:programs_this_cohort %}
+                                {% else %}
                                     <optgroup label="{{ program.name }}"></optgroup>
                                     {% for node in program.nodes %}
                                         <option value="{{ node.short_name }}-{{ program.name }}" node-id="{{ node.id }}" program-id="{{ program.id }}">
