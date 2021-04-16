@@ -25,6 +25,7 @@ function openExport() {
 </div>
 {% endblock %}
 {% block content %}
+    {% comment %}
     {% with cohort_id="1" %}
      {% include "cohorts/test.html" %}
    {% endwith %}
@@ -38,6 +39,7 @@ function openExport() {
 
 
 </div>
+{% endcomment %}
 <div class="container-fluid">
     <div class="page-action-group">
         <li role="menuitem">
@@ -69,7 +71,7 @@ function openExport() {
 
 
                         <th class="name-col">Name</th>
-                        <th class="id-col">Export</th>
+                        {% comment %}<th class="id-col">Export</th> {% endcomment %}
                         <th class="owner-col">Ownership</th>
                         <th class="share-col">Shared With</th>
                         <th class="version-col">Data Version</th>
@@ -78,7 +80,7 @@ function openExport() {
                         <col style="width: 2%">
                         <col style="width: 7%">
                         <col style="width: 10%">
-                        <col style="width: 7%">
+                        {% comment %}<col style="width: 7%"> {% endcomment %}
                         <col style="width: 29%">
                         <col style="width: 11%">
                         <col style="width: 9%">
@@ -96,9 +98,11 @@ function openExport() {
                             </td>
 
                             <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</a></td>
+                            {% comment %}
                             <td class="id-col">
                                 <button onclick="openExport()"></button>
                             </td>
+                            {% endcomment %}
                             <td class="owner-col">
                                 {% if cohort.perm == 'Owner' %}
                                     You
