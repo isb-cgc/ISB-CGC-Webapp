@@ -25,18 +25,11 @@ function openExport() {
 </div>
 {% endblock %}
 {% block content %}
-    {% with cohort_id="1" %}
-     {% include "cohorts/test.html" %}
-   {% endwith %}
-
-    <div>
-
-        <div class="cohort-manifest pull-right">
-                 <button id="export-manifest" class="btn btn-special pull-right" data-toggle="modal" data-target="#export-manifest-modal"> Export Cohort Manifest
-                 </button>
-        </div>
-
-
+<div>
+    <div class="cohort-manifest pull-right">
+         <button id="export-manifest" class="btn btn-special pull-right" data-toggle="modal" data-target="#export-manifest-modal"> Export Cohort Manifest
+         </button>
+    </div>
 </div>
 <div class="container-fluid">
     <div class="page-action-group">
