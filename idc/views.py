@@ -240,6 +240,25 @@ def help_page(request):
 def quota_page(request):
     return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
 
+@login_required
+def fetch_cohort_data(request):
+    ret = {}
+    try:
+        req = request.GET if request.GET else request.POST
+        collapse_on = req.get('collapse_on', 'SeriesInstanceUID')
+        filters = json.loads(req.get('filters', '{}'))
+        fields = json.loads(req.get('fields', '[]'))
+        order_docs = json.loads(req.get('order_docs', '[]'))
+        counts_only = (req.get('counts_only', "False").lower() == "true")
+
+
+    except Exception as e:
+        logger.error("[ERROR] While attempting to load the search page:")
+        logger.exception(e)
+        messages.error(request,
+                       "Encountered an error when attempting to load the page - please contact the administrator.")
+
+    return JsonResponse(ret)
 
 # Data exploration and cohort creation page
 @login_required
@@ -248,6 +267,7 @@ def explore_data_page(request):
     attr_sets = {}
     context = {'request': request}
     is_json = False
+
 
     try:
         req = request.GET if request.GET else request.POST
@@ -266,6 +286,7 @@ def explore_data_page(request):
         uniques = json.loads(req.get('uniques', '[]'))
         record_limit = int(req.get('record_limit', '2000'))
         offset = int(req.get('offset', '0'))
+        #sort_on = req.get('sort_on', collapse_on+' asc')
 
         context = build_explorer_context(is_dicofdic, source, versions, filters, fields, order_docs, counts_only,
                                          with_related, with_derived, collapse_on, is_json, uniques=uniques)
