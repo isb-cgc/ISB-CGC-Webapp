@@ -1578,8 +1578,8 @@ require([
             var reformDic = new Object();
             reformDic[listId] = new Object();
             for (item in progDic){
-                if ((item !=='All') && (item !=='None')){
-                    if ( Object.keys(progDic[item]['projects']).length===1) {
+                if ((item !=='All') && (item !=='None') && (item in window.programs) && (Object.keys(progDic[item]['projects']).length>0)){
+                    if ( Object.keys(window.programs[item]['projects']).length===1) {
                         nitem=Object.keys(progDic[item]['projects'])[0];
                         reformDic[listId][nitem]=new Object();
                         reformDic[listId][nitem]['count'] = progDic[item]['val'];
