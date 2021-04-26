@@ -462,8 +462,7 @@ require([
                     'create-cohort-form-item': token.clone(true)
                 });
 
-
-                $(selFilterPanel+' .panel-body').append($this.data('select-filters-item'));
+                $(selFilterPanel +' .panel-body').append($this.data('select-filters-item'));
                 createFormFilterSet.append($this.data('create-cohort-form-item'));
             }
         } else { // Checkbox unchecked
@@ -544,7 +543,8 @@ require([
             case 'EDITING':
                 // $('.data-tab-content-panel:not(.spinner-panel)').removeClass('col-md-12').addClass('col-md-9');
                 $('.filter-panel').show();
-                $('.selected-filters').show();
+                $('.selected-filters').hide();
+                $('.all-selected-filters').show();
                 cohort_id && $('.page-header').hide();
                 $('input[name="cohort-name"]').show();
                 $('#default-cohort-menu').hide();
@@ -1106,6 +1106,7 @@ require([
         (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
 
         update_displays(false,false,span_data['progId']);
+        update_all_selected_filters_ui('#' + ACTIVE_PROGRAM_ID + '-data');
         return false;
     });
 
@@ -1280,9 +1281,36 @@ require([
     };
 
     var update_all_selected_filters_ui = function(dataset_selector) {
-        var all_selected_panel = $(dataset_selector + ' .all-selected-filters' + ' .panel-body');
+        let all_selected_panel = $(dataset_selector + ' .all-selected-filters' + ' .panel-body');
         all_selected_panel.empty();
-        all_selected_panel.html($('#selected-filters').html());
+        let create_form_filters = $('#selected-filters');
+        create_form_filters.children('p').each(function() {
+            console.log($(this));
+            let program_id = $(this).prop('id').slice(0, -13);
+            let dataset_name = $(this).find('h5').text();
+           // var dataset_feature_name = $(this).find('span').attr('data-feature-id');
+            //var dataset_value_id = $(this).find('span').attr('data-value-id');
+            let link = "#" + program_id + "-data";
+            let div = $('<div>');
+            let current = (link === dataset_selector) ? " (Current Data Set)" : "";
+            div.append("<h5><a class=\"dataset-select-btn\" program-id=\"" + program_id
+                + "\">" + dataset_name + "</a>" + current + "</h5>");
+
+            $(this).find('span').each(function() {
+                var new_token = $(this).clone(true);
+                div.append(new_token);
+            });
+            all_selected_panel.append(div);
+        });
+
+        $('.dataset-select-btn').click(function(e) {
+            ACTIVE_PROGRAM_ID = $(e.target).attr('program-id');
+            let new_dataset_selector = '#'+ACTIVE_PROGRAM_ID+'-data';
+            $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
+            $(new_dataset_selector).addClass('active');
+            update_select_dataset_ui(new_dataset_selector);
+            update_all_selected_filters_ui(new_dataset_selector);
+        });
     };
 
     var ACTIVE_PROGRAM_ID = 0;
