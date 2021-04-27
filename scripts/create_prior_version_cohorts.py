@@ -83,6 +83,16 @@ cohort_defs = [
             }
         ]
     },
+    {
+        'name': 'Example: BodyPartExamine, Bladder and Brain',
+        'desc': 'V1 Count should differ in V2',
+        'filters': [
+            {
+                'attribute': 'BodyPartExamined',
+                'values': ['Bladder','Brain'],
+            }
+        ]
+    },
 ]
 
 def load_cohort_defs(filename):
@@ -140,7 +150,7 @@ def main():
                 str(attr_ids[x['attribute']]): x['values'] for x in cohort['filters']
             }
             for version in versions:
-                _save_cohort(user,filters,cohort['name'],None,version)
+                _save_cohort(user,filters,cohort['name'],None,version,no_stats=True)
 
     except Exception as e:
         logger.exception(e)

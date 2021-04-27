@@ -54,6 +54,13 @@
 
 {% block content %}
 
+<script>
+   window.selItems = new Object();
+   window.selItems.selProjects = new Array();
+   window.selItems.selStudies = new Object();
+   window.collection = {{ collections|tojson|safe }};
+   window.programs = {{ programs|tojson|safe }};
+</script>
 
 {% with is_cohort=True %}
     {% include "cohorts/export-manifest-modal.html" %}
