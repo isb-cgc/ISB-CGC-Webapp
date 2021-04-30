@@ -1048,9 +1048,9 @@ require([
                 success: function (data) {
 
                     studyDic = new Object();
-                    if (data.hasOwnProperty('uniques') && data['uniques'].hasOwnProperty('unique_StudyInstanceUID') && data['uniques']['unique_StudyInstanceUID']['buckets']){
-                        for (i=0;i<data['uniques']['unique_StudyInstanceUID']['buckets'].length;i++){
-                            curSet= data['uniques']['unique_StudyInstanceUID']['buckets'][i];
+                    if (data.hasOwnProperty('uniques') && data['uniques'].hasOwnProperty('StudyInstanceUID') && data['uniques']['StudyInstanceUID']['buckets']){
+                        for (i=0;i<data['uniques']['StudyInstanceUID']['buckets'].length;i++){
+                            curSet= data['uniques']['StudyInstanceUID']['buckets'][i];
                             if (curSet.hasOwnProperty('val') && curSet.hasOwnProperty('unique_count')){
                                 studyDic[curSet['val']]=curSet['unique_count']
                             }
@@ -1058,9 +1058,9 @@ require([
 
                     }
                     seriesDic = new Object();
-                    if (data.hasOwnProperty('uniques') && data['uniques'].hasOwnProperty('unique_SeriesInstanceUID') && data['uniques']['unique_SeriesInstanceUID']['buckets']){
-                        for (i=0;i<data['uniques']['unique_SeriesInstanceUID']['buckets'].length;i++){
-                            curSet= data['uniques']['unique_SeriesInstanceUID']['buckets'][i];
+                    if (data.hasOwnProperty('uniques') && data['uniques'].hasOwnProperty('SeriesInstanceUID') && data['uniques']['SeriesInstanceUID']['buckets']){
+                        for (i=0;i<data['uniques']['SeriesInstanceUID']['buckets'].length;i++){
+                            curSet= data['uniques']['SeriesInstanceUID']['buckets'][i];
                             if (curSet.hasOwnProperty('val') && curSet.hasOwnProperty('unique_count')){
                                 seriesDic[curSet['val']]=curSet['unique_count']
                             }
@@ -1217,9 +1217,9 @@ require([
 
                     if (!isSeries) {
                         seriesDic = new Object();
-                        if (data.hasOwnProperty('uniques') && data['uniques'].hasOwnProperty('unique_SeriesInstanceUID') && data['uniques']['unique_SeriesInstanceUID']['buckets']) {
-                            for (i = 0; i < data['uniques']['unique_SeriesInstanceUID']['buckets'].length; i++) {
-                                curSet = data['uniques']['unique_SeriesInstanceUID']['buckets'][i];
+                        if (data.hasOwnProperty('uniques') && data['uniques'].hasOwnProperty('SeriesInstanceUID') && data['uniques']['SeriesInstanceUID']['buckets']) {
+                            for (i = 0; i < data['uniques']['SeriesInstanceUID']['buckets'].length; i++) {
+                                curSet = data['uniques']['SeriesInstanceUID']['buckets'][i];
                                 if (curSet.hasOwnProperty('val') && curSet.hasOwnProperty('unique_count')) {
                                     seriesDic[curSet['val']] = curSet['unique_count']
                                 }

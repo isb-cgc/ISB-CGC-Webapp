@@ -267,7 +267,7 @@ def explore_data_page(request):
     attr_sets = {}
     context = {'request': request}
     is_json = False
-
+    wcohort = False
 
     try:
         req = request.GET if request.GET else request.POST
@@ -284,12 +284,29 @@ def explore_data_page(request):
         collapse_on = req.get('collapse_on', 'SeriesInstanceUID')
         is_json = (req.get('is_json', "False").lower() == "true")
         uniques = json.loads(req.get('uniques', '[]'))
+        totals = json.loads(req.get('totals', '[]'))
+
         record_limit = int(req.get('record_limit', '2000'))
         offset = int(req.get('offset', '0'))
         #sort_on = req.get('sort_on', collapse_on+' asc')
+        cohort_id = req.get('cohort_id','-1')
 
+        cohort_filters={}
+        if (int(cohort_id)>-1):
+            cohort = Cohort.objects.get(id=cohort_id, active=True)
+            cohort.perm = cohort.get_perm(request)
+            if cohort.perm:
+                wcohort = True
+                cohort_filters_dict = cohort.get_filters_as_dict()
+                cohort_filters_list = cohort_filters_dict[0]['filters']
+                for cohort in cohort_filters_list:
+                    cohort_filters[cohort['name']] = cohort['values']
+
+
+        if wcohort and is_json:
+            filters = cohort_filters
         context = build_explorer_context(is_dicofdic, source, versions, filters, fields, order_docs, counts_only,
-                                         with_related, with_derived, collapse_on, is_json, uniques=uniques)
+                                         with_related, with_derived, collapse_on, is_json, uniques=uniques, totals=totals)
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
@@ -302,7 +319,10 @@ def explore_data_page(request):
         return JsonResponse(context)
     else:
         # These are filters to be loaded *after* a page render
-        context['filters_for_load'] = json.loads(req.get('filters_for_load', '{}'))
+        if wcohort:
+            context['filters_for_load'] = cohort_filters_dict
+        else:
+            context['filters_for_load'] = json.loads(req.get('filters_for_load', '{}'))
         '''context['order'] = {'derived_set': ['dicom_derived_study_v2:segmentation', 'dicom_derived_study_v2:qualitative',
                                             'dicom_derived_study_v2:quantitative']}'''
 
