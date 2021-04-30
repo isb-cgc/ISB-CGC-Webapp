@@ -77,13 +77,7 @@
 
 {% block content %}
 
-<script>
-   window.selItems = new Object();
-   window.selItems.selProjects = new Array();
-   window.selItems.selStudies = new Object();
-   window.collection = {{ collections|tojson|safe }};
-   window.programs = {{ programs|tojson|safe }};
-</script>
+
 
 {% include "idc/explore_data_core.html" %}
 

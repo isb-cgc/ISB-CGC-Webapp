@@ -1868,10 +1868,6 @@ require([
                      */
                     changeAjax(false);
                     deferred.resolve();
-                },
-                error: function () {
-                    changeAjax(false);
-                    console.log("problem getting data");
                 }
             });
             return deferred.promise();

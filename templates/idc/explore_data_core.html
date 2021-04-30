@@ -1,6 +1,14 @@
 {% load custom_tags %}
 {% load staticfiles %}
 
+<script>
+   window.selItems = new Object();
+   window.selItems.selProjects = new Array();
+   window.selItems.selStudies = new Object();
+   window.collection = {{ collections|tojson|safe }};
+   window.programs = {{ programs|tojson|safe }};
+</script>
+
 
 <div class="container-fluid">
     <div class ="row">

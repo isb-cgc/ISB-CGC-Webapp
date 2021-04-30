@@ -503,7 +503,8 @@ require([
         var totals = JSON.stringify(["PatientID","StudyInstanceUID","SeriesInstanceUID"]);
 
        //# PatientId, StudyInstanceUID SeriesInstanceUID
-        let url = '/explore/?is_json=true&cohort_id='+id+'&totals='+totals;
+        let url = '/explore/?counts_only=True&is_json=True&is_dicofdic=True&with_clinical=False&cohort_id='+id+'&totals='+totals;
+        url = encodeURI(url);
         var ntxt="";
         $('.spinner').show();
         $.ajax({
