@@ -240,25 +240,7 @@ def help_page(request):
 def quota_page(request):
     return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
 
-@login_required
-def fetch_cohort_data(request):
-    ret = {}
-    try:
-        req = request.GET if request.GET else request.POST
-        collapse_on = req.get('collapse_on', 'SeriesInstanceUID')
-        filters = json.loads(req.get('filters', '{}'))
-        fields = json.loads(req.get('fields', '[]'))
-        order_docs = json.loads(req.get('order_docs', '[]'))
-        counts_only = (req.get('counts_only', "False").lower() == "true")
 
-
-    except Exception as e:
-        logger.error("[ERROR] While attempting to load the search page:")
-        logger.exception(e)
-        messages.error(request,
-                       "Encountered an error when attempting to load the page - please contact the administrator.")
-
-    return JsonResponse(ret)
 
 # Data exploration and cohort creation page
 @login_required
