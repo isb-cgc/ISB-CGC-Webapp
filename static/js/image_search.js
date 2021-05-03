@@ -1034,8 +1034,9 @@ require([
             var fields = ["collection_id", "PatientID","StudyInstanceUID","SeriesInstanceUID"];
             var collapse_on = 'PatientID'
             var order_docs = ["collection_id", "PatientID"];
-            var fieldStr = JSON.stringify(fields);
             var orderDocStr = JSON.stringify(order_docs);
+            var fieldStr = JSON.stringify(fields);
+            //var sortOnStr = JSON.stringify(sort_on);
             var uniques = JSON.stringify(["PatientID","StudyInstanceUID","SeriesInstanceUID"]);
             let url = '/explore/?counts_only=False&is_json=True&with_clinical=True&collapse_on=' + collapse_on + '&filters=' + filterStr + '&fields=' + fieldStr + '&order_docs=' + orderDocStr+'&uniques='+uniques;
             url = encodeURI(url);
@@ -1188,19 +1189,19 @@ require([
             var filterStr = JSON.stringify(curFilterObj);
             var fields = ["collection_id", "PatientID", "StudyInstanceUID", "StudyDescription", "StudyDate"];
             var collapse_on = 'StudyInstanceUID'
-            var order_docs = ["collection_id", "PatientID", "StudyInstanceUID"];
+            var sort_on = ["collection_id asc", "PatientID asc", "StudyInstanceUID asc"];
             if (isSeries) {
                 fields = ["collection_id", "PatientID", "StudyInstanceUID", "SeriesInstanceUID", "Modality", "BodyPartExamined", "SeriesNumber", "SeriesDescription"];
                 collapse_on = 'SeriesInstanceUID'
-                order_docs = ["collection_id", "PatientID", "StudyInstanceUID", "SeriesNumber"];
+                sort_on = ["collection_id asc", "PatientID asc", "StudyInstanceUID asc", "SeriesNumber asc"];
             }
 
             var fieldStr = JSON.stringify(fields);
-            var orderDocStr = JSON.stringify(order_docs);
+            var sortDocStr = JSON.stringify(sort_on);
 
 
 
-            let url = '/explore/?counts_only=False&is_json=True&with_clinical=True&collapse_on=' + collapse_on + '&filters=' + filterStr + '&fields=' + fieldStr + '&order_docs=' + orderDocStr;
+            let url = '/explore/?counts_only=False&is_json=True&with_clinical=True&collapse_on=' + collapse_on + '&filters=' + filterStr + '&fields=' + fieldStr + '&sort_on=' + sortDocStr;
             if (!isSeries){
                 var uniques = JSON.stringify(["StudyInstanceUID","SeriesInstanceUID"]);
                 url+='&uniques='+uniques;
@@ -1867,10 +1868,6 @@ require([
                      */
                     changeAjax(false);
                     deferred.resolve();
-                },
-                error: function () {
-                    changeAjax(false);
-                    console.log("problem getting data");
                 }
             });
             return deferred.promise();

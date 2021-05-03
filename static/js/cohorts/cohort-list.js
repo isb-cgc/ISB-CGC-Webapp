@@ -44,12 +44,16 @@ require([
     'bootstrap',
     'tablesorter'
 ], function($,base) {
+
+
+
     var cohort_list_table = $('#cohort-table').DataTable({
         "dom": '<"dataTables_controls"ilpf>rt<"bottom"><"clear">',
         "order": [[ 2, "desc" ]],
         "columns": [
             { "orderable": false },
             { "orderable": false },
+            null,
             null,
             null,
             null,
@@ -487,5 +491,55 @@ require([
     $('form').on('submit',function(){
         $(this).find('button[type="submit"]').attr('disabled','disabled');
     });
+
+
+
+    window.compareVer = function(selbutton){
+        cohort_row = $(selbutton).closest('tr');
+        var id = $(cohort_row).find('.id-col').text().trim();
+        var case_col = $(cohort_row).find('.case-col').text().trim();
+        var study_col = $(cohort_row).find('.study-col').text().trim();
+        var series_col = $(cohort_row).find('.series-col').text().trim();
+        var totals = JSON.stringify(["PatientID","StudyInstanceUID","SeriesInstanceUID"]);
+
+       //# PatientId, StudyInstanceUID SeriesInstanceUID
+        let url = '/cohorts/'+id+'/stats/?update=true'
+        url = encodeURI(url);
+        var ntxt="";
+        $('.spinner').show();
+        $.ajax({
+            url: url,
+            dataType: 'json',
+            type: 'get',
+            contentType: 'application/x-www-form-urlencoded',
+            success: function (data) {
+               ntxt += "<table class='table'><tr><th></th><th>Original Version</th><th>Current Version</th></tr>";
+               ntxt += "<tr><td># Cases</td> <td>"+case_col+"</td> <td>"+data['PatientID'].toString()+"</td> </tr>";
+               ntxt += "<tr><td># Studies</td> <td>"+study_col+"</td> <td>"+data['StudyInstanceUID'].toString()+"</td> </tr>";
+               ntxt += "<tr><td># Series</td> <td>"+series_col+"</td> <td>"+data['SeriesInstanceUID'].toString()+"</td> </tr>";
+               ntxt += "</table> <br>"
+               ntxt += "<button onclick=\"location.href = '/explore/?cohort_id="+id+"';\">Load New Version</button>"
+
+               $("#dialog-1")[0].innerHTML = ntxt;
+               $("#dialog-1").dialog('option','title','Comparing Versions of Cohort '+id);
+               $("#dialog-1").dialog('open');
+               $('.spinner').hide();
+            },
+            error: function () {
+                    $('.spinner').hide();
+                    console.log("problem getting data");
+            }
+        });
+
+
+    }
+
+    $(document).ready(function () {
+        $( "#dialog-1" ).dialog();
+        $( "#dialog-1" ).dialog("option","width", 400);
+        $( "#dialog-1" ).dialog('close');
+
+    });
+
 
 });
