@@ -543,8 +543,14 @@ require([
             case 'EDITING':
                 // $('.data-tab-content-panel:not(.spinner-panel)').removeClass('col-md-12').addClass('col-md-9');
                 $('.filter-panel').show();
-                $('.selected-filters').hide();
-                $('.all-selected-filters').show();
+                if (cohort_id) {
+                    $('.selected-filters').show();
+                    $('.all-selected-filters').hide();
+                }
+                else {
+                    $('.selected-filters').hide();
+                    $('.all-selected-filters').show();
+                }
                 cohort_id && $('.page-header').hide();
                 $('input[name="cohort-name"]').show();
                 $('#default-cohort-menu').hide();
@@ -617,7 +623,8 @@ require([
             form.append('<input type="hidden" name="apply-name" value="true" />');
         }
 
-        $('.selected-filters .panel-body span.filter-token').each(function() {
+        var token_list_selector = cohort_id ? '.selected-filters .panel-body' : '#selected-filters';
+        $(token_list_selector + ' span.filter-token').each(function() {
             var $this = $(this);
             var value = {
                 'feature': { name: $this.data('feature-name'), id: $this.data('feature-id') },
@@ -1117,7 +1124,7 @@ require([
     {
         // Collect all selected filters and save to session storage
         var filters = [];
-        $('.selected-filters .panel-body span.filter-token').each(function() {
+        $('#selected-filters span.filter-token').each(function() {
             var $this = $(this);
             var value = {
                 'feature': { name: $this.data('feature-name'), id: $this.data('feature-id') },
@@ -1329,13 +1336,13 @@ require([
 
         if (load_node_id == null) {
             load_node_id = all_nodes[0].id;
-            ACTIVE_NODE_ID = load_node_id;
         }
+        ACTIVE_NODE_ID = load_node_id;
 
         if (load_program_id == null) {
             load_program_id = all_nodes[0].programs[0].id;
-            ACTIVE_PROGRAM_ID = load_program_id;
         }
+        ACTIVE_PROGRAM_ID = load_program_id;
 
         var program_data_selector ='#'+load_program_id+'-data';
 
