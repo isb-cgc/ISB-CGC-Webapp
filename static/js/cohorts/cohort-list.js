@@ -503,7 +503,7 @@ require([
         var totals = JSON.stringify(["PatientID","StudyInstanceUID","SeriesInstanceUID"]);
 
        //# PatientId, StudyInstanceUID SeriesInstanceUID
-        let url = '/explore/?counts_only=True&is_json=True&is_dicofdic=True&with_clinical=False&cohort_id='+id+'&totals='+totals;
+        let url = '/cohorts/'+id+'/stats/?update=true'
         url = encodeURI(url);
         var ntxt="";
         $('.spinner').show();
@@ -514,9 +514,9 @@ require([
             contentType: 'application/x-www-form-urlencoded',
             success: function (data) {
                ntxt += "<table class='table'><tr><th></th><th>Original Version</th><th>Current Version</th></tr>";
-               ntxt += "<tr><td># Cases</td> <td>"+case_col+"</td> <td>"+data.totals['PatientID'].toString()+"</td> </tr>";
-               ntxt += "<tr><td># Studies</td> <td>"+study_col+"</td> <td>"+data.totals['StudyInstanceUID'].toString()+"</td> </tr>";
-               ntxt += "<tr><td># Series</td> <td>"+series_col+"</td> <td>"+data.totals['SeriesInstanceUID'].toString()+"</td> </tr>";
+               ntxt += "<tr><td># Cases</td> <td>"+case_col+"</td> <td>"+data['PatientID'].toString()+"</td> </tr>";
+               ntxt += "<tr><td># Studies</td> <td>"+study_col+"</td> <td>"+data['StudyInstanceUID'].toString()+"</td> </tr>";
+               ntxt += "<tr><td># Series</td> <td>"+series_col+"</td> <td>"+data['SeriesInstanceUID'].toString()+"</td> </tr>";
                ntxt += "</table> <br>"
                ntxt += "<button onclick=\"location.href = '/explore/?cohort_id="+id+"';\">Load New Version</button>"
 
