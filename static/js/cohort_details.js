@@ -1292,11 +1292,8 @@ require([
         all_selected_panel.empty();
         let create_form_filters = $('#selected-filters');
         create_form_filters.children('p').each(function() {
-            console.log($(this));
             let program_id = $(this).prop('id').slice(0, -13);
             let dataset_name = $(this).find('h5').text();
-           // var dataset_feature_name = $(this).find('span').attr('data-feature-id');
-            //var dataset_value_id = $(this).find('span').attr('data-value-id');
             let link = "#" + program_id + "-data";
             let div = $('<div>');
             let current = (link === dataset_selector) ? " (Current Data Set)" : "";
@@ -1327,12 +1324,6 @@ require([
         if (reject_load) {
             return;
         }
-
-        // var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id');
-
-        // if (load_program_id == null) {
-            // load_program_id = active_program_id;
-        // }
 
         if (load_node_id == null) {
             load_node_id = all_nodes[0].id;
@@ -1458,10 +1449,10 @@ require([
     // we need to stop the tab from responding to clicks for Issue
     // #1950 fix, so we introduce the next function...
 
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        ACTIVE_PROGRAM_ID = $('ul.nav-tabs-data li.active a').data('program-id');
-        filter_panel_load(cohort_id, ACTIVE_PROGRAM_ID);
-    });
+    // $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    //     ACTIVE_PROGRAM_ID = $('ul.nav-tabs-data li.active a').data('program-id');
+    //     filter_panel_load(cohort_id, ACTIVE_PROGRAM_ID);
+    // });
 
     // Clicking on the tab will have no effect if another tab
     // is loading....
