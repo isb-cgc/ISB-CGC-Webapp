@@ -240,7 +240,24 @@ def help_page(request):
 def quota_page(request):
     return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
 
+def populate_tables(request):
 
+    table_data = {}
+    try:
+        req = request.GET if request.GET else request.POST
+        path_arr = [nstr for nstr in request.path.split('/') if nstr]
+        table_type = path_arr[len(path_arr)-1]
+        filters = json.loads(req.get('filters', '{}'))
+        i=1
+
+    except Exception as e:
+        logger.error("[ERROR] While attempting to populate the table:")
+        logger.exception(e)
+        messages.error(request,"Encountered an error when attempting to populate the page - please contact the administrator.")
+
+
+    i=1
+    return JsonResponse(table_data)
 
 # Data exploration and cohort creation page
 @login_required
