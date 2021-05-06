@@ -51,8 +51,9 @@
     </div>
 {% endblock %}
 
-
 {% block content %}
+{% url 'cohort_manifest' cohort_id as export_uri %}
+{% include "cohorts/export-manifest-modal.html" with export_uri=export_uri %}
 
 <script>
    window.selItems = new Object();
@@ -63,22 +64,8 @@
 </script>
 
 {% with is_cohort=True %}
-    {% include "cohorts/export-manifest-modal.html" %}
     {% include "idc/explore_data_core.html" %}
 {% endwith %}
-
-    <!-- Download In Progress Modal -->
-<div class="modal fade" id="manifest-in-progress" tabindex="-1" role="dialog" data-backdrop="static" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header"></div>
-            <div class="modal-body">
-                <p><i class="fa fa-cog fa-spin"></i> Preparing cohort manifest...</p>
-            </div>
-            <div class="modal-footer"></div>
-        </div>
-    </div>
-</div>
 
 {% endblock %}
 
@@ -88,6 +75,7 @@
         var is_cohort = true;
         var cohort_version = "{{ cohort_version|safe }}";
         var cohort_id = "{{ cohort_id|safe }}";
+        var cohort_name = "{{ cohort.name|safe }}";
         var user_is_social = {% if is_social %}true{% else %}false{% endif %};
         var collection_tooltips = {{ collection_tooltips|safe }};
     </script>
@@ -95,4 +83,5 @@
     {{ block.super }}
     <script type="text/javascript" src="{% static 'js/explore.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/cohorts/cohort-details.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}"></script>
 {% endblock %}

@@ -74,10 +74,17 @@ require([
             $(this).prop('title', 'Click to display additional cohort details.');
         } else {
             $(this).prop('title', 'Click to hide cohort details.');
-            var desc = tr.attr('data-description');
-            var collex = tr.attr('data-collex');
+            var desc = tr.data('description');
+            var collex = tr.data('collex');
+            var name = tr.data('name');
+            var filters = tr.data('filters');
             (row.child() && row.child().length) ? row.child.show() : row.child(
-                $(`<tr><td></td><td colspan="5"><p><b>Description: </b></p><p>`+desc+`</p></td><td colspan="2"><p><b>Collections: </b></p><p>`+collex+`</p></td></tr>`)
+                $(`<tr><td></td>`+
+                    `<td colspan="6"><p><b>Name </b><br/>`+name+`</p>`+
+                    `<p><b>Description </b><br/>`+desc+`</p>`+
+                    `<p><b>Collections </b><br/>`+collex+`</p></td>`+
+                    `<td colspan="2"><p><b>Filters</b><br />`+filters+`</p></td>`+
+                    `</tr>`)
             ).show();
             tr.addClass('shown');
         }

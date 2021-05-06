@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load custom_tags %}
+{% load cohort_filters %}
 {#{% load tz %}#}
 {% block header %}
     <link rel="stylesheet" href="{% static  'css/jquery-ui.min.css' %}">
     <link type="text/css" rel="stylesheet" href="{% static 'css/spinner.css' %}">
-
 {% endblock %}
 
 {% block title %}
@@ -20,15 +20,24 @@
     <h1 class="page-header pull-left">Cohorts</h1>
 </div>
 {% endblock %}
+
 {% block content %}
 
-    <div id = "dialog-1" title = "Dialog Title goes here..." style="display:inline-block">This my first jQuery UI Dialog!</div>
+{% url 'cohort_manifest_base' as export_uri %}
+{% include "cohorts/export-manifest-modal.html" with export_uri=export_uri %}
 
+<div id = "dialog-1" title = "Dialog Title goes here..." style="display:inline-block">This my first jQuery UI Dialog!</div>
 <div class="spinner" style="display: none;"><i class="fa fa-spinner fa-spin spin"></i></div>
 
 <div class="container-fluid">
     <div class="page-action-group">
-        <li role="menuitem">
+        <li  role="menuitem">
+            <button id="export-manifest-set" class="btn btn-special" data-toggle="modal" data-target="#export-manifest-modal" aria-label="export-manifests" role="button" aria-expanded="true" disabled title="Select one or more cohorts.">
+                <i class="fa fa-clipboard"></i>
+                Export Manifests
+            </button>
+        </li>
+        <li role="menuitem" class="pull-right">
             <button id="delete-cohorts" type="button" class="btn btn-info owner-only" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true" disabled title="Select one or more cohorts.">
                 <i class="fa fa-trash"></i>
                 Delete
@@ -64,25 +73,39 @@
                     <colgroup>
                         <col style="width: 3%">
                         <col style="width: 3%">
-                        <col style="width: 7%">
-                        <col style="width: 19%">
+                        <col style="width: 5%">
+                        <col style="width: 25%">
                         <col style="width: 3%">
                         <col style="width: 3%">
                         <col style="width: 3%">
-                        <col style="width: 29%">
+                        <col style="width: 20%">
                         <col style="width: 6%">
                     </colgroup>
                     <tbody>
                     {% for cohort in cohorts %}
+                    {% with cohort.only_active_versions as only_active_versions %}
                     {% if cohort.owner.is_superuser == False %}
-                        <tr data-description='{% if cohort.description %}{{ cohort.description }}{% else %}N/A{% endif %}' data-collex="{{ cohort.collections }}">
+                        <tr data-description='{% if cohort.description %}{{ cohort.description }}{% else %}N/A{% endif %}'
+                            data-collex="{{ cohort.collections }}"
+                            data-name="{{ cohort.name }}"
+                            data-filters="{{ cohort.get_filter_display_string }}"
+                        >
                             <td class = "details-control" title="Click to display cohort description."> <i class="fa fa-plus-circle show-button"> </i><i class="fa fa-minus-circle hide-button"> </i> </td>
                             <td class="checkbox-col"> <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} class="cohort" type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>
                             </td>
                             <td class="id-col">
                                 {{ cohort.id }}
                             </td>
-                            <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</a></td>
+                            <td class="name-col">
+                                {% if only_active_versions %}
+                                <a href="{% url 'cohort_details' cohort.id %}"
+                                   title="View Cohort Details in the Data Explorer">
+                                    {{ cohort.name }}
+                                </a>
+                                {% else %}
+                                    <span title="Cohorts with inactive data versions cannot be viewed in the Data Explorer.">{{ cohort.name }}</span>
+                                {% endif %}
+                            </td>
                             <td class="case-col">{{ cohort.case_count }}</td>
                             <td class="study-col">{{ cohort.study_count }}</td>
                             <td class="series-col">{{ cohort.series_count }}</td>
@@ -100,23 +123,22 @@
 {#                                    You#}
 {#                                {% endif %}#}
 {#                            </td>#}
-
-                                {% for cohort_version in cohort_versions %}
-                                  {% if cohort_version.id == cohort.id %}
-                                      <td class="version-col">
-                                          {{ cohort_version.version }}
-                                      </td>
-                                      {% if cohort_version.version == current_version %}
-                                          <td></td>
-                                      {% else %}
-                                          <td><button onclick="compareVer(this)">Compare </button></td>
-                                      {% endif %}
-                                  {% endif %}
-                                {% endfor %}
-
-
+                            <td class="version-col{% if not only_active_versions %} inactive-data-version{% endif %}">
+                                {% with cohort.get_data_versions as cohort_versions %}
+                                    {{ cohort_versions|get_displays:True }}
+                                    {% if not only_active_versions %} (Inactive){% endif %}
+                                {% endwith %}
+                            </td>
+                            <td>
+                            {% if only_active_versions %}
+                                &nbsp;
+                            {% else %}
+                                <button onclick="compareVer(this)">Compare </button>
+                            {% endif %}
+                            </td>
                         </tr>
                     {% endif %}
+                    {% endwith %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -267,4 +289,5 @@
     </script>
 	{{ block.super }}
 	<script src="{% static 'js/cohorts/cohort-list.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}"></script>
 {% endblock %}

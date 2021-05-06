@@ -42,15 +42,9 @@ logger = logging.getLogger('main_logger')
 
 def main():
     try:
-        for cohort in Cohort.objects.all():
-            versions = cohort.get_data_versions()
-            contains_inactive = False
+        for cohort in Cohort.objects.filter(active=True):
 
-            for ver in versions:
-                if ver.active == 0:
-                    contains_inactive = True
-
-            if not contains_inactive:
+            if cohort.only_active_versions():
                 cohort_stats = _get_cohort_stats(cohort.id)
             else:
                 # _get_cohort_stats is written for the new, Study-aggregated index and won't function correctly
@@ -58,7 +52,7 @@ def main():
                 filters = cohort.get_filters_as_dict_simple()[0]
 
                 sources = DataSetType.objects.get(data_type=DataSetType.IMAGE_DATA).datasource_set.filter(
-                    id__in=versions.get_data_sources(source_type=DataSource.SOLR))
+                    id__in=cohort.get_data_sources())
 
                 child_record_searches = cohort.get_attrs().get_attr_set_types().get_child_record_searches()
                 result = get_collex_metadata(filters, None, sources=sources, facets=["collection_id"], counts_only=True,
@@ -66,20 +60,21 @@ def main():
                                              search_child_records_by=child_record_searches)
                 cohort_stats = {}
                 if 'totals' not in result:
-                    raise Exception(
+                    logger.error(
                         "No totals found for filters {}; remember that String searches are case sensitive!".format(
                             filters
                         ))
-                for total in result['totals']:
-                    cohort_stats[total] = result['totals'][total]
-                for src in result['facets']:
-                    if src.split(':')[0] in list(sources.values_list('name',flat=True)):
-                        cohort_stats['collections'] = [x for x, y in result['facets'][src]['facets']['collection_id'].items() if y > 0]
+                else:
+                    for total in result['totals']:
+                        cohort_stats[total] = result['totals'][total]
+                    for src in result['facets']:
+                        if src.split(':')[0] in list(sources.values_list('name',flat=True)):
+                            cohort_stats['collections'] = [x for x, y in result['facets'][src]['facets']['collection_id'].items() if y > 0]
 
-            cohort.case_count = cohort_stats['PatientID']
-            cohort.series_count = cohort_stats['SeriesInstanceUID']
-            cohort.study_count = cohort_stats['StudyInstanceUID']
-            cohort.collections = "; ".join(cohort_stats['collections'] if 'collections' in cohort_stats else 'collection_id')
+            cohort.case_count = cohort_stats.get('PatientID',0)
+            cohort.series_count = cohort_stats.get('SeriesInstanceUID',0)
+            cohort.study_count = cohort_stats.get('StudyInstanceUID',0)
+            cohort.collections = "; ".join(cohort_stats.get('collections',""))
             cohort.save()
 
     except Exception as e:

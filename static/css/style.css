@@ -4190,3 +4190,22 @@ ul.errorlist {
 .crdc-nav a {
   color: #fff;
 }
+
+#export-manifest-modal h4 {
+  font-size: 20px;
+}
+
+#manifest-in-progress .modal-dialog {
+  width: 650px;
+}
+
+#manifest-in-progress .modal-content {
+  border: 8px solid #7575cb;
+  border-radius: 3px;
+  margin-top: 80px;
+}
+
+.inactive-data-version {
+  background-color: #a19ca2;
+  color: #ffffff;
+}

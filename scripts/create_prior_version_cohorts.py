@@ -89,7 +89,7 @@ cohort_defs = [
         'filters': [
             {
                 'attribute': 'BodyPartExamined',
-                'values': ['Bladder','Brain'],
+                'values': ['BLADDER','BRAIN'],
             }
         ]
     },
