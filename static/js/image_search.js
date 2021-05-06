@@ -552,7 +552,6 @@ require([
 
 
         }
-        
 
         var mkSlider = function (divName, min, max, step, isInt, wNone, parStr, attr_id, attr_name, lower, upper, isActive,checked) {
             $('#'+divName).addClass('hasSlider');
