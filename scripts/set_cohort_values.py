@@ -46,11 +46,7 @@ def main():
             versions = cohort.get_data_versions()
             contains_inactive = False
 
-            for ver in versions:
-                if ver.active == 0:
-                    contains_inactive = True
-
-            if not contains_inactive:
+            if cohort.only_active_versions():
                 cohort_stats = _get_cohort_stats(cohort.id)
             else:
                 # _get_cohort_stats is written for the new, Study-aggregated index and won't function correctly
@@ -58,7 +54,7 @@ def main():
                 filters = cohort.get_filters_as_dict_simple()[0]
 
                 sources = DataSetType.objects.get(data_type=DataSetType.IMAGE_DATA).datasource_set.filter(
-                    id__in=versions.get_data_sources(source_type=DataSource.SOLR))
+                    id__in=cohort.get_data_sources())
 
                 child_record_searches = cohort.get_attrs().get_attr_set_types().get_child_record_searches()
                 result = get_collex_metadata(filters, None, sources=sources, facets=["collection_id"], counts_only=True,
