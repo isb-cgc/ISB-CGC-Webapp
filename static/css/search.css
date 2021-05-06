@@ -57,21 +57,21 @@
 }
 
 .slide_tooltipL {
-   position: 'absolute';
-    left: -5;
+   position:  absolute;
+    left: -5px;
 }
 
 .slide_tooltipR {
-   position: 'absolute';
-    right: -5;
+   position: absolute;
+    right: -5px;
 }
 
 .slide_tooltipT {
-    top:-25;
+    top: -25px;
 }
 
 .slide_tooltipB {
-    top:20;
+    top: 20px;
 }
 
 

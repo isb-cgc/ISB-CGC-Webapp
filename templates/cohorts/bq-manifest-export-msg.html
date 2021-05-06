@@ -1,12 +1,15 @@
 {% if long_running %}
-Your manifest job is still exporting. Please wait five minutes to allow the export to complete. Once finished, table
+Your manifest job is still exporting. Please wait five minutes to allow the export to complete. Once finished, the folliwing table or tables
 {% else %}
-Your manifest job has finished exporting. Table
+Your manifest job has finished exporting. The following table or tables
 {% endif %}
-<b>{{ full_table_id }}</b>
-<a role=button" class="copy-this" content="{{ full_table_id }}"  title="Copy table ID to clipboard">
+will be available for seven (7) days, accessible via your {{ email }} Google Account: <br />
+{% for table in tables %}
+<b>{{ table.full_id }}</b>
+<a role=button" class="copy-this" content="{{ table.full_id }}"  title="Copy table ID to clipboard">
     ( <i class="fa fa-copy" aria-hidden="true"></i> )
-</a> will be available for seven (7) days, accessible via your {{ email }} Google Account at <br />
-<a class="external-link" data-toggle="modal" data-target="#external-web-warning" url="{{ table_uri }}">
-    {{ table_uri }} <i class="fa fa-external-link external-link-icon" aria-hidden="true"></i>
-</a>
+</a>:
+<a class="external-link" data-toggle="modal" data-target="#external-web-warning" url="{{ table.uri }}">
+    {{ table.uri }} <i class="fa fa-external-link external-link-icon" aria-hidden="true"></i>
+</a><br />
+{% endfor %}
