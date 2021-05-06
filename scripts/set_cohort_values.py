@@ -53,7 +53,8 @@ def main():
                 # for a SOPInstanceUID index.
                 filters = cohort.get_filters_as_dict_simple()[0]
 
-                sources = cohort.get_data_sources()
+                sources = DataSetType.objects.get(data_type=DataSetType.IMAGE_DATA).datasource_set.filter(
+                    id__in=cohort.get_data_sources())
 
                 child_record_searches = cohort.get_attrs().get_attr_set_types().get_child_record_searches()
                 result = get_collex_metadata(filters, None, sources=sources, facets=["collection_id"], counts_only=True,
