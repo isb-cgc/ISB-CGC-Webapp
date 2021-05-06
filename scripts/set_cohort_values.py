@@ -43,8 +43,6 @@ logger = logging.getLogger('main_logger')
 def main():
     try:
         for cohort in Cohort.objects.filter(active=True):
-            versions = cohort.get_data_versions()
-            contains_inactive = False
 
             if cohort.only_active_versions():
                 cohort_stats = _get_cohort_stats(cohort.id)
@@ -73,11 +71,11 @@ def main():
                         if src.split(':')[0] in list(sources.values_list('name',flat=True)):
                             cohort_stats['collections'] = [x for x, y in result['facets'][src]['facets']['collection_id'].items() if y > 0]
 
-                cohort.case_count = cohort_stats.get('PatientID',0)
-                cohort.series_count = cohort_stats.get('SeriesInstanceUID',0)
-                cohort.study_count = cohort_stats.get('StudyInstanceUID',0)
-                cohort.collections = "; ".join(cohort_stats.get('collections',""))
-                cohort.save()
+            cohort.case_count = cohort_stats.get('PatientID',0)
+            cohort.series_count = cohort_stats.get('SeriesInstanceUID',0)
+            cohort.study_count = cohort_stats.get('StudyInstanceUID',0)
+            cohort.collections = "; ".join(cohort_stats.get('collections',""))
+            cohort.save()
 
     except Exception as e:
         logging.exception(e)
