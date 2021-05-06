@@ -9,6 +9,23 @@
 // ***********************************************
 //
 //
+
+Cypress.on('uncaught:exception', (err, runnable) => {
+    // returning false here prevents Cypress from
+    // failing the test
+    return false
+})
+
+ Cypress.on('window:before:load', (win) => {
+      Object.defineProperty(win, 'self', {
+        get: () => {
+          return window.top
+        }
+      })
+    }) 
+
+
+
 // -- This is a parent command --
 // Cypress.Commands.add("login", (email, password) => { ... })
 //
