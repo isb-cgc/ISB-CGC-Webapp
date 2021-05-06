@@ -73,19 +73,23 @@
                     <colgroup>
                         <col style="width: 3%">
                         <col style="width: 3%">
-                        <col style="width: 7%">
-                        <col style="width: 19%">
+                        <col style="width: 5%">
+                        <col style="width: 25%">
                         <col style="width: 3%">
                         <col style="width: 3%">
                         <col style="width: 3%">
-                        <col style="width: 29%">
+                        <col style="width: 20%">
                         <col style="width: 6%">
                     </colgroup>
                     <tbody>
                     {% for cohort in cohorts %}
                     {% with cohort.only_active_versions as only_active_versions %}
                     {% if cohort.owner.is_superuser == False %}
-                        <tr data-description='{% if cohort.description %}{{ cohort.description }}{% else %}N/A{% endif %}' data-collex="{{ cohort.collections }}">
+                        <tr data-description='{% if cohort.description %}{{ cohort.description }}{% else %}N/A{% endif %}'
+                            data-collex="{{ cohort.collections }}"
+                            data-name="{{ cohort.name }}"
+                            data-filters="{{ cohort.get_filter_display_string }}"
+                        >
                             <td class = "details-control" title="Click to display cohort description."> <i class="fa fa-plus-circle show-button"> </i><i class="fa fa-minus-circle hide-button"> </i> </td>
                             <td class="checkbox-col"> <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} class="cohort" type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>
                             </td>
@@ -125,11 +129,13 @@
                                     {% if not only_active_versions %} (Inactive){% endif %}
                                 {% endwith %}
                             </td>
-                            {% if cohort_version.version == current_version %}
-                                <td></td>
+                            <td>
+                            {% if only_active_versions %}
+                                &nbsp;
                             {% else %}
-                                <td><button onclick="compareVer(this)">Compare </button></td>
+                                <button onclick="compareVer(this)">Compare </button>
                             {% endif %}
+                            </td>
                         </tr>
                     {% endif %}
                     {% endwith %}
