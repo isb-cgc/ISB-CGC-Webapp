@@ -57,21 +57,21 @@
 }
 
 .slide_tooltipL {
-   position: 'absolute';
-    left: -5;
+   position:  absolute;
+    left: -5px;
 }
 
 .slide_tooltipR {
-   position: 'absolute';
-    right: -5;
+   position: absolute;
+    right: -5px;
 }
 
 .slide_tooltipT {
-    top:-25;
+    top: -25px;
 }
 
 .slide_tooltipB {
-    top:20;
+    top: 20px;
 }
 
 
@@ -221,24 +221,6 @@ bottom: 95%; /* At the top of the tooltip */
 
 
 
-.spinner {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    top: 50%;
-    left: 50%;
-    font-size: 100px;
-    transform: translate(-50%,-50%);
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 10; }
-
-.spinner .spin {
-    display: inline-block;
-    position: absolute;
-    #position: absolute;
-    top: 50%;
-    left: 50%; }
 
 .id-names{
     text-overflow: ellipsis;
@@ -333,13 +315,26 @@ tr {
     display: table;
     width: 100%; }
 
+#projects_table td.ckbx, #projects_table_head th.ckbx,
+#cases_table_head th.ckbx, #cases_table td.ckbx,
+#series_table_head th.ckbx, #series_table td.ckbx,
+#studies_table_head th.ckbx, #studies_table td.ckbx
+{
+    width: 5%;
+    word-wrap: break-word;
+}
+
+
+
 #projects_table td, #projects_table_head th {
-    width: 33.33%;
+    width: 31.33%;
     word-wrap: break-word; }
 
 
+
+
 #cases_table td, #cases_table_head th {
-    width: 25%;
+    width: 23.75%;
     word-wrap: break-word; }
 
 
@@ -348,15 +343,15 @@ tr {
     word-break: break-word; }
 #studies_table_head th.project-name, th.case-id, th.study-id,
 #studies_table td.project-name, td.case-id, td.study-id {
-    width: 17%;
+    width: 16%;
 }
 #studies_table_head th.study-description,
 #studies_table td.study-description {
-    width:36%;
+    width:33%;
 }
 #studies_table_head th.open-viewer,
 #studies_table td.open-viewer {
-    width:13%;
+    width:12%;
 }
 
 

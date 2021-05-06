@@ -30,13 +30,13 @@
                 </div>
             </div>
 
-            <form id="export-manifest-form" method="get" action="{% url 'cohort_manifest' cohort_id %}">
+            <form id="export-manifest-form" method="GET" data-uri-base="{{ export_uri }}" action="{{ export_uri }}">
                 <div class="modal-body">
                     <div class="form-group">
                         <!-- Name -->
                         <div>
                             <label for="export-manifest-name">Name</label>
-                            <input class="form-control" type="text" id="export-manifest-name" name="file_name" value="{{ cohort.name }}_{{ cohort.id }}_{% now "Ymd_Gis" %}" required />
+                            <input class="form-control" type="text" id="export-manifest-name" name="file_name" data-name-base="_{% now "Ymd_Gis" %}" value="" required />
                         </div>
                         <br>
 
@@ -168,6 +168,19 @@
                 <input type="hidden" name="header_fields">
                 <input type="hidden" name="include_header">
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Download In Progress Modal -->
+<div class="modal fade" id="manifest-in-progress" tabindex="-1" role="dialog" data-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"></div>
+            <div class="modal-body">
+                <p><i class="fa fa-cog fa-spin"></i> Preparing cohort manifest...</p>
+            </div>
+            <div class="modal-footer"></div>
         </div>
     </div>
 </div>

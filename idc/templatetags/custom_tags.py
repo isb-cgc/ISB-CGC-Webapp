@@ -43,7 +43,7 @@ ALPHANUM_SORT = [
 
 ]
 
-DISPLAY_SORT = ['SOPClassUID']
+DISPLAY_SORT = ['SOPClassUID', 'sample_type']
 
 simple_number_sort = [
     '0 to 200', '200.01 to 400', '400.01 to 600', '600.01 to 800', '800.01 to 1000', '1000.01 to 1200', '1200.01 to 1400', '1400.01+',
@@ -56,12 +56,9 @@ simple_number_sort = [
 
 # If an attribute has a specific order, list it here; these should be the *values* not the display strings
 VALUE_SPECIFIC_ORDERS = {
-    'derived':['dicom_derived_all:segmentation','dicom_derived_all:qualitative','dicom_derived_all:quantitative'],
-    #'dicom_derived_all:quantitative':
-
+    'derived':['segmentation','qualitative','quantitative'],
     'bmi': ['underweight', 'normal weight', 'overweight', 'obese', 'None', ],
     'hpv_status': ['Positive', 'Negative', 'None', ],
-    'age_at_diagnosis': simple_number_sort,
     'year_of_diagnosis': ['1976 to 1980', '1981 to 1985', '1986 to 1990', '1991 to 1995', '1996 to 2000', '2001 to 2005', '2006 to 2010', '2011 to 2015', 'None',],
     'overall_survival': simple_number_sort,
     'event_free_survival': simple_number_sort,
@@ -147,8 +144,7 @@ def get_idc_version(reasons):
 # these attributes are not returned in order right now
 @register.filter
 def order_seg(items,attr):
-    #return items
-    if (attr =='dicom_derived_all:segmentation'):
+    if (len(attr.split(':'))>1) and (attr.split(':')[1] =='segmentation'):
         return sorted(items, key=lambda k: str(k['value']) if (k['display_value'] is None) else str(k['display_value']) )
     else:
         return items
@@ -156,7 +152,8 @@ def order_seg(items,attr):
 @register.filter
 def order_quant(items, attr):
     item_order=['Diameter','Glycolysis_Within_First_Quarter_of_Intensity_Range','Glycolysis_Within_Second_Quarter_of_Intensity_Range','Glycolysis_Within_Third_Quarter_of_Intensity_Range','Glycolysis_Within_Fourth_Quarter_of_Intensity_Range', 'Percent_Within_First_Quarter_of_Intensity_Range', 'Percent_Within_Second_Quarter_of_Intensity_Range','Percent_Within_Third_Quarter_of_Intensity_Range', 'Percent_Within_Fourth_Quarter_of_Intensity_Range', 'SUVbw', 'Standardized_Added_Metabolic_Activity', 'Standardized_Added_Metabolic_Activity_Background','Surface_area_of_mesh', 'Total_Lesion_Glycolysis', 'Volume']
-    if (attr == 'dicom_derived_all:segmentation') or (attr == 'dicom_derived_all:qualitative'):
+
+    if (len(attr.split(':'))>1) and ((attr.split(':')[1] == 'segmentation') or (attr.split(':')[1] == 'qualitative')):
         return sorted(items, key=lambda k: k['name'])
     else:
         sort_order = []
@@ -171,6 +168,8 @@ def check_for_order(items, attr):
     if attr in VALUE_SPECIFIC_ORDERS:
         # If they have a specific order defined in the dict
         item_order = VALUE_SPECIFIC_ORDERS[attr]
+
+
         ordered_items = []
         for ordinal in item_order:
             for item in items:
@@ -178,7 +177,7 @@ def check_for_order(items, attr):
                     curValue = item['value']
                 except:
                     curValue = item[0]
-                if curValue == ordinal:
+                if (curValue == ordinal) or (len(curValue.split(':'))>1 and curValue.split(':')[1] ==ordinal):
                     ordered_items.append(item)
         return ordered_items
     elif attr in DISPLAY_SORT:

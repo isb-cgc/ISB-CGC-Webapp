@@ -1,7 +1,6 @@
-export const login=() =>{
+export const localLogin=() =>{
 
-cy.server();
-     //cy.visit('http://localhost:8085/') ;
+     cy.server();
      cy.visit('/');
      cy.get('button').filter('.btn-warn').click();
      cy.viewport(1300,800);
@@ -12,3 +11,19 @@ cy.server();
      cy.wait(1000);
 
 }
+
+/Users/george/idc/IDC-WebApp/cypress/util export const visitPage=(url,login) =>{
+
+   cy.server()
+   cy.visit(url).then(
+       if (login || Cypress.env('loginNeeded')){
+           if (Cypress.env('loginType')==='local'){
+              localLogin();
+          }
+      }
+
+   );
+
+}
+
+

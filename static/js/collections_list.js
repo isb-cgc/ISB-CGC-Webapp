@@ -19,7 +19,8 @@ require(['jquery', 'datatables.net','jqueryui', 'bootstrap', 'base'],
     function($) {
         var collex_data_table = $('#collections-table').DataTable({
             "dom": '<"dataTables_controls"i<>lpf>rt<"bottom"><"clear">',
-            "pageLength": 100
+            "pageLength": 100,
+            'order': [[ 2, 'desc' ], [ 1, 'asc' ]]
         });
 
         $('#collections-table tbody').on('click', 'td.details-control', function () {

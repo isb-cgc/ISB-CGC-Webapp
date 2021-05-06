@@ -77,9 +77,14 @@
 
 {% block content %}
 
+<script>
+   window.selItems = new Object();
+   window.selItems.selProjects = new Array();
+   window.selItems.selStudies = new Object();
+   window.collection = {{ collections|tojson|safe }};
+</script>
 
-
-{% include "idc/explore_data_core.html" %}
+{% include "idc/explore_data_core_demo.html" %}
 
 {% endblock %}
 
