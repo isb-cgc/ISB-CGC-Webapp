@@ -32,7 +32,7 @@ from django.contrib import messages
 
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
-from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion
+from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, DataSetType
 from idc_collections.collex_metadata_utils import build_explorer_context
 from .models import AppInfo
 from allauth.socialaccount.models import SocialAccount
@@ -241,13 +241,23 @@ def quota_page(request):
     return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
 
 def populate_tables(request):
-
     table_data = {}
     try:
         req = request.GET if request.GET else request.POST
         path_arr = [nstr for nstr in request.path.split('/') if nstr]
         table_type = path_arr[len(path_arr)-1]
         filters = json.loads(req.get('filters', '{}'))
+        table_data = get_table_data(filters, table_type)
+        #customFacets = {'uStudy':{'type': 'terms', 'field': 'PatientID', 'limit': -1, 'missing': True, 'facet': {'unique_count': 'unique(StudyInstanceUID)'}}}
+        '''sources = sources or DataSetType.objects.get(data_type=DataSetType.IMAGE_DATA).datasource_set.filter(
+            id__in=cohort.get_data_versions().get_data_sources(
+                source_type=DataSource.SOLR, aggregate_level="StudyInstanceUID"
+            ))'''
+
+        '''result = get_collex_metadata(filters, None, sources=sources, facets=["collection_id"], counts_only=True,
+                                     totals=["PatientID", "StudyInstanceUID", "SeriesInstanceUID"],
+                                     filtered_needed=False)'''
+
         i=1
 
     except Exception as e:
