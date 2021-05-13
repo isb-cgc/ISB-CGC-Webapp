@@ -91,30 +91,30 @@
             </div>
         </div>
 
-        <div class="row cgc-user-data-type-tabs">
-            <div class="col-sm-12 col-md-12 col-lg-12">
-                <div class="panel panel-default">
-                    <ul class="nav nav-tabs nav-tabs-data" role="tablist">
-                        {% for program in programs %}
-                            <li role="presentation" class="{% if forloop.first %}active{% endif %} program-tab"><a
-                                    href="#{{ program.id }}-data" class="program-tab-btn" role="tab" data-toggle="tab"
-                                    title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a>
-                            </li>
-                        {% endfor %}
-                        {% if user.is_authenticated %}
-                            <li role="presentation" class="program-tab"><a href="#0-data" role="tab" data-toggle="tab"
-                                                                           title="User Data" data-program-id="0">User
-                                Data</a></li>
-                        {% else %}
-                            <li role="presentation" class="program-tab disabled"><a href="#0-data" role="tab"
-                                                                                    data-toggle="tab" title="User Data"
-                                                                                    data-program-id="0" disabled>User
-                                Data</a></li>
-                        {% endif %}
-                    </ul>
-                </div>
-            </div>
-        </div>
+{#        <div class="row cgc-user-data-type-tabs">#}
+{#            <div class="col-sm-12 col-md-12 col-lg-12">#}
+{#                <div class="panel panel-default">#}
+{#                    <ul class="nav nav-tabs nav-tabs-data" role="tablist">#}
+{#                        {% for program in programs %}#}
+{#                            <li role="presentation" class="{% if forloop.first %}active{% endif %} program-tab"><a#}
+{#                                    href="#{{ program.id }}-data" class="program-tab-btn" role="tab" data-toggle="tab"#}
+{#                                    title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a>#}
+{#                            </li>#}
+{#                        {% endfor %}#}
+{#                        {% if user.is_authenticated %}#}
+{#                            <li role="presentation" class="program-tab"><a href="#0-data" role="tab" data-toggle="tab"#}
+{#                                                                           title="User Data" data-program-id="0">User#}
+{#                                Data</a></li>#}
+{#                        {% else %}#}
+{#                            <li role="presentation" class="program-tab disabled"><a href="#0-data" role="tab"#}
+{#                                                                                    data-toggle="tab" title="User Data"#}
+{#                                                                                    data-program-id="0" disabled>User#}
+{#                                Data</a></li>#}
+{#                        {% endif %}#}
+{#                    </ul>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
 
         <div class="row">
             <div class="tab-content data-tab-content">
@@ -201,6 +201,8 @@
     <script type="text/javascript">
         var base_url = '{{ base_url|safe }}';
         var cohort_id = undefined;
+        var all_nodes = {{ all_nodes|tojson|safe }};
+        var all_programs = {{ all_programs|tojson|safe }};
     </script>
 {% endblock %}
 
