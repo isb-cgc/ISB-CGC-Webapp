@@ -3,12 +3,46 @@
     <div class="container">
         <div class="row">
             <div id="citations" class="col-lg-12">
+                <h2>ISB-CGC Publications</h2>
+                <ol>
+                    <li>
+                        Kawther Abdilleh, Boris Aguilar, J. Ross Thomson et al.
+                        <a target="_blank" rel="noreferrer" href="https://storage.googleapis.com/isb-cgc-publications/Poster-166-ACM2020-Google-ISB-CGC.pdf">Multi-omics data integration in the Cloud: Analysis of Statistically Significant Associations Between Clinical and Molecular Features in Breast Cancer</a>.
+                        2021. doi: 10.1145/3388440.3414917.
+                    </li>
+                    <li>
+                        Boris Aguilar, Kawther Abdilleh, George Acquaah-Mensah.
+                        <a target="_blank" rel="noreferrer" href="https://storage.googleapis.com/isb-cgc-publications/CSHLVirtualMeeting2021-A%20tale%20of%20two%20cohorts%E2%80%95Transcriptomic%20and%20epigenomic%20analysis%20in%20breast%20cancer%20presentations.pdf">A tale of two cohorts: Transcriptomics and epigenomic analysis in breast cancer</a>.
+                        2021.
+                    </li>
+                    <li>
+                        Kawther Abdilleh, Boris Aguilar, Ronald C. Taylor, et al.
+                        <a target="_blank" rel="noreferrer" href="https://storage.googleapis.com/isb-cgc-publications/Poster_ISMB2020_Acquaah-Mensah.pdf">Multi-omics data analysis in the cloud: inference of differential breast cancer-related network hubs between TCGA patient cohorts</a>.
+                        2021. doi: 10.7490/f1000research.1118296.1.
+                    </li>
+                    <li>
+                        Dondra Bailey, Kawther Abdilleh, Boris Aguilar, et al.
+                        <a target="_blank" rel="noreferrer" href="https://storage.googleapis.com/isb-cgc-publications/ISB-CGC-BalieyGriggsLab-ACM-BCB-2020.pdf">Multi-omics characterization of Microtubule-actin cross linking factor 1 (MACF1) using the ISB-Cancer Genomics Cloud</a>.
+                        2020. doi: 10.1145/3388440.3414918.
+                    </li>
+                    <li>
+                        Kawther Abdilleh, Boris Aguilar, Ronald C. Taylor, et al.
+                        <a target="_blank" rel="noreferrer" href="https://storage.googleapis.com/isb-cgc-publications/ISB-CGC-BiologicalDataScience2020.pdf">Large-scale Cloud-based Inference of Differential Breast Cancer-related Network Gene Between Patient Cohorts</a>.
+                        2020.
+                    </li>
+                    <li>
+                        Sheila M. Reynolds, Michael Miller, Phyliss Lee, et al.
+                        <a target="_blank" rel="noreferrer" href="https://storage.googleapis.com/isb-cgc-publications/The%20ISB%20Cancer%20Genomics%20Cloud_%20A%20Flexible%20Cloud-Based%20Platform%20for%20Cancer%20Genomics%20Research.pdf">The ISB cancer genomics cloud: A flexible cloud-based platform for cancer genomics researchopens a new tab. Cancer Research</a>. 2017.
+                        doi: 10.1158/0008-5472.CAN-17-0617.
+                    </li>
+                </ol>
+
                 <h2>Citations</h2>
                 <ol type="1">
                     {% for paper in papers %}
                         <li>
                             {{ paper.authors }}
-                            <a target="_blank" rel="noreferrer" href="https://www.mendeley.com/catalogue/{{ paper.id }}/">
+                            <a target="_blank" rel="noreferrer" href="{{ paper.url }}/">
                                 {{ paper.title |safe }}</a>.
                             {% if paper.source %}<i>{{ paper.source |safe }}. </i>{% endif %}
                             {% if paper.year %}{{ paper.year }}. {% endif %}

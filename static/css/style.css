@@ -2547,6 +2547,18 @@ section .min-max {
     #cohort-details #selected-filters .label:hover, #cohort-details #selected-filters .tokenfield .token:hover, .tokenfield #cohort-details #selected-filters .token:hover, #cohort-filelist #selected-filters .label:hover, #cohort-filelist #selected-filters .tokenfield .token:hover, .tokenfield #cohort-filelist #selected-filters .token:hover {
       background-color: #c2dbf5; }
 
+#cohort-details .all-selected-filters, #cohort-filelist .all-selected-filters {
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden; }
+  #cohort-details .all-selected-filters .label, #cohort-details .all-selected-filters .tokenfield .token, .tokenfield #cohort-details .all-selected-filters .token, #cohort-filelist .all-selected-filters .label, #cohort-filelist .all-selected-filters .tokenfield .token, .tokenfield #cohort-filelist .all-selected-filters .token {
+    background-color: #d5e9fd; }
+    #cohort-details .all-selected-filters .label:hover, #cohort-details .all-selected-filters .tokenfield .token:hover, .tokenfield #cohort-details .all-selected-filters .token:hover, #cohort-filelist .all-selected-filters .label:hover, #cohort-filelist .all-selected-filters .tokenfield .token:hover, .tokenfield #cohort-filelist .all-selected-filters .token:hover {
+      background-color: #c2dbf5; }
+  #cohort-details .all-selected-filters a, #cohort-filelist .all-selected-filters a {
+    cursor: pointer;
+    text-decoration: none; }
+
 #cohort-details .multi-categorical, #cohort-filelist .multi-categorical {
   overflow-x: auto;
   min-height: 100px; }
