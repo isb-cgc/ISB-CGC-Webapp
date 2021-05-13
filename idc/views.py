@@ -33,7 +33,7 @@ from django.contrib import messages
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
 from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, DataSetType
-from idc_collections.collex_metadata_utils import build_explorer_context
+from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata
 from .models import AppInfo
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
@@ -241,25 +241,105 @@ def quota_page(request):
     return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
 
 def populate_tables(request):
-    table_data = {}
+    tableRes = []
     try:
         req = request.GET if request.GET else request.POST
         path_arr = [nstr for nstr in request.path.split('/') if nstr]
         table_type = path_arr[len(path_arr)-1]
+        fields = None
+        collapse_on = None
         filters = json.loads(req.get('filters', '{}'))
-        table_data = get_table_data(filters, table_type)
-        #customFacets = {'uStudy':{'type': 'terms', 'field': 'PatientID', 'limit': -1, 'missing': True, 'facet': {'unique_count': 'unique(StudyInstanceUID)'}}}
-        '''sources = sources or DataSetType.objects.get(data_type=DataSetType.IMAGE_DATA).datasource_set.filter(
-            id__in=cohort.get_data_versions().get_data_sources(
-                source_type=DataSource.SOLR, aggregate_level="StudyInstanceUID"
-            ))'''
+        offset = int(req.get('offset', '0'))
+        limit = int(req.get('limit', '500'))
+        sort = req.get('sort', 'PatientID')
+        sortdir = req.get('sortdir','asc')
+        #table_data = get_table_data(filters, table_type)
+        sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(active=True,source_type=DataSource.SOLR,aggregate_level="StudyInstanceUID")
 
-        '''result = get_collex_metadata(filters, None, sources=sources, facets=["collection_id"], counts_only=True,
-                                     totals=["PatientID", "StudyInstanceUID", "SeriesInstanceUID"],
-                                     filtered_needed=False)'''
+        sortByIndex = True
+        idsReq=[]
+        custom_facets=''
+        custom_facets_order=''
+        if table_type == 'cases':
+            custom_facets = {"per_id": {"type": "terms", "field": "PatientID", "limit": 500,
+                                "facet": {"unique_study": "unique(StudyInstanceUID)", "unique_series": "unique(SeriesInstanceUID)"}}
+                            }
+            tableIndex = 'PatientID'
+            fields = ['collection_id','PatientID']
+            facetfields=['unique_study','unique_series']
+
+            if sort == 'collection_id':
+                sortByIndex = True
+                sort_field = 'collection_id '+sortdir+', PatientID asc'
+
+            elif sort == 'PatientID':
+
+                sort_field = 'PatientID ' + sortdir
+
+            elif sort == 'StudyInstanceUID':
+                sortByIndex=False
+                custom_facets_order = {"per_id": {"type": "terms", "field": "PatientID", "sort":"unique_study", "offset":offset, "limit": limit,"facet": {"unique_study": "unique(StudyInstanceUID)", "unique_series": "unique(SeriesInstanceUID)"}}}
+                patientIdsReq = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, offset=offset,
+                                                    records_only=False,
+                                                    collapse_on=tableIndex, counts_only=True, filtered_needed=False, custom_facets=custom_facets, raw_format=True)
+
+        order = {}
+        curInd = 0
+
+        idsFilt=[]
+
+        if sortByIndex:
+            idsReq = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, offset=offset, records_only=True,
+                                collapse_on=tableIndex, counts_only=False,filtered_needed=False,sort=sort_field)
+            for rec in idsReq['docs']:
+                id = rec[tableIndex]
+                idsFilt.append(id)
+                order[id] = curInd
+                newRow={}
+                for field in fields:
+                    newRow[field]=rec[field]
+                tableRes.append(newRow)
+                curInd = curInd + 1
+            filters[tableIndex]=idsFilt
+            cntRecs = get_collex_metadata(filters, fields, record_limit=limit, sources=sources,
+                                            collapse_on=tableIndex, counts_only=True,records_only=False,
+                                            filtered_needed=False, custom_facets=custom_facets,raw_format=True)
+
+            for rec in cntRecs['facets']['per_id']['buckets']:
+                id = rec['val']
+                tableRow=tableRes[order[id]]
+                for facet in facetfields:
+                    tableRow[facet]=rec[facet]
+
+
+        else:
+            idsReq = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, offset=offset,
+                                        records_only=False,collapse_on=tableIndex, counts_only=True, filtered_needed=False,
+                                         custom_facets=custom_facets_order, raw_format=True)
+            for rec in idsReq['facets']['per_id']['buckets']:
+                id= rec['val']
+                idsFilt.append(id)
+                order[id] = curInd
+                newRow={tableIndex: id}
+                for facet in facetfields:
+                    newRow[facet]=rec[facet]
+                tableRes.append(newRow)
+                curInd = curInd + 1
+            filters[tableIndex] = idsFilt
+            fieldRecs = get_collex_metadata(filters, fields, record_limit=limit, sources=sources,
+                                         records_only=True,collapse_on=tableIndex, counts_only=False, filtered_needed=False)
+            for rec in fieldRecs['docs']:
+                id = rec[tableIndex]
+                tableRow = tableRes[order[id]]
+                for field in fields:
+                    if not field == tableIndex:
+                        tableRow[field] = rec[field]
+
+        '''result = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, facets=["collection_id"],
+        #                                 collapse_on=collapse_on, counts_only=cntOnly,records_only=recOnly,
+        #                                 filtered_needed=False, custom_facets=custom_facets,raw_format=cntOnly)'''
 
         i=1
-
     except Exception as e:
         logger.error("[ERROR] While attempting to populate the table:")
         logger.exception(e)
@@ -267,7 +347,7 @@ def populate_tables(request):
 
 
     i=1
-    return JsonResponse(table_data)
+    return JsonResponse({"res":tableRes})
 
 # Data exploration and cohort creation page
 @login_required
