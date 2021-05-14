@@ -503,11 +503,19 @@ require([
                                     '</div></td>';
                             break;
                         case 'camic_filename':
-                            table_row_data += '<td><div class="col-filename accessible-filename">' +
+                             if (files[i]['datatype'] == 'Tissue slide image') {
+                                 table_row_data += '<td><div class="col-filename accessible-filename">' +
+                                    '<div><a class="disable_tissue_slide_image">' + files[i]['filename'] +
+                                    '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
+                                    '<div class="osmisis" style="display: none;"><i>Currently Unavailable</i></div></a></div>' +
+                                    '</div></td>';
+                             } else {
+                                 table_row_data += '<td><div class="col-filename accessible-filename">' +
                                     '<div><a href="'+CAMIC_URL+files[i]['file_gdc_id']+'/" target="_blank" rel="noreferrer">' + files[i]['filename'] +
                                     '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
                                     '<div class="osmisis" style="display: none;"><i>Open in caMicroscope</i></div></a></div>' +
                                     '</div></td>';
+                             }
                             break;
                         case 'study_uid':
                             table_row_data += '<td><div class="study-uid">' +

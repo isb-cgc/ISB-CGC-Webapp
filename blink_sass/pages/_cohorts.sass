@@ -494,7 +494,16 @@
             padding: 0
         #selected-files-tokenfield
             border: none
-
+    .banner-section
+        .alert
+            text-align: center
+            background-color: #FFA000
+            color: black
+            margin: 0
+            padding: 0 20px
+        .alert-dismissible button.close
+            padding: 0 20px
+            color: black
     #filter-panel
         .panel
             .panel-heading
@@ -534,6 +543,9 @@
                         white-space: nowrap
                         overflow: hidden
                         text-overflow: ellipsis
+                .disable_tissue_slide_image
+                     pointer-events: none
+                     color: gray
                 .study-uid
                     display: block
                     white-space: nowrap
