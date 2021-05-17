@@ -283,9 +283,7 @@
 
 {% block js_file %}
     <script type="text/javascript">
-        var cohort_list = {{ cohorts_listing|safe }};
-        var shared_users = {{ shared_users|safe }};
-        var cohort_versions = {{ cohort_versions|safe }};
+        // var shared_users = {{ shared_users|safe }};
     </script>
 	{{ block.super }}
 	<script src="{% static 'js/cohorts/cohort-list.js' %}"></script>
