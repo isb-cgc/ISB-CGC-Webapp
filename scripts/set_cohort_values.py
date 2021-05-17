@@ -69,7 +69,7 @@ def main():
                         cohort_stats[total] = result['totals'][total]
                     for src in result['facets']:
                         if src.split(':')[0] in list(sources.values_list('name',flat=True)):
-                            cohort_stats['collections'] = [x for x, y in result['facets'][src]['facets']['collection_id'].items() if y > 0]
+                            cohort_stats['collections'] = [x for x, y in result['filtered_facets'][src]['facets']['collection_id'].items() if y > 0]
 
             cohort.case_count = cohort_stats.get('PatientID',0)
             cohort.series_count = cohort_stats.get('SeriesInstanceUID',0)

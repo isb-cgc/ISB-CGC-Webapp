@@ -97,8 +97,6 @@ require([
     };
 
         window.setSlider = function (slideDiv, reset, strt, end, isInt, updateNow) {
-
-
              parStr=$('#'+slideDiv).data("attr-par");
              if (parStr.startsWith('tcga_clinical') && !(reset)){
                 checkTcga();
@@ -175,7 +173,6 @@ require([
                 }
             }
 
-
             if (updateNow) {
                 //updatePlotBinsForSliders(slideDiv);
                 mkFiltText();
@@ -185,16 +182,13 @@ require([
 
 // Show more/less links on categories with >6 fiilters
 
-
          var mkFiltText = function () {
             var hasTcga = false;
             var tcgaColSelected = false;
             if ((window.filterObj.hasOwnProperty('Program')) && (window.filterObj.Program.indexOf('TCGA')>-1)){
                 tcgaColSelected = true;
                 $('#tcga_clinical_heading').children('a').removeClass('disabled');
-             }
-
-            else{
+             } else{
                 $('#tcga_clinical_heading').children('a').addClass('disabled');
                 if (!($('#tcga_clinical_heading').children('a')).hasClass('collapsed')){
                     $('#tcga_clinical_heading').children('a').click();
@@ -547,10 +541,7 @@ require([
                          $(this).parent().children('.plot_count').removeClass('plotit');
                      }
                  }
-
             });
-
-
         }
 
         var mkSlider = function (divName, min, max, step, isInt, wNone, parStr, attr_id, attr_name, lower, upper, isActive,checked) {
