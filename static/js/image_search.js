@@ -290,9 +290,13 @@ require([
             if (oStringA.length > 0) {
                 var oString = oStringA.join(" AND");
                 document.getElementById("search_def").innerHTML = '<p>' + oString + '</p>';
+                 document.getElementById('filt_txt').value=oString;
             } else {
                 document.getElementById("search_def").innerHTML = '<span class="placeholder">&nbsp;</span>';
+                 document.getElementById('filt_txt').value="";
             }
+
+
 
             //alert(oString);
         };
@@ -884,7 +888,7 @@ require([
 
             })
             if (addRow){
-                if (numArr < 2000){
+                if (numArr < 3000){
                     //$(selRows).addClass('selected_grey');
                     if (type ==='projects') {
                         addCases(curArr, "cases_table", false);
@@ -1678,7 +1682,8 @@ require([
 
         var updateFacetsData = function (newFilt) {
             changeAjax(true);
-            var url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True&data_source_type=' + ($("#data_source_type option:selected").val() || 'S');
+            //var url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True&data_source_type=' + ($("#data_source_type option:selected").val() || 'S');
+            var url = '/explore/'
             var parsedFiltObj=parseFilterObj();
             if (Object.keys(parsedFiltObj).length > 0) {
                  url += '&filters=' + JSON.stringify(parsedFiltObj);
@@ -1686,11 +1691,15 @@ require([
             }
 
             url = encodeURI(url);
+            url= encodeURI('/explore/')
+
+            ndic={'counts_only':'True', 'is_json':'True', 'is_dicofdic':'True', 'data_source_type':($("#data_source_type option:selected").val() || 'S'), 'filters':JSON.stringify(parsedFiltObj) }
             let deferred = $.Deferred();
             $.ajax({
                 url: url,
+                data: ndic,
                 dataType: 'json',
-                type: 'get',
+                type: 'post',
                 contentType: 'application/x-www-form-urlencoded',
                 success: function (data) {
                     var isFiltered = Boolean($('#search_def p').length>0);
