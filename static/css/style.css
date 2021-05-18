@@ -4210,3 +4210,15 @@ ul.errorlist {
   background-color: #a19ca2;
   color: #ffffff;
 }
+
+.sorter input {
+  margin: 0px 5px 0px 5px;
+}
+
+.dataTables_info {
+  margin-right: 10px;
+}
+
+.paginate_button {
+  margin-right: 5px;
+}

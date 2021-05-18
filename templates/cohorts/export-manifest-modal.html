@@ -125,9 +125,10 @@
 
                         <!-- Export Option -->
                         <div class="export-option">
-                            <span id="file-export-option" title="" class="value"><input type="radio" name="manifest-type" value="file-manifest" checked> Files</span>
+                            <span id="file-export-option" title="" class="value">
+                                <input class="file-manifest export-option" type="radio" name="manifest-type" value="file-manifest" checked> Files</span>
                             <span id="bq-export-option" style="margin-left:10px" class="value" {% if not is_social %}title="Export to BigQuery is only available with a Google Account."{% endif %}>
-                                <input type="radio" name="manifest-type" value="bq-manifest" {% if not is_social %}disabled{% endif %}> BigQuery</span>
+                                <input class="bq-manifest export-option" type="radio" name="manifest-type" value="bq-manifest" {% if not is_social %}disabled{% endif %}> BigQuery</span>
                         </div>
                         <br>
                         {% if is_social %}
@@ -149,13 +150,13 @@
                             <br>
 
                             {% csrf_token %}
-                            <a id="download-csv" class="btn btn-primary" title="Download this cohort's manifest in CSV format.">
+                            <a id="download-csv" class="btn btn-primary download-file" title="Download this cohort's manifest in CSV format.">
                                 Download CSV
                             </a>
-                            <a id="download-tsv" class="btn btn-primary " title="Download this cohort's manifest in TSV format.">
+                            <a id="download-tsv" class="btn btn-primary download-file" title="Download this cohort's manifest in TSV format.">
                                 Download TSV
                             </a>
-                            <a id="download-json" class="btn btn-primary " title="Download this cohort's manifest in JSON format.">
+                            <a id="download-json" class="btn btn-primary download-file" title="Download this cohort's manifest in JSON format.">
                                 Download JSON
                             </a>
                         </div>
