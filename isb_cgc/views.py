@@ -118,8 +118,9 @@ def _decode_dict(data):
 
 @never_cache
 def landing_page(request):
+    mitelman_url = settings.MITELMAN_URL
     logger.info("[STATUS] Received landing page view request at {}".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-    return render(request, 'isb_cgc/landing.html', {'request': request, })
+    return render(request, 'isb_cgc/landing.html', {'mitelman_url': mitelman_url })
 
 
 # Redirect all requests for the old landing page location to isb-cgc.org

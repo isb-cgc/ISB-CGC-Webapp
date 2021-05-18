@@ -671,6 +671,8 @@ if DEBUG and DEBUG_TOOLBAR:
     SHOW_TOOLBAR_CALLBACK = True
     INTERNAL_IPS = (os.environ.get('INTERNAL_IP', ''),)
 
+MITELMAN_URL = os.environ.get('MITELMAN_URL', 'https://mitelmandatabase.isb-cgc.org/')
+
 ##########################
 # OAUTH PLATFORM         #
 ##########################
