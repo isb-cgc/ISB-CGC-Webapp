@@ -2709,6 +2709,17 @@ section .min-max {
 #cohort-filelist .file-list #selected-files-tokenfield {
   border: none; }
 
+#cohort-filelist .banner-section .alert {
+  text-align: center;
+  background-color: #FFA000;
+  color: black;
+  margin: 0;
+  padding: 0 20px; }
+
+#cohort-filelist .banner-section .alert-dismissible button.close {
+  padding: 0 20px;
+  color: black; }
+
 #cohort-filelist #filter-panel .panel .panel-heading {
   background-color: #fff; }
 
@@ -2747,6 +2758,9 @@ section .min-max {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis; }
+    #cohort-filelist .filelist-panel table td .disable_tissue_slide_image {
+      pointer-events: none;
+      color: gray; }
     #cohort-filelist .filelist-panel table td .study-uid {
       display: block;
       white-space: nowrap;
