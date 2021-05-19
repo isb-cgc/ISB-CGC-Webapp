@@ -98,10 +98,14 @@
                             </td>
                             <td class="name-col">
                                 {% if only_active_versions %}
-                                <a href="{% url 'cohort_details' cohort.id %}"
-                                   title="View Cohort Details in the Data Explorer">
-                                    {{ cohort.name }}
-                                </a>
+                                 <form name="getCohort" method="POST" action="{% url 'cohort_details' cohort.id %}">
+                                    {% csrf_token %}
+                                     <a href="javascript:document.getCohort.submit()"
+                                       title="View Cohort Details in the Data Explorer">
+                                       {{ cohort.name }}
+                                    </a>
+                                 </form>
+
                                 {% else %}
                                     <span title="Cohorts with inactive data versions cannot be viewed in the Data Explorer.">{{ cohort.name }}</span>
                                 {% endif %}
