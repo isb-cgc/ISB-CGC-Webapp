@@ -27,6 +27,22 @@
 
 {% block page_header %}
     <div class="container">
+        <div class="banner-section">
+                <div class="alert alert-dismissible show" role="alert">
+                    <div class="row ">
+                        <div class="col-xs-1"></div>
+                        <div class="col-xs-10">
+                            <strong>All tissue slide images from the TCGA program are currently unavailable for viewing.</strong>
+                        </div>
+                        <div class="col-xs-1">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+        </div>
+
         {% if cohort %}
             <ol class="breadcrumb">
                 <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
