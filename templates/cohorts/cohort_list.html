@@ -6,6 +6,7 @@
 {% block header %}
     <link rel="stylesheet" href="{% static  'css/jquery-ui.min.css' %}">
     <link type="text/css" rel="stylesheet" href="{% static 'css/spinner.css' %}">
+    <link type="text/css" rel="stylesheet" href="{% static 'css/cohort-list.css' %}">
 {% endblock %}
 
 {% block title %}
@@ -26,7 +27,29 @@
 {% url 'cohort_manifest_base' as export_uri %}
 {% include "cohorts/export-manifest-modal.html" with export_uri=export_uri %}
 
-<div id = "dialog-1" title = "Dialog Title goes here..." style="display:inline-block">This my first jQuery UI Dialog!</div>
+<div id="version_d" tabindex="-1"  class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-draggable ui-resizable" aria-describedby="dialog-1" aria-labelledby="ui-id-1">
+        <div class="ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix ui-draggable-handle">
+             <span id="ui-id-1" class="ui-dialog-title">Comparing Versions of Cohort -1</span>
+             <button onclick="$('#version_d').hide()"><i class="fa fa-times"></i></button>
+        </div>
+    <div id="dialog-1" style="display: inline-block; width: auto; min-height: 90px; max-height: none; height: auto;" class="ui-dialog-content ui-widget-content">
+             <table class="table"><tbody>
+                 <tr><th></th><th>Original Version</th><th>Current Version</th></tr>
+             <tr><td># Cases</td> <td class="case_o">XXXX</td> <td class="case_c">XXXX</td> </tr>
+                 <tr><td># Studies</td> <td class="study_o">XXXX</td> <td class="study_c">XXXX</td> </tr>
+                 <tr><td># Series</td> <td class="series_o">XXXX</td> <td class="series_c">XXXX</td> </tr>
+
+             </tbody></table>
+             <br><button onclick="location.href = '/explore/?cohort_id=-1';">Load New Version</button>
+         </div>
+    <div class="ui-resizable-handle ui-resizable-n" style="z-index: 90;"></div>
+
+</div>
+
+
+</div>
+
+</div>
 <div class="spinner" style="display: none;"><i class="fa fa-spinner fa-spin spin"></i></div>
 
 <div class="container-fluid">
@@ -100,7 +123,7 @@
                                 {% if only_active_versions %}
                                  <form name="getCohort" method="POST" action="{% url 'cohort_details' cohort.id %}">
                                     {% csrf_token %}
-                                     <a href="javascript:document.getCohort.submit()"
+                                     <a href="#" onclick="$(this).parent().submit()"
                                        title="View Cohort Details in the Data Explorer">
                                        {{ cohort.name }}
                                     </a>

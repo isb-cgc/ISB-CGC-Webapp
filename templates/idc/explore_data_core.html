@@ -52,7 +52,7 @@
 
                                      </div>
                                      <div id="Program" class="collapse filter-panel collection-list">
-                                     <p><input id="hide-zeros" type="checkbox" value="hide-zeros" onchange="hideColl(this)"> Hide collections with 0 cases</p>
+                                     <p><input id="hide-zeros" class="hide-zeros" type="checkbox" value="hide-zeros" onchange="hideColl(this)"> Hide collections with 0 cases</p>
                                          {% with programs.items|length|add:"-5" as more %}
                                          <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                          <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
@@ -161,7 +161,7 @@
                                 <h4 class="panel-title">Search Configuration
                                     <div  class="tooltip_chart_info" style="float:right"><i class="fa fa-info-circle"></i></div>
                                 </h4>
-                                <br><span><input id="hide-zeros" type="checkbox" value="hide-zeros" onchange="hideAtt(this)"> Hide attribute values with 0 cases</span>
+                                <br><span><input id="hide-zeros" class="hide-zeros" type="checkbox" value="hide-zeros" onchange="hideAtt(this)"> Hide attribute values with 0 cases</span>
                             </div>
 
                             <ul class="nav nav-tabs nav-tabs-filters" role="tablist">

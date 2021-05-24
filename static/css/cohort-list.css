@@ -1,0 +1,16 @@
+.ui-dialog {
+    position:fixed;
+    height: auto;
+    width:400px;
+    top:50%;
+    left:50%;
+}
+
+.ui-dialog-content {
+    display:inline-block;
+    width:auto;
+    min-height:90px;
+    max-height:none;
+    height:auto;
+
+}

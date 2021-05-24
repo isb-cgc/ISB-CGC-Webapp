@@ -2866,7 +2866,7 @@ require([
         // For collection list
         $('.collection-list').each(function() {
             var $group = $(this);
-            var checkboxes = $group.find("input:checked");
+            var checkboxes = $group.find("input:checked").not(".hide-zeros");
             if (checkboxes.length > 0) {
                 var values = [];
                 var my_id = "";
