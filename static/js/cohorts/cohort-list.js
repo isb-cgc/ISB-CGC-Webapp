@@ -537,8 +537,6 @@ require([
                     console.log("problem getting data");
             }
         });
-
-
     }
 
     $(document).ready(function () {
@@ -547,6 +545,4 @@ require([
         $( "#dialog-1" ).dialog('close');
 
     });
-
-
 });
