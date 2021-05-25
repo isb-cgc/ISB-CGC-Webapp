@@ -18,6 +18,10 @@
                 <div class="row">
                     <div class="col-sm-3"></div>
                     <div class="col-sm-6">
+                        <div id="invalid-opt-in-alert" class="alert alert-warning alert-dismissable" style="display: none">
+                            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                            The "<span id="invalid-opt-in-field"></span>" field contains invalid input. Please adjust the content accordingly.
+                        </div>
                         <h4>
                             <a href="/" target="_blank" rel="noreferrer">
                                 <img height="42" width="42" style="margin-right: 5px;" src="{% static 'img/isblogo.png' %}"
@@ -53,7 +57,7 @@
                         <p>You can learn more about ISB-CGC at <a href="/" target="_blank" rel="noreferrer">isb-cgc.org</a>.</p>
                         <br>
 
-                        <form id="opt-in-form" method="POST" action="{% url 'opt_in_form_submitted' %}">
+                        <form id="opt-in-form">
                             {% csrf_token %}
                             {% if user.is_authenticated %}
                                 <input type="hidden" name="first-name" id="first-name" required value="{{ first_name }}">
@@ -83,7 +87,7 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="affiliation" >Affiliation</label>
+                                <label for="affiliation">Affiliation</label>
                                 <input type="text" class="form-control" name="affiliation" id="affiliation">
                             </div>
                             <div class="form-group">

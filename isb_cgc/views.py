@@ -25,6 +25,7 @@ import datetime
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
 from django.db.models import Count
 from django.shortcuts import render, redirect
@@ -895,6 +896,7 @@ def opt_in_form(request):
 
     return render(request, template, form)
 
+@csrf_protect
 def opt_in_form_submitted(request):
     msg = ''
     error_msg = ''
