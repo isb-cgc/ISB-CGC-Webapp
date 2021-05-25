@@ -284,9 +284,13 @@ require([
             if (oStringA.length > 0) {
                 var oString = oStringA.join(" AND");
                 document.getElementById("search_def").innerHTML = '<p>' + oString + '</p>';
+                 document.getElementById('filt_txt').value=oString;
             } else {
                 document.getElementById("search_def").innerHTML = '<span class="placeholder">&nbsp;</span>';
+                 document.getElementById('filt_txt').value="";
             }
+
+
 
             //alert(oString);
         };
@@ -781,14 +785,17 @@ require([
         }
 
         window.toggleRows = function (row, type,prefix,justClickedPlus) {
+
             var justClickedIndex=-1;
             var selRows = new Array();
             var addRow= true;
+            var justAddedRows = new Array();
 
             if ($(row).parent().is('thead')){
                 selRows= getSelRows(row);
                 addRow = justClickedPlus;
             }
+
             else{
                 selRows=[$(row).index(),$(row).index()];
                 justClickedIndex=selRows[0];
@@ -814,11 +821,12 @@ require([
                 }
 
                 if  ( addRow  &&  ((thisInd ===justClickedIndex) || !($(this).find('input:checkbox')[0]).checked )) {
+                    $(this).addClass('tryToAdd')
                     if (!(thisInd ===justClickedIndex) ) {
                         $(this).find('input:checkbox')[0].checked=true;
                     }
                     curArr.push(curId);
-                    numArr+= parseInt($(this).find('.projects_table_num_cohort, .numcases')[0].innerHTML);
+                    numArr+= parseInt($(this).find('.projects_table_num_cohort, .numrows')[0].innerHTML);
                     if (type==='cases') {
                         var projectId = $(this).attr('data-projectid');
                         if (!(projectId in selDic)){
@@ -874,8 +882,8 @@ require([
 
             })
             if (addRow){
-                if (numArr < 2000){
-                    //$(selRows).addClass('selected_grey');
+                if (numArr <= 3000){
+                    $(selRows).removeClass('tryToAdd');
                     if (type ==='projects') {
                         addCases(curArr, "cases_table", false);
                     }
@@ -888,7 +896,11 @@ require([
 
                 }
                 else{
-                    alert('Sorry only 2000 or less rows can be fetched at once. You have selected '+numArr.toString()+' rows.')
+                    $(selRows).filter('.tryToAdd').find('input:checkbox').each(function(){
+                        this.checked=false;
+                    });
+                    alert('Sorry only 3000 or less rows can be fetched at once. You have selected '+numArr.toString()+' rows.')
+                    $(selRows).removeClass('.tryToAdd');
                 }
             }
         }
@@ -1028,12 +1040,19 @@ require([
             var fieldStr = JSON.stringify(fields);
             //var sortOnStr = JSON.stringify(sort_on);
             var uniques = JSON.stringify(["PatientID","StudyInstanceUID","SeriesInstanceUID"]);
-            let url = '/explore/?counts_only=False&is_json=True&with_clinical=True&collapse_on=' + collapse_on + '&filters=' + filterStr + '&fields=' + fieldStr + '&order_docs=' + orderDocStr+'&uniques='+uniques;
+            let url = '/explore/'
             url = encodeURI(url);
+            ndic= {'counts_only':'False', 'is_json':'True', 'with_clinical':'True', 'collapse_on':collapse_on, 'filters':filterStr, 'fields':fieldStr, 'order_docs':orderDocStr, 'uniques':uniques}
+                //?counts_only=False&is_json=True&with_clinical=True&collapse_on=' + collapse_on + '&filters=' + filterStr + '&fields=' + fieldStr + '&order_docs=' + orderDocStr+'&uniques='+uniques;
+            if (typeof(window.csr) !=='undefined'){
+                ndic['csrfmiddlewaretoken'] = window.csr
+            }
+
             $.ajax({
                 url: url,
                 dataType: 'json',
-                type: 'get',
+                type: 'post',
+                data: ndic,
                 contentType: 'application/x-www-form-urlencoded',
                 success: function (data) {
 
@@ -1077,12 +1096,12 @@ require([
                         var newHtml = '';
                         var rowId = 'case_' + patientId.replace(/\./g, '-');
 
-                        newHtml = '<tr id="' + rowId + '" data-projectid="' + projectId + '" class="' + pclass + ' text_head" onclick="(toggleRows(this, \'cases\', \'case_\', false))">' +
-                                   '<td class="ckbx"><input type="checkbox"></td>'+
+                        newHtml = '<tr id="' + rowId + '" data-projectid="' + projectId + '" class="' + pclass + ' text_head" >' +
+                                   '<td class="ckbx"><input type="checkbox" onclick="(toggleRows($(this).parent().parent(), \'cases\', \'case_\', false))"></td>'+
                                    '<td class="col1 project-name">' + projectNm + '</td>' +
                                     '<td class="col1 case-id">' + patientId +'</td>' +
-                                    '<td class="col1">' + numStudy.toString() + '</td>' +
-                                    '<td class="col1 numcases">' + numSeries.toString() + '</td>' +
+                                    '<td class="col1 numrows">' + numStudy.toString() + '</td>' +
+                                    '<td class="col1 ">' + numSeries.toString() + '</td>' +
                                     '</tr>';
 
 
@@ -1189,19 +1208,26 @@ require([
             var fieldStr = JSON.stringify(fields);
             var sortDocStr = JSON.stringify(sort_on);
 
+            let url = '/explore/';
+                //?counts_only=False&is_json=True&with_clinical=True&collapse_on=' + collapse_on + '&filters=' + filterStr + '&fields=' + fieldStr + '&sort_on=' + sortDocStr;
 
 
-            let url = '/explore/?counts_only=False&is_json=True&with_clinical=True&collapse_on=' + collapse_on + '&filters=' + filterStr + '&fields=' + fieldStr + '&sort_on=' + sortDocStr;
+            ndic={'counts_only':'False', 'is_json':'True', 'with_clinical':'True', 'filters': filterStr, 'collapse_on':collapse_on, 'fields':fieldStr, 'sort_on':sortDocStr }
+            if (typeof(window.csr) !=='undefined'){
+                ndic['csrfmiddlewaretoken'] = window.csr
+            }
             if (!isSeries){
                 var uniques = JSON.stringify(["StudyInstanceUID","SeriesInstanceUID"]);
-                url+='&uniques='+uniques;
+                ndic['uniques']=uniques;
             }
+
 
             url = encodeURI(url);
             $.ajax({
                 url: url,
                 dataType: 'json',
-                type: 'get',
+                type: 'post',
+                data: ndic,
                 contentType: 'application/x-www-form-urlencoded',
                 success: function (data) {
 
@@ -1269,13 +1295,13 @@ require([
                                 numSeries=seriesDic[studyId];
                            }
 
-                            newHtml = '<tr id="' + rowId + '" data-projectid="'+ projectId +'" class="' + pclass + ' ' + cclass +' text_head" onclick="(toggleRows(this, \'studies\', \'study_\', false))">' +
+                            newHtml = '<tr id="' + rowId + '" data-projectid="'+ projectId +'" class="' + pclass + ' ' + cclass +' text_head">' +
                                 //'<td class="col1 project-name">' + projectId + '</td>' +
-                                '<td class="ckbx"><input type="checkbox"></td>' +
+                                '<td class="ckbx"><input type="checkbox" onclick="(toggleRows($(this).parent().parent(), \'studies\', \'study_\', false))"></td>' +
                                  '<td class="col1 case-id">' + patientId + '</td>'+
                                 '<td class="col2 study-id study-id-col" data-study-id="'+studyId+'">' + hrefTxt + '</td>' +
                                 '<td class="col1 study-description">' + studyDescription + '</td>' +
-                                '<td class="col1 numcases">' + numSeries.toString() + '</td>'+
+                                '<td class="col1 numrows">' + numSeries.toString() + '</td>'+
                                 '<td class="ohif open-viewer"><a  href="' + fetchUrl + '" target="_blank"><i class="fa fa-eye"></i></a></td></tr>'
 
                         }
@@ -1495,28 +1521,7 @@ require([
                 }
             }
         }
-    /*
-        var resetSearchScope = function (scopeArr, searchId) {
-            var selectElem = $('#' + searchId)[0];
-            var selIndex = 0;
-            if (scopeArr === window.tcgaColls) {
-                selIndex = 0;
-            } else {
-                selProject = scopeArr[0];
-                selectionArr = $(selectElem).children("option");
-                for (var i = 0; i < selectionArr.length; i++) {
-                    selectItem = selectionArr[i];
-                    if (selProject === selectItem.value) {
-                        selIndex = i;
-                        break;
-                    }
-                }
 
-            }
-            selectElem.selectedIndex = selIndex;
-        }
-
-*/
         var updateSliderSelection = function (inpDiv, displaySet, header, attributeName, isInt) {
             var val = document.getElementById(inpDiv).value;
             var newText = "&emsp;&emsp;" + header + ": " + val;
@@ -1668,7 +1673,8 @@ require([
 
         var updateFacetsData = function (newFilt) {
             changeAjax(true);
-            var url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True&data_source_type=' + ($("#data_source_type option:selected").val() || 'S');
+            //var url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True&data_source_type=' + ($("#data_source_type option:selected").val() || 'S');
+            var url = '/explore/'
             var parsedFiltObj=parseFilterObj();
             if (Object.keys(parsedFiltObj).length > 0) {
                  url += '&filters=' + JSON.stringify(parsedFiltObj);
@@ -1676,11 +1682,21 @@ require([
             }
 
             url = encodeURI(url);
+            url= encodeURI('/explore/')
+
+            ndic={'counts_only':'True', 'is_json':'True', 'is_dicofdic':'True', 'data_source_type':($("#data_source_type option:selected").val() || 'S'), 'filters':JSON.stringify(parsedFiltObj) }
+            if (typeof(window.csr) !=='undefined'){
+                ndic['csrfmiddlewaretoken'] = window.csr
+            }
+
+
             let deferred = $.Deferred();
             $.ajax({
                 url: url,
+                data: ndic,
                 dataType: 'json',
-                type: 'get',
+                type: 'post',
+
                 contentType: 'application/x-www-form-urlencoded',
                 success: function (data) {
                     var isFiltered = Boolean($('#search_def p').length>0);
@@ -1858,7 +1874,11 @@ require([
                      */
                     changeAjax(false);
                     deferred.resolve();
+                },
+                error: function(data){
+                    console.log('error loading data');
                 }
+
             });
             return deferred.promise();
         };
@@ -2637,49 +2657,49 @@ require([
             });
 
             $('#' + filterId).find('.check-all').on('click', function () {
-                //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
-                var filterElems = new Object();
-
-                filterElems = $(this).parentsUntil('.list-group-item, #program_set').filter('.list-group-item__body, .list-group-sub-item__body, #Program').children('ul').children();
-
-                for (var ind =0;ind<filterElems.length;ind++) {
-                    var ckElem = new Object();
-                    if ($(filterElems[ind]).children().filter('.list-group-item__heading').length>0){
-                        ckElem = $(filterElems[ind]).children().filter('.list-group-item__heading').children().filter('input:checkbox')[0];
-                    } else {
-                       ckElem=$(filterElems[ind]).children().filter('label').children().filter('input:checkbox')[0];
+                if (!is_cohort) {
+                    //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
+                    var filterElems = new Object();
+                    filterElems = $(this).parentsUntil('.list-group-item, #program_set').filter('.list-group-item__body, .list-group-sub-item__body, #Program').children('ul').children();
+                    for (var ind = 0; ind < filterElems.length; ind++) {
+                        var ckElem = new Object();
+                        if ($(filterElems[ind]).children().filter('.list-group-item__heading').length > 0) {
+                            ckElem = $(filterElems[ind]).children().filter('.list-group-item__heading').children().filter('input:checkbox')[0];
+                        } else {
+                            ckElem = $(filterElems[ind]).children().filter('label').children().filter('input:checkbox')[0];
+                        }
+                        ckElem.checked = true;
+                        //$(filterElem).prop('checked') = true;
+                        if (ind < filterElems.length - 1) {
+                            handleFilterSelectionUpdate(ckElem, false, false);
+                        } else {
+                            handleFilterSelectionUpdate(ckElem, true, true);
+                        }
                     }
-                    ckElem.checked= true;
-                  //$(filterElem).prop('checked') = true;
-                  if (ind<filterElems.length-1) {
-                      handleFilterSelectionUpdate(ckElem, false, false);
-                  } else {
-                      handleFilterSelectionUpdate(ckElem, true, true);
-                  }
                 }
             });
 
             $('#' + filterId).find('.uncheck-all').on('click', function () {
-                 //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
-                var filterElems = new Object();
+              if (!is_cohort){
+                    //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
+                    var filterElems = new Object();
+                    filterElems = $(this).parentsUntil('.list-group-item, #program_set').filter('.list-group-item__body, .list-group-sub-item__body, #Program').children('ul').children();
+                    for (var ind = 0; ind < filterElems.length; ind++) {
+                        var ckElem = new Object();
+                        if ($(filterElems[ind]).children().filter('.list-group-item__heading').length > 0) {
+                            ckElem = $(filterElems[ind]).children().filter('.list-group-item__heading').children().filter('input:checkbox')[0];
+                        } else {
+                            ckElem = $(filterElems[ind]).children().filter('label').children().filter('input:checkbox')[0];
+                        }
 
-                filterElems = $(this).parentsUntil('.list-group-item, #program_set').filter('.list-group-item__body, .list-group-sub-item__body, #Program').children('ul').children();
-
-                for (var ind =0;ind<filterElems.length;ind++) {
-                    var ckElem = new Object();
-                    if ($(filterElems[ind]).children().filter('.list-group-item__heading').length>0){
-                        ckElem = $(filterElems[ind]).children().filter('.list-group-item__heading').children().filter('input:checkbox')[0];
-                    } else {
-                       ckElem=$(filterElems[ind]).children().filter('label').children().filter('input:checkbox')[0];
-                    }
-
-                  ckElem.checked = false;
-                    if (ind<filterElems.length-1) {
-                      handleFilterSelectionUpdate(ckElem, false, false);
-                  } else{
-                      handleFilterSelectionUpdate(ckElem, true, true);
-                  }
-                }
+                        ckElem.checked = false;
+                        if (ind < filterElems.length - 1) {
+                            handleFilterSelectionUpdate(ckElem, false, false);
+                        } else {
+                            handleFilterSelectionUpdate(ckElem, true, true);
+                        }
+                   }
+              }
             });
         };
 
@@ -2846,7 +2866,7 @@ require([
         // For collection list
         $('.collection-list').each(function() {
             var $group = $(this);
-            var checkboxes = $group.find("input:checked");
+            var checkboxes = $group.find("input:checked").not(".hide-zeros");
             if (checkboxes.length > 0) {
                 var values = [];
                 var my_id = "";
@@ -2933,7 +2953,7 @@ require([
         save_anonymous_selection_data();
     });
 
-     var cohort_loaded = false;
+     cohort_loaded = false;
      function load_preset_filters() {
          if (is_cohort && !cohort_loaded) {
              var loadPending = load_filters(cohort_filters);
@@ -2941,7 +2961,8 @@ require([
                  console.debug("Load pending complete.");
                  cohort_loaded = true;
                  $('input[type="checkbox"]').prop("disabled", "disabled");
-
+                 $('#projects_table').find('input:checkbox').removeAttr("disabled");
+                 //$('.check-all').prop("disabled","disabled");
                  // Re-enable checkboxes for export manifest dialog, unless not using social login
                  if (user_is_social)
                  {
@@ -3002,8 +3023,11 @@ require([
      }
 
       $(document).ready(function () {
+          //const csrftoken = Cookies.get('csrftoken');
+
            // $('#proj_table').DataTable();
            // window.filterObj.collection_id = window.tcgaColls;
+            //var cohort_loaded = false;
             window.selItems = new Object();
             window.selItems.selStudies = new Object();
             window.selItems.selCases = new Object();

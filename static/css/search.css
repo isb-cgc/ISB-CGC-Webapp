@@ -412,3 +412,21 @@ table {
 svg {
     overflow:visible;
 }
+
+#Program .more-checks:after {
+    content: "";
+    display:table;
+    clear: both;
+}
+
+#Program_list:after {
+    content: "";
+    display:table;
+    clear: both;
+}
+
+.list-group-item__heading:after {
+    content: "";
+    display:table;
+    clear: both;
+}

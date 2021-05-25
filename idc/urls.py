@@ -47,6 +47,7 @@ urlpatterns = [
 
     url(r'^help/', views.help_page, name='help'),
     url(r'^explore/', views.explore_data_page, name='explore_data'),
+    url(r'^tables/', views.populate_tables, name='populate_tables'),
     url(r'^explore_demo/', demo_views.explore_demo_page, name='explore_demo'),
 
     #url(r'^test/', views.test, name='test'),
