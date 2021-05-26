@@ -930,7 +930,11 @@ def opt_in_form_submitted(request):
                 }
                 BigQueryFeedbackSupport.add_rows_to_table([feedback_row])
                 # send a notification to feedback@isb-cgc.org about the entry
-                send_feedback_notification(feedback_row)
+                if settings.IS_UAT:
+                    logger.info("[STATUS] UAT: sent email for feedback")
+                else:
+                    # send a notification to feedback@isb-cgc.org about the entry
+                    send_feedback_notification(feedback_row)
                 msg = 'We thank you for your time and suggestions.'
         else:
             error_msg = 'We were not able to find a user with the given email. Please check with us again later.'
