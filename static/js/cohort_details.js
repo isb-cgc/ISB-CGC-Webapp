@@ -1449,10 +1449,10 @@ require([
     // we need to stop the tab from responding to clicks for Issue
     // #1950 fix, so we introduce the next function...
 
-    // $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-    //     ACTIVE_PROGRAM_ID = $('ul.nav-tabs-data li.active a').data('program-id');
-    //     filter_panel_load(cohort_id, ACTIVE_PROGRAM_ID);
-    // });
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        ACTIVE_PROGRAM_ID = $('ul.nav-tabs-data li.active a').data('program-id');
+        filter_panel_load(cohort_id, ACTIVE_PROGRAM_ID);
+    });
 
     // Clicking on the tab will have no effect if another tab
     // is loading....
