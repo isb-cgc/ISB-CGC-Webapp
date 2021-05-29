@@ -25,7 +25,7 @@ import os
 import re
 from os.path import join, dirname, exists
 from argparse import ArgumentParser
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "isb_cgc.settings")
 
@@ -35,7 +35,7 @@ import django
 django.setup()
 
 from google_helpers.bigquery.bq_support import BigQuerySupport
-from projects.models import Program, Project, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataVersion
+from projects.models import Program, Project, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataVersion, DataNode
 from django.contrib.auth.models import User
 
 isb_superuser = User.objects.get(username="isb")
@@ -73,10 +73,16 @@ SOLR_TYPES = {
     "DATE": "pdate"
 }
 
+SOLR_SINGLE_VAL = ["case_barcode", "case_gdc_id"]
+
+ATTR_SET = {}
+DISPLAY_VALS = {}
+
 SOLR_URI = settings.SOLR_URI
 SOLR_LOGIN = settings.SOLR_LOGIN
 SOLR_PASSWORD = settings.SOLR_PASSWORD
 SOLR_CERT = settings.SOLR_CERT
+
 
 def add_data_versions(dv_set):
     for dv in dv_set:
@@ -93,63 +99,137 @@ def add_data_versions(dv_set):
 
             DataVersion.programs.through.objects.bulk_create(dv_to_prog)
 
-            print("Data Version created:")
-            print(obj)
+            logger.info("Data Version created: {}".format(obj))
         except Exception as e:
             logger.error("[ERROR] Data Version {} may not have been added!".format(dv['name']))
             logger.exception(e)
 
 
-def add_solr_collex(solr_set, version, version_type, programs):
-    for collex in solr_set:
-        try:
-            collex_obj = DataSource.objects.get(name=collex, source_type=DataSource.SOLR)
-            logger.warning("[WARINING] Solr Core with the name {} already exists - skipping.".format(collex))
-        except ObjectDoesNotExist:
-            obj, created = DataSource.objects.update_or_create(
-                name=collex,
-                version=DataVersion.objects.get(version=version, data_type=version_type),
-                shared_id_col="PatientID" if "tcia" in collex else "case_barcode",
-                source_type='S'
-            )
+def add_data_sources(sources, build_attrs=False, link_attr=True):
+    try:
+        attrs_to_srcs = []
+        for src in sources:
+            try:
+                obj = DataSource.objects.get(name=src['name'])
+                logger.warning("[WARNING] Source with the name {} already exists - skipping.".format(src['name']))
+            except ObjectDoesNotExist as e:
+                obj, created = DataSource.objects.update_or_create(
+                    name=src['name'], version=DataVersion.objects.get(version=src['version'], data_type=src['version_type']),
+                    source_type=src['source_type'],
+                )
 
-            progs = Program.objects.filter(name__in=programs)
-            src_to_prog = []
+                progs = Program.objects.filter(name__in=src['programs'])
+                src_to_prog = []
 
-            for prog in progs:
-                src_to_prog.append(DataSource.programs.through(datasource_id=obj.id, program_id=prog.id))
+                for prog in progs:
+                    src_to_prog.append(DataSource.programs.through(datasource_id=obj.id, program_id=prog.id))
 
-            DataSource.programs.through.objects.bulk_create(src_to_prog)
+                DataSource.programs.through.objects.bulk_create(src_to_prog)
 
-            print("Solr Collection entry created: {}".format(collex))
-        except Exception as e:
-            logger.error("[ERROR] Solr Collection {} may not have been added!".format(collex))
-            logger.exception(e)
+                nodes = DataNode.objects.filter(short_name__in=src['nodes'])
+                node_to_src = []
 
-def add_bq_tables(tables, version, version_type, programs):
-    for table in tables:
-        try:
-            table_obj = DataSource.objects.get(name=table)
-            logger.warning("[WARNING] BigQuery Data Source with the name {} already exists - skipping.".format(table))
-        except ObjectDoesNotExist as e:
-            obj, created = DataSource.objects.update_or_create(
-                name=table, version=DataVersion.objects.get(version=version, data_type=version_type),
-                shared_id_col="PatientID" if "idc" in table else "case_barcode",
-                source_type='B'
-            )
+                for node in nodes:
+                    node_to_src.append(DataNode.data_sources.through(datasource_id=obj.id, datanode_id=node.id))
 
-            progs = Program.objects.filter(name__in=programs)
-            src_to_prog = []
+                DataNode.data_sources.through.objects.bulk_create(node_to_src)
 
-            for prog in progs:
-                src_to_prog.append(DataSource.programs.through(datasource_id=obj.id, program_id=prog.id))
+                logger.info("Data Source created: {}".format(obj.name))
 
-            DataSource.programs.through.objects.bulk_create(src_to_prog)
+            if src['source_type'] == DataSource.SOLR:
+                schema_src = src['schema_source'].split('.')
+                schema = BigQuerySupport.get_table_schema(schema_src[0],schema_src[1],schema_src[2])
+                link_attrs = []
+                solr_schema = []
+                solr_index_strings = []
+                for field in schema:
+                    if field['name'] not in ATTR_SET:
+                        if build_attrs:
+                            attr_type = Attribute.CATEGORICAL if (not re.search(r'(_id|_barcode)', field['name']) and field['type'] == "STRING") else Attribute.STRING if field['type'] == "STRING" else Attribute.CONTINUOUS_NUMERIC
+                            ATTR_SET[field['name']] = {
+                                'name': field['name'],
+                                "display_name": field['name'].replace("_", " ").title() if re.search(r'_', field['name']) else
+                                field['name'],
+                                "type": attr_type,
+                                'solr_collex': [],
+                                'bq_tables': [],
+                                'display': (
+                                        (attr_type == Attribute.STRING and not re.search('_id|_barcode',field['name'].lower())) or attr_type == Attribute.CATEGORICAL or field['name'].lower() in ranges_needed)
+                            }
+                            attr = ATTR_SET[field['name']]
+                            attr['solr_collex'].append(src['name'])
 
-            print("BQ Table created: {}".format(table))
-        except Exception as e:
-            logger.error("[ERROR] BigQuery Table {} may not have been added!".format(table))
-            logger.exception(e)
+                            if attr['name'] in DISPLAY_VALS:
+                                if 'preformatted_values' in DISPLAY_VALS[attr['name']]:
+                                    attr['preformatted_values'] = True
+                                else:
+                                    if 'display_vals' not in attr:
+                                        attr['display_vals'] = []
+                                    attr['display_vals'].extend(DISPLAY_VALS[attr['name']]['vals'])
+
+                            if attr['name'] in DISPLAY_VALS:
+                                if 'preformatted_values' in DISPLAY_VALS[attr['name']]:
+                                    attr['preformatted_values'] = True
+                                else:
+                                    attr['display_vals'] = DISPLAY_VALS[attr['name']]['vals']
+
+                            if 'range' not in attr:
+                                if attr['name'].lower() in ranges_needed:
+                                    attr['range'] = ranges.get(ranges_needed.get(attr['name'], ''), [])
+                        elif link_attr:
+                            link_attrs.append(field['name'])
+                    solr_schema.append({
+                        "name": field['name'], "type": SOLR_TYPES[field['type']],
+                        "multiValued": True if field['name'] not in SOLR_SINGLE_VAL else False, "stored": True
+                    })
+
+                    if field['name'] not in SOLR_SINGLE_VAL:
+                        solr_index_strings.append("f.{}.split=true&f.{}.separator=|".format(field['name'],field['name']))
+
+                for la in link_attrs:
+                    try:
+                        a = Attribute.objects.get(name=la)
+                    except Exception as e:
+                        if isinstance(e,MultipleObjectsReturned):
+                            logger.info("More than one attribute with the name {} was found!".format(la))
+                        a = Attribute.objects.filter(name=la).first()
+                    attrs_to_srcs.append(Attribute.data_sources.through(attribute_id=a.id,datasource_id=obj.id))
+
+                with open("{}_solr_schemas.json".format(src['name']), "w") as schema_outfile:
+                    json.dump(solr_schema, schema_outfile)
+                schema_outfile.close()
+                with open("{}_solr_index_vars.txt".format(src['name']), "w") as solr_index_string:
+                    solr_index_string.write("&{}".format("&".join(solr_index_strings)))
+                solr_index_string.close()
+
+
+            #     # add core to Solr
+            #     # sudo -u solr /opt/bitnami/solr/bin/solr create -c <solr_name>  -s 2 -rf 2
+            #     core_uri = "{}/solr/admin/cores?action=CREATE&name={}".format(settings.SOLR_URI,solr_name)
+            #     core_create = requests.post(core_uri, auth=(SOLR_LOGIN, SOLR_PASSWORD), verify=SOLR_CERT)
+            #
+            #     # add schema to core
+            #     schema_uri = "{}/solr/{}/schema".format(settings.SOLR_URI,solr_name)
+            #     schema_load = requests.post(schema_uri, data=json.dumps({"add-field": solr_schema[src['name']]}),
+            #       headers={'Content-type': 'application/json'}, auth=(SOLR_LOGIN, SOLR_PASSWORD), verify=SOLR_CERT)
+            #
+            #     # query-to-file the table
+            #     # OR
+            #     # export from BQ console into GCS
+            #
+            #     # pull file to local
+            #     # gsutil cp gs://<BUCKET>/<CSV export> ./
+            #
+            #     # POST to Solr core
+            #     index_uri = "{}/solr/{}/update?commit=yes{}".format(settings.SOLR_URI,solr_name,"&".join(solr_index_vars))
+            #     index_load = requests.post(index_uri, files={'file': open('export.csv', 'rb')},
+            #       headers={'Content-type': 'application/csv'}, auth=(SOLR_LOGIN, SOLR_PASSWORD), verify=SOLR_CERT)
+
+        Attribute.data_sources.through.objects.bulk_create(attrs_to_srcs)
+    except Exception as e:
+        logger.error("[ERROR] Data Source {} may not have been added!".format(obj.name))
+        logger.exception(e)
+
 
 def add_attributes(attr_set):
 
@@ -157,7 +237,9 @@ def add_attributes(attr_set):
         for attr in attr_set:
             try:
                 obj = Attribute.objects.get(name=attr['name'], data_type=attr['type'])
+                logger.info("Attribute {} already located in the database - just updating...")
             except ObjectDoesNotExist:
+                logger.info("Attribute {} not found - creating".format(attr['name']))
                 obj, created = Attribute.objects.update_or_create(
                     name=attr['name'], display_name=attr['display_name'], data_type=attr['type'],
                     preformatted_values=True if 'preformatted_values' in attr else False,
@@ -210,10 +292,31 @@ def add_attributes(attr_set):
         logger.error("[ERROR] Attribute {} may not have been added!".format(attr['name']))
         logger.exception(e)
 
-def main(config):
+
+def copy_attrs(from_data_sources, to_data_sources):
+    to_sources = DataSource.objects.filter(name__in=to_data_sources)
+    from_sources = DataSource.objects.filter(name__in=from_data_sources)
+    to_sources_attrs = to_sources.get_source_attrs()
+    bulk_add = []
+
+    for fds in from_sources:
+        from_source_attrs = fds.attribute_set.exclude(id__in=to_sources_attrs['ids'])
+        logger.info("Copying {} attributes from {} to: {}.".format(
+            len(from_source_attrs.values_list('name',flat=True)),
+            fds.name, "; ".join(to_data_sources),
+
+        ))
+
+        for attr in from_source_attrs:
+            for ds in to_sources:
+                bulk_add.append(Attribute.data_sources.through(attribute_id=attr.id, datasource_id=ds.id))
+
+    Attribute.data_sources.through.objects.bulk_create(bulk_add)
+
+
+def main(config, make_attr=False):
 
     try:
-
         if 'programs' in config:
             for prog in config['programs']:
                 try:
@@ -221,7 +324,7 @@ def main(config):
                     logger.info("[STATUS] Program {} found - skipping creation.".format(prog))
                 except ObjectDoesNotExist:
                     logger.info("[STATUS] Program {} not found - creating.".format(prog))
-                    obj = Program.objects.update_or_create(name=prog['name'], owner=isb_superuser, active=True, is_public=True)
+                    obj = Program.objects.update_or_create(owner=isb_superuser, active=True, is_public=True, **prog)
 
         if 'projects' in config:
             for proj in config['projects']:
@@ -231,109 +334,34 @@ def main(config):
                     logger.info("[STATUS] Project {} found - skipping.".format(proj['name']))
                 except ObjectDoesNotExist:
                     logger.info("[STATUS] Project {} not found - creating.".format(proj['name']))
-                    obj = Project.objects.update_or_create(name=proj['name'], description=proj['description'], owner=isb_superuser, active=True, program=program)
+                    obj = Project.objects.update_or_create(name=proj['name'], owner=isb_superuser, active=True, program=program)
 
         if 'versions' in config:
             add_data_versions(config['versions'])
 
-        display_vals = {}
-        attr_set = {}
-        solr_schema = {}
-
         # Preload all display value information, as we'll want to load it into the attributes while we build that set
-        if exists(join(dirname(__file__), "display_vals.csv")):
-            attr_vals_file = open(join(dirname(__file__), "display_vals.csv"), "r")
+        if 'display_values' in config and exists(join(dirname(__file__), config['display_values'])):
+            attr_vals_file = open(join(dirname(__file__), config['display_values']), "r")
             line_reader = attr_vals_file.readlines()
 
             for line in line_reader:
                 line = line.strip()
                 line_split = line.split(",")
-                if line_split[0] not in display_vals:
-                    display_vals[line_split[0]] = {}
+                if line_split[0] not in DISPLAY_VALS:
+                    DISPLAY_VALS[line_split[0]] = {}
                     if line_split[1] == 'NULL':
-                        display_vals[line_split[0]]['preformatted_values'] = True
+                        DISPLAY_VALS[line_split[0]]['preformatted_values'] = True
                     else:
-                        display_vals[line_split[0]]['vals'] = [{'raw_value': line_split[1], 'display_value': line_split[2]}]
+                        DISPLAY_VALS[line_split[0]]['vals'] = [{'raw_value': line_split[1], 'display_value': line_split[2]}]
                 else:
-                    display_vals[line_split[0]]['vals'].append({'raw_value': line_split[1], 'display_value': line_split[2]})
+                    DISPLAY_VALS[line_split[0]]['vals'].append({'raw_value': line_split[1], 'display_value': line_split[2]})
 
             attr_vals_file.close()
 
-        for table in config['bq_tables']:
-            table_name = table['name'].split(".")
-            solr_name = table.get('solr_name',table_name[-1])
-            add_bq_tables([table['name']], table['version'], table['version_type'], table['programs'])
-            add_solr_collex([solr_name], table['version'], table['version_type'], table['programs'])
+        if 'data_sources' in config:
+            add_data_sources(config['data_sources'])
 
-            schema = BigQuerySupport.get_table_schema(table_name[0], table_name[1], table_name[2])
-
-            solr_schema[solr_name] = []
-
-            for field in schema:
-                if field['name'] not in attr_set:
-                    attr_type = Attribute.CATEGORICAL if (not re.search(r'(_id|_barcode)', field['name']) and field['type'] == "STRING") else Attribute.STRING if field['type'] == "STRING" else Attribute.CONTINUOUS_NUMERIC
-                    attr_set[field['name']] = {
-                        'name': field['name'],
-                        "display_name": field['name'].replace("_", " ").title() if re.search(r'_', field['name']) else
-                        field['name'],
-                        "type": attr_type,
-                        'solr_collex': [],
-                        'bq_tables': [],
-                        'display': (
-                            (attr_type == Attribute.STRING and not re.search('_id|_barcode',field['name'].lower())) or attr_type == Attribute.CATEGORICAL or field['name'].lower() in ranges_needed)
-                    }
-                attr = attr_set[field['name']]
-                attr['bq_tables'].append(table['name'])
-                attr['solr_collex'].append(solr_name)
-
-                if attr['name'] in display_vals:
-                    if 'preformatted_values' in display_vals[attr['name']]:
-                        attr['preformatted_values'] = True
-                    else:
-                        if 'display_vals' not in attr:
-                            attr['display_vals'] = []
-                        attr['display_vals'].extend(display_vals[attr['name']]['vals'])
-
-                if attr['name'] in display_vals:
-                    if 'preformatted_values' in display_vals[attr['name']]:
-                        attr['preformatted_values'] = True
-                    else:
-                        attr['display_vals'] = display_vals[attr['name']]['vals']
-
-                if 'range' not in attr:
-                    if attr['name'].lower() in ranges_needed:
-                        attr['range'] = ranges.get(ranges_needed.get(attr['name'], ''), [])
-
-                solr_schema[solr_name].append({
-                    "name": field['name'], "type": SOLR_TYPES[field['type']], "multiValued": False, "stored": True
-                })
-
-            with open("solr_schemas.json", "w") as schema_outfile:
-                json.dump(solr_schema, schema_outfile)
-
-            schema_outfile.close()
-
-            # add core to Solr
-            # sudo -u solr /opt/bitnami/solr/bin/solr create -c <solr_name>  -s 2 -rf 2
-            core_uri = "{}/solr/admin/cores?action=CREATE&name={}".format(settings.SOLR_URI,solr_name)
-            core_create = requests.post(core_uri, auth=(SOLR_LOGIN, SOLR_PASSWORD), verify=SOLR_CERT)
-
-            # add schema to core
-            schema_uri = "{}/solr/{}/schema".format(settings.SOLR_URI,solr_name)
-            schema_load = requests.post(schema_uri, data=json.dumps({"add-field": solr_schema[table_name[2]]}), headers={'Content-type': 'application/json'}, auth=(SOLR_LOGIN, SOLR_PASSWORD), verify=SOLR_CERT)
-
-            # query-to-file the table
-            # OR
-            # export from BQ console into GCS
-
-            # pull file to local
-            # gsutil cp gs://<BUCKET>/<CSV export> ./
-
-            # POST to Solr core
-            index_uri = "{}/solr/{}/update?commit=yes".format(settings.SOLR_URI,solr_name)
-            index_load = requests.post(index_uri, files={'file': open('export.csv', 'rb')}, headers={'Content-type': 'application/csv'}, auth=(SOLR_LOGIN, SOLR_PASSWORD), verify=SOLR_CERT)
-
-        add_attributes([attr_set[x] for x in attr_set])
+        len(ATTR_SET) and make_attr and add_attributes([ATTR_SET[x] for x in ATTR_SET])
 
     except Exception as e:
         logging.exception(e)
@@ -342,19 +370,20 @@ def main(config):
 if __name__ == "__main__":
     cmd_line_parser = ArgumentParser(description="Extract a data source from BigQuery and ETL it into Solr")
     cmd_line_parser.add_argument('-j', '--json-config-file', type=str, default='', help="JSON settings file")
+    cmd_line_parser.add_argument('-a', '--parse_attributes', type=str, default='False', help="Attempt to create/update attributes from the sources")
 
     args = cmd_line_parser.parse_args()
 
     if not len(args.json_config_file):
-        print("[ERROR] You must supply a JSON settings file!")
+        logger.info("[ERROR] You must supply a JSON settings file!")
         cmd_line_parser.print_help()
         exit(1)
 
     if not exists(join(dirname(__file__),args.json_config_file)):
-        print("[ERROR] JSON config file {} not found.".format(args.json_config_file))
+        logger.info("[ERROR] JSON config file {} not found.".format(args.json_config_file))
         exit(1)
 
     f = open(join(dirname(__file__),args.json_config_file), "r")
     settings = json.load(f)
 
-    main(settings)
+    main(settings, (args.parse_attributes == 'True'))
