@@ -78,10 +78,7 @@
 {% block content %}
 
 <script>
-   window.selItems = new Object();
-   window.selItems.selProjects = new Array();
-   window.selItems.selStudies = new Object();
-   window.collection = {{ collections|tojson|safe }};
+   var cohort_loaded  = false;
 </script>
 
 {% include "idc/explore_data_core_demo.html" %}
