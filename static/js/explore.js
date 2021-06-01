@@ -49,28 +49,30 @@ require([
             '#search_related_set .search-checkbox-list input:checked, ' +
             '#search_derived_set .search-checkbox-list input:checked').each(function(){
 
-            let modal_filter_block = '';
-            if($(this).parents('#program_set').length > 0) {
-                modal_filter_block = '#selected-filters-prog-set';
-            } else if($(this).parents('#search_orig_set').length > 0) {
-                modal_filter_block = '#selected-filters-orig-set';
-            } else if($(this).parents('#search_related_set').length > 0) {
-                modal_filter_block = '#selected-filters-rel-set';
-            } else if($(this).parents('#search_derived_set').length > 0) {
-                modal_filter_block = '#selected-filters-der-set';
-            }
+            if (!$(this).hasClass('hide-zeros')) {
+                let modal_filter_block = '';
+                if ($(this).parents('#program_set').length > 0) {
+                    modal_filter_block = '#selected-filters-prog-set';
+                } else if ($(this).parents('#search_orig_set').length > 0) {
+                    modal_filter_block = '#selected-filters-orig-set';
+                } else if ($(this).parents('#search_related_set').length > 0) {
+                    modal_filter_block = '#selected-filters-rel-set';
+                } else if ($(this).parents('#search_derived_set').length > 0) {
+                    modal_filter_block = '#selected-filters-der-set';
+                }
 
-            if($(`${modal_filter_block} p.`+$(this).data('filter-attr-id')).length <= 0) {
-                $(`${modal_filter_block}`).append('<p class="cohort-filter-display '+$(this).data('filter-attr-id')
-                    +'"><span class="attr">'+$(this).data('filter-display-attr')+':</span></p>');
+                if ($(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).length <= 0) {
+                    $(`${modal_filter_block}`).append('<p class="cohort-filter-display ' + $(this).data('filter-attr-id')
+                        + '"><span class="attr">' + $(this).data('filter-display-attr') + ':</span></p>');
+                }
+                $(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).append(
+                    '<span class="val">' + $(this).data('filter-display-val') + '</span>'
+                );
+                if (!filters[$(this).data('filter-attr-id')]) {
+                    filters[$(this).data('filter-attr-id')] = [];
+                }
+                filters[$(this).data('filter-attr-id')].push($(this).prop('value'));
             }
-             $(`${modal_filter_block} p.`+$(this).data('filter-attr-id')).append(
-                 '<span class="val">'+$(this).data('filter-display-val')+'</span>'
-             );
-            if(!filters[$(this).data('filter-attr-id')]) {
-                filters[$(this).data('filter-attr-id')] = [];
-            }
-            filters[$(this).data('filter-attr-id')].push($(this).prop('value'));
         });
 
         $('.ui-slider').each(function() {

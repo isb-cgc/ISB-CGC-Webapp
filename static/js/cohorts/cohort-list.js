@@ -513,6 +513,7 @@ require([
         let url = '/cohorts/'+id+'/stats/?update=true'
         url = encodeURI(url);
         var ntxt="";
+        $('#version_d').find('#ui-id-1')[0].innerHTML='Comparing Versions of Cohort '+id;
         $('.spinner').show();
         $.ajax({
             url: url,
@@ -520,16 +521,23 @@ require([
             type: 'get',
             contentType: 'application/x-www-form-urlencoded',
             success: function (data) {
-               ntxt += "<table class='table'><tr><th></th><th>Original Version</th><th>Current Version</th></tr>";
-               ntxt += "<tr><td># Cases</td> <td>"+case_col+"</td> <td>"+data['PatientID'].toString()+"</td> </tr>";
-               ntxt += "<tr><td># Studies</td> <td>"+study_col+"</td> <td>"+data['StudyInstanceUID'].toString()+"</td> </tr>";
-               ntxt += "<tr><td># Series</td> <td>"+series_col+"</td> <td>"+data['SeriesInstanceUID'].toString()+"</td> </tr>";
-               ntxt += "</table> <br>"
-               ntxt += "<button onclick=\"location.href = '/explore/?cohort_id="+id+"';\">Load New Version</button>"
+                $('#version_d').show();
+                var pageWidth = window.innerWidth;
+                var pageHeight = window.innerHeight;
+                var myElementWidth = document.getElementById('version_d').offsetWidth;
+                var myElementHeight = document.getElementById('version_d').offsetHeight;
+                document.getElementById('version_d').style.top = (pageHeight / 2) - (myElementHeight / 2) + "px";
+                document.getElementById('version_d').style.left = (pageWidth / 2) - (myElementWidth / 2) + "px";
+                $('#version_d').find('.case_o')[0].innerHTML=case_col;
+                $('#version_d').find('.case_c')[0].innerHTML=data['PatientID'].toString();
 
-               $("#dialog-1")[0].innerHTML = ntxt;
-               $("#dialog-1").dialog('option','title','Comparing Versions of Cohort '+id);
-               $("#dialog-1").dialog('open');
+                $('#version_d').find('.study_o')[0].innerHTML=study_col;
+                $('#version_d').find('.study_c')[0].innerHTML=data['StudyInstanceUID'].toString();
+
+                $('#version_d').find('.series_o')[0].innerHTML=series_col;
+                $('#version_d').find('.series_c')[0].innerHTML=data['SeriesInstanceUID'].toString();
+
+
                $('.spinner').hide();
             },
             error: function () {
@@ -540,9 +548,7 @@ require([
     }
 
     $(document).ready(function () {
-        $( "#dialog-1" ).dialog();
-        $( "#dialog-1" ).dialog("option","width", 400);
-        $( "#dialog-1" ).dialog('close');
-
+        $('#version_d').hide();
+        
     });
 });
