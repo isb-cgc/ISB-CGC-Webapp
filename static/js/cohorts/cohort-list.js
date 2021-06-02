@@ -549,6 +549,6 @@ require([
 
     $(document).ready(function () {
         $('#version_d').hide();
-        
+
     });
 });

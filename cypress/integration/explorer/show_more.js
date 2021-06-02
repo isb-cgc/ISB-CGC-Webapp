@@ -4,6 +4,9 @@ const checkVis = ($el, index, cutoff)=>{
        
    cy.get($el).children('.list-group-item__heading').find('a').as('nextBut');
    cy.get('@nextBut').click({force: true});
+
+
+
    cy.get($el).children('.list-group-item__body').find('.checkbox').as('checkboxes')
    cy.get('@checkboxes').not('.extra-values').as('notExtras');
    cy.get('@notExtras').its('length').should('be.lt',cutoff);
@@ -22,6 +25,8 @@ const checkVis = ($el, index, cutoff)=>{
         })
       }
    })
+
+  
  }
 
 
@@ -47,11 +52,43 @@ describe('Tests show more functionality', () => {
     cy.wait(1000);
     cy.get('#Program_heading').scrollIntoView().find('a').click({force:true});
     cy.get('#Program_list').should('be.visible');
+
+
+   cy.get('#Program_list').children('.list-group-item').children('.list-group-item__heading').find('.checkbox').as('checkboxes')
+   cy.get('@checkboxes').not('.extra-values').as('notExtras');
+   cy.get('@notExtras').its('length').should('be.lt',this.show.showMoreCutOff);
+   cy.get('@notExtras').each( function($not,index1)  {
+        cy.get($not).scrollIntoView().should('not.have.class','notDisp');
+        
+    })
+
+    cy.get('@checkboxes').filter('.extra-values').as('extras')
+    cy.get('@extras').each( function($not,index1)  {
+        cy.get($not).scrollIntoView().should('have.class','notDisp');
+        
+    })
+
+
+
+    
+
+
+/*
+    cy.get('@extras').each( ($is,index1) => {
+             cy.get($is).should('have.class','notDisp');
+         });
+    
+    
+   
+
+   
     cy.get('#TCGA_heading').children('a').click( {force : true});
     cy.get('#TCGA').find('.search-checkbox-list').children('.checkbox').as('checkboxes');
     cy.get('@checkboxes').not('.extra-values').as('notExtras');
     cy.get('@notExtras').its('length').should('be.lt',this.show.showMoreCutOff);
-    cy.get('@notExtras').each( ($el,index) => {
+
+   
+   cy.get('@notExtras').each( ($el,index) => {
         cy.get($el).should('be.visible');
      })
 
@@ -65,10 +102,11 @@ describe('Tests show more functionality', () => {
         cy.get($el).should('be.visible');
      })
     cy.get('#TCGA_heading').children('a').click( {force : true});
+ */
 
  })
 
-
+/*
  it ('Show more checkboxes orig', function() {
     cy.get('#search_orig').scrollIntoView();
     cy.get('#search_orig').children('a').click({force:true});
@@ -94,8 +132,8 @@ describe('Tests show more functionality', () => {
       })  
     }) 
  }) 
-
-
+*/
+/*
  it ('Show more checkboxes related', function() {
      cy.get('#search_related').children('a').scrollIntoView().click({force:true});
      cy.get('#tcga_clinical_heading').children('a').click({force:true});
@@ -109,5 +147,5 @@ describe('Tests show more functionality', () => {
 
      })  
  })  
-
+*/
 })
