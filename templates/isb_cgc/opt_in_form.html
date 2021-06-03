@@ -57,7 +57,7 @@
                         <p>You can learn more about ISB-CGC at <a href="/" target="_blank" rel="noreferrer">isb-cgc.org</a>.</p>
                         <br>
 
-                        <form id="opt-in-form">
+                        <form id="opt-in-form" method="POST" action="{% url 'opt_in_form_submitted' %}">
                             {% csrf_token %}
                             {% if user.is_authenticated %}
                                 <input type="hidden" name="first-name" id="first-name" required value="{{ first_name }}">

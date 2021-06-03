@@ -57,7 +57,6 @@ require([
     });
 
     $('#opt-in-form').on('submit', function (event) {
-        event.preventDefault();
         $('#invalid-opt-in-alert').hide();
 
         var form = this;

@@ -79,6 +79,21 @@ function($, tree_graph, stack_bar_chart) {
             gender: 'Gender',
             ethnicity: 'Race',
             age_at_diagnosis: 'Age at Diagnosis'
+        },
+        'FM': {
+            morphology: 'Morphology',
+            vital_status: 'Vital Status',
+            tissue_or_organ_of_origin: 'Tissue or Organ of Origin',
+            primary_site: 'Primary Site',
+            site_of_resection_or_biopsy: 'Site of Resection or Biopsy'
+        },
+        'ANY':{
+            project_short_name: 'Project',
+            morphology: 'Morphology',
+            vital_status: 'Vital Status',
+            gender: 'Gender',
+            ethnicity: 'Race',
+            age_at_diagnosis: 'Age at Diagnosis'
         }
     };
 
@@ -146,6 +161,9 @@ function($, tree_graph, stack_bar_chart) {
             }
 
             var clin_tree_attr = program_id <= 0 ? user_data_attr : PROG_CLIN_TREES[$('#'+program_id+'-data-filter-panel').data('prog-displ-name')];
+            if(!clin_tree_attr) {
+                clin_tree_attr = PROG_CLIN_TREES['ANY']
+            }
 
             var context = this;
             var filters = {};
