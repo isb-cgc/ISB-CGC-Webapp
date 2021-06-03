@@ -929,7 +929,7 @@ def opt_in_form_submitted(request):
                     "submitted_time": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
                 }
                 BigQueryFeedbackSupport.add_rows_to_table([feedback_row])
-
+                # send a notification to feedback@isb-cgc.org about the entry
                 if settings.IS_UAT:
                     logger.info("[STATUS] UAT: sent email for feedback")
                 else:

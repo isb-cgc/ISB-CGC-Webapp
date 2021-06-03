@@ -855,9 +855,24 @@ require([
                         var this_attr = data.metadata_data_attr[i];
                         for(var j=0; j < this_attr.values.length; j++) {
                             var this_val = this_attr.values[j];
+                            var attr = '#' + active_tab + '-' + data.build + '-' + this_attr.name;
                             if(this_val.count || this_val.count == 0) {
-                                $('#' + active_tab + '-' + data.build + '-' + this_attr.name + '-' + this_val.value).siblings('span.count').html(this_val.count.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'));
-                                $('#' + active_tab + '-' + data.build + '-' + this_attr.name + '-' + this_val.value).attr('data-count', this_val.count);
+                                // Previously unseen value, we need to add it in.
+                                if($(attr + '-' + this_val.value).length <= 0) {
+                                    let display = this_val.value == 'None' ? "<em>None</em>" : (this_val.displ_value ? this_val.displ_value : this_val.name);
+                                    $(attr).append(`<li class="checkbox"><label title="`+this_val.toolip || ""+`">` +
+                                        `<input type="checkbox" name="elements-selected" data-value-name="` +
+                                            this_val.name+`" id="`+attr+`-`+this_val.name+`" ` +
+                                            `data-feature-name="`+ this_attr.name +`" data-count="`+this_val.count+`"> ` +
+                                            display + `<span class="float-right file_count count">`+
+                                            this_val.count.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') +
+                                            `</span></label></li>`)
+                                }
+                                $('#' + active_tab + '-' + data.build + '-' + this_attr.name + '-' + this_val.value)
+                                    .siblings('span.count').html(this_val.count.toString()
+                                    .replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'));
+                                $('#' + active_tab + '-' + data.build + '-' + this_attr.name + '-' + this_val.value)
+                                    .attr('data-count', this_val.count);
                             }
                         }
                     }
