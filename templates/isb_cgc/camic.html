@@ -33,11 +33,11 @@
 {% block page_header %}
     <div class="container camic-header-container">
         <div class="pull-left logo">
-            <a href="http://imaging.cci.emory.edu/wiki/display/CAMIC/Home" target="_blank">
+            <a href="http://imaging.cci.emory.edu/wiki/display/CAMIC/Home" target="_blank" rel="noreferrer">
                 <img class="header-camic-logo" alt="caMicroscope Logo" src="{% static 'img/camic_logo.png' %}" />
             </a>
         </div>
-        <h1 class="page-header pull-left"><a href="http://imaging.cci.emory.edu/wiki/display/CAMIC/Home" target="_blank">caMicroscope</a></h1>
+        <h1 class="page-header pull-left"><a href="http://imaging.cci.emory.edu/wiki/display/CAMIC/Home" target="_blank" rel="noreferrer">caMicroscope</a></h1>
     </div>
 {% endblock %}
 
@@ -61,7 +61,7 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <input type="submit" form ="view-camic" value="Open in new tab" class="btn btn-primary pull-right nocap" />
-                                <form id="view-camic" method="POST" action="{% url 'camic_barcode' barcodes.0.barcode %}" target="_blank">
+                                <form id="view-camic" method="POST" action="{% url 'camic_barcode' barcodes.0.barcode %}" target="_blank" rel="noreferrer">
                                     {% csrf_token %}
                                 </form>
                             </div>

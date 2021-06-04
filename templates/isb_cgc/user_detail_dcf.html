@@ -38,10 +38,13 @@
     {% elif not user_details.NIH_username %}
         <div>Apply for dbGaP Authorized Access to access underlying Level 1 genomics data.</div>
 
-        <div>Associate your account with your eRA Commons Account</div>
+        <div>
+            Associate your account with your {% if idp == 'ras' %}RAS{% else %}eRA Commons{% endif %} Account
+        </div>
+
         <div class="text-right"><a class="sm_btn" data-toggle="modal" data-target="#link-nih-account-modal">
-            <i class="fa fa-link" aria-hidden="true"></i>Associate with eRA Account</a></div>
-        <div class="text-right"><a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank"><i
+        <i class="fa fa-link" aria-hidden="true"></i>Associate with {% if idp == 'ras' %}RAS{% else %}eRA{% endif %} Account</a></div>
+        <div class="text-right"><a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank" rel=“noreferrer”><i
                 class="fa fa-book" aria-hidden="true"></i>Learn More</a></div>
         {#        <div><a data-toggle="modal" data-target="#link-nih-account-modal">Associate with eRA Commons Account</a></div>#}
 
@@ -78,16 +81,16 @@
                 class="fa fa-chain-broken" aria-hidden="true"></i>Unlink</a></div>
         {# They are linked and active, but have no datasets they are authorized for #}
     {% elif not user_details.dbGaP_has_datasets %}
-        <div><i class="fa fa-check-circle"></i> eRA Account Authenticated</div>
+        <div><i class="fa fa-check-circle"></i> {% if idp == 'ras' %}RAS{% else %}eRA{% endif %} Account Authenticated</div>
         <hr>
         <div>Congratulations, <samp>{{ user_details.NIH_username }}</samp>!<br/>
-            <i class="fa fa-exclamation-circle" aria-hidden="true"></i>Your eRA account has been authenticated, but we do not
+            <i class="fa fa-exclamation-circle" aria-hidden="true"></i>Your {% if idp == 'ras' %}RAS{% else %}eRA{% endif %} account has been authenticated, but we do not
             currently have any authorized datasets on record for this NIH username. Recently authorized datasets may take up to 24
             hours to verify. If you believe this is in error, please contact dbGaP and inquire about your status on the
             dataset whitelists.
         </div>
         <div class="text-right">
-            <a  href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank"><i
+            <a  href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank" rel=“noreferrer”><i
                 class="fa fa-book" aria-hidden="true"></i>Learn How to Apply for dbGaP Access</a>
         </div>
         <div><label><i class="fa fa-clock-o" aria-hidden="true"></i>Access Valid Until:</label></div>
@@ -119,12 +122,12 @@
                     <tr>
                         <td>
                             <a href="https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id={{ dataset.whitelist_id }}"
-                               target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i>{{ dataset.name }}
+                               target="_blank" rel=“noreferrer”><i class="fa fa-external-link" aria-hidden="true"></i>{{ dataset.name }}
                             </a></td>
                         <td>{% if not dataset.public %} {{ dataset.whitelist_id }}{% endif %}</td>
                         <td>{% if dataset.duca_id %}
                             <a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc={{ dataset.duca_id }}"
-                               target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i>View</a>{% endif %}
+                               target="_blank" rel=“noreferrer”><i class="fa fa-external-link" aria-hidden="true"></i>View</a>{% endif %}
                         </td>
                     </tr>
                 {% endfor %}

@@ -10,6 +10,7 @@
             </div>
         </div>
         <div class="panel panel-default filter-panel">
+            <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
             {% for attr_build, vals in metadata_data_attr.items %}
             <div class="panel-body tab-content filter-build-panel" data-filter-build="{{ attr_build }}" id="igv-filter-panel-{{ attr_build }}" {% if build != attr_build %}style="display: none;"{% endif %}>
                 <ul class="list-group" id="metadata-data-accordian-igv" role="tablist" aria-multiselectable="true">
@@ -59,7 +60,6 @@
                                                     </label>
                                                 </li>
                                             {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                 <li class="extra-values checkbox" style="display:none;">
                                                     <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
                                                         <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="igv-{{ attr_build }}-{{ attr.name}}-{{ v.value }}"
@@ -80,6 +80,7 @@
                                             {% endif %}
                                         {% endfor %}
                                         {% if num_more > 0 %}
+                                            <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                             <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks text-right"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                         {% endif %}
                                     {% endwith %}
@@ -108,7 +109,7 @@
                 <div id="tokenfield-holder-igv">
                     <!-- "IGV selected files tokenizer" -->
                     <textarea name="selected-files-igv" class="form-control tokenfield" id="selected-files-igv" placeholder="Select files" aria-label="Hidden Selected Files"></textarea>
-                    <form id="view-igv" method="POST" action="{% url 'igv' %}" target="_blank">
+                    <form id="view-igv" method="POST" action="{% url 'igv' %}" target="_blank" rel=“noreferrer”>
                         <input type="text" class="hidden_form_value" id="checked_list_input" name="checked_list" data-type="checked_list" aria-label="Hidden Checked List">
                         <input type="text" class="hidden_form_value" id="igv-form-build" name="build" value="{{ build }}" aria-label="Hidden IGV Build">
                         {% csrf_token %}
@@ -118,7 +119,7 @@
         </div>
         <div class="filelist-panel panel">
             <div class="panel-heading">
-                <h4>File Listing</h4>
+                <h4>Sample File Listing</h4>
                 <div class="page-action-group pull-right">
                     <ul>
                         <li class="menu-item">
@@ -139,7 +140,7 @@
             </div>
             <div class="panel-body">
                 <div class="dataTables_info">
-                    <span class="file-page-count">Showing <span class="showing">25</span> of <span class="total-file-count"></span> entries</span>
+                    <span class="file-page-count">Showing <span class="showing">25</span> of <span class="total-file-count"></span> sample files</span>
                     <span class="no-file-page-count" style="display: none;">Showing 0 files.</span>
                     <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
                 </div>
@@ -160,7 +161,7 @@
                     </div>
                     <div class="dataTables_paginate">
                         <a class="prev-page paginate_button dataTables_button disabled">Previous</a>
-                        <span class="paginate_button_space"/>
+                        <span class="paginate_button_space"></span>
                         <a class="next-page paginate_button dataTables_button">Next</a>
                     </div>
                 </div>
@@ -178,6 +179,7 @@
                         <tr>
                             <th class="col-program" columnId="col-program">Program</th>
                             <th class="col-barcode" columnId="col-barcode">Case Barcode</th>
+                            <th class="col-sbarcode" columnId="col-sbarcode">Sample Barcode</th>
                             <th class="col-filename"columnId="col-filename">File Name</th>
                             <th class="col-diseasecode" columnId="col-diseasecode">Disease Code</th>
                             <th class="col-exp-strategy" columnId="col-exp-strategy">Exp. Strategy</th>
@@ -191,12 +193,13 @@
                     </thead>
                     <colgroup>
                         <col style="width: 9%">
-                        <col style="width: 12%">
-                        <col style="width: 19%">
+                        <col style="width: 10%">
+                        <col style="width: 7%">
+                        <col style="width: 15%">
                         <col style="width: 9%">
                         <col style="width: 9%">
                         <col style="width: 8%">
-                        <col style="width: 11%">
+                        <col style="width: 10%">
                         <col style="width: 7%">
                         <col style="width: 7%">
                         <col style="width: 5%">
@@ -212,4 +215,5 @@
 <script type="text/javascript">
     var total_files = {{ total_file_count|safe }};
     var file_listing = {{ file_list|tojson|safe }};
+    var build_total_files = { 'HG19': undefined, 'HG38': undefined };
 </script>

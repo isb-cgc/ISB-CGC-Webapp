@@ -283,7 +283,7 @@
                 <section class="panel panel-default">
                     <div class="panel-heading">
                         <h3 class="panel-title">
-                            <a href="{% url 'workbooks' %}">Saved Workbooks ({{ workbooks.count }})</a>
+                            <a href="{% url 'workbooks' %}">Saved Workbooks ({{ workbooks_count }})</a>
                         </h3>
                         <div class="min-max">
                             <a data-toggle="collapse" aria-label="Open/Close Workbook" href="#workbook-panel"><i
@@ -294,8 +294,8 @@
                         <div class="panel-body">
                             <p>Workbooks store the analyses you create, and their related data.</p>
                             <ul class="table-list">
-                                {% if workbooks.count > 0 %}
-                                    {% for workbook in workbooks|slice:':6' %}
+                                {% if workbooks_count > 0 %}
+                                    {% for workbook in workbooks %}
                                         <li>
                                             <a href="{% url 'workbook_detail' workbook.id %}"
                                                title="{{ workbook.name|title|wrap_text }}">
@@ -309,7 +309,7 @@
                                             </a>
                                         </li>
                                     {% endfor %}
-                                    {% if workbooks.count > 6 %}
+                                    {% if workbooks_count > 6 %}
                                         <a class="btn btn-link" href="{% url 'workbooks' %}">View All</a>
                                     {% endif %}
                                 {% endif %}
@@ -337,7 +337,7 @@
                 <section class="panel panel-default">
                     <div class="panel-heading">
                         <h3 class="panel-title">
-                            <a href="{% url 'cohort_list' %}">Saved Cohorts ({{ cohorts.count }})</a>
+                            <a href="{% url 'cohort_list' %}">Saved Cohorts ({{ cohorts_count }})</a>
                         </h3>
                         <div class="min-max">
                             <a data-toggle="collapse" aria-label="Open/Collapse Saved Cohorts" href="#cohorts-panel"><i
@@ -346,9 +346,9 @@
                     </div>
                     <div id="cohorts-panel" class="panel panel-collapse collapse in" aria-expanded="true">
                         <div class="panel-body">
-                            {% if cohorts.count > 0 %}
+                            {% if cohorts_count > 0 %}
                                 <ul class="table-list">
-                                    {% for cohort in cohorts|slice:':6' %}
+                                    {% for cohort in cohorts %}
                                         <li>
                                             <a href="{% url 'cohort_details' cohort.id %}">
                                                 <div class="list-main col-3">
@@ -374,7 +374,7 @@
                                             </div>
                                         </li>
                                     {% endfor %}
-                                    {% if cohorts.count > 6 %}
+                                    {% if cohorts_count > 6 %}
                                         <a class="btn btn-link float-right" href="{% url 'cohort_list' %}">View all</a>
                                     {% endif %}
                                 </ul>
@@ -397,89 +397,85 @@
                 </section>
             </div>
             <div class="col-md-6">
-                {% with gene_fave_count=genefaves.count genefaves_sorted=genefaves|sort_last_save %}
-                    <section class="panel panel-default">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">
-                                <a href="{% url 'genes' %}">Gene & miRNA Favorites ({{ gene_fave_count }})</a>
-                            </h3>
-                            <div class="min-max">
-                                <a data-toggle="collapse" aria-label="Open/Collapse Gene & miRNA Favorites"
-                                   href="#gene-fave-panel"><i class="show fa fa-angle-double-up"></i></a>
-                            </div>
+                <section class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <a href="{% url 'genes' %}">Gene & miRNA Favorites ({{ genefaves_count }})</a>
+                        </h3>
+                        <div class="min-max">
+                            <a data-toggle="collapse" aria-label="Open/Collapse Gene & miRNA Favorites"
+                               href="#gene-fave-panel"><i class="show fa fa-angle-double-up"></i></a>
                         </div>
-                        <div id="gene-fave-panel" class="panel panel-collapse collapse" aria-expanded="false">
-                            <div class="panel-body">
-                                {% if gene_fave_count > 0 %}
-                                    <ul class="table-list">
-                                        {% for genefavorite in genefaves_sorted|slice:':6' %}
-                                            <li>
-                                                <a href="{% url 'gene_fav_detail' genefavorite.id %}">
-                                                    <div class="list-main">
-                                                        <span class="list-title"
-                                                              title="{{ genefavorite.name|wrap_text }}">{{ genefavorite.name }}</span>
-                                                    </div>
-                                                    <div class="list-info">
-                                                        <span>{{ genefavorite.last_date_saved|date:'M d, Y, g:i a' }}</span>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                    {% if gene_fave_count > 6 %}
-                                        <a href="{% url 'genes' %}" class="btn btn-link float-right">View All</a>
+                    </div>
+                    <div id="gene-fave-panel" class="panel panel-collapse collapse" aria-expanded="false">
+                        <div class="panel-body">
+                            {% if genefaves_count > 0 %}
+                                <ul class="table-list">
+                                    {% for genefavorite in genefaves %}
+                                        <li>
+                                            <a href="{% url 'gene_fav_detail' genefavorite.id %}">
+                                                <div class="list-main">
+                                                    <span class="list-title"
+                                                          title="{{ genefavorite.name|wrap_text }}">{{ genefavorite.name }}</span>
+                                                </div>
+                                                <div class="list-info">
+                                                    <span>{{ genefavorite.last_date_saved|date:'M d, Y, g:i a' }}</span>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                                {% if genefaves_count > 6 %}
+                                    <a href="{% url 'genes' %}" class="btn btn-link float-right">View All</a>
+                                {% endif %}
+                            {% else %}
+                                <p>You don't have any saved Gene & miRNA Favorites.</p>
+                            {% endif %}
+                            <a href="{% url 'gene_fav_create' %}" class="nocap btn btn-link pull-right"><i
+                                    class="fa fa-plus"></i>Create Gene & miRNA Favorites</a>
+                        </div>
+                    </div>
+                </section>
+                <section class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <a href="{% url 'variables' %}">Variable Favorites ({{ varfaves_count }})</a>
+                        </h3>
+                        <div class="min-max">
+                            <a data-toggle="collapse" aria-label="Open/Collapse Variable Favorites"
+                               href="#var-faves-panel"><i class="show fa fa-angle-double-up"></i></a>
+                        </div>
+                    </div>
+                    <div id="var-faves-panel" class="panel panel-collapse collapse" aria-expanded="false">
+                        <div class="panel-body">
+                            {% if varfaves_count > 0 %}
+                                <ul class="table-list">
+                                    {% for variablefavorite in varfaves %}
+                                        <li>
+                                            <a href="{% url 'variable_fav_detail' variablefavorite.id %}">
+                                                <div class="list-main">
+                                                    <span class="list-title"
+                                                          title="{{ variablefavorite.name|wrap_text }}">{{ variablefavorite.name }}</span>
+                                                </div>
+                                                <div class="list-info">
+                                                    <span>{{ variablefavorite.last_date_saved|date:'M d, Y, g:i a' }}</span>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                    {% if varfaves_count > 6 %}
+                                        <a href="{% url 'variables' %}" class="btn btn-link float-right">View
+                                            All</a>
                                     {% endif %}
-                                {% else %}
-                                    <p>You don't have any saved Gene & miRNA Favorites.</p>
-                                {% endif %}
-                                <a href="{% url 'gene_fav_create' %}" class="nocap btn btn-link pull-right"><i
-                                        class="fa fa-plus"></i>Create Gene & miRNA Favorites</a>
-                            </div>
+                                </ul>
+                            {% else %}
+                                <p>You don't have any saved Variable Favorites.</p>
+                            {% endif %}
+                            <a href="{% url 'variable_fav_create' %}" class="btn btn-link pull-right"><i
+                                    class="fa fa-plus"></i>Create Variable Favorites</a>
                         </div>
-                    </section>
-                {% endwith %}
-                {% with varfave_count=varfaves.count %}
-                    <section class="panel panel-default">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">
-                                <a href="{% url 'variables' %}">Variable Favorites ({{ varfave_count }})</a>
-                            </h3>
-                            <div class="min-max">
-                                <a data-toggle="collapse" aria-label="Open/Collapse Variable Favorites"
-                                   href="#var-faves-panel"><i class="show fa fa-angle-double-up"></i></a>
-                            </div>
-                        </div>
-                        <div id="var-faves-panel" class="panel panel-collapse collapse" aria-expanded="false">
-                            <div class="panel-body">
-                                {% if varfave_count > 0 %}
-                                    <ul class="table-list">
-                                        {% for variablefavorite in varfaves|sort_last_save|slice:':6' %}
-                                            <li>
-                                                <a href="{% url 'variable_fav_detail' variablefavorite.id %}">
-                                                    <div class="list-main">
-                                                        <span class="list-title"
-                                                              title="{{ variablefavorite.name|wrap_text }}">{{ variablefavorite.name }}</span>
-                                                    </div>
-                                                    <div class="list-info">
-                                                        <span>{{ variablefavorite.last_date_saved|date:'M d, Y, g:i a' }}</span>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                        {% endfor %}
-                                        {% if varfave_count > 6 %}
-                                            <a href="{% url 'variables' %}" class="btn btn-link float-right">View
-                                                All</a>
-                                        {% endif %}
-                                    </ul>
-                                {% else %}
-                                    <p>You don't have any saved Variable Favorites.</p>
-                                {% endif %}
-                                <a href="{% url 'variable_fav_create' %}" class="btn btn-link pull-right"><i
-                                        class="fa fa-plus"></i>Create Variable Favorites</a>
-                            </div>
-                        </div>
-                    </section>
-                {% endwith %}
+                    </div>
+                </section>
             </div>
         </div>
 
@@ -487,7 +483,7 @@
             <hr>
             <div class="row">
                 <div class="col-md-12">
-                    {% with program_count=programs.count %}
+                    {% with program_count=programs_count %}
                         <section class="panel panel-default">
                             <div class="panel-heading">
                                 <h3 class="panel-title">
@@ -503,7 +499,7 @@
                                     <p>You can upload data from your own research programs.</p>
                                     {% if program_count > 0 %}
                                         <ul class="table-list">
-                                            {% for program in programs|slice:':6' %}
+                                            {% for program in programs %}
                                                 <li>
                                                     <a href="{% url 'program_detail' program.id %}">
                                                         <p class="list-title">{{ program.name }}</p>

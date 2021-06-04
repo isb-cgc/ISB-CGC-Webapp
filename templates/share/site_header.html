@@ -41,7 +41,7 @@
                                 <li role="menuitem"><a href="{% url 'bq_meta_search' %}">BigQuery Table Search</a>
                                 </li>
                                 <li role="menuitem"><a href="/cohorts/filelist/">Cancer Data File Browser</a></li>
-                                <li role="menuitem"><a href="https://mitelmandatabase.isb-cgc.org" target="_blank">Chromosomal
+                                <li role="menuitem"><a href="https://mitelmandatabase.isb-cgc.org" target="_blank" rel=“noreferrer”>Chromosomal
                                     Aberrations & Gene Fusions DB
                                 </a></li>
                             </ul>
@@ -66,15 +66,15 @@
                                 </li>
                                 <li role="menuitem"><a
                                         href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/RegulomeExplorerNotebooks.html"
-                                        target="_blank">Statistical
+                                        target="_blank" rel=“noreferrer”>Statistical
                                 </a></li>
                                 <li role="menuitem"><a
                                         href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html"
-                                        target="_blank">Community
+                                        target="_blank" rel=“noreferrer”>Community
                                 </a></li>
                                 <li role="menuitem"><a
                                         href="https://github.com/isb-cgc/Community-Notebooks"
-                                        target="_blank">GitHub Repo
+                                        target="_blank" rel=“noreferrer”>GitHub Repo
                                 </a></li>
                                 <li role="separator" class="divider"></li>
                                 <li role="menuitem"><a
@@ -83,7 +83,7 @@
                                         {% else %}
                                             href="{% url 'user_detail_login' %}"
                                         {% endif %}
-                                        target="_blank">Controlled Access Data
+                                        target="_blank" rel=“noreferrer”>Controlled Access Data
                                 </a></li>
 
                             </ul>
@@ -91,11 +91,15 @@
                     </li>
 
                     <li class="navbar-link navbar-item">
-                        <a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a>
+                        <a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank" rel=“noreferrer”>Documentation</a>
                     </li>
                     <li class="navbar-link navbar-item">
                         <a href="{% url 'about_page' %}">About</a>
                     </li>
+                    <li class="navbar-link navbar-item">
+                        <a href="{% url 'citations_page' %}">Publications</a>
+                    </li>
+
                     <li class="navbar-link navbar-item">
                         <div class="dropdown">
                             <a role="button" class="dropdown-toggle navbar-item__text" id="help-dropdown"
@@ -105,18 +109,19 @@
                             <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-label="help-dropdown">
                                 <li role="menuitem"><a
                                         href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowToGetStartedonISB-CGC.html"
-                                        target="_blank">How To Get Started</a></li>
-                                <li role="menuitem"><a href="{% url 'how_to_discover' %}" target="_blank">How to Discover Cancer Data Through ISB-CGC</a></li>
-                                <li role="menuitem"><a href="{% url 'vid_tutorials' %}" target="_blank">Video
+                                        target="_blank" rel=“noreferrer”>How To Get Started</a></li>
+                                <li role="menuitem"><a href="{% url 'how_to_discover' %}" target="_blank" rel=“noreferrer”>How to Discover Cancer Data Through ISB-CGC</a></li>
+                                <li role="menuitem"><a href="{% url 'vid_tutorials' %}" target="_blank" rel=“noreferrer”>Video
                                     Tutorials</a></li>
                                 <li role="menuitem"><a
                                         href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowTos.html#i-m-a-novice-how-do-i"
-                                        target="_blank">Getting Started Notebooks</a></li>
-                                <li role="menuitem"><a
-                                        href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/feedback"
-                                        target="_blank">We'd Love Your Feedback</a></li>
+                                        target="_blank" rel=“noreferrer”>Getting Started Notebooks</a></li>
+{#                                <li role="menuitem"><a#}
+{#                                        href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/feedback"#}
+{#                                        target="_blank" rel=“noreferrer”>We'd Love Your Feedback</a></li>#}
                                 <li role="menuitem"><a href="https://github.com/isb-cgc/ISB-CGC-Webapp/issues/new"
-                                                       target="_blank">Submit GitHub Issue</a></li>
+                                                       target="_blank" rel=“noreferrer”>Submit GitHub Issue</a></li>
+                                <li role="menuitem"><a href="{% url 'contact_us' %}" target="_blank" rel=“noreferrer”>Contact Us</a></li>
                             </ul>
                         </div>
                     </li>

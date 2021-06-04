@@ -27,6 +27,22 @@
 {% block link_page_name %}user-details{% endblock %}
 {% block page_name %}user-details{% endblock %}
 
+{% block page_header %}
+    {% if idp == 'ras' %}
+        <div class="row">
+            <div class="banner alert alert-dismissible text-center alert-warning" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <i class="fa fa-exclamation-circle" aria-hidden="true"></i> For data access, you will now be asked to
+                use <strong>NIH Researcher Auth Service (RAS)</strong> to associate your NIH identity with your Google Account.
+                Read more at:
+                <a target="_blank" rel="noreferrer" href="https://datascience.nih.gov/researcher-auth-service-initiative">
+                    Researcher Auth Service Initiative</a>.
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
     <div class="row">
         <div class="col-lg-4">
@@ -70,7 +86,7 @@
                         Data Access
 
                         <a class="float-right" href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/Gaining-Access-To-Controlled-Access-Data.html#accessing-controlled-data"
-                            target="_blank">
+                            target="_blank" rel="noreferrer">
                             <i class="fa fa-info-circle" aria-hidden="true"></i>
                         </a>
                     </h5>
@@ -90,7 +106,7 @@
                     <h5>
                         <i class="fa fa-cloud" aria-hidden="true"></i> Google Cloud Platform
                         <a class="float-right" href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/HowToGetStartedonISB-CGC.html#google-cloud-project-setup-and-data-access"
-                            target="_blank"><i class=" fa fa-info-circle" aria-hidden="true"></i>
+                            target="_blank" rel="noreferrer"><i class=" fa fa-info-circle" aria-hidden="true"></i>
                         </a>
                     </h5>
 
@@ -105,13 +121,13 @@
                         <div class="text-right">
                             <a class="sm_btn"
                                 href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/request-gcp"
-                                target="_blank"><i class="fa fa-credit-card" aria-hidden="true"></i>Request Credits</a>
+                                target="_blank" rel="noreferrer"><i class="fa fa-credit-card" aria-hidden="true"></i>Request Credits</a>
                         </div>
                         <label>Google Cloud Console</label>
                         <div>Access a user friendly, integrated Google Cloud Platform management console</div>
                         <div class="text-right">
                             <a class="sm_btn" href="http://console.cloud.google.com"
-                               target="_blank"><i class="fa fa-arrow-circle-o-right"
+                               target="_blank" rel="noreferrer"><i class="fa fa-arrow-circle-o-right"
                                                   aria-hidden="true"></i>Visit</a>
                         </div>
                         <label>Google Cloud Projects</label>

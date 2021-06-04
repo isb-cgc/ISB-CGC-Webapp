@@ -236,7 +236,7 @@
                     </div>
                 </div>
             {% endif %}
-            <div class="col-sm-12 col-md-12 col-lg-12">
+            <div class="col-sm-12 col-md-12 col-lg-12" style="display: none">
                 <div class="panel panel-default">
                     <ul class="nav nav-tabs nav-tabs-data" role="tablist">
                         {% for program in programs %}
@@ -401,6 +401,8 @@
         var user_data = {{ user_data|tojson|safe }};
         var cohort_programs = {{ cohort_programs|tojson|safe }};
         var request_user_id = {{ user.id }};
+        var all_nodes = {{ all_nodes|tojson|safe }};
+        var all_programs = {{ all_programs|tojson|safe }};
     </script>
 {% endblock %}
 
