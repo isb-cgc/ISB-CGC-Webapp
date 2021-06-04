@@ -73,7 +73,7 @@ SOLR_TYPES = {
     "DATE": "pdate"
 }
 
-SOLR_SINGLE_VAL = ["case_barcode", "case_gdc_id"]
+SOLR_SINGLE_VAL = ["case_barcode", "case_gdc_id", "case_pdc_id","program_name","project_short_name"]
 
 ATTR_SET = {}
 DISPLAY_VALS = {}
@@ -105,13 +105,13 @@ def add_data_versions(dv_set):
             logger.exception(e)
 
 
-def add_data_sources(sources, build_attrs=False, link_attr=True):
+def add_data_sources(sources, build_attrs=True, link_attr=True):
     try:
         attrs_to_srcs = []
         for src in sources:
             try:
                 obj = DataSource.objects.get(name=src['name'])
-                logger.warning("[WARNING] Source with the name {} already exists - skipping.".format(src['name']))
+                logger.warning("[WARNING] Source with the name {} already exists - updating ONLY.".format(src['name']))
             except ObjectDoesNotExist as e:
                 obj, created = DataSource.objects.update_or_create(
                     name=src['name'], version=DataVersion.objects.get(version=src['version'], data_type=src['version_type']),
@@ -136,6 +136,7 @@ def add_data_sources(sources, build_attrs=False, link_attr=True):
 
                 logger.info("Data Source created: {}".format(obj.name))
 
+            source_attrs = list(obj.get_source_attr(all=True).values_list('name',flat=True))
             if src['source_type'] == DataSource.SOLR:
                 schema_src = src['schema_source'].split('.')
                 schema = BigQuerySupport.get_table_schema(schema_src[0],schema_src[1],schema_src[2])
@@ -143,8 +144,8 @@ def add_data_sources(sources, build_attrs=False, link_attr=True):
                 solr_schema = []
                 solr_index_strings = []
                 for field in schema:
-                    if field['name'] not in ATTR_SET:
-                        if build_attrs:
+                    if build_attrs:
+                        if field['name'] not in ATTR_SET:
                             attr_type = Attribute.CATEGORICAL if (not re.search(r'(_id|_barcode)', field['name']) and field['type'] == "STRING") else Attribute.STRING if field['type'] == "STRING" else Attribute.CONTINUOUS_NUMERIC
                             ATTR_SET[field['name']] = {
                                 'name': field['name'],
@@ -156,44 +157,48 @@ def add_data_sources(sources, build_attrs=False, link_attr=True):
                                 'display': (
                                         (attr_type == Attribute.STRING and not re.search('_id|_barcode',field['name'].lower())) or attr_type == Attribute.CATEGORICAL or field['name'].lower() in ranges_needed)
                             }
-                            attr = ATTR_SET[field['name']]
-                            attr['solr_collex'].append(src['name'])
+                        attr = ATTR_SET[field['name']]
+                        attr['solr_collex'].append(src['name'])
 
-                            if attr['name'] in DISPLAY_VALS:
-                                if 'preformatted_values' in DISPLAY_VALS[attr['name']]:
-                                    attr['preformatted_values'] = True
-                                else:
-                                    if 'display_vals' not in attr:
-                                        attr['display_vals'] = []
-                                    attr['display_vals'].extend(DISPLAY_VALS[attr['name']]['vals'])
+                        if attr['name'] in DISPLAY_VALS:
+                            if 'preformatted_values' in DISPLAY_VALS[attr['name']]:
+                                attr['preformatted_values'] = True
+                            else:
+                                if 'display_vals' not in attr:
+                                    attr['display_vals'] = []
+                                attr['display_vals'].extend(DISPLAY_VALS[attr['name']]['vals'])
 
-                            if attr['name'] in DISPLAY_VALS:
-                                if 'preformatted_values' in DISPLAY_VALS[attr['name']]:
-                                    attr['preformatted_values'] = True
-                                else:
-                                    attr['display_vals'] = DISPLAY_VALS[attr['name']]['vals']
+                        if attr['name'] in DISPLAY_VALS:
+                            if 'preformatted_values' in DISPLAY_VALS[attr['name']]:
+                                attr['preformatted_values'] = True
+                            else:
+                                attr['display_vals'] = DISPLAY_VALS[attr['name']]['vals']
 
-                            if 'range' not in attr:
-                                if attr['name'].lower() in ranges_needed:
-                                    attr['range'] = ranges.get(ranges_needed.get(attr['name'], ''), [])
-                        elif link_attr:
-                            link_attrs.append(field['name'])
+                        if 'range' not in attr:
+                            if attr['name'].lower() in ranges_needed:
+                                attr['range'] = ranges.get(ranges_needed.get(attr['name'], ''), [])
+                    elif link_attr and field['name'] not in source_attrs:
+                        link_attrs.append(field['name'])
+
                     solr_schema.append({
                         "name": field['name'], "type": SOLR_TYPES[field['type']],
-                        "multiValued": True if field['name'] not in SOLR_SINGLE_VAL else False, "stored": True
+                        "multiValued": True if src['aggregated'] and field['name'] not in SOLR_SINGLE_VAL else False, "stored": True
                     })
 
-                    if field['name'] not in SOLR_SINGLE_VAL:
+                    if src['aggregated'] and field['name'] not in SOLR_SINGLE_VAL:
                         solr_index_strings.append("f.{}.split=true&f.{}.separator=|".format(field['name'],field['name']))
 
                 for la in link_attrs:
                     try:
                         a = Attribute.objects.get(name=la)
+                        attrs_to_srcs.append(Attribute.data_sources.through(attribute_id=a.id,datasource_id=obj.id))
                     except Exception as e:
                         if isinstance(e,MultipleObjectsReturned):
                             logger.info("More than one attribute with the name {} was found!".format(la))
-                        a = Attribute.objects.filter(name=la).first()
-                    attrs_to_srcs.append(Attribute.data_sources.through(attribute_id=a.id,datasource_id=obj.id))
+                            a = Attribute.objects.filter(name=la).first()
+                            attrs_to_srcs.append(Attribute.data_sources.through(attribute_id=a.id,datasource_id=obj.id))
+                        elif isinstance(e,ObjectDoesNotExist):
+                            logger.info("Attribute {} doesn't exist--can't add, skipping!".format(la))
 
                 with open("{}_solr_schemas.json".format(src['name']), "w") as schema_outfile:
                     json.dump(solr_schema, schema_outfile)
@@ -237,7 +242,7 @@ def add_attributes(attr_set):
         for attr in attr_set:
             try:
                 obj = Attribute.objects.get(name=attr['name'], data_type=attr['type'])
-                logger.info("Attribute {} already located in the database - just updating...")
+                logger.info("Attribute {} already located in the database - just updating...".format(attr['name']))
             except ObjectDoesNotExist:
                 logger.info("Attribute {} not found - creating".format(attr['name']))
                 obj, created = Attribute.objects.update_or_create(
@@ -246,6 +251,10 @@ def add_attributes(attr_set):
                     is_cross_collex=True if 'cross_collex' in attr else False,
                     default_ui_display=attr['display']
                 )
+            except Exception as e:
+                if isinstance(e,MultipleObjectsReturned):
+                    logger.info("More than one attribute with the name {} was found!".format(attr['name']))
+                    obj = Attribute.objects.filter(name=attr['name'], data_type=attr['type']).first()
 
             if 'range' in attr and not len(Attribute_Ranges.objects.select_related('attribute').filter(attribute=obj)):
                 if len(attr['range']):
@@ -265,10 +274,10 @@ def add_attributes(attr_set):
                     )
 
             if 'solr_collex' in attr:
-                attr_sources = obj.get_data_sources(DataSource.SOLR)
+                attr_sources = obj.get_data_sources(DataSource.SOLR, all=True)
                 missing_sources = [x for x in attr['solr_collex'] if x not in attr_sources]
                 if len(missing_sources):
-                    sources = DataSource.objects.filter(name__in=attr['solr_collex'])
+                    sources = DataSource.objects.filter(name__in=missing_sources)
                     attr_to_src = []
 
                     for src in sources:
@@ -277,10 +286,10 @@ def add_attributes(attr_set):
                     Attribute.data_sources.through.objects.bulk_create(attr_to_src)
 
             if 'bq_tables' in attr:
-                attr_sources = obj.get_data_sources(DataSource.BIGQUERY)
+                attr_sources = obj.get_data_sources(DataSource.BIGQUERY, all=True)
                 missing_sources = [x for x in attr['bq_tables'] if x not in attr_sources]
                 if len(missing_sources):
-                    sources = DataSource.objects.filter(name__in=attr['bq_tables'])
+                    sources = DataSource.objects.filter(name__in=missing_sources)
                     attr_to_src = []
 
                     for src in sources:
