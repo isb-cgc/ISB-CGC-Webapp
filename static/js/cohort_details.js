@@ -1325,7 +1325,7 @@ require([
             return;
         }
 
-        if(cohort) {
+        if(cohort && load_program_id === null) {
             load_program_id = cohort_programs[0].id;
         }
 
