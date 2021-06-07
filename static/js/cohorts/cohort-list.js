@@ -536,8 +536,7 @@ require([
 
                 $('#version_d').find('.series_o')[0].innerHTML=series_col;
                 $('#version_d').find('.series_c')[0].innerHTML=data['SeriesInstanceUID'].toString();
-
-
+                document.getElementById("load_new").innerHTML="<button onclick=\"location.href = '/explore/?cohort_id="+id+"';\">Load New Version</button>"
                $('.spinner').hide();
             },
             error: function () {
