@@ -3030,6 +3030,7 @@ require([
      }
 
       $(document).ready(function () {
+          $('.spinner').show();
           //const csrftoken = Cookies.get('csrftoken');
 
            // $('#proj_table').DataTable();
@@ -3119,7 +3120,8 @@ require([
 
             //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
             load_preset_filters();
-            demoUpdate();
+            $('.spinner').hide();
+            //demoUpdate();
         }
     );
 });
