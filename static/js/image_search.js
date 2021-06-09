@@ -2979,7 +2979,7 @@ require([
 
                  $('input#hide-zeros').prop("disabled", "");
                  $('input#hide-zeros').prop("checked", true);
-                 $('input#hide-zeros').triggerHandler('change');
+                 $('input#hide-zeros').each(function(){$(this).triggerHandler('change')});
                  $('div.ui-slider').siblings('button').prop("disabled", true);
                  $('.noneBut').find('input:checkbox').prop("disabled",true);
              });
@@ -3030,6 +3030,7 @@ require([
      }
 
       $(document).ready(function () {
+          $('.spinner').show();
           //const csrftoken = Cookies.get('csrftoken');
 
            // $('#proj_table').DataTable();
@@ -3119,7 +3120,8 @@ require([
 
             //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
             load_preset_filters();
-            demoUpdate();
+            $('.spinner').hide();
+            //demoUpdate();
         }
     );
 });
