@@ -2979,7 +2979,7 @@ require([
 
                  $('input#hide-zeros').prop("disabled", "");
                  $('input#hide-zeros').prop("checked", true);
-                 $('input#hide-zeros').triggerHandler('change');
+                 $('input#hide-zeros').each(function(){$(this).triggerHandler('change')});
                  $('div.ui-slider').siblings('button').prop("disabled", true);
                  $('.noneBut').find('input:checkbox').prop("disabled",true);
              });
