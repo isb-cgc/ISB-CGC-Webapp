@@ -1175,6 +1175,7 @@ require([
 
                 var programId = aFilter.program.id.toString();
                 var featureId = aFilter.feature.id.toString();
+                var featureName = aFilter.feature.name.toString();
                 var valueId = aFilter.value.id.toString();
 
                 if (featureId.startsWith("MUT:"))
@@ -1186,7 +1187,7 @@ require([
                 else
                 {
                     // case and data_type filters
-                    apply_anonymous_checkbox_filter(programId, featureId, valueId);
+                    apply_anonymous_checkbox_filter(programId, featureName, valueId);
                 }
             }
 
@@ -1472,6 +1473,7 @@ require([
     {
         $.setCookie('login_from','new_cohort','/');
         save_anonymous_filters();
+        location.href = '/accounts/login/';
     });
 
     filter_panel_load(cohort_id);
