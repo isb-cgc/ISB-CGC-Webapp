@@ -1701,7 +1701,7 @@ require([
                 success: function (data) {
                     var isFiltered = Boolean($('#search_def p').length>0);
                     if (is_cohort) {
-                        if (data.file_parts_count > data.display_file_parts_count) {
+                        if (file_parts_count > display_file_parts_count) {
                             $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
                             $('#file-export-option input').prop('disabled', 'disabled');
                             $('#file-export-option input').prop('checked', false);
@@ -1718,9 +1718,9 @@ require([
 
                             var select_box_div = $('#file-part-select-box');
                             var select_box = select_box_div.find('select');
-                            if (data.file_parts_count > 1) {
+                            if (file_parts_count > 1) {
                                 select_box_div.show();
-                                for (let i = 0; i < data.display_file_parts_count; ++i) {
+                                for (let i = 0; i < display_file_parts_count; ++i) {
                                     select_box.append($('<option/>', {
                                         value: i,
                                         text : "File Part " + (i + 1)

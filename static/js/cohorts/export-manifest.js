@@ -59,8 +59,18 @@ require([
         download_manifest("json", $(this), e)
     });
 
-    $('input.file-manifest,input.bq-manifest,input.export-option').on('click', function(){
-        update_export_option($(this).attr("value"));
+    $('.export-option input').on('click', function(){
+        let export_option = $(this).attr("value")
+        update_export_option(export_option);
+        if(export_option == 'bq-manifest') {
+            $('#columns-container').hide();
+            $('.file-name').hide();
+            $('.table-name').show();
+        } else {
+            $('#columns-container').show();
+            $('.file-name').show();
+            $('.table-name').hide();
+        }
     });
 
     var update_export_option = function(export_option) {
@@ -120,21 +130,17 @@ require([
         }
 
         var checked_fields = [];
-        $('.field-checkbox').each(function()
-        {
+        $('.field-checkbox').each(function() {
             var cb = $(this)[0];
-            if (cb.checked)
-            {
+            if (cb.checked) {
                 checked_fields.push(cb.value);
             }
         });
 
         var checked_columns = [];
-        $('.column-checkbox').each(function()
-        {
+        $('.column-checkbox').each(function() {
             var cb = $(this)[0];
-            if (cb.checked)
-            {
+            if (cb.checked) {
                 checked_columns.push(cb.value);
             }
         });
@@ -219,6 +225,40 @@ require([
                 $('.download-file,.file-manifest').removeAttr('disabled');
                 $('.download-file,.file-manifest').removeAttr('title');
                 $('input.file-manifest').trigger('click');
+                if(is_list) {
+                    let cohort_row=$('input.cohort:checked').parents('tr');
+                    let file_parts_count = cohort_row.data('file-parts-count');
+                    let display_file_parts_count = cohort_row.data('display-file-parts-count')
+                    if (file_parts_count > display_file_parts_count) {
+                        $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
+                        $('#file-export-option input').prop('disabled', 'disabled');
+                        $('#file-export-option input').prop('checked', false);
+                        $('#file-manifest').hide();
+                        if(!user_is_social) {
+                            $('#need-social-account').show();
+                        } else {
+                            $('#file-manifest-max-exceeded').show();
+                            $('#bq-export-option input').prop('checked', true).trigger("click");
+                        }
+                    } else {
+                        $('#file-manifest-max-exceeded').hide();
+                        $('#file-manifest').show();
+
+                        var select_box_div = $('#file-part-select-box');
+                        var select_box = select_box_div.find('select');
+                        if (file_parts_count > 1) {
+                            select_box_div.show();
+                            for (let i = 0; i < display_file_parts_count; ++i) {
+                                select_box.append($('<option/>', {
+                                    value: i,
+                                    text : "File Part " + (i + 1)
+                                }));
+                            }
+                        } else {
+                            select_box_div.hide();
+                        }
+                    }
+                }
             }
             $('#get-bq-table').removeAttr('disabled');
         }
@@ -244,6 +284,8 @@ require([
             'action',
             $('#export-manifest-form').data('uri-base')+"?ids="+encodeURIComponent(cohort_ids.join(","))
         );
+
+        $('input[name="ids"]').val(cohort_ids.join(","))
 
         $('#export-manifest-name').val("cohorts_"+cohort_ids.join("_")+$('#export-manifest-name').data('name-base'));
         update_download_manifest_buttons();
