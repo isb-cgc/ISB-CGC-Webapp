@@ -1,5 +1,5 @@
 requests==2.20.0
-django==2.2.18
+django==2.2.24
 PyYAML==4.2b1
 mysqlclient==2.0.1
 WebOb==1.5.0
