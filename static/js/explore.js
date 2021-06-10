@@ -61,17 +61,19 @@ require([
                     modal_filter_block = '#selected-filters-der-set';
                 }
 
-                if ($(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).length <= 0) {
-                    $(`${modal_filter_block}`).append('<p class="cohort-filter-display ' + $(this).data('filter-attr-id')
-                        + '"><span class="attr">' + $(this).data('filter-display-attr') + ':</span></p>');
+                if (!($(this).data('filter-attr-id')===1)) {
+                    if ($(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).length <= 0) {
+                        $(`${modal_filter_block}`).append('<p class="cohort-filter-display ' + $(this).data('filter-attr-id')
+                            + '"><span class="attr">' + $(this).data('filter-display-attr') + ':</span></p>');
+                    }
+                    $(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).append(
+                         '<span class="val">' + $(this).data('filter-display-val') + '</span>'
+                    );
+                    if (!filters[$(this).data('filter-attr-id')]) {
+                        filters[$(this).data('filter-attr-id')] = [];
+                    }
+                    filters[$(this).data('filter-attr-id')].push($(this).prop('value'));
                 }
-                $(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).append(
-                    '<span class="val">' + $(this).data('filter-display-val') + '</span>'
-                );
-                if (!filters[$(this).data('filter-attr-id')]) {
-                    filters[$(this).data('filter-attr-id')] = [];
-                }
-                filters[$(this).data('filter-attr-id')].push($(this).prop('value'));
             }
         });
 
