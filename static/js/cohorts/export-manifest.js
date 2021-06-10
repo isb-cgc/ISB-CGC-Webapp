@@ -227,35 +227,41 @@ require([
                 $('input.file-manifest').trigger('click');
                 if(is_list) {
                     let cohort_row=$('input.cohort:checked').parents('tr');
-                    let file_parts_count = cohort_row.data('file-parts-count');
-                    let display_file_parts_count = cohort_row.data('display-file-parts-count')
-                    if (file_parts_count > display_file_parts_count) {
-                        $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
-                        $('#file-export-option input').prop('disabled', 'disabled');
-                        $('#file-export-option input').prop('checked', false);
-                        $('#file-manifest').hide();
-                        if(!user_is_social) {
-                            $('#need-social-account').show();
-                        } else {
-                            $('#file-manifest-max-exceeded').show();
-                            $('#bq-export-option input').prop('checked', true).trigger("click");
-                        }
+                    if(cohort_row.data('inactive-versions') === "True") {
+                        $('.download-file,.file-manifest').attr('disabled', 'disabled');
+                        $('.download-file,.file-manifest').attr('title', 'Only a cohorts composed of active data versions can be downloaded as a file.');
+                        $('input.bq-manifest').trigger('click');
                     } else {
-                        $('#file-manifest-max-exceeded').hide();
-                        $('#file-manifest').show();
-
-                        var select_box_div = $('#file-part-select-box');
-                        var select_box = select_box_div.find('select');
-                        if (file_parts_count > 1) {
-                            select_box_div.show();
-                            for (let i = 0; i < display_file_parts_count; ++i) {
-                                select_box.append($('<option/>', {
-                                    value: i,
-                                    text : "File Part " + (i + 1)
-                                }));
+                        let file_parts_count = cohort_row.data('file-parts-count');
+                        let display_file_parts_count = cohort_row.data('display-file-parts-count')
+                        if (file_parts_count > display_file_parts_count) {
+                            $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
+                            $('#file-export-option input').prop('disabled', 'disabled');
+                            $('#file-export-option input').prop('checked', false);
+                            $('#file-manifest').hide();
+                            if(!user_is_social) {
+                                $('#need-social-account').show();
+                            } else {
+                                $('#file-manifest-max-exceeded').show();
+                                $('#bq-export-option input').prop('checked', true).trigger("click");
                             }
                         } else {
-                            select_box_div.hide();
+                            $('#file-manifest-max-exceeded').hide();
+                            $('#file-manifest').show();
+
+                            var select_box_div = $('#file-part-select-box');
+                            var select_box = select_box_div.find('select');
+                            if (file_parts_count > 1) {
+                                select_box_div.show();
+                                for (let i = 0; i < display_file_parts_count; ++i) {
+                                    select_box.append($('<option/>', {
+                                        value: i,
+                                        text : "File Part " + (i + 1)
+                                    }));
+                                }
+                            } else {
+                                select_box_div.hide();
+                            }
                         }
                     }
                 }
