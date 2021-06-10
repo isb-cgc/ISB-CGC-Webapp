@@ -113,6 +113,7 @@
                             data-filters="{{ cohort.get_filter_display_string }}"
                             data-file-parts-count="{{ cohort.file_parts_count }}"
                             data-display-file-parts-count="{{ cohort.display_file_parts_count }}"
+                            data-inactive-versions = {% if only_active_versions %} "False" {% else %} "True" {% endif %}
                         >
                             <td class = "details-control" title="Click to display cohort description."> <i class="fa fa-plus-circle show-button"> </i><i class="fa fa-minus-circle hide-button"> </i> </td>
                             <td class="checkbox-col"> <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} class="cohort" type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>

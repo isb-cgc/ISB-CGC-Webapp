@@ -211,7 +211,6 @@ require([
         var is_list = ($('tr:not(:first) input.cohort').length > 0);
 
         var checked_cohorts = $('tr:not(:first) input.cohort:checked').length;
-        var num_inactive = $('tr:not(:first) input.cohort:checked').parent().parent().find('.inactive-data-version').length;
         var num_selected_column =$('.column-checkbox:checked').length;
         var input_cohort_name_len = $('#export-manifest-name').val().length;
 
@@ -219,9 +218,9 @@ require([
             $('.download-file').attr('disabled', 'disabled');
             $('#get-bq-table').attr('disabled', 'disabled');
         } else {
-            if( (is_list && checked_cohorts > 1) || ((num_inactive>0))) {
+            if( is_list && checked_cohorts > 1 ) {
                 $('.download-file,.file-manifest').attr('disabled', 'disabled');
-                $('.download-file,.file-manifest').attr('title', 'Only a single cohort\'s file manifest may be downloaded as a file. A manifest for a cohort with an inactive data version cannot be downloaded as a file.');
+                $('.download-file,.file-manifest').attr('title', 'Only a single cohort with an active data version can be downloaded as a file.');
                 $('input.bq-manifest').trigger('click');
             }
 
@@ -233,7 +232,7 @@ require([
                     let cohort_row=$('input.cohort:checked').parents('tr');
                     if(cohort_row.data('inactive-versions') === "True") {
                         $('.download-file,.file-manifest').attr('disabled', 'disabled');
-                        $('.download-file,.file-manifest').attr('title', 'Only a cohorts composed of active data versions can be downloaded as a file.');
+                        $('.download-file,.file-manifest').attr('title', 'Only a single cohort with an active data version can be downloaded as a file.');
                         $('input.bq-manifest').trigger('click');
                     } else {
                         let file_parts_count = cohort_row.data('file-parts-count');
