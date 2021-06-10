@@ -75,6 +75,8 @@
         var cohort_name = "{{ cohort.name|safe }}";
         var user_is_social = {% if is_social %}true{% else %}false{% endif %};
         var collection_tooltips = {{ collection_tooltips|safe }};
+        var file_parts_count = {{ file_parts_count }};
+        var display_file_parts_count = {{ display_file_parts_count }};
     </script>
     <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
     {{ block.super }}
