@@ -1701,7 +1701,7 @@ require([
                 success: function (data) {
                     var isFiltered = Boolean($('#search_def p').length>0);
                     if (is_cohort) {
-                        if (data.file_parts_count > data.display_file_parts_count) {
+                        if (file_parts_count > display_file_parts_count) {
                             $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
                             $('#file-export-option input').prop('disabled', 'disabled');
                             $('#file-export-option input').prop('checked', false);
@@ -1718,9 +1718,9 @@ require([
 
                             var select_box_div = $('#file-part-select-box');
                             var select_box = select_box_div.find('select');
-                            if (data.file_parts_count > 1) {
+                            if (file_parts_count > 1) {
                                 select_box_div.show();
-                                for (let i = 0; i < data.display_file_parts_count; ++i) {
+                                for (let i = 0; i < display_file_parts_count; ++i) {
                                     select_box.append($('<option/>', {
                                         value: i,
                                         text : "File Part " + (i + 1)
@@ -2354,6 +2354,18 @@ require([
                     $('#' + filterCat+'_heading').children('a').children('.noCase').addClass('notDisp');
                 }
 
+                var numMore = filterList.children('li').filter('.extra-values').length;
+                if ($('#' + filterCat).children('.more-checks').children('.show-more').length>0){
+                    $('#' + filterCat).children('.more-checks').children('.show-more')[0].innerText = "show " + numMore.toString() + " more";
+                    if (numMore>0){
+                            $('#' + filterCat).children('.more-checks').children('.show-more').removeClass('notDisp');
+                            $('#' + filterCat).children('.less-checks').children('.show-less').removeClass('notDisp');
+                        } else{
+                            $('#' + filterCat).children('.more-checks').children('.show-more').addClass('notDisp');
+                            $('#' + filterCat).children('.less-checks').children('.show-less').addClass('notDisp');
+                        }
+                }
+
                 if ( numAttrAvail < 1)  {
                     $('#' + filterCat).children('.more-checks').hide();
                     $('#' + filterCat).children('.less-checks').hide();
@@ -2364,17 +2376,11 @@ require([
                     $('#' + filterCat).children('.less-checks').show();
                     $('#' + filterCat).children('.check-uncheck').show();
                 } else {
-                    numMore = filterList.children('li').filter('.extra-values').length;
+
                     $('#' + filterCat).children('.more-checks').show();
                     $('#' + filterCat).children('.check-uncheck').show();
                     if ($('#' + filterCat).children('.more-checks').children('.show-more').length>0){
-                        $('#' + filterCat).children('.more-checks').children('.show-more')[0].innerText = "show " + numMore.toString() + " more";
 
-                        if (numMore>0){
-                            $('#' + filterCat).children('.more-checks').children('.show-more').removeClass('notVis');
-                        } else{
-                            $('#' + filterCat).children('.more-checks').children('.show-more').addClass('notVis');
-                        }
                     }
                     $('#' + filterCat).children('.less-checks').hide();
                 }
@@ -2971,10 +2977,11 @@ require([
                  }
                  $('#include-header-checkbox').removeAttr('disabled');
 
-                 $('div.ui-slider').siblings('button').prop('disabled', 'disabled');
                  $('input#hide-zeros').prop("disabled", "");
                  $('input#hide-zeros').prop("checked", true);
-                 $('input#hide-zeros').triggerHandler('change');
+                 $('input#hide-zeros').each(function(){$(this).triggerHandler('change')});
+                 $('div.ui-slider').siblings('button').prop("disabled", true);
+                 $('.noneBut').find('input:checkbox').prop("disabled",true);
              });
          } else if (Object.keys(filters_for_load).length > 0) {
              var loadPending = load_filters(filters_for_load);
@@ -3023,6 +3030,7 @@ require([
      }
 
       $(document).ready(function () {
+          $('.spinner').show();
           //const csrftoken = Cookies.get('csrftoken');
 
            // $('#proj_table').DataTable();
@@ -3112,7 +3120,8 @@ require([
 
             //$("#number_ajax").bind("change", function(){ alert($()this.val)} );
             load_preset_filters();
-            demoUpdate();
+            $('.spinner').hide();
+            //demoUpdate();
         }
     );
 });

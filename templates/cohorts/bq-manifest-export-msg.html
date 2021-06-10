@@ -1,3 +1,6 @@
+{% if errors %}
+We encountered some errors exporting your manifests; not all of them may have been exported. These have been marked. Please contact us for assistance in exporting these cohorts.
+{% endif %}
 {% if long_running %}
 Your manifest job is still exporting. Please wait five minutes to allow the export to complete. Once finished, the folliwing table or tables
 {% else %}
@@ -5,7 +8,7 @@ Your manifest job has finished exporting. The following table or tables
 {% endif %}
 will be available for seven (7) days, accessible via your {{ email }} Google Account: <br />
 {% for table in tables %}
-<b>{{ table.full_id }}</b>
+<b>{{ table.full_id }}</b> {% if table.error %} (ERROR) {% endif %}
 <a role=button" class="copy-this" content="{{ table.full_id }}"  title="Copy table ID to clipboard">
     ( <i class="fa fa-copy" aria-hidden="true"></i> )
 </a>:
