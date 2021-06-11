@@ -38,7 +38,7 @@ logger = logging.getLogger('main_logger')
 cohort_defs = [
     {
         'name': 'Example: V1 collection ID',
-        'desc': None,
+        'desc': "This shouldn't change from V1 to V2",
         'filters': [
             {
                 'attribute': 'collection_id',
@@ -48,7 +48,7 @@ cohort_defs = [
     },
     {
         'name': 'Example: V1 Derived',
-        'desc': None,
+        'desc': "This shouldn't change from V1 to V2",
         'filters': [
             {
                 'attribute': 'AnatomicRegionSequence',
@@ -58,7 +58,7 @@ cohort_defs = [
     },
     {
         'name': 'Example: V1 Related, multi-value',
-        'desc': None,
+        'desc': "This shouldn't change from V1 to V2",
         'filters': [
             {
                 'attribute': 'disease_code',
@@ -75,7 +75,7 @@ cohort_defs = [
     },
     {
         'name': 'Example: V1 Comma-in-value',
-        'desc': None,
+        'desc': "This shouldn't change from V1 to V2",
         'filters': [
             {
                 'attribute': 'tcia_tumorLocation',
@@ -93,6 +93,34 @@ cohort_defs = [
             }
         ]
     },
+    {
+        'name': 'Example: SOPClassUID and Modality',
+        'desc': 'V1 Count should differ in V2',
+        'filters': [
+            {
+                'attribute': 'SOPClassUID',
+                'values': ['1.2.840.10008.5.1.4.1.1.88.33'],
+            },
+            {
+                'attribute': 'Modality',
+                'values': ['PT'],
+            }
+        ]
+    },
+    {
+        'name': 'Example: TCGA related filter',
+        'desc': 'This shouldn\'t change from V1 to V2',
+        'filters': [
+            {
+                'attribute': 'collection_id',
+                'values': ['tcga_hnsc'],
+            },
+            {
+                'attribute': 'pathologic_stage',
+                'values': ['Stage I'],
+            }
+        ]
+    }
 ]
 
 def load_cohort_defs(filename):
@@ -122,35 +150,47 @@ def parse_args():
 
     parser = ArgumentParser()
     parser.add_argument('-c', '--cohort-defs', type=str, default='', help=cohort_def_help_msg)
-    parser.add_argument('-u', '--user-email', type=str, default='', help='User email for cohort owner')
+    parser.add_argument('-u', '--user-emails', type=str, default='', help='User email(s) for cohort owner - comma separated')
     parser.add_argument('-v', '--versions', type=str, default='1.0', help='Versions for which to create cohorts, comma delimited. Eg.: 1.0,2.0')
     return parser.parse_args()
 
 def main():
     try:
         args = parse_args()
-        if not len(args.user_email):
-            logger.error("[ERROR] User email not provided! We can't make cohorts without a user to assign ownership.")
+        if not len(args.user_emails):
+            logger.error("[ERROR] User email(s) not provided! We can't make cohorts without a user or users to assign ownership.")
             exit(1)
 
         len(args.cohort_defs) and load_cohort_defs(args.cohort_defs)
         versions = ImagingDataCommonsVersion.objects.filter(version_number__in=args.versions.split(','))
-        try:
-            user = User.objects.get(email=args.user_email)
-        except ObjectDoesNotExist:
-            logger.error("[ERROR] User {} not found - you need to log in once first before running this script!".format(args.user_email))
-            exit(1)
-        attr_ids = {
-            i.name: i.id for i in
-            Attribute.objects.filter(name__in=[y['attribute'] for x in cohort_defs for y in x['filters']])
-        }
+        user_emails = args.user_emails.split(",")
+        users = User.objects.filter(email__in=user_emails)
 
-        for cohort in cohort_defs:
-            filters = {
-                str(attr_ids[x['attribute']]): x['values'] for x in cohort['filters']
+        if len(users) != len(user_emails):
+            logger.error("[ERROR] One or more users not found. Checking:")
+            not_found = []
+            for email in user_emails:
+                try:
+                    User.objects.get(email=email)
+                except ObjectDoesNotExist:
+                    not_found.append(email)
+            if len(not_found) > 0:
+                logger.error("[ERROR] The following users were not found - they need to log in once first before running this script!")
+                logger.error("{}".format(" ".join(not_found)))
+                exit(1)
+
+        for user in users:
+            attr_ids = {
+                i.name: i.id for i in
+                Attribute.objects.filter(name__in=[y['attribute'] for x in cohort_defs for y in x['filters']])
             }
-            for version in versions:
-                _save_cohort(user,filters,cohort['name'],None,version,no_stats=True)
+
+            for cohort in cohort_defs:
+                filters = {
+                    str(attr_ids[x['attribute']]): x['values'] for x in cohort['filters']
+                }
+                for version in versions:
+                    _save_cohort(user,filters,cohort['name'],None,version,desc=cohort['desc'],no_stats=True)
 
     except Exception as e:
         logger.exception(e)
