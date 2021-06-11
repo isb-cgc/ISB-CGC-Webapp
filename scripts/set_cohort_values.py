@@ -42,7 +42,7 @@ logger = logging.getLogger('main_logger')
 
 def main():
     try:
-        for cohort in Cohort.objects.filter(active=True):
+        for cohort in Cohort.objects.filter(active=True, case_count=0):
 
             if cohort.only_active_versions():
                 cohort_stats = _get_cohort_stats(cohort.id)
