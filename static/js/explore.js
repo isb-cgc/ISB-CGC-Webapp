@@ -233,4 +233,15 @@ require([
         target: '.no-viewer-tooltip',
         maxWidth: 130
     });
+
+    tippy.delegate('.series-table', {
+        content: function(reference) {
+            return $(reference).data('description');
+        },
+        theme: 'dark',
+        placement: 'right',
+        arrow: false,
+        target: '.description-tip',
+        maxWidth: 800
+    });
 });

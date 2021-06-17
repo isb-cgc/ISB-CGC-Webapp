@@ -1261,7 +1261,16 @@ require([
                             var seriesId = curData.SeriesInstanceUID;
                             var ppSeriesId = pretty_print_id(seriesId);
                             var seriesNumber = String(curData.SeriesNumber);
-                            var seriesDescription = curData.SeriesDescription;
+                            var seriesDescription = '';
+                            if (curData.SeriesDescription.length===1){
+                                seriesDescription = curData.SeriesDescription[0];
+                            }
+                            if (curData.SeriesDescription.length>1){
+                                seriesDescription = curData.SeriesDescription[0]+',...';
+                            }
+
+
+                            //var seriesDescription = curData.SeriesDescription;
                             var bodyPartExamined = curData.BodyPartExamined;
                             var modality = curData.Modality;
                             var rowId = 'series_' + seriesId.replace(/\./g, '-')
@@ -1271,11 +1280,18 @@ require([
                             var seriesTxt =     ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
 
                             newHtml = '<tr id="' + rowId + '" data-projectid="'+projectId+'" data-caseid="'+patientId+'" class="' + pclass + ' ' + cclass + ' ' + studyClass + ' text_head">' +
-                                '<td class="col1 study-id study-id-col" data-study-id="'+studyId+'">' + hrefTxt + '</td>' +
+                                '<td class="col1 study-id study-id-col" data-study-id="'+studyId+'">' + ppStudyId + '</td>' +
                                 '<td class="series-number">' + seriesNumber + '</td>' +
                                 '<td class="col1 modality">' + modality + '</td>' +
-                                '<td class="col1 body-part-examined">' + bodyPartExamined + '</td>' +
-                                '<td class="series-description">' + seriesDescription + '</td>';
+                                '<td class="col1 body-part-examined">' + bodyPartExamined + '</td>'
+                            if (curData.SeriesDescription.length>1){
+                                newHtml+='<td class="series-description description-tip" data-description="'+curData.SeriesDescription+'">' + seriesDescription;
+                                //newHtml+= '<span class="tooltiptext_ex">' + curData.SeriesDescription + '</span>';
+                                newHtml+= '</td>';
+                            }
+                            else{
+                                newHtml +='<td class="series-description">' + seriesDescription + '</td>';
+                            }
                             if ((modality ==='SEG') || (modality ==='RTSTRUCT') || (modality==='RTPLAN' ) || (modality==='RWV' ) ){
                                 newHtml += '<td class="ohif open-viewer"><a href="/" onclick="return false;"><i class="fa fa-eye-slash no-viewer-tooltip"></i></td></tr>';
 
@@ -1299,7 +1315,7 @@ require([
                                 //'<td class="col1 project-name">' + projectId + '</td>' +
                                 '<td class="ckbx"><input type="checkbox" onclick="(toggleRows($(this).parent().parent(), \'studies\', \'study_\', false))"></td>' +
                                  '<td class="col1 case-id">' + patientId + '</td>'+
-                                '<td class="col2 study-id study-id-col" data-study-id="'+studyId+'">' + hrefTxt + '</td>' +
+                                '<td class="col2 study-id study-id-col" data-study-id="'+studyId+'">' + ppStudyId + '</td>' +
                                 '<td class="col1 study-description">' + studyDescription + '</td>' +
                                 '<td class="col1 numrows">' + numSeries.toString() + '</td>'+
                                 '<td class="ohif open-viewer"><a  href="' + fetchUrl + '" target="_blank"><i class="fa fa-eye"></i></a></td></tr>'
