@@ -283,6 +283,7 @@ require([
 
     $('.tab-content').on('click', '.build-mol-filter', function(){
         var activeDataTab = $('.data-tab.active').attr('id');
+        var nodeId = $('.data-tab.active').attr('node-id');
         var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
         var createFormFilterSet = $('p#'+activeDataTab+'-filters');
 
@@ -291,7 +292,7 @@ require([
         var prog = $(this).closest('.filter-panel');
 
         if(createFormFilterSet.length <= 0) {
-            $('#selected-filters').append('<p id="'+activeDataTab+'-filters"></p>');
+            $('#selected-filters').append('<p id="'+activeDataTab+'-filters" node-id="'+nodeId+'"</p>');
             createFormFilterSet = $('p#'+activeDataTab+'-filters')
             createFormFilterSet.append('<h5>'+(prog.data('prog-displ-name'))+'</h5>');
         } else {
@@ -303,7 +304,8 @@ require([
         }
 
         var tokenProgDisplName = prog.data('prog-displ-name'),
-            tokenProgId = prog.data('prog-id');
+            tokenProgId = prog.data('prog-id'),
+            tokenNodeId = prog.data('node-id');
 
 
         var build = $('#p-' + tokenProgId + '-mutation-build :selected').val();
@@ -339,6 +341,7 @@ require([
                     'feature-type': 'molecular',
                     'feature-name': feature.data('feature-name'),
                     'prog-id': tokenProgId,
+                    'node-id': tokenNodeId,
                     'prog-name': tokenProgDisplName,
                     'filter': filter,
                     'class': '',
@@ -375,6 +378,7 @@ require([
     var filter_change_callback = function(e, withoutDisplayUpdates) {
 
         var activeDataTab = $('.data-tab.active').attr('id');
+        var nodeId = $('.data-tab.active').attr('node-id');
         var selFilterPanel = '.' + activeDataTab + '-selected-filters';
         var createFormFilterSet = $('p#'+activeDataTab + '-filters');
 
@@ -387,7 +391,7 @@ require([
             value = $this;
 
         if(createFormFilterSet.length <= 0) {
-            $('#selected-filters').append('<p id="'+activeDataTab+'-filters"></p>');
+            $('#selected-filters').append('<p id="'+activeDataTab+'-filters" node-id="'+nodeId+'"</p>');
             createFormFilterSet = $('p#'+activeDataTab+'-filters');
             createFormFilterSet.append('<h5>'+(prog.data('prog-displ-name'))+'</h5>');
         } else {
@@ -395,7 +399,8 @@ require([
         }
 
         var tokenProgDisplName = prog.data('prog-displ-name'),
-            tokenProgId = prog.data('prog-id');
+            tokenProgId = prog.data('prog-id'),
+            tokenNodeId = prog.data('node-id');
 
         if ($this.is(':checked')) { // Checkbox checked
             var tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
@@ -419,6 +424,7 @@ require([
                     'value-id': value_id,
                     'value-name': value.data('value-name'),
                     'prog-id': tokenProgId,
+                    'node-id': tokenNodeId,
                     'prog-name': tokenProgDisplName,
                 }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
 
@@ -439,6 +445,7 @@ require([
                     'value-id': value_id,
                     'value-name': value.data('value-name'),
                     'prog-id': tokenProgId,
+                    'node-id': tokenNodeId,
                     'prog-name': tokenProgDisplName,
                     'user-program-id': tokenUserProgId,
                 }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
@@ -1294,12 +1301,13 @@ require([
         let create_form_filters = $('#selected-filters');
         create_form_filters.children('p').each(function() {
             let program_id = $(this).prop('id').slice(0, -13);
+            let node_id =$(this).attr('node-id');
             let dataset_name = $(this).find('h5').text();
             let link = "#" + program_id + "-data";
             let div = $('<div>');
             let current = (link === dataset_selector) ? " (Current Data Set)" : "";
             div.append("<h5><a class=\"dataset-select-btn\" program-id=\"" + program_id
-                + "\">" + dataset_name + "</a>" + current + "</h5>");
+                + "\" node-id=\"" + node_id + "\">" + dataset_name + "</a>" + current + "</h5>");
 
             $(this).find('span').each(function() {
                 var new_token = $(this).clone(true);
@@ -1310,6 +1318,7 @@ require([
 
         $('.dataset-select-btn').click(function(e) {
             ACTIVE_PROGRAM_ID = $(e.target).attr('program-id');
+            ACTIVE_NODE_ID = $(e.target).attr('node-id');
             let new_dataset_selector = '#'+ACTIVE_PROGRAM_ID+'-data';
             $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
             $(new_dataset_selector).addClass('active');
