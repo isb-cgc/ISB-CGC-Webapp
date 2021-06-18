@@ -1292,14 +1292,27 @@ require([
                             else{
                                 newHtml +='<td class="series-description">' + seriesDescription + '</td>';
                             }
-                            if ((modality ==='SEG') || (modality ==='RTSTRUCT') || (modality==='RTPLAN' ) || (modality==='RWV' ) ){
-                                newHtml += '<td class="ohif open-viewer"><a href="/" onclick="return false;"><i class="fa fa-eye-slash no-viewer-tooltip"></i></td></tr>';
 
+
+                            var viewAble=true;
+                            if (Array.isArray(modality)){
+                                if ( modality.includes('SEG') || modality.includes('RTSTRUCT') || modality.includes('RTPLAN') || modality.includes('RWV')){
+                                    viewAble = false;
+                                }
                             }
-                            else {
+                            else if ( (modality==='SEG') || (modality==='RTSTRUCT') || (modality==='RTPLAN') || (modality==='RWV')){
+                                viewAble = false;
+                            }
+
+
+                            if ( viewAble ){
                                 newHtml += '<td class="ohif open-viewer"><a href="' + fetchUrlSeries + '" target="_blank"><i class="fa fa-eye"></i></td></tr>';
                             }
-                        }
+
+                            else {
+                                newHtml += '<td class="ohif open-viewer"><a href="/" onclick="return false;"><i class="fa fa-eye-slash no-viewer-tooltip"></i></td></tr>';
+                            }
+                         }
 
                         else{
                             var studyDescription = curData.StudyDescription;
