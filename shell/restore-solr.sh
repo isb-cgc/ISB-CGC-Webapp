@@ -27,6 +27,15 @@ do
     esac
 done
 
+if [[ ! -d $BACKUP_DIR ]]; then
+    echo "[ERROR] Backup directory ${BACKUP_DIR} not found - exiting!"
+    exit 1
+fi
+
+if [[ -z $SOLR_PWD ]]; then
+  echo "[ERROR] SOLR_PWD not set - exiting!"
+  exit 1
+fi
 
 if [[ $TARFILE != "" ]]; then
     if [[ -f $TARFILE ]]; then
@@ -37,19 +46,12 @@ if [[ $TARFILE != "" ]]; then
     fi
 fi
 
-if [[ ! -d $BACKUP_DIR ]]; then
-    echo "[ERROR] Backup directory ${$BACKUP_DIR} not found - exiting!"
-    exit 1
-fi
-
-if [[ -z $SOLR_PWD ]]; then
-  echo "[ERROR] SOLR_PWD not set - exiting!"
-  exit 1
-fi
-
 for dirname in ${BACKUP_DIR}/*/; do
-  CORE=$([ $BACKUP_DIR = "./" ] && awk -F. '{print $3}' <<< $dirname || awk -F'[./]' '{print $3}' <<< $dirname)
-  echo $MAKE_CORE
+  CORE=$([ "$BACKUP_DIR" == "./" ] && awk -F. '{print $3}' <<< $dirname || awk -F'[./]' '{print $4}' <<< $dirname)
+  if [ "$CORE" == "" || -z $CORE ]; then
+    echo "Something's wrong with the directory structure! Exiting."
+    exit 1
+  fi
   if [ "$MAKE_CORE" = true ]; then
     sudo -u solr /opt/bitnami/solr/bin/solr create -c $CORE -s 2 -rf 2
   else
@@ -58,7 +60,7 @@ for dirname in ${BACKUP_DIR}/*/; do
   fi
 
   SNAPSHOT=$(awk -F'[/]' '{print $2}' <<< $dirname)
-  echo "Restoring core ${CORE}..."
+  echo "Restoring core ${CORE}...into snapshot ${SNAPSHOT}"
   sudo chown solr $dirname
   sudo -u solr cp -r $dirname /opt/bitnami/solr/data/$CORE/data/$SNAPSHOT
   sudo -u solr mv /opt/bitnami/solr/data/$CORE/conf/managed-schema /opt/bitnami/solr/data/$CORE/conf/managed-schema.old
