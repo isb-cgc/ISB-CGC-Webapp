@@ -1468,22 +1468,20 @@ require([
 
     // Check to see if we need 'Show More' buttons for details and filter panels (we may not)
     var max_height = 0;
+    var num_progs = 0;
     $('.prog-filter-set').each(function(){
         var this_div = $(this);
+        num_progs++;
         if(this_div.outerHeight() > max_height) {
             max_height = this_div.outerHeight();
         }
     });
 
     set_prog_filter_height(100);
-
-    // $('.prog-filter-set').each(function(){
-    //     if($(this).outerHeight() < max_height) {
-    //         $(this).css('height', '100%');
-    //     }
-    // });
-
-    if(max_height < $('.curr-filter-panel').innerHeight()){
+    max_height += 15;
+    var num_prog_rows = Math.ceil(num_progs/4);
+    var height_all_rows = num_prog_rows * max_height + 15;
+    if (height_all_rows < $('.curr-filter-panel').innerHeight()){
         $('.curr-filter-panel').css('height','105px').toggleClass('gradient-overlay', false);
         $('.more-filters').hide();
     }
