@@ -255,7 +255,6 @@ def populate_tables(request):
         sortdir = req.get('sortdir','asc')
         #table_data = get_table_data(filters, table_type)
         sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(active=True,source_type=DataSource.SOLR,aggregate_level="StudyInstanceUID")
-
         sortByIndex = True
         idsReq=[]
         custom_facets=''
@@ -279,15 +278,12 @@ def populate_tables(request):
             elif sort == 'StudyInstanceUID':
                 sortByIndex=False
                 custom_facets_order = {"per_id": {"type": "terms", "field": "PatientID", "sort":"unique_study", "offset":offset, "limit": limit,"facet": {"unique_study": "unique(StudyInstanceUID)", "unique_series": "unique(SeriesInstanceUID)"}}}
-                patientIdsReq = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, offset=offset,
+                '''patientIdsReq = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, offset=offset,
                                                     records_only=False,
-                                                    collapse_on=tableIndex, counts_only=True, filtered_needed=False, custom_facets=custom_facets, raw_format=True)
-
+                                                    collapse_on=tableIndex, counts_only=True, filtered_needed=False, custom_facets=custom_facets, raw_format=True)'''
         order = {}
         curInd = 0
-
         idsFilt=[]
-
         if sortByIndex:
             idsReq = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, offset=offset, records_only=True,
                                 collapse_on=tableIndex, counts_only=False,filtered_needed=False,sort=sort_field)
@@ -345,8 +341,6 @@ def populate_tables(request):
         logger.exception(e)
         messages.error(request,"Encountered an error when attempting to populate the page - please contact the administrator.")
 
-
-    i=1
     return JsonResponse({"res":tableRes})
 
 # Data exploration and cohort creation page

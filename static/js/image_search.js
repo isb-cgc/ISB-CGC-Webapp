@@ -1009,7 +1009,134 @@ require([
             resetTableControls($('#' + seriesTableId), true, newScrollInd)
         }
 
-        window.addCases = function(projectIdArr, casetableId, refreshAfterFilter){
+        window.addCases = function(projectIdArr, casetableId, refreshAfterFilter, sortdir='asc', sort='StudyInstanceUID', offset=0, limit=2000){
+
+            changeAjax(true);
+            var curSelCasesDic = new Object();
+            var newSelCases = new Object();
+
+            if (refreshAfterFilter) {
+                for (projectId in window.selItems.selCases) {
+                    curSelCasesDic[projectId] = new Object();
+                    for (var i = 0; i < window.selItems.selCases[projectId].length; i++) {
+                        var curCase = window.selItems.selCases[projectId][i];
+                        curSelCasesDic[projectId][curCase] = 1;
+                    }
+                }
+            }
+            else {
+                for (i in projectIdArr) {
+                    window.selItems.selProjects.push(projectIdArr[i]);
+                }
+            }
+            curFilterObj = JSON.parse(JSON.stringify(parseFilterObj()));
+            curFilterObj.collection_id = projectIdArr;
+
+            var filterStr = JSON.stringify(curFilterObj);
+
+            let url = '/tables/cases/'
+            url = encodeURI(url);
+            ndic= {'filters':filterStr, 'sort':sort, 'sortdir':sortdir, 'offset':offset, 'limit':limit}
+                //?counts_only=False&is_json=True&with_clinical=True&collapse_on=' + collapse_on + '&filters=' + filterStr + '&fields=' + fieldStr + '&order_docs=' + orderDocStr+'&uniques='+uniques;
+            if (typeof(window.csr) !=='undefined'){
+                ndic['csrfmiddlewaretoken'] = window.csr
+            }
+
+            $.ajax({
+                url: url,
+                dataType: 'json',
+                type: 'post',
+                data: ndic,
+                contentType: 'application/x-www-form-urlencoded',
+                success: function (data) {
+
+                    studyDic = new Object();
+                    if (data.hasOwnProperty('uniques') && data['uniques'].hasOwnProperty('StudyInstanceUID') && data['uniques']['StudyInstanceUID']['buckets']){
+                        for (i=0;i<data['uniques']['StudyInstanceUID']['buckets'].length;i++){
+                            curSet= data['uniques']['StudyInstanceUID']['buckets'][i];
+                            if (curSet.hasOwnProperty('val') && curSet.hasOwnProperty('unique_count')){
+                                studyDic[curSet['val']]=curSet['unique_count']
+                            }
+                        }
+
+                    }
+                    seriesDic = new Object();
+                    if (data.hasOwnProperty('uniques') && data['uniques'].hasOwnProperty('SeriesInstanceUID') && data['uniques']['SeriesInstanceUID']['buckets']){
+                        for (i=0;i<data['uniques']['SeriesInstanceUID']['buckets'].length;i++){
+                            curSet= data['uniques']['SeriesInstanceUID']['buckets'][i];
+                            if (curSet.hasOwnProperty('val') && curSet.hasOwnProperty('unique_count')){
+                                seriesDic[curSet['val']]=curSet['unique_count']
+                            }
+                        }
+
+                    }
+
+                    for (i = 0; i < data['origin_set']['docs'].length; i++) {
+                        var curData = data['origin_set']['docs'][i];
+                        var projectId = curData.collection_id;
+                        var projectNm = $('#'+projectId).filter('.collection_name')[0].innerText;
+                        var patientId = curData.PatientID;
+                        var numStudy=0;
+                        if (studyDic.hasOwnProperty(patientId)){
+                            numStudy=studyDic[patientId];
+                        }
+                        var numSeries=0;
+                        if (seriesDic.hasOwnProperty(patientId)){
+                            numSeries=seriesDic[patientId];
+                        }
+
+
+                        var pclass = 'project_' + projectId;
+                        var newHtml = '';
+                        var rowId = 'case_' + patientId.replace(/\./g, '-');
+
+                        newHtml = '<tr id="' + rowId + '" data-projectid="' + projectId + '" class="' + pclass + ' text_head" >' +
+                                   '<td class="ckbx"><input type="checkbox" onclick="(toggleRows($(this).parent().parent(), \'cases\', \'case_\', false))"></td>'+
+                                   '<td class="col1 project-name">' + projectNm + '</td>' +
+                                    '<td class="col1 case-id">' + patientId +'</td>' +
+                                    '<td class="col1 numrows">' + numStudy.toString() + '</td>' +
+                                    '<td class="col1 ">' + numSeries.toString() + '</td>' +
+                                    '</tr>';
+
+
+
+                        $('#' + casetableId).append(newHtml);
+
+                        if (refreshAfterFilter && (curSelCasesDic.hasOwnProperty(projectId)) && (curSelCasesDic[projectId].hasOwnProperty(patientId)) ){
+                            $('#' + casetableId).find('#'+rowId).addClass("selected_grey");
+                            if ( !(newSelCases.hasOwnProperty(projectId))){
+                                newSelCases[projectId] = new Array();
+                            }
+                           newSelCases[projectId].push(patientId);
+                        }
+
+                    }
+
+                    changeAjax(false);
+                    resetTableControls($('#' + casetableId), false, 0);
+
+                    if (refreshAfterFilter){
+                        window.selItems.selCases = newSelCases;
+                        var caseArr = new Array();
+                        for (projId in window.selItems.selCases) {
+                        caseArr.push.apply(caseArr, window.selItems.selCases[projId]);
+                        }
+                        if (caseArr.length > 0) {
+                              addStudyOrSeries(window.selItems.selProjects, caseArr,[], "studies_table", true, {},false);
+                        }
+                    }
+
+
+                },
+                error: function () {
+                    changeAjax(false);
+                    console.log("problem getting data");
+                }
+            });
+
+        }
+
+        window.addCasesOld = function(projectIdArr, casetableId, refreshAfterFilter){
 
             changeAjax(true);
             var curSelCasesDic = new Object();
