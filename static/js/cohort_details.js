@@ -966,23 +966,33 @@ require([
             $('.more-filters').hide();
             $('.less-filters').show();
             var max_height = 0;
+            var num_programs = 0;
             $('.prog-filter-set').each(function(){
+                num_programs++;
                 var this_div = $(this);
                 if(this_div.outerHeight() > max_height) {
                     max_height = this_div.outerHeight();
                 }
             });
 
+            var num_rows = Math.ceil(num_programs/4);
+            max_height += 15;
             $('.curr-filter-panel').animate({
-                height: (max_height+15)+'px'
+                height: (max_height*num_rows+15)+'px'
             }, 800).toggleClass('gradient-overlay', false);
+
+            var height_perc = 100 / num_rows;
+            set_prog_filter_height(height_perc);
         });
+
         $('.less-filters button').on('click', function() {
             $('.less-filters').hide();
             $('.more-filters').show();
             $('.curr-filter-panel').animate({
                 height: '95px'
             }, 800).toggleClass('gradient-overlay', true);
+
+            set_prog_filter_height(100);
         });
 
         $('.more-details button').on('click', function() {
@@ -990,15 +1000,24 @@ require([
             $('.less-details').show();
 
             var max_height = 0;
+            var num_programs = 0;
             $('.creation-prog-filter-set').each(function(){
+                num_programs++;
                 var this_div = $(this);
                 if(this_div.outerHeight() > max_height) {
                     max_height = this_div.outerHeight();
                 }
             });
+            var num_rows = Math.ceil(num_programs/4);
+            max_height += 15;
+
             $('.details-panel').animate({
-                height: ($('.cohort-info').outerHeight() + max_height+$('ul.rev-history').outerHeight()+15)+'px'
+                height: ($('.cohort-info').outerHeight() + (max_height+$('ul.rev-history').outerHeight())*num_rows+15)+'px'
             }, 800);
+
+            $('.creation-prog-filter-set').each(function(){
+                $(this).css('height', max_height);
+            });
         });
         $('.less-details button').on('click', function() {
             $('.less-details').hide();
@@ -1032,6 +1051,12 @@ require([
         });
 
         createTokenizer($(program_data_selector+' .paste-in-genes'), [], program_data_selector, activeDataTab);
+    };
+
+    var set_prog_filter_height = function(height_perc) {
+        $('.prog-filter-set').each(function(){
+            $(this).css('height', height_perc + '%');
+        });
     };
 
     // Handler for the 'x' of the mutation 'category' filter tokens
@@ -1449,11 +1474,15 @@ require([
             max_height = this_div.outerHeight();
         }
     });
-    $('.prog-filter-set').each(function(){
-        if($(this).outerHeight() < max_height) {
-            $(this).css('height', '100%');
-        }
-    });
+
+    set_prog_filter_height(100);
+
+    // $('.prog-filter-set').each(function(){
+    //     if($(this).outerHeight() < max_height) {
+    //         $(this).css('height', '100%');
+    //     }
+    // });
+
     if(max_height < $('.curr-filter-panel').innerHeight()){
         $('.curr-filter-panel').css('height','105px').toggleClass('gradient-overlay', false);
         $('.more-filters').hide();
