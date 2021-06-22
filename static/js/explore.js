@@ -79,13 +79,13 @@ require([
 
         $('.ui-slider').each(function() {
             let modal_filter_block = '';
-            if($(this).parents('#program_set').length > 0) {
+            if ($(this).parents('#program_set').length > 0) {
                 modal_filter_block = '#selected-filters-prog-set';
-            } else if($(this).parents('#search_orig_set').length > 0) {
+            } else if ($(this).parents('#search_orig_set').length > 0) {
                 modal_filter_block = '#selected-filters-orig-set';
-            } else if($(this).parents('#search_related_set').length > 0) {
+            } else if ($(this).parents('#search_related_set').length > 0) {
                 modal_filter_block = '#selected-filters-rel-set';
-            } else if($(this).parents('#search_derived_set').length > 0) {
+            } else if ($(this).parents('#search_derived_set').length > 0) {
                 modal_filter_block = '#selected-filters-der-set';
             }
 
@@ -94,16 +94,45 @@ require([
             var right_val = $this.slider("values", 1);
             var min = $this.slider("option", "min");
             var max = $this.slider("option", "max");
-            if (left_val !== min || right_val !== max) {
-                if($(`${modal_filter_block} p.`+$(this).data('filter-attr-id')).length <= 0) {
-                    $(`${modal_filter_block}`).append('<p class="cohort-filter-display '+$(this).data('filter-attr-id')
-                        +'"><span class="attr">'+$(this).data('filter-display-attr')+':</span></p>');
+
+            if ($this.parent().hasClass('isActive') &&  ($this.parent().hasClass('wNone') && $this.siblings('.noneBut').find('input:checked').length>0) )
+            {
+                if ($(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).length <= 0) {
+                    $(`${modal_filter_block}`).append('<p class="cohort-filter-display ' + $(this).data('filter-attr-id')
+                        + '"><span class="attr">' + $(this).data('filter-display-attr') + ':</span></p>');
                 }
-                 $(`${modal_filter_block} p.`+$(this).data('filter-attr-id')).append(
-                     '<span class="val">'+left_val + " to "+right_val+'</span>'
-                 );
-                filters[$(this).data('filter-attr-id')] = [left_val,right_val];
+                $(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).append(
+                    '<span class="val">None,' + left_val + " to " + right_val + '</span>'
+                );
+                filters[$(this).data('filter-attr-id')] = ["None",[left_val, right_val]];
+
             }
+            else if ($this.parent().hasClass('isActive'))
+            {
+                if ($(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).length <= 0) {
+                    $(`${modal_filter_block}`).append('<p class="cohort-filter-display ' + $(this).data('filter-attr-id')
+                        + '"><span class="attr">' + $(this).data('filter-display-attr') + ':</span></p>');
+                }
+                $(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).append(
+                    '<span class="val">' + left_val + " to " + right_val + '</span>'
+
+                );
+                filters[$this.data('filter-attr-id')] = [left_val, right_val];
+
+            }
+            else if ($this.parent().hasClass('wNone') && $this.siblings('.noneBut').find('input:checked').length>0){
+                if ($(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).length <= 0) {
+                    $(`${modal_filter_block}`).append('<p class="cohort-filter-display ' + $(this).data('filter-attr-id')
+                        + '"><span class="attr">' + $(this).data('filter-display-attr') + ':</span></p>');
+                }
+                $(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).append(
+                    '<span class="val">None</span>'
+                );
+                filters[$this.data('filter-attr-id')] = ["None"];
+
+            }
+
+
         });
 
         $('#save-cohort-modal .selected-filters').each(function(){

@@ -197,7 +197,7 @@
 
                                                  {% endif %}>
                                                <div class="sorter">
-                                                 <span>Sort by: <input type="radio" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
+                                                 <span>Sort by: <input type="radio" class="sort_val" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" class="sort_val" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
                                             </div>
 
                                             <p style="display: block;" >
@@ -272,7 +272,7 @@
                                                     data-curminrng="{{ attr.min_max.min|floor }}" data-curmaxrng="{{ attr.min_max.max|ceiling }}"
                                                  {% endif %}>
                                                <div class="sorter">
-                                                 <span>Sort by: <input type="radio" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
+                                                 <span>Sort by: <input type="radio" class="sort_val" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" class="sort_val" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
                                             </div>
                                                <p style="display: block;" >
                                                     {% if attr.values|length > 5 %}
@@ -347,7 +347,7 @@
                                                  {% endif %}>
                                                  {% if attr.name != 'bmi' %}
                                                     <div class="sorter">
-                                                       <span>Sort by: <input type="radio" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
+                                                       <span>Sort by: <input type="radio" class="sort_val" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" class="sort_val" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
                                                     </div>
                                                  {% endif %}
                                                      <p style="display: block;" >
