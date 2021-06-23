@@ -965,24 +965,13 @@ require([
         $('.more-filters button').on('click', function() {
             $('.more-filters').hide();
             $('.less-filters').show();
-            var max_height = 0;
-            var num_programs = 0;
-            $('.prog-filter-set').each(function(){
-                num_programs++;
-                var this_div = $(this);
-                if(this_div.outerHeight() > max_height) {
-                    max_height = this_div.outerHeight();
-                }
-            });
 
-            var num_rows = Math.ceil(num_programs/4);
-            max_height += 15;
             $('.curr-filter-panel').animate({
-                height: (max_height*num_rows+15)+'px'
+                height: Program_Filter_AllRows_Height + 'px'
             }, 800).toggleClass('gradient-overlay', false);
 
-            var height_perc = 100 / num_rows;
-            set_prog_filter_height(height_perc);
+            var height_percentage = 100 / Program_Filter_Rows;
+            set_prog_filter_height(height_percentage);
         });
 
         $('.less-filters button').on('click', function() {
@@ -999,24 +988,13 @@ require([
             $('.more-details').hide();
             $('.less-details').show();
 
-            var max_height = 0;
-            var num_programs = 0;
-            $('.creation-prog-filter-set').each(function(){
-                num_programs++;
-                var this_div = $(this);
-                if(this_div.outerHeight() > max_height) {
-                    max_height = this_div.outerHeight();
-                }
-            });
-            var num_rows = Math.ceil(num_programs/4);
-            max_height += 15;
-
             $('.details-panel').animate({
-                height: ($('.cohort-info').outerHeight() + (max_height+$('ul.rev-history').outerHeight())*num_rows+15)+'px'
+                height: ($('.cohort-info').outerHeight() +
+                    (Program_Filter_Max_Height+$('ul.rev-history').outerHeight()) * Program_Filter_Rows + 15) + 'px'
             }, 800);
 
             $('.creation-prog-filter-set').each(function(){
-                $(this).css('height', max_height);
+                $(this).css('height', Program_Filter_Max_Height);
             });
         });
         $('.less-details button').on('click', function() {
@@ -1053,9 +1031,9 @@ require([
         createTokenizer($(program_data_selector+' .paste-in-genes'), [], program_data_selector, activeDataTab);
     };
 
-    var set_prog_filter_height = function(height_perc) {
+    var set_prog_filter_height = function(height_percentage) {
         $('.prog-filter-set').each(function(){
-            $(this).css('height', height_perc + '%');
+            $(this).css('height', height_percentage + '%');
         });
     };
 
@@ -1466,23 +1444,27 @@ require([
         }
     };
 
+    let Program_Filter_Max_Height = 0;
+    let Program_Filter_Count = 0;
+    let Program_Filter_Rows = 0;
+    let Program_Filter_AllRows_Height = 0;
+
     // Check to see if we need 'Show More' buttons for details and filter panels (we may not)
-    var max_height = 0;
-    var num_progs = 0;
     $('.prog-filter-set').each(function(){
         var this_div = $(this);
-        num_progs++;
-        if(this_div.outerHeight() > max_height) {
-            max_height = this_div.outerHeight();
+        Program_Filter_Count++;
+        if (this_div.outerHeight() > Program_Filter_Max_Height) {
+            Program_Filter_Max_Height = this_div.outerHeight();
         }
     });
 
+    Program_Filter_Max_Height += 15;
+    Program_Filter_Rows = Math.ceil(Program_Filter_Count / 4);
+    Program_Filter_AllRows_Height = Program_Filter_Rows * Program_Filter_Max_Height + 15;
+
     set_prog_filter_height(100);
 
-    max_height += 15;
-    var num_prog_rows = Math.ceil(num_progs/4);
-    var height_all_rows = num_prog_rows * max_height + 15;
-    if (height_all_rows < $('.curr-filter-panel').innerHeight()){
+    if (Program_Filter_AllRows_Height < $('.curr-filter-panel').innerHeight()){
         $('.curr-filter-panel').css('height','105px').toggleClass('gradient-overlay', false);
         $('.more-filters').hide();
     }
