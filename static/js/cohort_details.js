@@ -283,6 +283,7 @@ require([
 
     $('.tab-content').on('click', '.build-mol-filter', function(){
         var activeDataTab = $('.data-tab.active').attr('id');
+        var nodeId = $('.data-tab.active').attr('node-id');
         var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
         var createFormFilterSet = $('p#'+activeDataTab+'-filters');
 
@@ -291,7 +292,7 @@ require([
         var prog = $(this).closest('.filter-panel');
 
         if(createFormFilterSet.length <= 0) {
-            $('#selected-filters').append('<p id="'+activeDataTab+'-filters"></p>');
+            $('#selected-filters').append('<p id="'+activeDataTab+'-filters" node-id="'+nodeId+'"</p>');
             createFormFilterSet = $('p#'+activeDataTab+'-filters')
             createFormFilterSet.append('<h5>'+(prog.data('prog-displ-name'))+'</h5>');
         } else {
@@ -303,7 +304,8 @@ require([
         }
 
         var tokenProgDisplName = prog.data('prog-displ-name'),
-            tokenProgId = prog.data('prog-id');
+            tokenProgId = prog.data('prog-id'),
+            tokenNodeId = prog.data('node-id');
 
 
         var build = $('#p-' + tokenProgId + '-mutation-build :selected').val();
@@ -339,6 +341,7 @@ require([
                     'feature-type': 'molecular',
                     'feature-name': feature.data('feature-name'),
                     'prog-id': tokenProgId,
+                    'node-id': tokenNodeId,
                     'prog-name': tokenProgDisplName,
                     'filter': filter,
                     'class': '',
@@ -375,6 +378,7 @@ require([
     var filter_change_callback = function(e, withoutDisplayUpdates) {
 
         var activeDataTab = $('.data-tab.active').attr('id');
+        var nodeId = $('.data-tab.active').attr('node-id');
         var selFilterPanel = '.' + activeDataTab + '-selected-filters';
         var createFormFilterSet = $('p#'+activeDataTab + '-filters');
 
@@ -387,7 +391,7 @@ require([
             value = $this;
 
         if(createFormFilterSet.length <= 0) {
-            $('#selected-filters').append('<p id="'+activeDataTab+'-filters"></p>');
+            $('#selected-filters').append('<p id="'+activeDataTab+'-filters" node-id="'+nodeId+'"</p>');
             createFormFilterSet = $('p#'+activeDataTab+'-filters');
             createFormFilterSet.append('<h5>'+(prog.data('prog-displ-name'))+'</h5>');
         } else {
@@ -395,7 +399,8 @@ require([
         }
 
         var tokenProgDisplName = prog.data('prog-displ-name'),
-            tokenProgId = prog.data('prog-id');
+            tokenProgId = prog.data('prog-id'),
+            tokenNodeId = prog.data('node-id');
 
         if ($this.is(':checked')) { // Checkbox checked
             var tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
@@ -419,6 +424,7 @@ require([
                     'value-id': value_id,
                     'value-name': value.data('value-name'),
                     'prog-id': tokenProgId,
+                    'node-id': tokenNodeId,
                     'prog-name': tokenProgDisplName,
                 }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
 
@@ -439,6 +445,7 @@ require([
                     'value-id': value_id,
                     'value-name': value.data('value-name'),
                     'prog-id': tokenProgId,
+                    'node-id': tokenNodeId,
                     'prog-name': tokenProgDisplName,
                     'user-program-id': tokenUserProgId,
                 }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
@@ -959,23 +966,33 @@ require([
             $('.more-filters').hide();
             $('.less-filters').show();
             var max_height = 0;
+            var num_programs = 0;
             $('.prog-filter-set').each(function(){
+                num_programs++;
                 var this_div = $(this);
                 if(this_div.outerHeight() > max_height) {
                     max_height = this_div.outerHeight();
                 }
             });
 
+            var num_rows = Math.ceil(num_programs/4);
+            max_height += 15;
             $('.curr-filter-panel').animate({
-                height: (max_height+15)+'px'
+                height: (max_height*num_rows+15)+'px'
             }, 800).toggleClass('gradient-overlay', false);
+
+            var height_perc = 100 / num_rows;
+            set_prog_filter_height(height_perc);
         });
+
         $('.less-filters button').on('click', function() {
             $('.less-filters').hide();
             $('.more-filters').show();
             $('.curr-filter-panel').animate({
                 height: '95px'
             }, 800).toggleClass('gradient-overlay', true);
+
+            set_prog_filter_height(100);
         });
 
         $('.more-details button').on('click', function() {
@@ -983,15 +1000,24 @@ require([
             $('.less-details').show();
 
             var max_height = 0;
+            var num_programs = 0;
             $('.creation-prog-filter-set').each(function(){
+                num_programs++;
                 var this_div = $(this);
                 if(this_div.outerHeight() > max_height) {
                     max_height = this_div.outerHeight();
                 }
             });
+            var num_rows = Math.ceil(num_programs/4);
+            max_height += 15;
+
             $('.details-panel').animate({
-                height: ($('.cohort-info').outerHeight() + max_height+$('ul.rev-history').outerHeight()+15)+'px'
+                height: ($('.cohort-info').outerHeight() + (max_height+$('ul.rev-history').outerHeight())*num_rows+15)+'px'
             }, 800);
+
+            $('.creation-prog-filter-set').each(function(){
+                $(this).css('height', max_height);
+            });
         });
         $('.less-details button').on('click', function() {
             $('.less-details').hide();
@@ -1025,6 +1051,12 @@ require([
         });
 
         createTokenizer($(program_data_selector+' .paste-in-genes'), [], program_data_selector, activeDataTab);
+    };
+
+    var set_prog_filter_height = function(height_perc) {
+        $('.prog-filter-set').each(function(){
+            $(this).css('height', height_perc + '%');
+        });
     };
 
     // Handler for the 'x' of the mutation 'category' filter tokens
@@ -1294,12 +1326,13 @@ require([
         let create_form_filters = $('#selected-filters');
         create_form_filters.children('p').each(function() {
             let program_id = $(this).prop('id').slice(0, -13);
+            let node_id =$(this).attr('node-id');
             let dataset_name = $(this).find('h5').text();
             let link = "#" + program_id + "-data";
             let div = $('<div>');
             let current = (link === dataset_selector) ? " (Current Data Set)" : "";
             div.append("<h5><a class=\"dataset-select-btn\" program-id=\"" + program_id
-                + "\">" + dataset_name + "</a>" + current + "</h5>");
+                + "\" node-id=\"" + node_id + "\">" + dataset_name + "</a>" + current + "</h5>");
 
             $(this).find('span').each(function() {
                 var new_token = $(this).clone(true);
@@ -1310,6 +1343,7 @@ require([
 
         $('.dataset-select-btn').click(function(e) {
             ACTIVE_PROGRAM_ID = $(e.target).attr('program-id');
+            ACTIVE_NODE_ID = $(e.target).attr('node-id');
             let new_dataset_selector = '#'+ACTIVE_PROGRAM_ID+'-data';
             $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
             $(new_dataset_selector).addClass('active');
@@ -1434,18 +1468,21 @@ require([
 
     // Check to see if we need 'Show More' buttons for details and filter panels (we may not)
     var max_height = 0;
+    var num_progs = 0;
     $('.prog-filter-set').each(function(){
         var this_div = $(this);
+        num_progs++;
         if(this_div.outerHeight() > max_height) {
             max_height = this_div.outerHeight();
         }
     });
-    $('.prog-filter-set').each(function(){
-        if($(this).outerHeight() < max_height) {
-            $(this).css('height', '100%');
-        }
-    });
-    if(max_height < $('.curr-filter-panel').innerHeight()){
+
+    set_prog_filter_height(100);
+
+    max_height += 15;
+    var num_prog_rows = Math.ceil(num_progs/4);
+    var height_all_rows = num_prog_rows * max_height + 15;
+    if (height_all_rows < $('.curr-filter-panel').innerHeight()){
         $('.curr-filter-panel').css('height','105px').toggleClass('gradient-overlay', false);
         $('.more-filters').hide();
     }

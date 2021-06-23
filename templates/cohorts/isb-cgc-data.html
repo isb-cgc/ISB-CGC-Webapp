@@ -1,5 +1,5 @@
 {# Public Data Set Filter Template #}
-<div id="{{ program.id }}-data" class="tab-pane data-tab" role="tabpanel">
+<div id="{{ program.id }}-data" node-id="{{ node_id }}" class="tab-pane data-tab" role="tabpanel">
     <div class="col-lg-3 " role="tabpanel">
         <div>
 
@@ -53,7 +53,7 @@
             <!-- Filter Panel -->
             <div id="{{ program.id }}-data-filter-panel" class="panel panel-default filter-panel"
                  role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %}
-                 data-prog-id="{{ program.id }}" data-prog-displ-name="{{ program.name }}">
+                 data-prog-id="{{ program.id }}" data-node-id="{{ node_id }}" data-prog-displ-name="{{ program.name }}">
                 <div class="panel-heading clearfix">
                     <h4 class="panel-title pull-left">Select Filters</h4>
                 </div>
