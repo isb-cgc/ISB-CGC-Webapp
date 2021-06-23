@@ -498,7 +498,7 @@ require([
                             var file_loc = PATH_PDF_URL+files[i]['file_node_id'];
                             table_row_data += '<td><div class ="col-filename accessible-filename">' +
                                     '<div><a href="'+file_loc+'/" target="_blank" rel="noreferrer">' + files[i]['filename'] +
-                                    '<div>[GDC ID: ' + files[i]['file_node_id'] + ']</div>' +
+                                    '<div>[' + files[i]['node'] + ' ID: ' + files[i]['file_node_id'] + ']</div>' +
                                     '<div class="osmisis" style="display: none;"><i>Click to View File in a New Tab</i></div></a></div>' +
                                     '</div></td>';
                             break;
@@ -506,13 +506,13 @@ require([
                              if (files[i]['datatype'] == 'Tissue slide image') {
                                  table_row_data += '<td><div class="col-filename accessible-filename">' +
                                     '<div><a class="disable_tissue_slide_image">' + files[i]['filename'] +
-                                    '<div>[GDC ID: ' + files[i]['file_node_id'] + ']</div>' +
+                                    '<div>[' + files[i]['node'] + ' ID: ' + files[i]['file_node_id'] + ']</div>' +
                                     '<div class="osmisis" style="display: none;"><i>Currently Unavailable</i></div></a></div>' +
                                     '</div></td>';
                              } else {
                                  table_row_data += '<td><div class="col-filename accessible-filename">' +
                                     '<div><a href="'+CAMIC_URL+files[i]['file_node_id']+'/" target="_blank" rel="noreferrer">' + files[i]['filename'] +
-                                    '<div>[GDC ID: ' + files[i]['file_node_id'] + ']</div>' +
+                                    '<div>[' + files[i]['node'] + ' ID: ' + files[i]['file_node_id'] + ']</div>' +
                                     '<div class="osmisis" style="display: none;"><i>Open in caMicroscope</i></div></a></div>' +
                                     '</div></td>';
                              }
