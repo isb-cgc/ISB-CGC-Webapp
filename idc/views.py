@@ -21,6 +21,7 @@ import logging
 import sys
 import datetime
 import re
+import copy
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -253,6 +254,7 @@ def populate_tables(request):
         limit = int(req.get('limit', '500'))
         sort = req.get('sort', 'PatientID')
         sortdir = req.get('sortdir','asc')
+        checkedIds = json.loads(req.get('checkedIds','[]'))
         #table_data = get_table_data(filters, table_type)
         sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(active=True,source_type=DataSource.SOLR,aggregate_level="StudyInstanceUID")
         sortByIndex = True
@@ -277,16 +279,24 @@ def populate_tables(request):
 
             elif sort == 'StudyInstanceUID':
                 sortByIndex=False
-                custom_facets_order = {"per_id": {"type": "terms", "field": "PatientID", "sort":"unique_study", "offset":offset, "limit": limit,"facet": {"unique_study": "unique(StudyInstanceUID)", "unique_series": "unique(SeriesInstanceUID)"}}}
+                custom_facets_order = {"tot":"unique(PatientID)", "per_id": {"type": "terms", "field": "PatientID", "sort":"unique_study", "offset":offset, "limit": limit,"facet": {"unique_study": "unique(StudyInstanceUID)", "unique_series": "unique(SeriesInstanceUID)"}}}
                 '''patientIdsReq = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, offset=offset,
                                                     records_only=False,
                                                     collapse_on=tableIndex, counts_only=True, filtered_needed=False, custom_facets=custom_facets, raw_format=True)'''
         order = {}
         curInd = 0
         idsFilt=[]
+        if len(checkedIds)>0:
+            selFilters=copy.deepcopy(filters)
+            selFilters[tableIndex]=checkedIds
+            newIds = get_collex_metadata(selFilters, [tableIndex], sources=sources, records_only=True,
+                                collapse_on=tableIndex, counts_only=False,filtered_needed=False,sort=tableIndex+' asc')
+
         if sortByIndex:
             idsReq = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, offset=offset, records_only=True,
                                 collapse_on=tableIndex, counts_only=False,filtered_needed=False,sort=sort_field)
+
+            cnt = idsReq['total']
             for rec in idsReq['docs']:
                 id = rec[tableIndex]
                 idsFilt.append(id)
@@ -312,6 +322,7 @@ def populate_tables(request):
             idsReq = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, offset=offset,
                                         records_only=False,collapse_on=tableIndex, counts_only=True, filtered_needed=False,
                                          custom_facets=custom_facets_order, raw_format=True)
+            cnt = idsReq['facets']['tot']
             for rec in idsReq['facets']['per_id']['buckets']:
                 id= rec['val']
                 idsFilt.append(id)
@@ -341,7 +352,7 @@ def populate_tables(request):
         logger.exception(e)
         messages.error(request,"Encountered an error when attempting to populate the page - please contact the administrator.")
 
-    return JsonResponse({"res":tableRes})
+    return JsonResponse({"res":tableRes, "cnt":cnt})
 
 # Data exploration and cohort creation page
 @login_required
