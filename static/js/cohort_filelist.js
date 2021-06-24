@@ -491,14 +491,14 @@ require([
                         case 'filename':
                             table_row_data += '<td><div class ="col-filename">' +
                                     '<div>' + files[i]['filename'] + '</div>' +
-                                    '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
+                                    '<div>[GDC ID: ' + files[i]['file_node_id'] + ']</div>' +
                                     '</div></td>';
                             break;
                         case 'pdf_filename':
-                            var file_loc = PATH_PDF_URL+files[i]['file_gdc_id'];
+                            var file_loc = PATH_PDF_URL+files[i]['file_node_id'];
                             table_row_data += '<td><div class ="col-filename accessible-filename">' +
                                     '<div><a href="'+file_loc+'/" target="_blank" rel="noreferrer">' + files[i]['filename'] +
-                                    '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
+                                    '<div>[' + files[i]['node'] + ' ID: ' + files[i]['file_node_id'] + ']</div>' +
                                     '<div class="osmisis" style="display: none;"><i>Click to View File in a New Tab</i></div></a></div>' +
                                     '</div></td>';
                             break;
@@ -506,13 +506,13 @@ require([
                              if (files[i]['datatype'] == 'Tissue slide image') {
                                  table_row_data += '<td><div class="col-filename accessible-filename">' +
                                     '<div><a class="disable_tissue_slide_image">' + files[i]['filename'] +
-                                    '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
+                                    '<div>[' + files[i]['node'] + ' ID: ' + files[i]['file_node_id'] + ']</div>' +
                                     '<div class="osmisis" style="display: none;"><i>Currently Unavailable</i></div></a></div>' +
                                     '</div></td>';
                              } else {
                                  table_row_data += '<td><div class="col-filename accessible-filename">' +
-                                    '<div><a href="'+CAMIC_URL+files[i]['file_gdc_id']+'/" target="_blank" rel="noreferrer">' + files[i]['filename'] +
-                                    '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
+                                    '<div><a href="'+CAMIC_URL+files[i]['file_node_id']+'/" target="_blank" rel="noreferrer">' + files[i]['filename'] +
+                                    '<div>[' + files[i]['node'] + ' ID: ' + files[i]['file_node_id'] + ']</div>' +
                                     '<div class="osmisis" style="display: none;"><i>Open in caMicroscope</i></div></a></div>' +
                                     '</div></td>';
                              }
@@ -855,9 +855,24 @@ require([
                         var this_attr = data.metadata_data_attr[i];
                         for(var j=0; j < this_attr.values.length; j++) {
                             var this_val = this_attr.values[j];
+                            var attr = '#' + active_tab + '-' + data.build + '-' + this_attr.name;
                             if(this_val.count || this_val.count == 0) {
-                                $('#' + active_tab + '-' + data.build + '-' + this_attr.name + '-' + this_val.value).siblings('span.count').html(this_val.count.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'));
-                                $('#' + active_tab + '-' + data.build + '-' + this_attr.name + '-' + this_val.value).attr('data-count', this_val.count);
+                                // Previously unseen value, we need to add it in.
+                                if($(attr + '-' + this_val.value).length <= 0) {
+                                    let display = this_val.value == 'None' ? "<em>None</em>" : (this_val.displ_value ? this_val.displ_value : this_val.name);
+                                    $(attr).append(`<li class="checkbox"><label title="`+this_val.toolip || ""+`">` +
+                                        `<input type="checkbox" name="elements-selected" data-value-name="` +
+                                            this_val.name+`" id="`+attr+`-`+this_val.name+`" ` +
+                                            `data-feature-name="`+ this_attr.name +`" data-count="`+this_val.count+`"> ` +
+                                            display + `<span class="float-right file_count count">`+
+                                            this_val.count.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') +
+                                            `</span></label></li>`)
+                                }
+                                $('#' + active_tab + '-' + data.build + '-' + this_attr.name + '-' + this_val.value)
+                                    .siblings('span.count').html(this_val.count.toString()
+                                    .replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'));
+                                $('#' + active_tab + '-' + data.build + '-' + this_attr.name + '-' + this_val.value)
+                                    .attr('data-count', this_val.count);
                             }
                         }
                     }
