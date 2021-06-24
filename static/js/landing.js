@@ -46,12 +46,71 @@ require([
     ,'bootstrap'
     ,'assetscore'
     ,'assetsresponsive'
-], function($) {
+], function($, base) {
     A11y.Core();
     //pause video when scrolling to other videos
     $(".carousel-control, .carousel-indicators li:not(.active)").click(function () {
         $('.tutorial-vid').each(function() {
             this.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+        });
+    });
+
+    $('#opt-in-form').on('submit', function (event) {
+        $('#invalid-opt-in-alert').hide();
+
+        var form = this;
+        var first_name = $(form).find("#first-name").val();
+        var last_name  = $(form).find("#last-name").val();
+        var email = $(form).find("#email").val();
+        var affiliation  = $(form).find("#affiliation").val();
+        var feedback = $(form).find("#feedback").val();
+
+        if (first_name.match(base.blacklist)) {
+            $('#invalid-opt-in-field').text("First Name");
+            $('#invalid-opt-in-alert').show();
+            return false;
+        }
+
+        if (last_name.match(base.blacklist)) {
+            $('#invalid-opt-in-field').text("Last Name");
+            $('#invalid-opt-in-alert').show();
+            return false;
+        }
+
+        if (!email.match(base.email)) {
+            $('#invalid-opt-in-field').text("Email");
+            $('#invalid-opt-in-alert').show();
+            return false;
+        }
+
+        if (affiliation.match(base.blacklist)) {
+            $('#invalid-opt-in-field').text("Affiliation");
+            $('#invalid-opt-in-alert').show();
+            return false;
+        }
+
+        if (feedback.match(base.blacklist)) {
+            $('#invalid-opt-in-field').text("Feedback");
+            $('#invalid-opt-in-alert').show();
+            return false;
+        }
+
+        var subscribed = $(form).find("#subscribed").find('option:selected').val();
+
+        var form_data = {};
+        form_data['first-name'] = first_name;
+        form_data['last-name'] = last_name;
+        form_data['email'] = email;
+        form_data['affiliation'] = affiliation;
+        form_data['feedback'] = feedback;
+        form_data['subscribed']= subscribed;
+
+        var url = BASE_URL + '/opt_in/form_submit';
+
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: form_data
         });
     });
 });

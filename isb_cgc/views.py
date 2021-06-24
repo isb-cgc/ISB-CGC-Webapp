@@ -25,6 +25,7 @@ import datetime
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
 from django.db.models import Count
 from django.shortcuts import render, redirect
@@ -118,8 +119,9 @@ def _decode_dict(data):
 
 @never_cache
 def landing_page(request):
+    mitelman_url = settings.MITELMAN_URL
     logger.info("[STATUS] Received landing page view request at {}".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-    return render(request, 'isb_cgc/landing.html', {'request': request, })
+    return render(request, 'isb_cgc/landing.html', {'mitelman_url': mitelman_url })
 
 
 # Redirect all requests for the old landing page location to isb-cgc.org
@@ -893,6 +895,7 @@ def opt_in_form(request):
 
     return render(request, template, form)
 
+@csrf_protect
 def opt_in_form_submitted(request):
     msg = ''
     error_msg = ''
@@ -926,7 +929,11 @@ def opt_in_form_submitted(request):
                 }
                 BigQueryFeedbackSupport.add_rows_to_table([feedback_row])
                 # send a notification to feedback@isb-cgc.org about the entry
-                send_feedback_notification(feedback_row)
+                if settings.IS_UAT:
+                    logger.info("[STATUS] UAT: sent email for feedback")
+                else:
+                    # send a notification to feedback@isb-cgc.org about the entry
+                    send_feedback_notification(feedback_row)
                 msg = 'We thank you for your time and suggestions.'
         else:
             error_msg = 'We were not able to find a user with the given email. Please check with us again later.'
