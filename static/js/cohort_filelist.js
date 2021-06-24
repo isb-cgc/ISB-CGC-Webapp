@@ -491,7 +491,7 @@ require([
                         case 'filename':
                             table_row_data += '<td><div class ="col-filename">' +
                                     '<div>' + files[i]['filename'] + '</div>' +
-                                    '<div>[GDC ID: ' + files[i]['file_node_id'] + ']</div>' +
+                                    '<div>[' + files[i]['node'] + ' ID: ' + files[i]['file_node_id'] + ']</div>' +
                                     '</div></td>';
                             break;
                         case 'pdf_filename':
