@@ -31,6 +31,7 @@ from django.db.models.query import QuerySet
 from projects.models import Program
 from workbooks.models import Workbook
 import logging
+import math
 
 logger = logging.getLogger('main_logger')
 
@@ -323,7 +324,8 @@ def tojson(obj, esacpe_html=True):
 
 @register.filter
 def get_prog_col_size(programs):
-    return (old_div(12,len(programs)))
+    total_col = 12 * math.ceil(len(programs) / 4)
+    return (old_div(total_col, len(programs)))
 
 
 @register.filter
