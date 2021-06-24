@@ -124,11 +124,18 @@
                             </td>
                             <td class="name-col" data-order="{{ cohort.name }}">
                                 {% if only_active_versions %}
-                                 <form name="getCohort" method="POST" action="{% url 'cohort_details' cohort.id %}">
+                               {% comment %}  <form name="getCohort" method="POST" action="{% url 'cohort_details' cohort.id %}">
                                     {% csrf_token %}
                                      <a href="#" onclick="$(this).parent().submit()"
                                        title="View Cohort Details in the Data Explorer">{{ cohort.name }}</a>
                                  </form>
+                                {% endcomment %}
+
+                                  <a href="{% url 'cohort_details' cohort.id %}"
+                                     title="View Cohort Details in the Data Explorer">
+                                       {{ cohort.name }}
+                                  </a>
+
                                 {% else %}
                                     <span title="Cohorts with inactive data versions cannot be viewed in the Data Explorer.">{{ cohort.name }}</span>
                                 {% endif %}

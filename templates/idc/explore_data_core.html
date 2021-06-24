@@ -197,7 +197,7 @@
 
                                                  {% endif %}>
                                                <div class="sorter">
-                                                 <span>Sort by: <input type="radio" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
+                                                 <span>Sort by: <input type="radio" class="sort_val" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" class="sort_val" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
                                             </div>
 
                                             <p style="display: block;" >
@@ -272,7 +272,7 @@
                                                     data-curminrng="{{ attr.min_max.min|floor }}" data-curmaxrng="{{ attr.min_max.max|ceiling }}"
                                                  {% endif %}>
                                                <div class="sorter">
-                                                 <span>Sort by: <input type="radio" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
+                                                 <span>Sort by: <input type="radio" class="sort_val" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" class="sort_val" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
                                             </div>
                                                <p style="display: block;" >
                                                     {% if attr.values|length > 5 %}
@@ -347,7 +347,7 @@
                                                  {% endif %}>
                                                  {% if attr.name != 'bmi' %}
                                                     <div class="sorter">
-                                                       <span>Sort by: <input type="radio" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
+                                                       <span>Sort by: <input type="radio" class="sort_val" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" class="sort_val" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
                                                     </div>
                                                  {% endif %}
                                                      <p style="display: block;" >
@@ -543,7 +543,7 @@
                     </div>
 
 
-                       <div class="dataTables_goto_page goto-page-number" style="width:50%; text-align:center" data-curpage="1" data-min="1" data-max="1">
+                       <div class="dataTables_goto_page goto-page-number"  data-curpage="1" data-min="1" data-max="1">
                            <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
                            <span class="paginate_button_space" ><a class="dataTables_button paginate_button numeric_button current">1</a></span>
                            <a class="next-page paginate_button dataTables_button" style="float:right">Next</a>
@@ -595,7 +595,7 @@
                     </div>
 
 
-                        <div class="dataTables_goto_page goto-page-number" style="width:50%; text-align:center" data-curpage="1" data-min="1" data-max="1">
+                        <div class="dataTables_goto_page goto-page-number"  data-curpage="1" data-min="1" data-max="1">
                            <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
                            <span class="paginate_button_space" ><a class="dataTables_button paginate_button numeric_button current">1</a></span>
                            <a class="next-page paginate_button dataTables_button" style="float:right">Next</a>
@@ -641,7 +641,7 @@
                     </div>
 
 
-                        <div class="dataTables_goto_page goto-page-number" style="width:50%; text-align:center" data-curpage="1" data-min="1" data-max="1">
+                        <div class="dataTables_goto_page goto-page-number"  data-curpage="1" data-min="1" data-max="1">
                            <a class="prev-page paginate_button dataTables_button">Previous</a>
                            <span class="paginate_button_space" ><a class="dataTables_button paginate_button numeric_button current">1</a></span>
                            <a class="next-page paginate_button dataTables_button">Next</a>
@@ -658,7 +658,7 @@
                                  <th class='text_data case-id'>Case Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
                                  <th class='text_data study-id'>Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
                                  <th class='text_data study-description'>Study Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                 <th class='text_data study-id'># of Series<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                 <th class='numeric_data'># of Series<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
                                  <th class="text_data open-viewer">View</th>
                              </tr>
                               </thead>
@@ -690,7 +690,7 @@
                                 </div>
 
 
-                                 <div class="dataTables_goto_page goto-page-number" style="width:50%; text-align:center" data-curpage="1" data-min="1" data-max="1">
+                                 <div class="dataTables_goto_page goto-page-number"  data-curpage="1" data-min="1" data-max="1">
                                      <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
                                     <span class="paginate_button_space" ><a class="dataTables_button paginate_button numeric_button current">1</a></span>
                                     <a class="next-page paginate_button dataTables_button" style="float:right">Next</a>
