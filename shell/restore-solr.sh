@@ -28,8 +28,12 @@ do
 done
 
 if [[ ! -d $BACKUP_DIR ]]; then
-    echo "[ERROR] Backup directory ${BACKUP_DIR} not found - exiting!"
-    exit 1
+  echo "[ERROR] Backup directory ${BACKUP_DIR} not found - exiting!"
+  exit 1
+else
+  if [[ "${BACKUP_DIR: -1}" == "/" ]]; then
+    BACKUP_DIR=${BACKUP_DIR::-1}
+  fi
 fi
 
 if [[ -z $SOLR_PWD ]]; then
@@ -47,15 +51,15 @@ if [[ $TARFILE != "" ]]; then
 fi
 
 for dirname in ${BACKUP_DIR}/*/; do
-  CORE=$([ "$BACKUP_DIR" == "./" ] && awk -F. '{print $3}' <<< $dirname || awk -F'[./]' '{print $4}' <<< $dirname)
-  if [ "$CORE" == "" || -z $CORE ]; then
+  CORE=$([[ "$BACKUP_DIR" == "./" ]] && awk -F. '{print $3}' <<< $dirname || awk -F'[./]' '{print $3}' <<< $dirname)
+  if [ "${CORE}" == "" || -z $CORE || "${CORE}" == " " ]; then
     echo "Something's wrong with the directory structure! Exiting."
     exit 1
   fi
   if [ "$MAKE_CORE" = true ]; then
     sudo -u solr /opt/bitnami/solr/bin/solr create -c $CORE -s 2 -rf 2
   else
-    echo "[STATUS] Core creation disabled - this assumes core ${CORE} exists already!"
+    echo "[STATUS] Core creation disabled - this assumes core \"${CORE}\" exists already!"
     echo "  You'll see an error if it doesn't."
   fi
 
