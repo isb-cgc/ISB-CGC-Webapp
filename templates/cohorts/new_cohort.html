@@ -61,7 +61,8 @@
                 </button>
             {% else %}
                 <button class="btn btn-primary pull-right" id="log-in-to-save-btn"
-                        title="Please select at least one filter." onclick="location.href='{% url 'account_login' %}'"
+                        title="Please select at least one filter."
+{#                        onclick="location.href='{% url 'account_login' %}'"#}
                         disabled>Log In to Save New Cohort
                 </button>
             {% endif %}
@@ -91,7 +92,7 @@
             </div>
         </div>
 
-        <div class="row cgc-user-data-type-tabs">
+        <div class="row cgc-user-data-type-tabs" style="display: none">
             <div class="col-sm-12 col-md-12 col-lg-12">
                 <div class="panel panel-default">
                     <ul class="nav nav-tabs nav-tabs-data" role="tablist">
@@ -201,6 +202,8 @@
     <script type="text/javascript">
         var base_url = '{{ base_url|safe }}';
         var cohort_id = undefined;
+        var all_nodes = {{ all_nodes|tojson|safe }};
+        var all_programs = {{ all_programs|tojson|safe }};
     </script>
 {% endblock %}
 
