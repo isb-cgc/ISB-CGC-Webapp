@@ -109,9 +109,9 @@ require([
             if (reset) {
                 strt = $('#' + slideDiv).parent().attr('data-min');
                 end = $('#' + slideDiv).parent().attr('data-max');
-                if ( ($('#' + slideDiv).parent().find('.noneBut').length===0 ) ||  ( !($('#' + slideDiv).parent().find('.noneBut').find(':input')[0].checked)) ){
-                    $('#' + slideDiv).parent().removeClass('isActive');
-                }
+
+                $('#' + slideDiv).parent().removeClass('isActive');
+
             }
             else{
                 $('#' + slideDiv).parent().addClass('isActive');
@@ -174,7 +174,6 @@ require([
             }
 
             if (updateNow) {
-                //updatePlotBinsForSliders(slideDiv);
                 mkFiltText();
                 updateFacetsData(true);
             }
@@ -479,7 +478,7 @@ require([
                     window.filterObj[id]['type']='none';
                 }
                 window.filterObj[id]['none'] = true;
-                $(elem).parent().parent().addClass('isActive');
+                //$(elem).parent().parent().addClass('isActive');
             }
 
             else{
@@ -487,7 +486,7 @@ require([
                     delete window.filterObj[id]['none'];
                     if (!('rng' in window.filterObj[id])){
                         delete window.filterObj[id];
-                        $(elem).parent().parent().removeClass('isActive');
+                        //$(elem).parent().parent().removeClass('isActive');
                     }
                 }
             }
@@ -496,7 +495,6 @@ require([
                 checkTcga();
             }
             var slideNm = $(elem).parent()[0].id+"_slide";
-            //updatePlotBinsForSliders(slideNm);
             mkFiltText();
 
             if (updateNow) {
@@ -530,12 +528,7 @@ require([
                          }
 
                      }
-                     /* if ( ((valArr[0]==='*') || (endInd>= valArr[0])) && ((valArr[1]==='*') || (strtInd< valArr[1])) ){
-                         $(this).parent().children('.plot_count').addClass('plotit');
-                     }
-                     else{
-                         $(this).parent().children('.plot_count').removeClass('plotit');
-                     } */
+
                  }
                  else if (val.includes('None')){
                      if (wNone){
@@ -2950,7 +2943,7 @@ require([
                 mkSlider($(this).prop('id'), min, max, 1, true, wNone, parStr, $(this).data('filter-attr-id'), $(this).data('filter-display-attr'), lower, upper, isActive,checked);
             } else{
                 $(this).removeClass('hasSlider');
-                //$(this).removeClass('isActive');
+
             }
         });
      };
@@ -2972,11 +2965,36 @@ require([
                     var attValueFoundInside= false;
                     if ($(selEle).children('.ui-slider').length > 0) {
                         attValueFoundInside= true;
-                       sliders.push({
-                           'id': $('div.list-group-item__body[data-filter-attr-id="' + filter['id'] + '"]').children('.ui-slider')[0].id,
-                           'left_val': filter['values'][0].indexOf(".") >= 0 ? parseFloat(filter['values'][0]) : parseInt(filter['values'][0]),
-                           'right_val': filter['values'][1].indexOf(".") >= 0 ? parseFloat(filter['values'][1]) : parseInt(filter['values'][1]),
-                       })
+                        var pushSliders = false;
+                        var left =0;
+                        var right=0;
+                        if (filter['values'].indexOf('None')>-1)
+                        {
+                            var ckbx=$(selEle).find('.noneBut').children('input:checkbox')[0];
+                            ckbx.checked=true;
+                            var parStr=$(selEle).children('.ui-slider').data('attr-par');
+                            addNone(ckbx, parStr, false);
+                            if (filter['values'].length>1){
+                                pushSliders=true;
+                                var ind = (filter['values'].indexOf('None')+1)%2
+                                var vals=JSON.parse(filter['values'][ind]);
+                                left_val=vals[0];
+                                right_val=vals[1];
+                            }
+                        }
+                        else {
+                            pushSliders=true;
+                            left_val=filter['values'][0].indexOf(".") >= 0 ? parseFloat(filter['values'][0]) : parseInt(filter['values'][0]);
+                            right_val=filter['values'][1].indexOf(".") >= 0 ? parseFloat(filter['values'][1]) : parseInt(filter['values'][1]);
+                        }
+
+                        if (pushSliders) {
+                            sliders.push({
+                                'id': $('div.list-group-item__body[data-filter-attr-id="' + filter['id'] + '"]').children('.ui-slider')[0].id,
+                                'left_val': left_val,
+                                'right_val': right_val,
+                            })
+                        }
                      } else {
                        _.each(filter['values'], function (val) {
                            if ($(selEle).find('input[data-filter-attr-id="' + filter['id'] + '"][value="' + val + '"]').length>0) {
@@ -3007,7 +3025,7 @@ require([
         _.each(sliders, function(slider) {
             var slider_id = slider['id'];
             setSlider(slider_id, false, slider['left_val'], slider['right_val'], true, false);
-            updatePlotBinsForSliders(slider_id);
+            //updatePlotBinsForSliders(slider_id);
         });
 
         if (do_update) {
@@ -3028,7 +3046,7 @@ require([
         // For collection list
         $('.collection-list').each(function() {
             var $group = $(this);
-            var checkboxes = $group.find("input:checked").not(".hide-zeros");
+            var checkboxes = $group.find("input:checked").not(".hide-zeros").not(".sort_val");
             if (checkboxes.length > 0) {
                 var values = [];
                 var my_id = "";
@@ -3051,7 +3069,7 @@ require([
             var my_id = $group.data('filter-attr-id');
             if (my_id != null)
             {
-                var checkboxes = $group.find("input:checked");
+                var checkboxes = $group.find("input:checked").not(".hide-zeros").not(".sort_val");
                 if (checkboxes.length > 0)
                 {
                     var values = [];

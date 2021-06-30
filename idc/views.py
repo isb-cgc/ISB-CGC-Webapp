@@ -241,6 +241,7 @@ def help_page(request):
 def quota_page(request):
     return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
 
+@login_required
 def populate_tables(request):
     tableRes = []
     try:
