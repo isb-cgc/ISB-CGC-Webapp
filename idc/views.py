@@ -255,15 +255,15 @@ def populate_tables(request):
         limit = int(req.get('limit', '500'))
         sort = req.get('sort', 'PatientID')
         sortdir = req.get('sortdir','asc')
-        checkedIds = json.loads(req.get('checkedIds','[]'))
+        #checkedIds = json.loads(req.get('checkedIds','[]'))
         #table_data = get_table_data(filters, table_type)
         sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(active=True,source_type=DataSource.SOLR,aggregate_level="StudyInstanceUID")
-        sortByIndex = True
-        idsReq=[]
+        sortByField = True
+        #idsReq=[]
         custom_facets=''
         custom_facets_order=''
         if table_type == 'cases':
-            custom_facets = {"per_id": {"type": "terms", "field": "PatientID", "limit": 500,
+            custom_facets = {"per_id": {"type": "terms", "field": "PatientID", "limit": limit,
                                 "facet": {"unique_study": "unique(StudyInstanceUID)", "unique_series": "unique(SeriesInstanceUID)"}}
                             }
             tableIndex = 'PatientID'
@@ -271,31 +271,68 @@ def populate_tables(request):
             facetfields=['unique_study','unique_series']
 
             if sort == 'collection_id':
-                sortByIndex = True
-                sort_field = 'collection_id '+sortdir+', PatientID asc'
+                sortByField = True
+                sort_arg = 'collection_id '+sortdir
 
             elif sort == 'PatientID':
-
-                sort_field = 'PatientID ' + sortdir
+                sort_arg = 'PatientID ' + sortdir
 
             elif sort == 'StudyInstanceUID':
-                sortByIndex=False
-                custom_facets_order = {"tot":"unique(PatientID)", "per_id": {"type": "terms", "field": "PatientID", "sort":"unique_study", "offset":offset, "limit": limit,"facet": {"unique_study": "unique(StudyInstanceUID)", "unique_series": "unique(SeriesInstanceUID)"}}}
-                '''patientIdsReq = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, offset=offset,
-                                                    records_only=False,
-                                                    collapse_on=tableIndex, counts_only=True, filtered_needed=False, custom_facets=custom_facets, raw_format=True)'''
+                sortByField=False
+                sort_arg = 'unique_study ' + sortdir
+                custom_facets_order = {"tot":"unique(PatientID)", "per_id": {"type": "terms", "field": "PatientID", "sort":sort_arg, "offset":offset, "limit": limit,
+                                                                             "facet": {"unique_study": "unique(StudyInstanceUID)", "unique_series": "unique(SeriesInstanceUID)"}}
+                                        }
+            elif sort == 'SeriesInstanceUID':
+                sortByField=False
+                sort_arg = 'unique_series '+sortdir
+                custom_facets_order = {"tot":"unique(PatientID)", "per_id": {"type": "terms", "field": "PatientID", "sort":sort_arg, "offset":offset, "limit": limit,
+                                                                             "facet": {"unique_study": "unique(StudyInstanceUID)", "unique_series": "unique(SeriesInstanceUID)"}}
+                                        }
+
+        if table_type == 'studies':
+            custom_facets = {"per_id": {"type": "terms", "field": "StudyInstanceUID", "limit": limit,
+                                        "facet": {"unique_series": "unique(SeriesInstanceUID)"}}
+                             }
+            tableIndex = 'StudyInstanceUID'
+            fields = ['PatientID','StudyInstanceUID','StudyDescription']
+            facetfields = ['unique_series']
+
+            if sort == 'PatientID':
+                sortByField = True
+                sort_arg = 'PatientID ' + sortdir
+
+            elif sort == 'StudyInstanceUID':
+                sortByField = True
+                sort_arg = 'StudyInstanceUID ' + sortdir
+
+            elif sort == 'StudyDescription':
+                sortByField = True
+                sort_arg = 'StudyDescription ' + sortdir
+
+            elif sort == 'SeriesInstanceUID':
+                sortByField = False
+                sort_arg = 'unique_series '+sortdir
+
+                custom_facets_order = {"tot": "unique(SeriesInstanceUID)",
+                                       "per_id": {"type": "terms", "field": "StudyInstanceUID", "sort": sort_arg,"offset": offset, "limit": limit,
+                                                  "facet": {"unique_series": "unique(SeriesInstanceUID)"}}
+                                       }
+
+
         order = {}
         curInd = 0
         idsFilt=[]
-        if len(checkedIds)>0:
+
+        '''if len(checkedIds)>0:
             selFilters=copy.deepcopy(filters)
             selFilters[tableIndex]=checkedIds
-            newIds = get_collex_metadata(selFilters, [tableIndex], sources=sources, records_only=True,
-                                collapse_on=tableIndex, counts_only=False,filtered_needed=False,sort=tableIndex+' asc')
+            newCheckedIds = get_collex_metadata(selFilters, [tableIndex], sources=sources, records_only=True,
+                                collapse_on=tableIndex, counts_only=False,filtered_needed=False,sort=tableIndex+' asc')'''
 
-        if sortByIndex:
+        if sortByField:
             idsReq = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, offset=offset, records_only=True,
-                                collapse_on=tableIndex, counts_only=False,filtered_needed=False,sort=sort_field)
+                                collapse_on=tableIndex, counts_only=False,filtered_needed=False,sort=sort_arg)
 
             cnt = idsReq['total']
             for rec in idsReq['docs']:
@@ -343,11 +380,7 @@ def populate_tables(request):
                     if not field == tableIndex:
                         tableRow[field] = rec[field]
 
-        '''result = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, facets=["collection_id"],
-        #                                 collapse_on=collapse_on, counts_only=cntOnly,records_only=recOnly,
-        #                                 filtered_needed=False, custom_facets=custom_facets,raw_format=cntOnly)'''
 
-        i=1
     except Exception as e:
         logger.error("[ERROR] While attempting to populate the table:")
         logger.exception(e)
