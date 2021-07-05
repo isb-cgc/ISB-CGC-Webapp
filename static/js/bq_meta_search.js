@@ -234,6 +234,16 @@ require([
 
                 },
                 {
+                    'name': 'usefulJoins',
+                    'data': function (data) {
+                        return data.usefulJoins;
+                    },
+                    'render': function(data, type) {
+                        let num_joins = data.length;
+                        return '<div class = "joins-detail">' + num_joins + '</div>';
+                    }
+                },
+                {
                     'name': 'createdDate',
                     'data': 'creationTime',
                     'className': 'text-right colvis-toggle',
@@ -444,6 +454,12 @@ require([
                 .search(term, regex_search, smart_search)
                 .draw();
         };
+        // Add event listener for opening and closing join details
+        $('#bqmeta').find('tbody').on('click', 'td.joins-detail', function () {
+            // var tr = $(this).closest('tr');
+            // var row = table.row(tr);
+            return "Hi";
+        });
 
         // Add event listener for opening and closing details
         $('#bqmeta').find('tbody').on('click', 'td.details-control', function () {
