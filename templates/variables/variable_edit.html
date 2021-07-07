@@ -104,30 +104,54 @@
             </section>
         </div>
         <div class="row">
-            <div class="col-lg-7">
-                <div class="panel panel-default">
-                    <ul class="nav nav-tabs" role="tablist">
-                        {% with public_programs|first as first_prog %}
-                            {% for program in public_programs %}
-                                <li role="presentation"
-                                    class="program-tab{% if program.id == first_prog.id %} active{% endif %}"><a
-                                        href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data"
-                                        data-program-id="{{ program.id }}">{{ program.name }}</a></li>
+            <div class="col-lg-5" id="filter-panel">
+                <!-- Select Dataset Panel -->
+                <div class="panel panel-default" role="tabpanel">
+                <div class="panel-heading clearfix">
+                    <h4 class="panel-title pull-left">Select Data Set</h4>
+                </div>
+                <div class="panel-body">
+                    <div>
+                        <span>Sort by:
+                            <input type="radio" class="sort-radio" value="node" checked>Node
+                            <input type="radio" class="sort-radio" value="program">Program
+                        </span>
+                    </div>
+                    <br>
+                    <div>
+                        <!-- Grouped by node -->
+                        <select class="sort-by-node dataset-select-box form-control">
+                            {% for node in all_nodes %}
+                                <optgroup label="{{ node.name }}"></optgroup>
+                                {% for program in node.programs %}
+                                    <!-- Do not show it in dropdown if it is in cohort detail and the program is not in this cohort -->
+                                    {% if cohort.id and not program.id|program_is_in_cohort:programs_this_cohort %}
+                                    {% else %}
+                                        <option value="{{ node.short_name }}-{{ program.name }}" node-id="{{ node.id }}" program-id="{{ program.id }}">
+                                            {{ program.name }}-{{ node.short_name }}
+                                        </option>
+                                    {% endif %}
+                                {% endfor %}
                             {% endfor %}
-                            <li role="presentation"
-                                class="program-tab {% if favorite_list|length <= 0 %}disabled{% endif %}"><a
-                                    href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab"
-                                    titles="Favorites">Favorites ({{ favorite_list | length }})</a></li>
-                            <li role="presentation" class="program-tab {% if not has_user_data %}disabled{% endif %}"><a
-                                    href="#0-data" role="tab" class="user-vars-tab" data-toggle="tab" title="User Data"
-                                    data-program-id="0">User Data</a></li>
-                        {% endwith %}
-                    </ul>
+                        </select>
+                        <!-- Grouped by program -->
+                        <select class="sort-by-program dataset-select-box form-control" style='display:none'>
+                            {% for program in all_programs %}
+                                {% if cohort.id and not program.id|program_is_in_cohort:programs_this_cohort %}
+                                {% else %}
+                                    <optgroup label="{{ program.name }}"></optgroup>
+                                    {% for node in program.nodes %}
+                                        <option value="{{ node.short_name }}-{{ program.name }}" node-id="{{ node.id }}" program-id="{{ program.id }}">
+                                            {{ program.name }}-{{ node.short_name }}
+                                        </option>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-7" id="filter-panel">
+
                 <section class="panel panel-default">
                     <div class="panel-body">
                         <div class="row">
@@ -264,7 +288,7 @@
                     </div>
                 </section>
             </div>
-            <div class="col-lg-5">
+            <div class="col-lg-7">
                 <section class="panel">
                     <form action="">
                         <div class="form-group selected-filters panel-default">
@@ -302,6 +326,8 @@
     <script type="text/javascript">
         var base_api_url = '{{ base_api_url|safe }}';
         var cohort_id = undefined;
+        var all_nodes = {{ all_nodes|tojson|safe }};
+        var all_programs = {{ all_programs|tojson|safe }};
     </script>
 {% endblock %}
 
