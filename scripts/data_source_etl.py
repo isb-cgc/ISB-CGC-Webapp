@@ -309,7 +309,10 @@ def copy_attrs(from_data_sources, to_data_sources):
     bulk_add = []
 
     for fds in from_sources:
-        from_source_attrs = fds.attribute_set.exclude(id__in=to_sources_attrs['ids'])
+        if to_sources_attrs['ids']:
+            from_source_attrs = fds.attribute_set.exclude(id__in=to_sources_attrs['ids'])
+        else:
+            from_source_attrs = fds.attribute_set.all()
         logger.info("Copying {} attributes from {} to: {}.".format(
             len(from_source_attrs.values_list('name',flat=True)),
             fds.name, "; ".join(to_data_sources),
@@ -369,6 +372,10 @@ def main(config, make_attr=False):
 
         if 'data_sources' in config:
             add_data_sources(config['data_sources'])
+
+        if 'attr_copy' in config:
+            for each in config['attr_copy']:
+                copy_attrs(each['src'],each['dest'])
 
         len(ATTR_SET) and make_attr and add_attributes([ATTR_SET[x] for x in ATTR_SET])
 
