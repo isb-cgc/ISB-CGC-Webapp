@@ -146,7 +146,6 @@ def get_user_vars(request):
         # user_programs is not being used. Can a shared program actually show up twice?
         #user_programs = programs.distinct()
 
-
         # This detailed construction of user data variables WAS happening in the template. Now it is here:
 
         user_vars = {}
