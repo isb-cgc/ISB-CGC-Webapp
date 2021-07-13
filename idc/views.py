@@ -297,6 +297,7 @@ def populate_tables(request):
             tableIndex = 'StudyInstanceUID'
             fields = ['PatientID','StudyInstanceUID','StudyDescription']
             facetfields = ['unique_series']
+            sort_arg = 'PatientID asc'
 
             if sort == 'PatientID':
                 sortByField = True
@@ -318,6 +319,31 @@ def populate_tables(request):
                                        "per_id": {"type": "terms", "field": "StudyInstanceUID", "sort": sort_arg,"offset": offset, "limit": limit,
                                                   "facet": {"unique_series": "unique(SeriesInstanceUID)"}}
                                        }
+
+        if table_type == 'series':
+            custom_facets = {}
+            tableIndex = 'SeriesInstanceUID'
+            fields = ['SeriesInstanceUID']
+            facetfields = []
+            sortByField = True
+            sort_arg='SeriesInstanceUID asc'
+
+            if sort == 'StudyInstanceUID':
+                sort_arg = 'StudyInstanceUID ' + sortdir+', SeriesNumber asc'
+
+            elif sort == 'SeriesNumber':
+                sort_arg = 'SeriesNumber ' + sortdir+', SeriesNumber asc'
+
+            elif sort == 'Modality':
+                sort_arg = 'unique_series '+sortdir+', SeriesNumber asc'
+
+            elif sort == 'BodyPartExamined':
+                sort_arg = 'BodyPartExamined ' + sortdir + ', SeriesNumber asc'
+
+            elif sort == 'SeriesDescription':
+                sort_arg = 'SeriesDescription ' + sortdir + ', SeriesNumber asc'
+
+                custom_facets_order = {}
 
 
         order = {}
@@ -341,19 +367,27 @@ def populate_tables(request):
                 order[id] = curInd
                 newRow={}
                 for field in fields:
-                    newRow[field]=rec[field]
+                    if field in rec:
+                        newRow[field]=rec[field]
+                    else:
+                        newRow[field]=''
                 tableRes.append(newRow)
                 curInd = curInd + 1
             filters[tableIndex]=idsFilt
-            cntRecs = get_collex_metadata(filters, fields, record_limit=limit, sources=sources,
+            if not table_type == 'series':
+                cntRecs = get_collex_metadata(filters, fields, record_limit=limit, sources=sources,
                                             collapse_on=tableIndex, counts_only=True,records_only=False,
                                             filtered_needed=False, custom_facets=custom_facets,raw_format=True)
 
-            for rec in cntRecs['facets']['per_id']['buckets']:
-                id = rec['val']
-                tableRow=tableRes[order[id]]
-                for facet in facetfields:
-                    tableRow[facet]=rec[facet]
+                for rec in cntRecs['facets']['per_id']['buckets']:
+                    id = rec['val']
+                    tableRow=tableRes[order[id]]
+                    for facet in facetfields:
+                        if facet in rec:
+                            tableRow[facet]=rec[facet]
+                        else:
+                            tableRow[facet] = 0
+
 
 
         else:
@@ -367,7 +401,10 @@ def populate_tables(request):
                 order[id] = curInd
                 newRow={tableIndex: id}
                 for facet in facetfields:
-                    newRow[facet]=rec[facet]
+                    if facet in rec:
+                        newRow[facet]=rec[facet]
+                    else:
+                        newRow[facet] = 0
                 tableRes.append(newRow)
                 curInd = curInd + 1
             filters[tableIndex] = idsFilt
@@ -378,7 +415,10 @@ def populate_tables(request):
                 tableRow = tableRes[order[id]]
                 for field in fields:
                     if not field == tableIndex:
-                        tableRow[field] = rec[field]
+                        if field in rec:
+                            tableRow[field] = rec[field]
+                        else:
+                            tableRow[field] = ''
 
 
     except Exception as e:
