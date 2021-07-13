@@ -234,13 +234,20 @@ require([
 
                 },
                 {
+                    'className': 'useful-join-detail',
                     'name': 'usefulJoins',
                     'data': function (data) {
                         return data.usefulJoins;
                     },
                     'render': function(data, type) {
                         let num_joins = data.length;
-                        return '<div class = "joins-detail">' + num_joins + '</div>';
+                        if (num_joins > 0) {
+                            return '<div><a class="useful-join-detail">' + num_joins + '</a></div>';
+                        }
+                        else {
+                            return '<div>' + num_joins + '</div>';
+                        }
+
                     }
                 },
                 {
@@ -448,18 +455,31 @@ require([
             }
         });
 
+        $('#bqmeta').find('tbody').on('click', 'td .useful-join-detail', function () {
+            var tr = $(this).closest('tr');
+            var td = $(this).closest('td');
+            var row = table.row(tr);
+            var join_data = table.cell(td).data();
+            if (row.child.isShown() && tr.hasClass('useful-join-shown')) {
+                // This row is already open - close it
+                row.child.hide();
+                tr.removeClass('shown useful-join-shown');
+            }
+            else {
+                // Open this row
+                row.child(format_useful_join_details(join_data)).show();
+                set_gcp_open_btn($(tr).next('tr').find('.detail-table'));
+                tr.addClass('shown useful-join-shown');
+                tr.removeClass('preview-shown');
+            }
+        });
+
         var columnSearch = function(column_name, term, regex_search, smart_search){
             table
                 .columns(column_name+':name')
                 .search(term, regex_search, smart_search)
                 .draw();
         };
-        // Add event listener for opening and closing join details
-        $('#bqmeta').find('tbody').on('click', 'td.joins-detail', function () {
-            // var tr = $(this).closest('tr');
-            // var row = table.row(tr);
-            return "Hi";
-        });
 
         // Add event listener for opening and closing details
         $('#bqmeta').find('tbody').on('click', 'td.details-control', function () {
@@ -511,6 +531,15 @@ require([
                             + '&d=' + tbl_ref.datasetId
                             + '&t=' + tbl_ref.tableId
                             + '&page=table';
+    };
+
+    var format_useful_join_details = function(d) {
+        let join_table = '<table>';
+        d.forEach(join_info => {
+           join_table += '<tr><td>' + join_info['sql'] + '<td></tr>';
+        });
+        join_table += '</table>';
+        return join_table;
     };
 
     var format_tbl_details = function(d) {

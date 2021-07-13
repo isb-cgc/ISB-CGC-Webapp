@@ -1804,10 +1804,7 @@ a#user-dropdown:hover {
     content: "\f055";
     color: #3A79B8;
     cursor: pointer; }
-   #bq-meta-searcher #bqmeta tr td.joins-control:before {
-    font-family: FontAwesome;
-    font-size: 1.1em;
-    content: "\f055";
+    #bq-meta-searcher #bqmeta tr td a.useful-join-detail {
     color: #3A79B8;
     cursor: pointer; }
 
