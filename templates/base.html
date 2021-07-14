@@ -132,7 +132,36 @@
         </div>
     </div>
 
+
+<!-- Warning Modal -->
+<div class="modal fade" id="gov_warning" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="gov_warning-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button> -->
+                <h4 class="modal-title" id="gov_warning-header">Warning</h4>
+            </div>
+            <div class="modal-body">
+            <p>You are accessing a US Government web site which may contain information that must be protected under the
+                US Privacy Act or other sensitive information and is intended for Government authorized use only. </p>
+            <p>Unauthorized attempts to upload information, change information, or use of this web site may result in
+                disciplinary action, civil, and/or criminal penalties. Unauthorized users of this website should have no
+                expectation of privacy regarding any communications or data processed by this website.</p>
+            <p> Anyone accessing this website expressly consents to monitoring of their actions and all communications
+                or data transiting or stored on related to this website and is advised that if such monitoring reveals
+                possible evidence of criminal activity, NIH may provide that evidence to law enforcement officials</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-warn">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script>
+    var user_is_auth = {% if request.user.is_authenticated %}true{% else %}false{% endif %};
+    var warningSeen = {% if request.session.seenWarning %}true{% else %}false{% endif %};
     var user_is_auth = {% if request.user.is_authenticated %}true{% else %}false{% endif %};
 </script>
 
@@ -153,6 +182,7 @@
         var expireAfter = {{ request|expire_after|unlocalize }};
         var confirmFormDiscard = "{% trans 'You have unsaved changes in a form of this page.' %}";
         var returnToUrl = '{% url 'landing_page' %}';
+        var showWarning = false;
     </script>
     {% endlocalize %}
 {% endif %}
