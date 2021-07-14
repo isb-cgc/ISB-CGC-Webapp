@@ -30,7 +30,7 @@ from bq_data_access.v2.feature_search.util import SearchableFieldHelper as Searc
 from bq_data_access.v2.feature_search.clinical_schema_utils import ClinicalColumnFeatureSupport
 from .models import VariableFavorite
 from workbooks.models import Workbook, Worksheet
-from projects.models import Program, DataSource, DataVersion
+from projects.models import Program, DataSource, DataVersion, DataNode
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.conf import settings
@@ -145,6 +145,7 @@ def get_user_vars(request):
         programs = ownedPrograms | sharedPrograms
         # user_programs is not being used. Can a shared program actually show up twice?
         #user_programs = programs.distinct()
+
 
         # This detailed construction of user data variables WAS happening in the template. Now it is here:
 
@@ -280,6 +281,8 @@ def initialize_variable_selection_page(request,
 
         has_user_data = (request.user.program_set.filter(active=True).count() > 0)
 
+        all_nodes, all_programs = DataNode.get_node_programs(request.user.is_authenticated)
+
         context = {
             'favorite_list'         : favorite_list,
             'full_favorite_list_count': full_fave_count,
@@ -294,7 +297,9 @@ def initialize_variable_selection_page(request,
             'existing_variable_list'    : existing_variable_list,
             'new_workbook'              : new_workbook,
             'program_attrs'         : program_attrs,
-            'has_user_data'         : has_user_data
+            'has_user_data'         : has_user_data,
+            'all_nodes': all_nodes,
+            'all_programs': all_programs
         }
     except Exception as e:
         logger.error("[ERROR] While attempting to initialize variable selection:")
