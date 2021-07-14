@@ -162,7 +162,6 @@
 <script>
     var user_is_auth = {% if request.user.is_authenticated %}true{% else %}false{% endif %};
     var warningSeen = {% if request.session.seenWarning %}true{% else %}false{% endif %};
-    var user_is_auth = {% if request.user.is_authenticated %}true{% else %}false{% endif %};
 </script>
 
 {% load session_security_tags %}
