@@ -351,6 +351,27 @@ require([
 
     // ------ end pagination -------
 
+    $('#gov_warning button').on('click', function(){
+        $('#gov_warning button').prop("disabled", true);
+        $('#gov_warning').modal('hide');
+        $.ajax({
+            async: true,
+            type: "GET",
+            url: "/warning/",
+            contentType: "charset=utf-8",
+            fail: function () {
+                console.warn("Unable to record status for Government Notice! You may see that popup again.");
+            },
+            always: function() {
+                $('#gov_warning button').prop("disabled", false);
+            }
+        });
+    });
+
+    if (!warningSeen && showWarning) {
+        $('#gov_warning').modal('show');
+    }
+
     $(document).ready(function(){
         if(sessionStorage.getItem("reloadMsg")) {
             var msg = JSON.parse(sessionStorage.getItem("reloadMsg"));
