@@ -91,6 +91,7 @@ urlpatterns = [
     url(r'^opt_in/form/$', views.opt_in_form, name='opt_in_form'),
     url(r'^opt_in/form_reg_user/$', views.form_reg_user, name='opt_in_form_reg_user'),
     url(r'^opt_in/form_submit', views.opt_in_form_submitted, name='opt_in_form_submitted'),
+    url(r'^warning/', views.warn_page, name='warn'),
 ]
 
 if settings.IS_DEV:
