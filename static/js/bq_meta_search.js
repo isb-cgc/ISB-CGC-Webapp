@@ -468,6 +468,17 @@ require([
             else {
                 // Open this row
                 row.child(format_useful_join_details(join_data)).show();
+                $('.useful-join-view-btn').each(function(index) {
+                    $(this).data(join_data[index]);
+                });
+                $('.useful-join-view-btn').on('click', function() {
+                    console.log($(this).data());
+                    let dialog_content = '<p>';
+                    dialog_content += $(this).data()['subject'];
+                    dialog_content += '</p>';
+                    $('#useful-join-view-modal').find('.modal-body').html(dialog_content);
+                    $('#useful-join-view-modal').modal('show');
+                });
                 set_gcp_open_btn($(tr).next('tr').find('.detail-table'));
                 tr.addClass('shown useful-join-shown');
                 tr.removeClass('preview-shown');
@@ -533,12 +544,19 @@ require([
                             + '&page=table';
     };
 
+    // Useful join table
     var format_useful_join_details = function(d) {
-        let join_table = '<table>';
+        let join_table = '<div class="useful-join-table"><p>Useful Joins</p><table>';
+        join_table += '<thead><tr><th style="width:150px">Join Subject</th><th style="width:400px">Joined Tables</th><th>View</th></tr></thead>';
+        join_table += '<tbody>';
         d.forEach(join_info => {
-           join_table += '<tr><td>' + join_info['sql'] + '<td></tr>';
+           join_table += '<tr>' +
+               '<td>' + join_info['subject'] + '</td>' +
+               '<td>' + join_info['table'] + '</td>' +
+               '<td><button class="useful-join-view-btn open-gcp-btn">View Details</button></td>' +
+               '</tr>';
         });
-        join_table += '</table>';
+        join_table += '</tbody></table></div>';
         return join_table;
     };
 
