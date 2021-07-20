@@ -459,7 +459,8 @@ require([
             var tr = $(this).closest('tr');
             var td = $(this).closest('td');
             var row = table.row(tr);
-            var join_data = table.cell(td).data();
+            var row_data = row.data();
+            var joins_data = table.cell(td).data();
             if (row.child.isShown() && tr.hasClass('useful-join-shown')) {
                 // This row is already open - close it
                 row.child.hide();
@@ -467,16 +468,28 @@ require([
             }
             else {
                 // Open this row
-                row.child(format_useful_join_details(join_data)).show();
+                row.child(format_useful_join_details(joins_data)).show();
                 $('.useful-join-view-btn').each(function(index) {
-                    $(this).data(join_data[index]);
+                    let this_join_data = joins_data[index];
+                    this_join_data['tableName'] = row_data['friendlyName'];
+                    this_join_data['tableId'] = row_data['tableReference']['tableId'];
+                    $(this).data(this_join_data);
                 });
                 $('.useful-join-view-btn').on('click', function() {
-                    console.log($(this).data());
-                    let dialog_content = '<p>';
-                    dialog_content += $(this).data()['subject'];
-                    dialog_content += '</p>';
+                    let join_data = $(this).data();
+                    let dialog_content =
+                        '<h5>Join Subject</h5><p>' + join_data['subject'] + '</p><br>' +
+                        '<h5>Description</h5><p>' + join_data['description'] + '</p><br>' +
+                        '<h5>Joined Tables</h5><p>' + join_data['table'] + '</p><br>' +
+                        '<h5>SQL Statement</h5>' +
+                        '<p>' + join_data['sql'] + '&nbsp;&nbsp;<button class="copy-btn" title="Copy to Clipboard">' +
+                        '<i class="fa fa-clipboard" aria-hidden="true"></i>COPY</button></p><br>' +
+                        '<h5>Joined Condition</h5><p>' + join_data['condition'] + '</p>';
+
                     $('#useful-join-view-modal').find('.modal-body').html(dialog_content);
+
+                    let subtitle_content = join_data['tableName'] + '[' + join_data['tableId'] + ']';
+                    $('#useful-join-view-modal').find('.modal-sub-title').html(subtitle_content);
                     $('#useful-join-view-modal').modal('show');
                 });
                 set_gcp_open_btn($(tr).next('tr').find('.detail-table'));
@@ -484,6 +497,7 @@ require([
                 tr.removeClass('preview-shown');
             }
         });
+
 
         var columnSearch = function(column_name, term, regex_search, smart_search){
             table
