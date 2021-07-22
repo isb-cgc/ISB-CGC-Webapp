@@ -51,11 +51,6 @@ urlpatterns = [
     url(r'^explore_demo/', demo_views.explore_demo_page, name='explore_demo'),
 
     #url(r'^test/', views.test, name='test'),
-    # url(r'^viewer/', views.ohif_viewer_page, name='ohif_view'),
-    # url(r'^callback', views.ohif_callback_page, name='ohif_callback'),
-    # url(r'^ocallback/', views.ohif_callback_page, name='ohif_callback'),
-    # url(r'^projects/', views.ohif_projects_page, name='ohif_projects'),
-    # url(r'^ohif/', views.ohif_page, name='ohif'),
     url(r'^warning/', views.warn_page, name='warn'),
     url(r'^about/', views.about_page, name='about_page'),
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
