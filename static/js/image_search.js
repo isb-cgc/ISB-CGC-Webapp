@@ -548,16 +548,19 @@ require([
             }
 
             var tooltipL = $('<div class="slide_tooltip tooltipL slide_tooltipT" />').text('stuff').css({
-               position: 'absolute',
-               top: -25,
-               left: -5,
-                });
+                position: 'absolute',
+                top: -25,
+                left: 0,
+                transform: 'translateX(-50%)'
+
+            });
 
              var tooltipR = $('<div class="slide_tooltip slide_tooltipB tooltipR" />').text('stuff').css({
                position: 'absolute',
                top: 20,
-               right: -5,
-                });
+               right: 0,
+                 transform: 'translateX(50%)'
+             });
 
 
               var labelMin = $('<div class="labelMin"/>').text(min).css({
@@ -809,9 +812,6 @@ require([
             $(selRows).each( function(index){
                 var thisInd = $(this).index();
                 var curId = $(this)[0].id.substring(prefix.length);
-                if (type==='studies'){
-                    curId=curId.replaceAll('-','.');
-                }
 
                 if  ( addRow  &&  ((thisInd ===justClickedIndex) || !($(this).find('input:checkbox')[0]).checked )) {
                     $(this).addClass('tryToAdd')
@@ -920,24 +920,11 @@ require([
         removeRowsFromTable = function(tableId,selId,selType){
             var table = document.getElementById(tableId);
             var scrollPos = table.scrollTop+table.offsetTop;
-            if (selType ==='study'){
-                selId=selId.replaceAll('.','-');
-            }
+
             var remainingTrs = $('#' + tableId).find('tr').not('.'+selType+'_' + selId);
             var newScrollInd = Array.from(remainingTrs.map(function () {
                 return ((this.offsetTop <= scrollPos) ? 0 : 1)
             })).indexOf(1);
-            /*
-            if (newScrollInd > 0) {
-                var scrollB = remainingTrs.get(newScrollInd - 1).offsetTop;
-                var scrollF = remainingTrs.get(newScrollInd).offsetTop;
-
-                if ((scrollPos - scrollB) < (scrollF - scrollPos)) {
-                    var newScrollInd = newScrollInd + 1;
-                }
-            }
-
-             */
 
             $('#' + tableId).find('.'+selType+'_' + selId).remove();
             resetTableControls($('#' + tableId), true, newScrollInd)
@@ -1084,10 +1071,9 @@ require([
                             numSeries=seriesDic[patientId];
                         }
 
-
                         var pclass = 'project_' + projectId;
                         var newHtml = '';
-                        var rowId = 'case_' + patientId.replace(/\./g, '-');
+                        var rowId = 'case_' + patientId;
 
                         newHtml = '<tr id="' + rowId + '" data-projectid="' + projectId + '" class="' + pclass + ' text_head" >' +
                                    '<td class="ckbx"><input type="checkbox" onclick="(toggleRows($(this).parent().parent(), \'cases\', \'case_\', false))"></td>'+
@@ -1176,8 +1162,6 @@ require([
 
            var curFilterObj = new Object();
            if (isSeries){
-
-               //curFilterObj.collection_id = projectIdArr;
                curFilterObj.StudyInstanceUID = studyIdArr;
            }
             else {
@@ -1185,8 +1169,6 @@ require([
            }
             curFilterObj.collection_id = projectIdArr;
             curFilterObj.PatientID = caseIdArr;
-
-            //curFilterObj={"Diameter_btw":[51,'*']}
 
             var filterStr = JSON.stringify(curFilterObj);
             var fields = ["collection_id", "PatientID", "StudyInstanceUID", "StudyDescription", "StudyDate","Modality"];
@@ -1202,9 +1184,6 @@ require([
             var sortDocStr = JSON.stringify(sort_on);
 
             let url = '/explore/';
-                //?counts_only=False&is_json=True&with_clinical=True&collapse_on=' + collapse_on + '&filters=' + filterStr + '&fields=' + fieldStr + '&sort_on=' + sortDocStr;
-
-
             ndic={'counts_only':'False', 'is_json':'True', 'with_clinical':'True', 'filters': filterStr, 'collapse_on':collapse_on, 'fields':fieldStr, 'sort_on':sortDocStr }
             if (typeof(window.csr) !=='undefined'){
                 ndic['csrfmiddlewaretoken'] = window.csr
@@ -1213,7 +1192,6 @@ require([
                 var uniques = JSON.stringify(["StudyInstanceUID","SeriesInstanceUID"]);
                 ndic['uniques']=uniques;
             }
-
 
             url = encodeURI(url);
             $.ajax({
@@ -1237,7 +1215,6 @@ require([
                         }
                     }
 
-                    //nstart = new Date().getTime();
                     for (i = 0; i < data['origin_set']['docs'].length; i++) {
                         var curData = data['origin_set']['docs'][i];
                         var projectId = curData.collection_id;
@@ -1246,7 +1223,6 @@ require([
                         var ppStudyId = pretty_print_id(studyId);
                         var fetchUrl = ((!isSeries && curData.Modality[0] === "SM" || curData.Modality === "SM") ? SLIM_VIEWER_PATH : DICOM_STORE_PATH) + studyId;
                         var hrefTxt = ppStudyId + '</a>';
-                        //var hrefTxt =  ppStudyId + '<span class="tooltiptext_ex">' + studyId + '</span>';
                         var pclass = 'project_' + projectId;
                         var cclass = 'case_' + patientId;
                         var newHtml = '';
@@ -1262,15 +1238,13 @@ require([
                                 seriesDescription = curData.SeriesDescription[0]+',...';
                             }
 
-                            //var seriesDescription = curData.SeriesDescription;
                             var bodyPartExamined = curData.BodyPartExamined;
                             var modality = curData.Modality;
-                            var rowId = 'series_' + seriesId.replace(/\./g, '-')
-                            var studyClass = 'study_' + studyId.replace(/\./g, '-');
+                            var rowId = 'series_' + seriesId;
+                            var studyClass = 'study_' + studyId;
                             var fetchUrlSeries = fetchUrl + '?SeriesInstanceUID=' + seriesId;
                             var hrefSeriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
                             var seriesTxt =     ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
-
                             newHtml = '<tr id="' + rowId + '" data-projectid="'+projectId+'" data-caseid="'+patientId+'" class="' + pclass + ' ' + cclass + ' ' + studyClass + ' text_head">' +
                                 '<td class="col1 study-id study-id-col" data-study-id="'+studyId+'">' + ppStudyId + '</td>' +
                                 '<td class="series-number">' + seriesNumber + '</td>' +
@@ -1278,7 +1252,6 @@ require([
                                 '<td class="col1 body-part-examined">' + bodyPartExamined + '</td>'
                             if (curData.SeriesDescription.length>1){
                                 newHtml+='<td class="series-description description-tip" data-description="'+curData.SeriesDescription+'">' + seriesDescription;
-                                //newHtml+= '<span class="tooltiptext_ex">' + curData.SeriesDescription + '</span>';
                                 newHtml+= '</td>';
                             }
                             else{
@@ -1308,16 +1281,13 @@ require([
 
                         else{
                             var studyDescription = curData.StudyDescription;
-                            //var studyDate = curData.StudyDate;
-                            var rowId = 'study_' + studyId.replace(/\./g, '-');
-
+                            var rowId = 'study_' + studyId;
                             var numSeries=0;
                             if (seriesDic.hasOwnProperty(studyId)){
                                 numSeries=seriesDic[studyId];
                            }
 
                             newHtml = '<tr id="' + rowId + '" data-projectid="'+ projectId +'" class="' + pclass + ' ' + cclass +' text_head">' +
-                                //'<td class="col1 project-name">' + projectId + '</td>' +
                                 '<td class="ckbx"><input type="checkbox" onclick="(toggleRows($(this).parent().parent(), \'studies\', \'study_\', false))"></td>' +
                                  '<td class="col1 case-id">' + patientId + '</td>'+
                                 '<td class="col2 study-id study-id-col" data-study-id="'+studyId+'">' + ppStudyId + '</td>' +
@@ -1336,12 +1306,9 @@ require([
                             newSelStudies[patientId].push(studyId);
                         }
 
-
                     }
 
                     resetTableControls($('#' + tableId), false, 0);
-
-
                      if (refreshAfterFilter && !isSeries) {
                         window.selItems.selStudies = newSelStudies;
                         var studyArr = new Array();
@@ -2616,6 +2583,7 @@ require([
                 var curInd = $(this).parent().parent().index();
                 var tbl = $(this).parentsUntil('div').filter('table');
                 sortTable(tbl, curInd, asc);
+                resetTableControls(tbl.find('tbody'), true, -1);
             });
         };
 
@@ -2656,6 +2624,22 @@ require([
         };
 
         var filterItemBindings = function (filterId) {
+            /*
+            In progress - text input to search for attribute values
+            $('#' + filterId).find('.text-filter').on("keyup",function(){
+                var value = $(this).val().toLowerCase();
+                collections=$(this).parent().parent().children('ul').children('.list-group_item').each(function() {
+                    list_val=$(this).children('.list-group-item__heading').data('filter-display-val');
+                    if (list_val.indexOf(value)>-1){
+                       $(this).removeClass('filtText');
+                    }
+                    else{
+                        $(this).addClass('filtText');
+                    }
+                });
+
+            }) */
+
             $('#' + filterId).find('input:checkbox').not('#hide-zeros').on('click', function () {
                 handleFilterSelectionUpdate(this, true, true);
             });
