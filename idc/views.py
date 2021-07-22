@@ -254,7 +254,9 @@ def populate_tables(request):
         sort = req.get('sort', 'PatientID')
         sortdir = req.get('sortdir','asc')
         #table_data = get_table_data(filters, table_type)
-        sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(active=True,source_type=DataSource.SOLR,aggregate_level="StudyInstanceUID")
+        sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
+            active=True,source_type=DataSource.SOLR,aggregate_level="StudyInstanceUID"
+        )
 
         sortByIndex = True
         idsReq=[]
@@ -278,10 +280,24 @@ def populate_tables(request):
 
             elif sort == 'StudyInstanceUID':
                 sortByIndex=False
-                custom_facets_order = {"per_id": {"type": "terms", "field": "PatientID", "sort":"unique_study", "offset":offset, "limit": limit,"facet": {"unique_study": "unique(StudyInstanceUID)", "unique_series": "unique(SeriesInstanceUID)"}}}
-                patientIdsReq = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, offset=offset,
-                                                    records_only=False,
-                                                    collapse_on=tableIndex, counts_only=True, filtered_needed=False, custom_facets=custom_facets, raw_format=True)
+                custom_facets_order = {
+                    "per_id": {
+                        "type": "terms",
+                        "field": "PatientID",
+                        "sort":"unique_study",
+                        "offset":offset,
+                        "limit": limit,
+                        "facet": {
+                            "unique_study": "unique(StudyInstanceUID)",
+                            "unique_series": "unique(SeriesInstanceUID)"
+                        }
+                    }
+                }
+                patientIdsReq = get_collex_metadata(
+                    filters, fields, record_limit=limit, sources=sources, offset=offset, records_only=False,
+                    collapse_on=tableIndex, counts_only=True, filtered_needed=False, custom_facets=custom_facets,
+                    raw_format=True
+                )
 
         order = {}
         curInd = 0
@@ -289,8 +305,10 @@ def populate_tables(request):
         idsFilt=[]
 
         if sortByIndex:
-            idsReq = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, offset=offset, records_only=True,
-                                collapse_on=tableIndex, counts_only=False,filtered_needed=False,sort=sort_field)
+            idsReq = get_collex_metadata(
+                filters, fields, record_limit=limit, sources=sources, offset=offset, records_only=True,
+                collapse_on=tableIndex, counts_only=False,filtered_needed=False,sort=sort_field
+            )
             for rec in idsReq['docs']:
                 id = rec[tableIndex]
                 idsFilt.append(id)
@@ -301,9 +319,10 @@ def populate_tables(request):
                 tableRes.append(newRow)
                 curInd = curInd + 1
             filters[tableIndex]=idsFilt
-            cntRecs = get_collex_metadata(filters, fields, record_limit=limit, sources=sources,
-                                            collapse_on=tableIndex, counts_only=True,records_only=False,
-                                            filtered_needed=False, custom_facets=custom_facets,raw_format=True)
+            cntRecs = get_collex_metadata(
+                filters, fields, record_limit=limit, sources=sources, collapse_on=tableIndex, counts_only=True,
+                records_only=False, filtered_needed=False, custom_facets=custom_facets,raw_format=True
+            )
 
             for rec in cntRecs['facets']['per_id']['buckets']:
                 id = rec['val']
@@ -313,9 +332,11 @@ def populate_tables(request):
 
 
         else:
-            idsReq = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, offset=offset,
-                                        records_only=False,collapse_on=tableIndex, counts_only=True, filtered_needed=False,
-                                         custom_facets=custom_facets_order, raw_format=True)
+            idsReq = get_collex_metadata(
+                filters, fields, record_limit=limit, sources=sources, offset=offset, records_only=False,
+                collapse_on=tableIndex, counts_only=True, filtered_needed=False, custom_facets=custom_facets_order,
+                raw_format=True
+            )
             for rec in idsReq['facets']['per_id']['buckets']:
                 id= rec['val']
                 idsFilt.append(id)
@@ -326,8 +347,10 @@ def populate_tables(request):
                 tableRes.append(newRow)
                 curInd = curInd + 1
             filters[tableIndex] = idsFilt
-            fieldRecs = get_collex_metadata(filters, fields, record_limit=limit, sources=sources,
-                                         records_only=True,collapse_on=tableIndex, counts_only=False, filtered_needed=False)
+            fieldRecs = get_collex_metadata(
+                filters, fields, record_limit=limit, sources=sources, records_only=True, collapse_on=tableIndex,
+                counts_only=False, filtered_needed=False
+            )
             for rec in fieldRecs['docs']:
                 id = rec[tableIndex]
                 tableRow = tableRes[order[id]]

@@ -18,7 +18,7 @@ do
         echo "-h           This help."
         echo "-l <FILE>    Specifies a file which lists the cores to be backed up. Required if -c is not supplied."
         echo "-c <CORE>    Specifies a list of comma-separated cores to back up. Required if -l is not supplied."
-        echo "-f <FILE>    Specifies an output file name for the resulting TAR file. Optional."
+        echo "-f <FILE>    Specifies an output file name for the resulting TAR file. Optional. Default: solr_cores_backup_<datestamp>.tar"
         echo "-d <BUCKET>  Specifies a destination bucket for storing the resulting TAR output. Optional."
         echo " "
         echo "You must store the Solr API password in SOLR_PWD before running this script!"

@@ -503,26 +503,26 @@ def main():
 
     try:
         args = parse_args()
-        new_versions = ["TCIA Image Data Wave 2","TCIA Derived Data Wave 2"]
+        new_versions = ["TCIA Image Data Wave 3","TCIA Derived Data Wave 3"]
 
         set_types = ["IDC Source Data","Derived Data"]
         bioclin_version = ["GDC Data Release 9"]
 
         add_data_versions(
             {'name': "Imaging Data Commons Data Release",
-             'version_number': "2.0",
-             'case_count': 24265,
-             'collex_count': 120,
+             'version_number': "3.0",
+             'case_count': 17174,
+             'collex_count': 112,
              'data_volume': 0,
-             'series_count': 174653
+             'series_count': 168727
              },
-            [{'name': x, 'ver': '2'} for x in new_versions],
+            [{'name': x, 'ver': '3'} for x in new_versions],
             bioclin_version
         )
 
         add_data_sources([
             {
-                'name': 'dicom_derived_series_v2',
+                'name': 'dicom_derived_series_v3',
                 'source_type': DataSource.SOLR,
                 'count_col': 'PatientID',
                 'programs': [],
@@ -530,7 +530,7 @@ def main():
                 'data_sets': set_types,
             },
             {
-                'name': 'dicom_derived_study_v2',
+                'name': 'dicom_derived_study_v3',
                 'source_type': DataSource.SOLR,
                 'count_col': 'PatientID',
                 'programs': [],
@@ -538,7 +538,7 @@ def main():
                 'data_sets': set_types,
             },
             {
-                'name': 'idc-dev-etl.idc_v2.dicom_derived_all_pivot',
+                'name': 'idc-dev-etl.idc_v3.dicom_pivot_v3',
                 'source_type': DataSource.BIGQUERY,
                 'count_col': 'PatientID',
                 'programs': [],
@@ -548,36 +548,23 @@ def main():
         ])
 
         add_source_joins(
-            ['dicom_derived_study_v2','dicom_derived_series_v2'],
+            ['dicom_derived_study_v3','dicom_derived_series_v3'],
             "PatientID",
             ["tcga_bios","tcga_clin"],
             "case_barcode"
         )
 
         add_source_joins(
-            ["idc-dev-etl.idc_v2.dicom_derived_all_pivot"],
+            ["idc-dev-etl.idc_v3.dicom_pivot_v3"],
             "PatientID",
             ["isb-cgc.TCGA_bioclin_v0.Biospecimen","isb-cgc.TCGA_bioclin_v0.clinical_v1"],
             "case_barcode"
         )
 
-        new_attr = []
-        new_attr.append(new_attribute("Apparent_Diffusion_Coefficient", "Apparent Diffusion Coefficient", Attribute.CONTINUOUS_NUMERIC, True, units="um2/s"))
-        new_attr[0]['solr_collex'] = ['dicom_derived_study_v2','dicom_derived_series_v2']
-        new_attr[0]['bq_tables'] = ["idc-dev-etl.idc_v2.dicom_derived_all_pivot"]
-        new_attr[0]['set_types'] = [{'set': DataSetType.DERIVED_DATA, 'child_record_search': None}]
+        copy_attrs(["idc-dev-etl.idc_v2.dicom_pivot_v2"],["idc-dev-etl.idc_v3.dicom_pivot_v3"])
+        copy_attrs(["dicom_derived_series_v2"],["dicom_derived_series_v3","dicom_derived_study_v3"])
 
-        new_attr.append(new_attribute("tcia_species", "Species", Attribute.CATEGORICAL, True))
-        new_attr[1]['solr_collex'] = ['dicom_derived_study_v2','dicom_derived_series_v2']
-        new_attr[1]['bq_tables'] = ["idc-dev-etl.idc_v2.dicom_derived_all_pivot"]
-        new_attr[1]['set_types'] = [{'set': DataSetType.IMAGE_DATA, 'child_record_search': None}]
-
-        add_attributes(new_attr)
-
-        copy_attrs(["idc-dev.metadata.dicom_pivot_wave1"],["idc-dev-etl.idc_v2.dicom_derived_all_pivot"])
-        copy_attrs(["dicom_derived_all"],["dicom_derived_series_v2","dicom_derived_study_v2"])
-
-        deactivate_data_versions(["TCIA Image Data Wave 1","TCIA Derived Data Wave 1"], ["1.0"])
+        deactivate_data_versions(["TCIA Image Data Wave 2","TCIA Derived Data Wave 2"], ["2.0"])
 
         len(args.programs_file) and load_programs(args.programs_file)
         len(args.collex_file) and load_collections(args.collex_file)

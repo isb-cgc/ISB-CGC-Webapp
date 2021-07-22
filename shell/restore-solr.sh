@@ -66,9 +66,11 @@ for dirname in ${BACKUP_DIR}/*/; do
   SNAPSHOT=$(awk -F'[/]' '{print $2}' <<< $dirname)
   echo "Restoring core ${CORE}...into snapshot ${SNAPSHOT}"
   sudo chown solr $dirname
-  sudo -u solr cp -r $dirname /opt/bitnami/solr/data/$CORE/data/$SNAPSHOT
-  sudo -u solr mv /opt/bitnami/solr/data/$CORE/conf/managed-schema /opt/bitnami/solr/data/$CORE/conf/managed-schema.old
-  sudo -u solr cp $BACKUP_DIR/$CORE.managed-schema /opt/bitnami/solr/data/$CORE/conf/managed-schema
+  sudo -u solr cp -r $dirname /opt/bitnami/solr/server/solr/$CORE/data/$SNAPSHOT
+  if [[ -f /opt/bitnami/solr/server/solr/$CORE/conf/managed-schema ]]; then
+    sudo -u solr mv /opt/bitnami/solr/server/solr/$CORE/conf/managed-schema /opt/bitnami/solr/data/$CORE/conf/managed-schema.old
+  fi
+  sudo -u solr cp $BACKUP_DIR/$CORE.managed-schema /opt/bitnami/solr/server/solr/$CORE/conf/managed-schema
   curl -u idc:$SOLR_PWD -X GET "https://localhost:8983/solr/$CORE/replication?command=restore&name=$CORE" --cacert solr-ssl.pem
 done
 
