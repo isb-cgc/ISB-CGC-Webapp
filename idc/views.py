@@ -436,8 +436,6 @@ def explore_data_page(request):
             context['filters_for_load'] = cohort_filters_dict
         else:
             context['filters_for_load'] = json.loads(req.get('filters_for_load', '{}'))
-        '''context['order'] = {'derived_set': ['dicom_derived_study_v2:segmentation', 'dicom_derived_study_v2:qualitative',
-                                            'dicom_derived_study_v2:quantitative']}'''
 
         return render(request, 'idc/explore.html', context)
 

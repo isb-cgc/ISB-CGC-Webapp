@@ -1026,7 +1026,7 @@ require([
             curFilterObj.collection_id = projectIdArr;
 
             var filterStr = JSON.stringify(curFilterObj);
-            var fields = ["collection_id", "PatientID","StudyInstanceUID","SeriesInstanceUID"];
+            var fields = ["collection_id", "PatientID","StudyInstanceUID","SeriesInstanceUID","Modality"];
             var collapse_on = 'PatientID'
             var order_docs = ["collection_id", "PatientID"];
             var orderDocStr = JSON.stringify(order_docs);
@@ -1189,7 +1189,7 @@ require([
             //curFilterObj={"Diameter_btw":[51,'*']}
 
             var filterStr = JSON.stringify(curFilterObj);
-            var fields = ["collection_id", "PatientID", "StudyInstanceUID", "StudyDescription", "StudyDate"];
+            var fields = ["collection_id", "PatientID", "StudyInstanceUID", "StudyDescription", "StudyDate","Modality"];
             var collapse_on = 'StudyInstanceUID'
             var sort_on = ["collection_id asc", "PatientID asc", "StudyInstanceUID asc"];
             if (isSeries) {
@@ -1244,7 +1244,7 @@ require([
                         var patientId = curData.PatientID;
                         var studyId = curData.StudyInstanceUID;
                         var ppStudyId = pretty_print_id(studyId);
-                        var fetchUrl = DICOM_STORE_PATH + studyId;
+                        var fetchUrl = ((!isSeries && curData.Modality[0] === "SM" || curData.Modality === "SM") ? SLIM_VIEWER_PATH : DICOM_STORE_PATH) + studyId;
                         var hrefTxt = ppStudyId + '</a>';
                         //var hrefTxt =  ppStudyId + '<span class="tooltiptext_ex">' + studyId + '</span>';
                         var pclass = 'project_' + projectId;
@@ -1261,7 +1261,6 @@ require([
                             if (curData.SeriesDescription.length>1){
                                 seriesDescription = curData.SeriesDescription[0]+',...';
                             }
-
 
                             //var seriesDescription = curData.SeriesDescription;
                             var bodyPartExamined = curData.BodyPartExamined;

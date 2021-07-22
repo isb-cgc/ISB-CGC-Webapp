@@ -51,8 +51,13 @@ if [[ $TARFILE != "" ]]; then
 fi
 
 for dirname in ${BACKUP_DIR}/*/; do
-  CORE=$([[ "$BACKUP_DIR" == "./" ]] && awk -F. '{print $3}' <<< $dirname || awk -F'[./]' '{print $3}' <<< $dirname)
-  if [ "${CORE}" == "" || -z $CORE || "${CORE}" == " " ]; then
+  CORE=""
+  if [[ "$BACKUP_DIR" == "./" ]]; then
+    CORE=$(awk -F. '{print $3}' <<< $dirname)
+  else
+    CORE=$(awk -F'[./]' '{print $3}' <<< $dirname)
+  fi
+  if [[ "${CORE}" == "" || "${CORE}" == " " ]]; then
     echo "Something's wrong with the directory structure! Exiting."
     exit 1
   fi
@@ -68,7 +73,7 @@ for dirname in ${BACKUP_DIR}/*/; do
   sudo chown solr $dirname
   sudo -u solr cp -r $dirname /opt/bitnami/solr/server/solr/$CORE/data/$SNAPSHOT
   if [[ -f /opt/bitnami/solr/server/solr/$CORE/conf/managed-schema ]]; then
-    sudo -u solr mv /opt/bitnami/solr/server/solr/$CORE/conf/managed-schema /opt/bitnami/solr/data/$CORE/conf/managed-schema.old
+    sudo -u solr mv /opt/bitnami/solr/server/solr/$CORE/conf/managed-schema /opt/bitnami/solr/server/solr/$CORE/conf/managed-schema.old
   fi
   sudo -u solr cp $BACKUP_DIR/$CORE.managed-schema /opt/bitnami/solr/server/solr/$CORE/conf/managed-schema
   curl -u idc:$SOLR_PWD -X GET "https://localhost:8983/solr/$CORE/replication?command=restore&name=$CORE" --cacert solr-ssl.pem

@@ -176,7 +176,7 @@ def explore_demo_page(request):
     else:
         # These are filters to be loaded *after* a page render
         context['filters_for_load'] = json.loads(req.get('filters_for_load', '{}'))
-        context['order'] = {'derived_set': ['dicom_derived_series_v2:segmentation', 'dicom_derived_series_v2:qualitative',
-                                            'dicom_derived_series_v2:quantitative']}
+        context['order'] = {'derived_set': ['dicom_derived_series_v3:segmentation', 'dicom_derived_series_v3:qualitative',
+                                            'dicom_derived_series_v3:quantitative']}
 
         return render(request, 'idc/explore_demo.html', context)
