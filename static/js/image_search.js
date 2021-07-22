@@ -1013,7 +1013,7 @@ require([
             curFilterObj.collection_id = projectIdArr;
 
             var filterStr = JSON.stringify(curFilterObj);
-            var fields = ["collection_id", "PatientID","StudyInstanceUID","SeriesInstanceUID"];
+            var fields = ["collection_id", "PatientID","StudyInstanceUID","SeriesInstanceUID","Modality"];
             var collapse_on = 'PatientID'
             var order_docs = ["collection_id", "PatientID"];
             var orderDocStr = JSON.stringify(order_docs);
@@ -1171,7 +1171,7 @@ require([
             curFilterObj.PatientID = caseIdArr;
 
             var filterStr = JSON.stringify(curFilterObj);
-            var fields = ["collection_id", "PatientID", "StudyInstanceUID", "StudyDescription", "StudyDate"];
+            var fields = ["collection_id", "PatientID", "StudyInstanceUID", "StudyDescription", "StudyDate","Modality"];
             var collapse_on = 'StudyInstanceUID'
             var sort_on = ["collection_id asc", "PatientID asc", "StudyInstanceUID asc"];
             if (isSeries) {
@@ -1221,7 +1221,7 @@ require([
                         var patientId = curData.PatientID;
                         var studyId = curData.StudyInstanceUID;
                         var ppStudyId = pretty_print_id(studyId);
-                        var fetchUrl = DICOM_STORE_PATH + studyId;
+                        var fetchUrl = ((!isSeries && curData.Modality[0] === "SM" || curData.Modality === "SM") ? SLIM_VIEWER_PATH : DICOM_STORE_PATH) + studyId;
                         var hrefTxt = ppStudyId + '</a>';
                         var pclass = 'project_' + projectId;
                         var cclass = 'case_' + patientId;

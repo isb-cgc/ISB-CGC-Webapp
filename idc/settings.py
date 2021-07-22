@@ -642,6 +642,7 @@ if DEBUG and DEBUG_TOOLBAR:
 APPEND_SLASH = False
 
 DICOM_STORE_PATH=os.environ.get('DICOM_STORE_PATH','')
+SLIM_VIEWER_PATH=os.environ.get('SLIM_VIEWER_PATH','')
 
 # Log the version of our app
 print("[STATUS] Application Version is {}".format(APP_VERSION))
