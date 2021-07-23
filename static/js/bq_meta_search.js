@@ -477,10 +477,17 @@ require([
                 });
                 $('.useful-join-view-btn').on('click', function() {
                     let join_data = $(this).data();
+                    let tables = "";
+                    join_data['tables'].forEach(function(value, i) {
+                        tables += value;
+                        if (i !== join_data['tables'].length - 1) {
+                            tables += "<br>";
+                        }
+                    });
                     let dialog_content =
-                        '<h5>Join Subject</h5><p>' + join_data['subject'] + '</p><br>' +
+                        '<h5>Join Subject</h5><p>' + join_data['title'] + '</p><br>' +
                         '<h5>Description</h5><p>' + join_data['description'] + '</p><br>' +
-                        '<h5>Joined Tables</h5><p>' + join_data['table'] + '</p><br>' +
+                        '<h5>Joined Tables</h5><p>' + tables + '</p><br>' +
                         '<h5>SQL Statement</h5>' +
                         '<p>' + join_data['sql'] + '&nbsp;&nbsp;<button class="copy-btn" title="Copy to Clipboard">' +
                         '<i class="fa fa-clipboard" aria-hidden="true"></i>COPY</button></p><br>' +
@@ -564,9 +571,16 @@ require([
         join_table += '<thead><tr><th style="width:150px">Join Subject</th><th style="width:400px">Joined Tables</th><th>View</th></tr></thead>';
         join_table += '<tbody>';
         d.forEach(join_info => {
-           join_table += '<tr>' +
-               '<td>' + join_info['subject'] + '</td>' +
-               '<td>' + join_info['table'] + '</td>' +
+            let tables = "";
+            join_info['tables'].forEach(function(value, i) {
+                tables += value;
+                if (i !== join_info['tables'].length - 1) {
+                    tables += "<br>";
+                }
+            });
+            join_table += '<tr>' +
+               '<td>' + join_info['title'] + '</td>' +
+               '<td>' + tables + '</td>' +
                '<td><button class="useful-join-view-btn open-gcp-btn">View Details</button></td>' +
                '</tr>';
         });
