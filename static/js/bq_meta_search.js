@@ -464,7 +464,7 @@ require([
             if (row.child.isShown() && tr.hasClass('useful-join-shown')) {
                 // This row is already open - close it
                 row.child.hide();
-                tr.removeClass('shown useful-join-shown');
+                tr.removeClass('useful-join-shown');
             }
             else {
                 // Open this row
@@ -472,7 +472,7 @@ require([
                 $('.useful-join-view-btn').each(function(index) {
                     let this_join_data = joins_data[index];
                     this_join_data['tableName'] = row_data['friendlyName'];
-                    this_join_data['tableId'] = row_data['tableReference']['tableId'];
+                    this_join_data['tableId'] = formatFullId(row_data['tableReference'], false);
                     $(this).data(this_join_data);
                 });
                 $('.useful-join-view-btn').on('click', function() {
@@ -484,24 +484,31 @@ require([
                             tables += "<br>";
                         }
                     });
+                    let [query_comment, ...rest] = join_data['sql'].split('\n');
+                    query_comment = query_comment.replace('#', '');
+                    let sql_query = rest.join('<br>');
                     let dialog_content =
                         '<h5>Join Subject</h5><p>' + join_data['title'] + '</p><br>' +
                         '<h5>Description</h5><p>' + join_data['description'] + '</p><br>' +
                         '<h5>Joined Tables</h5><p>' + tables + '</p><br>' +
                         '<h5>SQL Statement</h5>' +
-                        '<p>' + join_data['sql'] + '&nbsp;&nbsp;<button class="copy-btn" title="Copy to Clipboard">' +
-                        '<i class="fa fa-clipboard" aria-hidden="true"></i>COPY</button></p><br>' +
+                        '<p>' + query_comment + '</p>' +
+                        '<p><i>' + sql_query + '</i></p>' +
+                        '<button class="copy-btn" title="Copy to Clipboard">' +
+                        '<i class="fa fa-clipboard" aria-hidden="true"></i>COPY</button><br><br>' +
                         '<h5>Joined Condition</h5><p>' + join_data['condition'] + '</p>';
+
 
                     $('#useful-join-view-modal').find('.modal-body').html(dialog_content);
 
-                    let subtitle_content = join_data['tableName'] + '[' + join_data['tableId'] + ']';
+                    let subtitle_content = join_data['tableName'] + ' [' + join_data['tableId'] + ']';
                     $('#useful-join-view-modal').find('.modal-sub-title').html(subtitle_content);
                     $('#useful-join-view-modal').modal('show');
                 });
                 set_gcp_open_btn($(tr).next('tr').find('.detail-table'));
-                tr.addClass('shown useful-join-shown');
+                tr.addClass('useful-join-shown');
                 tr.removeClass('preview-shown');
+                tr.removeClass('details-shown');
             }
         });
 
@@ -567,8 +574,8 @@ require([
 
     // Useful join table
     var format_useful_join_details = function(d) {
-        let join_table = '<div class="useful-join-table"><p>Useful Joins</p><table>';
-        join_table += '<thead><tr><th style="width:150px">Join Subject</th><th style="width:400px">Joined Tables</th><th>View</th></tr></thead>';
+        let join_table = '<div class="useful-join-table"><table>';
+        join_table += '<thead><tr><th style="width:200px">Join Subject</th><th style="width:400px">Joined Tables</th><th>View</th></tr></thead>';
         join_table += '<tbody>';
         d.forEach(join_info => {
             let tables = "";
