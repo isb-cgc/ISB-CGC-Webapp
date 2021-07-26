@@ -259,6 +259,11 @@ def extended_login_view(request):
     return redirect(reverse(redirect_to))
 
 
+# Callback for recording the user's agreement to the warning popup
+def warn_page(request):
+    request.session['seenWarning'] = True
+    return JsonResponse({'warning_status': 'SEEN'}, status=200)
+
 '''
 DEPRECATED - Returns Results from text search
 '''
