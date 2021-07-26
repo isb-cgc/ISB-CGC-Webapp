@@ -6,6 +6,15 @@
    window.selItems.selProjects = new Array();
    window.selItems.selStudies = new Object();
    window.collection = {{ collections|tojson|safe }};
+   var lst = Object.keys(window.collection).sort();
+
+   window.collectionData = new Array();
+   for (var i=0;i< lst.length;i++){
+       var cKey =lst[i];
+       var val = window.collectionData[cKey];
+       window.collectionData.push([ckey,val,val]);
+   }
+
    window.programs = {{ programs|tojson|safe }};
    window.csr = "{{  csrf_token }}";
 </script>
@@ -535,15 +544,15 @@
                                         <th class="ckbx text_data"></th><th class='text_data'>Collection Name </th><th class='numeric_data'>Total # of Cases</th><th class='numeric_data'># of Cases(this cohort)</th>
                                     </tr>
                                 </thead>
-                                <tbody id="projects_table">
-                                {% for progK, progV in programs.items|dictsort:"0.lower" %}
+                                <!-- <tbody id="projects_table">
+                                 {% for progK, progV in programs.items|dictsort:"0.lower" %}
                                      {% for proj, projD in progV.projects.items %}
-                                         <tr id="project_row_{{ proj }}" data-projectid="{{ proj }}" class="text_head")"><td class="ckbx text_data"><input type="checkbox" onclick="(updateCaseTable($(this).parent().parent()))"></td> <td>{{ projD.display }}</td><td>{{ projD.val }}</td><td id="patient_col_{{ proj }}" class="projects_table_num_cohort">{{ projD.val }}</td> </tr>
+                                         <tr id="project_row_{{ proj }}" data-projectid="{{ proj }}" class="text_head")"><td class="ckbx text_data"><input class="tbl-sel" type="checkbox" onclick="(updateProjectSelection($(this).parent().parent()))"></td> <td>{{ projD.display }}</td><td>{{ projD.val }}</td><td id="patient_col_{{ proj }}" class="projects_table_num_cohort">{{ projD.val }}</td> </tr>
                                      {% endfor %}
 
                                 {% endfor %}
 
-                                </tbody>
+                                </tbody> -->
                             </table>
                          </div>
                      </div>
@@ -582,10 +591,10 @@
                               <thead id="studies_table_head">
                              <tr>
                                  <th class="ckbx text_data notVis"><i class="fa fa-plus-circle fa-lg" onclick="(toggleRows($(this).parent().parent(),'studies', 'study_',true))"></i><i class="fa fa-minus-circle fa-lg" onclick="(toggleRows($(this).parent().parent(),'studies', 'study_',false))"></i></th>
-                                 <th class='text_data case-id'>Case Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                 <th class='text_data study-id'>Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                 <th class='text_data study-description'>Study Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                 <th class='numeric_data'># of Series<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                 <th class='text_data case-id'>Case Id</th>
+                                 <th class='text_data study-id'>Study Id</th>
+                                 <th class='text_data study-description'>Study Description</th>
+                                 <th class='numeric_data'># of Series</th>
                                  <th class="text_data open-viewer">View</th>
                              </tr>
                               </thead>
@@ -602,18 +611,17 @@
                          <div class="panel-heading clearfix"><h4 class="panel-title">Selected Series</h4></div>
                          <div class="panel-body">
 
-                             <table class = "table table-striped series-table">
+                             <table id="series_tab" class = "table table-striped series-table">
                                 <thead id="series_table_head">
                                     <tr>
-                                        <th class="study-id">Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                        <th class="series-number">Series Number<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                        <th class="modality">Modality<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                        <th class="body-part-examined">Body Part Examined<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                        <th class="series-description">Series Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                        <th class="study-id">Study Id</th>
+                                        <th class="series-number">Series Number</th>
+                                        <th class="modality">Modality</th>
+                                        <th class="body-part-examined">Body Part Examined</th>
+                                        <th class="series-description">Series Description</th>
                                         <th class="text_data">View</th>
                                     </tr>
                                 </thead>
-                                <tbody id="series_table" class="set_height"></tbody>
                              </table>
                          </div>
                      </div>

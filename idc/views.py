@@ -255,9 +255,16 @@ def populate_tables(request):
         limit = int(req.get('limit', '500'))
         sort = req.get('sort', 'PatientID')
         sortdir = req.get('sortdir','asc')
-        #checkedIds = json.loads(req.get('checkedIds','[]'))
+        checkIds = json.loads(req.get('checkids','[]'))
         #table_data = get_table_data(filters, table_type)
-        sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(active=True,source_type=DataSource.SOLR,aggregate_level="StudyInstanceUID")
+        diffA=[]
+
+        if table_type=='series':
+            sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(active=True,
+                                                                                          source_type=DataSource.SOLR,
+                                                                                          aggregate_level="SeriesInstanceUID")
+        else:
+            sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(active=True,source_type=DataSource.SOLR,aggregate_level="StudyInstanceUID")
         sortByField = True
         #idsReq=[]
         custom_facets=''
@@ -323,10 +330,10 @@ def populate_tables(request):
         if table_type == 'series':
             custom_facets = {}
             tableIndex = 'SeriesInstanceUID'
-            fields = ['SeriesInstanceUID']
+            fields = ['SeriesInstanceUID','StudyInstanceUID','SeriesDescription','SeriesNumber','BodyPartExamined','Modality']
             facetfields = []
             sortByField = True
-            sort_arg='SeriesInstanceUID asc'
+            sort_arg='StudyInstanceUID asc, SeriesNumber asc'
 
             if sort == 'StudyInstanceUID':
                 sort_arg = 'StudyInstanceUID ' + sortdir+', SeriesNumber asc'
@@ -335,7 +342,7 @@ def populate_tables(request):
                 sort_arg = 'SeriesNumber ' + sortdir+', SeriesNumber asc'
 
             elif sort == 'Modality':
-                sort_arg = 'unique_series '+sortdir+', SeriesNumber asc'
+                sort_arg = 'Modality '+sortdir+', SeriesNumber asc'
 
             elif sort == 'BodyPartExamined':
                 sort_arg = 'BodyPartExamined ' + sortdir + ', SeriesNumber asc'
@@ -350,11 +357,14 @@ def populate_tables(request):
         curInd = 0
         idsFilt=[]
 
-        '''if len(checkedIds)>0:
+        if len(checkIds)>0:
             selFilters=copy.deepcopy(filters)
-            selFilters[tableIndex]=checkedIds
-            newCheckedIds = get_collex_metadata(selFilters, [tableIndex], sources=sources, records_only=True,
-                                collapse_on=tableIndex, counts_only=False,filtered_needed=False,sort=tableIndex+' asc')'''
+            selFilters[tableIndex]=checkIds
+            newCheckIds = get_collex_metadata(selFilters, [tableIndex], record_limit=len(checkIds)+1,sources=sources, records_only=True,
+                                collapse_on=tableIndex, counts_only=False,filtered_needed=False,sort=tableIndex+' asc')
+
+            nset = set([x[tableIndex] for x in newCheckIds['docs']])
+            diffA = [x for x in checkIds if x not in nset]
 
         if sortByField:
             idsReq = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, offset=offset, records_only=True,
@@ -426,7 +436,7 @@ def populate_tables(request):
         logger.exception(e)
         messages.error(request,"Encountered an error when attempting to populate the page - please contact the administrator.")
 
-    return JsonResponse({"res":tableRes, "cnt":cnt})
+    return JsonResponse({"res":tableRes, "cnt":cnt, "diff":diffA})
 
 # Data exploration and cohort creation page
 @login_required
