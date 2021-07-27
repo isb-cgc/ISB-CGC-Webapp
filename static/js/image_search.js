@@ -655,6 +655,14 @@ require([
             updateCaseTable(rowsAdded, !rowsAdded, false, purgeChildSelections)
         }
 
+        window.updateMultipleRows=function(table,add,type){
+            rowA=$(table).find('tbody').children();
+            $(rowA).each(function(){
+                    $(this).children('.ckbx').children().prop("checked",add);
+            });
+            updateCasesOrStudiesSelection(rowA, type);
+        }
+
         window.updateCasesOrStudiesSelection = function(rowA, type){
             var purgeChildTables=[false];
             var rowsAdded= ($(rowA[0]).children('.ckbx').children().is(':checked') )?true:false
@@ -975,7 +983,8 @@ require([
                         } },
                     {"type": "text", "orderable": true, data:'StudyInstanceUID', render:function(data){
                         return pretty_print_id(data);
-                        }, "createdCell":function(td,data)
+                        },
+                        "createdCell":function(td,data)
                         {
                             $(td).attr('data-study-id',data);
                             return;
@@ -2633,20 +2642,23 @@ require([
                     "dom":'<"dataTables_controls"ilpf>rt<"bottom"><"clear">',
                     "order": [[ 1, "asc" ]],
                     "data": window.collectionData,
+                    "createdRow":function(row,data,dataIndex){
+                        $(row).data('projectid',data[1])
+                    },
+                    "columnDefs":[
+                    {className:"ckbx text_data", "targets":[0]},
+                    {className:"projects_table_num_cohort", "targets":[3]},
+                  ],
                     "columns": [
-                       { "type": "html", "orderable": false },
-                       { "type": "text", "orderable": true },
+                        {"type": "html", "orderable": false, render:function(){return '<input type="checkbox" onclick="updateProjectSelection($(this).parent().parent())">'}},
+                       {"type": "text", "orderable": true},
                        {"type":"num", orderable:true},
                        {"type":"num", orderable:true}
-
                   ]
                }
             );
+            //"createdCell":function(td,data,row){$(td).attr("id","patient_col_"+row[1]);}
             $('#proj_table').children('tbody').attr('id','projects_table');
-            //window.resetTableControls ($('#projects_table'), false,0);
-            /*window.resetTableControls ($('#cases_table'), false, 0);
-            window.resetTableControls ($('#studies_table'), false, 0);
-            window.resetTableControls ($('#series_table'), false, 0);*/
 
              $('.clear-filters').on('click', function () {
                    $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('checked',false);

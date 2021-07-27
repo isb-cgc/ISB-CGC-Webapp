@@ -11,8 +11,10 @@
    window.collectionData = new Array();
    for (var i=0;i< lst.length;i++){
        var cKey =lst[i];
-       var val = window.collectionData[cKey];
-       window.collectionData.push([ckey,val,val]);
+       if (!(cKey==="All")) {
+           var val = window.collection[cKey];
+           window.collectionData.push(['tmp', cKey, val, val]);
+       }
    }
 
    window.programs = {{ programs|tojson|safe }};
@@ -541,18 +543,11 @@
                              <table id="proj_table" class="table table-striped">
                                 <thead id="projects_table_head">
                                     <tr>
-                                        <th class="ckbx text_data"></th><th class='text_data'>Collection Name </th><th class='numeric_data'>Total # of Cases</th><th class='numeric_data'># of Cases(this cohort)</th>
+                                         <th class="ckbx text_data"></th>
+                                        <th class='text_data'>Collection Name </th><th class='numeric_data'>Total # of Cases</th><th class='numeric_data'># of Cases(this cohort)</th>
                                     </tr>
                                 </thead>
-                                <!-- <tbody id="projects_table">
-                                 {% for progK, progV in programs.items|dictsort:"0.lower" %}
-                                     {% for proj, projD in progV.projects.items %}
-                                         <tr id="project_row_{{ proj }}" data-projectid="{{ proj }}" class="text_head")"><td class="ckbx text_data"><input class="tbl-sel" type="checkbox" onclick="(updateProjectSelection($(this).parent().parent()))"></td> <td>{{ projD.display }}</td><td>{{ projD.val }}</td><td id="patient_col_{{ proj }}" class="projects_table_num_cohort">{{ projD.val }}</td> </tr>
-                                     {% endfor %}
 
-                                {% endfor %}
-
-                                </tbody> -->
                             </table>
                          </div>
                      </div>
@@ -567,8 +562,8 @@
                                 <thead id="cases_table_head">
                                     <tr>
                                         <th class="ckbx text_data notVis">
-                                             <i class="fa fa-plus-circle fa-lg" onclick="(toggleRows($(this).parent().parent(),'cases', 'case_',true))" style="font-family :'FontAwesome' !important"></i>
-                                             <i class="fa fa-minus-circle fa-lg" onclick="(toggleRows($(this).parent().parent(),'cases', 'case_',false))" style="font-family :'FontAwesome' !important"></i>
+                                             <i class="fa fa-plus-circle fa-lg" onclick="(updateMultipleRows($($(this).parentsUntil('table')[2]).parent(),true,'cases'))" style="font-family :'FontAwesome' !important"></i>
+                                             <i class="fa fa-minus-circle fa-lg" onclick="(updateMultipleRows($($(this).parentsUntil('table')[2]).parent(),false,'cases'))" style="font-family :'FontAwesome' !important"></i>
                                         </th>
                                         <th class='text_data'>Collection Name</th><th class='numeric_data'>Case Id</th><th class='numeric_data'>Total # of Studies</th>
 
@@ -590,7 +585,10 @@
                              <table id="studies_tab" class="table table-striped studies-table" >
                               <thead id="studies_table_head">
                              <tr>
-                                 <th class="ckbx text_data notVis"><i class="fa fa-plus-circle fa-lg" onclick="(toggleRows($(this).parent().parent(),'studies', 'study_',true))"></i><i class="fa fa-minus-circle fa-lg" onclick="(toggleRows($(this).parent().parent(),'studies', 'study_',false))"></i></th>
+                                 <th class="ckbx text_data notVis">
+                                     <i class="fa fa-plus-circle fa-lg" onclick="(updateMultipleRows($($(this).parentsUntil('table')[2]).parent(),true,'studies'))"></i>
+                                     <i class="fa fa-minus-circle fa-lg" onclick="(updateMultipleRows($($(this).parentsUntil('table')[2]).parent(),false,'studies'))"></i>
+                                 </th>
                                  <th class='text_data case-id'>Case Id</th>
                                  <th class='text_data study-id'>Study Id</th>
                                  <th class='text_data study-description'>Study Description</th>
