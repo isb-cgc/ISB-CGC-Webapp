@@ -370,16 +370,19 @@ require([
             }
 
             var tooltipL = $('<div class="slide_tooltip tooltipL slide_tooltipT" />').text('stuff').css({
-               position: 'absolute',
-               top: -25,
-               left: -5,
-                });
+                position: 'absolute',
+                top: -25,
+                left: 0,
+                transform: 'translateX(-50%)'
+
+            });
 
              var tooltipR = $('<div class="slide_tooltip slide_tooltipB tooltipR" />').text('stuff').css({
                position: 'absolute',
                top: 20,
-               right: -5,
-                });
+               right: 0,
+                 transform: 'translateX(50%)'
+             });
 
 
               var labelMin = $('<div class="labelMin"/>').text(min).css({
@@ -497,10 +500,42 @@ require([
         };
 
         var updateTablesAfterFilter = function (collFilt, collectionsData){
-            editProjectsTableAfterFilter('projects_table', collFilt, collectionsData);
-            updateCaseTable(false, false, true, [false,false]);
+            //editProjectsTableAfterFilter('projects_table', collFilt, collectionData);
+            //kSet =  Object.keys(window.collectionData).sort();
+            var usedCollectionData = new Array();
+            var hasColl = collFilt.length>0 ? true : false;
+            for (var i=0;i<window.collectionData.length;i++){
+                var cRow = window.collectionData[i];
+                var projId=cRow[0];
+                if ( (projId in collectionsData) && (!hasColl || (collFilt.indexOf(projId)>-1)) ){
+                    cRow[3] = collectionsData[projId]['count'];
+                }
+                else{
+                   cRow[3] = 0;
+                }
+                if (cRow[3]===0){
+                    var projIndex = window.selItems.selProjects.indexOf(projId);
+                    if (projIndex !==-1) window.selItems.selProjects.splice(projIndex,1);
+                    if (window.selItems.selCases.hasOwnProperty(projId)) {
+                           selCases= window.selItems.selCases[projId];
+                           for (j=0;j<selCases.length;j++){
+                               var selCase = selCases[j];
+                               delete window.selItems.selStudies[selCase];
+                           }
 
+                        delete window.selItems.selCases[projId];
+                    }
+                }
+                else{
+                    usedCollectionData.push(cRow);
+                }
+
+            }
+
+            updateProjectTable(usedCollectionData);
+            updateCaseTable(false, false, true, [false,false]);
         }
+
         var editProjectsTableAfterFilter = function (tableId, collFilt, collectionsData) {
             //var selectedElem = document.getElementById(scopeId).selectedOptions[0];
             //var project_scope = selectedElem.value;
@@ -552,84 +587,11 @@ require([
 
 
 
-        var resetCasesAndStudiesAndSeriesTables = function (caseId, studyId, seriesId) {
-
-            tableElem = document.getElementById(caseId);
-            //var newInnerHTML = '<tr><th>Project Name</th><th>Patient Id</th><th>Study Id</th><th>Study Description</th></tr>';
-            tableElem.innerHTML = '';
-            window.resetTableControls ($('#'+caseId), false, 0);
-
-            tableElem = document.getElementById(studyId);
-            //var newInnerHTML = '<tr><th>Project Name</th><th>Patient Id</th><th>Study Id</th><th>Study Description</th></tr>';
-            tableElem.innerHTML = '';
-            window.resetTableControls ($('#'+studyId), false, 0);
-
-            tableElem = document.getElementById(seriesId);
-            //var newInnerHTML = '<tr> <th>Study Id</th><th>Series Id</th><th>Modality</th><th>Body Part Examined</th> </tr>';
-            tableElem.innerHTML = '';
-            window.resetTableControls ($('#'+seriesId), false, 0);
-        }
 
 
 
 
-        getSelRows = function(row){
-            table = $(row).parent().parent();
-            ck = $(row).find('input:checkbox').is(':checked');
-            numPerPg= parseInt(table.parent().find('.files-per-page-select').data('fpp'));
-            curPg= parseInt(table.parent().find('.dataTables_goto_page').data('curpage'));
-            fInd=numPerPg*(curPg-1);
-            lInd=fInd+numPerPg-1;
 
-            return [fInd, lInd];
-        }
-
-
-        setSelectedProjects = function(projectArr, is_add, reset){
-            if (reset) {
-                window.selItems[itemType] = new Array();
-            }
-            for (projId in projectArr){
-                curInd = window.selItems[itemType].indexOf(itemId);
-                if(is_add && (curInd<0)){
-                    window.selItems[itemType].push(itemId);
-                }
-                else if (!is_add && (curInd>-1)){
-                    window.selItems.remove(curInd);
-                }
-            }
-            window.selItems.selProjects.sort();
-
-        }
-        setSelectedCases = function(caseArr,is_add, reset){
-            if (reset){
-                window.selItems.selCases = new Object();
-            }
-            for (projId in window.selItems.selCases){
-                if (window.selItems.selProjects.indexOf(projId)<0){
-                    delete window.selItems.selCases[projId];
-                }
-
-            }
-        }
-
-        handleCase = function() {
-            $.ajax({
-                url: '/tables/cases/',
-                dataType: 'json',
-                type: 'post',
-                contentType: 'application/x-www-form-urlencoded',
-                success: function (data) {
-
-
-                    ndata=[ ["1","2","3","4"]];
-                    return ndata;
-                },
-                error: function () {
-                    console.log("problem getting data");
-                }
-            });
-        }
 
         window.updateProjectSelection = function(row){
             var purgeChildSelections=[false,false]
@@ -734,20 +696,15 @@ require([
             var removedChildItems = new Array();
             var itemsRemoved = false;
             var updateChildTable = new Array();
-
             if (itemType ==='projects'){
-
                 childDic=window.selItems.selCases
-
             }
             else if (itemType==='cases'){
                 childDic=window.selItems.selStudies
             }
-
             if (cleanAll){
                 removedItems = Object.keys(childDic);
             }
-
             for (i=0;i<removedItems.length;i++){
                 id = removedItems[i];
                 if (id in childDic)
@@ -767,6 +724,46 @@ require([
             return updateChildTable;
         }
 
+        updateProjectTable = function(collectionData) {
+            $('#proj_table').DataTable().destroy();
+            $('#proj_table').DataTable(
+                {
+                    "dom": '<"dataTables_controls"ilpf>rt<"bottom"><"clear">',
+                    "order": [[1, "asc"]],
+                    "data": collectionData,
+                    "createdRow": function (row, data, dataIndex) {
+                        $(row).data('projectid', data[0]);
+                        $(row).attr('id', 'project_row_' + data[0]);
+                    },
+                    "columnDefs": [
+                        {className: "ckbx text_data", "targets": [0]},
+                        {className: "projects_table_num_cohort", "targets": [3]},
+                    ],
+                    "columns": [
+                        {
+                            "type": "html", "orderable": false, render: function (data) {
+                                if (window.selItems.selProjects.indexOf(data)>-1) {
+                                    return '<input type="checkbox" onclick="updateProjectSelection($(this).parent().parent())" checked>'
+                                }
+                                else{
+                                    return '<input type="checkbox" onclick="updateProjectSelection($(this).parent().parent())" >'
+                                }
+                            }
+                        },
+                        {"type": "text", "orderable": true},
+                        {"type": "num", orderable: true},
+                        {
+                            "type": "num", orderable: true, "createdCell": function (td, data, row) {
+                                $(td).attr('id', 'patient_col_' + row[0]);
+                                return;
+                            }
+                        }
+                    ]
+                }
+            );
+            //"createdCell":function(td,data,row){$(td).attr("id","patient_col_"+row[1]);}
+            $('#proj_table').children('tbody').attr('id', 'projects_table');
+        }
 
         window.updateCaseTable = function(rowsAdded, rowsRemoved, refreshAfterFilter,updateChildTables) {
 
@@ -779,12 +776,10 @@ require([
                 "order": [[2, "asc"]],
                 "createdRow":function(row,data,dataIndex){
                     $(row).attr('id','case_'+data['PatientID'])
-
                     $(row).attr('data-projectid',data['collection_id']);
                     $(row).attr('data-caseid',data['PatientID']);
                     $(row).addClass('text_head');
                     $(row).addClass('project_'+data['collection_id']);
-
                 },
                 "columnDefs":[
                     {className:"ckbx", "targets":[0]},
@@ -806,7 +801,8 @@ require([
                     },
 
                     {"type": "text", "orderable": true, data:'collection_id', render:function(data){
-                        return data;
+                        var projectNm = $('#'+data).filter('.collection_name')[0].innerText;
+                        return projectNm;
                         } },
                     {"type": "text", "orderable": true, data:'PatientID', render:function(data){
                         return data;
@@ -822,7 +818,6 @@ require([
                     var refreshAfterFilter=$('#cases_tab').data('refreshafterfilter');
                     var updateChildTables = $('#cases_tab').data('updatechildtables');
                     var checkIds = new Array();
-
                     var cols=['','collection_id','PatientID','StudyInstanceUID','SeriesInstanceUID'];
                     ssCallNeeded = true;
                     if (window.selItems.selProjects.length ===0){
@@ -846,7 +841,6 @@ require([
                         curFilterObj = JSON.parse(JSON.stringify(parseFilterObj()));
                         curFilterObj.collection_id = window.selItems.selProjects;
                         var filterStr = JSON.stringify(curFilterObj);
-
                         let url = '/tables/cases/';
                         url = encodeURI(url);
                         ndic= {'filters':filterStr, 'limit':2000}
@@ -868,7 +862,6 @@ require([
                             if (typeof(request.order[0].dir)!=='undefined'){
                                 ndic['sortdir'] = request.order[0].dir;
                             }
-
                             ndic['limit']=request.length;
                         }
 
@@ -993,8 +986,14 @@ require([
                     },
                     {"type": "num", "orderable": true, data:'StudyDescription'},
                     {"type": "num", "orderable": true, data:'unique_series'},
-                    {"type": "html", "orderable": false, data:'StudyInstanceUID', render:function(data){
-                        return '<a href="' + DICOM_STORE_PATH+data + '" target="_blank"><i class="fa fa-eye"></i>'
+                    {"type": "html", "orderable": false, data:'StudyInstanceUID', render:function(data,type,row){
+                        var modality = row['Modality'];
+                        if ((modality[0]==='SM') || (modality==='SM')){
+                            return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank"><i class="fa fa-eye"></i>'
+                        }
+                        else {
+                            return '<a href="' + DICOM_STORE_PATH + data + '" target="_blank"><i class="fa fa-eye"></i>'
+                        }
                     }
 
                     },
@@ -1158,13 +1157,16 @@ require([
                             }
                        }
                     },
-                    {"type": "html", "orderable": false, data:'StudyInstanceUID', render:function(data,type, row){
+                    {"type": "html", "orderable": false, data:'SeriesInstanceUID', render:function(data,type, row){
 
-                          if ( (row['Modality']==='SEG') || (row['Modality']==='RTSTRUCT') || (row['Modality']==='RTPLAN') || (row['Modality']==='RWV')){
+                          if ( (row['Modality']==='SEG' || row['Modality'][0]==='SEG') || (row['Modality']==='RTSTRUCT' || row['Modality'][0]==='RTSTRUCT') || (row['Modality']==='RTPLAN' || row['Modality'][0]==='RTPLAN') || (row['Modality']==='RWV' || row['Modality'][0]==='RWV')){
                                  return '<a href="/" onclick="return false;"><i class="fa fa-eye-slash no-viewer-tooltip"></i>';
                             }
+                          else if ( (row['Modality']==='SM') ){
+                              return '<a href="' + SLIM_VIEWER_PATH  + data + '" target="_blank"><i class="fa fa-eye"></i>'
+                          }
                           else {
-                              return '<a href="' + DICOM_STORE_PATH + data + '" target="_blank"><i class="fa fa-eye"></i>'
+                              return '<a href="' + DICOM_STORE_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' + data + '" target="_blank"><i class="fa fa-eye"></i>'
                           }
                         }
 
@@ -2198,6 +2200,22 @@ require([
         };
 
         var filterItemBindings = function (filterId) {
+            /*
+            In progress - text input to search for attribute values
+            $('#' + filterId).find('.text-filter').on("keyup",function(){
+                var value = $(this).val().toLowerCase();
+                collections=$(this).parent().parent().children('ul').children('.list-group_item').each(function() {
+                    list_val=$(this).children('.list-group-item__heading').data('filter-display-val');
+                    if (list_val.indexOf(value)>-1){
+                       $(this).removeClass('filtText');
+                    }
+                    else{
+                        $(this).addClass('filtText');
+                    }
+                });
+
+            }) */
+
             $('#' + filterId).find('input:checkbox').not('#hide-zeros').on('click', function () {
                 handleFilterSelectionUpdate(this, true, true);
             });
@@ -2637,13 +2655,18 @@ require([
             //var numCol = $('#projects_table').children('tr').length
             //$('#projects_panel').find('.total-file-count')[0].innerHTML = numCol.toString();
             //$('#projects_panel').find('.goto-page-number').data('max','3');
+          updateProjectTable(window.collectionData);
+           /*
+
+
             $('#proj_table').DataTable(
                 {
                     "dom":'<"dataTables_controls"ilpf>rt<"bottom"><"clear">',
                     "order": [[ 1, "asc" ]],
                     "data": window.collectionData,
                     "createdRow":function(row,data,dataIndex){
-                        $(row).data('projectid',data[1])
+                        $(row).data('projectid',data[1]);
+                        $(row).attr('id','project_row_'+data[1]);
                     },
                     "columnDefs":[
                     {className:"ckbx text_data", "targets":[0]},
@@ -2653,12 +2676,17 @@ require([
                         {"type": "html", "orderable": false, render:function(){return '<input type="checkbox" onclick="updateProjectSelection($(this).parent().parent())">'}},
                        {"type": "text", "orderable": true},
                        {"type":"num", orderable:true},
-                       {"type":"num", orderable:true}
+                       {"type":"num", orderable:true, "createdCell":function(td,data,row)
+                        {
+                            $(td).attr('id','patient_col_'+row[1]);
+                            return;
+                       }}
                   ]
                }
             );
             //"createdCell":function(td,data,row){$(td).attr("id","patient_col_"+row[1]);}
             $('#proj_table').children('tbody').attr('id','projects_table');
+            */
 
              $('.clear-filters').on('click', function () {
                    $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('checked',false);
