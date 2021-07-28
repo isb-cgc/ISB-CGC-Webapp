@@ -357,6 +357,7 @@ def populate_tables(request):
         curInd = 0
         idsFilt=[]
 
+        #check that any selected ids are still valid after the filter is updated. ids that are not longer valid are then deselected on the front end
         if len(checkIds)>0:
             selFilters=copy.deepcopy(filters)
             selFilters[tableIndex]=checkIds
