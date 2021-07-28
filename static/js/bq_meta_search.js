@@ -475,11 +475,16 @@ require([
                     this_join_data['tableId'] = formatFullId(row_data['tableReference'], false);
                     $(this).data(this_join_data);
                 });
+
+                $('.joined-table-link').on('click', function() {
+                   console.log("WANT TO open a new table tab");
+                });
+
                 $('.useful-join-view-btn').on('click', function() {
                     let join_data = $(this).data();
                     let tables = "";
                     join_data['tables'].forEach(function(value, i) {
-                        tables += value;
+                        tables += ('<a class="joined-table-link">' + value + '</a>');
                         if (i !== join_data['tables'].length - 1) {
                             tables += "<br>";
                         }
@@ -493,18 +498,26 @@ require([
                         '<h5>Joined Tables</h5><p>' + tables + '</p><br>' +
                         '<h5>SQL Statement</h5>' +
                         '<p>' + query_comment + '</p>' +
-                        '<p><i>' + sql_query + '</i></p>' +
-                        '<button class="copy-btn" title="Copy to Clipboard">' +
-                        '<i class="fa fa-clipboard" aria-hidden="true"></i>COPY</button><br><br>' +
+                        '<p class="query-body"><i>' + sql_query + '</i></p>' +
+                        '<button class="copy-query-btn" title="Copy to Clipboard">' +
+                        '<i class="fa fa-clipboard" aria-hidden="true"></i>'+ 'COPY' + '</button>'+ '<br><br>' +
                         '<h5>Joined Condition</h5><p>' + join_data['condition'] + '</p>';
 
-
                     $('#useful-join-view-modal').find('.modal-body').html(dialog_content);
+
+                    $('.joined-table-link').on('click', function() {
+                       console.log("222 WANT TO open a new table tab");
+                    });
+
+                    $(".copy-query-btn").on('click', function () {
+                        copy_to_clipboard($(this).siblings('p.query-body')[0]);
+                    });
 
                     let subtitle_content = join_data['tableName'] + ' [' + join_data['tableId'] + ']';
                     $('#useful-join-view-modal').find('.modal-sub-title').html(subtitle_content);
                     $('#useful-join-view-modal').modal('show');
                 });
+
                 set_gcp_open_btn($(tr).next('tr').find('.detail-table'));
                 tr.addClass('useful-join-shown');
                 tr.removeClass('preview-shown');
@@ -580,7 +593,7 @@ require([
         d.forEach(join_info => {
             let tables = "";
             join_info['tables'].forEach(function(value, i) {
-                tables += value;
+                tables += ('<a class="joined-table-link">' + value + '</a>');
                 if (i !== join_info['tables'].length - 1) {
                     tables += "<br>";
                 }
