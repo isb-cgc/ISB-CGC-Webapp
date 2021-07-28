@@ -94,6 +94,13 @@ commands:
           command: |
             sudo -E /bin/bash ./shell/run_tests.sh
 
+  run_lint:
+    steps:
+      - run:
+          name: "Run Tests"
+          command: |
+            sudo -E /bin/bash ./shell/run_lint.sh
+
 jobs:
   build_job:
     environment:
@@ -136,6 +143,7 @@ jobs:
           command: |
             sudo -E /bin/bash ./shell/gcloud-pull-staging-files.sh
             sudo -E /bin/bash ./shell/database-setup.sh
+      - run_lint
       - save_cache:
           key: isb-cgc-webapp-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
           paths:
