@@ -97,7 +97,7 @@ commands:
   run_lint:
     steps:
       - run:
-          name: "Run Tests"
+          name: "Run Pylint"
           command: |
             sudo -E /bin/bash ./shell/run_lint.sh
 

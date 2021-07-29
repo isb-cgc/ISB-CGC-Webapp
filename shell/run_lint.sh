@@ -19,3 +19,5 @@ python3 -m pylint adminrestrict analysis bq_data_access genes isb_cgc offline sc
 echo "::::::::::::::::::::: Running Pylint on ISB-CGC-Common modules :::::::::::::::::::::"
 
 python3 -m pylint accounts cohorts solr_helpers sharing projects metadata_utils dataset_utils
+
+exit 0
