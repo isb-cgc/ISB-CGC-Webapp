@@ -813,6 +813,13 @@ require([
                 "processing": true,
                 "serverSide": true,
                 "ajax": function (request, callback, settings) {
+                    var dataRowStrt=request.start;
+                    var dataRowLength=request.length;
+                    var dataRowEnd=request.start+request.length;
+                    var backendReqLength=500;
+                    var backendStrt=Math.max(0,request.start-Math.floor(backendReqLength*0.5));
+
+
                     $('.spinner').show();
                     var rowsRemoved=$('#cases_tab').data('rowsremoved');
                     var refreshAfterFilter=$('#cases_tab').data('refreshafterfilter');
@@ -830,6 +837,8 @@ require([
                         $('.spinner').hide();
                         callback({"data":[], "recordsTotal":"0", "recordsFiltered":"0"})
                     }
+
+                    //ssCallNeeded = checkClientCache(request,'cases');
 
                     if (ssCallNeeded) {
                         if (refreshAfterFilter){
@@ -850,10 +859,10 @@ require([
                                ndic['csrfmiddlewaretoken'] = window.csr
                         }
                         if (typeof(request.start)!=='undefined'){
-                            ndic['offset']=request.start;
+                            ndic['offset']=backendStrt;
                         }
                         if (typeof(request.length)!=='undefined'){
-                            ndic['limit']=request.length;
+                            ndic['limit']=backendReqLength;
                         }
                         if (typeof(request.order)!=='undefined'){
                             if (typeof(request.order[0].column)!=='undefined'){
@@ -872,7 +881,15 @@ require([
                             type: 'post',
                             contentType: 'application/x-www-form-urlencoded',
                             success: function (data) {
-                                 dataset=data['res'].slice(0,10);
+                                 dataset=data['res'].slice(request.start-backendStrt,request.offset);
+                                 window.casesCache = new Object();
+                                 window.casesCache.request = request;
+                                 window.casesCache.backendStrt=backendStrt;
+                                 window.casesCache.backendReqLength=backendReqLength;
+                                 window.casesCache.cacheLength = data['res'].length;
+                                 window.casesCache.recordsTotal = data['cnt'];
+
+
                                  for (set in dataset) {
                                      set['ids'] = {'PatientID': set['PatientID'], 'collection_id': set['collection_id']}
                                  }
@@ -921,6 +938,10 @@ require([
 
                             }
                         });
+                    }
+
+                    else{
+
                     }
 
                 }
