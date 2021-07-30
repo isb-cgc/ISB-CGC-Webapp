@@ -1221,7 +1221,7 @@ require([
                         var patientId = curData.PatientID;
                         var studyId = curData.StudyInstanceUID;
                         var ppStudyId = pretty_print_id(studyId);
-                        var fetchUrl = ((!isSeries && curData.Modality[0] === "SM" || curData.Modality === "SM") ? SLIM_VIEWER_PATH : DICOM_STORE_PATH) + studyId;
+                        var fetchUrl = ((curData.Modality[0] === "SM" || curData.Modality === "SM") ? SLIM_VIEWER_PATH : DICOM_STORE_PATH) + studyId;
                         var hrefTxt = ppStudyId + '</a>';
                         var pclass = 'project_' + projectId;
                         var cclass = 'case_' + patientId;
@@ -1231,18 +1231,23 @@ require([
                             var ppSeriesId = pretty_print_id(seriesId);
                             var seriesNumber = String(curData.SeriesNumber);
                             var seriesDescription = '';
-                            if (curData.SeriesDescription.length===1){
+
+                            if (!(curData.hasOwnProperty('SeriesDescription')) || (curData.SeriesDescription.length===0)){
+                                seriesDescription = '';
+                            }
+                            else if (curData.SeriesDescription.length===1){
                                 seriesDescription = curData.SeriesDescription[0];
                             }
-                            if (curData.SeriesDescription.length>1){
+                            else if (curData.SeriesDescription.length>1){
                                 seriesDescription = curData.SeriesDescription[0]+',...';
                             }
 
-                            var bodyPartExamined = curData.BodyPartExamined;
+                            var bodyPartExamined = curData.hasOwnProperty('BodyPartExamined')? curData.BodyPartExamined  : '';
                             var modality = curData.Modality;
                             var rowId = 'series_' + seriesId;
                             var studyClass = 'study_' + studyId;
-                            var fetchUrlSeries = fetchUrl + '?SeriesInstanceUID=' + seriesId;
+
+                            var fetchUrlSeries = (curData.Modality[0] === "SM" || curData.Modality === "SM") ?  fetchUrl + '/series/' + seriesId : fetchUrl + '?SeriesInstanceUID=' + seriesId;
                             var hrefSeriesTxt = ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
                             var seriesTxt =     ppSeriesId + '<span class="tooltiptext_ex">' + seriesId + '</span>';
                             newHtml = '<tr id="' + rowId + '" data-projectid="'+projectId+'" data-caseid="'+patientId+'" class="' + pclass + ' ' + cclass + ' ' + studyClass + ' text_head">' +
@@ -1250,7 +1255,7 @@ require([
                                 '<td class="series-number">' + seriesNumber + '</td>' +
                                 '<td class="col1 modality">' + modality + '</td>' +
                                 '<td class="col1 body-part-examined">' + bodyPartExamined + '</td>'
-                            if (curData.SeriesDescription.length>1){
+                            if (curData.hasOwnProperty('SeriesDescription') && curData.SeriesDescription.length>1){
                                 newHtml+='<td class="series-description description-tip" data-description="'+curData.SeriesDescription+'">' + seriesDescription;
                                 newHtml+= '</td>';
                             }
@@ -1280,7 +1285,7 @@ require([
                          }
 
                         else{
-                            var studyDescription = curData.StudyDescription;
+                            var studyDescription = curData.hasOwnProperty('StudyDescription') ? curData.StudyDescription : '';
                             var rowId = 'study_' + studyId;
                             var numSeries=0;
                             if (seriesDic.hasOwnProperty(studyId)){
