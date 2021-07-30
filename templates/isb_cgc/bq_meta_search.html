@@ -95,8 +95,8 @@
                         <input type="text" class="form-control bq-filter" data-column-name="friendlyName">
                     </div>
                     <div>
-                        <label>Id</label>
-                        <input type="text" class="form-control bq-filter" data-column-name="tableId">
+                        <label>Full ID</label>
+                        <input type="text" id="search-by-full-id" class="form-control bq-filter" data-column-name="FullId">
                     </div>
                     <div>
                         <label>Program</label>
@@ -326,6 +326,7 @@
     </div>
     <script type="text/javascript">
         var gcp_modal_disabled = ('{{ user.is_authenticated}}' === 'True');
+        var selected_table_full_id = '{{ selected_table_full_id|safe }}';
         {#var user_is_authenticated = ('{{ user.is_authenticated}}' === 'True');#}
         {#var user_is_ca_authorized = false;#}
     </script>

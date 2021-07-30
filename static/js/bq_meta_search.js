@@ -357,6 +357,8 @@ require([
             order: [[1, 'asc']],
             initComplete: function (settings, json) {
                 $('.spinner').remove();
+                $('#search-by-full-id')[0].value = selected_table_full_id;
+                columnSearch('FullId', selected_table_full_id);
                 reset_table_style(settings);
             },
             drawCallback: function (settings) {
@@ -476,13 +478,14 @@ require([
                 });
 
                 $('.joined-table-link').on('click', function() {
-                    window.open(window.location.href + '/someID/', '_blank');
+                    window.open('/bq_meta_search/' + $(this)[0].innerText, '_blank');
                 });
 
                 $('.useful-join-view-btn').on('click', function() {
                     let join_data = $(this).data();
                     let tables = "";
                     join_data['tables'].forEach(function(value, i) {
+                        value = value.replace(':', '.');
                         tables += ('<a class="joined-table-link">' + value + '</a>');
                         if (i !== join_data['tables'].length - 1) {
                             tables += "<br>";
@@ -505,7 +508,7 @@ require([
                     $('#useful-join-view-modal').find('.modal-body').html(dialog_content);
 
                     $('.joined-table-link').on('click', function() {
-                       console.log("222 WANT TO open a new table tab");
+                        window.open('/bq_meta_search/' + $(this)[0].innerText, '_blank');
                     });
 
                     $(".copy-query-btn").on('click', function () {
@@ -592,6 +595,7 @@ require([
         d.forEach(join_info => {
             let tables = "";
             join_info['tables'].forEach(function(value, i) {
+                value = value.replace(':', '.');
                 tables += ('<a class="joined-table-link">' + value + '</a>');
                 if (i !== join_info['tables'].length - 1) {
                     tables += "<br>";
@@ -854,5 +858,4 @@ require([
 
         });
     };
-
 });
