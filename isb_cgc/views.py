@@ -670,14 +670,16 @@ def contact_us(request):
     return render(request, 'isb_cgc/contact_us.html')
 
 
-def bq_meta_search(request):
+def bq_meta_search(request, table_id=""):
     bq_filter_file_name = 'bq_meta_filters.json'
     bq_filter_file_path = BQ_ECOSYS_BUCKET + bq_filter_file_name
     bq_filters = requests.get(bq_filter_file_path).json()
+    bq_filters['select-table'] = table_id
     return render(request, 'isb_cgc/bq_meta_search.html', bq_filters)
 
 
 def bq_meta_data(request):
+    # get ID with that table
     bq_meta_data_file_name = 'bq_meta_data.json'
     bq_meta_data_file_path = BQ_ECOSYS_BUCKET + bq_meta_data_file_name
     bq_meta_data = requests.get(bq_meta_data_file_path).json()
@@ -692,7 +694,6 @@ def bq_meta_data(request):
                 useful_joins = join['joins']
                 break
         bq_meta_data_row['usefulJoins'] = useful_joins
-
     return JsonResponse(bq_meta_data, safe=False)
 
 def programmatic_access_page(request):

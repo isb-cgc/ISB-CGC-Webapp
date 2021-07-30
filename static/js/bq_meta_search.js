@@ -203,7 +203,6 @@ require([
                     'className': 'label-filter colvis-toggle',
                     'visible': false
                 },
-
                 {
                     'name': 'status',
                     'data': function (data) {
@@ -477,7 +476,7 @@ require([
                 });
 
                 $('.joined-table-link').on('click', function() {
-                   console.log("WANT TO open a new table tab");
+                    window.open(window.location.href + '/someID/', '_blank');
                 });
 
                 $('.useful-join-view-btn').on('click', function() {
