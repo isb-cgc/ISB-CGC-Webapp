@@ -492,7 +492,7 @@ require([
                         }
                     });
                     let [query_comment, ...rest] = join_data['sql'].split('\n');
-                    query_comment = query_comment.replace('#', '');
+                    query_comment = query_comment;
                     let sql_query = rest.join('<br>');
                     let dialog_content =
                         '<h5>Join Subject</h5><p>' + join_data['title'] + '</p><br>' +
@@ -515,7 +515,7 @@ require([
                         copy_to_clipboard($(this).siblings('p.query-body')[0]);
                     });
 
-                    let subtitle_content = join_data['tableName'] + ' [' + join_data['tableId'] + ']';
+                    let subtitle_content = join_data['tableName'] + '<br>' + join_data['tableId'];
                     $('#useful-join-view-modal').find('.modal-sub-title').html(subtitle_content);
                     $('#useful-join-view-modal').modal('show');
                 });
