@@ -619,8 +619,8 @@ def path_report(request, report_file=None):
             messages.error(
                 "Error while attempting to display this pathology report: a report file name was not provided.")
             return redirect(reverse('cohort_list'))
-
-        response = requests.get("https://nci-crdc.datacommons.io/user/data/download/{}?protocol=gs".format(report_file))
+        uri = "https://nci-crdc.datacommons.io/user/data/download/{}?protocol=gs".format(report_file)
+        response = requests.get(uri)
 
         if response.status_code != 200:
             logger.warning("[WARNING] From IndexD: {}".format(response.text))
@@ -634,6 +634,7 @@ def path_report(request, report_file=None):
     except Exception as e:
         logger.error("[ERROR] While trying to load Pathology report:")
         logger.exception(e)
+        logger.error("Attempted URI: {}".format(uri))
         return render(request, '500.html')
 
     return render(request, template, context)

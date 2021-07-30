@@ -309,21 +309,23 @@ def copy_attrs(from_data_sources, to_data_sources):
     bulk_add = []
 
     for fds in from_sources:
-        if to_sources_attrs['ids']:
-            from_source_attrs = fds.attribute_set.exclude(id__in=to_sources_attrs['ids'])
-        else:
-            from_source_attrs = fds.attribute_set.all()
+        from_source_attrs = fds.attribute_set.exclude(id__in=to_sources_attrs['ids']) if to_sources_attrs['ids'] else fds.attribute_set.all()
         logger.info("Copying {} attributes from {} to: {}.".format(
             len(from_source_attrs.values_list('name',flat=True)),
-            fds.name, "; ".join(to_data_sources),
-
+            fds.name, "; ".join(to_data_sources)
         ))
 
         for attr in from_source_attrs:
             for ds in to_sources:
                 bulk_add.append(Attribute.data_sources.through(attribute_id=attr.id, datasource_id=ds.id))
 
-    Attribute.data_sources.through.objects.bulk_create(bulk_add)
+    if len(bulk_add):
+        try:
+            Attribute.data_sources.through.objects.bulk_create(bulk_add)
+        except Exception as e:
+            logger.error("[ERROR] While trying to copy attributes from {} to {}:".format(fds.name, "; ".join(to_data_sources)))
+            logger.error("Attributes: {}".format(",".join(from_source_attrs.values_list('name',flat=True))))
+            logger.exception(e)
 
 
 def main(config, make_attr=False):
