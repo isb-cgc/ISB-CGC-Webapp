@@ -491,15 +491,14 @@ require([
                             tables += "<br>";
                         }
                     });
-                    let [query_comment, ...rest] = join_data['sql'].split('\n');
-                    query_comment = query_comment;
-                    let sql_query = rest.join('<br>');
+                    // let [query_comment, ...rest] = join_data['sql'].split('\n');
+                    // let sql_query = rest.join('<br>');
+                    let sql_query = join_data['sql'].replace('\n', '\n<br>');
                     let dialog_content =
                         '<h5>Join Subject</h5><p>' + join_data['title'] + '</p><br>' +
                         '<h5>Description</h5><p>' + join_data['description'] + '</p><br>' +
                         '<h5>Joined Tables</h5><p>' + tables + '</p><br>' +
                         '<h5>SQL Statement</h5>' +
-                        '<p>' + query_comment + '</p>' +
                         '<p class="query-body"><i>' + sql_query + '</i></p>' +
                         '<button class="copy-query-btn" title="Copy to Clipboard">' +
                         '<i class="fa fa-clipboard" aria-hidden="true"></i>'+ 'COPY' + '</button>'+ '<br><br>' +
@@ -512,11 +511,12 @@ require([
                     });
 
                     $(".copy-query-btn").on('click', function () {
-                        copy_to_clipboard($(this).siblings('p.query-body')[0]);
+                        let query = $(this).siblings('p.query-body')[0];
+                        copy_to_clipboard($(this).siblings('p.query-body'));
                     });
 
-                    let subtitle_content = join_data['tableName'] + '<br>' + join_data['tableId'];
-                    $('#useful-join-view-modal').find('.modal-sub-title').html(subtitle_content);
+                    $('#useful-join-view-modal').find('.modal-sub-title').html(join_data['tableName']);
+                    $('#useful-join-view-modal').find('.modal-sub-sub-title').html(join_data['tableId']);
                     $('#useful-join-view-modal').modal('show');
                 });
 
@@ -659,9 +659,9 @@ require([
     };
 
     var copy_to_clipboard = function(el) {
-        var $temp = $("<input>");
+        var $temp = $("<textarea>");
         $("body").append($temp);
-        $temp.val( '`' + $(el).text() + '`' ).select();
+        $temp.val($(el).text()).select();
         document.execCommand("copy");
         $temp.remove();
     };
