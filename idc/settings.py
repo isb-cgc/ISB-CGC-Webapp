@@ -528,10 +528,9 @@ if not IS_DEV:
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": "redis://{REDIS_AUTH}@{REDIS_IP}:{REDIS_PORT}/1".format(
+            "LOCATION": "redis://{REDIS_IP}:{REDIS_PORT}/1".format(
                 REDIS_IP=CACHE_IP,
-                REDIS_PORT=CACHE_PORT,
-                REDIS_AUTH=REDIS_AUTH
+                REDIS_PORT=CACHE_PORT
             ),
             "OPTIONS": {
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
