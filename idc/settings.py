@@ -528,7 +528,7 @@ if not IS_DEV:
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": "redis://{REDIS_IP}:{REDIS_PORT}/1".format(
+            "LOCATION": "redis://{REDIS_IP}:{REDIS_PORT}/0".format(
                 REDIS_IP=CACHE_IP,
                 REDIS_PORT=CACHE_PORT
             ),
