@@ -528,6 +528,16 @@ if not IS_DEV:
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": "redis://{REDIS_IP}:{REDIS_PORT}/0".format(
+                REDIS_IP=CACHE_IP,
+                REDIS_PORT=CACHE_PORT
+            ),
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            }
+        },
+        "axes": {
+            "BACKEND": "django_redis.cache.RedisCache",
             "LOCATION": "redis://{REDIS_IP}:{REDIS_PORT}/1".format(
                 REDIS_IP=CACHE_IP,
                 REDIS_PORT=CACHE_PORT
@@ -550,6 +560,7 @@ else:
 #########################################
 
 AXES_HANDLER = 'axes.handlers.cache.AxesCacheHandler' if not IS_DEV else 'axes.handlers.dummy.AxesDummyHandler'
+AXES_CACHE = 'axes'
 
 #########################################
 #   MailGun Email Settings for requests #
