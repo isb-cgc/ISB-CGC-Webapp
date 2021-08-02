@@ -205,7 +205,7 @@ require([
     tippy('.explainer', {
         interactive: true,
         allowHTML:true,
-        content: 'As some attributes have non mutually exclusive values the charts may contain non zero counts for these values even when they are not selected in the left hand panel. See <a href="https://learn.canceridc.dev/portal/data-exploration-and-cohorts#count-clarification-of-categorization" target="_blank">here</a> for a detailed explanation.'
+        content: 'As some attributes have non mutually exclusive values the charts may contain non zero counts for these values even when they are not selected in the left hand panel. See <a href="https://learn.canceridc.dev/portal/data-exploration-and-cohorts/exploring-imaging-data#understanding-counts-in-the-search-results" target="_blank">here</a> for a detailed explanation.'
         //interactive:true
 
     });
