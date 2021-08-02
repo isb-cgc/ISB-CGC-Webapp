@@ -47,7 +47,11 @@
                                          </a>
                                      </div>
                                      <div id="Program" class="collapse filter-panel collection-list">
-                                     <p><input id="hide-zeros" class="hide-zeros" type="checkbox" value="hide-zeros" onchange="hideColl(this)"> Hide collections with 0 cases</p>
+
+                                     <p>
+                                         <!-- In progress text input to search for collections
+                                         <input class="text-filter" type="text" placeholder="Search.."><br> -->
+                                         <input id="hide-zeros" class="hide-zeros" type="checkbox" value="hide-zeros" onchange="hideColl(this)"> Hide collections with 0 cases</p>
                                          {% with programs.items|length|add:"-5" as more %}
                                          <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                          <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
