@@ -535,16 +535,6 @@ if not IS_DEV:
             "OPTIONS": {
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
             }
-        },
-        "axes": {
-            "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": "redis://{REDIS_IP}:{REDIS_PORT}/1".format(
-                REDIS_IP=CACHE_IP,
-                REDIS_PORT=CACHE_PORT
-            ),
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            }
         }
     }
 else:
