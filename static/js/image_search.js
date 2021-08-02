@@ -813,9 +813,7 @@ require([
                 "processing": true,
                 "serverSide": true,
                 "ajax": function (request, callback, settings) {
-                    var dataRowStrt=request.start;
-                    var dataRowLength=request.length;
-                    var dataRowEnd=request.start+request.length;
+
                     var backendReqLength=500;
                     var backendStrt=Math.max(0,request.start-Math.floor(backendReqLength*0.5));
 
@@ -888,7 +886,7 @@ require([
                                  window.casesCache.backendReqLength=backendReqLength;
                                  window.casesCache.cacheLength = data['res'].length;
                                  window.casesCache.recordsTotal = data['cnt'];
-
+                                 window.casesCache.data = data['res'];
 
                                  for (set in dataset) {
                                      set['ids'] = {'PatientID': set['PatientID'], 'collection_id': set['collection_id']}
@@ -1024,6 +1022,9 @@ require([
                 "serverSide": true,
                 "ajax": function (request, callback, settings, refreshAfterFilter) {
                     $('.spinner').show();
+
+                    var backendReqLength=500;
+                    var backendStrt=Math.max(0,request.start-Math.floor(backendReqLength*0.5));
 
                     var rowsRemoved=$('#studies_tab').data('rowsremoved');
                     var refreshAfterFilter=$('#studies_tab').data('refreshafterfilter');
@@ -1198,6 +1199,10 @@ require([
                 "serverSide": true,
                 "ajax": function (request, callback, settings, refreshAfterFilter) {
                     $('.spinner').show();
+
+                    var backendReqLength=500;
+                    var backendStrt=Math.max(0,request.start-Math.floor(backendReqLength*0.5));
+
                     var rowsRemoved=$('#series_tab').data('rowsremoved');
                     var refreshAfterFilter =$('#series_tab').data('refreshafterfilter');
                     var cols=['StudyInstanceUID','SeriesNumber','Modality','BodyPartExamined','SeriesDescription'];
