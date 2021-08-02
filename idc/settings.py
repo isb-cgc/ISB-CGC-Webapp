@@ -676,7 +676,7 @@ if DEBUG and DEBUG_TOOLBAR:
 # on failed user authentication attempts from login views.
 # If you do not want Axes to override the authentication response
 # you can skip installing the middleware and use your own views.
-MIDDLEWARE.append('axes.middleware.AxesMiddleware',)
+# MIDDLEWARE.append('axes.middleware.AxesMiddleware',)
 
 ##################
 # OHIF_SETTINGS
