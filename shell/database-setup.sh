@@ -89,3 +89,5 @@ mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NA
 # Setting up API token
 python3 ${HOMEROOT}/scripts/create_api_token.py
 
+# Check system config
+python3 ${HOMEROOT}/manage.py check
