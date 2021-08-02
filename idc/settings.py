@@ -550,7 +550,6 @@ else:
 #########################################
 
 AXES_HANDLER = 'axes.handlers.cache.AxesCacheHandler' if not IS_DEV else 'axes.handlers.dummy.AxesDummyHandler'
-AXES_CACHE = 'axes'
 
 #########################################
 #   MailGun Email Settings for requests #
