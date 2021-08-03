@@ -550,6 +550,11 @@ else:
 #########################################
 
 AXES_HANDLER = 'axes.handlers.cache.AxesCacheHandler' if not IS_DEV else 'axes.handlers.dummy.AxesDummyHandler'
+AXES_META_PRECEDENCE_ORDER = [
+    'HTTP_X_FORWARDED_FOR',
+    'REMOTE_ADDR',
+]
+AXES_PROXY_COUNT=1
 
 #########################################
 #   MailGun Email Settings for requests #
