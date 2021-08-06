@@ -39,13 +39,11 @@ require.config({
 require([
     'jquery',
     'datatables.net',
-    'base',
     'jqueryui',
     'bootstrap',
-    'tablesorter'
+    'tablesorter',
+    'base'
 ], function($,base) {
-
-
 
     var cohort_list_table = $('#cohort-table').DataTable({
         "dom": '<"dataTables_controls"ilpf>rt<"bottom"><"clear">',
@@ -138,7 +136,6 @@ require([
             canDelOrShare && $('.owner-only').removeAttr('disabled') &&$('.page-action-group .btn:not(.set-ops)').removeAttr('title');
             !canDelOrShare && $('.owner-only').prop('disabled', 'disabled') && $('.page-action-group .btn.owner-only').attr('title', "You don't have permission to share or delete some of the selected cohorts.");
         }
-
 
         $('.cohort-table tr:not(:first) input[type="checkbox"]:checked').length == 0 && $('#cohort-apply-to-workbook .btn').prop('disabled', 'disabled');
         $('.cohort-table tr:not(:first) input[type="checkbox"]:checked').length > 0 && $('#cohort-apply-to-workbook .btn').removeAttr('disabled');
@@ -501,18 +498,17 @@ require([
 
 
 
-    window.compareVer = function(selbutton){
-        cohort_row = $(selbutton).closest('tr');
-        var id = $(cohort_row).find('.id-col').text().trim();
-        var case_col = $(cohort_row).find('.case-col').text().trim();
-        var study_col = $(cohort_row).find('.study-col').text().trim();
-        var series_col = $(cohort_row).find('.series-col').text().trim();
-        var totals = JSON.stringify(["PatientID","StudyInstanceUID","SeriesInstanceUID"]);
+    $('.compare-version').on('click', function(){
+        let cohort_row = $(this).closest('tr');
+        let id = $(cohort_row).find('.id-col').text().trim();
+        let case_col = $(cohort_row).find('.case-col').text().trim();
+        let study_col = $(cohort_row).find('.study-col').text().trim();
+        let series_col = $(cohort_row).find('.series-col').text().trim();
+        let totals = JSON.stringify(["PatientID","StudyInstanceUID","SeriesInstanceUID"]);
 
        //# PatientId, StudyInstanceUID SeriesInstanceUID
         let url = '/cohorts/'+id+'/stats/?update=true'
         url = encodeURI(url);
-        var ntxt="";
         $('#version_d').find('#ui-id-1')[0].innerHTML='Comparing Versions of Cohort '+id;
         $('.spinner').show();
         $.ajax({
@@ -540,11 +536,11 @@ require([
                $('.spinner').hide();
             },
             error: function () {
-                    $('.spinner').hide();
-                    console.log("problem getting data");
+                $('.spinner').hide();
+                console.log("problem getting data");
             }
         });
-    }
+    });
 
     $(document).ready(function () {
         $('#version_d').hide();
