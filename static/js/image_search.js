@@ -1426,6 +1426,7 @@ require([
                 }
             }
             updateFilterSelections('program_set', {'unfilt':reformDic});
+            updateColl();
         }
         var updateCollectionTotals_old = function (listId, progDic) {
             //dic.val dic.projects
