@@ -1280,7 +1280,7 @@ require([
 
 
                             if ( viewAble ){
-                                newHtml += '<td class="ohif open-viewer"><a href="' + fetchUrlSeries + '" target="_blank"><i class="fa fa-eye"></i></td></tr>';
+                                newHtml += '<td class="ohif open-viewer"><a href="' + fetchUrlSeries + '" target="_blank" rel="noopener noreferrer"><i class="fa fa-eye"></i></td></tr>';
                             }
 
                             else {
@@ -1302,7 +1302,7 @@ require([
                                 '<td class="col2 study-id study-id-col" data-study-id="'+studyId+'">' + ppStudyId + '</td>' +
                                 '<td class="col1 study-description">' + studyDescription + '</td>' +
                                 '<td class="col1 numrows">' + numSeries.toString() + '</td>'+
-                                '<td class="ohif open-viewer"><a  href="' + fetchUrl + '" target="_blank"><i class="fa fa-eye"></i></a></td></tr>'
+                                '<td class="ohif open-viewer"><a  href="' + fetchUrl + '" target="_blank" rel="noopener noreferrer"><i class="fa fa-eye"></i></a></td></tr>'
 
                         }
 
