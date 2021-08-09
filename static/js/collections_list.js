@@ -36,7 +36,7 @@ require(['jquery', 'datatables.net','jqueryui', 'bootstrap', 'base'],
                 $(this).prop('title', 'Click to hide collection description.');
                 var desc = collection_descs[$(this).data('collex-id')];
                 var doi = $(this).data('doi');
-                (row.child() && row.child().length) ? row.child.show() : row.child($(`<tr><td></td><td colspan="7"><p><b>DOI: </b><a href="https://doi.org/${doi}" target="_blank">${doi}</a></p>${desc}</td></tr>`)).show();
+                (row.child() && row.child().length) ? row.child.show() : row.child($(`<tr><td></td><td colspan="7"><p><b>DOI: </b><a href="https://doi.org/${doi}" target="_blank" rel="noopener noreferrer">${doi}</a></p>${desc}</td></tr>`)).show();
                 tr.addClass('shown');
             }
         });
