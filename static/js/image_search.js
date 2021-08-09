@@ -96,7 +96,7 @@ require([
         $('#rh_panel').addClass('col-md-9');
     };
 
-        window.setSlider = function (slideDiv, reset, strt, end, isInt, updateNow) {
+    window.setSlider = function (slideDiv, reset, strt, end, isInt, updateNow) {
              parStr=$('#'+slideDiv).data("attr-par");
              if (parStr.startsWith('tcga_clinical') && !(reset)){
                 checkTcga();
@@ -178,6 +178,11 @@ require([
                 updateFacetsData(true);
             }
         };
+
+    //window.filterCollectionByText() = function(){
+      //  collList = $('.collection')
+
+   // };
 
 // Show more/less links on categories with >6 fiilters
 
@@ -2240,13 +2245,35 @@ require([
             }
         }
 
-        var updateFilters = function (filterCat, dic, dataFetched) {
+        window.updateFilters = function (filterCat, dic, dataFetched) {
+            var numAttrAvail = 0;
+            var numCnts=0;
+
+            var headerCnt = $('#'+filterCat).filter('.collection_name').siblings().filter('.case_count');
+            if (headerCnt.length>0){
+                numCnts = headerCnt[0].innerHTML;
+            }
+
             var showZeros = true;
             var searchDomain = $('#'+filterCat).closest('.search-configuration, .search-scope');
             //var isSearchConf = ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').length>0);
             if ((searchDomain.find('#hide-zeros').length>0) && (searchDomain.find('#hide-zeros').prop('checked'))){
                 showZeros = false;
             }
+            var textFilt=false;
+            var textFiltVal='';
+            if ($('#'+filterCat).children('.text-filter').length>0){
+                textFiltVal = $('#'+filterCat).children('.text-filter')[0].value;
+
+            }
+            else if ($('#'+filterCat).find('.collection_value').length>0){
+                textFiltVal = $('#collection_search')[0].value;
+            }
+
+            if (!(textFiltVal==='')){
+                textFilt=true;
+            }
+
             if (  $('#'+filterCat).hasClass('isQuant') && dataFetched){
                 if (dic.hasOwnProperty('unfilt') && dic['filt'].hasOwnProperty('min_max') ){
                     if (dic['unfilt']['min_max'].hasOwnProperty('min')) {
@@ -2297,11 +2324,23 @@ require([
                 showExtras = true;
             }
             //var allUnchecked = ((checkedFilters.length == 0) ? true : false)
-            var numAttrAvail = 0;
+
             var numNonZero = 0;
+            numCnts = 0;
             for (var i = 0; i < allFilters.length; i++) {
+
                 var elem = allFilters.get(i);
-                var val = $(elem)[0].value;
+                var val = $(elem).data('filterDisplayVal');
+                var filtByVal = false;
+
+                if ($(elem).siblings().filter('a').length===0) {
+                    if (textFilt && !(val.toLowerCase().includes(textFiltVal.toLowerCase()))) {
+                        filtByVal = true;
+                        $(elem).parent().parent().addClass('filtByVal');
+                    } else {
+                        $(elem).parent().parent().removeClass('filtByVal');
+                    }
+                }
                 var checked = $(elem).prop('checked');
                 var spans = $(elem).parent().find('span');
                 //var lbl = spans.get(0).innerHTML;
@@ -2319,16 +2358,25 @@ require([
                     $(elem).parent().parent().addClass('zeroed');
                     isZero=true;
                 }
-                if ( (cntUf>0) || checked || showZeros) {
-                      numAttrAvail++;
+                var allChildrenHidden = false;
+                if ( $(elem).parent().siblings().filter('.list-group-sub-item__body').length>0 ){
+                    if ($(elem).parent().siblings().filter('.list-group-sub-item__body').find('.checkbox').not('.notDisp').length===0){
+                        allChildrenHidden = true;
+                    }
                 }
-                if ( (numAttrAvail>5) && (!isZero || showZeros)  ) {
+                var thisAttrAvail = (( ( !isZero || showZeros) && !filtByVal  && !allChildrenHidden) || checked) ? true:false;
+                if  ( thisAttrAvail){
+                      numAttrAvail++;
+                      numCnts+=cntUf;
+                }
+
+                if ( (numAttrAvail>5) && thisAttrAvail  ) {
                     $(elem).parent().parent().addClass('extra-values');
                 } else {
                     $(elem).parent().parent().removeClass('extra-values');
                 }
 
-                if ( ( (cntUf>0) || checked || showZeros ) && (showExtras || (numAttrAvail<6)) ) {
+                if ( thisAttrAvail && (showExtras || (numAttrAvail<6)) ) {
                       $(elem).parent().parent().removeClass('notDisp');
                 } else {
                     $(elem).parent().parent().addClass('notDisp');
@@ -2377,23 +2425,41 @@ require([
                     $('#' + filterCat).children('.less-checks').hide();
                 }
             }
+            return [numAttrAvail, numCnts];
         }
 
         setAllFilterElements = function(hideEmpty,filtSet){
             //var filtSet = ["search_orig_set","segmentation","quantitative","qualitative","tcga_clinical"];
             for (var i=0;i<filtSet.length;i++) {
                 filterCats = findFilterCats(filtSet[i], false);
+                var resetParentVal=false;
+                progInd = filterCats.indexOf('Program');
+                if (progInd>-1){
+                    filterCats.splice(progInd,1);
+                    filterCats.push('Program');
+                    resetParentVal=true;
+                }
+
+
                 for (var j = 0; j < filterCats.length; j++) {
-                        updateFilters(filterCats[j],{},false);
+                        var ret = updateFilters(filterCats[j],{},false);
+                        if (resetParentVal && !(filterCats[j]==='Program')){
+                            parentVal=$('#'+filterCats[j]).siblings().filter('.list-group-item__heading').find('.case_count');
+                            parentVal[0].innerHTML=ret[1];
+                            if (ret[0]===0){
+                                $('#'+filterCats[j]).addClass('notDisp')
+                            }
+                        }
                 }
             }
             addSliders('quantitative', false, hideEmpty,'');
             addSliders('tcga_clinical',false, hideEmpty,'tcga_clinical.');
         }
 
-        window.hideColl = function(hideElem){
-            var filtSet=["program_set"]
-            setAllFilterElements(hideElem.checked,filtSet);
+        window.updateColl = function(){
+            var filtSet=['program_set']
+            var checked=$('#Program').find('.hide-zeros')[0].checked;
+            setAllFilterElements(checked,filtSet);
         }
 
         window.hideAtt = function(hideElem){
@@ -2476,7 +2542,12 @@ require([
                      hasCheckBox = true;
                      numCheckBoxes++;
                 } else {
-                    filtnm=$(filterCat).children('.list-group-sub-item__body, .list-group-item__body, .collection-list')[0].id;
+
+                    var filtnmSrc=$(filterCat).children('.list-group-sub-item__body, .list-group-item__body, .collection-list')
+                    if (filtnmSrc.length<1){
+                        filtnmSrc=$(filterCat).children().children('.collection_id')
+                    }
+                    var filtnm = filtnmSrc[0].id;
                     if  ($(filterCat).children('.list-group-item__heading').children('input:checkbox').length>0) {
                        hasCheckBox = true;
                        numCheckBoxes++;
@@ -2643,6 +2714,13 @@ require([
                 });
 
             }) */
+
+            /*$('#' + filterId).find('.text-filter').on('keypress', function() {
+                 //alert('hi');
+                 updateFilters(filterId,{},false);
+                 //handleFilterSelectionUpdate(this, false, false);
+
+            }); */
 
             $('#' + filterId).find('input:checkbox').not('#hide-zeros').on('click', function () {
                 handleFilterSelectionUpdate(this, true, true);
@@ -3115,6 +3193,7 @@ require([
             min= Math.floor(parseInt($('#age_at_diagnosis').data('data-min')));
 
             $('#age_at_diagnosis').addClass('isQuant');
+            $('#age_at_diagnosis').find('.text-filter').remove();
             $('#age_at_diagnosis').addClass('wNone');
 
             //mkSlider('age_at_diagnosis', min, max,1,true,true, 'tcga_clinical.', $('#age_at_diagnosis').data('filter-attr-id'), $('#age_at_diagnosis').data('filter-display-attr'),min,max,false);
@@ -3122,6 +3201,7 @@ require([
 
             $('#quantitative').find('.list-group-item__body').each(function() {
                 $(this).addClass('isQuant');
+                $(this).find('.text-filter').remove();
             });
             addSliders('tcga_clinical',true, false,'tcga_clinical.');
             addSliders('quantitative',true, false,'');
