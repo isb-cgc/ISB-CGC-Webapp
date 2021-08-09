@@ -56,9 +56,10 @@ urlpatterns = [
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
     url(r'^extended_login/$', views.extended_login_view, name='extended_login'),
     url(r'^privacy/', views.privacy_policy, name='privacy'),
+    url(r'^news/', views.news_page, name='news'),
     url(r'^collaborators/', views.collaborators, name='collaborators'),
     url(r'^collections/', include('idc_collections.urls')),
-    url(r'^share/', include('sharing.urls')),
+    #url(r'^share/', include('sharing.urls')),
 ]
 
 if settings.IS_DEV:

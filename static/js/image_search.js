@@ -234,7 +234,6 @@ require([
                             fStr += 'None';
                         }
 
-
                         var nstr = '<span class="filter-type">' + disp + '</span> IN (<span class="filter-att">' + fStr + '</span>)';
                         oStringA.push(nstr);
                     }

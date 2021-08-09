@@ -496,8 +496,6 @@ require([
         $(this).find('button[type="submit"]').attr('disabled','disabled');
     });
 
-
-
     $('.compare-version').on('click', function(){
         let cohort_row = $(this).closest('tr');
         let id = $(cohort_row).find('.id-col').text().trim();

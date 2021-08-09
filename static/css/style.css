@@ -4227,3 +4227,7 @@ ul.errorlist {
 .paginate_button {
   margin-right: 5px;
 }
+
+d-topics-list iframe {
+  width: 800px !important;
+}

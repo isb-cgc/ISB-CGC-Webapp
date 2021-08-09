@@ -51,6 +51,12 @@
                             <i class="fa fa-external-link external-link-icon" aria-hidden="true"></i>
                         </a>
                     </li>
+                    <li class="navbar-link navbar-item">
+                        <a class="main-links" href="{% url 'news' %}" title="View news items"><i class="fa fa-bullhorn"></i> News</a>
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a class="main-links" href="{% url 'about_page' %}" title="Information about IDC"><i class="fa fa-list-alt"></i> About</a>
+                    </li>
                     {% if user.is_authenticated %}
                     <li class="navbar-link navbar-item">
                         <a href="{% url 'cohort_list' %}" title="View Your Cohorts"><i class="fa fa-archive"></i> Cohorts</a>
