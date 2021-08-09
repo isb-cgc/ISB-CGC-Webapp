@@ -165,10 +165,11 @@ def order_quant(items, attr):
 
 @register.filter
 def check_for_order(items, attr):
+    if not items:
+        return items
     if attr in VALUE_SPECIFIC_ORDERS:
         # If they have a specific order defined in the dict
         item_order = VALUE_SPECIFIC_ORDERS[attr]
-
 
         ordered_items = []
         for ordinal in item_order:

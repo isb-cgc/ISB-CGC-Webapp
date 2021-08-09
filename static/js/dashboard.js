@@ -31,26 +31,28 @@ require([
         $(this).find('i').toggleClass('fa-angle-double-down');
     });
 
-    $(window).on('beforeunload', function () {
-        var settingsObj = {};
-        $('.panel-collapse').each(function (index, elem) {
-            settingsObj[$(elem).attr('id')] = $(elem).attr('aria-expanded');
+    if(typeof USER_SETTINGS_KEY !== 'undefined') {
+        $(window).on('beforeunload', function () {
+            var settingsObj = {};
+            $('.panel-collapse').each(function (index, elem) {
+                settingsObj[$(elem).attr('id')] = $(elem).attr('aria-expanded');
+            });
+            sessionStorage.setItem(USER_SETTINGS_KEY, JSON.stringify(settingsObj));
         });
-        sessionStorage.setItem(USER_SETTINGS_KEY, JSON.stringify(settingsObj));
-    });
 
-    if (sessionStorage.getItem(USER_SETTINGS_KEY)) {
-        var settingsObj = JSON.parse(sessionStorage.getItem(USER_SETTINGS_KEY));
+        if (sessionStorage.getItem(USER_SETTINGS_KEY)) {
+            var settingsObj = JSON.parse(sessionStorage.getItem(USER_SETTINGS_KEY));
 
-        for (var i in settingsObj) {
-            if (settingsObj.hasOwnProperty(i)) {
-                var expanded = settingsObj[i];
-                var elem = $('#' + i);
-                if (elem.attr('aria-expanded') !== expanded) {
-                    elem.attr('aria-expanded', expanded);
-                    elem.toggleClass('in');
-                    elem.siblings('.panel-heading').find('i').toggleClass('fa-angle-double-up');
-                    elem.siblings('.panel-heading').find('i').toggleClass('fa-angle-double-down');
+            for (var i in settingsObj) {
+                if (settingsObj.hasOwnProperty(i)) {
+                    var expanded = settingsObj[i];
+                    var elem = $('#' + i);
+                    if (elem.attr('aria-expanded') !== expanded) {
+                        elem.attr('aria-expanded', expanded);
+                        elem.toggleClass('in');
+                        elem.siblings('.panel-heading').find('i').toggleClass('fa-angle-double-up');
+                        elem.siblings('.panel-heading').find('i').toggleClass('fa-angle-double-down');
+                    }
                 }
             }
         }
