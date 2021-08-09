@@ -150,6 +150,10 @@ def test_methods(request):
 
 
 
+# News page (loads from Discourse)
+def news_page(request):
+
+    return render(request, 'idc/news.html')
 
 
 # User details page
@@ -415,9 +419,9 @@ def explore_data_page(request):
                 for cohort in cohort_filters_list:
                     cohort_filters[cohort['name']] = cohort['values']
 
-
         if wcohort and is_json:
             filters = cohort_filters
+
         context = build_explorer_context(is_dicofdic, source, versions, filters, fields, order_docs, counts_only,
                                          with_related, with_derived, collapse_on, is_json, uniques=uniques)
 
@@ -436,6 +440,8 @@ def explore_data_page(request):
             context['filters_for_load'] = cohort_filters_dict
         else:
             context['filters_for_load'] = json.loads(req.get('filters_for_load', '{}'))
+
+        print(context['filters_for_load'])
 
         return render(request, 'idc/explore.html', context)
 
