@@ -317,7 +317,8 @@ INSTALLED_APPS = (
     'cohorts',
     'idc_collections',
     'offline',
-    'adminrestrict'
+    'adminrestrict',
+    'axes'
 )
 
 #############################
@@ -461,6 +462,8 @@ TEMPLATES = [
 ]
 
 AUTHENTICATION_BACKENDS = (
+    # Prevent login hammering
+    "axes.backends.AxesBackend",
     # Needed to login by username in Django admin, regardless of `allauth`
     "django.contrib.auth.backends.ModelBackend",
 
@@ -513,6 +516,45 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'idc.validators.PasswordReuseValidator'
     }
 ]
+
+#########################################
+# Cache Setting                         #
+#########################################
+
+if not IS_DEV:
+    CACHE_IP = os.environ.get("CACHE_IP","127.0.0.1")
+    CACHE_PORT = os.environ.get("CACHE_PORT","6379")
+    REDIS_AUTH = os.environ.get("REDIS_AUTH","")
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": "redis://{REDIS_IP}:{REDIS_PORT}/0".format(
+                REDIS_IP=CACHE_IP,
+                REDIS_PORT=CACHE_PORT
+            ),
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            }
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            'BACKEND': 'django.core.cache.backends.dummy.DummyCache'
+        }
+    }
+
+
+#########################################
+# Axes Settings
+#########################################
+
+AXES_HANDLER = 'axes.handlers.cache.AxesCacheHandler' if not IS_DEV else 'axes.handlers.dummy.AxesDummyHandler'
+AXES_META_PRECEDENCE_ORDER = [
+    'HTTP_X_FORWARDED_FOR',
+    'REMOTE_ADDR',
+]
+AXES_PROXY_COUNT=1
 
 #########################################
 #   MailGun Email Settings for requests #
@@ -634,6 +676,13 @@ if DEBUG and DEBUG_TOOLBAR:
     SHOW_TOOLBAR_CALLBACK = True
     INTERNAL_IPS = (os.environ.get('INTERNAL_IP', ''),)
 
+# AxesMiddleware should be the last middleware in the MIDDLEWARE list.
+# It only formats user lockout messages and renders Axes lockout responses
+# on failed user authentication attempts from login views.
+# If you do not want Axes to override the authentication response
+# you can skip installing the middleware and use your own views.
+# MIDDLEWARE.append('axes.middleware.AxesMiddleware',)
+
 ##################
 # OHIF_SETTINGS
 ##################
@@ -642,6 +691,7 @@ if DEBUG and DEBUG_TOOLBAR:
 APPEND_SLASH = False
 
 DICOM_STORE_PATH=os.environ.get('DICOM_STORE_PATH','')
+SLIM_VIEWER_PATH=os.environ.get('SLIM_VIEWER_PATH','')
 
 # Log the version of our app
 print("[STATUS] Application Version is {}".format(APP_VERSION))

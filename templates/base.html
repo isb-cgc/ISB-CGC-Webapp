@@ -51,6 +51,7 @@
         var BASE_URL = '{{ BASE_URL }}' || "";
         var STORAGE_URI = '{{ STORAGE_URI }}';
         var DICOM_STORE_PATH = '{{ DICOM_STORE_PATH }}';
+        var SLIM_VIEWER_PATH = '{{ SLIM_VIEWER_PATH }}';
     </script>
 
 </head>
@@ -131,7 +132,7 @@
             </div>
             <div class="modal-footer">
                 <a type="button" class="btn btn-primary btn-warn" data-dismiss="modal">Cancel</a>
-                <a type="button" href="" class="btn btn-primary btn-warn" id="go-to-external-link" target="_blank">OK</a>
+                <a type="button" href="" class="btn btn-primary btn-warn" id="go-to-external-link" target="_blank" rel="noopener noreferrer">OK</a>
             </div>
         </div>
     </div>

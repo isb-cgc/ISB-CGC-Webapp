@@ -42,7 +42,7 @@
 }
 .next-page{
     float:right;
-    margin-right:200px;
+    #margin-right:200px;
 }
 
 
@@ -54,16 +54,6 @@
     display:inline-block;
     width:70%;
     margin-right:20px;
-}
-
-.slide_tooltipL {
-   position:  absolute;
-    left: -5px;
-}
-
-.slide_tooltipR {
-   position: absolute;
-    right: -5px;
 }
 
 .slide_tooltipT {

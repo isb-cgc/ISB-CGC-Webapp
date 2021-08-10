@@ -2,18 +2,18 @@
 {% load staticfiles %}
 
 {% block title %}
-    IDC | About
+    IDC | News
 {% endblock %}
 
 {% block description %}
-    About IDC
+    IDC News
 {% endblock %}
 
-{% block page_name %}about{% endblock %}
+{% block page_name %}news{% endblock %}
 
 {% block page_header %}
     <div class="container-fluid">
-        <h3 class="pull-left">About</h3>
+        <h3 class="pull-left">News</h3>
     </div>
 {% endblock %}
 
@@ -23,7 +23,7 @@
             <div class="col-lg-12 col-md-12">
                 <div class="panel panel-default" role="panel panel-default">
                     <div class="panel-body">
-                        <p>About Page Text</p>
+                        <d-topics-list template="complete" discourse-url="https://discourse.canceridc.dev/" category="5" per-page="5"></d-topics-list>
                     </div>
                 </div>
             </div>
@@ -37,4 +37,5 @@
     <script>
     var showWarning = true;
     </script>
+    <script src="https://discourse.canceridc.dev/javascripts/embed-topics.js"></script>
 {% endblock %}

@@ -124,11 +124,18 @@
                             </td>
                             <td class="name-col" data-order="{{ cohort.name }}">
                                 {% if only_active_versions %}
-                                 <form name="getCohort" method="POST" action="{% url 'cohort_details' cohort.id %}">
+                               {% comment %}  <form name="getCohort" method="POST" action="{% url 'cohort_details' cohort.id %}">
                                     {% csrf_token %}
                                      <a href="#" onclick="$(this).parent().submit()"
                                        title="View Cohort Details in the Data Explorer">{{ cohort.name }}</a>
                                  </form>
+                                {% endcomment %}
+
+                                  <a href="{% url 'cohort_details' cohort.id %}"
+                                     title="View Cohort Details in the Data Explorer">
+                                       {{ cohort.name }}
+                                  </a>
+
                                 {% else %}
                                     <span title="Cohorts with inactive data versions cannot be viewed in the Data Explorer.">{{ cohort.name }}</span>
                                 {% endif %}
@@ -160,7 +167,7 @@
                             {% if only_active_versions %}
                                 &nbsp;
                             {% else %}
-                                <button onclick="compareVer(this)">Compare </button>
+                                <button class="btn-primary compare-version">Compare</button>
                             {% endif %}
                             </td>
                         </tr>
@@ -180,68 +187,68 @@
 </div>
 
     <!-- Set Operation Modal -->
-    <div class="modal fade" id="set-ops-modal" tabindex="-1" role="dialog" aria-labelledby="union-header" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="union-header">New Cohorts</h4>
-                </div>
-                <form id="set-op-cohort" method="POST" action="{% url 'set_operation' %}" class="">
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label for="new-cohort-name">Cohort Name</label>
-                            <input type="text" class="form-control" id="new-cohort-name" name="name" placeholder="Enter name for new cohort" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="operation">Set Operation</label>
-                            <div>
-                                <select name="operation" id="operation" class="form-control">
-                                    <option value="union">Union</option>
-                                    <option value="intersect">Intersection</option>
-                                    <option value="complement">Complement</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group set-control">
-                            <label for="selected-ids">Selected Cohorts</label>
-                            <div>
-                                <div class="form-control-static" id="selected-ids">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group complement-control">
-                            <label for="base-cohort">Base Cohort</label>
-                            <div>
-                                <p class="form-control-static" id="base-id"></p>
-                                <div class="cohort-search-div">
-                                    <a class="add-cohort btn btn-link"><i class="fa fa-plus"></i> Choose Cohort</a>
-                                    <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group complement-control">
-                            <label for="subtract-cohorts">Subtracted Cohorts</label>
-                            <div>
-                                <p class="form-control-static" id="subtract-ids"></p>
-                                <div class="cohort-search-div">
-                                    <a class="add-cohort btn btn-link"><i class="fa fa-plus"></i> Choose Cohort</a>
-                                    <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-primary">Okay</button>
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+{#    <div class="modal fade" id="set-ops-modal" tabindex="-1" role="dialog" aria-labelledby="union-header" aria-hidden="true">#}
+{#        <div class="modal-dialog">#}
+{#            <div class="modal-content">#}
+{#                <div class="modal-header">#}
+{#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
+{#                    <h4 class="modal-title" id="union-header">New Cohorts</h4>#}
+{#                </div>#}
+{#                <form id="set-op-cohort" method="POST" action="{% url 'set_operation' %}" class="">#}
+{#                    <div class="modal-body">#}
+{#                        <div class="form-group">#}
+{#                            <label for="new-cohort-name">Cohort Name</label>#}
+{#                            <input type="text" class="form-control" id="new-cohort-name" name="name" placeholder="Enter name for new cohort" required>#}
+{#                        </div>#}
+{#                        <div class="form-group">#}
+{#                            <label for="operation">Set Operation</label>#}
+{#                            <div>#}
+{#                                <select name="operation" id="operation" class="form-control">#}
+{#                                    <option value="union">Union</option>#}
+{#                                    <option value="intersect">Intersection</option>#}
+{#                                    <option value="complement">Complement</option>#}
+{#                                </select>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="form-group set-control">#}
+{#                            <label for="selected-ids">Selected Cohorts</label>#}
+{#                            <div>#}
+{#                                <div class="form-control-static" id="selected-ids">#}
+{##}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="form-group complement-control">#}
+{#                            <label for="base-cohort">Base Cohort</label>#}
+{#                            <div>#}
+{#                                <p class="form-control-static" id="base-id"></p>#}
+{#                                <div class="cohort-search-div">#}
+{#                                    <a class="add-cohort btn btn-link"><i class="fa fa-plus"></i> Choose Cohort</a>#}
+{#                                    <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="form-group complement-control">#}
+{#                            <label for="subtract-cohorts">Subtracted Cohorts</label>#}
+{#                            <div>#}
+{#                                <p class="form-control-static" id="subtract-ids"></p>#}
+{#                                <div class="cohort-search-div">#}
+{#                                    <a class="add-cohort btn btn-link"><i class="fa fa-plus"></i> Choose Cohort</a>#}
+{#                                    <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{##}
+{#                    </div>#}
+{#                    <div class="modal-footer">#}
+{#                        {% csrf_token %}#}
+{#                        <button type="submit" class="btn btn-primary">Okay</button>#}
+{#                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>#}
+{#                    </div>#}
+{#                </form>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
 
     <!-- Delete Cohort Modal -->
     <div class="modal fade" id="delete-cohorts-modal" tabindex="-1" role="dialog" aria-labelledby="delete-cohort-header" aria-hidden="true">
@@ -267,43 +274,43 @@
     </div>
 
     <!-- Share Cohort Modal -->
-    <div class="modal fade" id="share-cohorts-modal" tabindex="-1" role="dialog" aria-labelledby="share-cohort-header" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Cohort Sharing</h4>
-                    <div class="modal-js-messages" id="share-cohort-js-messages"></div>
-                    <ul class="nav nav-tabs">
-                        <li role="presentation" class="active"><a data-target="#share-pane" data-toggle="tab" id="share-cohort-header">Share Cohort</a></li>
-                        <li role="presentation"><a data-target="#shared-with-pane" data-toggle="tab">Shared With</a></li>
-                    </ul>
-                </div>
-                <div class="tab-content">
-                    <div class="tab-pane active" id="share-pane">
-                        <form id="share-cohort-form">
-                            <div class="modal-body">
-                                <label>Selected Cohorts</label>
-                                <p class="form-control-static selected-cohorts"></p>
-                                <label for="share-share_users">Enter email addresses separated by a comma</label>
-                                <textarea id="share-share_users" class="form-control" name="share_users"></textarea>
-                            </div>
-                            <div class="modal-footer">
-                                {% csrf_token %}
-                                <input type="submit" value="Share Cohort" class="btn btn-primary owner-only" />
-                                <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="tab-pane" id="shared-with-pane">
-                        <div class="modal-body">
-                            <table class="table table-striped"></table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+{#    <div class="modal fade" id="share-cohorts-modal" tabindex="-1" role="dialog" aria-labelledby="share-cohort-header" aria-hidden="true">#}
+{#        <div class="modal-dialog">#}
+{#            <div class="modal-content">#}
+{#                <div class="modal-header">#}
+{#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
+{#                    <h4 class="modal-title">Cohort Sharing</h4>#}
+{#                    <div class="modal-js-messages" id="share-cohort-js-messages"></div>#}
+{#                    <ul class="nav nav-tabs">#}
+{#                        <li role="presentation" class="active"><a data-target="#share-pane" data-toggle="tab" id="share-cohort-header">Share Cohort</a></li>#}
+{#                        <li role="presentation"><a data-target="#shared-with-pane" data-toggle="tab">Shared With</a></li>#}
+{#                    </ul>#}
+{#                </div>#}
+{#                <div class="tab-content">#}
+{#                    <div class="tab-pane active" id="share-pane">#}
+{#                        <form id="share-cohort-form">#}
+{#                            <div class="modal-body">#}
+{#                                <label>Selected Cohorts</label>#}
+{#                                <p class="form-control-static selected-cohorts"></p>#}
+{#                                <label for="share-share_users">Enter email addresses separated by a comma</label>#}
+{#                                <textarea id="share-share_users" class="form-control" name="share_users"></textarea>#}
+{#                            </div>#}
+{#                            <div class="modal-footer">#}
+{#                                {% csrf_token %}#}
+{#                                <input type="submit" value="Share Cohort" class="btn btn-primary owner-only" />#}
+{#                                <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>#}
+{#                            </div>#}
+{#                        </form>#}
+{#                    </div>#}
+{#                    <div class="tab-pane" id="shared-with-pane">#}
+{#                        <div class="modal-body">#}
+{#                            <table class="table table-striped"></table>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
 
 {% endblock %}
 

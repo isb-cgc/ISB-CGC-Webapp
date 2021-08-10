@@ -3,6 +3,11 @@ CORE_LIST_FILE=""
 CORE_LIST=""
 FILE_NAME=""
 DEST_BUCKET=""
+MAX_WAIT=3
+SOLR_DATA="/opt/bitnami/solr/server/solr"
+RUN=`date +%s`
+BACKUPS_DIR="${SOLR_DATA}/backups_${RUN}"
+PARSE_RESPONSE="import sys, json; print(json.load(sys.stdin)['status'])"
 
 while getopts ":c:l:f:d:h" flag
 do
@@ -13,7 +18,7 @@ do
         echo "-h           This help."
         echo "-l <FILE>    Specifies a file which lists the cores to be backed up. Required if -c is not supplied."
         echo "-c <CORE>    Specifies a list of comma-separated cores to back up. Required if -l is not supplied."
-        echo "-f <FILE>    Specifies an output file name for the resulting TAR file. Optional."
+        echo "-f <FILE>    Specifies an output file name for the resulting TAR file. Optional. Default: solr_cores_backup_<datestamp>.tar"
         echo "-d <BUCKET>  Specifies a destination bucket for storing the resulting TAR output. Optional."
         echo " "
         echo "You must store the Solr API password in SOLR_PWD before running this script!"
@@ -40,15 +45,17 @@ if [[ ! -f $CORE_LIST_FILE ]] && [[ $CORE_LIST == "" ]]; then
     exit 1
 fi
 
-if [ ! -d "/opt/bitnami/apache-solr/server/solr/backups" ]; then
-    sudo -u solr mkdir /opt/bitnami/apache-solr/server/solr/backups
+if [ ! -d $BACKUPS_DIR ]; then
+    sudo -u solr mkdir $BACKUPS_DIR
+    echo "[STATUS] Backups will be saved to ${BACKUPS_DIR}"
 fi
 
 cores=[]
 
 if [[ $FILE_NAME == "" ]]; then
-    FILE_NAME="solr_cores_backup.tar"
+    FILE_NAME="solr_cores_backup_${RUN}.tar"
 fi
+echo "[STATUS] Backups will be tar'd to ${FILE_NAME}"
 
 if [[ $CORE_LIST != "" ]]; then
     IFS=$','
@@ -57,18 +64,34 @@ else
     IFS=$'\n'
     readarray -t cores < $CORE_LIST_FILE
 fi
+echo "[STATUS] Running backups: "
 
 for core in "${cores[@]}"; do
     if [[ $core != "" ]]; then
-        curl -u idc:$SOLR_PWD -X GET "https://localhost:8983/solr/$core/replication?command=backup&location=/opt/bitnami/solr/server/solr/backups/&name=$core" --cacert solr-ssl.pem
-        sudo -u solr cp /opt/bitnami/apache-solr/server/solr/$core/conf/managed-schema /opt/bitnami/apache-solr/server/solr/backups/$core.managed-schema
+        echo "Backup for core ${core} started..."
+        sudo -u solr cp ${SOLR_DATA}/$core/conf/managed-schema ${BACKUPS_DIR}/$core.managed-schema
+        curl -u idc:$SOLR_PWD -X GET "https://localhost:8983/solr/$core/replication?command=backup&location=${BACKUPS_DIR}/&name=$core" --cacert solr-ssl.pem
+        status=`curl -u idc:${SOLR_PWD} -X GET "https://localhost:8983/solr/${core}/replication?command=details" --cacert solr-ssl.pem | python3 -c "${PARSE_RESPONSE}"`
+        retries=0
+        while [[ "$status" != "OK" && "$retries" -lt  "$MAX_WAIT" ]]; do
+          echo "Backup for core ${core} isn't completed, waiting..."
+          sleep 2
+          ((retries++))
+          status=`curl -u idc:${SOLR_PWD} -X GET "https://localhost:8983/solr/${core}/replication?command=details" --cacert solr-ssl.pem | python3 -c "${PARSE_RESPONSE}"`
+        done
+        if [ "$status" == "OK" ]; then
+          echo "Core ${core} backup completed."
+        else
+          echo "Core ${core} backup is still pending."
+          echo "You may need to re-run TAR on the snapshots from ${BACKUPS_DIR} if you see an error message about files changing during the TAR process."
+        fi
     fi
 done
 
-tar -cvf ${FILE_NAME} -C /opt/bitnami/apache-solr/server/solr/backups .
+tar -cvf ${FILE_NAME} -C ${BACKUPS_DIR} .
 
 if [[ ! -z ${DEST_BUCKET} ]]; then
-        gsutil cp ${FILE_NAME} gs://$DEST_BUCKET/
+        gsutil cp ${FILE_NAME} gs://${DEST_BUCKET}/
 else
         echo "[STATUS] Backups stored in tarfile ${FILE_NAME}."
 fi

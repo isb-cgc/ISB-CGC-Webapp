@@ -77,9 +77,9 @@
                 </div>
                 <div class="panel-body">
                     <p>
-                        Apply for "cloud credits" and your own Google Cloud project by submitting a request <a href="https://learn.canceridc.dev/introduction/requesting-gcp-cloud-credits" target="_blank">here</a>.
+                        Apply for "cloud credits" and your own Google Cloud project by submitting a request <a href="https://learn.canceridc.dev/introduction/requesting-gcp-cloud-credits" target="_blank" rel="noopener noreferrer">here</a>.
                     </p>
-                    <p>Go to the <a href="http://console.cloud.google.com" target="_blank">Google Cloud Console</a>.</p>
+                    <p>Go to the <a href="http://console.cloud.google.com" target="_blank" rel="noopener noreferrer">Google Cloud Console</a>.</p>
                 </div>
             </div>
         </div>
@@ -93,7 +93,7 @@
                 <div class="panel-body">
                     {% if unconnected_local_account %}
                     <p>
-                        <a href="{% url 'account_change_password' %}" target="_blank">Change Your Password</a>
+                        <a href="{% url 'account_change_password' %}" target="_blank" rel="noopener noreferrer">Change Your Password</a>
                     </p>
                     <p>
                         <a href="{% provider_login_url "google" process="connect" %}">Connect a Google Account</a>
