@@ -241,12 +241,8 @@ require([
                     'render': function(data, type) {
                         let num_joins = data.length;
                         if (num_joins > 0) {
-                            return '<div><a class="useful-join-detail">' + num_joins + '</a></div>';
+                            return '<div class="text-center"><a class="useful-join-detail">' + num_joins + '</a></div>';
                         }
-                        else {
-                            return '<div>' + num_joins + '</div>';
-                        }
-
                     }
                 },
                 {
