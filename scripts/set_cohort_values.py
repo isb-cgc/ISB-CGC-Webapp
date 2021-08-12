@@ -43,7 +43,6 @@ logger = logging.getLogger('main_logger')
 def main():
     try:
         for cohort in Cohort.objects.filter(active=True, case_count=0):
-
             if cohort.only_active_versions():
                 cohort_stats = _get_cohort_stats(cohort.id)
             else:
@@ -52,8 +51,7 @@ def main():
                 filters = cohort.get_filters_as_dict_simple()[0]
 
                 sources = DataSetType.objects.get(data_type=DataSetType.IMAGE_DATA).datasource_set.filter(
-                    id__in=cohort.get_data_sources())
-
+                    id__in=cohort.get_data_sources(current=None))
                 child_record_searches = cohort.get_attrs().get_attr_set_types().get_child_record_searches()
                 result = get_collex_metadata(filters, None, sources=sources, facets=["collection_id"], counts_only=True,
                                              totals=["PatientID", "StudyInstanceUID", "SeriesInstanceUID"],
