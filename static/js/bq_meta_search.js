@@ -233,19 +233,6 @@ require([
 
                 },
                 {
-                    'className': 'useful-join-detail',
-                    'name': 'usefulJoins',
-                    'data': function (data) {
-                        return data.usefulJoins;
-                    },
-                    'render': function(data, type) {
-                        let num_joins = data.length;
-                        if (num_joins > 0) {
-                            return '<div class="text-center"><a class="useful-join-detail">' + num_joins + '</a></div>';
-                        }
-                    }
-                },
-                {
                     'name': 'createdDate',
                     'data': 'creationTime',
                     'className': 'text-right colvis-toggle',
@@ -260,6 +247,18 @@ require([
                         }
                     },
                     'searchable': false
+                },
+                {
+                    'className': 'useful-join-detail',
+                    'name': 'usefulJoins',
+                    'data': function (data) {
+                        return data.usefulJoins;
+                    },
+                    'render': function(data, type) {
+                        let num_joins = data.length;
+                        let display = num_joins > 0 ? num_joins : '';
+                        return '<div class="text-center"><a class="useful-join-detail">' + display + '</a></div>';
+                    }
                 },
                 {
                     'name': 'preview',
@@ -585,7 +584,7 @@ require([
 
     // Useful join table
     var format_useful_join_details = function(d) {
-        let join_table = '<div class="useful-join-table"><table>';
+        let join_table = '<div><table class="useful-join-table">';
         join_table += '<thead><tr><th style="width:200px">Join Subject</th><th style="width:400px">Joined Tables</th><th>View</th></tr></thead>';
         join_table += '<tbody>';
         d.forEach(join_info => {
