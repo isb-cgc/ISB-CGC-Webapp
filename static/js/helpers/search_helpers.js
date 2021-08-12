@@ -189,7 +189,7 @@ function($, tree_graph, stack_bar_chart) {
 
             if(filter_panel_load) {
                 var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
-                clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
+                Object.keys(clin_tree_attr_counts).length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
 
                 $('.clinical-trees .spinner').hide();
                 $('.user-data-trees .spinner').hide();
@@ -237,9 +237,8 @@ function($, tree_graph, stack_bar_chart) {
                         context.update_filter_counts(case_counts, null, program_id);
 
                         context.update_zero_case_filters_all();
-
-                        var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(case_counts, clin_tree_attr) : case_counts;
-                        clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
+                        var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(results['filtered_counts']['case_data'], clin_tree_attr) : case_counts;
+                        Object.keys(clin_tree_attr_counts).length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
 
                         if (metadata_counts.hasOwnProperty('data_avail')) {
                             var features = [
@@ -295,9 +294,10 @@ function($, tree_graph, stack_bar_chart) {
                 var $this = $(this),
                     key = $this.data('feature-name'),
                     val = $this.data('value-name');
-
+                let key_id = -1;
                 if ($this.data('feature-id'))
-                    key = $this.data('feature-id');
+                    key_id = $this.data('feature-id');
+                key = (key_id > 0 ? key_id+":" : "") + key
                 if ($this.data('value-id'))
                     val = $this.data('value-id');
 
