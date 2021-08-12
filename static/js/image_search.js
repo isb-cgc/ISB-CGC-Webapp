@@ -584,15 +584,6 @@ require([
         };
 
 
-
-
-
-
-
-
-
-
-
         window.updateProjectSelection = function(row){
             var purgeChildSelections=[false,false]
             var rowsAdded=true;
@@ -764,6 +755,73 @@ require([
             //"createdCell":function(td,data,row){$(td).attr("id","patient_col_"+row[1]);}
             $('#proj_table').children('tbody').attr('id', 'projects_table');
         }
+//checkClientCache(request,'cases');
+
+        var updateCache = function(cache,request,backendReqStrt, backendReqLength,data){
+            cache.lastRequest = request;
+            cache.backendReqStrt=backendReqStrt;
+            cache.backendReqLength=backendReqLength;
+            cache.cacheLength = data['res'].length;
+            cache.recordsTotal = data['cnt'];
+            cache.data = data['res'];
+
+        }
+        var checkClientCache = function(request, type){
+            var cache;
+            var reorderNeeded = false;
+            var updateNeeded = true;
+            if (request.draw ===1){
+                updateNeeded = true;
+            }
+            else {
+                if (type === 'cases') {
+                    cache = window.casesCache;
+                } else if (type === 'studies') {
+                    cache = window.studiesCache;
+                } else if (type === 'series') {
+                    cache = window.seriesCache;
+                }
+
+                if ((cache.lastRequest.order[0]['column'] === request.order[0]['column']) && (cache.lastRequest.order[0]['dir'] === request.order[0]['dir'])) {
+                    if ( (cache.backendReqStrt<=request.start) && ( (cache.backendReqStrt+cache.backendReqLength) >= (request.start+request.length)  )){
+                        updateNeeded=false;
+                    }
+                    else{
+                        updateNeeded = true;
+                    }
+                } else if (cache.cacheLength===cache.recordsTotal){
+                    updateNeeded = false;
+                    reorderNeeded=true;
+                }
+                else {
+                    updateNeeded = true;
+                }
+            }
+            return [updateNeeded , reorderNeeded];
+        }
+
+        reorderCacheData = function(cache,request,thead){
+            var dir = request.order[0]['dir'];
+            var col = parseInt(request.order[0]['column']);
+            if ($(thead).children.get(col).hasClass('numeric_data')){
+                if (dir==='asc'){
+                    cache.data=cache.data.sort((a,b)=>parseFloat(a-b));
+                }
+                else{
+                    cache.data=cache.data.sort((a,b)=>parseFloat(b-a));
+                }
+            }
+            else{
+                if (dir==='asc'){
+                    cache.data=cache.data.sort((a,b)=>a<b);
+                }
+                else{
+                    cache.data=cache.data.sort((a,b)=>b<a);
+                }
+
+            }
+
+        }
 
         window.updateCaseTable = function(rowsAdded, rowsRemoved, refreshAfterFilter,updateChildTables) {
 
@@ -815,7 +873,7 @@ require([
                 "ajax": function (request, callback, settings) {
 
                     var backendReqLength=500;
-                    var backendStrt=Math.max(0,request.start-Math.floor(backendReqLength*0.5));
+                    var backendReqStrt=Math.max(0,request.start-Math.floor(backendReqLength*0.5));
 
 
                     $('.spinner').show();
@@ -836,7 +894,9 @@ require([
                         callback({"data":[], "recordsTotal":"0", "recordsFiltered":"0"})
                     }
 
-                    //ssCallNeeded = checkClientCache(request,'cases');
+                    ret = checkClientCache(request,'cases');
+                    var ssCallNeeded = ret[0];
+                    var reorderNeeded = ret[1];
 
                     if (ssCallNeeded) {
                         if (refreshAfterFilter){
@@ -856,12 +916,10 @@ require([
                         if (typeof(window.csr) !=='undefined'){
                                ndic['csrfmiddlewaretoken'] = window.csr
                         }
-                        if (typeof(request.start)!=='undefined'){
-                            ndic['offset']=backendStrt;
-                        }
-                        if (typeof(request.length)!=='undefined'){
-                            ndic['limit']=backendReqLength;
-                        }
+
+                        ndic['offset']=backendReqStrt;
+                        ndic['limit']=backendReqLength;
+
                         if (typeof(request.order)!=='undefined'){
                             if (typeof(request.order[0].column)!=='undefined'){
                                 ndic['sort'] = cols[request.order[0].column];
@@ -869,7 +927,6 @@ require([
                             if (typeof(request.order[0].dir)!=='undefined'){
                                 ndic['sortdir'] = request.order[0].dir;
                             }
-                            ndic['limit']=request.length;
                         }
 
                         $.ajax({
@@ -879,14 +936,9 @@ require([
                             type: 'post',
                             contentType: 'application/x-www-form-urlencoded',
                             success: function (data) {
-                                 dataset=data['res'].slice(request.start-backendStrt,request.offset);
-                                 window.casesCache = new Object();
-                                 window.casesCache.request = request;
-                                 window.casesCache.backendStrt=backendStrt;
-                                 window.casesCache.backendReqLength=backendReqLength;
-                                 window.casesCache.cacheLength = data['res'].length;
-                                 window.casesCache.recordsTotal = data['cnt'];
-                                 window.casesCache.data = data['res'];
+                                window.casesCache = new Object();
+                                updateCache(window.casesCache,request,backendReqStrt, backendReqLength,data);
+                                dataset=data['res'].slice(request.start-backendReqStrt,request.start-backendReqStrt+request.length);
 
                                  for (set in dataset) {
                                      set['ids'] = {'PatientID': set['PatientID'], 'collection_id': set['collection_id']}
@@ -939,7 +991,17 @@ require([
                     }
 
                     else{
-
+                        if (reorderNeeded){
+                            reorderCacheData(window.casesCache,request,$('cases_table_head'));
+                        }
+                         dataset=window.casesCache.data.slice(request.start-window.casesCache.backendReqStrt,request.start-window.casesCache.backendReqStrt+request.length);
+                         window.casesCache.lastRequest=request;
+                         $('.spinner').hide();
+                                callback({
+                                    "data": dataset,
+                                    "recordsTotal": window.casesCache.cacheLength,
+                                    "recordsFiltered": window.casesCache.cacheLength
+                                })
                     }
 
                 }
