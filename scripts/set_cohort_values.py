@@ -16,26 +16,15 @@
 
 from __future__ import print_function
 
-from builtins import str
-from builtins import object
-import datetime
 import logging
-import traceback
-import os
-import re
-import csv
-from argparse import ArgumentParser
-import sys
-import time
-from copy import deepcopy
-
 import django
+
 django.setup()
 
 from cohorts.models import Cohort
 from cohorts.utils import _get_cohort_stats
 from idc_collections.collex_metadata_utils import get_collex_metadata
-from idc_collections.models import DataSetType,DataSource
+from idc_collections.models import DataSetType
 
 logger = logging.getLogger('main_logger')
 
