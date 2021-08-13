@@ -95,10 +95,6 @@
                         <input type="text" class="form-control bq-filter" data-column-name="friendlyName">
                     </div>
                     <div>
-                        <label>Full ID</label>
-                        <input type="text" id="search-by-full-id" class="form-control bq-filter" data-column-name="FullId">
-                    </div>
-                    <div>
                         <label>Program</label>
                         <select multiple data-placeholder="Choose Programs..."
                                 class="autocomplete_select_box form-control bq-select" data-column-name="program">
@@ -171,7 +167,7 @@
                     <div id="advSearch0" class="adv-div collapse">
                         <div>
                             <label>BQ Project</label>
-                            <select class="form-control bq-select" data-column-name="projectId">
+                            <select id="search-by-project-id" class="form-control bq-select" data-column-name="projectId">
                                 {% for option in project_id.options %}
                                     {% if option.value == '' %}
                                         <option value="{{ option.value }}" selected>{{ option.label }}</option>
@@ -183,11 +179,11 @@
                         </div>
                         <div>
                             <label>BQ Dataset</label>
-                            <input type="text" class="form-control bq-filter" data-column-name="datasetId">
+                            <input type="text" id="search-by-dataset-id" class="form-control bq-filter" data-column-name="datasetId">
                         </div>
                         <div>
                             <label>BQ Table</label>
-                            <input type="text" class="form-control bq-filter" data-column-name="tableId">
+                            <input type="text" id="search-by-table-id" class="form-control bq-filter" data-column-name="tableId">
                         </div>
                         <div>
                             <label>Table Description</label>

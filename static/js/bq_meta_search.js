@@ -123,7 +123,7 @@ require([
                     'name': 'datasetId',
                     'data': 'tableReference.datasetId',
                     'visible': false,
-                    'className': 'colvis-toggle'
+                    'className': 'colvis-toggle',
                 },
                 {
                     'name': 'tableId',
@@ -352,8 +352,26 @@ require([
             order: [[1, 'asc']],
             initComplete: function (settings, json) {
                 $('.spinner').remove();
-                $('#search-by-full-id')[0].value = selected_table_full_id;
-                columnSearch('FullId', selected_table_full_id);
+                if (selected_table_full_id !== "") {
+                    let parts = selected_table_full_id.split('.');
+                    let project_id = parts[0];
+                    let dataset_id = parts[1];
+                    let table_id = parts[2];
+                    $('#search-by-dataset-id')[0].value = dataset_id;
+                    $('#search-by-project-id option').each(function() {
+                        if ($(this)[0].innerText === project_id) {
+                            $(this).prop('selected', true);
+                        }
+                    });
+                    $('#search-by-table-id')[0].value = table_id;
+                    columnSearch('datasetId', dataset_id);
+                    columnSearch('projectId', project_id);
+                    columnSearch('tableId', table_id);
+
+                    $('.adv-toggle-btn').removeClass('collapsed');
+                }
+
+
                 reset_table_style(settings);
             },
             drawCallback: function (settings) {
