@@ -368,9 +368,8 @@ require([
                     columnSearch('projectId', project_id);
                     columnSearch('tableId', table_id);
 
-                    $('.adv-toggle-btn').removeClass('collapsed');
+                    $('.adv-toggle-btn').click();
                 }
-
 
                 reset_table_style(settings);
             },
@@ -499,7 +498,7 @@ require([
                     let tables = "";
                     join_data['tables'].forEach(function(value, i) {
                         value = value.replace(':', '.');
-                        tables += ('<a class="joined-table-link">' + value + '</a>');
+                        tables += ('<a class="joined-table-link" title="Open in new tab">' + value + '</a>');
                         if (i !== join_data['tables'].length - 1) {
                             tables += "<br>";
                         }
@@ -512,12 +511,14 @@ require([
                         '<h5>Description</h5><p>' + join_data['description'] + '</p><br>' +
                         '<h5>Joined Tables</h5><p>' + tables + '</p><br>' +
                         '<h5>SQL Statement</h5>' +
-                        '<p class="query-body"><i>' + sql_query + '</i></p>' +
+                        '<pre><code class="language-sql query-body">' + sql_query + '</code></pre>' +
                         '<button class="copy-query-btn" title="Copy to Clipboard">' +
                         '<i class="fa fa-clipboard" aria-hidden="true"></i>'+ 'COPY' + '</button>'+ '<br><br>' +
                         '<h5>Joined Condition</h5><p>' + join_data['condition'] + '</p>';
 
                     $('#useful-join-view-modal').find('.modal-body').html(dialog_content);
+
+                    Prism.highlightAll();
 
                     $('.joined-table-link').on('click', function() {
                         window.open('/bq_meta_search/' + $(this)[0].innerText, '_blank');
@@ -609,7 +610,7 @@ require([
             let tables = "";
             join_info['tables'].forEach(function(value, i) {
                 value = value.replace(':', '.');
-                tables += ('<a class="joined-table-link">' + value + '</a>');
+                tables += ('<a class="joined-table-link" title="Open in new tab">' + value + '</a>');
                 if (i !== join_info['tables'].length - 1) {
                     tables += "<br>";
                 }
