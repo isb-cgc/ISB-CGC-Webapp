@@ -2900,6 +2900,7 @@ html {
 #landing .modality-spec .tab-content {
   background: transparent;
   padding: 0;
+  margin-top: -5px;
 }
 
 #landing .option2 .modality-panel {
@@ -2910,7 +2911,6 @@ html {
 }
 
 #landing .modality-heading {
-  padding: 5px 0 5px 25px;
   justify-content: end;
 }
 
@@ -2961,8 +2961,12 @@ html {
     border: 0;
 }
 
-#landing .spec-tabs {
-
+#landing .spec-tabs li {
+  padding-left: 10px;
+  margin-right: 10px;
+  background-color: inherit;
+  border: 1px solid #4b616b;
+  border-radius: 3px 3px 3px 3px;
 }
 
 #landing .spec-tabs li a {
@@ -3000,6 +3004,12 @@ html {
     color: #000;
     padding-top: 0;
     margin-top: -1px;
+}
+
+#landing .spec-tabs li {
+  width: 25%;
+  margin-bottom: -2px;
+  border-bottom: 0;
 }
 
 #landing .option1 .modality-nav-tabs li {
@@ -3051,7 +3061,7 @@ html {
     border: 0;
 }
 
-#landing .option2 .modality-nav-tabs li.active {
+#landing .option2 .modality-nav-tabs li.active, #landing .spec-tabs li.active {
     background-color: rgb(204 220 227);
 }
 
