@@ -482,18 +482,19 @@ require([
             else {
                 // Open this row
                 row.child(format_useful_join_details(joins_data)).show();
-                $('.useful-join-view-btn').each(function(index) {
+                tr.next().find('.useful-join-view-btn').each(function(index) {
                     let this_join_data = joins_data[index];
                     this_join_data['tableName'] = row_data['friendlyName'];
                     this_join_data['tableId'] = formatFullId(row_data['tableReference'], false);
                     $(this).data(this_join_data);
                 });
 
+                $('.joined-table-link').unbind('click');
                 $('.joined-table-link').on('click', function() {
                     window.open('/bq_meta_search/' + $(this)[0].innerText, '_blank');
                 });
 
-                $('.useful-join-view-btn').on('click', function() {
+                tr.next().find('.useful-join-view-btn').on('click', function() {
                     let join_data = $(this).data();
                     let tables = "";
                     join_data['tables'].forEach(function(value, i) {
@@ -525,8 +526,8 @@ require([
                     });
 
                     $(".copy-query-btn").on('click', function () {
-                        let query = $(this).siblings('p.query-body')[0];
-                        copy_to_clipboard($(this).siblings('p.query-body'));
+                        let query = $(this).siblings().find('.query-body')[0];
+                        copy_to_clipboard(query);
                     });
 
                     $('#useful-join-view-modal').find('.modal-sub-title').html(join_data['tableName']);
@@ -675,7 +676,7 @@ require([
     var copy_to_clipboard = function(el) {
         var $temp = $("<textarea>");
         $("body").append($temp);
-        $temp.val($(el).text()).select();
+        $temp.val($(el).text()).focus().select();
         document.execCommand("copy");
         $temp.remove();
     };
