@@ -441,8 +441,6 @@ def explore_data_page(request):
         else:
             context['filters_for_load'] = json.loads(req.get('filters_for_load', '{}'))
 
-        print(context['filters_for_load'])
-
         return render(request, 'idc/explore.html', context)
 
 

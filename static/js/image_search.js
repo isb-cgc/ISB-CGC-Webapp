@@ -97,368 +97,206 @@ require([
     };
 
     window.setSlider = function (slideDiv, reset, strt, end, isInt, updateNow) {
-             parStr=$('#'+slideDiv).data("attr-par");
-             if (parStr.startsWith('tcga_clinical') && !(reset)){
-                checkTcga();
-            }
-            //var slideDiv = divName + "_slide";
-            var max = $('#' + slideDiv).slider("option", "max");
+        parStr=$('#'+slideDiv).data("attr-par");
+        var max = $('#' + slideDiv).slider("option", "max");
+        var divName = slideDiv.replace("_slide","");
+        if (reset) {
+            strt = $('#' + slideDiv).parent().attr('data-min');
+            end = $('#' + slideDiv).parent().attr('data-max');
+            $('#' + slideDiv).parent().removeClass('isActive');
+        }
+        else{
+            $('#' + slideDiv).parent().addClass('isActive');
+        }
+        $('#' + slideDiv).parent().attr('data-curminrng',strt);
+        $('#' + slideDiv).parent().attr('data-curmaxrng',end);
+        vals = [strt, end];
+        $('#' + slideDiv).find(".slide_tooltip").each(function(index){
+            $(this).text(vals[index].toString());
+        });
 
-            var divName = slideDiv.replace("_slide","");
+        $('#' + slideDiv).slider("values", "0", strt);
+        $('#' + slideDiv).slider("values", "1", end);
+        var inpDiv = slideDiv.replace("_slide", "_input");
+        var val = String(strt) + "-" + String(end);
 
-            if (reset) {
-                strt = $('#' + slideDiv).parent().attr('data-min');
-                end = $('#' + slideDiv).parent().attr('data-max');
-
-                $('#' + slideDiv).parent().removeClass('isActive');
-
-            }
-            else{
-                $('#' + slideDiv).parent().addClass('isActive');
-            }
-            $('#' + slideDiv).parent().attr('data-curminrng',strt);
-            $('#' + slideDiv).parent().attr('data-curmaxrng',end);
-
-             vals = [strt, end];
-
-            $('#' + slideDiv).find(".slide_tooltip").each(function(index){
-                $(this).text(vals[index].toString());
-            });
-
-            $('#' + slideDiv).slider("values", "0", strt);
-            $('#' + slideDiv).slider("values", "1", end);
-
-            var inpDiv = slideDiv.replace("_slide", "_input");
-            //var inpDiv = divName + "_input";
-            var val = String(strt) + "-" + String(end);
-
-            // $("#inp_age_slide").value="0-120";
-            document.getElementById(inpDiv).value = val;
-            nm=new Array();
-            var filterCats= $('#'+divName).parentsUntil('.tab-pane','.list-group-item__body');
-            for (var i=0;i<filterCats.length;i++){
-                var ind = filterCats.length-1-i;
-                nm.push(filterCats[ind].id);
-            }
-            nm.push(divName);
-            filtAtt = nm.join('.')+ '_rng';
-            if (reset) {
-                if (  (window.filterObj.hasOwnProperty(filtAtt)) && (window.filterObj[filtAtt].hasOwnProperty('rng')) ) {
-                    delete window.filterObj[filtAtt]['rng'];
-                    if ( 'none' in window.filterObj[filtAtt]){
-                        window.filterObj[filtAtt]['type']='none';
-                    }
-                    else{
-                        delete window.filterObj[filtAtt];
-                    }
-                }
-            } else {
-                var attVal = [];
-                if (isInt) {
-                    attVal = [parseInt(strt), parseInt(end)];
-
-                } else {
-                    attVal = [parseFloat(strt), parseFloat(end)];
-                }
-                //$(this).find('.slide_tooltip').text( ui.values[index].toString() );
-                if (!(filtAtt in window.filterObj)){
-                    window.filterObj[filtAtt] = new Object();
-                }
-                window.filterObj[filtAtt]['rng'] = attVal;
-                if (end<max) {
-                    window.filterObj[filtAtt]['type'] = 'ebtw';
+        document.getElementById(inpDiv).value = val;
+        nm=new Array();
+        var filterCats= $('#'+divName).parentsUntil('.tab-pane','.list-group-item__body');
+        for (var i=0;i<filterCats.length;i++){
+            var ind = filterCats.length-1-i;
+            nm.push(filterCats[ind].id);
+        }
+        nm.push(divName);
+        filtAtt = nm.join('.')+ '_rng';
+        if (reset) {
+            if (  (window.filterObj.hasOwnProperty(filtAtt)) && (window.filterObj[filtAtt].hasOwnProperty('rng')) ) {
+                delete window.filterObj[filtAtt]['rng'];
+                if ( 'none' in window.filterObj[filtAtt]){
+                    window.filterObj[filtAtt]['type']='none';
                 }
                 else{
-                    window.filterObj[filtAtt]['type'] = 'ebtwe';
+                    delete window.filterObj[filtAtt];
                 }
             }
-
-            if (updateNow) {
-                mkFiltText();
-                updateFacetsData(true);
+        }
+        else {
+            var attVal = [];
+            if (isInt) {
+                attVal = [parseInt(strt), parseInt(end)];
             }
-        };
+            else {
+                attVal = [parseFloat(strt), parseFloat(end)];
+                }
 
-    //window.filterCollectionByText() = function(){
-      //  collList = $('.collection')
+            if (!(filtAtt in window.filterObj)){
+                window.filterObj[filtAtt] = new Object();
+            }
+            window.filterObj[filtAtt]['rng'] = attVal;
+            if (end<max) {
+                window.filterObj[filtAtt]['type'] = 'ebtw';
+            }
+            else{
+                window.filterObj[filtAtt]['type'] = 'ebtwe';
+            }
+        }
 
-   // };
+        if (updateNow) {
+            mkFiltText();
+            updateFacetsData(true);
+        }
+     };
 
-// Show more/less links on categories with >6 fiilters
 
-         var mkFiltText = function () {
-            var hasTcga = false;
-            var tcgaColSelected = false;
-            if ((window.filterObj.hasOwnProperty('Program')) && (window.filterObj.Program.indexOf('TCGA')>-1)){
-                tcgaColSelected = true;
-                $('#tcga_clinical_heading').children('a').removeClass('disabled');
-             } else{
+
+    var mkFiltText = function () {
+        var hasTcga = false;
+        var tcgaColSelected = false;
+        if ((window.filterObj.hasOwnProperty('Program')) && (window.filterObj.Program.indexOf('TCGA')>-1)){
+            tcgaColSelected = true;
+            $('#tcga_clinical_heading').children('a').removeClass('disabled');
+        }
+        else
+            {
                 $('#tcga_clinical_heading').children('a').addClass('disabled');
                 if (!($('#tcga_clinical_heading').children('a')).hasClass('collapsed')){
                     $('#tcga_clinical_heading').children('a').click();
                 }
             }
 
-            var curKeys = Object.keys(filterObj).sort();
-            oStringA = new Array();
-            var collection = new Array();
-
-            for (i = 0; i < curKeys.length; i++) {
-                var addKey = true;
-                var curKey = curKeys[i];
-                /* if ((curKey === 'collection_id') && (filterObj[curKey] === tcgaColls)) {
-                    continue;
-                } */
-                if (curKey.startsWith('Program')) {
-                    curArr = filterObj[curKey];
-                    for (var j = 0; j < curArr.length; j++) {
-                        if (!(('Program.' + curArr[j]) in filterObj)) {
-                            var colName=$('#'+curArr[j]).filter('.collection_name')[0].innerText;
-                            collection.push(colName);
-                        }
-                    }
-                } else if (curKey.endsWith('_rng')) {
-                    var realKey = curKey.substring(0, curKey.length - 4).split('.').pop();
-                    var disp = $('#' + realKey + '_heading').children().children('.attDisp')[0].innerText;
-                    if (curKey.startsWith('tcga_clinical') && tcgaColSelected) {
-                        disp = 'tcga.' + disp;
-                        hasTcga = true;
-                    } else if (curKey.startsWith('tcga_clinical') && !tcgaColSelected) {
-                        addKey = false;
-                        break;
-                    }
-                    if (addKey) {
-                        var fStr = '';
-                        if ('rng' in filterObj[curKey]) {
-                            fStr += filterObj[curKey]['rng'][0].toString() + '-' + (filterObj[curKey]['rng'][1]).toString();
-                        }
-                        if (('rng' in filterObj[curKey]) && ('none' in filterObj[curKey])) {
-                            fStr += ', ';
-                        }
-                        if ('none' in filterObj[curKey]) {
-                            fStr += 'None';
-                        }
-
-                        var nstr = '<span class="filter-type">' + disp + '</span> IN (<span class="filter-att">' + fStr + '</span>)';
-                        oStringA.push(nstr);
-                    }
-                } else {
-                    var realKey = curKey.split('.').pop();
-
-                    var disp = $('#' + realKey + '_heading').children().children('.attDisp')[0].innerText;
-                    if (curKey.startsWith('tcga_clinical') && tcgaColSelected) {
-                        disp = 'tcga.' + disp;
-                        hasTcga = true;
-                    } else if (curKey.startsWith('tcga_clinical') && !tcgaColSelected) {
-                        addKey = false;
-                        break;
-                    }
-
-                    if (addKey) {
-                        var valueSpans = $('#' + realKey + '_list').children().children().children('input:checked').siblings('.value');
-                        oVals = new Array();
-                        valueSpans.each(function () {
-                            oVals.push($(this).text())
-                        });
-
-                        var oArray = oVals.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
-                        nstr = '<span class="filter-type">' + disp + '</span>';
-                        nstr += 'IN (' + oArray.join("") + ')';
-                        oStringA.push(nstr);
-
-                    }
-
-                }
-
-
-            }
-            if (hasTcga && tcgaColSelected) {
-                    $('#search_def_warn').show();
-                } else {
-                    $('#search_def_warn').hide();
-                }
-            if (collection.length>0){
-                var oArray = collection.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
-                nstr = '<span class="filter-type">Collection</span>';
-                nstr += 'IN (' + oArray.join("") + ')';
-                oStringA.unshift(nstr);
-            }
-
-            if (oStringA.length > 0) {
-                var oString = oStringA.join(" AND");
-                document.getElementById("search_def").innerHTML = '<p>' + oString + '</p>';
-                 document.getElementById('filt_txt').value=oString;
-            } else {
-                document.getElementById("search_def").innerHTML = '<span class="placeholder">&nbsp;</span>';
-                 document.getElementById('filt_txt').value="";
-            }
-
-
-
-            //alert(oString);
-        };
-
-        var mkFiltTextAlt = function () {
-
-            var curKeys = Object.keys(filterObj).sort();
-            outStr="";
-            oStringA = new Array();
-            oStringClinA = new Array();
-             var collection = new Array();
-             var collectionTcga = new Array();
-            for (i = 0; i < curKeys.length; i++) {
-
-                var curKey = curKeys[i];
-                /* if ((curKey === 'collection_id') && (filterObj[curKey] === tcgaColls)) {
-                    continue;
-                } */
-                if (curKey.startsWith('Program')){
-                    var hasCollection = true;
-                     curArr= filterObj[curKey];
-                     for (var j=0;j<curArr.length;j++){
-                         if ( ! ( ('Program.'+curArr[j]) in filterObj)){
-                             if ( (curArr[j]==='tcga') || (curArr[j].startsWith('tcga_'))){
-                                 collectionTcga.push(curArr[j]);
-                             }
-                             else{
-                               collection.push(curArr[j]);
-                             }
-
-                         }
-                     }
-                }
-                else{
-                     if (curKey.endsWith('_rng')) {
-                        var realKey=curKey.substring(0, curKey.length-4).split('.').pop();
-                        var disp = $('#'+realKey+'_heading').children()[0].innerText;
-                        var fStr='';
-                        if ('rng' in filterObj[curKey]){
-                            fStr += filterObj[curKey]['rng'][0].toString()+'-'+(filterObj[curKey]['rng'][1] + 1).toString();
-                        }
-                        if (('rng' in filterObj[curKey]) && ('none' in filterObj[curKey])){
-                            fStr+=', ';
-                        }
-                        if ('none' in filterObj[curKey]){
-                            fStr+='None';
-                        }
-
-
-                        var nstr = '<span class="filter-type">'+disp+'</span> IN (<span class="filter-att">' + fStr + '</span>)';
-
-                    } else {
-                        var realKey = curKey.split('.').pop()
-                        var disp = $('#' + realKey + '_heading').children()[0].innerText;
-
-                        var valueSpans = $('#' + realKey + '_list').children().children().children('input:checked').siblings('.value');
-                        oVals = new Array();
-                        valueSpans.each(function () {
-                            oVals.push($(this).text())
-                        });
-
-                        var oArray = oVals.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
-
-
-                        //var nstr=disp+": "
-                        //nstr += oArray.join(", &ensp; ");
-                        nstr = '<span class="filter-type">' + disp + '</span>';
-                        nstr += 'IN (' + oArray.join("") + ')';
-                    }
-
-                    if (curKey.startsWith('tcga_clinical')) {
-                        oStringClinA.push(nstr);
-                    }
-                    else{
-                        oStringA.push(nstr);
+        var curKeys = Object.keys(filterObj).sort();
+        oStringA = new Array();
+        var collection = new Array();
+        for (i = 0; i < curKeys.length; i++) {
+            var addKey = true;
+            var curKey = curKeys[i];
+            if (curKey.startsWith('Program')) {
+                curArr = filterObj[curKey];
+                for (var j = 0; j < curArr.length; j++) {
+                    if (!(('Program.' + curArr[j]) in filterObj)) {
+                        var colName=$('#'+curArr[j]).filter('.collection_name')[0].innerText;
+                        collection.push(colName);
                     }
                 }
             }
-
-             if (oStringClinA.length>0){
-                 if ((collection.length ==0) && (collectionTcga.length ===0)){
-                    collection=['ispy1','lidc_idri','qin_headneck'];
-                    collectionTcga=['tcga_blca','tcga_brca','tcga_cesc','tcga_coad','tcga_esca','tcga_gbm','tcga_hnsc','tcga_kich','tcga_kirc','tcga_kirp','tcga_lgg','tcga_lihc','tcga_luad','tcga_lusc','tcga_ov','tcga_prad','tcga_read','tcga_sarc','tcga_stad','tcga_thca','tcga_ucec'];
+            else if (curKey.endsWith('_rng')) {
+                var realKey = curKey.substring(0, curKey.length - 4).split('.').pop();
+                var disp = $('#' + realKey + '_heading').children().children('.attDisp')[0].innerText;
+                if (curKey.startsWith('tcga_clinical') && tcgaColSelected) {
+                    disp = 'tcga.' + disp;
+                    hasTcga = true;
+                } else if (curKey.startsWith('tcga_clinical') && !tcgaColSelected) {
+                    addKey = false;
+                    break;
                 }
+                if (addKey) {
+                    var fStr = '';
+                    if ('rng' in filterObj[curKey]) {
+                        fStr += filterObj[curKey]['rng'][0].toString() + '-' + (filterObj[curKey]['rng'][1]).toString();
+                    }
+                    if (('rng' in filterObj[curKey]) && ('none' in filterObj[curKey])) {
+                        fStr += ', ';
+                    }
+                    if ('none' in filterObj[curKey]) {
+                        fStr += 'None';
+                    }
 
-
-            }
-            else{
-                collection=collection.concat(collectionTcga).sort();
-                collectionTcga=[];
-            }
-
-
-
-            if ( (collection.length>0) && (collectionTcga.length>0) && (oStringA.length>0)){
-                outStr="{"
-            }
-            if (collection.length>0){
-                var oArray = collection.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
-                nstr = '<span class="filter-type">Collection</span>';
-                nstr += 'IN (' + oArray.join("") + ')';
-                outStr+=nstr;
-            }
-            if (collection.length>0 && collectionTcga.length>0){
-                outStr+=" OR (";
-            }
-            if (collectionTcga.length>0){
-                var oArray = collectionTcga.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
-                nstr = '<span class="filter-type">Collection</span>';
-                nstr += 'IN (' + oArray.join("") + ')';
-                outStr+=nstr+" AND ";
-                outStr+=oStringClinA.join(" AND ")
-
-            }
-
-            if (collection.length>0 && collectionTcga.length>0){
-                outStr+=")";
-
-            }
-            if ( (collection.length>0) && (collectionTcga.length>0) && (oStringA.length>0)){
-                outStr+="}";
-            }
-
-            if ((collection.length>0 || collectionTcga.length>0) && (oStringA.length > 0)){
-                outStr+=" AND ";
-            }
-
-
-            if (oStringA.length > 0) {
-                var oString = oStringA.join(" AND");
-                outStr+=oString;
-
-            }
-            document.getElementById("search_def").innerHTML = '<p>' + outStr + '</p>';
-            //else {
-            //    document.getElementById("search_def").innerHTML = '<span class="placeholder">&nbsp;</span>';
-            //}
-
-            //alert(oString);
-        };
-
-        window.showGraphs = function(selectElem){
-            $(selectElem).parent().siblings('.graph-set').show();
-            $(selectElem).parent().siblings('.less-graphs').show();
-            $(selectElem).parent().hide();
-        }
-        window.hideGraphs = function(selectElem){
-            $(selectElem).parent().siblings('.graph-set').hide();
-            $(selectElem).parent().siblings('.more-graphs').show();
-            $(selectElem).parent().hide();
-        }
-
-        window.toggleGraphOverFlow = function(id, showMore){
-            if (showMore) {
-                $('.' + id).parent().find('.more-graphs').hide();
-                $('.' + id).parent().find('.less-graphs').show();
-                $('.' + id).find('.chart-overflow').removeClass('hide-chart');
+                    var nstr = '<span class="filter-type">' + disp + '</span> IN (<span class="filter-att">' + fStr + '</span>)';
+                    oStringA.push(nstr);
+                }
             }
             else {
-                $('.' + id).parent().find('.more-graphs').show();
-                $('.' + id).parent().find('.less-graphs').hide();
-                $('.' + id).find('.chart-overflow').addClass('hide-chart')
+                var realKey = curKey.split('.').pop();
+                var disp = $('#' + realKey + '_heading').children().children('.attDisp')[0].innerText;
+                if (curKey.startsWith('tcga_clinical') && tcgaColSelected) {
+                    disp = 'tcga.' + disp;
+                    hasTcga = true;
+                } else if (curKey.startsWith('tcga_clinical') && !tcgaColSelected) {
+                    addKey = false;
+                    break;
+                }
+                if (addKey) {
+                    var valueSpans = $('#' + realKey + '_list').children().children().children('input:checked').siblings('.value');
+                    oVals = new Array();
+                    valueSpans.each(function () {
+                        oVals.push($(this).text())
+                    });
+
+                    var oArray = oVals.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
+                    nstr = '<span class="filter-type">' + disp + '</span>';
+                    nstr += 'IN (' + oArray.join("") + ')';
+                    oStringA.push(nstr);
+
+                }
             }
 
         }
+        if (hasTcga && tcgaColSelected) {
+            $('#search_def_warn').show();
+        } else {
+            $('#search_def_warn').hide();
+        }
+        if (collection.length>0){
+            var oArray = collection.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
+            nstr = '<span class="filter-type">Collection</span>';
+            nstr += 'IN (' + oArray.join("") + ')';
+            oStringA.unshift(nstr);
+        }
+        if (oStringA.length > 0) {
+            var oString = oStringA.join(" AND");
+            document.getElementById("search_def").innerHTML = '<p>' + oString + '</p>';
+            document.getElementById('filt_txt').value=oString;
+        } else {
+            document.getElementById("search_def").innerHTML = '<span class="placeholder">&nbsp;</span>';
+            document.getElementById('filt_txt').value="";
+        }
+
+    };
+
+
+    window.showGraphs = function(selectElem){
+        $(selectElem).parent().siblings('.graph-set').show();
+        $(selectElem).parent().siblings('.less-graphs').show();
+        $(selectElem).parent().hide();
+    }
+    window.hideGraphs = function(selectElem){
+        $(selectElem).parent().siblings('.graph-set').hide();
+        $(selectElem).parent().siblings('.more-graphs').show();
+        $(selectElem).parent().hide();
+    }
+
+    window.toggleGraphOverFlow = function(id, showMore){
+        if (showMore) {
+            $('.' + id).parent().find('.more-graphs').hide();
+            $('.' + id).parent().find('.less-graphs').show();
+            $('.' + id).find('.chart-overflow').removeClass('hide-chart');
+        }
+        else {
+            $('.' + id).parent().find('.more-graphs').show();
+            $('.' + id).parent().find('.less-graphs').hide();
+            $('.' + id).find('.chart-overflow').addClass('hide-chart')
+        }
+    }
 
         window.showMoreGraphs = function (graphClass, height) {
             $('.'+graphClass).parent().find('.more-graphs').hide();
@@ -495,9 +333,6 @@ require([
                 }
             }
 
-            if (parStr.startsWith('tcga_clinical')){
-                checkTcga();
-            }
             var slideNm = $(elem).parent()[0].id+"_slide";
             mkFiltText();
 
@@ -716,8 +551,6 @@ require([
                         delete window.selItems.selCases[projId];
                     }
                     curRow.classList.add('hide');
-                    curRow.classList.remove("selected_grey");
-
                 }
             }
             window.resetTableControls($('#projects_table'), true, 0);
@@ -1092,7 +925,6 @@ require([
                         $('#' + casetableId).append(newHtml);
 
                         if (refreshAfterFilter && (curSelCasesDic.hasOwnProperty(projectId)) && (curSelCasesDic[projectId].hasOwnProperty(patientId)) ){
-                            $('#' + casetableId).find('#'+rowId).addClass("selected_grey");
                             if ( !(newSelCases.hasOwnProperty(projectId))){
                                 newSelCases[projectId] = new Array();
                             }
@@ -1308,7 +1140,6 @@ require([
 
                         $('#' + tableId).append(newHtml);
                         if ( !isSeries && refreshAfterFilter && (patientId in curSelStudiesDic) && (studyId in curSelStudiesDic[patientId])) {
-                            $('#' + tableId).find('#'+ rowId).addClass("selected_grey");
                             if (!(patientId in newSelStudies)) {
                                 newSelStudies[patientId] = new Array();
                             }
@@ -1591,6 +1422,7 @@ require([
                 }
             }
             updateFilterSelections('program_set', {'unfilt':reformDic});
+            updateColl();
         }
         var updateCollectionTotals_old = function (listId, progDic) {
             //dic.val dic.projects
@@ -2485,31 +2317,6 @@ require([
             }
         };
 
-        var checkTcga = function(){
-             if ( !('Program' in window.filterObj) ){
-                    window.filterObj['Program'] = new Array();
-                }
-                if (window.filterObj['Program'].indexOf('TCGA')<0) {
-                    window.filterObj['Program'].push('TCGA');
-                    window.filterObj['Program.TCGA'] = ['tcga_blca','tcga_brca','tcga_cesc','tcga_coad','tcga_esca','tcga_gbm','tcga_hnsc','tcga_kich','tcga_kirc','tcga_kirp','tcga_lgg','tcga_lihc','tcga_luad','tcga_lusc','tcga_ov','tcga_prad','tcga_read','tcga_sarc','tcga_stad','tcga_thca','tcga_ucec'];
-                    $('#TCGA_heading').parent().find('input:checkbox').prop('checked',true);
-                    $('#TCGA_heading').parent().find('input:checkbox').prop('indeterminate',false);
-                }
-
-        };
-
-        var resetTcgaFilters = function(){
-            if ( ('Program' in window.filterObj) && (window.filterObj['Program'].indexOf('TCGA')<0 )){
-                $('#tcga_clinical').find('input:checkbox').prop('checked',false);
-                setSlider('age_at_diagnosis_slide',true,0,0,true, false);
-                var attKey =  Object.keys(window.filterObj);
-                for (att in attKey){
-                    if (attKey[att].startsWith('tcga_clinical')){
-                        delete(window.filterObj[attKey[att]]);
-                    }
-                }
-            }
-        };
 
         var checkFilters = function(filterElem) {
             var checked = $(filterElem).prop('checked');
@@ -2562,10 +2369,6 @@ require([
                     checkBox.indeterminate = false;
                 }
 
-                if ( (checked) && (filtnm ==='tcga_clinical') && !is_cohort){
-                    checkTcga();
-                }
-
                 if ((checked) && (curCat.length>0) && hasCheckBox  ){
                     if (!(checkBox.indeterminate)) {
                         checkBox.checked = true;
@@ -2576,12 +2379,6 @@ require([
                     if (filterObj[curCat].indexOf(filtnm)<0){
                         filterObj[curCat].push(filtnm)
                     }
-                    if ((ind ===0) && (curCat.startsWith('Program'))){
-                       //resetTcgaFilters();
-                    }
-                    /* if ( allChecked && (i === (filterCats.length-1)) && (numCheckBoxes>1)) {
-                        delete filterObj[curCat];
-                    }*/
                 }
 
                 if (!checked && ( (ind===0) || ( (ind===1) && hasCheckBox && noneChecked)) ){
@@ -2595,9 +2392,6 @@ require([
                         }
                    }
 
-                   if ((ind ===0) && (curCat.startsWith('Program'))){
-                       //resetTcgaFilters();
-                    }
                    if (curCat.length>0){
                      curCat+="."
                      }
@@ -2649,8 +2443,6 @@ require([
         var tableSortBindings = function (filterId) {
             $('#' + filterId).find('.fa-caret-up, .fa-caret-down').on('click', function () {
                 var sorter = this;
-                $(this).parent().parent().parent().find('.fa-caret-up, .fa-caret-down').removeClass('selected_grey');
-                $(this).addClass('selected_grey');
                 var asc = false;
                 if (sorter.classList.contains('fa-caret-up')) {
                     asc = true;
