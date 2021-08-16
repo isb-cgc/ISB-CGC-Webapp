@@ -551,8 +551,6 @@ require([
                         delete window.selItems.selCases[projId];
                     }
                     curRow.classList.add('hide');
-                    curRow.classList.remove("selected_grey");
-
                 }
             }
             window.resetTableControls($('#projects_table'), true, 0);
@@ -927,7 +925,6 @@ require([
                         $('#' + casetableId).append(newHtml);
 
                         if (refreshAfterFilter && (curSelCasesDic.hasOwnProperty(projectId)) && (curSelCasesDic[projectId].hasOwnProperty(patientId)) ){
-                            $('#' + casetableId).find('#'+rowId).addClass("selected_grey");
                             if ( !(newSelCases.hasOwnProperty(projectId))){
                                 newSelCases[projectId] = new Array();
                             }
@@ -1143,7 +1140,6 @@ require([
 
                         $('#' + tableId).append(newHtml);
                         if ( !isSeries && refreshAfterFilter && (patientId in curSelStudiesDic) && (studyId in curSelStudiesDic[patientId])) {
-                            $('#' + tableId).find('#'+ rowId).addClass("selected_grey");
                             if (!(patientId in newSelStudies)) {
                                 newSelStudies[patientId] = new Array();
                             }
@@ -2447,8 +2443,6 @@ require([
         var tableSortBindings = function (filterId) {
             $('#' + filterId).find('.fa-caret-up, .fa-caret-down').on('click', function () {
                 var sorter = this;
-                $(this).parent().parent().parent().find('.fa-caret-up, .fa-caret-down').removeClass('selected_grey');
-                $(this).addClass('selected_grey');
                 var asc = false;
                 if (sorter.classList.contains('fa-caret-up')) {
                     asc = true;
