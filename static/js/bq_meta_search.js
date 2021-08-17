@@ -477,7 +477,7 @@ require([
             if (row.child.isShown() && tr.hasClass('useful-join-shown')) {
                 // This row is already open - close it
                 row.child.hide();
-                tr.removeClass('useful-join-shown');
+                tr.removeClass('shown useful-join-shown');
             }
             else {
                 // Open this row
@@ -536,7 +536,7 @@ require([
                 });
 
                 set_gcp_open_btn($(tr).next('tr').find('.detail-table'));
-                tr.addClass('useful-join-shown');
+                tr.addClass('shown useful-join-shown');
                 tr.removeClass('preview-shown');
                 tr.removeClass('details-shown');
             }
@@ -568,6 +568,7 @@ require([
                 set_gcp_open_btn($(tr).next('tr').find('.detail-table'));
                 tr.addClass('shown details-shown');
                 tr.removeClass('preview-shown');
+                tr.removeClass('useful-join-shown');
             }
         });
         $('#bq-meta-form').find('i.fa-info-circle').tooltip();
@@ -590,6 +591,7 @@ require([
             row.child(format_tbl_preview(schema_fields, tbl_data)).show();
         }
         tr.removeClass('details-shown');
+        tr.removeClass('useful-join-shown');
         td.find('.preview-loading').hide();
         tr.addClass('shown preview-shown');
     };
