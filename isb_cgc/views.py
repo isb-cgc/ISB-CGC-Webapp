@@ -619,8 +619,8 @@ def path_report(request, report_file=None):
             messages.error(
                 "Error while attempting to display this pathology report: a report file name was not provided.")
             return redirect(reverse('cohort_list'))
-
-        response = requests.get("https://nci-crdc.datacommons.io/user/data/download/{}?protocol=gs".format(report_file))
+        uri = "https://nci-crdc.datacommons.io/user/data/download/{}?protocol=gs".format(report_file)
+        response = requests.get(uri)
 
         if response.status_code != 200:
             logger.warning("[WARNING] From IndexD: {}".format(response.text))
@@ -634,6 +634,7 @@ def path_report(request, report_file=None):
     except Exception as e:
         logger.error("[ERROR] While trying to load Pathology report:")
         logger.exception(e)
+        logger.error("Attempted URI: {}".format(uri))
         return render(request, '500.html')
 
     return render(request, template, context)
@@ -670,10 +671,11 @@ def contact_us(request):
     return render(request, 'isb_cgc/contact_us.html')
 
 
-def bq_meta_search(request):
+def bq_meta_search(request, table_id=""):
     bq_filter_file_name = 'bq_meta_filters.json'
     bq_filter_file_path = BQ_ECOSYS_BUCKET + bq_filter_file_name
     bq_filters = requests.get(bq_filter_file_path).json()
+    bq_filters['selected_table_full_id'] = table_id
     return render(request, 'isb_cgc/bq_meta_search.html', bq_filters)
 
 
@@ -681,6 +683,17 @@ def bq_meta_data(request):
     bq_meta_data_file_name = 'bq_meta_data.json'
     bq_meta_data_file_path = BQ_ECOSYS_BUCKET + bq_meta_data_file_name
     bq_meta_data = requests.get(bq_meta_data_file_path).json()
+    bq_useful_join_file_name = 'bq_useful_join.json'
+    bq_useful_join_file_path = BQ_ECOSYS_BUCKET + bq_useful_join_file_name
+    bq_useful_join = requests.get(bq_useful_join_file_path).json()
+    for bq_meta_data_row in bq_meta_data:
+        useful_joins = []
+        row_id = bq_meta_data_row['id']
+        for join in bq_useful_join:
+            if join['id'] == row_id:
+                useful_joins = join['joins']
+                break
+        bq_meta_data_row['usefulJoins'] = useful_joins
     return JsonResponse(bq_meta_data, safe=False)
 
 def programmatic_access_page(request):

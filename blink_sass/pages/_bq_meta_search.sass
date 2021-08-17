@@ -243,6 +243,11 @@
                         border: 1px solid #dddddd
                         table td
                             border: 1px solid #efefef
+                &.useful-join-table
+                    th, td
+                        border-bottom: 1px solid lightgrey
+                        padding-bottom: 3px
+                        vertical-align: top
             //&.tbl-preview
             .tbl-preview
                 &:before
@@ -258,6 +263,12 @@
                     content: "\f055"
                     color: #3A79B8
                     cursor: pointer
+            a.useful-join-detail
+                color: #3A79B8
+                cursor: pointer
+            a.joined-table-link
+                color: #3A79B8
+                cursor: pointer
         &.details-shown
             td.details-control
                 &:before
@@ -269,6 +280,10 @@
             td > .tbl-preview
                 &:before
                     color: $isb-warning
+
+    .joined-table-link
+        color: #3A79B8
+        cursor: pointer
 
     .modal ul
         list-style: inherit
