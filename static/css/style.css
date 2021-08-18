@@ -2883,6 +2883,7 @@ html {
   background-color: #4e1a61;
 }
 
+
 #landing .modality.option2 div {
   background-color: rgb(204 220 227);
   color: #4b616b;
@@ -2904,16 +2905,12 @@ html {
 }
 
 #landing .option2 .modality-panel {
-  padding-top: 15px;
+  padding: 5px 20px;
   border: 1px solid #4b616b;
-  border-radius: 3px 3px 0px 0px;
+    border-radius: 3px 3px 0px 0px;
   justify-content: end;
+  margin-top: 35px;
 }
-
-#landing .modality-heading {
-  justify-content: end;
-}
-
 
 #landing .option1 .modality-panel {
   padding: 5px 20px;
@@ -2951,7 +2948,11 @@ html {
   padding-bottom: 15px;
 }
 
-#landing .modality-nav-tabs {
+#landing .modality-heading {
+  text-align: left !important;
+}
+
+#modality-nav-tabs {
     position: relative;
     background-color: inherit;
     height: 100%;
@@ -2961,44 +2962,8 @@ html {
     border: 0;
 }
 
-#landing .spec-tabs li {
-  padding-left: 10px;
-  margin-right: 10px;
-  background-color: inherit;
-  border: 1px solid #4b616b;
-  border-radius: 3px 3px 3px 3px;
-}
-
-#landing .spec-tabs li a {
-  display: inline-block;
-  padding-left: 0px;
-  margin-left: 15px;
-  font-weight: bold;
-}
-
-#landing .spec-tabs li a:hover {
-  color: #413067;
-}
-
-#landing .spec-tabs li.active a:hover {
-  color: #000;
-}
-
-#landing .spec-tabs li a::after {
-  background: transparent;
-}
-
-#landing .spec-tabs li i {
-  display: none;
-  margin-right: -10px;
-}
-
-#landing .spec-tabs li.active i {
-  display: inline-block;
-}
-
-#landing .modality-nav-tabs li {
-    width: 33.33%;
+#modality-nav-tabs li {
+    width: 25%;
     background-color: inherit;
     text-transform: none !important;
     color: #000;
@@ -3006,54 +2971,42 @@ html {
     margin-top: -1px;
 }
 
-#landing .spec-tabs li {
-  width: 25%;
-  margin-bottom: -2px;
-  border-bottom: 0;
-}
-
-#landing .option1 .modality-nav-tabs li {
+.option1 #modality-nav-tabs li {
   background-color: #dcdcdc;
   padding-top: 5px;
   box-shadow: 0px 0px 5px #000000;
   margin-top: 0;
 }
 
-#landing .option1 .modality-nav-tabs li a {
+.option1 #modality-nav-tabs li a {
     border-top: 5px solid #3d884e;
 }
 
-#landing .option1 .modality-nav-tabs li.active a {
+.option1 #modality-nav-tabs li.active a {
     border-top: 0;
 }
 
-#landing .option1 .modality-nav-tabs li.active a:after {
+.option1 #modality-nav-tabs li.active a:after {
     height: 4px;
 }
 
-#landing .option2 .modality-nav-tabs li {
+.option2 #modality-nav-tabs li {
     border: 1px solid #4b616b;
     border-radius: 0px 0px 3px 3px;
     border-top: none;
 }
 
-#landing .option2 .modality-nav-tabs li.active a:after {
+.option2 #modality-nav-tabs li.active a:after {
     background-color: #7d4c84;
 }
 
-#landing .modality-nav-tabs:before {
+#modality-nav-tabs:before {
     display: inline-block;
 }
 
-#landing .modality-nav-tabs li:first-child {
-    margin-right: 3px;
-}
 
-#landing .modality-nav-tabs li:last-child {
-    margin-left: 3px;
-}
 
-#landing .modality-nav-tabs li>a {
+#modality-nav-tabs li>a {
     text-transform: none !important;
     background-color: inherit;
     color: #000;
@@ -3061,17 +3014,17 @@ html {
     border: 0;
 }
 
-#landing .option2 .modality-nav-tabs li.active, #landing .spec-tabs li.active {
+.option2 #modality-nav-tabs li.active {
     background-color: rgb(204 220 227);
 }
 
-#landing .option1 .modality-nav-tabs li.active {
+.option1 #modality-nav-tabs li.active {
     background-color: #fff;
     color: #000;
     border-top: 0;
 }
 
-#landing .option2 .modality-nav-tabs li.active>a {
+.option2 #modality-nav-tabs li.active>a {
     color: #4b616b;
 }
 
@@ -3080,10 +3033,6 @@ html {
   max-width: 100%;
   height: auto;
   border: 2px solid black;
-}
-
-#landing .modality-panel img.path-example {
-  width: 505px !important;
 }
 
 .dropdown .sign-in-dropdown {
