@@ -124,13 +124,12 @@ function($, d3, d3tip, vis_helpers) {
 
             // Munge Data
             var tree_data = {};
-            for (var i = 0; i < data.length; i++) {
-                if (clin_attr[data[i]['name']]) {
+            for (var i in data) {
+                if(data.hasOwnProperty(i) && clin_attr[data[i]['name']]) {
                     total = data[i].total;
                     tree_data[data[i]['name']] = data[i]['values']
                 }
             }
-
             // Calculate our pseudocount:
             var pcount = (total * 0.008) > 1 ? (total * 0.008) : 0;
 
