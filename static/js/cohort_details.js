@@ -902,30 +902,32 @@ require([
     });
 
 
+    $('#clear-all-yes-btn').on('click', function() {
+        let creationForm = $('#create-cohort-form');
+
+        let clearFiltersButton = $('.clear-filters');
+        clearFiltersButton.closest('.all-selected-filters').siblings('.selected-filters').find('.panel-body').empty();
+
+        // bug fix #2722
+        creationForm.find('#selected-filters p').hide();
+
+        clearFiltersButton.parents('.data-tab').find('.filter-panel input:checked').each(function() {
+            $(this).prop('checked', false);
+        });
+
+        creationForm.find('#selected-filters span').remove();
+
+        update_all_selected_filters_ui('#' + ACTIVE_PROGRAM_ID + '-data');
+
+        update_displays();
+    });
+
     var bind_widgets = function(program_data_selector,activeDataTab) {
 
         $(program_data_selector + ' .search-checkbox-list input[type="checkbox"]').on('change', filter_change_callback);
 
         $(program_data_selector + ' .clear-filters').on('click', function() {
-            let creationForm = $('#create-cohort-form');
-            $(this).closest('.all-selected-filters').siblings('.selected-filters').find('.panel-body').empty();
-
-            // bug fix #2722
-            creationForm.find('#selected-filters p').hide();
-
-            $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
-                $(this).prop('checked', false);
-            });
-
-            if (program_data_selector === '#isb-cgc-data') {
-                $('#paste-in-genes').siblings('div.token').find('a.close').trigger('click');
-            }
-
-            creationForm.find('#selected-filters span').remove();
-
-            update_all_selected_filters_ui('#' + ACTIVE_PROGRAM_ID + '-data');
-
-            update_displays();
+             $('#clear-all-warning-modal').modal('show');
         });
 
         // Show more/less links on categories with >6 fiilters
@@ -1299,9 +1301,14 @@ require([
     var update_all_selected_filters_ui = function(dataset_selector) {
         let all_selected_panel = $(dataset_selector + ' .all-selected-filters' + ' .panel-body');
         all_selected_panel.empty();
+
         let create_form_filters = $('#selected-filters');
+        let all_filters_count = 0;
+
         create_form_filters.children('p').each(function() {
-            if ($(this).find('span').length > 0) {
+            let dataset_filters_count = $(this).find('span').length;
+            if (dataset_filters_count > 0) {
+                all_filters_count += dataset_filters_count;
                 let program_id = $(this).prop('id').slice(0, -13);
                 let node_id =$(this).attr('node-id');
                 let dataset_name = $(this).find('h5').text();
@@ -1318,6 +1325,12 @@ require([
                 all_selected_panel.append(div);
             }
         });
+
+        if (all_filters_count > 0) {
+            $('.clear-filters').show();
+        } else {
+            $('.clear-filters').hide();
+        }
 
         $('.dataset-select-btn').click(function(e) {
             ACTIVE_PROGRAM_ID = $(e.target).attr('program-id');
