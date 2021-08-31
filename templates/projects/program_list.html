@@ -14,7 +14,6 @@
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
     </ol>
     <h1 class="page-header pull-left">Programs</h1>
-    <a href="{% url 'program_upload' %}" class="btn btn-primary pull-right"><i class="fa fa-cloud-upload"></i>Upload Data</a>
 </div>
 {% endblock %}
 {% block content %}
@@ -108,8 +107,7 @@
                     </tbody>
                 </table>
                 {% else %}
-                <p class="center space-top-10">You don't have any saved programs yet</p>
-                <p class="center"><a href="{% url 'program_upload' %}" class="btn btn-primary"><i class="fa fa-cloud-upload"></i>Upload Program Data</a></p>
+                <p class="center space-top-10">You don't have any saved programs.</p>
                 {% endif %}
             </div>
             <div role="tabpanel" class="tab-pane {% if is_public %} active {% endif %}" id="public-programs-list">
