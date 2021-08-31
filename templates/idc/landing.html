@@ -34,7 +34,7 @@
                         <strong>Get started today!</strong>
                         <strong> Contact us about setting up your own Google Cloud Platform Project with <a
                                 href="https://learn.canceridc.dev/introduction/requesting-gcp-cloud-credits"
-                                target="_blank">free cloud credits</a></strong>
+                                target="_blank" rel="noopener noreferrer">free cloud credits</a></strong>
                     </div>
                     <div class="col-xs-1">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -47,7 +47,6 @@
         <div class="buttons row">
             <div class="container-fluid">
             <div class="col-lg-12 col-md-12 col-sm-12 buttons-col">
-
                 <a class="btn btn-collex" href="{% url 'collections' %}"><span><i class="fa fa-th-list"></i></span> Collections</a>
                 <a class="btn btn-explore" href="{% url 'explore_data' %}"><span><i class="fa fa-eye"></i></span> Exploration</a>
             </div>
@@ -58,24 +57,33 @@
             <div class="col-lg-4 col-md-5 col-sm-12">
                 <div class="modality option2">
                     <div class="modality-panel">
-                        <div class="modality-heading"><h3>RADIOLOGY</h3></div>
                         <div class="tab-content">
                             <div class="tab-pane active" id="ct-example">
+                                <div class="modality-heading"><h4>RADIOLOGY</h4></div>
                                 <a href="{{ DICOM_STORE_PATH }}1.3.6.1.4.1.14519.5.2.1.6279.6001.224985459390356936417021464571?seriesInstanceUID=1.2.276.0.7230010.3.1.3.0.57823.1553343864.578877,1.3.6.1.4.1.14519.5.2.1.6279.6001.273525289046256012743471155680"
                                    target="_blank" title="Click to see in IDC Viewer">
                                     <img class="ct-example example" data-study-id="1.3.6.1.4.1.14519.5.2.1.6279.6001.224985459390356936417021464571" src="{% static 'img/ct_ex.jpg' %}" />
                                 </a>
                             </div>
                             <div class="tab-pane" id="mr-example">
+                                <div class="modality-heading"><h4>RADIOLOGY</h4></div>
                                 <a href="{{ DICOM_STORE_PATH }}1.3.6.1.4.1.14519.5.2.1.1706.4001.149500105036523046215258942545?seriesInstanceUID=1.3.6.1.4.1.14519.5.2.1.1706.4001.315980779833795710131738723922"
                                    target="_blank" title="Click to see in IDC Viewer">
                                     <img class="mr-example example" data-study-id="1.3.6.1.4.1.14519.5.2.1.1706.4001.149500105036523046215258942545" src="{% static 'img/mr_ex.jpg' %}" />
                                 </a>
                             </div>
                             <div class="tab-pane" id="pet-example">
+                                <div class="modality-heading"><h4>RADIOLOGY</h4></div>
                                 <a href="{{ DICOM_STORE_PATH }}1.3.6.1.4.1.14519.5.2.1.2744.7002.950936925946327395356711739684?seriesInstanceUID=1.3.6.1.4.1.14519.5.2.1.2744.7002.746890305525203600008140092112,1.3.6.1.4.1.14519.5.2.1.2744.7002.304930022156956249911027532702,1.2.276.0.7230010.3.1.3.8323329.19624.1440005692.252349"
                                    target="_blank" title="Click to see in IDC Viewer">
                                     <img class="pet-example example" data-study-id="1.3.6.1.4.1.14519.5.2.1.2744.7002.950936925946327395356711739684" src="{% static 'img/pet_ex.jpg' %}" />
+                                </a>
+                            </div>
+                            <div class="tab-pane" id="path-example">
+                                <div class="modality-heading"><h4>PATHOLOGY</h4></div>
+                                <a href="{{ SLIM_VIEWER_PATH }}1.3.6.1.4.1.5962.99.1.2463087261.2121647220.1625960757917.3.0/series/1.3.6.1.4.1.5962.99.1.2463087261.2121647220.1625960757917.2.0"
+                                   target="_blank" rel="noopener noreferrer" title="Click to see in IDC SliM Viewer">
+                                    <img class="path-example example" data-study-id="1.3.6.1.4.1.5962.99.1.2463087261.2121647220.1625960757917.3.0" src="{% static 'img/path_ex.jpg' %}" />
                                 </a>
                             </div>
                         </div>
@@ -94,6 +102,11 @@
                         <li>
                             <a href="#pet-example" role="tab" data-toggle="tab">
                                 Positron Emission Tomography (PET)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#path-example" role="tab" data-toggle="tab">
+                                Slide Microscopy (SM)
                             </a>
                         </li>
                     </ul>

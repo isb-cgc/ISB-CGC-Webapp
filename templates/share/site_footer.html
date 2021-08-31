@@ -7,70 +7,30 @@
         <div class="row">
             <a href="/">Site Home</a>
             &nbsp; &nbsp; | &nbsp; &nbsp;
-            <a href="{% url 'privacy' %}" target="_blank">Privacy Policy</a>
-            &nbsp; &nbsp; | &nbsp;&nbsp;
-            <a href="{% url 'collaborators' %}" target="_blank">Team and Collaborators</a>
-            &nbsp; &nbsp; | &nbsp; &nbsp;
             <a href="mailto:support@canceridc.dev">Contact Us</a>
             &nbsp; &nbsp; | &nbsp; &nbsp;
-            <a class="external-link" href="" url="https://discourse.canceridc.dev"
-               data-toggle="modal" data-target="#external-web-warning">
-               Discourse <i class="fa fa-external-link external-link-icon" aria-hidden="true"></i>
-            </a>
-            &nbsp; &nbsp; | &nbsp; &nbsp;
-            <a href="https://www.cancer.gov/policies/accessibility" target="_blank">Accessibility</a>
-            &nbsp; &nbsp; | &nbsp; &nbsp;
-            <a href="https://www.cancer.gov/policies/disclaimer" target="_blank">Disclaimer</a>
-            &nbsp; &nbsp; | &nbsp; &nbsp;
-            <a href="https://www.cancer.gov/policies/foia" target="_blank">FOIA</a>
-        </div>
-        <div class="row">
-            <p><i><b>Pilot Application Version:</b> {{ APP_VERSION }}</i></p>
-            <p>{{ idc_info.name }} Version {{ idc_info.version_number }}
-                - {{ idc_info.date_active|date:"F d, Y" }}</p>
-            <p>Data hosted by IDC is subject to the <a href="https://wiki.cancerimagingarchive.net/x/c4hF" target="_blank">TCIA Data
-                Usage License and Citation Requirements</a></p>
-            <p class="acknowledgement">
-                <i>NCI Imaging Data Commons is supported by the contract number 19X037Q from Leidos
-                    Biomedical Research under Task Order HHSN26100071 from NCI.</i>
-            </p>
-        </div>
-        <div class="row">
-            <span class="social-media-item">
-                <a class="external-link" href="" url="https://www.youtube.com/channel/UCQxuVp3_3aTJZBA4zZLMQtQ"
-                   data-toggle="modal" data-target="#external-web-warning">
-                   &nbsp <i class="fa fa-youtube-play social-media-icon" aria-hidden="true"></i>Youtube
-                    <i class="fa fa-external-link external-link-icon" aria-hidden="true"></i>
-                </a>
-            </span>
-            &nbsp; &nbsp; | &nbsp; &nbsp;
-            <span class="social-media-item">
-                <a class="external-link" href="" url="http://github.com/ImagingDataCommons"
-                   data-toggle="modal" data-target="#external-web-warning">
-                   &nbsp <i class="fa fa-github-square social-media-icon" aria-hidden="true"></i>GitHub
-                    <i class="fa fa-external-link external-link-icon" aria-hidden="true"></i>
-                </a>
-            </span>
+            <a href="{% url 'privacy' %}" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
             &nbsp; &nbsp; | &nbsp;&nbsp;
-            <span class="social-media-item">
-                <a class="external-link" href="" url="https://twitter.com/CancerIDC"
-                   data-toggle="modal" data-target="#external-web-warning">
-                   &nbsp <i class="fa fa-twitter-square social-media-icon" aria-hidden="true"></i>Twitter
-                    <i class="fa fa-external-link external-link-icon" aria-hidden="true"></i>
-                </a>
-            </span>
+            <a href="https://www.cancer.gov/policies/accessibility" target="_blank" rel="noopener noreferrer">Accessibility</a>
+            &nbsp; &nbsp; | &nbsp; &nbsp;
+            <a href="https://www.cancer.gov/policies/foia" target="_blank" rel="noopener noreferrer">FOIA</a>
         </div>
         <div class="row">
-            <a href="https://www.hhs.gov/" target="_blank">U.S. Department of Health and Human Services</a>
+            <a href="https://www.hhs.gov/" target="_blank" rel="noopener noreferrer">U.S. Department of Health and Human Services</a>
             &nbsp; &nbsp; | &nbsp; &nbsp;
-            <a href="https://www.nih.gov/" target="_blank">National Institutes of Health</a>
-            &nbsp; &nbsp; | &nbsp;&nbsp;
-            <a href="https://www.cancer.gov/" target="_blank">National Cancer Institute</a>
+            <a href="https://www.nih.gov/" target="_blank" rel="noopener noreferrer">National Institutes of Health</a>
             &nbsp; &nbsp; | &nbsp; &nbsp;
-            <a href="https://www.usa.gov/" target="_blank">USA.gov</a>
+            <a href="https://www.cancer.gov/" target="_blank" rel="noopener noreferrer">National Cancer Institute</a>
+            &nbsp; &nbsp; | &nbsp; &nbsp;
+            <a href="https://www.usa.gov/" target="_blank" rel="noopener noreferrer">USA.gov</a>
         </div>
         <div class="row mat-toolbar-row">
             NIH... Turning Discovery Into Health ®
+        </div>
+        <div class="row">
+            <i><b>Pilot Application Version:</b> {{ APP_VERSION }}</i>
+            &nbsp; &nbsp; | &nbsp; &nbsp;
+            {{ idc_info.name }} Version {{ idc_info.version_number }} - {{ idc_info.date_active|date:"F d, Y" }}
         </div>
     </footer>
 

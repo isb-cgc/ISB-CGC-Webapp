@@ -27,7 +27,8 @@ google-cloud-storage==1.18.0
 django-session-security==2.6.5
 django-anymail[mailgun]
 djangorestframework==3.11.2
-# django-axes==5.5.0
+django-axes==5.20.0
+django-redis==5.0.0
 # If you are seeing an error about django-debug-toolbar not being installed,
 # the problem is almost certainly that your developer .env wasn't found
 # django-debug-toolbar should **only** be installed on local developer builds, so do

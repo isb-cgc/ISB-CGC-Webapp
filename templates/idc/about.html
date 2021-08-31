@@ -2,29 +2,63 @@
 {% load staticfiles %}
 
 {% block title %}
-    IDC|About
+    IDC | About
 {% endblock %}
 
 {% block description %}
     About IDC
 {% endblock %}
 
+{% block page_name %}about{% endblock %}
+
 {% block page_header %}
-<div class="container">
-    <ol class="breadcrumb">
-        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-    </ol>
-    <h1 class="page-header">About</h1>
-</div>
+    <div class="container-fluid">
+        <h3 class="pull-left">About</h3>
+    </div>
 {% endblock %}
 
 {% block content %}
-    <h4>This is a about page</h4>
+    <div class="container-fluid">
+        <div class ="row">
+            <div class="col-lg-12 col-md-12">
+                <div class="panel panel-default" role="panel panel-default">
+                    <div class="panel-body">
+                        <h5>About IDC</h5>
+                        <p>The National Cancer Institute (NCI)
+                        <a href="https://datacommons.cancer.gov/" target="_blank" rel="noreferrer nofollow">Cancer
+                        Research Data Commons (CRDC)</a> aims to establish a national cloud-based data science
+                        infrastructure. Imaging Data Commons (IDC) is a new data repository of CRDC supported by the
+                        Cancer Moonshot. The goal of IDC is to enable a broad spectrum of cancer researchers, with and
+                        without imaging expertise, to easily access and explore the value of de-identified imaging data
+                        and to support integrated analyses with non-imaging data utilizing CRDC Cloud Resources.
+                        </p>
+                        <p>&nbsp;</p>
+                        <h5>Data Submission to IDC</h5>
+                        <p>
+                            IDC only hosts public datasets. It does not support access limitations, such as, data
+                            embargoes or sequestration.
+                        </p>
+                        <p>
+                            Submitters of data to IDC must ensure that the data have been de-identified with respect to
+                            protected health information (PHI). Currently, IDC accepts data de-identified by
+                            <a href="https://www.cancerimagingarchive.net/" target="_blank" rel="noreferrer nofollow">The
+                            Cancer Imaging Archive (TCIA)</a>. Datasets de-identified by other data coordinating centers
+                            (DCC) may be considered but in such cases further information will be required.
+                        </p>
+                        <p>
+                        If you are interested in making your data available within IDC, please contact us by sending
+                        email to <a href="mailto:support@canceridc.dev">support@canceridc.dev</a>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block js_file %}
 	{{ block.super }}
-	<script src="{% static 'js/dashboard.js' %}"></script>
+	<script src="{% static 'js/news.js' %}"></script>
     <script>
     var showWarning = true;
     </script>

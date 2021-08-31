@@ -96,183 +96,120 @@ require([
         $('#rh_panel').addClass('col-md-9');
     };
 
-        window.setSlider = function (slideDiv, reset, strt, end, isInt, updateNow) {
-             parStr=$('#'+slideDiv).data("attr-par");
-             if (parStr.startsWith('tcga_clinical') && !(reset)){
-                checkTcga();
-            }
-            //var slideDiv = divName + "_slide";
-            var max = $('#' + slideDiv).slider("option", "max");
+    window.setSlider = function (slideDiv, reset, strt, end, isInt, updateNow) {
+        parStr=$('#'+slideDiv).data("attr-par");
+        var max = $('#' + slideDiv).slider("option", "max");
+        var divName = slideDiv.replace("_slide","");
+        if (reset) {
+            strt = $('#' + slideDiv).parent().attr('data-min');
+            end = $('#' + slideDiv).parent().attr('data-max');
+            $('#' + slideDiv).parent().removeClass('isActive');
+        }
+        else{
+            $('#' + slideDiv).parent().addClass('isActive');
+        }
+        $('#' + slideDiv).parent().attr('data-curminrng',strt);
+        $('#' + slideDiv).parent().attr('data-curmaxrng',end);
+        vals = [strt, end];
+        $('#' + slideDiv).find(".slide_tooltip").each(function(index){
+            $(this).text(vals[index].toString());
+        });
 
-            var divName = slideDiv.replace("_slide","");
+        $('#' + slideDiv).slider("values", "0", strt);
+        $('#' + slideDiv).slider("values", "1", end);
+        var inpDiv = slideDiv.replace("_slide", "_input");
+        var val = String(strt) + "-" + String(end);
 
-            if (reset) {
-                strt = $('#' + slideDiv).parent().attr('data-min');
-                end = $('#' + slideDiv).parent().attr('data-max');
-
-                $('#' + slideDiv).parent().removeClass('isActive');
-
-            }
-            else{
-                $('#' + slideDiv).parent().addClass('isActive');
-            }
-            $('#' + slideDiv).parent().attr('data-curminrng',strt);
-            $('#' + slideDiv).parent().attr('data-curmaxrng',end);
-
-             vals = [strt, end];
-
-            $('#' + slideDiv).find(".slide_tooltip").each(function(index){
-                $(this).text(vals[index].toString());
-            });
-
-            $('#' + slideDiv).slider("values", "0", strt);
-            $('#' + slideDiv).slider("values", "1", end);
-
-            var inpDiv = slideDiv.replace("_slide", "_input");
-            //var inpDiv = divName + "_input";
-            var val = String(strt) + "-" + String(end);
-
-            // $("#inp_age_slide").value="0-120";
-            document.getElementById(inpDiv).value = val;
-            nm=new Array();
-            var filterCats= $('#'+divName).parentsUntil('.tab-pane','.list-group-item__body');
-            for (var i=0;i<filterCats.length;i++){
-                var ind = filterCats.length-1-i;
-                nm.push(filterCats[ind].id);
-            }
-            nm.push(divName);
-            filtAtt = nm.join('.')+ '_rng';
-            if (reset) {
-                if (  (window.filterObj.hasOwnProperty(filtAtt)) && (window.filterObj[filtAtt].hasOwnProperty('rng')) ) {
-                    delete window.filterObj[filtAtt]['rng'];
-                    if ( 'none' in window.filterObj[filtAtt]){
-                        window.filterObj[filtAtt]['type']='none';
-                    }
-                    else{
-                        delete window.filterObj[filtAtt];
-                    }
-                }
-            } else {
-                var attVal = [];
-                if (isInt) {
-                    attVal = [parseInt(strt), parseInt(end)];
-
-                } else {
-                    attVal = [parseFloat(strt), parseFloat(end)];
-                }
-                //$(this).find('.slide_tooltip').text( ui.values[index].toString() );
-                if (!(filtAtt in window.filterObj)){
-                    window.filterObj[filtAtt] = new Object();
-                }
-                window.filterObj[filtAtt]['rng'] = attVal;
-                if (end<max) {
-                    window.filterObj[filtAtt]['type'] = 'ebtw';
+        document.getElementById(inpDiv).value = val;
+        nm=new Array();
+        var filterCats= $('#'+divName).parentsUntil('.tab-pane','.list-group-item__body');
+        for (var i=0;i<filterCats.length;i++){
+            var ind = filterCats.length-1-i;
+            nm.push(filterCats[ind].id);
+        }
+        nm.push(divName);
+        filtAtt = nm.join('.')+ '_rng';
+        if (reset) {
+            if (  (window.filterObj.hasOwnProperty(filtAtt)) && (window.filterObj[filtAtt].hasOwnProperty('rng')) ) {
+                delete window.filterObj[filtAtt]['rng'];
+                if ( 'none' in window.filterObj[filtAtt]){
+                    window.filterObj[filtAtt]['type']='none';
                 }
                 else{
-                    window.filterObj[filtAtt]['type'] = 'ebtwe';
+                    delete window.filterObj[filtAtt];
                 }
             }
-
-            if (updateNow) {
-                mkFiltText();
-                updateFacetsData(true);
+        }
+        else {
+            var attVal = [];
+            if (isInt) {
+                attVal = [parseInt(strt), parseInt(end)];
             }
-        };
+            else {
+                attVal = [parseFloat(strt), parseFloat(end)];
+                }
 
-// Show more/less links on categories with >6 fiilters
+            if (!(filtAtt in window.filterObj)){
+                window.filterObj[filtAtt] = new Object();
+            }
+            window.filterObj[filtAtt]['rng'] = attVal;
+            if (end<max) {
+                window.filterObj[filtAtt]['type'] = 'ebtw';
+            }
+            else{
+                window.filterObj[filtAtt]['type'] = 'ebtwe';
+            }
+        }
 
-         var mkFiltText = function () {
-            var hasTcga = false;
-            var tcgaColSelected = false;
-            if ((window.filterObj.hasOwnProperty('Program')) && (window.filterObj.Program.indexOf('TCGA')>-1)){
-                tcgaColSelected = true;
-                $('#tcga_clinical_heading').children('a').removeClass('disabled');
-             } else{
+        if (updateNow) {
+            mkFiltText();
+            updateFacetsData(true);
+        }
+     };
+
+
+
+    var mkFiltText = function () {
+        var hasTcga = false;
+        var tcgaColSelected = false;
+        if ((window.filterObj.hasOwnProperty('Program')) && (window.filterObj.Program.indexOf('TCGA')>-1)){
+            tcgaColSelected = true;
+            $('#tcga_clinical_heading').children('a').removeClass('disabled');
+        }
+        else
+            {
                 $('#tcga_clinical_heading').children('a').addClass('disabled');
                 if (!($('#tcga_clinical_heading').children('a')).hasClass('collapsed')){
                     $('#tcga_clinical_heading').children('a').click();
                 }
             }
 
-            var curKeys = Object.keys(filterObj).sort();
-            oStringA = new Array();
-            var collection = new Array();
-
-            for (i = 0; i < curKeys.length; i++) {
-                var addKey = true;
-                var curKey = curKeys[i];
-                /* if ((curKey === 'collection_id') && (filterObj[curKey] === tcgaColls)) {
-                    continue;
-                } */
-                if (curKey.startsWith('Program')) {
-                    curArr = filterObj[curKey];
-                    for (var j = 0; j < curArr.length; j++) {
-                        if (!(('Program.' + curArr[j]) in filterObj)) {
-                            var colName=$('#'+curArr[j]).filter('.collection_name')[0].innerText;
-                            collection.push(colName);
-                        }
+        var curKeys = Object.keys(filterObj).sort();
+        oStringA = new Array();
+        var collection = new Array();
+        for (i = 0; i < curKeys.length; i++) {
+            var addKey = true;
+            var curKey = curKeys[i];
+            if (curKey.startsWith('Program')) {
+                curArr = filterObj[curKey];
+                for (var j = 0; j < curArr.length; j++) {
+                    if (!(('Program.' + curArr[j]) in filterObj)) {
+                        var colName=$('#'+curArr[j]).filter('.collection_name')[0].innerText;
+                        collection.push(colName);
                     }
-                } else if (curKey.endsWith('_rng')) {
-                    var realKey = curKey.substring(0, curKey.length - 4).split('.').pop();
-                    var disp = $('#' + realKey + '_heading').children().children('.attDisp')[0].innerText;
-                    if (curKey.startsWith('tcga_clinical') && tcgaColSelected) {
-                        disp = 'tcga.' + disp;
-                        hasTcga = true;
-                    } else if (curKey.startsWith('tcga_clinical') && !tcgaColSelected) {
-                        addKey = false;
-                        break;
-                    }
-                    if (addKey) {
-                        var fStr = '';
-                        if ('rng' in filterObj[curKey]) {
-                            fStr += filterObj[curKey]['rng'][0].toString() + '-' + (filterObj[curKey]['rng'][1]).toString();
-                        }
-                        if (('rng' in filterObj[curKey]) && ('none' in filterObj[curKey])) {
-                            fStr += ', ';
-                        }
-                        if ('none' in filterObj[curKey]) {
-                            fStr += 'None';
-                        }
-
-
-                        var nstr = '<span class="filter-type">' + disp + '</span> IN (<span class="filter-att">' + fStr + '</span>)';
-                        oStringA.push(nstr);
-                    }
-                } else {
-                    var realKey = curKey.split('.').pop();
-
-                    var disp = $('#' + realKey + '_heading').children().children('.attDisp')[0].innerText;
-                    if (curKey.startsWith('tcga_clinical') && tcgaColSelected) {
-                        disp = 'tcga.' + disp;
-                        hasTcga = true;
-                    } else if (curKey.startsWith('tcga_clinical') && !tcgaColSelected) {
-                        addKey = false;
-                        break;
-                    }
-
-                    if (addKey) {
-                        var valueSpans = $('#' + realKey + '_list').children().children().children('input:checked').siblings('.value');
-                        oVals = new Array();
-                        valueSpans.each(function () {
-                            oVals.push($(this).text())
-                        });
-
-                        var oArray = oVals.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
-                        nstr = '<span class="filter-type">' + disp + '</span>';
-                        nstr += 'IN (' + oArray.join("") + ')';
-                        oStringA.push(nstr);
-
-                    }
-
                 }
-
-
             }
-            if (hasTcga && tcgaColSelected) {
-                    $('#search_def_warn').show();
-                } else {
-                    $('#search_def_warn').hide();
+            else if (curKey.endsWith('_rng')) {
+                var realKey = curKey.substring(0, curKey.length - 4).split('.').pop();
+                var disp = $('#' + realKey + '_heading').children().children('.attDisp')[0].innerText;
+                if (curKey.startsWith('tcga_clinical') && tcgaColSelected) {
+                    disp = 'tcga.' + disp;
+                    hasTcga = true;
+                } else if (curKey.startsWith('tcga_clinical') && !tcgaColSelected) {
+                    addKey = false;
+                    break;
                 }
+
             if (collection.length>0){
                 var oArray = collection.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
                 nstr = '<span class="filter-type">Collection</span>';
@@ -291,30 +228,18 @@ require([
 
         };
 
-        window.showGraphs = function(selectElem){
-            $(selectElem).parent().siblings('.graph-set').show();
-            $(selectElem).parent().siblings('.less-graphs').show();
-            $(selectElem).parent().hide();
+    window.toggleGraphOverFlow = function(id, showMore){
+        if (showMore) {
+            $('.' + id).parent().find('.more-graphs').hide();
+            $('.' + id).parent().find('.less-graphs').show();
+            $('.' + id).find('.chart-overflow').removeClass('hide-chart');
         }
-        window.hideGraphs = function(selectElem){
-            $(selectElem).parent().siblings('.graph-set').hide();
-            $(selectElem).parent().siblings('.more-graphs').show();
-            $(selectElem).parent().hide();
+        else {
+            $('.' + id).parent().find('.more-graphs').show();
+            $('.' + id).parent().find('.less-graphs').hide();
+            $('.' + id).find('.chart-overflow').addClass('hide-chart')
         }
-
-        window.toggleGraphOverFlow = function(id, showMore){
-            if (showMore) {
-                $('.' + id).parent().find('.more-graphs').hide();
-                $('.' + id).parent().find('.less-graphs').show();
-                $('.' + id).find('.chart-overflow').removeClass('hide-chart');
-            }
-            else {
-                $('.' + id).parent().find('.more-graphs').show();
-                $('.' + id).parent().find('.less-graphs').hide();
-                $('.' + id).find('.chart-overflow').addClass('hide-chart')
-            }
-
-        }
+    }
 
         window.showMoreGraphs = function (graphClass, height) {
             $('.'+graphClass).parent().find('.more-graphs').hide();
@@ -351,9 +276,6 @@ require([
                 }
             }
 
-            if (parStr.startsWith('tcga_clinical')){
-                checkTcga();
-            }
             var slideNm = $(elem).parent()[0].id+"_slide";
             mkFiltText();
 
@@ -1015,13 +937,13 @@ require([
             $('#studies_tab').data('refreshafterfilter',refreshAfterFilter);
             $('#studies_tab').data('updatechildtables',updateChildTables);
 
+
             $('#studies_tab').DataTable().destroy();
             $('#studies_tab').DataTable({
                 "dom": '<"dataTables_controls"ilp>rt<"bottom"><"clear">',
                 "order": [[1, "asc"]],
                 "createdRow":function(row,data,dataIndex){
                     $(row).attr('id','study_'+data['StudyInstanceUID'])
-
                     $(row).attr('data-studyid',data['StudyInstanceUID']);
                     $(row).attr('data-caseid',data['PatientID']);
                     $(row).addClass('text_head');
@@ -1245,13 +1167,14 @@ require([
                                 $(td).attr('data-description', data);
                                 $(td).addClass('description-tip');
                                 return;
+
                             }
                        }
                     },
                     {"type": "html", "orderable": false, data:'SeriesInstanceUID', render:function(data,type, row){
-
                           if ( (row['Modality']==='SEG' || row['Modality'][0]==='SEG') || (row['Modality']==='RTSTRUCT' || row['Modality'][0]==='RTSTRUCT') || (row['Modality']==='RTPLAN' || row['Modality'][0]==='RTPLAN') || (row['Modality']==='RWV' || row['Modality'][0]==='RWV')){
                                  return '<a href="/" onclick="return false;"><i class="fa fa-eye-slash no-viewer-tooltip"></i>';
+
                             }
                           else if ( (row['Modality']==='SM') ){
                               return '<a href="' + SLIM_VIEWER_PATH  + data + '" target="_blank"><i class="fa fa-eye"></i>'
@@ -1271,11 +1194,9 @@ require([
 
                     var backendReqLength = 500;
                     var backendReqStrt = Math.max(0, request.start - Math.floor(backendReqLength * 0.5));
-
                     var rowsRemoved = $('#series_tab').data('rowsremoved');
                     var refreshAfterFilter = $('#series_tab').data('refreshafterfilter');
-                    var cols = ['StudyInstanceUID', 'SeriesNumber', 'Modality', 'BodyPartExamined', 'SeriesDescription'];
-
+                    var cols = ['StudyInstanceUID', 'SeriesNumber', 'Modality', 'BodyPartExamined', 'SeriesDescription']
                     var ssCallNeeded = true;
                     var caseArr = new Array();
                     for (caseid in window.selItems.selCases) {
@@ -1427,6 +1348,7 @@ require([
                 }
             }
             updateFilterSelections('program_set', {'unfilt':reformDic});
+            updateColl();
         }
 
         var parseFilterObj = function (){
@@ -1959,13 +1881,35 @@ require([
             }
         }
 
-        var updateFilters = function (filterCat, dic, dataFetched) {
+        window.updateFilters = function (filterCat, dic, dataFetched) {
+            var numAttrAvail = 0;
+            var numCnts=0;
+
+            var headerCnt = $('#'+filterCat).filter('.collection_name').siblings().filter('.case_count');
+            if (headerCnt.length>0){
+                numCnts = headerCnt[0].innerHTML;
+            }
+
             var showZeros = true;
             var searchDomain = $('#'+filterCat).closest('.search-configuration, .search-scope');
             //var isSearchConf = ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').length>0);
             if ((searchDomain.find('#hide-zeros').length>0) && (searchDomain.find('#hide-zeros').prop('checked'))){
                 showZeros = false;
             }
+            var textFilt=false;
+            var textFiltVal='';
+            if ($('#'+filterCat).children('.text-filter').length>0){
+                textFiltVal = $('#'+filterCat).children('.text-filter')[0].value;
+
+            }
+            else if ($('#'+filterCat).find('.collection_value').length>0){
+                textFiltVal = $('#collection_search')[0].value;
+            }
+
+            if (!(textFiltVal==='')){
+                textFilt=true;
+            }
+
             if (  $('#'+filterCat).hasClass('isQuant') && dataFetched){
                 if (dic.hasOwnProperty('unfilt') && dic['filt'].hasOwnProperty('min_max') ){
                     if (dic['unfilt']['min_max'].hasOwnProperty('min')) {
@@ -2016,11 +1960,23 @@ require([
                 showExtras = true;
             }
             //var allUnchecked = ((checkedFilters.length == 0) ? true : false)
-            var numAttrAvail = 0;
+
             var numNonZero = 0;
+            numCnts = 0;
             for (var i = 0; i < allFilters.length; i++) {
+
                 var elem = allFilters.get(i);
-                var val = $(elem)[0].value;
+                var val = $(elem).data('filterDisplayVal');
+                var filtByVal = false;
+
+                if ($(elem).siblings().filter('a').length===0) {
+                    if (textFilt && !(val.toLowerCase().includes(textFiltVal.toLowerCase()))) {
+                        filtByVal = true;
+                        $(elem).parent().parent().addClass('filtByVal');
+                    } else {
+                        $(elem).parent().parent().removeClass('filtByVal');
+                    }
+                }
                 var checked = $(elem).prop('checked');
                 var spans = $(elem).parent().find('span');
                 //var lbl = spans.get(0).innerHTML;
@@ -2038,16 +1994,25 @@ require([
                     $(elem).parent().parent().addClass('zeroed');
                     isZero=true;
                 }
-                if ( (cntUf>0) || checked || showZeros) {
-                      numAttrAvail++;
+                var allChildrenHidden = false;
+                if ( $(elem).parent().siblings().filter('.list-group-sub-item__body').length>0 ){
+                    if ($(elem).parent().siblings().filter('.list-group-sub-item__body').find('.checkbox').not('.notDisp').length===0){
+                        allChildrenHidden = true;
+                    }
                 }
-                if ( (numAttrAvail>5) && (!isZero || showZeros)  ) {
+                var thisAttrAvail = (( ( !isZero || showZeros) && !filtByVal  && !allChildrenHidden) || checked) ? true:false;
+                if  ( thisAttrAvail){
+                      numAttrAvail++;
+                      numCnts+=cntUf;
+                }
+
+                if ( (numAttrAvail>5) && thisAttrAvail  ) {
                     $(elem).parent().parent().addClass('extra-values');
                 } else {
                     $(elem).parent().parent().removeClass('extra-values');
                 }
 
-                if ( ( (cntUf>0) || checked || showZeros ) && (showExtras || (numAttrAvail<6)) ) {
+                if ( thisAttrAvail && (showExtras || (numAttrAvail<6)) ) {
                       $(elem).parent().parent().removeClass('notDisp');
                 } else {
                     $(elem).parent().parent().addClass('notDisp');
@@ -2096,23 +2061,41 @@ require([
                     $('#' + filterCat).children('.less-checks').hide();
                 }
             }
+            return [numAttrAvail, numCnts];
         }
 
         setAllFilterElements = function(hideEmpty,filtSet){
             //var filtSet = ["search_orig_set","segmentation","quantitative","qualitative","tcga_clinical"];
             for (var i=0;i<filtSet.length;i++) {
                 filterCats = findFilterCats(filtSet[i], false);
+                var resetParentVal=false;
+                progInd = filterCats.indexOf('Program');
+                if (progInd>-1){
+                    filterCats.splice(progInd,1);
+                    filterCats.push('Program');
+                    resetParentVal=true;
+                }
+
+
                 for (var j = 0; j < filterCats.length; j++) {
-                        updateFilters(filterCats[j],{},false);
+                        var ret = updateFilters(filterCats[j],{},false);
+                        if (resetParentVal && !(filterCats[j]==='Program')){
+                            parentVal=$('#'+filterCats[j]).siblings().filter('.list-group-item__heading').find('.case_count');
+                            parentVal[0].innerHTML=ret[1];
+                            if (ret[0]===0){
+                                $('#'+filterCats[j]).addClass('notDisp')
+                            }
+                        }
                 }
             }
             addSliders('quantitative', false, hideEmpty,'');
             addSliders('tcga_clinical',false, hideEmpty,'tcga_clinical.');
         }
 
-        window.hideColl = function(hideElem){
-            var filtSet=["program_set"]
-            setAllFilterElements(hideElem.checked,filtSet);
+        window.updateColl = function(){
+            var filtSet=['program_set']
+            var checked=$('#Program').find('.hide-zeros')[0].checked;
+            setAllFilterElements(checked,filtSet);
         }
 
         window.hideAtt = function(hideElem){
@@ -2136,19 +2119,6 @@ require([
                 }
                 updateFilters(filterCats[i], filtDic, true);
             }
-        };
-
-        var checkTcga = function(){
-             if ( !('Program' in window.filterObj) ){
-                    window.filterObj['Program'] = new Array();
-                }
-                if (window.filterObj['Program'].indexOf('TCGA')<0) {
-                    window.filterObj['Program'].push('TCGA');
-                    window.filterObj['Program.TCGA'] = ['tcga_blca','tcga_brca','tcga_cesc','tcga_coad','tcga_esca','tcga_gbm','tcga_hnsc','tcga_kich','tcga_kirc','tcga_kirp','tcga_lgg','tcga_lihc','tcga_luad','tcga_lusc','tcga_ov','tcga_prad','tcga_read','tcga_sarc','tcga_stad','tcga_thca','tcga_ucec'];
-                    $('#TCGA_heading').parent().find('input:checkbox').prop('checked',true);
-                    $('#TCGA_heading').parent().find('input:checkbox').prop('indeterminate',false);
-                }
-
         };
 
 
@@ -2183,7 +2153,12 @@ require([
                      hasCheckBox = true;
                      numCheckBoxes++;
                 } else {
-                    filtnm=$(filterCat).children('.list-group-sub-item__body, .list-group-item__body, .collection-list')[0].id;
+
+                    var filtnmSrc=$(filterCat).children('.list-group-sub-item__body, .list-group-item__body, .collection-list')
+                    if (filtnmSrc.length<1){
+                        filtnmSrc=$(filterCat).children().children('.collection_id')
+                    }
+                    var filtnm = filtnmSrc[0].id;
                     if  ($(filterCat).children('.list-group-item__heading').children('input:checkbox').length>0) {
                        hasCheckBox = true;
                        numCheckBoxes++;
@@ -2196,10 +2171,6 @@ require([
                     checkBox.checked = false;
                 } else if (hasCheckBox){
                     checkBox.indeterminate = false;
-                }
-
-                if ( (checked) && (filtnm ==='tcga_clinical') && !is_cohort){
-                    checkTcga();
                 }
 
                 if ((checked) && (curCat.length>0) && hasCheckBox  ){
@@ -2272,7 +2243,6 @@ require([
             }
         };
 
-
         var sortTable = function (tbl, curInd, asc) {
             var thd = $(tbl).find('thead').find('th')[curInd];
             var isSeries = ( ($(tbl).find('tbody')[0].id === 'series_table') ? true : false);
@@ -2325,6 +2295,13 @@ require([
                 });
 
             }) */
+
+            /*$('#' + filterId).find('.text-filter').on('keypress', function() {
+                 //alert('hi');
+                 updateFilters(filterId,{},false);
+                 //handleFilterSelectionUpdate(this, false, false);
+
+            }); */
 
             $('#' + filterId).find('input:checkbox').not('#hide-zeros').on('click', function () {
                 handleFilterSelectionUpdate(this, true, true);
@@ -2751,10 +2728,12 @@ require([
             min= Math.floor(parseInt($('#age_at_diagnosis').data('data-min')));
 
             $('#age_at_diagnosis').addClass('isQuant');
+            $('#age_at_diagnosis').find('.text-filter').remove();
             $('#age_at_diagnosis').addClass('wNone');
 
             $('#quantitative').find('.list-group-item__body').each(function() {
                 $(this).addClass('isQuant');
+                $(this).find('.text-filter').remove();
             });
             addSliders('tcga_clinical',true, false,'tcga_clinical.');
             addSliders('quantitative',true, false,'');

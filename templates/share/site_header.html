@@ -11,7 +11,7 @@
         <div class="row">
             <div class="col-lg-12 col-md-12 col-sm-12">
                 <div class="crdc-nav">
-                <a target="_blank" href="https://datacommons.cancer.gov/">NCI Cancer Research Data Commons</a> <i class="fa fa-external-link"></i>
+                <a target="_blank" rel="noopener noreferrer" href="https://datacommons.cancer.gov/">NCI Cancer Research Data Commons</a>
                 </div>
             </div>
         </div>
@@ -50,6 +50,12 @@
                            &nbsp <i class="fa fa-book"></i> <p class="navbar-label">Documentation</p>
                             <i class="fa fa-external-link external-link-icon" aria-hidden="true"></i>
                         </a>
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a class="main-links" href="{% url 'news' %}" title="View news items"><i class="fa fa-bullhorn"></i> News</a>
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a class="main-links" href="{% url 'about_page' %}" title="Information about IDC"><i class="fa fa-info-circle"></i> About</a>
                     </li>
                     {% if user.is_authenticated %}
                     <li class="navbar-link navbar-item">

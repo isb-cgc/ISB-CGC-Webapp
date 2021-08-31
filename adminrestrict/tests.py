@@ -13,34 +13,36 @@ from adminrestrict.models import AllowedIP
 
 
 class ModelTests(TestCase):
+
     def setUp(self):
-        self.user = User.objects.create_user(username="foo", password="bar")
+        self.password = '!ThisPasswordWorks3'
+        self.user = User.objects.create_user(username="foo", password=self.password)
 
     def test_allow_all_if_empty(self):
-        resp = self.client.post("/admin/", data={'username':"foo", 'password':"bar"})
+        resp = self.client.post("/admin/", data={'username':"foo", 'password':self.password})
         self.assertIn(resp.status_code, [200, 302])
 
     def test_allowed_ip(self):
         a = AllowedIP.objects.create(ip_address="127.0.0.1")
-        resp = self.client.post("/admin/", data={'username':"foo", 'password':"bar"}, follow=True)
+        resp = self.client.post("/admin/", data={'username':"foo", 'password':self.password}, follow=True)
         self.assertEqual(resp.status_code, 200)
         a.delete()
 
     def test_allowed_wildcard(self):
         a = AllowedIP.objects.create(ip_address="127.0*")
-        resp = self.client.post("/admin/", data={'username':"foo", 'password':"bar"}, follow=True)
+        resp = self.client.post("/admin/", data={'username':"foo", 'password':self.password}, follow=True)
         self.assertEqual(resp.status_code, 200)
         a.delete()
 
     def test_blocked_no_wildcard_match(self):
         a = AllowedIP.objects.create(ip_address="16*")
-        resp = self.client.post("/admin/", data={'username':"foo", 'password':"bar"}, follow=True)
+        resp = self.client.post("/admin/", data={'username':"foo", 'password':self.password}, follow=True)
         self.assertEqual(resp.status_code, 403)
         a.delete()
 
     def test_allow_all(self):
         a = AllowedIP.objects.create(ip_address="*")
-        resp = self.client.post("/admin/", data={'username':"foo", 'password':"bar"}, follow=True)
+        resp = self.client.post("/admin/", data={'username':"foo", 'password':self.password}, follow=True)
         self.assertEqual(resp.status_code, 200)
         a.delete()
 

@@ -63,12 +63,12 @@
                                              <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>COLLECTION
                                          </a>
                                      </div>
-                                     <div id="Program" class="collapse filter-panel collection-list">
+                                     <div id="Program" data-filter-attr-nm="Program" class="collapse filter-panel collection-list">
 
                                      <p>
-                                         <!-- In progress text input to search for collections
-                                         <input class="text-filter" type="text" placeholder="Search.."><br> -->
-                                         <input id="hide-zeros" class="hide-zeros" type="checkbox" value="hide-zeros" onchange="hideColl(this)"> Hide collections with 0 cases</p>
+                                         <!-- In progress text input to search for collections -->
+                                         <input id="collection_search" class="collection-text-filter" type="text" placeholder="Search.." onkeyup="updateColl()"><br>
+                                         <input id="hide-zeros" class="hide-zeros" type="checkbox" value="hide-zeros" onchange="updateColl()"> Hide collections with 0 cases</p>
                                          {% with programs.items|length|add:"-5" as more %}
                                          <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                          <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
@@ -78,25 +78,21 @@
                                              {% for progK, progV in programs.items|dictsort:"0.lower" %}
                                                  {% if progK != "All" and progK != "None" %}
                                                  <li class="list-group-item  {% if forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if progV.val == 0 %} zeroed {% endif %}">
-                                                    {% comment %} {% if not progV.projects %}
-                                                        <div id="{{ progK }}_heading" class="list-group-item__heading">
-                                                                   <input class="collection_value" type="checkbox" value="{{ progK }}">
-                                                                   <span id="{{  progK }}" class="collection_name value">{{ progK|upper }} </span> <span class="float-right case_count count">{{ progV.val }}</span>
-                                                               </div>
-                                                         <div id="{{ progK }}" data-filter-attr-id="{{ progV.collex_attr_id }}" class="collapse list-group-sub-item__body">
-                                                     {% endcomment %}
                                                      {% if progV.projects and progV.projects.items|length == 1 %}
                                                            {% for proj, projD in progV.projects.items %}
-                                                               <div id="{{ proj }}_heading" class="list-group-item__heading {% if forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if projD.val == 0 %} zeroed {% endif %}">
+                                                               <div id="{{ proj }}_heading" class="list-group-item__heading">
                                                                    <input data-filter-attr-id="{{ progV.collex_attr_id }}"
                                                                           data-filter-display-attr="Collection" data-filter-display-val="{{ proj|upper }}"
                                                                           class="collection_value"
                                                                           type="checkbox" value="{{ proj }}">
-                                                                   <span id="{{ proj }}" class="collection_name value">{{ projD.display }}</span> <span class="float-right case_count count">{{ projD.val }}</span>
+                                                                   <span id="{{ proj }}" class="collection_name value collection_id">{{ projD.display }}</span> <span class="float-right case_count count">{{ projD.val }}</span>
                                                                </div>
-                                                            <div id="{{ proj }}" data-filter-attr-id="{{ progV.collex_attr_id }}" class="collapse list-group-sub-item__body">
+
                                                            {% endfor %}
-                                                     {% else %}
+
+
+                                                     {% elif progV.projects and progV.projects.items|length > 1 %}
+
                                                      <div id="{{ progK }}_heading" class="list-group-item__heading">
                                                          <input data-filter-attr-id="{{ progV.prog_attr_id }}"
                                                                 data-filter-display-attr="Program" data-filter-display-val="{{ progK|upper }}"
@@ -110,8 +106,7 @@
                                                          <span class="float-right case_count count">{{ progV.val }}</span>
                                                      </div>
                                                      <div id="{{ progK }}" data-filter-attr-id="{{ progV.collex_attr_id }}" class="collapse list-group-sub-item__body">
-                                                     {% endif %}
-                                                     {% if progV.projects and progV.projects.items|length > 1 %}
+
                                                         {% if progV.projects.items|length > 5 %}
                                                               {% with progV.projects.items|length|add:"-5" as more %}
                                                               <p class="more-checks"><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
@@ -138,10 +133,10 @@
                                                             </ul>
 
 
-
+                                                           </div>
                                                           {% endif %}
 
-                                                          </div>
+
                                                  </li>
                                                 {% endif %}
                                              {% endfor %}
@@ -217,6 +212,7 @@
                                                            data-curminrng="{{ attr.min_max.min|floor }}" data-curmaxrng="{{ attr.min_max.max|ceiling }}"
 
                                                  {% endif %}>
+                                              <input class="text-filter" type="text" placeholder="Search.." onkeyup="updateFilters( '{{ attr.name }}',{},false)"><br>
                                                <div class="sorter">
                                                  <span>Sort by: <input type="radio" class="sort_val" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" class="sort_val" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
                                             </div>
@@ -292,6 +288,7 @@
                                                     data-curmin="{{ attr.min_max.min }}" data-curmax="{{ attr.min_max.max }}"
                                                     data-curminrng="{{ attr.min_max.min|floor }}" data-curmaxrng="{{ attr.min_max.max|ceiling }}"
                                                  {% endif %}>
+                                               <input class="text-filter" type="text" placeholder="Search.." onkeyup="updateFilters( '{{ attr.name }}',{},false)"><br>
                                                <div class="sorter">
                                                  <span>Sort by: <input type="radio" class="sort_val" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" class="sort_val" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
                                             </div>
@@ -367,6 +364,7 @@
                                                       data-curminrng="{{ attr.min_max.min|floor }}" data-curmaxrng="{{ attr.min_max.max|ceiling }}"
                                                  {% endif %}>
                                                  {% if attr.name != 'bmi' %}
+                                                     <input class="text-filter" type="text" placeholder="Search.." onkeyup="updateFilters( '{{ attr.name }}',{},false)"><br>
                                                     <div class="sorter">
                                                        <span>Sort by: <input type="radio" class="sort_val" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" class="sort_val" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
                                                     </div>
