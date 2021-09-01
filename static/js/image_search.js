@@ -168,7 +168,6 @@ require([
      };
 
 
-
     var mkFiltText = function () {
         var hasTcga = false;
         var tcgaColSelected = false;
@@ -209,24 +208,138 @@ require([
                     addKey = false;
                     break;
                 }
+                if (addKey) {
+                    var fStr = '';
+                    if ('rng' in filterObj[curKey]) {
+                        fStr += filterObj[curKey]['rng'][0].toString() + '-' + (filterObj[curKey]['rng'][1]).toString();
+                    }
+                    if (('rng' in filterObj[curKey]) && ('none' in filterObj[curKey])) {
+                        fStr += ', ';
+                    }
+                    if ('none' in filterObj[curKey]) {
+                        fStr += 'None';
+                    }
 
-            if (collection.length>0){
-                var oArray = collection.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
-                nstr = '<span class="filter-type">Collection</span>';
-                nstr += 'IN (' + oArray.join("") + ')';
-                oStringA.unshift(nstr);
+                    var nstr = '<span class="filter-type">' + disp + '</span> IN (<span class="filter-att">' + fStr + '</span>)';
+                    oStringA.push(nstr);
+                }
+            }
+            else {
+                var realKey = curKey.split('.').pop();
+                var disp = $('#' + realKey + '_heading').children().children('.attDisp')[0].innerText;
+                if (curKey.startsWith('tcga_clinical') && tcgaColSelected) {
+                    disp = 'tcga.' + disp;
+                    hasTcga = true;
+                } else if (curKey.startsWith('tcga_clinical') && !tcgaColSelected) {
+                    addKey = false;
+                    break;
+                }
+                if (addKey) {
+                    var valueSpans = $('#' + realKey + '_list').children().children().children('input:checked').siblings('.value');
+                    oVals = new Array();
+                    valueSpans.each(function () {
+                        oVals.push($(this).text())
+                    });
+
+                    var oArray = oVals.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
+                    nstr = '<span class="filter-type">' + disp + '</span>';
+                    nstr += 'IN (' + oArray.join("") + ')';
+                    oStringA.push(nstr);
+
+                }
             }
 
-            if (oStringA.length > 0) {
-                var oString = oStringA.join(" AND");
-                document.getElementById("search_def").innerHTML = '<p>' + oString + '</p>';
-                 document.getElementById('filt_txt').value=oString;
-            } else {
-                document.getElementById("search_def").innerHTML = '<span class="placeholder">&nbsp;</span>';
-                 document.getElementById('filt_txt').value="";
+        }
+        if (hasTcga && tcgaColSelected) {
+            $('#search_def_warn').show();
+        } else {
+            $('#search_def_warn').hide();
+        }
+        if (collection.length>0){
+            var oArray = collection.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
+            nstr = '<span class="filter-type">Collection</span>';
+            nstr += 'IN (' + oArray.join("") + ')';
+            oStringA.unshift(nstr);
+        }
+        if (oStringA.length > 0) {
+            var oString = oStringA.join(" AND");
+            document.getElementById("search_def").innerHTML = '<p>' + oString + '</p>';
+            document.getElementById('filt_txt').value=oString;
+        } else {
+            document.getElementById("search_def").innerHTML = '<span class="placeholder">&nbsp;</span>';
+            document.getElementById('filt_txt').value="";
+        }
+
+    };
+    var mkFiltTextm = function () {
+        var hasTcga = false;
+        var tcgaColSelected = false;
+        if ((window.filterObj.hasOwnProperty('Program')) && (window.filterObj.Program.indexOf('TCGA') > -1)) {
+            tcgaColSelected = true;
+            $('#tcga_clinical_heading').children('a').removeClass('disabled');
+        } else {
+            $('#tcga_clinical_heading').children('a').addClass('disabled');
+            if (!($('#tcga_clinical_heading').children('a')).hasClass('collapsed')) {
+                $('#tcga_clinical_heading').children('a').click();
+            }
+        }
+
+        var curKeys = Object.keys(filterObj).sort();
+        oStringA = new Array();
+        var collection = new Array();
+        for (i = 0; i < curKeys.length; i++) {
+            var addKey = true;
+            var curKey = curKeys[i];
+            if (curKey.startsWith('Program')) {
+                curArr = filterObj[curKey];
+                for (var j = 0; j < curArr.length; j++) {
+                    if (!(('Program.' + curArr[j]) in filterObj)) {
+                        var colName = $('#' + curArr[j]).filter('.collection_name')[0].innerText;
+                        collection.push(colName);
+                    }
+                }
+            } else if (curKey.endsWith('_rng')) {
+                var realKey = curKey.substring(0, curKey.length - 4).split('.').pop();
+                var disp = $('#' + realKey + '_heading').children().children('.attDisp')[0].innerText;
+                if (curKey.startsWith('tcga_clinical') && tcgaColSelected) {
+                    disp = 'tcga.' + disp;
+                    hasTcga = true;
+                } else if (curKey.startsWith('tcga_clinical') && !tcgaColSelected) {
+                    addKey = false;
+                    break;
+                }
+
+                if (collection.length > 0) {
+                    var oArray = collection.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
+                    nstr = '<span class="filter-type">Collection</span>';
+                    nstr += 'IN (' + oArray.join("") + ')';
+                    oStringA.unshift(nstr);
+                }
+
+                if (oStringA.length > 0) {
+                    var oString = oStringA.join(" AND");
+                    document.getElementById("search_def").innerHTML = '<p>' + oString + '</p>';
+                    document.getElementById('filt_txt').value = oString;
+                } else {
+                    document.getElementById("search_def").innerHTML = '<span class="placeholder">&nbsp;</span>';
+                    document.getElementById('filt_txt').value = "";
+                }
+
             }
 
-        };
+        }
+    };
+
+    window.showGraphs = function(selectElem){
+        $(selectElem).parent().siblings('.graph-set').show();
+        $(selectElem).parent().siblings('.less-graphs').show();
+        $(selectElem).parent().hide();
+    }
+    window.hideGraphs = function(selectElem){
+        $(selectElem).parent().siblings('.graph-set').hide();
+        $(selectElem).parent().siblings('.more-graphs').show();
+        $(selectElem).parent().hide();
+    }
 
     window.toggleGraphOverFlow = function(id, showMore){
         if (showMore) {
@@ -240,18 +353,6 @@ require([
             $('.' + id).find('.chart-overflow').addClass('hide-chart')
         }
     }
-
-        window.showMoreGraphs = function (graphClass, height) {
-            $('.'+graphClass).parent().find('.more-graphs').hide();
-            $('.'+graphClass).parent().find('.less-graphs').show();
-            $('.'+graphClass).animate({height: height}, 800);
-        };
-
-        window.showLessGraphs = function (graphClass, height) {
-            $('.'+graphClass).parent().find('.less-graphs').hide();
-            $('.'+graphClass).parent().find('.more-graphs').show();
-            $('.'+graphClass).animate({height: height}, 800);
-        };
 
         window.addNone = function(elem, parStr, updateNow)
         {
@@ -422,8 +523,6 @@ require([
         };
 
         var updateTablesAfterFilter = function (collFilt, collectionsData){
-            //editProjectsTableAfterFilter('projects_table', collFilt, collectionData);
-            //kSet =  Object.keys(window.collectionData).sort();
             var usedCollectionData = new Array();
             var hasColl = collFilt.length>0 ? true : false;
             for (var i=0;i<window.collectionData.length;i++){
@@ -457,53 +556,6 @@ require([
             updateProjectTable(usedCollectionData);
             updateCaseTable(false, false, true, [false,false]);
         }
-
-        var editProjectsTableAfterFilter = function (tableId, collFilt, collectionsData) {
-            //var selectedElem = document.getElementById(scopeId).selectedOptions[0];
-            //var project_scope = selectedElem.value;
-            //var curCount = collection[project_scope];
-            var tableElem = document.getElementById(tableId);
-            var tableRows = $(tableElem).find('tr');
-            for (var i = 0; i < tableRows.length; i++) {
-                var curRow = $(tableRows)[i];
-                var projId = curRow.id.replace('project_row_', '');
-                var newTot = 0;
-                if (projId in collectionsData){
-                        newTot = collectionsData[projId]['count'];
-                }
-
-                var patientElemId = 'patient_col_' + projId;
-                document.getElementById(patientElemId).innerHTML =  String(newTot);
-
-                if ( (newTot> 0) && ((collFilt.length ===0) || (collFilt.indexOf(projId) >-1)) ) {
-                    //curRow.classList.remove('hide');
-                    $(curRow).children('.ckbx').children('input').prop("disabled",false);
-
-                } else {
-                    $(curRow).children('.ckbx').children('input').prop("checked",false);
-                    $(curRow).children('.ckbx').children('input').prop("disabled",true);
-                    var patientElemId = 'patient_col_' + projId;
-                    document.getElementById(patientElemId).innerHTML =  '0';
-
-                    var projIndex = window.selItems.selProjects.indexOf(projId);
-                    if (projIndex !==-1) window.selItems.selProjects.splice(projIndex,1);
-                    if (window.selItems.selCases.hasOwnProperty(projId)) {
-                           selCases= window.selItems.selCases[projId];
-                           for (j=0;j<selCases.length;j++){
-                               var selCase = selCases[j];
-                               delete window.selItems.selStudies[selCase];
-                           }
-
-                        delete window.selItems.selCases[projId];
-                    }
-
-                   // curRow.classList.add('hide');
-                    //curRow.classList.remove("selected_grey");
-
-                }
-            }
-
-        };
 
 
         window.updateProjectSelection = function(row){
@@ -1297,7 +1349,7 @@ require([
             $('#series_tab').children('tbody').attr('id','series_table');
         }
 
-        var changeAjax = function (isIncrement) {
+        /* var changeAjax = function (isIncrement) {
             if (isIncrement) {
                 $('#number_ajax')[0].value = String(parseInt($('#number_ajax')[0].value) + 1);
             } else {
@@ -1310,7 +1362,7 @@ require([
             } else {
                 $('.spinner').show();
             }
-        }
+        } */
 
         var pretty_print_id = function (id) {
             var newId = id.slice(0, 12) + '...' + id.slice(id.length - 12, id.length);
@@ -1403,7 +1455,8 @@ require([
         };
 
         var updateFacetsData = function (newFilt) {
-            changeAjax(true);
+            $('.spinner').show();
+            //changeAjax(true);
             //var url = '/explore/?counts_only=True&is_json=true&is_dicofdic=True&data_source_type=' + ($("#data_source_type option:selected").val() || 'S');
             var url = '/explore/'
             var parsedFiltObj=parseFilterObj();
@@ -1575,7 +1628,8 @@ require([
                      }
 
 
-                    changeAjax(false);
+                    //changeAjax(false);
+                    $('.spinner').hide();
                     deferred.resolve();
                 },
                 error: function(data){
@@ -2655,8 +2709,10 @@ require([
      cohort_loaded = false;
      function load_preset_filters() {
          if (is_cohort && !cohort_loaded) {
+             $('.spinner').show();
              var loadPending = load_filters(cohort_filters);
              loadPending.done(function () {
+                 $('.spinner').show();
                  console.debug("Load pending complete.");
                  cohort_loaded = true;
                  $('input[type="checkbox"]').prop("disabled", "disabled");
@@ -2675,6 +2731,7 @@ require([
                  $('input#hide-zeros').each(function(){$(this).triggerHandler('change')});
                  $('div.ui-slider').siblings('button').prop("disabled", true);
                  $('.noneBut').find('input:checkbox').prop("disabled",true);
+                 $('.spinner').hide();
              });
          } else if (Object.keys(filters_for_load).length > 0) {
              var loadPending = load_filters(filters_for_load);
@@ -2708,7 +2765,6 @@ require([
 
 
       $(document).ready(function () {
-          $('.spinner').show();
             window.selItems = new Object();
             window.selItems.selStudies = new Object();
             window.selItems.selCases = new Object();
@@ -2791,7 +2847,7 @@ require([
              });
 
             load_preset_filters();
-            $('.spinner').hide();
+            //$('.spinner').hide();
 
         }
     );
