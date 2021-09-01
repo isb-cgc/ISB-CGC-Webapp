@@ -496,7 +496,6 @@
                             </div>
                             <div id="programs-panel" class="panel panel-collapse collapse" aria-expanded="false">
                                 <div class="panel-body">
-                                    <p>You can upload data from your own research programs.</p>
                                     {% if program_count > 0 %}
                                         <ul class="table-list">
                                             {% for program in programs %}
@@ -518,9 +517,6 @@
                                     {% endif %}
                                 </div>
                                 <div class="panel-footer">
-                                    <a href="{% url 'program_upload' %}" class="btn btn-link"><i
-                                            class="fa fa-cloud-upload"></i>Upload
-                                        Program Data</a>
                                 </div>
                             </div>
                         </section>
