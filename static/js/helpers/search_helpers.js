@@ -266,7 +266,7 @@ function($, tree_graph, stack_bar_chart) {
                                 metadata_counts['data_avail'][i] = new_item;
                             }
                         } else {
-                            console.debug(results);
+                            console.debug("Data Availability counts not found!");
                         }
                     },
                     error: function(req,status,err){
