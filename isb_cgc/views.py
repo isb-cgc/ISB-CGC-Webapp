@@ -225,9 +225,7 @@ def bucket_object_list(request):
 
 # Extended login view so we can track user logins
 def extended_login_view(request):
-    redirect_to = 'dashboard'
-    if request.COOKIES and request.COOKIES.get('login_from', '') == 'new_cohort':
-        redirect_to = 'cohort'
+    redirect_to = 'landing_page'
     try:
         # Write log entry
         st_logger = StackDriverLogger.build_from_django_settings()
@@ -238,7 +236,7 @@ def extended_login_view(request):
             "[WEBAPP LOGIN] User {} logged in to the web application at {}".format(user.email,
                                                                                    datetime.datetime.utcnow())
         )
-
+        redirect_to = 'cohort' if request.COOKIES and request.COOKIES.get('login_from', '') == 'new_cohort' else 'dashboard'
         # If user logs in for the second time, or user has not completed the survey, opt-in status changes to NOT_SEEN
         user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=user).first()
         if user_opt_in_stat_obj:
@@ -249,7 +247,8 @@ def extended_login_view(request):
             elif user_opt_in_stat_obj.opt_in_status == UserOptInStatus.SEEN:
                 user_opt_in_stat_obj.opt_in_status = UserOptInStatus.SKIP_ONCE
                 user_opt_in_stat_obj.save()
-
+    except User.DoesNotExist as e:
+        logger.error("[ERROR] User not found! User provided: {}".format(request.user))
     except Exception as e:
         logger.exception(e)
 

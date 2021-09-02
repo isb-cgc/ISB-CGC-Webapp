@@ -167,12 +167,18 @@ function($, tree_graph, stack_bar_chart) {
 
             var context = this;
             var filters = {};
+            let filters_found = false;
             if(cohort_id && !filter_panel_load) {
+                // Cohorts always have filters
+                filters_found = true;
                 cohort_programs.map(function(prog){
                     filters[prog.id] = context.format_filters(prog.id);
                 });
             } else {
                 filters[program_id] = this.format_filters(program_id);
+                if(Object.keys(filters[program_id]).length > 0) {
+                    filters_found = true;
+                }
             }
 
             // Get active panel
@@ -188,7 +194,7 @@ function($, tree_graph, stack_bar_chart) {
             var startReq = new Date().getTime();
 
             if(filter_panel_load) {
-                var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
+                var clin_tree_attr_counts = filters_found ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
                 Object.keys(clin_tree_attr_counts).length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
 
                 $('.clinical-trees .spinner').hide();
@@ -237,7 +243,7 @@ function($, tree_graph, stack_bar_chart) {
                         context.update_filter_counts(case_counts, null, program_id);
 
                         context.update_zero_case_filters_all();
-                        var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(results['filtered_counts']['case_data'], clin_tree_attr) : case_counts;
+                        var clin_tree_attr_counts = filters_found ? context.filter_data_for_clin_trees(results['filtered_counts']['case_data'], clin_tree_attr) : case_counts;
                         Object.keys(clin_tree_attr_counts).length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
 
                         if (metadata_counts.hasOwnProperty('data_avail')) {
