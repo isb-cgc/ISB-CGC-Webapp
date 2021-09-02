@@ -6,9 +6,10 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         underscore: 'libs/underscore-min',
         tablesorter: 'libs/jquery.tablesorter.min',
+        jquerydt: 'libs/jquery.dataTables.min',
         base: 'base',
         imagesearch: 'image_search',
-        cohortfilelist: 'cohort_filelist',
+        //cohortfilelist: 'cohort_filelist',
         tippy: 'libs/tippy-bundle.umd.min',
         '@popperjs/core': 'libs/popper.min'
     },
@@ -22,6 +23,7 @@ require.config({
         },
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
+        'jquerydt': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'tablesorter': ['jquery'],
@@ -36,9 +38,10 @@ require([
     'base',
     'imagesearch',
     'jqueryui',
+    'jquerydt',
     'bootstrap',
     'tablesorter',
-    'cohortfilelist',
+    //'cohortfilelist',
 ], function ($, tippy, base, imagesearch, d3, cohortfilelist) {
     var saving_cohort = false;
 
