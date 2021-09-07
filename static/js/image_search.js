@@ -1075,7 +1075,7 @@ require([
                         ssCallNeeded = false;
                         $('#studies_tab').children('thead').children('tr').children('.ckbx').addClass('notVis');
                         if (refreshAfterFilter || updateChildTables[0]) {
-                            //updateSeriesTable(false,true,false)
+                            updateSeriesTable(false,true,false)
                         }
                         $('.spinner').hide();
                         callback({"data": [], "recordsTotal": "0", "recordsFiltered": "0"});
@@ -2832,7 +2832,7 @@ require([
             //"createdCell":function(td,data,row){$(td).attr("id","patient_col_"+row[1]);}
             $('#proj_table').children('tbody').attr('id','projects_table');
             */
-
+             // .search-configuration .vert
              $('.clear-filters').on('click', function () {
                    $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('checked',false);
                    $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('indeterminate',false);
