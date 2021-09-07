@@ -53,7 +53,6 @@
             <li class="separator"></li>
         {% endif %}
         {% if program.owner.id == user.id %}
-        <li role="menuitem"><a href="{% url 'program_upload_existing' %}?program_id={{ program.id }}" class="btn btn-info"><i class="fa fa-cloud-upload"></i>Upload Data</a></li>
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#edit-program-details-modal">Edit Details</button></li>
         <li role="menuitem"><button class="btn btn-info program-delete" data-toggle="modal" data-target="#delete-program-modal">Delete</button></li>
         <li class="separator"></li>
@@ -86,46 +85,6 @@
                     </ul>
                 </div>
                 <h4 class="panel-title pull-left">{{ project.name }}</h4>
-            </div>
-            <div class="panel-body">
-                {% if project.get_status_with_message.status == 'Processing' %}
-                <div class="message message-info alert alert-dismissible fade in">
-                    <p>Project Data is currently being processed.</p>
-                    <a class="close" data-dismiss="alert" aria-label="Close"><i class="fa fa-times" aria-hidden="true"></i></a>
-                </div>
-                {% elif project.get_status_with_message.status == 'Error' %}
-                <div class="message message-error alert alert-dismissible fade in">
-                    <p>Upload of project data had an error:
-                        {% if project.get_status_with_message.errmsg %}
-                            [{{ project.get_status_with_message.errmsg }}].
-                        {% else %}
-                            [No specific message provided].
-                        {% endif %}
-                        Please delete the project and re-upload.</p>
-                    <a class="close" data-dismiss="alert" aria-label="Close"><i class="fa fa-times" aria-hidden="true"></i></a>
-                </div>
-                {% comment "Success message does not yet have technical implementation" %}
-                <div class="message message-success alert alert-dismissible fade in">
-                    Upload of project data is complete.
-                    <a class="close" data-dismiss="alert" aria-label="Close"><i class="fa fa-times" aria-hidden="true"></i></a>
-                </div>
-                {% endcomment %}
-                {% endif %}
-                <p>{{ project.description }}</p>
-                <dl>
-                    <dt>Created</dt>
-                    <dd>{{ project.last_date_saved|date:'M d, Y, g:i a' }}</dd>
-                    {% if not program.is_public %}
-                        <dt>Number of Files</dt>
-                        <dd>{{ project.get_file_count }}</dd>
-                        <dt>Cloud Storage Bucket Name</dt>
-                        <dd>{{ project.user_data_tables_set.all.0.google_bucket.bucket_name }}</dd>
-                        <dt>BigQuery Data Table(s)</dt>
-                        {% for item in project.get_bq_tables %}
-                            <dd>{{ item }}</dd>
-                        {% endfor %}
-                    {% endif %}
-                </dl>
             </div>
         </section>
         {% include "projects/project_modals.html" %}
