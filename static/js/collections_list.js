@@ -101,8 +101,6 @@ require(['jquery', 'datatables.net','jqueryui', 'bootstrap', 'base'],
             });
 
             var table_bottom = $('#collections-table_wrapper').find('.bottom');
-            table_bottom.html('<span class="gray-out-text">' +
-                    '* Gray text collections are part of the analysis, ' +
-                    'but not currently hosted by IDC.');
+
         });
 });
