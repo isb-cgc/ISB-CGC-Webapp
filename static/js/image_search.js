@@ -2792,6 +2792,17 @@ require([
 
 
 
+     const myObserver = new ResizeObserver(entries => {
+         entries.forEach(entry => {
+             htr = $('.vert').height();
+             htsrch = $('.search-scope').height();
+             ht = Math.max(2000,htr-htsrch+100);
+             $('.search-con').css('max-height',ht+'px');
+       });
+     });
+     myObserver.observe($('#rh_panel')[0])
+     myObserver.observe($('.search-scope')[0])
+
       $(document).ready(function () {
             window.selItems = new Object();
             window.selItems.selStudies = new Object();
