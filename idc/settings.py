@@ -393,17 +393,17 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'axes': {
+            'handlers': ['console_dev', 'console_prod'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
         'allauth': {
             'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'google_helpers': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'data_upload': {
             'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
