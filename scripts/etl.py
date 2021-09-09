@@ -20,8 +20,9 @@ from builtins import str
 from builtins import object
 import datetime
 import logging
+import json
 import traceback
-import os
+from os.path import join, dirname, exists
 import re
 from csv import reader as csv_reader
 import csv
@@ -44,11 +45,18 @@ from idc_collections.models import Program, Collection, Attribute, Attribute_Ran
     Attribute_Set_Type, Attribute_Display_Category, ImagingDataCommonsVersion, Attribute_Tooltips
 
 from django.contrib.auth.models import User
-idc_superuser = User.objects.get(username="idc")
+
+app_superuser = User.objects.get(username="idc")
 
 logger = logging.getLogger('main_logger')
 
-BQ_PROJ_DATASET = 'idc-dev-etl.idc_tcia_views_mvp_wave0'
+SOLR_SINGLE_VAL = {
+    'StudyInstanceUID': ["PatientID", "StudyInstanceUID", "crdc_study_uuid"],
+    'SeriesInstanceUID': ["PatientID", "StudyInstanceUID", "crdc_study_uuid", 'SeriesInstanceUID','crdc_study_uuid'],
+}
+
+ATTR_SET = {}
+DISPLAY_VALS = {}
 
 
 def new_attribute(name, displ_name, type, display_default, cross_collex=False, units=None):
@@ -491,38 +499,79 @@ def load_display_vals(filename):
     return display_vals
 
 
-def parse_args():
-    parser = ArgumentParser()
-    parser.add_argument('-c', '--collex-file', type=str, default='', help='List of Collections to update/create')
-    parser.add_argument('-v', '--display-vals', type=str, default='', help='List of display values to add/update')
-    parser.add_argument('-p', '--programs-file', type=str, default='', help='List of programs to add/update')
-    return parser.parse_args()
-
-
-def main():
+def main(config, make_attr=False):
 
     try:
-        args = parse_args()
-        new_versions = ["TCIA Image Data Wave 3","TCIA Derived Data Wave 3"]
+        if 'programs' in config:
+            for prog in config['programs']:
+                try:
+                    obj = Program.objects.get(name=prog['name'], owner=app_superuser, active=True, is_public=True)
+                    logger.info("[STATUS] Program {} found - skipping creation.".format(prog))
+                except ObjectDoesNotExist:
+                    logger.info("[STATUS] Program {} not found - creating.".format(prog))
+                    obj = Program.objects.update_or_create(owner=app_superuser, active=True, is_public=True, **prog)
+
+        if 'collections' in config:
+            for proj in config['collections']:
+                program = Program.objects.get(name=proj['program'], owner=app_superuser, active=True)
+                try:
+                    obj = Collection.objects.get(name=proj['name'], owner=app_superuser, active=True, program=program)
+                    logger.info("[STATUS] Collection {} found - skipping.".format(proj['name']))
+                except ObjectDoesNotExist:
+                    logger.info("[STATUS] Collection {} not found - creating.".format(proj['name']))
+                    obj = Collection.objects.update_or_create(name=proj['name'], owner=app_superuser, active=True, program=program)
+
+        if 'versions' in config:
+            add_data_versions(config['versions'])
+
+        # Preload all display value information, as we'll want to load it into the attributes while we build that set
+        if 'display_values' in config and exists(join(dirname(__file__), config['display_values'])):
+            attr_vals_file = open(join(dirname(__file__), config['display_values']), "r")
+            line_reader = attr_vals_file.readlines()
+
+            for line in line_reader:
+                line = line.strip()
+                line_split = line.split(",")
+                if line_split[0] not in DISPLAY_VALS:
+                    DISPLAY_VALS[line_split[0]] = {}
+                    if line_split[1] == 'NULL':
+                        DISPLAY_VALS[line_split[0]]['preformatted_values'] = True
+                    else:
+                        DISPLAY_VALS[line_split[0]]['vals'] = [{'raw_value': line_split[1], 'display_value': line_split[2]}]
+                else:
+                    DISPLAY_VALS[line_split[0]]['vals'].append({'raw_value': line_split[1], 'display_value': line_split[2]})
+
+            attr_vals_file.close()
+
+        if 'data_sources' in config:
+            add_data_sources(config['data_sources'])
+
+        if 'attr_copy' in config:
+            for each in config['attr_copy']:
+                copy_attrs(each['src'],each['dest'])
+
+        len(ATTR_SET) and make_attr and add_attributes([ATTR_SET[x] for x in ATTR_SET])
+
+        new_versions = ["TCIA Image Data Wave 4","TCIA Derived Data Wave 4"]
 
         set_types = ["IDC Source Data","Derived Data"]
         bioclin_version = ["GDC Data Release 9"]
 
         add_data_versions(
-            {'name': "Imaging Data Commons Data Release",
-             'version_number': "3.0",
+            {'name': "IDC Data Release",
+             'version_number': "4.0",
              'case_count': 17174,
              'collex_count': 112,
              'data_volume': 0,
              'series_count': 168727
              },
-            [{'name': x, 'ver': '3'} for x in new_versions],
+            [{'name': x, 'ver': '4'} for x in new_versions],
             bioclin_version
         )
 
         add_data_sources([
             {
-                'name': 'dicom_derived_series_v3',
+                'name': 'dicom_derived_series_v4',
                 'source_type': DataSource.SOLR,
                 'count_col': 'PatientID',
                 'programs': [],
@@ -530,7 +579,7 @@ def main():
                 'data_sets': set_types,
             },
             {
-                'name': 'dicom_derived_study_v3',
+                'name': 'dicom_derived_study_v4',
                 'source_type': DataSource.SOLR,
                 'count_col': 'PatientID',
                 'programs': [],
@@ -538,7 +587,7 @@ def main():
                 'data_sets': set_types,
             },
             {
-                'name': 'idc-dev-etl.idc_v3.dicom_pivot_v3',
+                'name': 'idc-dev-etl.idc_v4.dicom_pivot_v4',
                 'source_type': DataSource.BIGQUERY,
                 'count_col': 'PatientID',
                 'programs': [],
@@ -548,23 +597,23 @@ def main():
         ])
 
         add_source_joins(
-            ['dicom_derived_study_v3','dicom_derived_series_v3'],
+            ['dicom_derived_study_v4','dicom_derived_series_v4'],
             "PatientID",
             ["tcga_bios","tcga_clin"],
             "case_barcode"
         )
 
         add_source_joins(
-            ["idc-dev-etl.idc_v3.dicom_pivot_v3"],
+            ["idc-dev-etl.idc_v4.dicom_pivot_v4"],
             "PatientID",
             ["isb-cgc.TCGA_bioclin_v0.Biospecimen","isb-cgc.TCGA_bioclin_v0.clinical_v1"],
             "case_barcode"
         )
 
-        copy_attrs(["idc-dev-etl.idc_v2.dicom_pivot_v2"],["idc-dev-etl.idc_v3.dicom_pivot_v3"])
-        copy_attrs(["dicom_derived_series_v2"],["dicom_derived_series_v3","dicom_derived_study_v3"])
+        copy_attrs(["idc-dev-etl.idc_v2.dicom_pivot_v3"],["idc-dev-etl.idc_v4.dicom_pivot_v4"])
+        copy_attrs(["dicom_derived_series_v3"],["dicom_derived_series_v4","dicom_derived_study_v4"])
 
-        deactivate_data_versions(["TCIA Image Data Wave 2","TCIA Derived Data Wave 2"], ["2.0"])
+        deactivate_data_versions(["TCIA Image Data Wave 3","TCIA Derived Data Wave 3"], ["3.0"])
 
         len(args.programs_file) and load_programs(args.programs_file)
         len(args.collex_file) and load_collections(args.collex_file)
@@ -578,4 +627,28 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        cmd_line_parser = ArgumentParser(description="Extract a data source from BigQuery and ETL it into Solr")
+        cmd_line_parser.add_argument('-j', '--json-config-file', type=str, default='', help="JSON settings file")
+        cmd_line_parser.add_argument('-a', '--parse_attributes', type=str, default='False', help="Attempt to create/update attributes from the sources")
+
+        args = cmd_line_parser.parse_args()
+
+        if not len(args.json_config_file):
+            logger.info("[ERROR] You must supply a JSON settings file!")
+            cmd_line_parser.print_help()
+            exit(1)
+
+        if not exists(join(dirname(__file__),args.json_config_file)):
+            logger.info("[ERROR] JSON config file {} not found.".format(args.json_config_file))
+            exit(1)
+
+        f = open(join(dirname(__file__),args.json_config_file), "r")
+        settings = json.load(f)
+
+        main(settings, (args.parse_attributes == 'True'))
+
+    except Exception as e:
+        logger.error("[ERROR] While attempting to load etl.py:")
+        logger.exception(e)
+        exit(1)
