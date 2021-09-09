@@ -808,6 +808,7 @@ require([
             $('#cases_tab').data('updatechildtables',updateChildTables);
             $('#cases_tab').DataTable().destroy();
             $('#cases_tab').DataTable({
+                "autoWidth": false,
                 "dom": '<"dataTables_controls"ilp>rt<"bottom"><"clear">',
                 "order": [[2, "asc"]],
                 "createdRow":function(row,data,dataIndex){
@@ -979,6 +980,13 @@ require([
                 }
 
             });
+            $('#cases_tab').on('draw.dt', function(){
+                $('#cases_table_head').children('tr').children().each(function(){
+                    this.style.width=null;
+                    }
+
+                );
+            })
             $('#cases_tab').children('tbody').attr('id','cases_table');
 
         }
@@ -992,6 +1000,7 @@ require([
 
             $('#studies_tab').DataTable().destroy();
             $('#studies_tab').DataTable({
+                "autoWidth": false,
                 "dom": '<"dataTables_controls"ilp>rt<"bottom"><"clear">',
                 "order": [[1, "asc"]],
                 "createdRow":function(row,data,dataIndex){
@@ -1075,7 +1084,7 @@ require([
                         ssCallNeeded = false;
                         $('#studies_tab').children('thead').children('tr').children('.ckbx').addClass('notVis');
                         if (refreshAfterFilter || updateChildTables[0]) {
-                            //updateSeriesTable(false,true,false)
+                            updateSeriesTable(false,true,false)
                         }
                         $('.spinner').hide();
                         callback({"data": [], "recordsTotal": "0", "recordsFiltered": "0"});
@@ -1162,6 +1171,14 @@ require([
                 }
 
             });
+
+            $('#studies_tab').on('draw.dt', function(){
+                $('#studies_table_head').children('tr').children().each(function(){
+                    this.style.width=null;
+                    }
+
+                );
+            })
             $('#studies_tab').children('tbody').attr('id','studies_table');
         }
 
@@ -1171,6 +1188,7 @@ require([
             $('#series_tab').attr('data-refreshafterfilter',refreshAfterFilter);
             $('#series_tab').DataTable().destroy();
             $('#series_tab').DataTable({
+                "autoWidth": false,
                 "dom": '<"dataTables_controls"ilp>rt<"bottom"><"clear">',
                 "order": [[0, "asc"]],
                 "createdRow":function(row,data,dataIndex){
@@ -1346,7 +1364,17 @@ require([
                 }
 
             });
+
+            $('#series_tab').on('draw.dt', function(){
+                $('#series_table_head').children('tr').children().each(function(){
+                    this.style.width=null;
+                    }
+
+                );
+            })
+
             $('#series_tab').children('tbody').attr('id','series_table');
+
         }
 
         /* var changeAjax = function (isIncrement) {
@@ -2832,7 +2860,7 @@ require([
             //"createdCell":function(td,data,row){$(td).attr("id","patient_col_"+row[1]);}
             $('#proj_table').children('tbody').attr('id','projects_table');
             */
-
+             // .search-configuration .vert
              $('.clear-filters').on('click', function () {
                    $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('checked',false);
                    $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('indeterminate',false);
