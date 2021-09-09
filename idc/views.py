@@ -263,12 +263,11 @@ def populate_tables(request):
         #table_data = get_table_data(filters, table_type)
         diffA=[]
 
-        if table_type=='series':
-            sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(active=True,
-                                                                                          source_type=DataSource.SOLR,
-                                                                                          aggregate_level="SeriesInstanceUID")
-        else:
-            sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(active=True,source_type=DataSource.SOLR,aggregate_level="StudyInstanceUID")
+        sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
+            active=True, source_type=DataSource.SOLR,
+            aggregate_level="SeriesInstanceUID"  if table_type=='series' else "StudyInstanceUID"
+        )
+
         sortByField = True
         #idsReq=[]
         custom_facets=''
@@ -291,9 +290,20 @@ def populate_tables(request):
             elif sort == 'StudyInstanceUID':
                 sortByField=False
                 sort_arg = 'unique_study ' + sortdir
-                custom_facets_order = {"tot":"unique(PatientID)", "per_id": {"type": "terms", "field": "PatientID", "sort":sort_arg, "offset":offset, "limit": limit,
-                                                                             "facet": {"unique_study": "unique(StudyInstanceUID)", "unique_series": "unique(SeriesInstanceUID)"}}
-                                        }
+                custom_facets_order = {
+                    "tot": "unique(PatientID)",
+                    "per_id": {
+                        "type": "terms",
+                        "field": "PatientID",
+                        "sort": sort_arg,
+                        "offset": offset,
+                        "limit": limit,
+                        "facet": {
+                            "unique_study": "unique(StudyInstanceUID)",
+                            "unique_series": "unique(SeriesInstanceUID)"
+                        }
+                    }
+                }
             elif sort == 'SeriesInstanceUID':
                 sortByField=False
                 sort_arg = 'unique_series '+sortdir
@@ -310,18 +320,9 @@ def populate_tables(request):
             facetfields = ['unique_series']
             sort_arg = 'PatientID asc'
 
-            if sort == 'PatientID':
+            if sort in ['PatientID','StudyInstanceUID', 'StudyDescription',]:
                 sortByField = True
-                sort_arg = 'PatientID ' + sortdir
-
-            elif sort == 'StudyInstanceUID':
-                sortByField = True
-                sort_arg = 'StudyInstanceUID ' + sortdir
-
-            elif sort == 'StudyDescription':
-                sortByField = True
-                sort_arg = 'StudyDescription ' + sortdir
-
+                sort_arg = "{} {}".format(sort, sortdir)
             elif sort == 'SeriesInstanceUID':
                 sortByField = False
                 sort_arg = 'unique_series '+sortdir
@@ -337,31 +338,20 @@ def populate_tables(request):
             fields = ['SeriesInstanceUID','StudyInstanceUID','SeriesDescription','SeriesNumber','BodyPartExamined','Modality']
             facetfields = []
             sortByField = True
-            sort_arg='StudyInstanceUID asc, SeriesNumber asc'
 
-            if sort == 'StudyInstanceUID':
-                sort_arg = 'StudyInstanceUID ' + sortdir+', SeriesNumber asc'
+            sort_arg = 'StudyInstanceUID asc, SeriesNumber asc' if not sort else "{} {}, SeriesNumber asc".format(
+                sort, sortdir
+            )
 
-            elif sort == 'SeriesNumber':
-                sort_arg = 'SeriesNumber ' + sortdir+', SeriesNumber asc'
-
-            elif sort == 'Modality':
-                sort_arg = 'Modality '+sortdir+', SeriesNumber asc'
-
-            elif sort == 'BodyPartExamined':
-                sort_arg = 'BodyPartExamined ' + sortdir + ', SeriesNumber asc'
-
-            elif sort == 'SeriesDescription':
-                sort_arg = 'SeriesDescription ' + sortdir + ', SeriesNumber asc'
-
+            if sort == 'SeriesDescription':
                 custom_facets_order = {}
-
 
         order = {}
         curInd = 0
-        idsFilt=[]
+        idsFilt = []
 
-        #check that any selected ids are still valid after the filter is updated. ids that are not longer valid are then deselected on the front end
+        # check that any selected ids are still valid after the filter is updated. ids that are not longer valid are
+        # then deselected on the front end
         if len(checkIds)>0:
             selFilters=copy.deepcopy(filters)
             selFilters[tableIndex]=checkIds
@@ -380,7 +370,7 @@ def populate_tables(request):
                 id = rec[tableIndex]
                 idsFilt.append(id)
                 order[id] = curInd
-                newRow={}
+                newRow = {}
                 for field in fields:
                     if field in rec:
                         newRow[field]=rec[field]
@@ -396,25 +386,22 @@ def populate_tables(request):
 
                 for rec in cntRecs['facets']['per_id']['buckets']:
                     id = rec['val']
-                    tableRow=tableRes[order[id]]
+                    tableRow = tableRes[order[id]]
                     for facet in facetfields:
                         if facet in rec:
                             tableRow[facet]=rec[facet]
                         else:
                             tableRow[facet] = 0
-
-
-
         else:
             idsReq = get_collex_metadata(filters, fields, record_limit=limit, sources=sources, offset=offset,
                                         records_only=False,collapse_on=tableIndex, counts_only=True, filtered_needed=False,
                                          custom_facets=custom_facets_order, raw_format=True)
             cnt = idsReq['facets']['tot']
             for rec in idsReq['facets']['per_id']['buckets']:
-                id= rec['val']
+                id = rec['val']
                 idsFilt.append(id)
                 order[id] = curInd
-                newRow={tableIndex: id}
+                newRow = {tableIndex: id}
                 for facet in facetfields:
                     if facet in rec:
                         newRow[facet]=rec[facet]
@@ -435,13 +422,16 @@ def populate_tables(request):
                         else:
                             tableRow[field] = ''
 
-
     except Exception as e:
         logger.error("[ERROR] While attempting to populate the table:")
         logger.exception(e)
-        messages.error(request,"Encountered an error when attempting to populate the page - please contact the administrator.")
+        messages.error(
+           request,
+           "Encountered an error when attempting to populate the page - please contact the administrator."
+        )
 
-    return JsonResponse({"res":tableRes, "cnt":cnt, "diff":diffA})
+    return JsonResponse({"res": tableRes, "cnt": cnt, "diff": diffA})
+
 
 # Data exploration and cohort creation page
 @login_required

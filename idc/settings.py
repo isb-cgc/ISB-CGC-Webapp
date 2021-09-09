@@ -183,6 +183,7 @@ BQ_MAX_ATTEMPTS             = int(os.environ.get('BQ_MAX_ATTEMPTS', '10'))
 
 API_USER = os.environ.get('API_USER', 'api_user')
 API_AUTH_KEY = os.environ.get('API_AUTH_KEY', 'Token')
+API_AUTH_HEADER = os.environ.get('API_AUTH_HEADER', 'HTTP_AUTHORIZATION')
 
 # TODO Remove duplicate class.
 #
@@ -464,10 +465,9 @@ TEMPLATES = [
 AUTHENTICATION_BACKENDS = (
     # Prevent login hammering
     "axes.backends.AxesBackend",
-    # Needed to login by username in Django admin, regardless of `allauth`
+    # Local account logins
     "django.contrib.auth.backends.ModelBackend",
-
-    # `allauth` specific authentication methods, such as login by e-mail
+    # `allauth` specific authentication methods (Google)
     "allauth.account.auth_backends.AuthenticationBackend",
 )
 
