@@ -151,7 +151,7 @@ def parse_args():
     parser = ArgumentParser()
     parser.add_argument('-c', '--cohort-defs', type=str, default='', help=cohort_def_help_msg)
     parser.add_argument('-u', '--user-emails', type=str, default='', help='User email(s) for cohort owner - comma separated')
-    parser.add_argument('-v', '--versions', type=str, default='1.0', help='Versions for which to create cohorts, comma delimited. Eg.: 1.0,2.0')
+    parser.add_argument('-v', '--versions', type=str, default='2.0', help='Versions for which to create cohorts, comma delimited. Eg.: 2.0, 3.0')
     return parser.parse_args()
 
 def main():
