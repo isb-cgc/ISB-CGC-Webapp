@@ -801,6 +801,21 @@ require([
 
         }
 
+        window.changePage = function(wrapper){
+            var elem=$('#'+wrapper);
+            var valStr = elem.find('.dataTables_controls').find('.goto-page-number').val();
+            try {
+                var val =parseInt(valStr);
+                if (Number.isInteger(val) && (val>0) ) {
+                    elem.find('table').DataTable().page(val-1).draw(false);
+                }
+            }
+            catch(err){
+               console.log(err);
+            }
+
+        }
+
         window.updateCaseTable = function(rowsAdded, rowsRemoved, refreshAfterFilter,updateChildTables) {
 
             $('#cases_tab').data('rowsremoved',rowsRemoved);
@@ -971,8 +986,8 @@ require([
                             $('.spinner').hide();
                             callback({
                                 "data": dataset,
-                                "recordsTotal": window.casesCache.cacheLength,
-                                "recordsFiltered": window.casesCache.cacheLength
+                                "recordsTotal": window.casesCache.recordsTotal,
+                                "recordsFiltered": window.casesCache.recordsTotal
                             })
                         }
 
@@ -986,8 +1001,10 @@ require([
                     }
 
                 );
+
             })
-            $('#cases_tab').children('tbody').attr('id','cases_table');
+            $('#cases_tab').find('tbody').attr('id','cases_table');
+            $('#cases_panel').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'cases_tab_wrapper\')">Go</button></div>');
 
         }
 
@@ -1163,8 +1180,8 @@ require([
                             $('.spinner').hide();
                             callback({
                                 "data": dataset,
-                                "recordsTotal": window.studiesCache.cacheLength,
-                                "recordsFiltered": window.studiesCache.cacheLength
+                                "recordsTotal": window.studiesCache.recordsTotal,
+                                "recordsFiltered": window.studiesCache.recordsTotal
                             })
                         }
                     }
@@ -1180,6 +1197,7 @@ require([
                 );
             })
             $('#studies_tab').children('tbody').attr('id','studies_table');
+            $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'studies_tab_wrapper\')">Go</button></div>');
         }
 
         window.updateSeriesTable = function(rowsAdded, rowsRemoved, refreshAfterFilter) {
@@ -1355,8 +1373,8 @@ require([
                             $('.spinner').hide();
                             callback({
                                 "data": dataset,
-                                "recordsTotal": window.seriesCache.cacheLength,
-                                "recordsFiltered": window.seriesCache.cacheLength
+                                "recordsTotal": window.seriesCache.recordsTotal,
+                                "recordsFiltered": window.seriesCache.recordsTotal
                             })
 
                         }
@@ -1374,6 +1392,7 @@ require([
             })
 
             $('#series_tab').children('tbody').attr('id','series_table');
+            $('#series_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'series_tab_wrapper\')">Go</button></div>');
 
         }
 
@@ -2791,6 +2810,17 @@ require([
      }
 
 
+
+     const myObserver = new ResizeObserver(entries => {
+         entries.forEach(entry => {
+             htr = $('.vert').height();
+             htsrch = $('.search-scope').height();
+             ht = Math.max(2000,htr-htsrch+100);
+             $('.search-con').css('max-height',ht+'px');
+       });
+     });
+     myObserver.observe($('#rh_panel')[0])
+     myObserver.observe($('.search-scope')[0])
 
       $(document).ready(function () {
             window.selItems = new Object();
