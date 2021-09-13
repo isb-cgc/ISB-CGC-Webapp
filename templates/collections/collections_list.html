@@ -56,7 +56,7 @@
                             <td class="collection-explore" data-collex-id="{{ collection.collection_id }}">
                                 <a role="button" >
                             {% if collection.get_collection_type == 'Analysis' %}
-                                {{ collection.name }}
+                                {{ collection.collection_id }}
                             {% else %}
                                 {{ collection.tcia_collection_id }}
                             {% endif %}
