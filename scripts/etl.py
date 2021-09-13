@@ -413,6 +413,9 @@ def load_attributes(filename, solr_sources, bq_sources):
 def add_attributes(attr_set):
     for attr_name, attr in attr_set.items():
         try:
+            obj = Attribute.objects.get(name=attr['name'])
+            logger.info("[STATUS] Attribute {} already found - skipping!".format(attr['name']))
+        except ObjectDoesNotExist as e:
             obj, created = Attribute.objects.update_or_create(
                 name=attr['name'], display_name=attr['display_name'], data_type=attr['type'],
                 preformatted_values=True if 'preformatted_values' in attr else False,
@@ -691,7 +694,7 @@ def main():
         add_source_joins(
             ["idc-dev-etl.idc_v4.dicom_pivot_v4"],
             "PatientID",
-            ["isb-cgc.TCGA_bioclin_v0.Biospecimen","isb-cgc.TCGA_bioclin_v0.clinical_v1"],
+            ["isb-cgc.TCGA_bioclin_v0.Biospecimen","isb-cgc.TCGA_bioclin_v0.clinical_v1_1"],
             "case_barcode"
         )
 
@@ -705,8 +708,8 @@ def main():
         )
 
         len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
-        len(args.programs_file) and load_programs(args.programs_file)
-        len(args.collex_file) and load_collections(args.collex_file)
+        # len(args.programs_file) and load_programs(args.programs_file)
+        # len(args.collex_file) and load_collections(args.collex_file)
         if len(args.display_vals):
             dvals = load_display_vals(args.display_vals)
             for attr in dvals:
