@@ -47,11 +47,16 @@
                     <tbody>
                         {% for collection in active_collections %}
                         <tr>
-                            <td class="details-control" data-doi="{{ collection.doi }}" data-collex-id="{{ collection.collection_id }}" title="Click to display collection description."><i class="fa fa-plus-circle show-button"> </i><i class="fa fa-minus-circle hide-button"> </i></td>
+                            <td class="details-control" data-doi="{{ collection.doi }}"
+                                data-collex-id="{{ collection.collection_id }}"
+                                title="Click to display collection description."
+                                data-collex-collex="{{ collection.collections }}"
+                            >
+                                <i class="fa fa-plus-circle show-button"> </i><i class="fa fa-minus-circle hide-button"> </i></td>
                             <td class="collection-explore" data-collex-id="{{ collection.collection_id }}">
                                 <a role="button" >
                             {% if collection.get_collection_type == 'Analysis' %}
-                                {{ collection.collections }}
+                                {{ collection.name }}
                             {% else %}
                                 {{ collection.tcia_collection_id }}
                             {% endif %}

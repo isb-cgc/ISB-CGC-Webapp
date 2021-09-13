@@ -26,7 +26,6 @@ require(['jquery', 'datatables.net','jqueryui', 'bootstrap', 'base'],
         $('#collections-table tbody').on('click', 'td.details-control', function () {
             var tr = $(this).parents('tr');
             var row = collex_data_table.row(tr);
-
             if (row.child.isShown()) {
                 // This row is already open - close it
                 row.child.hide();
@@ -34,9 +33,10 @@ require(['jquery', 'datatables.net','jqueryui', 'bootstrap', 'base'],
                 $(this).prop('title', 'Click to display collection description.');
             } else {
                 $(this).prop('title', 'Click to hide collection description.');
-                var desc = collection_descs[$(this).data('collex-id')];
+                var desc = collection_descs[$(this).data('collex-id')] || `<b>Collections:</b> `+$(this).data('collex-collex');
                 var doi = $(this).data('doi');
-                (row.child() && row.child().length) ? row.child.show() : row.child($(`<tr><td></td><td colspan="7"><p><b>DOI: </b><a href="https://doi.org/${doi}" target="_blank" rel="noopener noreferrer">${doi}</a></p>${desc}</td></tr>`)).show();
+                (row.child() && row.child().length) ? row.child.show() : row.child($(`<tr><td></td><td colspan="7">`+
+                    `<p><b>DOI: </b><a href="https://doi.org/${doi}" target="_blank" rel="noopener noreferrer">${doi}</a></p>${desc}</td></tr>`)).show();
                 tr.addClass('shown');
             }
         });
