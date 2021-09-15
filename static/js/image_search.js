@@ -1699,13 +1699,19 @@ require([
 
                 var parStr = $('#'+filterId).find('#'+filterId+'_slide').data('attr-par');
 
-
-                if (label !=='None') {
-                    if (! (typeof(inpElem)==="undefined")){
-                        inpElem.checked=false;
-                        var parStr = $(inpElem).data("attr-par");
-                        window.addNone(inpElem,parStr,false);
+                if ((label ==='None') && $('#'+filterId).hasClass('wNone')){
+                    butElem = $('#'+filterId).find('.noneBut').children('input')[0];
+                    butElem.checked=true
+                    setSlider(slideDiv, filterId+"_slide", minx, maxx, true, false);
+                    window.addNone(butElem,parStr,true);
+                }
+                else {
+                    if ($('#'+filterId).hasClass('wNone')){
+                        butElem = $('#'+filterId).find('.noneBut').children('input')[0];
+                        butElem.checked=false;
+                        window.addNone(butElem,parStr,false);
                     }
+
                     var selArr = label.split(' To ');
                     var strt = parseInt((selArr[0] === '*') ? '0' : selArr[0]);
                     var end = parseInt((selArr[1] === '*') ? maxx : selArr[1]);
