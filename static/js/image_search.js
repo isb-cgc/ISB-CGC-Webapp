@@ -2841,6 +2841,10 @@ require([
             max= Math.ceil(parseInt($('#age_at_diagnosis').data('data-max')));
             min= Math.floor(parseInt($('#age_at_diagnosis').data('data-min')));
 
+            $('#SliceThickness').addClass('isQuant');
+            $('#SliceThickness').addClass('wNone');
+            $('#SliceThickness').find('.text-filter').remove();
+
             $('#age_at_diagnosis').addClass('isQuant');
             $('#age_at_diagnosis').find('.text-filter').remove();
             $('#age_at_diagnosis').addClass('wNone');
@@ -2849,8 +2853,11 @@ require([
                 $(this).addClass('isQuant');
                 $(this).find('.text-filter').remove();
             });
+
+            addSliders('search_orig_set',true, false,'');
             addSliders('tcga_clinical',true, false,'tcga_clinical.');
             addSliders('quantitative',true, false,'');
+
             createPlots('search_orig_set');
             createPlots('search_derived_set');
             createPlots('tcga_clinical');
