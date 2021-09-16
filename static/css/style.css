@@ -242,8 +242,8 @@ nav {
 .dataTables_paginate, .dataTables_goto_page {
   padding-left: 20px; }
 .dataTables_goto_page {
-  width:45%;
-  text-align:center;
+  #width:45%;
+  #text-align:center;
 }
 
 .dataTables_filter {
@@ -281,7 +281,7 @@ nav {
     width: 35px; }
 
 .goto-page-number {
-  #width: 4em;
+  width: 4em;
 }
 
 .column_toggle_button {
