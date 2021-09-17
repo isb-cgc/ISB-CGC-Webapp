@@ -1033,9 +1033,10 @@ require([
                     {className:"ckbx", "targets":[0]},
                     {className:"col1 case-id", "targets":[1]},
                     {className:"col2 study-id study-id-col", "targets":[2]},
-                    {className:"col1 study-description", "targets":[3]},
-                    {className:"col1 numrows", "targets":[4]},
-                    {className:"ohif open-viewer", "targets":[5]},
+                    {className:"col1 study-date", "targets":[3]},
+                    {className:"col1 study-description", "targets":[4]},
+                    {className:"col1 numrows", "targets":[5]},
+                    {className:"ohif open-viewer", "targets":[6]},
 
                   ],
                 "columns": [
@@ -1049,7 +1050,7 @@ require([
                           }
                        }
                     },
-                    {"type": "text", "orderable": true, data:'PatientID', render:function(data){
+                    {"type": "text", "orderable": true, data:'StudyId', render:function(data){
                         return data;
                         } },
                     {"type": "text", "orderable": true, data:'StudyInstanceUID', render:function(data){
@@ -1062,6 +1063,7 @@ require([
                        }
 
                     },
+                    {"type": "text", "orderable": true, data:'StudyDate'},
                     {"type": "num", "orderable": true, data:'StudyDescription'},
                     {"type": "num", "orderable": true, data:'unique_series'},
                     {"type": "html", "orderable": false, data:'StudyInstanceUID', render:function(data,type,row){
