@@ -72,6 +72,9 @@ VALUE_SPECIFIC_ORDERS = {
     'residual_tumor': ['R0','R1','R2','RX','None',],
 }
 
+
+KEEP_ORDER=['SliceThickness']
+
 ATTR_SPECIFIC_ORDERS = [
 
 
@@ -184,6 +187,8 @@ def check_for_order(items, attr):
     elif attr in DISPLAY_SORT:
         # If they should be sorted alphanumerically based on the value
         return sorted(items, key=lambda k: str(k['display_value']) )
+    elif attr in KEEP_ORDER:
+        return items
     else:
         # Otherwise, sort them by count, descending
         return sorted(items, key=lambda k: k['value'])

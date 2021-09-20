@@ -1,5 +1,5 @@
 ###
-# Copyright 2015-2020, Institute for Systems Biology
+# Copyright 2015-2021, Institute for Systems Biology
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ from builtins import str
 from builtins import object
 import datetime
 import logging
-import traceback
 import os
 import re
+import json
 from csv import reader as csv_reader
 import csv
 from argparse import ArgumentParser
@@ -42,13 +42,88 @@ django.setup()
 from idc_collections.models import Program, Collection, Attribute, Attribute_Ranges, \
     Attribute_Display_Values, DataSource, DataSourceJoin, DataVersion, DataSetType, \
     Attribute_Set_Type, Attribute_Display_Category, ImagingDataCommonsVersion, Attribute_Tooltips
+from google_helpers.bigquery.bq_support import BigQuerySupport
 
 from django.contrib.auth.models import User
 idc_superuser = User.objects.get(username="idc")
 
 logger = logging.getLogger('main_logger')
 
-BQ_PROJ_DATASET = 'idc-dev-etl.idc_tcia_views_mvp_wave0'
+ATTR_SET = {}
+DISPLAY_VALS = {}
+
+ranges_needed = {
+
+}
+
+ranges_needed = {
+    'wbc_at_diagnosis': 'by_200',
+    'event_free_survival_time_in_days': 'by_500',
+    'days_to_death': 'by_500',
+    'days_to_last_known_alive': 'by_500',
+    'days_to_last_followup': 'by_500',
+    'year_of_diagnosis': 'year',
+    'days_to_birth': 'by_negative_3k',
+    'year_of_initial_pathologic_diagnosis': 'year',
+    'age_at_diagnosis': None,
+    'SUVbw': 'SUVbw',
+    'Volume': 'Volume',
+    'Diameter': 'Diameter',
+    'Surface_area_of_mesh': 'Surface_area_of_mesh',
+    'Total_Lesion_Glycolysis': 'Total_Lesion_Glycolysis',
+    'Standardized_Added_Metabolic_Activity': 'Standardized_Added_Metabolic_Activity',
+    'Percent_Within_First_Quarter_of_Intensity_Range': 'Percent_Within_First_Quarter_of_Intensity_Range',
+    'Percent_Within_Third_Quarter_of_Intensity_Range': 'Percent_Within_Third_Quarter_of_Intensity_Range',
+    'Percent_Within_Fourth_Quarter_of_Intensity_Range': 'Percent_Within_Fourth_Quarter_of_Intensity_Range',
+    'Percent_Within_Second_Quarter_of_Intensity_Range': 'Percent_Within_Second_Quarter_of_Intensity_Range',
+    'Standardized_Added_Metabolic_Activity_Background': 'Standardized_Added_Metabolic_Activity_Background',
+    'Glycolysis_Within_First_Quarter_of_Intensity_Range': 'Glycolysis_Within_First_Quarter_of_Intensity_Range',
+    'Glycolysis_Within_Third_Quarter_of_Intensity_Range': 'Glycolysis_Within_Third_Quarter_of_Intensity_Range',
+    'Glycolysis_Within_Fourth_Quarter_of_Intensity_Range': 'Glycolysis_Within_Fourth_Quarter_of_Intensity_Range',
+    'Glycolysis_Within_Second_Quarter_of_Intensity_Range': 'Glycolysis_Within_Second_Quarter_of_Intensity_Range'
+}
+
+ranges = {
+    'by_200': [{'first': "200", "last": "1400", "gap": "200", "include_lower": True, "unbounded": True,
+                "include_upper": True, 'type': 'F', 'unit': '0.01'}],
+    'by_negative_3k': [{'first': "-15000", "last": "-5000", "gap": "3000", "include_lower": True, "unbounded": True,
+                        "include_upper": False, 'type': 'I'}],
+    'by_500': [{'first': "500", "last": "6000", "gap": "500", "include_lower": False, "unbounded": True,
+                "include_upper": True, 'type': 'I'}],
+    'year': [{'first': "1976", "last": "2015", "gap": "5", "include_lower": True, "unbounded": False,
+              "include_upper": False, 'type': 'I'}],
+    'SUVbw': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '3', 'last': '12', 'gap': '1'}],
+    'Volume': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '10', 'last': '28000', 'gap': '2800'}],
+    'Diameter': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '6', 'last': '55', 'gap': '6'}],
+    'Surface_area_of_mesh': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '150', 'last': '4500', 'gap': '435'}],
+    'Total_Lesion_Glycolysis': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '78', 'last': '698', 'gap': '78'}],
+    'Standardized_Added_Metabolic_Activity': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '56', 'last': '502', 'gap': '56'}],
+    'Percent_Within_First_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '10', 'last': '90', 'gap': '10'}],
+    'Percent_Within_Third_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '10', 'last': '90', 'gap': '10'}],
+    'Percent_Within_Fourth_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '10', 'last': '90', 'gap': '10'}],
+    'Percent_Within_Second_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '10', 'last': '90', 'gap': '10'}],
+    'Standardized_Added_Metabolic_Activity_Background': [{'type': 'F', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '0.5', 'last': '5', 'gap': '0.5'}],
+    'Glycolysis_Within_First_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '28', 'last': '251', 'gap': '28'}],
+    'Glycolysis_Within_Third_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '25', 'last': '225', 'gap': '25'}],
+    'Glycolysis_Within_Fourth_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '19', 'last': '170', 'gap': '19'}],
+    'Glycolysis_Within_Second_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '25', 'last': '227', 'gap': '25'}]
+}
+
+
+SOLR_TYPES = {
+    'STRING': "string",
+    "FLOAT64": "pfloat",
+    "NUMERIC": "pfloat",
+    "INT64": "plong",
+    "INTEGER": "plong",
+    "DATE": "pdate",
+    "DATETIME": "pdate"
+}
+
+SOLR_SINGLE_VAL = {
+    "StudyInstanceUID": ["PatientID", "StudyInstanceUID", "crdc_study_uuid"],
+    "SeriesInstanceUID": ["PatientID", "StudyInstanceUID", "SeriesInstanceUID", "crdc_study_uuid", "crdc_series_uuid"]
+}
 
 
 def new_attribute(name, displ_name, type, display_default, cross_collex=False, units=None):
@@ -129,13 +204,14 @@ def add_data_sources(source_set):
         add_data_source(**source)
 
 
-def add_data_source(name, count_col, source_type, versions, programs, data_sets):
+def add_data_source(name, count_col, source_type, versions, programs, data_sets, aggregate_level):
     obj = None
     try:
         obj, created = DataSource.objects.update_or_create(
             name=name,
             count_col=count_col,
-            source_type=source_type
+            source_type=source_type,
+            aggregate_level=aggregate_level
         )
 
         progs = Program.objects.filter(short_name__in=programs)
@@ -213,11 +289,11 @@ def load_collections(filename):
                     "analysis_artifacts": line[10],
                     "description": re.sub(r' style="[^"]+"', '', (re.sub(r'<div [^>]+>',"<p>", line[11]).replace("</div>","</p>"))),
                     "collection_type": line[12],
-                    "date_updated": line[14],
+                    "date_updated": datetime.datetime.strptime(line[14], '%Y-%m-%d'),
                     "nbia_collection_id": line[15],
                     "tcia_collection_id": line[15]
                 },
-                "data_versions": [{"ver": "2.0", "name": "TCIA Image Data"}]
+                "data_versions": [{"ver": "4.0", "name": "TCIA Image Data"}]
             }
             if line[13] and len(line[13]):
                 try:
@@ -281,9 +357,65 @@ def add_collections(new,update):
         logger.exception(e)
 
 
+def create_solr_params(schema_src, solr_src):
+    solr_src = DataSource.objects.get(name=solr_src)
+    schema_src = schema_src.split('.')
+    schema = BigQuerySupport.get_table_schema(schema_src[0],schema_src[1],schema_src[2])
+    solr_schema = []
+    solr_index_strings = []
+    for field in schema:
+        if not re.search(r'has_',field['name']):
+            field_schema = {
+                "name": field['name'],
+                "type": SOLR_TYPES[field['type']],
+                "multiValued": False if field['name'] in SOLR_SINGLE_VAL.get(solr_src.aggregate_level, {}) else True,
+                "stored": True
+            }
+            solr_schema.append(field_schema)
+            if field_schema['multiValued']:
+                solr_index_strings.append("f.{}.split=true&f.{}.separator=|".format(field['name'],field['name']))
+
+    with open("{}_solr_schemas.json".format(solr_src.name), "w") as schema_outfile:
+        json.dump(solr_schema, schema_outfile)
+    schema_outfile.close()
+    with open("{}_solr_index_vars.txt".format(solr_src.name), "w") as solr_index_string:
+        solr_index_string.write("&{}".format("&".join(solr_index_strings)))
+    solr_index_string.close()
+
+
+def load_attributes(filename, solr_sources, bq_sources):
+    attr_file = open(filename, "r")
+    for line in csv_reader(attr_file):
+        if line[0] not in ATTR_SET:
+            ATTR_SET[line[0]] = new_attribute(
+                line[0],
+                line[0].replace("_", " ").title() if re.search(r'_', line[1]) else line[1],
+                Attribute.CATEGORICAL if line[2] == 'CATEGORICAL STRING' else Attribute.STRING if line[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                True if line[-1] == 'True' else False,
+                True
+            )
+        attr = ATTR_SET[line[0]]
+        if attr['name'] != 'gcs_url':
+            attr['solr_collex'].extend(solr_sources)
+        attr['bq_tables'].extend(bq_sources)
+
+        attr['set_types'].append({'set': DataSetType.IMAGE_DATA, 'child_record_search': 'StudyInstanceUID'})
+
+        if attr['name'] in DISPLAY_VALS:
+            if 'preformatted_values' in DISPLAY_VALS[attr['name']]:
+                attr['preformatted_values'] = True
+            else:
+                attr['display_vals'] = DISPLAY_VALS[attr['name']]['vals']
+
+    attr_file.close()
+
+
 def add_attributes(attr_set):
-    for attr in attr_set:
+    for attr_name, attr in attr_set.items():
         try:
+            obj = Attribute.objects.get(name=attr['name'])
+            logger.info("[STATUS] Attribute {} already found - skipping!".format(attr['name']))
+        except ObjectDoesNotExist as e:
             obj, created = Attribute.objects.update_or_create(
                 name=attr['name'], display_name=attr['display_name'], data_type=attr['type'],
                 preformatted_values=True if 'preformatted_values' in attr else False,
@@ -315,7 +447,8 @@ def add_attributes(attr_set):
             if len(attr.get('set_types',[])):
                 for set_type in attr.get('set_types'):
                     Attribute_Set_Type.objects.update_or_create(
-                        datasettype=DataSetType.objects.get(data_type=set_type['set']), attribute=obj, child_record_search=set_type['child_record_search']
+                        datasettype=DataSetType.objects.get(data_type=set_type['set']), attribute=obj,
+                        child_record_search=set_type['child_record_search']
                     )
             if len(attr.get('categories',[])):
                 for cat in attr['categories']:
@@ -496,6 +629,7 @@ def parse_args():
     parser.add_argument('-c', '--collex-file', type=str, default='', help='List of Collections to update/create')
     parser.add_argument('-v', '--display-vals', type=str, default='', help='List of display values to add/update')
     parser.add_argument('-p', '--programs-file', type=str, default='', help='List of programs to add/update')
+    parser.add_argument('-a', '--attributes-file', type=str, default='', help='List of attributes to add/update')
     return parser.parse_args()
 
 
@@ -503,75 +637,87 @@ def main():
 
     try:
         args = parse_args()
-        new_versions = ["TCIA Image Data Wave 3","TCIA Derived Data Wave 3"]
+        new_versions = ["TCIA Image Data Wave 4","TCIA Derived Data Wave 4"]
 
         set_types = ["IDC Source Data","Derived Data"]
         bioclin_version = ["GDC Data Release 9"]
 
         add_data_versions(
-            {'name': "Imaging Data Commons Data Release",
-             'version_number': "3.0",
-             'case_count': 17174,
-             'collex_count': 112,
-             'data_volume': 0,
-             'series_count': 168727
+            {'name': "IDC Data Release",
+             'version_number': "4.0",
+             'case_count': 43428,
+             'collex_count': 113,
+             'data_volume': 16.7,
+             'series_count': 371814
              },
-            [{'name': x, 'ver': '3'} for x in new_versions],
+            [{'name': x, 'ver': '4'} for x in new_versions],
             bioclin_version
         )
 
         add_data_sources([
             {
-                'name': 'dicom_derived_series_v3',
+                'name': 'dicom_derived_series_v4',
                 'source_type': DataSource.SOLR,
                 'count_col': 'PatientID',
                 'programs': [],
                 'versions': new_versions,
                 'data_sets': set_types,
+                'aggregate_level': "SeriesInstanceUID"
             },
             {
-                'name': 'dicom_derived_study_v3',
+                'name': 'dicom_derived_study_v4',
                 'source_type': DataSource.SOLR,
                 'count_col': 'PatientID',
                 'programs': [],
                 'versions': new_versions,
                 'data_sets': set_types,
+                'aggregate_level': "StudyInstanceUID"
             },
             {
-                'name': 'idc-dev-etl.idc_v3.dicom_pivot_v3',
+                'name': 'idc-dev-etl.idc_v4.dicom_pivot_v4',
                 'source_type': DataSource.BIGQUERY,
                 'count_col': 'PatientID',
                 'programs': [],
                 'versions': new_versions,
                 'data_sets': set_types,
+                'aggregate_level': 'SOPInstanceUID'
             }
         ])
 
         add_source_joins(
-            ['dicom_derived_study_v3','dicom_derived_series_v3'],
+            ['dicom_derived_study_v4','dicom_derived_series_v4'],
             "PatientID",
             ["tcga_bios","tcga_clin"],
             "case_barcode"
         )
 
         add_source_joins(
-            ["idc-dev-etl.idc_v3.dicom_pivot_v3"],
+            ["idc-dev-etl.idc_v4.dicom_pivot_v4"],
             "PatientID",
-            ["isb-cgc.TCGA_bioclin_v0.Biospecimen","isb-cgc.TCGA_bioclin_v0.clinical_v1"],
+            ["isb-cgc.TCGA_bioclin_v0.Biospecimen","isb-cgc.TCGA_bioclin_v0.clinical_v1_1"],
             "case_barcode"
         )
 
-        copy_attrs(["idc-dev-etl.idc_v2.dicom_pivot_v2"],["idc-dev-etl.idc_v3.dicom_pivot_v3"])
-        copy_attrs(["dicom_derived_series_v2"],["dicom_derived_series_v3","dicom_derived_study_v3"])
+        copy_attrs(["idc-dev-etl.idc_v3.dicom_pivot_v3"],["idc-dev-etl.idc_v4.dicom_pivot_v4"])
+        copy_attrs(["dicom_derived_series_v3"],["dicom_derived_series_v4","dicom_derived_study_v4"])
 
-        deactivate_data_versions(["TCIA Image Data Wave 2","TCIA Derived Data Wave 2"], ["2.0"])
+        deactivate_data_versions(["TCIA Image Data Wave 3","TCIA Derived Data Wave 3"], ["3.0"])
 
-        len(args.programs_file) and load_programs(args.programs_file)
-        len(args.collex_file) and load_collections(args.collex_file)
+        len(args.attributes_file) and load_attributes(args.attributes_file,
+            ["dicom_derived_series_v4","dicom_derived_study_v4"], ["idc-dev-etl.idc_v4.dicom_pivot_v4"]
+        )
+
+        len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
+        # len(args.programs_file) and load_programs(args.programs_file)
+        # len(args.collex_file) and load_collections(args.collex_file)
         if len(args.display_vals):
             dvals = load_display_vals(args.display_vals)
             for attr in dvals:
                 update_attribute(Attribute.objects.get(name=attr),{'display_vals': dvals[attr]})
+
+        for src in [("idc-dev-etl.idc_v4.dicom_derived_all", "dicom_derived_series_v4",),
+                    ("idc-dev-etl.idc_v4.dicom_derived_all", "dicom_derived_study_v4",),]:
+            create_solr_params(src[0],src[1])
 
     except Exception as e:
         logging.exception(e)

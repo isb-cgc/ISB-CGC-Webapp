@@ -6,7 +6,24 @@
    window.selItems.selProjects = new Array();
    window.selItems.selStudies = new Object();
    window.collection = {{ collections|tojson|safe }};
+   var lst = Object.keys(window.collection).sort();
+
+   window.collectionData = new Array();
+
+
    window.programs = {{ programs|tojson|safe }};
+   var ind=0;
+   for (program in window.programs) {
+       for (project in window.programs[program]['projects']) {
+           var col = project;
+           var disp = window.programs[program]['projects'][project]['display'];
+           var val = window.programs[program]['projects'][project]['val'];
+           window.collectionData.push([col, disp, val, val]);
+       }
+
+     }
+
+
    window.csr = "{{  csrf_token }}";
 </script>
 
@@ -182,7 +199,7 @@
                                          <li class="list-group-item">
                                             <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                 <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
-                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> <span class="attDisp">{{ attr.display_name }}</span> <span class="notDisp noCase"> (0 cases)</span>
+                                                    <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> <span class="attDisp">{{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}</span> <span class="notDisp noCase"> (0 cases)</span>
 
                                                 </a>
                                             </div>
@@ -530,190 +547,93 @@
                     <div class="panel panel-default">
                          <div class="panel-heading clearfix"><h4 class="panel-title">Collections</h4></div>
                          <div id = "projects_panel" class="panel-body">
-                             <div class="dataTables_info">
-                                 <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">24</span> entries</span>
-                             </div>
-                         <div>
-                      <div class="dataTables_length files-per-page">
-                        <label>Show</label>
-                        <select class="files-per-page-select" data-fpp="10">
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                        </select>
-                        <label>entries</label>
-                    </div>
 
-
-                       <div class="dataTables_goto_page goto-page-number"  data-curpage="1" data-min="1" data-max="1">
-                           <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
-                           <span class="paginate_button_space" ><a class="dataTables_button paginate_button numeric_button current">1</a></span>
-                           <a class="next-page paginate_button dataTables_button" style="float:right">Next</a>
-                       </div>
-                </div>
                              <table id="proj_table" class="table table-striped">
                                 <thead id="projects_table_head">
                                     <tr>
-                                        <th class="ckbx text_data"></th><th class='text_data'>Collection Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'>Total # of Cases<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'># of Cases(this cohort)<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                         <th class="ckbx text_data"></th>
+                                        <th class='text_data'>Collection Name </th><th class='numeric_data'>Total # of Cases</th><th class='numeric_data'># of Cases(this cohort)</th>
                                     </tr>
                                 </thead>
-                                <tbody id="projects_table" class="set_height">
-                                {% for progK, progV in programs.items|dictsort:"0.lower" %}
-                                     {% for proj, projD in progV.projects.items %}
-                                         <tr id="project_row_{{ proj }}" class="text_head")"><td class="ckbx text_data"><input type="checkbox" onclick="(toggleRows($(this).parent().parent(),'projects', 'project_row_',false))"></td> <td>{{ projD.display }}</td><td>{{ projD.val }}</td><td id="patient_col_{{ proj }}" class="projects_table_num_cohort">{{ projD.val }}</td> </tr>
-                                     {% endfor %}
 
-                                {% endfor %}
-                                {% comment %}
-                                {% for coll, cnt in collections.items|dictsort:"0.lower" %}
-                                      {% if coll != "All" %}
-                                          <tr id="project_row_{{ coll }}" class="text_head")"><td class="ckbx text_data"><input type="checkbox" onclick="(toggleRows($(this).parent().parent(),'projects', 'project_row_',false))"></td> <td>{{ coll }}</td><td>{{ cnt }}</td><td id="patient_col_{{ coll }}" class="projects_table_num_cohort">{{ cnt }}</td> </tr>
-                                      {% endif %}
-                                {% endfor %}
-                                {% endcomment %}
-                                </tbody>
                             </table>
                          </div>
                      </div>
                 </div>
 
-                    <div class="tabpanel data-tab-content-panel table-panel">
+                        <div class="tabpanel data-tab-content-panel table-panel">
                     <div class="panel panel-default">
                          <div class="panel-heading clearfix"><h4 class="panel-title">Selected Cases</h4></div>
                          <div id = "cases_panel" class="panel-body">
-                             <div class="dataTables_info">
-                                 <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">23</span> entries</span>
-                                 <span class="no-file-page-count" style="display: none;" data-num="1">Showing 0 files.</span>
-                             </div>
-                         <div>
-                      <div class="dataTables_length files-per-page">
-                        <label>Show</label>
-                        <select class="files-per-page-select" data-fpp="10">
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                        </select>
-                        <label>entries</label>
-                    </div>
 
-
-                        <div class="dataTables_goto_page goto-page-number"  data-curpage="1" data-min="1" data-max="1">
-                           <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
-                           <span class="paginate_button_space" ><a class="dataTables_button paginate_button numeric_button current">1</a></span>
-                           <a class="next-page paginate_button dataTables_button" style="float:right">Next</a>
-                       </div>
-
-
-                </div>
-                             <table class="table table-striped">
+                             <table id="cases_tab" class="table table-striped">
                                 <thead id="cases_table_head">
                                     <tr>
-                                        <th class="ckbx text_data notVis"><i class="fa fa-plus-circle fa-lg" onclick="(toggleRows($(this).parent().parent(),'cases', 'case_',true))"></i><i class="fa fa-minus-circle fa-lg" onclick="(toggleRows($(this).parent().parent(),'cases', 'case_',false))"></i> </th><th class='text_data'>Collection Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'>Case Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th><th class='numeric_data'>Total # of Studies<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                        <th class="ckbx text_data notVis">
+                                             <i class="fa fa-plus-circle fa-lg" onclick="(updateMultipleRows($($(this).parentsUntil('table')[2]).parent(),true,'cases'))" style="font-family :'FontAwesome' !important"></i>
+                                             <i class="fa fa-minus-circle fa-lg" onclick="(updateMultipleRows($($(this).parentsUntil('table')[2]).parent(),false,'cases'))" style="font-family :'FontAwesome' !important"></i>
+                                        </th>
+                                        <th class='text_data'>Collection Name</th><th class='numeric_data'>Case Id</th><th class='numeric_data'>Total # of Studies</th>
 
-                                        <th class='numeric_data'>Total # of Series<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                        <!-- <th>Collection Name </th><th>Total # of Patients</th><th># of Patients(this cohort)</th> -->
+                                        <th class='numeric_data'>Total # of Series</th>
+
                                     </tr>
                                 </thead>
-                                <tbody id="cases_table" class="set_height">
-
-                                </tbody>
+                                
                             </table>
                          </div>
-                     </div>
-                </div>
-                    <div class="tabpanel data-tab-content-panel table-panel">
+                    </div>
+                        </div>
+
+
+                        <div class="tabpanel data-tab-content-panel table-panel">
                      <div class="panel panel-default">
                          <div class="panel-heading clearfix"><h4 class="panel-title">Selected Studies</h4></div>
                          <div class="panel-body">
-
-                         <div class="dataTables_info">
-                    <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">0</span> entries</span>
-
-                         </div>
-                       <div>
-
-                          <div class="dataTables_length files-per-page">
-                        <label>Show</label>
-                        <select class="files-per-page-select" data-fpp="10">
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                        </select>
-                        <label>entries</label>
-                    </div>
-
-
-                        <div class="dataTables_goto_page goto-page-number"  data-curpage="1" data-min="1" data-max="1">
-                           <a class="prev-page paginate_button dataTables_button">Previous</a>
-                           <span class="paginate_button_space" ><a class="dataTables_button paginate_button numeric_button current">1</a></span>
-                           <a class="next-page paginate_button dataTables_button">Next</a>
-                       </div>
-
-
-
-                       </div>
-                               <table class="table table-striped studies-table" >
+                             <table id="studies_tab" class="table table-striped studies-table" >
                               <thead id="studies_table_head">
                              <tr>
-                                 <!-- <th class='text_data '>Project Name <span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th> -->
-                                 <th class="ckbx text_data notVis"><i class="fa fa-plus-circle fa-lg" onclick="(toggleRows($(this).parent().parent(),'studies', 'study_',true))"></i><i class="fa fa-minus-circle fa-lg" onclick="(toggleRows($(this).parent().parent(),'studies', 'study_',false))"></i></th>
-                                 <th class='text_data case-id'>Case Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                 <th class='text_data study-id'>Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                 <th class='text_data study-description'>Study Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                 <th class='numeric_data'># of Series<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                 <th class="text_data open-viewer">View</th>
+                                 <th class="ckbx text_data notVis">
+                                     <i class="fa fa-plus-circle fa-lg" onclick="(updateMultipleRows($($(this).parentsUntil('table')[2]).parent(),true,'studies'))"></i>
+                                     <i class="fa fa-minus-circle fa-lg" onclick="(updateMultipleRows($($(this).parentsUntil('table')[2]).parent(),false,'studies'))"></i>
+                                 </th>
+                                 <th class='col1 text_data case-id'>Case Id</th>
+                                 <th class='col2 text_data study-id study-id-col'>Study Id</th>
+                                 <th class='col1 text_data study-description'>Study Description</th>
+                                 <th class='col1 numrows numeric_data'># of Series</th>
+                                 <th class="ohif text_data open-viewer">View</th>
                              </tr>
                               </thead>
 
-                             <tbody  id="studies_table" class="set_height" data-rowpos="">
 
-                              </tbody>
                           </table >
-                         </div>
                      </div>
+                    </div>
                 </div>
-                    <div class="tabpanel data-tab-content-panel table-panel">
+
+
+                        <div class="tabpanel data-tab-content-panel table-panel">
                      <div class="panel panel-default">
                          <div class="panel-heading clearfix"><h4 class="panel-title">Selected Series</h4></div>
                          <div class="panel-body">
-                            <div class="dataTables_info">
-                                <span class="file-page-count">Showing <span class="showing">1 to 10</span> of <span class="total-file-count">0</span> entries</span>
 
-                            </div>
-                            <div>
-                                <div class="dataTables_length files-per-page">
-                                    <label>Show</label>
-                                    <select class="files-per-page-select" data-fpp="10">
-                                        <option value="10">10</option>
-                                        <option value="25">25</option>
-                                        <option value="50">50</option>
-                                    </select>
-                                    <label>entries</label>
-                                </div>
-
-
-                                 <div class="dataTables_goto_page goto-page-number"  data-curpage="1" data-min="1" data-max="1">
-                                     <a class="prev-page paginate_button dataTables_button" style="float:left">Previous</a>
-                                    <span class="paginate_button_space" ><a class="dataTables_button paginate_button numeric_button current">1</a></span>
-                                    <a class="next-page paginate_button dataTables_button" style="float:right">Next</a>
-                                 </div>
-                            </div>
-                             <table class = "table table-striped series-table">
+                             <table id="series_tab" class = "table table-striped series-table">
                                 <thead id="series_table_head">
                                     <tr>
-                                        <th class="study-id">Study Id<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                        <th class="series-number">Series Number<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                        <th class="modality">Modality<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                        <th class="body-part-examined">Body Part Examined<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
-                                        <th class="series-description">Series Description<span class="fa fa-stack"><i class="fa fa-caret-up"></i><i class="fa fa-caret-down" style="background-color:grey"></i></span></th>
+                                        <th class="study-id">Study Id</th>
+                                        <th class="series-number">Series Number</th>
+                                        <th class="modality">Modality</th>
+                                        <th class="body-part-examined">Body Part Examined</th>
+                                        <th class="series-description">Series Description</th>
                                         <th class="text_data">View</th>
                                     </tr>
                                 </thead>
-                                <tbody id="series_table" class="set_height"></tbody>
                              </table>
                          </div>
                      </div>
                 </div>
+
+
                 </div>
             </div>
         </div>

@@ -61,7 +61,7 @@
             </button>
         </li>
         <li role="menuitem" class="pull-right">
-            <button id="delete-cohorts" type="button" class="btn btn-info owner-only" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true" disabled title="Select one or more cohorts.">
+            <button id="delete-cohorts" type="button" class="btn btn-info" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true" disabled title="Select one or more cohorts.">
                 <i class="fa fa-trash"></i>
                 Delete
             </button>
@@ -260,12 +260,12 @@
                 </div>
                 <form id="delete-cohort-form" method="POST" action="{% url 'delete_cohort' %}">
                     <div class="modal-body">
-                        <label>Are you sure you want to delete cohorts?</label>
+                        <label>Are you sure you want to delete these cohorts?</label>
                         <p class="form-control-static selected-cohorts"></p>
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
-                        <input type="submit" value="Delete" class="btn btn-primary owner-only" />
+                        <input type="submit" value="Delete" class="btn btn-primary" />
                         <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
                     </div>
                 </form>
