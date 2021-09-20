@@ -39,6 +39,10 @@ if [ -z $SOLR_PWD ]; then
     echo "[ERROR] Solr API password not supplied - exiting."
     exit 1
 fi
+if [ -z $SOLR_USER ]; then
+    echo "[ERROR] Solr API user not supplied - exiting."
+    exit 1
+fi
 
 if [[ ! -f $CORE_LIST_FILE ]] && [[ $CORE_LIST == "" ]]; then
     echo "[ERROR] Couldn't find list of cores - exiting."
@@ -70,14 +74,14 @@ for core in "${cores[@]}"; do
     if [[ $core != "" ]]; then
         echo "Backup for core ${core} started..."
         sudo -u solr cp ${SOLR_DATA}/$core/conf/managed-schema ${BACKUPS_DIR}/$core.managed-schema
-        curl -u idc:$SOLR_PWD -X GET "https://localhost:8983/solr/$core/replication?command=backup&location=${BACKUPS_DIR}/&name=$core" --cacert solr-ssl.pem
-        status=`curl -u idc:${SOLR_PWD} -X GET "https://localhost:8983/solr/${core}/replication?command=details" --cacert solr-ssl.pem | python3 -c "${PARSE_RESPONSE}"`
+        curl -u $SOLR_USER:$SOLR_PWD -X GET "https://localhost:8983/solr/$core/replication?command=backup&location=${BACKUPS_DIR}/&name=$core" --cacert solr-ssl.pem
+        status=`curl -u $SOLR_USER:${SOLR_PWD} -X GET "https://localhost:8983/solr/${core}/replication?command=details" --cacert solr-ssl.pem | python3 -c "${PARSE_RESPONSE}"`
         retries=0
         while [[ "$status" != "OK" && "$retries" -lt  "$MAX_WAIT" ]]; do
           echo "Backup for core ${core} isn't completed, waiting..."
           sleep 2
           ((retries++))
-          status=`curl -u idc:${SOLR_PWD} -X GET "https://localhost:8983/solr/${core}/replication?command=details" --cacert solr-ssl.pem | python3 -c "${PARSE_RESPONSE}"`
+          status=`curl -u $SOLR_USER:${SOLR_PWD} -X GET "https://localhost:8983/solr/${core}/replication?command=details" --cacert solr-ssl.pem | python3 -c "${PARSE_RESPONSE}"`
         done
         if [ "$status" == "OK" ]; then
           echo "Core ${core} backup completed."
