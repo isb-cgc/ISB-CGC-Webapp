@@ -22,6 +22,9 @@ DEFAULT_SENSITIVE_HEADERS = [
 ] if IS_DJANGO_VERSION_GTE_3_2_0 else [
     "HTTP_AUTHORIZATION", "HTTP_PROXY_AUTHORIZATION"
 ]
+# Added by SP for IDC: a list of content items which should cause their omission from the log
+# (just log their presence)
+DEFAULT_SENSITIVE_CONTENT = ["password="]
 SETTING_NAMES = {
     "log_level": "REQUEST_LOGGING_DATA_LOG_LEVEL",
     "http_4xx_log_level": "REQUEST_LOGGING_HTTP_4XX_LOG_LEVEL",
@@ -29,6 +32,7 @@ SETTING_NAMES = {
     "colorize": "REQUEST_LOGGING_ENABLE_COLORIZE",
     "max_body_length": "REQUEST_LOGGING_MAX_BODY_LENGTH",
     "sensitive_headers": "REQUEST_LOGGING_SENSITIVE_HEADERS",
+    "sensitive_content": "REQUEST_LOGGING_SENSITIVE_CONTENT"
 }
 BINARY_REGEX = re.compile(r"(.+Content-Type:.*?)(\S+)/(\S+)(?:\r\n)*(.+)", re.S | re.I)
 BINARY_TYPES = ("image", "application")
@@ -77,6 +81,7 @@ class LoggingMiddleware(object):
         self.log_level = getattr(settings, SETTING_NAMES["log_level"], DEFAULT_LOG_LEVEL)
         self.http_4xx_log_level = getattr(settings, SETTING_NAMES["http_4xx_log_level"], DEFAULT_HTTP_4XX_LOG_LEVEL)
         self.sensitive_headers = getattr(settings, SETTING_NAMES["sensitive_headers"], DEFAULT_SENSITIVE_HEADERS)
+        self.sensitive_content = getattr(settings, SETTING_NAMES["sensitive_content"], DEFAULT_SENSITIVE_CONTENT)
         if not isinstance(self.sensitive_headers, list):
             raise ValueError(
                 "{} should be list. {} is not list.".format(SETTING_NAMES["sensitive_headers"], self.sensitive_headers)
@@ -206,10 +211,13 @@ class LoggingMiddleware(object):
             if is_multipart:
                 self._log_multipart(self._chunked_to_max(self.cached_request_body), logging_context, log_level)
             else:
+                chunk = self._chunked_to_max(self.cached_request_body) if len(self.cached_request_body) else "(request body is empty)"
+                for i in self.sensitive_content:
+                    if re.search(i, str(chunk)):
+                        chunk = re.sub("{}[^&]+".format(i), "{}********".format(i), str(chunk))
                 self.logger.log(
                     log_level,
-                    self._chunked_to_max(self.cached_request_body)
-                    if len(self.cached_request_body) else "(request body is empty)",
+                    chunk,
                     logging_context
                 )
 
@@ -296,4 +304,6 @@ class LoggingMiddleware(object):
                 self.logger.log(level, self._chunked_to_max(response.content), logging_context)
 
     def _chunked_to_max(self, msg):
-        return msg[0:self.max_body_length]
+        if len(msg) > self.max_body_length:
+            return "{} [...more...]".format(str(msg[0:self.max_body_length]))
+        return msg
