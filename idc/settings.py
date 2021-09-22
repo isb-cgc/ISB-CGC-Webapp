@@ -293,6 +293,7 @@ MIDDLEWARE = [
     'idc.team_only_middleware.TeamOnly',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'request_logging.middleware.LoggingMiddleware',
     'offline.middleware.OfflineMiddleware',
 ]
 
@@ -384,9 +385,9 @@ LOGGING = {
     },
     'loggers': {
         'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
+            'handlers': ['console_dev', 'console_prod'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
         'main_logger': {
             'handlers': ['console_dev', 'console_prod'],
@@ -548,13 +549,20 @@ else:
 #########################################
 # Axes Settings
 #########################################
-
 AXES_HANDLER = 'axes.handlers.cache.AxesCacheHandler' if not IS_DEV else 'axes.handlers.dummy.AxesDummyHandler'
 AXES_META_PRECEDENCE_ORDER = [
     'HTTP_X_FORWARDED_FOR',
     'REMOTE_ADDR',
 ]
 AXES_PROXY_COUNT=1
+
+
+#########################################
+# Request Logging
+#########################################
+REQUEST_LOGGING_MAX_BODY_LENGTH = int(os.environ.get('REQUEST_LOGGING_MAX_BODY_LENGTH', '1000'))
+REQUEST_LOGGING_ENABLE_COLORIZE = bool(os.environ.get('REQUEST_LOGGING_ENABLE_COLORIZE', 'False') == 'True')
+
 
 #########################################
 #   MailGun Email Settings for requests #
