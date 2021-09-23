@@ -776,11 +776,40 @@ require([
         }
 
         reorderCacheData = function(cache,request,thead){
+
+            function compCols(a,b,order,isNum,hasAux,c,d,auxIsNum){
+                var cmp=0;
+
+                if (isNum){
+                    cmp=parseFloat(a)- parseFloat(b);
+                }
+                else{
+                    cmp=a[col]>b[col] ? 1 :  (a[col]==b[col]? 0: -1)
+                }
+                if ((cmp === 0) && hasAux){
+                    if (auxIsNum){
+                        cmp=parseFloat(c)- parseFloat(d);
+                    }
+                    else{
+                        cmp=c>=d ? 1 : -1;
+                    }
+
+                }
+                else if (order ==-1){
+                    cmp=-cmp;
+                }
+                return cmp;
+            }
+
+
             var dir = request.order[0]['dir'];
             var colId = parseInt(request.order[0]['column']);
             var col = cache.colOrder[colId];
             var ntmp  = cache.data.slice(0,3);
             var rtmp = new Array();
+
+
+
             if ($(thead.children('tr').children().get(col)).hasClass('numeric_data')){
                 if (dir==='asc'){
                     cache.data=cache.data.sort((a,b) => (parseFloat(a[col])- parseFloat(b[col]) ) );
@@ -1050,7 +1079,7 @@ require([
                           }
                        }
                     },
-                    {"type": "text", "orderable": true, data:'StudyId', render:function(data){
+                    {"type": "text", "orderable": true, data:'PatientID', render:function(data){
                         return data;
                         } },
                     {"type": "text", "orderable": true, data:'StudyInstanceUID', render:function(data){

@@ -72,6 +72,7 @@ VALUE_SPECIFIC_ORDERS = {
     'residual_tumor': ['R0','R1','R2','RX','None',],
 }
 
+
 KEEP_ORDER = ['SliceThickness']
 
 ATTR_SPECIFIC_ORDERS = [

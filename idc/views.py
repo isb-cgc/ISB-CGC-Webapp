@@ -318,11 +318,17 @@ def populate_tables(request):
             tableIndex = 'StudyInstanceUID'
             fields = ['PatientID','StudyInstanceUID','StudyDescription','Modality','StudyDate']
             facetfields = ['unique_series']
-            sort_arg = 'PatientID asc'
+            sort_arg = 'PatientID asc, StudyDate asc'
 
-            if sort in ['PatientID','StudyInstanceUID', 'StudyDescription',]:
+            if sort in ['PatientID','StudyInstanceUID', 'StudyDescription', 'StudyDate']:
                 sortByField = True
                 sort_arg = "{} {}".format(sort, sortdir)
+                if sort == 'PatientID':
+                    sort_arg = sort_arg+' StudyDate asc'
+                #elif sort == 'StudyInstanceUID':
+                #    sort_arg = sort_arg + 'StudyDate asc'
+
+
             elif sort == 'SeriesInstanceUID':
                 sortByField = False
                 sort_arg = 'unique_series '+sortdir
