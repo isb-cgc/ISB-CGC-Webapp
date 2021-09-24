@@ -523,7 +523,9 @@ require([
         };
 
         var updateTablesAfterFilter = function (collFilt, collectionsData){
+
             var usedCollectionData = new Array();
+            rmCases = []
             var hasColl = collFilt.length>0 ? true : false;
             for (var i=0;i<window.collectionData.length;i++){
                 var cRow = window.collectionData[i];
@@ -541,6 +543,7 @@ require([
                            selCases= window.selItems.selCases[projId];
                            for (j=0;j<selCases.length;j++){
                                var selCase = selCases[j];
+                               rmCases.append(selCase);
                                delete window.selItems.selStudies[selCase];
                            }
 
@@ -554,7 +557,7 @@ require([
             }
 
             updateProjectTable(usedCollectionData);
-            updateCaseTable(false, false, true, [false,false]);
+            updateCaseTable(false, false, true, [false,false], rmCases);
         }
 
 
@@ -579,7 +582,7 @@ require([
                    purgeChildSelections=cleanChildSelections(removedProjects,'projects',false);
                }
             }
-            updateCaseTable(rowsAdded, !rowsAdded, false, purgeChildSelections)
+            updateCaseTable(rowsAdded, !rowsAdded, false, purgeChildSelections,[])
         }
 
         window.updateMultipleRows=function(table,add,type){
@@ -845,7 +848,13 @@ require([
 
         }
 
-        window.updateCaseTable = function(rowsAdded, rowsRemoved, refreshAfterFilter,updateChildTables) {
+        window.filterTable = function(wrapper, type){
+            var elem=$('#'+wrapper);
+            var varStr=elem.find('.dataTables_controls').find('.'+type+'_inp');
+
+        }
+
+        window.updateCaseTable = function(rowsAdded, rowsRemoved, refreshAfterFilter,updateChildTables, rmCases) {
 
             $('#cases_tab').data('rowsremoved',rowsRemoved);
             $('#cases_tab').data('refreshafterfilter',refreshAfterFilter);
@@ -970,18 +979,20 @@ require([
                                         $('#cases_tab').children('thead').children('tr').children('.ckbx').addClass('notVis');
                                     }
 
-                                    if (refreshAfterFilter && (data['diff'].length > 0)) {
-                                        for (projid in window.selItems.selCases) {
-                                            for (var i = 0; i < window.selItems.selCases[projid].length; i++) {
-                                                caseid = window.selItems.selCases[projid][i];
-                                                var ind = data['diff'].indexOf(caseid);
-                                                if (ind > -1) {
-                                                    window.selItems.selCases[projid].splice(i, 1);
-                                                    i--;
+                                    if (refreshAfterFilter && ((data['diff'].length > 0) || (rmCases.length>0)) ) {
+                                        if (data['diff'].length>0){
+                                            for (projid in window.selItems.selCases) {
+                                                for (var i = 0; i < window.selItems.selCases[projid].length; i++) {
+                                                    caseid = window.selItems.selCases[projid][i];
+                                                    var ind = data['diff'].indexOf(caseid);
+                                                    if (ind > -1) {
+                                                        window.selItems.selCases[projid].splice(i, 1);
+                                                        i--;
+                                                    }
                                                 }
-                                            }
-                                            if (window.selItems.selCases[projid].length === 0) {
-                                                delete window.selItems.selCases[projid];
+                                                if (window.selItems.selCases[projid].length === 0) {
+                                                    delete window.selItems.selCases[projid];
+                                                }
                                             }
                                         }
                                         updateChildTables = cleanChildSelections(data['diff'], 'cases', false)
@@ -1229,6 +1240,7 @@ require([
             })
             $('#studies_tab').children('tbody').attr('id','studies_table');
             $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'studies_tab_wrapper\')">Go</button></div>');
+            $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<br><div>Find by CaseID:<input class="PatientID_inp" type="text-box"><button onclick="filterTable(\'studies_tab_wrapper\',\'PatientID\')">Go</button></div>');
         }
 
         window.updateSeriesTable = function(rowsAdded, rowsRemoved, refreshAfterFilter) {

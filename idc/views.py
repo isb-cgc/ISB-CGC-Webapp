@@ -324,7 +324,7 @@ def populate_tables(request):
                 sortByField = True
                 sort_arg = "{} {}".format(sort, sortdir)
                 if sort == 'PatientID':
-                    sort_arg = sort_arg+' StudyDate asc'
+                    sort_arg = sort_arg+', StudyDate asc'
                 #elif sort == 'StudyInstanceUID':
                 #    sort_arg = sort_arg + 'StudyDate asc'
 
