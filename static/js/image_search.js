@@ -523,6 +523,7 @@ require([
         };
 
         var updateTablesAfterFilter = function (collFilt, collectionsData){
+            var rmSelCases = new Array();
             var usedCollectionData = new Array();
             var hasColl = collFilt.length>0 ? true : false;
             for (var i=0;i<window.collectionData.length;i++){
@@ -541,6 +542,7 @@ require([
                            selCases= window.selItems.selCases[projId];
                            for (j=0;j<selCases.length;j++){
                                var selCase = selCases[j];
+                               rmSelCases.push(selCase);
                                delete window.selItems.selStudies[selCase];
                            }
 
@@ -554,7 +556,7 @@ require([
             }
 
             updateProjectTable(usedCollectionData);
-            updateCaseTable(false, false, true, [false,false]);
+            updateCaseTable(false, false, true, [false,false], rmSelCases);
         }
 
 
@@ -579,7 +581,7 @@ require([
                    purgeChildSelections=cleanChildSelections(removedProjects,'projects',false);
                }
             }
-            updateCaseTable(rowsAdded, !rowsAdded, false, purgeChildSelections)
+            updateCaseTable(rowsAdded, !rowsAdded, false, purgeChildSelections,[])
         }
 
         window.updateMultipleRows=function(table,add,type){
@@ -816,7 +818,7 @@ require([
 
         }
 
-        window.updateCaseTable = function(rowsAdded, rowsRemoved, refreshAfterFilter,updateChildTables) {
+        window.updateCaseTable = function(rowsAdded, rowsRemoved, refreshAfterFilter,updateChildTables, rmSelCases) {
 
             $('#cases_tab').data('rowsremoved',rowsRemoved);
             $('#cases_tab').data('refreshafterfilter',refreshAfterFilter);
@@ -941,18 +943,21 @@ require([
                                         $('#cases_tab').children('thead').children('tr').children('.ckbx').addClass('notVis');
                                     }
 
-                                    if (refreshAfterFilter && (data['diff'].length > 0)) {
-                                        for (projid in window.selItems.selCases) {
-                                            for (var i = 0; i < window.selItems.selCases[projid].length; i++) {
-                                                caseid = window.selItems.selCases[projid][i];
-                                                var ind = data['diff'].indexOf(caseid);
-                                                if (ind > -1) {
-                                                    window.selItems.selCases[projid].splice(i, 1);
-                                                    i--;
+                                    if (refreshAfterFilter &&  ( (data['diff'].length > 0) || (rmSelCases.length>0)) ) {
+                                        if (data['diff'].length > 0)
+                                        {
+                                            for (projid in window.selItems.selCases) {
+                                                for (var i = 0; i < window.selItems.selCases[projid].length; i++) {
+                                                    caseid = window.selItems.selCases[projid][i];
+                                                    var ind = data['diff'].indexOf(caseid);
+                                                    if (ind > -1) {
+                                                        window.selItems.selCases[projid].splice(i, 1);
+                                                        i--;
+                                                    }
                                                 }
-                                            }
-                                            if (window.selItems.selCases[projid].length === 0) {
-                                                delete window.selItems.selCases[projid];
+                                                if (window.selItems.selCases[projid].length === 0) {
+                                                    delete window.selItems.selCases[projid];
+                                                }
                                             }
                                         }
                                         updateChildTables = cleanChildSelections(data['diff'], 'cases', false)
