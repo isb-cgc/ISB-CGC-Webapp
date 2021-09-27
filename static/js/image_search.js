@@ -2578,7 +2578,9 @@ require([
          var sliders = [];
         _.each(filters, function(group){
             _.each(group['filters'], function(filter) {
-                let selector = 'div.list-group-item__body[data-filter-attr-id="' + filter['id'] + '"], ' + 'div.list-group-sub-item__body[data-filter-attr-id="' + filter['id'] + '"]';
+                let selector = 'div.list-group-item__body[data-filter-attr-id="' +
+                    filter['id'] + '"], ' + 'div.list-group-sub-item__body[data-filter-attr-id="' +
+                    filter['id'] + '"]';
                 $(selector).parents('.collection-list').collapse('show');
 
                 $(selector).each(function(index, selEle)

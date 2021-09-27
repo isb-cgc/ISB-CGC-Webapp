@@ -46,29 +46,34 @@
                     </colgroup>
                     <tbody>
                         {% for collection in active_collections %}
-                        <tr>
-                            <td class="details-control" data-doi="{{ collection.doi }}"
-                                data-collex-id="{{ collection.collection_id }}"
-                                title="Click to display collection description."
-                                data-collex-collex="{{ collection.collections }}"
-                            >
-                                <i class="fa fa-plus-circle show-button"> </i><i class="fa fa-minus-circle hide-button"> </i></td>
-                            <td class="collection-explore" data-collex-id="{{ collection.collection_id }}">
-                                <a role="button" >
-                            {% if collection.get_collection_type == 'Analysis' %}
-                                {{ collection.collection_id }}
-                            {% else %}
-                                {{ collection.tcia_collection_id }}
-                            {% endif %}
-                                </a>
-                            </td>
-                            <td>{{ collection.get_collection_type }}</td>
-                            <td>{{ collection.cancer_type }}</td>
-                            <td>{{ collection.image_types }}</td>
-                            <td>{{ collection.subject_count }}</td>
-                            <td>{{ collection.location }}</td>
-                            <td>{{ collection.supporting_data }}</td>
-                        </tr>
+                            {% with collex_type=collection.get_collection_type %}
+                            <tr>
+                                <td class="details-control" data-doi="{{ collection.doi }}"
+                                    data-collex-id="{{ collection.collection_id }}"
+                                    title="Click to display collection description."
+                                >
+                                    <i class="fa fa-plus-circle show-button"> </i><i class="fa fa-minus-circle hide-button"> </i></td>
+                                <td class="collection-explore"
+                                    data-collex-id="{{ collection.collection_id }}"
+                                    data-collex-collex="{{ collection.collections }}"
+                                    data-collex-type="{{ collex_type }}"
+                                >
+                                    <a role="button" >
+                                {% if collex_type == 'Analysis' %}
+                                    {{ collection.collection_id }}
+                                {% else %}
+                                    {{ collection.tcia_collection_id }}
+                                {% endif %}
+                                    </a>
+                                </td>
+                                <td>{{ collection.get_collection_type }}</td>
+                                <td>{{ collection.cancer_type }}</td>
+                                <td>{{ collection.image_types }}</td>
+                                <td>{{ collection.subject_count }}</td>
+                                <td>{{ collection.location }}</td>
+                                <td>{{ collection.supporting_data }}</td>
+                            </tr>
+                            {% endwith %}
                         {% endfor %}
                     </tbody>
                 </table>
