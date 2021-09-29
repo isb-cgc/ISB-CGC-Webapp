@@ -33,7 +33,7 @@ from django.contrib import messages
 
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
-from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, DataSetType
+from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, DataSetType, Attribute
 from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata
 from .models import AppInfo
 from allauth.socialaccount.models import SocialAccount
@@ -257,6 +257,9 @@ def populate_tables(request):
         filters = json.loads(req.get('filters', '{}'))
         offset = int(req.get('offset', '0'))
         limit = int(req.get('limit', '500'))
+        if limit > settings.MAX_SOLR_RECORD_REQUEST:
+            logger.error("[ERROR] Attempt to request more than MAX_SOLR_RECORD_REQUEST! ({})".format(limit))
+            limit = settings.MAX_SOLR_RECORD_REQUEST
         sort = req.get('sort', 'PatientID')
         sortdir = req.get('sortdir','asc')
         checkIds = json.loads(req.get('checkids','[]'))
@@ -274,11 +277,12 @@ def populate_tables(request):
         custom_facets_order=''
         if table_type == 'cases':
             custom_facets = {"per_id": {"type": "terms", "field": "PatientID", "limit": limit,
-                                "facet": {"unique_study": "unique(StudyInstanceUID)", "unique_series": "unique(SeriesInstanceUID)"}}
+                                "facet": {"unique_study": "unique(StudyInstanceUID)",
+                                          "unique_series": "unique(SeriesInstanceUID)"}}
                             }
             tableIndex = 'PatientID'
-            fields = ['collection_id','PatientID']
-            facetfields=['unique_study','unique_series']
+            fields = ['collection_id', 'PatientID']
+            facetfields=['unique_study', 'unique_series']
 
             if sort == 'collection_id':
                 sortByField = True
@@ -307,9 +311,16 @@ def populate_tables(request):
             elif sort == 'SeriesInstanceUID':
                 sortByField=False
                 sort_arg = 'unique_series '+sortdir
-                custom_facets_order = {"tot":"unique(PatientID)", "per_id": {"type": "terms", "field": "PatientID", "sort":sort_arg, "offset":offset, "limit": limit,
-                                                                             "facet": {"unique_study": "unique(StudyInstanceUID)", "unique_series": "unique(SeriesInstanceUID)"}}
-                                        }
+                custom_facets_order = {
+                    "tot": "unique(PatientID)",
+                    "per_id": {
+                        "type": "terms", "field": "PatientID", "sort": sort_arg, "offset": offset, "limit": limit,
+                        "facet": {
+                            "unique_study": "unique(StudyInstanceUID)",
+                            "unique_series": "unique(SeriesInstanceUID)"
+                        }
+                    }
+                }
 
         if table_type == 'studies':
             custom_facets = {"per_id": {"type": "terms", "field": "StudyInstanceUID", "limit": limit,
@@ -461,6 +472,9 @@ def explore_data_page(request):
         with_related = (req.get('with_clinical', "True").lower() == "true")
         with_derived = (req.get('with_derived', "True").lower() == "true")
         collapse_on = req.get('collapse_on', 'SeriesInstanceUID')
+        if len(Attribute.objects.filter(name=collapse_on)) <= 0:
+            logger.error("[ERROR] Attempt to collapse on an invalid field: {}".format(collapse_on))
+            collapse_on='SeriesInstanceUID'
         is_json = (req.get('is_json', "False").lower() == "true")
         uniques = json.loads(req.get('uniques', '[]'))
         totals = json.loads(req.get('totals', '[]'))
