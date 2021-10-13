@@ -26,6 +26,7 @@ import copy
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -102,7 +103,6 @@ def landing_page(request):
 
 
 # Displays the privacy policy
-@never_cache
 def privacy_policy(request):
     return render(request, 'idc/privacy.html', {'request': request, })
 

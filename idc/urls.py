@@ -30,13 +30,13 @@ urlpatterns = [
 
     url(r'^$', views.landing_page, name='landing_page'),
     url(r'^quota/', views.quota_page, name='quota_page'),
-    url(r'^test_methods/', views.test_methods, name='test_methods'),
-    url(r'^style_guide/', views.css_test),
+    # url(r'^test_methods/', views.test_methods, name='test_methods'),
+    # url(r'^style_guide/', views.css_test),
     url(r'^users/(?P<user_id>\d+)/$', views.user_detail, name='user_detail'),
     url(r'^users/api/', views_api.user_detail, name='user_detail_api'),
 
     url(r'^cohort_detail/(?P<cohort_id>\d+)/$', demo_views.cohort_detail, name='cohort_detail'),
-    url(r'^cohort_test/', demo_views.cohort_test, name='cohort_test'),
+    # url(r'^cohort_test/', demo_views.cohort_test, name='cohort_test'),
 
     url(r'^cohorts/', include('cohorts.urls')),
     path('admin/', admin.site.urls),
