@@ -111,46 +111,6 @@ def collaborators(request):
     return render(request, 'idc/collaborators.html', {'request': request, })
 
 
-# Returns css_test page used to test css for general ui elements
-def css_test(request):
-    return render(request, 'idc/css_test.html', {'request': request})
-
-
-#def test(request):
-#    return render(request, 'idc/test.html', {'request': request})
-
-
-# View for testing methods manually
-@login_required
-def test_methods(request):
-    context = {}
-    try:
-        # These are example filters; typically they will be reconstituted from the request
-        filters = {"vital_status": ["Alive"], "disease_code": ["READ", "BRCA"]}
-        # These are the actual data fields to display in the expanding table; again this is just an example
-        # set that should be properly supplied in the reuqest
-        fields = ["BodyPartExamined", "Modality", "StudyDescription", "StudyInstanceUID", "SeriesInstanceUID",
-                  "case_barcode", "disease_code", "sample_type"]
-
-        # get_collex_metadata will eventually branch into 'from BQ' and 'from Solr' depending on if there's a request
-        # for a version which isn't current, or for a user cohort
-        facets_and_lists = get_collex_metadata(filters, fields)
-
-        if facets_and_lists:
-            context = {
-                'collex_attr_counts': facets_and_lists['clinical'],
-                'cross_collex_attr_counts': facets_and_lists['facets']['cross_collex'],
-                'listings': facets_and_lists['docs']
-            }
-
-    except Exception as e:
-        logger.error("[ERROR] In explore_data:")
-        logger.exception(e)
-
-    return render(request, 'idc/explore.html', {'request': request, 'context': context})
-
-
-
 # News page (loads from Discourse)
 def news_page(request):
 
