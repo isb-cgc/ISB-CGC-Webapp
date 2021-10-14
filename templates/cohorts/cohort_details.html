@@ -67,14 +67,15 @@
 {% endblock %}
 
 {% block js_file %}
+    {{ collection_tooltips|json_script:"collection_tooltips" }}
     <script>
         var cohort_filters = {{ cohort_filters|safe }};
         var is_cohort = true;
         var cohort_version = "{{ cohort_version|safe }}";
         var cohort_id = "{{ cohort_id|safe }}";
         var cohort_name = "{{ cohort.name|safe }}";
-        var user_is_social = {% if is_social %}true{% else %}false{% endif %};
-        var collection_tooltips = {{ collection_tooltips|safe }};
+        var user_is_social = {% if is_social %} true {% else %} false {% endif %};
+        const collection_tooltips = JSON.parse(document.getElementById('collection_tooltips').textContent);
         var file_parts_count = {{ file_parts_count }};
         var display_file_parts_count = {{ display_file_parts_count }};
     </script>
