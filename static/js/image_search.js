@@ -2578,21 +2578,19 @@ require([
                     filter['id'] + '"]';
                 $(selector).parents('.collection-list').collapse('show');
 
-                $(selector).each(function(index, selEle)
-                {
+                $(selector).each(function(index, selEle) {
                     /*if ($(selEle).find('ul, .ui-slider').length>0) {
                         $(selEle).collapse('show');
                         $(selEle).find('.show-more').triggerHandler('click');
                         $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
                     }*/
-                    var attValueFoundInside= false;
+                    let attValueFoundInside = false;
                     if ($(selEle).children('.ui-slider').length > 0) {
-                        attValueFoundInside= true;
-                        var pushSliders = false;
-                        var left =0;
-                        var right=0;
-                        if (filter['values'].indexOf('None')>-1)
-                        {
+                        attValueFoundInside = true;
+                        let pushSliders = false;
+                        let left = 0;
+                        let right = 0;
+                        if (filter['values'].indexOf('None')>-1) {
                             var ckbx=$(selEle).find('.noneBut').children('input:checkbox')[0];
                             ckbx.checked=true;
                             var parStr=$(selEle).children('.ui-slider').data('attr-par');
@@ -2604,8 +2602,7 @@ require([
                                 left_val=vals[0];
                                 right_val=vals[1];
                             }
-                        }
-                        else {
+                        } else {
                             pushSliders=true;
                             left_val=filter['values'][0].indexOf(".") >= 0 ? parseFloat(filter['values'][0]) : parseInt(filter['values'][0]);
                             right_val=filter['values'][1].indexOf(".") >= 0 ? parseFloat(filter['values'][1]) : parseInt(filter['values'][1]);
@@ -2628,12 +2625,11 @@ require([
 
                       });
                   }
-                    if (attValueFoundInside){
-                        $(selEle).collapse('show');
-                        $(selEle).find('.show-more').triggerHandler('click');
-                        $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
-                    }
-
+                if (attValueFoundInside){
+                    $(selEle).collapse('show');
+                    $(selEle).find('.show-more').triggerHandler('click');
+                    $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
+                }
                });
             });
         });

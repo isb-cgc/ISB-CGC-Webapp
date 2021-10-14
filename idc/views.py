@@ -463,7 +463,16 @@ def explore_data_page(request):
         if wcohort:
             context['filters_for_load'] = cohort_filters_dict
         else:
-            context['filters_for_load'] = json.loads(req.get('filters_for_load', '{}'))
+            filters_for_load = req.get('filters_for_load', '{}')
+            blacklist = re.compile(settings.BLACKLIST_RE, re.UNICODE)
+            if blacklist.search(filters_for_load):
+                logger.warning("[WARNING] Saw bad filters in filters_for_load:")
+                logger.warning(filters_for_load)
+                filters_for_load = '{}'
+                messages.error(request,
+                       "There was a problem with some of your filters - please ensure they're properly formatted.")
+
+            context['filters_for_load'] = json.loads(filters_for_load)
 
         return render(request, 'idc/explore.html', context)
 

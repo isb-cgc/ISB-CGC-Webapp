@@ -90,9 +90,11 @@
 {% endblock %}
 
 {% block js_file %}
+    {{ collection_tooltips|json_script:"collection_tooltips" }}
+    {{ filters_for_load|json_script:"filters_for_load" }}
     <script>
-        var filters_for_load = {{ filters_for_load|safe }};
-        var collection_tooltips = {{ collection_tooltips|safe }};
+        const filters_for_load = JSON.parse(document.getElementById('filters_for_load').textContent);
+        const collection_tooltips = JSON.parse(document.getElementById('collection_tooltips').textContent);
         var is_cohort = false;
         var showWarning = true;
         var user_is_auth = {% if request.user.is_authenticated %} true {% else %} false {% endif %};
