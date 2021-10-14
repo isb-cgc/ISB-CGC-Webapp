@@ -87,9 +87,10 @@
 {% endblock %}
 
 {% block js_file %}
+    {{ active_collection_descs|json_script:"collection_descs" }}
 	{{ block.super }}
 	<script src="{% static 'js/collections_list.js' %}"></script>
     <script>
-        var collection_descs = {{ active_collection_descs|safe }};
+        const collection_descs = JSON.parse(document.getElementById('collection_descs').textContent);
     </script>
 {% endblock %}
