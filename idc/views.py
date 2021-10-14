@@ -1,5 +1,5 @@
 ###
-# Copyright 2015-2020, Institute for Systems Biology
+# Copyright 2015-2021, Institute for Systems Biology
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import copy
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
-from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -34,15 +33,12 @@ from django.contrib import messages
 
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
-from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, DataSetType, Attribute
+from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute
 from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata
-from .models import AppInfo
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.signals import user_login_failed
 from django.dispatch import receiver
-
-from django.utils.html import escape
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
@@ -55,7 +51,6 @@ WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 @never_cache
 def landing_page(request):
     collex = Collection.objects.filter(active=True, subject_count__gt=6, collection_type=Collection.ORIGINAL_COLLEX, species='Human').values()
-    #app_info = AppInfo.objects.get(active=True)
     idc_info = ImagingDataCommonsVersion.objects.get(active=True)
 
     sapien_counts = {}
@@ -97,7 +92,6 @@ def landing_page(request):
         'request': request,
         'case_counts': [{'site': x, 'cases': sapien_counts[x], 'fileCount': 0} for x in sapien_counts.keys()],
         'example_tooltips': ex_tooltips,
-        #'app_info': app_info,
         'idc_info': idc_info
     })
 
@@ -113,7 +107,6 @@ def collaborators(request):
 
 # News page (loads from Discourse)
 def news_page(request):
-
     return render(request, 'idc/news.html')
 
 
@@ -204,6 +197,7 @@ def help_page(request):
 
 def quota_page(request):
     return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
+
 
 @login_required
 def populate_tables(request):
@@ -495,12 +489,6 @@ def dashboard_page(request):
         cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True)))
         # TODO: Add in 'date created' and sort on that
         context['cohorts'] = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-name')
-
-        # Program List
-        ownedPrograms = request.user.program_set.filter(active=True)
-        sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-        programs = ownedPrograms | sharedPrograms
-        context['programs'] = programs.distinct().order_by('-last_date_saved')
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the dashboard:")
