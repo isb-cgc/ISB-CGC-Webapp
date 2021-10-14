@@ -25,7 +25,7 @@ require([
     'jqueryui',
     'bootstrap',
     'base'
-], function($, _, jqueryui, bootstrap, jquerydt ) {
+], function($, _, jquerydt, jqueryui, bootstrap) {
 
     $('.manifest-size-warning').hide();
 
@@ -906,10 +906,6 @@ require([
                             ndic = {'filters': filterStr, 'limit': 2000}
                             ndic['checkids'] = JSON.stringify(checkIds);
 
-                            if (typeof (window.csr) !== 'undefined') {
-                                ndic['csrfmiddlewaretoken'] = window.csr
-                            }
-
                             ndic['offset'] = backendReqStrt;
                             ndic['limit'] = backendReqLength;
 
@@ -921,13 +917,14 @@ require([
                                     ndic['sortdir'] = request.order[0].dir;
                                 }
                             }
-
+                            var csrftoken = $.getCookie('csrftoken');
                             $.ajax({
                                 url: url,
                                 dataType: 'json',
                                 data: ndic,
                                 type: 'post',
                                 contentType: 'application/x-www-form-urlencoded',
+                                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                                 success: function (data) {
                                     window.casesCache = new Object();
                                     colSort = ["", "collection_id", "PatientID", "unique_study", "unique_series"];
@@ -1125,9 +1122,6 @@ require([
                             let url = '/tables/studies/';
                             url = encodeURI(url);
                             ndic = {'filters': filterStr, 'limit': 2000}
-                            if (typeof (window.csr) !== 'undefined') {
-                                ndic['csrfmiddlewaretoken'] = window.csr
-                            }
 
                             ndic['offset'] = backendReqStrt;
                             ndic['limit'] = backendReqLength;
@@ -1140,13 +1134,14 @@ require([
                                     ndic['sortdir'] = request.order[0].dir;
                                 }
                             }
-
+                            var csrftoken = $.getCookie('csrftoken');
                             $.ajax({
                                 url: url,
                                 dataType: 'json',
                                 data: ndic,
                                 type: 'post',
                                 contentType: 'application/x-www-form-urlencoded',
+                                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                                 success: function (data) {
                                     window.studiesCache = new Object();
                                     updateCache(window.studiesCache, request, backendReqStrt, backendReqLength, data, cols);
@@ -1325,9 +1320,6 @@ require([
                             let url = '/tables/series/';
                             url = encodeURI(url);
                             ndic = {'filters': filterStr, 'limit': 2000}
-                            if (typeof (window.csr) !== 'undefined') {
-                                ndic['csrfmiddlewaretoken'] = window.csr
-                            }
 
                             ndic['offset'] = backendReqStrt;
                             ndic['limit'] = backendReqLength;
@@ -1347,6 +1339,7 @@ require([
                                 data: ndic,
                                 type: 'post',
                                 contentType: 'application/x-www-form-urlencoded',
+                                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                                 success: function (data) {
                                     window.seriesCache = new Object();
                                     var colSort = ['StudyInstanceUID','SeriesNumber','Modality','BodyPartExamined','SeriesDescription']
@@ -1521,19 +1514,16 @@ require([
             url= encodeURI('/explore/')
 
             ndic={'counts_only':'True', 'is_json':'True', 'is_dicofdic':'True', 'data_source_type':($("#data_source_type option:selected").val() || 'S'), 'filters':JSON.stringify(parsedFiltObj) }
-            if (typeof(window.csr) !=='undefined'){
-                ndic['csrfmiddlewaretoken'] = window.csr
-            }
 
-
+            var csrftoken = $.getCookie('csrftoken');
             let deferred = $.Deferred();
             $.ajax({
                 url: url,
                 data: ndic,
                 dataType: 'json',
                 type: 'post',
-
                 contentType: 'application/x-www-form-urlencoded',
+                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success: function (data) {
                     var isFiltered = Boolean($('#search_def p').length>0);
                     if (is_cohort) {

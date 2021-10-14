@@ -1,5 +1,5 @@
 ###
-# Copyright 2015-2020, Institute for Systems Biology
+# Copyright 2015-2021, Institute for Systems Biology
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,15 +33,12 @@ from django.contrib import messages
 
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
-from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, DataSetType, Attribute
+from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute
 from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata
-from .models import AppInfo
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.signals import user_login_failed
 from django.dispatch import receiver
-
-from django.utils.html import escape
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
@@ -54,7 +51,6 @@ WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 @never_cache
 def landing_page(request):
     collex = Collection.objects.filter(active=True, subject_count__gt=6, collection_type=Collection.ORIGINAL_COLLEX, species='Human').values()
-    #app_info = AppInfo.objects.get(active=True)
     idc_info = ImagingDataCommonsVersion.objects.get(active=True)
 
     sapien_counts = {}
@@ -96,13 +92,11 @@ def landing_page(request):
         'request': request,
         'case_counts': [{'site': x, 'cases': sapien_counts[x], 'fileCount': 0} for x in sapien_counts.keys()],
         'example_tooltips': ex_tooltips,
-        #'app_info': app_info,
         'idc_info': idc_info
     })
 
 
 # Displays the privacy policy
-@never_cache
 def privacy_policy(request):
     return render(request, 'idc/privacy.html', {'request': request, })
 
@@ -111,49 +105,8 @@ def collaborators(request):
     return render(request, 'idc/collaborators.html', {'request': request, })
 
 
-# Returns css_test page used to test css for general ui elements
-def css_test(request):
-    return render(request, 'idc/css_test.html', {'request': request})
-
-
-#def test(request):
-#    return render(request, 'idc/test.html', {'request': request})
-
-
-# View for testing methods manually
-@login_required
-def test_methods(request):
-    context = {}
-    try:
-        # These are example filters; typically they will be reconstituted from the request
-        filters = {"vital_status": ["Alive"], "disease_code": ["READ", "BRCA"]}
-        # These are the actual data fields to display in the expanding table; again this is just an example
-        # set that should be properly supplied in the reuqest
-        fields = ["BodyPartExamined", "Modality", "StudyDescription", "StudyInstanceUID", "SeriesInstanceUID",
-                  "case_barcode", "disease_code", "sample_type"]
-
-        # get_collex_metadata will eventually branch into 'from BQ' and 'from Solr' depending on if there's a request
-        # for a version which isn't current, or for a user cohort
-        facets_and_lists = get_collex_metadata(filters, fields)
-
-        if facets_and_lists:
-            context = {
-                'collex_attr_counts': facets_and_lists['clinical'],
-                'cross_collex_attr_counts': facets_and_lists['facets']['cross_collex'],
-                'listings': facets_and_lists['docs']
-            }
-
-    except Exception as e:
-        logger.error("[ERROR] In explore_data:")
-        logger.exception(e)
-
-    return render(request, 'idc/explore.html', {'request': request, 'context': context})
-
-
-
 # News page (loads from Discourse)
 def news_page(request):
-
     return render(request, 'idc/news.html')
 
 
@@ -244,6 +197,7 @@ def help_page(request):
 
 def quota_page(request):
     return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
+
 
 @login_required
 def populate_tables(request):
@@ -535,12 +489,6 @@ def dashboard_page(request):
         cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True)))
         # TODO: Add in 'date created' and sort on that
         context['cohorts'] = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-name')
-
-        # Program List
-        ownedPrograms = request.user.program_set.filter(active=True)
-        sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-        programs = ownedPrograms | sharedPrograms
-        context['programs'] = programs.distinct().order_by('-last_date_saved')
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the dashboard:")
