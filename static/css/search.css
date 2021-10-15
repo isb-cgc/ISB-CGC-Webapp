@@ -11,6 +11,26 @@
     bottom: .5em;
 }
 
+
+
+
+.controls {
+    float:right;
+}
+
+.list-group *[data-toggle="collapse"][aria-expanded="true"]  {
+    border-color: red;
+}
+
+.list-group *[data-toggle="collapse"][aria-expanded="true"] ~ .controls {
+    display: inline-block;
+}
+
+.list-group *[data-toggle="collapse"][aria-expanded="false"] ~ .controls {
+    display: none;
+}
+
+
 .greyText {
    color:#808080;
 }
