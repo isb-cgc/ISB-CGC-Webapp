@@ -1212,8 +1212,6 @@ require([
                 "createdRow":function(row,data,dataIndex){
                     $(row).attr('id','series_'+data['SeriesInstanceUID'])
                     $(row).addClass('text_head');
-
-
                 },
                 "columnDefs":[
                     {className:"col1 study-id study-id-col", "targets":[0]},
@@ -1222,10 +1220,8 @@ require([
                     {className:"col1 body-part-examined", "targets":[3]},
                     {className:"series-description", "targets":[4]},
                     {className:"ohif open-viewer", "targets":[5]},
-
-                  ],
+                ],
                 "columns": [
-
                     {"type": "text", "orderable": true, data:'StudyInstanceUID', render:function(data){
                         return pretty_print_id(data);
                         }, "createdCell":function(td,data)
@@ -1241,45 +1237,36 @@ require([
                     {"type": "text", "orderable": true, data:'SeriesDescription', render:function(data){
                         if (data.length>1){
                          return data[0]+',...';
-                        }
-                        else if(data.length===1){
+                        } else if(data.length===1){
                             return data[0];
-                        }
-                        else{
+                        } else {
                            return '';
                         }
                     },
-                       "createdCell":function(td,data)
-                        {
-                            if (data.length>1) {
-                                $(td).attr('data-description', data);
-                                $(td).addClass('description-tip');
-                                return;
-
-                            }
-                       }
-                    },
+                   "createdCell":function(td,data) {
+                        if (data.length>1) {
+                            $(td).attr('data-description', data);
+                            $(td).addClass('description-tip');
+                            return;
+                        }
+                   }
+                   },
                     {"type": "html", "orderable": false, data:'SeriesInstanceUID', render:function(data,type, row){
                           if ( (row['Modality']==='SEG' || row['Modality'][0]==='SEG') || (row['Modality']==='RTSTRUCT' || row['Modality'][0]==='RTSTRUCT') || (row['Modality']==='RTPLAN' || row['Modality'][0]==='RTPLAN') || (row['Modality']==='RWV' || row['Modality'][0]==='RWV')){
                                  return '<a href="/" onclick="return false;"><i class="fa fa-eye-slash no-viewer-tooltip"></i>';
 
-                            }
-                          else if ( (row['Modality']==='SM') ){
+                          } else if ( (row['Modality']==='SM') ){
                               return '<a href="' + SLIM_VIEWER_PATH  + data + '" target="_blank"><i class="fa fa-eye"></i>'
-                          }
-                          else {
+                          } else {
                               return '<a href="' + DICOM_STORE_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' + data + '" target="_blank"><i class="fa fa-eye"></i>'
                           }
                         }
-
                     },
-
                 ],
                 "processing": true,
                 "serverSide": true,
                 "ajax": function (request, callback, settings, refreshAfterFilter) {
                     $('.spinner').show();
-
                     var backendReqLength = 500;
                     var backendReqStrt = Math.max(0, request.start - Math.floor(backendReqLength * 0.5));
                     var rowsRemoved = $('#series_tab').data('rowsremoved');
@@ -1332,7 +1319,7 @@ require([
                                     ndic['sortdir'] = request.order[0].dir;
                                 }
                             }
-
+                            var csrftoken = $.getCookie('csrftoken');
                             $.ajax({
                                 url: url,
                                 dataType: 'json',
@@ -1352,7 +1339,6 @@ require([
                                         "recordsTotal": data["cnt"],
                                         "recordsFiltered": data["cnt"]
                                     })
-
                                 },
                                 error: function () {
                                     console.log("problem getting data");
@@ -1378,20 +1364,15 @@ require([
                         }
                     }
                 }
-
             });
 
             $('#series_tab').on('draw.dt', function(){
                 $('#series_table_head').children('tr').children().each(function(){
                     this.style.width=null;
-                    }
-
-                );
-            })
-
+                });
+            });
             $('#series_tab').children('tbody').attr('id','series_table');
             $('#series_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'series_tab_wrapper\')">Go</button></div>');
-
         }
 
         /* var changeAjax = function (isIncrement) {
@@ -1430,8 +1411,7 @@ require([
                         nitem=Object.keys(progDic[item]['projects'])[0];
                         reformDic[listId][nitem]=new Object();
                         reformDic[listId][nitem]['count'] = progDic[item]['val'];
-                    }
-                    else {
+                    } else {
                         reformDic[listId][item]=new Object();
                         reformDic[listId][item]['count'] = progDic[item]['val'];
                         reformDic[item] =  new Object();
@@ -1440,8 +1420,6 @@ require([
                             reformDic[item][project]['count']=progDic[item]['projects'][project]['val'];
                         }
                     }
-
-
                 }
             }
             updateFilterSelections('program_set', {'unfilt':reformDic});
@@ -1600,12 +1578,9 @@ require([
                                     && data.filtered_counts.derived_set[facetSet].hasOwnProperty('attributes')
                                 ) {
                                     dicofdic['filt'] = data.filtered_counts.derived_set[facetSet].attributes;
-                                }
-                                else if (isFiltered)
-                                    {
+                                } else if (isFiltered) {
                                     dicofdic['filt'] = {};
-                                }
-                                else{
+                                } else {
                                     dicofdic['filt'] = data.derived_set[facetSet].attributes;
                                 }
                                 updateFilterSelections(data.derived_set[facetSet].name, dicofdic);
@@ -1616,7 +1591,7 @@ require([
                                 }
                             }
                         }
-                    } else{
+                    } else {
                         $('#search_derived_set').addClass('disabled');
                     }
 
@@ -1663,12 +1638,10 @@ require([
 
                     updateTablesAfterFilter(collFilt,data.origin_set.All.attributes.collection_id);
 
-
-                     if ($('#hide-zeros')[0].checked) {
+                    if ($('#hide-zeros')[0].checked) {
                          addSliders('quantitative', false, true,'');
                          addSliders('tcga_clinical',false, true,'tcga_clinical.');
-                     }
-
+                    }
 
                     //changeAjax(false);
                     $('.spinner').hide();
@@ -1682,8 +1655,7 @@ require([
             return deferred.promise();
         };
 
-
-        var manageUpdateFromPlot = function(plotId, label){
+        var manageUpdateFromPlot = function(plotId, label) {
             var listId = plotId.replace('_chart','_list');
             var filterId = plotId.replace('_chart','');
 
@@ -1699,8 +1671,7 @@ require([
                     butElem.checked=true
                     setSlider(slideDiv, filterId+"_slide", minx, maxx, true, false);
                     window.addNone(butElem,parStr,true);
-                }
-                else {
+                } else {
                     if ($('#'+filterId).hasClass('wNone')){
                         butElem = $('#'+filterId).find('.noneBut').children('input')[0];
                         butElem.checked=false;
@@ -1712,8 +1683,7 @@ require([
                     var end = parseInt((selArr[1] === '*') ? maxx : selArr[1]);
                     setSlider(filterId+"_slide", false, strt, end, true,true);
                 }
-            }
-            else {
+            } else {
                 var inputList = $('#' + listId).find(':input');
                 for (var i = 0; i < inputList.length; i++) {
                     var curLabel = $(inputList[i]).parent().children()[1].innerHTML;
@@ -1732,7 +1702,7 @@ require([
             }
         }
 
-        var plotCategoricalData = function (plotId, lbl, plotData, isPie, showLbl){
+        var plotCategoricalData = function (plotId, lbl, plotData, isPie, showLbl) {
             var width = 300;
             var height = 260;
             var shifty = 30;
@@ -1798,13 +1768,13 @@ require([
                    nonZeroLabels.push(pkey);
                }
                //rng.push(parseFloat(i)*parseFloat(spcing));
-             }
-             $('#'+plotId).data('total',tot.toString());
+            }
+            $('#'+plotId).data('total',tot.toString());
 
            // set the color scale
            var color = d3.scaleOrdinal()
-           .domain(nonZeroLabels)
-           .range(d3.schemeCategory10);
+            .domain(nonZeroLabels)
+            .range(d3.schemeCategory10);
 
            // don't color last pie slice the same as first
            var colorPie = function(lbl){
@@ -1875,19 +1845,18 @@ require([
                 }
             });
 
-        var txtbx=pieg.append("text").attr("x","0px").attr("y","10px").attr('text-anchor','start');
-        txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",0);
-        txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",20);
-        txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",40);
-        txtbx.attr("opacity",0);
+            var txtbx=pieg.append("text").attr("x","0px").attr("y","10px").attr('text-anchor','start');
+            txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",0);
+            txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",20);
+            txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",40);
+            txtbx.attr("opacity",0);
 
-        if (tot===0) {
-            txtbx.attr('text-anchor','middle');
-            tspans=txtbx.node().childNodes;
-            tspans[0].textContent = "No Data Available";
-            txtbx.attr("opacity",1);
-        }
-
+            if (tot===0) {
+                txtbx.attr('text-anchor','middle');
+                tspans=txtbx.node().childNodes;
+                tspans[0].textContent = "No Data Available";
+                txtbx.attr("opacity",1);
+            }
         }
 
 
