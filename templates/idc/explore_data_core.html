@@ -1,17 +1,16 @@
 {% load custom_tags %}
 {% load staticfiles %}
 
+{{ collections|json_script:"collections" }}
+{{ programs|json_script:"programs" }}
 <script>
    window.selItems = new Object();
    window.selItems.selProjects = new Array();
    window.selItems.selStudies = new Object();
-   window.collection = {{ collections|tojson|safe }};
+   window.collection = JSON.parse(document.getElementById('collections').textContent);
    var lst = Object.keys(window.collection).sort();
-
    window.collectionData = new Array();
-
-
-   window.programs = {{ programs|tojson|safe }};
+   window.programs = JSON.parse(document.getElementById('programs').textContent);
    var ind=0;
    for (program in window.programs) {
        for (project in window.programs[program]['projects']) {
@@ -20,11 +19,7 @@
            var val = window.programs[program]['projects'][project]['val'];
            window.collectionData.push([col, disp, val, val]);
        }
-
-     }
-
-
-   window.csr = "{{  csrf_token }}";
+   }
 </script>
 
 

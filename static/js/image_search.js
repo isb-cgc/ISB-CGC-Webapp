@@ -25,7 +25,7 @@ require([
     'jqueryui',
     'bootstrap',
     'base'
-], function($, _, jqueryui, bootstrap, jquerydt ) {
+], function($, _, jquerydt, jqueryui, bootstrap) {
 
     $('.manifest-size-warning').hide();
 
@@ -895,10 +895,7 @@ require([
                         {className: "col1", "targets": [4]},
                     ],
                     "columns": [
-                        {
-                            "type": "html",
-                            "orderable": false,
-                            "data": "PatientID",
+                        {"type": "html", "orderable": false, "data": "PatientID",
                             render: function (PatientID, type, row) {
                                 collection_id = row['collection_id'][0];
                                 if ((collection_id in window.selItems.selCases) && (window.selItems.selCases[collection_id].indexOf(PatientID) > -1)) {
@@ -909,14 +906,12 @@ require([
                             }
                         },
 
-                        {
-                            "type": "text", "orderable": true, data: 'collection_id', render: function (data) {
+                        {"type": "text", "orderable": true, data: 'collection_id', render: function (data) {
                                 var projectNm = $('#' + data).filter('.collection_name')[0].innerText;
                                 return projectNm;
                             }
                         },
-                        {
-                            "type": "text", "orderable": true, data: 'PatientID', render: function (data) {
+                        {"type": "text", "orderable": true, data: 'PatientID', render: function (data) {
                                 return data;
                             }
                         },
@@ -947,7 +942,6 @@ require([
                             updateStudyTable(false, true, refreshAfterFilter, [updateChildTables[1]], studyID);
                             callback({"data": [], "recordsTotal": "0", "recordsFiltered": "0"})
                         } else {
-
                             var ret = checkClientCache(request, 'cases');
                             var ssCallNeeded = ret[0];
                             var reorderNeeded = ret[1];
@@ -984,10 +978,6 @@ require([
                                 ndic = {'filters': filterStr, 'limit': 2000}
                                 ndic['checkids'] = JSON.stringify(checkIds);
 
-                                if (typeof (window.csr) !== 'undefined') {
-                                    ndic['csrfmiddlewaretoken'] = window.csr
-                                }
-
                                 ndic['offset'] = backendReqStrt;
                                 ndic['limit'] = backendReqLength;
 
@@ -1000,17 +990,19 @@ require([
                                     }
                                 }
 
-                                $.ajax({
-                                    url: url,
-                                    dataType: 'json',
-                                    data: ndic,
-                                    type: 'post',
-                                    contentType: 'application/x-www-form-urlencoded',
-                                    success: function (data) {
-                                        window.casesCache = new Object();
-                                        colSort = ["", "collection_id", "PatientID", "unique_study", "unique_series"];
-                                        updateCache(window.casesCache, request, backendReqStrt, backendReqLength, data, colSort);
-                                        dataset = data['res'].slice(request.start - backendReqStrt, request.start - backendReqStrt + request.length);
+                            var csrftoken = $.getCookie('csrftoken');
+                            $.ajax({
+                                url: url,
+                                dataType: 'json',
+                                data: ndic,
+                                type: 'post',
+                                contentType: 'application/x-www-form-urlencoded',
+                                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+                                success: function (data) {
+                                    window.casesCache = new Object();
+                                    colSort = ["", "collection_id", "PatientID", "unique_study", "unique_series"];
+                                    updateCache(window.casesCache, request, backendReqStrt, backendReqLength, data, colSort);
+                                    dataset = data['res'].slice(request.start - backendReqStrt, request.start - backendReqStrt + request.length);
 
                                         /* for (set in dataset) {
                                             set['ids'] = {'PatientID': set['PatientID'], 'collection_id': set['collection_id']}
@@ -1232,14 +1224,9 @@ require([
                                 }
 
                                 var filterStr = JSON.stringify(curFilterObj);
-
                                 let url = '/tables/studies/';
                                 url = encodeURI(url);
                                 ndic = {'filters': filterStr, 'limit': 2000}
-
-                                if (typeof (window.csr) !== 'undefined') {
-                                    ndic['csrfmiddlewaretoken'] = window.csr
-                                }
 
                                 ndic['offset'] = backendReqStrt;
                                 ndic['limit'] = backendReqLength;
@@ -1248,17 +1235,18 @@ require([
                                     if (typeof (request.order[0].column) !== 'undefined') {
                                         ndic['sort'] = cols[request.order[0].column];
                                     }
-                                    if (typeof (request.order[0].dir) !== 'undefined') {
-                                        ndic['sortdir'] = request.order[0].dir;
-                                    }
+                                   if (typeof (request.order[0].dir) !== 'undefined') {
+                                       ndic['sortdir'] = request.order[0].dir;
+                                   }
                                 }
-
+                                var csrftoken = $.getCookie('csrftoken');
                                 $.ajax({
                                     url: url,
                                     dataType: 'json',
                                     data: ndic,
                                     type: 'post',
                                     contentType: 'application/x-www-form-urlencoded',
+                                    beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                                     success: function (data) {
                                         window.studiesCache = new Object();
                                         updateCache(window.studiesCache, request, backendReqStrt, backendReqLength, data, cols);
@@ -1436,9 +1424,6 @@ require([
                             let url = '/tables/series/';
                             url = encodeURI(url);
                             ndic = {'filters': filterStr, 'limit': 2000}
-                            if (typeof (window.csr) !== 'undefined') {
-                                ndic['csrfmiddlewaretoken'] = window.csr
-                            }
 
                             ndic['offset'] = backendReqStrt;
                             ndic['limit'] = backendReqLength;
@@ -1458,6 +1443,7 @@ require([
                                 data: ndic,
                                 type: 'post',
                                 contentType: 'application/x-www-form-urlencoded',
+                                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                                 success: function (data) {
                                     window.seriesCache = new Object();
                                     var colSort = ['StudyInstanceUID', 'SeriesNumber', 'Modality', 'BodyPartExamined', 'SeriesDescription']
@@ -1618,17 +1604,15 @@ require([
             url= encodeURI('/explore/')
 
             ndic={'counts_only':'True', 'is_json':'True', 'is_dicofdic':'True', 'data_source_type':($("#data_source_type option:selected").val() || 'S'), 'filters':JSON.stringify(parsedFiltObj) }
-            if (typeof(window.csr) !=='undefined'){
-                ndic['csrfmiddlewaretoken'] = window.csr
-            }
+            var csrftoken = $.getCookie('csrftoken');
             let deferred = $.Deferred();
             $.ajax({
                 url: url,
                 data: ndic,
                 dataType: 'json',
                 type: 'post',
-
                 contentType: 'application/x-www-form-urlencoded',
+                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success: function (data) {
                     try {
                         var isFiltered = Boolean($('#search_def p').length > 0);
@@ -2667,21 +2651,19 @@ require([
                     filter['id'] + '"]';
                 $(selector).parents('.collection-list').collapse('show');
 
-                $(selector).each(function(index, selEle)
-                {
+                $(selector).each(function(index, selEle) {
                     /*if ($(selEle).find('ul, .ui-slider').length>0) {
                         $(selEle).collapse('show');
                         $(selEle).find('.show-more').triggerHandler('click');
                         $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
                     }*/
-                    var attValueFoundInside= false;
+                    let attValueFoundInside = false;
                     if ($(selEle).children('.ui-slider').length > 0) {
-                        attValueFoundInside= true;
-                        var pushSliders = false;
-                        var left =0;
-                        var right=0;
-                        if (filter['values'].indexOf('None')>-1)
-                        {
+                        attValueFoundInside = true;
+                        let pushSliders = false;
+                        let left = 0;
+                        let right = 0;
+                        if (filter['values'].indexOf('None')>-1) {
                             var ckbx=$(selEle).find('.noneBut').children('input:checkbox')[0];
                             ckbx.checked=true;
                             var parStr=$(selEle).children('.ui-slider').data('attr-par');
@@ -2693,8 +2675,7 @@ require([
                                 left_val=vals[0];
                                 right_val=vals[1];
                             }
-                        }
-                        else {
+                        } else {
                             pushSliders=true;
                             left_val=filter['values'][0].indexOf(".") >= 0 ? parseFloat(filter['values'][0]) : parseInt(filter['values'][0]);
                             right_val=filter['values'][1].indexOf(".") >= 0 ? parseFloat(filter['values'][1]) : parseInt(filter['values'][1]);
@@ -2717,12 +2698,11 @@ require([
 
                       });
                   }
-                    if (attValueFoundInside){
-                        $(selEle).collapse('show');
-                        $(selEle).find('.show-more').triggerHandler('click');
-                        $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
-                    }
-
+                if (attValueFoundInside){
+                    $(selEle).collapse('show');
+                    $(selEle).find('.show-more').triggerHandler('click');
+                    $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
+                }
                });
             });
         });

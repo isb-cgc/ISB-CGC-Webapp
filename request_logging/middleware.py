@@ -18,13 +18,16 @@ DEFAULT_COLORIZE = True
 DEFAULT_MAX_BODY_LENGTH = 50000  # log no more than 3k bytes of content
 IS_DJANGO_VERSION_GTE_3_2_0 = django_version >= (3, 2, 0, "final", 0)
 DEFAULT_SENSITIVE_HEADERS = [
-    "Authorization", "Proxy-Authorization"
+    "Authorization", "Proxy-Authorization", "X-Csrftoken"
 ] if IS_DJANGO_VERSION_GTE_3_2_0 else [
-    "HTTP_AUTHORIZATION", "HTTP_PROXY_AUTHORIZATION"
+    "HTTP_AUTHORIZATION", "HTTP_PROXY_AUTHORIZATION", "HTTP_X_CSRFTOKEN"
 ]
 # Added by SP for IDC: a list of content items which should cause their omission from the log
 # (just log their presence)
 DEFAULT_SENSITIVE_CONTENT = ["password="]
+# Added by SP for IDC: a list of cookies which should cause their omission from the log
+# (just log their presence)
+DEFAULT_SENSITIVE_COOKIES = ["csrftoken="]
 SETTING_NAMES = {
     "log_level": "REQUEST_LOGGING_DATA_LOG_LEVEL",
     "http_4xx_log_level": "REQUEST_LOGGING_HTTP_4XX_LOG_LEVEL",
@@ -32,7 +35,8 @@ SETTING_NAMES = {
     "colorize": "REQUEST_LOGGING_ENABLE_COLORIZE",
     "max_body_length": "REQUEST_LOGGING_MAX_BODY_LENGTH",
     "sensitive_headers": "REQUEST_LOGGING_SENSITIVE_HEADERS",
-    "sensitive_content": "REQUEST_LOGGING_SENSITIVE_CONTENT"
+    "sensitive_content": "REQUEST_LOGGING_SENSITIVE_CONTENT",
+    "sensitive_cookies": "REQUEST_LOGGING_SENSITIVE_COOKIES"
 }
 BINARY_REGEX = re.compile(r"(.+Content-Type:.*?)(\S+)/(\S+)(?:\r\n)*(.+)", re.S | re.I)
 BINARY_TYPES = ("image", "application")
@@ -82,6 +86,7 @@ class LoggingMiddleware(object):
         self.http_4xx_log_level = getattr(settings, SETTING_NAMES["http_4xx_log_level"], DEFAULT_HTTP_4XX_LOG_LEVEL)
         self.sensitive_headers = getattr(settings, SETTING_NAMES["sensitive_headers"], DEFAULT_SENSITIVE_HEADERS)
         self.sensitive_content = getattr(settings, SETTING_NAMES["sensitive_content"], DEFAULT_SENSITIVE_CONTENT)
+        self.sensitive_cookies = getattr(settings, SETTING_NAMES["sensitive_cookies"], DEFAULT_SENSITIVE_COOKIES)
         if not isinstance(self.sensitive_headers, list):
             raise ValueError(
                 "{} should be list. {} is not list.".format(SETTING_NAMES["sensitive_headers"], self.sensitive_headers)
@@ -198,6 +203,14 @@ class LoggingMiddleware(object):
                 for k, v in request.META.items()
                 if k.startswith("HTTP_")
             }
+
+        if len(self.sensitive_cookies):
+            cookie_index = 'Cookie' if IS_DJANGO_VERSION_GTE_3_2_0 else 'HTTP_COOKIE'
+            cookie = headers[cookie_index]
+            for i in self.sensitive_cookies:
+                if re.search(i, headers.get(cookie_index,"")):
+                    cookie = re.sub("{}[^;]+".format(i), "{}********".format(i), cookie)
+            headers[cookie_index] = cookie
 
         if headers:
             self.logger.log(log_level, headers, logging_context)
