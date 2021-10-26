@@ -104,9 +104,11 @@ require([
             strt = $('#' + slideDiv).parent().attr('data-min');
             end = $('#' + slideDiv).parent().attr('data-max');
             $('#' + slideDiv).parent().removeClass('isActive');
+            $('#' + slideDiv).siblings('.reset').addClass('disabled');
         }
         else{
             $('#' + slideDiv).parent().addClass('isActive');
+            $('#' + slideDiv).siblings('.reset').removeClass('disabled');
         }
         $('#' + slideDiv).parent().attr('data-curminrng',strt);
         $('#' + slideDiv).parent().attr('data-curmaxrng',end);
@@ -445,6 +447,12 @@ require([
             }
             if ($('#'+divName).find('.reset').length===0){
                 $('#' + divName).append(  '<button class="reset" style="display:block;margin-top:18px" onclick=\'setSlider("' + slideName + '",true,0,0,' + String(isInt) + ', true,"'+parStr+'")\'>Clear Slider</button>');
+            }
+            if (isActive){
+                $('#'+divName).find('.reset').removeClass('disabled');
+            }
+            else{
+                $('#'+divName).find('.reset').addClass('disabled');
             }
 
              $('#'+slideName).append(labelMin);
