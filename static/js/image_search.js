@@ -514,6 +514,7 @@ require([
             $('#' + slideName).data("filter-display-attr",attr_name);
 
             $('#'+slideName).append(labelMax);
+            $('#'+slideName).addClass('space-top-15');
 
 
             $('#'+ divName+'_list').addClass('hide');
@@ -1313,7 +1314,6 @@ require([
             $('#series_tab').attr('data-rowsremoved', rowsRemoved);
             $('#series_tab').attr('data-refreshafterfilter', refreshAfterFilter);
             $('#series_tab').DataTable().destroy();
-
             try {
 
                 $('#series_tab').DataTable({
@@ -1339,6 +1339,7 @@ require([
                         }, "createdCell": function (td, data) {
                             $(td).attr('data-study-id', data);
                             return;
+
                         }
 
                     },
@@ -1377,15 +1378,15 @@ require([
                             } else {
                                 return '<a href="' + DICOM_STORE_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' + data + '" target="_blank"><i class="fa fa-eye"></i>'
                             }
+
                         }
-
                     },
-
                 ],
                 "processing": true,
                 "serverSide": true,
                 "ajax": function (request, callback, settings, refreshAfterFilter) {
                          var backendReqLength = 500;
+
                     var backendReqStrt = Math.max(0, request.start - Math.floor(backendReqLength * 0.5));
                     var rowsRemoved = $('#series_tab').data('rowsremoved');
                     var refreshAfterFilter = $('#series_tab').data('refreshafterfilter');
@@ -1436,7 +1437,7 @@ require([
                                     ndic['sortdir'] = request.order[0].dir;
                                 }
                             }
-
+                            var csrftoken = $.getCookie('csrftoken');
                             $.ajax({
                                 url: url,
                                 dataType: 'json',
@@ -1455,7 +1456,6 @@ require([
                                         "recordsTotal": data["cnt"],
                                         "recordsFiltered": data["cnt"]
                                     })
-
                                 },
                                 error: function () {
                                     console.log("problem getting data");
@@ -1489,14 +1489,10 @@ require([
             $('#series_tab').on('draw.dt', function(){
                 $('#series_table_head').children('tr').children().each(function(){
                     this.style.width=null;
-                    }
-
-                );
-            })
-
+                });
+            });
             $('#series_tab').children('tbody').attr('id','series_table');
             $('#series_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'series_tab_wrapper\')">Go</button></div>');
-
         }
 
 
@@ -1522,8 +1518,7 @@ require([
                         nitem=Object.keys(progDic[item]['projects'])[0];
                         reformDic[listId][nitem]=new Object();
                         reformDic[listId][nitem]['count'] = progDic[item]['val'];
-                    }
-                    else {
+                    } else {
                         reformDic[listId][item]=new Object();
                         reformDic[listId][item]['count'] = progDic[item]['val'];
                         reformDic[item] =  new Object();
@@ -1532,8 +1527,6 @@ require([
                             reformDic[item][project]['count']=progDic[item]['projects'][project]['val'];
                         }
                     }
-
-
                 }
             }
             updateFilterSelections('program_set', {'unfilt':reformDic});
@@ -1668,6 +1661,7 @@ require([
                         updateCollectionTotals('Program', data.programs);
                         //updateFilterSelections('search_orig_set', data.origin_set.All.attributes);
 
+
                         dicofdic = {'unfilt': data.origin_set.All.attributes, 'filt': ''}
                         if (isFiltered) {
                             dicofdic['filt'] = data.filtered_counts.origin_set.All.attributes;
@@ -1699,15 +1693,16 @@ require([
                                     }
                                     updateFilterSelections(data.derived_set[facetSet].name, dicofdic);
                                     var derivedAttrIndex = derivedAttrs.indexOf(data.derived_set[facetSet].name);
-
                                     if (derivedAttrIndex > -1) {
                                         derivedAttrs.splice(derivedAttrIndex, 1);
                                     }
                                 }
                             }
+
                         } else {
                             $('#search_derived_set').addClass('disabled');
                         }
+
 
                         for (var i = 0; i < derivedAttrs.length; i++) {
                             updateFilterSelections(derivedAttrs[i], {});
@@ -1746,14 +1741,16 @@ require([
                                 }
                             }
                         }
+
+
                         updateTablesAfterFilter(collFilt, data.origin_set.All.attributes.collection_id);
+
                         if ($('#hide-zeros')[0].checked) {
+                            addSliders('search_orig_set', false, true, '');
                             addSliders('quantitative', false, true, '');
                             addSliders('tcga_clinical', false, true, 'tcga_clinical.');
                         }
-                    }
-                    catch(err){
-                        alert("The following error was reported when processing server data: "+ err +". Please alert the systems administrator")
+
                     }
                     //changeAjax(false);
                     finally {
@@ -1770,8 +1767,7 @@ require([
             return deferred.promise();
         };
 
-
-        var manageUpdateFromPlot = function(plotId, label){
+        var manageUpdateFromPlot = function(plotId, label) {
             var listId = plotId.replace('_chart','_list');
             var filterId = plotId.replace('_chart','');
 
@@ -1787,8 +1783,7 @@ require([
                     butElem.checked=true
                     setSlider(slideDiv, filterId+"_slide", minx, maxx, true, false);
                     window.addNone(butElem,parStr,true);
-                }
-                else {
+                } else {
                     if ($('#'+filterId).hasClass('wNone')){
                         butElem = $('#'+filterId).find('.noneBut').children('input')[0];
                         butElem.checked=false;
@@ -1800,8 +1795,7 @@ require([
                     var end = parseInt((selArr[1] === '*') ? maxx : selArr[1]);
                     setSlider(filterId+"_slide", false, strt, end, true,true);
                 }
-            }
-            else {
+            } else {
                 var inputList = $('#' + listId).find(':input');
                 for (var i = 0; i < inputList.length; i++) {
                     var curLabel = $(inputList[i]).parent().children()[1].innerHTML;
@@ -1820,7 +1814,7 @@ require([
             }
         }
 
-        var plotCategoricalData = function (plotId, lbl, plotData, isPie, showLbl){
+        var plotCategoricalData = function (plotId, lbl, plotData, isPie, showLbl) {
             var width = 300;
             var height = 260;
             var shifty = 30;
@@ -1886,13 +1880,13 @@ require([
                    nonZeroLabels.push(pkey);
                }
                //rng.push(parseFloat(i)*parseFloat(spcing));
-             }
-             $('#'+plotId).data('total',tot.toString());
+            }
+            $('#'+plotId).data('total',tot.toString());
 
            // set the color scale
            var color = d3.scaleOrdinal()
-           .domain(nonZeroLabels)
-           .range(d3.schemeCategory10);
+            .domain(nonZeroLabels)
+            .range(d3.schemeCategory10);
 
            // don't color last pie slice the same as first
            var colorPie = function(lbl){
@@ -1963,19 +1957,18 @@ require([
                 }
             });
 
-        var txtbx=pieg.append("text").attr("x","0px").attr("y","10px").attr('text-anchor','start');
-        txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",0);
-        txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",20);
-        txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",40);
-        txtbx.attr("opacity",0);
+            var txtbx=pieg.append("text").attr("x","0px").attr("y","10px").attr('text-anchor','start');
+            txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",0);
+            txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",20);
+            txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",40);
+            txtbx.attr("opacity",0);
 
-        if (tot===0) {
-            txtbx.attr('text-anchor','middle');
-            tspans=txtbx.node().childNodes;
-            tspans[0].textContent = "No Data Available";
-            txtbx.attr("opacity",1);
-        }
-
+            if (tot===0) {
+                txtbx.attr('text-anchor','middle');
+                tspans=txtbx.node().childNodes;
+                tspans[0].textContent = "No Data Available";
+                txtbx.attr("opacity",1);
+            }
         }
 
 
@@ -2122,7 +2115,7 @@ require([
                 updateAttributeValues(filterList, dic);
             }
 
-            var sorter= $('#'+filterCat).children().children('.sorter').find(":radio").filter(':checked');
+            var sorter= $('#'+filterCat).children('.sorter').find(":radio").filter(':checked');
             if (sorter.length>0){
                  if (sorter.val()==="alpha"){
                      filterList.children('li').sort(
@@ -2284,6 +2277,7 @@ require([
                         }
                 }
             }
+            addSliders('search_orig_set', false, hideEmpty,'');
             addSliders('quantitative', false, hideEmpty,'');
             addSliders('tcga_clinical',false, hideEmpty,'tcga_clinical.');
         }
@@ -2571,7 +2565,7 @@ require([
         }
      };
 
-    var addSliders = function(id,initialized,hideZeros, parStr){
+    var addSliders = function(id,initialCreation,hideZeros, parStr){
         $('#'+id).find('.list-group-item__body.isQuant').each(function() {
             $(this).find('.more-checks').addClass('hide');
             $(this).find('.less-checks').addClass('hide');
@@ -2588,7 +2582,12 @@ require([
             var wNone = $(this).hasClass('wNone');
             var checked = ($(this).find('.noneBut').length>0) ? $(this).find('.noneBut').find(':input')[0].checked : false;
 
-            if (!initialized) {
+            if (initialCreation){
+                var heading = $(this).prop('id') + '_heading';
+                $('#'+heading).find('.controls').remove();
+            }
+            else {
+
                 var slideDivId = $(this).prop('id') + '_slide';
                 curmin = $(this).attr('data-curmin');
                 curmax = $(this).attr('data-curmax');
