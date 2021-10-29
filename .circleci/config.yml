@@ -106,7 +106,7 @@ jobs:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
     working_directory: ~/IDC-WebApp
     docker:
-      - image: cimg/python:3.7.0-stretch
+      - image: cimg/python:3.7.0
       - image: cimg/mysql:5.7
         environment:
           MYSQL_ROOT_HOST: "%"
@@ -171,7 +171,7 @@ jobs:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
     working_directory: ~/IDC-WebApp
     docker:
-      - image: cimg/python:3.7.0-stretch
+      - image: cimg/python:3.7.0
     steps:
       - restore_cache:
           keys:
