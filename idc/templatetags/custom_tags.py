@@ -73,7 +73,7 @@ VALUE_SPECIFIC_ORDERS = {
 }
 
 
-KEEP_ORDER=['SliceThickness']
+KEEP_ORDER = ['SliceThickness']
 
 ATTR_SPECIFIC_ORDERS = [
 
