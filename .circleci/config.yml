@@ -106,8 +106,8 @@ jobs:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
     working_directory: ~/IDC-WebApp
     docker:
-      - image: circleci/python:3.7.0-stretch
-      - image: circleci/mysql:5.7
+      - image: cimg/python:3.7.0-stretch
+      - image: cimg/mysql:5.7
         environment:
           MYSQL_ROOT_HOST: "%"
           MYSQL_USER: ubuntu
@@ -171,7 +171,7 @@ jobs:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
     working_directory: ~/IDC-WebApp
     docker:
-      - image: circleci/python:3.7.0-stretch
+      - image: cimg/python:3.7.0-stretch
     steps:
       - restore_cache:
           keys:
