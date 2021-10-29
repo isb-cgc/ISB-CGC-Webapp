@@ -60,7 +60,7 @@ if [ -z "${CI}" ]; then
     apt-get install -y --force-yes python3.7-venv python3.7-distutils python3.7-dev
 fi
 
-apt-get install -y --force-yes python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
+apt-get install -y --force-yes python3-mysqldb libmysqlclient-dev libpython3-dev build-essential python3-distutils
 apt-get install -y --force-yes mysql-client
 
 echo "Dependencies Installed"
