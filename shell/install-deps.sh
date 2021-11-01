@@ -47,7 +47,7 @@ apt-get update -qq
 echo "Installing Dependencies..."
 apt-get install -y --force-yes unzip libffi-dev libssl-dev git ruby g++ curl dos2unix
 
-# CircleCI provides a Python 3.8 image, but locally, we yse 3.7 to mimic the Dockerfile
+# CircleCI provides a Python 3.8 image, but locally, we use 3.7 to mimic the Dockerfile
 if [ -z "${CI}" ]; then
     # Update to Python 3.7
     add-apt-repository ppa:deadsnakes/ppa
