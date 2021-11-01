@@ -58,9 +58,12 @@ if [ -z "${CI}" ]; then
     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
 
     apt-get install -y --force-yes python3.8-venv python3.8-distutils python3.8-dev
+else
+# If this is CircleCI, distutils has a different name (because why would this be easy?)
+  apt-get install -y --force-yes python3-distutils
 fi
 
-apt-get install -y --force-yes python3-mysqldb libmysqlclient-dev libpython3-dev build-essential python3-distutils
+apt-get install -y --force-yes python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
 apt-get install -y --force-yes mysql-client
 
 echo "Dependencies Installed"
