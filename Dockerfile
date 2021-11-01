@@ -23,7 +23,7 @@ FROM gcr.io/google_appengine/python
 # Create a virtualenv for dependencies. This isolates these packages from
 # system-level packages.
 # Use -p python3 or -p python3.7 to select python version. Default is version 2.
-RUN virtualenv /env -p python3.7
+RUN virtualenv /env -p python3
 
 # Setting these environment variables are the same as running
 # source /env/bin/activate.
@@ -58,7 +58,7 @@ RUN apt-get install -y mysql-server
 # Get pip3 installed
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python3
 
-RUN apt-get -y install build-essential apt-transport-https gnupg
+RUN apt-get -y install build-essential
 RUN apt-get -y install --reinstall python-m2crypto python3-crypto
 RUN apt-get -y install libxml2-dev libxmlsec1-dev swig
 RUN pip3 install pexpect
@@ -68,7 +68,7 @@ RUN easy_install -U distribute
 
 ADD . /app
 
-# We need to recompile some of the items because of differences in compiler versions 
+# We need to recompile some of the items because of differences in compiler versions
 RUN pip3 install -r /app/requirements.txt -t /app/lib/ --upgrade
 RUN pip3 install gunicorn==19.6.0
 
