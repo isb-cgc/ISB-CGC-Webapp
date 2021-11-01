@@ -47,19 +47,18 @@ apt-get update -qq
 echo "Installing Dependencies..."
 apt-get install -y --force-yes unzip libffi-dev libssl-dev git ruby g++ curl dos2unix
 
-# CircleCI provides a Python 3.8 image, but locally, we have to do that ourselves.
+# CircleCI provides a Python 3.8 image, but locally, we yse 3.7 to mimic the Dockerfile
 if [ -z "${CI}" ]; then
-    # Update to Python 3.8
+    # Update to Python 3.7
     add-apt-repository ppa:deadsnakes/ppa
     apt update
-    apt install -y --force-yes python3.8
+    apt install -y --force-yes python3.7
 
-    # Set Python 3.8 as the python3 version
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
+    # Set Python 3.7 as the python3 version
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1
 
-    apt-get install -y --force-yes python3.8-venv python3.8-distutils python3.8-dev
+    apt-get install -y --force-yes python3.7-venv python3.7-distutils python3.7-dev
 else
-# If this is CircleCI, distutils has a different name (because why would this be easy?)
   apt-get install -y --force-yes python3-distutils
 fi
 
