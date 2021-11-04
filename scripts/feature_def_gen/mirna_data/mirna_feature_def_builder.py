@@ -106,8 +106,6 @@ class MIRNFeatureDefBuilder(FeatureDefBigqueryProvider):
         return result
 
     def unpack_query_response(self, row_item_array):
-        table_config_mapping = self.build_table_mapping(self.config)
-
         feature_type = get_feature_type()
         result = []
         for row in row_item_array:

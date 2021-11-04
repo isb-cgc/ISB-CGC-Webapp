@@ -237,7 +237,7 @@ class SeqPeekViewDataBuilder(object):
         for track in plot_data['tracks']:
             track['type'] = 'tumor'
 
-            label, cohort_size = get_track_label_and_cohort_information(track[TRACK_ID_FIELD], cohort_info_map)
+            label = get_track_label_and_cohort_information(track[TRACK_ID_FIELD], cohort_info_map)
             track['label'] = label
 
         # Display the "combined" track only if more than one cohort is visualized
