@@ -123,7 +123,7 @@ require([
                     'name': 'datasetId',
                     'data': 'tableReference.datasetId',
                     'visible': false,
-                    'className': 'colvis-toggle'
+                    'className': 'colvis-toggle',
                 },
                 {
                     'name': 'tableId',
@@ -203,7 +203,6 @@ require([
                     'className': 'label-filter colvis-toggle',
                     'visible': false
                 },
-
                 {
                     'name': 'status',
                     'data': function (data) {
@@ -248,6 +247,18 @@ require([
                         }
                     },
                     'searchable': false
+                },
+                {
+                    'className': 'useful-join-detail',
+                    'name': 'usefulJoins',
+                    'data': function (data) {
+                        return data.usefulJoins;
+                    },
+                    'render': function(data, type) {
+                        let num_joins = data.length;
+                        let display = num_joins > 0 ? num_joins : '';
+                        return '<div class="text-center"><a class="useful-join-detail">' + display + '</a></div>';
+                    }
                 },
                 {
                     'name': 'preview',
@@ -341,6 +352,25 @@ require([
             order: [[1, 'asc']],
             initComplete: function (settings, json) {
                 $('.spinner').remove();
+                if (selected_table_full_id !== "") {
+                    let parts = selected_table_full_id.split('.');
+                    let project_id = parts[0];
+                    let dataset_id = parts[1];
+                    let table_id = parts[2];
+                    $('#search-by-dataset-id')[0].value = dataset_id;
+                    $('#search-by-project-id option').each(function() {
+                        if ($(this)[0].innerText === project_id) {
+                            $(this).prop('selected', true);
+                        }
+                    });
+                    $('#search-by-table-id')[0].value = table_id;
+                    columnSearch('datasetId', dataset_id);
+                    columnSearch('projectId', project_id);
+                    columnSearch('tableId', table_id);
+
+                    $('.adv-toggle-btn').click();
+                }
+
                 reset_table_style(settings);
             },
             drawCallback: function (settings) {
@@ -438,6 +468,81 @@ require([
             }
         });
 
+        $('#bqmeta').find('tbody').on('click', 'td .useful-join-detail', function () {
+            var tr = $(this).closest('tr');
+            var td = $(this).closest('td');
+            var row = table.row(tr);
+            var row_data = row.data();
+            var joins_data = table.cell(td).data();
+            if (row.child.isShown() && tr.hasClass('useful-join-shown')) {
+                // This row is already open - close it
+                row.child.hide();
+                tr.removeClass('shown useful-join-shown');
+            }
+            else {
+                // Open this row
+                row.child(format_useful_join_details(joins_data)).show();
+                tr.next().find('.useful-join-view-btn').each(function(index) {
+                    let this_join_data = joins_data[index];
+                    this_join_data['tableName'] = row_data['friendlyName'];
+                    this_join_data['tableId'] = formatFullId(row_data['tableReference'], false);
+                    $(this).data(this_join_data);
+                });
+
+                $('.joined-table-link').unbind('click');
+                $('.joined-table-link').on('click', function() {
+                    window.open('/bq_meta_search/' + $(this)[0].innerText, '_blank');
+                });
+
+                tr.next().find('.useful-join-view-btn').on('click', function() {
+                    let join_data = $(this).data();
+                    let tables = "";
+                    join_data['tables'].forEach(function(value, i) {
+                        value = value.replace(':', '.');
+                        tables += ('<a class="joined-table-link" title="Open in new tab">' + value + '</a>');
+                        if (i !== join_data['tables'].length - 1) {
+                            tables += "<br>";
+                        }
+                    });
+                    // let [query_comment, ...rest] = join_data['sql'].split('\n');
+                    // let sql_query = rest.join('<br>');
+                    let sql_query = join_data['sql'].replace('\n', '\n<br>');
+                    let dialog_content =
+                        '<h5>Join Subject</h5><p>' + join_data['title'] + '</p><br>' +
+                        '<h5>Description</h5><p>' + join_data['description'] + '</p><br>' +
+                        '<h5>Joined Tables</h5><p>' + tables + '</p><br>' +
+                        '<h5>SQL Statement</h5>' +
+                        '<pre><code class="language-sql query-body">' + sql_query + '</code></pre>' +
+                        '<button class="copy-query-btn" title="Copy to Clipboard">' +
+                        '<i class="fa fa-clipboard" aria-hidden="true"></i>'+ 'COPY' + '</button>'+ '<br><br>' +
+                        '<h5>Joined Condition</h5><p>' + join_data['condition'] + '</p>';
+
+                    $('#useful-join-view-modal').find('.modal-body').html(dialog_content);
+
+                    Prism.highlightAll();
+
+                    $('.joined-table-link').on('click', function() {
+                        window.open('/bq_meta_search/' + $(this)[0].innerText, '_blank');
+                    });
+
+                    $(".copy-query-btn").on('click', function () {
+                        let query = $(this).siblings().find('.query-body')[0];
+                        copy_to_clipboard(query);
+                    });
+
+                    $('#useful-join-view-modal').find('.modal-sub-title').html(join_data['tableName']);
+                    $('#useful-join-view-modal').find('.modal-sub-sub-title').html(join_data['tableId']);
+                    $('#useful-join-view-modal').modal('show');
+                });
+
+                set_gcp_open_btn($(tr).next('tr').find('.detail-table'));
+                tr.addClass('shown useful-join-shown');
+                tr.removeClass('preview-shown');
+                tr.removeClass('details-shown');
+            }
+        });
+
+
         var columnSearch = function(column_name, term, regex_search, smart_search){
             table
                 .columns(column_name+':name')
@@ -463,6 +568,7 @@ require([
                 set_gcp_open_btn($(tr).next('tr').find('.detail-table'));
                 tr.addClass('shown details-shown');
                 tr.removeClass('preview-shown');
+                tr.removeClass('useful-join-shown');
             }
         });
         $('#bq-meta-form').find('i.fa-info-circle').tooltip();
@@ -485,6 +591,7 @@ require([
             row.child(format_tbl_preview(schema_fields, tbl_data)).show();
         }
         tr.removeClass('details-shown');
+        tr.removeClass('useful-join-shown');
         td.find('.preview-loading').hide();
         tr.addClass('shown preview-shown');
     };
@@ -495,6 +602,30 @@ require([
                             + '&d=' + tbl_ref.datasetId
                             + '&t=' + tbl_ref.tableId
                             + '&page=table';
+    };
+
+    // Useful join table
+    var format_useful_join_details = function(d) {
+        let join_table = '<div><table class="useful-join-table">';
+        join_table += '<thead><tr><th style="width:200px">Join Subject</th><th style="width:400px">Joined Tables</th><th>View</th></tr></thead>';
+        join_table += '<tbody>';
+        d.forEach(join_info => {
+            let tables = "";
+            join_info['tables'].forEach(function(value, i) {
+                value = value.replace(':', '.');
+                tables += ('<a class="joined-table-link" title="Open in new tab">' + value + '</a>');
+                if (i !== join_info['tables'].length - 1) {
+                    tables += "<br>";
+                }
+            });
+            join_table += '<tr>' +
+               '<td>' + join_info['title'] + '</td>' +
+               '<td>' + tables + '</td>' +
+               '<td><button class="useful-join-view-btn open-gcp-btn">View Details</button></td>' +
+               '</tr>';
+        });
+        join_table += '</tbody></table></div>';
+        return join_table;
     };
 
     var format_tbl_details = function(d) {
@@ -545,9 +676,9 @@ require([
     };
 
     var copy_to_clipboard = function(el) {
-        var $temp = $("<input>");
+        var $temp = $("<textarea>");
         $("body").append($temp);
-        $temp.val( '`' + $(el).text() + '`' ).select();
+        $temp.val($(el).text()).focus().select();
         document.execCommand("copy");
         $temp.remove();
     };
@@ -744,5 +875,4 @@ require([
 
         });
     };
-
 });
