@@ -28,7 +28,8 @@ django-session-security==2.6.5
 django-anymail[mailgun]
 djangorestframework==3.11.2
 pylint
+
 # If you are seeing an error about django-debug-toolbar not being installed,
 # the problem is almost certainly that your developer .env wasn't found
 # django-debug-toolbar should **only** be installed on local developer builds, so do
-# not add it to this file.
+# not add it to this file.  Force recache

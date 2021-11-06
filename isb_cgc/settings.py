@@ -84,8 +84,8 @@ GCP_ACTIVITY_LOG_NAME = os.environ.get('GCP_ACTIVITY_LOG_NAME', 'local_dev_loggi
 DCF_REFRESH_LOG_NAME = os.environ.get('DCF_REFRESH_LOG_NAME', 'local_dev_logging')
 DCF_SA_REG_LOG_NAME = os.environ.get('DCF_SA_REG_LOG_NAME', 'local_dev_logging')
 
-BASE_URL                = os.environ.get('BASE_URL', 'https://mvm-dot-isb-cgc.appspot.com')
-BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://mvm-api-dot-isb-cgc.appspot.com')
+BASE_URL                = os.environ.get('BASE_URL', 'https://isb-cgc-uat.appspot.com')
+BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://isb-cgc-uat.appspot.com')
 
 # Compute services - Should not be necessary in webapp
 PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
