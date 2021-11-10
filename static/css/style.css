@@ -91,6 +91,12 @@ ul, ol {
   min-height: calc(100vh - 290px);
 }
 
+/* The cohorts list page has an additional section (action buttons) which complicates the layout count */
+#cohorts-list .short-inner-content {
+  min-height: calc(100vh - 389px);
+}
+
+
 .table-list li:after, .table-list_warning li:after, .worksheet-header:after, .worksheet-body:after {
   visibility: hidden;
   display: block;
