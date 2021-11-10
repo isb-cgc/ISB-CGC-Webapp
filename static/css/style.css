@@ -66,14 +66,19 @@ ul, ol {
 .main-content {
   margin-top: 86px; }
 
+/*
+  Calc the space displayed minus headers and footers to produce a min-height for
+  pages that are lacking content to appropriately extend the page
+ */
 .short-inner-content {
   min-height: calc(100vh - 306px);
-  /* 306 = margin-top of main (for site header, 86) + page header (56) + page header padding (20) + panel bottom margin (20) + footer height (124)*/
+  /* 306 = margin-top of main (for site header, 86) + page header (56) + page header padding (20) +
+  panel bottom margin (20) + footer height (124) */
 }
 
+/* Pages with BIG headers (eg. user details) need to account for more used space */
 .short-inner-content-big-header {
   min-height: calc(100vh - 503px);
-  /* 306 = margin-top of main (for site header, 86) + page header (56) + page header padding (20) + panel bottom margin (20) + footer height (124)*/
 }
 
 /* Pages with no use of a header need more space taken up */
