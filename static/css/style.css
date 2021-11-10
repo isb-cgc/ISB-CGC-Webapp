@@ -71,8 +71,8 @@ ul, ol {
   /* 306 = margin-top of main (for site header, 86) + page header (56) + page header padding (20) + panel bottom margin (20) + footer height (124)*/
 }
 
-.landing .site-footer {
-  margin: 0;
+#landing .short-inner-content {
+  min-height: calc(100vh - 290px);
 }
 
 .table-list li:after, .table-list_warning li:after, .worksheet-header:after, .worksheet-body:after {
@@ -2819,6 +2819,7 @@ html {
 
 #landing .summary {
   background-color: #245f80;
+  margin: 0;
 }
 
 #landing .features {
@@ -3080,10 +3081,15 @@ html {
   margin-bottom: 0;
 }
 
+.landing-bottom {
+  margin: 0;
+}
+
 .site-footer {
   background-color: #003a55;
   text-align: center;
   font-size: 1em;
+  margin: 0;
 }
 
 .site-footer p {
