@@ -66,6 +66,15 @@ ul, ol {
 .main-content {
   margin-top: 86px; }
 
+.short-inner-content {
+  min-height: calc(100vh - 306px);
+  /* 306 = margin-top of main (for site header, 86) + page header (56) + page header padding (20) + panel bottom margin (20) + footer height (124)*/
+}
+
+.landing .site-footer {
+  margin: 0;
+}
+
 .table-list li:after, .table-list_warning li:after, .worksheet-header:after, .worksheet-body:after {
   visibility: hidden;
   display: block;
@@ -2787,10 +2796,12 @@ span.code {
  * Landing Page Styles
  *******************************************/
 html {
-  scroll-behavior: smooth; }
+  scroll-behavior: smooth;
+  position: relative;
+  min-height: 100%;
+}
 
 #landing .landing-content-div {
-  position: absolute;
   top: 86px;
   left: 0;
   width: 100%;
@@ -2812,7 +2823,7 @@ html {
 
 #landing .features {
   margin-top: -35px;
-  margin-bottom: 20px;
+  margin-bottom: 90px;
 }
 
 #landing .features .container-fluid {
