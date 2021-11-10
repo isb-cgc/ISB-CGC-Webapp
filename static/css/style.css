@@ -2844,10 +2844,6 @@ html {
   margin: 0;
 }
 
-#landing .features {
-  margin-top: 70px;
-}
-
 #landing .features .container-fluid {
   padding-left: 0;
   padding-bottom: 0;
@@ -2864,7 +2860,7 @@ html {
 
 #landing .buttons {
   margin-top: 20px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 #landing .buttons .buttons-col {
