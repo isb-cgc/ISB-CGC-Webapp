@@ -5,7 +5,7 @@
 {% load tz %}
 {% comment %}
 
-   Copyright 2015, Institute for Systems Biology
+   Copyright 2021, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -29,16 +29,16 @@
 {% block page_name %}user-details{% endblock %}
 
 {% block content %}
+    <div class="user-detail">
     {% if not unconnected_local_account %}
-    <img src="{{ user_details.extra_data.picture }}" class="avatar space-top-10" alt="User Avatar"/>
+        <img src="{{ user_details.extra_data.picture }}" class="avatar space-top-10" alt="User Avatar"/>
     {% else %}
-        <div class="user-detail">
-            <i class="fa fa-user space-top-10 basic-avatar" alt="User Avatar"/> </i>
-        </div>
+        <i class="fa fa-user space-top-10 basic-avatar" alt="User Avatar"/> </i>
     {% endif %}
-    <h4>Welcome {% if not unconnected_local_account %}{{ user_details.first_name }} {{ user_details.last_name }}{% else %}{{ user_details.email }}{% endif %}!</h4>
-    <div class="row">
-        <div class="col-lg-4 col-md-4 col-sm-12">
+        <h4>Welcome {% if not unconnected_local_account %}{{ user_details.first_name }} {{ user_details.last_name }}{% else %}{{ user_details.email }}{% endif %}!</h4>
+    </div>
+    <div class="row user-row">
+        <div class="col-lg-4 col-md-4 col-sm-12 short-inner-content-big-header">
             <div class="panel panel-default user-panel">
                 <div class="panel-heading">
                     <h5>

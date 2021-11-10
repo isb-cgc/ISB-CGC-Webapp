@@ -71,6 +71,17 @@ ul, ol {
   /* 306 = margin-top of main (for site header, 86) + page header (56) + page header padding (20) + panel bottom margin (20) + footer height (124)*/
 }
 
+.short-inner-content-big-header {
+  min-height: calc(100vh - 503px);
+  /* 306 = margin-top of main (for site header, 86) + page header (56) + page header padding (20) + panel bottom margin (20) + footer height (124)*/
+}
+
+/* Pages with no use of a header need more space taken up */
+.short-inner-content-no-header {
+  min-height: calc(100vh - 210px);
+}
+
+/* The landing page has an additional section (summary) which complicates the layout count */
 #landing .short-inner-content {
   min-height: calc(100vh - 290px);
 }
@@ -3259,11 +3270,11 @@ html {
     width: 200px; }
   #user-details h4 {
     text-align: center; }
-  #user-details .row {
+  #user-details .user-row {
     width: 100%;
     text-align: center;
     margin: 20px 0px; }
-    #user-details .row .panel {
+    #user-details .user-row .panel {
       border: 3px solid #716784;
       border-radius: 7px;
       box-shadow: none;
@@ -3272,31 +3283,31 @@ html {
       text-align: left;
       vertical-align: top;
       min-width: 90%;}
-      #user-details .row .panel:nth-child(2) {
+      #user-details .user-row .panel:nth-child(2) {
         margin: 0px 15px; }
-    #user-details .row a {
+    #user-details .user-row a {
       text-decoration: underline;
       cursor: pointer; }
-    #user-details .row .gcp-panel a {
+    #user-details .user-row .gcp-panel a {
       display: inline-block; }
-    #user-details .row table.user-info tr td {
+    #user-details .user-row table.user-info tr td {
       vertical-align: top; }
-    #user-details .row table.user-info tr td:first-child {
+    #user-details .user-row table.user-info tr td:first-child {
       font-weight: bold;
       text-align: right;
       padding: 5px 10px;
       width: 20%; }
-    #user-details .row table.user-info tr td:last-child {
+    #user-details .user-row table.user-info tr td:last-child {
       padding: 5px 10px;
       margin-left: 5px;
       width: 80%; }
-    #user-details .row .fa-check-circle {
+    #user-details .user-row .fa-check-circle {
       color: #0c4fba;
       font-size: 21px;
       line-height: 10px; }
-    #user-details .row hr {
+    #user-details .user-row hr {
       margin: 0px -15px 10px -15px; }
-    #user-details .row ul {
+    #user-details .user-row ul {
       margin-bottom: 10px;
       list-style: circle;
       margin-left: 20px; }
