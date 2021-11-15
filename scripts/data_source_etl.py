@@ -334,7 +334,6 @@ def main(config, make_attr=False):
         if 'programs' in config:
             for prog in config['programs']:
                 try:
-                    obj = Program.objects.get(name=prog['name'], owner=isb_superuser, active=True, is_public=True)
                     logger.info("[STATUS] Program {} found - skipping creation.".format(prog))
                 except ObjectDoesNotExist:
                     logger.info("[STATUS] Program {} not found - creating.".format(prog))
