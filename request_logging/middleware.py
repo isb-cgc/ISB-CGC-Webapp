@@ -206,11 +206,12 @@ class LoggingMiddleware(object):
 
         if len(self.sensitive_cookies):
             cookie_index = 'Cookie' if IS_DJANGO_VERSION_GTE_3_2_0 else 'HTTP_COOKIE'
-            cookie = headers[cookie_index]
-            for i in self.sensitive_cookies:
-                if re.search(i, headers.get(cookie_index,"")):
-                    cookie = re.sub("{}[^;]+".format(i), "{}********".format(i), cookie)
-            headers[cookie_index] = cookie
+            if headers.get(cookie_index, None):
+                cookie = headers[cookie_index]
+                for i in self.sensitive_cookies:
+                    if re.search(i, headers.get(cookie_index,"")):
+                        cookie = re.sub("{}[^;]+".format(i), "{}********".format(i), cookie)
+                headers[cookie_index] = cookie
 
         if headers:
             self.logger.log(log_level, headers, logging_context)
