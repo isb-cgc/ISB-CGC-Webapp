@@ -8,7 +8,8 @@ require.config({
         jquerydt: 'libs/jquery.dataTables.min',
         //d3: 'libs/d3.v5.min',
         base: 'base',
-        underscore: 'libs/underscore-min'
+        underscore: 'libs/underscore-min',
+
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -24,7 +25,6 @@ require([
     'jquerydt',
     'jqueryui',
     'bootstrap',
-    'base'
 ], function($, _, jquerydt, jqueryui, bootstrap) {
 
     $('.manifest-size-warning').hide();
@@ -37,6 +37,8 @@ require([
     window.projSets['tcga']=["tcga_blca", "tcga_brca", "tcga_cesc", "tcga_coad", "tcga_esca", "tcga_gbm", "tcga_hnsc", "tcga_kich", "tcga_kirc", "tcga_kirp", "tcga_lgg", "tcga_lihc", "tcga_luad", "tcga_lusc", "tcga_ov", "tcga_prad", "tcga_read", "tcga_sarc", "tcga_stad", "tcga_thca", "tcga_ucec"];
     window.projSets['rider']=["rider_lung_ct", "rider_phantom_pet_ct","rider_breast_mri", "rider_neuro_mri","rider_phantom_mri", "rider_lung_pet_ct"];
     window.projSets['qin'] = ["qin_headneck","qin_lung_ct","qin_pet_phantom","qin_breast_dce_mri"];
+
+
 
     var plotLayout = {
         title: '',
@@ -1129,7 +1131,7 @@ require([
                     "columnDefs": [
                         {className: "ckbx", "targets": [0]},
                         {className: "col1 case-id", "targets": [1]},
-                        {className: "col2 study-id study-id-col", "targets": [2]},
+                        {className: "col2 study-id study-id-col study-id-tltp", "targets": [2]},
                         {className: "col1 study-date", "targets": [3]},
                         {className: "col1 study-description", "targets": [4]},
                         {className: "col1 numrows", "targets": [5]},
@@ -1160,9 +1162,10 @@ require([
                                 return pretty_print_id(data);
                             },
                             "createdCell": function (td, data) {
-                                $(td).attr('data-study-id', data);
+                                $(td).data('study-id', data);
                                 return;
                             }
+
 
                         },
                         {
@@ -1311,10 +1314,17 @@ require([
                     }
 
                 );
+
+
+
+
             })
+
+
             $('#studies_tab').children('tbody').attr('id','studies_table');
             $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'studies_tab_wrapper\')">Go</button></div>');
             $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<br><div>Find by StudyID:<input class="studyID_inp" type="text-box" value="'+studyID+'"><button onclick="filterTable(\'studies_tab_wrapper\',\'studyID\')">Go</button></div>');
+
         }
 
         window.updateSeriesTable = function(rowsAdded, rowsRemoved, refreshAfterFilter) {
@@ -1333,7 +1343,7 @@ require([
                         $(row).addClass('text_head');
                      },
                     "columnDefs": [
-                        {className: "col1 study-id study-id-col", "targets": [0]},
+                        {className: "col1 study-id study-id-col study-id-tltp", "targets": [0]},
                         {className: "series-number", "targets": [1]},
                         {className: "col1 modality", "targets": [2]},
                         {className: "col1 body-part-examined", "targets": [3]},
@@ -1345,7 +1355,7 @@ require([
                         "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                             return pretty_print_id(data);
                         }, "createdCell": function (td, data) {
-                            $(td).attr('data-study-id', data);
+                            $(td).data('study-id', data);
                             return;
 
                         }
