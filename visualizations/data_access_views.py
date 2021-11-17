@@ -403,7 +403,6 @@ def get_confirmed_project_ids_for_cohorts(cohort_id_array):
 def data_access_for_plot(request):
     """ Used by the web application."""
     try:
-        ver = request.GET.get('ver', '1')
         x_id = request.GET.get('x_id', None)
         y_id = request.GET.get('y_id', None)
         c_id = request.GET.get('c_id', None)

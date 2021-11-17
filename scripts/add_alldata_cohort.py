@@ -612,7 +612,6 @@ def insert_barcodes_mysql(conn, superuser_id, cohort_name, sample_barcodes):
 
 
 def create_bq_cohort(project_id, dataset_id, table_id, cohort_id, sample_barcodes):
-    service = authorize_credentials_with_Google()
     bqs = BigQueryCohortSupport(project_id, dataset_id, table_id)
     bq_result = bqs.add_cohort_to_bq(cohort_id, sample_barcodes)
 
