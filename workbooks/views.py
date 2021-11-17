@@ -31,7 +31,7 @@ from bq_data_access.v2.feature_search.util import SearchableFieldHelper as Searc
 from django.http import HttpResponse, JsonResponse
 from workbooks.models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_variable, Worksheet_gene, Worksheet_cohort, \
     Worksheet_plot, Worksheet_plot_cohort
-from variables.models import VariableFavorite, Variable
+from variables.models import VariableFavorite
 from genes.models import GeneFavorite
 from analysis.models import Analysis
 from projects.models import Program
@@ -672,7 +672,6 @@ def workbook_create_with_plot(request):
 def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
     command = request.path.rsplit('/', 1)[1];
     json_response = False
-    default_name = "Untitled Workbook"
     result = {}
     try:
         workbook_model = Workbook.objects.get(id=workbook_id) if workbook_id else None
@@ -680,7 +679,6 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
         if request.method == "POST":
             workbook_model.save()
             if command == "delete":
-                var = Worksheet_plot.objects.get(id=plot_id).delete()
                 result['message'] = "This plot has been deleted from workbook."
             else:
                 body_unicode = request.body
