@@ -204,6 +204,7 @@ require([
         allowHTML: true,
         interactive: true
     });
+
     const temp='<html><strong>now</strong></html>';
     tippy('.explainer', {
         interactive: true,
@@ -237,24 +238,31 @@ require([
 
     tippy.delegate('.studies-table', {
         content: function(reference) {
-            return $(reference).data('study-id');
+            return '<span class="tippy-uid">'+$(reference).data('study-id')+'</span>';
         },
         theme: 'dark',
         placement: 'right',
-        arrow: false,
-        target: '.study-id-col',
-        maxWidth: 300
+        arrow: true,
+        target: 'td.study-id-tltp',
+        interactive:'true',
+        interactiveBorder:10,
+        maxWidth: 600,
+        allowHTML:true
     });
+
 
     tippy.delegate('.series-table', {
         content: function(reference) {
-            return $(reference).data('study-id');
+            return '<span class="tippy-uid">'+$(reference).data('study-id')+'</span>';
         },
         theme: 'dark',
         placement: 'right',
-        arrow: false,
-        target: '.study-id-col',
-        maxWidth: 300
+        arrow: true,
+        interactive:'true',
+        interactiveBorder:10,
+        target: 'td.study-id-tltp',
+        maxWidth: 600,
+        allowHTML:true
     });
 
     tippy.delegate('.series-table', {
