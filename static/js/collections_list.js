@@ -62,6 +62,6 @@ require(['jquery', 'datatables.net','jqueryui', 'bootstrap', 'base'],
         });
 
         $(document).ready(function () {
-            $('.collex-panel').removeClass('hidden');
+            $('.collex-panel, .site-footer').removeClass('hidden');
         });
 });

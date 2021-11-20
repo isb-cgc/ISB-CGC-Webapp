@@ -3,7 +3,7 @@
 
 {% with idc_info=""|get_idc_version %}
 
-    <footer class="row container-fluid site-footer">
+    <footer class="row container-fluid site-footer{% if hide == "True" %} hidden{% endif %}">
         <div class="row">
             <a href="/">Site Home</a>
             &nbsp; &nbsp; | &nbsp; &nbsp;

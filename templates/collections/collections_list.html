@@ -79,11 +79,11 @@
                 </table>
                 </div>
             </div>
-             <!-- Include footer here instead of base.html so it can be hidden by default -->
-            {% include 'share/site_footer.html'  %}
         </div>
     </div>
 </div>
+<!-- Include footer here instead of base.html so it can be hidden by default -->
+{% include 'share/site_footer.html' with hide="True" %}
 {% endblock %}
 
 {% block js_file %}

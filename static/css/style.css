@@ -66,6 +66,37 @@ ul, ol {
 .main-content {
   margin-top: 86px; }
 
+/*
+  Calc the space displayed minus headers and footers to produce a min-height for
+  pages that are lacking content to appropriately extend the page
+ */
+.short-inner-content {
+  min-height: calc(100vh - 306px);
+  /* 306 = margin-top of main (for site header, 86) + page header (56) + page header padding (20) +
+  panel bottom margin (20) + footer height (124) */
+}
+
+/* Pages with BIG headers (eg. user details) need to account for more used space */
+.short-inner-content-big-header {
+  min-height: calc(100vh - 503px);
+}
+
+/* Pages with no use of a header need more space taken up */
+.short-inner-content-no-header {
+  min-height: calc(100vh - 210px);
+}
+
+/* The landing page has an additional section (summary) which complicates the layout count */
+#landing .short-inner-content {
+  min-height: calc(100vh - 290px);
+}
+
+/* The cohorts list page has an additional section (action buttons) which complicates the layout count */
+#cohorts-list .short-inner-content {
+  min-height: calc(100vh - 389px);
+}
+
+
 .table-list li:after, .table-list_warning li:after, .worksheet-header:after, .worksheet-body:after {
   visibility: hidden;
   display: block;
@@ -2787,10 +2818,12 @@ span.code {
  * Landing Page Styles
  *******************************************/
 html {
-  scroll-behavior: smooth; }
+  scroll-behavior: smooth;
+  position: relative;
+  min-height: 100%;
+}
 
 #landing .landing-content-div {
-  position: absolute;
   top: 86px;
   left: 0;
   width: 100%;
@@ -2808,11 +2841,7 @@ html {
 
 #landing .summary {
   background-color: #245f80;
-}
-
-#landing .features {
-  margin-top: -35px;
-  margin-bottom: 20px;
+  margin: 0;
 }
 
 #landing .features .container-fluid {
@@ -2831,7 +2860,7 @@ html {
 
 #landing .buttons {
   margin-top: 20px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 #landing .buttons .buttons-col {
@@ -3069,10 +3098,15 @@ html {
   margin-bottom: 0;
 }
 
+.landing-bottom {
+  margin: 0;
+}
+
 .site-footer {
   background-color: #003a55;
   text-align: center;
   font-size: 1em;
+  margin: 0;
 }
 
 .site-footer p {
@@ -3242,11 +3276,11 @@ html {
     width: 200px; }
   #user-details h4 {
     text-align: center; }
-  #user-details .row {
+  #user-details .user-row {
     width: 100%;
     text-align: center;
     margin: 20px 0px; }
-    #user-details .row .panel {
+    #user-details .user-row .panel {
       border: 3px solid #716784;
       border-radius: 7px;
       box-shadow: none;
@@ -3255,31 +3289,31 @@ html {
       text-align: left;
       vertical-align: top;
       min-width: 90%;}
-      #user-details .row .panel:nth-child(2) {
+      #user-details .user-row .panel:nth-child(2) {
         margin: 0px 15px; }
-    #user-details .row a {
+    #user-details .user-row a {
       text-decoration: underline;
       cursor: pointer; }
-    #user-details .row .gcp-panel a {
+    #user-details .user-row .gcp-panel a {
       display: inline-block; }
-    #user-details .row table.user-info tr td {
+    #user-details .user-row table.user-info tr td {
       vertical-align: top; }
-    #user-details .row table.user-info tr td:first-child {
+    #user-details .user-row table.user-info tr td:first-child {
       font-weight: bold;
       text-align: right;
       padding: 5px 10px;
       width: 20%; }
-    #user-details .row table.user-info tr td:last-child {
+    #user-details .user-row table.user-info tr td:last-child {
       padding: 5px 10px;
       margin-left: 5px;
       width: 80%; }
-    #user-details .row .fa-check-circle {
+    #user-details .user-row .fa-check-circle {
       color: #0c4fba;
       font-size: 21px;
       line-height: 10px; }
-    #user-details .row hr {
+    #user-details .user-row hr {
       margin: 0px -15px 10px -15px; }
-    #user-details .row ul {
+    #user-details .user-row ul {
       margin-bottom: 10px;
       list-style: circle;
       margin-left: 20px; }
