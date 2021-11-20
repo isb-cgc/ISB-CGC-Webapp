@@ -12,7 +12,9 @@
 }
 
 
-
+.tippy-uid {
+    font-size:20px;
+}
 
 .controls {
     float:right;
