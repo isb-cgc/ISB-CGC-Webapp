@@ -68,7 +68,7 @@ RUN easy_install -U distribute
 
 ADD . /app
 
-# We need to recompile some of the items because of differences in compiler versions 
+# We need to recompile some of the items because of differences in compiler versions
 RUN pip3 install -r /app/requirements.txt -t /app/lib/ --upgrade
 RUN pip3 install gunicorn==19.6.0
 

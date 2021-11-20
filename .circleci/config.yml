@@ -88,7 +88,8 @@ commands:
           name: "Install CloudSDK"
           command: |
             echo "export CLOUDSDK_CORE_DISABLE_PROMPTS=1" >> $BASH_ENV
-            sudo apt-get install ca-certificates
+            sudo apt-get update -qq
+            sudo apt-get install ca-certificates python3-distutils apt-transport-https gnupg
             echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
             curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
             sudo apt-get update -qq
@@ -107,7 +108,7 @@ jobs:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
     working_directory: ~/IDC-WebApp
     docker:
-      - image: circleci/python:3.7.0-stretch
+      - image: cimg/python:3.8
       - image: circleci/mysql:5.7
         environment:
           MYSQL_ROOT_HOST: "%"
@@ -172,7 +173,7 @@ jobs:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
     working_directory: ~/IDC-WebApp
     docker:
-      - image: circleci/python:3.7.0-stretch
+      - image: cimg/python:3.8
     steps:
       - restore_cache:
           keys:
