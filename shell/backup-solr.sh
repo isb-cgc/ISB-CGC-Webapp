@@ -68,15 +68,17 @@ else
     IFS=$'\n'
     readarray -t cores < $CORE_LIST_FILE
 fi
-echo "[STATUS] Running backups: "
+echo "[STATUS] Building backup script: "
 
 for core in "${cores[@]}"; do
     if [[ $core != "" ]]; then
-#        echo "Backup for core ${core} started..."
+        echo "-----> Backup for core ${core} <-----"
         echo "Copying schema for ${core}..."
         sudo -u solr cp ${SOLR_DATA}/${core}/conf/managed-schema ${BACKUPS_DIR}/$core.managed-schema
         echo "Backup command for ${core}:"
         echo "curl -u ${SOLR_USER}:${SOLR_PWD} -X GET \"https://localhost:8983/solr/$core/replication?command=backup&location=${BACKUPS_DIR}/&name=${core}\" --cacert solr-ssl.pem"
+        echo "Status command for ${core}":
+        echo "curl -u ${SOLR_USER}:${SOLR_PWD} -X GET \"https://localhost:8983/solr/${core}/replication?command=details\" --cacert solr-ssl.pem"
 #        curl -u $SOLR_USER:$SOLR_PWD -X GET "https://localhost:8983/solr/$core/replication?command=backup&location=${BACKUPS_DIR}/&name=$core" --cacert solr-ssl.pem
 #        status=`curl -u $SOLR_USER:${SOLR_PWD} -X GET "https://localhost:8983/solr/${core}/replication?command=details" --cacert solr-ssl.pem | python3 -c "${PARSE_RESPONSE}"`
 #        retries=0
@@ -92,10 +94,12 @@ for core in "${cores[@]}"; do
 #          echo "Core ${core} backup is still pending."
 #          echo "You may need to re-run TAR on the snapshots from ${BACKUPS_DIR} if you see an error message about files changing during the TAR process."
 #        fi
+         echo "-------------> Done <-------------"
     fi
 done
 
-#tar -cvf ${FILE_NAME} -C ${BACKUPS_DIR} .
+echo "Tar command: "
+echo "tar -cvf ${FILE_NAME} -C ${BACKUPS_DIR} ."
 #
 #if [[ ! -z ${DEST_BUCKET} ]]; then
 #        gsutil cp ${FILE_NAME} gs://${DEST_BUCKET}/
