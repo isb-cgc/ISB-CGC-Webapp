@@ -750,6 +750,7 @@ require([
             );
             //"createdCell":function(td,data,row){$(td).attr("id","patient_col_"+row[1]);}
             $('#proj_table').children('tbody').attr('id', 'projects_table');
+            $('#proj_table')[0].style.width=null;
         }
 //checkClientCache(request,'cases');
 
@@ -1101,7 +1102,7 @@ require([
             })
             $('#cases_tab').find('tbody').attr('id','cases_table');
             $('#cases_panel').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'cases_tab_wrapper\')">Go</button></div>');
-            $('#cases_panel').find('.dataTables_controls').find('.dataTables_paginate').after('<br><div>Find by CaseID:<input class="caseID_inp" type="text-box" value="'+caseID+'"><button onclick="filterTable(\'cases_panel\',\'caseID\')">Go</button></div>');
+            $('#cases_panel').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by CaseID:</strong><input class="caseID_inp" type="text-box" value="'+caseID+'"><button onclick="filterTable(\'cases_panel\',\'caseID\')">Go</button></div>');
 
         }
 
@@ -1323,7 +1324,7 @@ require([
 
             $('#studies_tab').children('tbody').attr('id','studies_table');
             $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'studies_tab_wrapper\')">Go</button></div>');
-            $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<br><div>Find by StudyID:<input class="studyID_inp" type="text-box" value="'+studyID+'"><button onclick="filterTable(\'studies_tab_wrapper\',\'studyID\')">Go</button></div>');
+            $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by StudyID:</strong><input class="studyID_inp" type="text-box" value="'+studyID+'"><button onclick="filterTable(\'studies_tab_wrapper\',\'studyID\')">Go</button></div>');
 
         }
 
