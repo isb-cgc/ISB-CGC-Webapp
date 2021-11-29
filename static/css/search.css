@@ -20,6 +20,11 @@
     float:right;
 }
 
+.controls i {
+    margin-left: 4px;
+    font-size: 16px;
+}
+
 .list-group *[data-toggle="collapse"][aria-expanded="true"]  {
     border-color: red;
 }
@@ -159,9 +164,20 @@ bottom: 95%; /* At the top of the tooltip */
     #background-style: grey;
 }
 
+.value-search {
+    margin-bottom: 8px;
+    border: 2px solid #476a75;
+    border-radius: 3px;
+    width: 200px;
+}
 
+.cntr {
+    margin-bottom: 11px;
+}
 
-
+.sorter.cntr {
+    margin-bottom: 14px;
+}
 
 .fa-stack {
   text-align: center;

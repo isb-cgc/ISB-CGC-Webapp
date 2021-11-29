@@ -83,8 +83,10 @@ for dirname in ${BACKUP_DIR}/*/; do
   fi
   sudo -u solr cp $BACKUP_DIR/$CORE.managed-schema $SOLR_DATA/$CORE/conf/managed-schema
   curl -u $SOLR_USER:$SOLR_PWD -X GET "https://localhost:8983/solr/$CORE/replication?command=restore&name=$CORE" --cacert solr-ssl.pem
+  echo "Restoration started, status check:"
+  curl -u $SOLR_USER:$SOLR_PWD -X GET "https://localhost:8983/solr/$CORE/replication?command=details&name=$CORE" --cacert solr-ssl.pem
 done
 
-sudo -u solr /opt/bitnami/solr/bin/solr restart
+echo "Remember to wait until the cores are done restoring before you restart!"
 
 exit 0
