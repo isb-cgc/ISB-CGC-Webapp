@@ -62,6 +62,8 @@ if [ -z "${CI}" ]; then
     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1
 
     apt-get install -y --force-yes python3.7-venv python3.7-distutils python3.7-dev
+else
+  apt-get install -y --force-yes python3-distutils
 fi
 
 apt-get install -y --force-yes python3-mysqldb libmysqlclient-dev libpython3-dev build-essential

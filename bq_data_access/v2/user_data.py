@@ -209,7 +209,6 @@ class UserFeatureDef(object):
     def build_query(self, cohort_table, cohort_ids, project_id_array):
 
         cohort_str = ",".join([str(cohort_id) for cohort_id in cohort_ids])
-        project_id_stmt = ''
         if project_id_array is not None and len(project_id_array):
             project_id_stmt = ', '.join([str(project_id) for project_id in project_id_array])
 
