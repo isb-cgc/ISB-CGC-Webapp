@@ -1183,12 +1183,24 @@ require([
                             "orderable": false,
                             data: 'StudyInstanceUID',
                             render: function (data, type, row) {
-                                var modality = row['Modality'];
-                                if ((modality[0] === 'SM') || (modality === 'SM')) {
-                                    return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank"><i class="fa fa-eye"></i>'
-                                } else {
-                                    return '<a href="' + DICOM_STORE_PATH + data + '" target="_blank"><i class="fa fa-eye"></i>'
+                                var coll_id="";
+                                if (Array.isArray(row['collection_id'])){
+                                    coll_id=row['collection_id'][0];
                                 }
+                                else {
+                                    coll_id=row['collection_id']
+                                }
+                                if (!(coll_id in window.collection) || (window.collection[coll_id].access !=='Public')  ) {
+                                    return '<i class="fa fa-minus-circle coll-explain"></i>';
+                                }
+                                else{
+                                    var modality = row['Modality'];
+                                    if ((modality[0] === 'SM') || (modality === 'SM')) {
+                                        return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank"><i class="fa fa-eye"></i>'
+                                     } else {
+                                        return '<a href="' + DICOM_STORE_PATH + data + '" target="_blank"><i class="fa fa-eye"></i>'
+                                    }
+                               }
                             }
 
                         },
@@ -1389,7 +1401,18 @@ require([
                         "orderable": false,
                         data: 'SeriesInstanceUID',
                         render: function (data, type, row) {
-                            if ((row['Modality'] === 'SEG' || row['Modality'][0] === 'SEG') || (row['Modality'] === 'RTSTRUCT' || row['Modality'][0] === 'RTSTRUCT') || (row['Modality'] === 'RTPLAN' || row['Modality'][0] === 'RTPLAN') || (row['Modality'] === 'RWV' || row['Modality'][0] === 'RWV')) {
+                            var coll_id="";
+                            if (Array.isArray(row['collection_id'])){
+                                coll_id=row['collection_id'][0];
+                            }
+                            else {
+                                coll_id=row['collection_id']
+                            }
+                            if (!(coll_id in window.collection) || (window.collection[coll_id].access !=='Public')  ) {
+                                return '<i class="fa fa-minus-circle coll-explain"></i>';
+                            }
+
+                            else if ((row['Modality'] === 'SEG' || row['Modality'][0] === 'SEG') || (row['Modality'] === 'RTSTRUCT' || row['Modality'][0] === 'RTSTRUCT') || (row['Modality'] === 'RTPLAN' || row['Modality'][0] === 'RTPLAN') || (row['Modality'] === 'RWV' || row['Modality'][0] === 'RWV')) {
                                 return '<a href="/" onclick="return false;"><i class="fa fa-eye-slash no-viewer-tooltip"></i>';
 
                             } else if ((row['Modality'] === 'SM')) {
@@ -2139,14 +2162,36 @@ require([
                  if (sorter.val()==="alpha"){
                      filterList.children('li').sort(
                         function (a,b){
-                        return (  $(b).children().children('.value').text() < $(a).children().children('.value').text() ? 1: -1)
+                         if ( ($(a).children().children('input:checkbox')[0].checked) && !($(b).children().children('input:checkbox')[0].checked)){
+                             return -1;
+                         }
+                         else if ( ($(b).children().children('input:checkbox')[0].checked) && !($(a).children().children('input:checkbox')[0].checked)){
+                             return 1;
+                         }
+
+                         else if ($(b).children().children('.value').text() < $(a).children().children('.value').text()){
+                             return 1;
+                         }
+                         else{
+                             return -1;
+                         }
+                         
                         }).appendTo(filterList);
                  }
                  else if (sorter.val()==="num"){
                      filterList.children('li').sort(
                         function (a,b){
-                        return (  parseFloat($(a).children().children('.case_count').text()) < parseFloat($(b).children().children('.case_count').text()) ? 1: -1)
-                        }).appendTo(filterList);
+                            if ( ($(a).children().children('input:checkbox')[0].checked) && !($(b).children().children('input:checkbox')[0].checked)){
+                             return -1;
+                             }
+                             else if ( ($(b).children().children('input:checkbox')[0].checked) && !($(a).children().children('input:checkbox')[0].checked)){
+                                return 1;
+                             }
+                            else {
+
+                                return ($(b).children().children('input:checkbox')[0].checked < $(a).children().children('input:checkbox')[0].checked ? 1 : parseFloat($(a).children().children('.case_count').text()) < parseFloat($(b).children().children('.case_count').text()) ? 1 : -1)
+                               }
+                            }).appendTo(filterList);
                  }
             }
 

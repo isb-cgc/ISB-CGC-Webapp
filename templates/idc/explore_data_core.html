@@ -57,7 +57,7 @@
                                          <a role="button" data-toggle="collapse" href="#Program" aria-expanded="false" aria-controls="Program">
                                              <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>COLLECTION
                                          </a>
-                                         <span class="controls"><i class="fa fa-cog"></i><i class="fa fa-search"></i></span>
+                                         <span class="controls"><i class="fa fa-minus-circle coll-explain"></i><i class="fa fa-cog"></i><i class="fa fa-search"></i></span>
                                      </div>
                                      <div id="Program" data-filter-attr-nm="Program" class="collapse filter-panel collection-list">
 
@@ -84,7 +84,11 @@
                                                                           data-filter-display-attr="Collection" data-filter-display-val="{{ proj|upper }}"
                                                                           class="collection_value"
                                                                           type="checkbox" value="{{ proj }}">
-                                                                   <span id="{{ proj }}" class="collection_name value collection_id">{{ projD.display }}</span> <span class="float-right case_count count">{{ projD.val }}</span>
+                                                                   {% if projD.access == "Public" %}
+                                                                         <span id="{{ proj }}" class="collection_name value collection_id">{{ projD.display }} </span> <span class="float-right case_count count">{{ projD.val }}</span>
+                                                                   {% else %}
+                                                                       <span id="{{ proj }}" class="collection_name value collection_id">{{ projD.display }}<i class="fa fa-minus-circle"></i></span> <span class="float-right case_count count">{{ projD.val }}</span>
+                                                                   {% endif %}
                                                                </div>
 
                                                            {% endfor %}
@@ -130,8 +134,12 @@
                                                                   <input data-filter-attr-id="{{ progV.collex_attr_id }}"
                                                                          data-filter-display-attr="Collection" data-filter-display-val="{{ proj|upper }}"
                                                                          class="collection_value" type="checkbox" value="{{ proj }}">
-                                                                    <span id="{{ proj }}" class="collection_name value">{{ projD.display }} </span> <span class="float-right case_count count plotit">{{ projD.val }}</span>
-                                                                 </label>
+                                                                         {% if projD.access == 'Public' %}
+                                                                              <span id="{{ proj }}" class="collection_name value">{{ projD.display }} </span> <span class="float-right case_count count plotit">{{ projD.val }}</span>
+                                                                         {% else %}
+                                                                              <span id="{{ proj }}" class="collection_name value">{{ projD.display }} <i class="fa fa-minus-circle"></i></span> <span class="float-right case_count count plotit">{{ projD.val }}</span>
+                                                                         {% endif %}
+                                                                </label>
                                                                </li>
                                                             {% endfor %}
                                                             </ul>
