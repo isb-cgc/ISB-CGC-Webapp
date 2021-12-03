@@ -143,8 +143,9 @@
                         <div class="export-option">
                             <span id="file-export-option" title="" class="value">
                                 <input class="file-manifest export-option" type="radio" name="manifest-type" value="file-manifest" checked> Files</span>
-                            <span id="bq-export-option" style="margin-left:10px" class="value" {% if not is_social %}title="Export to BigQuery is only available with a Google Account."{% endif %}>
-                                <input class="bq-manifest export-option" type="radio" name="manifest-type" value="bq-manifest" {% if not is_social %}disabled{% endif %}> BigQuery</span>
+                            <span id="bq-export-option" style="margin-left:10px" class="value">
+                                <input class="bq-manifest export-option" type="radio" name="manifest-type" value="bq-manifest" {% if not is_social %}disabled{% endif %}> BigQuery
+                                {% if not is_social %} <i class="fa fa-exclamation-circle bq-disabled"></i>{% endif %}</span>
                         </div>
                         <br>
                         {% if is_social %}
