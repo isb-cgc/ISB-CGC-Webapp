@@ -4052,6 +4052,11 @@ html {
   display: inline-block;
 }
 
+.bq-disabled {
+  color: darkred;
+  font-size: 15px;
+}
+
 .cohort-manifest i {
   margin-right: 15px;
   color: #ecf609;
