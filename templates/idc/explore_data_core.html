@@ -57,22 +57,22 @@
                                          <a role="button" data-toggle="collapse" href="#Program" aria-expanded="false" aria-controls="Program">
                                              <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i>COLLECTION
                                          </a>
-                                         <span class="controls"><i class="fa fa-minus-circle coll-explain"></i><i class="fa fa-cog"></i><i class="fa fa-search"></i></span>
+
+                                         <span class="controls">
+                                             <i class="fa fa-minus-circle coll-explain"></i>
+                                             <i class="fa fa-cog" title="Settings"></i>
+                                             <i class="fa fa-search" title="Filter values"></i>
+                                         </span>
                                      </div>
                                      <div id="Program" data-filter-attr-nm="Program" class="collapse filter-panel collection-list">
-
-
-
-                                         <input id="collection_search" class="collection-text-filter notDisp" type="text" placeholder="Search.." onkeyup="updateColl(true)">
+                                         <input id="collection_search" class="collection-text-filter notDisp value-search" type="text" placeholder="Search..." onkeyup="updateColl(true)">
                                          <div class="cntr notDisp">
-                                         <input id="hide-zeros" class="hide-zeros " type="checkbox" value="hide-zeros" onchange="updateColl()"> Hide collections with 0 cases
+                                            <input id="hide-zeros" class="hide-zeros " type="checkbox" value="hide-zeros" onchange="updateColl()"> Hide collections with 0 cases
                                           </div>
                                          {% with programs.items|length|add:"-5" as more %}
                                          <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                          <p class="less-checks" style="display: none;" > <a class="show-less">show less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                          {% endwith %}
-
-
                                          <ul id="Program_list" class="search-checkbox-list" style="list-style: none;">
                                              {% for progK, progV in programs.items|dictsort:"0.lower" %}
                                                  {% if progK != "All" and progK != "None" %}
@@ -212,7 +212,10 @@
                                                 <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
                                                     <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> <span class="attDisp">{{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}</span> <span class="notDisp noCase"> (0 cases)</span>
                                                 </a>
-                                                <span class="controls"><i class="fa fa-cog"></i><i class="fa fa-search"></i></span>
+                                                <span class="controls">
+                                                     <i class="fa fa-cog" title="Sort results"></i>
+                                                     <i class="fa fa-search" title="Filter displayed values"></i>
+                                                 </span>
                                             </div>
 
                                             <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}" class="collapse list-group-item__body"
@@ -223,12 +226,11 @@
                                                            data-curminrng="{{ attr.min_max.min|floor }}" data-curmaxrng="{{ attr.min_max.max|ceiling }}"
 
                                                  {% endif %}>
-                                               <input class="text-filter notDisp" type="text" placeholder="Search.." onkeyup="updateFilters( '{{ attr.name }}',{},false, true)">
-
-
-                                                     <span class="sorter cntr notDisp">Sort by: <input type="radio" class="sort_val" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" class="sort_val" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
-
-
+                                               <input class="text-filter value-search notDisp" type="text" placeholder="Search..." onkeyup="updateFilters( '{{ attr.name }}',{},false, true)">
+                                                     <div class="sorter cntr notDisp">
+                                                         Sort by: <input type="radio" class="sort_val" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha
+                                                         <input type="radio" class="sort_val" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num
+                                                     </div>
                                                 {% if attr.values|length > 5 %}
                                                     {% with attr.values|length|add:"-5" as more %}
                                                         <p class="more-checks" style="display: block;" ><a class="show-more">show {{ more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
@@ -286,8 +288,10 @@
                                                          <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> <span class="attDisp">{{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}</span> <span class="notDisp noCase"> (0 cases)</span>
                                                        </a>
                                                           {% if attr_setV.name != 'quantitative'%}
-
-                                                               <span class="controls"><i class="fa fa-cog"></i><i class="fa fa-search"></i></span>
+                                                              <span class="controls">
+                                                                 <i class="fa fa-cog" title="Sort results"></i>
+                                                                 <i class="fa fa-search" title="Filter displayed values"></i>
+                                                             </span>
                                                           {% endif %}
                                                     </div>
 
@@ -297,7 +301,7 @@
                                                     data-curmin="{{ attr.min_max.min }}" data-curmax="{{ attr.min_max.max }}"
                                                     data-curminrng="{{ attr.min_max.min|floor }}" data-curmaxrng="{{ attr.min_max.max|ceiling }}"
                                                  {% endif %}>
-                                               <input class="text-filter notDisp" type="text" placeholder="Search.." onkeyup="updateFilters( '{{ attr.name }}',{},false, true)">
+                                               <input class="text-filter value-search notDisp" type="text" placeholder="Search..." onkeyup="updateFilters( '{{ attr.name }}',{},false, true)">
                                                <div class="sorter cntr notDisp">
                                                  <span>Sort by: <input type="radio" class="sort_val" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" class="sort_val" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
                                             </div>
@@ -364,7 +368,10 @@
                                                      <a role="button" data-toggle="collapse"  href="#{{ attr.name }}" aria-expanded="false" aria-controls="{{ attr.name }}">
                                                          <i class="fa fa-caret-right" disabled></i> <i class="fa fa-caret-down"disabled></i> <span class="attDisp">{{ attr.display_name }} {% if attr.units %}({{ attr.units }}){% endif %}</span> <span class="notDisp noCase"> (0 TCGA cases)</span>
                                                      </a>
-                                                    <span class="controls"><i class="fa fa-cog"></i><i class="fa fa-search"></i></span>
+                                                     <span class="controls">
+                                                         <i class="fa fa-cog" title="Sort results"></i>
+                                                         <i class="fa fa-search" title="Filter displayed values"></i>
+                                                     </span>
                                                  </div>
                                                  <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}" class="collapse list-group-item__body collapse" aria-expanded="false"
                                                  {% if attr.min_max %}
@@ -374,9 +381,11 @@
                                                       data-curminrng="{{ attr.min_max.min|floor }}" data-curmaxrng="{{ attr.min_max.max|ceiling }}"
                                                  {% endif %}>
                                                  {% if attr.name != 'bmi' %}
-                                                     <input class="text-filter notDisp" type="text" placeholder="Search.." onkeyup="updateFilters( '{{ attr.name }}',{},false, true)">
-
-                                                       <span class="sorter cntr notDisp">Sort by: <input type="radio" class="sort_val" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha<input type="radio" class="sort_val" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num</span>
+                                                     <input class="text-filter value-search notDisp" type="text" placeholder="Search..." onkeyup="updateFilters( '{{ attr.name }}',{},false, true)">
+                                                     <div class="sorter cntr notDisp">
+                                                         Sort by: <input type="radio" class="sort_val" name="{{ attr.name }}" value="alpha" checked onclick="resort('{{ attr.name }}')">Alpha
+                                                         <input type="radio" class="sort_val" name="{{ attr.name }}" value="num" onclick="resort('{{ attr.name }}')">Num
+                                                     </div>
 
                                                  {% endif %}
 
