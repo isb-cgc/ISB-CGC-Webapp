@@ -210,8 +210,6 @@ require([
         interactive: true,
         allowHTML:true,
         content: 'As some attributes have non mutually exclusive values the charts may contain non zero counts for these values even when they are not selected in the left hand panel. See <a href="https://learn.canceridc.dev/portal/data-exploration-and-cohorts/exploring-imaging-data#understanding-counts-in-the-search-results" target="_blank" rel="noopener noreferrer">here</a> for a detailed explanation.'
-        //interactive:true
-
     });
 
     tippy('.tooltip_filter_info',{
@@ -234,6 +232,17 @@ require([
         theme: 'light',
         placement: 'top-start',
         arrow: false
+    });
+
+    tippy('.bq-disabled', {
+        content: 'Exporting to BigQuery requires a linked Google Social Account. You can link your account to a Google ID from the '
+            +  '<a target="_blank" rel="noopener noreferrer" href="/users/' + user_id + '/">'
+            + 'Account Details</a> page.',
+        theme: 'dark',
+        placement: 'right',
+        arrow: true,
+        interactive: true,
+        allowHTML: true
     });
 
     tippy.delegate('.studies-table', {

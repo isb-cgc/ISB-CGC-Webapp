@@ -235,7 +235,7 @@ def populate_tables(request):
                                           "unique_series": "unique(SeriesInstanceUID)"}}
                             }
             tableIndex = 'PatientID'
-            fields = ['collection_id', 'PatientID']
+            fields = ['collection_id', 'PatientID','access']
             facetfields=['unique_study', 'unique_series']
 
             if sort == 'collection_id':
@@ -281,7 +281,7 @@ def populate_tables(request):
                                         "facet": {"unique_series": "unique(SeriesInstanceUID)"}}
                              }
             tableIndex = 'StudyInstanceUID'
-            fields = ['PatientID','StudyInstanceUID','StudyDescription','Modality','StudyDate']
+            fields = ['PatientID','StudyInstanceUID','StudyDescription','Modality','StudyDate','access']
             facetfields = ['unique_series']
             sort_arg = 'PatientID asc, StudyDate asc'
 
@@ -306,7 +306,7 @@ def populate_tables(request):
         if table_type == 'series':
             custom_facets = {}
             tableIndex = 'SeriesInstanceUID'
-            fields = ['SeriesInstanceUID','StudyInstanceUID','SeriesDescription','SeriesNumber','BodyPartExamined','Modality']
+            fields = ['SeriesInstanceUID','StudyInstanceUID','SeriesDescription','SeriesNumber','BodyPartExamined','Modality','access']
             facetfields = []
             sortByField = True
 
