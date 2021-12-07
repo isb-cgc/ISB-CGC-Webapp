@@ -47,7 +47,7 @@
                             </div>
                             <div id="collapse-all-{{ attr_build }}-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
                                  aria-labelledby="heading-all-{{ attr_build }}-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}">
-                                <ul class="search-checkbox-list" id="all-{{ attr.name }}">
+                                <ul class="search-checkbox-list" id="all-{{ attr_build }}-{{ attr.name }}">
                                     {% with attr.values|how_many_more:6 as num_more %}
                                         {% for v in attr.values|check_for_order:attr.name %}
                                             {% if forloop.counter0 < 6 %}
@@ -55,7 +55,7 @@
                                                     <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
                                                         <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr_build }}-{{ attr.name }}-{{ v.value }}"
                                                                data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
-                                                        {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
+                                                        {% if v.value == 'None' %}<em>None</em>{% elif v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
                                                          <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
                                                     </label>
                                                 </li>
@@ -64,7 +64,7 @@
                                                     <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
                                                         <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr_build }}-{{ attr.name}}-{{ v.value }}"
                                                                data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
-                                                        {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
+                                                        {% if v.value == 'None' %}<em>None</em>{% elif v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
                                                          <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
                                                     </label>
                                                 </li>
@@ -73,7 +73,7 @@
                                                     <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
                                                         <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr_build }}-{{ attr.name }}-{{ v.value }}"
                                                                data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
-                                                        {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
+                                                        {% if v.value == 'None' %}<em>None</em>{% elif v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
                                                          <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
                                                     </label>
                                                 </li>

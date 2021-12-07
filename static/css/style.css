@@ -1792,6 +1792,10 @@ a#user-dropdown:hover {
     border: 1px solid #dddddd; }
     #bq-meta-searcher #bqmeta tr td table.preview-table th table td, #bq-meta-searcher #bqmeta tr td table.preview-table td table td {
       border: 1px solid #efefef; }
+  #bq-meta-searcher #bqmeta tr td table.useful-join-table th, #bq-meta-searcher #bqmeta tr td table.useful-join-table td {
+    border-bottom: 1px solid lightgrey;
+    padding-bottom: 3px;
+    vertical-align: top; }
   #bq-meta-searcher #bqmeta tr td .tbl-preview:before {
     font-family: FontAwesome;
     content: "\f0ce";
@@ -1804,6 +1808,12 @@ a#user-dropdown:hover {
     content: "\f055";
     color: #3A79B8;
     cursor: pointer; }
+  #bq-meta-searcher #bqmeta tr td a.useful-join-detail {
+    color: #3A79B8;
+    cursor: pointer; }
+  #bq-meta-searcher #bqmeta tr td a.joined-table-link {
+    color: #3A79B8;
+    cursor: pointer; }
 
 #bq-meta-searcher #bqmeta tr.details-shown td.details-control:before {
   content: "\f056";
@@ -1811,6 +1821,10 @@ a#user-dropdown:hover {
 
 #bq-meta-searcher #bqmeta tr.preview-shown td > .tbl-preview:before {
   color: #F7991B; }
+
+#bq-meta-searcher .joined-table-link {
+  color: #3A79B8;
+  cursor: pointer; }
 
 #bq-meta-searcher .modal ul {
   list-style: inherit;
@@ -2547,6 +2561,18 @@ section .min-max {
     #cohort-details #selected-filters .label:hover, #cohort-details #selected-filters .tokenfield .token:hover, .tokenfield #cohort-details #selected-filters .token:hover, #cohort-filelist #selected-filters .label:hover, #cohort-filelist #selected-filters .tokenfield .token:hover, .tokenfield #cohort-filelist #selected-filters .token:hover {
       background-color: #c2dbf5; }
 
+#cohort-details .all-selected-filters, #cohort-filelist .all-selected-filters {
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden; }
+  #cohort-details .all-selected-filters .label, #cohort-details .all-selected-filters .tokenfield .token, .tokenfield #cohort-details .all-selected-filters .token, #cohort-filelist .all-selected-filters .label, #cohort-filelist .all-selected-filters .tokenfield .token, .tokenfield #cohort-filelist .all-selected-filters .token {
+    background-color: #d5e9fd; }
+    #cohort-details .all-selected-filters .label:hover, #cohort-details .all-selected-filters .tokenfield .token:hover, .tokenfield #cohort-details .all-selected-filters .token:hover, #cohort-filelist .all-selected-filters .label:hover, #cohort-filelist .all-selected-filters .tokenfield .token:hover, .tokenfield #cohort-filelist .all-selected-filters .token:hover {
+      background-color: #c2dbf5; }
+  #cohort-details .all-selected-filters a, #cohort-filelist .all-selected-filters a {
+    cursor: pointer;
+    text-decoration: none; }
+
 #cohort-details .multi-categorical, #cohort-filelist .multi-categorical {
   overflow-x: auto;
   min-height: 100px; }
@@ -2697,6 +2723,17 @@ section .min-max {
 #cohort-filelist .file-list #selected-files-tokenfield {
   border: none; }
 
+#cohort-filelist .banner-section .alert {
+  text-align: center;
+  background-color: #FFA000;
+  color: black;
+  margin: 0;
+  padding: 0 20px; }
+
+#cohort-filelist .banner-section .alert-dismissible button.close {
+  padding: 0 20px;
+  color: black; }
+
 #cohort-filelist #filter-panel .panel .panel-heading {
   background-color: #fff; }
 
@@ -2735,6 +2772,9 @@ section .min-max {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis; }
+    #cohort-filelist .filelist-panel table td .disable_tissue_slide_image {
+      pointer-events: none;
+      color: gray; }
     #cohort-filelist .filelist-panel table td .study-uid {
       display: block;
       white-space: nowrap;

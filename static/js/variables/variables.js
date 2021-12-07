@@ -415,21 +415,74 @@ require([
         }
     };
 
-    $('.user-vars-tab').on('click',function(){
-        $.ajax({
-            type: 'GET',
-            url: BASE_URL + '/variables/user_vars/',
-            success: function(user_vars) {
-                $('#0-data').empty();
-                $('#0-data').append(user_vars);
-                // Re-run the checkbox settings to account for user vars now
-                check_for_selections();
-            },
-            error: function() {
-                base.showJsMessage("error","There was an error while retrieving your user variables - please contact the administrator.",true);
-                $('.spinner').hide();
+    var SORT_DATASET_BY = "node";
+
+    let default_selected_dataset = $('.sort-by-node').find('option:selected');
+    var ACTIVE_NODE_ID = default_selected_dataset.attr('node-id');
+    var ACTIVE_PROGRAM_ID = default_selected_dataset.attr('program-id');
+
+    var update_select_dataset_ui = function() {
+        if (SORT_DATASET_BY === "node") {
+            $('.sort-by-node').show();
+            $('.sort-by-program').hide();
+            $(".sort-radio[value='node']").prop('checked', true);
+            $(".sort-radio[value='program']").prop('checked', false);
+            $(".sort-by-node option[node-id='" + ACTIVE_NODE_ID
+                + "'][program-id='" + ACTIVE_PROGRAM_ID + "']").prop('selected', true);
+        } else if (SORT_DATASET_BY === "program") {
+            $('.sort-by-node').hide();
+            $('.sort-by-program').show();
+            $(".sort-radio[value='node']").prop('checked', false);
+            $(".sort-radio[value='program']").prop('checked', true);
+            $(".sort-by-program option[node-id='" + ACTIVE_NODE_ID
+                + "'][program-id='" + ACTIVE_PROGRAM_ID + "']").prop('selected', true);
+        }
+    };
+
+    $('.dataset-select-box').change(function() {
+        let old_dataset_selector = '#'+ACTIVE_PROGRAM_ID+'-data';
+        if (ACTIVE_PROGRAM_ID === 'favorite') {
+            old_dataset_selector = '#favorites';
+        }
+        let selected = $(this).find('option:selected');
+        ACTIVE_NODE_ID = selected.attr('node-id');
+        ACTIVE_PROGRAM_ID = selected.attr('program-id');
+        let new_dataset_selector = '#'+ACTIVE_PROGRAM_ID+'-data';
+
+        if (new_dataset_selector === '#favorite-data') {
+            $(old_dataset_selector).removeClass('active');
+            $('#favorites').addClass('active');
+        }
+        else if ($(new_dataset_selector).length != 0) {
+            $(old_dataset_selector).removeClass('active');
+            if (new_dataset_selector === '#0-data') {
+                $.ajax({
+                    type: 'GET',
+                    url: BASE_URL + '/variables/user_vars/',
+                    success: function (user_vars) {
+                        $('#0-data').empty();
+                        $('#0-data').append(user_vars);
+
+                        $(new_dataset_selector).addClass('active');
+
+                        // Re-run the checkbox settings to account for user vars now
+                        check_for_selections();
+                    },
+                    error: function () {
+                        base.showJsMessage("error", "There was an error while retrieving your user variables - please contact the administrator.", true);
+                        $('.spinner').hide();
+                    }
+                });
             }
-        });
+            else {
+                $(new_dataset_selector).addClass('active');
+            }
+        }
+    });
+
+    $('.sort-radio').click(function () {
+        SORT_DATASET_BY = $(this).val();
+        update_select_dataset_ui();
     });
 
     check_for_selections();

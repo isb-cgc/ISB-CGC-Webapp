@@ -45,20 +45,6 @@
 
                 </div>
             </div>
-            <div class="alert alert-dismissible show temp-alert" role="alert">
-                <div class="row ">
-                    <div class="col-xs-1"></div>
-                    <div class="col-xs-10">
-                        YOUR FEEDBACK IS IMPORTANT TO US
-                        <strong><a href="https://www.surveymonkey.com/r/Q3XYKPY" target="_blank" rel="noreferrer">PLEASE TAKE A SURVEY</a></strong>
-                    </div>
-                    <div class="col-xs-1">
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
         </div>
         <div class="header-div container-fluid">
             <div class="row ">
@@ -180,14 +166,14 @@
                             <div class="panel-heading row">
                                 <div class="col-xs-9">
                                     <a target="_blank" rel="noreferrer"
-                                           href="https://mitelmandatabase.isb-cgc.org">
+                                           href="{{ mitelman_url }}">
                                     <h4>Chromosomal Aberrations & Gene Fusions DB</h4>
                                     </a>
                                 </div>
 
                                 <div class="col-xs-3 padding-left-0">
                                     <a target="_blank" rel="noreferrer"
-                                       href="https://mitelmandatabase.isb-cgc.org">
+                                       href="{{ mitelman_url }}">
                                         <img src="{% static 'img/md-icon.png' %}" class="img-fluid"
                                              alt="database icon">
                                     </a>
@@ -211,7 +197,7 @@
                                     </div>
                                     <div class="col-xs-4 text-center">
                                         <a target="_blank" rel="noreferrer"
-                                           href="https://mitelmandatabase.isb-cgc.org">
+                                           href="{{ mitelman_url }}">
                                             <div class="launch-icon landing-icon"></div>
                                             <div class="icon-caption">Launch</div>
                                         </a>
@@ -459,7 +445,7 @@
                         &copy; 2020, ISB
                     </div>
                     <div class="col-xs-6 col-md-8 col-lg-10 text-center">
-                        <a href="{% url 'privacy' %}">PRIVACY POLICY</a>
+                        <a href="{% url 'privacy' %}" target="_blank" rel="noreferrer">PRIVACY POLICY</a>
                     </div>
                     <div class="col-xs-3 col-md-2 col-lg-1">
                         <div class="row">
@@ -488,4 +474,7 @@
 
 {% block js_file %}
     {{ block.super }}
+    <script>
+    var showWarning = true;
+    </script>
 {% endblock %}

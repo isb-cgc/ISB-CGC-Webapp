@@ -167,7 +167,7 @@
                     <div id="advSearch0" class="adv-div collapse">
                         <div>
                             <label>BQ Project</label>
-                            <select class="form-control bq-select" data-column-name="projectId">
+                            <select id="search-by-project-id" class="form-control bq-select" data-column-name="projectId">
                                 {% for option in project_id.options %}
                                     {% if option.value == '' %}
                                         <option value="{{ option.value }}" selected>{{ option.label }}</option>
@@ -179,11 +179,11 @@
                         </div>
                         <div>
                             <label>BQ Dataset</label>
-                            <input type="text" class="form-control bq-filter" data-column-name="datasetId">
+                            <input type="text" id="search-by-dataset-id" class="form-control bq-filter" data-column-name="datasetId">
                         </div>
                         <div>
                             <label>BQ Table</label>
-                            <input type="text" class="form-control bq-filter" data-column-name="tableId">
+                            <input type="text" id="search-by-table-id" class="form-control bq-filter" data-column-name="tableId">
                         </div>
                         <div>
                             <label>Table Description</label>
@@ -239,6 +239,7 @@
                         <th style="width:9%;">Status</th>
                         <th style="width:8%;">Rows</th>
                         <th style="width:8%;">Created</th>
+                        <th style="width:8%;">Example Joins</th>
                         <th style="width:7%;">Preview</th>
                         <th style="width:7%;">Description</th>
                         <th>Labels</th>
@@ -255,6 +256,23 @@
                 </strong>
             </div>
 
+        </div>
+    </div>
+
+    <!-- Useful Join Modal -->
+    <div class="modal fade" id="useful-join-view-modal" tabindex="-1" role="dialog" aria-labelledby="useful-join-view-title" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="useful-join-view-title">Join Details</h4>
+                    <h5 class="modal-sub-title"></h5>
+                    <i><p class="modal-sub-sub-title"></p></i>
+                </div>
+                <div class="modal-body">
+                </div>
+            </div>
         </div>
     </div>
 
@@ -305,6 +323,7 @@
     </div>
     <script type="text/javascript">
         var gcp_modal_disabled = ('{{ user.is_authenticated}}' === 'True');
+        var selected_table_full_id = '{{ selected_table_full_id|safe }}';
         {#var user_is_authenticated = ('{{ user.is_authenticated}}' === 'True');#}
         {#var user_is_ca_authorized = false;#}
     </script>
@@ -312,5 +331,7 @@
 
 {% block js_file %}
 	{{ block.super }}
+    <link href="{% static 'css/prism.css' %}" rel="stylesheet"/>
+    <script type="text/javascript" src="{% static 'js/libs/prism.js' %}"></script>
 	<script src="{% static 'js/bq_meta_search.js' %}"></script>
 {% endblock %}

@@ -25,6 +25,7 @@ import datetime
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
 from django.db.models import Count
 from django.shortcuts import render, redirect
@@ -56,6 +57,7 @@ from google_helpers.bigquery.service import get_bigquery_service
 from google_helpers.bigquery.feedback_support import BigQueryFeedbackSupport
 from solr_helpers import query_solr_and_format_result, build_solr_query, build_solr_facets
 from projects.models import Attribute, DataVersion, DataSource
+from solr_helpers import query_solr_and_format_result
 
 import requests
 
@@ -117,8 +119,9 @@ def _decode_dict(data):
 
 @never_cache
 def landing_page(request):
+    mitelman_url = settings.MITELMAN_URL
     logger.info("[STATUS] Received landing page view request at {}".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-    return render(request, 'isb_cgc/landing.html', {'request': request, })
+    return render(request, 'isb_cgc/landing.html', {'mitelman_url': mitelman_url })
 
 
 # Redirect all requests for the old landing page location to isb-cgc.org
@@ -222,9 +225,7 @@ def bucket_object_list(request):
 
 # Extended login view so we can track user logins
 def extended_login_view(request):
-    redirect_to = 'dashboard'
-    if request.COOKIES and request.COOKIES.get('login_from', '') == 'new_cohort':
-        redirect_to = 'cohort'
+    redirect_to = 'landing_page'
     try:
         # Write log entry
         st_logger = StackDriverLogger.build_from_django_settings()
@@ -235,7 +236,7 @@ def extended_login_view(request):
             "[WEBAPP LOGIN] User {} logged in to the web application at {}".format(user.email,
                                                                                    datetime.datetime.utcnow())
         )
-
+        redirect_to = 'cohort' if request.COOKIES and request.COOKIES.get('login_from', '') == 'new_cohort' else 'dashboard'
         # If user logs in for the second time, or user has not completed the survey, opt-in status changes to NOT_SEEN
         user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=user).first()
         if user_opt_in_stat_obj:
@@ -246,12 +247,18 @@ def extended_login_view(request):
             elif user_opt_in_stat_obj.opt_in_status == UserOptInStatus.SEEN:
                 user_opt_in_stat_obj.opt_in_status = UserOptInStatus.SKIP_ONCE
                 user_opt_in_stat_obj.save()
-
+    except User.DoesNotExist as e:
+        logger.error("[ERROR] User not found! User provided: {}".format(request.user))
     except Exception as e:
         logger.exception(e)
 
     return redirect(reverse(redirect_to))
 
+
+# Callback for recording the user's agreement to the warning popup
+def warn_page(request):
+    request.session['seenWarning'] = True
+    return JsonResponse({'warning_status': 'SEEN'}, status=200)
 
 '''
 DEPRECATED - Returns Results from text search
@@ -536,21 +543,60 @@ def camic(request, file_uuid=None):
 
 
 @login_required
-def igv(request, sample_barcode=None, readgroupset_id=None):
+def igv(request):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
 
+    req = request.GET or request.POST
+    build = req.get('build','hg38')
+    checked_list = json.loads(req.get('checked_list','{}'))
     readgroupset_list = []
     bam_list = []
 
-    checked_list = json.loads(request.POST.get('checked_list','{}'))
-    build = request.POST.__getitem__('build')
+    # This is a POST request with all the information we already need
+    if len(checked_list):
+        for item in checked_list['gcs_bam']:
+            bam_item = checked_list['gcs_bam'][item]
+            id_barcode = item.split(',')
+            bam_list.append({
+                'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': build, 'program': bam_item['program']
+            })
+    # This is a single GET request, we need to get the full file info from Solr first
+    else:
+        sources = DataSource.objects.filter(source_type=DataSource.SOLR, version=DataVersion.objects.get(data_type=DataVersion.FILE_DATA, active=True, build=build))
+        gdc_ids = list(set(req.get('gdc_ids','').split(',')))
 
-    for item in checked_list['gcs_bam']:
-        bam_item = checked_list['gcs_bam'][item]
-        id_barcode = item.split(',')
-        bam_list.append({
-            'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': build, 'program': bam_item['program']
-        })
+        if not len(gdc_ids):
+            messages.error(request,"A list of GDC file UUIDs was not provided. Please indicate the files you wish to view.")
+        else:
+            if len(gdc_ids) > settings.MAX_FILES_IGV:
+                messages.warning(request,"The maximum number of files which can be viewed in IGV at one time is {}.".format(settings.MAX_FILES_IGV) +
+                                 " Only the first {} will be displayed.".format(settings.MAX_FILES_IGV))
+                gdc_ids = gdc_ids[:settings.MAX_FILES_IGV]
+
+            for source in sources:
+                result = query_solr_and_format_result(
+                    {
+                        'collection': source.name,
+                        'fields': ['sample_barcode','file_gdc_id','file_name_key','index_file_name_key', 'program_name', 'access'],
+                        'query_string': 'file_gdc_id:("{}") AND data_format:("BAM")'.format('" "'.join(gdc_ids)),
+                        'counts_only': False
+                    }
+                )
+                if 'docs' not in result or not len(result['docs']):
+                    messages.error(request,"IGV compatible files corresponding to the following UUIDs were not found: {}.".format(" ".join(gdc_ids))
+                                   + "Note that the default build is HG38; to view HG19 files, you must indicate the build as HG19: &build=hg19")
+                saw_controlled = False
+                for doc in result['docs']:
+                    if doc['access'] == 'controlled':
+                        saw_controlled = True
+                    bam_list.append({
+                        'sample_barcode': doc['sample_barcode'],
+                        'gcs_path': "{};{}".format(doc['file_name_key'],doc['index_file_name_key']),
+                        'build': build,
+                        'program': doc['program_name']
+                    })
+                if saw_controlled:
+                    messages.info(request,"Some of the requested files require approved access to controlled data - if you receive a 403 error, double-check your current login status with DCF.")
 
     context = {
         'readgroupset_list': readgroupset_list,
@@ -572,8 +618,8 @@ def path_report(request, report_file=None):
             messages.error(
                 "Error while attempting to display this pathology report: a report file name was not provided.")
             return redirect(reverse('cohort_list'))
-
-        response = requests.get("https://nci-crdc.datacommons.io/user/data/download/{}?protocol=gs".format(report_file))
+        uri = "https://nci-crdc.datacommons.io/user/data/download/{}?protocol=gs".format(report_file)
+        response = requests.get(uri)
 
         if response.status_code != 200:
             logger.warning("[WARNING] From IndexD: {}".format(response.text))
@@ -587,6 +633,7 @@ def path_report(request, report_file=None):
     except Exception as e:
         logger.error("[ERROR] While trying to load Pathology report:")
         logger.exception(e)
+        logger.error("Attempted URI: {}".format(uri))
         return render(request, '500.html')
 
     return render(request, template, context)
@@ -623,10 +670,11 @@ def contact_us(request):
     return render(request, 'isb_cgc/contact_us.html')
 
 
-def bq_meta_search(request):
+def bq_meta_search(request, table_id=""):
     bq_filter_file_name = 'bq_meta_filters.json'
     bq_filter_file_path = BQ_ECOSYS_BUCKET + bq_filter_file_name
     bq_filters = requests.get(bq_filter_file_path).json()
+    bq_filters['selected_table_full_id'] = table_id
     return render(request, 'isb_cgc/bq_meta_search.html', bq_filters)
 
 
@@ -634,6 +682,17 @@ def bq_meta_data(request):
     bq_meta_data_file_name = 'bq_meta_data.json'
     bq_meta_data_file_path = BQ_ECOSYS_BUCKET + bq_meta_data_file_name
     bq_meta_data = requests.get(bq_meta_data_file_path).json()
+    bq_useful_join_file_name = 'bq_useful_join.json'
+    bq_useful_join_file_path = BQ_ECOSYS_BUCKET + bq_useful_join_file_name
+    bq_useful_join = requests.get(bq_useful_join_file_path).json()
+    for bq_meta_data_row in bq_meta_data:
+        useful_joins = []
+        row_id = bq_meta_data_row['id']
+        for join in bq_useful_join:
+            if join['id'] == row_id:
+                useful_joins = join['joins']
+                break
+        bq_meta_data_row['usefulJoins'] = useful_joins
     return JsonResponse(bq_meta_data, safe=False)
 
 def programmatic_access_page(request):
@@ -854,6 +913,7 @@ def opt_in_form(request):
 
     return render(request, template, form)
 
+@csrf_protect
 def opt_in_form_submitted(request):
     msg = ''
     error_msg = ''
@@ -887,7 +947,11 @@ def opt_in_form_submitted(request):
                 }
                 BigQueryFeedbackSupport.add_rows_to_table([feedback_row])
                 # send a notification to feedback@isb-cgc.org about the entry
-                send_feedback_notification(feedback_row)
+                if settings.IS_UAT:
+                    logger.info("[STATUS] UAT: sent email for feedback")
+                else:
+                    # send a notification to feedback@isb-cgc.org about the entry
+                    send_feedback_notification(feedback_row)
                 msg = 'We thank you for your time and suggestions.'
         else:
             error_msg = 'We were not able to find a user with the given email. Please check with us again later.'

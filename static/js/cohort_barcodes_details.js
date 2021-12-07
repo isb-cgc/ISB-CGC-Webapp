@@ -50,7 +50,8 @@ require([
     // 'dataTables'
     'datatables.net'
 
-], function ($, jqueryui, bootstrap, session_security, _, base, ajv) {
+], function ($, jqueryui, bootstrap, session_security,
+             _, base, ajv) {
 
     var BARCODE_LENGTH_MAX = 45;
     var savingChanges = false;
@@ -146,7 +147,8 @@ require([
                     if (isGdcTsv) {
                         entry_split = barcode.split(/\s*\t\s*/);
                     }
-                    if ((isGdcTsv && entry_split.length < 2) || barcode.length <= 0 || (!isGdcTsv && barcode.replace(/["']/g, "").length > BARCODE_LENGTH_MAX
+                    if ((isGdcTsv && entry_split.length < 2) || barcode.length <= 0 ||
+                        (!isGdcTsv && barcode.replace(/["']/g, "").length > BARCODE_LENGTH_MAX
                         || (isGdcTsv && entry_split[case_id_col].length > BARCODE_LENGTH_MAX))) {
                         if (!result.invalid_entries) {
                             result.invalid_entries = [];
@@ -178,20 +180,24 @@ require([
                                     if (barcode.startsWith("CCLE-")) {
                                         sample_barcode = barcode;
                                         program = 'CCLE';
-                                    }
-                                    else if(barcode.toUpperCase().startsWith("CR") || barcode.toUpperCase().startsWith("BA")){
+                                    } else if(barcode.toUpperCase().startsWith("CR") || barcode.toUpperCase().startsWith("BA")) {
                                         sample_barcode = barcode;
                                         program = 'BEATAML1.0';
+                                    } else if(barcode.toUpperCase().startsWith("MMRF_")) {
+                                        sample_barcode = barcode;
+                                        program = 'MMRF';
                                     }
-                                    else{
+                                    else {
                                         case_barcode = barcode;
                                         program = 'CCLE';
                                     }
                                 } else {
-                                    if (program === 'BEATAML1.0') {
+                                    // The following programs do not have easily discernible rules for sample vs. case
+                                    // barcodes, so we simply assign them to both. They'll only match one.
+                                    if (['MMFR','FM','OHSU','BEATAML1.0','GPRP'].includes(program)) {
                                         case_barcode = barcode_split[1];
-                                    }
-                                    else {
+                                        sample_barcode = barcode_split[1];
+                                    } else {
                                         if (barcode_split.length === 3) {
                                             case_barcode = barcode;
                                         }
@@ -268,7 +274,8 @@ require([
         // - Content must have an even number of single and/or double quotes
         // - Content must only have characters present on the whitelist
 
-        return !(whitelistMatch) && !(tsvMatch && csvMatch && ((dQuoteMatch && dQuoteMatch.length % 2 != 0) || (sQuoteMatch && sQuoteMatch.length % 2 != 0)))
+        return !(whitelistMatch) && !(tsvMatch && csvMatch && ((dQuoteMatch && dQuoteMatch.length % 2 != 0)
+            || (sQuoteMatch && sQuoteMatch.length % 2 != 0)))
             && !(dQuoteMatch && dQuoteMatch.length % 2 != 0) && !(sQuoteMatch && sQuoteMatch.length % 2 != 0);
     }
 
@@ -279,7 +286,10 @@ require([
 
         if(!checkContentValidity(content)) {
             $('.verify-pending').hide();
-            base.showJsMessage("error","The entered set of barcodes is not properly formatted. Please double-check that they are in tab- or comma-delimited format.",true);
+            base.showJsMessage(
+                "error","The entered set of barcodes is not properly formatted. Please double-check "+
+                "that they are in tab- or comma-delimited format.",true
+            );
             return false;
         } else {
             $('.alert-dismissible button.close').trigger('click');
@@ -298,7 +308,11 @@ require([
                 $('.verify-pending').hide();
                 // We only reach this point if no entries are valid, so show an error message as well.
                 // base.showJsMessage("error","None of the supplied barcode entries were valid. Please double-check the format of your entries.",true);
-                base.showJsMessage("error","We were not able to validate any of the supplied barcode entries. Please review the format of your entries. If you are listing case barcodes for BEATAML1.0, please add `BEATAML1.0-` before the case barcode.",true);
+                base.showJsMessage(
+                    "error","We were not able to validate any of the supplied barcode entries. Please "+
+                    "review the format of your entries. If you are listing barcodes for any of the following "+
+                    "programs, please review the instructions for special instructions when specifying these barcodes: "+
+                    "BEATAML1.0, MMRF, OHSU, Family Medicine, Georgetown PRP",true);
 
                 showEntries(result,$('#enter-barcodes'));
                 fileUploadField.val("");
@@ -427,7 +441,10 @@ require([
                             $('#file-upload-btn').removeAttr('disabled');
                         },function(result){
                             // We only reach this point if no entries are valid, so show an error message as well.
-                            base.showJsMessage("error","We were not able to validate any of the supplied barcode entries. Please review the format of your entries. If you are listing case barcodes for BEATAML1.0, please add `BEATAML1.0-` before the case barcode.",true);
+                            base.showJsMessage("error","We were not able to validate any of the supplied barcode entries. Please "+
+                                "review the format of your entries. If you are listing barcodes for any of the following "+
+                                "programs, please review the instructions for special instructions when specifying these barcodes: "+
+                                "BEATAML1.0, MMRF, OHSU, Family Medicine, Georgetown PRP",true);
                             showEntries(result,$('#upload-file'));
                             fileUploadField.val("");
                             $('#upload-file .save-cohort button').attr('disabled','disabled');

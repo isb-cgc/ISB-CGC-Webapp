@@ -72,7 +72,7 @@ def run_query(gcp_project_id, x, y, cohort_id_array, program_array, project_id_a
     bqss = BigQueryServiceSupport.build_from_application_default()
     fvb = FeatureVectorBigQueryBuilder(gcp_project_id, cohort_settings, bqss)
 
-    data = get_merged_feature_vectors(fvb, x, y, None, cohort_id_array, log_transform, project_id_array, program_set=program_set)
+
 
 
 @click.command()
