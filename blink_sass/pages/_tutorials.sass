@@ -1,12 +1,27 @@
 #video-tutorials
-    li
-        padding: 10px 50px
-        margin: 5px auto
-        background-color: $bg-color
-        iframe
-            float: left
-            width: 640px
-            height: 365px
-        .vid-text
-            margin-left: 680px
-            height: 365px
+  .vid-desc-text
+    color: dimgrey
+  .panel .row
+    padding: 25px
+    .col-md-4
+      padding: 0 20px
+  .vid-container
+    position: relative
+    display: inline-block
+    overflow: hidden
+    a
+      opacity: 1
+      top: 0
+      z-index: 500
+      color: rgba(0,0,0, .8)
+      img
+        width: 100%
+      &:hover img
+        opacity: .5
+      span
+        top: 50%
+        position: absolute
+        left: 0
+        right: 0
+        transform: translateY(-50%)
+        text-align: center
