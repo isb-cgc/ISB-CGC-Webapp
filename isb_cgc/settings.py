@@ -675,6 +675,7 @@ if DEBUG and DEBUG_TOOLBAR:
     INTERNAL_IPS = (os.environ.get('INTERNAL_IP', ''),)
 
 MITELMAN_URL = os.environ.get('MITELMAN_URL', 'https://mitelmandatabase.isb-cgc.org/')
+TP53_URL = os.environ.get('TP53_URL', 'https://tp53.isb-cgc.org/')
 
 ##########################
 # OAUTH PLATFORM         #
