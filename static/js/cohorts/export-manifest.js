@@ -22,6 +22,7 @@ require.config({
         jquery: 'libs/jquery-3.5.1',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
+        underscore: 'libs/underscore-min',
         tablesorter: 'libs/jquery.tablesorter.min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
@@ -40,8 +41,10 @@ require.config({
         },
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
+        'jquerydt': ['jquery'],
         'base': ['jquery', 'jqueryui', 'bootstrap', 'session_security', 'underscore', 'utils', 'assetscore', 'assetsresponsive', 'tablesorter'],
         'underscore': {exports: '_'},
+        'tablesorter': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui']
     }
