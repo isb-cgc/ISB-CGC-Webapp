@@ -191,9 +191,16 @@ require([
 
     tippy('.collection_name', {
         content: function(reference) {
+            let warning='<p style="color:red">Image files in this collection are not publicly available.</p>'
             let tooltip = collection_tooltips[$(reference).siblings('input.collection_value').attr('value')];
+            let collection_id=$(reference)[0].id
             if(tooltip) {
-                return '<div class="collection-tooltip">'+tooltip+'</div>';
+                if ((collection_id in window.collection) && (window.collection[collection_id].access==='Public')) {
+                    return '<div class="collection-tooltip">' + tooltip + '</div>';
+                }
+                else{
+                    return '<div class="collection-tooltip">' + tooltip + warning + '</div>';
+                }
             }
             return '<span></span>';
 
@@ -259,6 +266,16 @@ require([
         allowHTML:true
     });
 
+    tippy.delegate('.studies-table', {
+        content: 'Images in this collection are not publicly available',
+        theme: 'dark',
+        placement: 'right',
+        arrow: false,
+        interactive:true,
+        target: '.coll-explain',
+        maxWidth: 130
+    });
+
 
     tippy.delegate('.series-table', {
         content: function(reference) {
@@ -274,14 +291,28 @@ require([
         allowHTML:true
     });
 
+
     tippy.delegate('.series-table', {
         content: 'Please open at the study level to see this series',
         theme: 'dark',
         placement: 'right',
         arrow: false,
+        interactive:true,
         target: '.no-viewer-tooltip',
         maxWidth: 130
     });
+
+    tippy.delegate('.series-table', {
+        content: 'Images in this collection are not publicly available',
+        theme: 'dark',
+        placement: 'right',
+        arrow: false,
+        interactive:true,
+        target: '.coll-explain',
+        maxWidth: 130
+    });
+
+
 
     tippy.delegate('.series-table', {
         content: function(reference) {
@@ -292,5 +323,14 @@ require([
         arrow: false,
         target: '.description-tip',
         maxWidth: 800
+    });
+
+
+
+    tippy('.coll-explain', {
+        allowHTML:true,
+        content: 'For collections denoted by the <i class="fa fa-minus-circle"></i> icon image files are not publicly available',
+        interactive:true
+
     });
 });
