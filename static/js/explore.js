@@ -234,17 +234,6 @@ require([
         arrow: false
     });
 
-    tippy('.bq-disabled', {
-        content: 'Exporting to BigQuery requires a linked Google Social Account. You can link your account to a Google ID from the '
-            +  '<a target="_blank" rel="noopener noreferrer" href="/users/' + user_id + '/">'
-            + 'Account Details</a> page.',
-        theme: 'dark',
-        placement: 'right',
-        arrow: true,
-        interactive: true,
-        allowHTML: true
-    });
-
     tippy.delegate('.studies-table', {
         content: function(reference) {
             return '<span class="tippy-uid">'+$(reference).data('study-id')+'</span>';
