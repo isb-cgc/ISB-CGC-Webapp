@@ -27,6 +27,7 @@ require.config({
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
         jquerydt: 'libs/jquery.dataTables.min',
+        session_security: 'session_security/script'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -34,7 +35,8 @@ require.config({
         'jquerydt': ['jquery'],
         'tablesorter': ['jquery'],
         'underscore': {exports: '_'},
-        'base': ['jquery', 'jqueryui', 'bootstrap', 'session_security', 'underscore', 'utils', 'assetscore', 'assetsresponsive', 'tablesorter'],
+        'session_security': ['jquery'],
+        'base': ['jquery', 'jqueryui', 'bootstrap', 'session_security', 'underscore', 'utils', 'assetscore', 'assetsresponsive', 'tablesorter']
     }
 });
 
