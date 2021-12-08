@@ -34,7 +34,7 @@ require.config({
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'tablesorter': ['jquery'],
-        'base': ['jquery'],
+        'base': ['jquery', 'jqueryui', 'bootstrap', 'underscore', 'utils', 'assetscore', 'assetsresponsive', 'tablesorter']
     }
 });
 

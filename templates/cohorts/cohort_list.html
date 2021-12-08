@@ -317,6 +317,7 @@
 {% block js_file %}
     <script type="text/javascript">
         // var shared_users = {{ shared_users|safe }};
+        var user_id = {% if request.user.is_authenticated %}{{ request.user.id|safe }}{% else %}null{% endif %};
     </script>
 	{{ block.super }}
 	<script src="{% static 'js/cohorts/cohort-list.js' %}"></script>
