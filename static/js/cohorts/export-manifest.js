@@ -23,13 +23,28 @@ require.config({
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
         underscore: 'libs/underscore-min',
+        tablesorter: 'libs/jquery.tablesorter.min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
-        base: 'base'
+        jquerydt: 'libs/jquery.dataTables.min',
+        base: 'base',
+        tippy: 'libs/tippy-bundle.umd.min',
+        '@popperjs/core': 'libs/popper.min'
     },
     shim: {
+        '@popperjs/core': {
+            exports: "@popperjs/core"
+        },
+        'tippy': {
+            exports: 'tippy',
+            deps: ['@popperjs/core']
+        },
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
+        'jquerydt': ['jquery'],
+        'base': ['jquery', 'jqueryui', 'bootstrap', 'session_security', 'underscore', 'utils', 'assetscore', 'assetsresponsive', 'tablesorter'],
+        'underscore': {exports: '_'},
+        'tablesorter': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui']
     }
@@ -38,11 +53,12 @@ require.config({
 require([
     'jquery',
     'jqueryui',
-    'base',
+    'tippy',
+    'base', // Do not remove
     'bootstrap',
     'assetscore',
     'assetsresponsive',
-], function($, jqueryui, base, bootstrap) {
+], function($, jqueryui, tippy, base) {
     A11y.Core();
 
     var downloadToken = new Date().getTime();
@@ -297,6 +313,17 @@ require([
 
         $('#export-manifest-name').val("cohorts_"+cohort_ids.join("_")+$('#export-manifest-name').data('name-base'));
         update_download_manifest_buttons();
+    });
+
+    tippy('.bq-disabled', {
+        content: 'Exporting to BigQuery requires a linked Google Social Account. You can link your account to a Google ID from the '
+            +  '<a target="_blank" rel="noopener noreferrer" href="/users/' + user_id + '/">'
+            + 'Account Details</a> page.',
+        theme: 'dark',
+        placement: 'right',
+        arrow: true,
+        interactive: true,
+        allowHTML: true
     });
 
 });
