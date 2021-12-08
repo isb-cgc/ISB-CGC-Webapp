@@ -29,7 +29,8 @@ require.config({
         jquerydt: 'libs/jquery.dataTables.min',
         base: 'base',
         tippy: 'libs/tippy-bundle.umd.min',
-        '@popperjs/core': 'libs/popper.min'
+        '@popperjs/core': 'libs/popper.min',
+        session_security: 'session_security/script'
     },
     shim: {
         '@popperjs/core': {
@@ -46,6 +47,7 @@ require.config({
         'underscore': {exports: '_'},
         'tablesorter': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
+        'session_security': ['jquery'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui']
     }
 });
