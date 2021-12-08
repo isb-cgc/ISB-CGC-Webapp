@@ -1,20 +1,40 @@
-
+/**
+ *
+ * Copyright 2021, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 require.config({
     baseUrl: STATIC_FILES_URL + 'js/',
     paths: {
         jquery: 'libs/jquery-3.5.1',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
-        jquerydt: 'libs/jquery.dataTables.min',
-        //d3: 'libs/d3.v5.min',
         base: 'base',
         underscore: 'libs/underscore-min',
-
+        tablesorter: 'libs/jquery.tablesorter.min',
+        assetscore: 'libs/assets.core',
+        assetsresponsive: 'libs/assets.responsive',
+        jquerydt: 'libs/jquery.dataTables.min',
     },
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
-        'jquerydt': ['jquery']
+        'jquerydt': ['jquery'],
+        'tablesorter': ['jquery'],
+        'underscore': {exports: '_'},
+        'base': ['jquery', 'jqueryui', 'bootstrap', 'session_security', 'underscore', 'utils', 'assetscore', 'assetsresponsive', 'tablesorter'],
     }
 });
 
@@ -22,10 +42,11 @@ require.config({
 require([
     'jquery',
     'underscore',
+    'base', // This must ALWAYS be loaded!
     'jquerydt',
     'jqueryui',
-    'bootstrap',
-], function($, _, jquerydt, jqueryui, bootstrap) {
+    'bootstrap'
+], function($, _) {
 
     $('.manifest-size-warning').hide();
 
@@ -1183,12 +1204,24 @@ require([
                             "orderable": false,
                             data: 'StudyInstanceUID',
                             render: function (data, type, row) {
-                                var modality = row['Modality'];
-                                if ((modality[0] === 'SM') || (modality === 'SM')) {
-                                    return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank"><i class="fa fa-eye"></i>'
-                                } else {
-                                    return '<a href="' + DICOM_STORE_PATH + data + '" target="_blank"><i class="fa fa-eye"></i>'
+                                var coll_id="";
+                                if (Array.isArray(row['collection_id'])){
+                                    coll_id=row['collection_id'][0];
                                 }
+                                else {
+                                    coll_id=row['collection_id']
+                                }
+                                if (!(coll_id in window.collection) || (window.collection[coll_id].access !=='Public')  ) {
+                                    return '<i class="fa fa-minus-circle coll-explain"></i>';
+                                }
+                                else{
+                                    var modality = row['Modality'];
+                                    if ((modality[0] === 'SM') || (modality === 'SM')) {
+                                        return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank"><i class="fa fa-eye"></i>'
+                                     } else {
+                                        return '<a href="' + DICOM_STORE_PATH + data + '" target="_blank"><i class="fa fa-eye"></i>'
+                                    }
+                               }
                             }
 
                         },
@@ -1389,7 +1422,18 @@ require([
                         "orderable": false,
                         data: 'SeriesInstanceUID',
                         render: function (data, type, row) {
-                            if ((row['Modality'] === 'SEG' || row['Modality'][0] === 'SEG') || (row['Modality'] === 'RTSTRUCT' || row['Modality'][0] === 'RTSTRUCT') || (row['Modality'] === 'RTPLAN' || row['Modality'][0] === 'RTPLAN') || (row['Modality'] === 'RWV' || row['Modality'][0] === 'RWV')) {
+                            var coll_id="";
+                            if (Array.isArray(row['collection_id'])){
+                                coll_id=row['collection_id'][0];
+                            }
+                            else {
+                                coll_id=row['collection_id']
+                            }
+                            if (!(coll_id in window.collection) || (window.collection[coll_id].access !=='Public')  ) {
+                                return '<i class="fa fa-minus-circle coll-explain"></i>';
+                            }
+
+                            else if ((row['Modality'] === 'SEG' || row['Modality'][0] === 'SEG') || (row['Modality'] === 'RTSTRUCT' || row['Modality'][0] === 'RTSTRUCT') || (row['Modality'] === 'RTPLAN' || row['Modality'][0] === 'RTPLAN') || (row['Modality'] === 'RWV' || row['Modality'][0] === 'RWV')) {
                                 return '<a href="/" onclick="return false;"><i class="fa fa-eye-slash no-viewer-tooltip"></i>';
 
                             } else if ((row['Modality'] === 'SM')) {
@@ -2139,14 +2183,36 @@ require([
                  if (sorter.val()==="alpha"){
                      filterList.children('li').sort(
                         function (a,b){
-                        return (  $(b).children().children('.value').text() < $(a).children().children('.value').text() ? 1: -1)
+                         if ( ($(a).children().children('input:checkbox')[0].checked) && !($(b).children().children('input:checkbox')[0].checked)){
+                             return -1;
+                         }
+                         else if ( ($(b).children().children('input:checkbox')[0].checked) && !($(a).children().children('input:checkbox')[0].checked)){
+                             return 1;
+                         }
+
+                         else if ($(b).children().children('.value').text() < $(a).children().children('.value').text()){
+                             return 1;
+                         }
+                         else{
+                             return -1;
+                         }
+                         
                         }).appendTo(filterList);
                  }
                  else if (sorter.val()==="num"){
                      filterList.children('li').sort(
                         function (a,b){
-                        return (  parseFloat($(a).children().children('.case_count').text()) < parseFloat($(b).children().children('.case_count').text()) ? 1: -1)
-                        }).appendTo(filterList);
+                            if ( ($(a).children().children('input:checkbox')[0].checked) && !($(b).children().children('input:checkbox')[0].checked)){
+                             return -1;
+                             }
+                             else if ( ($(b).children().children('input:checkbox')[0].checked) && !($(a).children().children('input:checkbox')[0].checked)){
+                                return 1;
+                             }
+                            else {
+
+                                return ($(b).children().children('input:checkbox')[0].checked < $(a).children().children('input:checkbox')[0].checked ? 1 : parseFloat($(a).children().children('.case_count').text()) < parseFloat($(b).children().children('.case_count').text()) ? 1 : -1)
+                               }
+                            }).appendTo(filterList);
                  }
             }
 
