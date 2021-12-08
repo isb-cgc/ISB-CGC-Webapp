@@ -1,3 +1,20 @@
+/**
+ *
+ * Copyright 2021, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 require.config({
     baseUrl: STATIC_FILES_URL + 'js/',
     paths: {
@@ -6,10 +23,11 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         underscore: 'libs/underscore-min',
         tablesorter: 'libs/jquery.tablesorter.min',
+        assetscore: 'libs/assets.core',
+        assetsresponsive: 'libs/assets.responsive',
         jquerydt: 'libs/jquery.dataTables.min',
         base: 'base',
         imagesearch: 'image_search',
-        //cohortfilelist: 'cohort_filelist',
         tippy: 'libs/tippy-bundle.umd.min',
         '@popperjs/core': 'libs/popper.min'
     },
@@ -27,22 +45,22 @@ require.config({
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'tablesorter': ['jquery'],
-        'base': ['jquery']
-
+        'underscore': {exports: '_'},
+        'base': ['jquery', 'jqueryui', 'bootstrap', 'session_security', 'underscore', 'utils', 'assetscore', 'assetsresponsive', 'tablesorter'],
+        'imagesearch': ['jquery', 'underscore', 'base', 'jquerydt', 'jqueryui', 'bootstrap']
     }
 });
 
 require([
     'jquery',
     'tippy',
-    'base',
+    'base', // This must always be loaded
     'imagesearch',
     'jqueryui',
     'jquerydt',
     'bootstrap',
-    'tablesorter',
-    //'cohortfilelist',
-], function ($, tippy, base, imagesearch, d3, cohortfilelist) {
+    'tablesorter'
+], function ($, tippy, base) {
     var saving_cohort = false;
 
     $('#save-cohort-modal').on('show.bs.modal', function() {
@@ -313,8 +331,6 @@ require([
         target: '.description-tip',
         maxWidth: 800
     });
-
-
 
     tippy('.coll-explain', {
         allowHTML:true,

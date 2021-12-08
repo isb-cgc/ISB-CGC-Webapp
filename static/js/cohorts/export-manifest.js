@@ -22,14 +22,26 @@ require.config({
         jquery: 'libs/jquery-3.5.1',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
-        underscore: 'libs/underscore-min',
+        tablesorter: 'libs/jquery.tablesorter.min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
-        base: 'base'
+        jquerydt: 'libs/jquery.dataTables.min',
+        base: 'base',
+        tippy: 'libs/tippy-bundle.umd.min',
+        '@popperjs/core': 'libs/popper.min'
     },
     shim: {
+        '@popperjs/core': {
+            exports: "@popperjs/core"
+        },
+        'tippy': {
+            exports: 'tippy',
+            deps: ['@popperjs/core']
+        },
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
+        'base': ['jquery', 'jqueryui', 'bootstrap', 'session_security', 'underscore', 'utils', 'assetscore', 'assetsresponsive', 'tablesorter'],
+        'underscore': {exports: '_'},
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui']
     }
@@ -38,11 +50,12 @@ require.config({
 require([
     'jquery',
     'jqueryui',
-    'base',
+    'tippy',
+    'base', // Do not remove
     'bootstrap',
     'assetscore',
     'assetsresponsive',
-], function($, jqueryui, base, bootstrap) {
+], function($, jqueryui, tippy, base) {
     A11y.Core();
 
     var downloadToken = new Date().getTime();
