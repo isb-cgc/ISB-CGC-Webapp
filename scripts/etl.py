@@ -347,11 +347,9 @@ def add_collections(new,update):
         Collection.data_versions.through.objects.bulk_create(collex_to_dv)
 
         updated_collex = Collection.objects.filter(name__in=list(update.keys()))
-        fields = None
 
         for upd in updated_collex:
-            if not fields:
-                fields = list(update[upd.name]['data'].keys())
+            fields = list(update[upd.name]['data'].keys())
             vals = update[upd.name]['data']
             for key in vals:
                 setattr(upd,key,vals[key])

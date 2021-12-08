@@ -78,6 +78,7 @@
         const collection_tooltips = JSON.parse(document.getElementById('collection_tooltips').textContent);
         var file_parts_count = {{ file_parts_count }};
         var display_file_parts_count = {{ display_file_parts_count }};
+        var user_id = {% if request.user.is_authenticated %}{{ request.user.id|safe }}{% else %}null{% endif %};
     </script>
     <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
     {{ block.super }}

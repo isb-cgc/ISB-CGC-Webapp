@@ -45,9 +45,9 @@ require(['jquery', 'datatables.net','jqueryui', 'bootstrap', 'base'],
 
         $('#collections-table tbody').on('click', 'td.collection-explore', function () {
             let collection_id = $(this).data('collex-type') === 'Analysis' ?
-                $(this).data('collex-collex').split(', ').map(
+                $(this).data('collex-collex').split(',').map(
                     function n(x, i, a ){
-                    return ((x == 'SPIE-AAPM-NCI PROSTATEx Challenges (Prostate-X-Challenge)') ? 'prostatex' : x).toLowerCase().replaceAll("-","_");
+                    return x.toLowerCase().replaceAll("-","_");
                 })
                 : [$(this).data('collex-id')];
             let filterStr = JSON.stringify([{'filters': [{
