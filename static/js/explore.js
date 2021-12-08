@@ -29,7 +29,8 @@ require.config({
         base: 'base',
         imagesearch: 'image_search',
         tippy: 'libs/tippy-bundle.umd.min',
-        '@popperjs/core': 'libs/popper.min'
+        '@popperjs/core': 'libs/popper.min',
+        session_security: 'session_security/script'
     },
     shim: {
         '@popperjs/core': {
@@ -46,6 +47,7 @@ require.config({
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'tablesorter': ['jquery'],
         'underscore': {exports: '_'},
+        'session_security': ['jquery'],
         'base': ['jquery', 'jqueryui', 'bootstrap', 'session_security', 'underscore', 'utils', 'assetscore', 'assetsresponsive', 'tablesorter'],
         'imagesearch': ['jquery', 'underscore', 'base', 'jquerydt', 'jqueryui', 'bootstrap']
     }
