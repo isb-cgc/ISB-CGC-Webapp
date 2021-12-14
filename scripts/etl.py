@@ -634,76 +634,76 @@ def main():
 
     try:
         args = parse_args()
-        # new_versions = ["TCIA Image Data Version 5","TCIA Derived Data Version 5"]
-        #
-        # set_types = ["IDC Source Data","Derived Data"]
-        # bioclin_version = ["GDC Data Release 9"]
-        #
-        # add_data_versions(
-        #     {'name': "IDC Data Release",
-        #      'version_number': "5.0",
-        #      'case_count': 52042,
-        #      'collex_count': 112,
-        #      'data_volume': 16.67,
-        #      'series_count': 420747
-        #      },
-        #     [{'name': x, 'ver': '5'} for x in new_versions],
-        #     bioclin_version
-        # )
-        #
-        # add_data_sources([
-        #     {
-        #         'name': 'dicom_derived_series_v5',
-        #         'source_type': DataSource.SOLR,
-        #         'count_col': 'PatientID',
-        #         'programs': [],
-        #         'versions': new_versions,
-        #         'data_sets': set_types,
-        #         'aggregate_level': "SeriesInstanceUID"
-        #     },
-        #     {
-        #         'name': 'dicom_derived_study_v5',
-        #         'source_type': DataSource.SOLR,
-        #         'count_col': 'PatientID',
-        #         'programs': [],
-        #         'versions': new_versions,
-        #         'data_sets': set_types,
-        #         'aggregate_level': "StudyInstanceUID"
-        #     },
-        #     {
-        #         'name': 'idc-dev-etl.idc_v5.dicom_pivot_v5',
-        #         'source_type': DataSource.BIGQUERY,
-        #         'count_col': 'PatientID',
-        #         'programs': [],
-        #         'versions': new_versions,
-        #         'data_sets': set_types,
-        #         'aggregate_level': 'SOPInstanceUID'
-        #     }
-        # ])
-        #
-        # add_source_joins(
-        #     ['dicom_derived_study_v5','dicom_derived_series_v5'],
-        #     "PatientID",
-        #     ["tcga_bios","tcga_clin"],
-        #     "case_barcode"
-        # )
-        #
-        # add_source_joins(
-        #     ["idc-dev-etl.idc_v5.dicom_pivot_v5"],
-        #     "PatientID",
-        #     ["idc-dev-etl.idc_v4.tcga_biospecimen_rel9","idc-dev-etl.idc_v4.tcga_clinical_rel9"],
-        #     "case_barcode"
-        # )
-        #
-        # copy_attrs(["idc-dev-etl.idc_v4.dicom_pivot_v4"],["idc-dev-etl.idc_v5.dicom_pivot_v5"])
-        # copy_attrs(["dicom_derived_series_v4"],["dicom_derived_series_v5","dicom_derived_study_v5"])
-        #
-        # deactivate_data_versions(["TCIA Image Data Wave 4","TCIA Derived Data Wave 4"], ["4.0"])
-        #
-        # len(args.attributes_file) and load_attributes(args.attributes_file,
-        #     ["dicom_derived_series_v5","dicom_derived_study_v5"], ["idc-dev-etl.idc_v5.dicom_pivot_v5"]
-        # )
-        #
+        new_versions = ["TCIA Image Data Version 6","TCIA Derived Data Version 6"]
+
+        set_types = ["IDC Source Data","Derived Data"]
+        bioclin_version = ["GDC Data Release 9"]
+
+        add_data_versions(
+            {'name': "IDC Data Release",
+             'version_number': "6.0",
+             'case_count': 52042,
+             'collex_count': 112,
+             'data_volume': 21.04,
+             'series_count': 420747
+             },
+            [{'name': x, 'ver': '6'} for x in new_versions],
+            bioclin_version
+        )
+
+        add_data_sources([
+            {
+                'name': 'dicom_derived_series_v6',
+                'source_type': DataSource.SOLR,
+                'count_col': 'PatientID',
+                'programs': [],
+                'versions': new_versions,
+                'data_sets': set_types,
+                'aggregate_level': "SeriesInstanceUID"
+            },
+            {
+                'name': 'dicom_derived_study_v6',
+                'source_type': DataSource.SOLR,
+                'count_col': 'PatientID',
+                'programs': [],
+                'versions': new_versions,
+                'data_sets': set_types,
+                'aggregate_level': "StudyInstanceUID"
+            },
+            {
+                'name': 'idc-dev-etl.idc_v6.dicom_pivot_v6',
+                'source_type': DataSource.BIGQUERY,
+                'count_col': 'PatientID',
+                'programs': [],
+                'versions': new_versions,
+                'data_sets': set_types,
+                'aggregate_level': 'SOPInstanceUID'
+            }
+        ])
+
+        add_source_joins(
+            ['dicom_derived_study_v6','dicom_derived_series_v6'],
+            "PatientID",
+            ["tcga_bios","tcga_clin"],
+            "case_barcode"
+        )
+
+        add_source_joins(
+            ["idc-dev-etl.idc_v6.dicom_pivot_v6"],
+            "PatientID",
+            ["idc-dev-etl.idc_v5.tcga_biospecimen_rel9","idc-dev-etl.idc_v5.tcga_clinical_rel9"],
+            "case_barcode"
+        )
+
+        copy_attrs(["idc-dev-etl.idc_v5.dicom_pivot_v5"],["idc-dev-etl.idc_v6.dicom_pivot_v6"])
+        copy_attrs(["dicom_derived_series_v5"],["dicom_derived_series_v6","dicom_derived_study_v6"])
+
+        deactivate_data_versions(["TCIA Image Data Version 5","TCIA Derived Data Version 5"], ["5.0"])
+
+        len(args.attributes_file) and load_attributes(args.attributes_file,
+            ["dicom_derived_series_v6","dicom_derived_study_v6"], ["idc-dev-etl.idc_v5.dicom_pivot_v6"]
+        )
+
         len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
         len(args.programs_file) and load_programs(args.programs_file)
         len(args.collex_file) and load_collections(args.collex_file)

@@ -24,7 +24,10 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         'datatables.net': 'libs/jquery.dataTables.min',
         underscore: 'libs/underscore-min',
-        tablesorter:'libs/jquery.tablesorter.min',
+        assetscore: 'libs/assets.core',
+        assetsresponsive: 'libs/assets.responsive',
+        jquerydt: 'libs/jquery.dataTables.min',
+        session_security: 'session_security/script',
         base: 'base'
     },
     shim: {
@@ -32,7 +35,7 @@ require.config({
         'jqueryui': ['jquery'],
         'datatables.net': ['jquery'],
         'tablesorter': ['jquery'],
-        'base': ['jquery'],
+        'base': ['jquery', 'jqueryui', 'bootstrap', 'session_security', 'underscore', 'utils', 'assetscore', 'assetsresponsive', 'tablesorter']
     }
 });
 

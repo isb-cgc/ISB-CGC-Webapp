@@ -231,5 +231,4 @@ require([
         });
         return false;
     });
-
 });
