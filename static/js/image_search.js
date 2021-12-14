@@ -572,40 +572,52 @@ require([
         }
 
 
-        window.updateProjectSelection = function(row){
+        window.updateProjectSelection = function(rowA){
             var purgeChildSelections=[false,false]
-            var rowsAdded=true;
-            projid= $(row).data('projectid');
-            if ($(row).children('.ckbx').children().is(':checked') ) {
-                if (window.selItems.selProjects.indexOf(projid) < 0) {
-                       window.selItems.selProjects.push(projid);
-                   }
-            }
-            else {
-                rowsAdded = false;
-                var removedProjects = new Array();
-                if (window.selItems.selProjects.indexOf(projid) > -1) {
-                    ind = window.selItems.selProjects.indexOf(projid);
-                    window.selItems.selProjects.splice(ind,1);
-                    removedProjects.push(projid);
+            var rowsAdded=false;
+            var rowsRemoved=false;
+
+            rowA.forEach(function(row) {
+                projid = $(row).data('projectid');
+                if ($(row).children('.ckbx').children().is(':checked')) {
+                    if (window.selItems.selProjects.indexOf(projid) < 0) {
+                        window.selItems.selProjects.push(projid);
+                        rowsAdded = true
+                    }
+                } else {
+                    rowsRemoved = true;
+                    var removedProjects = new Array();
+                    if (window.selItems.selProjects.indexOf(projid) > -1) {
+                        ind = window.selItems.selProjects.indexOf(projid);
+                        window.selItems.selProjects.splice(ind, 1);
+                        removedProjects.push(projid);
+                    }
+                    if (removedProjects.length > 0) {
+                        purgeChildSelections = cleanChildSelections(removedProjects, 'projects', false);
+                    }
                 }
-               if (removedProjects.length>0){
-                   purgeChildSelections=cleanChildSelections(removedProjects,'projects',false);
-               }
-            }
+            });
+
             var caseID='';
             if ($('#cases_panel').find('.caseID_inp').length>0){
                 caseID = $('#cases_panel').find('.caseID_inp').val().trim();
             }
-            updateCaseTable(rowsAdded, !rowsAdded, false, purgeChildSelections,[],caseID);
+            updateCaseTable(rowsAdded, rowsRemoved, false, purgeChildSelections,[],caseID);
         }
 
         window.updateMultipleRows=function(table,add,type){
             rowA=$(table).find('tbody').children();
+            rowArr = new Array();
             $(rowA).each(function(){
                     $(this).children('.ckbx').children().prop("checked",add);
+                    rowArr.push($(this))
             });
-            updateCasesOrStudiesSelection(rowA, type);
+            if (type === 'projects'){
+                updateProjectSelection(rowArr);
+            }
+            else {
+                updateCasesOrStudiesSelection(rowA, type);
+            }
         }
 
         window.updateCasesOrStudiesSelection = function(rowA, type){
@@ -721,6 +733,14 @@ require([
                     "createdRow": function (row, data, dataIndex) {
                         $(row).data('projectid', data[0]);
                         $(row).attr('id', 'project_row_' + data[0]);
+                        $(row).on('click', function(event){
+                            var elem = event.target;
+                            if (!$(elem).parent().hasClass('ckbx')) {
+                                ckbx=$(elem).closest('tr').find('.ckbx').children()
+                                ckbx.prop("checked", !ckbx.prop("checked"));
+                            }
+                            updateProjectSelection([$(this)])
+                        })
                     },
                     "columnDefs": [
                         {className: "ckbx text_data", "targets": [0]},
@@ -730,10 +750,10 @@ require([
                         {
                             "type": "html", "orderable": false, render: function (data) {
                                 if (window.selItems.selProjects.indexOf(data)>-1) {
-                                    return '<input type="checkbox" onclick="updateProjectSelection($(this).parent().parent())" checked>'
+                                    return '<input type="checkbox" checked>'
                                 }
                                 else{
-                                    return '<input type="checkbox" onclick="updateProjectSelection($(this).parent().parent())" >'
+                                    return '<input type="checkbox">'
                                 }
                             }
                         },
@@ -898,6 +918,14 @@ require([
                         $(row).attr('data-caseid', data['PatientID']);
                         $(row).addClass('text_head');
                         $(row).addClass('project_' + data['collection_id']);
+                        $(row).on('click', function(event){
+                            var elem = event.target;
+                            if (!$(elem).parent().hasClass('ckbx')) {
+                                ckbx = $(elem).closest('tr').find('.ckbx').children()
+                                ckbx.prop("checked", !ckbx.prop("checked"));
+                            }
+                            updateCasesOrStudiesSelection([$(this)], 'cases')
+                        })
                     },
                     "columnDefs": [
                         {className: "ckbx", "targets": [0]},
@@ -911,9 +939,9 @@ require([
                             render: function (PatientID, type, row) {
                                 collection_id = row['collection_id'][0];
                                 if ((collection_id in window.selItems.selCases) && (window.selItems.selCases[collection_id].indexOf(PatientID) > -1)) {
-                                    return '<input type="checkbox" class="tbl-sel" checked="true" onclick="updateCasesOrStudiesSelection([$(this).parent().parent()],\'cases\')">';
+                                    return '<input type="checkbox" class="tbl-sel" checked="true">';
                                 } else {
-                                    return '<input type="checkbox" class="tbl-sel" onclick="updateCasesOrStudiesSelection([$(this).parent().parent()],\'cases\')">';
+                                    return '<input type="checkbox" class="tbl-sel">';
                                 }
                             }
                         },
@@ -1111,8 +1139,6 @@ require([
             $('#studies_tab').data('rowsremoved',rowsRemoved);
             $('#studies_tab').data('refreshafterfilter',refreshAfterFilter);
             $('#studies_tab').data('updatechildtables',updateChildTables);
-
-
             $('#studies_tab').DataTable().destroy();
 
             try {
@@ -1127,7 +1153,16 @@ require([
                         $(row).addClass('text_head');
                         $(row).addClass('project_' + data['collection_id']);
                         $(row).addClass('case_' + data['PatientID']);
-
+                        $(row).on('click', function(event){
+                            var elem = event.target;
+                            if (!($(elem).is('a')) && !($(elem).hasClass('fa-eye'))) {
+                                if (!$(elem).parent().hasClass('ckbx')) {
+                                    ckbx = $(elem).closest('tr').find('.ckbx').children()
+                                    ckbx.prop("checked", !ckbx.prop("checked"));
+                                }
+                                updateCasesOrStudiesSelection([$(this)], 'studies')
+                            }
+                        })
                     },
                     "columnDefs": [
                         {className: "ckbx", "targets": [0]},
@@ -1147,9 +1182,9 @@ require([
                             render: function (data, type, row) {
                                 var PatientID = row['PatientID'];
                                 if ((PatientID in window.selItems.selStudies) && (window.selItems.selStudies[PatientID].indexOf(data) > -1)) {
-                                    return '<input type="checkbox" class="tbl-sel" checked="true" onclick="updateCasesOrStudiesSelection([$(this).parent().parent()],\'studies\')">';
+                                    return '<input type="checkbox" class="tbl-sel" checked="true">';
                                 } else {
-                                    return '<input type="checkbox" class="tbl-sel" onclick="updateCasesOrStudiesSelection([$(this).parent().parent()],\'studies\')">';
+                                    return '<input type="checkbox" class="tbl-sel">';
                                 }
                             }
                         },

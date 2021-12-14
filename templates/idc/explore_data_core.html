@@ -570,7 +570,10 @@
                              <table id="proj_table" class="table table-striped">
                                 <thead id="projects_table_head">
                                     <tr>
-                                         <th class="ckbx text_data"></th>
+                                         <th class="ckbx text_data">
+                                             <i class="fa fa-plus-circle fa-lg" onclick="(updateMultipleRows($($(this).parentsUntil('table')[2]).parent(),true,'projects'))" style="font-family :'FontAwesome' !important"></i>
+                                             <i class="fa fa-minus-circle fa-lg" onclick="(updateMultipleRows($($(this).parentsUntil('table')[2]).parent(),false,'projects'))" style="font-family :'FontAwesome' !important"></i>
+                                         </th>
                                         <th class='text_data'>Collection Name </th><th class='numeric_data'>Total # of Cases</th><th class='numeric_data'># of Cases(this cohort)</th>
                                     </tr>
                                 </thead>
