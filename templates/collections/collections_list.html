@@ -26,23 +26,23 @@
                         <th></th>
                         <th class="id-col">ID</th>
                         <th class="collex-type-col">Collection Type</th>
+                        <th class="access-col">Access</th>
                         <th class="cancer-type-col">Cancer Type</th>
                         <th class="image-type-col">Image Types</th>
                         <th class="subject-col">Subject Count</th>
                         <th class="locations-col">Locations</th>
                         <th class="supporting-data-col">Supporting Data</th>
-
                     </thead>
                     <colgroup>
                         <col style="width: 3%">
                         <col style="width: 12%">
+                        <col style="width: 8%">
                         <col style="width: 8%">
                         <col style="width: 13%">
                         <col style="width: 8%">
                         <col style="width: 8%">
                         <col style="width: 9%">
                         <col style="width: 9%">
-
                     </colgroup>
                     <tbody>
                         {% for collection in active_collections %}
@@ -67,6 +67,7 @@
                                     </a>
                                 </td>
                                 <td>{{ collection.get_collection_type }}</td>
+                                <td>{{ collection.access }}</td>
                                 <td>{{ collection.cancer_type }}</td>
                                 <td>{{ collection.image_types }}</td>
                                 <td>{{ collection.subject_count }}</td>
