@@ -2623,6 +2623,8 @@ require([
 
             $('#' + filterId).find('.check-all').on('click', function () {
                 if (!is_cohort) {
+                    checkUncheckAll(this, true, true);
+                    /*
                     //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
                     var filterElems = new Object();
                     filterElems = $(this).parentsUntil('.list-group-item, #program_set').filter('.list-group-item__body, .list-group-sub-item__body, #Program').children('ul').children();
@@ -2641,11 +2643,14 @@ require([
                             handleFilterSelectionUpdate(ckElem, true, true);
                         }
                     }
+                    */
                 }
             });
 
             $('#' + filterId).find('.uncheck-all').on('click', function () {
               if (!is_cohort){
+                  checkUncheckAll(this, false, true);
+                    /*
                     //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
                     var filterElems = new Object();
                     filterElems = $(this).parentsUntil('.list-group-item, #program_set').filter('.list-group-item__body, .list-group-sub-item__body, #Program').children('ul').children();
@@ -2664,10 +2669,33 @@ require([
                             handleFilterSelectionUpdate(ckElem, true, true);
                         }
                    }
+                  */
               }
             });
         };
 
+        var checkUncheckAll = function(aelem, isCheck, checkSrch){
+            //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
+                    var filterElems = new Object();
+                    filterElems = $(aelem).parentsUntil('.list-group-item, #program_set').filter('.list-group-item__body, .list-group-sub-item__body, #Program').children('ul').children();
+                    for (var ind = 0; ind < filterElems.length; ind++) {
+                        var ckElem = new Object();
+                        if ($(filterElems[ind]).children().filter('.list-group-item__heading').length > 0) {
+                            ckElem = $(filterElems[ind]).children().filter('.list-group-item__heading').children().filter('input:checkbox')[0];
+                        } else {
+                            ckElem = $(filterElems[ind]).children().filter('label').children().filter('input:checkbox')[0];
+                        }
+                        ckElem.checked = isCheck;
+                        //$(filterElem).prop('checked') = true;
+                        if (ind < filterElems.length - 1) {
+                            handleFilterSelectionUpdate(ckElem, false, false);
+                        } else {
+                            handleFilterSelectionUpdate(ckElem, true, true);
+                        }
+                    }
+
+
+        }
         var clearFilter = function (filterElem) {
             if (filterElem.classList.contains('all')){
                     for (cat in window.filterObj){
