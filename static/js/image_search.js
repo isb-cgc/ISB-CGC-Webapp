@@ -2136,6 +2136,15 @@ require([
             updateFilters(filterCat,{},false, false);
         }
 
+       window.resortColl = function() {
+           updateFilters('program_set',{},false, false);
+           for (program in window.programs) {
+               if (Object.keys(window.programs[program].projects).length > 1) {
+                   updateFilters(program,{},false, false);
+               }
+           }
+       }
+
         var updateAttributeValues = function(attributeValList, dic){
             var allValues = attributeValList.children('li').children().children('input:checkbox');
             for (var i = 0; i < allValues.length; i++) {
@@ -2216,18 +2225,23 @@ require([
             }
 
             var sorter= $('#'+filterCat).children('.sorter').find(":radio").filter(':checked');
+
+            if ($('#'+filterCat).find('.collection_value').length>0){
+                sorter= $('#Program').children('.sorter').find(":radio").filter(':checked');
+            }
+
             if (sorter.length>0){
                  if (sorter.val()==="alpha"){
                      filterList.children('li').sort(
                         function (a,b){
-                         if ( ($(a).children().children('input:checkbox')[0].checked) && !($(b).children().children('input:checkbox')[0].checked)){
+                         if ( ($(a).children().children('input:checkbox')[0].checked || $(a).children().children('input:checkbox')[0].indeterminate) && !($(b).children().children('input:checkbox')[0].checked || $(b).children().children('input:checkbox')[0].indeterminate)){
                              return -1;
                          }
-                         else if ( ($(b).children().children('input:checkbox')[0].checked) && !($(a).children().children('input:checkbox')[0].checked)){
+                         else if ( ($(b).children().children('input:checkbox')[0].checked || $(b).children().children('input:checkbox')[0].indeterminate) && !($(a).children().children('input:checkbox')[0].checked || $(a).children().children('input:checkbox')[0].indeterminate)){
                              return 1;
                          }
 
-                         else if ($(b).children().children('.value').text() < $(a).children().children('.value').text()){
+                         else if ($(b).children().children('.value').text().trim() < $(a).children().children('.value').text().trim()){
                              return 1;
                          }
                          else{
@@ -2239,10 +2253,10 @@ require([
                  else if (sorter.val()==="num"){
                      filterList.children('li').sort(
                         function (a,b){
-                            if ( ($(a).children().children('input:checkbox')[0].checked) && !($(b).children().children('input:checkbox')[0].checked)){
+                            if ( ($(a).children().children('input:checkbox')[0].checked || $(a).children().children('input:checkbox')[0].indeterminate) && !($(b).children().children('input:checkbox')[0].checked || $(b).children().children('input:checkbox')[0].indeterminate)){
                              return -1;
                              }
-                             else if ( ($(b).children().children('input:checkbox')[0].checked) && !($(a).children().children('input:checkbox')[0].checked)){
+                             else if ( ($(b).children().children('input:checkbox')[0].checked || $(b).children().children('input:checkbox')[0].indeterminate) && !($(a).children().children('input:checkbox')[0].checked || $(a).children().children('input:checkbox')[0].indeterminate)){
                                 return 1;
                              }
                             else {
@@ -2399,20 +2413,29 @@ require([
                         }
                 }
             }
-            addSliders('search_orig_set', false, hideEmpty,'');
+            /*addSliders('search_orig_set', false, hideEmpty,'');
             addSliders('quantitative', false, hideEmpty,'');
-            addSliders('tcga_clinical',false, hideEmpty,'tcga_clinical.');
+            addSliders('tcga_clinical',false, hideEmpty,'tcga_clinical.');*/
         }
 
         window.updateColl = function(srch){
-            var filtSet=['program_set']
             var checked=$('#Program').find('.hide-zeros')[0].checked;
+            var filtSet=['program_set']
+            /* for (program in window.programs){
+                if (Object.keys(window.programs[program].projects).length>1){
+                    filtSet.push(program)
+                }
+            }*/
+
             setAllFilterElements(checked,filtSet,srch);
         }
 
         window.hideAtt = function(hideElem){
             var filtSet = ["search_orig_set","segmentation","quantitative","qualitative","tcga_clinical"];
             setAllFilterElements(hideElem.checked, filtSet);
+            addSliders('search_orig_set', false, hideEmpty,'');
+            addSliders('quantitative', false, hideEmpty,'');
+            addSliders('tcga_clinical',false, hideEmpty,'tcga_clinical.');
         }
 
         var updateFilterSelections = function (id, dicofdic) {
@@ -2649,7 +2672,7 @@ require([
 
             $('#' + filterId).find('.uncheck-all').on('click', function () {
               if (!is_cohort){
-                  checkUncheckAll(this, false, true);
+                  checkUncheckAll(this, false, false);
                     /*
                     //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
                     var filterElems = new Object();
@@ -2685,15 +2708,42 @@ require([
                         } else {
                             ckElem = $(filterElems[ind]).children().filter('label').children().filter('input:checkbox')[0];
                         }
-                        ckElem.checked = isCheck;
+                        var subListUsed=false
+                        if (checkSrch) {
+                            subListElem = $(ckElem).parent().parent().children('.list-group-sub-item__body')
+                            if (subListElem.length > 0) {
+                                subListUsed = true
+                                subFilterElems = subListElem.find('ul').find('.checkbox')
+                                for (var subInd = 0; subInd < subFilterElems.length; subInd++) {
+                                    subFilterElem = subFilterElems[subInd];
+                                    if (!$(subFilterElem).hasClass('filtByVal')) {
+                                        subCkElem = $(subFilterElem).find('input:checkbox')[0];
+                                        subCkElem.checked = isCheck;
+                                        if ((subInd < subFilterElems.length - 1) || (ind < filterElems.length - 1)) {
+                                            handleFilterSelectionUpdate(subCkElem, false, false);
+                                        } else {
+                                            handleFilterSelectionUpdate(subCkElem, true, true);
+                                        }
+                                    }
+
+                                }
+
+                            } else if (!$(ckElem).parent().parent().hasClass('filtByVal')) {
+                                ckElem.checked = isCheck;
+                            }
+                        }
+                        else {
+                            ckElem.checked = isCheck;
+                        }
+
                         //$(filterElem).prop('checked') = true;
-                        if (ind < filterElems.length - 1) {
+                        if ((ind < filterElems.length - 1) && (!subListUsed)){
                             handleFilterSelectionUpdate(ckElem, false, false);
-                        } else {
+                        } else if (!subListUsed) {
                             handleFilterSelectionUpdate(ckElem, true, true);
                         }
-                    }
 
+                    }
 
         }
         var clearFilter = function (filterElem) {
