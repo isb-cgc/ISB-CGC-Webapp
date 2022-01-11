@@ -519,7 +519,7 @@ require([
                             break;
                         case 'study_uid':
                             table_row_data += '<td><div class="study-uid">' +
-                                    '<a href="'+DICOM_URL+files[i]['study_uid']+'/" target="_blank" rel="noreferrer">'+files[i]['study_uid']+
+                                    '<a href="https://'+DICOM_VIEWER_URL+files[i]['study_uid']+'/" target="_blank" rel="nofollow noreferrer">'+files[i]['study_uid']+
                                     '<div class="osmisis" style="display: none;"><i>Open in OHIF Viewer</i></div></a>'+
                                     '</div></td>';
                             break;

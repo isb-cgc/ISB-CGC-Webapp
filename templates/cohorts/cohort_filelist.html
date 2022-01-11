@@ -233,7 +233,7 @@
         };
     {% endif %}
 
-    var DICOM_URL = {% url 'dicom' %};
+    var DICOM_VIEWER_URL = '{{ dicom_viewer_url }}';
     var CAMIC_URL = {% url 'camic' %};
     var PATH_PDF_URL = {% url 'path_pdf' %};
 
