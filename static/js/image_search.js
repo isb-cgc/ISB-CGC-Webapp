@@ -2261,7 +2261,7 @@ require([
                              }
                             else {
 
-                                return ($(b).children().children('input:checkbox')[0].checked < $(a).children().children('input:checkbox')[0].checked ? 1 : parseFloat($(a).children().children('.case_count').text()) < parseFloat($(b).children().children('.case_count').text()) ? 1 : -1)
+                                return (parseFloat($(a).children().children('.case_count').text()) < parseFloat($(b).children().children('.case_count').text()) ? 1 : -1)
                                }
                             }).appendTo(filterList);
                  }
