@@ -1792,6 +1792,10 @@ a#user-dropdown:hover {
     border: 1px solid #dddddd; }
     #bq-meta-searcher #bqmeta tr td table.preview-table th table td, #bq-meta-searcher #bqmeta tr td table.preview-table td table td {
       border: 1px solid #efefef; }
+  #bq-meta-searcher #bqmeta tr td table.useful-join-table th, #bq-meta-searcher #bqmeta tr td table.useful-join-table td {
+    border-bottom: 1px solid lightgrey;
+    padding-bottom: 3px;
+    vertical-align: top; }
   #bq-meta-searcher #bqmeta tr td .tbl-preview:before {
     font-family: FontAwesome;
     content: "\f0ce";
@@ -1804,6 +1808,12 @@ a#user-dropdown:hover {
     content: "\f055";
     color: #3A79B8;
     cursor: pointer; }
+  #bq-meta-searcher #bqmeta tr td a.useful-join-detail {
+    color: #3A79B8;
+    cursor: pointer; }
+  #bq-meta-searcher #bqmeta tr td a.joined-table-link {
+    color: #3A79B8;
+    cursor: pointer; }
 
 #bq-meta-searcher #bqmeta tr.details-shown td.details-control:before {
   content: "\f056";
@@ -1811,6 +1821,10 @@ a#user-dropdown:hover {
 
 #bq-meta-searcher #bqmeta tr.preview-shown td > .tbl-preview:before {
   color: #F7991B; }
+
+#bq-meta-searcher .joined-table-link {
+  color: #3A79B8;
+  cursor: pointer; }
 
 #bq-meta-searcher .modal ul {
   list-style: inherit;

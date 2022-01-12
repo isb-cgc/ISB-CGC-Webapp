@@ -78,6 +78,12 @@ scripts/metadata_featdef_tables.sql
 # dummy datasets
 *.tsv
 *.csv
+scripts/csv
+scripts/csv/*
+scripts/json
+scripts/json/*
+scripts/output
+scripts/output/*
 *.xls
 *.txt
 !requirements.txt

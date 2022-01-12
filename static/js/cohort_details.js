@@ -500,8 +500,6 @@ require([
     $('.clear-filters').on('click', function() {
         var activeDataTab = $('.data-tab.active').attr('id');
         var prog_id = $('.data-tab.active .filter-panel').data('prog-id');
-        var filterType = $(this).attr('id').split('-clear-filters')[0];
-        var createFormFilterSet = $('p#'+activeDataTab+'-filters');
 
         $(this).parents('.selected-filters').find('.panel-body').empty();
         $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
@@ -510,8 +508,8 @@ require([
 
         delete SELECTED_FILTERS[prog_id];
 
-        $(createFormFilterSet+' span.'+filterType+'-token').remove();
-
+        $('#selected-filters span').remove();
+        update_all_selected_filters_ui('#' + ACTIVE_PROGRAM_ID + '-data');
         update_displays();
     });
 
@@ -904,30 +902,32 @@ require([
     });
 
 
+    $('#clear-all-yes-btn').on('click', function() {
+        let creationForm = $('#create-cohort-form');
+
+        let clearFiltersButton = $('.clear-filters');
+        clearFiltersButton.closest('.all-selected-filters').siblings('.selected-filters').find('.panel-body').empty();
+
+        // bug fix #2722
+        creationForm.find('#selected-filters p').hide();
+
+        clearFiltersButton.parents('.data-tab').find('.filter-panel input:checked').each(function() {
+            $(this).prop('checked', false);
+        });
+
+        creationForm.find('#selected-filters span').remove();
+
+        update_all_selected_filters_ui('#' + ACTIVE_PROGRAM_ID + '-data');
+
+        update_displays();
+    });
+
     var bind_widgets = function(program_data_selector,activeDataTab) {
 
         $(program_data_selector + ' .search-checkbox-list input[type="checkbox"]').on('change', filter_change_callback);
 
         $(program_data_selector + ' .clear-filters').on('click', function() {
-            var filterType = $(this).attr('id').split('-clear-filters')[0];
-            var creationFormFilterSet = $('p#'+filterType+'-filters');
-
-
-            $(this).parents('.selected-filters').find('.panel-body').empty();
-
-            // bug fix #2722
-            creationFormFilterSet.hide();
-
-            $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
-                $(this).prop('checked', false);
-            });
-            if(filterType === 'isb-cgc-data') {
-                $('#paste-in-genes').siblings('div.token').find('a.close').trigger('click');
-            }
-
-            $('#create-cohort-form .form-control-static span.'+filterType+'-token').remove();
-
-            update_displays();
+             $('#clear-all-warning-modal').modal('show');
         });
 
         // Show more/less links on categories with >6 fiilters
@@ -1301,23 +1301,36 @@ require([
     var update_all_selected_filters_ui = function(dataset_selector) {
         let all_selected_panel = $(dataset_selector + ' .all-selected-filters' + ' .panel-body');
         all_selected_panel.empty();
-        let create_form_filters = $('#selected-filters');
-        create_form_filters.children('p').each(function() {
-            let program_id = $(this).prop('id').slice(0, -13);
-            let node_id =$(this).attr('node-id');
-            let dataset_name = $(this).find('h5').text();
-            let link = "#" + program_id + "-data";
-            let div = $('<div>');
-            let current = (link === dataset_selector) ? " (Current Data Set)" : "";
-            div.append("<h5><a class=\"dataset-select-btn\" program-id=\"" + program_id
-                + "\" node-id=\"" + node_id + "\">" + dataset_name + "</a>" + current + "</h5>");
 
-            $(this).find('span').each(function() {
-                var new_token = $(this).clone(true);
-                div.append(new_token);
-            });
-            all_selected_panel.append(div);
+        let create_form_filters = $('#selected-filters');
+        let all_filters_count = 0;
+
+        create_form_filters.children('p').each(function() {
+            let dataset_filters_count = $(this).find('span').length;
+            if (dataset_filters_count > 0) {
+                all_filters_count += dataset_filters_count;
+                let program_id = $(this).prop('id').slice(0, -13);
+                let node_id =$(this).attr('node-id');
+                let dataset_name = $(this).find('h5').text();
+                let link = "#" + program_id + "-data";
+                let div = $('<div>');
+                let current = (link === dataset_selector) ? " (Current Data Set)" : "";
+                div.append("<h5><a class=\"dataset-select-btn\" program-id=\"" + program_id
+                    + "\" node-id=\"" + node_id + "\">" + dataset_name + "</a>" + current + "</h5>");
+
+                $(this).find('span').each(function() {
+                    var new_token = $(this).clone(true);
+                    div.append(new_token);
+                });
+                all_selected_panel.append(div);
+            }
         });
+
+        if (all_filters_count > 0) {
+            $('.clear-filters').show();
+        } else {
+            $('.clear-filters').hide();
+        }
 
         $('.dataset-select-btn').click(function(e) {
             ACTIVE_PROGRAM_ID = $(e.target).attr('program-id');
