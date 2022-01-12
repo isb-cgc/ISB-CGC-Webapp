@@ -96,7 +96,5 @@ def run_cluster():
     numNodes = 1 # The number of kubernetes slaves (cluster total hosts - 1)
     machineType = "g1-small" # small machines are probably good enough for this test
 
-    # Run the cluster test function
-    exitCode = clusterTest(container, name, project, zone, numNodes, machineType)
 
 			
