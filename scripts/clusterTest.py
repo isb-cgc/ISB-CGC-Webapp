@@ -97,6 +97,5 @@ def run_cluster():
     machineType = "g1-small" # small machines are probably good enough for this test
 
     # Run the cluster test function
-    exitCode = clusterTest(container, name, project, zone, numNodes, machineType)
+    clusterTest(container, name, project, zone, numNodes, machineType)
 
-			
