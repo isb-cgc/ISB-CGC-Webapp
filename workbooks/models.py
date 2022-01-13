@@ -66,6 +66,10 @@ class Workbook(models.Model):
     @classmethod
     def createDefault(cls, name, description, user):
         workbook_model = cls.create(name, description, user)
+        Worksheet.objects.create(name="worksheet 1",
+                                 description="",
+                                 workbook=workbook_model)
+
         return workbook_model
 
     @classmethod

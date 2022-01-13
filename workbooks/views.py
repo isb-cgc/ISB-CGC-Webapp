@@ -679,6 +679,7 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
         if request.method == "POST":
             workbook_model.save()
             if command == "delete":
+                Worksheet_plot.objects.get(id=plot_id).delete()
                 result['message'] = "This plot has been deleted from workbook."
             else:
                 body_unicode = request.body
