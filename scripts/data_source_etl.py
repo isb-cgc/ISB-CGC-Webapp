@@ -334,20 +334,21 @@ def main(config, make_attr=False):
         if 'programs' in config:
             for prog in config['programs']:
                 try:
+                    Program.objects.get(name=prog['name'], owner=isb_superuser, active=True, is_public=True)
                     logger.info("[STATUS] Program {} found - skipping creation.".format(prog))
                 except ObjectDoesNotExist:
                     logger.info("[STATUS] Program {} not found - creating.".format(prog))
-                    obj = Program.objects.update_or_create(owner=isb_superuser, active=True, is_public=True, **prog)
+                    Program.objects.update_or_create(owner=isb_superuser, active=True, is_public=True, **prog)
 
         if 'projects' in config:
             for proj in config['projects']:
                 program = Program.objects.get(name=proj['program'], owner=isb_superuser, active=True)
                 try:
-                    obj = Project.objects.get(name=proj['name'], owner=isb_superuser, active=True, program=program)
+                    Project.objects.get(name=proj['name'], owner=isb_superuser, active=True, program=program)
                     logger.info("[STATUS] Project {} found - skipping.".format(proj['name']))
                 except ObjectDoesNotExist:
                     logger.info("[STATUS] Project {} not found - creating.".format(proj['name']))
-                    obj = Project.objects.update_or_create(name=proj['name'], owner=isb_superuser, active=True, program=program)
+                    Project.objects.update_or_create(name=proj['name'], owner=isb_superuser, active=True, program=program)
 
         if 'versions' in config:
             add_data_versions(config['versions'])
