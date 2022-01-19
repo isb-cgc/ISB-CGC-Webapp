@@ -595,40 +595,52 @@ require([
         }
 
 
-        window.updateProjectSelection = function(row){
+        window.updateProjectSelection = function(rowA){
             var purgeChildSelections=[false,false]
-            var rowsAdded=true;
-            projid= $(row).data('projectid');
-            if ($(row).children('.ckbx').children().is(':checked') ) {
-                if (window.selItems.selProjects.indexOf(projid) < 0) {
-                       window.selItems.selProjects.push(projid);
-                   }
-            }
-            else {
-                rowsAdded = false;
-                var removedProjects = new Array();
-                if (window.selItems.selProjects.indexOf(projid) > -1) {
-                    ind = window.selItems.selProjects.indexOf(projid);
-                    window.selItems.selProjects.splice(ind,1);
-                    removedProjects.push(projid);
+            var rowsAdded=false;
+            var rowsRemoved=false;
+
+            rowA.forEach(function(row) {
+                projid = $(row).data('projectid');
+                if ($(row).children('.ckbx').children().is(':checked')) {
+                    if (window.selItems.selProjects.indexOf(projid) < 0) {
+                        window.selItems.selProjects.push(projid);
+                        rowsAdded = true
+                    }
+                } else {
+                    rowsRemoved = true;
+                    var removedProjects = new Array();
+                    if (window.selItems.selProjects.indexOf(projid) > -1) {
+                        ind = window.selItems.selProjects.indexOf(projid);
+                        window.selItems.selProjects.splice(ind, 1);
+                        removedProjects.push(projid);
+                    }
+                    if (removedProjects.length > 0) {
+                        purgeChildSelections = cleanChildSelections(removedProjects, 'projects', false);
+                    }
                 }
-               if (removedProjects.length>0){
-                   purgeChildSelections=cleanChildSelections(removedProjects,'projects',false);
-               }
-            }
+            });
+
             var caseID='';
             if ($('#cases_panel').find('.caseID_inp').length>0){
                 caseID = $('#cases_panel').find('.caseID_inp').val().trim();
             }
-            updateCaseTable(rowsAdded, !rowsAdded, false, purgeChildSelections,[],caseID);
+            updateCaseTable(rowsAdded, rowsRemoved, false, purgeChildSelections,[],caseID);
         }
 
         window.updateMultipleRows=function(table,add,type){
             rowA=$(table).find('tbody').children();
+            rowArr = new Array();
             $(rowA).each(function(){
                     $(this).children('.ckbx').children().prop("checked",add);
+                    rowArr.push($(this))
             });
-            updateCasesOrStudiesSelection(rowA, type);
+            if (type === 'projects'){
+                updateProjectSelection(rowArr);
+            }
+            else {
+                updateCasesOrStudiesSelection(rowA, type);
+            }
         }
 
         window.updateCasesOrStudiesSelection = function(rowA, type){
@@ -744,6 +756,14 @@ require([
                     "createdRow": function (row, data, dataIndex) {
                         $(row).data('projectid', data[0]);
                         $(row).attr('id', 'project_row_' + data[0]);
+                        $(row).on('click', function(event){
+                            var elem = event.target;
+                            if (!$(elem).parent().hasClass('ckbx')) {
+                                ckbx=$(elem).closest('tr').find('.ckbx').children()
+                                ckbx.prop("checked", !ckbx.prop("checked"));
+                            }
+                            updateProjectSelection([$(this)])
+                        })
                     },
                     "columnDefs": [
                         {className: "ckbx text_data", "targets": [0]},
@@ -753,10 +773,10 @@ require([
                         {
                             "type": "html", "orderable": false, render: function (data) {
                                 if (window.selItems.selProjects.indexOf(data)>-1) {
-                                    return '<input type="checkbox" onclick="updateProjectSelection($(this).parent().parent())" checked>'
+                                    return '<input type="checkbox" checked>'
                                 }
                                 else{
-                                    return '<input type="checkbox" onclick="updateProjectSelection($(this).parent().parent())" >'
+                                    return '<input type="checkbox">'
                                 }
                             }
                         },
@@ -921,6 +941,14 @@ require([
                         $(row).attr('data-caseid', data['PatientID']);
                         $(row).addClass('text_head');
                         $(row).addClass('project_' + data['collection_id']);
+                        $(row).on('click', function(event){
+                            var elem = event.target;
+                            if (!$(elem).parent().hasClass('ckbx')) {
+                                ckbx = $(elem).closest('tr').find('.ckbx').children()
+                                ckbx.prop("checked", !ckbx.prop("checked"));
+                            }
+                            updateCasesOrStudiesSelection([$(this)], 'cases')
+                        })
                     },
                     "columnDefs": [
                         {className: "ckbx", "targets": [0]},
@@ -934,9 +962,9 @@ require([
                             render: function (PatientID, type, row) {
                                 collection_id = row['collection_id'][0];
                                 if ((collection_id in window.selItems.selCases) && (window.selItems.selCases[collection_id].indexOf(PatientID) > -1)) {
-                                    return '<input type="checkbox" class="tbl-sel" checked="true" onclick="updateCasesOrStudiesSelection([$(this).parent().parent()],\'cases\')">';
+                                    return '<input type="checkbox" class="tbl-sel" checked="true">';
                                 } else {
-                                    return '<input type="checkbox" class="tbl-sel" onclick="updateCasesOrStudiesSelection([$(this).parent().parent()],\'cases\')">';
+                                    return '<input type="checkbox" class="tbl-sel">';
                                 }
                             }
                         },
@@ -1134,8 +1162,6 @@ require([
             $('#studies_tab').data('rowsremoved',rowsRemoved);
             $('#studies_tab').data('refreshafterfilter',refreshAfterFilter);
             $('#studies_tab').data('updatechildtables',updateChildTables);
-
-
             $('#studies_tab').DataTable().destroy();
 
             try {
@@ -1150,7 +1176,16 @@ require([
                         $(row).addClass('text_head');
                         $(row).addClass('project_' + data['collection_id']);
                         $(row).addClass('case_' + data['PatientID']);
-
+                        $(row).on('click', function(event){
+                            var elem = event.target;
+                            if (!($(elem).is('a')) && !($(elem).hasClass('fa-eye'))) {
+                                if (!$(elem).parent().hasClass('ckbx')) {
+                                    ckbx = $(elem).closest('tr').find('.ckbx').children()
+                                    ckbx.prop("checked", !ckbx.prop("checked"));
+                                }
+                                updateCasesOrStudiesSelection([$(this)], 'studies')
+                            }
+                        })
                     },
                     "columnDefs": [
                         {className: "ckbx", "targets": [0]},
@@ -1170,9 +1205,9 @@ require([
                             render: function (data, type, row) {
                                 var PatientID = row['PatientID'];
                                 if ((PatientID in window.selItems.selStudies) && (window.selItems.selStudies[PatientID].indexOf(data) > -1)) {
-                                    return '<input type="checkbox" class="tbl-sel" checked="true" onclick="updateCasesOrStudiesSelection([$(this).parent().parent()],\'studies\')">';
+                                    return '<input type="checkbox" class="tbl-sel" checked="true">';
                                 } else {
-                                    return '<input type="checkbox" class="tbl-sel" onclick="updateCasesOrStudiesSelection([$(this).parent().parent()],\'studies\')">';
+                                    return '<input type="checkbox" class="tbl-sel">';
                                 }
                             }
                         },
@@ -2101,6 +2136,15 @@ require([
             updateFilters(filterCat,{},false, false);
         }
 
+       window.resortColl = function() {
+           updateFilters('program_set',{},false, false);
+           for (program in window.programs) {
+               if (Object.keys(window.programs[program].projects).length > 1) {
+                   updateFilters(program,{},false, false);
+               }
+           }
+       }
+
         var updateAttributeValues = function(attributeValList, dic){
             var allValues = attributeValList.children('li').children().children('input:checkbox');
             for (var i = 0; i < allValues.length; i++) {
@@ -2181,18 +2225,23 @@ require([
             }
 
             var sorter= $('#'+filterCat).children('.sorter').find(":radio").filter(':checked');
+
+            if ($('#'+filterCat).find('.collection_value').length>0){
+                sorter= $('#Program').children('.sorter').find(":radio").filter(':checked');
+            }
+
             if (sorter.length>0){
                  if (sorter.val()==="alpha"){
                      filterList.children('li').sort(
                         function (a,b){
-                         if ( ($(a).children().children('input:checkbox')[0].checked) && !($(b).children().children('input:checkbox')[0].checked)){
+                         if ( ($(a).children().children('input:checkbox')[0].checked || $(a).children().children('input:checkbox')[0].indeterminate) && !($(b).children().children('input:checkbox')[0].checked || $(b).children().children('input:checkbox')[0].indeterminate)){
                              return -1;
                          }
-                         else if ( ($(b).children().children('input:checkbox')[0].checked) && !($(a).children().children('input:checkbox')[0].checked)){
+                         else if ( ($(b).children().children('input:checkbox')[0].checked || $(b).children().children('input:checkbox')[0].indeterminate) && !($(a).children().children('input:checkbox')[0].checked || $(a).children().children('input:checkbox')[0].indeterminate)){
                              return 1;
                          }
 
-                         else if ($(b).children().children('.value').text() < $(a).children().children('.value').text()){
+                         else if ($(b).children().children('.value').text().trim() < $(a).children().children('.value').text().trim()){
                              return 1;
                          }
                          else{
@@ -2204,15 +2253,15 @@ require([
                  else if (sorter.val()==="num"){
                      filterList.children('li').sort(
                         function (a,b){
-                            if ( ($(a).children().children('input:checkbox')[0].checked) && !($(b).children().children('input:checkbox')[0].checked)){
+                            if ( ($(a).children().children('input:checkbox')[0].checked || $(a).children().children('input:checkbox')[0].indeterminate) && !($(b).children().children('input:checkbox')[0].checked || $(b).children().children('input:checkbox')[0].indeterminate)){
                              return -1;
                              }
-                             else if ( ($(b).children().children('input:checkbox')[0].checked) && !($(a).children().children('input:checkbox')[0].checked)){
+                             else if ( ($(b).children().children('input:checkbox')[0].checked || $(b).children().children('input:checkbox')[0].indeterminate) && !($(a).children().children('input:checkbox')[0].checked || $(a).children().children('input:checkbox')[0].indeterminate)){
                                 return 1;
                              }
                             else {
 
-                                return ($(b).children().children('input:checkbox')[0].checked < $(a).children().children('input:checkbox')[0].checked ? 1 : parseFloat($(a).children().children('.case_count').text()) < parseFloat($(b).children().children('.case_count').text()) ? 1 : -1)
+                                return (parseFloat($(a).children().children('.case_count').text()) < parseFloat($(b).children().children('.case_count').text()) ? 1 : -1)
                                }
                             }).appendTo(filterList);
                  }
@@ -2364,20 +2413,29 @@ require([
                         }
                 }
             }
-            addSliders('search_orig_set', false, hideEmpty,'');
+            /*addSliders('search_orig_set', false, hideEmpty,'');
             addSliders('quantitative', false, hideEmpty,'');
-            addSliders('tcga_clinical',false, hideEmpty,'tcga_clinical.');
+            addSliders('tcga_clinical',false, hideEmpty,'tcga_clinical.');*/
         }
 
         window.updateColl = function(srch){
-            var filtSet=['program_set']
             var checked=$('#Program').find('.hide-zeros')[0].checked;
+            var filtSet=['program_set']
+            /* for (program in window.programs){
+                if (Object.keys(window.programs[program].projects).length>1){
+                    filtSet.push(program)
+                }
+            }*/
+
             setAllFilterElements(checked,filtSet,srch);
         }
 
         window.hideAtt = function(hideElem){
             var filtSet = ["search_orig_set","segmentation","quantitative","qualitative","tcga_clinical"];
             setAllFilterElements(hideElem.checked, filtSet);
+            addSliders('search_orig_set', false, hideEmpty,'');
+            addSliders('quantitative', false, hideEmpty,'');
+            addSliders('tcga_clinical',false, hideEmpty,'tcga_clinical.');
         }
 
         var updateFilterSelections = function (id, dicofdic) {
@@ -2588,6 +2646,8 @@ require([
 
             $('#' + filterId).find('.check-all').on('click', function () {
                 if (!is_cohort) {
+                    checkUncheckAll(this, true, true);
+                    /*
                     //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
                     var filterElems = new Object();
                     filterElems = $(this).parentsUntil('.list-group-item, #program_set').filter('.list-group-item__body, .list-group-sub-item__body, #Program').children('ul').children();
@@ -2606,11 +2666,14 @@ require([
                             handleFilterSelectionUpdate(ckElem, true, true);
                         }
                     }
+                    */
                 }
             });
 
             $('#' + filterId).find('.uncheck-all').on('click', function () {
               if (!is_cohort){
+                  checkUncheckAll(this, false, false);
+                    /*
                     //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
                     var filterElems = new Object();
                     filterElems = $(this).parentsUntil('.list-group-item, #program_set').filter('.list-group-item__body, .list-group-sub-item__body, #Program').children('ul').children();
@@ -2629,10 +2692,60 @@ require([
                             handleFilterSelectionUpdate(ckElem, true, true);
                         }
                    }
+                  */
               }
             });
         };
 
+        var checkUncheckAll = function(aelem, isCheck, checkSrch){
+            //$('#' + filterId).find('.checkbox').find('input').prop('checked', true);
+                    var filterElems = new Object();
+                    filterElems = $(aelem).parentsUntil('.list-group-item, #program_set').filter('.list-group-item__body, .list-group-sub-item__body, #Program').children('ul').children();
+                    for (var ind = 0; ind < filterElems.length; ind++) {
+                        var ckElem = new Object();
+                        if ($(filterElems[ind]).children().filter('.list-group-item__heading').length > 0) {
+                            ckElem = $(filterElems[ind]).children().filter('.list-group-item__heading').children().filter('input:checkbox')[0];
+                        } else {
+                            ckElem = $(filterElems[ind]).children().filter('label').children().filter('input:checkbox')[0];
+                        }
+                        var subListUsed=false
+                        if (checkSrch) {
+                            subListElem = $(ckElem).parent().parent().children('.list-group-sub-item__body')
+                            if (subListElem.length > 0) {
+                                subListUsed = true
+                                subFilterElems = subListElem.find('ul').find('.checkbox')
+                                for (var subInd = 0; subInd < subFilterElems.length; subInd++) {
+                                    subFilterElem = subFilterElems[subInd];
+                                    if (!$(subFilterElem).hasClass('filtByVal')) {
+                                        subCkElem = $(subFilterElem).find('input:checkbox')[0];
+                                        subCkElem.checked = isCheck;
+                                        if ((subInd < subFilterElems.length - 1) || (ind < filterElems.length - 1)) {
+                                            handleFilterSelectionUpdate(subCkElem, false, false);
+                                        } else {
+                                            handleFilterSelectionUpdate(subCkElem, true, true);
+                                        }
+                                    }
+
+                                }
+
+                            } else if (!$(ckElem).parent().parent().hasClass('filtByVal')) {
+                                ckElem.checked = isCheck;
+                            }
+                        }
+                        else {
+                            ckElem.checked = isCheck;
+                        }
+
+                        //$(filterElem).prop('checked') = true;
+                        if ((ind < filterElems.length - 1) && (!subListUsed)){
+                            handleFilterSelectionUpdate(ckElem, false, false);
+                        } else if (!subListUsed) {
+                            handleFilterSelectionUpdate(ckElem, true, true);
+                        }
+
+                    }
+
+        }
         var clearFilter = function (filterElem) {
             if (filterElem.classList.contains('all')){
                     for (cat in window.filterObj){
