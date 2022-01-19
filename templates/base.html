@@ -35,6 +35,10 @@
 
     {% block header %}{% endblock %}
 
+    {% if CRAZY_EGG %}
+        <script type="text/javascript" src="//script.crazyegg.com/pages/scripts/0076/1527.js" async="async" ></script>
+    {% endif %}
+
     {% if SITE_GOOGLE_ANALYTICS %}
         <!-- Global site tag (gtag.js) - Google Analytics -->
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ SITE_GOOGLE_ANALYTICS_TRACKING_ID }}"></script>
