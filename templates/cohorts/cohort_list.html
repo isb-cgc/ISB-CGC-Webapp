@@ -27,7 +27,10 @@
 {% url 'cohort_manifest_base' as export_uri %}
 {% include "cohorts/export-manifest-modal.html" with export_uri=export_uri %}
 
-<div id="version_d" tabindex="-1"  class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-draggable ui-resizable" aria-describedby="dialog-1" aria-labelledby="ui-id-1">
+<div id="version_d" tabindex="-1"
+     class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-draggable ui-resizable hidden"
+     aria-describedby="dialog-1"
+     aria-labelledby="ui-id-1">
         <div class="ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix ui-draggable-handle">
              <span id="ui-id-1" class="ui-dialog-title">Comparing Versions of Cohort -1</span>
              <button onclick="$('#version_d').hide()"><i class="fa fa-times"></i></button>
