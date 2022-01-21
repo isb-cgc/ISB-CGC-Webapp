@@ -2433,9 +2433,9 @@ require([
         window.hideAtt = function(hideElem){
             var filtSet = ["search_orig_set","segmentation","quantitative","qualitative","tcga_clinical"];
             setAllFilterElements(hideElem.checked, filtSet);
-            addSliders('search_orig_set', false, hideEmpty,'');
-            addSliders('quantitative', false, hideEmpty,'');
-            addSliders('tcga_clinical',false, hideEmpty,'tcga_clinical.');
+            addSliders('search_orig_set', false, hideElem.checked,'');
+            addSliders('quantitative', false, hideElem.checked,'');
+            addSliders('tcga_clinical',false, hideElem.checked,'tcga_clinical.');
         }
 
         var updateFilterSelections = function (id, dicofdic) {
