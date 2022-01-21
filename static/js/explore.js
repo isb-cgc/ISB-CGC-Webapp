@@ -67,7 +67,7 @@ require([
 
     $('#save-cohort-modal').on('show.bs.modal', function() {
         var filters = {};
-        $('#program_set input:checked, ' +
+        $('#program_set .search-checkbox-list input:checked , ' +
             '#search_orig_set .search-checkbox-list input:checked, ' +
             '#search_related_set .search-checkbox-list input:checked, ' +
             '#search_derived_set .search-checkbox-list input:checked').each(function(){
