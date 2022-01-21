@@ -544,7 +544,6 @@ require([
     });
 
     $(document).ready(function () {
-        $('#version_d').hide();
-
+        $('.cohorts-panel, .site-footer').removeClass('hidden');
     });
 });

@@ -92,7 +92,7 @@
         </div>
     </div>
     <!-- The landing page and collections page have a special layout, so they have their own footer include -->
-    {% if request.path != '/' and request.path != '/collections/' %}
+    {% if request.path != '/' and request.path != '/collections/' and request.path != '/cohorts/' %}
         {% include 'share/site_footer.html'  %}
     {% endif %}
 </main>
