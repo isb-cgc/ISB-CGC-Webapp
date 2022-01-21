@@ -28,7 +28,8 @@
 {% include "cohorts/export-manifest-modal.html" with export_uri=export_uri %}
 
 <div id="version_d" tabindex="-1"
-     class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-draggable ui-resizable hidden"
+     class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-draggable ui-resizable"
+     style="display: none;"
      aria-describedby="dialog-1"
      aria-labelledby="ui-id-1">
         <div class="ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix ui-draggable-handle">
@@ -81,7 +82,7 @@
 {#            </button>#}
 {#        </li>#}
     </div>
-    <div class="panel panel-default short-inner-content">
+    <div class="panel panel-default short-inner-content cohorts-panel hidden">
         <div class="panel-body" id="saved-cohorts-list">
             {% if cohorts.has_private_cohorts %}
                 <table id="cohort-table" class="table table-striped tablesorter cohort-table table-hover">
@@ -314,7 +315,8 @@
 {#            </div>#}
 {#        </div>#}
 {#    </div>#}
-
+<!-- Include footer here instead of base.html so it can be hidden by default -->
+{% include 'share/site_footer.html' with hide="True" %}
 {% endblock %}
 
 {% block js_file %}
