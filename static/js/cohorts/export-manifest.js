@@ -43,7 +43,6 @@ require.config({
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'jquerydt': ['jquery'],
-        'base': ['jquery', 'jqueryui', 'bootstrap', 'session_security', 'underscore', 'utils', 'assetscore', 'assetsresponsive', 'tablesorter'],
         'underscore': {exports: '_'},
         'tablesorter': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],

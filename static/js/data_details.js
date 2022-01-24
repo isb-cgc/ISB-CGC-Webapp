@@ -51,8 +51,7 @@ require.config({
         'bloodhound': {
            deps: ['jquery'],
            exports: 'Bloodhound'
-        },
-        'base': ['jquery', 'jqueryui', 'bootstrap', 'underscore']
+        }
     }
 });
 
