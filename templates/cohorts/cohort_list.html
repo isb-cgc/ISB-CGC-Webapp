@@ -325,6 +325,6 @@
         var user_id = {% if request.user.is_authenticated %}{{ request.user.id|safe }}{% else %}null{% endif %};
     </script>
 	{{ block.super }}
-	<script src="{% static 'js/cohorts/cohort-list.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/cohorts/cohort-list.js' %}?v={{ APP_VERSION }}"></script>
+    <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}?v={{ APP_VERSION }}"></script>
 {% endblock %}
