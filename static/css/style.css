@@ -71,7 +71,7 @@ ul, ol {
   pages that are lacking content to appropriately extend the page
  */
 .short-inner-content {
-  min-height: calc(100vh - 306px);
+  min-height: calc(100vh - 310px);
   /* 306 = margin-top of main (for site header, 86) + page header (56) + page header padding (20) +
   panel bottom margin (20) + footer height (124) */
 }
@@ -88,12 +88,12 @@ ul, ol {
 
 /* The landing page has an additional section (summary) which complicates the layout count */
 #landing .short-inner-content {
-  min-height: calc(100vh - 290px);
+  min-height: calc(100vh - 294px);
 }
 
 /* The cohorts list page has an additional section (action buttons) which complicates the layout count */
 #cohorts-list .short-inner-content {
-  min-height: calc(100vh - 389px);
+  min-height: calc(100vh - 394px);
 }
 
 

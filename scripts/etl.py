@@ -627,6 +627,7 @@ def parse_args():
     parser.add_argument('-v', '--display-vals', type=str, default='', help='List of display values to add/update')
     parser.add_argument('-p', '--programs-file', type=str, default='', help='List of programs to add/update')
     parser.add_argument('-a', '--attributes-file', type=str, default='', help='List of attributes to add/update')
+    parser.add_argument('-s', '--solr-files', type=str, default='n', help='Should Solr parameter files be made? (Yy/Nn)')
     return parser.parse_args()
 
 
@@ -712,9 +713,10 @@ def main():
             for attr in dvals:
                 update_display_values(Attribute.objects.get(name=attr), dvals[attr]['vals'])
 
-        # for src in [("idc-dev-etl.idc_v5.dicom_derived_all", "dicom_derived_series_v5",),
-        #             ("idc-dev-etl.idc_v5.dicom_derived_all", "dicom_derived_study_v5",),]:
-        #     create_solr_params(src[0],src[1])
+        if args.solr_files.lower() == 'y':
+            for src in [("idc-dev-etl.idc_v7.dicom_derived_all", "dicom_derived_series_v7",),
+                    ("idc-dev-etl.idc_v7.dicom_derived_all", "dicom_derived_study_v7",),]:
+                create_solr_params(src[0],src[1])
 
     except Exception as e:
         logging.exception(e)

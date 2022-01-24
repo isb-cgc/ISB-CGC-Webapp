@@ -35,8 +35,7 @@ require.config({
         'jquerydt': ['jquery'],
         'tablesorter': ['jquery'],
         'underscore': {exports: '_'},
-        'session_security': ['jquery'],
-        'base': ['jquery', 'jqueryui', 'bootstrap', 'session_security', 'underscore', 'utils', 'assetscore', 'assetsresponsive', 'tablesorter']
+        'session_security': ['jquery']
     }
 });
 
