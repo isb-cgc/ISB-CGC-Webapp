@@ -93,7 +93,7 @@ ul, ol {
 
 /* The cohorts list page has an additional section (action buttons) which complicates the layout count */
 #cohorts-list .short-inner-content {
-  min-height: calc(100vh - 395px);
+  min-height: calc(100vh - 394px);
 }
 
 
