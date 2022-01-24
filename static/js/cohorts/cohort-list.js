@@ -41,11 +41,11 @@ require.config({
 
 require([
     'jquery',
+    'base',
     'datatables.net',
     'jqueryui',
     'bootstrap',
-    'tablesorter',
-    'base'
+    'tablesorter'
 ], function($,base) {
 
     var cohort_list_table = $('#cohort-table').DataTable({
@@ -544,7 +544,6 @@ require([
     });
 
     $(document).ready(function () {
-        $('#version_d').hide();
-
+        $('.cohorts-panel, .site-footer').removeClass('hidden');
     });
 });

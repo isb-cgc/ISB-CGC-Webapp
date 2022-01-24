@@ -634,26 +634,26 @@ def main():
 
     try:
         args = parse_args()
-        new_versions = ["TCIA Image Data Version 6","TCIA Derived Data Version 6"]
+        new_versions = ["TCIA Image Data Version 7", "TCIA Derived Data Version 7"]
 
-        set_types = ["IDC Source Data","Derived Data"]
+        set_types = ["IDC Source Data", "Derived Data"]
         bioclin_version = ["GDC Data Release 9"]
 
         add_data_versions(
             {'name': "IDC Data Release",
-             'version_number': "6.0",
-             'case_count': 52042,
-             'collex_count': 112,
-             'data_volume': 21.04,
-             'series_count': 420747
+             'version_number': "7.0",
+             'case_count': 0,
+             'collex_count': 0,
+             'data_volume': 0,
+             'series_count': 0
              },
-            [{'name': x, 'ver': '6'} for x in new_versions],
+            [{'name': x, 'ver': '7'} for x in new_versions],
             bioclin_version
         )
 
         add_data_sources([
             {
-                'name': 'dicom_derived_series_v6',
+                'name': 'dicom_derived_series_v7',
                 'source_type': DataSource.SOLR,
                 'count_col': 'PatientID',
                 'programs': [],
@@ -662,7 +662,7 @@ def main():
                 'aggregate_level': "SeriesInstanceUID"
             },
             {
-                'name': 'dicom_derived_study_v6',
+                'name': 'dicom_derived_study_v7',
                 'source_type': DataSource.SOLR,
                 'count_col': 'PatientID',
                 'programs': [],
@@ -671,7 +671,7 @@ def main():
                 'aggregate_level': "StudyInstanceUID"
             },
             {
-                'name': 'idc-dev-etl.idc_v6.dicom_pivot_v6',
+                'name': 'idc-dev-etl.idc_v6.dicom_pivot_v7',
                 'source_type': DataSource.BIGQUERY,
                 'count_col': 'PatientID',
                 'programs': [],
@@ -682,23 +682,23 @@ def main():
         ])
 
         add_source_joins(
-            ['dicom_derived_study_v6','dicom_derived_series_v6'],
+            ['dicom_derived_study_v7','dicom_derived_series_v7'],
             "PatientID",
             ["tcga_bios","tcga_clin"],
             "case_barcode"
         )
 
         add_source_joins(
-            ["idc-dev-etl.idc_v6.dicom_pivot_v6"],
+            ["idc-dev-etl.idc_v7.dicom_pivot_v6"],
             "PatientID",
-            ["idc-dev-etl.idc_v5.tcga_biospecimen_rel9","idc-dev-etl.idc_v5.tcga_clinical_rel9"],
+            ["idc-dev-etl.idc_v7.tcga_biospecimen_rel9","idc-dev-etl.idc_v7.tcga_clinical_rel9"],
             "case_barcode"
         )
 
-        copy_attrs(["idc-dev-etl.idc_v5.dicom_pivot_v5"],["idc-dev-etl.idc_v6.dicom_pivot_v6"])
-        copy_attrs(["dicom_derived_series_v5"],["dicom_derived_series_v6","dicom_derived_study_v6"])
+        copy_attrs(["idc-dev-etl.idc_v6.dicom_pivot_v6"],["idc-dev-etl.idc_v7.dicom_pivot_v7"])
+        copy_attrs(["dicom_derived_series_v6"],["dicom_derived_series_v7","dicom_derived_study_v7"])
 
-        deactivate_data_versions(["TCIA Image Data Version 5","TCIA Derived Data Version 5"], ["5.0"])
+        deactivate_data_versions(["TCIA Image Data Version 6","TCIA Derived Data Version 6"], ["6.0"])
 
         len(args.attributes_file) and load_attributes(args.attributes_file,
             ["dicom_derived_series_v6","dicom_derived_study_v6"], ["idc-dev-etl.idc_v5.dicom_pivot_v6"]
