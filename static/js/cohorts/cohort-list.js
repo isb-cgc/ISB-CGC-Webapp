@@ -34,8 +34,7 @@ require.config({
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'datatables.net': ['jquery'],
-        'tablesorter': ['jquery'],
-        'base': ['jquery', 'jqueryui', 'bootstrap', 'session_security', 'underscore', 'utils', 'assetscore', 'assetsresponsive', 'tablesorter']
+        'tablesorter': ['jquery']
     }
 });
 
