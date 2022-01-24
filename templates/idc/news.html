@@ -38,9 +38,9 @@
 
 {% block js_file %}
 	{{ block.super }}
-	<script src="{% static 'js/news.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/news.js' %}?v={{ APP_VERSION }}"></script>
     <script>
     var showWarning = true;
     </script>
-    <script src="https://discourse.canceridc.dev/javascripts/embed-topics.js"></script>
+    <script type="text/javascript" src="https://discourse.canceridc.dev/javascripts/embed-topics.js"></script>
 {% endblock %}

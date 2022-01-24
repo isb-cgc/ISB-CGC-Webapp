@@ -101,5 +101,5 @@
     </script>
     <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
     {{ block.super }}
-    <script type="text/javascript" src="{% static 'js/explore.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/explore.js' %}?v={{ APP_VERSION }}"></script>
 {% endblock %}

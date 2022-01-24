@@ -35,7 +35,6 @@ require.config({
         'jqueryui': ['jquery'],
         'tokenfield': ['jquery', 'jqueryui'],
         'underscore': {exports: '_'},
-        'base': ['jquery', 'jqueryui', 'bootstrap', 'underscore'],
     }
 });
 
