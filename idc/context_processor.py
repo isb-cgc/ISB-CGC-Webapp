@@ -17,5 +17,6 @@ def additional_context(request):
             'DICOM_STORE_PATH': settings.DICOM_STORE_PATH,
             'SLIM_VIEWER_PATH': settings.SLIM_VIEWER_PATH,
             'APP_VERSION': settings.APP_VERSION,
-            'DEV_TIER': settings.DEV_TIER
+            'DEV_TIER': settings.DEV_TIER,
+            'CRAZY_EGG': settings.CRAZY_EGG
     }
