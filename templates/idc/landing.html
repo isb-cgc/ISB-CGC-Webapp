@@ -142,7 +142,7 @@
 
 {% block js_file %}
     {{ block.super }}
-    <script src="{% static 'js/landing.js' %}"></script>
+    <script src="{% static 'js/landing.js' %}?v={{ APP_VERSION }}"></script>
     <script>
     var case_counts = {{ case_counts|safe }};
     var ex_tooltips = {{ example_tooltips|safe }};
