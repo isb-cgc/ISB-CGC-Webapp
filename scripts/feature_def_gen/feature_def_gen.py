@@ -40,7 +40,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 def run_query(project_id, provider, config):
-    job_reference = provider.submit_query_and_get_job_ref(project_id)
+    provider.submit_query_and_get_job_ref(project_id)
 
     poll_retry_limit = provider.BQ_JOB_POLL_MAX_RETRIES
     poll_sleep_time = provider.BQ_JOB_POLL_SLEEP_TIME

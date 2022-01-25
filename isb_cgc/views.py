@@ -119,9 +119,9 @@ def _decode_dict(data):
 
 @never_cache
 def landing_page(request):
-    mitelman_url = settings.MITELMAN_URL
+
     logger.info("[STATUS] Received landing page view request at {}".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-    return render(request, 'isb_cgc/landing.html', {'mitelman_url': mitelman_url })
+    return render(request, 'isb_cgc/landing.html', {'mitelman_url': settings.MITELMAN_URL, 'tp53_url': settings.TP53_URL })
 
 
 # Redirect all requests for the old landing page location to isb-cgc.org
@@ -447,15 +447,6 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
 
     return JsonResponse(result, status=status)
 
-
-def dicom(request, study_uid=None):
-    template = 'isb_cgc/dicom.html'
-
-    context = {
-        'study_uid': study_uid,
-        'dicom_viewer': settings.DICOM_VIEWER
-    }
-    return render(request, template, context)
 
 @login_required
 def test_solr_data(request):
