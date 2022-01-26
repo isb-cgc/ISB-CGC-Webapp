@@ -270,7 +270,7 @@ def add_source_joins(froms, from_col, tos=None, to_col=None):
         DataSourceJoin.objects.bulk_create(src_joins)
 
 
-def load_collections(filename):
+def load_collections(filename, data_version="7.0"):
     try:
         collection_file = open(filename, "r")
         new_collection_set = []
@@ -279,35 +279,36 @@ def load_collections(filename):
             collex = {
                 'data': {
                     "collection_id": line[0],
-                    "name": line[1],
-                    "collections": line[2],
-                    "image_types": line[3],
-                    "supporting_data": line[4],
-                    "subject_count": line[5],
-                    "doi": line[6],
-                    "cancer_type": line[7],
-                    "species": line[8],
-                    "location": line[9],
-                    "analysis_artifacts": line[10],
-                    "description": re.sub(r' style="[^"]+"', '', (re.sub(r'<div [^>]+>',"<p>", line[11]).replace("</div>","</p>"))),
-                    "collection_type": line[12],
-                    "access": line[14],
-                    "date_updated": datetime.datetime.strptime(line[15], '%Y-%m-%d'),
-                    "nbia_collection_id": line[16],
-                    "tcia_collection_id": line[16],
-                    "active": bool((line[17]).lower() == "true")
+                    "collection_uuid": line[1],
+                    "name": line[2],
+                    "collections": line[3],
+                    "image_types": line[4],
+                    "supporting_data": line[5],
+                    "subject_count": line[6],
+                    "doi": line[7],
+                    "cancer_type": line[8],
+                    "species": line[9],
+                    "location": line[10],
+                    "analysis_artifacts": line[11],
+                    "description": re.sub(r' style="[^"]+"', '', (re.sub(r'<div [^>]+>',"<p>", line[12]).replace("</div>","</p>"))),
+                    "collection_type": line[13],
+                    "access": line[15],
+                    "date_updated": datetime.datetime.strptime(line[16], '%Y-%m-%d'),
+                    "nbia_collection_id": line[17],
+                    "tcia_collection_id": line[17],
+                    "active": bool((line[18]).lower() == "true")
                 },
-                "data_versions": [{"ver": "5.0", "name": "TCIA Image Data"}]
+                "data_versions": [{"ver": data_version, "name": "TCIA Image Data"}]
             }
-            if line[13] and len(line[13]):
+            if line[14] and len(line[14]):
                 try:
-                    prog = Program.objects.get(short_name=line[13])
+                    prog = Program.objects.get(short_name=line[14])
                     collex['data']['program'] = prog
                 except Exception as e:
-                    logger.info("[STATUS] Program {} not found for collection {} - it will not be added!".format(line[13],line[1]))
+                    logger.info("[STATUS] Program {} not found for collection {} - it will not be added!".format(line[14],line[2]))
             try:
-                Collection.objects.get(name=line[1])
-                logger.info("[STATUS] Collection {} already exists - it will be updated.".format(line[1]))
+                Collection.objects.get(collection_uuid=line[1])
+                logger.info("[STATUS] Collection {} already exists - it will be updated.".format(line[2]))
                 updated_collection_set[line[1]] = collex
             except ObjectDoesNotExist:
                 new_collection_set.append(collex)
@@ -336,7 +337,7 @@ def add_collections(new,update):
 
         collex_to_dv = []
         for collex in new:
-            obj = Collection.objects.get(name=collex['data']['name'])
+            obj = Collection.objects.get(collection_uuid=collex['data']['collection_uuid'])
 
             if len(collex.get('data_versions',[])):
                 collex_to_dv = []
@@ -643,10 +644,10 @@ def main():
         add_data_versions(
             {'name': "IDC Data Release",
              'version_number': "7.0",
-             'case_count': 0,
-             'collex_count': 0,
-             'data_volume': 0,
-             'series_count': 0
+             'case_count': 53544,
+             'collex_count': 122,
+             'data_volume': 20.48,
+             'series_count': 426088
              },
             [{'name': x, 'ver': '7'} for x in new_versions],
             bioclin_version
@@ -672,7 +673,7 @@ def main():
                 'aggregate_level': "StudyInstanceUID"
             },
             {
-                'name': 'idc-dev-etl.idc_v6.dicom_pivot_v7',
+                'name': 'idc-dev-etl.idc_v7.dicom_pivot_v7',
                 'source_type': DataSource.BIGQUERY,
                 'count_col': 'PatientID',
                 'programs': [],
@@ -690,7 +691,7 @@ def main():
         )
 
         add_source_joins(
-            ["idc-dev-etl.idc_v7.dicom_pivot_v6"],
+            ["idc-dev-etl.idc_v7.dicom_pivot_v7"],
             "PatientID",
             ["idc-dev-etl.idc_v7.tcga_biospecimen_rel9","idc-dev-etl.idc_v7.tcga_clinical_rel9"],
             "case_barcode"
@@ -702,7 +703,7 @@ def main():
         deactivate_data_versions(["TCIA Image Data Version 6","TCIA Derived Data Version 6"], ["6.0"])
 
         len(args.attributes_file) and load_attributes(args.attributes_file,
-            ["dicom_derived_series_v6","dicom_derived_study_v6"], ["idc-dev-etl.idc_v5.dicom_pivot_v6"]
+            ["dicom_derived_series_v7","dicom_derived_study_v7"], ["idc-dev-etl.idc_v7.dicom_pivot_v7"]
         )
 
         len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
