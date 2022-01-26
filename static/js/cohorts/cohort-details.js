@@ -42,8 +42,27 @@ require([
     'bootstrap',
     'assetscore',
     'assetsresponsive'
-], function($, jqueryui, base, bootstrap) {
+], function($, jqueryui, base) {
     A11y.Core();
 
+    $('#bq-string-display').on('show.bs.modal', function() {
+        $.ajax({
+            url: $('#bq-string-display .modal-body').data('uri'),
+            method: 'GET',
+            success: function (data) {
+                $('#bq-string-display .bq-string').innerHTML = data['data']['query_string'];
+            },
+            error: function (xhr) {
+                var responseJSON = $.parseJSON(xhr.responseText);
+                // If we received a redirect, honor that
+                if(responseJSON.redirect) {
+                    base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                    window.location = responseJSON.redirect;
+                } else {
+                    base.showJsMessage(responseJSON.level || "error",responseJSON.message,true, "#bq-string-modal-js-messages");
+                }
+            }
+        });
+    });
 
 });
