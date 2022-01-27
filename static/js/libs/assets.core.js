@@ -272,7 +272,7 @@ var A11y = {
                 'cursor': 'context-menu'
             });
         }
-        $(".fa-trash-o").attr("style", "font-family :'FontAwesome' !important").html("<span class='adobeBlank'>Delete icon </span>");
+        $(".fa-trash-o").attr("style", "font-family :'Font Awesome 6 Free' !important").html("<span class='adobeBlank'>Delete icon </span>");
         //change text for save button also
         $('.dataTable').on('click', '.rowActionBtn.save', function() {
             $('#liveText').text('Changes Saved');
@@ -329,7 +329,7 @@ var A11y = {
     //datepicker 508
     datepicker: function() {
         //add fontawesome font family to datepicker calendars
-        $('.date-picker-control .fa.fa-calendar').attr("style", "font-family :'FontAwesome' !important");
+        $('.date-picker-control .fa.fa-calendar').attr("style", "font-family :'Font Awesome 6 Free' !important");
     },
 
     //dialog 508
@@ -375,7 +375,7 @@ var A11y = {
 
         //make 'x' close button in header larger
         titleBar.find('.ui-button').attr({
-            "style": "font-family: 'FontAwesome' !important;font-size: 44px !important;"
+            "style": "font-family: 'Font Awesome 6 Free' !important;font-size: 44px !important;"
         });
         //change title to H1
         title.replaceWith(function() {
@@ -528,10 +528,10 @@ var A11y = {
 
     //font based icons 508
     fontIcons: function() {
-        $('.fa').attr("style", "font-family :'FontAwesome' !important");
+        $('.fa').attr("style", "font-family :'Font Awesome 6 Free' !important");
         $('.glyphicon').delay(500).attr("style", "font-family :'Glyphicons Halflings' !important");
         $('button[data-validationtrigger]').on('click', function() {
-            $('.fa').attr("style", "font-family :'FontAwesome' !important");
+            $('.fa').attr("style", "font-family :'Font Awesome 6 Free' !important");
             $('.glyphicon').delay(500).attr("style", "font-family :'Glyphicons Halflings' !important");
         });
     },

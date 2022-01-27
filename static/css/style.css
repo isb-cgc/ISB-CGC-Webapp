@@ -151,9 +151,12 @@ nav {
 .navbar-nav li a:hover {
   background-color: #fff; }
 
+.navbar-signin .dropdown i.fa {
+  font-size: x-large !important;
+}
+
 #user-dropdown i.fa {
   margin-top: -5px;
-  font-size: x-large !important;
 }
 
 #secondary-nav {
@@ -4304,9 +4307,11 @@ ul.errorlist {
   margin-top: 80px;
 }
 
-.inactive-data-version {
-  background-color: #a19ca2;
+.inactive-data-version p {
+  background-color: #8d8a8e;
   color: #ffffff;
+  display: inline-block;
+  padding: 8px;
 }
 
 .sorter input {
