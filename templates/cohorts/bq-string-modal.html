@@ -9,7 +9,10 @@
                     </div>
                 </div>
                 <div class="modal-body">
-                    <pre class="code bq-string">
+                    <button type="button" class="copy-this btn btn-special" content="{{ bq_string }}"  title="Copy query text to clipboard">
+                        <i class="fa fa-copy" aria-hidden="true"></i>
+                    </button>
+                    <pre class="code bq-string unformatted">
                     {{ bq_string}}
                     </pre>
                 </div>

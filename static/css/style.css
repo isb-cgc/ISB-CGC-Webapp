@@ -1790,7 +1790,8 @@ section .min-max {
   .page-heading .container {
     padding: 15px; }
   .page-heading .btn.pull-right {
-    margin-top: 5px; }
+    margin-top: 5px;
+    margin-left: 10px;}
   .page-heading .page-action-group {
     margin-bottom: 0; }
 
@@ -2347,6 +2348,16 @@ section .min-max {
    #content: 'case(s)';
     font-size: 1.2em;
     padding-left: 5px; }
+
+#bq-string-display .copy-this {
+  font-size: x-large;
+}
+
+pre.bq-string {
+  max-height: 600px;
+  width: 570px;
+  margin-top: 10px;
+}
 
 #cohort-filelist #placeholder .panel-body {
   height: 500px;
