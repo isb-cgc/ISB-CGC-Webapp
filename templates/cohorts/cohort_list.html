@@ -96,6 +96,7 @@
                         <th class="series-col">Series Count</th>
                         <th class="version-col">Data Version</th>
                         <th class="version-col">Version Compare</th>
+                        <th class="version-col">Query String</th>
                     </thead>
                     <colgroup>
                         <col style="width: 3%">
@@ -105,8 +106,9 @@
                         <col style="width: 3%">
                         <col style="width: 3%">
                         <col style="width: 3%">
-                        <col style="width: 20%">
+                        <col style="width: 12%">
                         <col style="width: 6%">
+                        <col style="width: 8%">
                     </colgroup>
                     <tbody>
                     {% for cohort in cohorts %}
@@ -173,6 +175,15 @@
                             {% else %}
                                 <button class="btn-primary compare-version">Compare</button>
                             {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn-icon bq-string-display"
+                                    data-toggle="modal"
+                                    data-target="#bq-string-display"
+                                    data-cohort-id="{{ cohort.id }}"
+                                    data-bq-string-uri="{% url 'bq_string' cohort.id %}"
+                                    title="View the BigQuery String for this cohort"
+                                ><img src="{% static 'img/bq_icon.png' %}"></button>
                             </td>
                         </tr>
                     {% endwith %}
@@ -315,8 +326,11 @@
 {#            </div>#}
 {#        </div>#}
 {#    </div>#}
+{% include "cohorts/bq-string-modal.html" with bq_string_uri="True" %}
+
 <!-- Include footer here instead of base.html so it can be hidden by default -->
 {% include 'share/site_footer.html' with hide="True" %}
+
 {% endblock %}
 
 {% block js_file %}
