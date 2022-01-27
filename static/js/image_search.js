@@ -3106,7 +3106,6 @@ require([
 
      });
 
-
      const myObserver = new ResizeObserver(entries => {
          entries.forEach(entry => {
              htr = $('.vert').height();
@@ -3124,9 +3123,7 @@ require([
          $('.spinner').hide();
      })
 
-
-
-      $(document).ready(function () {
+    $(document).ready(function () {
             window.selItems = new Object();
             window.selItems.selStudies = new Object();
             window.selItems.selCases = new Object();
