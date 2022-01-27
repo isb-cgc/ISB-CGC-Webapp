@@ -56,9 +56,8 @@
 
 {% block content %}
 {% url 'cohort_manifest' cohort_id as export_uri %}
-{% url 'bq_string' cohort_id as bq_string_uri %}
 {% include "cohorts/export-manifest-modal.html" with export_uri=export_uri %}
-{% include "cohorts/bq-string-modal.html" with bq_string_uri=bq_string_uri %}
+{% include "cohorts/bq-string-modal.html" with bq_string=bq_string %}
 
 <script>
    var cohort_loaded = true

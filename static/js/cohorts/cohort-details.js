@@ -25,7 +25,8 @@ require.config({
         underscore: 'libs/underscore-min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
-        base: 'base'
+        base: 'base',
+        sqlFormatter: 'libs/sql-formatter.min'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -39,30 +40,24 @@ require([
     'jquery',
     'jqueryui',
     'base',
+    'sqlFormatter',
     'bootstrap',
     'assetscore',
     'assetsresponsive'
-], function($, jqueryui, base) {
+], function($, jqueryui, base, sqlFormatter) {
     A11y.Core();
 
     $('#bq-string-display').on('show.bs.modal', function() {
-        $.ajax({
-            url: $('#bq-string-display .modal-body').data('uri'),
-            method: 'GET',
-            success: function (data) {
-                $('#bq-string-display .bq-string').innerHTML = data['data']['query_string'];
-            },
-            error: function (xhr) {
-                var responseJSON = $.parseJSON(xhr.responseText);
-                // If we received a redirect, honor that
-                if(responseJSON.redirect) {
-                    base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
-                    window.location = responseJSON.redirect;
-                } else {
-                    base.showJsMessage(responseJSON.level || "error",responseJSON.message,true, "#bq-string-modal-js-messages");
-                }
-            }
-        });
+        // sql-formatter doesn't support BigQuery at the moment, so we need to do a little tweaking of the
+        // output.
+        let formattedSql = sqlFormatter.format($('#bq-string-display .bq-string').text().replace("#standardSQL",""));
+        formattedSql = formattedSql.replace(/\s-\s/g,"-")
+            .replace(/((JOIN|FROM)\s+`)\s+/g,"$1")
+            .replace(/(\.[A-Za-z0-9_]+)\s`/g,"$1`")
+            .replace(/\s(ON\s)/g,"\n$1")
+        ;
+        console.debug(formattedSql);
+        $('#bq-string-display .bq-string').html(formattedSql);
     });
 
 });

@@ -8,12 +8,10 @@
                     <div class="modal-js-messages" id="bq-string-modal-js-messages">
                     </div>
                 </div>
-                <div class="modal-body" data-uri="{{ bq_string_uri }}">
-                    <span class="code bq-string">
-                    SELECT BOB
-                    FROM FOO
-                    WHERE BAR AND BAZ;
-                    </span>
+                <div class="modal-body">
+                    <pre class="code bq-string">
+                    {{ bq_string}}
+                    </pre>
                 </div>
             </div>
         </div>
