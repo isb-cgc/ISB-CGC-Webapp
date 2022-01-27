@@ -16,7 +16,7 @@
                                 <li class="list-group-item">
                                     <div id="{{ program.id }}-heading-{{attr.name}}" class="list-group-item__heading">
                                         <a role="button" data-toggle="collapse" data-parent="#clin-accordion-{{ program.id }}" href="#{{ program.id }}-collapse-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-{{ attr.name }}">
-                                            <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
+                                            <i class="fa fa-solid fa-caret-right"></i><i class="fa fa-solid fa-caret-down"></i> {{ attr.displ_name }}
                                         </a>
                                     </div>
 
@@ -82,7 +82,7 @@
                                 <div class="list-group-item__heading" role="tab" id="{{ program.id }}-heading-{{ attr.name }}">
                                     <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#{{ program.id }}-collapse-{{ attr.name }}"
                                        aria-expanded="false" aria-controls="collapse-{{ attr.name }}" {% if 'mRNA' in attr.name or 'miRNA' in attr.name %}style="text-transform:none!important"{% endif %}>
-                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name|check_special_casing }}
+                                        <i class="fa fa-solid fa-caret-right"></i><i class="fa fa-solid fa-caret-down"></i> {{ attr.displ_name|check_special_casing }}
                                     </a>
                                 </div>
                                 <div id="{{ program.id }}-collapse-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
@@ -130,7 +130,7 @@
                         <li class="list-group-item">
                             <div class="list-group-item__heading" role="tab" id="p-{{ program.id }}-heading-gene-mutation-status">
                                 <a class="collapse-gene-mutation-status" role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#p-{{ program.id }}-collapse-gene-mutation-status" aria-expanded="false" aria-controls="collapse-gene-mutation-status">
-                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> GENE MUTATION STATUS
+                                    <i class="fa fa-solid fa-caret-right"></i><i class="fa fa-solid fa-caret-down"></i> GENE MUTATION STATUS
                                 </a>
                             </div>
                             <div id="p-{{ program.id }}-collapse-gene-mutation-status" class="list-group-item__body collapse cohort-feature-select-block gene-mutation-status" role="tabpanel"
