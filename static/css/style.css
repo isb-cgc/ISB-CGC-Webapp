@@ -2389,6 +2389,7 @@ pre.bq-string {
 
 .compare-version i {
   font-size: x-large;
+  color: #32699a;
 }
 
 #cohort-filelist #placeholder .panel-body {
