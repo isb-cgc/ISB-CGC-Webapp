@@ -1,4 +1,4 @@
-@import url("./font-awesome.min.css");
+@import url("../fontawesome/css/all.min.css");
 @import url("./vendor.css");
 @import url("./sapiens.css");
 @import url("./gdc-fonts.css");
@@ -150,6 +150,14 @@ nav {
 
 .navbar-nav li a:hover {
   background-color: #fff; }
+
+.navbar-signin .dropdown i.fa {
+  font-size: x-large !important;
+}
+
+#user-dropdown i.fa {
+  margin-top: -5px;
+}
 
 #secondary-nav {
   background-color: #fff;
@@ -2382,6 +2390,14 @@ pre.bq-string {
   width: 20px;
 }
 
+button.compare-version {
+  padding: 4px 4px 2px 4px;
+}
+.compare-version i {
+  font-size: 22px;
+  color: #32699a;
+}
+
 #cohort-filelist #placeholder .panel-body {
   height: 500px;
   position: relative;
@@ -4294,9 +4310,11 @@ ul.errorlist {
   margin-top: 80px;
 }
 
-.inactive-data-version {
-  background-color: #a19ca2;
+.inactive-data-version p {
+  background-color: #8d8a8e;
   color: #ffffff;
+  display: inline-block;
+  padding: 8px;
 }
 
 .sorter input {

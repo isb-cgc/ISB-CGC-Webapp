@@ -335,7 +335,7 @@ require([
 
     tippy('.coll-explain', {
         allowHTML:true,
-        content: 'For collections denoted by the <i class="fa fa-minus-circle"></i> icon image files are not publicly available',
+        content: 'For collections denoted by the <i class="fa-solid fa-circle-minus"></i> icon image files are not publicly available',
         interactive:true
 
     });
