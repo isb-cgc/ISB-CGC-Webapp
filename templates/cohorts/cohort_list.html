@@ -172,13 +172,12 @@
                                 </p>
                             </td>
                             <td>
-                            {% if only_active_versions %}
-                                &nbsp;
-                            {% else %}
-                                <button class="btn-icon compare-version" title="Compare this cohort's counts in the new data version.">
+                                <button class="btn btn-icon compare-version" role="button"
+                                    title="{% if only_active_versions %}Version is active.{% else %}Compare this cohort's counts in the new data version.{% endif %}"
+                                    {% if only_active_versions %}disabled{% endif %}
+                                >
                                     <i class="fa-solid fa-code-compare"></i>
                                 </button>
-                            {% endif %}
                             </td>
                             <td>
                                 <button class="btn-icon bq-string-display"

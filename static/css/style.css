@@ -2390,8 +2390,11 @@ pre.bq-string {
   width: 20px;
 }
 
+button.compare-version {
+  padding: 4px 4px 2px 4px;
+}
 .compare-version i {
-  font-size: x-large;
+  font-size: 22px;
   color: #32699a;
 }
 
