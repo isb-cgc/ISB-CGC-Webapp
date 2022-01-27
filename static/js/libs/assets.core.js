@@ -9,9 +9,9 @@ var debugON = false;
 ********************************************************************************/
 var exitText = '<span class="sr-only"> opens a new tab</span>',
     //insert same span but with visible image on page
-    exitTextImage = '<span class="fa fa-external-link fa-spacing"><span class="adobeBlank" aria-hidden="true">New Window icon</span></span><span class="sr-only">This link opens a new window or tab</span>',
+    exitTextImage = '<span class="fa-solid fa-external-link fa-spacing"><span class="adobeBlank" aria-hidden="true">New Window icon</span></span><span class="sr-only">This link opens a new window or tab</span>',
     //policy text
-    policyText = '<a href="http://www.medicare.gov/sharedresources/shared/pages/external-link-disclaimer.aspx" class="fa fa-external-link non-gov-notice" title="Medicare\' External Link Policy" target="_blank"><span class="adobeBlank">New Window icon</span></a>',
+    policyText = '<a href="http://www.medicare.gov/sharedresources/shared/pages/external-link-disclaimer.aspx" class="fa-solid fa-external-link non-gov-notice" title="Medicare\' External Link Policy" target="_blank"><span class="adobeBlank">New Window icon</span></a>',
     //use hidden text to note where user is located
     youAreHere = '<span class="hiddenText">You are here</span>',
     //add ARIA attributes to mobile navigation and remove if screen size is adjusted above mobile screen size
