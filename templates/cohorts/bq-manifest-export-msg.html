@@ -12,9 +12,9 @@ will be available for seven (7) days, accessible via your {{ email }} Google Acc
 {% for table in tables %}
 <b>{{ table.full_id }}</b> {% if table.error %} (ERROR) {% endif %}
 <a role=button" class="copy-this" content="{{ table.full_id }}"  title="Copy table ID to clipboard">
-    ( <i class="fa fa-copy" aria-hidden="true"></i> )
+    ( <i class="fa-solid fa-copy" aria-hidden="true"></i> )
 </a>:
 <a class="external-link" data-toggle="modal" data-target="#external-web-warning" url="{{ table.uri }}">
-    {{ table.uri }} <i class="fa fa-external-link external-link-icon" aria-hidden="true"></i>
+    {{ table.uri }} <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
 </a><br />
 {% endfor %}

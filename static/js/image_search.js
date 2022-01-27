@@ -1248,14 +1248,14 @@ require([
                                     coll_id=row['collection_id']
                                 }
                                 if (!(coll_id in window.collection) || (window.collection[coll_id].access !=='Public')  ) {
-                                    return '<i class="fa fa-minus-circle coll-explain"></i>';
+                                    return '<i class="fa-solid fa-circle-minus coll-explain"></i>';
                                 }
                                 else{
                                     var modality = row['Modality'];
                                     if ((modality[0] === 'SM') || (modality === 'SM')) {
-                                        return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank"><i class="fa fa-eye"></i>'
+                                        return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank"><i class="fa-solid fa-eye"></i>'
                                      } else {
-                                        return '<a href="' + DICOM_STORE_PATH + data + '" target="_blank"><i class="fa fa-eye"></i>'
+                                        return '<a href="' + DICOM_STORE_PATH + data + '" target="_blank"><i class="fa-solid fa-eye"></i>'
                                     }
                                }
                             }
@@ -1466,16 +1466,16 @@ require([
                                 coll_id=row['collection_id']
                             }
                             if (!(coll_id in window.collection) || (window.collection[coll_id].access !=='Public')  ) {
-                                return '<i class="fa fa-minus-circle coll-explain"></i>';
+                                return '<i class="fa-solid fa-circle-minus coll-explain"></i>';
                             }
 
                             else if ((row['Modality'] === 'SEG' || row['Modality'][0] === 'SEG') || (row['Modality'] === 'RTSTRUCT' || row['Modality'][0] === 'RTSTRUCT') || (row['Modality'] === 'RTPLAN' || row['Modality'][0] === 'RTPLAN') || (row['Modality'] === 'RWV' || row['Modality'][0] === 'RWV')) {
-                                return '<a href="/" onclick="return false;"><i class="fa fa-eye-slash no-viewer-tooltip"></i>';
+                                return '<a href="/" onclick="return false;"><i class="fa-solid fa-eye-slash no-viewer-tooltip"></i>';
 
                             } else if ((row['Modality'] === 'SM')) {
-                                return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank"><i class="fa fa-eye"></i>'
+                                return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank"><i class="fa-solid fa-eye"></i>'
                             } else {
-                                return '<a href="' + DICOM_STORE_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' + data + '" target="_blank"><i class="fa fa-eye"></i>'
+                                return '<a href="' + DICOM_STORE_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' + data + '" target="_blank"><i class="fa-solid fa-eye"></i>'
                             }
 
                         }
