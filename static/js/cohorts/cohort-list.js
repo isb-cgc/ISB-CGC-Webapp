@@ -155,7 +155,7 @@ require([
                 var token = $('<span class="cohort-label label label-default space-right-5" value="'
                         + $(this).val() + '" name="selected-ids">'
                         + $(this).parents('tr').find('.name-col a').html()
-                        + ' <a role="button" class="delete-x"><i class="fa fa-times"></a>'
+                        + ' <a role="button" class="delete-x"><i class="fa-solid fa-times"></a>'
                         + '</span>');
                 $('.selected-cohorts').each(function() {
                     $(this).append(token.clone());
@@ -194,7 +194,7 @@ require([
             var cohort_token = $('<span class="cohort-label label label-default space-right-5" value="'
                 + $(this).val() + '" name="selected-ids">'
                 + $(this).parents('tr').find('.name-col a').html()
-                + ' <a href="" class="delete-x"><i class="fa fa-times"></a>'
+                + ' <a href="" class="delete-x"><i class="fa-solid fa-times"></a>'
                 + '</span>');
             $('#selected-ids').append(cohort_token.clone());
             if(!tablename.match(/public/)) {
@@ -280,7 +280,7 @@ require([
     //             $(that).find('table').append(
     //                 '<tr><td>'+ user.first_name + ' ' + user.last_name + '</td>'
     //                 +'<td>'+ user.email +'</td>'
-    //                 +'<td><a title="Remove '+user.first_name+' '+user.last_name+' from all shared Cohorts?" class="remove-shared-user" role="button" data-user-id="'+user.id+'" data-cohort-ids="'+user.shared_cohorts.join(",")+'"><i class="fa fa-times"></i></a></td></tr>')
+    //                 +'<td><a title="Remove '+user.first_name+' '+user.last_name+' from all shared Cohorts?" class="remove-shared-user" role="button" data-user-id="'+user.id+'" data-cohort-ids="'+user.shared_cohorts.join(",")+'"><i class="fa-solid fa-times"></i></a></td></tr>')
     //         });
     //         $('.remove-shared-user').on('click', remove_shared_user);
     //     }else{
@@ -421,7 +421,7 @@ require([
     //             var token_str = '<span class="cohort-label label label-default space-right-5" value="'
     //                 + largest.value + '" name="selected-ids">'
     //                 + largest.label
-    //                 + ' <a href="" class="delete-x"><i class="fa fa-times"></a>'
+    //                 + ' <a href="" class="delete-x"><i class="fa-solid fa-times"></a>'
     //                 + '</span>';
     //             var cohort_token = $(token_str);
     //             $('#base-id').append(cohort_token);
@@ -433,7 +433,7 @@ require([
     //                     var token_str = '<span class="cohort-label label label-default space-right-5" value="'
     //                         + cohort.value + '" name="selected-ids">'
     //                         + cohort.label
-    //                         + ' <a href="" class="delete-x"><i class="fa fa-times"></a>'
+    //                         + ' <a href="" class="delete-x"><i class="fa-solid fa-times"></a>'
     //                         + '</span>';
     //                     var cohort_token = $(token_str);
     //                     $('#subtract-ids').append(cohort_token);
@@ -467,7 +467,7 @@ require([
     //                 var token_str = '<span class="cohort-label label label-default space-right-5" value="'
     //                             + ui.item.value + '" name="selected-ids">'
     //                             + ui.item.label
-    //                             + ' <a href="" class="delete-x"><i class="fa fa-times"></a>'
+    //                             + ' <a href="" class="delete-x"><i class="fa-solid fa-times"></a>'
     //                             + '</span>';
     //                 var cohort_token = $(token_str);
     //                 $(event.target).parents('.form-group').find('.form-control-static').append(cohort_token);
