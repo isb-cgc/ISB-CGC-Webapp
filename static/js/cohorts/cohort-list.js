@@ -86,7 +86,7 @@ require([
                     `<td colspan="6"><p><b>Name </b><br/>`+name+`</p>`+
                     `<p><b>Description </b><br/>`+desc+`</p>`+
                     `<p><b>Collections </b><br/>`+collex+`</p></td>`+
-                    `<td colspan="2"><p><b>Filters</b><br />`+filters+`</p></td>`+
+                    `<td colspan="3"><p><b>Filters</b><br />`+filters+`</p></td>`+
                     `</tr>`)
             ).show();
             tr.addClass('shown');
