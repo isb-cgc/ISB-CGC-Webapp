@@ -1238,6 +1238,15 @@ a.skip-nav {
   border-top: 1px solid #ddd;
 }
 
+#cohort-table th,
+#cohort-table td {
+  padding: 5px;
+}
+
+#cohort-table .details-control {
+  padding-top: 9px;
+}
+
 @media screen and (max-width: 1199px) {
   #gene-list-table .name-col, #gene-list-table .name-col a, #var-list-table .name-col, #var-list-table .name-col a {
     max-width: 600px; } }
