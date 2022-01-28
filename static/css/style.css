@@ -939,7 +939,7 @@ nav, .site-header {
     font-weight: bold; }
 
 .site-header nav .navbar-item i, .site-header nav .navbar-right i {
-  font-size: xx-large;
+  font-size: 28px;
   vertical-align: middle;
 }
 
@@ -1236,6 +1236,15 @@ a.skip-nav {
 .cohort-table th {
   background-color: #e4d8f9;
   border-top: 1px solid #ddd;
+}
+
+#cohort-table th,
+#cohort-table td {
+  padding: 5px;
+}
+
+#cohort-table .details-control {
+  padding-top: 9px;
 }
 
 @media screen and (max-width: 1199px) {
