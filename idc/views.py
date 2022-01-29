@@ -483,6 +483,31 @@ def explore_data_page(request):
         return render(request, 'idc/explore.html', context)
 
 
+def parse_explore_filters(request):
+    try:
+        if not request.GET:
+            raise Exception("This call only supports GET!")
+        filters = {x: request.GET.get(x) for x in request.GET.keys()}
+        # determine if any of the filters are misnamed
+        filter_names = filters.keys()
+        attrs = Attribute.objects.filter(name__in=filters.keys())
+        not_found = [x for x in filter_names if x not in attrs.values_list("name", flat=True)]
+        if len(not_found) > 0:
+            not_rec = "{}".format("; ".join(not_found))
+            logger.warning("[WARNING] Saw invalid filters while parsing explore/filters call:")
+            logger.warning(not_rec)
+            messages.info(request, "The following attribute names are not recognized: {}".format(not_rec))
+        if len(attrs) > 0:
+            print(attrs)
+
+    except Exception as e:
+        logger.error("[ERROR] While parsing filters for the explorer page:")
+        logger.exception(e)
+
+    return redirect(reverse('collections'))
+
+
+
 # Callback for recording the user's agreement to the warning popup
 def warn_page(request):
     request.session['seenWarning'] = True;
