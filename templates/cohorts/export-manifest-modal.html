@@ -47,7 +47,7 @@
                         <div id="Fields_heading" class="list-group-item__heading export-manifest-group__heading">
                             <a role="button" data-toggle="collapse" href="#header-fields" aria-expanded="false"
                                aria-controls="header-fields">
-                                <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> Header Fields
+                                <i class="fa fa-solid fa-caret-right"></i> <i class="fa fa-solid fa-caret-down"></i> Header Fields
                             </a>
                         </div>
                         <div id="header-fields" class="collapse">
@@ -83,7 +83,7 @@
                         <div id="Columns_heading" class="list-group-item__heading export-manifest-group__heading">
                             <a role="button" data-toggle="collapse" href="#columns" aria-expanded="false"
                                aria-controls="columns">
-                                <i class="fa fa-caret-right"></i> <i class="fa fa-caret-down"></i> Columns
+                                <i class="fa fa-solid fa-caret-right"></i> <i class="fa fa-solid fa-caret-down"></i> Columns
                             </a>
                         </div>
                         <div id="columns" class="collapse">
@@ -136,6 +136,10 @@
                                 <input class="column-checkbox bq-only" type="checkbox" value="gcs_url" checked>
                                 <span class="value">Cloud Storage Path</span>
                             </label></li>
+                            <li class="checkbox bq-only"><label>
+                                <input class="column-checkbox bq-only" type="checkbox" value="idc_version" checked>
+                                <span class="value">IDC Data Version</span>
+                            </label></li>
                         </div>
                         </div>
 
@@ -145,7 +149,7 @@
                                 <input class="file-manifest export-option" type="radio" name="manifest-type" value="file-manifest" checked> Files</span>
                             <span id="bq-export-option" style="margin-left:10px" class="value">
                                 <input class="bq-manifest export-option" type="radio" name="manifest-type" value="bq-manifest" {% if not is_social %}disabled{% endif %}> BigQuery
-                                {% if not is_social %} <i class="fa fa-exclamation-circle bq-disabled"></i>{% endif %}</span>
+                                {% if not is_social %} <i class="fa-solid fa-exclamation-circle bq-disabled"></i>{% endif %}</span>
                         </div>
                         <br>
                         {% if is_social %}
@@ -195,7 +199,7 @@
         <div class="modal-content">
             <div class="modal-header"></div>
             <div class="modal-body">
-                <p><i class="fa fa-cog fa-spin"></i> Preparing cohort manifest...</p>
+                <p><i class="fa-solid fa-cog fa-spin"></i> Preparing cohort manifest...</p>
             </div>
             <div class="modal-footer"></div>
         </div>

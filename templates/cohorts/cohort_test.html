@@ -86,7 +86,7 @@
 
 
                         <tr data-description='{% if cohort.description %}{{ cohort.description }}{% else %}N/A{% endif %}'   {% if cohort.versionId == 0 %} style="border:2px solid red" {% endif %}>
-                            <td class = "details-control" title="Click to display cohort description." onclick="showOrHide(this)"> <i class="fa fa-plus-circle show-button"> </i><i class="fa fa-minus-circle hide-button"> </i> </td>
+                            <td class = "details-control" title="Click to display cohort description." onclick="showOrHide(this)"> <i class="fa fa-plus-circle show-button"> </i><i class="fa fa-circle-minus hide-button"> </i> </td>
                             <td class="checkbox-col"> <input class="cohort" type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>
                             </td>
                             <td class="id-col">
@@ -272,5 +272,5 @@
         var cohort_versions = {{ cohort_versions|safe }};
     </script> -->
 	{{ block.super }}
-	<!-- <script src="{% static 'js/cohorts/cohort-list.js' %}"></script> -->
+	<!-- <script type="text/javascript" src="{% static 'js/cohorts/cohort-list.js' %}?v={{ APP_VERSION }}"></script> -->
 {% endblock %}

@@ -32,34 +32,34 @@
                 <div class="collapse navbar-collapse" id="main-navbar-collapse">
                 <ul class="nav navbar-nav navbar-left">
                     <li class="navbar-link navbar-item {% if 'collections' in request.path %}active-page{% endif %}">
-                        <a class="main-links" href="{% url 'collections' %}" title="View IDC collections"><i class="fa fa-th-list"></i> Collections</a>
+                        <a class="main-links" href="{% url 'collections' %}" title="View IDC collections"><i class="fa-solid fa-table-list"></i> Collections</a>
                     </li>
                     <li class="navbar-link navbar-item {% if 'explore' in request.path %}active-page{% endif %}">
-                        <a class="main-links" href="{% url 'explore_data' %}" title="Explore image data"><i class="fa fa-eye"></i> Exploration</a>
+                        <a class="main-links" href="{% url 'explore_data' %}" title="Explore image data"><i class="fa-solid fa-eye"></i> Exploration</a>
                     </li>
                     <li class="navbar-link navbar-item">
                         <a class="external-link" href="" url="https://discourse.canceridc.dev"
                            data-toggle="modal" data-target="#external-web-warning">
-                           &nbsp <i class="fa fa-comments"></i> <p class="navbar-label">Discourse</p>
-                            <i class="fa fa-external-link external-link-icon" aria-hidden="true"></i>
+                           &nbsp <i class="fa-regular fa-comments"></i> <p class="navbar-label">Discourse</p>
+                            <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
                         </a>
                     </li>
                     <li class="navbar-link navbar-item">
                         <a class="external-link" href="" url="https://learn.canceridc.dev"
                             data-toggle="modal" data-target="#external-web-warning">
-                           &nbsp <i class="fa fa-book"></i> <p class="navbar-label">Documentation</p>
-                            <i class="fa fa-external-link external-link-icon" aria-hidden="true"></i>
+                           &nbsp <i class="fa-solid fa-book"></i> <p class="navbar-label">Documentation</p>
+                            <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
                         </a>
                     </li>
                     <li class="navbar-link navbar-item">
-                        <a class="main-links" href="{% url 'news' %}" title="View news items"><i class="fa fa-bullhorn"></i> News</a>
+                        <a class="main-links" href="{% url 'news' %}" title="View news items"><i class="fa-solid fa-bullhorn"></i> News</a>
                     </li>
                     <li class="navbar-link navbar-item">
-                        <a class="main-links" href="{% url 'about_page' %}" title="Information about IDC"><i class="fa fa-info-circle"></i> About</a>
+                        <a class="main-links" href="{% url 'about_page' %}" title="Information about IDC"><i class="fa-solid fa-info-circle"></i> About</a>
                     </li>
                     {% if user.is_authenticated %}
                     <li class="navbar-link navbar-item">
-                        <a href="{% url 'cohort_list' %}" title="View Your Cohorts"><i class="fa fa-archive"></i> Cohorts</a>
+                        <a href="{% url 'cohort_list' %}" title="View Your Cohorts"><i class="fa-solid fa-archive"></i> Cohorts</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -71,17 +71,17 @@
                                 {% if avatar_url %}
                                     <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="40" height="40" alt="Avatar Link to User Details">
                                 {% else %}
-                                    <i class="fa fa-user basic-avatar"> </i>
+                                    <i class="fa-solid fa-user basic-avatar"> </i>
                                 {% endif %}
                             {% endwith %}
                         </a>
                         <div class="dropdown">
                             <a role="button" class="dropdown-toggle navbar-item__text" id="user-dropdown" data-toggle="dropdown" aria-label="User Dropdown" aria-expanded="true">
-                                {{ user.first_name }} <i class="fa fa-caret-down"></i>
+                                {{ user.first_name }} <i class="fa fa-solid fa-caret-down"></i>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-label="user-dropdown">
-                                {% if has_access %}<li role="menuitem"><a href="{% url 'user_detail' user.id %}">Account Details <i class="fa fa-cog"></i></a></li>{% endif %}
-                                <li role="menuitem"><a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out">Sign Out <i class="fa fa-sign-out"></i></a></li>
+                                {% if has_access %}<li role="menuitem"><a href="{% url 'user_detail' user.id %}">Account Details <i class="fa-solid fa-cog"></i></a></li>{% endif %}
+                                <li role="menuitem"><a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out">Sign Out <i class="fa-solid fa-sign-out"></i></a></li>
                             </ul>
                         </div>
                     </li>
@@ -89,7 +89,7 @@
                     <li class="navbar-item inline-block navbar-signin">
                         <div class="dropdown">
                             <a id="sign-in-dropdown" class="sign-in-dropdown dropdown-toggle navbar-item__text"
-                               href="{% url 'account_login' %}" title="Sign In"><i class="fa fa-sign-in"></i><p class="navbar-label">Sign In</p></a>
+                               href="{% url 'account_login' %}" title="Sign In"><i class="fa fa-solid fa-sign-in"></i><p class="navbar-label">Sign In</p></a>
                         </div>
                     </li>
                 {% endif %}

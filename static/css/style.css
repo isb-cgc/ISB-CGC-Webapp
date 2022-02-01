@@ -1,4 +1,4 @@
-@import url("./font-awesome.min.css");
+@import url("../fontawesome/css/all.min.css");
 @import url("./vendor.css");
 @import url("./sapiens.css");
 @import url("./gdc-fonts.css");
@@ -71,7 +71,7 @@ ul, ol {
   pages that are lacking content to appropriately extend the page
  */
 .short-inner-content {
-  min-height: calc(100vh - 306px);
+  min-height: calc(100vh - 310px);
   /* 306 = margin-top of main (for site header, 86) + page header (56) + page header padding (20) +
   panel bottom margin (20) + footer height (124) */
 }
@@ -88,12 +88,12 @@ ul, ol {
 
 /* The landing page has an additional section (summary) which complicates the layout count */
 #landing .short-inner-content {
-  min-height: calc(100vh - 290px);
+  min-height: calc(100vh - 294px);
 }
 
 /* The cohorts list page has an additional section (action buttons) which complicates the layout count */
 #cohorts-list .short-inner-content {
-  min-height: calc(100vh - 389px);
+  min-height: calc(100vh - 394px);
 }
 
 
@@ -150,6 +150,14 @@ nav {
 
 .navbar-nav li a:hover {
   background-color: #fff; }
+
+.navbar-signin .dropdown i.fa {
+  font-size: x-large !important;
+}
+
+#user-dropdown i.fa {
+  margin-top: -5px;
+}
 
 #secondary-nav {
   background-color: #fff;
@@ -476,10 +484,10 @@ nav {
 
 .btn-default {
   color: #fff !important;
-  background-color: #d97c17;
+  background-color: #b36715;
   border: 1px solid #e18408 !important; }
   .btn-default:hover, .btn-default:active, .btn-default:focus {
-    background-color: #ed8b08 !important;
+    background-color: #cb7809 !important;
     color: #fff !important;
     border: 1px solid #fac57e !important; }
 
@@ -491,6 +499,17 @@ nav {
     background-color: #8d43b6 !important;
     color: #fff !important;
     border: 1px solid #8a6dbc !important; }
+
+.btn-icon {
+  color: #fff !important;
+  background-color: #f3f3f3;
+  border: 1px solid #505b75 !important;
+  border-radius: 4px;
+  padding: 5px; }
+.btn-icon:hover, .btn-icon:active, .btn-icon:focus {
+  background-color: #e9e9e9 !important;
+  color: #fff !important;
+  border: 1px solid #105bb3 !important; }
 
 .btn-link {
   font-weight: 400; }
@@ -920,7 +939,7 @@ nav, .site-header {
     font-weight: bold; }
 
 .site-header nav .navbar-item i, .site-header nav .navbar-right i {
-  font-size: xx-large;
+  font-size: 28px;
   vertical-align: middle;
 }
 
@@ -1217,6 +1236,15 @@ a.skip-nav {
 .cohort-table th {
   background-color: #e4d8f9;
   border-top: 1px solid #ddd;
+}
+
+#cohort-table th,
+#cohort-table td {
+  padding: 5px;
+}
+
+#cohort-table .details-control {
+  padding-top: 9px;
 }
 
 @media screen and (max-width: 1199px) {
@@ -1790,7 +1818,8 @@ section .min-max {
   .page-heading .container {
     padding: 15px; }
   .page-heading .btn.pull-right {
-    margin-top: 5px; }
+    margin-top: 5px;
+    margin-left: 10px;}
   .page-heading .page-action-group {
     margin-bottom: 0; }
 
@@ -2347,6 +2376,36 @@ section .min-max {
    #content: 'case(s)';
     font-size: 1.2em;
     padding-left: 5px; }
+
+#bq-string-display .modal-dialog {
+  width: 620px;
+}
+
+#bq-string-display .copy-this {
+  font-size: x-large;
+}
+
+#bq-string-display .copy-this {
+  border-radius: 4px;
+}
+
+pre.bq-string {
+  max-height: 600px;
+  width: 570px;
+  margin-top: 10px;
+}
+
+.bq-string-display img {
+  width: 20px;
+}
+
+button.compare-version {
+  padding: 4px 4px 2px 4px;
+}
+.compare-version i {
+  font-size: 22px;
+  color: #32699a;
+}
 
 #cohort-filelist #placeholder .panel-body {
   height: 500px;
@@ -4260,9 +4319,11 @@ ul.errorlist {
   margin-top: 80px;
 }
 
-.inactive-data-version {
-  background-color: #a19ca2;
+.inactive-data-version p {
+  background-color: #8d8a8e;
   color: #ffffff;
+  display: inline-block;
+  padding: 8px;
 }
 
 .sorter input {

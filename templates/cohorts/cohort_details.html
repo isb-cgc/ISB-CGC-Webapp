@@ -24,7 +24,6 @@
     <link type="text/css" rel="stylesheet" href="{% static 'css/search.css' %}">
     <link type="text/css" rel="stylesheet" href="{% static 'css/jquery-ui.min.css' %}">
     <link type="text/css" rel="stylesheet" href="{% static 'css/spinner.css' %}">
-    <!-- <script src="https://d3js.org/d3.v5.min.js"></script> -->
     <!-- <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script> -->
 {% endblock %}
 
@@ -43,9 +42,16 @@
             </div>
             <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
                 <div class="cohort-manifest pull-right">
-                 <button id="export-manifest" class="btn btn-special pull-right" data-toggle="modal"
-                        data-target="#export-manifest-modal"> Export Cohort Manifest
-                 </button>
+                    <button id="export-manifest" class="btn btn-special pull-right" data-toggle="modal"
+                        data-target="#export-manifest-modal"
+                        title="Export this cohort as a manifest"
+                    > Export Cohort Manifest
+                    </button>
+                    <button id="bq-string" class="btn btn-default pull-right" data-toggle="modal"
+                        data-target="#bq-string-display"
+                        title="View the BigQuery String for this cohort"
+                    > View BQ String
+                    </button>
                 </div>
             </div>
         </div>
@@ -55,6 +61,7 @@
 {% block content %}
 {% url 'cohort_manifest' cohort_id as export_uri %}
 {% include "cohorts/export-manifest-modal.html" with export_uri=export_uri %}
+{% include "cohorts/bq-string-modal.html" with bq_string=bq_string bq_string_uri="Falase" cohort_id=cohort.id %}
 
 <script>
    var cohort_loaded = true
@@ -82,7 +89,7 @@
     </script>
     <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
     {{ block.super }}
-    <script type="text/javascript" src="{% static 'js/explore.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/cohorts/cohort-details.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/explore.js' %}?v={{ APP_VERSION }}"></script>
+    <script type="text/javascript" src="{% static 'js/cohorts/cohort-details.js' %}?v={{ APP_VERSION }}"></script>
+    <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}?v={{ APP_VERSION }}"></script>
 {% endblock %}

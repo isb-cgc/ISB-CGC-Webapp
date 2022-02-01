@@ -1,0 +1,29 @@
+    <!-- BigQuery String Modal -->
+    <div class="modal fade" id="bq-string-display" tabindex="-1" role="dialog" aria-labelledby="bqStringDisplay"
+         aria-hidden="true"
+         cohort_id="{% if bq_string_uri == "True" %}0{% else %}{{ cohort_id }}{% endif %}"
+    >
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="bqStringDisplay">BigQuery Cohort Query String</h4>
+                </div>
+                <div class="modal-body">
+                    <button type="button" class="copy-this btn btn-default"
+                            content="{% if bq_string_uri == "True" %}{% else %}{{ bq_string }}{% endif %}"
+                            title="Copy query text to clipboard"
+                    >
+                        <i class="fa-solid fa-copy" aria-hidden="true"></i>
+                    </button>
+                    <pre class="code bq-string unformatted">
+                        {% if bq_string_uri == "True" %}
+                            Loading...
+                        {% else %}
+                            {{ bq_string}}
+                        {% endif %}
+                    </pre>
+                </div>
+            </div>
+        </div>
+    </div>

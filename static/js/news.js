@@ -9,8 +9,7 @@ require.config({
     },
     shim: {
         'bootstrap': ['jquery'],
-        'jqueryui': ['jquery'],
-        'base': ['jquery']
+        'jqueryui': ['jquery']
     }
 });
 

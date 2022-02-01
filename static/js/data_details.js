@@ -51,8 +51,7 @@ require.config({
         'bloodhound': {
            deps: ['jquery'],
            exports: 'Bloodhound'
-        },
-        'base': ['jquery', 'jqueryui', 'bootstrap', 'underscore']
+        }
     }
 });
 
@@ -363,7 +362,7 @@ require([
                 token.append(
                     $('<a>').addClass('delete-x filter-label label label-default mol-cat-filter-x')
                         .text(valTokenDisplay)
-                        .append('<i class="fa fa-times">')
+                        .append('<i class="fa-solid fa-times">')
                         .attr("title", valTokenDisplay)
                 );
 
@@ -457,7 +456,7 @@ require([
                 token.append(
                     $('<a>').addClass('delete-x filter-label label label-default')
                         .text(tokenFeatDisplName + ': ' + tokenValDisplName)
-                        .append('<i class="fa fa-times">')
+                        .append('<i class="fa-solid fa-times">')
                         .attr("title",tokenFeatDisplName + ': ' + tokenValDisplName)
                 );
 

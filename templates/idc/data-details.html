@@ -156,5 +156,5 @@
 
 {% block js_file %}
 	{{ block.super }}
-	<script src="{% static 'js/data_details.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/data_details.js' %}?v={{ APP_VERSION }}"></script>
 {% endblock %}
