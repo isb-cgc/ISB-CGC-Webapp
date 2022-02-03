@@ -21,6 +21,7 @@ from builtins import object
 import datetime
 import logging
 import os
+from os.path import join, dirname, exists
 import re
 import json
 from csv import reader as csv_reader
@@ -201,8 +202,12 @@ def add_programs(program_set):
     return results
 
 
-def add_data_sources(source_set):
+def add_data_sources(source_set, subversions, set_types):
     for source in source_set:
+        source.update({
+            "versions": subversions,
+            "set_types": set_types
+        })
         add_data_source(**source)
 
 
@@ -622,13 +627,40 @@ def load_display_vals(filename):
     return display_vals
 
 
+def update_data_versions(filename):
+    f = open(join(dirname(__file__),filename), "r")
+    config = json.load(f)
+
+    add_data_versions(
+        config.new_major_version,
+        [{'name': x, 'ver': config.subversion_number} for x in config.new_sub_versions],
+        config.bioclin_version
+    )
+
+    add_data_sources(config.data_sources, config.new_sub_versions, config.set_types)
+
+    for ds in config.data_sources:
+        for jn in ds.joins:
+            add_source_joins(
+                [ds.name],
+                jn.from_col,
+                jn.sources,
+                jn.to_col
+            )
+        copy_attrs([ds.attr_from], [ds.name])
+
+    deactivate_data_versions(config.minor, config.major)
+
+    return
+
 def parse_args():
     parser = ArgumentParser()
-    parser.add_argument('-c', '--collex-file', type=str, default='', help='List of Collections to update/create')
-    parser.add_argument('-v', '--display-vals', type=str, default='', help='List of display values to add/update')
-    parser.add_argument('-p', '--programs-file', type=str, default='', help='List of programs to add/update')
-    parser.add_argument('-a', '--attributes-file', type=str, default='', help='List of attributes to add/update')
-    parser.add_argument('-s', '--solr-files', type=str, default='n', help='Should Solr parameter files be made? (Yy/Nn)')
+    parser.add_argument('-v', '--version-file', type=str, default='', help='JSON file of version data to update')
+    parser.add_argument('-c', '--collex-file', type=str, default='', help='CSV data of collections to update/create')
+    parser.add_argument('-d', '--display-vals', type=str, default='', help='CSV data of display values to add/update')
+    parser.add_argument('-p', '--programs-file', type=str, default='', help='CSV data of programs to add/update')
+    parser.add_argument('-a', '--attributes-file', type=str, default='', help='CSV data of attributes to add/update')
+    parser.add_argument('-s', '--solr-files', type=str, default='n', help='Should Solr parameter and JSON schema files be made? (Yy/Nn)')
     return parser.parse_args()
 
 
@@ -636,71 +668,8 @@ def main():
 
     try:
         args = parse_args()
-        new_versions = ["TCIA Image Data Version 7", "TCIA Derived Data Version 7"]
 
-        set_types = ["IDC Source Data", "Derived Data"]
-        bioclin_version = ["GDC Data Release 9"]
-
-        add_data_versions(
-            {'name': "IDC Data Release",
-             'version_number': "7.0",
-             'case_count': 53544,
-             'collex_count': 122,
-             'data_volume': 20.48,
-             'series_count': 426088
-             },
-            [{'name': x, 'ver': '7'} for x in new_versions],
-            bioclin_version
-        )
-
-        add_data_sources([
-            {
-                'name': 'dicom_derived_series_v7',
-                'source_type': DataSource.SOLR,
-                'count_col': 'PatientID',
-                'programs': [],
-                'versions': new_versions,
-                'data_sets': set_types,
-                'aggregate_level': "SeriesInstanceUID"
-            },
-            {
-                'name': 'dicom_derived_study_v7',
-                'source_type': DataSource.SOLR,
-                'count_col': 'PatientID',
-                'programs': [],
-                'versions': new_versions,
-                'data_sets': set_types,
-                'aggregate_level': "StudyInstanceUID"
-            },
-            {
-                'name': 'idc-dev-etl.idc_v7.dicom_pivot_v7',
-                'source_type': DataSource.BIGQUERY,
-                'count_col': 'PatientID',
-                'programs': [],
-                'versions': new_versions,
-                'data_sets': set_types,
-                'aggregate_level': 'SOPInstanceUID'
-            }
-        ])
-
-        add_source_joins(
-            ['dicom_derived_study_v7','dicom_derived_series_v7'],
-            "PatientID",
-            ["tcga_bios","tcga_clin"],
-            "case_barcode"
-        )
-
-        add_source_joins(
-            ["idc-dev-etl.idc_v7.dicom_pivot_v7"],
-            "PatientID",
-            ["idc-dev-etl.idc_v7.tcga_biospecimen_rel9","idc-dev-etl.idc_v7.tcga_clinical_rel9"],
-            "case_barcode"
-        )
-
-        copy_attrs(["idc-dev-etl.idc_v6.dicom_pivot_v6"],["idc-dev-etl.idc_v7.dicom_pivot_v7"])
-        copy_attrs(["dicom_derived_series_v6"],["dicom_derived_series_v7","dicom_derived_study_v7"])
-
-        deactivate_data_versions(["TCIA Image Data Version 6","TCIA Derived Data Version 6"], ["6.0"])
+        len(args.version_file) and update_data_versions(args.version_file)
 
         len(args.attributes_file) and load_attributes(args.attributes_file,
             ["dicom_derived_series_v7","dicom_derived_study_v7"], ["idc-dev-etl.idc_v7.dicom_pivot_v7"]
