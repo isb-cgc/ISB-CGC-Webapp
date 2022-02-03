@@ -501,7 +501,7 @@ require([
         $(this).find('button[type="submit"]').attr('disabled','disabled');
     });
 
-    $('.compare-version').on('click', function(){
+    $('#cohort-table').on('click', '.compare-version', function(){
         let cohort_row = $(this).closest('tr');
         let id = $(cohort_row).find('.id-col').text().trim();
         let case_col = $(cohort_row).find('.case-col').text().trim();
@@ -545,7 +545,7 @@ require([
         });
     });
 
-    $('.bq-string-display').on('click', function() {
+    $('#cohort-table').on('click', '.bq-string-display', function() {
         if($('#bq-string-display .bq-string').attr('cohort_id') !== $(this).data('cohort-id')) {
             $('#bq-string-display .bq-string').html("Loading...");
             $('#bq-string-display .bq-string').attr('cohort_id',$(this).data('cohort-id'));
