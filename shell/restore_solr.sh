@@ -87,6 +87,7 @@ for dirname in ${BACKUP_DIR}/*/; do
   curl -u $SOLR_USER:$SOLR_PWD -X GET "https://localhost:8983/solr/$CORE/replication?command=details&name=$CORE" --cacert solr-ssl.pem
 done
 
-echo "Remember to wait until the cores are done restoring before you restart!"
+echo "Remember to wait until the cores are done restoring before you restart! To check the status, run:"
+echo "curl -u $SOLR_USER:$SOLR_PWD -X GET \"https://localhost:8983/solr/$CORE/replication?command=details&name=$CORE\" --cacert solr-ssl.pem"
 
 exit 0
