@@ -406,7 +406,7 @@ def populate_tables(request):
 
 # Data exploration and cohort creation page
 @login_required
-def explore_data_page(request):
+def explore_data_page(request, filter_path=False, path_filters=None):
     attr_by_source = {}
     attr_sets = {}
     context = {'request': request}
@@ -436,10 +436,10 @@ def explore_data_page(request):
         record_limit = int(req.get('record_limit', '2000'))
         offset = int(req.get('offset', '0'))
         #sort_on = req.get('sort_on', collapse_on+' asc')
-        cohort_id = req.get('cohort_id','-1')
+        cohort_id = req.get('cohort_id', '-1')
 
-        cohort_filters={}
-        if (int(cohort_id)>-1):
+        cohort_filters = {}
+        if (int(cohort_id) > -1):
             cohort = Cohort.objects.get(id=cohort_id, active=True)
             cohort.perm = cohort.get_perm(request)
             if cohort.perm:
@@ -448,6 +448,8 @@ def explore_data_page(request):
                 cohort_filters_list = cohort_filters_dict[0]['filters']
                 for cohort in cohort_filters_list:
                     cohort_filters[cohort['name']] = cohort['values']
+        if filter_path and is_json:
+            filters = path_filters
 
         if wcohort and is_json:
             filters = cohort_filters
@@ -468,6 +470,8 @@ def explore_data_page(request):
         # These are filters to be loaded *after* a page render
         if wcohort:
             context['filters_for_load'] = cohort_filters_dict
+        elif filter_path:
+            context['filters_for_load'] = path_filters
         else:
             filters_for_load = req.get('filters_for_load', '{}')
             blacklist = re.compile(settings.BLACKLIST_RE, re.UNICODE)
@@ -487,25 +491,34 @@ def parse_explore_filters(request):
     try:
         if not request.GET:
             raise Exception("This call only supports GET!")
-        filters = {x: request.GET.get(x) for x in request.GET.keys()}
+        filters = {x: request.GET.getlist(x) for x in request.GET.keys()}
         # determine if any of the filters are misnamed
         filter_names = filters.keys()
         attrs = Attribute.objects.filter(name__in=filters.keys())
-        not_found = [x for x in filter_names if x not in attrs.values_list("name", flat=True)]
+        attr_map = {x.name: x.id for x in attrs}
+        not_found = [x for x in filter_names if x not in attr_map.keys()]
         if len(not_found) > 0:
             not_rec = "{}".format("; ".join(not_found))
             logger.warning("[WARNING] Saw invalid filters while parsing explore/filters call:")
             logger.warning(not_rec)
-            messages.info(request, "The following attribute names are not recognized: {}".format(not_rec))
-        if len(attrs) > 0:
-            print(attrs)
+            messages.warning(request, "The following attribute names are not recognized: {}".format(not_rec))
+        else:
+            blacklist = re.compile(settings.BLACKLIST_RE, re.UNICODE)
+            if blacklist.search(str(filters)):
+                logger.warning("[WARNING] Saw bad filters in filters_for_load:")
+                logger.warning(filters)
+                messages.error(request,
+                               "There was a problem with some of your filters - please ensure they're properly formatted.")
+            else:
+                if len(attrs) > 0:
+                    filters = [{"id": attr_map[x], "values": filters[x]} for x in attr_map]
+                    return explore_data_page(request, filter_path=True, path_filters=[{"filters": filters}])
 
     except Exception as e:
         logger.error("[ERROR] While parsing filters for the explorer page:")
         logger.exception(e)
 
-    return redirect(reverse('collections'))
-
+    return redirect(reverse('explore_data'))
 
 
 # Callback for recording the user's agreement to the warning popup
