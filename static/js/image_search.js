@@ -1455,11 +1455,12 @@ require([
                         else if ((row['Modality'] === 'SEG' || row['Modality'][0] === 'SEG') || (row['Modality'] === 'RTSTRUCT' || row['Modality'][0] === 'RTSTRUCT') || (row['Modality'] === 'RTPLAN' || row['Modality'][0] === 'RTPLAN') || (row['Modality'] === 'RWV' || row['Modality'][0] === 'RWV')) {
                             return '<a href="/" onclick="return false;"><i class="fa-solid fa-eye-slash no-viewer-tooltip"></i>';
 
-                        } else if ((row['Modality'] === 'SM')) {
-                            return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank"><i class="fa-solid fa-eye"></i>'
-                        } else {
-                            return '<a href="' + DICOM_STORE_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' + data + '" target="_blank"><i class="fa-solid fa-eye"></i>'
-                        }
+                            } else if ((row['Modality'] === 'SM') || (row['Modality'][0] === 'SM')) {
+                                return '<a href="' + SLIM_VIEWER_PATH + row['StudyInstanceUID'] + '/series/' + data + '" target="_blank"><i class="fa-solid fa-eye"></i>'
+
+                            } else {
+                                return '<a href="' + DICOM_STORE_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' + data + '" target="_blank"><i class="fa-solid fa-eye"></i>'
+                            }
 
                     }
                 },
@@ -3104,6 +3105,7 @@ require([
 
          if (srch.hasClass('notDisp')){
              srch.removeClass('notDisp');
+             srch[0].focus();
          }
          else{
              srch.addClass('notDisp');
