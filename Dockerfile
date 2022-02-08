@@ -31,7 +31,7 @@ ENV VIRTUAL_ENV /env
 ENV PATH /env/bin:$PATH
 
 RUN echo 'download mysql public build key'
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 467B942D3A79BD29
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 467B942D3A79BD29
 
 RUN apt-get update
 ENV DEBIAN_FRONTEND=noninteractive
