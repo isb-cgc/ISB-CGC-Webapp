@@ -39,14 +39,11 @@ urlpatterns = [
     url(r'^igv/$', views.igv, name='igv'),
     url(r'^camic/$', views.camic, name='camic'),
     url(r'^camic/(?P<file_uuid>[A-Za-z0-9\-]+)/$', views.camic, name='camic_barcode'),
-    url(r'^dicom/$', views.dicom, name='dicom'),
-    url(r'^dicom/(?P<study_uid>[A-Za-z0-9]+)/$', views.dicom, name='dicom_study'),
     url(r'^report/$', views.path_report, name='path_pdf'),
     url(r'^report/(?P<report_file>[A-Za-z0-9._/-]+)/$', views.path_report, name='path_pdf_report'),
 
     url(r'^images/(?P<file_uuid>[A-Za-z0-9\-]+)/$', views.get_image_data, name='image_data'),
     url(r'^images/', views.get_image_data_args, name='image_data_args'),
-    url(r'^dicom/(?P<study_uid>[A-Za-z0-9\.]+)/$', views.dicom, name='dicom'),
 
     url(r'^solr_test/', views.test_solr_data, name='solr_test'),
 
@@ -74,7 +71,7 @@ urlpatterns = [
     url(r'^how_to_discover/', views.how_to_discover_page, name='how_to_discover'),
     url(r'^contact_us/', views.contact_us, name='contact_us'),
     url(r'^bq_meta_search/$', views.bq_meta_search, name='bq_meta_search'),
-    url(r'^bq_meta_search/(?P<table_id>.+)/$', views.bq_meta_search, name='bq_meta_search_table'),
+    url(r'^bq_meta_search/(?P<table_id>[A-Za-z0-9._/-]+)/$', views.bq_meta_search, name='bq_meta_search_table'),
     url(r'^bq_meta_data/$', views.bq_meta_data, name='bq_meta_data'),
     url(r'^programmatic_access/', views.programmatic_access_page, name='programmatic_access'),
     url(r'^workflow/', views.workflow_page, name='workflow'),
