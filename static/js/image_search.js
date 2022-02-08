@@ -47,7 +47,7 @@ require([
     'jquerydt',
     'jqueryui',
     'bootstrap'
-], function($, _) {
+], function($, _, base) {
 
     $('.manifest-size-warning').hide();
 
@@ -1673,6 +1673,7 @@ require([
             $('.copy-url').removeAttr("content");
             $('.copy-url').attr("disabled","disabled");
             $('.hide-filter-uri').triggerHandler('click');
+            $('.url-too-long').hide();
         } else {
             $('.get-filter-uri').removeAttr("disabled");
             $('.copy-url').removeAttr("disabled");
@@ -1687,6 +1688,8 @@ require([
                 }
             }
             url += encoded_filters.join("&");
+            url.length > 2048 && $('.url-too-long').show();
+            url.length <= 2048 && $('.url-too-long').hide();
             $('.filter-url').html(url);
             $('.copy-url').attr("content",url);
         }
@@ -3203,5 +3206,18 @@ require([
             $('.filter-url').show();
             $('.filter-url').removeClass("is-hidden");
         });
+
+        $('#js-messages').append(
+            $('<div>')
+                .addClass('alert alert-warning alert-dismissible url-too-long')
+                .html(
+                    "Your query's URL exceeds the maximum length allowed (2048 characters). "
+                    + "You will need to select fewer filters or the URL will not properly load when used."
+                )
+                .prepend(
+                    '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">'
+                    +'&times;</span><span class="sr-only">Close</span></button>'
+                ).attr("style","display: none;")
+        )
     });
 });
