@@ -494,7 +494,6 @@ def parse_explore_filters(request):
         filters = {x: request.GET.getlist(x) for x in request.GET.keys()}
         # determine if any of the filters are misnamed
         filter_name_map = {(x[:x.rfind('_')] if re.search('_[gl]te?|_e?btwe?', x) else x): x for x in filters.keys()}
-        print(filter_name_map)
         attr_names = filter_name_map.keys()
         attrs = Attribute.objects.filter(name__in=attr_names)
         attr_map = {x.name: {"id": x.id, "filter": filter_name_map[x.name]} for x in attrs}
@@ -514,7 +513,6 @@ def parse_explore_filters(request):
             else:
                 if len(attrs) > 0:
                     filters = [{"id": attr_map[x]['id'], "values": filters[attr_map[x]['filter']]} for x in attr_map]
-                    print(filters)
                     return explore_data_page(request, filter_path=True, path_filters=[{"filters": filters}])
 
     except Exception as e:
