@@ -36,6 +36,7 @@ if [ -n "$CI" ]; then
     # Use these next 4 lines to update mysql public build key
     echo 'download mysql public build key'
     apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 5072E1F5
+    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 467B942D3A79BD29
 #    wget -O - -q 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x8C718D3B5072E1F5' | grep -v '>' | grep -v '<' | grep -v '{' > mysql_pubkey.asc
 #    apt-key add mysql_pubkey.asc || exit 1
     echo 'mysql build key update done.'
@@ -50,22 +51,7 @@ apt-get install ca-certificates
 # Install apt-get dependencies
 echo "Installing Dependencies..."
 apt-get install -y --force-yes unzip libffi-dev libssl-dev git ruby g++ curl dos2unix
-
-# CircleCI provides a Python 3.7 image, but locally, we have to do that ourselves.
-if [ -z "${CI}" ]; then
-    # Update to Python 3.7
-    add-apt-repository ppa:deadsnakes/ppa
-    apt update
-    apt install -y --force-yes python3.7
-
-    # Set Python 3.7 as the python3 version
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1
-
-    apt-get install -y --force-yes python3.7-venv python3.7-distutils python3.7-dev
-else
-  apt-get install -y --force-yes python3-distutils
-fi
-
+apt-get install -y --force-yes python3-distutils
 apt-get install -y --force-yes python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
 apt-get install -y --force-yes mysql-client
 
