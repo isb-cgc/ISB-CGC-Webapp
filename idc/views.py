@@ -493,10 +493,11 @@ def parse_explore_filters(request):
             raise Exception("This call only supports GET!")
         filters = {x: request.GET.getlist(x) for x in request.GET.keys()}
         # determine if any of the filters are misnamed
-        filter_names = filters.keys()
-        attrs = Attribute.objects.filter(name__in=filters.keys())
-        attr_map = {x.name: x.id for x in attrs}
-        not_found = [x for x in filter_names if x not in attr_map.keys()]
+        filter_name_map = {(x[:x.rfind('_')] if re.search('_[gl]te?|_e?btwe?', x) else x): x for x in filters.keys()}
+        attr_names = filter_name_map.keys()
+        attrs = Attribute.objects.filter(name__in=attr_names)
+        attr_map = {x.name: {"id": x.id, "filter": filter_name_map[x.name]} for x in attrs}
+        not_found = [x for x in attr_names if x not in attr_map.keys()]
         if len(not_found) > 0:
             not_rec = "{}".format("; ".join(not_found))
             logger.warning("[WARNING] Saw invalid filters while parsing explore/filters call:")
@@ -511,7 +512,7 @@ def parse_explore_filters(request):
                                "There was a problem with some of your filters - please ensure they're properly formatted.")
             else:
                 if len(attrs) > 0:
-                    filters = [{"id": attr_map[x], "values": filters[x]} for x in attr_map]
+                    filters = [{"id": attr_map[x]['id'], "values": filters[attr_map[x]['filter']]} for x in attr_map]
                     return explore_data_page(request, filter_path=True, path_filters=[{"filters": filters}])
 
     except Exception as e:
