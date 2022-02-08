@@ -447,15 +447,6 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
     return JsonResponse(result, status=status)
 
 
-def dicom(request, study_uid=None):
-    template = 'isb_cgc/dicom.html'
-
-    context = {
-        'study_uid': study_uid,
-        'dicom_viewer': settings.DICOM_VIEWER
-    }
-    return render(request, template, context)
-
 @login_required
 def test_solr_data(request):
     status=200

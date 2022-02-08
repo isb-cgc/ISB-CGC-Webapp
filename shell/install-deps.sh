@@ -44,9 +44,6 @@ if [ -n "$CI" ]; then
     dpkg -i mysql-apt-config_0.8.9-1_all.deb
 fi
 
-
-
-
 apt-get update -qq
 apt-get install ca-certificates
 
