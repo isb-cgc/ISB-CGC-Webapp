@@ -35,7 +35,7 @@ def vector_to_dict(vector, id_key, value_key):
 def find_all_id_keys(*vectors, **kwargs):
     id_key = kwargs['id_key']
     identifiers = set()
-    for vector in enumerate(vectors):
+    for index, vector in enumerate(vectors):
         for item in vector:
             item_id = item[id_key]
 
