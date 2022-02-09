@@ -190,11 +190,7 @@ def health_check(request, match):
     return HttpResponse('')
 
 
-# Returns the basic help page (will direct to contact info and readthedocs
-def help_page(request):
-    return render(request, 'idc/help.html', {'request': request})
-
-
+# Quote page
 def quota_page(request):
     return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
 
