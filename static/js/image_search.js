@@ -825,28 +825,29 @@ require([
     }
 
     reorderCacheData = function(cache,request,thead){
-
-        function compCols(a,b,order,isNum,hasAux,c,d,auxIsNum){
+        function compCols(a,b,col,dir,isNum,hasAux,auxCol,auxIsNum){
             var cmp=0;
-
             if (isNum){
-                cmp=parseFloat(a)- parseFloat(b);
+                cmp=parseFloat(a[col])- parseFloat(b[col]);
             }
             else{
-                cmp=a[col]>b[col] ? 1 :  (a[col]==b[col]? 0: -1)
+                cmp=(a[col]>b[col] ? 1 :  a[col]==b[col]? 0: -1)
             }
+
+            if (dir ==='desc'){
+                cmp=-cmp;
+            }
+
             if ((cmp === 0) && hasAux){
                 if (auxIsNum){
-                    cmp=parseFloat(c)- parseFloat(d);
+                    cmp=parseFloat(a[auxCol])- parseFloat(b[auxCol]);
                 }
                 else{
-                    cmp=c>=d ? 1 : -1;
+                    cmp=(a[auxCol]>b[auxCol] ? 1 :  a[auxCol]==b[auxCol]? 0: -1)
                 }
 
             }
-            else if (order ==-1){
-                cmp=-cmp;
-            }
+
             return cmp;
         }
 
@@ -857,25 +858,21 @@ require([
         var ntmp  = cache.data.slice(0,3);
         var rtmp = new Array();
 
+        isNum = ( $(thead.children('tr').children().get(colId)).hasClass('numeric_data') ? true: false);
+        hasAux = ( $(thead.children('tr').children().get(colId)).hasClass('has_aux') ? true: false);
 
-
-        if ($(thead.children('tr').children().get(col)).hasClass('numeric_data')){
-            if (dir==='asc'){
-                cache.data=cache.data.sort((a,b) => (parseFloat(a[col])- parseFloat(b[col]) ) );
-            }
-            else{
-                cache.data=cache.data.sort((a,b)=> (parseFloat(b[col]) -parseFloat(a[col])) );
-            }
+        if (hasAux){
+            auxColId = parseInt($(thead.children('tr').children().get(colId)).data('auxid'));
+            auxCol = cache.colOrder[auxColId]
+            auxIsNum = ( $(thead.children('tr').children().get(auxColId)).hasClass('numeric_data') ? true: false);
         }
         else{
-            if (dir==='asc'){
-                cache.data=cache.data.sort((a,b)=> (a[col]<=b[col]) ? 1 : -1 );
-            }
-            else{
-                cache.data=cache.data.sort((a,b)=> (b[col]<=a[col]) ? 1: -1);
-            }
-
+            auxColId=-1
+            auxCol=''
+            auxIsNum= false;
         }
+
+         cache.data.sort((a,b)=> compCols(a,b,col,dir,isNum,hasAux,auxCol,auxIsNum))
 
     }
 
@@ -1255,7 +1252,7 @@ require([
                     var rowsRemoved = $('#studies_tab').data('rowsremoved');
                     var refreshAfterFilter = $('#studies_tab').data('refreshafterfilter');
                     var updateChildTables = [$('#studies_tab').data('updatechildtables')];
-                    var cols = ['', 'PatientID', 'StudyInstanceUID', 'StudyDescription', 'SeriesInstanceUID'];
+                    var cols = ['', 'PatientID', 'StudyInstanceUID', 'StudyDate','StudyDescription', 'SeriesInstanceUID'];
                     var ssCallNeeded = true;
 
                     var caseArr = new Array();
@@ -1314,7 +1311,8 @@ require([
                                 beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                                 success: function (data) {
                                     window.studiesCache = new Object();
-                                    updateCache(window.studiesCache, request, backendReqStrt, backendReqLength, data, cols);
+                                    colSort = ["", "PatientID", "StudyInstanceUID","StudyDate","StudyDescription","unique_series"]
+                                    updateCache(window.studiesCache, request, backendReqStrt, backendReqLength, data, colSort);
                                     dataset = data['res'].slice(request.start - backendReqStrt, request.start - backendReqStrt + request.length);
                                     if (dataset.length > 0) {
                                         $('#studies_tab').children('thead').children('tr').children('.ckbx').removeClass('notVis');
