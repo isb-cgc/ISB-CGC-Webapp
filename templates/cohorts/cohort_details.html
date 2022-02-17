@@ -75,6 +75,7 @@
 
 {% block js_file %}
     {{ collection_tooltips|json_script:"collection_tooltips" }}
+    {{ collections|json_script:"collections" }}
     <script>
         var cohort_filters = {{ cohort_filters|safe }};
         var is_cohort = true;
@@ -83,6 +84,7 @@
         var cohort_name = "{{ cohort.name|safe }}";
         var user_is_social = {% if is_social %} true {% else %} false {% endif %};
         const collection_tooltips = JSON.parse(document.getElementById('collection_tooltips').textContent);
+        window.collection = JSON.parse(document.getElementById('collections').textContent);
         var file_parts_count = {{ file_parts_count }};
         var display_file_parts_count = {{ display_file_parts_count }};
         var user_id = {% if request.user.is_authenticated %}{{ request.user.id|safe }}{% else %}null{% endif %};
