@@ -1742,6 +1742,9 @@ require([
                                 select_box_div.hide();
                             }
                         }
+                        $('#search_def_stats').removeClass('notDisp');
+                        $('#search_def_stats').html(data.totals.PatientID.toString()+" Cases, "+data.totals.StudyInstanceUID.toString()+" Studies, and "+data.totals.SeriesInstanceUID.toString()+" Series in this cohort");
+
                     } else {
                         if (isFiltered && data.total > 0) {
                             $('#save-cohort-btn').prop('disabled', '');
