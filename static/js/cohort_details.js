@@ -419,8 +419,8 @@ require([
             if (feature.data('feature-type') === 'datatype') { // Datatype filter
 
                 token = $('<span>').data({
-                    'feature-id': 'data_type',
-                    'feature-name': 'data_type',
+                    'feature-id': 'data_type_availability',
+                    'feature-name': 'data_type_availability',
                     'value-id': value_id,
                     'value-name': value.data('value-name'),
                     'prog-id': tokenProgId,
@@ -1212,11 +1212,11 @@ require([
     var apply_anonymous_checkbox_filter = function(programId, featureId, valueId)
     {
         var checkbox = null;
-        if (featureId === "data_type") {
+        if (featureId === "data_type_availability") {
             // data type filters...
             $("input[data-value-id ='"+valueId+"']").each(function()
             {
-                if($(this).closest("[data-feature-id=\"data_type\"]").length !== 0)
+                if($(this).closest("[data-feature-id=\"data_type_availability\"]").length !== 0)
                 {
                     checkbox = $(this);
                     return;
