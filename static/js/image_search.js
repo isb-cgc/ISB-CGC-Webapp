@@ -1697,15 +1697,9 @@ require([
         update_filter_url();
         var url = '/explore/'
         var parsedFiltObj=parseFilterObj();
-        if (Object.keys(parsedFiltObj).length > 0) {
-             url += '&filters=' + JSON.stringify(parsedFiltObj);
-             //url += '&filters='+JSON.stringify({"age_at_diagnosis":['None' ]});
-        }
-
-        url = encodeURI(url);
         url= encodeURI('/explore/')
 
-        ndic={'counts_only':'True', 'is_json':'True', 'is_dicofdic':'True', 'data_source_type':($("#data_source_type option:selected").val() || 'S'), 'filters':JSON.stringify(parsedFiltObj) }
+        ndic={'totals':JSON.stringify(["PatientID", "StudyInstanceUID", "SeriesInstanceUID"]),'counts_only':'True', 'is_json':'True', 'is_dicofdic':'True', 'data_source_type':($("#data_source_type option:selected").val() || 'S'), 'filters':JSON.stringify(parsedFiltObj) }
         var csrftoken = $.getCookie('csrftoken');
         let deferred = $.Deferred();
         $.ajax({
@@ -1754,10 +1748,18 @@ require([
                             if (user_is_auth) {
                                 $('#save-cohort-btn').prop('title', '');
                             }
+                            $('#search_def_stats').removeClass('notDisp');
+                            $('#search_def_stats').html(data.totals.PatientID.toString()+" Cases, "+data.totals.StudyInstanceUID.toString()+" Studies, and "+data.totals.SeriesInstanceUID.toString()+" Series in this cohort");
                         } else {
                             $('#save-cohort-btn').prop('disabled', 'disabled');
                             if (data.total <= 0) {
-                                window.alert('There are no cases matching the selected set of filters.')
+                                $('#search_def_stats').removeClass('notDisp');
+                                $('#search_def_stats').html('<span style="color:red">There are no cases matching the selected set of filters</span>');
+                                //window.alert('There are no cases matching the selected set of filters.')
+                            }
+                            else{
+                                $('#search_def_stats').addClass('notDisp');
+                                $('#search_def_stats').html("Don't show this!");
                             }
                             if (user_is_auth) {
                                 $('#save-cohort-btn').prop('title', data.total > 0 ? 'Please select at least one filter.' : 'There are no cases in this cohort.');
