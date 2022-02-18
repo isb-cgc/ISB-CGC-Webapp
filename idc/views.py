@@ -451,7 +451,7 @@ def explore_data_page(request, filter_path=False, path_filters=None):
             filters = cohort_filters
 
         context = build_explorer_context(is_dicofdic, source, versions, filters, fields, order_docs, counts_only,
-                                         with_related, with_derived, collapse_on, is_json, uniques=uniques)
+                                         with_related, with_derived, collapse_on, is_json, uniques=uniques, totals=totals)
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")

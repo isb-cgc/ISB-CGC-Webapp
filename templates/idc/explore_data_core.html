@@ -600,9 +600,14 @@
                         <div class="panel-body">
                             <input id="filt_txt" type="hidden" value="">
                             <div id="search_def"><span class="placeholder">&nbsp;</span></div>
+
+
                             <div id="search_def_warn" style="display:none">Note: TCGA.* filters only apply to TCGA
                                 collections
                             </div>
+                            <div id="search_def_stats" class="notDisp">No Text
+                            </div>
+
                             <div class="space-top-10 space-top-10">
                                 <button
                                         class="btn btn-special get-filter-uri space-bottom-5"
@@ -798,7 +803,7 @@
                                                    style="font-family :'Font Awesome 6 Free' !important"></i>
                                             </th>
                                             <th class='text_data'>Collection Name</th>
-                                            <th class='numeric_data'>Case Id</th>
+                                            <th class='text_data'>Case ID</th>
                                             <th class='numeric_data'>Total # of Studies</th>
 
                                             <th class='numeric_data'>Total # of Series</th>
@@ -825,8 +830,8 @@
                                                 <i class="fa-solid fa-circle-minus fa-lg"
                                                    onclick="(updateMultipleRows($($(this).parentsUntil('table')[2]).parent(),false,'studies'))"></i>
                                             </th>
-                                            <th class='col1 text_data case-id'>Case Id</th>
-                                            <th class='col2 text_data study-id study-id-col'>Study Id</th>
+                                            <th class='col1 text_data case-id has_aux' data-auxid='3'>Case ID</th>
+                                            <th class='col2 text_data study-id study-id-col'>Study Instance UID</th>
                                             <th class='col1 text_data study-date'>Study Date</th>
                                             <th class='col1 text_data study-description'>Study Description</th>
                                             <th class='col1 numrows numeric_data'># of Series</th>
@@ -847,8 +852,8 @@
                                     <table id="series_tab" class="table table-striped series-table">
                                         <thead id="series_table_head">
                                         <tr>
-                                            <th class="study-id">Study Id</th>
-                                            <th class="series-number">Series Number</th>
+                                            <th class="study-id">Study Instance UID</th>
+                                            <th class="series-number numeric_data">Series Number</th>
                                             <th class="modality">Modality</th>
                                             <th class="body-part-examined">Body Part Examined</th>
                                             <th class="series-description">Series Description</th>
