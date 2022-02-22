@@ -906,11 +906,16 @@ require([
         $('#cases_tab').data('rowsremoved',rowsRemoved);
         $('#cases_tab').data('refreshafterfilter',refreshAfterFilter);
         $('#cases_tab').data('updatechildtables',updateChildTables);
+        if ($('#cases_tab_wrapper').find('.dataTables_controls').length>0){
+            pageRows = parseInt($('#cases_tab_wrapper').find('.dataTables_length select').val());
+        }
+        else {
+            pageRows = 10;
+        }
         $('#cases_tab').DataTable().destroy();
-
         try{
-
             $('#cases_tab').DataTable({
+                "iDisplayLength": pageRows,
                 "autoWidth": false,
                 "dom": '<"dataTables_controls"ilp>rt<"bottom"><"clear">',
                 "order": [[2, "asc"]],
@@ -1114,9 +1119,12 @@ require([
                         }
 
                     }
+
                 }
 
+
             });
+
         }
         catch(err){
             alert("The following error occurred trying to update the case table:" +err+". Please alert the systems administrator");
@@ -1126,10 +1134,10 @@ require([
             $('#cases_table_head').children('tr').children().each(function(){
                 this.style.width=null;
                 }
-
             );
 
         })
+
         $('#cases_tab').find('tbody').attr('id','cases_table');
         $('#cases_panel').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'cases_tab_wrapper\')">Go</button></div>');
         $('#cases_panel').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by CaseID:</strong><input class="caseID_inp" type="text-box" value="'+caseID+'"><button onclick="filterTable(\'cases_panel\',\'caseID\')">Go</button></div>');
@@ -1141,10 +1149,17 @@ require([
         $('#studies_tab').data('rowsremoved',rowsRemoved);
         $('#studies_tab').data('refreshafterfilter',refreshAfterFilter);
         $('#studies_tab').data('updatechildtables',updateChildTables);
+        if ($('#studies_tab_wrapper').find('.dataTables_controls').length>0){
+            pageRows = parseInt($('#studies_tab_wrapper').find('.dataTables_length select').val());
+        }
+        else {
+            pageRows = 10;
+        }
         $('#studies_tab').DataTable().destroy();
 
         try {
             $('#studies_tab').DataTable({
+                "iDisplayLength": pageRows,
                 "autoWidth": false,
                 "dom": '<"dataTables_controls"ilp>rt<"bottom"><"clear">',
                 "order": [[1, "asc"]],
@@ -1279,20 +1294,16 @@ require([
                             curFilterObj = new Object();
                             curFilterObj.collection_id = window.selItems.selProjects;
                             curFilterObj.PatientID = caseArr;
-
                             if (studyID.trim().length > 0) {
                                 curFilterObj.StudyInstanceUID = studyID;
 
                             }
-
                             var filterStr = JSON.stringify(curFilterObj);
                             let url = '/tables/studies/';
                             url = encodeURI(url);
                             ndic = {'filters': filterStr, 'limit': 2000}
-
                             ndic['offset'] = backendReqStrt;
                             ndic['limit'] = backendReqLength;
-
                             if (typeof (request.order) !== 'undefined') {
                                 if (typeof (request.order[0].column) !== 'undefined') {
                                     ndic['sort'] = cols[request.order[0].column];
@@ -1353,6 +1364,7 @@ require([
                 }
 
             });
+
         }
 
         catch(err){
@@ -1366,11 +1378,7 @@ require([
 
             );
 
-
-
-
         })
-
 
         $('#studies_tab').children('tbody').attr('id','studies_table');
         $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'studies_tab_wrapper\')">Go</button></div>');
@@ -1382,10 +1390,16 @@ require([
 
         $('#series_tab').attr('data-rowsremoved', rowsRemoved);
         $('#series_tab').attr('data-refreshafterfilter', refreshAfterFilter);
+        if ($('#series_tab_wrapper').find('.dataTables_controls').length>0){
+            pageRows = parseInt($('#series_tab_wrapper').find('.dataTables_length select').val());
+        }
+        else {
+            pageRows = 10;
+        }
         $('#series_tab').DataTable().destroy();
         try {
-
             $('#series_tab').DataTable({
+                "iDisplayLength": pageRows,
                  "autoWidth": false,
                  "dom": '<"dataTables_controls"ilp>rt<"bottom"><"clear">',
                  "order": [[0, "asc"]],
@@ -1562,10 +1576,13 @@ require([
               }
 
            });
+
         }
         catch(err){
             alert("The following error was reported when processing server data: "+ err +". Please alert the systems administrator");
         }
+
+
 
         $('#series_tab').on('draw.dt', function(){
             $('#series_table_head').children('tr').children().each(function(){
@@ -3178,7 +3195,6 @@ require([
         createPlots('tcga_clinical');
 
         updateProjectTable(window.collectionData);
-
         $('.clear-filters').on('click', function () {
             $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('checked',false);
             $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('indeterminate',false);
