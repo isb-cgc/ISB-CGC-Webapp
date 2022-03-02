@@ -35,7 +35,7 @@ from idc_collections.models import ImagingDataCommonsVersion, Attribute
 
 logger = logging.getLogger('main_logger')
 
-cohort_defs = [
+COHORT_DEFS = [
     {
         'name': 'Example: V1 collection ID',
         'desc': "This shouldn't change from V1 to V2",
@@ -126,7 +126,7 @@ cohort_defs = [
 def load_cohort_defs(filename):
     with open(filename, 'r') as json_file:
         cohort_defs = json.load(json_file)
-    return
+    return cohort_defs
 
 def parse_args():
     cohort_def_help_msg = """
@@ -161,7 +161,8 @@ def main():
             logger.error("[ERROR] User email(s) not provided! We can't make cohorts without a user or users to assign ownership.")
             exit(1)
 
-        len(args.cohort_defs) and load_cohort_defs(args.cohort_defs)
+        if len(args.cohort_defs):
+            COHORT_DEFS = load_cohort_defs(args.cohort_defs)
         versions = ImagingDataCommonsVersion.objects.filter(version_number__in=args.versions.split(','))
         user_emails = args.user_emails.split(",")
         users = User.objects.filter(email__in=user_emails)
@@ -182,15 +183,15 @@ def main():
         for user in users:
             attr_ids = {
                 i.name: i.id for i in
-                Attribute.objects.filter(name__in=[y['attribute'] for x in cohort_defs for y in x['filters']])
+                Attribute.objects.filter(name__in=[y['attribute'] for x in COHORT_DEFS for y in x['filters']])
             }
 
-            for cohort in cohort_defs:
+            for cohort in COHORT_DEFS:
                 filters = {
                     str(attr_ids[x['attribute']]): x['values'] for x in cohort['filters']
                 }
                 for version in versions:
-                    _save_cohort(user,filters,cohort['name'],None,version,desc=cohort['desc'],no_stats=True)
+                    _save_cohort(user, filters, cohort['name'], None, version, desc=cohort['desc'], no_stats=bool(version == "1.0"))
 
     except Exception as e:
         logger.exception(e)
