@@ -1,8 +1,8 @@
 #!/bin/sh
 
-cd ../cypress_test
+# cd ../cypress_test
 
 
-./node_modules/cypress/bin/cypress run
+# ./node_modules/cypress/bin/cypress run
 #echo 'hi'
 #exit -1 
