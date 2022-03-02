@@ -59,6 +59,11 @@ else
 fi
 apt-get install -y --force-yes python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
 apt-get install -y --force-yes mysql-client
+
+# Per https://stackoverflow.com/questions/13708180/python-dev-installation-error-importerror-no-module-named-apt-pkg
+# there's an issue with Python 3.7 and deadsnakes.
+cp -v /usr/lib/python3/dist-packages/apt_pkg.cpython-36m-x86_64-linux-gnu.so /usr/lib/python3/dist-packages/apt_pkg.so
+
 echo "Dependencies Installed"
 
 # If this is local development, clean out lib for a re-structuring 
