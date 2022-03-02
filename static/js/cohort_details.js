@@ -1201,29 +1201,24 @@ require([
                 }
             }
 
-            if (has_mut_filter)
-            {
+            if (has_mut_filter) {
                 $('#p-2-mut-filter-combine').val(MUTATION_FILTER_COMBINE);
                 $('.mut-filter-combine').trigger('change');
             }
         }
     };
 
-    var apply_anonymous_checkbox_filter = function(programId, featureId, valueId)
-    {
+    var apply_anonymous_checkbox_filter = function(programId, featureId, valueId) {
         var checkbox = null;
         if (featureId === "data_type_availability") {
             // data type filters...
-            $("input[data-value-id ='"+valueId+"']").each(function()
-            {
-                if($(this).closest("[data-feature-id=\"data_type_availability\"]").length !== 0)
-                {
+            $("input[data-value-id ='"+valueId+"']").each(function() {
+                if($(this).closest("[data-feature-id=\"data_type_availability\"]").length !== 0) {
                     checkbox = $(this);
                     return;
                 }
             });
-        }
-        else {
+        } else {
             // case filters...
             var checkboxId = programId + "-" + featureId + "-" + valueId;
             checkboxId = checkboxId.replace(/ /g, "_");
@@ -1241,8 +1236,7 @@ require([
         }
     };
 
-    var apply_anonymous_molec_filter = function(programId, featureId, valueId)
-    {
+    var apply_anonymous_molec_filter = function(programId, featureId, valueId) {
         var parts = featureId.split(":");
 
         var build = parts[1];
@@ -1256,17 +1250,13 @@ require([
 
         var mut_cat = is_negative ? parts[4] : parts[3];
         var mut_type = valueId;
-        if (mut_cat === 'specific')
-        {
+        if (mut_cat === 'specific') {
             $('.mutation-category-selector').val('indv-selex');
             $('.spec-molecular-attrs ul').show();
             $('.spec-molecular-attrs ul').find("[data-value-id='"+mut_type+"']").prop("checked", true);
-        }
-        else if (mut_cat === 'category')
-        {
+        } else if (mut_cat === 'category') {
             $('.mutation-category-selector').val(mut_type);
         }
-
         $('.build-mol-filter').removeAttr('disabled');
         $('.build-mol-filter').trigger( "click" );
     };
