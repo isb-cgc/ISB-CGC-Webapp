@@ -71,6 +71,13 @@ require([
       Chest: 'rgb(0, 233, 255)',
     };
 
+    var variantNames = {
+        'Kidney': ['Renal'],
+        'Head and Neck': ['Head','Head-Neck', 'Head-and-Neck'],
+        'Colorectal': ['Colon','Rectum'],
+        "Blood": ["Marrow, Blood"]
+    };
+
     let data = case_counts.sort(function(a,b){
         let aSite = a['site'].toLowerCase();
         let bSite = b['site'].toLowerCase();
@@ -83,27 +90,16 @@ require([
         return 1;
     });
 
-    let clickHandler = function(id)
-    {
+    let clickHandler = function(id) {
         var groups = [];
         var filters = [];
         var values = [];
 
-        if (id.site === "Head and Neck" || id.site === "Head-and-Neck")
-        {
-            values.push("Head-Neck");
-        }
-        else if (id.site == "Colorectal")
-        {
-            values.push("Colon");
-        }
-        else
-        {
-            values.push(id.site)
+        if(variantNames[id.site] !== null && variantNames[id.site] !== undefined){
+            values.push(...variantNames[id.site]);
         }
 
-        filters.push(
-        {
+        filters.push({
             'id': '128',
             'values': values,
         });

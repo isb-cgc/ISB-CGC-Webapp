@@ -61,7 +61,8 @@ def landing_page(request):
         'Head-Neck': 'Head and Neck',
         'Head-and-Neck': 'Head and Neck',
         'Colon': 'Colorectal',
-        'Rectum': 'Colorectal'
+        'Rectum': 'Colorectal',
+        "Marrow, Blood": "Blood"
     }
 
     skip = [
