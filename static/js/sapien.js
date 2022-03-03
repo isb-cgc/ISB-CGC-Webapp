@@ -91,23 +91,14 @@ require([
     });
 
     let clickHandler = function(id) {
-        var groups = [];
-        var filters = [];
-        var values = [];
-
-        if(variantNames[id.site] !== null && variantNames[id.site] !== undefined){
-            values.push(...variantNames[id.site]);
-        }
-
-        filters.push({
-            'id': '128',
-            'values': values,
+        let url = BASE_URL+"/explore/filters/?access=Public&";
+        let encoded_filters = []
+        let values = (variantNames[id.site] !== null && variantNames[id.site] !== undefined) ? variantNames[id.site] : [id.site];
+        _.each(values, function (val) {
+            encoded_filters.push("tcia_tumorLocation" + "=" + encodeURI(val));
         });
-        groups.push({'filters': filters});
-        var filterStr = JSON.stringify(groups);
 
-        let url = '/explore/?filters_for_load=' + filterStr;
-        url = encodeURI(url);
+        url += encoded_filters.join("&");
 
         window.location.href = url;
     };

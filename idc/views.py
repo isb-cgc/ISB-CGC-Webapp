@@ -33,7 +33,7 @@ from django.contrib import messages
 
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
-from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute
+from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute, Attribute_Tooltips
 from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
@@ -50,7 +50,9 @@ WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 # The site's homepage
 @never_cache
 def landing_page(request):
-    collex = Collection.objects.filter(active=True, subject_count__gt=6, collection_type=Collection.ORIGINAL_COLLEX, species='Human').values()
+    collex = Collection.objects.filter(active=True, subject_count__gt=6,
+                                       collection_type=Collection.ORIGINAL_COLLEX, species='Human',
+                                       access="Public").values()
     idc_info = ImagingDataCommonsVersion.objects.get(active=True)
 
     sapien_counts = {}
@@ -404,8 +406,6 @@ def populate_tables(request):
 # Data exploration and cohort creation page
 @login_required
 def explore_data_page(request, filter_path=False, path_filters=None):
-    attr_by_source = {}
-    attr_sets = {}
     context = {'request': request}
     is_json = False
     wcohort = False
@@ -430,13 +430,10 @@ def explore_data_page(request, filter_path=False, path_filters=None):
         uniques = json.loads(req.get('uniques', '[]'))
         totals = json.loads(req.get('totals', '[]'))
 
-        record_limit = int(req.get('record_limit', '2000'))
-        offset = int(req.get('offset', '0'))
-        #sort_on = req.get('sort_on', collapse_on+' asc')
-        cohort_id = req.get('cohort_id', '-1')
+        cohort_id = int(req.get('cohort_id', '-1'))
 
         cohort_filters = {}
-        if (int(cohort_id) > -1):
+        if cohort_id > 0:
             cohort = Cohort.objects.get(id=cohort_id, active=True)
             cohort.perm = cohort.get_perm(request)
             if cohort.perm:
@@ -470,16 +467,23 @@ def explore_data_page(request, filter_path=False, path_filters=None):
         elif filter_path:
             context['filters_for_load'] = path_filters
         else:
-            filters_for_load = req.get('filters_for_load', '{}')
-            blacklist = re.compile(settings.BLACKLIST_RE, re.UNICODE)
-            if blacklist.search(filters_for_load):
-                logger.warning("[WARNING] Saw bad filters in filters_for_load:")
-                logger.warning(filters_for_load)
-                filters_for_load = '{}'
-                messages.error(request,
-                       "There was a problem with some of your filters - please ensure they're properly formatted.")
-
-            context['filters_for_load'] = json.loads(filters_for_load)
+            filters_for_load = req.get('filters_for_load', None)
+            if filters_for_load:
+                blacklist = re.compile(settings.BLACKLIST_RE, re.UNICODE)
+                if blacklist.search(filters_for_load):
+                    logger.warning("[WARNING] Saw bad filters in filters_for_load:")
+                    logger.warning(filters_for_load)
+                    filters_for_load = {}
+                    messages.error(request,
+                           "There was a problem with some of your filters - please ensure they're properly formatted.")
+                else:
+                    filters_for_load = json.loads(filters_for_load)
+            else:
+                filters_for_load = [{"filters": [{
+                    "id": Attribute.objects.get(name="access").id,
+                    "values": ["Public"]
+                }]}]
+            context['filters_for_load'] = filters_for_load
 
         return render(request, 'idc/explore.html', context)
 
