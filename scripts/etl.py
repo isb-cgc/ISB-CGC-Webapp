@@ -58,6 +58,8 @@ ranges_needed = {
 
 }
 
+COLLECTION_HEADER_CHK = "collection_uuid"
+
 ranges_needed = {
     'wbc_at_diagnosis': 'by_200',
     'event_free_survival_time_in_days': 'by_500',
@@ -211,7 +213,7 @@ def add_data_sources(source_set, subversions, set_types):
         add_data_source(**source)
 
 
-def add_data_source(name, count_col, source_type, versions, programs, data_sets, aggregate_level):
+def add_data_source(name, count_col, source_type, versions, programs, aggregate_level, set_types, joins, attr_from):
     obj = None
     try:
         obj, created = DataSource.objects.update_or_create(
@@ -233,11 +235,20 @@ def add_data_source(name, count_col, source_type, versions, programs, data_sets,
             versions_to_source.append(DataSource.versions.through(dataversion_id=dv.id, datasource_id=obj.id))
         DataSource.versions.through.objects.bulk_create(versions_to_source)
 
-        datasets = DataSetType.objects.filter(name__in=data_sets)
+        datasets = DataSetType.objects.filter(name__in=set_types)
         datasets_to_source = []
         for data_set in datasets:
             datasets_to_source.append(DataSource.data_sets.through(datasource_id=obj.id, datasettype_id=data_set.id))
         DataSource.data_sets.through.objects.bulk_create(datasets_to_source)
+
+        for jn in joins:
+            add_source_joins(
+                [name],
+                jn['from'],
+                jn['sources'],
+                jn['to']
+            )
+        copy_attrs([attr_from], [name])
 
         print("DataSource entry created: {}".format(obj.name))
     except Exception as e:
@@ -275,12 +286,14 @@ def add_source_joins(froms, from_col, tos=None, to_col=None):
         DataSourceJoin.objects.bulk_create(src_joins)
 
 
-def load_collections(filename, data_version="7.0"):
+def load_collections(filename, data_version="8.0"):
     try:
         collection_file = open(filename, "r")
         new_collection_set = []
         updated_collection_set = {}
         for line in csv_reader(collection_file):
+            if COLLECTION_HEADER_CHK in line:
+                continue
             collex = {
                 'data': {
                     "collection_id": line[0],
@@ -327,7 +340,7 @@ def load_collections(filename, data_version="7.0"):
         logger.error("Line: {}".format(line))
 
 
-def add_collections(new,update):
+def add_collections(new, update):
     collex_list = []
     try:
         for collex in new:
@@ -353,13 +366,13 @@ def add_collections(new,update):
         Collection.data_versions.through.objects.bulk_create(collex_to_dv)
 
         updated_collex = Collection.objects.filter(name__in=list(update.keys()))
-
-        for upd in updated_collex:
-            fields = list(update[upd.name]['data'].keys())
-            vals = update[upd.name]['data']
-            for key in vals:
-                setattr(upd,key,vals[key])
-        Collection.objects.bulk_update(updated_collex,fields)
+        if len(updated_collex):
+            for upd in updated_collex:
+                fields = list(update[upd.name]['data'].keys())
+                vals = update[upd.name]['data']
+                for key in vals:
+                    setattr(upd, key, vals[key])
+            Collection.objects.bulk_update(updated_collex, fields)
 
     except Exception as e:
         logger.error("[ERROR] While adding/updating collections:")
@@ -372,6 +385,10 @@ def create_solr_params(schema_src, solr_src):
     schema = BigQuerySupport.get_table_schema(schema_src[0],schema_src[1],schema_src[2])
     solr_schema = []
     solr_index_strings = []
+    SCHEMA_BASE = '{"add-field": %s}'
+    CORE_CREATE_STRING = "sudo -u solr /opt/bitnami/solr/bin/solr create -c {solr_src} -s 2 -rf 2"
+    SCHEMA_STRING = "curl -u {solr_user}:{solr_pwd} -X POST -H 'Content-type:application/json' --data-binary '{schema}' https://localhost:8983/solr/{solr_src}/schema --cacert solr-ssl.pem"
+    INDEX_STRING = "curl -u {solr_user}:{solr_pwd} -X POST 'https://localhost:8983/solr/{solr_src}/update?commit=yes{params}' --data-binary @{file_name}.csv -H 'Content-type:application/csv' --cacert solr-ssl.pem"
     for field in schema:
         if not re.search(r'has_',field['name']):
             field_schema = {
@@ -384,12 +401,27 @@ def create_solr_params(schema_src, solr_src):
             if field_schema['multiValued']:
                 solr_index_strings.append("f.{}.split=true&f.{}.separator=|".format(field['name'],field['name']))
 
-    with open("{}_solr_schemas.json".format(solr_src.name), "w") as schema_outfile:
-        json.dump(solr_schema, schema_outfile)
-    schema_outfile.close()
-    with open("{}_solr_index_vars.txt".format(solr_src.name), "w") as solr_index_string:
-        solr_index_string.write("&{}".format("&".join(solr_index_strings)))
-    solr_index_string.close()
+    with open("{}_solr_cmds.txt".format(solr_src.name), "w") as cmd_outfile:
+        schema_array = SCHEMA_BASE % solr_schema
+        params = "&{}".format("&".join(solr_index_strings))
+        cmd_outfile.write(CORE_CREATE_STRING.format(solr_src=solr_src.name))
+        cmd_outfile.write("\n\n")
+        cmd_outfile.write(SCHEMA_STRING.format(
+            solr_user=settings.SOLR_LOGIN,
+            solr_pwd=settings.SOLR_PASSWORD,
+            solr_src=solr_src.name,
+            schema=schema_array
+        ))
+        cmd_outfile.write("\n\n")
+        cmd_outfile.write(INDEX_STRING.format(
+            solr_user=settings.SOLR_LOGIN,
+            solr_pwd=settings.SOLR_PASSWORD,
+            solr_src=solr_src.name,
+            params=params,
+            file_name=solr_src.name
+        ))
+
+    cmd_outfile.close()
 
 
 def load_attributes(filename, solr_sources, bq_sources):
@@ -558,7 +590,6 @@ def update_display_values(attr, updates):
     if len(updates):
         new_vals = []
         to_update = Attribute_Display_Values.objects.filter(raw_value__in=[x for x in updates], attribute=attr)
-        print(to_update)
         if len(to_update):
             for upd in to_update:
                 upd.display_value = updates[upd.raw_value]['display_value']
@@ -566,7 +597,6 @@ def update_display_values(attr, updates):
         to_add = set([x for x in updates]).difference(set([x.raw_value for x in to_update]))
         for rv in to_add:
             new_vals.append(Attribute_Display_Values(raw_value=rv, display_value=updates[rv]['display_value'], attribute=attr))
-        print(new_vals)
         len(new_vals) and Attribute_Display_Values.objects.bulk_create(new_vals)
 
 
@@ -611,6 +641,8 @@ def load_display_vals(filename):
         attr_vals_file = open(filename, "r")
 
         for line in csv_reader(attr_vals_file):
+            if 'display_value' in line:
+                continue
             if line[0] not in display_vals:
                 display_vals[line[0]] = {
                     'vals': {}
@@ -632,24 +664,14 @@ def update_data_versions(filename):
     config = json.load(f)
 
     add_data_versions(
-        config.new_major_version,
-        [{'name': x, 'ver': config.subversion_number} for x in config.new_sub_versions],
-        config.bioclin_version
+        config['new_major_version'],
+        [{'name': x, 'ver': config['subversion_number']} for x in config['new_sub_versions']],
+        config['bioclin_version']
     )
 
-    add_data_sources(config.data_sources, config.new_sub_versions, config.set_types)
+    add_data_sources(config['data_sources'], config['new_sub_versions'], config['set_types'])
 
-    for ds in config.data_sources:
-        for jn in ds.joins:
-            add_source_joins(
-                [ds.name],
-                jn.from_col,
-                jn.sources,
-                jn.to_col
-            )
-        copy_attrs([ds.attr_from], [ds.name])
-
-    deactivate_data_versions(config.minor, config.major)
+    deactivate_data_versions(config['deactivate']['minor'], config['deactivate']['major'])
 
     return
 
@@ -672,7 +694,7 @@ def main():
         len(args.version_file) and update_data_versions(args.version_file)
 
         len(args.attributes_file) and load_attributes(args.attributes_file,
-            ["dicom_derived_series_v7","dicom_derived_study_v7"], ["idc-dev-etl.idc_v7.dicom_pivot_v7"]
+            ["dicom_derived_series_v8","dicom_derived_study_v8"], ["idc-dev-etl.idc_v7.dicom_pivot_v8"]
         )
 
         len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
@@ -684,12 +706,13 @@ def main():
                 update_display_values(Attribute.objects.get(name=attr), dvals[attr]['vals'])
 
         if args.solr_files.lower() == 'y':
-            for src in [("idc-dev-etl.idc_v7.dicom_derived_all", "dicom_derived_series_v7",),
-                    ("idc-dev-etl.idc_v7.dicom_derived_all", "dicom_derived_study_v7",),]:
-                create_solr_params(src[0],src[1])
+            for src in [("idc-dev-etl.idc_v8_pub.dicom_derived_all", "dicom_derived_series_v8",),
+                    ("idc-dev-etl.idc_v8_pub.dicom_derived_all", "dicom_derived_study_v8",),]:
+                create_solr_params(src[0], src[1])
 
     except Exception as e:
-        logging.exception(e)
+        logger.error("[ERROR] While parsing ETL:")
+        logger.exception(e)
 
 
 if __name__ == "__main__":
