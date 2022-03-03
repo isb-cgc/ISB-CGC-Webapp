@@ -33,7 +33,7 @@ from django.contrib import messages
 
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
-from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute
+from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute, Attribute_Tooltips
 from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
@@ -453,6 +453,9 @@ def explore_data_page(request, filter_path=False, path_filters=None):
 
         context = build_explorer_context(is_dicofdic, source, versions, filters, fields, order_docs, counts_only,
                                          with_related, with_derived, collapse_on, is_json, uniques=uniques, totals=totals)
+
+        if not is_json:
+            context['collection_tooltips'] = Attribute_Tooltips.objects.all().get_tooltips("collection_id")
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
