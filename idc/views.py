@@ -65,7 +65,6 @@ def landing_page(request):
         'Colon': 'Colorectal',
         'Rectum': 'Colorectal',
         "Marrow, Blood": "Blood",
-        "Mesothelium": "Chest",
         "Testicles": "Testis",
         "Adrenal Glands": "Adrenal Gland"
     }
@@ -76,7 +75,8 @@ def landing_page(request):
         'Abdomen',
         'Ear',
         'Pelvis, Prostate, Anus',
-        "Intraocular"
+        "Intraocular",
+        "Mesothelium"
     ]
 
     for collection in collex:
