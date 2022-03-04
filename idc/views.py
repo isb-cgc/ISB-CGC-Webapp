@@ -64,7 +64,10 @@ def landing_page(request):
         'Head-and-Neck': 'Head and Neck',
         'Colon': 'Colorectal',
         'Rectum': 'Colorectal',
-        "Marrow, Blood": "Blood"
+        "Marrow, Blood": "Blood",
+        "Mesothelium": "Chest",
+        "Testicles": "Testis",
+        "Adrenal Glands": "Adrenal Gland"
     }
 
     skip = [
@@ -72,7 +75,8 @@ def landing_page(request):
         'Abdomen, Mediastinum',
         'Abdomen',
         'Ear',
-        'Pelvis, Prostate, Anus'
+        'Pelvis, Prostate, Anus',
+        "Intraocular"
     ]
 
     for collection in collex:
