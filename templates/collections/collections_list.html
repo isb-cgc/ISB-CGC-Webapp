@@ -61,6 +61,8 @@
                                     <a role="button" >
                                 {% if collex_type == 'Analysis' %}
                                     {{ collection.collection_id }}
+                                {% elif collection.tcia_collection_id|length == 0 %}
+                                    {{ collection.name }}
                                 {% else %}
                                     {{ collection.tcia_collection_id }}
                                 {% endif %}

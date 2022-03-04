@@ -32,7 +32,20 @@ define(['jquery'], function($) {
 
     <svg id="male-organs" viewBox="0 0 34 46" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;">
         <g transform="matrix(0.5,0,0,0.5,-182.748,-591.474)">
-
+            <g transform="matrix(2,0,0,2,0,0)">
+                <g opacity="0.490005">
+                    <g>
+                        <g opacity="0.589996">
+                            <clipPath id="_male-organsclip1">
+                                <rect x="204" y="612.96" width="12.748" height="24.08"/>
+                            </clipPath>
+                            <g clip-path="url(#_male-organsclip1)">
+                                <path d="M216.748,625C216.748,631.649 213.894,637.04 210.374,637.04C206.854,637.04 204,631.649 204,625C204,618.351 206.854,612.96 210.374,612.96C213.894,612.96 216.748,618.351 216.748,625" style="fill:rgb(241,90,34);fill-rule:nonzero;"/>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
             <g transform="matrix(2,0,0,2,0,0)">
                 <g opacity="0.490005">
                     <g>
@@ -512,7 +525,20 @@ define(['jquery'], function($) {
               <image id="_pancreas" width="54px" height="25px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADYAAAAZCAYAAAB6v90+AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAFGUlEQVRYhc2Y208bRxTGv736tjZrsA0YFwwhhJKQSGnSSpGqRmr7VvUhf2Teqr71pVWkPlRqeGlEEmgo5RKCYztgr71re1nbu33YOWZYm0scEvpJR+Px2rvzm3N25pwRcMXyYIhcV+Ra3vhrAOCeYhCgs/YKxMHwg5e5dpDR7wiiA8ABYLPWYd+5AnT3wmCnzCzJ5Ts0a2fA8BAqs/ApRtfpPwTVBGABqAMwWNtkgGeDscGcZkHRA3thwdqgV3iQKDMNQIKZxrUau06ABGYzkDKAN8wKAA4YrCOfA0RhoAYsGBodHIeGw/Vd7j48CEGMcpbi+5bS1GqqFa6ppmSoZremmm0BohDqKlKoq3qSJ9mxTqS6YMysq66yyobee/4JsACQGhhIcAb50KBYp/Bosj6BhQMgGc4mHKk9/iZWiu9qhe6eVrTehautI8kxBk16QFIkF1p+tPW9PGNNGgAq8D1p98AYFA+UYLOY4gYxCkBn14OhYcGP9QprLeY1mbtXFkDWg5ctRSqZN1pR2Uy8NnbiBcsVXPMCIH1qSUfe08xqfsaa1MFNuByACsP3SoYNIg9gDkC+obRy+9HSiKU0Q3W1gZpqHbVkuxN3YqruxNW4E3Pj7dhRrjFuKK58wOAcNgG6By+7pxXH1pJb7Vf6ttGQW8VhQAYp6SSAwHsvc+Gnwp/ZCQDzAJY84PbreGHh+eg/4ovkZtUV3Op5D4l2wvIX724u36kspBOOJtZVy13Ttw7/Sq2/q4bqby8LhjTiaPKD0p23YCEIWvIZGEFlASwCuFtXrQc/559o+7FSc5gHChAw3hqLFCMHrUti6FO2mY4+2v6unnC0JwBWAGzAXymbtADwYEulyOGDn+Z+DRuqORQUAHjw8DGhrtdmRn7cfWiGuuoKgL/hL/d1sH2MwMLwF4WcI7Y/fzz/i9KSbedjDepDJEDAl+Xl1MPC/YLkiX8CWAWwCX8Pa8IPRfAe0wBk/k3sTbdku3tF4z5T87XpxMO395VMa3QVwDMAawB24IcfLVauAN3lN1oVQHRD35UB/K/AMq2x8Lf7X6VmzalNAC/gA20hkG0A6FA6x2/QLgA31o582lGfoYSjKV8X76aWK9dLoif+Bv9d2oKfQpXRlx8e56gyjlMiG0B9zsw1VjLPB6Zan0ICBNww8vqdwxvRWXOqIHri7/DfIfJQGX4SQEC9jJ6/D4FRUlnIm9mNm9X5ey+Tm0OviMMo4WjKvYOlzFL1mpNwtG0GsoPjBJfeIwq7Pi/xIjCH/akgeuLaD7vfpABce5ncHCrNuagUVxEXajMjtyrzkVlzqix64tMBMJT/WTjegDvA4PKIJHDpFKVScwBuu4J7d13fuvXHxDP7IFy1LwsmbSfDC0Zez5tZcaoxXpE9icqOIAzVWPb7APXAAMCDQeUJJas5AAsAFl3BXXyl7+S24/vCrlYwq6H6hfc32ZOEyWY6OtlIxzKtUemzxoSdPEocAihyVoa/slF+aaHfOxcGCoKdWPLhb9aUCE8z0CyACUtpjpUjlUhdsSQjZLo11XQkVxIi3ZAc7obkUFf1Yu2Il7aTndGjEUv0RMr4KxwAeYQPMyp1gvXcewGdAAvA8UVhsBiksoXqMypfSMG6jKzOAdS56xRmvdUNQ3jnTLAAIF8585Uvb1Su8wUnX3SeZoOq7L5Tpg/VwDOPAQcvvPHHAwRF4o8JBlnfuchlgQR17inVKUdl5x3qnPBC4PNHg+H1H/gZVV5wQeSZAAAAAElFTkSuQmCC"/>
           </defs>
       </svg> 
-     
+      <svg id="Adrenal-Gland" viewBox="0 0 15 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;">
+          <g transform="matrix(0.5,0,0,0.5,0.458744,1.14446)">
+              <g opacity="0.886275">
+                  <g transform="matrix(0.7145,0,0,0.7145,3.86761,2.57136)">
+                      <g transform="matrix(2.79916,-0,-0,2.79916,-6.69712,-6.80236)">
+                          <use xlink:href="#_adrenal" x="0" y="0" width="14.464px" height="11.295px"/>
+                      </g>
+                  </g>
+              </g>
+          </g>
+          <defs>
+              <image id="_adrenal" width="15px" height="12px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAMCAYAAAC9QufkAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABuElEQVQokX2STU8TURSGnzsfd+i0IF8CkRoXEhsKsjAxYQERI7olkvgf3Bl3hpWJP4CfYEhYKAkLWOkOFUwUUwLqgo0QNlNCO53SwelM26mLXkiD0Tc5uclJnptzzvsKlJoSDdAAS1UCMFUvAkIgUG9DRMSiDbSALqAfGAIGgJSCA6AA5AEH8IBQKDABXAVuAhMMp+9UHs2Oe81Gp184pukWgy63fDT862hTRNEXYB8oGGq0PiCLaT4oLizM7V0x5fr7N5ROnPOtJDa3J0b7M0/3i6ZdDctARQOSQBrbnnbfrjx5nf8ul5YX28EL7emh3Oo27gGDgKUBNnAjfPb84drXd/zY/vAX1K7A0DuBDkDTAAmk4qmpnp3tjf+CACPIPHAG1M9t8MXu7mlm/O4/IU3TmbeGqtm895HWxUP9pY4BWMZOTs+8eDUme/tE2fc4O/UA6LBT3M9OMl9LetOfcis0Gp+BQ8AXTXlh0yimOVmfezzz+9ZIut7bY4miW7ccp2Svrn6jUskBP4EDwOWSz93ANeC6+iyhViqpMR1aQfGB2uWEmbRSllSgDsRAlVbCAqAGxCIiBvgDu3eXDbmGRVwAAAAASUVORK5CYII="/>
+          </defs>
+      </svg>     
       <svg id="Prostate" viewBox="0 0 30 25" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;">
           <g transform="matrix(0.5,0,0,0.5,4.27959,4.75916)">
               <g opacity="0.945098">
@@ -527,7 +553,20 @@ define(['jquery'], function($) {
               <image id="_prostate" width="30px" height="25px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAZCAYAAAAmNZ4aAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAC9ElEQVRIib2Wz28aRxTHP28HFjC2sYlxCRaKLVlKkHJr1UPv/qfbew9Rj5GcSk5CtMJxTIKDMQHWzE4OO8P+cKCEtnnS04xGs/t5b35838CmFhhFYNSmn8tagMT+CaQXvbboFfNWgGOgAynAs216LA3T1qPM2JIAHoKTDBVQBPycO7hn5zmQBsKc3y+CyAWQBSdZOmgF2AbKwI5tt5aAvwBTYGTbO2CSgmeyT8BZaNkCd4G69Zr1bZt50X55b7O7A4bWB9Zv7fg0Dy+QNQetWVgT+Mm2TXWvG4VJWCvM5hUV6jKA9tV0XipM5hV/qIuqD1xZ/2Bbt3UOTgJOsi3ajOrAEdAGjnfeDztHf7073e9+rBuREg/PhhFjZjfHB4PeL08uRo9r58TblD6AsQcG2qLTGSu7hNvAPtASY56e/n7+W+PV+yeR8kpGll4CMSLlvXefWvU3/UfXncfN12edP42I2/sJ2f1eLLU7LO4wNcSY9ukf578e/H11HCnPX0bMW6S8UuPV1bHA/OKsMzIiQ5K9nliW9nLXxweqQH239/nk8OVl23iyNtSZ8cQ/fHnZ3u19PiHetirJVYTAKC8134G3gOrO5fAwKnjl74U6iwpeeedyeGihWxkwyV3MK1KpcjOuGpGNtdiIqMrNuAqUcv9WabA7da4/m+xXx2LMSr1dZWKMnuxXx8CMh7JKeqmd5H0BxqNW7dqbR9NNwd48mt4e7X0AxvafYSoAvJSMOfAYGNwe7b29ft4KJDLh90IlMuH181YwatW6xAo2zoDbotNLHREf9zugb0SCi7POi/6zZtfT0WztTHU06z9rdi/OOi+MSAD0Sa7SonLFipAol5PLBpso18nBoPfzQrm6QAD0LHyIk8226HyR8FlDq1WoK4VwXgaY+4Wp9tUqrR6koOGyIqHtBNefEZe5AdDTRVXTxYqrTumyuG51Wtgm9dgnvptp8MzCN6jHWTj80BfIt7N3QfzPb65vB+DsP3tlbm7/8l39Ff/qegT/zkj9AAAAAElFTkSuQmCC"/>
           </defs>
       </svg>
-     
+      <svg id="Testis" viewBox="0 0 15 23" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;">
+          <g transform="matrix(0.5,0,0,0.5,0.96194,-0.759222)">
+              <g opacity="0.87451">
+                  <g transform="matrix(0.689173,0,0,0.689173,3.96239,7.45985)">
+                      <g transform="matrix(2.90203,-0,-0,2.90203,-8.54107,-8.62107)">
+                          <use xlink:href="#_testis" x="0" y="0" width="14.672px" height="22.482px"/>
+                      </g>
+                  </g>
+              </g>
+          </g>
+          <defs>
+              <image id="_testis" width="15px" height="23px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAXCAYAAADUUxW8AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB4ElEQVQ4jZ2UQW/TMBTHf36u2zRRhwbqVpDggDQh9c5l4rYzX6Mfat9lN8SFeyU0aRck6FYNtFVJ06S2OcRps7BFaL7Z7//z/z3bz4rW8OdoQADdWLaAUzNsU6taoAEMkAAx0AcKIANSoFQzyn/g4BgDY+At8CZskgI/gR/AEsjqDFQDHAATYOry3qftbfzRrc2hDMs/vVfZN4m2X4A5sAA2aobtBWMBDoD33spp8Wv02ZcSA9jUHLpiNBm8u3NKuzyUcAtYCXAEvAROyuvkrAZ3JZUSl9fJGXASdBGAhJQjYOKtTG3aP2rfQJVB/8hbmYbSIn+OlpByDIzt/WCKfwwFPNi7wYdwoDEg9X1GwNitzfgJFAC3NpMAR7B3joCRtyrpgr1TCTAK+p2zAWK/FemEq3gU9Lop1vvDf2JUcVNPm2qLdt1wFd89T6F69CWQqZ7rpEM8D3orQL2wUtqnnbD4FFgFvaudc2Apw3LZBcuwXFA1R950zoClPtjMHzZp0xb0i833AGeAk9BeObBQ2s11Utw8xuqkuFHa1V2Vq9n+bnLgN3BpjtMLZVz2wNS4zBynF8Bl0OUAdUs64B64UtpF/dcrafez0u4rcBV0LlRSjWf/JI0NnveHtTL4r9/zL79YzWywHAR1AAAAAElFTkSuQmCC"/>
+          </defs>
+      </svg>     
       <svg id="Cervix" viewBox="0 0 31 28" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-miterlimit:10;">
           <g transform="matrix(0.5,0,0,0.5,3.3629,3.7191)">
               <g transform="matrix(2,-0,-0,2,-6.72579,-7.43819)">
