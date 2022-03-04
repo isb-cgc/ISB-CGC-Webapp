@@ -320,8 +320,6 @@ require([
         maxWidth: 130
     });
 
-
-
     tippy.delegate('.series-table', {
         content: function(reference) {
             return $(reference).data('description');

@@ -114,6 +114,16 @@ blockquote {
   margin: 10px 20px;
   padding: 2px 20px; }
 
+.quote {
+  border: 2px solid #47477a;
+  border-radius: 2px;
+  background-color: #dbdbdb;
+  font-size: medium;
+  color: black;
+  margin: 10px;
+  padding: 10px;
+}
+
 textarea {
   height: 40px; }
 

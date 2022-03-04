@@ -33,7 +33,7 @@ from django.contrib import messages
 
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
-from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute
+from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute, Attribute_Tooltips
 from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
@@ -50,7 +50,9 @@ WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 # The site's homepage
 @never_cache
 def landing_page(request):
-    collex = Collection.objects.filter(active=True, subject_count__gt=6, collection_type=Collection.ORIGINAL_COLLEX, species='Human').values()
+    collex = Collection.objects.filter(active=True, subject_count__gt=6,
+                                       collection_type=Collection.ORIGINAL_COLLEX, species='Human',
+                                       access="Public").values()
     idc_info = ImagingDataCommonsVersion.objects.get(active=True)
 
     sapien_counts = {}
@@ -61,7 +63,10 @@ def landing_page(request):
         'Head-Neck': 'Head and Neck',
         'Head-and-Neck': 'Head and Neck',
         'Colon': 'Colorectal',
-        'Rectum': 'Colorectal'
+        'Rectum': 'Colorectal',
+        "Marrow, Blood": "Blood",
+        "Testicles": "Testis",
+        "Adrenal Glands": "Adrenal Gland"
     }
 
     skip = [
@@ -69,7 +74,9 @@ def landing_page(request):
         'Abdomen, Mediastinum',
         'Abdomen',
         'Ear',
-        'Pelvis, Prostate, Anus'
+        'Pelvis, Prostate, Anus',
+        "Intraocular",
+        "Mesothelium"
     ]
 
     for collection in collex:
@@ -190,11 +197,7 @@ def health_check(request, match):
     return HttpResponse('')
 
 
-# Returns the basic help page (will direct to contact info and readthedocs
-def help_page(request):
-    return render(request, 'idc/help.html', {'request': request})
-
-
+# Quote page
 def quota_page(request):
     return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
 
@@ -406,9 +409,7 @@ def populate_tables(request):
 
 # Data exploration and cohort creation page
 @login_required
-def explore_data_page(request):
-    attr_by_source = {}
-    attr_sets = {}
+def explore_data_page(request, filter_path=False, path_filters=None):
     context = {'request': request}
     is_json = False
     wcohort = False
@@ -433,13 +434,10 @@ def explore_data_page(request):
         uniques = json.loads(req.get('uniques', '[]'))
         totals = json.loads(req.get('totals', '[]'))
 
-        record_limit = int(req.get('record_limit', '2000'))
-        offset = int(req.get('offset', '0'))
-        #sort_on = req.get('sort_on', collapse_on+' asc')
-        cohort_id = req.get('cohort_id','-1')
+        cohort_id = int(req.get('cohort_id', '-1'))
 
-        cohort_filters={}
-        if (int(cohort_id)>-1):
+        cohort_filters = {}
+        if cohort_id > 0:
             cohort = Cohort.objects.get(id=cohort_id, active=True)
             cohort.perm = cohort.get_perm(request)
             if cohort.perm:
@@ -448,12 +446,14 @@ def explore_data_page(request):
                 cohort_filters_list = cohort_filters_dict[0]['filters']
                 for cohort in cohort_filters_list:
                     cohort_filters[cohort['name']] = cohort['values']
+        if filter_path and is_json:
+            filters = path_filters
 
         if wcohort and is_json:
             filters = cohort_filters
 
         context = build_explorer_context(is_dicofdic, source, versions, filters, fields, order_docs, counts_only,
-                                         with_related, with_derived, collapse_on, is_json, uniques=uniques)
+                                         with_related, with_derived, collapse_on, is_json, uniques=uniques, totals=totals)
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
@@ -468,19 +468,63 @@ def explore_data_page(request):
         # These are filters to be loaded *after* a page render
         if wcohort:
             context['filters_for_load'] = cohort_filters_dict
+        elif filter_path:
+            context['filters_for_load'] = path_filters
         else:
-            filters_for_load = req.get('filters_for_load', '{}')
-            blacklist = re.compile(settings.BLACKLIST_RE, re.UNICODE)
-            if blacklist.search(filters_for_load):
-                logger.warning("[WARNING] Saw bad filters in filters_for_load:")
-                logger.warning(filters_for_load)
-                filters_for_load = '{}'
-                messages.error(request,
-                       "There was a problem with some of your filters - please ensure they're properly formatted.")
-
-            context['filters_for_load'] = json.loads(filters_for_load)
+            filters_for_load = req.get('filters_for_load', None)
+            if filters_for_load:
+                blacklist = re.compile(settings.BLACKLIST_RE, re.UNICODE)
+                if blacklist.search(filters_for_load):
+                    logger.warning("[WARNING] Saw bad filters in filters_for_load:")
+                    logger.warning(filters_for_load)
+                    filters_for_load = {}
+                    messages.error(request,
+                           "There was a problem with some of your filters - please ensure they're properly formatted.")
+                else:
+                    filters_for_load = json.loads(filters_for_load)
+            else:
+                filters_for_load = [{"filters": [{
+                    "id": Attribute.objects.get(name="access").id,
+                    "values": ["Public"]
+                }]}]
+            context['filters_for_load'] = filters_for_load
 
         return render(request, 'idc/explore.html', context)
+
+
+def parse_explore_filters(request):
+    try:
+        if not request.GET:
+            raise Exception("This call only supports GET!")
+        filters = {x: request.GET.getlist(x) for x in request.GET.keys()}
+        # determine if any of the filters are misnamed
+        filter_name_map = {(x[:x.rfind('_')] if re.search('_[gl]te?|_e?btwe?', x) else x): x for x in filters.keys()}
+        attr_names = filter_name_map.keys()
+        attrs = Attribute.objects.filter(name__in=attr_names)
+        attr_map = {x.name: {"id": x.id, "filter": filter_name_map[x.name]} for x in attrs}
+        not_found = [x for x in attr_names if x not in attr_map.keys()]
+        if len(not_found) > 0:
+            not_rec = "{}".format("; ".join(not_found))
+            logger.warning("[WARNING] Saw invalid filters while parsing explore/filters call:")
+            logger.warning(not_rec)
+            messages.warning(request, "The following attribute names are not recognized: {}".format(not_rec))
+        else:
+            blacklist = re.compile(settings.BLACKLIST_RE, re.UNICODE)
+            if blacklist.search(str(filters)):
+                logger.warning("[WARNING] Saw bad filters in filters_for_load:")
+                logger.warning(filters)
+                messages.error(request,
+                               "There was a problem with some of your filters - please ensure they're properly formatted.")
+            else:
+                if len(attrs) > 0:
+                    filters = [{"id": attr_map[x]['id'], "values": filters[attr_map[x]['filter']]} for x in attr_map]
+                    return explore_data_page(request, filter_path=True, path_filters=[{"filters": filters}])
+
+    except Exception as e:
+        logger.error("[ERROR] While parsing filters for the explorer page:")
+        logger.exception(e)
+
+    return redirect(reverse('explore_data'))
 
 
 # Callback for recording the user's agreement to the warning popup
