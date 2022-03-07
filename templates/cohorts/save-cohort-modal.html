@@ -41,9 +41,11 @@
                             </div>
                             </div>
                         </div>
+                        <div class="access_warn notDisp" style="color:red">This cohort includes collections with limited access. The DICOM files of these collections are not publicly available</div>
                     </div>
                     <input type="hidden" name="mut_filter_combine" value="AND" />
                     <input type="hidden" name="selected-filters" value="" />
+
                     <div class="modal-footer">
                         {% csrf_token %}
                         <input type="submit" value="Save Cohort" class="btn btn-primary" />
