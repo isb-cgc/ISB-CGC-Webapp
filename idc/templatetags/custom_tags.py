@@ -172,8 +172,6 @@ def get_by_name(items,name):
     if item['name']==name:
       return item
   return None
-  #return items
-
 
 @register.filter
 def check_for_order(items, attr):
