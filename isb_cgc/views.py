@@ -474,7 +474,8 @@ def test_solr_data(request):
             attrs = sources.get_source_attrs(for_ui=True)
             for source in sources:
                 solr_query = build_solr_query(prog_filters, with_tags_for_ex=True) if prog_filters else None
-                solr_facets = build_solr_facets(attrs['sources'][source.id]['attrs'], filter_tags=solr_query['filter_tags'] if solr_query else None, unique='case_barcode')
+                solr_facets = build_solr_facets(attrs['sources'][source.id]['attrs'], filter_tags=solr_query['filter_tags'] if solr_query else None)
+                # solr_facets = build_solr_facets(attrs['sources'][source.id]['attrs'], filter_tags=solr_query['filter_tags'] if solr_query else None, unique='case_barcode')
                 query_set = []
 
                 if solr_query:
