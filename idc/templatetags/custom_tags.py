@@ -167,6 +167,13 @@ def order_quant(items, attr):
         return(sort_order)
 
 @register.filter
+def get_by_name(items,name):
+  for item in items:
+    if item['name']==name:
+      return item
+  return None
+
+@register.filter
 def check_for_order(items, attr):
     if not items:
         return items
