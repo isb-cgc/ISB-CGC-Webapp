@@ -232,6 +232,14 @@ require([
     });
 
     const temp='<html><strong>now</strong></html>';
+    
+    tippy('.case-info', {
+        interactive: true,
+        content: 'The Case ID attribute in the portal corresponds to the DICOM Patient ID attribute'
+    });
+
+
+
     tippy('.explainer', {
         interactive: true,
         allowHTML:true,

@@ -59,7 +59,7 @@ require([
     window.projSets['tcga']=["tcga_blca", "tcga_brca", "tcga_cesc", "tcga_coad", "tcga_esca", "tcga_gbm", "tcga_hnsc", "tcga_kich", "tcga_kirc", "tcga_kirp", "tcga_lgg", "tcga_lihc", "tcga_luad", "tcga_lusc", "tcga_ov", "tcga_prad", "tcga_read", "tcga_sarc", "tcga_stad", "tcga_thca", "tcga_ucec"];
     window.projSets['rider']=["rider_lung_ct", "rider_phantom_pet_ct","rider_breast_mri", "rider_neuro_mri","rider_phantom_mri", "rider_lung_pet_ct"];
     window.projSets['qin'] = ["qin_headneck","qin_lung_ct","qin_pet_phantom","qin_breast_dce_mri"];
-
+    var first_filter_load = true;
 
 
     var plotLayout = {
@@ -1665,6 +1665,13 @@ require([
 
     var updateFacetsData = function (newFilt) {
         update_filter_url();
+        if(window.location.href.search(/\/filters\//g) >= 0) {
+            if(!first_filter_load) {
+                window.history.pushState({}, '', BASE_URL + "/explore/")
+            } else {
+                first_filter_load = false;
+            }
+        }
         var url = '/explore/'
         var parsedFiltObj=parseFilterObj();
         url= encodeURI('/explore/')
@@ -1760,6 +1767,7 @@ require([
                         }
                     }
                     //updateCollectionTotals(data.total, data.origin_set.attributes.collection_id);
+
                     updateCollectionTotals('Program', data.programs);
                     //updateFilterSelections('search_orig_set', data.origin_set.All.attributes);
 
@@ -1771,6 +1779,7 @@ require([
                         dicofdic['filt'] = data.origin_set.All.attributes;
                     }
 
+                    updateFilterSelections('access_set', dicofdic);
                     updateFilterSelections('search_orig_set', dicofdic);
                     createPlots('search_orig_set');
 
