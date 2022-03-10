@@ -1760,6 +1760,7 @@ require([
                         }
                     }
                     //updateCollectionTotals(data.total, data.origin_set.attributes.collection_id);
+
                     updateCollectionTotals('Program', data.programs);
                     //updateFilterSelections('search_orig_set', data.origin_set.All.attributes);
 
@@ -1771,6 +1772,7 @@ require([
                         dicofdic['filt'] = data.origin_set.All.attributes;
                     }
 
+                    updateFilterSelections('access_set', dicofdic);
                     updateFilterSelections('search_orig_set', dicofdic);
                     createPlots('search_orig_set');
 
