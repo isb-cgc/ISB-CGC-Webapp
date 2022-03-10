@@ -11,7 +11,7 @@ Your manifest job has finished exporting. The following table or tables
 will be available for seven (7) days, accessible via your {{ email }} Google Account: <br />
 {% for table in tables %}
 <b>{{ table.full_id }}</b> {% if table.error %} (ERROR) {% endif %}
-<a role=button" class="copy-this" content="{{ table.full_id }}"  title="Copy table ID to clipboard">
+<a role="button" class="copy-this" content="{{ table.full_id }}"  title="Copy table ID to clipboard">
     ( <i class="fa-solid fa-copy" aria-hidden="true"></i> )
 </a>:
 <a class="external-link" data-toggle="modal" data-target="#external-web-warning" url="{{ table.uri }}">

@@ -118,15 +118,17 @@ define(['jquery'], function($) {
             } else {
                 msg = text;
             }
+            let uuid = crypto.randomUUID();
             $(rootSelector).append(
                 $('<div>')
-                    .addClass('alert alert-'+type +' alert-dismissible')
+                    .addClass('alert alert-'+type +' alert-dismissible '+uuid)
                     .html(msg)
                     .prepend(
                         '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">'
                         +'&times;</span><span class="sr-only">Close</span></button>'
                     )
             );
+            return uuid;
         },
         // Block re-requests of requests which can't be handled via AJAX (eg. file downloads)
         // Uses cookie polling

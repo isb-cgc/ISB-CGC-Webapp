@@ -71,6 +71,13 @@ require([
       Chest: 'rgb(0, 233, 255)',
     };
 
+    var variantNames = {
+        'Kidney': ['Renal'],
+        'Head and Neck': ['Head','Head-Neck', 'Head-and-Neck'],
+        'Colorectal': ['Colon','Rectum'],
+        "Blood": ["Marrow, Blood"]
+    };
+
     let data = case_counts.sort(function(a,b){
         let aSite = a['site'].toLowerCase();
         let bSite = b['site'].toLowerCase();
@@ -83,35 +90,15 @@ require([
         return 1;
     });
 
-    let clickHandler = function(id)
-    {
-        var groups = [];
-        var filters = [];
-        var values = [];
-
-        if (id.site === "Head and Neck" || id.site === "Head-and-Neck")
-        {
-            values.push("Head-Neck");
-        }
-        else if (id.site == "Colorectal")
-        {
-            values.push("Colon");
-        }
-        else
-        {
-            values.push(id.site)
-        }
-
-        filters.push(
-        {
-            'id': '128',
-            'values': values,
+    let clickHandler = function(id) {
+        let url = BASE_URL+"/explore/filters/?access=Public&";
+        let encoded_filters = []
+        let values = (variantNames[id.site] !== null && variantNames[id.site] !== undefined) ? variantNames[id.site] : [id.site];
+        _.each(values, function (val) {
+            encoded_filters.push("tcia_tumorLocation" + "=" + encodeURI(val));
         });
-        groups.push({'filters': filters});
-        var filterStr = JSON.stringify(groups);
 
-        let url = '/explore/?filters_for_load=' + filterStr;
-        url = encodeURI(url);
+        url += encoded_filters.join("&");
 
         window.location.href = url;
     };

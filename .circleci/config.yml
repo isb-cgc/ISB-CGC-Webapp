@@ -141,6 +141,12 @@ jobs:
           command: |
             sudo -E /bin/bash ./shell/gcloud-pull-staging-files.sh
             sudo -E /bin/bash ./shell/database-setup.sh
+      - run:
+          name: Compare Config
+          command: |
+            sudo -E /bin/bash ./shell/compareConfig.sh "gs://${DEPLOYMENT_BUCKET}/deployment_config.txt"
+            sudo -E /bin/bash ./shell/compareConfig.sh "gs://${DEPLOYMENT_BUCKET}/${ENV_FILE}"
+            sudo -E /bin/bash ./shell/compareConfig.sh "gs://${DEPLOYMENT_BUCKET}/${WEBAPP_APP_YAML}"
       - save_cache:
           key: idc-webapp-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
           paths:

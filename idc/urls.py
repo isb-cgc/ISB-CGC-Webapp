@@ -42,8 +42,8 @@ urlpatterns = [
     url(r'^data/', include('data_upload.urls')),
     url(r'^_ah/(vm_)?health$', views.health_check),
 
-    url(r'^help/', views.help_page, name='help'),
-    url(r'^explore/', views.explore_data_page, name='explore_data'),
+    url(r'^explore/$', views.explore_data_page, name='explore_data'),
+    url(r'^explore/filters/', views.parse_explore_filters, name='parse_explore_filters'),
     url(r'^tables/', views.populate_tables, name='populate_tables'),
 
     url(r'^warning/', views.warn_page, name='warn'),
