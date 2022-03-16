@@ -178,7 +178,7 @@ require([
     .enter()
     .append('text')
     .attr('class', d => `primary-site-label-${toClassName(d[primarySiteKey])}`)
-    .attr('y', (d, i) => ((plotHeight / data.length) * i) + 25)
+    .attr('y', (d, i) => ((plotHeight / data.length) * i) + 18)
     .attr('x', barStartOffset - 10)
     .attr('fill', 'rgb(10, 10, 10)')
     .attr('font-size', labelSize)
