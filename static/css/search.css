@@ -396,8 +396,15 @@ tr {
 }
 #series_table_head th.study-id,
 #series_table td.study-id {
-   width: 17%;
+   width: 15%;
 }
+
+#series_table_head th.series-id,
+#series_table td.series-id
+{
+    width: 15%;
+}
+
 #series_table_head th.series-number,
 #series_table td.series-number
 {
@@ -405,19 +412,19 @@ tr {
 }
 #series_table_head th.modality,
 #series_table td.modality {
-    width:10%;
+    width:11%;
 }
 #series_table_head th.body-part-examined,
 #series_table td.body-part-examined {
-    width:17%;
+    width:15%;
 }
 #series_table_head th.series-description,
 #series_table td.series-description {
-    width:32%;
+    width:26%;
 }
 #series_table_head th.open-viewer,
 #series_table td.open-viewer {
-    width:13%;
+    width:7%;
 }
 
 #series_table td.ohif, #studies_table td.ohif {
