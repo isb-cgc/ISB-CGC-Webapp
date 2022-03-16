@@ -76,7 +76,8 @@ def landing_page(request):
         'Ear',
         'Pelvis, Prostate, Anus',
         "Intraocular",
-        "Mesothelium"
+        "Mesothelium",
+        "Chest-Abdomen-Pelvis, Leg, TSpine"
     ]
 
     for collection in collex:

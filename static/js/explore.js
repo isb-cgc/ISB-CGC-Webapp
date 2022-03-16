@@ -232,7 +232,7 @@ require([
     });
 
     const temp='<html><strong>now</strong></html>';
-    
+
     tippy('.case-info', {
         interactive: true,
         content: 'The Case ID attribute in the portal corresponds to the DICOM Patient ID attribute'
@@ -303,6 +303,20 @@ require([
         interactive:'true',
         interactiveBorder:10,
         target: 'td.study-id-tltp',
+        maxWidth: 600,
+        allowHTML:true
+    });
+
+    tippy.delegate('.series-table', {
+        content: function(reference) {
+            return '<span class="tippy-uid">'+$(reference).data('series-id')+'</span>';
+        },
+        theme: 'dark',
+        placement: 'right',
+        arrow: true,
+        interactive:'true',
+        interactiveBorder:10,
+        target: 'td.series-id-tltp',
         maxWidth: 600,
         allowHTML:true
     });
