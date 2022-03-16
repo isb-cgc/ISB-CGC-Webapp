@@ -331,7 +331,7 @@ def load_collections(filename, data_version="8.0"):
             except ObjectDoesNotExist:
                 new_collection_set.append(collex)
 
-        add_collections(new_collection_set,updated_collection_set)
+        add_collections(new_collection_set, updated_collection_set)
 
         load_tooltips(Collection,"collection_id","description")
     except Exception as e:
@@ -365,11 +365,11 @@ def add_collections(new, update):
 
         Collection.data_versions.through.objects.bulk_create(collex_to_dv)
 
-        updated_collex = Collection.objects.filter(name__in=list(update.keys()))
+        updated_collex = Collection.objects.filter(collection_uuid__in=list(update.keys()))
         if len(updated_collex):
             for upd in updated_collex:
-                fields = list(update[upd.name]['data'].keys())
-                vals = update[upd.name]['data']
+                fields = list(update[upd.collection_uuid]['data'].keys())
+                vals = update[upd.collection_uuid]['data']
                 for key in vals:
                     setattr(upd, key, vals[key])
             Collection.objects.bulk_update(updated_collex, fields)
@@ -600,7 +600,7 @@ def update_display_values(attr, updates):
         len(new_vals) and Attribute_Display_Values.objects.bulk_create(new_vals)
 
 
-def load_tooltips(SourceObj,attr_name,source_tooltip):
+def load_tooltips(SourceObj, attr_name, source_tooltip):
     try:
         source_objs = SourceObj.objects.filter(owner=idc_superuser, active=True)
         attr = Attribute.objects.get(name=attr_name, active=True)
@@ -610,26 +610,36 @@ def load_tooltips(SourceObj,attr_name,source_tooltip):
         extent_tooltips = {}
 
         for tip in tips:
-            if not tip.attribute.id in extent_tooltips:
+            if tip.attribute.id not in extent_tooltips:
                 extent_tooltips[tip.attribute.id] = []
             extent_tooltips[tip.attribute.id].append(tip.tooltip_id)
 
-        tooltips_by_val = {x[attr_name]: {'tip': x[source_tooltip], 'obj': attr} for x in source_objs.values() if x[attr_name] != '' and x[attr_name] is not None}
+        tooltips_by_val = {x[attr_name]: {'tip': x[source_tooltip]} for x in source_objs.values() if x[attr_name] != '' and x[attr_name] is not None}
 
-        tooltips = []
+        new_tooltips = []
+        updated_tooltips = []
 
         for val in tooltips_by_val:
             if not tooltips_by_val[val]['tip']:
                 continue
-            if val not in extent_tooltips.get(tooltips_by_val[val]['obj'].id,[]):
-                tooltips.append(Attribute_Tooltips(tooltip_id=val, tooltip=tooltips_by_val[val]['tip'],
-                                                   attribute=tooltips_by_val[val]['obj']))
+            if val not in extent_tooltips.get(attr.id, []):
+                new_tooltips.append(Attribute_Tooltips(tooltip_id=val, tooltip=tooltips_by_val[val]['tip'],
+                                                   attribute=attr))
+            else:
+                updated_tooltips.append(val)
 
-        if len(tooltips):
-            logger.info("[STATUS] Adding {} new tooltips.".format(str(len(tooltips))))
-            Attribute_Tooltips.objects.bulk_create(tooltips)
-        else:
-            logger.info("[STATUS] - No new tooltips available.")
+        if len(new_tooltips):
+            logger.info("[STATUS] Adding {} new tooltips.".format(str(len(new_tooltips))))
+            Attribute_Tooltips.objects.bulk_create(new_tooltips)
+        if len(updated_tooltips):
+            logger.info("[STATUS] Updating {} tooltips.".format(str(len(updated_tooltips))))
+            to_update = Attribute_Tooltips.objects.filter(tooltip_id__in=updated_tooltips, attribute=attr)
+            for ttip in to_update:
+                ttip.tooltip = tooltips_by_val[ttip.tooltip_id]['tip']
+            Attribute_Tooltips.objects.bulk_update(to_update, ['tooltip'])
+
+        if not len(new_tooltips) and not len(updated_tooltips):
+            logger.info("[STATUS] No new or changed tooltips found.")
     except Exception as e:
         logger.error("[ERROR] While attempting to load tooltips:")
         logger.exception(e)
