@@ -644,7 +644,11 @@ require([
             updateStudyTable(rowsAdded,!rowsAdded,false,purgeChildTables, studyID);
         }
         else if (type==='studies'){
-            updateSeriesTable(rowsAdded,!rowsAdded,false);
+            var seriesID="";
+            if ($('#series_tab').find('.seriesID-inp').length>0) {
+                seriesID=$('#series_tab').find('.seriesID-inp').val();
+            }
+            updateSeriesTable(rowsAdded,!rowsAdded,false,seriesID);
         }
     }
 
@@ -800,7 +804,9 @@ require([
                 }
 
             }
-
+            if (cmp==0){
+                cmp=1;
+            }
             return cmp;
         }
 
@@ -847,11 +853,15 @@ require([
     window.filterTable = function(wrapper, type){
         var elem=$('#'+wrapper);
         var varStr=elem.find('.dataTables_controls').find('.'+type+'_inp').val();
-        if (type ==="studyID") {
+        if (type ==="seriesID") {
+            window.updateSeriesTable(false, false, true,varStr)
+        }
+
+        else if (type ==="studyID") {
             window.updateStudyTable(false, false, true, true, varStr)
         }
         else if (type==="caseID"){
-            window.updateCaseTable(false, false,  true, true, [],varStr)
+            window.updateCaseTable(false, false,  true, [true,true], [],varStr)
         }
     }
 
@@ -953,7 +963,7 @@ require([
 
                                 }
                             }
-                            curFilterObj = JSON.parse(JSON.stringify(parseFilterObj()));
+                            var curFilterObj = JSON.parse(JSON.stringify(parseFilterObj()));
                             curFilterObj.collection_id = window.selItems.selProjects;
                             if (caseID.trim().length > 0) {
                                 curFilterObj.PatientID = caseID;
@@ -1093,7 +1103,7 @@ require([
 
         $('#cases_tab').find('tbody').attr('id','cases_table');
         $('#cases_panel').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'cases_tab_wrapper\')">Go</button></div>');
-        $('#cases_panel').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by CaseID:</strong><input class="caseID_inp" type="text-box" value="'+caseID+'"><button onclick="filterTable(\'cases_panel\',\'caseID\')">Go</button></div>');
+        $('#cases_panel').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Case ID:</strong><input class="caseID_inp" type="text-box" value="'+caseID+'"><button onclick="filterTable(\'cases_panel\',\'caseID\')">Go</button></div>');
 
     }
 
@@ -1125,7 +1135,7 @@ require([
                     $(row).addClass('case_' + data['PatientID']);
                     $(row).on('click', function(event){
                         var elem = event.target;
-                        if (!($(elem).is('a')) && !($(elem).hasClass('fa-eye'))) {
+                        if (!($(elem).is('a')) && !($(elem).hasClass('fa-eye')) && !($(elem).hasClass('tippy-box'))  && !($(elem).parents().hasClass('tippy-box'))  ) {
                             if (!$(elem).parent().hasClass('ckbx')) {
                                 ckbx = $(elem).closest('tr').find('.ckbx').children()
                                 ckbx.prop("checked", !ckbx.prop("checked"));
@@ -1220,6 +1230,7 @@ require([
                     var rowsRemoved = $('#studies_tab').data('rowsremoved');
                     var refreshAfterFilter = $('#studies_tab').data('refreshafterfilter');
                     var updateChildTables = [$('#studies_tab').data('updatechildtables')];
+                    var checkIds = new Array();
                     var cols = ['', 'PatientID', 'StudyInstanceUID', 'StudyDate','StudyDescription', 'SeriesInstanceUID'];
                     var ssCallNeeded = true;
 
@@ -1234,7 +1245,11 @@ require([
                         ssCallNeeded = false;
                         $('#studies_tab').children('thead').children('tr').children('.ckbx').addClass('notVis');
                         if (refreshAfterFilter || updateChildTables[0]) {
-                            updateSeriesTable(false, true, false)
+                            var seriesID = "";
+                            if ($('.series_tab').find('#series_id').length > 0) {
+                                seriesID = $('#series_tab').find('.seriesID-inp').val();
+                            }
+                            updateSeriesTable(false, true, false,seriesID)
                         }
                         callback({"data": [], "recordsTotal": "0", "recordsFiltered": "0"});
                     } else {
@@ -1243,13 +1258,29 @@ require([
                         var reorderNeeded = ret[1];
 
                         if (ssCallNeeded) {
+
                             //curFilterObj = JSON.parse(JSON.stringify(parseFilterObj()));
-                            curFilterObj = new Object();
+                            var curFilterObj = new Object();
                             curFilterObj.collection_id = window.selItems.selProjects;
                             curFilterObj.PatientID = caseArr;
                             if (studyID.trim().length > 0) {
                                 curFilterObj.StudyInstanceUID = studyID;
-
+                                if (checkIds.indexOf(studyID) > -1) {
+                                    checkIds = [studyID];
+                                }
+                                for (caseId in window.selItems.selStudies){
+                                    if (window.selItems.selStudies[caseId].indexOf(studyID)>-1){
+                                        window.selItems.selStudies[caseId]=[studyID]
+                                    }
+                                    else{
+                                        delete window.selItems.selStudies[caseId];
+                                    }
+                                }
+                            }
+                            else if (refreshAfterFilter){
+                                for (caseId in window.selItems.selStudies){
+                                    checkIds=checkIds.concat(window.selItems.selStudies[caseId])
+                                }
                             }
                             var filterStr = JSON.stringify(curFilterObj);
                             let url = '/tables/studies/';
@@ -1285,7 +1316,11 @@ require([
                                     }
 
                                     if (refreshAfterFilter || updateChildTables[0]) {
-                                        updateSeriesTable(false, true, false)
+                                        var seriesID = "";
+                                        if ($('.series_tab').find('#series_id').length > 0) {
+                                            seriesID = $('#series_tab').find('.seriesID-inp').val();
+                                        }
+                                        updateSeriesTable(false, true, false,seriesID)
                                     }
                                     callback({
                                         "data": dataset,
@@ -1335,11 +1370,11 @@ require([
 
         $('#studies_tab').children('tbody').attr('id','studies_table');
         $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'studies_tab_wrapper\')">Go</button></div>');
-        $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by StudyID:</strong><input class="studyID_inp" type="text-box" value="'+studyID+'"><button onclick="filterTable(\'studies_tab_wrapper\',\'studyID\')">Go</button></div>');
+        $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Study Instance UID:</strong><input class="studyID_inp" type="text-box" value="'+studyID+'"><button onclick="filterTable(\'studies_tab_wrapper\',\'studyID\')">Go</button></div>');
 
     }
 
-    window.updateSeriesTable = function(rowsAdded, rowsRemoved, refreshAfterFilter) {
+    window.updateSeriesTable = function(rowsAdded, rowsRemoved, refreshAfterFilter,seriesID) {
 
         $('#series_tab').attr('data-rowsremoved', rowsRemoved);
         $('#series_tab').attr('data-refreshafterfilter', refreshAfterFilter);
@@ -1362,11 +1397,12 @@ require([
                  },
                 "columnDefs": [
                     {className: "col1 study-id study-id-col study-id-tltp", "targets": [0]},
-                    {className: "series-number", "targets": [1]},
-                    {className: "col1 modality", "targets": [2]},
-                    {className: "col1 body-part-examined", "targets": [3]},
-                    {className: "series-description", "targets": [4]},
-                    {className: "ohif open-viewer", "targets": [5]},
+                    {className: "series-id series-id-tltp", "targets": [1]},
+                    {className: "series-number", "targets": [2]},
+                    {className: "col1 modality", "targets": [3]},
+                    {className: "col1 body-part-examined", "targets": [4]},
+                    {className: "series-description", "targets": [5]},
+                    {className: "ohif open-viewer", "targets": [6]},
                  ],
                   "columns": [
                   {
@@ -1374,6 +1410,16 @@ require([
                         return pretty_print_id(data);
                     }, "createdCell": function (td, data) {
                         $(td).data('study-id', data);
+                        return;
+
+                    }
+
+                },
+                      {
+                    "type": "text", "orderable": true, data: 'SeriesInstanceUID', render: function (data) {
+                        return pretty_print_id(data);
+                    }, "createdCell": function (td, data) {
+                        $(td).data('series-id', data);
                         return;
 
                     }
@@ -1464,9 +1510,13 @@ require([
 
                     if (ssCallNeeded) {
                         //curFilterObj = JSON.parse(JSON.stringify(parseFilterObj()));
+                        var curFilterObj = new Object();
                         curFilterObj.collection_id = window.selItems.selProjects;
                         curFilterObj.PatientID = caseArr;
                         curFilterObj.StudyInstanceUID = studyArr;
+                        if (seriesID.trim().length > 0) {
+                                curFilterObj.SeriesInstanceUID = seriesID;
+                        }
 
                         var filterStr = JSON.stringify(curFilterObj);
 
@@ -1495,7 +1545,7 @@ require([
                             beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                             success: function (data) {
                                 window.seriesCache = new Object();
-                                var colSort = ['StudyInstanceUID', 'SeriesNumber', 'Modality', 'BodyPartExamined', 'SeriesDescription']
+                                var colSort = ['StudyInstanceUID', 'SeriesInstanceUID','SeriesNumber', 'Modality', 'BodyPartExamined', 'SeriesDescription']
                                 updateCache(window.seriesCache, request, backendReqStrt, backendReqLength, data, colSort)
                                 dataset = data['res'].slice(request.start - backendReqStrt, request.start - backendReqStrt + request.length);
 
@@ -1544,6 +1594,8 @@ require([
         });
         $('#series_tab').children('tbody').attr('id','series_table');
         $('#series_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'series_tab_wrapper\')">Go</button></div>');
+        $('#series_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Series Instance UID:</strong><input class="seriesID_inp" type="text-box" value="'+seriesID+'"><button onclick="filterTable(\'series_tab_wrapper\',\'seriesID\')">Go</button></div>');
+
     }
 
     var pretty_print_id = function (id) {
