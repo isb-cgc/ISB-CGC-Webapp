@@ -252,7 +252,7 @@ def populate_tables(request):
                 sort_arg = 'PatientID ' + sortdir
 
             elif sort == 'StudyInstanceUID':
-                sortByField=False
+                sortByField = False
                 sort_arg = 'unique_study ' + sortdir
                 custom_facets_order = {
                     "tot": "unique(PatientID)",
@@ -298,8 +298,6 @@ def populate_tables(request):
                     sort_arg = sort_arg+', StudyDate asc'
                 #elif sort == 'StudyInstanceUID':
                 #    sort_arg = sort_arg + 'StudyDate asc'
-
-
             elif sort == 'SeriesInstanceUID':
                 sortByField = False
                 sort_arg = 'unique_series '+sortdir
@@ -397,8 +395,10 @@ def populate_tables(request):
                 tableRes.append(newRow)
                 curInd = curInd + 1
             filters[tableIndex] = idsFilt
-            fieldRecs = get_collex_metadata(filters, fields, record_limit=limit, sources=sources,
-                                         records_only=True,collapse_on=tableIndex, counts_only=False, filtered_needed=False)
+            fieldRecs = get_collex_metadata(
+                filters, fields, record_limit=limit, sources=sources, records_only=True, collapse_on=tableIndex,
+                counts_only=False, filtered_needed=False
+            )
             for rec in fieldRecs['docs']:
                 id = rec[tableIndex]
                 tableRow = tableRes[order[id]]
@@ -431,6 +431,7 @@ def explore_data_page(request, filter_path=False, path_filters=None):
     context = {'request': request}
     is_json = False
     wcohort = False
+    status = 200
 
     try:
         req = request.GET if request.GET else request.POST
@@ -470,18 +471,23 @@ def explore_data_page(request, filter_path=False, path_filters=None):
         if wcohort and is_json:
             filters = cohort_filters
 
-        context = build_explorer_context(is_dicofdic, source, versions, filters, fields, order_docs, counts_only,
-                                         with_related, with_derived, collapse_on, is_json, uniques=uniques, totals=totals)
+        context = build_explorer_context(
+            is_dicofdic, source, versions, filters, fields, order_docs, counts_only, with_related, with_derived,
+            collapse_on, is_json, uniques=uniques, totals=totals
+        )
 
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
         logger.exception(e)
-        messages.error(request,
-                       "Encountered an error when attempting to load the page - please contact the administrator.")
+        messages.error(
+            request,
+            "Encountered an error when attempting to load the page - please contact the administrator."
+        )
+        status = 400
 
     if is_json:
         # In the case of is_json=True, the 'context' is simply attr_by_source
-        return JsonResponse(context)
+        return JsonResponse(context, status=status)
     else:
         # These are filters to be loaded *after* a page render
         if wcohort:
@@ -496,8 +502,10 @@ def explore_data_page(request, filter_path=False, path_filters=None):
                     logger.warning("[WARNING] Saw bad filters in filters_for_load:")
                     logger.warning(filters_for_load)
                     filters_for_load = {}
-                    messages.error(request,
-                           "There was a problem with some of your filters - please ensure they're properly formatted.")
+                    messages.error(
+                        request,
+                        "There was a problem with some of your filters - please ensure they're properly formatted."
+                    )
                 else:
                     filters_for_load = json.loads(filters_for_load)
             else:
