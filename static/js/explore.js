@@ -66,14 +66,14 @@ require([
 
     $('#save-cohort-modal').on('show.bs.modal', function() {
         var filters = {};
-        $('#program_set .search-checkbox-list input:checked , ' +
+        $('.search-scope .search-checkbox-list input:checked , ' +
             '#search_orig_set .search-checkbox-list input:checked, ' +
             '#search_related_set .search-checkbox-list input:checked, ' +
             '#search_derived_set .search-checkbox-list input:checked').each(function(){
 
             if (!$(this).hasClass('hide-zeros')) {
                 let modal_filter_block = '';
-                if ($(this).parents('#program_set').length > 0) {
+                 if ($(this).parents('.search-scope').length > 0) {
                     modal_filter_block = '#selected-filters-prog-set';
                 } else if ($(this).parents('#search_orig_set').length > 0) {
                     modal_filter_block = '#selected-filters-orig-set';
