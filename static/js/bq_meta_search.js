@@ -90,29 +90,29 @@ require([
                     },
                     'className': 'label-filter colvis-toggle'
                 },
-                {
-                    'name': 'dataAccess',
-                    'data': function (data) {
-                        return filtered_label_data(data.labels, 'access');
-                        // return (data.labels && data.labels.access) ? data.labels.access: null;
-                    },
-                    'render': function(data, type){
-                        if (type === 'display') {
-                            if (data != null && data.toLowerCase() === 'controlled') {
-                                return '<i class="fa fa-lock" aria-hidden="true" title="Controlled Access"></i>';
-                            }
-                            else {
-                                return '';
-                            }
-                        }
-                        else {
-                            return data;
-                        }
-                    },
-                    'className': 'label-filter text-center',
-                    'orderable': false
-
-                },
+                // {
+                //     'name': 'dataAccess',
+                //     'data': function (data) {
+                //         return filtered_label_data(data.labels, 'access');
+                //         // return (data.labels && data.labels.access) ? data.labels.access: null;
+                //     },
+                //     'render': function(data, type){
+                //         if (type === 'display') {
+                //             if (data != null && data.toLowerCase() === 'controlled') {
+                //                 return '<i class="fa fa-lock" aria-hidden="true" title="Controlled Access"></i>';
+                //             }
+                //             else {
+                //                 return '';
+                //             }
+                //         }
+                //         else {
+                //             return data;
+                //         }
+                //     },
+                //     'className': 'label-filter text-center',
+                //     'orderable': false
+                //
+                // },
                 {
                     'name': 'projectId',
                     'data': 'tableReference.projectId',
