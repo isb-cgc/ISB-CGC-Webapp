@@ -276,14 +276,15 @@ require([
         } else {
             $('#search_def_warn').hide();
         }
-        if (accessStr.length>0){
-            oStringA.unshift(accessStr);
-        }
+
         if (collection.length>0){
             var oArray = collection.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
             nstr = '<span class="filter-type">Collection</span>';
             nstr += 'IN (' + oArray.join("") + ')';
             oStringA.unshift(nstr);
+        }
+        if (accessStr.length>0){
+            oStringA.unshift(accessStr);
         }
         if (oStringA.length > 0) {
             var oString = oStringA.join(" AND");
@@ -1186,6 +1187,7 @@ require([
                     },
                     {
                         "type": "text", "orderable": true, data: 'StudyDate', render: function (data) {
+                            // fix when StudyData is an array of values
                             var dt = new Date(Date.parse(data));
                             var dtStr = (dt.getMonth() + 1).toLocaleString('en-US', {minimumIntegerDigits: 2}) + "-" + dt.getDate().toLocaleString('en-US', {minimumIntegerDigits: 2}) + "-" + dt.getFullYear().toString();
                             return dtStr;
