@@ -1211,9 +1211,9 @@ require([
                             else{
                                 var modality = row['Modality'];
                                 if ((modality[0] === 'SM') || (modality === 'SM')) {
-                                    return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank"><i class="fa-solid fa-eye"></i>'
+                                    return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                                  } else {
-                                    return '<a href="' + DICOM_STORE_PATH + data + '" target="_blank"><i class="fa-solid fa-eye"></i>'
+                                    return '<a href="' + DICOM_STORE_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                                 }
                            }
                         }
@@ -1467,10 +1467,10 @@ require([
                             return '<a href="/" onclick="return false;"><i class="fa-solid fa-eye-slash no-viewer-tooltip"></i>';
 
                             } else if ((row['Modality'] === 'SM') || (row['Modality'][0] === 'SM')) {
-                                return '<a href="' + SLIM_VIEWER_PATH + row['StudyInstanceUID'] + '/series/' + data + '" target="_blank"><i class="fa-solid fa-eye"></i>'
+                                return '<a href="' + SLIM_VIEWER_PATH + row['StudyInstanceUID'] + '/series/' + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
 
                             } else {
-                                return '<a href="' + DICOM_STORE_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' + data + '" target="_blank"><i class="fa-solid fa-eye"></i>'
+                                return '<a href="' + DICOM_STORE_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                             }
 
                     }
