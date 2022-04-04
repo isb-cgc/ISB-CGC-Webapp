@@ -276,14 +276,15 @@ require([
         } else {
             $('#search_def_warn').hide();
         }
-        if (accessStr.length>0){
-            oStringA.unshift(accessStr);
-        }
+
         if (collection.length>0){
             var oArray = collection.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
             nstr = '<span class="filter-type">Collection</span>';
             nstr += 'IN (' + oArray.join("") + ')';
             oStringA.unshift(nstr);
+        }
+        if (accessStr.length>0){
+            oStringA.unshift(accessStr);
         }
         if (oStringA.length > 0) {
             var oString = oStringA.join(" AND");
@@ -1186,6 +1187,7 @@ require([
                     },
                     {
                         "type": "text", "orderable": true, data: 'StudyDate', render: function (data) {
+                            // fix when StudyData is an array of values
                             var dt = new Date(Date.parse(data));
                             var dtStr = (dt.getMonth() + 1).toLocaleString('en-US', {minimumIntegerDigits: 2}) + "-" + dt.getDate().toLocaleString('en-US', {minimumIntegerDigits: 2}) + "-" + dt.getFullYear().toString();
                             return dtStr;
@@ -3028,11 +3030,11 @@ require([
 
     var load_anonymous_selection_data = function() {
         // Load anonymous filters from session storage and clear it, so it is not always there
-        var filter_str = sessionStorage.getItem('anonymous_filters');
+        let filter_str = sessionStorage.getItem('anonymous_filters');
         ANONYMOUS_FILTERS = JSON.parse(filter_str);
         sessionStorage.removeItem('anonymous_filters');
 
-        var slider_str = sessionStorage.getItem('anonymous_sliders');
+        let slider_str = sessionStorage.getItem('anonymous_sliders');
         ANONYMOUS_SLIDERS = JSON.parse(slider_str);
         sessionStorage.removeItem('anonymous_sliders');
     };
@@ -3051,7 +3053,7 @@ require([
     cohort_loaded = false;
     function load_preset_filters() {
          if (is_cohort && !cohort_loaded) {
-             var loadPending = load_filters(cohort_filters);
+             let loadPending = load_filters(cohort_filters);
              loadPending.done(function () {
                  console.debug("Load pending complete.");
                  cohort_loaded = true;
@@ -3072,31 +3074,36 @@ require([
                  $('div.ui-slider').siblings('button').prop("disabled", true);
                  $('.noneBut').find('input:checkbox').prop("disabled",true);;
              });
-         } else if (Object.keys(filters_for_load).length > 0) {
-             var loadPending = load_filters(filters_for_load);
-             loadPending.done(function () {
-                 //console.debug("External filter load done.");
-             });
          } else {
+             // Anonymously selected filters have precedence over filters for load.
              // check for localStorage key of saved filters from a login
              load_anonymous_selection_data();
-             var has_sliders = (ANONYMOUS_SLIDERS !== null && ANONYMOUS_SLIDERS.length > 0);
-             var has_filters = (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS[0]['filters'].length > 0);
-             if (has_sliders) {
-                 let loadPending = load_sliders(ANONYMOUS_SLIDERS, !has_filters);
-                 if (has_filters) {
-                     //console.debug("Sliders loaded from anonymous login.");
-                 } else {
-                    loadPending.done(function () {
-                     //console.debug("Sliders loaded from anonymous login.");
-                    });
+             let has_sliders = (ANONYMOUS_SLIDERS !== null && ANONYMOUS_SLIDERS.length > 0);
+             let has_filters = (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS[0]['filters'].length > 0);
+
+             if (!(has_filters || has_sliders)) {
+                 // No anonymous filters seen--check for filter URI
+                if (Object.keys(filters_for_load).length > 0) {
+                     let loadPending = load_filters(filters_for_load);
+                     loadPending.done(function () {
+                         //console.debug("External filter load done.");
+                     });
                  }
-             }
-             if (has_filters) {
-                 let loadPending = load_filters(ANONYMOUS_FILTERS);
-                 loadPending.done(function () {
-                     console.debug("Filters loaded from anonymous login.");
-                 });
+             } else {
+                 if (has_sliders) {
+                     let loadPending = load_sliders(ANONYMOUS_SLIDERS, !has_filters);
+                     if (loadPending) {
+                        loadPending.done(function () {
+                             //console.debug("Sliders loaded from anonymous login.");
+                         });
+                     }
+                 }
+                 if (has_filters) {
+                     let loadPending = load_filters(ANONYMOUS_FILTERS);
+                     loadPending.done(function () {
+                         //console.debug("Filters loaded from anonymous login.");
+                     });
+                 }
              }
          }
      }
