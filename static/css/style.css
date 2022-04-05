@@ -4336,6 +4336,13 @@ ul.errorlist {
   padding: 8px;
 }
 
+.inactive-export p {
+  background-color: #8d8a8e;
+  color: #ffffff;
+  display: inline-block;
+  padding: 8px;
+}
+
 .sorter input {
   margin: 0px 5px 0px 5px;
 }
