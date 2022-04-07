@@ -58,7 +58,7 @@ def landing_page(request):
     sapien_counts = {}
 
     changes = {
-        'Renal': 'Kidney',
+        #'Renal': 'Kidney',
         'Head': 'Head and Neck',
         'Head-Neck': 'Head and Neck',
         'Head-and-Neck': 'Head and Neck',
