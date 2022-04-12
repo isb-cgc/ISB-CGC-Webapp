@@ -216,7 +216,6 @@ require([
                         collection.push(colName);
                     }
                 }
-
             } else if (curKey.endsWith('_rng')) {
                 var realKey = curKey.substring(0, curKey.length - 4).split('.').pop();
                 var disp = $('#' + realKey + '_heading').children().children('.attDisp')[0].innerText;
@@ -487,10 +486,10 @@ require([
         $('#'+slideName).addClass('space-top-15');
 
 
-        $('#'+ divName+'_list').addClass('hide');
+        /*$('#'+ divName+'_list').addClass('hide');
         $('#'+ divName).find('.more-checks').addClass('hide');
         $('#'+ divName).find('.less-checks').addClass('hide');
-        $('#'+ divName).find('.hide-zeros').addClass('hide');
+        $('#'+ divName).find('.hide-zeros').addClass('hide');*/
     };
 
     var updateTablesAfterFilter = function (collFilt, collectionsData){
@@ -1910,7 +1909,7 @@ require([
 
                     updateTablesAfterFilter(collFilt, data.origin_set.All.attributes.collection_id);
 
-                    if ($('#hide-zeros')[0].checked) {
+                    if ($('.search-configuration').find('#hide-zeros')[0].checked) {
                         addSliders('search_orig_set', false, true, '');
                         addSliders('quantitative', false, true, '');
                         addSliders('tcga_clinical', false, true, 'tcga_clinical.');
@@ -2679,7 +2678,6 @@ require([
 
     var filterItemBindings = function (filterId) {
 
-
         $('#' + filterId).find('input:checkbox').not('#hide-zeros').on('click', function () {
             handleFilterSelectionUpdate(this, true, true);
         });
@@ -2793,11 +2791,6 @@ require([
 
     var addSliders = function(id,initialCreation,hideZeros, parStr){
         $('#'+id).find('.list-group-item__body.isQuant').each(function() {
-            $(this).find('.more-checks').addClass('hide');
-            $(this).find('.less-checks').addClass('hide');
-            $(this).find('.sorter').addClass('hide');
-            //var min = Math.ceil($(this).data('min') * 1000)/1000;
-            //var min = Math.floor($(this).data('min'));
 
             var min = Math.floor(parseInt($(this).attr('data-min')));
             var max = Math.ceil(parseInt($(this).attr('data-max')));
@@ -2811,25 +2804,24 @@ require([
             if (initialCreation){
                 var heading = $(this).prop('id') + '_heading';
                 $('#'+heading).find('.controls').remove();
+                $('#'+this.id+'_list').addClass('hide');
+                $(this).find('.more-checks').addClass('hide');
+                $(this).find('.less-checks').addClass('hide');
+                $(this).find('.sorter').addClass('hide');
             }
             else {
-
                 var slideDivId = $(this).prop('id') + '_slide';
                 curmin = $(this).attr('data-curmin');
                 curmax = $(this).attr('data-curmax');
-
                 $(this).find('#' + slideDivId).remove();
                 $(this).find('.reset').remove();
-
                 $(this).find('.noneBut').remove();
                 var inpName = $(this).prop('id') + '_input';
                 $(this).find('#'+inpName).remove();
-
                 if (hideZeros) {
                     if ( ( (curmin === 'NA') || (curmax === 'NA')) && !isActive ){
                         addSlider = false;
                         $(this).removeClass('hasSlider');
-                        //$(this).removeClass('isActive');
                     } else if (isActive){
                         if (curmin === 'NA') {
                                 min = lower;
@@ -2846,14 +2838,10 @@ require([
                             max = Math.ceil(curmax);
                             lower=min;
                             upper=max;
-                            //$(this).attr('data-curminrng', lower);
-                            //$(this).attr('data-curmaxrng', upper);
                     }
                 } else if (!isActive){
                     lower=min;
                     upper=max;
-                    //$(this).attr('data-curminrng', lower);
-                    //$(this).attr('data-curmaxrng', upper);
                 }
             }
 
@@ -2862,7 +2850,6 @@ require([
                 mkSlider($(this).prop('id'), min, max, 1, true, wNone, parStr, $(this).data('filter-attr-id'), $(this).data('filter-display-attr'), lower, upper, isActive,checked);
             } else{
                 $(this).removeClass('hasSlider');
-
             }
         });
      };
@@ -3151,7 +3138,13 @@ require([
         $('.spinner').hide();
     });
 
+
     $(document).ready(function () {
+
+        $('#body').on("unload", function(){
+            alert('hi');
+        })
+
         window.selItems = new Object();
         window.selItems.selStudies = new Object();
         window.selItems.selCases = new Object();
