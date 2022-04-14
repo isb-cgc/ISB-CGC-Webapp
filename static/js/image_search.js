@@ -1213,9 +1213,9 @@ require([
                             else{
                                 var modality = row['Modality'];
                                 if ((modality[0] === 'SM') || (modality === 'SM')) {
-                                    return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank"><i class="fa-solid fa-eye"></i>'
+                                    return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                                  } else {
-                                    return '<a href="' + DICOM_STORE_PATH + data + '" target="_blank"><i class="fa-solid fa-eye"></i>'
+                                    return '<a href="' + DICOM_STORE_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                                 }
                            }
                         }
@@ -2867,6 +2867,7 @@ require([
         });
      };
 
+    var showFilters = [];
     var load_filters = function(filters) {
          var sliders = [];
         _.each(filters, function(group){
@@ -2877,17 +2878,12 @@ require([
                 $(selector).parents('.collection-list').collapse('show');
 
                 $(selector).each(function(index, selEle) {
-                    /*if ($(selEle).find('ul, .ui-slider').length>0) {
-                        $(selEle).collapse('show');
-                        $(selEle).find('.show-more').triggerHandler('click');
-                        $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
-                    }*/
                     let attValueFoundInside = false;
                     if ($(selEle).children('.ui-slider').length > 0) {
                         attValueFoundInside = true;
                         let pushSliders = false;
-                        let left = 0;
-                        let right = 0;
+                        let left_val = 0;
+                        let right_val = 0;
                         if (filter['values'].indexOf('None')>-1) {
                             var ckbx=$(selEle).find('.noneBut').children('input:checkbox')[0];
                             ckbx.checked=true;
@@ -2924,9 +2920,7 @@ require([
                       });
                   }
                 if (attValueFoundInside){
-                    $(selEle).collapse('show');
-                    $(selEle).find('.show-more').triggerHandler('click');
-                    $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
+                    showFilters.push([selEle,selector]);
                 }
                });
             });
@@ -3039,6 +3033,16 @@ require([
         sessionStorage.removeItem('anonymous_sliders');
     };
 
+    var load_filter_selections = function(selections) {
+        _.each(selections,function(selectors){
+            let selEle = selectors[0];
+            let selector = selectors[1];
+            $(selEle).collapse('show');
+            $(selEle).find('.show-more').triggerHandler('click');
+            $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
+        });
+    };
+
     $('#save-cohort-btn').on('click', function() {
         if(!user_is_auth) {
             save_anonymous_selection_data();
@@ -3052,8 +3056,9 @@ require([
 
     cohort_loaded = false;
     function load_preset_filters() {
-         if (is_cohort && !cohort_loaded) {
-             let loadPending = load_filters(cohort_filters);
+        let loadPending = null;
+        if (is_cohort && !cohort_loaded) {
+             loadPending = load_filters(cohort_filters);
              loadPending.done(function () {
                  console.debug("Load pending complete.");
                  cohort_loaded = true;
@@ -3072,7 +3077,7 @@ require([
                  $('input#hide-zeros').prop("checked", true);
                  $('input#hide-zeros').each(function(){$(this).triggerHandler('change')});
                  $('div.ui-slider').siblings('button').prop("disabled", true);
-                 $('.noneBut').find('input:checkbox').prop("disabled",true);;
+                 $('.noneBut').find('input:checkbox').prop("disabled",true);
              });
          } else {
              // Anonymously selected filters have precedence over filters for load.
@@ -3084,14 +3089,14 @@ require([
              if (!(has_filters || has_sliders)) {
                  // No anonymous filters seen--check for filter URI
                 if (Object.keys(filters_for_load).length > 0) {
-                     let loadPending = load_filters(filters_for_load);
+                     loadPending = load_filters(filters_for_load);
                      loadPending.done(function () {
                          //console.debug("External filter load done.");
                      });
                  }
              } else {
                  if (has_sliders) {
-                     let loadPending = load_sliders(ANONYMOUS_SLIDERS, !has_filters);
+                     loadPending = load_sliders(ANONYMOUS_SLIDERS, !has_filters);
                      if (loadPending) {
                         loadPending.done(function () {
                              //console.debug("Sliders loaded from anonymous login.");
@@ -3099,12 +3104,17 @@ require([
                      }
                  }
                  if (has_filters) {
-                     let loadPending = load_filters(ANONYMOUS_FILTERS);
+                     loadPending = load_filters(ANONYMOUS_FILTERS);
                      loadPending.done(function () {
                          //console.debug("Filters loaded from anonymous login.");
                      });
                  }
              }
+         }
+         if(loadPending) {
+             loadPending.done(function() {
+                 load_filter_selections(showFilters);
+             });
          }
      }
 
@@ -3239,6 +3249,6 @@ require([
                     '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">'
                     +'&times;</span><span class="sr-only">Close</span></button>'
                 ).attr("style","display: none;")
-        )
+        );
     });
 });
