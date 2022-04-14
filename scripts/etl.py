@@ -704,7 +704,7 @@ def main():
         len(args.version_file) and update_data_versions(args.version_file)
 
         len(args.attributes_file) and load_attributes(args.attributes_file,
-            ["dicom_derived_series_v8","dicom_derived_study_v8"], ["idc-dev-etl.idc_v7.dicom_pivot_v8"]
+            ["dicom_derived_series_v8","dicom_derived_study_v8"], ["idc-dev-etl.idc_v8_dev.dicom_pivot_v8"]
         )
 
         len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
