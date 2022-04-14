@@ -66,3 +66,17 @@ if settings.DEBUG and settings.DEBUG_TOOLBAR:
     urlpatterns = [
         url(r'^__debug__/', include(debug_toolbar.urls)),
     ] + urlpatterns
+
+if settings.LOCAL_RESPONSE_PAGES:
+    from django.views.defaults import page_not_found, server_error
+
+    def custom_page_not_found(request):
+        return page_not_found(request, None)
+
+    def custom_server_error(request):
+        return server_error(request)
+
+    urlpatterns += [
+        path("404/", custom_page_not_found),
+        path("500/", custom_server_error),
+    ]
