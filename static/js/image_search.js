@@ -1721,7 +1721,7 @@ require([
         update_filter_url();
         if(window.location.href.search(/\/filters\//g) >= 0) {
             if(!first_filter_load) {
-                window.history.pushState({}, '', BASE_URL + "/explore/")
+                window.history.pushState({}, '', window.location.origin + "/explore/")
             } else {
                 first_filter_load = false;
             }
