@@ -476,6 +476,34 @@ def explore_data_page(request, filter_path=False, path_filters=None):
             collapse_on, is_json, uniques=uniques, totals=totals
         )
 
+        if not is_json:
+            # These are filters to be loaded *after* a page render
+            if wcohort:
+                context['filters_for_load'] = cohort_filters_dict
+            elif filter_path:
+                context['filters_for_load'] = path_filters
+            else:
+                filters_for_load = req.get('filters_for_load', None)
+                if filters_for_load:
+                    blacklist = re.compile(settings.BLACKLIST_RE, re.UNICODE)
+                    if blacklist.search(filters_for_load):
+                        logger.warning("[WARNING] Saw bad filters in filters_for_load:")
+                        logger.warning(filters_for_load)
+                        filters_for_load = {}
+                        messages.error(
+                            request,
+                            "There was a problem with some of your filters - please ensure they're properly formatted."
+                        )
+                        status = 400
+                    else:
+                        filters_for_load = json.loads(filters_for_load)
+                else:
+                    filters_for_load = [{"filters": [{
+                        "id": Attribute.objects.get(name="access").id,
+                        "values": ["Public"]
+                    }]}]
+                context['filters_for_load'] = filters_for_load
+
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
         logger.exception(e)
@@ -483,39 +511,13 @@ def explore_data_page(request, filter_path=False, path_filters=None):
             request,
             "Encountered an error when attempting to load the page - please contact the administrator."
         )
-        status = 400
+        status = 500
 
     if is_json:
         # In the case of is_json=True, the 'context' is simply attr_by_source
         return JsonResponse(context, status=status)
-    else:
-        # These are filters to be loaded *after* a page render
-        if wcohort:
-            context['filters_for_load'] = cohort_filters_dict
-        elif filter_path:
-            context['filters_for_load'] = path_filters
-        else:
-            filters_for_load = req.get('filters_for_load', None)
-            if filters_for_load:
-                blacklist = re.compile(settings.BLACKLIST_RE, re.UNICODE)
-                if blacklist.search(filters_for_load):
-                    logger.warning("[WARNING] Saw bad filters in filters_for_load:")
-                    logger.warning(filters_for_load)
-                    filters_for_load = {}
-                    messages.error(
-                        request,
-                        "There was a problem with some of your filters - please ensure they're properly formatted."
-                    )
-                else:
-                    filters_for_load = json.loads(filters_for_load)
-            else:
-                filters_for_load = [{"filters": [{
-                    "id": Attribute.objects.get(name="access").id,
-                    "values": ["Public"]
-                }]}]
-            context['filters_for_load'] = filters_for_load
 
-        return render(request, 'idc/explore.html', context)
+    return render(request, 'idc/explore.html', context)
 
 
 def parse_explore_filters(request):
