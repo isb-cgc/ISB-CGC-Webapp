@@ -27,10 +27,8 @@
     <!-- <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script> -->
 {% endblock %}
 
+<div id="secondary-nav" class="navbar-fixed-top"></div>
 
-<div id="secondary-nav" class="navbar-fixed-top">
-
-</div>
 {% block link_page_name %}help{% endblock %}
 {% block page_name %}cohort-details{% endblock %}
 
@@ -79,7 +77,6 @@
     {{ programs|json_script:"programs" }}
 
     <script>
-
         window.collection = JSON.parse(document.getElementById('collections').textContent);
         window.collectionData = new Array();
         window.programs = JSON.parse(document.getElementById('programs').textContent);
