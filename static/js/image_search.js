@@ -1906,8 +1906,6 @@ require([
                             }
                         }
                     }
-
-
                     updateTablesAfterFilter(collFilt, data.origin_set.All.attributes.collection_id);
 
                     if ($('#hide-zeros')[0].checked) {
@@ -1925,9 +1923,7 @@ require([
             error: function(data){
                 alert("There was an error fetching server data. Please alert the systems administrator")
                 console.log('error loading data');
-
             }
-
         });
         return deferred.promise();
     };

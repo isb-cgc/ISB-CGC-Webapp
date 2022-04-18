@@ -117,8 +117,7 @@ require([
             var min = $this.slider("option", "min");
             var max = $this.slider("option", "max");
 
-            if ($this.parent().hasClass('isActive') &&  ($this.parent().hasClass('wNone') && $this.siblings('.noneBut').find('input:checked').length>0) )
-            {
+            if ($this.parent().hasClass('isActive') &&  ($this.parent().hasClass('wNone') && $this.siblings('.noneBut').find('input:checked').length>0) ) {
                 if ($(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).length <= 0) {
                     $(`${modal_filter_block}`).append('<p class="cohort-filter-display ' + $(this).data('filter-attr-id')
                         + '"><span class="attr">' + $(this).data('filter-display-attr') + ':</span></p>');
@@ -128,21 +127,17 @@ require([
                 );
                 filters[$(this).data('filter-attr-id')] = ["None",[left_val, right_val]];
 
-            }
-            else if ($this.parent().hasClass('isActive'))
-            {
+            } else if ($this.parent().hasClass('isActive')) {
                 if ($(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).length <= 0) {
                     $(`${modal_filter_block}`).append('<p class="cohort-filter-display ' + $(this).data('filter-attr-id')
                         + '"><span class="attr">' + $(this).data('filter-display-attr') + ':</span></p>');
                 }
                 $(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).append(
                     '<span class="val">' + left_val + " to " + right_val + '</span>'
-
                 );
                 filters[$this.data('filter-attr-id')] = [left_val, right_val];
 
-            }
-            else if ($this.parent().hasClass('wNone') && $this.siblings('.noneBut').find('input:checked').length>0){
+            } else if ($this.parent().hasClass('wNone') && $this.siblings('.noneBut').find('input:checked').length>0){
                 if ($(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).length <= 0) {
                     $(`${modal_filter_block}`).append('<p class="cohort-filter-display ' + $(this).data('filter-attr-id')
                         + '"><span class="attr">' + $(this).data('filter-display-attr') + ':</span></p>');
@@ -151,10 +146,7 @@ require([
                     '<span class="val">None</span>'
                 );
                 filters[$this.data('filter-attr-id')] = ["None"];
-
             }
-
-
         });
 
         $('#save-cohort-modal .selected-filters').each(function(){
@@ -200,13 +192,11 @@ require([
             e.preventDefault();
             return false;
         }
-
         $(this).find('input[type="submit"]').attr("disabled","disabled");
         $('#saving-cohort').css('display','inline-block');
         saving_cohort = true;
         $('#save-cohort-modal').prop("saving", "saving");
     });
-
 
     tippy('.collection_name', {
         content: function(reference) {
@@ -216,13 +206,11 @@ require([
             if(tooltip) {
                 if ((collection_id in window.collection) && (window.collection[collection_id].access==='Public')) {
                     return '<div class="collection-tooltip">' + tooltip + '</div>';
-                }
-                else{
+                } else {
                     return '<div class="collection-tooltip">' + tooltip + warning + '</div>';
                 }
             }
             return '<span></span>';
-
         },
         theme: 'light',
         placement: 'right-end',
@@ -237,8 +225,6 @@ require([
         interactive: true,
         content: 'The Case ID attribute in the portal corresponds to the DICOM Patient ID attribute'
     });
-
-
 
     tippy('.explainer', {
         interactive: true,
@@ -291,7 +277,6 @@ require([
         target: '.coll-explain',
         maxWidth: 130
     });
-
 
     tippy.delegate('.series-table', {
         content: function(reference) {
