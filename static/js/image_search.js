@@ -121,6 +121,7 @@ require([
     };
 
     window.setSlider = function (slideDiv, reset, strt, end, isInt, updateNow) {
+        $('#' + slideDiv).closest('.hasSlider').find('.slider-message').addClass('notDisp');
         parStr=$('#'+slideDiv).data("attr-par");
         var max = $('#' + slideDiv).slider("option", "max");
         var divName = slideDiv.replace("_slide","");
@@ -175,11 +176,7 @@ require([
                 window.filterObj[filtAtt] = new Object();
             }
             window.filterObj[filtAtt]['rng'] = attVal;
-            if (end<max) {
-                window.filterObj[filtAtt]['type'] = 'ebtw';
-            } else {
-                window.filterObj[filtAtt]['type'] = 'ebtwe';
-            }
+            window.filterObj[filtAtt]['type'] = 'ebtwe';
         }
         if (updateNow) {
             mkFiltText();
@@ -320,7 +317,7 @@ require([
     }
 
     window.addNone = function(elem, parStr, updateNow) {
-            var id = parStr+$(elem).parent().parent()[0].id+"_rng";
+            var id = parStr+$(elem).closest('.list-group-item__body')[0].id+"_rng";
 
             if (elem.checked){
                 if (!(id in window.filterObj)) {
@@ -359,9 +356,10 @@ require([
             position: 'absolute',
             top: -25,
             left: 0,
-            transform: 'translateX(-50%)'
+            transform: 'translateX(-50%)',
 
         });
+
 
          var tooltipR = $('<div class="slide_tooltip slide_tooltipB tooltipR" />').text('stuff').css({
            position: 'absolute',
@@ -406,9 +404,8 @@ require([
         if ($('#'+divName).find('#'+inpName).length===0){
             $('#' + divName).append('<input id="' + inpName + '" type="text" value="' + strtInp + '" style="display:none">');
         }
-        if ($('#'+divName).find('.reset').length===0){
-            $('#' + divName).append(  '<button class="reset" style="display:block;margin-top:18px" onclick=\'setSlider("' + slideName + '",true,0,0,' + String(isInt) + ', true,"'+parStr+'")\'>Clear Slider</button>');
-        }
+
+
         if (isActive){
             $('#'+divName).find('.reset').removeClass('disabled');
         }
@@ -417,12 +414,6 @@ require([
         }
 
          $('#'+slideName).append(labelMin);
-
-         if (wNone){
-            $('#' + divName).append( '<span class="noneBut"><input type="checkbox"   onchange="addNone(this, \''+parStr+'\', true)"> None </span>');
-            $('#' + divName).find('.noneBut').find(':input')[0].checked = checked
-
-         }
 
 
         $('#' + slideName).slider({
@@ -447,7 +438,6 @@ require([
                 $('#' + slideName).addClass('used');
                 var val = $('#' + inpName)[0].value;
                 var valArr = val.split('-');
-
                 window.setSlider(slideName, false, valArr[0], valArr[1], isInt, true);
 
             }
@@ -485,11 +475,6 @@ require([
         $('#'+slideName).append(labelMax);
         $('#'+slideName).addClass('space-top-15');
 
-
-        /*$('#'+ divName+'_list').addClass('hide');
-        $('#'+ divName).find('.more-checks').addClass('hide');
-        $('#'+ divName).find('.less-checks').addClass('hide');
-        $('#'+ divName).find('.hide-zeros').addClass('hide');*/
     };
 
     var updateTablesAfterFilter = function (collFilt, collectionsData){
@@ -2800,22 +2785,28 @@ require([
             var isActive = $(this).hasClass('isActive');
             var wNone = $(this).hasClass('wNone');
             var checked = ($(this).find('.noneBut').length>0) ? $(this).find('.noneBut').find(':input')[0].checked : false;
+            var txtLower = ($(this).find('.sl_lower').length>0) ? $(this).find('.sl_lower').val():'';
+            var txtUpper = ($(this).find('.sl_lower').length>0) ? $(this).find('.sl_upper').val():'';
+            var cntrNotDisp = ($(this).find('.cntr').length>0) ?$(this).find('.cntr').hasClass('notDisp'):true;
+
 
             if (initialCreation){
                 var heading = $(this).prop('id') + '_heading';
-                $('#'+heading).find('.controls').remove();
+                $('#'+heading).find('.fa-cog').attr('title', 'Control slider');
+                $('#'+heading).find('.fa-search').remove();
+
+                $(this).find('.more-checks').remove();
+                $(this).find('.less-checks').remove();
+                $(this).find('.sorter').remove();
                 $('#'+this.id+'_list').addClass('hide');
-                $(this).find('.more-checks').addClass('hide');
-                $(this).find('.less-checks').addClass('hide');
-                $(this).find('.sorter').addClass('hide');
             }
             else {
                 var slideDivId = $(this).prop('id') + '_slide';
                 curmin = $(this).attr('data-curmin');
                 curmax = $(this).attr('data-curmax');
                 $(this).find('#' + slideDivId).remove();
-                $(this).find('.reset').remove();
-                $(this).find('.noneBut').remove();
+                $(this).find('.cntr').remove();
+                //$(this).find('.noneBut').remove();
                 var inpName = $(this).prop('id') + '_input';
                 $(this).find('#'+inpName).remove();
                 if (hideZeros) {
@@ -2848,9 +2839,46 @@ require([
             if (addSlider) {
                 $(this).addClass('hasSlider');
                 mkSlider($(this).prop('id'), min, max, 1, true, wNone, parStr, $(this).data('filter-attr-id'), $(this).data('filter-display-attr'), lower, upper, isActive,checked);
+                var cntrlDiv=$('<div class="cntr"></div>');
+                cntrlDiv.append('<div class="sliderset" style="display:block;margin-bottom:8px">Lower: <input type="text" style="display:inline" size="5" class="sl_lower" value="'+ txtLower + '">' +
+                    ' Upper: <input class="sl_upper" type="text" style="display:inline" size="5" class="upper" value="' + txtUpper + '">' +
+                    '<div class="slider-message notDisp" style="color:red"><br>Please set lower and upper bounds to numeric values with the upper value greater than the lower, then press Return in either text box. </div></div>')
+                cntrlDiv.append(  '<button class="reset" style="display:block;" onclick=\'setSlider("'+ this.id + '_slide", true,0,0,true, true,"'+parStr+'")\'>Clear Slider</button>');
+                if (wNone){
+                   cntrlDiv.append( '<span class="noneBut"><input type="checkbox"   onchange="addNone(this, \''+parStr+'\', true)"> None </span>');
+                   cntrlDiv.find('.noneBut').find(':input')[0].checked = checked;
+                }
+                if (cntrNotDisp){
+                    cntrlDiv.addClass('notDisp');
+                }
+                $(this).append(cntrlDiv);
+                $(this).find('.sliderset').keypress(function(event){
+                   var keycode = (event.keyCode ? event.keyCode : event.which);
+                   if(keycode == '13'){
+
+                   try {
+                      var txtlower = parseFloat($(this).parent().find('.sl_lower').val());
+                      var txtupper = parseFloat($(this).parent().find('.sl_upper').val());
+                      if (txtlower<=txtupper){
+                        setSlider($(this).closest('.hasSlider')[0].id+"_slide", false, txtlower, txtupper, false,true);
+                      }
+                      else{
+                          $(this).closest('.hasSlider').find('.slider-message').removeClass('notDisp');
+
+                      }
+                   }
+                  catch(error){
+                    $(this).closest('.hasSlider').find('.slider-message').removeClass('notDisp');
+                    console.log(error);
+                  }
+               }
+              });
+
             } else{
                 $(this).removeClass('hasSlider');
+
             }
+
         });
      };
 
@@ -2911,7 +2939,7 @@ require([
                       });
                   }
                 if (attValueFoundInside){
-                    $(selEle).collapse('show');
+                    //$(selEle).collapse('show');
                     $(selEle).find('.show-more').triggerHandler('click');
                     $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
                 }
