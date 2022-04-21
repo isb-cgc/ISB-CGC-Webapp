@@ -1686,6 +1686,19 @@ require([
         return filtObj;
     };
 
+    var update_bq_filters = function() {
+        let filters = parseFilterObj();
+        if(Object.keys(filters).length <= 0) {
+            $('.bq-string-display').attr("disabled","disabled");
+            $('.bq-string-display').attr("title","Select a filter to enable this feature.");
+            $('.bq-string').html("");
+        } else {
+            $('.bq-string-display').removeAttr("disabled");
+            $('.bq-string-display').attr("title","Click to display this filter as a BQ string.");
+            $('.bq-string-display').attr('filter-params', JSON.stringify(filters));
+        }
+    };
+
     var update_filter_url = function() {
         let filters = parseFilterObj();
         if(Object.keys(filters).length <= 0) {
@@ -1719,6 +1732,7 @@ require([
 
     var updateFacetsData = function (newFilt) {
         update_filter_url();
+        update_bq_filters();
         if(window.location.href.search(/\/filters\//g) >= 0) {
             if(!first_filter_load) {
                 window.history.pushState({}, '', window.location.origin + "/explore/")
@@ -1727,8 +1741,8 @@ require([
             }
         }
         var url = '/explore/'
-        var parsedFiltObj=parseFilterObj();
-        url= encodeURI('/explore/')
+        var parsedFiltObj = parseFilterObj();
+        url = encodeURI('/explore/')
 
         ndic={'totals':JSON.stringify(["PatientID", "StudyInstanceUID", "SeriesInstanceUID"]),'counts_only':'True', 'is_json':'True', 'is_dicofdic':'True', 'data_source_type':($("#data_source_type option:selected").val() || 'S'), 'filters':JSON.stringify(parsedFiltObj) }
         var csrftoken = $.getCookie('csrftoken');

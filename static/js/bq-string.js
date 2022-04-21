@@ -30,12 +30,14 @@ require([
     'base',
     'sqlFormatter'
 ], function($, base, sqlFormatter) {
-    A11y.Core();
 
-    function getBqString(bqStringUri) {
+    function getBqString(bqStringUri, OP, payload) {
+        var csrftoken = $.getCookie('csrftoken');
         $.ajax({
             url: bqStringUri,
-            type: 'GET',
+            type: OP,
+            data: payload,
+            beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success: function (data) {
                 // sql-formatter doesn't support BigQuery at the moment, so we need to do a little tweaking of the
                 // output.
@@ -62,7 +64,7 @@ require([
         if($('#bq-string-display .bq-string').attr('cohort_id') !== $(this).data('cohort-id')) {
             $('#bq-string-display .bq-string').html("Loading...");
             $('#bq-string-display .bq-string').attr('cohort_id',$(this).data('cohort-id'));
-            getBqString($(this).data('bq-string-uri'));
+            getBqString($(this).data('bq-string-uri'), 'GET', null);
         }
     });
 
@@ -70,7 +72,7 @@ require([
         if($('#bq-string-display .bq-string').attr('filter-params') !== $(this).attr('filter-params')) {
             $('#bq-string-display .bq-string').html("Loading...");
             $('#bq-string-display .bq-string').attr('filter-params',$(this).attr('filter-params'));
-            getBqString($(this).attr('bq-string-uri'));
+            getBqString("/explore/bq_string/", 'POST', {"filters": $(this).attr('filter-params')});
         }
     });
 });
