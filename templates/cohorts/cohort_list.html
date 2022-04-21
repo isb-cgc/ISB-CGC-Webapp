@@ -346,7 +346,7 @@
 {#            </div>#}
 {#        </div>#}
 {#    </div>#}
-{% include "cohorts/bq-string-modal.html" with bq_string_uri="True" %}
+{% include "idc/bq-string-modal.html" with bq_string_uri="True" %}
 
 <!-- Include footer here instead of base.html so it can be hidden by default -->
 {% include 'share/site_footer.html' with hide="True" %}
@@ -361,4 +361,5 @@
 	{{ block.super }}
 	<script type="text/javascript" src="{% static 'js/cohorts/cohort-list.js' %}?v={{ APP_VERSION }}"></script>
     <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}?v={{ APP_VERSION }}"></script>
+    <script type="text/javascript" src="{% static 'js/bq-string.js' %}?v={{ APP_VERSION }}"></script>
 {% endblock %}
