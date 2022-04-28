@@ -1,7 +1,10 @@
+// From https://github.com/oncojs/sapien
+// Revised by Mi Tian and Suzanne Paquette for ISB-CGC and IDC
+
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        jquery: 'libs/jquery-1.11.1.min'
+        jquery: 'libs/jquery-3.5.1'
     }
 });
 
