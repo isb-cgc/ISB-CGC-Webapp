@@ -72,6 +72,7 @@ def landing_page(request):
     skip = [
         'Extremities',
         'Abdomen, Mediastinum',
+        'Abdomen, Pelvis',
         'Abdomen',
         'Ear',
         'Pelvis, Prostate, Anus',
