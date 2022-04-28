@@ -119,3 +119,5 @@ IDC-Common/
 
 secure_files
 secure_files/
+
+*.yaml
