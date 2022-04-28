@@ -269,7 +269,7 @@ require([
     });
 
     tippy.delegate('.studies-table', {
-        content: 'Images in this collection are not publicly available',
+        content: 'Some or all of the images in this collection are not publicly available.',
         theme: 'dark',
         placement: 'right',
         arrow: false,
@@ -318,7 +318,7 @@ require([
     });
 
     tippy.delegate('.series-table', {
-        content: 'Images in this collection are not publicly available',
+        content: 'Some or all of the images in this collection are not publicly available.',
         theme: 'dark',
         placement: 'right',
         arrow: false,
