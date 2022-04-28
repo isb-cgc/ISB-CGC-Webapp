@@ -200,7 +200,7 @@ require([
 
     tippy('.collection_name', {
         content: function(reference) {
-            let warning='<p style="color:red">Image files in this collection are not publicly available.</p>'
+            let warning='<p style="color:red">Some or all of the image files in this collection are not publicly available.</p>'
             let tooltip = collection_tooltips[$(reference).siblings('input.collection_value').attr('value')];
             let collection_id=$(reference)[0].id
             if(tooltip) {
@@ -340,7 +340,7 @@ require([
 
     tippy('.coll-explain', {
         allowHTML:true,
-        content: 'For collections denoted by the <i class="fa-solid fa-circle-minus"></i> icon image files are not publicly available',
+        content: 'For collections denoted by the <i class="fa-solid fa-circle-minus"></i> icon some or all of the image files are not publicly available.',
         interactive:true
 
     });
