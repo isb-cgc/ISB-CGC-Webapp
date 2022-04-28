@@ -329,6 +329,7 @@ def load_collections(filename, data_version="8.0"):
                 logger.info("[STATUS] Collection {} already exists - it will be updated.".format(line[2]))
                 updated_collection_set[line[1]] = collex
             except ObjectDoesNotExist:
+                logger.info("[STATUS] Saw new Collection {}".format(line[2]))
                 new_collection_set.append(collex)
 
         add_collections(new_collection_set, updated_collection_set)
@@ -685,6 +686,7 @@ def update_data_versions(filename):
 
     return
 
+
 def parse_args():
     parser = ArgumentParser()
     parser.add_argument('-v', '--version-file', type=str, default='', help='JSON file of version data to update')
@@ -704,7 +706,7 @@ def main():
         len(args.version_file) and update_data_versions(args.version_file)
 
         len(args.attributes_file) and load_attributes(args.attributes_file,
-            ["dicom_derived_series_v8","dicom_derived_study_v8"], ["idc-dev-etl.idc_v8_dev.dicom_pivot_v8"]
+            ["dicom_derived_series_v9", "dicom_derived_study_v9"], ["idc-dev-etl.idc_v9_dev.dicom_pivot_v9"]
         )
 
         len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
@@ -716,8 +718,8 @@ def main():
                 update_display_values(Attribute.objects.get(name=attr), dvals[attr]['vals'])
 
         if args.solr_files.lower() == 'y':
-            for src in [("idc-dev-etl.idc_v8_pub.dicom_derived_all", "dicom_derived_series_v8",),
-                    ("idc-dev-etl.idc_v8_pub.dicom_derived_all", "dicom_derived_study_v8",),]:
+            for src in [("idc-dev-etl.idc_v9_pub.dicom_derived_all", "dicom_derived_series_v9",),
+                    ("idc-dev-etl.idc_v9_pub.dicom_derived_all", "dicom_derived_study_v9",),]:
                 create_solr_params(src[0], src[1])
 
     except Exception as e:
