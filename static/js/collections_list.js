@@ -45,7 +45,7 @@ require(['jquery', 'datatables.net','jqueryui', 'bootstrap', 'base'],
 
         $('#collections-table tbody').on('click', 'td.collection-explore', function () {
             let url = '/explore/filters/?'
-                + $(this).data('collex-type') === 'Analysis' ? "analysis_results_id" : "collection_id"
+                + ($(this).data('collex-type') === 'Analysis' ? "analysis_results_id" : "collection_id")
                 + "=" + $(this).data('collex-id');
 
             window.location.href = url;
