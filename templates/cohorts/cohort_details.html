@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load custom_tags %}
-{% load staticfiles %}
+{% load static %}
 
 {% comment %}
 
@@ -27,10 +27,8 @@
     <!-- <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script> -->
 {% endblock %}
 
+<div id="secondary-nav" class="navbar-fixed-top"></div>
 
-<div id="secondary-nav" class="navbar-fixed-top">
-
-</div>
 {% block link_page_name %}help{% endblock %}
 {% block page_name %}cohort-details{% endblock %}
 
@@ -61,7 +59,7 @@
 {% block content %}
 {% url 'cohort_manifest' cohort_id as export_uri %}
 {% include "cohorts/export-manifest-modal.html" with export_uri=export_uri %}
-{% include "cohorts/bq-string-modal.html" with bq_string=bq_string bq_string_uri="Falase" cohort_id=cohort.id %}
+{% include "idc/bq-string-modal.html" with bq_string=bq_string bq_string_uri="False" cohort_id=cohort.id %}
 
 <script>
    var cohort_loaded = true
@@ -79,7 +77,6 @@
     {{ programs|json_script:"programs" }}
 
     <script>
-
         window.collection = JSON.parse(document.getElementById('collections').textContent);
         window.collectionData = new Array();
         window.programs = JSON.parse(document.getElementById('programs').textContent);

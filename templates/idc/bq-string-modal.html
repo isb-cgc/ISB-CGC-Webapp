@@ -1,7 +1,8 @@
     <!-- BigQuery String Modal -->
     <div class="modal fade" id="bq-string-display" tabindex="-1" role="dialog" aria-labelledby="bqStringDisplay"
          aria-hidden="true"
-         cohort_id="{% if bq_string_uri == "True" %}0{% else %}{{ cohort_id }}{% endif %}"
+         cohort_id="{% if bq_string_uri == "True" %}0{% else %}{{ cohort_id }}{% endif %}",
+         filter-params=""
     >
         <div class="modal-dialog">
             <div class="modal-content">
@@ -20,7 +21,7 @@
                         {% if bq_string_uri == "True" %}
                             Loading...
                         {% else %}
-                            {{ bq_string}}
+                            {{ bq_string }}
                         {% endif %}
                     </pre>
                 </div>

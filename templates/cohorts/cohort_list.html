@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
+{% load static %}
 {% load custom_tags %}
 {% load cohort_filters %}
 {#{% load tz %}#}
@@ -95,8 +95,9 @@
                         <th class="study-col">Study<br /> Count</th>
                         <th class="series-col">Series<br /> Count</th>
                         <th class="version-col">Data Version</th>
-                        <th class="version-col">Version Compare</th>
-                        <th class="version-col">Query String</th>
+                        <th class="export-col">Last Export</th>
+                        <th class="compare-col">Version Compare</th>
+                        <th class="query-str-col">Query String</th>
                     </thead>
                     <colgroup>
                         <col style="width: 2%">
@@ -107,12 +108,13 @@
                         <col style="width: 3%">
                         <col style="width: 3%">
                         <col style="width: 16%">
+                        <col style="width: 10%">
                         <col style="width: 3%; min-width: 45px;">
                         <col style="width: 3%; min-width: 45px;">
                     </colgroup>
                     <tbody>
                     {% for cohort in cohorts %}
-                    {% with cohort.only_active_versions as only_active_versions %}
+                    {% with only_active_versions=cohort.only_active_versions valid_export=cohort.get_export_is_valid %}
                         <tr data-description='{% if cohort.description %}{{ cohort.description }}{% else %}N/A{% endif %}'
                             data-collex="{{ cohort.collections }}"
                             data-name="{{ cohort.name }}"
@@ -165,10 +167,25 @@
 {#                            </td>#}
                             <td class="version-col{% if not only_active_versions %} inactive-data-version{% endif %}">
                                 <p>
-                                {% with cohort.get_data_versions as cohort_versions %}
+                                {% with cohort_versions=cohort.get_data_versions %}
                                     {{ cohort_versions|get_displays:True }}
                                     {% if not only_active_versions %} (Inactive){% endif %}
                                 {% endwith %}
+                                </p>
+                            </td>
+                            <td class="export-col{% if not valid_export and cohort.last_exported_table %} inactive-export{% endif %}">
+                                <p>
+                                    {% with table_uri=cohort.get_last_export_uri %}
+                                        {% if valid_export %}
+                                            <a href="{{ table_uri }}" target="_blank" rel="noreferrer nofollow" title="{{ cohort.last_exported_table }}">
+                                                {{ cohort.last_exported_date|date:"Y/m/d h:i e"}}
+                                            </a>
+                                        {% elif cohort.last_exported_table %}
+                                            {{ cohort.last_exported_date|date:"Y/m/d h:i e"}} (Expired)
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    {% endwith %}
                                 </p>
                             </td>
                             <td>
@@ -329,7 +346,7 @@
 {#            </div>#}
 {#        </div>#}
 {#    </div>#}
-{% include "cohorts/bq-string-modal.html" with bq_string_uri="True" %}
+{% include "idc/bq-string-modal.html" with bq_string_uri="True" %}
 
 <!-- Include footer here instead of base.html so it can be hidden by default -->
 {% include 'share/site_footer.html' with hide="True" %}
@@ -344,4 +361,5 @@
 	{{ block.super }}
 	<script type="text/javascript" src="{% static 'js/cohorts/cohort-list.js' %}?v={{ APP_VERSION }}"></script>
     <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}?v={{ APP_VERSION }}"></script>
+    <script type="text/javascript" src="{% static 'js/bq-string.js' %}?v={{ APP_VERSION }}"></script>
 {% endblock %}

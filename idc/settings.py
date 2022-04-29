@@ -54,6 +54,7 @@ DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 CONNECTION_IS_LOCAL     = (os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost')
 IS_CIRCLE               = (os.environ.get('CI', None) is not None)
 DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') and CONNECTION_IS_LOCAL)
+LOCAL_RESPONSE_PAGES    = (os.environ.get('LOCAL_RESPONSE_PAGES', 'False') == 'True')
 
 IMG_QUOTA = os.environ.get('IMG_QUOTA', '137')
 
@@ -82,6 +83,7 @@ BIGQUERY_PROJECT_ID            = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PR
 BIGQUERY_DATA_PROJECT_ID       = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
 BIGQUERY_USER_DATA_PROJECT_ID  = os.environ.get('BIGQUERY_USER_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
 BIGQUERY_USER_MANIFEST_DATASET = os.environ.get('BIGQUERY_USER_MANIFEST_DATASET', 'dev_user_dataset')
+BIGQUERY_USER_MANIFEST_TIMEOUT = int(os.environ.get('BIGQUERY_USER_MANIFEST_TIMEOUT', '7'))
 
 # Deployment module
 CRON_MODULE             = os.environ.get('CRON_MODULE')

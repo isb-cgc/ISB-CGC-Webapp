@@ -76,8 +76,6 @@ VALUE_SPECIFIC_ORDERS = {
 KEEP_ORDER = ['SliceThickness']
 
 ATTR_SPECIFIC_ORDERS = [
-
-
     'program_name',
     'project_short_name',
     'user_program',
@@ -107,9 +105,11 @@ def quick_js_bracket_replace(matchobj):
     else:
         return '\u003E'
 
+
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
 
 @register.filter
 def plotnm(item):
@@ -118,6 +118,11 @@ def plotnm(item):
         return plotnmDic[item]
     else:
         return item
+
+
+@register.filter
+def get_account_email(account):
+    return account.account.extra_data.get('email','None')
 
 
 @register.filter
