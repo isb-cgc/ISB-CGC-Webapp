@@ -148,13 +148,18 @@ if exists(join(dirname(__file__), '../version.env')):
 else:
     if IS_DEV:
         import git
-        repo = git.Repo(path="/home/vagrant/www/",search_parent_directories=True)
-        VERSION = "{}.{}.{}".format("local-dev", datetime.datetime.now().strftime('%Y%m%d%H%M'),
-                                    str(repo.head.object.hexsha)[-6:])
+        try:
+            repo = git.Repo(path="/home/vagrant/www/", search_parent_directories=True)
+            VERSION = "{}.{}.{}".format("local-dev", datetime.datetime.now().strftime('%Y%m%d%H%M'),
+                                        str(repo.head.object.hexsha)[-6:])
+        except Exception as e:
+            print("[ERROR] While trying to set local/developer git version: ")
+            print(e)
+            VERSION = "{}.{}.{}".format("local-dev", datetime.datetime.now().strftime('%Y%m%d%H%M'), "unavailable")
 
 APP_VERSION = os.environ.get("APP_VERSION", VERSION)
 
-DEV_TIER = bool(DEBUG or re.search(r'^dev\.',APP_VERSION))
+DEV_TIER = bool(DEBUG or re.search(r'^dev\.', APP_VERSION))
 
 # If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
