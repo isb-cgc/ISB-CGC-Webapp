@@ -304,26 +304,29 @@ def load_collections(filename, data_version="8.0"):
                     "supporting_data": line[5],
                     "subject_count": line[6],
                     "doi": line[7],
-                    "cancer_type": line[8],
-                    "species": line[9],
-                    "location": line[10],
-                    "analysis_artifacts": line[11],
-                    "description": re.sub(r' style="[^"]+"', '', (re.sub(r'<div [^>]+>',"<p>", line[12]).replace("</div>","</p>"))),
-                    "collection_type": line[13],
-                    "access": line[15],
-                    "date_updated": datetime.datetime.strptime(line[16], '%Y-%m-%d'),
-                    "nbia_collection_id": line[17],
-                    "tcia_collection_id": line[17],
-                    "active": bool((line[18]).lower() == "true")
+                    "source_url": line[8],
+                    "cancer_type": line[9],
+                    "species": line[10],
+                    "location": line[11],
+                    "analysis_artifacts": line[12],
+                    "description": re.sub(r' style="[^"]+"', '', (re.sub(r'<div [^>]+>',"<p>", line[13]).replace("</div>","</p>"))),
+                    "collection_type": line[14],
+                    "access": line[16],
+                    "date_updated": datetime.datetime.strptime(line[17], '%Y-%m-%d'),
+                    "nbia_collection_id": line[18],
+                    "tcia_collection_id": line[18],
+                    "active": bool((line[19]).lower() == "true")
                 },
                 "data_versions": [{"ver": data_version, "name": "TCIA Image Data"}]
             }
-            if line[14] and len(line[14]):
+            if line[15] and len(line[15]):
                 try:
-                    prog = Program.objects.get(short_name=line[14])
+                    prog = Program.objects.get(short_name=line[15])
                     collex['data']['program'] = prog
                 except Exception as e:
-                    logger.info("[STATUS] Program {} not found for collection {} - it will not be added!".format(line[14],line[2]))
+                    logger.info("[STATUS] Program {} not found for collection {} - it will not be added!".format(
+                        line[15], line[2]
+                    ))
             try:
                 Collection.objects.get(collection_uuid=line[1])
                 logger.info("[STATUS] Collection {} already exists - it will be updated.".format(line[2]))
@@ -601,10 +604,12 @@ def update_display_values(attr, updates):
         len(new_vals) and Attribute_Display_Values.objects.bulk_create(new_vals)
 
 
-def load_tooltips(SourceObj, attr_name, source_tooltip):
+def load_tooltips(SourceObj, attr_name, source_tooltip, obj_attr=None):
     try:
         source_objs = SourceObj.objects.filter(owner=idc_superuser, active=True)
         attr = Attribute.objects.get(name=attr_name, active=True)
+        if not obj_attr:
+            obj_attr = attr_name
 
         tips = Attribute_Tooltips.objects.select_related('attribute').filter(attribute=attr)
 
@@ -615,7 +620,7 @@ def load_tooltips(SourceObj, attr_name, source_tooltip):
                 extent_tooltips[tip.attribute.id] = []
             extent_tooltips[tip.attribute.id].append(tip.tooltip_id)
 
-        tooltips_by_val = {x[attr_name]: {'tip': x[source_tooltip]} for x in source_objs.values() if x[attr_name] != '' and x[attr_name] is not None}
+        tooltips_by_val = {x[obj_attr]: {'tip': x[source_tooltip]} for x in source_objs.values() if x[obj_attr] != '' and x[obj_attr] is not None}
 
         new_tooltips = []
         updated_tooltips = []
