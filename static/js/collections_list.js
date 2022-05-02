@@ -44,19 +44,9 @@ require(['jquery', 'datatables.net','jqueryui', 'bootstrap', 'base'],
         });
 
         $('#collections-table tbody').on('click', 'td.collection-explore', function () {
-            let encoded_filters = []
-            let collection_id = $(this).data('collex-type') === 'Analysis' ?
-                $(this).data('collex-collex').split(',').map(
-                    function n(x, i, a ){
-                    return x.toLowerCase().replaceAll("-","_");
-                })
-                : [$(this).data('collex-id')];
-
-            _.each(collection_id, function (val) {
-                encoded_filters.push("collection_id" + "=" + encodeURI(val));
-            });
-
-            let url = '/explore/filters/?' + encoded_filters.join("&");;
+            let url = '/explore/filters/?'
+                + ($(this).data('collex-type') === 'Analysis' ? "analysis_results_id" : "collection_id")
+                + "=" + $(this).data('collex-id');
 
             window.location.href = url;
         });
