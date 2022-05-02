@@ -35,7 +35,7 @@
                                                            aria-expanded="false" aria-controls="{{ attr.name }}">
                                                             <i class="fa fa-solid fa-caret-right"></i> <i
                                                                 class="fa fa-solid fa-caret-down"></i> <span
-                                                                class="attDisp">ACCESS
+                                                                class="attDisp">Access
                                                             {% if attr.units %}({{ attr.units }}){% endif %}</span>
                                                             <span class="notDisp noCase"> (0 cases)</span>
                                                         </a>
@@ -79,7 +79,7 @@
                                                 <a role="button" data-toggle="collapse" href="#Program"
                                                    aria-expanded="false" aria-controls="Program">
                                                     <i class="fa fa-solid fa-caret-right"></i> <i
-                                                        class="fa fa-solid fa-caret-down"></i>COLLECTION
+                                                        class="fa fa-solid fa-caret-down"></i>Collection
                                                 </a>
 
                                                 <span class="controls">
@@ -100,9 +100,10 @@
                                                             onclick="updateColl()">Num</span>
 
                                                 </div>
-                                                <input id="hide-zeros" class="hide-zeros " type="checkbox"
-                                                       value="hide-zeros" onchange="updateColl()"> Hide collections with
-                                                0 cases
+                                                <div style="display:block">
+                                                <input id="hide-zeros" class="hide-zeros "  type="checkbox"
+                                                       value="hide-zeros" onchange="updateColl()"> Hide collections with 0 cases
+                                                </div>
 
                                                 {% with programs.items|length|add:"-5" as more %}
                                                     <p class="more-checks" style="display: block;"><a class="show-more">show {{ more }}
@@ -227,7 +228,7 @@
                                                            aria-expanded="false" aria-controls="{{ attr.name }}">
                                                             <i class="fa fa-solid fa-caret-right"></i> <i
                                                                 class="fa fa-solid fa-caret-down"></i> <span
-                                                                class="attDisp">ANALYSIS RESULTS
+                                                                class="attDisp">Analysis Results
                                                             {% if attr.units %}({{ attr.units }}){% endif %}</span>
                                                             <span class="notDisp noCase"> (0 cases)</span>
                                                         </a>
@@ -248,14 +249,16 @@
 
                                                      <div class="sorter cntr notDisp">
                                                          <span>Sort by: <input type="radio" class="sort_val" value="alpha"
-                                                                          name="Program" checked onclick="resort('analysis_results_id')">Alpha<input
-                                                            type="radio" class="sort_val" value="num" name="Program"
+                                                                          name="Access" checked onclick="resort('analysis_results_id')">Alpha<input
+                                                            type="radio" class="sort_val" value="num" name="Access"
                                                             onclick="resort('analysis_results_id')">Num</span>
 
                                                      </div>
-                                                    <input id="hide-zeros" class="hide-zeros " type="checkbox"
-                                                       value="hide-zeros" onchange="updateFilters('analysis_results_id',{},false,false)"> Hide analysis results with
-                                                    0 cases
+
+                                                    <div style="display:block">
+                                                    <input id="hide-zeros" class="hide-zeros" type="checkbox"
+                                                       value="hide-zeros" onchange="updateFilters('analysis_results_id',{},false,false)"> Hide analysis results with 0 cases
+                                                    </div>
 
                                                 {% with attr.values|length|add:"-5" as more %}
                                                     <p class="more-checks" style="display: block;"><a class="show-more">show {{ more }}

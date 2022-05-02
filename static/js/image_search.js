@@ -2242,7 +2242,7 @@ require([
         }
 
         var showZeros = true;
-        var searchDomain = $('#'+filterCat).closest('.search-configuration, .search-scope');
+        var searchDomain = $('#'+filterCat).closest('.search-configuration, #program_set, #analysis_set');
         //var isSearchConf = ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').length>0);
         if ((searchDomain.find('#hide-zeros').length>0) && (searchDomain.find('#hide-zeros').prop('checked'))){
             showZeros = false;
