@@ -219,6 +219,22 @@ require([
         interactive: true
     });
 
+    tippy.delegate('div#analysis_results_id', {
+        content: function(reference) {
+            let tooltip = analysis_results_tooltips[$(reference).siblings('input').attr('value')];
+            if(tooltip) {
+                return '<div class="collection-tooltip">' + tooltip + '</div>';
+            }
+            return '<span></span>';
+        },
+        theme: 'light',
+        placement: 'right-end',
+        target: 'span.value',
+        arrow: false,
+        allowHTML: true,
+        interactive: true
+    });
+
     const temp='<html><strong>now</strong></html>';
 
     tippy('.case-info', {

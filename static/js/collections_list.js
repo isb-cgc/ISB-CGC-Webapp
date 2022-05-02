@@ -36,9 +36,12 @@ require(['jquery', 'datatables.net','jqueryui', 'bootstrap', 'base'],
                 let collex_info = $(this).siblings('.collection-explore');
                 let type = collex_info.data('collex-type');
                 let desc = (type !== 'Analysis') ? collection_descs[$(this).data('collex-id')] : `<b>Collections:</b> `+collex_info.data('collex-collex');
-                let doi = $(this).data('doi');
+                let loc = $(this).data('doi') || $(this).data('source-url');
+                let url = $(this).data('source-url') ? loc : "https://doi.org/${loc}";
+                let source_location = `<b>` + ($(this).data('source-url') ? `Source` : `DOI`)
+                    + `: </b><a href="${url}" target="_blank" rel="noopener noreferrer">${loc}</a>`;
                 (row.child() && row.child().length) ? row.child.show() : row.child($(`<tr><td></td><td colspan="7">`+
-                    `<p><b>DOI: </b><a href="https://doi.org/${doi}" target="_blank" rel="noopener noreferrer">${doi}</a></p>${desc}</td></tr>`)).show();
+                    `<p>${source_location}</p>${desc}</td></tr>`)).show();
                 tr.addClass('shown');
             }
         });
