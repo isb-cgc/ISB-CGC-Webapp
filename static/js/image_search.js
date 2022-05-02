@@ -1191,7 +1191,7 @@ require([
                             else {
                                 coll_id=row['collection_id']
                             }
-                            if (!(coll_id in window.collection) || (window.collection[coll_id].access !=='Public')  ) {
+                            if (row['access'].includes('Limited') ) {
                                 return '<i class="fa-solid fa-circle-minus coll-explain"></i>';
                             }
                             else{
@@ -1445,7 +1445,7 @@ require([
                         else {
                             coll_id=row['collection_id']
                         }
-                        if (!(coll_id in window.collection) || (window.collection[coll_id].access !=='Public')  ) {
+                        if (row['access'].includes('Limited') ) {
                             return '<i class="fa-solid fa-circle-minus coll-explain"></i>';
                         }
 
@@ -1832,6 +1832,7 @@ require([
                     }
 
                     updateFilterSelections('access_set', dicofdic);
+                    updateFilterSelections('analysis_set', dicofdic);
                     updateFilterSelections('search_orig_set', dicofdic);
                     createPlots('search_orig_set');
 
@@ -3165,7 +3166,7 @@ require([
 
     $('.fa-search').on("click",function(){
          //alert('hi');
-         srch=$(this).parent().parent().parent().find('.text-filter, .collection-text-filter');
+         srch=$(this).parent().parent().parent().find('.text-filter, .collection-text-filter, .analysis-text-filter');
 
          if (srch.hasClass('notDisp')){
              srch.removeClass('notDisp');
@@ -3212,8 +3213,10 @@ require([
         window.studyTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
         window.seriesTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
 
-        filterItemBindings('program_set');
         filterItemBindings('access_set');
+        filterItemBindings('program_set');
+        filterItemBindings('analysis_set');
+
         filterItemBindings('search_orig_set');
         filterItemBindings('search_derived_set');
         filterItemBindings('search_related_set');
