@@ -204,7 +204,7 @@ bottom: 95%; /* At the top of the tooltip */
 
 .search-con {
   overflow-y: auto;
-    overflow-x:hidden;
+  overflow-x: hidden;
   max-height: 2000px;
 }
 
