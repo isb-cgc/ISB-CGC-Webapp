@@ -22,7 +22,7 @@ from django.contrib import admin
 from django.conf import settings
 
 from . import views, views_api, demo_views
-from cohorts.views import get_query_string
+from cohorts.views import get_query_str_response
 
 
 admin.autodiscover()
@@ -45,7 +45,7 @@ urlpatterns = [
 
     url(r'^explore/$', views.explore_data_page, name='explore_data'),
     url(r'^explore/filters/', views.parse_explore_filters, name='parse_explore_filters'),
-    url(r'^explore/bq_string/$', get_query_string, name='explore_bq_string'),
+    url(r'^explore/bq_string/$', get_query_str_response, name='explore_bq_string'),
     url(r'^tables/', views.populate_tables, name='populate_tables'),
 
     url(r'^warning/', views.warn_page, name='warn'),
