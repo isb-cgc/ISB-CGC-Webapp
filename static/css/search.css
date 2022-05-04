@@ -468,8 +468,13 @@ svg {
     clear: both;
 }
 
+
 .list-group-item__heading:after {
     content: "";
     display:table;
     clear: both;
+}
+
+.ui-slider{
+    margin-bottom: 18px;
 }
