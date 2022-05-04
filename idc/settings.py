@@ -301,8 +301,7 @@ MIDDLEWARE = [
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'request_logging.middleware.LoggingMiddleware',
-    'offline.middleware.OfflineMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'offline.middleware.OfflineMiddleware'
 ]
 
 ROOT_URLCONF = 'idc.urls'
