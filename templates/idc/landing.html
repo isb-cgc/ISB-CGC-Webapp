@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load humanize %}
-{% load staticfiles %}
+{% load static %}
 
 {% comment %}
 
@@ -61,21 +61,21 @@
                             <div class="tab-pane active" id="ct-example">
                                 <div class="modality-heading"><h4>RADIOLOGY</h4></div>
                                 <a href="{{ DICOM_STORE_PATH }}1.3.6.1.4.1.14519.5.2.1.6279.6001.224985459390356936417021464571?seriesInstanceUID=1.2.276.0.7230010.3.1.3.0.57823.1553343864.578877,1.3.6.1.4.1.14519.5.2.1.6279.6001.273525289046256012743471155680"
-                                   target="_blank" title="Click to see in IDC Viewer">
+                                   target="_blank" rel="noopener noreferrer" title="Click to see in IDC Viewer">
                                     <img class="ct-example example" data-study-id="1.3.6.1.4.1.14519.5.2.1.6279.6001.224985459390356936417021464571" src="{% static 'img/ct_ex.jpg' %}" />
                                 </a>
                             </div>
                             <div class="tab-pane" id="mr-example">
                                 <div class="modality-heading"><h4>RADIOLOGY</h4></div>
                                 <a href="{{ DICOM_STORE_PATH }}1.3.6.1.4.1.14519.5.2.1.7311.5101.170561193612723093192571245493?seriesInstanceUID=1.3.6.1.4.1.14519.5.2.1.7311.5101.206828891270520544417996275680,1.2.276.0.7230010.3.1.3.1070885483.15960.1599120307.701"
-                                   target="_blank" title="Click to see in IDC Viewer">
+                                   target="_blank" rel="noopener noreferrer" title="Click to see in IDC Viewer">
                                     <img class="mr-example example" data-study-id="1.3.6.1.4.1.14519.5.2.1.7311.5101.170561193612723093192571245493" src="{% static 'img/mr_ex.jpg' %}" />
                                 </a>
                             </div>
                             <div class="tab-pane" id="pet-example">
                                 <div class="modality-heading"><h4>RADIOLOGY</h4></div>
                                 <a href="{{ DICOM_STORE_PATH }}1.3.6.1.4.1.14519.5.2.1.5168.1900.259520120774497994844579066293"
-                                   target="_blank" title="Click to see in IDC Viewer">
+                                   target="_blank" rel="noopener noreferrer" title="Click to see in IDC Viewer">
                                     <img class="pet-example example" data-study-id="1.3.6.1.4.1.14519.5.2.1.5168.1900.259520120774497994844579066293" src="{% static 'img/pet_ex.jpg' %}" />
                                 </a>
                             </div>

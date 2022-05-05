@@ -54,11 +54,12 @@ ATTR_SET = {}
 DISPLAY_VALS = {}
 SEPERATOR = "[]"
 
-ranges_needed = {
-
-}
-
 COLLECTION_HEADER_CHK = "collection_uuid"
+
+FIELD_MAP = {x: i for i, x in enumerate(['collection_id','collection_uuid','name','collections','image_types','supporting_data',
+                            'subject_count','doi','source_url','cancer_type','species','location','analysis_artifacts',
+                            'description','collection_type','program','access','date_updated','tcia_wiki_collection_id',
+                            'active'])}
 
 ranges_needed = {
     'wbc_at_diagnosis': 'by_200',
@@ -291,49 +292,50 @@ def load_collections(filename, data_version="8.0"):
         collection_file = open(filename, "r")
         new_collection_set = []
         updated_collection_set = {}
+        exact_collection_fields = [
+            "collection_id", "collection_uuid", "name", "collections", "image_types", "supporting_data", "subject_count", "doi",
+            "source_url", "cancer_type", "species", "location", "analysis_artifacts", "description", "collection_type",
+            "access", "date_updated", "active"]
+        field_map = FIELD_MAP
         for line in csv_reader(collection_file):
             if COLLECTION_HEADER_CHK in line:
+                print("[STATUS] Header found - mappping attributes.")
+                i = 0
+                field_map = {}
+                for field in line:
+                    field_map[field] = i
+                    i += 1
+                print(field_map)
                 continue
             collex = {
-                'data': {
-                    "collection_id": line[0],
-                    "collection_uuid": line[1],
-                    "name": line[2],
-                    "collections": line[3],
-                    "image_types": line[4],
-                    "supporting_data": line[5],
-                    "subject_count": line[6],
-                    "doi": line[7],
-                    "cancer_type": line[8],
-                    "species": line[9],
-                    "location": line[10],
-                    "analysis_artifacts": line[11],
-                    "description": re.sub(r' style="[^"]+"', '', (re.sub(r'<div [^>]+>',"<p>", line[12]).replace("</div>","</p>"))),
-                    "collection_type": line[13],
-                    "access": line[15],
-                    "date_updated": datetime.datetime.strptime(line[16], '%Y-%m-%d'),
-                    "nbia_collection_id": line[17],
-                    "tcia_collection_id": line[17],
-                    "active": bool((line[18]).lower() == "true")
-                },
+                'data': { x: line[field_map[x]] for x in exact_collection_fields },
                 "data_versions": [{"ver": data_version, "name": "TCIA Image Data"}]
             }
-            if line[14] and len(line[14]):
+            collex['data']['nbia_collection_id'] = line[field_map['tcia_wiki_collection_id']]
+            collex['data']['tcia_collection_id'] = line[field_map['tcia_wiki_collection_id']]
+            collex['data']['active'] = bool((line[field_map['active']]).lower() == "true")
+            collex['data']['date_updated'] = datetime.datetime.strptime(line[field_map['date_updated']], '%Y-%m-%d')
+            collex['data']['description'] = re.sub(r' style="[^"]+"', '', (re.sub(r'<div [^>]+>',"<p>", line[field_map['description']]).replace("</div>","</p>")))
+            if line[field_map['program']] and len(line[field_map['program']]):
                 try:
-                    prog = Program.objects.get(short_name=line[14])
+                    prog = Program.objects.get(short_name=line[field_map['program']])
                     collex['data']['program'] = prog
                 except Exception as e:
-                    logger.info("[STATUS] Program {} not found for collection {} - it will not be added!".format(line[14],line[2]))
+                    logger.info("[STATUS] Program {} not found for collection {} - it will not be added!".format(
+                        line[field_map['program']], line[field_map['name']]
+                    ))
             try:
-                Collection.objects.get(collection_uuid=line[1])
-                logger.info("[STATUS] Collection {} already exists - it will be updated.".format(line[2]))
-                updated_collection_set[line[1]] = collex
+                Collection.objects.get(collection_uuid=line[field_map['collection_uuid']])
+                logger.info("[STATUS] Collection {} already exists - it will be updated.".format(line[field_map['name']]))
+                updated_collection_set[line[field_map['collection_uuid']]] = collex
             except ObjectDoesNotExist:
+                logger.info("[STATUS] Saw new Collection {}".format(line[field_map['name']]))
                 new_collection_set.append(collex)
 
         add_collections(new_collection_set, updated_collection_set)
 
-        load_tooltips(Collection,"collection_id","description")
+        load_tooltips(Collection.objects.filter(owner=idc_superuser, active=True, collection_type=Collection.ORIGINAL_COLLEX), "collection_id", "description")
+        load_tooltips(Collection.objects.filter(owner=idc_superuser, active=True, collection_type=Collection.ANALYSIS_COLLEX), "analysis_results_id", "description", "collection_id")
     except Exception as e:
         logger.error("[ERROR] While processing collections file {}:".format(filename))
         logger.exception(e)
@@ -600,10 +602,11 @@ def update_display_values(attr, updates):
         len(new_vals) and Attribute_Display_Values.objects.bulk_create(new_vals)
 
 
-def load_tooltips(SourceObj, attr_name, source_tooltip):
+def load_tooltips(source_objs, attr_name, source_tooltip, obj_attr=None):
     try:
-        source_objs = SourceObj.objects.filter(owner=idc_superuser, active=True)
         attr = Attribute.objects.get(name=attr_name, active=True)
+        if not obj_attr:
+            obj_attr = attr_name
 
         tips = Attribute_Tooltips.objects.select_related('attribute').filter(attribute=attr)
 
@@ -614,7 +617,7 @@ def load_tooltips(SourceObj, attr_name, source_tooltip):
                 extent_tooltips[tip.attribute.id] = []
             extent_tooltips[tip.attribute.id].append(tip.tooltip_id)
 
-        tooltips_by_val = {x[attr_name]: {'tip': x[source_tooltip]} for x in source_objs.values() if x[attr_name] != '' and x[attr_name] is not None}
+        tooltips_by_val = {x[obj_attr]: {'tip': x[source_tooltip]} for x in source_objs.values() if x[obj_attr] != '' and x[obj_attr] is not None}
 
         new_tooltips = []
         updated_tooltips = []
@@ -685,6 +688,7 @@ def update_data_versions(filename):
 
     return
 
+
 def parse_args():
     parser = ArgumentParser()
     parser.add_argument('-v', '--version-file', type=str, default='', help='JSON file of version data to update')
@@ -704,7 +708,7 @@ def main():
         len(args.version_file) and update_data_versions(args.version_file)
 
         len(args.attributes_file) and load_attributes(args.attributes_file,
-            ["dicom_derived_series_v8","dicom_derived_study_v8"], ["idc-dev-etl.idc_v7.dicom_pivot_v8"]
+            ["dicom_derived_series_v9", "dicom_derived_study_v9"], ["idc-dev-etl.idc_v9_dev.dicom_pivot_v9"]
         )
 
         len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
@@ -716,8 +720,8 @@ def main():
                 update_display_values(Attribute.objects.get(name=attr), dvals[attr]['vals'])
 
         if args.solr_files.lower() == 'y':
-            for src in [("idc-dev-etl.idc_v8_pub.dicom_derived_all", "dicom_derived_series_v8",),
-                    ("idc-dev-etl.idc_v8_pub.dicom_derived_all", "dicom_derived_study_v8",),]:
+            for src in [("idc-dev-etl.idc_v9_pub.dicom_derived_all", "dicom_derived_series_v9",),
+                    ("idc-dev-etl.idc_v9_pub.dicom_derived_all", "dicom_derived_study_v9",),]:
                 create_solr_params(src[0], src[1])
 
     except Exception as e:

@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load static %}
+{% load i18n l10n %}
 {% comment %}
 
    Copyright 2015, Institute for Systems Biology
@@ -21,5 +23,23 @@
 {% block title %}Page not found{% endblock %}
 
 {% block content %}
-<h4>404: The page you requested could not be found.</h4>
+        <div class="col-lg-12 short-inner-content-no-header">
+            <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2"></div>
+            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-8 accounts-col">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h1>{% trans "Not Found" %}</h1>
+                    </div>
+                    <div class="panel-body">
+                        <h4>404: The page you requested could not be found.</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2"></div>
+        </div>
+{% endblock %}
+
+{% block js_file %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'js/base.js' %}?v={{ APP_VERSION }}"></script>
 {% endblock %}

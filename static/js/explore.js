@@ -117,8 +117,7 @@ require([
             var min = $this.slider("option", "min");
             var max = $this.slider("option", "max");
 
-            if ($this.parent().hasClass('isActive') &&  ($this.parent().hasClass('wNone') && $this.siblings('.noneBut').find('input:checked').length>0) )
-            {
+            if ($this.parent().hasClass('isActive') &&  ($this.parent().hasClass('wNone') && $this.siblings('.noneBut').find('input:checked').length>0) ) {
                 if ($(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).length <= 0) {
                     $(`${modal_filter_block}`).append('<p class="cohort-filter-display ' + $(this).data('filter-attr-id')
                         + '"><span class="attr">' + $(this).data('filter-display-attr') + ':</span></p>');
@@ -128,21 +127,17 @@ require([
                 );
                 filters[$(this).data('filter-attr-id')] = ["None",[left_val, right_val]];
 
-            }
-            else if ($this.parent().hasClass('isActive'))
-            {
+            } else if ($this.parent().hasClass('isActive')) {
                 if ($(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).length <= 0) {
                     $(`${modal_filter_block}`).append('<p class="cohort-filter-display ' + $(this).data('filter-attr-id')
                         + '"><span class="attr">' + $(this).data('filter-display-attr') + ':</span></p>');
                 }
                 $(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).append(
                     '<span class="val">' + left_val + " to " + right_val + '</span>'
-
                 );
                 filters[$this.data('filter-attr-id')] = [left_val, right_val];
 
-            }
-            else if ($this.parent().hasClass('wNone') && $this.siblings('.noneBut').find('input:checked').length>0){
+            } else if ($this.parent().hasClass('wNone') && $this.siblings('.noneBut').find('input:checked').length>0){
                 if ($(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).length <= 0) {
                     $(`${modal_filter_block}`).append('<p class="cohort-filter-display ' + $(this).data('filter-attr-id')
                         + '"><span class="attr">' + $(this).data('filter-display-attr') + ':</span></p>');
@@ -151,10 +146,7 @@ require([
                     '<span class="val">None</span>'
                 );
                 filters[$this.data('filter-attr-id')] = ["None"];
-
             }
-
-
         });
 
         $('#save-cohort-modal .selected-filters').each(function(){
@@ -200,32 +192,44 @@ require([
             e.preventDefault();
             return false;
         }
-
         $(this).find('input[type="submit"]').attr("disabled","disabled");
         $('#saving-cohort').css('display','inline-block');
         saving_cohort = true;
         $('#save-cohort-modal').prop("saving", "saving");
     });
 
-
     tippy('.collection_name', {
         content: function(reference) {
-            let warning='<p style="color:red">Image files in this collection are not publicly available.</p>'
+            let warning='<p style="color:red">Some or all of the image files in this collection are not publicly available.</p>'
             let tooltip = collection_tooltips[$(reference).siblings('input.collection_value').attr('value')];
             let collection_id=$(reference)[0].id
             if(tooltip) {
                 if ((collection_id in window.collection) && (window.collection[collection_id].access==='Public')) {
                     return '<div class="collection-tooltip">' + tooltip + '</div>';
-                }
-                else{
+                } else {
                     return '<div class="collection-tooltip">' + tooltip + warning + '</div>';
                 }
             }
             return '<span></span>';
-
         },
         theme: 'light',
         placement: 'right-end',
+        arrow: false,
+        allowHTML: true,
+        interactive: true
+    });
+
+    tippy.delegate('div#analysis_results_id', {
+        content: function(reference) {
+            let tooltip = analysis_results_tooltips[$(reference).siblings('input').attr('value')];
+            if(tooltip) {
+                return '<div class="collection-tooltip">' + tooltip + '</div>';
+            }
+            return '<span></span>';
+        },
+        theme: 'light',
+        placement: 'right-end',
+        target: 'span.value',
         arrow: false,
         allowHTML: true,
         interactive: true
@@ -237,8 +241,6 @@ require([
         interactive: true,
         content: 'The Case ID attribute in the portal corresponds to the DICOM Patient ID attribute'
     });
-
-
 
     tippy('.explainer', {
         interactive: true,
@@ -283,7 +285,7 @@ require([
     });
 
     tippy.delegate('.studies-table', {
-        content: 'Images in this collection are not publicly available',
+        content: 'Some or all of the images in this collection are not publicly available.',
         theme: 'dark',
         placement: 'right',
         arrow: false,
@@ -291,7 +293,6 @@ require([
         target: '.coll-explain',
         maxWidth: 130
     });
-
 
     tippy.delegate('.series-table', {
         content: function(reference) {
@@ -333,7 +334,7 @@ require([
     });
 
     tippy.delegate('.series-table', {
-        content: 'Images in this collection are not publicly available',
+        content: 'Some or all of the images in this collection are not publicly available.',
         theme: 'dark',
         placement: 'right',
         arrow: false,
@@ -355,7 +356,7 @@ require([
 
     tippy('.coll-explain', {
         allowHTML:true,
-        content: 'For collections denoted by the <i class="fa-solid fa-circle-minus"></i> icon image files are not publicly available',
+        content: 'For collections denoted by the <i class="fa-solid fa-circle-minus"></i> icon some or all of the image files are not publicly available.',
         interactive:true
 
     });
