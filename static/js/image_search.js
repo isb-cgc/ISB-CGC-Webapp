@@ -61,7 +61,6 @@ require([
     window.projSets['qin'] = ["qin_headneck","qin_lung_ct","qin_pet_phantom","qin_breast_dce_mri"];
     var first_filter_load = true;
 
-
     var plotLayout = {
         title: '',
         autosize: true,
@@ -1996,9 +1995,21 @@ require([
          .attr("width", width)
          .attr("height", height).style("text-anchor","middle");
 
+
+        var Tooltip = $("#"+plotId + " div.chart-tooltip").length > 0
+            ? d3.select("#"+plotId + " div.chart-tooltip")
+            : d3.select("#"+plotId)
+                .append("div")
+                .attr("class", "chart-tooltip")
+                .style("top", "260px")
+                .style("left", "0px");
+
         svg.selectAll("*").remove();
 
-        titlePart = svg.append("text").attr("text-anchor","middle").attr("font-size", "14px").attr("fill","#2A537A");
+        titlePart = svg.append("text")
+            .attr("text-anchor","middle")
+            .attr("font-size", "16px")
+            .attr("fill","#2A537A");
         var title0="";
         var title1="";
         var title2="";
@@ -2077,26 +2088,26 @@ require([
         colorPie(d.data.key)  )
        })
       .attr("stroke", "black")
+      .attr("data-tooltip", function(d){
+          let perc = (parseInt((parseFloat(d.data.value)/parseFloat($('#'+plotId).data('total')))*100)).toString()+"%";
+          let val = d.data.key.replace('* To',mn.toString()+' To').replace('To *', 'To '+mx.toString());
+          let count = d.data.value;
+
+          return '<div>' + val + '<br />' + count + ' (' + perc + ')</div>';
+      })
+      .attr('data-tooltip-color', function(d){
+          return colorPie(d.data.key);
+      })
       .style("stroke-width", "0px")
       .style("opacity", 0.7)
+          .on("mouseover", function(d){
+              Tooltip.style("opacity", 1);
+          })
           .on("mousemove",function(d){
-            var tot=parseFloat($('#'+plotId).data('total'));
-            var frac = parseInt(parseFloat(d.data.value)/tot*100);
-            var i=1;
-            var xpos = d3.mouse(this)[0];
-            var ypos = d3.mouse(this)[1];
-           txtbx.attr("x",xpos);
-           txtbx.attr("y",ypos+30);
-           txtbx.selectAll('*').attr("x",xpos);
-           txtbx.selectAll('*').attr("y",ypos+30);
-           tspans=txtbx.node().childNodes;
-
-
-           tspans[0].textContent = d.data.key.replace('* To',mn.toString()+' To').replace('To *', 'To '+mx.toString());
-           tspans[1].textContent = d.data.value;
-           tspans[2].textContent = frac.toString()+"%";
-           txtbx.attr("opacity",1);
-
+              let node = $(d3.select(this).node());
+            Tooltip
+                .html(node.data('tooltip'));
+            $(Tooltip.node()).children("div").css("border-color", node.data('tooltip-color'))
             d3.select(this).attr('d', d3.arc()
            .innerRadius(0)
            .outerRadius(radiusB)
@@ -2104,12 +2115,11 @@ require([
 
         })
          .on("mouseleave",function(d){
+             Tooltip.style("opacity", 0);
             d3.select(this).attr('d', d3.arc()
            .innerRadius(0)
            .outerRadius(radius)
            );
-
-            txtbx.attr("opacity",0);
          })
         .on("click",function(d){
             if(!is_cohort) {
