@@ -2070,7 +2070,7 @@ require([
       .enter()
       .append('path')
       .attr('d', d3.arc()
-      .innerRadius(0)
+      .innerRadius(45)
       .outerRadius(radius)
       )
       .attr('fill', function(d){ return(
@@ -2098,14 +2098,14 @@ require([
            txtbx.attr("opacity",1);
 
             d3.select(this).attr('d', d3.arc()
-           .innerRadius(0)
+           .innerRadius(45)
            .outerRadius(radiusB)
            );
 
         })
          .on("mouseleave",function(d){
             d3.select(this).attr('d', d3.arc()
-           .innerRadius(0)
+           .innerRadius(45)
            .outerRadius(radius)
            );
 
