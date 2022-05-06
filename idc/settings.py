@@ -54,6 +54,7 @@ DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 CONNECTION_IS_LOCAL     = (os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost')
 IS_CIRCLE               = (os.environ.get('CI', None) is not None)
 DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') and CONNECTION_IS_LOCAL)
+LOCAL_RESPONSE_PAGES    = (os.environ.get('LOCAL_RESPONSE_PAGES', 'False') == 'True')
 
 IMG_QUOTA = os.environ.get('IMG_QUOTA', '137')
 
@@ -82,6 +83,7 @@ BIGQUERY_PROJECT_ID            = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PR
 BIGQUERY_DATA_PROJECT_ID       = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
 BIGQUERY_USER_DATA_PROJECT_ID  = os.environ.get('BIGQUERY_USER_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
 BIGQUERY_USER_MANIFEST_DATASET = os.environ.get('BIGQUERY_USER_MANIFEST_DATASET', 'dev_user_dataset')
+BIGQUERY_USER_MANIFEST_TIMEOUT = int(os.environ.get('BIGQUERY_USER_MANIFEST_TIMEOUT', '7'))
 
 # Deployment module
 CRON_MODULE             = os.environ.get('CRON_MODULE')
@@ -146,13 +148,18 @@ if exists(join(dirname(__file__), '../version.env')):
 else:
     if IS_DEV:
         import git
-        repo = git.Repo(path="/home/vagrant/www/",search_parent_directories=True)
-        VERSION = "{}.{}.{}".format("local-dev", datetime.datetime.now().strftime('%Y%m%d%H%M'),
-                                    str(repo.head.object.hexsha)[-6:])
+        try:
+            repo = git.Repo(path="/home/vagrant/www/", search_parent_directories=True)
+            VERSION = "{}.{}.{}".format("local-dev", datetime.datetime.now().strftime('%Y%m%d%H%M'),
+                                        str(repo.head.object.hexsha)[-6:])
+        except Exception as e:
+            print("[ERROR] While trying to set local/developer git version: ")
+            print(e)
+            VERSION = "{}.{}.{}".format("local-dev", datetime.datetime.now().strftime('%Y%m%d%H%M'), "unavailable")
 
 APP_VERSION = os.environ.get("APP_VERSION", VERSION)
 
-DEV_TIER = bool(DEBUG or re.search(r'^dev\.',APP_VERSION))
+DEV_TIER = bool(DEBUG or re.search(r'^dev\.', APP_VERSION))
 
 # If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
@@ -294,7 +301,7 @@ MIDDLEWARE = [
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'request_logging.middleware.LoggingMiddleware',
-    'offline.middleware.OfflineMiddleware',
+    'offline.middleware.OfflineMiddleware'
 ]
 
 ROOT_URLCONF = 'idc.urls'

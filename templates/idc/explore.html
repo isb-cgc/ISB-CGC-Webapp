@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load custom_tags %}
-{% load staticfiles %}
+{% load static %}
 
 {% comment %}
 
@@ -35,7 +35,7 @@
 
 {% block page_header %}
     <div class="pf-heading">
-        <div class="container-fluid">
+        <div class="container-fluid explore-container">
             <div class="banner-section row">
                 <div class="alert alert-dismissible show" role="alert">
                     <div class="row ">
@@ -54,12 +54,6 @@
                     </div>
                 </div>
             </div>
-{# THIS NEEDS TO BE MOVED OR REFORMATTED TO PROPERLY FLOW WITH THE REST OF THE PAGE HEADER #}
-{#            <ol class="breadcrumb">#}
-{#                <li id="previous" style="display:none"><a href="#" onclick="javascript:selectHistoricFilter(-1)">Previous Filter</a></li>#}
-{#                <li id="next" style="display:none"><a href="#" onclick="javascript:selectHistoricFilter(1)">Next Filter</a></li>#}
-{#            </ol>#}
-
             <h3 class="pull-left" role="heading" aria-level="1">Explore Image Data</h3>
             {% if request.user.is_authenticated %}
             <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal"
@@ -71,6 +65,11 @@
                 disabled="disabled" data-uri="{% url 'account_login' %}"> Log in to Save
             </button>
             {% endif %}
+            <button class="btn btn-default pull-right bq-string-display" data-toggle="modal"
+                    data-target="#bq-string-display"
+                    title="View the BigQuery String for these filters"
+            > View BQ String
+            </button>
         </div>
     </div>
 {% endblock %}
@@ -84,17 +83,20 @@
 {% block modal_includes %}
 
 {% include "cohorts/save-cohort-modal.html" %}
+{% include "idc/bq-string-modal.html" with bq_string_uri="True" %}
 
 {% endblock %}
 
 {% block js_file %}
     {{ collection_tooltips|json_script:"collection_tooltips" }}
+    {{ analysis_results_tooltips|json_script:"analysis_results_tooltips" }}
     {{ filters_for_load|json_script:"filters_for_load" }}
     {{ collections|json_script:"collections" }}
     {{ programs|json_script:"programs" }}
     <script>
         const filters_for_load = JSON.parse(document.getElementById('filters_for_load').textContent);
         const collection_tooltips = JSON.parse(document.getElementById('collection_tooltips').textContent);
+        const analysis_results_tooltips = JSON.parse(document.getElementById('analysis_results_tooltips').textContent);
         window.selItems = new Object();
         window.selItems.selProjects = new Array();
         window.selItems.selStudies = new Object();
@@ -118,4 +120,5 @@
     <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
     {{ block.super }}
     <script type="text/javascript" src="{% static 'js/explore.js' %}?v={{ APP_VERSION }}"></script>
+    <script type="text/javascript" src="{% static 'js/bq-string.js' %}?v={{ APP_VERSION }}"></script>
 {% endblock %}

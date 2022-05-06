@@ -1,6 +1,5 @@
 {% load custom_tags %}
-{% load staticfiles %}
-
+{% load static %}
 <div class="container-fluid">
     <div class="row">
         <div class="tab-content data-tab-content">
@@ -36,7 +35,7 @@
                                                            aria-expanded="false" aria-controls="{{ attr.name }}">
                                                             <i class="fa fa-solid fa-caret-right"></i> <i
                                                                 class="fa fa-solid fa-caret-down"></i> <span
-                                                                class="attDisp">ACCESS
+                                                                class="attDisp">Access
                                                             {% if attr.units %}({{ attr.units }}){% endif %}</span>
                                                             <span class="notDisp noCase"> (0 cases)</span>
                                                         </a>
@@ -80,7 +79,7 @@
                                                 <a role="button" data-toggle="collapse" href="#Program"
                                                    aria-expanded="false" aria-controls="Program">
                                                     <i class="fa fa-solid fa-caret-right"></i> <i
-                                                        class="fa fa-solid fa-caret-down"></i>COLLECTION
+                                                        class="fa fa-solid fa-caret-down"></i>Collection
                                                 </a>
 
                                                 <span class="controls">
@@ -101,9 +100,10 @@
                                                             onclick="updateColl()">Num</span>
 
                                                 </div>
-                                                <input id="hide-zeros" class="hide-zeros " type="checkbox"
-                                                       value="hide-zeros" onchange="updateColl()"> Hide collections with
-                                                0 cases
+                                                <div style="display:block">
+                                                <input id="hide-zeros" class="hide-zeros "  type="checkbox"
+                                                       value="hide-zeros" onchange="updateColl()"> Hide collections with 0 cases
+                                                </div>
 
                                                 {% with programs.items|length|add:"-5" as more %}
                                                     <p class="more-checks" style="display: block;"><a class="show-more">show {{ more }}
@@ -219,6 +219,82 @@
                                         </li>
                                     </ul>
                                 </div>
+                                <div id="analysis_set" class="tab-pane active" role="tabpanel">
+                                    {% with set_attributes.origin_set.All.attributes|get_by_name:'analysis_results_id' as attr %}
+                                   <ul class="list-group" role="tablist" aria-multiselectable="true">
+                                                <li class="list-group-item">
+                                                    <div id="{{ attr.name }}_heading" class="list-group-item__heading">
+                                                        <a role="button" data-toggle="collapse" href="#{{ attr.name }}"
+                                                           aria-expanded="false" aria-controls="{{ attr.name }}">
+                                                            <i class="fa fa-solid fa-caret-right"></i> <i
+                                                                class="fa fa-solid fa-caret-down"></i> <span
+                                                                class="attDisp">Analysis Results
+                                                            {% if attr.units %}({{ attr.units }}){% endif %}</span>
+                                                            <span class="notDisp noCase"> (0 cases)</span>
+                                                        </a>
+
+                                                    <span class="controls">
+                                                   <i class="fa-solid fa-cog" title="Settings"></i>
+                                                   <i class="fa-solid fa-search" title="Filter values"></i>
+                                                  </span>
+
+                                                    </div>
+
+                                                    <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}"
+                                                         class="collapse list-group-item__body">
+
+                                                    <input id="analysis_search"
+                                                       class="text-filter notDisp value-search" type="text"
+                                                       placeholder="Search..." onkeyup="updateFilters('analysis_results_id',{},false,true)">
+
+                                                     <div class="sorter cntr notDisp">
+                                                         <span>Sort by: <input type="radio" class="sort_val" value="alpha"
+                                                                          name="Access" checked onclick="resort('analysis_results_id')">Alpha<input
+                                                            type="radio" class="sort_val" value="num" name="Access"
+                                                            onclick="resort('analysis_results_id')">Num</span>
+
+                                                     </div>
+
+                                                    <div style="display:block">
+                                                    <input id="hide-zeros" class="hide-zeros" type="checkbox"
+                                                       value="hide-zeros" onchange="updateFilters('analysis_results_id',{},false,false)"> Hide analysis results with 0 cases
+                                                    </div>
+
+                                                {% with attr.values|length|add:"-5" as more %}
+                                                    <p class="more-checks" style="display: block;"><a class="show-more">show {{ more }}
+                                                        more</a><span class="checks"><a class="check-all">Check All</a> / <a
+                                                            class="uncheck-all">Uncheck All</a></span></p>
+                                                    <p class="less-checks" style="display: none;"><a class="show-less">show
+                                                        less</a><span class="checks"><a class="check-all">Check All</a> / <a
+                                                            class="uncheck-all">Uncheck All</a></span></p>
+                                                {% endwith %}
+
+
+                                                        <ul id="{{ attr.name }}_list" class="search-checkbox-list"
+                                                            style="list-style: none;">
+                                                            {% for val in attr.values|check_for_order:attr.name %}
+                                                                {% with val.display_value|get_display_val:val.value as display_value %}
+                                                                    <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if val.count == 0 %} zeroed {% endif %}">
+                                                                        <label>
+                                                                            <input type="checkbox"
+                                                                                   value="{{ val.value }}"
+                                                                                   data-filter-attr-id="{{ attr.id }}"
+                                                                                   data-filter-display-attr="{{ attr.display_name }}"
+                                                                                   data-filter-display-val="{{ display_value }}">
+                                                                            <span class="value">{{ display_value }}</span>
+                                                                            <span class="float-right plot_count count plotit">{{ val.count }}</span>
+                                                                            <span class="float-right case_count count">{{ val.count }}</span>
+                                                                        </label>
+                                                                    </li>
+                                                                {% endwith %}
+                                                            {% endfor %}
+                                                        </ul>
+
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                {% endwith %}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -274,7 +350,7 @@
                             <div class="tab-content">
                                 <div id="search_orig_set" role="tabpanel" class="tab-pane search-set active">
                                     {% for attr in set_attributes.origin_set.All.attributes %}
-                                        {% if attr.name != "collection_id"  and attr.name != "access" %}
+                                        {% if attr.name != "access" and attr.name != "collection_id"  and attr.name != "analysis_results_id" %}
                                             <ul class="list-group" role="tablist" aria-multiselectable="true">
                                                 <li class="list-group-item">
                                                     <div id="{{ attr.name }}_heading" class="list-group-item__heading">
@@ -397,13 +473,12 @@
                                                                                     ){% endif %}</span> <span
                                                                                 class="notDisp noCase"> (0 cases)</span>
                                                                         </a>
-                                                                        {% if attr_setV.name != 'quantitative' %}
-                                                                            <span class="controls">
-                                                                 <i class="fa-solid fa-cog" title="Sort results"></i>
-                                                                 <i class="fa-solid fa-search"
-                                                                    title="Filter displayed values"></i>
-                                                             </span>
-                                                                        {% endif %}
+
+                                                                        <span class="controls">
+                                                                          <i class="fa-solid fa-cog" title="Sort results"></i>
+                                                                          <i class="fa-solid fa-search" title="Filter displayed values"></i>
+                                                                        </span>
+
                                                                     </div>
 
                                                                     <div id="{{ attr.name }}"
@@ -714,7 +789,7 @@
                                 <div id="results_orig_set" role="tabpanel" class="tab-pane active panel">
                                     <div class="panel-body original-graphs graph-set">
                                         {% for attr in set_attributes.origin_set.All.attributes %}
-                                            {% if attr.name != 'collection_id' and attr.name != 'access' %}
+                                            {% if attr.name != 'access' and attr.name != 'collection_id' and attr.name != 'analysis_results_id' %}
                                                 <div id="{{ attr.name }}_chart" class="bar-chart">
                                                     <svg width="240" height="200"></svg>
                                                 </div>

@@ -83,7 +83,7 @@ ul, ol {
 
 /* Pages with no use of a header need more space taken up */
 .short-inner-content-no-header {
-  min-height: calc(100vh - 210px);
+  min-height: calc(100vh - 214px);
 }
 
 /* The landing page has an additional section (summary) which complicates the layout count */
@@ -1828,7 +1828,7 @@ section .min-max {
   .page-heading .container {
     padding: 15px; }
   .page-heading .btn.pull-right {
-    margin-top: 5px;
+    margin-top: 12px;
     margin-left: 10px;}
   .page-heading .page-action-group {
     margin-bottom: 0; }
@@ -4103,14 +4103,6 @@ html {
   background: none;
 }
 
-#save-cohort-btn {
-  margin-top: 12px;
-}
-
-.cohort-manifest {
-  margin-top: 8px;
-}
-
 .export-manifest-group__heading a {
       color: #2A537A;
       font-weight: 500; }
@@ -4330,6 +4322,13 @@ ul.errorlist {
 }
 
 .inactive-data-version p {
+  background-color: #8d8a8e;
+  color: #ffffff;
+  display: inline-block;
+  padding: 8px;
+}
+
+.inactive-export p {
   background-color: #8d8a8e;
   color: #ffffff;
   display: inline-block;

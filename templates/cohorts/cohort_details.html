@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load custom_tags %}
-{% load staticfiles %}
+{% load static %}
 
 {% comment %}
 
@@ -27,10 +27,8 @@
     <!-- <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script> -->
 {% endblock %}
 
+<div id="secondary-nav" class="navbar-fixed-top"></div>
 
-<div id="secondary-nav" class="navbar-fixed-top">
-
-</div>
 {% block link_page_name %}help{% endblock %}
 {% block page_name %}cohort-details{% endblock %}
 
@@ -61,7 +59,7 @@
 {% block content %}
 {% url 'cohort_manifest' cohort_id as export_uri %}
 {% include "cohorts/export-manifest-modal.html" with export_uri=export_uri %}
-{% include "cohorts/bq-string-modal.html" with bq_string=bq_string bq_string_uri="Falase" cohort_id=cohort.id %}
+{% include "idc/bq-string-modal.html" with bq_string=bq_string bq_string_uri="False" cohort_id=cohort.id %}
 
 <script>
    var cohort_loaded = true
@@ -76,10 +74,12 @@
 {% block js_file %}
     {{ collection_tooltips|json_script:"collection_tooltips" }}
     {{ collections|json_script:"collections" }}
+    {{ analysis_results_tooltips|json_script:"analysis_results_tooltips" }}
     {{ programs|json_script:"programs" }}
 
     <script>
-
+        const collection_tooltips = JSON.parse(document.getElementById('collection_tooltips').textContent);
+        const analysis_results_tooltips = JSON.parse(document.getElementById('analysis_results_tooltips').textContent);
         window.collection = JSON.parse(document.getElementById('collections').textContent);
         window.collectionData = new Array();
         window.programs = JSON.parse(document.getElementById('programs').textContent);
@@ -92,14 +92,12 @@
                 window.collectionData.push([col, disp, val, val]);
             }
         }
-
         var cohort_filters = {{ cohort_filters|safe }};
         var is_cohort = true;
         var cohort_version = "{{ cohort_version|safe }}";
         var cohort_id = "{{ cohort_id|safe }}";
         var cohort_name = "{{ cohort.name|safe }}";
         var user_is_social = {% if is_social %} true {% else %} false {% endif %};
-        const collection_tooltips = JSON.parse(document.getElementById('collection_tooltips').textContent);
         var file_parts_count = {{ file_parts_count }};
         var display_file_parts_count = {{ display_file_parts_count }};
         var user_id = {% if request.user.is_authenticated %}{{ request.user.id|safe }}{% else %}null{% endif %};

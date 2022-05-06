@@ -204,7 +204,7 @@ bottom: 95%; /* At the top of the tooltip */
 
 .search-con {
   overflow-y: auto;
-    overflow-x:hidden;
+  overflow-x: hidden;
   max-height: 2000px;
 }
 
@@ -247,8 +247,22 @@ bottom: 95%; /* At the top of the tooltip */
     right: 20px;
 }
 
+.chart-tooltip {
+    position: absolute;
+    z-index: 9999;
+    opacity: 0;
+    width: 100%;
+    text-align: center;
+    background-color: #fff;
+    font-weight: bold;
+}
 
-
+.chart-tooltip div {
+    display: inline-block;
+    text-align: left;
+    border-bottom: 3px solid black;
+    max-width: 250px;
+}
 
 .id-names{
     text-overflow: ellipsis;
@@ -289,13 +303,11 @@ bottom: 95%; /* At the top of the tooltip */
     overflow: visible
 }
 
-
-
 .bar-chart {
    display: inline-block;
     position:relative;
     width: 300px;
-    height: 260px;
+    height: 310px;
     overflow:visible;
 }
 
@@ -304,8 +316,9 @@ bottom: 95%; /* At the top of the tooltip */
 }
 
 
-
-
+#results_derived_set .tab-pane:not(:last-of-type) {
+    margin-bottom: 20px;
+}
 
 /* th, tb,tr,td {
     border: 1px solid black; } */
@@ -468,8 +481,13 @@ svg {
     clear: both;
 }
 
+
 .list-group-item__heading:after {
     content: "";
     display:table;
     clear: both;
+}
+
+.ui-slider{
+    margin-bottom: 18px;
 }

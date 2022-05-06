@@ -26,7 +26,9 @@ require.config({
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
         base: 'base',
-        sapien: 'sapien'
+        sapien: 'sapien',
+        tippy: 'libs/tippy-bundle.umd.min',
+        '@popperjs/core': 'libs/popper.min'
     },
     shim: {
         '@popperjs/core': {
@@ -42,9 +44,7 @@ require.config({
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'sapien': {
             exports: 'Sapien'
-        },
-        tippy: 'libs/tippy-bundle.umd.min',
-        '@popperjs/core': 'libs/popper.min'
+        }
     }
 });
 

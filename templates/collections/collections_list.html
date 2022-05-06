@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
+{% load static %}
 {% load custom_tags %}
 {% block title %}Collections | IDC{% endblock %}}
 {% block extra_css_libs %}{% endblock %}
@@ -49,6 +49,7 @@
                             {% with collex_type=collection.get_collection_type %}
                             <tr>
                                 <td class="details-control" data-doi="{{ collection.doi }}"
+                                    data-source-url="{{ collection.source_url }}"
                                     data-collex-id="{{ collection.collection_id }}"
                                     title="Click to display collection description."
                                 >

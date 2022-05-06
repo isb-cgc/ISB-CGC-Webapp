@@ -61,7 +61,6 @@ require([
     window.projSets['qin'] = ["qin_headneck","qin_lung_ct","qin_pet_phantom","qin_breast_dce_mri"];
     var first_filter_load = true;
 
-
     var plotLayout = {
         title: '',
         autosize: true,
@@ -121,6 +120,7 @@ require([
     };
 
     window.setSlider = function (slideDiv, reset, strt, end, isInt, updateNow) {
+        $('#' + slideDiv).closest('.hasSlider').find('.slider-message').addClass('notDisp');
         parStr=$('#'+slideDiv).data("attr-par");
         var max = $('#' + slideDiv).slider("option", "max");
         var divName = slideDiv.replace("_slide","");
@@ -175,11 +175,7 @@ require([
                 window.filterObj[filtAtt] = new Object();
             }
             window.filterObj[filtAtt]['rng'] = attVal;
-            if (end<max) {
-                window.filterObj[filtAtt]['type'] = 'ebtw';
-            } else {
-                window.filterObj[filtAtt]['type'] = 'ebtwe';
-            }
+            window.filterObj[filtAtt]['type'] = 'ebtwe';
         }
         if (updateNow) {
             mkFiltText();
@@ -216,7 +212,6 @@ require([
                         collection.push(colName);
                     }
                 }
-
             } else if (curKey.endsWith('_rng')) {
                 var realKey = curKey.substring(0, curKey.length - 4).split('.').pop();
                 var disp = $('#' + realKey + '_heading').children().children('.attDisp')[0].innerText;
@@ -321,7 +316,7 @@ require([
     }
 
     window.addNone = function(elem, parStr, updateNow) {
-            var id = parStr+$(elem).parent().parent()[0].id+"_rng";
+            var id = parStr+$(elem).closest('.list-group-item__body')[0].id+"_rng";
 
             if (elem.checked){
                 if (!(id in window.filterObj)) {
@@ -360,9 +355,10 @@ require([
             position: 'absolute',
             top: -25,
             left: 0,
-            transform: 'translateX(-50%)'
+            transform: 'translateX(-50%)',
 
         });
+
 
          var tooltipR = $('<div class="slide_tooltip slide_tooltipB tooltipR" />').text('stuff').css({
            position: 'absolute',
@@ -407,9 +403,8 @@ require([
         if ($('#'+divName).find('#'+inpName).length===0){
             $('#' + divName).append('<input id="' + inpName + '" type="text" value="' + strtInp + '" style="display:none">');
         }
-        if ($('#'+divName).find('.reset').length===0){
-            $('#' + divName).append(  '<button class="reset" style="display:block;margin-top:18px" onclick=\'setSlider("' + slideName + '",true,0,0,' + String(isInt) + ', true,"'+parStr+'")\'>Clear Slider</button>');
-        }
+
+
         if (isActive){
             $('#'+divName).find('.reset').removeClass('disabled');
         }
@@ -418,12 +413,6 @@ require([
         }
 
          $('#'+slideName).append(labelMin);
-
-         if (wNone){
-            $('#' + divName).append( '<span class="noneBut"><input type="checkbox"   onchange="addNone(this, \''+parStr+'\', true)"> None </span>');
-            $('#' + divName).find('.noneBut').find(':input')[0].checked = checked
-
-         }
 
 
         $('#' + slideName).slider({
@@ -448,7 +437,6 @@ require([
                 $('#' + slideName).addClass('used');
                 var val = $('#' + inpName)[0].value;
                 var valArr = val.split('-');
-
                 window.setSlider(slideName, false, valArr[0], valArr[1], isInt, true);
 
             }
@@ -486,11 +474,6 @@ require([
         $('#'+slideName).append(labelMax);
         $('#'+slideName).addClass('space-top-15');
 
-
-        $('#'+ divName+'_list').addClass('hide');
-        $('#'+ divName).find('.more-checks').addClass('hide');
-        $('#'+ divName).find('.less-checks').addClass('hide');
-        $('#'+ divName).find('.hide-zeros').addClass('hide');
     };
 
     var updateTablesAfterFilter = function (collFilt, collectionsData){
@@ -1207,7 +1190,7 @@ require([
                             else {
                                 coll_id=row['collection_id']
                             }
-                            if (!(coll_id in window.collection) || (window.collection[coll_id].access !=='Public')  ) {
+                            if (row['access'].includes('Limited') ) {
                                 return '<i class="fa-solid fa-circle-minus coll-explain"></i>';
                             }
                             else{
@@ -1461,7 +1444,7 @@ require([
                         else {
                             coll_id=row['collection_id']
                         }
-                        if (!(coll_id in window.collection) || (window.collection[coll_id].access !=='Public')  ) {
+                        if (row['access'].includes('Limited') ) {
                             return '<i class="fa-solid fa-circle-minus coll-explain"></i>';
                         }
 
@@ -1469,10 +1452,10 @@ require([
                             return '<a href="/" onclick="return false;"><i class="fa-solid fa-eye-slash no-viewer-tooltip"></i>';
 
                             } else if ((row['Modality'] === 'SM') || (row['Modality'][0] === 'SM')) {
-                                return '<a href="' + SLIM_VIEWER_PATH + row['StudyInstanceUID'] + '/series/' + data + '" target="_blank"><i class="fa-solid fa-eye"></i>'
+                                return '<a href="' + SLIM_VIEWER_PATH + row['StudyInstanceUID'] + '/series/' + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
 
                             } else {
-                                return '<a href="' + DICOM_STORE_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' + data + '" target="_blank"><i class="fa-solid fa-eye"></i>'
+                                return '<a href="' + DICOM_STORE_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                             }
 
                     }
@@ -1686,6 +1669,19 @@ require([
         return filtObj;
     };
 
+    var update_bq_filters = function() {
+        let filters = parseFilterObj();
+        if(Object.keys(filters).length <= 0) {
+            $('.bq-string-display').attr("disabled","disabled");
+            $('.bq-string-display').attr("title","Select a filter to enable this feature.");
+            $('.bq-string').html("");
+        } else {
+            $('.bq-string-display').removeAttr("disabled");
+            $('.bq-string-display').attr("title","Click to display this filter as a BQ string.");
+            $('.bq-string-display').attr('filter-params', JSON.stringify(filters));
+        }
+    };
+
     var update_filter_url = function() {
         let filters = parseFilterObj();
         if(Object.keys(filters).length <= 0) {
@@ -1719,16 +1715,17 @@ require([
 
     var updateFacetsData = function (newFilt) {
         update_filter_url();
+        update_bq_filters();
         if(window.location.href.search(/\/filters\//g) >= 0) {
             if(!first_filter_load) {
-                window.history.pushState({}, '', BASE_URL + "/explore/")
+                window.history.pushState({}, '', window.location.origin + "/explore/")
             } else {
                 first_filter_load = false;
             }
         }
         var url = '/explore/'
-        var parsedFiltObj=parseFilterObj();
-        url= encodeURI('/explore/')
+        var parsedFiltObj = parseFilterObj();
+        url = encodeURI('/explore/')
 
         ndic={'totals':JSON.stringify(["PatientID", "StudyInstanceUID", "SeriesInstanceUID"]),'counts_only':'True', 'is_json':'True', 'is_dicofdic':'True', 'data_source_type':($("#data_source_type option:selected").val() || 'S'), 'filters':JSON.stringify(parsedFiltObj) }
         var csrftoken = $.getCookie('csrftoken');
@@ -1834,6 +1831,7 @@ require([
                     }
 
                     updateFilterSelections('access_set', dicofdic);
+                    updateFilterSelections('analysis_set', dicofdic);
                     updateFilterSelections('search_orig_set', dicofdic);
                     createPlots('search_orig_set');
 
@@ -1906,11 +1904,9 @@ require([
                             }
                         }
                     }
-
-
                     updateTablesAfterFilter(collFilt, data.origin_set.All.attributes.collection_id);
 
-                    if ($('#hide-zeros')[0].checked) {
+                    if ($('.search-configuration').find('#hide-zeros')[0].checked) {
                         addSliders('search_orig_set', false, true, '');
                         addSliders('quantitative', false, true, '');
                         addSliders('tcga_clinical', false, true, 'tcga_clinical.');
@@ -1925,9 +1921,7 @@ require([
             error: function(data){
                 alert("There was an error fetching server data. Please alert the systems administrator")
                 console.log('error loading data');
-
             }
-
         });
         return deferred.promise();
     };
@@ -2001,9 +1995,21 @@ require([
          .attr("width", width)
          .attr("height", height).style("text-anchor","middle");
 
+
+        var Tooltip = $("#"+plotId + " div.chart-tooltip").length > 0
+            ? d3.select("#"+plotId + " div.chart-tooltip")
+            : d3.select("#"+plotId)
+                .append("div")
+                .attr("class", "chart-tooltip")
+                .style("top", "260px")
+                .style("left", "0px");
+
         svg.selectAll("*").remove();
 
-        titlePart = svg.append("text").attr("text-anchor","middle").attr("font-size", "14px").attr("fill","#2A537A");
+        titlePart = svg.append("text")
+            .attr("text-anchor","middle")
+            .attr("font-size", "16px")
+            .attr("fill","#2A537A");
         var title0="";
         var title1="";
         var title2="";
@@ -2082,26 +2088,26 @@ require([
         colorPie(d.data.key)  )
        })
       .attr("stroke", "black")
+      .attr("data-tooltip", function(d){
+          let perc = (parseInt((parseFloat(d.data.value)/parseFloat($('#'+plotId).data('total')))*100)).toString()+"%";
+          let val = d.data.key.replace('* To',mn.toString()+' To').replace('To *', 'To '+mx.toString());
+          let count = d.data.value;
+
+          return '<div>' + val + '<br />' + count + ' (' + perc + ')</div>';
+      })
+      .attr('data-tooltip-color', function(d){
+          return colorPie(d.data.key);
+      })
       .style("stroke-width", "0px")
       .style("opacity", 0.7)
+          .on("mouseover", function(d){
+              Tooltip.style("opacity", 1);
+          })
           .on("mousemove",function(d){
-            var tot=parseFloat($('#'+plotId).data('total'));
-            var frac = parseInt(parseFloat(d.data.value)/tot*100);
-            var i=1;
-            var xpos = d3.mouse(this)[0];
-            var ypos = d3.mouse(this)[1];
-           txtbx.attr("x",xpos);
-           txtbx.attr("y",ypos+30);
-           txtbx.selectAll('*').attr("x",xpos);
-           txtbx.selectAll('*').attr("y",ypos+30);
-           tspans=txtbx.node().childNodes;
-
-
-           tspans[0].textContent = d.data.key.replace('* To',mn.toString()+' To').replace('To *', 'To '+mx.toString());
-           tspans[1].textContent = d.data.value;
-           tspans[2].textContent = frac.toString()+"%";
-           txtbx.attr("opacity",1);
-
+              let node = $(d3.select(this).node());
+            Tooltip
+                .html(node.data('tooltip'));
+            $(Tooltip.node()).children("div").css("border-color", node.data('tooltip-color'))
             d3.select(this).attr('d', d3.arc()
            .innerRadius(0)
            .outerRadius(radiusB)
@@ -2109,12 +2115,11 @@ require([
 
         })
          .on("mouseleave",function(d){
+             Tooltip.style("opacity", 0);
             d3.select(this).attr('d', d3.arc()
            .innerRadius(0)
            .outerRadius(radius)
            );
-
-            txtbx.attr("opacity",0);
          })
         .on("click",function(d){
             if(!is_cohort) {
@@ -2247,7 +2252,7 @@ require([
         }
 
         var showZeros = true;
-        var searchDomain = $('#'+filterCat).closest('.search-configuration, .search-scope');
+        var searchDomain = $('#'+filterCat).closest('.search-configuration, #program_set, #analysis_set');
         //var isSearchConf = ($('#'+filterCat).closest('.search-configuration').find('#hide-zeros').length>0);
         if ((searchDomain.find('#hide-zeros').length>0) && (searchDomain.find('#hide-zeros').prop('checked'))){
             showZeros = false;
@@ -2679,7 +2684,6 @@ require([
 
     var filterItemBindings = function (filterId) {
 
-
         $('#' + filterId).find('input:checkbox').not('#hide-zeros').on('click', function () {
             handleFilterSelectionUpdate(this, true, true);
         });
@@ -2793,11 +2797,6 @@ require([
 
     var addSliders = function(id,initialCreation,hideZeros, parStr){
         $('#'+id).find('.list-group-item__body.isQuant').each(function() {
-            $(this).find('.more-checks').addClass('hide');
-            $(this).find('.less-checks').addClass('hide');
-            $(this).find('.sorter').addClass('hide');
-            //var min = Math.ceil($(this).data('min') * 1000)/1000;
-            //var min = Math.floor($(this).data('min'));
 
             var min = Math.floor(parseInt($(this).attr('data-min')));
             var max = Math.ceil(parseInt($(this).attr('data-max')));
@@ -2807,29 +2806,34 @@ require([
             var isActive = $(this).hasClass('isActive');
             var wNone = $(this).hasClass('wNone');
             var checked = ($(this).find('.noneBut').length>0) ? $(this).find('.noneBut').find(':input')[0].checked : false;
+            var txtLower = ($(this).find('.sl_lower').length>0) ? $(this).find('.sl_lower').val():'';
+            var txtUpper = ($(this).find('.sl_lower').length>0) ? $(this).find('.sl_upper').val():'';
+            var cntrNotDisp = ($(this).find('.cntr').length>0) ?$(this).find('.cntr').hasClass('notDisp'):true;
+
 
             if (initialCreation){
                 var heading = $(this).prop('id') + '_heading';
-                $('#'+heading).find('.controls').remove();
+                $('#'+heading).find('.fa-cog').attr('title', 'Control slider');
+                $('#'+heading).find('.fa-search').remove();
+
+                $(this).find('.more-checks').remove();
+                $(this).find('.less-checks').remove();
+                $(this).find('.sorter').remove();
+                $('#'+this.id+'_list').addClass('hide');
             }
             else {
-
                 var slideDivId = $(this).prop('id') + '_slide';
                 curmin = $(this).attr('data-curmin');
                 curmax = $(this).attr('data-curmax');
-
                 $(this).find('#' + slideDivId).remove();
-                $(this).find('.reset').remove();
-
-                $(this).find('.noneBut').remove();
+                $(this).find('.cntr').remove();
+                //$(this).find('.noneBut').remove();
                 var inpName = $(this).prop('id') + '_input';
                 $(this).find('#'+inpName).remove();
-
                 if (hideZeros) {
                     if ( ( (curmin === 'NA') || (curmax === 'NA')) && !isActive ){
                         addSlider = false;
                         $(this).removeClass('hasSlider');
-                        //$(this).removeClass('isActive');
                     } else if (isActive){
                         if (curmin === 'NA') {
                                 min = lower;
@@ -2846,24 +2850,56 @@ require([
                             max = Math.ceil(curmax);
                             lower=min;
                             upper=max;
-                            //$(this).attr('data-curminrng', lower);
-                            //$(this).attr('data-curmaxrng', upper);
                     }
                 } else if (!isActive){
                     lower=min;
                     upper=max;
-                    //$(this).attr('data-curminrng', lower);
-                    //$(this).attr('data-curmaxrng', upper);
                 }
             }
 
             if (addSlider) {
                 $(this).addClass('hasSlider');
                 mkSlider($(this).prop('id'), min, max, 1, true, wNone, parStr, $(this).data('filter-attr-id'), $(this).data('filter-display-attr'), lower, upper, isActive,checked);
+                var cntrlDiv=$('<div class="cntr"></div>');
+                cntrlDiv.append('<div class="sliderset" style="display:block;margin-bottom:8px">Lower: <input type="text" style="display:inline" size="5" class="sl_lower" value="'+ txtLower + '">' +
+                    ' Upper: <input class="sl_upper" type="text" style="display:inline" size="5" class="upper" value="' + txtUpper + '">' +
+                    '<div class="slider-message notDisp" style="color:red"><br>Please set lower and upper bounds to numeric values with the upper value greater than the lower, then press Return in either text box. </div></div>')
+                cntrlDiv.append(  '<button class="reset" style="display:block;" onclick=\'setSlider("'+ this.id + '_slide", true,0,0,true, true,"'+parStr+'")\'>Clear Slider</button>');
+                if (wNone){
+                   cntrlDiv.append( '<span class="noneBut"><input type="checkbox"   onchange="addNone(this, \''+parStr+'\', true)"> None </span>');
+                   cntrlDiv.find('.noneBut').find(':input')[0].checked = checked;
+                }
+                if (cntrNotDisp){
+                    cntrlDiv.addClass('notDisp');
+                }
+                $(this).append(cntrlDiv);
+                $(this).find('.sliderset').keypress(function(event){
+                   var keycode = (event.keyCode ? event.keyCode : event.which);
+                   if(keycode == '13'){
+
+                   try {
+                      var txtlower = parseFloat($(this).parent().find('.sl_lower').val());
+                      var txtupper = parseFloat($(this).parent().find('.sl_upper').val());
+                      if (txtlower<=txtupper){
+                        setSlider($(this).closest('.hasSlider')[0].id+"_slide", false, txtlower, txtupper, false,true);
+                      }
+                      else{
+                          $(this).closest('.hasSlider').find('.slider-message').removeClass('notDisp');
+
+                      }
+                   }
+                  catch(error){
+                    $(this).closest('.hasSlider').find('.slider-message').removeClass('notDisp');
+                    console.log(error);
+                  }
+               }
+              });
+
             } else{
                 $(this).removeClass('hasSlider');
 
             }
+
         });
      };
 
@@ -2920,6 +2956,11 @@ require([
                       });
                   }
                 if (attValueFoundInside){
+
+                    /*$(selEle).collapse('show');
+                    $(selEle).find('.show-more').triggerHandler('click');
+                    $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
+                     */
                     showFilters.push([selEle,selector]);
                 }
                });
@@ -3135,7 +3176,7 @@ require([
 
     $('.fa-search').on("click",function(){
          //alert('hi');
-         srch=$(this).parent().parent().parent().find('.text-filter, .collection-text-filter');
+         srch=$(this).parent().parent().parent().find('.text-filter, .collection-text-filter, .analysis-text-filter');
 
          if (srch.hasClass('notDisp')){
              srch.removeClass('notDisp');
@@ -3166,7 +3207,13 @@ require([
         $('.spinner').hide();
     });
 
+
     $(document).ready(function () {
+
+        $('#body').on("unload", function(){
+            alert('hi');
+        })
+
         window.selItems = new Object();
         window.selItems.selStudies = new Object();
         window.selItems.selCases = new Object();
@@ -3176,8 +3223,10 @@ require([
         window.studyTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
         window.seriesTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
 
-        filterItemBindings('program_set');
         filterItemBindings('access_set');
+        filterItemBindings('program_set');
+        filterItemBindings('analysis_set');
+
         filterItemBindings('search_orig_set');
         filterItemBindings('search_derived_set');
         filterItemBindings('search_related_set');

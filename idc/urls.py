@@ -1,5 +1,5 @@
 ###
-# Copyright 2015-2019, Institute for Systems Biology
+# Copyright 2015-2022, Institute for Systems Biology
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ from django.contrib import admin
 from django.conf import settings
 
 from . import views, views_api, demo_views
+from cohorts.views import get_query_str_response
 
 
 admin.autodiscover()
@@ -44,6 +45,7 @@ urlpatterns = [
 
     url(r'^explore/$', views.explore_data_page, name='explore_data'),
     url(r'^explore/filters/', views.parse_explore_filters, name='parse_explore_filters'),
+    url(r'^explore/bq_string/$', get_query_str_response, name='explore_bq_string'),
     url(r'^tables/', views.populate_tables, name='populate_tables'),
 
     url(r'^warning/', views.warn_page, name='warn'),
@@ -66,3 +68,17 @@ if settings.DEBUG and settings.DEBUG_TOOLBAR:
     urlpatterns = [
         url(r'^__debug__/', include(debug_toolbar.urls)),
     ] + urlpatterns
+
+if settings.LOCAL_RESPONSE_PAGES:
+    from django.views.defaults import page_not_found, server_error
+
+    def custom_page_not_found(request):
+        return page_not_found(request, None)
+
+    def custom_server_error(request):
+        return server_error(request)
+
+    urlpatterns += [
+        path("404/", custom_page_not_found),
+        path("500/", custom_server_error),
+    ]
