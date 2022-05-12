@@ -129,6 +129,7 @@ require([
             end = $('#' + slideDiv).parent().attr('data-max');
             $('#' + slideDiv).parent().removeClass('isActive');
             $('#' + slideDiv).siblings('.reset').addClass('disabled');
+            $('#' + slideDiv).parent().find('.sliderset').find(':input').val('');
         } else {
             $('#' + slideDiv).parent().addClass('isActive');
             $('#' + slideDiv).siblings('.reset').removeClass('disabled');
@@ -427,6 +428,8 @@ require([
 
                  $(this).find('.slide_tooltip').each( function(index){
                     $(this).text( ui.values[index].toString() );
+                    $(this).closest('.ui-slider').parent().find('.sliderset').find(':input')[index].value=ui.values[index].toString();
+
 
                 });
 
