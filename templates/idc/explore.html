@@ -93,6 +93,7 @@
     {{ filters_for_load|json_script:"filters_for_load" }}
     {{ collections|json_script:"collections" }}
     {{ programs|json_script:"programs" }}
+    {{ history|json_script:"history" }}
     <script>
         const filters_for_load = JSON.parse(document.getElementById('filters_for_load').textContent);
         const collection_tooltips = JSON.parse(document.getElementById('collection_tooltips').textContent);

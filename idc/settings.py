@@ -51,6 +51,7 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
+#DEBUG = False
 CONNECTION_IS_LOCAL     = (os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost')
 IS_CIRCLE               = (os.environ.get('CI', None) is not None)
 DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') and CONNECTION_IS_LOCAL)
@@ -345,7 +346,7 @@ MIDDLEWARE.append(
 # End django-session-security #
 ###############################
 
-TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+TEST_RUNNER = 'django.tesbut.runner.DiscoverRunner'
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

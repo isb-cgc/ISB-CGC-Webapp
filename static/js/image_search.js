@@ -3198,6 +3198,19 @@ require([
     });
 
 
+    updateViaHistory = function(){
+        var history = JSON.parse(document.getElementById('history').textContent);
+        if ('hz' in history){
+            for (ckey in history['hz']){
+                isHid = history['hz'][ckey];
+                if (isHid)
+                {
+                    $('#'+ckey).find('.hide-zeros').click();
+                }
+            }
+        }
+    }
+
     $(document).ready(function () {
 
         $('#body').on("unload", function(){
@@ -3289,5 +3302,50 @@ require([
                     +'&times;</span><span class="sr-only">Close</span></button>'
                 ).attr("style","display: none;")
         );
+
+        $(window).bind("beforeunload",function(){
+            hs= new Object();
+            hs['hz']= new Object();
+            $('body').find('.hide-zeros').each(function(){
+                var pfar = $(this).closest('.collection-list, .search-configuration, #analysis_set ');
+                var pid = pfar[0].id;
+                var checked = pfar.find('.hide-zeros')[0].checked;
+                hs['hz'][pid] = checked;
+                var i=1;
+
+            });
+
+            var url = encodeURI('/uihist/')
+            nhs={'his':JSON.stringify(hs)}
+            var csrftoken = $.getCookie('csrftoken');
+            let deferred = $.Deferred();
+
+            $.ajax({
+              url: url,
+              data: nhs,
+              dataType: 'json',
+              type: 'post',
+              contentType: 'application/x-www-form-urlencoded',
+              beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+              success: function (data) {
+                  try {
+                     console.log('ui history saved');
+                  }
+
+                  finally {
+                     deferred.resolve();
+                  }
+               },
+              error: function(data){
+                console.log('error saving ui history');
+              }
+        });
+
+        });
+
+        if (document.contains(document.getElementById('history'))){
+            updateViaHistory();
+        }
+
     });
 });
