@@ -541,7 +541,6 @@ def igv(request):
     req = request.GET or request.POST
     build = req.get('build','hg38')
     checked_list = json.loads(req.get('checked_list','{}'))
-    readgroupset_list = []
     bam_list = []
 
     # This is a POST request with all the information we already need
@@ -569,32 +568,32 @@ def igv(request):
                 result = query_solr_and_format_result(
                     {
                         'collection': source.name,
-                        'fields': ['sample_barcode','file_gdc_id','file_name_key','index_file_name_key', 'program_name', 'access'],
-                        'query_string': 'file_gdc_id:("{}") AND data_format:("BAM")'.format('" "'.join(gdc_ids)),
+                        'fields': ['sample_barcode','file_node_id','file_name_key','index_file_name_key', 'program_name', 'access'],
+                        'query_string': 'file_node_id:("{}") AND data_format:("BAM")'.format('" "'.join(gdc_ids)),
                         'counts_only': False
                     }
                 )
                 if 'docs' not in result or not len(result['docs']):
                     messages.error(request,"IGV compatible files corresponding to the following UUIDs were not found: {}.".format(" ".join(gdc_ids))
                                    + "Note that the default build is HG38; to view HG19 files, you must indicate the build as HG19: &build=hg19")
-                saw_controlled = False
-                for doc in result['docs']:
-                    if doc['access'] == 'controlled':
-                        saw_controlled = True
-                    bam_list.append({
-                        'sample_barcode': doc['sample_barcode'],
-                        'gcs_path': "{};{}".format(doc['file_name_key'],doc['index_file_name_key']),
-                        'build': build,
-                        'program': doc['program_name']
-                    })
-                if saw_controlled:
-                    messages.info(request,"Some of the requested files require approved access to controlled data - if you receive a 403 error, double-check your current login status with DCF.")
+                else:
+                    saw_controlled = False
+                    for doc in result['docs']:
+                        if doc['access'] == 'controlled':
+                            saw_controlled = True
+                        bam_list.append({
+                            'sample_barcode': doc['sample_barcode'],
+                            'gcs_path': "{};{}".format(doc['file_name_key'],doc['index_file_name_key']),
+                            'build': build,
+                            'program': doc['program_name']
+                        })
+                    if saw_controlled:
+                        messages.info(request,"Some of the requested files require approved access to controlled data - if you receive a 403 error, double-check your current login status with DCF.")
 
     context = {
-        'readgroupset_list': readgroupset_list,
         'bam_list': bam_list,
         'base_url': settings.BASE_URL,
-        'service_account': settings.OAUTH2_CLIENT_ID,
+        'oauth_client_id': settings.OAUTH2_CLIENT_ID,
         'build': build,
     }
 
