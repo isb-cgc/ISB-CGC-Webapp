@@ -2070,7 +2070,7 @@ require([
       .enter()
       .append('path')
       .attr('d', d3.arc()
-      .innerRadius(45)
+      .innerRadius(0)
       .outerRadius(radius)
       )
       .attr('fill', function(d){ return(
@@ -2098,14 +2098,14 @@ require([
            txtbx.attr("opacity",1);
 
             d3.select(this).attr('d', d3.arc()
-           .innerRadius(45)
+           .innerRadius(0)
            .outerRadius(radiusB)
            );
 
         })
          .on("mouseleave",function(d){
             d3.select(this).attr('d', d3.arc()
-           .innerRadius(45)
+           .innerRadius(0)
            .outerRadius(radius)
            );
 
@@ -3209,6 +3209,19 @@ require([
                 }
             }
         }
+
+        if ('sorter' in history){
+            for (ckey in history['sorter']){
+                sortval = history['sorter'][ckey];
+                $('#'+ckey).find(':input').each(function(){
+                    var val = $(this).val();
+                    if (val == sortval) {
+                        $(this).click();
+                    }
+                });
+            }
+        }
+
     }
 
     $(document).ready(function () {
@@ -3306,13 +3319,19 @@ require([
         $(window).bind("beforeunload",function(){
             hs= new Object();
             hs['hz']= new Object();
+            hs['sorter'] = new Object();
             $('body').find('.hide-zeros').each(function(){
                 var pfar = $(this).closest('.collection-list, .search-configuration, #analysis_set ');
                 var pid = pfar[0].id;
                 var checked = pfar.find('.hide-zeros')[0].checked;
                 hs['hz'][pid] = checked;
-                var i=1;
+            });
 
+            $('body').find('.sorter').each(function(){
+                var pfar = $(this).closest('.collection-list, .list-group-item__body ');
+                var pid = pfar[0].id;
+                var sort = $(this).find('input:checked').val()
+                hs['sorter'][pid] = sort;
             });
 
             var url = encodeURI('/uihist/')
@@ -3331,7 +3350,6 @@ require([
                   try {
                      console.log('ui history saved');
                   }
-
                   finally {
                      deferred.resolve();
                   }
@@ -3340,12 +3358,10 @@ require([
                 console.log('error saving ui history');
               }
         });
-
         });
 
         if (document.contains(document.getElementById('history'))){
             updateViaHistory();
         }
-
     });
 });
