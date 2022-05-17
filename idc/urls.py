@@ -43,6 +43,7 @@ urlpatterns = [
     url(r'^data/', include('data_upload.urls')),
     url(r'^_ah/(vm_)?health$', views.health_check),
 
+   url(r'^uihist/$', views.ui_hist_page, name='ui_hist'),
     url(r'^explore/$', views.explore_data_page, name='explore_data'),
     url(r'^explore/filters/', views.parse_explore_filters, name='parse_explore_filters'),
     url(r'^explore/bq_string/$', get_query_str_response, name='explore_bq_string'),

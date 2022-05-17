@@ -39,6 +39,8 @@ from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.signals import user_login_failed
 from django.dispatch import receiver
+from idc.models import User_Data
+
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
@@ -203,6 +205,22 @@ def health_check(request, match):
 def quota_page(request):
     return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
 
+@login_required
+def ui_hist_page(request):
+    req = request.POST
+    hist = request.POST['his']
+    #user = User.objects.get(id=request.user.id)
+    userD= None
+    try:
+      userD=User_Data.objects.get(user_id=request.user.id)
+      userD.history = hist
+    except:
+      user_data= {'user_id':request.user.id, "history":hist}
+      userD = User_Data(**user_data)
+
+    userD.save()
+
+    return HttpResponse('')
 
 @login_required
 def populate_tables(request):
@@ -517,6 +535,14 @@ def explore_data_page(request, filter_path=False, path_filters=None):
     if is_json:
         # In the case of is_json=True, the 'context' is simply attr_by_source
         return JsonResponse(context, status=status)
+    request.session['fav']='temp'
+
+    context['hist']=''
+    try:
+      userD=User_Data.objects.get(user_id=request.user.id)
+      context['history']=json.loads(userD.history)
+    except:
+      pass
 
     return render(request, 'idc/explore.html', context)
 
