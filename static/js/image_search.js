@@ -61,6 +61,8 @@ require([
     window.projSets['qin'] = ["qin_headneck","qin_lung_ct","qin_pet_phantom","qin_breast_dce_mri"];
     var first_filter_load = true;
 
+    var defaultFilter=new Object();
+    defaultFilter['access']=['Public']
     var plotLayout = {
         title: '',
         autosize: true,
@@ -3237,11 +3239,8 @@ require([
 
     }
 
-    $(document).ready(function () {
-
-        $('#body').on("unload", function(){
-            alert('hi');
-        })
+    initializeTableData = function()
+    {
 
         window.selItems = new Object();
         window.selItems.selStudies = new Object();
@@ -3251,7 +3250,15 @@ require([
         window.casesTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
         window.studyTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
         window.seriesTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
+    }
 
+    $(document).ready(function () {
+
+        $('#body').on("unload", function(){
+            alert('hi');
+        })
+
+        initializeTableData();
         filterItemBindings('access_set');
         filterItemBindings('program_set');
         filterItemBindings('analysis_set');
@@ -3285,10 +3292,12 @@ require([
         createPlots('tcga_clinical');
 
         updateProjectTable(window.collectionData);
+
         $('.clear-filters').on('click', function () {
             $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('checked',false);
             $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('indeterminate',false);
-            window.filterObj = new Object();
+            window.filterObj=JSON.parse(JSON.stringify(defaultFilter));
+            $('#access').find('input:checkbox[value="Public"]').prop("checked",true);
             $('.ui-slider').each(function(){
                 setSlider(this.id,true,0,0,true, false);
             })
@@ -3296,6 +3305,11 @@ require([
 
             mkFiltText();
             updateFacetsData(true);
+            initializeTableData();
+            /* updateProjectTable(window.collectionData);
+            $('#cases_tab').DataTable().destroy();
+            $('#studies_tab').DataTable().destroy();
+            $('#series_tab').DataTable().destroy(); */
         });
 
         load_preset_filters();
