@@ -509,11 +509,8 @@ require([
                         case 'study_uid':
                             table_row_data += '<td><div class="study-uid">' +
                                     '<a href="https://'+DICOM_VIEWER_URL+files[i]['study_uid']+'/" target="_blank" rel="nofollow noreferrer">'+files[i]['study_uid']+
-                                    '<div class="osmisis" style="display: none;"><i>Open in OHIF Viewer</i></div></a>'+
+                                    '<div class="osmisis" style="display:thu none;"><i>Open in OHIF Viewer</i></div></a>'+
                                     '</div></td>';
-                            break;
-                        case 'thumbnail':
-                            table_row_data += '<td><img src="'+IMG_THUMBS_URL+files[i]['file_node_id']+'/thmb_128x64.jpeg" alt="thumb"></td>';
                             break;
                         case 'platform':
                             table_row_data += '<td>' + happy_name(files[i][column_name]) + '</td>';
