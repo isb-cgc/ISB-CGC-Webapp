@@ -462,7 +462,7 @@ require([
                 }
 
                 if(active_tab !== 'all') {
-                    if (files[i]['cloudstorage_location'] && ((files[i]['dataformat'] == 'BAM') || (files[i]['datatype'] == 'Slide image'))) {
+                    if (files[i]['cloudstorage_location'] && ((files[i]['dataformat'] == 'BAM') || (files[i]['datatype'] == 'Slide Image'))) {
                         if(active_tab === 'igv' && files[i]['dataformat'] == 'BAM') {
                             var tokenLabel = files[i]['sample'] + ", " + files[i]['exp_strat'] + ", " + happy_name(files[i]['platform']) + ", " + files[i]['datatype'];
                             val = files[i]['cloudstorage_location'] + ';' + files[i]['index_name'] + ',' + files[i]['sample'];
@@ -1024,7 +1024,7 @@ require([
                 filter_param = {"data_type": ["Radiology image"]};
                 break;
             case "slim":
-                filter_param = {"data_type": ["Slide image"]};
+                filter_param = {"data_type": ["Slide Image"]};
                 break;
             case "pdf":
                 filter_param = {"data_format": ["PDF"]};
