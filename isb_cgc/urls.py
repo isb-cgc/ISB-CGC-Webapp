@@ -37,8 +37,6 @@ urlpatterns = [
 
     url(r'^bucket_object_list/$', views.bucket_object_list, name='bucket_object_list'),
     url(r'^igv/$', views.igv, name='igv'),
-    url(r'^camic/$', views.camic, name='camic'),
-    url(r'^camic/(?P<file_uuid>[A-Za-z0-9\-]+)/$', views.camic, name='camic_barcode'),
     url(r'^report/$', views.path_report, name='path_pdf'),
     url(r'^report/(?P<report_file>[A-Za-z0-9._/-]+)/$', views.path_report, name='path_pdf_report'),
 

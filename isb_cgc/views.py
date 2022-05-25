@@ -516,23 +516,6 @@ def test_solr_data(request):
 
     return JsonResponse({'result': results}, status=status)
 
-def camic(request, file_uuid=None):
-    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
-    context = {}
-
-    if not file_uuid:
-        messages.error("Error while attempting to display this pathology image: a file UUID was not provided.")
-        return redirect(reverse('cohort_list'))
-
-    images = [{'file_uuid': file_uuid, 'thumb': '', 'type': ''}]
-    template = 'isb_cgc/camic_single.html'
-
-    context['files'] = images
-    context['camic_viewer'] = settings.CAMIC_VIEWER
-    context['img_thumb_url'] = settings.IMG_THUMBS_URL
-
-    return render(request, template, context)
-
 
 @login_required
 def igv(request):
