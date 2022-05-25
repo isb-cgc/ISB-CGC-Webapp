@@ -148,7 +148,6 @@
             ['Case Barcode', 1],
             ['File Name', 1],
             ['Disease Code', 1],
-            ['Thumbnail', 1],
             ['Data Type', 1],
             ['Data Format', 1],
             ['File Size', 1]
@@ -195,7 +194,7 @@
     var tab_columns = {
         'all': ['program', 'case', 'filename', 'disease_code', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize'],
         'igv': ['program', 'case', 'sample', 'filename', 'disease_code', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize', 'file_viewer'],
-        'slim': ['program', 'case', 'slide_filename', 'disease_code', 'thumbnail', 'datatype', 'dataformat', 'filesize'],
+        'slim': ['program', 'case', 'slide_filename', 'disease_code', 'datatype', 'dataformat', 'filesize'],
         'dicom': ['program', 'case', 'disease_code', 'project_short_name', 'study_desc', 'study_uid'],
         'pdf': ['program', 'case', 'pdf_filename', 'disease_code', 'datacat', 'datatype', 'dataformat', 'filesize']
     };
@@ -226,7 +225,6 @@
 
     var SEL_IGV_FILE_MAX = '{{  sel_file_max }}';
     var FILE_LIST_MAX = '{{  file_list_max }}';
-    var IMG_THUMBS_URL = '{{ img_thumbs_url }}';
     var HAS_USER_DATA = {% if has_user_data %}true{% else %}false{% endif %};
     var request_user_id = {% if user.is_anonymous %} null {% else %} {{ user.id }} {% endif %};
     var programs_this_cohort = {{ programs_this_cohort|tojson|safe }};

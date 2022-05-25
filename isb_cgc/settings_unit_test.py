@@ -586,7 +586,6 @@ FILE_SIZE_UPLOAD_MAX = 1950000
 #################################
 DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
 SLIM_VIEWER = os.environ.get('SLIM_VIEWER', None)
-IMG_THUMBS_URL = os.environ.get('IMG_THUMBS_URL', None)
 
 #################################
 # NOTEBOOK settings
