@@ -4,7 +4,7 @@
 
 {% comment %}
 
-   Copyright 2017, Institute for Systems Biology
+   Copyright 2022, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -28,19 +28,6 @@
 {% block page_header %}
     <div class="container">
         <div class="banner-section">
-                <div class="alert alert-dismissible show" role="alert">
-                    <div class="row ">
-                        <div class="col-xs-1"></div>
-                        <div class="col-xs-10">
-                            <strong>All tissue slide images from the TCGA program are currently unavailable for viewing.</strong>
-                        </div>
-                        <div class="col-xs-1">
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
         </div>
 
         {% if cohort %}
@@ -70,7 +57,7 @@
                 <div class="panel panel-default">
                     <ul class="nav nav-tabs nav-tabs-files" role="tablist">
                         <li role="presentation" class="file-browser-tab active"><a href="#all-files" role="tab" data-toggle="tab" title="Browse All Files" data-file-type="all">All Files</a></li>
-                        <li role="presentation" class="file-browser-tab"><a href="#camic-files" role="tab" data-toggle="tab" title="Browse Pathology Image Files" data-file-type="camic">Pathology Images</a></li>
+                        <li role="presentation" class="file-browser-tab"><a href="#slim-files" role="tab" data-toggle="tab" title="Browse Pathology Image Files" data-file-type="slim">Pathology Images</a></li>
                         <li role="presentation" class="file-browser-tab"><a href="#pdf-files" role="tab" data-toggle="tab" title="Browse Pathology Report Files" data-file-type="pdf">Pathology Reports</a></li>
                         <li role="presentation" class="file-browser-tab"><a href="#dicom-files" role="tab" data-toggle="tab" title="Browse Radiology Image Files" data-file-type="dicom">Radiology Images</a></li>
                         <li role="presentation" class="file-browser-tab {% if user.is_anonymous %} disabled {% endif %}"><a href="#igv-files" role="tab" data-toggle="tab" title="Browse IGV Files" data-file-type="igv">IGV</a></li>
@@ -105,28 +92,28 @@
     var tab_page ={
         'all': 1
         ,'igv': 1
-        ,'camic': 1
+        ,'slim': 1
         ,'dicom': 1
         ,'pdf': 1
     };
     var tab_count={
         'all': 0,
         'igv': 0,
-        'camic': 0,
+        'slim': 0,
         'dicom': 0,
         'pdf': 0
     };
     var tab_files_per_page={
         'all': 25,
         'igv': 25,
-        'camic': 25,
+        'slim': 25,
         'dicom': 25,
         'pdf': 25
     };
     var tab_sort_column={   //columnId, 0: asc 1: desc
         'all': ['col-program',0],
         'igv': ['col-program',0],
-        'camic': ['col-program',0],
+        'slim': ['col-program',0],
         'dicom': ['col-program',0],
         'pdf': ['col-program',0]
     };
@@ -156,7 +143,7 @@
             ['Data Format', 1],
             ['File Size', 1]
         ],
-        'camic': [
+        'slim': [
             ['Program', 1],
             ['Case Barcode', 1],
             ['File Name', 1],
@@ -194,8 +181,8 @@
             'HG19': '',
             'HG38': ''
         },
-        'camic': {
-            'HG19': ''
+        'slim': {
+            'HG38': ''
         },
         'dicom': {
             'HG19': ''
@@ -208,7 +195,7 @@
     var tab_columns = {
         'all': ['program', 'case', 'filename', 'disease_code', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize'],
         'igv': ['program', 'case', 'sample', 'filename', 'disease_code', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize', 'file_viewer'],
-        'camic': ['program', 'case', 'camic_filename', 'disease_code', 'thumbnail', 'datatype', 'dataformat', 'filesize'],
+        'slim': ['program', 'case', 'slide_filename', 'disease_code', 'thumbnail', 'datatype', 'dataformat', 'filesize'],
         'dicom': ['program', 'case', 'disease_code', 'project_short_name', 'study_desc', 'study_uid'],
         'pdf': ['program', 'case', 'pdf_filename', 'disease_code', 'datacat', 'datatype', 'dataformat', 'filesize']
     };
@@ -219,7 +206,7 @@
         var ajax_update_url = {
             'all': '{% url 'cohort_filelist_ajax_panel' cohort.id 'all' %}'
             ,'igv': '{% url 'cohort_filelist_ajax_panel' cohort.id 'igv' %}'
-            ,'camic':'{% url 'cohort_filelist_ajax_panel' cohort.id 'camic' %}'
+            ,'slim':'{% url 'cohort_filelist_ajax_panel' cohort.id 'slim' %}'
             ,'dicom':'{% url 'cohort_filelist_ajax_panel' cohort.id 'dicom' %}'
             ,'pdf':'{% url 'cohort_filelist_ajax_panel' cohort.id 'pdf' %}'
         };
@@ -227,14 +214,14 @@
         var ajax_update_url = {
             'all': '{% url 'filelist_ajax_panel' 'all' %}'
             ,'igv': '{% url 'filelist_ajax_panel' 'igv' %}'
-            ,'camic':'{% url 'filelist_ajax_panel' 'camic' %}'
+            ,'slim':'{% url 'filelist_ajax_panel' 'slim' %}'
             ,'dicom':'{% url 'filelist_ajax_panel' 'dicom' %}'
             ,'pdf':'{% url 'filelist_ajax_panel' 'pdf' %}'
         };
     {% endif %}
 
     var DICOM_VIEWER_URL = '{{ dicom_viewer_url }}';
-    var CAMIC_URL = {% url 'camic' %};
+    var SLIM_URL = '{{ slim_viewer_url }}';
     var PATH_PDF_URL = {% url 'path_pdf' %};
 
     var SEL_IGV_FILE_MAX = '{{  sel_file_max }}';

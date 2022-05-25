@@ -73,7 +73,7 @@ SOLR_TYPES = {
     "DATE": "pdate"
 }
 
-SOLR_SINGLE_VAL = ["case_barcode", "case_gdc_id", "case_pdc_id","program_name","project_short_name"]
+SOLR_SINGLE_VAL = ["case_barcode", "case_gdc_id", "case_pdc_id", "program_name", "project_short_name", "case_node_id", "StudyInstanceUID", "SeriesInstanceUID"]
 
 ATTR_SET = {}
 DISPLAY_VALS = {}
@@ -82,6 +82,36 @@ SOLR_URI = settings.SOLR_URI
 SOLR_LOGIN = settings.SOLR_LOGIN
 SOLR_PASSWORD = settings.SOLR_PASSWORD
 SOLR_CERT = settings.SOLR_CERT
+
+
+def make_solr_commands(sources):
+    try:
+        attrs_to_srcs = []
+        for src in sources:
+            schema_src = src['schema_source'].split('.')
+            schema = BigQuerySupport.get_table_schema(schema_src[0], schema_src[1], schema_src[2])
+            solr_schema = []
+            solr_index_strings = []
+            for field in schema:
+                solr_schema.append({
+                    "name": field['name'], "type": SOLR_TYPES[field['type']],
+                    "multiValued": True if src['aggregated'] and field['name'] not in SOLR_SINGLE_VAL else False, "stored": True
+                })
+
+                if src['aggregated'] and field['name'] not in SOLR_SINGLE_VAL:
+                    solr_index_strings.append("f.{}.split=true&f.{}.separator=|".format(field['name'],field['name']))
+
+                with open("output/{}_solr_schemas.json".format(src['name']), "w") as schema_outfile:
+                    json.dump(solr_schema, schema_outfile)
+                schema_outfile.close()
+                with open("output/{}_solr_index_vars.txt".format(src['name']), "w") as solr_index_string:
+                    solr_index_string.write("&{}".format("&".join(solr_index_strings)))
+                solr_index_string.close()
+
+        Attribute.data_sources.through.objects.bulk_create(attrs_to_srcs)
+    except Exception as e:
+        logger.error("[ERROR] Data Source {} may not have been added!".format(obj.name))
+        logger.exception(e)
 
 
 def add_data_versions(dv_set):
@@ -146,7 +176,7 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
                 for field in schema:
                     if build_attrs:
                         if field['name'] not in ATTR_SET:
-                            attr_type = Attribute.CATEGORICAL if (not re.search(r'(_id|_barcode)', field['name']) and field['type'] == "STRING") else Attribute.STRING if field['type'] == "STRING" else Attribute.CONTINUOUS_NUMERIC
+                            attr_type = Attribute.CATEGORICAL if (not re.search(r'(_id|_barcode|UID)', field['name']) and field['type'] == "STRING") else Attribute.STRING if field['type'] == "STRING" else Attribute.CONTINUOUS_NUMERIC
                             ATTR_SET[field['name']] = {
                                 'name': field['name'],
                                 "display_name": field['name'].replace("_", " ").title() if re.search(r'_', field['name']) else
@@ -155,7 +185,7 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
                                 'solr_collex': [],
                                 'bq_tables': [],
                                 'display': (
-                                        (attr_type == Attribute.STRING and not re.search('_id|_barcode',field['name'].lower())) or attr_type == Attribute.CATEGORICAL or field['name'].lower() in ranges_needed)
+                                        (attr_type == Attribute.STRING and not re.search('_id|_barcode|UID',field['name'].lower())) or attr_type == Attribute.CATEGORICAL or field['name'].lower() in ranges_needed)
                             }
                         attr = ATTR_SET[field['name']]
                         attr['solr_collex'].append(src['name'])
@@ -382,26 +412,36 @@ def main(config, make_attr=False):
         len(ATTR_SET) and make_attr and add_attributes([ATTR_SET[x] for x in ATTR_SET])
 
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
 
 
 if __name__ == "__main__":
-    cmd_line_parser = ArgumentParser(description="Extract a data source from BigQuery and ETL it into Solr")
-    cmd_line_parser.add_argument('-j', '--json-config-file', type=str, default='', help="JSON settings file")
-    cmd_line_parser.add_argument('-a', '--parse_attributes', type=str, default='False', help="Attempt to create/update attributes from the sources")
+    try:
+        cmd_line_parser = ArgumentParser(description="Metadata ETL for ISB-CGC Cloud Resource")
+        cmd_line_parser.add_argument('-s', '--solr-only', type=str, default='False', help="Use JSON settings file to parse our Solr indexing commands (exclusive of other ETL ops.)")
+        cmd_line_parser.add_argument('-j', '--json-config-file', type=str, default='', help="JSON settings file")
+        cmd_line_parser.add_argument('-a', '--parse_attributes', type=str, default='False', help="Attempt to create/update attributes from the sources")
 
-    args = cmd_line_parser.parse_args()
+        args = cmd_line_parser.parse_args()
 
-    if not len(args.json_config_file):
-        logger.info("[ERROR] You must supply a JSON settings file!")
-        cmd_line_parser.print_help()
+        if not len(args.json_config_file):
+            logger.error("[ERROR] You must supply a JSON settings file!")
+            cmd_line_parser.print_help()
+            exit(1)
+
+        if not exists(join(dirname(__file__),args.json_config_file)):
+            logger.error("[ERROR] JSON config file {} not found.".format(args.json_config_file))
+            exit(1)
+
+        f = open(join(dirname(__file__),args.json_config_file), "r")
+        settings = json.load(f)
+
+        if args.solr_only in ["True", "T", "t", "true"]:
+            make_solr_commands(settings['data_sources'])
+        else:
+            main(settings, (args.parse_attributes in ["True", "T", "t", "true"]))
+
+    except Exception as e:
+        logger.error("[ERROR] While processing ETL command line and running operations:")
+        logger.exception(e)
         exit(1)
-
-    if not exists(join(dirname(__file__),args.json_config_file)):
-        logger.info("[ERROR] JSON config file {} not found.".format(args.json_config_file))
-        exit(1)
-
-    f = open(join(dirname(__file__),args.json_config_file), "r")
-    settings = json.load(f)
-
-    main(settings, (args.parse_attributes == 'True'))
