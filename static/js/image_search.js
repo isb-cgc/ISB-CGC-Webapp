@@ -1246,11 +1246,8 @@ require([
                         var ret = checkClientCache(request, 'studies');
                         ssCallNeeded = ret[0];
                         var reorderNeeded = ret[1];
-
                         if (ssCallNeeded) {
-
-                            //curFilterObj = JSON.parse(JSON.stringify(parseFilterObj()));
-                            var curFilterObj = new Object();
+                            var curFilterObj = parseFilterObj();
                             curFilterObj.collection_id = window.selItems.selProjects;
                             curFilterObj.PatientID = caseArr;
                             if (studyID.trim().length > 0) {
@@ -1499,7 +1496,6 @@ require([
                     var reorderNeeded = ret[1];
 
                     if (ssCallNeeded) {
-                        //curFilterObj = JSON.parse(JSON.stringify(parseFilterObj()));
                         var curFilterObj = new Object();
                         curFilterObj.collection_id = window.selItems.selProjects;
                         curFilterObj.PatientID = caseArr;
