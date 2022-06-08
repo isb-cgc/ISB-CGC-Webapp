@@ -625,15 +625,10 @@ MAX_FILES_IGV = 5
 FILE_SIZE_UPLOAD_MAX = 1950000
 
 #################################
-# caMicroscope Viewer settings
-#################################
-CAMIC_VIEWER = os.environ.get('CAMIC_VIEWER', None)
-IMG_THUMBS_URL = os.environ.get('IMG_THUMBS_URL', None)
-
-#################################
-# DICOM Viewer settings
+# Viewer settings
 #################################
 DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
+SLIM_VIEWER = os.environ.get('SLIM_VIEWER', None)
 
 #################################
 # NOTEBOOK settings
