@@ -21,6 +21,7 @@ import logging
 
 logger = logging.getLogger('main_logger')
 
+
 class AppInfo(models.Model):
     id = models.AutoField(primary_key=True, null=False, blank=False)
     app_version = models.CharField(max_length=32, null=False, blank=False, default="1.0.0")
@@ -28,9 +29,9 @@ class AppInfo(models.Model):
     app_date = models.DateField(auto_now_add=True, null=False, blank=False)
     active = models.BooleanField(default=True, null=False, blank=False)
 
+
 class User_Data(models.Model):
     id = models.AutoField(primary_key=True, null=False, blank=False)
     user = models.ForeignKey(User, null=False, blank=True, on_delete=models.CASCADE)
-
     history = models.CharField(max_length=2000, blank=False, null=False, default='')
 
