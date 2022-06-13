@@ -66,9 +66,6 @@ if [ -z "${CI}" ]; then
   cp -v /usr/lib/python3/dist-packages/apt_pkg.cpython-36m-x86_64-linux-gnu.so /usr/lib/python3/dist-packages/apt_pkg.so
 fi
 
-# Bug in git and Ubuntu 20+
-git config --global --add safe.directory /home/circleci/${HOME}
-
 echo "Dependencies Installed"
 
 # If this is local development, clean out lib for a re-structuring 
@@ -141,6 +138,5 @@ if [ -n "${CI}" ]; then
     else
         TIER=${DEPLOYMENT_TIER,,}
     fi
-    SHA=$(git rev-list -1 HEAD)
-    echo "APP_VERSION=${TIER}.$(date '+%Y%m%d%H%M').${SHA:0:7}" > ${HOMEROOT}/version.env
+    echo "APP_VERSION=${TIER}.$(date '+%Y%m%d%H%M').${APP_SHA}" > ${HOMEROOT}/version.env
 fi
