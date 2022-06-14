@@ -14,6 +14,15 @@
   width: 100%;
 }
 
+.bq-menu-img {
+  width: 28px;
+  filter: brightness(80%) !important;
+}
+
+a:hover .bq-menu-img {
+  filter: brightness(60%) !important;
+}
+
 @media (min-width: 1400px) {
   .container {
     width: 1370px;
