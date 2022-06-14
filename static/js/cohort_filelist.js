@@ -61,8 +61,8 @@ require([
             'HG19': {},
             'HG38': {}
         },
-        'camic': {
-            'HG19': {}
+        'slim': {
+            'HG38': {}
         },
         'dicom': {
             'HG19': {}
@@ -316,11 +316,9 @@ require([
                     filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
                 }
                 break;
-            case "camic":
+            case "slim":
                 if(!SELECTED_FILTERS[active_tab][build]["data_type"]) {
-                    SELECTED_FILTERS[active_tab][build]["data_type"] = [];
-                    SELECTED_FILTERS[active_tab][build]["data_type"].push("Diagnostic image");
-                    SELECTED_FILTERS[active_tab][build]["data_type"].push("Tissue slide image");
+                    SELECTED_FILTERS[active_tab][build]["data_type"] = [ "Slide Image" ];
                 }
                 if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
                     filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
@@ -340,7 +338,7 @@ require([
             + (tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab][build]).length > 0 ?
                     'case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab][build]) + '&' : '')
             + 'downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
-        if(active_tab !== 'camic' && active_tab !== 'dicom') {
+        if(active_tab !== 'slim' && active_tab !== 'dicom') {
             $(tab_selector).find('.download-link').attr('href',$(tab_selector).find('.download-link').attr('href')+'&build='+build);
         }
     }
@@ -368,7 +366,7 @@ require([
         if(tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab][build]).length >0){
             url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab][build]);
         }
-        if(active_tab !== 'camic' && active_tab !== 'dicom') {
+        if(active_tab !== 'slim' && active_tab !== 'dicom') {
             url += '&build='+$(tab_selector).find('.build :selected').val();
         }
 
@@ -464,7 +462,7 @@ require([
                 }
 
                 if(active_tab !== 'all') {
-                    if (files[i]['cloudstorage_location'] && ((files[i]['dataformat'] == 'BAM') || (files[i]['datatype'] == 'Tissue slide image') || (files[i]['datatype'] == 'Diagnostic image'))) {
+                    if (files[i]['cloudstorage_location'] && ((files[i]['dataformat'] == 'BAM') || (files[i]['datatype'] == 'Slide Image'))) {
                         if(active_tab === 'igv' && files[i]['dataformat'] == 'BAM') {
                             var tokenLabel = files[i]['sample'] + ", " + files[i]['exp_strat'] + ", " + happy_name(files[i]['platform']) + ", " + files[i]['datatype'];
                             val = files[i]['cloudstorage_location'] + ';' + files[i]['index_name'] + ',' + files[i]['sample'];
@@ -475,9 +473,6 @@ require([
                                 checkbox_inputs += ' disabled';
                             }
                             checkbox_inputs += '>';
-                        } else if(active_tab === 'camic' && (files[i]['datatype'] == 'Tissue slide image' || files[i]['datatype'] == 'Diagnostic image')) {
-                            files[i]['slide_barcode'] = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
-                            files[i]['thumbnail'] = files[i]['cloudstorage_location'].split('/').slice(-2)[0];
                         }
                     }
                     files[i]['file_viewer'] = checkbox_inputs;
@@ -502,29 +497,20 @@ require([
                                     '<div class="osmisis" style="display: none;"><i>Click to View File in a New Tab</i></div></a></div>' +
                                     '</div></td>';
                             break;
-                        case 'camic_filename':
-                             if (files[i]['datatype'] == 'Tissue slide image') {
-                                 table_row_data += '<td><div class="col-filename accessible-filename">' +
-                                    '<div><a class="disable_tissue_slide_image">' + files[i]['filename'] +
-                                    '<div>[' + files[i]['node'] + ' ID: ' + files[i]['file_node_id'] + ']</div>' +
-                                    '<div class="osmisis" style="display: none;"><i>Currently Unavailable</i></div></a></div>' +
-                                    '</div></td>';
-                             } else {
-                                 table_row_data += '<td><div class="col-filename accessible-filename">' +
-                                    '<div><a href="'+CAMIC_URL+files[i]['file_node_id']+'/" target="_blank" rel="noreferrer">' + files[i]['filename'] +
-                                    '<div>[' + files[i]['node'] + ' ID: ' + files[i]['file_node_id'] + ']</div>' +
-                                    '<div class="osmisis" style="display: none;"><i>Open in caMicroscope</i></div></a></div>' +
-                                    '</div></td>';
-                             }
+                        case 'slide_filename':
+                             table_row_data += '<td><div class="col-filename accessible-filename">' +
+                                '<div><a href="https://'+ SLIM_URL+files[i]['study_uid'] + '/series/'
+                                    + files[i]['series_uid'] + '/" target="_blank" rel="noreferrer">'
+                                 + files[i]['filename'] + '<div>[' + files[i]['node'] + ' ID: '
+                                 + files[i]['file_node_id'] + ']</div>'
+                                 + '<div class="osmisis" style="display: none;"><i>Open in IDC SliM</i></div></a></div>' +
+                                '</div></td>';
                             break;
                         case 'study_uid':
                             table_row_data += '<td><div class="study-uid">' +
                                     '<a href="https://'+DICOM_VIEWER_URL+files[i]['study_uid']+'/" target="_blank" rel="nofollow noreferrer">'+files[i]['study_uid']+
-                                    '<div class="osmisis" style="display: none;"><i>Open in OHIF Viewer</i></div></a>'+
+                                    '<div class="osmisis" style="display:thu none;"><i>Open in OHIF Viewer</i></div></a>'+
                                     '</div></td>';
-                            break;
-                        case 'thumbnail':
-                            table_row_data += '<td><img src="'+IMG_THUMBS_URL+files[i]['thumbnail']+'/thmb_128x64.jpeg" alt="thumb"></td>';
                             break;
                         case 'platform':
                             table_row_data += '<td>' + happy_name(files[i][column_name]) + '</td>';
@@ -826,7 +812,7 @@ require([
             var files_per_page = tab_files_per_page[active_tab];
             var url = ajax_update_url[active_tab] +
                 '?files_per_page=' +files_per_page +
-                (active_tab != 'camic' && active_tab != 'dicom'  ? '&build='+build : '') +
+                (active_tab != 'slim' && active_tab != 'dicom'  ? '&build='+build : '') +
                 '&sort_column='+ tab_sort_column[active_tab][0] +'&sort_order='+tab_sort_column[active_tab][1];
             if(tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab][build]).length > 0){
                 url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab][build]);
@@ -1034,8 +1020,8 @@ require([
             case "dicom":
                 filter_param = {"data_type": ["Radiology image"]};
                 break;
-            case "camic":
-                filter_param = {"data_type": ["Diagnostic image", "Tissue slide image"]};
+            case "slim":
+                filter_param = {"data_type": ["Slide Image"]};
                 break;
             case "pdf":
                 filter_param = {"data_format": ["PDF"]};
