@@ -36,6 +36,7 @@ from cohorts.models import Cohort, Cohort_Perms
 from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute, Attribute_Tooltips
 from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata
 from allauth.socialaccount.models import SocialAccount
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.signals import user_login_failed
 from django.dispatch import receiver
@@ -205,22 +206,24 @@ def health_check(request, match):
 def quota_page(request):
     return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
 
+
 @login_required
 def ui_hist_page(request):
-    req = request.POST
-    hist = request.POST['his']
-    #user = User.objects.get(id=request.user.id)
-    userD= None
+    req = request.POST or request.GET
+    hist = req['his']
+    userD = None
     try:
-      userD=User_Data.objects.get(user_id=request.user.id)
+      userD = User_Data.objects.get(user_id=request.user.id)
       userD.history = hist
-    except:
-      user_data= {'user_id':request.user.id, "history":hist}
+
+    except ObjectDoesNotExist:
+      user_data = {'user_id': request.user.id, "history": hist}
       userD = User_Data(**user_data)
 
     userD.save()
 
     return HttpResponse('')
+
 
 @login_required
 def populate_tables(request):
