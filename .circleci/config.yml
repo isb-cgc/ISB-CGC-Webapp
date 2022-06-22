@@ -111,7 +111,7 @@ jobs:
     working_directory: ~/ISB-CGC-Webapp
     docker:
       - image: cimg/python:3.8
-      - image: circleci/mysql:5.7
+      - image: cimg/mysql:5.7
         environment:
           MYSQL_ROOT_HOST: "%"
           MYSQL_USER: ubuntu
@@ -147,6 +147,14 @@ jobs:
             sudo -E /bin/bash ./shell/gcloud-pull-staging-files.sh
             sudo -E /bin/bash ./shell/database-setup.sh
       - run_lint
+      - run:
+          name: Compare Config
+          command: |
+            echo "Compare env config file"
+            sudo -E /bin/bash ./shell/compareConfig.sh "gs://${DEPLOYMENT_BUCKET}/${ENV_FILE}"
+            echo "Compare deployment config text file"
+            sudo -E /bin/bash ./shell/compareConfig.sh "gs://${DEPLOYMENT_BUCKET}/deployment_config.txt"
+
       - save_cache:
           key: isb-cgc-webapp-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
           paths:
