@@ -383,7 +383,15 @@
                                                         <input class="text-filter value-search notDisp" type="text"
                                                                placeholder="Search..."
                                                                onkeyup="updateFilters( '{{ attr.name }}',{},false, true)">
+                                                        {% if attr.name == "Modality" %}
+                                                                Join multiple by: <input type="radio" class="join_val"
+                                                                            name="{{ attr.name }}_join" value="OR" checked>OR
+                                                            <input type="radio" class="join_val" name="{{ attr.name }}_join"
+                                                                   value="AND">AND <br>
+                                                            {% endif %}
+
                                                         <div class="sorter cntr notDisp">
+
                                                             Sort by: <input type="radio" class="sort_val"
                                                                             name="{{ attr.name }}" value="alpha" checked
                                                                             onclick="resort('{{ attr.name }}')">Alpha
