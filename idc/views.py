@@ -17,6 +17,7 @@
 from builtins import str
 import time
 import json
+from json.decoder import JSONDecodeError
 import logging
 import sys
 import datetime
@@ -61,7 +62,6 @@ def landing_page(request):
     sapien_counts = {}
 
     changes = {
-        #'Renal': 'Kidney',
         'Head': 'Head and Neck',
         'Head-Neck': 'Head and Neck',
         'Head-and-Neck': 'Head and Neck',
@@ -211,16 +211,15 @@ def quota_page(request):
 def ui_hist_page(request):
     req = request.POST or request.GET
     hist = req['his']
-    userD = None
     try:
-      userD = User_Data.objects.get(user_id=request.user.id)
-      userD.history = hist
+        user_data = User_Data.objects.get(user_id=request.user.id)
+        user_data.history = hist
 
     except ObjectDoesNotExist:
-      user_data = {'user_id': request.user.id, "history": hist}
-      userD = User_Data(**user_data)
+        user_data_dict = {'user_id': request.user.id, "history": hist}
+        user_data = User_Data(**user_data_dict)
 
-    userD.save()
+    user_data.save()
 
     return HttpResponse('')
 
@@ -526,6 +525,20 @@ def explore_data_page(request, filter_path=False, path_filters=None):
                     }]}]
                 context['filters_for_load'] = filters_for_load
 
+            request.session['fav'] = 'temp'
+            context['hist'] = ''
+            user_data = User_Data.objects.get(user_id=request.user.id)
+            context['history'] = json.loads(user_data.history)
+
+    except JSONDecodeError as e:
+        logger.error("[ERROR] While attempting to load the search page:")
+        logger.error("Invalid JSON format received.")
+        logger.exception(e)
+        messages.error(
+            request,
+            "The filters supplied contained invalid JSON."
+        )
+        status = 400
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
         logger.exception(e)
@@ -538,14 +551,6 @@ def explore_data_page(request, filter_path=False, path_filters=None):
     if is_json:
         # In the case of is_json=True, the 'context' is simply attr_by_source
         return JsonResponse(context, status=status)
-    request.session['fav']='temp'
-
-    context['hist']=''
-    try:
-      userD=User_Data.objects.get(user_id=request.user.id)
-      context['history']=json.loads(userD.history)
-    except:
-      pass
 
     return render(request, 'idc/explore.html', context)
 
@@ -571,8 +576,10 @@ def parse_explore_filters(request):
             if blacklist.search(str(filters)):
                 logger.warning("[WARNING] Saw bad filters in filters_for_load:")
                 logger.warning(filters)
-                messages.error(request,
-                               "There was a problem with some of your filters - please ensure they're properly formatted.")
+                messages.error(
+                    request,
+                    "There was a problem with some of your filters - please ensure they're properly formatted."
+                )
             else:
                 if len(attrs) > 0:
                     filters = [{"id": attr_map[x]['id'], "values": filters[attr_map[x]['filter']]} for x in attr_map]
