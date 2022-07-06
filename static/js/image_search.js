@@ -160,7 +160,7 @@ require([
         if (reset) {
             if (  (window.filterObj.hasOwnProperty(filtAtt)) && (window.filterObj[filtAtt].hasOwnProperty('rng')) ) {
                 delete window.filterObj[filtAtt]['rng'];
-                if('none' in window.filterObj[filtAtt]){
+                if ('none' in window.filterObj[filtAtt]){
                     window.filterObj[filtAtt]['type']='none';
                 } else {
                     delete window.filterObj[filtAtt];
@@ -337,7 +337,7 @@ require([
                 //$(elem).parent().parent().addClass('isActive');
             }
 
-            else{
+            else {
                 if ((id in window.filterObj) && ('none' in window.filterObj[id])){
                     delete window.filterObj[id]['none'];
                     if (!('rng' in window.filterObj[id])){
@@ -418,7 +418,7 @@ require([
         if (isActive){
             $('#'+divName).find('.reset').removeClass('disabled');
         }
-        else{
+        else {
             $('#'+divName).find('.reset').addClass('disabled');
         }
 
@@ -471,7 +471,7 @@ require([
                     if (index ==0) {
                         $(this).text(lower.toString());
                     }
-                    else{
+                    else {
                         $(this).text(upper.toString());
                     }
                });
@@ -499,7 +499,7 @@ require([
             if ( (projId in collectionsData) && (!hasColl || (collFilt.indexOf(projId)>-1)) ){
                 cRow[3] = collectionsData[projId]['count'];
             }
-            else{
+            else {
                cRow[3] = 0;
             }
             if (cRow[3]===0){
@@ -516,7 +516,7 @@ require([
                     delete window.selItems.selCases[projId];
                 }
             }
-            else{
+            else {
                 usedCollectionData.push(cRow);
             }
 
@@ -709,7 +709,7 @@ require([
                             if (window.selItems.selProjects.indexOf(data)>-1) {
                                 return '<input type="checkbox" checked>'
                             }
-                            else{
+                            else {
                                 return '<input type="checkbox">'
                             }
                         }
@@ -763,7 +763,7 @@ require([
                 if ( (cache.backendReqStrt<=request.start) && ( (cache.backendReqStrt+cache.backendReqLength) >= (request.start+request.length)  )){
                     updateNeeded=false;
                 }
-                else{
+                else {
                     updateNeeded = true;
                 }
             } else if (cache.cacheLength===cache.recordsTotal){
@@ -783,7 +783,7 @@ require([
             if (isNum){
                 cmp=parseFloat(a[col])- parseFloat(b[col]);
             }
-            else{
+            else {
                 cmp=(a[col]>b[col] ? 1 :  a[col]==b[col]? 0: -1)
             }
 
@@ -795,7 +795,7 @@ require([
                 if (auxIsNum){
                     cmp=parseFloat(a[auxCol])- parseFloat(b[auxCol]);
                 }
-                else{
+                else {
                     cmp=(a[auxCol]>b[auxCol] ? 1 :  a[auxCol]==b[auxCol]? 0: -1)
                 }
 
@@ -821,7 +821,7 @@ require([
             auxCol = cache.colOrder[auxColId]
             auxIsNum = ( $(thead.children('tr').children().get(auxColId)).hasClass('numeric_data') ? true: false);
         }
-        else{
+        else {
             auxColId=-1
             auxCol=''
             auxIsNum= false;
@@ -1205,7 +1205,7 @@ require([
                             if (row['access'].includes('Limited') ) {
                                 return '<i class="fa-solid fa-circle-minus coll-explain"></i>';
                             }
-                            else{
+                            else {
                                 var modality = row['Modality'];
                                 if ((modality[0] === 'SM') || (modality === 'SM')) {
                                     return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
@@ -1266,7 +1266,7 @@ require([
                                     if (window.selItems.selStudies[caseId].indexOf(studyID)>-1){
                                         window.selItems.selStudies[caseId]=[studyID]
                                     }
-                                    else{
+                                    else {
                                         delete window.selItems.selStudies[caseId];
                                     }
                                 }
@@ -1679,7 +1679,7 @@ require([
 
     var update_bq_filters = function() {
         let filters = parseFilterObj();
-        if(Object.keys(filters).length <= 0) {
+        if (Object.keys(filters).length <= 0) {
             $('.bq-string-display').attr("disabled","disabled");
             $('.bq-string-display').attr("title","Select a filter to enable this feature.");
             $('.bq-string').html("");
@@ -1692,7 +1692,7 @@ require([
 
     var update_filter_url = function() {
         let filters = parseFilterObj();
-        if(Object.keys(filters).length <= 0) {
+        if (Object.keys(filters).length <= 0) {
             $('.get-filter-uri').attr("disabled","disabled");
             $('.get-filter-uri').attr("title","Select a filter to enable this feature.");
             $('.filter-url').html("");
@@ -1724,8 +1724,8 @@ require([
     var updateFacetsData = function (newFilt) {
         update_filter_url();
         update_bq_filters();
-        if(window.location.href.search(/\/filters\//g) >= 0) {
-            if(!first_filter_load) {
+        if (window.location.href.search(/\/filters\//g) >= 0) {
+            if (!first_filter_load) {
                 window.history.pushState({}, '', window.location.origin + "/explore/")
             } else {
                 first_filter_load = false;
@@ -1800,8 +1800,7 @@ require([
                             if (('filtered_counts' in data) && ('access' in data['filtered_counts']['origin_set']['All']['attributes']) && ('Limited' in data['filtered_counts']['origin_set']['All']['attributes']['access']) && (data['filtered_counts']['origin_set']['All']['attributes']['access']['Limited']['count']>0) ){
                                $('#search_def_access').removeClass('notDisp');
                                $('.access_warn').removeClass('notDisp');
-                            }
-                            else{
+                            } else {
                                 $('#search_def_access').addClass('notDisp');
                                 $('.access_warn').addClass('notDisp');
                             }
@@ -1813,8 +1812,7 @@ require([
                                 $('#search_def_stats').removeClass('notDisp');
                                 $('#search_def_stats').html('<span style="color:red">There are no cases matching the selected set of filters</span>');
                                 //window.alert('There are no cases matching the selected set of filters.')
-                            }
-                            else{
+                            } else {
                                 $('#search_def_stats').addClass('notDisp');
                                 $('#search_def_stats').html("Don't show this!");
                             }
@@ -2026,13 +2024,13 @@ require([
             var titA = lbl.split('Quarter');
             title1=titA[0]+' Quarter';
             title2=titA[1];
-        } else if(lbl.includes('Background')){
+        } else if (lbl.includes('Background')){
             var titA = lbl.split('Activity');
             var titB = titA[1].split('(');
             title0 = titA[0];
             title1= 'Activity '+titB[0];
             title2= '('+titB[1];
-        } else if(lbl.includes('(')){
+        } else if (lbl.includes('(')){
            var titA = lbl.split('(');
            title1=titA[0];
            title2='('+titA[1];
@@ -2130,7 +2128,7 @@ require([
            );
          })
         .on("click",function(d){
-            if(!is_cohort) {
+            if (!is_cohort) {
                 manageUpdateFromPlot(plotId, d.data.key);
             }
         });
@@ -2231,8 +2229,7 @@ require([
             var cntUf=0;
             if (dic.hasOwnProperty('unfilt') && dic['unfilt'].hasOwnProperty(val)) {
                 cntUf = dic['unfilt'][val].count
-            }
-            else {
+            } else {
                 cntUf = 0;
             }
 
@@ -2267,11 +2264,9 @@ require([
         }
         var textFilt=false;
         var textFiltVal='';
-        if ($('#'+filterCat).children('.text-filter').length>0){
+        if ($('#'+filterCat).children('.text-filter').length>0) {
             textFiltVal = $('#'+filterCat).children('.text-filter')[0].value;
-
-        }
-        else if ($('#'+filterCat).find('.collection_value').length>0){
+        } else if ($('#'+filterCat).find('.collection_value').length>0){
             textFiltVal = $('#collection_search')[0].value;
         }
 
@@ -2291,7 +2286,7 @@ require([
                 } else {
                     $('#'+filterCat).attr('data-curmax','NA');
                 }
-            } else{
+            } else {
                 $('#'+filterCat).attr('data-curmin','NA');
                 $('#'+filterCat).attr('data-curmax','NA');
             }
@@ -2320,8 +2315,7 @@ require([
 
                      else if ($(b).children().children('.value').text().trim() < $(a).children().children('.value').text().trim()){
                          return 1;
-                     }
-                     else{
+                     } else {
                          return -1;
                      }
 
@@ -2335,8 +2329,7 @@ require([
                          }
                          else if ( ($(b).children().children('input:checkbox')[0].checked || $(b).children().children('input:checkbox')[0].indeterminate) && !($(a).children().children('input:checkbox')[0].checked || $(a).children().children('input:checkbox')[0].indeterminate)){
                             return 1;
-                         }
-                        else {
+                         } else {
 
                             return (parseFloat($(a).children().children('.case_count').text()) < parseFloat($(b).children().children('.case_count').text()) ? 1 : -1)
                            }
@@ -2438,7 +2431,7 @@ require([
                 if (numMore>0){
                         $('#' + filterCat).children('.more-checks').children('.show-more').removeClass('notDisp');
                         $('#' + filterCat).children('.less-checks').children('.show-less').removeClass('notDisp');
-                    } else{
+                    } else {
                         $('#' + filterCat).children('.more-checks').children('.show-more').addClass('notDisp');
                         $('#' + filterCat).children('.less-checks').children('.show-less').addClass('notDisp');
                     }
@@ -2478,7 +2471,6 @@ require([
                 resetParentVal=true;
             }
 
-
             for (var j = 0; j < filterCats.length; j++) {
                     var ret = updateFilters(filterCats[j],{},false,srch);
                     if (resetParentVal && !(filterCats[j]==='Program')){
@@ -2516,17 +2508,15 @@ require([
     }
 
     var updateFilterSelections = function (id, dicofdic) {
-        filterCats = findFilterCats(id,false);
-        for (i = 0; i < filterCats.length; i++) {
-            cat = filterCats[i]
-            filtDic={'unfilt':'', 'filt':''}
+        let filterCats = findFilterCats(id,false);
+        for (let i = 0; i < filterCats.length; i++) {
+            let cat = filterCats[i]
+            let filtDic = {'unfilt':'', 'filt':''}
 
-            if ( (dicofdic.hasOwnProperty('unfilt')) &&  (dicofdic['unfilt'].hasOwnProperty(cat)))
-            {
+            if ( (dicofdic.hasOwnProperty('unfilt')) &&  (dicofdic['unfilt'].hasOwnProperty(cat))){
                 filtDic['unfilt']=dicofdic['unfilt'][cat]
             }
-            if ( (dicofdic.hasOwnProperty('filt')) && (dicofdic['filt'].hasOwnProperty(cat))  )
-            {
+            if ( (dicofdic.hasOwnProperty('filt')) && (dicofdic['filt'].hasOwnProperty(cat))) {
                 filtDic['filt']=dicofdic['filt'][cat]
             }
             updateFilters(filterCats[i], filtDic, true, false);
@@ -2539,10 +2529,9 @@ require([
         var opInfoElem = $(filterElem).closest('.list-group-item__body, .list-group-sub-item__body','.colections-list').find('.join_val').filter('input:checked')
         if (opInfoElem.length>0){
             operatorInfo = true;
-            operator = opInfoElem.attr('value')
+            operator = opInfoElem.attr('value');
         }
 
-        var checked = $(filterElem).prop('checked');
         var checked = $(filterElem).prop('checked');
         var neighbours =$(filterElem).parentsUntil('.list-group-item__body, .list-group-sub-item__body','ul').children().children().children('input:checkbox');
         var neighboursCk = $(filterElem).parentsUntil('.list-group-item__body, .list-group-sub-item__body','ul').children().children().children(':checked');
@@ -2573,7 +2562,6 @@ require([
                  hasCheckBox = true;
                  numCheckBoxes++;
             } else {
-
                 var filtnmSrc=$(filterCat).children('.list-group-sub-item__body, .list-group-item__body, .collection-list')
                 if (filtnmSrc.length<1){
                     filtnmSrc=$(filterCat).children().children('.collection_id')
@@ -2602,19 +2590,18 @@ require([
                     if (!(filterObj.hasOwnProperty(curCat))) {
                         filterObj[curCat] = new Object();
                         filterObj[curCat]['values'] = new Array();
-                        filterObj[curCat]['op']=operator
                     }
+                    filterObj[curCat]['op'] = operator
                     if (filterObj[curCat]['values'].indexOf(filtnm) < 0) {
-                        filterObj[curCat]['values'].push(filtnm)
+                        filterObj[curCat]['values'].push(filtnm);
                     }
 
-                }
-                else {
+                } else {
                     if (!(filterObj.hasOwnProperty(curCat))) {
                         filterObj[curCat] = new Array();
                     }
                     if (filterObj[curCat].indexOf(filtnm) < 0) {
-                        filterObj[curCat].push(filtnm)
+                        filterObj[curCat].push(filtnm);
                     }
                 }
 
@@ -2817,8 +2804,7 @@ require([
                         } else if (!$(ckElem).parent().parent().hasClass('filtByVal')) {
                             ckElem.checked = isCheck;
                         }
-                    }
-                    else {
+                    } else {
                         ckElem.checked = isCheck;
                     }
 
@@ -2877,8 +2863,7 @@ require([
                 $(this).find('.less-checks').remove();
                 $(this).find('.sorter').remove();
                 $('#'+this.id+'_list').addClass('hide');
-            }
-            else {
+            } else {
                 var slideDivId = $(this).prop('id') + '_slide';
                 curmin = $(this).attr('data-curmin');
                 curmax = $(this).attr('data-curmax');
@@ -2932,15 +2917,14 @@ require([
                 $(this).append(cntrlDiv);
                 $(this).find('.sliderset').keypress(function(event){
                    var keycode = (event.keyCode ? event.keyCode : event.which);
-                   if(keycode == '13'){
+                   if (keycode == '13'){
 
                    try {
                       var txtlower = parseFloat($(this).parent().find('.sl_lower').val());
                       var txtupper = parseFloat($(this).parent().find('.sl_upper').val());
                       if (txtlower<=txtupper){
                         setSlider($(this).closest('.hasSlider')[0].id+"_slide", false, txtlower, txtupper, false,true);
-                      }
-                      else{
+                      } else {
                           $(this).closest('.hasSlider').find('.slider-message').removeClass('notDisp');
 
                       }
@@ -2952,7 +2936,7 @@ require([
                }
               });
 
-            } else{
+            } else {
                 $(this).removeClass('hasSlider');
 
             }
@@ -3032,7 +3016,7 @@ require([
                });
             });
         });
-        if(sliders.length > 0) {
+        if (sliders.length > 0) {
             load_sliders(sliders, false);
         }
         mkFiltText();
@@ -3151,7 +3135,7 @@ require([
     };
 
     $('#save-cohort-btn').on('click', function() {
-        if(!user_is_auth) {
+        if (!user_is_auth) {
             save_anonymous_selection_data();
             location.href=$(this).data('uri');
         }
@@ -3218,7 +3202,7 @@ require([
                  }
              }
          }
-         if(loadPending) {
+         if (loadPending) {
              loadPending.done(function() {
                  load_filter_selections(showFilters);
              });
@@ -3231,8 +3215,7 @@ require([
 
          if (srt.hasClass('notDisp')){
              srt.removeClass('notDisp');
-         }
-         else{
+         } else {
              srt.addClass('notDisp');
          }
          $(this).parent().parent().parent().find('.text-filter, .collection-text-filter').addClass('notDisp');
@@ -3247,8 +3230,7 @@ require([
          if (srch.hasClass('notDisp')){
              srch.removeClass('notDisp');
              srch[0].focus();
-         }
-         else{
+         } else {
              srch.addClass('notDisp');
          }
          $(this).parent().parent().parent().find('.cntr').addClass('notDisp');
