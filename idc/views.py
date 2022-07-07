@@ -376,9 +376,9 @@ def populate_tables(request):
                 newRow = {}
                 for field in fields:
                     if field in rec:
-                        newRow[field]=rec[field]
+                        newRow[field] = rec[field]
                     else:
-                        newRow[field]=''
+                        newRow[field] = ''
                 tableRes.append(newRow)
                 curInd = curInd + 1
             filters[tableIndex]=idsFilt
@@ -393,7 +393,7 @@ def populate_tables(request):
                     tableRow = tableRes[order[id]]
                     for facet in facetfields:
                         if facet in rec:
-                            tableRow[facet]=rec[facet]
+                            tableRow[facet] = rec[facet]
                         else:
                             tableRow[facet] = 0
         else:
