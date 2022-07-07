@@ -259,7 +259,14 @@ require([
 
                     var oArray = oVals.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
                     nstr = '<span class="filter-type">' + disp + '</span>';
-                    nstr += 'IN (' + oArray.join("") + ')';
+                    var joinElem = $('#'+curKey).find('.join_val').filter(':checked');
+                    if (joinElem.length >0){
+                       var joinstr=joinElem.attr("value");
+                       nstr += 'IN (' + oArray.join(joinstr) + ')';
+                    }
+                    else {
+                        nstr += 'IN (' + oArray.join("") + ')';
+                    }
                     if (curKey ==='access'){
                      accessStr=nstr;
                     }
@@ -2527,6 +2534,15 @@ require([
     };
 
     var checkFilters = function(filterElem) {
+        var operatorInfo = false;
+        var operator=""
+        var opInfoElem = $(filterElem).closest('.list-group-item__body, .list-group-sub-item__body','.colections-list').find('.join_val').filter('input:checked')
+        if (opInfoElem.length>0){
+            operatorInfo = true;
+            operator = opInfoElem.attr('value')
+        }
+
+        var checked = $(filterElem).prop('checked');
         var checked = $(filterElem).prop('checked');
         var neighbours =$(filterElem).parentsUntil('.list-group-item__body, .list-group-sub-item__body','ul').children().children().children('input:checkbox');
         var neighboursCk = $(filterElem).parentsUntil('.list-group-item__body, .list-group-sub-item__body','ul').children().children().children(':checked');
@@ -2581,11 +2597,25 @@ require([
                 if (!(checkBox.indeterminate)) {
                     checkBox.checked = true;
                 }
-                if (!(filterObj.hasOwnProperty(curCat))){
-                    filterObj[curCat] = new Array();
+
+                if (operatorInfo){
+                    if (!(filterObj.hasOwnProperty(curCat))) {
+                        filterObj[curCat] = new Object();
+                        filterObj[curCat]['values'] = new Array();
+                        filterObj[curCat]['op']=operator
+                    }
+                    if (filterObj[curCat]['values'].indexOf(filtnm) < 0) {
+                        filterObj[curCat]['values'].push(filtnm)
+                    }
+
                 }
-                if (filterObj[curCat].indexOf(filtnm)<0){
-                    filterObj[curCat].push(filtnm)
+                else {
+                    if (!(filterObj.hasOwnProperty(curCat))) {
+                        filterObj[curCat] = new Array();
+                    }
+                    if (filterObj[curCat].indexOf(filtnm) < 0) {
+                        filterObj[curCat].push(filtnm)
+                    }
                 }
 
             }
@@ -2593,14 +2623,26 @@ require([
             if (!checked && ( (ind===0) || ( (ind===1) && hasCheckBox && noneChecked)) ){
                checkBox.checked = false;
                //checkBox.indeterminate =  false;
-               if ( filterObj.hasOwnProperty(curCat) && (filterObj[curCat].indexOf(filtnm)>-1) ){
-                    pos = filterObj[curCat].indexOf(filtnm);
-                    filterObj[curCat].splice(pos,1);
-                    if (Object.keys(filterObj[curCat]).length===0){
-                         delete filterObj[curCat];
-                    }
-               }
+               if ( filterObj.hasOwnProperty(curCat)) {
+                   if (operatorInfo) {
+                       if (filterObj[curCat]['values'].indexOf(filtnm) > -1) {
+                           pos = filterObj[curCat]['values'].indexOf(filtnm);
+                           filterObj[curCat]['values'].splice(pos, 1);
+                           if (Object.keys(filterObj[curCat]['values']).length === 0) {
+                               delete filterObj[curCat];
+                           }
+                       }
 
+                   } else {
+                       if (filterObj[curCat].indexOf(filtnm) > -1) {
+                           pos = filterObj[curCat].indexOf(filtnm);
+                           filterObj[curCat].splice(pos, 1);
+                           if (Object.keys(filterObj[curCat]).length === 0) {
+                               delete filterObj[curCat];
+                           }
+                       }
+                   }
+               }
                if (curCat.length>0){
                  curCat+="."
                  }
@@ -2637,6 +2679,10 @@ require([
         }
     };
 
+    var applyFilters = function(){
+        mkFiltText();
+        updateFacetsData(true);
+    }
     var handleFilterSelectionUpdate = function(filterElem, mkFilt, doUpdate) {
         checkFilters(filterElem);
         if (mkFilt) {
@@ -2683,7 +2729,17 @@ require([
         $(tbl).find('tbody').append(rowSet);
     };
 
+
     var filterItemBindings = function (filterId) {
+
+        $('#' + filterId).find('.join_val').on('click', function () {
+            var attribute = $(this).closest('.list-group-item__body, .list-group-sub-item__body','.colections-list')[0].id;
+            if (filterObj.hasOwnProperty(attribute) && (window.filterObj[attribute]['values'].length>1)){
+                mkFiltText();
+                filterObj[attribute]['op']=$(this).attr('value');
+                updateFacetsData(true);
+            }
+        });
 
         $('#' + filterId).find('input:checkbox').not('#hide-zeros').on('click', function () {
             handleFilterSelectionUpdate(this, true, true);
@@ -2948,6 +3004,15 @@ require([
                         }
                      } else {
                        _.each(filter['values'], function (val) {
+                           if  ( ( $(selEle).find('.join_val').length>0) && (filter.hasOwnProperty('op')) )
+                           {
+                               if (filter['op']=='O'){
+                                   $(selEle).find('.join_val').filter('input[value=OR]').prop("checked",true)
+                               }
+                               else if (filter['op']=='A'){
+                                   $(selEle).find('.join_val').filter('input[value=AND]').prop("checked",true)
+                               }
+                           }
                            if ($(selEle).find('input[data-filter-attr-id="' + filter['id'] + '"][value="' + val + '"]').length>0) {
                                attValueFoundInside = true;
                            }
