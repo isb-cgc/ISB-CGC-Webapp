@@ -1706,10 +1706,15 @@ require([
             $('.get-filter-uri').attr("title","Click to display this filter set's Query URL.");
             let url = BASE_URL+"/explore/filters/?";
             let encoded_filters = []
-            for (i in filters) {
+            for (let i in filters) {
                 if (filters.hasOwnProperty(i)) {
-                    _.each(filters[i], function (val) {
-                        encoded_filters.push(i + "=" + encodeURI(val));
+                    let vals = filters[i];
+                    if(!Array.isArray(filters[i])) {
+                        vals = filters[i]['values'];
+                        encoded_filters.push(i+"_op="+encodeURI(filters[i]['op']));
+                    }
+                    _.each(vals, function (val) {
+                        encoded_filters.push(i+"="+encodeURI(val));
                     });
                 }
             }
@@ -2984,17 +2989,19 @@ require([
                                 'id': $('div.list-group-item__body[data-filter-attr-id="' + filter['id'] + '"]').children('.ui-slider')[0].id,
                                 'left_val': left_val,
                                 'right_val': right_val,
-                            })
+                            });
                         }
                      } else {
                        _.each(filter['values'], function (val) {
-                           if  ( ( $(selEle).find('.join_val').length>0) && (filter.hasOwnProperty('op')) )
-                           {
-                               if (filter['op']=='O'){
-                                   $(selEle).find('.join_val').filter('input[value=OR]').prop("checked",true)
-                               }
-                               else if (filter['op']=='A'){
-                                   $(selEle).find('.join_val').filter('input[value=AND]').prop("checked",true)
+                           if (filter.hasOwnProperty('op')) {
+                               if($(selEle).find('.join_val').length>0) {
+                                   $(selEle).find('.join_val').filter('input[value=' + filter['op'].toUpperCase() + ']').prop("checked", true);
+                               } else {
+                                   filter['op'] !== 'OR' && base.showJsMessage(
+                                       "warning",
+                                       "Invalid operator seen for attribute '"+$(selEle).attr('id')+"'; default of OR used instead.",
+                                       true
+                                   );
                                }
                            }
                            if ($(selEle).find('input[data-filter-attr-id="' + filter['id'] + '"][value="' + val + '"]').length>0) {
@@ -3009,7 +3016,8 @@ require([
 
                     /*$(selEle).collapse('show');
                     $(selEle).find('.show-more').triggerHandler('click');
-                    $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
+                    $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' +
+                    $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
                      */
                     showFilters.push([selEle,selector]);
                 }
@@ -3213,7 +3221,7 @@ require([
          //alert('hi');
          srt=$(this).parent().parent().parent().find('.cntr')
 
-         if (srt.hasClass('notDisp')){
+         if (srt.hasClass('notDisp')) {
              srt.removeClass('notDisp');
          } else {
              srt.addClass('notDisp');
@@ -3227,7 +3235,7 @@ require([
          //alert('hi');
          srch=$(this).parent().parent().parent().find('.text-filter, .collection-text-filter, .analysis-text-filter');
 
-         if (srch.hasClass('notDisp')){
+         if (srch.hasClass('notDisp')) {
              srch.removeClass('notDisp');
              srch[0].focus();
          } else {
@@ -3410,26 +3418,23 @@ require([
             let deferred = $.Deferred();
 
             $.ajax({
-              url: url,
-              data: nhs,
-              dataType: 'json',
-              type: 'post',
-              contentType: 'application/x-www-form-urlencoded',
-              beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
-              success: function (data) {
-                  try {
-                     console.log('ui history saved');
-                  }
-                  finally {
-                     deferred.resolve();
-                  }
-               },
-              error: function(data){
-                console.log('error saving ui history');
-              }
+                url: url,
+                data: nhs,
+                dataType: 'json',
+                type: 'post',
+                contentType: 'application/x-www-form-urlencoded',
+                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+                success: function (data) {
+                },
+                error: function(data){
+                    console.debug('Error saving ui history:');
+                    console.debug(data);
+                },
+                complete: function(data) {
+                    deferred.resolve();
+                }
+            });
         });
-        });
-
         if (document.contains(document.getElementById('history'))){
             updateViaHistory();
         }

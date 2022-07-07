@@ -254,8 +254,8 @@ def populate_tables(request):
 
         sortByField = True
         #idsReq=[]
-        custom_facets=''
-        custom_facets_order=''
+        custom_facets = None
+        custom_facets_order = None
         if table_type == 'cases':
             custom_facets = {"per_id": {"type": "terms", "field": "PatientID", "limit": limit,
                                 "facet": {"unique_study": "unique(StudyInstanceUID)",
@@ -492,8 +492,6 @@ def explore_data_page(request, filter_path=False, path_filters=None):
         if wcohort and is_json:
             filters = cohort_filters
 
-        print(filters)
-
         context = build_explorer_context(
             is_dicofdic, source, versions, filters, fields, order_docs, counts_only, with_related, with_derived,
             collapse_on, is_json, uniques=uniques, totals=totals
@@ -561,7 +559,14 @@ def parse_explore_filters(request):
     try:
         if not request.GET:
             raise Exception("This call only supports GET!")
-        filters = {x: request.GET.getlist(x) for x in request.GET.keys()}
+        raw_filters = {x: request.GET.getlist(x) for x in request.GET.keys()}
+        filters = {}
+        filter_ops = {}
+        for x in raw_filters:
+            if re.search('_op', x):
+                filter_ops[x[:x.rfind('_')]] = raw_filters[x][0]
+            else:
+                filters[x] = raw_filters[x]
         # determine if any of the filters are misnamed
         filter_name_map = {(x[:x.rfind('_')] if re.search('_[gl]te?|_e?btwe?', x) else x): x for x in filters.keys()}
         attr_names = filter_name_map.keys()
@@ -584,7 +589,11 @@ def parse_explore_filters(request):
                 )
             else:
                 if len(attrs) > 0:
-                    filters = [{"id": attr_map[x]['id'], "values": filters[attr_map[x]['filter']]} for x in attr_map]
+                    filters = [{
+                        "id": attr_map[x]['id'],
+                        "values": filters[attr_map[x]['filter']],
+                        "op": filter_ops.get(x, 'OR')
+                    } for x in attr_map]
                     return explore_data_page(request, filter_path=True, path_filters=[{"filters": filters}])
 
     except Exception as e:
