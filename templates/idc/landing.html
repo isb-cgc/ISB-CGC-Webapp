@@ -57,62 +57,92 @@
         <div class="features row">
             <div class="container-fluid">
             <div class="col-lg-4 col-md-5 col-sm-12">
-                <div class="modality option2">
-                    <div class="modality-panel">
-                        <div class="tab-content">
-                            <div class="tab-pane active" id="ct-example">
-                                <div class="modality-heading"><h4>RADIOLOGY</h4></div>
-                                <a href="{{ DICOM_STORE_PATH }}1.3.6.1.4.1.14519.5.2.1.6279.6001.224985459390356936417021464571?seriesInstanceUID=1.2.276.0.7230010.3.1.3.0.57823.1553343864.578877,1.3.6.1.4.1.14519.5.2.1.6279.6001.273525289046256012743471155680"
-                                   target="_blank" rel="noopener noreferrer" title="Click to see in IDC Viewer">
-                                    <img class="ct-example example" data-study-id="1.3.6.1.4.1.14519.5.2.1.6279.6001.224985459390356936417021464571" src="{% static 'img/ct_ex.jpg' %}" />
-                                </a>
+                <div id="modality-carousel" class="carousel slide modality" data-ride="carousel">
+
+                    <!-- Indicators -->
+                    <ol class="carousel-indicators">
+                        <li data-target="#modality-carousel" title="Computed Tomopgrahy" data-slide-to="0" class="active"></li>
+                        <li data-target="#modality-carousel" title="Magnetic Resonance" data-slide-to="1"></li>
+                        <li data-target="#modality-carousel" title="Positron Emission Tomography" data-slide-to="2"></li>
+                        <li data-target="#modality-carousel" title="Slide Microscopy" data-slide-to="3"></li>
+                        <li data-target="#modality-carousel" title="Human Tumor Atlas Network" data-slide-to="4"></li>
+                    </ol>
+                    <div class="pause-resume">
+                        <span class="pause-carousel" title="Pause images"><i class="fa-solid fa-pause-circle"></i></span>
+                        <span class="play-carousel" title="Resume images" style="display: none;"><i class="fa-solid fa-play-circle"></i></span>
+                    </div>
+                    <!-- Content -->
+                    <div class="carousel-inner" role="listbox">
+
+                        <!-- CT Example -->
+                        <div class="item active">
+                            <div>
+                            <a href="{{ DICOM_STORE_PATH }}1.3.6.1.4.1.14519.5.2.1.6279.6001.224985459390356936417021464571?seriesInstanceUID=1.2.276.0.7230010.3.1.3.0.57823.1553343864.578877,1.3.6.1.4.1.14519.5.2.1.6279.6001.273525289046256012743471155680"
+                               target="_blank" rel="noopener noreferrer" title="Click to see in IDC Viewer">
+                            <img data-study-id="1.3.6.1.4.1.14519.5.2.1.6279.6001.224985459390356936417021464571" src="{% static 'img/ct_ex.jpg' %}" alt="CT Example Image">
+                            </a>
                             </div>
-                            <div class="tab-pane" id="mr-example">
-                                <div class="modality-heading"><h4>RADIOLOGY</h4></div>
-                                <a href="{{ DICOM_STORE_PATH }}1.3.6.1.4.1.14519.5.2.1.7311.5101.170561193612723093192571245493?seriesInstanceUID=1.3.6.1.4.1.14519.5.2.1.7311.5101.206828891270520544417996275680,1.2.276.0.7230010.3.1.3.1070885483.15960.1599120307.701"
-                                   target="_blank" rel="noopener noreferrer" title="Click to see in IDC Viewer">
-                                    <img class="mr-example example" data-study-id="1.3.6.1.4.1.14519.5.2.1.7311.5101.170561193612723093192571245493" src="{% static 'img/mr_ex.jpg' %}" />
-                                </a>
+                            <div class="carousel-caption">
+                                <h3>Computed Tomography (CT)</h3>
                             </div>
-                            <div class="tab-pane" id="pet-example">
-                                <div class="modality-heading"><h4>RADIOLOGY</h4></div>
-                                <a href="{{ DICOM_STORE_PATH }}1.3.6.1.4.1.14519.5.2.1.5168.1900.259520120774497994844579066293"
-                                   target="_blank" rel="noopener noreferrer" title="Click to see in IDC Viewer">
-                                    <img class="pet-example example" data-study-id="1.3.6.1.4.1.14519.5.2.1.5168.1900.259520120774497994844579066293" src="{% static 'img/pet_ex.jpg' %}" />
-                                </a>
+                        </div>
+
+                        <!-- MR Example -->
+                        <div class="item">
+                            <a href="{{ DICOM_STORE_PATH }}1.3.6.1.4.1.14519.5.2.1.7311.5101.170561193612723093192571245493?seriesInstanceUID=1.3.6.1.4.1.14519.5.2.1.7311.5101.206828891270520544417996275680,1.2.276.0.7230010.3.1.3.1070885483.15960.1599120307.701"
+                               target="_blank" rel="noopener noreferrer" title="Click to see in IDC Viewer">
+                            <img src="{% static 'img/mr_ex.jpg' %}" data-study-id="1.3.6.1.4.1.14519.5.2.1.7311.5101.170561193612723093192571245493" alt="MR Example Image">
+                            </a>
+                            <div class="carousel-caption">
+                                <h3>Magnetic Resonance (MR)</h3>
                             </div>
-                            <div class="tab-pane" id="path-example">
-                                <div class="modality-heading"><h4>PATHOLOGY</h4></div>
-                                <a href="{{ SLIM_VIEWER_PATH }}2.25.211094631316408413440371843585977094852/series/1.3.6.1.4.1.5962.99.1.208792987.352384958.1640886332827.2.0"
-                                   target="_blank" rel="noopener noreferrer" title="Click to see in IDC SliM Viewer">
-                                    <img class="path-example example" data-study-id="2.25.211094631316408413440371843585977094852" src="{% static 'img/path_ex.jpg' %}" />
-                                </a>
+                        </div>
+
+                        <!-- PET Example -->
+                        <div class="item">
+                            <a href="{{ DICOM_STORE_PATH }}1.3.6.1.4.1.14519.5.2.1.5168.1900.259520120774497994844579066293"
+                               target="_blank" rel="noopener noreferrer" title="Click to see in IDC Viewer">
+                            <img src="{% static 'img/pet_ex.jpg' %}" data-study-id="1.3.6.1.4.1.14519.5.2.1.5168.1900.259520120774497994844579066293" alt="PET Example Image">
+                            </a>
+                            <div class="carousel-caption">
+                                <h3>Positron Emission Tomography (PET)</h3>
+                            </div>
+                        </div>
+
+                        <!-- SM Example -->
+                        <div class="item">
+                            <a href="{{ SLIM_VIEWER_PATH }}2.25.211094631316408413440371843585977094852/series/1.3.6.1.4.1.5962.99.1.208792987.352384958.1640886332827.2.0"
+                               target="_blank" rel="noopener noreferrer" title="Click to see in IDC SliM Viewer">
+                            <img src="{% static 'img/path_ex.jpg' %}" data-study-id="2.25.211094631316408413440371843585977094852" alt="SM Example Image">
+                            </a>
+                            <div class="carousel-caption">
+                                <h3>Slide Microscopy (SM)</h3>
+                            </div>
+                        </div>
+
+                        <!-- HTAN Example -->
+                        <div class="item">
+                            <a href="{{ SLIM_VIEWER_PATH }}"
+                               target="_blank" rel="noopener noreferrer" title="Click to see in IDC SliM Viewer">
+                            <img src="{% static 'img/path_ex.jpg' %}" data-study-id="" alt="HTAN Example Image">
+                            </a>
+                            <div class="carousel-caption">
+                                <h3>Human Tumor Atlas Network (HTAN)</h3>
                             </div>
                         </div>
                     </div>
-                    <ul id="modality-nav-tabs" class="nav nav-tabs" role="tablist">
-                        <li class="active">
-                            <a href="#ct-example" role="tab" data-toggle="tab">
-                                Computed Tomography (CT)
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#mr-example" role="tab" data-toggle="tab">
-                                Magnetic Resonance (MR)
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#pet-example" role="tab" data-toggle="tab">
-                                Positron Emission Tomography (PET)
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#path-example" role="tab" data-toggle="tab">
-                                Slide Microscopy (SM)
-                            </a>
-                        </li>
-                    </ul>
-            </div>
+
+                    <!-- Previous/Next controls -->
+                    <a class="left carousel-control" href="#modality-carousel" role="button" data-slide="prev">
+                        <span class="icon-prev" aria-hidden="true"></span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <a class="right carousel-control" href="#modality-carousel" role="button" data-slide="next">
+                        <span class="icon-next" aria-hidden="true"></span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </div>
+
             </div>
             <div class="col-lg-8 col-md-7 col-sm-12 sapiens">
                 <div class="sapiens-heading"><h4>Cases by Major Primary Site</h4></div>
