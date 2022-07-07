@@ -384,10 +384,16 @@
                                                                placeholder="Search..."
                                                                onkeyup="updateFilters( '{{ attr.name }}',{},false, true)">
                                                         {% if attr.name == "Modality" %}
-                                                                Join multiple by: <input type="radio" class="join_val"
-                                                                            name="{{ attr.name }}_join" value="OR" checked>OR
-                                                            <input type="radio" class="join_val" name="{{ attr.name }}_join"
-                                                                   value="AND">AND <br>
+                                                                Find studies with
+                                                                    <input id="{{ attr.name }}_join_or" type="radio"
+                                                                           class="join_val" name="{{ attr.name }}_join"
+                                                                           value="OR" checked>
+                                                                    <label for="{{ attr.name }}_join_or" class="join">ANY</label>
+                                                                    <input id="{{ attr.name }}_join_and" type="radio"
+                                                                           class="join_val" name="{{ attr.name }}_join"
+                                                                        value="AND">
+                                                                    <label for="{{ attr.name }}_join_and" class="join">ALL</label>
+                                                                selected modalities
                                                             {% endif %}
 
                                                         <div class="sorter cntr notDisp">

@@ -4359,3 +4359,14 @@ ul.errorlist {
 d-topics-list iframe {
   width: 800px !important;
 }
+
+input.join_val {
+  vertical-align: middle;
+  margin-top: -1px;
+  margin-left: 5px;
+}
+
+label.join:last-of-type {
+  margin-right: 5px;
+}
+
