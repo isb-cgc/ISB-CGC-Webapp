@@ -4366,7 +4366,7 @@ input.join_val {
   margin-left: 5px;
 }
 
-input.join_val:last-of-type {
+label.join:last-of-type {
   margin-right: 5px;
 }
 
