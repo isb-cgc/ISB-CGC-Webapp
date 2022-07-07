@@ -17,6 +17,7 @@
 from builtins import str
 import time
 import json
+from json.decoder import JSONDecodeError
 import logging
 import sys
 import datetime
@@ -36,9 +37,12 @@ from cohorts.models import Cohort, Cohort_Perms
 from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute, Attribute_Tooltips
 from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata
 from allauth.socialaccount.models import SocialAccount
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.signals import user_login_failed
 from django.dispatch import receiver
+from idc.models import User_Data
+
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
@@ -58,7 +62,6 @@ def landing_page(request):
     sapien_counts = {}
 
     changes = {
-        #'Renal': 'Kidney',
         'Head': 'Head and Neck',
         'Head-Neck': 'Head and Neck',
         'Head-and-Neck': 'Head and Neck',
@@ -205,6 +208,23 @@ def quota_page(request):
 
 
 @login_required
+def ui_hist_page(request):
+    req = request.POST or request.GET
+    hist = req['his']
+    try:
+        user_data = User_Data.objects.get(user_id=request.user.id)
+        user_data.history = hist
+
+    except ObjectDoesNotExist:
+        user_data_dict = {'user_id': request.user.id, "history": hist}
+        user_data = User_Data(**user_data_dict)
+
+    user_data.save()
+
+    return HttpResponse('')
+
+
+@login_required
 def populate_tables(request):
     response = {}
     status = 200
@@ -234,8 +254,8 @@ def populate_tables(request):
 
         sortByField = True
         #idsReq=[]
-        custom_facets=''
-        custom_facets_order=''
+        custom_facets = None
+        custom_facets_order = None
         if table_type == 'cases':
             custom_facets = {"per_id": {"type": "terms", "field": "PatientID", "limit": limit,
                                 "facet": {"unique_study": "unique(StudyInstanceUID)",
@@ -356,9 +376,9 @@ def populate_tables(request):
                 newRow = {}
                 for field in fields:
                     if field in rec:
-                        newRow[field]=rec[field]
+                        newRow[field] = rec[field]
                     else:
-                        newRow[field]=''
+                        newRow[field] = ''
                 tableRes.append(newRow)
                 curInd = curInd + 1
             filters[tableIndex]=idsFilt
@@ -373,7 +393,7 @@ def populate_tables(request):
                     tableRow = tableRes[order[id]]
                     for facet in facetfields:
                         if facet in rec:
-                            tableRow[facet]=rec[facet]
+                            tableRow[facet] = rec[facet]
                         else:
                             tableRow[facet] = 0
         else:
@@ -505,6 +525,20 @@ def explore_data_page(request, filter_path=False, path_filters=None):
                     }]}]
                 context['filters_for_load'] = filters_for_load
 
+            request.session['fav'] = 'temp'
+            context['hist'] = ''
+            user_data = User_Data.objects.get(user_id=request.user.id)
+            context['history'] = json.loads(user_data.history)
+
+    except JSONDecodeError as e:
+        logger.error("[ERROR] While attempting to load the search page:")
+        logger.error("Invalid JSON format received.")
+        logger.exception(e)
+        messages.error(
+            request,
+            "The filters supplied contained invalid JSON."
+        )
+        status = 400
     except Exception as e:
         logger.error("[ERROR] While attempting to load the search page:")
         logger.exception(e)
@@ -525,7 +559,14 @@ def parse_explore_filters(request):
     try:
         if not request.GET:
             raise Exception("This call only supports GET!")
-        filters = {x: request.GET.getlist(x) for x in request.GET.keys()}
+        raw_filters = {x: request.GET.getlist(x) for x in request.GET.keys()}
+        filters = {}
+        filter_ops = {}
+        for x in raw_filters:
+            if re.search('_op', x):
+                filter_ops[x[:x.rfind('_')]] = raw_filters[x][0]
+            else:
+                filters[x] = raw_filters[x]
         # determine if any of the filters are misnamed
         filter_name_map = {(x[:x.rfind('_')] if re.search('_[gl]te?|_e?btwe?', x) else x): x for x in filters.keys()}
         attr_names = filter_name_map.keys()
@@ -542,11 +583,17 @@ def parse_explore_filters(request):
             if blacklist.search(str(filters)):
                 logger.warning("[WARNING] Saw bad filters in filters_for_load:")
                 logger.warning(filters)
-                messages.error(request,
-                               "There was a problem with some of your filters - please ensure they're properly formatted.")
+                messages.error(
+                    request,
+                    "There was a problem with some of your filters - please ensure they're properly formatted."
+                )
             else:
                 if len(attrs) > 0:
-                    filters = [{"id": attr_map[x]['id'], "values": filters[attr_map[x]['filter']]} for x in attr_map]
+                    filters = [{
+                        "id": attr_map[x]['id'],
+                        "values": filters[attr_map[x]['filter']],
+                        "op": filter_ops.get(x, 'OR')
+                    } for x in attr_map]
                     return explore_data_page(request, filter_path=True, path_filters=[{"filters": filters}])
 
     except Exception as e:

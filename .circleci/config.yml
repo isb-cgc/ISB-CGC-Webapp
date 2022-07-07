@@ -119,6 +119,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Fix for bug with Git and Ubuntu 20+
+          command: |
+            SHA=$(git rev-list -1 HEAD)
+            echo "export APP_SHA=${SHA:0:7}" >> $BASH_ENV
+      - run:
           name: Set Python Path
           command: |
             echo "export PYTHONPATH=/home/circleci/${CIRCLE_PROJECT_REPONAME}:/home/circleci/${CIRCLE_PROJECT_REPONAME}/lib:/home/circleci/${CIRCLE_PROJECT_REPONAME}/IDC-Common" >> $BASH_ENV

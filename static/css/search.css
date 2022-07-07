@@ -42,12 +42,26 @@
    color:#808080;
 }
 
-.notDisp{
-    display:none;
+.notDisp {
+    display: none !important;
 }
 
-.notVis{
-    visibility:hidden;
+.display-block {
+    display: block;
+}
+
+.notVis {
+    visibility: hidden;
+}
+
+input.join_val, input.sort_val {
+    vertical-align: middle;
+    margin-top: -1px;
+    margin-left: 5px;
+}
+
+label.join:last-of-type {
+    margin-right: 5px;
 }
 
 .multiSel{
@@ -169,6 +183,7 @@ bottom: 95%; /* At the top of the tooltip */
     border: 2px solid #476a75;
     border-radius: 3px;
     width: 200px;
+    display: block;
 }
 
 .cntr {

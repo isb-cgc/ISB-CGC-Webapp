@@ -67,4 +67,17 @@ require([
             $('.'+$(this).data('display-target')).show();
         }
     });
+
+    $('.pause-carousel').on('click', function() {
+        $("#modality-carousel").carousel('pause');
+        $('.pause-carousel').hide();
+        $('.play-carousel').show();
+    });
+
+    $('.play-carousel').on('click', function() {
+        $("#modality-carousel").carousel('cycle');
+        $('.pause-carousel').show();
+        $('.play-carousel').hide();
+    });
+
 });
