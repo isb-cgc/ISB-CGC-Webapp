@@ -138,6 +138,5 @@ if [ -n "${CI}" ]; then
     else
         TIER=${DEPLOYMENT_TIER,,}
     fi
-    SHA=$(git rev-list -1 HEAD)
-    echo "APP_VERSION=${TIER}.$(date '+%Y%m%d%H%M').${SHA:0:7}" > ${HOMEROOT}/version.env
+    echo "APP_VERSION=${TIER}.$(date '+%Y%m%d%H%M').${APP_SHA}" > ${HOMEROOT}/version.env
 fi

@@ -61,6 +61,8 @@ require([
     window.projSets['qin'] = ["qin_headneck","qin_lung_ct","qin_pet_phantom","qin_breast_dce_mri"];
     var first_filter_load = true;
 
+    var defaultFilter=new Object();
+    defaultFilter['access']=['Public']
     var plotLayout = {
         title: '',
         autosize: true,
@@ -158,7 +160,7 @@ require([
         if (reset) {
             if (  (window.filterObj.hasOwnProperty(filtAtt)) && (window.filterObj[filtAtt].hasOwnProperty('rng')) ) {
                 delete window.filterObj[filtAtt]['rng'];
-                if('none' in window.filterObj[filtAtt]){
+                if ('none' in window.filterObj[filtAtt]){
                     window.filterObj[filtAtt]['type']='none';
                 } else {
                     delete window.filterObj[filtAtt];
@@ -257,7 +259,14 @@ require([
 
                     var oArray = oVals.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
                     nstr = '<span class="filter-type">' + disp + '</span>';
-                    nstr += 'IN (' + oArray.join("") + ')';
+                    var joinElem = $('#'+curKey).find('.join_val').filter(':checked');
+                    if (joinElem.length >0){
+                       var joinstr=joinElem.attr("value");
+                       nstr += 'IN (' + oArray.join(joinstr) + ')';
+                    }
+                    else {
+                        nstr += 'IN (' + oArray.join("") + ')';
+                    }
                     if (curKey ==='access'){
                      accessStr=nstr;
                     }
@@ -328,7 +337,7 @@ require([
                 //$(elem).parent().parent().addClass('isActive');
             }
 
-            else{
+            else {
                 if ((id in window.filterObj) && ('none' in window.filterObj[id])){
                     delete window.filterObj[id]['none'];
                     if (!('rng' in window.filterObj[id])){
@@ -409,7 +418,7 @@ require([
         if (isActive){
             $('#'+divName).find('.reset').removeClass('disabled');
         }
-        else{
+        else {
             $('#'+divName).find('.reset').addClass('disabled');
         }
 
@@ -462,7 +471,7 @@ require([
                     if (index ==0) {
                         $(this).text(lower.toString());
                     }
-                    else{
+                    else {
                         $(this).text(upper.toString());
                     }
                });
@@ -490,7 +499,7 @@ require([
             if ( (projId in collectionsData) && (!hasColl || (collFilt.indexOf(projId)>-1)) ){
                 cRow[3] = collectionsData[projId]['count'];
             }
-            else{
+            else {
                cRow[3] = 0;
             }
             if (cRow[3]===0){
@@ -507,7 +516,7 @@ require([
                     delete window.selItems.selCases[projId];
                 }
             }
-            else{
+            else {
                 usedCollectionData.push(cRow);
             }
 
@@ -700,7 +709,7 @@ require([
                             if (window.selItems.selProjects.indexOf(data)>-1) {
                                 return '<input type="checkbox" checked>'
                             }
-                            else{
+                            else {
                                 return '<input type="checkbox">'
                             }
                         }
@@ -754,7 +763,7 @@ require([
                 if ( (cache.backendReqStrt<=request.start) && ( (cache.backendReqStrt+cache.backendReqLength) >= (request.start+request.length)  )){
                     updateNeeded=false;
                 }
-                else{
+                else {
                     updateNeeded = true;
                 }
             } else if (cache.cacheLength===cache.recordsTotal){
@@ -774,7 +783,7 @@ require([
             if (isNum){
                 cmp=parseFloat(a[col])- parseFloat(b[col]);
             }
-            else{
+            else {
                 cmp=(a[col]>b[col] ? 1 :  a[col]==b[col]? 0: -1)
             }
 
@@ -786,7 +795,7 @@ require([
                 if (auxIsNum){
                     cmp=parseFloat(a[auxCol])- parseFloat(b[auxCol]);
                 }
-                else{
+                else {
                     cmp=(a[auxCol]>b[auxCol] ? 1 :  a[auxCol]==b[auxCol]? 0: -1)
                 }
 
@@ -812,7 +821,7 @@ require([
             auxCol = cache.colOrder[auxColId]
             auxIsNum = ( $(thead.children('tr').children().get(auxColId)).hasClass('numeric_data') ? true: false);
         }
-        else{
+        else {
             auxColId=-1
             auxCol=''
             auxIsNum= false;
@@ -1196,7 +1205,7 @@ require([
                             if (row['access'].includes('Limited') ) {
                                 return '<i class="fa-solid fa-circle-minus coll-explain"></i>';
                             }
-                            else{
+                            else {
                                 var modality = row['Modality'];
                                 if ((modality[0] === 'SM') || (modality === 'SM')) {
                                     return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
@@ -1244,11 +1253,8 @@ require([
                         var ret = checkClientCache(request, 'studies');
                         ssCallNeeded = ret[0];
                         var reorderNeeded = ret[1];
-
                         if (ssCallNeeded) {
-
-                            //curFilterObj = JSON.parse(JSON.stringify(parseFilterObj()));
-                            var curFilterObj = new Object();
+                            var curFilterObj = parseFilterObj();
                             curFilterObj.collection_id = window.selItems.selProjects;
                             curFilterObj.PatientID = caseArr;
                             if (studyID.trim().length > 0) {
@@ -1260,7 +1266,7 @@ require([
                                     if (window.selItems.selStudies[caseId].indexOf(studyID)>-1){
                                         window.selItems.selStudies[caseId]=[studyID]
                                     }
-                                    else{
+                                    else {
                                         delete window.selItems.selStudies[caseId];
                                     }
                                 }
@@ -1497,7 +1503,6 @@ require([
                     var reorderNeeded = ret[1];
 
                     if (ssCallNeeded) {
-                        //curFilterObj = JSON.parse(JSON.stringify(parseFilterObj()));
                         var curFilterObj = new Object();
                         curFilterObj.collection_id = window.selItems.selProjects;
                         curFilterObj.PatientID = caseArr;
@@ -1674,7 +1679,7 @@ require([
 
     var update_bq_filters = function() {
         let filters = parseFilterObj();
-        if(Object.keys(filters).length <= 0) {
+        if (Object.keys(filters).length <= 0) {
             $('.bq-string-display').attr("disabled","disabled");
             $('.bq-string-display').attr("title","Select a filter to enable this feature.");
             $('.bq-string').html("");
@@ -1687,7 +1692,7 @@ require([
 
     var update_filter_url = function() {
         let filters = parseFilterObj();
-        if(Object.keys(filters).length <= 0) {
+        if (Object.keys(filters).length <= 0) {
             $('.get-filter-uri').attr("disabled","disabled");
             $('.get-filter-uri').attr("title","Select a filter to enable this feature.");
             $('.filter-url').html("");
@@ -1701,10 +1706,15 @@ require([
             $('.get-filter-uri').attr("title","Click to display this filter set's Query URL.");
             let url = BASE_URL+"/explore/filters/?";
             let encoded_filters = []
-            for (i in filters) {
+            for (let i in filters) {
                 if (filters.hasOwnProperty(i)) {
-                    _.each(filters[i], function (val) {
-                        encoded_filters.push(i + "=" + encodeURI(val));
+                    let vals = filters[i];
+                    if(!Array.isArray(filters[i])) {
+                        vals = filters[i]['values'];
+                        encoded_filters.push(i+"_op="+encodeURI(filters[i]['op']));
+                    }
+                    _.each(vals, function (val) {
+                        encoded_filters.push(i+"="+encodeURI(val));
                     });
                 }
             }
@@ -1719,8 +1729,8 @@ require([
     var updateFacetsData = function (newFilt) {
         update_filter_url();
         update_bq_filters();
-        if(window.location.href.search(/\/filters\//g) >= 0) {
-            if(!first_filter_load) {
+        if (window.location.href.search(/\/filters\//g) >= 0) {
+            if (!first_filter_load) {
                 window.history.pushState({}, '', window.location.origin + "/explore/")
             } else {
                 first_filter_load = false;
@@ -1795,8 +1805,7 @@ require([
                             if (('filtered_counts' in data) && ('access' in data['filtered_counts']['origin_set']['All']['attributes']) && ('Limited' in data['filtered_counts']['origin_set']['All']['attributes']['access']) && (data['filtered_counts']['origin_set']['All']['attributes']['access']['Limited']['count']>0) ){
                                $('#search_def_access').removeClass('notDisp');
                                $('.access_warn').removeClass('notDisp');
-                            }
-                            else{
+                            } else {
                                 $('#search_def_access').addClass('notDisp');
                                 $('.access_warn').addClass('notDisp');
                             }
@@ -1808,8 +1817,7 @@ require([
                                 $('#search_def_stats').removeClass('notDisp');
                                 $('#search_def_stats').html('<span style="color:red">There are no cases matching the selected set of filters</span>');
                                 //window.alert('There are no cases matching the selected set of filters.')
-                            }
-                            else{
+                            } else {
                                 $('#search_def_stats').addClass('notDisp');
                                 $('#search_def_stats').html("Don't show this!");
                             }
@@ -2021,13 +2029,13 @@ require([
             var titA = lbl.split('Quarter');
             title1=titA[0]+' Quarter';
             title2=titA[1];
-        } else if(lbl.includes('Background')){
+        } else if (lbl.includes('Background')){
             var titA = lbl.split('Activity');
             var titB = titA[1].split('(');
             title0 = titA[0];
             title1= 'Activity '+titB[0];
             title2= '('+titB[1];
-        } else if(lbl.includes('(')){
+        } else if (lbl.includes('(')){
            var titA = lbl.split('(');
            title1=titA[0];
            title2='('+titA[1];
@@ -2125,7 +2133,7 @@ require([
            );
          })
         .on("click",function(d){
-            if(!is_cohort) {
+            if (!is_cohort) {
                 manageUpdateFromPlot(plotId, d.data.key);
             }
         });
@@ -2226,8 +2234,7 @@ require([
             var cntUf=0;
             if (dic.hasOwnProperty('unfilt') && dic['unfilt'].hasOwnProperty(val)) {
                 cntUf = dic['unfilt'][val].count
-            }
-            else {
+            } else {
                 cntUf = 0;
             }
 
@@ -2262,11 +2269,9 @@ require([
         }
         var textFilt=false;
         var textFiltVal='';
-        if ($('#'+filterCat).children('.text-filter').length>0){
+        if ($('#'+filterCat).children('.text-filter').length>0) {
             textFiltVal = $('#'+filterCat).children('.text-filter')[0].value;
-
-        }
-        else if ($('#'+filterCat).find('.collection_value').length>0){
+        } else if ($('#'+filterCat).find('.collection_value').length>0){
             textFiltVal = $('#collection_search')[0].value;
         }
 
@@ -2286,7 +2291,7 @@ require([
                 } else {
                     $('#'+filterCat).attr('data-curmax','NA');
                 }
-            } else{
+            } else {
                 $('#'+filterCat).attr('data-curmin','NA');
                 $('#'+filterCat).attr('data-curmax','NA');
             }
@@ -2315,8 +2320,7 @@ require([
 
                      else if ($(b).children().children('.value').text().trim() < $(a).children().children('.value').text().trim()){
                          return 1;
-                     }
-                     else{
+                     } else {
                          return -1;
                      }
 
@@ -2330,8 +2334,7 @@ require([
                          }
                          else if ( ($(b).children().children('input:checkbox')[0].checked || $(b).children().children('input:checkbox')[0].indeterminate) && !($(a).children().children('input:checkbox')[0].checked || $(a).children().children('input:checkbox')[0].indeterminate)){
                             return 1;
-                         }
-                        else {
+                         } else {
 
                             return (parseFloat($(a).children().children('.case_count').text()) < parseFloat($(b).children().children('.case_count').text()) ? 1 : -1)
                            }
@@ -2433,7 +2436,7 @@ require([
                 if (numMore>0){
                         $('#' + filterCat).children('.more-checks').children('.show-more').removeClass('notDisp');
                         $('#' + filterCat).children('.less-checks').children('.show-less').removeClass('notDisp');
-                    } else{
+                    } else {
                         $('#' + filterCat).children('.more-checks').children('.show-more').addClass('notDisp');
                         $('#' + filterCat).children('.less-checks').children('.show-less').addClass('notDisp');
                     }
@@ -2473,7 +2476,6 @@ require([
                 resetParentVal=true;
             }
 
-
             for (var j = 0; j < filterCats.length; j++) {
                     var ret = updateFilters(filterCats[j],{},false,srch);
                     if (resetParentVal && !(filterCats[j]==='Program')){
@@ -2511,17 +2513,15 @@ require([
     }
 
     var updateFilterSelections = function (id, dicofdic) {
-        filterCats = findFilterCats(id,false);
-        for (i = 0; i < filterCats.length; i++) {
-            cat = filterCats[i]
-            filtDic={'unfilt':'', 'filt':''}
+        let filterCats = findFilterCats(id,false);
+        for (let i = 0; i < filterCats.length; i++) {
+            let cat = filterCats[i]
+            let filtDic = {'unfilt':'', 'filt':''}
 
-            if ( (dicofdic.hasOwnProperty('unfilt')) &&  (dicofdic['unfilt'].hasOwnProperty(cat)))
-            {
+            if ( (dicofdic.hasOwnProperty('unfilt')) &&  (dicofdic['unfilt'].hasOwnProperty(cat))){
                 filtDic['unfilt']=dicofdic['unfilt'][cat]
             }
-            if ( (dicofdic.hasOwnProperty('filt')) && (dicofdic['filt'].hasOwnProperty(cat))  )
-            {
+            if ( (dicofdic.hasOwnProperty('filt')) && (dicofdic['filt'].hasOwnProperty(cat))) {
                 filtDic['filt']=dicofdic['filt'][cat]
             }
             updateFilters(filterCats[i], filtDic, true, false);
@@ -2529,6 +2529,14 @@ require([
     };
 
     var checkFilters = function(filterElem) {
+        var operatorInfo = false;
+        var operator=""
+        var opInfoElem = $(filterElem).closest('.list-group-item__body, .list-group-sub-item__body','.colections-list').find('.join_val').filter('input:checked')
+        if (opInfoElem.length>0){
+            operatorInfo = true;
+            operator = opInfoElem.attr('value');
+        }
+
         var checked = $(filterElem).prop('checked');
         var neighbours =$(filterElem).parentsUntil('.list-group-item__body, .list-group-sub-item__body','ul').children().children().children('input:checkbox');
         var neighboursCk = $(filterElem).parentsUntil('.list-group-item__body, .list-group-sub-item__body','ul').children().children().children(':checked');
@@ -2559,7 +2567,6 @@ require([
                  hasCheckBox = true;
                  numCheckBoxes++;
             } else {
-
                 var filtnmSrc=$(filterCat).children('.list-group-sub-item__body, .list-group-item__body, .collection-list')
                 if (filtnmSrc.length<1){
                     filtnmSrc=$(filterCat).children().children('.collection_id')
@@ -2583,11 +2590,24 @@ require([
                 if (!(checkBox.indeterminate)) {
                     checkBox.checked = true;
                 }
-                if (!(filterObj.hasOwnProperty(curCat))){
-                    filterObj[curCat] = new Array();
-                }
-                if (filterObj[curCat].indexOf(filtnm)<0){
-                    filterObj[curCat].push(filtnm)
+
+                if (operatorInfo){
+                    if (!(filterObj.hasOwnProperty(curCat))) {
+                        filterObj[curCat] = new Object();
+                        filterObj[curCat]['values'] = new Array();
+                    }
+                    filterObj[curCat]['op'] = operator
+                    if (filterObj[curCat]['values'].indexOf(filtnm) < 0) {
+                        filterObj[curCat]['values'].push(filtnm);
+                    }
+
+                } else {
+                    if (!(filterObj.hasOwnProperty(curCat))) {
+                        filterObj[curCat] = new Array();
+                    }
+                    if (filterObj[curCat].indexOf(filtnm) < 0) {
+                        filterObj[curCat].push(filtnm);
+                    }
                 }
 
             }
@@ -2595,14 +2615,26 @@ require([
             if (!checked && ( (ind===0) || ( (ind===1) && hasCheckBox && noneChecked)) ){
                checkBox.checked = false;
                //checkBox.indeterminate =  false;
-               if ( filterObj.hasOwnProperty(curCat) && (filterObj[curCat].indexOf(filtnm)>-1) ){
-                    pos = filterObj[curCat].indexOf(filtnm);
-                    filterObj[curCat].splice(pos,1);
-                    if (Object.keys(filterObj[curCat]).length===0){
-                         delete filterObj[curCat];
-                    }
-               }
+               if ( filterObj.hasOwnProperty(curCat)) {
+                   if (operatorInfo) {
+                       if (filterObj[curCat]['values'].indexOf(filtnm) > -1) {
+                           pos = filterObj[curCat]['values'].indexOf(filtnm);
+                           filterObj[curCat]['values'].splice(pos, 1);
+                           if (Object.keys(filterObj[curCat]['values']).length === 0) {
+                               delete filterObj[curCat];
+                           }
+                       }
 
+                   } else {
+                       if (filterObj[curCat].indexOf(filtnm) > -1) {
+                           pos = filterObj[curCat].indexOf(filtnm);
+                           filterObj[curCat].splice(pos, 1);
+                           if (Object.keys(filterObj[curCat]).length === 0) {
+                               delete filterObj[curCat];
+                           }
+                       }
+                   }
+               }
                if (curCat.length>0){
                  curCat+="."
                  }
@@ -2639,6 +2671,10 @@ require([
         }
     };
 
+    var applyFilters = function(){
+        mkFiltText();
+        updateFacetsData(true);
+    }
     var handleFilterSelectionUpdate = function(filterElem, mkFilt, doUpdate) {
         checkFilters(filterElem);
         if (mkFilt) {
@@ -2685,7 +2721,17 @@ require([
         $(tbl).find('tbody').append(rowSet);
     };
 
+
     var filterItemBindings = function (filterId) {
+
+        $('#' + filterId).find('.join_val').on('click', function () {
+            var attribute = $(this).closest('.list-group-item__body, .list-group-sub-item__body','.colections-list')[0].id;
+            if (filterObj.hasOwnProperty(attribute) && (window.filterObj[attribute]['values'].length>1)){
+                mkFiltText();
+                filterObj[attribute]['op']=$(this).attr('value');
+                updateFacetsData(true);
+            }
+        });
 
         $('#' + filterId).find('input:checkbox').not('#hide-zeros').on('click', function () {
             handleFilterSelectionUpdate(this, true, true);
@@ -2763,8 +2809,7 @@ require([
                         } else if (!$(ckElem).parent().parent().hasClass('filtByVal')) {
                             ckElem.checked = isCheck;
                         }
-                    }
-                    else {
+                    } else {
                         ckElem.checked = isCheck;
                     }
 
@@ -2823,8 +2868,7 @@ require([
                 $(this).find('.less-checks').remove();
                 $(this).find('.sorter').remove();
                 $('#'+this.id+'_list').addClass('hide');
-            }
-            else {
+            } else {
                 var slideDivId = $(this).prop('id') + '_slide';
                 curmin = $(this).attr('data-curmin');
                 curmax = $(this).attr('data-curmax');
@@ -2878,15 +2922,14 @@ require([
                 $(this).append(cntrlDiv);
                 $(this).find('.sliderset').keypress(function(event){
                    var keycode = (event.keyCode ? event.keyCode : event.which);
-                   if(keycode == '13'){
+                   if (keycode == '13'){
 
                    try {
                       var txtlower = parseFloat($(this).parent().find('.sl_lower').val());
                       var txtupper = parseFloat($(this).parent().find('.sl_upper').val());
                       if (txtlower<=txtupper){
                         setSlider($(this).closest('.hasSlider')[0].id+"_slide", false, txtlower, txtupper, false,true);
-                      }
-                      else{
+                      } else {
                           $(this).closest('.hasSlider').find('.slider-message').removeClass('notDisp');
 
                       }
@@ -2898,7 +2941,7 @@ require([
                }
               });
 
-            } else{
+            } else {
                 $(this).removeClass('hasSlider');
 
             }
@@ -2946,10 +2989,21 @@ require([
                                 'id': $('div.list-group-item__body[data-filter-attr-id="' + filter['id'] + '"]').children('.ui-slider')[0].id,
                                 'left_val': left_val,
                                 'right_val': right_val,
-                            })
+                            });
                         }
                      } else {
                        _.each(filter['values'], function (val) {
+                           if (filter.hasOwnProperty('op')) {
+                               if($(selEle).find('.join_val').length>0) {
+                                   $(selEle).find('.join_val').filter('input[value=' + filter['op'].toUpperCase() + ']').prop("checked", true);
+                               } else {
+                                   filter['op'] !== 'OR' && base.showJsMessage(
+                                       "warning",
+                                       "Invalid operator seen for attribute '"+$(selEle).attr('id')+"'; default of OR used instead.",
+                                       true
+                                   );
+                               }
+                           }
                            if ($(selEle).find('input[data-filter-attr-id="' + filter['id'] + '"][value="' + val + '"]').length>0) {
                                attValueFoundInside = true;
                            }
@@ -2962,14 +3016,15 @@ require([
 
                     /*$(selEle).collapse('show');
                     $(selEle).find('.show-more').triggerHandler('click');
-                    $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
+                    $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' +
+                    $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
                      */
                     showFilters.push([selEle,selector]);
                 }
                });
             });
         });
-        if(sliders.length > 0) {
+        if (sliders.length > 0) {
             load_sliders(sliders, false);
         }
         mkFiltText();
@@ -3088,7 +3143,7 @@ require([
     };
 
     $('#save-cohort-btn').on('click', function() {
-        if(!user_is_auth) {
+        if (!user_is_auth) {
             save_anonymous_selection_data();
             location.href=$(this).data('uri');
         }
@@ -3155,7 +3210,7 @@ require([
                  }
              }
          }
-         if(loadPending) {
+         if (loadPending) {
              loadPending.done(function() {
                  load_filter_selections(showFilters);
              });
@@ -3166,10 +3221,9 @@ require([
          //alert('hi');
          srt=$(this).parent().parent().parent().find('.cntr')
 
-         if (srt.hasClass('notDisp')){
+         if (srt.hasClass('notDisp')) {
              srt.removeClass('notDisp');
-         }
-         else{
+         } else {
              srt.addClass('notDisp');
          }
          $(this).parent().parent().parent().find('.text-filter, .collection-text-filter').addClass('notDisp');
@@ -3181,11 +3235,10 @@ require([
          //alert('hi');
          srch=$(this).parent().parent().parent().find('.text-filter, .collection-text-filter, .analysis-text-filter');
 
-         if (srch.hasClass('notDisp')){
+         if (srch.hasClass('notDisp')) {
              srch.removeClass('notDisp');
              srch[0].focus();
-         }
-         else{
+         } else {
              srch.addClass('notDisp');
          }
          $(this).parent().parent().parent().find('.cntr').addClass('notDisp');
@@ -3211,11 +3264,34 @@ require([
     });
 
 
-    $(document).ready(function () {
+    updateViaHistory = function(){
+        var history = JSON.parse(document.getElementById('history').textContent);
+        if ('hz' in history){
+            for (ckey in history['hz']){
+                isHid = history['hz'][ckey];
+                if (isHid)
+                {
+                    $('#'+ckey).find('.hide-zeros').click();
+                }
+            }
+        }
 
-        $('#body').on("unload", function(){
-            alert('hi');
-        })
+        if ('sorter' in history){
+            for (ckey in history['sorter']){
+                sortval = history['sorter'][ckey];
+                $('#'+ckey).find(':input').each(function(){
+                    var val = $(this).val();
+                    if (val == sortval) {
+                        $(this).click();
+                    }
+                });
+            }
+        }
+
+    }
+
+    initializeTableData = function()
+    {
 
         window.selItems = new Object();
         window.selItems.selStudies = new Object();
@@ -3225,7 +3301,15 @@ require([
         window.casesTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
         window.studyTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
         window.seriesTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
+    }
 
+    $(document).ready(function () {
+
+        $('#body').on("unload", function(){
+            alert('hi');
+        })
+
+        initializeTableData();
         filterItemBindings('access_set');
         filterItemBindings('program_set');
         filterItemBindings('analysis_set');
@@ -3259,10 +3343,12 @@ require([
         createPlots('tcga_clinical');
 
         updateProjectTable(window.collectionData);
+
         $('.clear-filters').on('click', function () {
             $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('checked',false);
             $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('indeterminate',false);
-            window.filterObj = new Object();
+            window.filterObj=JSON.parse(JSON.stringify(defaultFilter));
+            $('#access').find('input:checkbox[value="Public"]').prop("checked",true);
             $('.ui-slider').each(function(){
                 setSlider(this.id,true,0,0,true, false);
             })
@@ -3270,6 +3356,11 @@ require([
 
             mkFiltText();
             updateFacetsData(true);
+            initializeTableData();
+            /* updateProjectTable(window.collectionData);
+            $('#cases_tab').DataTable().destroy();
+            $('#studies_tab').DataTable().destroy();
+            $('#series_tab').DataTable().destroy(); */
         });
 
         load_preset_filters();
@@ -3302,5 +3393,50 @@ require([
                     +'&times;</span><span class="sr-only">Close</span></button>'
                 ).attr("style","display: none;")
         );
+
+        $(window).bind("beforeunload",function(){
+            hs= new Object();
+            hs['hz']= new Object();
+            hs['sorter'] = new Object();
+            $('body').find('.hide-zeros').each(function(){
+                var pfar = $(this).closest('.collection-list, .search-configuration, #analysis_set ');
+                var pid = pfar[0].id;
+                var checked = pfar.find('.hide-zeros')[0].checked;
+                hs['hz'][pid] = checked;
+            });
+
+            $('body').find('.sorter').each(function(){
+                var pfar = $(this).closest('.collection-list, .list-group-item__body ');
+                var pid = pfar[0].id;
+                var sort = $(this).find('input:checked').val()
+                hs['sorter'][pid] = sort;
+            });
+
+            var url = encodeURI('/uihist/')
+            nhs={'his':JSON.stringify(hs)}
+            var csrftoken = $.getCookie('csrftoken');
+            let deferred = $.Deferred();
+
+            $.ajax({
+                url: url,
+                data: nhs,
+                dataType: 'json',
+                type: 'post',
+                contentType: 'application/x-www-form-urlencoded',
+                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+                success: function (data) {
+                },
+                error: function(data){
+                    console.debug('Error saving ui history:');
+                    console.debug(data);
+                },
+                complete: function(data) {
+                    deferred.resolve();
+                }
+            });
+        });
+        if (document.contains(document.getElementById('history'))){
+            updateViaHistory();
+        }
     });
 });

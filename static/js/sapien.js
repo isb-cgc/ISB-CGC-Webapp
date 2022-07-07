@@ -38,6 +38,8 @@ require([
     'underscore'
 ], function($, rawsvg, d3, _) {
 
+    const toClassName = key => key.split(' ').join('-');
+
     let colorCodes = {
       'Adrenal Gland': 'rgb(190, 48, 44)',
       'Bile Duct': 'rgb(213, 141, 0)',
@@ -72,8 +74,6 @@ require([
     };
 
     var variantNames = {
-        //'Kidney': ['Renal'],
-        'Head and Neck': ['Head','Head-Neck', 'Head-and-Neck'],
         'Colorectal': ['Colon','Rectum'],
         "Blood": ["Marrow, Blood"],
         "Bile-Duct": ["Bile Duct"],
@@ -97,7 +97,8 @@ require([
     let clickHandler = function(id) {
         let url = BASE_URL+"/explore/filters/?access=Public&";
         let encoded_filters = []
-        let values = (variantNames[id.site] !== null && variantNames[id.site] !== undefined) ? variantNames[id.site] : [id.site];
+        let id_site = toClassName(id.site)
+        let values = (variantNames[id_site] !== null && variantNames[id_site] !== undefined) ? variantNames[id_site] : [id_site];
         _.each(values, function (val) {
             encoded_filters.push("tcia_tumorLocation" + "=" + encodeURI(val));
         });
@@ -131,7 +132,6 @@ require([
   const barStartOffset = 130;
   const barWidth = initChartWidth - barStartOffset;
   const maxCases = Math.max(...data.map(d => d[caseCountKey]));
-  const toClassName = key => key.split(' ').join('-');
   const halfPixel = 0.5;
 
   // The Bar Chart
