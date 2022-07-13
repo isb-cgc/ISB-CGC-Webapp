@@ -3047,6 +3047,7 @@ html {
   font-size: 30px;
   text-shadow: 0 1px 2px rgb(0 0 0 / 77%);
   cursor: pointer;
+  margin-left: 10px;
 }
 
 #landing .modality .pause-resume span:hover {
