@@ -2993,6 +2993,10 @@ html {
 /*
  Modality Carousel
  */
+#landing .images-col {
+  width: 620px;
+  float: left;
+}
 #landing .modality {
   width: 600px;
   margin-top: 35px;
@@ -3004,9 +3008,14 @@ html {
   border-radius: 5px;
 }
 
+#landing .modality h3 {
+  max-width: 250px;
+  display: inline-block;
+}
+
 #landing .modality .carousel-control {
   background: none;
-  bottom: 85px;
+  bottom: 125px;
   opacity: 100%;
 }
 
