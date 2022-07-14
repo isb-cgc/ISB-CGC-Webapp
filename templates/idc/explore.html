@@ -72,6 +72,11 @@
                     title="View the BigQuery String for these filters"
             > View BQ String
             </button>
+            <button class="btn btn-default pull-right download-images-btn" data-toggle="modal"
+                    data-target="#download-images"
+                    title="View instructions for image download"
+            > Download Images
+            </button>
         </div>
     </div>
 {% endblock %}
@@ -85,6 +90,7 @@
 {% block modal_includes %}
 
 {% include "cohorts/save-cohort-modal.html" %}
+{% include "idc/download-modal.html" %}
 {% include "idc/bq-string-modal.html" with bq_string_uri="True" %}
 
 {% endblock %}
