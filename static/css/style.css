@@ -10,6 +10,17 @@
 @import url("https://fonts.googleapis.com/css?family=Lato:300,400,700&subset=latin,latin-ext");
 @import url("https://fonts.googleapis.com/css?family=Montserrat:300,700&subset=latin,latin-ext");
 
+body.landing {
+  min-width: 725px;
+}
+
+@media (max-width: 767px) {
+  #landing .col-sm-12.sapiens {
+    width: 100%;
+    float:left;
+  }
+}
+
 #landing .container {
   width: 100%;
 }
@@ -2993,6 +3004,10 @@ html {
 /*
  Modality Carousel
  */
+#landing .images-col {
+  width: 620px;
+  float: left;
+}
 #landing .modality {
   width: 600px;
   margin-top: 35px;
@@ -3004,9 +3019,14 @@ html {
   border-radius: 5px;
 }
 
+#landing .modality h3 {
+  max-width: 250px;
+  display: inline-block;
+}
+
 #landing .modality .carousel-control {
   background: none;
-  bottom: 85px;
+  bottom: 125px;
   opacity: 100%;
 }
 
@@ -3038,6 +3058,7 @@ html {
   font-size: 30px;
   text-shadow: 0 1px 2px rgb(0 0 0 / 77%);
   cursor: pointer;
+  margin-left: 10px;
 }
 
 #landing .modality .pause-resume span:hover {

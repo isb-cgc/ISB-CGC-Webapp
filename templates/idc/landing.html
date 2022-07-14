@@ -56,7 +56,7 @@
         </div>
         <div class="features row">
             <div class="container-fluid">
-            <div class="col-lg-4 col-md-5 col-sm-12">
+            <div class="images-col">
                 <div id="modality-carousel" class="carousel slide modality" data-ride="carousel">
 
                     <!-- Indicators -->
@@ -64,8 +64,8 @@
                         <li data-target="#modality-carousel" title="Computed Tomopgrahy" data-slide-to="0" class="active"></li>
                         <li data-target="#modality-carousel" title="Magnetic Resonance" data-slide-to="1"></li>
                         <li data-target="#modality-carousel" title="Positron Emission Tomography" data-slide-to="2"></li>
-                        <li data-target="#modality-carousel" title="Slide Microscopy" data-slide-to="3"></li>
-                        <li data-target="#modality-carousel" title="Human Tumor Atlas Network" data-slide-to="4"></li>
+                        <li data-target="#modality-carousel" title="Slide Microscopy - Brightfield" data-slide-to="3"></li>
+                        <li data-target="#modality-carousel" title="Slide Microscopy - Fluorescence" data-slide-to="4"></li>
                     </ol>
                     <div class="pause-resume">
                         <span class="pause-carousel" title="Pause images"><i class="fa-solid fa-pause-circle"></i></span>
@@ -113,21 +113,21 @@
                         <div class="item">
                             <a href="{{ SLIM_VIEWER_PATH }}2.25.211094631316408413440371843585977094852/series/1.3.6.1.4.1.5962.99.1.208792987.352384958.1640886332827.2.0"
                                target="_blank" rel="noopener noreferrer" title="Click to see in IDC SliM Viewer">
-                            <img src="{% static 'img/path_ex.jpg' %}" data-study-id="2.25.211094631316408413440371843585977094852" alt="SM Example Image">
+                            <img src="{% static 'img/path_ex.jpg' %}" data-study-id="2.25.211094631316408413440371843585977094852" alt="SM Example Image - Brightfield">
                             </a>
                             <div class="carousel-caption">
-                                <h3>Slide Microscopy (SM)</h3>
+                                <h3>Slide Microscopy (SM) - Brightfield</h3>
                             </div>
                         </div>
 
                         <!-- HTAN Example -->
                         <div class="item">
-                            <a href="{{ SLIM_VIEWER_PATH }}"
+                            <a href="{{ SLIM_VIEWER_PATH }}2.25.93749216439228361118017742627453453196/series/1.3.6.1.4.1.5962.99.1.2344794501.795090168.1655907236229.4.0?state=1.2.826.0.1.3680043.10.511.3.79630386778396943986328353882008803"
                                target="_blank" rel="noopener noreferrer" title="Click to see in IDC SliM Viewer">
-                            <img src="{% static 'img/path_ex.jpg' %}" data-study-id="" alt="HTAN Example Image">
+                            <img src="{% static 'img/sm_bf_ex.jpg' %}" data-study-id="2.25.93749216439228361118017742627453453196" alt="SM Example Image - Fluorescence">
                             </a>
                             <div class="carousel-caption">
-                                <h3>Human Tumor Atlas Network (HTAN)</h3>
+                                <h3>Slide Microscopy (SM) - Fluorescence</h3>
                             </div>
                         </div>
                     </div>
@@ -144,7 +144,7 @@
                 </div>
 
             </div>
-            <div class="col-lg-8 col-md-7 col-sm-12 sapiens">
+            <div class="col-lg-6 col-sm-12 sapiens">
                 <div class="sapiens-heading"><h4>Cases by Major Primary Site</h4></div>
                 <div id="human-body-root"></div>
             </div>
