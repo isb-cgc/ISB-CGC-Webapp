@@ -384,4 +384,8 @@ require([
         interactive:true
 
     });
+
+    $('.download-link').on('click', function(){
+        $('#download-images').modal("hide");
+    });
 });
