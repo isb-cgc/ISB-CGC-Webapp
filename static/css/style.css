@@ -10,6 +10,17 @@
 @import url("https://fonts.googleapis.com/css?family=Lato:300,400,700&subset=latin,latin-ext");
 @import url("https://fonts.googleapis.com/css?family=Montserrat:300,700&subset=latin,latin-ext");
 
+body.landing {
+  min-width: 725px;
+}
+
+@media (max-width: 767px) {
+  #landing .col-sm-12.sapiens {
+    width: 100%;
+    float:left;
+  }
+}
+
 #landing .container {
   width: 100%;
 }
@@ -3044,13 +3055,10 @@ html {
 #landing .modality .pause-resume {
   color: white;
   text-align: center;
-  font-size: 25px;
+  font-size: 30px;
   text-shadow: 0 1px 2px rgb(0 0 0 / 77%);
   cursor: pointer;
-  position: absolute;
-  margin-left: 20%;
-  bottom: 45px;
-  z-index: 15;
+  margin-left: 10px;
 }
 
 #landing .modality .pause-resume span:hover {
