@@ -37,11 +37,6 @@
 
     {% block header %}{% endblock %}
 
-    {% if CRAZY_EGG %}
-        <script type="text/javascript" src="https://script.crazyegg.com/pages/scripts/0076/1527.js" async="async" >
-        </script>
-    {% endif %}
-
     {% if SITE_GOOGLE_ANALYTICS %}
         <!-- Global site tag (gtag.js) - Google Analytics -->
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ SITE_GOOGLE_ANALYTICS_TRACKING_ID }}">
@@ -62,7 +57,9 @@
         var SLIM_VIEWER_PATH = '{{ SLIM_VIEWER_PATH }}';
     </script>
     <!-- Adobe User Research study -->
-    <script src="https://assets.adobedtm.com/6a4249cd0a2c/9d422d6cad08/launch-7e4a83c1c1c3.min.js" async></script>
+    {% if RESEARCH_STUDY %}
+        <script src="https://assets.adobedtm.com/6a4249cd0a2c/9d422d6cad08/launch-7e4a83c1c1c3.min.js" async></script>
+    {% endif %}
 </head>
 <body class="{% block body_class %}content{% endblock %}" id="body">
 <!--Include site main header-->
