@@ -3387,27 +3387,27 @@ require([
                 ).attr("style","display: none;")
         );
 
-        $(window).bind("beforeunload",function(){
-            hs= new Object();
-            hs['hz']= new Object();
+        $(window).on("beforeunload",function(){
+            let hs = new Object();
+            hs['hz'] = new Object();
             hs['sorter'] = new Object();
             $('body').find('.hide-zeros').each(function(){
-                var pfar = $(this).closest('.collection-list, .search-configuration, #analysis_set ');
-                var pid = pfar[0].id;
-                var checked = pfar.find('.hide-zeros')[0].checked;
+                let pfar = $(this).closest('.collection-list, .search-configuration, #analysis_set ');
+                let pid = pfar[0].id;
+                let checked = pfar.find('.hide-zeros')[0].checked;
                 hs['hz'][pid] = checked;
             });
 
             $('body').find('.sorter').each(function(){
-                var pfar = $(this).closest('.collection-list, .list-group-item__body ');
-                var pid = pfar[0].id;
-                var sort = $(this).find('input:checked').val()
+                let pfar = $(this).closest('.collection-list, .list-group-item__body ');
+                let pid = pfar[0].id;
+                let sort = $(this).find('input:checked').val()
                 hs['sorter'][pid] = sort;
             });
 
-            var url = encodeURI('/uihist/')
-            nhs = {'his':JSON.stringify(hs)}
-            var csrftoken = $.getCookie('csrftoken');
+            let url = encodeURI('/uihist/')
+            let nhs = {'his':JSON.stringify(hs)}
+            let csrftoken = $.getCookie('csrftoken');
             let deferred = $.Deferred();
 
             $.ajax({
