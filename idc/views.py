@@ -527,8 +527,11 @@ def explore_data_page(request, filter_path=False, path_filters=None):
 
             request.session['fav'] = 'temp'
             context['hist'] = ''
-            user_data = User_Data.objects.get(user_id=request.user.id)
-            context['history'] = json.loads(user_data.history)
+            try:
+                user_data = User_Data.objects.get(user_id=request.user.id)
+                context['history'] = json.loads(user_data.history)
+            except ObjectDoesNotExist:
+                pass
 
     except JSONDecodeError as e:
         logger.error("[ERROR] While attempting to load the search page:")

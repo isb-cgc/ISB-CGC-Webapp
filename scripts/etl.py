@@ -126,6 +126,10 @@ SOLR_TYPES = {
     "DATETIME": "pdate"
 }
 
+SOLR_TYPE_EXCEPTION = {
+    'SamplesPerPixel': 'string'
+}
+
 SOLR_SINGLE_VAL = {
     "StudyInstanceUID": ["PatientID", "StudyInstanceUID", "crdc_study_uuid"],
     "SeriesInstanceUID": ["PatientID", "StudyInstanceUID", "SeriesInstanceUID", "crdc_study_uuid", "crdc_series_uuid"]
@@ -395,7 +399,7 @@ def create_solr_params(schema_src, solr_src):
         if not re.search(r'has_',field['name']):
             field_schema = {
                 "name": field['name'],
-                "type": SOLR_TYPES[field['type']],
+                "type": SOLR_TYPES[field['type']] if field['name'] not in SOLR_TYPE_EXCEPTION else SOLR_TYPE_EXCEPTION[field['name']],
                 "multiValued": False if field['name'] in SOLR_SINGLE_VAL.get(solr_src.aggregate_level, {}) else True,
                 "stored": True
             }
