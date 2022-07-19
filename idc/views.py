@@ -208,20 +208,25 @@ def quota_page(request):
 
 
 @login_required
-def ui_hist_page(request):
-    req = request.POST or request.GET
-    hist = req['his']
+def save_ui_hist(request):
+    status = 200
     try:
-        user_data = User_Data.objects.get(user_id=request.user.id)
-        user_data.history = hist
+        req = request.POST or request.GET
+        hist = req['his']
+        try:
+            user_data = User_Data.objects.get(user_id=request.user.id)
+            user_data.history = hist
+            user_data.save()
 
-    except ObjectDoesNotExist:
-        user_data_dict = {'user_id': request.user.id, "history": hist}
-        user_data = User_Data(**user_data_dict)
+        except ObjectDoesNotExist:
+            user_data_dict = {'user_id': request.user.id, "history": hist}
+            User_Data.objects.update_or_create(**user_data_dict)
+    except Exception as e:
+        logger.error("[ERROR] While trying to save the user's UI preferences:")
+        logger.exception(e)
+        status = 500
 
-    user_data.save()
-
-    return HttpResponse('')
+    return JsonResponse({}, status=status)
 
 
 @login_required

@@ -3265,7 +3265,7 @@ require([
 
 
     updateViaHistory = function(){
-        var history = JSON.parse(document.getElementById('history').textContent);
+        let history = JSON.parse(document.getElementById('history').textContent);
         if ('hz' in history){
             for (ckey in history['hz']){
                 isHid = history['hz'][ckey];
@@ -3290,9 +3290,7 @@ require([
 
     }
 
-    initializeTableData = function()
-    {
-
+    initializeTableData = function() {
         window.selItems = new Object();
         window.selItems.selStudies = new Object();
         window.selItems.selCases = new Object();
@@ -3304,11 +3302,6 @@ require([
     }
 
     $(document).ready(function () {
-
-        $('#body').on("unload", function(){
-            alert('hi');
-        })
-
         initializeTableData();
         filterItemBindings('access_set');
         filterItemBindings('program_set');
@@ -3318,8 +3311,8 @@ require([
         filterItemBindings('search_derived_set');
         filterItemBindings('search_related_set');
 
-        max= Math.ceil(parseInt($('#age_at_diagnosis').data('data-max')));
-        min= Math.floor(parseInt($('#age_at_diagnosis').data('data-min')));
+        max = Math.ceil(parseInt($('#age_at_diagnosis').data('data-max')));
+        min = Math.floor(parseInt($('#age_at_diagnosis').data('data-min')));
 
         $('#SliceThickness').addClass('isQuant');
         $('#SliceThickness').addClass('wNone');
@@ -3413,7 +3406,7 @@ require([
             });
 
             var url = encodeURI('/uihist/')
-            nhs={'his':JSON.stringify(hs)}
+            nhs = {'his':JSON.stringify(hs)}
             var csrftoken = $.getCookie('csrftoken');
             let deferred = $.Deferred();
 
@@ -3427,8 +3420,7 @@ require([
                 success: function (data) {
                 },
                 error: function(data){
-                    console.debug('Error saving ui history:');
-                    console.debug(data);
+                    console.debug('Error saving ui preferences.');
                 },
                 complete: function(data) {
                     deferred.resolve();
