@@ -1703,7 +1703,7 @@ require([
         } else {
             $('.get-filter-uri').removeAttr("disabled");
             $('.copy-url').removeAttr("disabled");
-            $('.get-filter-uri').attr("title","Click to display this filter set's Query URL.");
+            $('.get-filter-uri').attr("title","Click to display this filter set's query URL.");
             let url = BASE_URL+"/explore/filters/?";
             let encoded_filters = []
             for (let i in filters) {
