@@ -8,9 +8,10 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="bqStringDisplay">BigQuery Cohort Query String</h4>
+                    <h4 class="modal-title" id="bqStringDisplay">BigQuery SQL Query String</h4>
                 </div>
                 <div class="modal-body">
+                    <p>Copy and paste this query into the BigQuery Console to select files corresponding to the current filter selection.</p>
                     <button type="button" class="copy-this btn btn-default"
                             content="{% if bq_string_uri == "True" %}{% else %}{{ bq_string }}{% endif %}"
                             title="Copy query text to clipboard"
