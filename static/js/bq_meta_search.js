@@ -257,7 +257,7 @@ require([
                     'render': function(data, type) {
                         let num_joins = data.length;
                         let display = num_joins == 0 ? '':
-                            '<div class="text-center"><a title="View list of examples" class="useful-join-detail badge bqmeta-outline-badge">' + num_joins + '</a></div>';
+                            '<div class="text-center"><a title="View List of Examples" class="useful-join-detail badge bqmeta-outline-badge">' + num_joins + '</a></div>';
                         return display;
                     }
                 },
