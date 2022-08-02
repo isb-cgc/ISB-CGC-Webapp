@@ -355,9 +355,9 @@ require([
                 $('.spinner').remove();
                 if (selected_table_full_id !== "") {
                     let parts = selected_table_full_id.split('.');
-                    let project_id = parts[0].trim();
-                    let dataset_id = "\""+parts[1].trim()+"\"";
-                    let table_id = "\""+parts[2].trim()+"\"";
+                    let project_id = parts[0];
+                    let dataset_id = "\""+parts[1]+"\"";
+                    let table_id = "\""+parts[2]+"\"";
                     $('#search-by-dataset-id')[0].value = dataset_id;
                     $('#search-by-project-id option').each(function() {
                         if ($(this)[0].innerText === project_id) {
