@@ -1207,7 +1207,7 @@ require([
                             }
                             else {
                                 var modality = row['Modality'];
-                                if ((modality[0] === 'SM') || (modality === 'SM')) {
+                                if (( Array.isArray(modality) && modality.includes('SM')) || (modality === 'SM')) {
                                     return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                                  } else {
                                     return '<a href="' + DICOM_STORE_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
@@ -1369,7 +1369,8 @@ require([
     }
 
     window.updateSeriesTable = function(rowsAdded, rowsRemoved, refreshAfterFilter,seriesID) {
-
+        var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV"])
+        var slimViewAbleModality=new Set(["SM"])
         $('#series_tab').attr('data-rowsremoved', rowsRemoved);
         $('#series_tab').attr('data-refreshafterfilter', refreshAfterFilter);
         if ($('#series_tab_wrapper').find('.dataTables_controls').length>0){
@@ -1457,10 +1458,10 @@ require([
                             return '<i class="fa-solid fa-circle-minus coll-explain"></i>';
                         }
 
-                        else if ((row['Modality'] === 'SEG' || row['Modality'][0] === 'SEG') || (row['Modality'] === 'RTSTRUCT' || row['Modality'][0] === 'RTSTRUCT') || (row['Modality'] === 'RTPLAN' || row['Modality'][0] === 'RTPLAN') || (row['Modality'] === 'RWV' || row['Modality'][0] === 'RWV')) {
+                        else if ( (Array.isArray(row['Modality']) && row['Modality'].some(function(el){return nonViewAbleModality.has(el)}) ) || nonViewAbleModality.has(row['Modality']) )   {
                             return '<a href="/" onclick="return false;"><i class="fa-solid fa-eye-slash no-viewer-tooltip"></i>';
 
-                            } else if ((row['Modality'] === 'SM') || (row['Modality'][0] === 'SM')) {
+                            } else if (  ( Array.isArray(row['Modality']) && row['Modality'].some(function(el){return slimViewAbleModality.has(el)}) ) || (slimViewAbleModality.has(row['Modality']))) {
                                 return '<a href="' + SLIM_VIEWER_PATH + row['StudyInstanceUID'] + '/series/' + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
 
                             } else {
@@ -1478,7 +1479,7 @@ require([
                 var backendReqStrt = Math.max(0, request.start - Math.floor(backendReqLength * 0.5));
                 var rowsRemoved = $('#series_tab').data('rowsremoved');
                 var refreshAfterFilter = $('#series_tab').data('refreshafterfilter');
-                var cols = ['StudyInstanceUID', 'SeriesNumber', 'Modality', 'BodyPartExamined', 'SeriesDescription']
+                var cols = ['StudyInstanceUID', 'SeriesInstanceUID','SeriesNumber', 'Modality', 'BodyPartExamined', 'SeriesDescription']
                 var ssCallNeeded = true;
                 var caseArr = new Array();
                 for (caseid in window.selItems.selCases) {
