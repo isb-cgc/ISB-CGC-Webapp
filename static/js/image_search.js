@@ -3255,25 +3255,25 @@ require([
 
     updateViaHistory = function(){
         let history = JSON.parse(document.getElementById('history').textContent);
-        if ('hz' in history){
-            for (ckey in history['hz']){
-                isHid = history['hz'][ckey];
-                if (isHid)
-                {
-                    $('#'+ckey).find('.hide-zeros').click();
+        if (history.hasOwnProperty('hz') && history['hz']){
+            for (let ckey in history['hz']){
+                if(history['hz'].hasOwnProperty(ckey)) {
+                    if (history['hz'][ckey]) {
+                        $('#'+ckey).find('.hide-zeros').click();
+                    }
                 }
             }
         }
 
-        if ('sorter' in history){
-            for (ckey in history['sorter']){
-                sortval = history['sorter'][ckey];
-                $('#'+ckey).find(':input').each(function(){
-                    var val = $(this).val();
-                    if (val == sortval) {
-                        $(this).click();
-                    }
-                });
+        if (history.hasOwnProperty('sorter') && history['sorter']){
+            for (let ckey in history['sorter']){
+                if(history['sorter'].hasOwnProperty(ckey)) {
+                    $('#'+ckey).find(':input').each(function(){
+                        if ($(this).val() == history['sorter'][ckey]) {
+                            $(this).click();
+                        }
+                    });
+                }
             }
         }
     }
