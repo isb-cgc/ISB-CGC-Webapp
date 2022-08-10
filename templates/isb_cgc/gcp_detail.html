@@ -39,98 +39,98 @@
 {% block content %}
     <div class="container">
         <div class="row">
-            {% if is_linked %}
-            <div class="col-sm-12 col-md-12 col-lg-12">
-
-                <section class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">
-                            Service Accounts
-                        </h3>
-                    </div>
-                    <div class="panel-body">
-                        <table class="table" role="presentation">
-                            <thead>
-                            <tr>
-                                <th>Service Account</th>
-                                <th>Authorized Controlled-Access Datasets</th>
-                                <th>Current Access Expires</th>
-                                <th></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for svc_act in sa_list  %}
-                                <tr>
-                                    <td>{{ svc_act.name }}</td>
-                                    <td>{% if svc_act.num_auth == 0 %}None{% else %}{{ svc_act.auth_dataset_names }}{% endif %}</td>
-                                    <td>{% if svc_act.is_expired %}{{ svc_act.expiration_date}}{% else %}{{ svc_act.expiration_date|date:'M d, Y, g:i a' }}{% endif %}</td>
-                                    <td>
-                                        {% if not svc_act.is_expired %}
-                                            <a title="Refresh this Service Account" aria-label="Refresh SA" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ svc_act.esc_name }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
-                                        {% endif %}
-                                        <a title="Delete this Service Account" aria-label="Delete SA" data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ svc_act.esc_name }}"><i class="fa fa-trash"></i></a>
-                                        <a title="Adjust Datasets for this Service Account" aria-label="Adjust Datasets for SA" role="button" href="{% url 'adjust_sa' user.id %}?sa_name={{ svc_act.name }}"><i class="fa fa-plus-square"></i></a>
-                                    </td>
-                                </tr>
-                            <!-- Refresh Service Account Modal -->
-                            <!-- TODO: this should be using the user_gcp_list_modals template instead -->
-                            <div class="modal fade" id="refresh-sa-modal-{{ svc_act.esc_name  }}" tabindex="-1" role="dialog" aria-labelledby="refresh-sa-header" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                            <h4 id="refresh-sa-header" class="modal-title">Refresh this Service Account?</h4>
-                                        </div>
-                                        <form id="refresh-sa" method="POST" action="{% url 'register_sa' user.id %}">
-                                            <div class="modal-body">
-                                                {% csrf_token %}
-                                                <p>
-                                                    <em>Note</em>: By refreshing this Service Account, you are extending its access to the specified dataset.
-                                                </p>
-                                                <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />
-                                                <input type="hidden" name="user_sa" value="{{ svc_act.name }}" />
-                                                <input type="hidden" name="datasets" value="{{ svc_act.auth_dataset_ids }}" />
-                                                <input type="hidden" name="is_refresh" value="true" />
-                                            </div>
-                                            <div class="modal-footer">
-                                                <input type="submit" value="Refresh" class="btn btn-primary" />
-                                                <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Delete Service Account Modal -->
-                            <div class="modal fade" id="delete-sa-modal-{{ svc_act.esc_name }}" tabindex="-1" role="dialog" aria-labelledby="delete-sa-header" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                            <h4 id="delete-sa-header" class="modal-title">Unregister this Service Account?</h4>
-                                        </div>
-                                        <form id="delete-sa" method="POST" action="{% url 'delete_sa' user.id svc_act.name %}">
-                                            <div class="modal-body">
-                                                {% csrf_token %}
-                                                <p>
-                                                    <em>Note</em>: By unregistering this Service Account, you are only revoking its access to controlled datasets.
-                                                </p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <input type="submit" value="Unregister" class="btn btn-primary" />
-                                                <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                        <a href="{% url 'register_sa' user.id %}?gcp_id={{ gcp.project_id }}" class="btn btn-link">Register Service Account</a>
-                    </div>
-                </section>
-            </div>
-            {% endif %}
+{#            {% if is_linked %}#}
+{#            <div class="col-sm-12 col-md-12 col-lg-12">#}
+{##}
+{#                <section class="panel panel-default">#}
+{#                    <div class="panel-heading">#}
+{#                        <h3 class="panel-title">#}
+{#                            Service Accounts#}
+{#                        </h3>#}
+{#                    </div>#}
+{#                    <div class="panel-body">#}
+{#                        <table class="table" role="presentation">#}
+{#                            <thead>#}
+{#                            <tr>#}
+{#                                <th>Service Account</th>#}
+{#                                <th>Authorized Controlled-Access Datasets</th>#}
+{#                                <th>Current Access Expires</th>#}
+{#                                <th></th>#}
+{#                            </tr>#}
+{#                            </thead>#}
+{#                            <tbody>#}
+{#                            {% for svc_act in sa_list  %}#}
+{#                                <tr>#}
+{#                                    <td>{{ svc_act.name }}</td>#}
+{#                                    <td>{% if svc_act.num_auth == 0 %}None{% else %}{{ svc_act.auth_dataset_names }}{% endif %}</td>#}
+{#                                    <td>{% if svc_act.is_expired %}{{ svc_act.expiration_date}}{% else %}{{ svc_act.expiration_date|date:'M d, Y, g:i a' }}{% endif %}</td>#}
+{#                                    <td>#}
+{#                                        {% if not svc_act.is_expired %}#}
+{#                                            <a title="Refresh this Service Account" aria-label="Refresh SA" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ svc_act.esc_name }}" class="space-right-5"><i class="fa fa-refresh"></i></a>#}
+{#                                        {% endif %}#}
+{#                                        <a title="Delete this Service Account" aria-label="Delete SA" data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ svc_act.esc_name }}"><i class="fa fa-trash"></i></a>#}
+{#                                        <a title="Adjust Datasets for this Service Account" aria-label="Adjust Datasets for SA" role="button" href="{% url 'adjust_sa' user.id %}?sa_name={{ svc_act.name }}"><i class="fa fa-plus-square"></i></a>#}
+{#                                    </td>#}
+{#                                </tr>#}
+{#                            <!-- Refresh Service Account Modal -->#}
+{#                            <!-- TODO: this should be using the user_gcp_list_modals template instead -->#}
+{#                            <div class="modal fade" id="refresh-sa-modal-{{ svc_act.esc_name  }}" tabindex="-1" role="dialog" aria-labelledby="refresh-sa-header" aria-hidden="true">#}
+{#                                <div class="modal-dialog">#}
+{#                                    <div class="modal-content">#}
+{#                                        <div class="modal-header">#}
+{#                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
+{#                                            <h4 id="refresh-sa-header" class="modal-title">Refresh this Service Account?</h4>#}
+{#                                        </div>#}
+{#                                        <form id="refresh-sa" method="POST" action="{% url 'register_sa' user.id %}">#}
+{#                                            <div class="modal-body">#}
+{#                                                {% csrf_token %}#}
+{#                                                <p>#}
+{#                                                    <em>Note</em>: By refreshing this Service Account, you are extending its access to the specified dataset.#}
+{#                                                </p>#}
+{#                                                <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />#}
+{#                                                <input type="hidden" name="user_sa" value="{{ svc_act.name }}" />#}
+{#                                                <input type="hidden" name="datasets" value="{{ svc_act.auth_dataset_ids }}" />#}
+{#                                                <input type="hidden" name="is_refresh" value="true" />#}
+{#                                            </div>#}
+{#                                            <div class="modal-footer">#}
+{#                                                <input type="submit" value="Refresh" class="btn btn-primary" />#}
+{#                                                <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>#}
+{#                                            </div>#}
+{#                                        </form>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                            <!-- Delete Service Account Modal -->#}
+{#                            <div class="modal fade" id="delete-sa-modal-{{ svc_act.esc_name }}" tabindex="-1" role="dialog" aria-labelledby="delete-sa-header" aria-hidden="true">#}
+{#                                <div class="modal-dialog">#}
+{#                                    <div class="modal-content">#}
+{#                                        <div class="modal-header">#}
+{#                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
+{#                                            <h4 id="delete-sa-header" class="modal-title">Unregister this Service Account?</h4>#}
+{#                                        </div>#}
+{#                                        <form id="delete-sa" method="POST" action="{% url 'delete_sa' user.id svc_act.name %}">#}
+{#                                            <div class="modal-body">#}
+{#                                                {% csrf_token %}#}
+{#                                                <p>#}
+{#                                                    <em>Note</em>: By unregistering this Service Account, you are only revoking its access to controlled datasets.#}
+{#                                                </p>#}
+{#                                            </div>#}
+{#                                            <div class="modal-footer">#}
+{#                                                <input type="submit" value="Unregister" class="btn btn-primary" />#}
+{#                                                <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>#}
+{#                                            </div>#}
+{#                                        </form>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                            {% endfor %}#}
+{#                            </tbody>#}
+{#                        </table>#}
+{#                        <a href="{% url 'register_sa' user.id %}?gcp_id={{ gcp.project_id }}" class="btn btn-link">Register Service Account</a>#}
+{#                    </div>#}
+{#                </section>#}
+{#            </div>#}
+{#            {% endif %}#}
 
             <div class="col-md-6 col-lg-6">
                 <section class="panel panel-default">
