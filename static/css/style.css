@@ -1211,7 +1211,7 @@ a.skip-nav {
   border: none; }
   .panel-invisible {
     margin-bottom: 30px; }
-  .panel-heading a:hover {
+  .panel-heading a:not(.btn):hover {
     color: inherit;
     text-decoration: none; }
   .panel-primary .panel-heading .dropdown > a {
