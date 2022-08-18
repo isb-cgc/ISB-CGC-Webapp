@@ -3953,7 +3953,7 @@ tbody.collapse.in {
       margin-left: 15px;
       margin-right: 15px; } }
 
-@media (min-width: 1540px) {
+@media (min-width: 1440px) {
   .navbar-left {
     float: left !important; }
   .navbar-right {
