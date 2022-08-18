@@ -35,7 +35,7 @@
                             <a class="main-links" href="{% url 'collections' %}" title="View IDC collections"><i class="fa-solid fa-table-list"></i> Collections</a>
                         </li>
                         <li class="navbar-link navbar-item {% if 'explore' in request.path %}active-page{% endif %}">
-                            <a class="main-links" href="{% url 'explore_data' %}" title="Explore image data"><i class="fa-solid fa-eye"></i> Exploration</a>
+                            <a class="main-links" href="{% url 'explore_data' %}" title="Explore image data"><i class="fa-solid fa-eye"></i> Explore</a>
                         </li>
                         <li class="navbar-link navbar-item">
                             <a class="external-link" href=""
@@ -54,8 +54,8 @@
                         </li>
                         <li class="navbar-link navbar-item">
                             <a class="external-link" href="" url="https://learn.canceridc.dev"
-                                data-toggle="modal" data-target="#external-web-warning">
-                               <i class="fa-solid fa-book"></i> <p class="navbar-label"> Documentation</p>
+                                data-toggle="modal" data-target="#external-web-warning" title="Documentation">
+                               <i class="fa-solid fa-book"></i> <p class="navbar-label"> Docs</p>
                                <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
                             </a>
                         </li>
@@ -77,7 +77,7 @@
                             <a class="avatar-link" href="{% url 'user_detail' user.id %}">
                                 {% with avatar_url=user.socialaccount_set.all.0.get_avatar_url %}
                                     {% if avatar_url %}
-                                        <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="40" height="40" alt="Avatar Link to User Details">
+                                        <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="40" height="40" alt="Avatar">
                                     {% else %}
                                         <i class="fa-solid fa-user basic-avatar"> </i>
                                     {% endif %}
