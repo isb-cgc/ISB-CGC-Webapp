@@ -725,9 +725,9 @@
                     <div class="panel panel-default">
                         <div class="panel-heading clearfix"><h4 class="panel-title">Filter Definition</h4>
                             {% if not is_cohort %}
-                                <a class="pull-right clear-filters" role="button" id="5-data-clear-filters">Reset</a>
+                                <a class="pull-right clear-filters btn btn-primary" role="button" id="5-data-clear-filters">Reset</a>
                             {% else %}
-                                <a class="pull-right btn btn-secondary" role="button" href={% url 'explore_data' %}>Return
+                                <a class="pull-right btn btn-primary" role="button" href={% url 'explore_data' %}>Return
                                     to Data Explorer</a>
                             {% endif %}
                         </div>
@@ -753,7 +753,8 @@
                                 <button
                                         class="btn btn-special hide-filter-uri space-bottom-5"
                                         role="button" style="display: none;" title="Hide the filter query URL.">Hide Filter URL</button>
-                                <button role="button" class="btn btn-primary copy-this copy-url space-bottom-5" disabled title="Copy Filter URL to clipboard" style="display:none;">
+                                <button role="button" class="btn btn-primary copy-this copy-url space-bottom-5"
+                                        disabled title="Copy Filter URL to clipboard" style="display:none;">
                                     <i class="fa-solid fa-copy" aria-hidden="true"></i>
                                 </button>
                                 <pre class="filter-url code is-hidden" style="display:none;"></pre>

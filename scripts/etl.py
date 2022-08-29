@@ -600,10 +600,13 @@ def update_display_values(attr, updates):
             for upd in to_update:
                 upd.display_value = updates[upd.raw_value]['display_value']
             Attribute_Display_Values.objects.bulk_update(to_update, ['display_value'])
+            logger.info("[STATUS] Updated {} display values.".format(str(len(to_update))))
         to_add = set([x for x in updates]).difference(set([x.raw_value for x in to_update]))
         for rv in to_add:
             new_vals.append(Attribute_Display_Values(raw_value=rv, display_value=updates[rv]['display_value'], attribute=attr))
-        len(new_vals) and Attribute_Display_Values.objects.bulk_create(new_vals)
+        if len(new_vals):
+            Attribute_Display_Values.objects.bulk_create(new_vals)
+            logger.info("[STATUS] Added {} display values.".format(str(len(new_vals))))
 
 
 def load_tooltips(source_objs, attr_name, source_tooltip, obj_attr=None):
@@ -712,7 +715,7 @@ def main():
         len(args.version_file) and update_data_versions(args.version_file)
 
         len(args.attributes_file) and load_attributes(args.attributes_file,
-            ["dicom_derived_series_v10", "dicom_derived_study_v10"], ["idc-dev-etl.idc_v9_dev.dicom_pivot_v10"]
+            ["dicom_derived_series_v11", "dicom_derived_study_v11"], ["idc-dev-etl.idc_v11_pub.dicom_pivot_v11"]
         )
 
         len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
@@ -724,8 +727,8 @@ def main():
                 update_display_values(Attribute.objects.get(name=attr), dvals[attr]['vals'])
 
         if args.solr_files.lower() == 'y':
-            for src in [("idc-dev-etl.idc_v10_pub.dicom_derived_all", "dicom_derived_series_v10",),
-                    ("idc-dev-etl.idc_v10_pub.dicom_derived_all", "dicom_derived_study_v10",),]:
+            for src in [("idc-dev-etl.idc_v11_pub.dicom_derived_all", "dicom_derived_series_v11",),
+                    ("idc-dev-etl.idc_v11_pub.dicom_derived_all", "dicom_derived_study_v11",),]:
                 create_solr_params(src[0], src[1])
 
     except Exception as e:
