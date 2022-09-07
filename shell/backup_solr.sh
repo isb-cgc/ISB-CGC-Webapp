@@ -79,6 +79,7 @@ for core in "${cores[@]}"; do
         echo "curl -u ${SOLR_USER}:${SOLR_PWD} -X GET \"https://localhost:8983/solr/$core/replication?command=backup&location=${BACKUPS_DIR}/&name=${core}\" --cacert solr-ssl.pem"
         echo "Status command for ${core}":
         echo "curl -u ${SOLR_USER}:${SOLR_PWD} -X GET \"https://localhost:8983/solr/${core}/replication?command=details\" --cacert solr-ssl.pem"
+        echo "---------------->  <-----------------"
 #        curl -u $SOLR_USER:$SOLR_PWD -X GET "https://localhost:8983/solr/$core/replication?command=backup&location=${BACKUPS_DIR}/&name=$core" --cacert solr-ssl.pem
 #        status=`curl -u $SOLR_USER:${SOLR_PWD} -X GET "https://localhost:8983/solr/${core}/replication?command=details" --cacert solr-ssl.pem | python3 -c "${PARSE_RESPONSE}"`
 #        retries=0
