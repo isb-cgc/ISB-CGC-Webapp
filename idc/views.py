@@ -529,8 +529,6 @@ def explore_data_page(request, filter_path=False, path_filters=None):
                         "values": ["Public"]
                     }]}]
                 context['filters_for_load'] = filters_for_load
-
-            request.session['fav'] = 'temp'
             context['hist'] = ''
             try:
                 user_data = User_Data.objects.get(user_id=request.user.id)
