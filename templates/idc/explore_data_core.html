@@ -26,51 +26,6 @@
                                 <h4 class="panel-title">Search Scope</h4>
                             </div>
                             <div class="tab-content">
-                                <div id="access_set" class="tab-pane active" role="tabpanel">
-                                    {% with set_attributes.origin_set.All.attributes|get_by_name:'access' as attr %}
-                                   <ul class="list-group" role="tablist" aria-multiselectable="true">
-                                                <li class="list-group-item">
-                                                    <div id="{{ attr.name }}_heading" class="list-group-item__heading">
-                                                        <a role="button" data-toggle="collapse" href="#{{ attr.name }}"
-                                                           aria-expanded="false" aria-controls="{{ attr.name }}">
-                                                            <i class="fa fa-solid fa-caret-right"></i> <i
-                                                                class="fa fa-solid fa-caret-down"></i> <span
-                                                                class="attDisp">Access
-                                                            {% if attr.units %}({{ attr.units }}){% endif %}</span>
-                                                            <span class="notDisp noCase"> (0 cases)</span>
-                                                        </a>
-
-                                                    </div>
-
-                                                    <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}"
-                                                         class="collapse list-group-item__body">
-
-
-                                                        <ul id="{{ attr.name }}_list" class="search-checkbox-list"
-                                                            style="list-style: none;">
-                                                            {% for val in attr.values|check_for_order:attr.name %}
-                                                                {% with val.display_value|get_display_val:val.value as display_value %}
-                                                                    <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if val.count == 0 %} zeroed {% endif %}">
-                                                                        <label>
-                                                                            <input type="checkbox"
-                                                                                   value="{{ val.value }}"
-                                                                                   data-filter-attr-id="{{ attr.id }}"
-                                                                                   data-filter-display-attr="{{ attr.display_name }}"
-                                                                                   data-filter-display-val="{{ display_value }}">
-                                                                            <span class="value">{{ display_value }}</span>
-                                                                            <span class="float-right plot_count count plotit">{{ val.count }}</span>
-                                                                            <span class="float-right case_count count">{{ val.count }}</span>
-                                                                        </label>
-                                                                    </li>
-                                                                {% endwith %}
-                                                            {% endfor %}
-                                                        </ul>
-
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                {% endwith %}
-                                </div>
                                 <div id="program_set" class="tab-pane active" role="tabpanel">
                                     <ul class="list-group" role="tablist" aria-multiselectable="true">
                                         <li class="list-group-item">
