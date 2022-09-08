@@ -117,7 +117,7 @@ def sort_orig_attr(attr_list):
     first = []
     rest = []
     for attr in attr_list:
-        if attr.name in ORIG_ATTR_FIRST:
+        if attr['name'] in ORIG_ATTR_FIRST:
             first.append(attr)
         else:
             rest.append(attr)

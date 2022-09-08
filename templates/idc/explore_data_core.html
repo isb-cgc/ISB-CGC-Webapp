@@ -347,7 +347,8 @@
                             </ul>
                             <div class="tab-content">
                                 <div id="search_orig_set" role="tabpanel" class="tab-pane search-set active">
-                                    {% for attr in set_attributes.origin_set.All.attributes|sort_orig_attr   %}
+                                {% with ordered_attr=set_attributes.origin_set.All.attributes|sort_orig_attr %}
+                                    {% for attr in ordered_attr %}
                                         {% if attr.name != "access" and attr.name != "collection_id"  and attr.name != "analysis_results_id" %}
                                             <ul class="list-group" role="tablist" aria-multiselectable="true">
                                                 <li class="list-group-item">
@@ -449,6 +450,7 @@
                                             </ul>
                                         {% endif %}
                                     {% endfor %}
+                                {% endwith %}
                                 </div>
 
                                 <div id="search_derived_set" role="tabpanel" class="tab-pane search-set">
