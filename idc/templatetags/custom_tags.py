@@ -98,12 +98,33 @@ ATTR_SPECIFIC_ORDERS = [
     'ethnicity',
 ]
 
+ORIG_ATTR_FIRST = [
+    "Modality",
+    "BodyPartExamined",
+    "tcia_tumorLocation"
+]
+
 
 def quick_js_bracket_replace(matchobj):
     if matchobj.group(0) == '<':
         return '\u003C'
     else:
         return '\u003E'
+
+
+@register.filter
+def sort_orig_attr(attr_list):
+    first = []
+    rest = []
+    for attr in attr_list:
+        if attr['name'] in ORIG_ATTR_FIRST:
+            first.append(attr)
+        else:
+            rest.append(attr)
+
+    first.extend(rest)
+
+    return first
 
 
 @register.filter
