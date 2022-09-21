@@ -267,7 +267,7 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
                         elif isinstance(e,ObjectDoesNotExist):
                             logger.info("Attribute {} doesn't exist--can't add, skipping!".format(la))
 
-                create_solr_params(schema_src, src['name'])
+                create_solr_params(src['schema_source'], src['name'])
 
             #     # add core to Solr
             #     # sudo -u solr /opt/bitnami/solr/bin/solr create -c <solr_name>  -s 2 -rf 2
