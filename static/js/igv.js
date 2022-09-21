@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2022, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,9 +63,9 @@ require([
     };
 
     if(genome_build === 'HG38') {
-        genes_track.url = 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/genes/gencode.v24.annotation.sorted.gtf.gz';
-        genes_track.indexURL = 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/genes/gencode.v24.annotation.sorted.gtf.gz.tbi';
-        genes_track.name = 'Genes: Gencode v24';
+        genes_track.url = GENCODE_URI + 'gencode.v36.annotation.sorted.gtf.gz';
+        genes_track.indexURL = GENCODE_URI + 'gencode.v36.annotation.sorted.gtf.gz.tbi';
+        genes_track.name = 'Genes: Gencode v36';
         genes_track.format = 'gtf';
     }
 
