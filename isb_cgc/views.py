@@ -229,16 +229,7 @@ def extended_login_view(request):
     if request.COOKIES and request.COOKIES.get('login_from', '') == 'new_cohort':
         redirect_to = 'cohort'
     try:
-        # Write log entry
-        st_logger = StackDriverLogger.build_from_django_settings()
-        log_name = WEBAPP_LOGIN_LOG_NAME
         user = User.objects.get(id=request.user.id)
-        st_logger.write_text_log_entry(
-            log_name,
-            "[WEBAPP LOGIN] User {} logged in to the web application at {}".format(user.email,
-                                                                                   datetime.datetime.utcnow())
-        )
-
         # If user logs in for the second time, or user has not completed the survey, opt-in status changes to NOT_SEEN
         user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=user).first()
         if user_opt_in_stat_obj:
