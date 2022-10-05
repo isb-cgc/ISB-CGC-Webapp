@@ -49,16 +49,16 @@ gsutil cp ${CONFIG_PATH}"#"${CURR} ${TMP_CURR}  > /dev/null 2>&1
 echo "Diff of previous (" ${PEN_STR} ") to current (" ${CURR_STR} ") for" ${CONFIG_PATH} ":"
 diff ${TMP_LAST} ${TMP_CURR} > ${TMP_DIFF}
 while read -r LINE; do
-    CHECK_LINE_PASS=`echo ${LINE} | grep -q "PASSWORD"`
-    if [ -n `echo "${LINE}" | grep -iq "PASSWORD"` ]; then
+    echo "${LINE}"
+    if [ ! -z `echo "${LINE}" | grep -iq "PASSWORD"` ]; then
         echo "PASSWORD REDACTED"
-    elif [ -n `echo "${LINE}" | grep -iq "SECRET"` ]; then
+    elif [ ! -z `echo "${LINE}" | grep -iq "SECRET"` ]; then
         echo "SECRET REDACTED"
-    elif [ -n `echo "${LINE}" | grep -iq "KEY"` ]; then
+    elif [ ! -z `echo "${LINE}" | grep -iq "KEY"` ]; then
         echo "KEY REDACTED"
-    elif [ -n `echo "${LINE}" | grep -iq "TOKEN"` ]; then
+    elif [ ! -z `echo "${LINE}" | grep -iq "TOKEN"` ]; then
         echo "TOKEN REDACTED"
-    elif [ -n `echo "${LINE}" | grep -iq "DICOM"` ]; then
+    elif [ ! -z `echo "${LINE}" | grep -iq "DICOM"` ]; then
         echo "DICOM REDACTED"
     else
         echo "${LINE}"
