@@ -50,18 +50,15 @@ echo "Diff of previous (" ${PEN_STR} ") to current (" ${CURR_STR} ") for" ${CONF
 diff ${TMP_LAST} ${TMP_CURR} > ${TMP_DIFF}
 
 while read -r LINE; do
-    echo "line check" "${LINE}"
-    RES=`echo "${LINE}" | grep -iq "DICOM"`
-    echo "chk chk" ${RES}
-    if [ ! -z `echo "${LINE}" | grep -iq "PASSWORD"` ]; then
+    if [ ! -z `echo "${LINE}" | grep -i "PASSWORD"` ]; then
         echo "PASSWORD REDACTED"
-    elif [ ! -z `echo "${LINE}" | grep -iq "SECRET"` ]; then
+    elif [ ! -z `echo "${LINE}" | grep -i "SECRET"` ]; then
         echo "SECRET REDACTED"
-    elif [ ! -z `echo "${LINE}" | grep -iq "KEY"` ]; then
+    elif [ ! -z `echo "${LINE}" | grep -i "KEY"` ]; then
         echo "KEY REDACTED"
-    elif [ ! -z `echo "${LINE}" | grep -iq "TOKEN"` ]; then
+    elif [ ! -z `echo "${LINE}" | grep -i "TOKEN"` ]; then
         echo "TOKEN REDACTED"
-    elif [ ! -z `echo "${LINE}" | grep -iq "DICOM"` ]; then
+    elif [ ! -z `echo "${LINE}" | grep -i "DICOM"` ]; then
         echo "DICOM REDACTED"
     else
         echo "${LINE}"
