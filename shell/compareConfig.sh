@@ -60,8 +60,6 @@ while read -r LINE; do
         echo "KEY REDACTED"
     elif [ ! -z `echo "${LINE}" | sed -e 's/<//' |  sed -e 's/>//' | grep -i "TOKEN"` ]; then
         echo "TOKEN REDACTED"
-    elif [ ! -z `echo "${LINE}" | sed -e 's/<//' |  sed -e 's/>//' | grep -i "DICOM"` ]; then
-        echo "DICOM REDACTED"
     else
         echo "${LINE}"
     fi
