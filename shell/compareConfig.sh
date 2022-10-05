@@ -51,6 +51,8 @@ diff ${TMP_LAST} ${TMP_CURR} > ${TMP_DIFF}
 
 while read -r LINE; do
     echo "line check" "${LINE}"
+    RES=`echo "${LINE}" | grep -iq "DICOM"`
+    echo "chk chk" ${RES}
     if [ ! -z `echo "${LINE}" | grep -iq "PASSWORD"` ]; then
         echo "PASSWORD REDACTED"
     elif [ ! -z `echo "${LINE}" | grep -iq "SECRET"` ]; then
