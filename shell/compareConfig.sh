@@ -48,8 +48,9 @@ gsutil cp ${CONFIG_PATH}"#"${CURR} ${TMP_CURR}  > /dev/null 2>&1
 
 echo "Diff of previous (" ${PEN_STR} ") to current (" ${CURR_STR} ") for" ${CONFIG_PATH} ":"
 diff ${TMP_LAST} ${TMP_CURR} > ${TMP_DIFF}
+
 while read -r LINE; do
-    echo "${LINE}"
+    echo "line check" "${LINE}"
     if [ ! -z `echo "${LINE}" | grep -iq "PASSWORD"` ]; then
         echo "PASSWORD REDACTED"
     elif [ ! -z `echo "${LINE}" | grep -iq "SECRET"` ]; then
@@ -63,7 +64,6 @@ while read -r LINE; do
     else
         echo "${LINE}"
     fi
-
 done < ${TMP_DIFF}
 
 
