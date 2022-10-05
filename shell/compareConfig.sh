@@ -49,17 +49,16 @@ gsutil cp ${CONFIG_PATH}"#"${CURR} ${TMP_CURR}  > /dev/null 2>&1
 echo "Diff of previous (" ${PEN_STR} ") to current (" ${CURR_STR} ") for" ${CONFIG_PATH} ":"
 diff ${TMP_LAST} ${TMP_CURR} > ${TMP_DIFF}
 
+# The < and > mess up the tests:
+
 while read -r LINE; do
-    echo "line check" "${LINE}"
-    RES=`echo "${LINE}" | sed -e 's/<//' | grep -i "DICOM"`
-    echo "chk chk" ${RES}
-    if [ ! -z `echo "${LINE}" | grep -i "PASSWORD"` ]; then
+    if [ ! -z `echo "${LINE}" | sed -e 's/<//' |  sed -e 's/>//' | grep -i "PASSWORD"` ]; then
         echo "PASSWORD REDACTED"
-    elif [ ! -z `echo "${LINE}" | grep -i "SECRET"` ]; then
+    elif [ ! -z `echo "${LINE}" | sed -e 's/<//' |  sed -e 's/>//' | grep -i "SECRET"` ]; then
         echo "SECRET REDACTED"
-    elif [ ! -z `echo "${LINE}" | grep -i "KEY"` ]; then
+    elif [ ! -z `echo "${LINE}" | sed -e 's/<//' |  sed -e 's/>//' | grep -i "KEY"` ]; then
         echo "KEY REDACTED"
-    elif [ ! -z `echo "${LINE}" | grep -i "TOKEN"` ]; then
+    elif [ ! -z `echo "${LINE}" | sed -e 's/<//' |  sed -e 's/>//' | grep -i "TOKEN"` ]; then
         echo "TOKEN REDACTED"
     elif [ ! -z `echo "${LINE}" | sed -e 's/<//' |  sed -e 's/>//' | grep -i "DICOM"` ]; then
         echo "DICOM REDACTED"
@@ -67,7 +66,6 @@ while read -r LINE; do
         echo "${LINE}"
     fi
 done < ${TMP_DIFF}
-
 
 trap 'rm -f ${TMP_VERS} ${TMP_SORT} ${TMP_CURR} ${TMP_LAST} ${TMP_DIFF}' EXIT
 
