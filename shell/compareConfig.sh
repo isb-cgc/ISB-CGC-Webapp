@@ -11,6 +11,7 @@ TMP_VERS=$(mktemp /tmp/vers.XXXXXXXXX)
 TMP_SORT=$(mktemp /tmp/sort.XXXXXXXXX)
 TMP_CURR=$(mktemp /tmp/curr.XXXXXXXXX)
 TMP_LAST=$(mktemp /tmp/last.XXXXXXXXX)
+TMP_DIFF=$(mktemp /tmp/diff.XXXXXXXXX)
 
 cat < /dev/null > ${TMP_VERS}
 VERS=`gsutil ls -a ${CONFIG_PATH}`
@@ -23,7 +24,7 @@ VER_LEN=`cat ${TMP_VERS} | wc -l`
 
 if (( ${VER_LEN} < 2 )); then
   echo "No diff: first version for " ${CONFIG_PATH}
-  rm -f ${TMP_VERS} ${TMP_SORT} ${TMP_CURR} ${TMP_LAST}
+  rm -f ${TMP_VERS} ${TMP_SORT} ${TMP_CURR} ${TMP_LAST} ${TMP_DIFF}
   exit
 fi
 
@@ -46,7 +47,25 @@ gsutil cp ${CONFIG_PATH}"#"${PENULT} ${TMP_LAST} > /dev/null 2>&1
 gsutil cp ${CONFIG_PATH}"#"${CURR} ${TMP_CURR}  > /dev/null 2>&1
 
 echo "Diff of previous (" ${PEN_STR} ") to current (" ${CURR_STR} ") for" ${CONFIG_PATH} ":"
-diff ${TMP_LAST} ${TMP_CURR}
+diff ${TMP_LAST} ${TMP_CURR} > ${TMP_DIFF}
+while read -r LINE; do
+    CHECK_LINE_PASS=`echo ${LINE} | grep -q "PASSWORD"`
+    if [ -n `echo "${LINE}" | grep -iq "PASSWORD"` ]; then
+        echo "PASSWORD REDACTED"
+    elif [ -n `echo "${LINE}" | grep -iq "SECRET"` ]; then
+        echo "SECRET REDACTED"
+    elif [ -n `echo "${LINE}" | grep -iq "KEY"` ]; then
+        echo "KEY REDACTED"
+    elif [ -n `echo "${LINE}" | grep -iq "TOKEN"` ]; then
+        echo "TOKEN REDACTED"
+    elif [ -n `echo "${LINE}" | grep -iq "DICOM"` ]; then
+        echo "DICOM REDACTED"
+    else
+        echo "${LINE}"
+    fi
 
-trap 'rm -f ${TMP_VERS} ${TMP_SORT} ${TMP_CURR} ${TMP_LAST}' EXIT
+done < ${TMP_DIFF}
+
+
+trap 'rm -f ${TMP_VERS} ${TMP_SORT} ${TMP_CURR} ${TMP_LAST} ${TMP_DIFF}' EXIT
 
