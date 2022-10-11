@@ -29,9 +29,18 @@ require.config({
         jquerydt: 'libs/jquery.dataTables.min',
         session_security: 'session_security/script',
         base: 'base',
-        sqlFormatter: 'libs/sql-formatter.min'
+        sqlFormatter: 'libs/sql-formatter.min',
+        tippy: 'libs/tippy-bundle.umd.min',
+        '@popperjs/core': 'libs/popper.min'
     },
     shim: {
+        '@popperjs/core': {
+            exports: "@popperjs/core"
+        },
+        'tippy': {
+            exports: 'tippy',
+            deps: ['@popperjs/core']
+        },
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'datatables.net': ['jquery']
@@ -42,10 +51,11 @@ require([
     'jquery',
     'base',
     'sqlFormatter',
+    'tippy',
     'datatables.net',
     'jqueryui',
     'bootstrap'
-], function($,base, sqlFormatter) {
+], function($,base, sqlFormatter, tippy) {
 
     var cohort_list_table = $('#cohort-table').DataTable({
         "dom": '<"dataTables_controls"ilpf>rt<"bottom"><"clear">',
@@ -536,7 +546,27 @@ require([
 
                 $('#version_d').find('.series_o')[0].innerHTML=series_col;
                 $('#version_d').find('.series_c')[0].innerHTML=data['SeriesInstanceUID'].toString();
-                document.getElementById("load_new").innerHTML="<button onclick=\"location.href = '/explore/?cohort_id="+id+"';\">Load New Version</button>"
+                if(data['PatientID'] <= 0) {
+                    $('.load-new').attr("disabled","disabled");
+                    $('.none-found').show();
+                } else {
+                    $('.load-new').removeAttr("disabled");
+                    $('.none-found').hide();
+                    $('.load-new').attr("onclick","location.href = '/explore/?cohort_id="+id+"'");
+                }
+                if(data['inactive_attr']) {
+                    $('.inactive-filters').show();
+                    $('.inactive-filters .inactive-attrs').text(data['inactive_attr']);
+                } else {
+                    $('.inactive-filters').hide();
+                }
+                if(!data['filters_found']) {
+                    $('.no-filters-found').show();
+                    $('.some-found').hide();
+                } else {
+                    $('.no-filters-found').hide();
+                    $('.some-found').show();
+                }
                $('.spinner').hide();
             },
             error: function () {
@@ -574,6 +604,13 @@ require([
                 }
             });
         }
+    });
+
+    tippy('.inactive-attr', {
+        allowHTML:true,
+        content: 'This cohort contains one or more attributes which are no longer available in the current version.<br />' +
+            'If you bring this cohort into latest IDC data version, the filters for those inactive attributes will be removed.<br />' +
+            'The cases, series, and studies contained in your cohort may change from this version.'
     });
 
     $(document).ready(function () {
