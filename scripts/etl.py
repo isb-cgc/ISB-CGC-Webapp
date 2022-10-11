@@ -728,8 +728,8 @@ def main():
                 update_display_values(Attribute.objects.get(name=attr), dvals[attr]['vals'])
 
         if args.solr_files.lower() == 'y':
-            for src in [("idc-dev-etl.idc_v11_pub.dicom_derived_all", "dicom_derived_series_v11",),
-                    ("idc-dev-etl.idc_v11_pub.dicom_derived_all", "dicom_derived_study_v11",),]:
+            for src in [("idc-dev-etl.idc_v12_pub.dicom_derived_all", "dicom_derived_series_v12",),
+                    ("idc-dev-etl.idc_v12_pub.dicom_derived_all", "dicom_derived_study_v12",),]:
                 create_solr_params(src[0], src[1])
 
     except Exception as e:

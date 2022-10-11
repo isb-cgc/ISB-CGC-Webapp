@@ -660,13 +660,15 @@
                     </div>
                 {% endif %}
                 <div class="tabpanel data-tab-content-panel">
-                    <div class="panel panel-default">
+                    <div class="panel panel-default filter-display-panel">
                         <div class="panel-heading clearfix"><h4 class="panel-title">Filter Definition</h4>
                             {% if not is_cohort %}
-                                <a class="pull-right clear-filters btn btn-primary" role="button" id="5-data-clear-filters">Reset</a>
+                                <a class="pull-left clear-filters btn btn-primary btn-small" role="button"
+                                   id="5-data-clear-filters">
+                                    <i class="fa fa-rotate-left"></i> Reset</a>
                             {% else %}
-                                <a class="pull-right btn btn-primary" role="button" href={% url 'explore_data' %}>Return
-                                    to Data Explorer</a>
+                                <a class="pull-left btn btn-primary btn-small" role="button" href={% url 'explore_data' %}>
+                                    <i class="fa fa-arrow-left"></i> Return to Data Explorer</a>
                             {% endif %}
                         </div>
                         <div class="panel-body">
