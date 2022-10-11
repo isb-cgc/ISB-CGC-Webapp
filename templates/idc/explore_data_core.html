@@ -70,7 +70,7 @@
                                                     style="list-style: none;">
                                                     {% for progK, progV in programs.items|dictsort:0 %}
                                                         {% if progK != "All" and progK != "None" %}
-                                                            <li class="list-group-item  {% if forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if progV.val == 0 %} zeroed {% endif %}">
+                                                            <li class="{{ progK }} list-group-item{% if forloop.counter >= 6 %} extra-values notDisp{% endif %}{% if progV.val == 0 %} zeroed{% endif %}">
                                                                 {% if progV.projects and progV.projects.items|length == 1 %}
                                                                     {% for proj, projD in progV.projects.items %}
                                                                         <div id="{{ proj }}_heading"
