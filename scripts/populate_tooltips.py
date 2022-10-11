@@ -45,7 +45,7 @@ logger = logging.getLogger('main_logger')
 def main():
     try:
         # populate collection tooltips
-        collections = Collection.objects.filter(owner=idc_superuser, active=True)
+        collections = Collection.objects.filter(owner=idc_superuser, active=True, access="Public")
         collection_id = Attribute.objects.get(name="collection_id", active=True)
 
         tips = Attribute_Tooltips.objects.all()

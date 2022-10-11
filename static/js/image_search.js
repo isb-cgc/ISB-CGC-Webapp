@@ -3178,7 +3178,7 @@ require([
 
              if (!(has_filters || has_sliders)) {
                  // No anonymous filters seen--check for filter URI
-                if (Object.keys(filters_for_load).length > 0) {
+                if (filters_for_load && Object.keys(filters_for_load).length > 0) {
                      loadPending = load_filters(filters_for_load);
                      loadPending.done(function () {
                          //console.debug("External filter load done.");
