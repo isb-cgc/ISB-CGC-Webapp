@@ -176,16 +176,30 @@ nav {
   padding-bottom: 5px;
 }
 
+.navbar-nav .fa-external-link {
+  margin-top: -5px;
+}
+
 .navbar-nav .search-item .input-group {
   margin-top: 10px;
   margin-left: 41px; }
   .navbar-nav .search-item .input-group i {
     padding: 3px; }
 
-.navbar-nav li a:hover {
-  background-color: #fff; }
+.idc-nav .navbar-item {
+  color: #000;
+}
 
-.navbar-signin .dropdown i.fa {
+.idc-nav .navbar-left li:hover, .idc-nav .navbar-left li:hover> a, .idc-nav .navbar-left li a:hover {
+  background-color: #aeaeae;
+  color: #000;
+}
+
+.idc-nav .navbar-collapse {
+  background-color: #f8f8f8
+}
+
+.navbar-login .dropdown i.fa {
   font-size: x-large !important;
 }
 
@@ -973,7 +987,7 @@ nav, .site-header {
     font-weight: bold; }
 
 .site-header nav .navbar-item i, .site-header nav .navbar-right i {
-  font-size: 28px;
+  font-size: 16px;
   vertical-align: middle;
 }
 
@@ -1007,11 +1021,13 @@ nav, .site-header {
   font-size: 50px;
 }
 
+.navbar-right .navbar-item.navbar-login {
+  padding: 13px 10px 13px 10px;
+}
+
 .navbar-item {
   vertical-align: middle;
-  padding-top: 10px;
-  padding-right: 10px;
-  padding-left: 5px;
+  padding: 18px 15px 19px 15px;
   }
   .navbar-item .dropdown:hover {
     cursor: pointer; }
@@ -1035,12 +1051,7 @@ nav, .site-header {
     .navbar-link a:hover, .navbar-link a:focus {
       color: #1f5261; }
 
-.navbar-signin {
-  padding-top: 6px;
-}
-
-.partners-div
-{
+.partners-div {
   padding-top: 50px;
   padding-bottom: 150px;
   text-align: center;
@@ -1076,13 +1087,10 @@ a.skip-nav {
 #user-login .avatar-link:hover {
   text-decoration: none; }
 
-#user-login .login-link {
-  font-size: 16px; }
-
 #user-login img {
   margin: 0px 10px;
   border-radius: 50%;
-  border: 1px solid #F8F8F8; }
+  border: 1px solid transparent; }
 
 #user-login .dropdown {
   display: inline-block;
@@ -1295,14 +1303,6 @@ a.skip-nav {
 .inactive-attrs {
   color: #b0692b;
 }
-
-@media screen and (max-width: 1199px) {
-  #gene-list-table .name-col, #gene-list-table .name-col a, #var-list-table .name-col, #var-list-table .name-col a {
-    max-width: 600px; } }
-
-@media screen and (min-width: 1200px) {
-  #gene-list-table .name-col, #gene-list-table .name-col a, #var-list-table .name-col, #var-list-table .name-col a {
-    max-width: 750px; } }
 
 .share-col a {
   color: #2B7388;

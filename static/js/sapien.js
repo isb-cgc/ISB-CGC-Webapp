@@ -95,7 +95,7 @@ require([
     });
 
     let clickHandler = function(id) {
-        let url = BASE_URL+"/explore/filters/?access=Public&";
+        let url = BASE_URL+"/explore/filters/?";
         let encoded_filters = []
         let id_site = toClassName(id.site)
         let values = (variantNames[id_site] !== null && variantNames[id_site] !== undefined) ? variantNames[id_site] : [id_site];

@@ -3128,7 +3128,6 @@ require([
             let selEle = selectors[0];
             let selector = selectors[1];
             $(selEle).collapse('show');
-            $(selEle).find('.show-more').triggerHandler('click');
             $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
         });
     };

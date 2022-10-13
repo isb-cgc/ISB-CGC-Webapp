@@ -301,7 +301,7 @@
                                 <div id="search_orig_set" role="tabpanel" class="tab-pane search-set active">
                                 {% with ordered_attr=set_attributes.origin_set.All.attributes|sort_orig_attr %}
                                     {% for attr in ordered_attr %}
-                                        {% if attr.name != "access" and attr.name != "collection_id"  and attr.name != "analysis_results_id" %}
+                                        {% if attr.name != "collection_id"  and attr.name != "analysis_results_id" %}
                                             <ul class="list-group" role="tablist" aria-multiselectable="true">
                                                 <li class="list-group-item">
                                                     <div id="{{ attr.name }}_heading" class="list-group-item__heading">
@@ -338,17 +338,17 @@
                                                                placeholder="Search..."
                                                                onkeyup="updateFilters( '{{ attr.name }}',{},false, true)">
                                                         {% if attr.name == "Modality" %}
-                                                                Find studies with
-                                                                    <input id="{{ attr.name }}_join_or" type="radio"
-                                                                           class="join_val" name="{{ attr.name }}_join"
-                                                                           value="OR" checked>
-                                                                    <label for="{{ attr.name }}_join_or" class="join">ANY</label>
-                                                                    <input id="{{ attr.name }}_join_and" type="radio"
-                                                                           class="join_val" name="{{ attr.name }}_join"
-                                                                        value="AND">
-                                                                    <label for="{{ attr.name }}_join_and" class="join">ALL</label>
-                                                                selected modalities
-                                                            {% endif %}
+                                                            Find studies with
+                                                                <input id="{{ attr.name }}_join_or" type="radio"
+                                                                       class="join_val" name="{{ attr.name }}_join"
+                                                                       value="OR" checked>
+                                                                <label for="{{ attr.name }}_join_or" class="join">ANY</label>
+                                                                <input id="{{ attr.name }}_join_and" type="radio"
+                                                                       class="join_val" name="{{ attr.name }}_join"
+                                                                    value="AND">
+                                                                <label for="{{ attr.name }}_join_and" class="join">ALL</label>
+                                                            selected modalities
+                                                        {% endif %}
 
                                                         <div class="sorter cntr notDisp">
 
