@@ -186,13 +186,14 @@ nav {
   .navbar-nav .search-item .input-group i {
     padding: 3px; }
 
-.idc-nav .navbar-item {
+.idc-nav .navbar-nav .navbar-item a {
   color: #000;
 }
 
 .idc-nav .navbar-left li:hover, .idc-nav .navbar-left li:hover> a, .idc-nav .navbar-left li a:hover {
-  background-color: #aeaeae;
+  background-color: #c6c6c6;
   color: #000;
+  transition: 0.2s;
 }
 
 .idc-nav .navbar-collapse {
@@ -1022,13 +1023,18 @@ nav, .site-header {
 }
 
 .navbar-right .navbar-item.navbar-login {
-  padding: 13px 10px 13px 10px;
+  padding: 18px 10px 16px 10px;
 }
 
 .navbar-item {
   vertical-align: middle;
   padding: 18px 15px 19px 15px;
   }
+@media(max-width: 1265px) {
+  .navbar-item {
+    padding: 8px 15px 8px 15px;
+  }
+}
   .navbar-item .dropdown:hover {
     cursor: pointer; }
   .navbar-item > a {
@@ -3008,16 +3014,9 @@ html {
   vertical-align: middle;
 }
 
-#landing .btn-collex {
-  background-color: darkgreen;
-}
-
 #landing .btn-explore {
   background-color: rebeccapurple;
-}
-
-#landing .btn-collex:hover {
-  background-color: #004d00;
+  transition: 0.2s;
 }
 
 #landing .btn-explore:hover {
