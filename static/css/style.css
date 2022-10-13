@@ -1252,19 +1252,26 @@ a.skip-nav {
   color: #000;
   font-weight: 500; }
 
+#cohort-table td {
+  vertical-align: middle;
+}
+
 .table tbody .name-col,.table tbody .desc-col  {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden; }
-  .table tbody .name-col a {
-    display: inline-block;
-    width: 100%;
+
+.table tbody .name-col a {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden; }
 
 #cohort-table {
   table-layout: fixed;
+}
+
+#cohort-table p {
+  margin: 0 0 5px;
 }
 
 .cohort-table th {
@@ -1279,6 +1286,14 @@ a.skip-nav {
 
 #cohort-table .details-control {
   padding-top: 9px;
+}
+
+#version_d .notes .fa {
+  color: darkred;
+}
+
+.inactive-attrs {
+  color: #b0692b;
 }
 
 @media screen and (max-width: 1199px) {
@@ -1496,6 +1511,10 @@ a.skip-nav {
 .tab-pane.filter-panel {
   margin-left: -10px;
   margin-right: -10px; }
+
+.filter-display-panel h4 {
+  margin-bottom: 8px;
+}
 
 .disabled {
   pointer-events: none;
@@ -4287,4 +4306,12 @@ d-topics-list iframe {
   width: 800px !important;
 }
 
+.inactive-attr {
+  color: #c18011;
+  font-size: inherit;
+  display: inline;
+}
 
+.btn-small {
+  padding: 4px 8px;
+}

@@ -1,8 +1,8 @@
 mkdir ./json
 mkdir ./txt
-
 gsutil cp "gs://${DEPLOYMENT_BUCKET}/${WEBAPP_APP_YAML}" ./app.yaml
 gsutil cp "gs://${DEPLOYMENT_BUCKET}/${ENV_FILE}" ./.env
+
 gsutil cp "gs://${DEPLOYMENT_BUCKET}/${WEBAPP_RUNTIME_SA_KEY}" ./privatekey.json
 gsutil cp "gs://${DEPLOYMENT_BUCKET}/solr-ssl.pem" ./solr-ssl.pem
 

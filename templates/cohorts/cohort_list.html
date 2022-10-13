@@ -42,12 +42,24 @@
              <tr><td># Cases</td> <td class="case_o">XXXX</td> <td class="case_c">XXXX</td> </tr>
                  <tr><td># Studies</td> <td class="study_o">XXXX</td> <td class="study_c">XXXX</td> </tr>
                  <tr><td># Series</td> <td class="series_o">XXXX</td> <td class="series_c">XXXX</td> </tr>
-
              </tbody></table>
-             <br ><span id="load_new"><button onclick="location.href = '/explore/?cohort_id=-1';">Load New Version</button></span>
-         </div>
+        <p class="notes none-found">
+            <i class="fa fa-warning"></i>
+            This cohort's filters as applied to the new data version do not return any Patients, Studies, or Series.
+            It cannot be loaded into the new version.
+        </p>
+        <p class="notes inactive-filters">
+            <i class="fa fa-warning"></i>
+            The following attributes are no longer available in the current data version: <span class="inactive-attrs"></span> <br />
+            <span class="some-found">Filters using these attributes will be removed if the cohort is brought forward into the new data version.</span>
+        </p>
+        <p class="notes no-filters-found">
+            <i class="fa fa-warning"></i>
+            No attributes used in this cohort's filters were found for the current data version. It cannot be loaded into the new version.
+        </p>
+        <button class="load-new">Load New Version</button>
+     </div>
     <div class="ui-resizable-handle ui-resizable-n" style="z-index: 90;"></div>
-
 </div>
 
 
@@ -114,7 +126,7 @@
                     </colgroup>
                     <tbody>
                     {% for cohort in cohorts %}
-                    {% with only_active_versions=cohort.only_active_versions valid_export=cohort.get_export_is_valid %}
+                    {% with only_active_versions=cohort.only_active_versions valid_export=cohort.get_export_is_valid has_inactive_attr=cohort.has_inactive_attr %}
                         <tr data-description='{% if cohort.description %}{{ cohort.description }}{% else %}N/A{% endif %}'
                             data-collex="{{ cohort.collections }}"
                             data-name="{{ cohort.name }}"
@@ -131,6 +143,9 @@
                                 {{ cohort.id }}
                             </td>
                             <td class="name-col" data-order="{{ cohort.name }}">
+                                {% if has_inactive_attr %}
+                                    <i class="fa fa-exclamation-circle inactive-attr"></i>
+                                {% endif %}
                                 {% if only_active_versions %}
                                {% comment %}  <form name="getCohort" method="POST" action="{% url 'cohort_details' cohort.id %}">
                                     {% csrf_token %}

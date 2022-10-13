@@ -209,16 +209,17 @@ def add_programs(program_set):
     return results
 
 
-def add_data_sources(source_set, subversions, set_types):
+def add_data_sources(source_set, subversions, set_types, attr_exclude):
     for source in source_set:
         source.update({
             "versions": subversions,
-            "set_types": set_types
+            "set_types": set_types,
+            "attr_exclude": attr_exclude
         })
         add_data_source(**source)
 
 
-def add_data_source(name, count_col, source_type, versions, programs, aggregate_level, set_types, joins, attr_from):
+def add_data_source(name, count_col, source_type, versions, programs, aggregate_level, set_types, joins, attr_from, attr_exclude):
     obj = None
     try:
         obj, created = DataSource.objects.update_or_create(
@@ -253,7 +254,7 @@ def add_data_source(name, count_col, source_type, versions, programs, aggregate_
                 jn['sources'],
                 jn['to']
             )
-        copy_attrs([attr_from], [name])
+        copy_attrs([attr_from], [name], attr_exclude)
 
         print("DataSource entry created: {}".format(obj.name))
     except Exception as e:
@@ -508,14 +509,14 @@ def add_attributes(attr_set):
             logger.exception(e)
 
 
-def copy_attrs(from_data_sources, to_data_sources):
+def copy_attrs(from_data_sources, to_data_sources, attr_excludes):
     to_sources = DataSource.objects.filter(name__in=to_data_sources)
     from_sources = DataSource.objects.filter(name__in=from_data_sources)
     to_sources_attrs = to_sources.get_source_attrs()
     bulk_add = []
 
     for fds in from_sources:
-        from_source_attrs = fds.attribute_set.exclude(id__in=to_sources_attrs['ids'])
+        from_source_attrs = fds.attribute_set.exclude(id__in=to_sources_attrs['ids']).exclude(name__in=attr_excludes)
         print("Copying {} attributes from {} to: {}.".format(
             len(from_source_attrs.values_list('name',flat=True)),
             fds.name, "; ".join(to_data_sources),
@@ -689,7 +690,7 @@ def update_data_versions(filename):
         config['bioclin_version']
     )
 
-    add_data_sources(config['data_sources'], config['new_sub_versions'], config['set_types'])
+    add_data_sources(config['data_sources'], config['new_sub_versions'], config['set_types'], config['attr_exclude'])
 
     deactivate_data_versions(config['deactivate']['minor'], config['deactivate']['major'])
 
@@ -727,8 +728,8 @@ def main():
                 update_display_values(Attribute.objects.get(name=attr), dvals[attr]['vals'])
 
         if args.solr_files.lower() == 'y':
-            for src in [("idc-dev-etl.idc_v11_pub.dicom_derived_all", "dicom_derived_series_v11",),
-                    ("idc-dev-etl.idc_v11_pub.dicom_derived_all", "dicom_derived_study_v11",),]:
+            for src in [("idc-dev-etl.idc_v12_pub.dicom_derived_all", "dicom_derived_series_v12",),
+                    ("idc-dev-etl.idc_v12_pub.dicom_derived_all", "dicom_derived_study_v12",),]:
                 create_solr_params(src[0], src[1])
 
     except Exception as e:
