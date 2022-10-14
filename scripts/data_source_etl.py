@@ -68,12 +68,23 @@ ranges = {
 
 SOLR_TYPES = {
     'STRING': "string",
+    "FLOAT64": "pfloat",
     "FLOAT": "pfloat",
+    "NUMERIC": "pfloat",
+    "INT64": "plong",
     "INTEGER": "plong",
-    "DATE": "pdate"
+    "DATE": "pdate",
+    "DATETIME": "pdate"
 }
 
-SOLR_SINGLE_VAL = ["case_barcode", "case_gdc_id", "case_pdc_id", "program_name", "project_short_name", "case_node_id", "StudyInstanceUID", "SeriesInstanceUID"]
+SOLR_TYPE_EXCEPTION = {
+    'SamplesPerPixel': 'string'
+}
+
+SOLR_SINGLE_VAL = {
+    "case_barcode": ["case_barcode", "case_node_id"],
+    "sample_barcode": ["case_barcode", "case_node_id", "sample_barcode", "sample_node_id"]
+}
 
 ATTR_SET = {}
 DISPLAY_VALS = {}
@@ -86,42 +97,33 @@ SOLR_CERT = settings.SOLR_CERT
 
 def make_solr_commands(sources):
     try:
-        attrs_to_srcs = []
         for src in sources:
-            schema_src = src['schema_source'].split('.')
-            schema = BigQuerySupport.get_table_schema(schema_src[0], schema_src[1], schema_src[2])
-            solr_schema = []
-            solr_index_strings = []
-            for field in schema:
-                solr_schema.append({
-                    "name": field['name'], "type": SOLR_TYPES[field['type']],
-                    "multiValued": True if src['aggregated'] and field['name'] not in SOLR_SINGLE_VAL else False, "stored": True
-                })
+            create_solr_params(src['schema_source'], src['name'], src['aggregated'])
 
-                if src['aggregated'] and field['name'] not in SOLR_SINGLE_VAL:
-                    solr_index_strings.append("f.{}.split=true&f.{}.separator=|".format(field['name'],field['name']))
-
-                with open("output/{}_solr_schemas.json".format(src['name']), "w") as schema_outfile:
-                    json.dump(solr_schema, schema_outfile)
-                schema_outfile.close()
-                with open("output/{}_solr_index_vars.txt".format(src['name']), "w") as solr_index_string:
-                    solr_index_string.write("&{}".format("&".join(solr_index_strings)))
-                solr_index_string.close()
-
-        Attribute.data_sources.through.objects.bulk_create(attrs_to_srcs)
     except Exception as e:
-        logger.error("[ERROR] Data Source {} may not have been added!".format(obj.name))
+        logger.error("[ERROR] While making Solr params: ")
         logger.exception(e)
+
+
+def inactivate_data_versions(dv_set):
+    for dv in dv_set:
+        try:
+            dv_obj = DataVersion.objects.get(version=dv)
+            dv_obj.active = False
+            dv_obj.save()
+        except Exception as e:
+            logger.error("[ERROR] While deactivating version {} :".format(dv_obj))
+            logger.exceiption(e)
 
 
 def add_data_versions(dv_set):
     for dv in dv_set:
         try:
-            dv_obj = DataVersion.objects.get(name=dv['name'])
+            DataVersion.objects.get(name=dv['name'])
             logger.warning("[WARNING] Data Version {} already exists! Skipping.".format(dv['name']))
         except ObjectDoesNotExist:
             progs = Program.objects.filter(name__in=dv['programs'], active=True, owner=isb_superuser, is_public=True)
-            obj, created = DataVersion.objects.update_or_create(name=dv['name'], data_type=dv['type'], version=dv['ver'])
+            obj, created = DataVersion.objects.update_or_create(name=dv['name'], data_type=dv['type'], version=dv['ver'], build=dv["build"])
             dv_to_prog = []
 
             for prog in progs:
@@ -133,6 +135,51 @@ def add_data_versions(dv_set):
         except Exception as e:
             logger.error("[ERROR] Data Version {} may not have been added!".format(dv['name']))
             logger.exception(e)
+
+
+def create_solr_params(schema_src, solr_src, aggregated=False):
+    solr_src = DataSource.objects.get(name=solr_src)
+    schema_src = schema_src.split('.')
+    schema = BigQuerySupport.get_table_schema(schema_src[0],schema_src[1],schema_src[2])
+    solr_schema = []
+    solr_index_strings = []
+    SCHEMA_BASE = '{"add-field": %s}'
+    CORE_CREATE_STRING = "sudo -u solr /opt/bitnami/solr/bin/solr create -c {solr_src} -s 2 -rf 2"
+    SCHEMA_STRING = "curl -u {solr_user}:{solr_pwd} -X POST -H 'Content-type:application/json' --data-binary '{schema}' https://localhost:8983/solr/{solr_src}/schema --cacert solr-ssl.pem"
+    INDEX_STRING = "curl -u {solr_user}:{solr_pwd} -X POST 'https://localhost:8983/solr/{solr_src}/update?commit=yes{params}' --data-binary @{file_name}.csv -H 'Content-type:application/csv' --cacert solr-ssl.pem"
+    for field in schema:
+        if not re.search(r'has_',field['name']):
+            field_schema = {
+                "name": field['name'],
+                "type": SOLR_TYPES[field['type']] if field['name'] not in SOLR_TYPE_EXCEPTION else SOLR_TYPE_EXCEPTION[field['name']],
+                "multiValued": False if not aggregated else False if field['name'] in SOLR_SINGLE_VAL.get(solr_src.aggregate_level, {}) else True,
+                "stored": True
+            }
+            solr_schema.append(field_schema)
+            if field_schema['multiValued']:
+                solr_index_strings.append("f.{}.split=true&f.{}.separator=|".format(field['name'],field['name']))
+
+    with open("{}_solr_cmds.txt".format(solr_src.name), "w") as cmd_outfile:
+        schema_array = SCHEMA_BASE % solr_schema
+        params = "{}{}".format("&" if len(solr_index_strings) else "", "&".join(solr_index_strings))
+        cmd_outfile.write(CORE_CREATE_STRING.format(solr_src=solr_src.name))
+        cmd_outfile.write("\n\n")
+        cmd_outfile.write(SCHEMA_STRING.format(
+            solr_user=SOLR_LOGIN,
+            solr_pwd=SOLR_PASSWORD,
+            solr_src=solr_src.name,
+            schema=schema_array
+        ))
+        cmd_outfile.write("\n\n")
+        cmd_outfile.write(INDEX_STRING.format(
+            solr_user=SOLR_LOGIN,
+            solr_pwd=SOLR_PASSWORD,
+            solr_src=solr_src.name,
+            params=params,
+            file_name=solr_src.name
+        ))
+
+    cmd_outfile.close()
 
 
 def add_data_sources(sources, build_attrs=True, link_attr=True):
@@ -171,8 +218,6 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
                 schema_src = src['schema_source'].split('.')
                 schema = BigQuerySupport.get_table_schema(schema_src[0],schema_src[1],schema_src[2])
                 link_attrs = []
-                solr_schema = []
-                solr_index_strings = []
                 for field in schema:
                     if build_attrs:
                         if field['name'] not in ATTR_SET:
@@ -210,14 +255,6 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
                     elif link_attr and field['name'] not in source_attrs:
                         link_attrs.append(field['name'])
 
-                    solr_schema.append({
-                        "name": field['name'], "type": SOLR_TYPES[field['type']],
-                        "multiValued": True if src['aggregated'] and field['name'] not in SOLR_SINGLE_VAL else False, "stored": True
-                    })
-
-                    if src['aggregated'] and field['name'] not in SOLR_SINGLE_VAL:
-                        solr_index_strings.append("f.{}.split=true&f.{}.separator=|".format(field['name'],field['name']))
-
                 for la in link_attrs:
                     try:
                         a = Attribute.objects.get(name=la)
@@ -230,13 +267,7 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
                         elif isinstance(e,ObjectDoesNotExist):
                             logger.info("Attribute {} doesn't exist--can't add, skipping!".format(la))
 
-                with open("{}_solr_schemas.json".format(src['name']), "w") as schema_outfile:
-                    json.dump(solr_schema, schema_outfile)
-                schema_outfile.close()
-                with open("{}_solr_index_vars.txt".format(src['name']), "w") as solr_index_string:
-                    solr_index_string.write("&{}".format("&".join(solr_index_strings)))
-                solr_index_string.close()
-
+                create_solr_params(src['schema_source'], src['name'])
 
             #     # add core to Solr
             #     # sudo -u solr /opt/bitnami/solr/bin/solr create -c <solr_name>  -s 2 -rf 2
@@ -381,7 +412,10 @@ def main(config, make_attr=False):
                     Project.objects.update_or_create(name=proj['name'], owner=isb_superuser, active=True, program=program)
 
         if 'versions' in config:
-            add_data_versions(config['versions'])
+            if 'create' in config['versions']:
+                add_data_versions(config['versions']['create'])
+            if 'deprecate' in config['versions']:
+                inactivate_data_versions(config['versions']['deprecate'])
 
         # Preload all display value information, as we'll want to load it into the attributes while we build that set
         if 'display_values' in config and exists(join(dirname(__file__), config['display_values'])):
