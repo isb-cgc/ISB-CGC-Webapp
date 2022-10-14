@@ -88,35 +88,37 @@
                         </div>
                         <div id="columns" class="collapse">
                             <li class="checkbox"><label>
+                                <input class="column-checkbox" type="hidden" value="collection_id" checked>
+                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">Collection ID</span>
+                            </label></li>
+                            <li class="checkbox"><label>
+                                <input class="column-checkbox" type="hidden" value="SeriesInstanceUID" checked>
+                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">Series Instance UID</span>
+                            </label></li>
+                            <li class="checkbox"><label>
+                                <input class="column-checkbox" type="hidden" value="source_DOI" checked>
+                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">Source DOI</span>
+                            </label></li>
+                            <li class="checkbox"><label>
+                                <input class="column-checkbox" type="hidden" value="idc_version" checked>
+                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">IDC Data Version</span>
+                            </label></li>
+                            <li class="checkbox bq-only"><label>
+                                <input class="column-checkbox bq-only" type="hidden" value="gcs_url" checked>
+                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">Cloud Storage Path</span>
+                            </label></li>
+                            <li class="checkbox"><label>
                                 <input class="column-checkbox" type="checkbox" value="PatientID" checked>
                                 <span class="value">Patient ID</span>
                             </label></li>
-
-                            <li class="checkbox"><label>
-                                <input class="column-checkbox" type="checkbox" value="collection_id" checked>
-                                <span class="value">Collection ID</span>
-                            </label></li>
-
                             <li class="checkbox"><label>
                                 <input class="column-checkbox" type="checkbox" value="StudyInstanceUID" checked>
                                 <span class="value">Study Instance UID</span>
                             </label></li>
-
-                            <li class="checkbox"><label>
-                                <input class="column-checkbox" type="checkbox" value="SeriesInstanceUID" checked>
-                                <span class="value">Series Instance UID</span>
-                            </label></li>
-
                             <li class="checkbox bq-only"><label>
                                 <input class="column-checkbox bq-only" type="checkbox" value="SOPInstanceUID" checked>
                                 <span class="value">SOP Instance UID</span>
                             </label></li>
-
-                            <li class="checkbox"><label>
-                                <input class="column-checkbox" type="checkbox" value="source_DOI" checked>
-                                <span class="value">Source DOI</span>
-                            </label></li>
-
                             <li class="checkbox"><label>
                                 <input class="column-checkbox" type="checkbox" value="crdc_study_uuid" checked>
                                 <span class="value">CRDC Study UUID</span>
@@ -126,23 +128,9 @@
                                 <input class="column-checkbox" type="checkbox" value="crdc_series_uuid" checked>
                                 <span class="value">CRDC Series UUID</span>
                             </label></li>
-
                             <li class="checkbox bq-only"><label>
                                 <input class="column-checkbox bq-only" type="checkbox" value="crdc_instance_uuid" checked>
                                 <span class="value">CRDC SOP Instance UUID</span>
-                            </label></li>
-
-                            <li class="checkbox bq-only"><label>
-                                <input class="column-checkbox bq-only" type="checkbox" value="gcs_url" checked>
-                                <span class="value">Cloud Storage Path</span>
-                            </label></li>
-                            <li class="checkbox bq-only"><label>
-                                <input class="column-checkbox bq-only" type="checkbox" value="idc_version" checked>
-                                <span class="value">IDC Data Version</span>
-                            </label></li>
-                            <li class="checkbox bq-only"><label>
-                                <input class="column-checkbox bq-only" type="checkbox" value="access" checked>
-                                <span class="value">Access</span>
                             </label></li>
                         </div>
                         </div>
