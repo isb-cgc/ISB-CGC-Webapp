@@ -1023,7 +1023,7 @@ nav, .site-header {
 }
 
 .navbar-right .navbar-item.navbar-login {
-  padding: 18px 10px 16px 10px;
+  padding: 13px 10px 14px 10px;
 }
 
 .navbar-item {
@@ -4313,4 +4313,10 @@ d-topics-list iframe {
 
 .btn-small {
   padding: 4px 8px;
+}
+
+#export-manifest-form .checkbox i {
+  margin-left: -20px;
+  font-size: medium;
+  color: #555a8a;
 }
