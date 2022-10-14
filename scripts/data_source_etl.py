@@ -108,11 +108,14 @@ def make_solr_commands(sources):
 def inactivate_data_versions(dv_set):
     for dv in dv_set:
         try:
-            dv_obj = DataVersion.objects.get(version=dv)
-            dv_obj.active = False
-            dv_obj.save()
+            dv_objs = DataVersion.objects.filter(version=dv['ver'], data_type__in=dv['type'])
+            for dv_obj in dv_objs:
+                dv_obj.active = False
+                dv_obj.save()
+        except ObjectDoesNotExist:
+            logger.warning("[WARNING] Could not de-active version {}: it was not found!".format(dv))
         except Exception as e:
-            logger.error("[ERROR] While deactivating version {} :".format(dv_obj))
+            logger.error("[ERROR] While deactivating version {} :".format(dv))
             logger.exceiption(e)
 
 
@@ -123,7 +126,7 @@ def add_data_versions(dv_set):
             logger.warning("[WARNING] Data Version {} already exists! Skipping.".format(dv['name']))
         except ObjectDoesNotExist:
             progs = Program.objects.filter(name__in=dv['programs'], active=True, owner=isb_superuser, is_public=True)
-            obj, created = DataVersion.objects.update_or_create(name=dv['name'], data_type=dv['type'], version=dv['ver'], build=dv["build"])
+            obj, created = DataVersion.objects.update_or_create(name=dv['name'], data_type=dv['type'], version=dv['ver'], build=dv.get("build",None))
             dv_to_prog = []
 
             for prog in progs:
