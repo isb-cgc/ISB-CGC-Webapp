@@ -4,106 +4,97 @@
 {% load socialaccount %}
 {% load idc_collections_custom_tags %}
 
-<header class="navbar navbar-fixed-top site-header" role="menubar">
+<header class="site-header">
 
     {% is_allowed user as has_access %}
-    <nav class="container-fluid navbar-container">
-        <div class="row">
-            <div class="col-lg-12 col-md-12 col-sm-12">
-                <div class="crdc-nav">
+    <nav class="navbar navbar-default navbar-fixed-top idc-nav navbar-container">
+        <div class="container-fluid">
+            <div class="crdc-nav">
                 <a target="_blank" rel="noopener noreferrer" href="https://datacommons.cancer.gov/">NCI Cancer Research Data Commons</a>
-                </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                            data-target="#main-navbar-collapse" aria-expanded="false">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <a href="{% url 'landing_page' %}" title="Home Page" >
-                        <img class="navbar-brand" src="{% static 'img/NIH_IDC_title.svg' %}" alt="NIH IDC Logo"/>
-                    </a>
-                </div>
-                <div class="collapse navbar-collapse" id="main-navbar-collapse">
-                    <ul class="nav navbar-nav navbar-left">
-                        <li class="navbar-link navbar-item {% if 'collections' in request.path %}active-page{% endif %}">
-                            <a class="main-links" href="{% url 'collections' %}" title="View IDC collections"><i class="fa-solid fa-table-list"></i> Collections</a>
-                        </li>
-                        <li class="navbar-link navbar-item {% if 'explore' in request.path %}active-page{% endif %}">
-                            <a class="main-links" href="{% url 'explore_data' %}" title="Explore image data"><i class="fa-solid fa-eye"></i> Explore</a>
-                        </li>
-                        <li class="navbar-link navbar-item">
-                            <a class="external-link" href=""
-                               url="https://console.cloud.google.com/bigquery?ws=!1m5!1m4!4m3!1sbigquery-public-data!2sidc_current!3sdicom_all"
-                               title="View IDC BigQuery Public Data"
-                               data-toggle="modal" data-target="#external-web-warning">
-                                <img class="bq-menu-img" src="{% static 'img/bq_icon_menu.png' %}"> <p class="navbar-label"> BigQuery</p>
-                                <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i></a>
-                        </li>
-                        <li class="navbar-link navbar-item">
-                            <a class="external-link" href="" url="https://discourse.canceridc.dev"
-                               data-toggle="modal" data-target="#external-web-warning">
-                               <i class="fa-regular fa-comments"></i> <p class="navbar-label"> Discourse</p>
-                               <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#main-navbar-collapse" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a href="{% url 'landing_page' %}" title="Home Page" >
+                    <img class="navbar-brand" src="{% static 'img/NIH_IDC_title.svg' %}" alt="NIH IDC Logo"/>
+                </a>
+            </div>
+            <div class="collapse navbar-collapse" id="main-navbar-collapse">
+                <ul class="nav navbar-nav navbar-left">
+                    <li class="navbar-link navbar-item {% if 'explore' in request.path %}active-page{% endif %}">
+                        <a class="main-links" href="{% url 'explore_data' %}" title="Explore image data">Explore Images</a>
+                    </li>
+                    <li class="navbar-link navbar-item {% if 'collections' in request.path %}active-page{% endif %}">
+                        <a class="main-links" href="{% url 'collections' %}" title="View IDC collections">Collections</a>
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a class="external-link" href=""
+                           url="https://console.cloud.google.com/bigquery?ws=!1m5!1m4!4m3!1sbigquery-public-data!2sidc_current!3sdicom_all"
+                           title="View IDC BigQuery Public Data"
+                           data-toggle="modal" data-target="#external-web-warning">
+                            BigQuery <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
                             </a>
-                        </li>
-                        <li class="navbar-link navbar-item">
-                            <a class="external-link" href="" url="https://learn.canceridc.dev"
-                                data-toggle="modal" data-target="#external-web-warning" title="Documentation">
-                               <i class="fa-solid fa-book"></i> <p class="navbar-label"> Docs</p>
-                               <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
-                            </a>
-                        </li>
-                        <li class="navbar-link navbar-item">
-                            <a class="main-links" href="{% url 'news' %}" title="View news items"><i class="fa-solid fa-bullhorn"></i> News</a>
-                        </li>
-                        <li class="navbar-link navbar-item">
-                            <a class="main-links" href="{% url 'about_page' %}" title="Information about IDC"><i class="fa-solid fa-info-circle"></i> About</a>
-                        </li>
-                        {% if user.is_authenticated %}
-                        <li class="navbar-link navbar-item">
-                            <a href="{% url 'cohort_list' %}" title="View Your Cohorts"><i class="fa-solid fa-archive"></i> Cohorts</a>
-                        </li>
-                        {% endif %}
-                    </ul>
-                    <ul class="nav navbar-nav navbar-right">
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a class="external-link" href="" url="https://discourse.canceridc.dev"
+                           data-toggle="modal" data-target="#external-web-warning">
+                           User Forum <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                        </a>
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a class="main-links" href="{% url 'news' %}" title="View news items">News</a>
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a class="main-links" href="{% url 'about_page' %}" title="Information about IDC">About</a>
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a class="external-link" href="" url="https://learn.canceridc.dev"
+                           data-toggle="modal" data-target="#external-web-warning" title="Documentation">
+                            Help <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                        </a>
+                    </li>
                     {% if user.is_authenticated %}
-                        <li id="user-login" class="navbar-item navbar-signin">
-                            <a class="avatar-link" href="{% url 'user_detail' user.id %}">
-                                {% with avatar_url=user.socialaccount_set.all.0.get_avatar_url %}
-                                    {% if avatar_url %}
-                                        <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="40" height="40" alt="Avatar">
-                                    {% else %}
-                                        <i class="fa-solid fa-user basic-avatar"> </i>
-                                    {% endif %}
-                                {% endwith %}
-                            </a>
-                            <div class="dropdown">
-                                <a role="button" class="dropdown-toggle navbar-item__text" id="user-dropdown" data-toggle="dropdown" aria-label="User Dropdown" aria-expanded="true">
-                                    {{ user.first_name }} <i class="fa fa-solid fa-caret-down"></i>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-label="user-dropdown">
-                                    {% if has_access %}<li role="menuitem"><a href="{% url 'user_detail' user.id %}">Account Details <i class="fa-solid fa-cog"></i></a></li>{% endif %}
-                                    <li role="menuitem"><a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out">Sign Out <i class="fa-solid fa-sign-out"></i></a></li>
-                                </ul>
-                            </div>
-                        </li>
-                    {% else %}
-                        <li class="navbar-item inline-block navbar-signin">
-                            <div class="dropdown">
-                                <a id="sign-in-dropdown" class="sign-in-dropdown dropdown-toggle navbar-item__text"
-                                   href="{% url 'account_login' %}" title="Sign In"><i class="fa fa-solid fa-sign-in"></i><p class="navbar-label">Sign In</p></a>
-                            </div>
-                        </li>
+                    <li class="navbar-link navbar-item">
+                        <a href="{% url 'cohort_list' %}" title="View Your Cohorts">Cohorts</a>
+                    </li>
                     {% endif %}
                 </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    {% if user.is_authenticated %}
+                    <li id="user-login" class="navbar-item navbar-login">
+                        <a class="avatar-link" href="{% url 'user_detail' user.id %}">
+                            {% with avatar_url=user.socialaccount_set.all.0.get_avatar_url %}
+                                {% if avatar_url %}
+                                    <img src="{{ avatar_url }}" width="30" height="30" alt="Avatar">
+                                {% else %}
+                                    <i class="fa-solid fa-user basic-avatar"> </i>
+                                {% endif %}
+                            {% endwith %}
+                        </a>
+                        <div class="dropdown">
+                            <a role="button" class="dropdown-toggle navbar-item__text" id="user-dropdown" data-toggle="dropdown" aria-label="User Dropdown" aria-expanded="true">
+                                {{ user.first_name }} <i class="fa fa-solid fa-caret-down"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-label="user-dropdown">
+                                {% if has_access %}<li role="menuitem"><a href="{% url 'user_detail' user.id %}">Account Details <i class="fa-solid fa-cog"></i></a></li>{% endif %}
+                                <li role="menuitem"><a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out">Sign Out <i class="fa-solid fa-sign-out"></i></a></li>
+                            </ul>
+                        </div>
+                    </li>
+                {% else %}
+                    <li class="navbar-item inline-block navbar-signin">
+                        <a id="sign-in-dropdown" class="sign-in-dropdown dropdown-toggle navbar-item__text"
+                               href="{% url 'account_login' %}" title="Sign In"><i class="fa fa-solid fa-sign-in"></i>Sign In</a>
+                    </li>
+                {% endif %}
+                    </ul>
                 </div>
-            </div>
         </div>
     </nav>
 </header>

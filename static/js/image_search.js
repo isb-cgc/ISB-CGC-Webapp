@@ -61,8 +61,6 @@ require([
     window.projSets['qin'] = ["qin_headneck","qin_lung_ct","qin_pet_phantom","qin_breast_dce_mri"];
     var first_filter_load = true;
 
-    var defaultFilter=new Object();
-    defaultFilter['access']=['Public']
     var plotLayout = {
         title: '',
         autosize: true,
@@ -3130,7 +3128,6 @@ require([
             let selEle = selectors[0];
             let selector = selectors[1];
             $(selEle).collapse('show');
-            $(selEle).find('.show-more').triggerHandler('click');
             $(selEle).parents('.tab-pane.search-set').length > 0 && $('a[href="#' + $(selector).parents('.tab-pane.search-set')[0].id + '"]').tab('show');
         });
     };
@@ -3180,7 +3177,7 @@ require([
 
              if (!(has_filters || has_sliders)) {
                  // No anonymous filters seen--check for filter URI
-                if (Object.keys(filters_for_load).length > 0) {
+                if (filters_for_load && Object.keys(filters_for_load).length > 0) {
                      loadPending = load_filters(filters_for_load);
                      loadPending.done(function () {
                          //console.debug("External filter load done.");
@@ -3328,8 +3325,6 @@ require([
         $('.clear-filters').on('click', function () {
             $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('checked',false);
             $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('indeterminate',false);
-            window.filterObj=JSON.parse(JSON.stringify(defaultFilter));
-            $('#access').find('input:checkbox[value="Public"]').prop("checked",true);
             $('.ui-slider').each(function(){
                 setSlider(this.id,true,0,0,true, false);
             })

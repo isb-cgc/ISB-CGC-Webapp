@@ -98,12 +98,34 @@ ATTR_SPECIFIC_ORDERS = [
     'ethnicity',
 ]
 
+ORIG_ATTR_FIRST = [
+    "tcia_tumorLocation",
+    "BodyPartExamined",
+    "Modality"
+]
+
 
 def quick_js_bracket_replace(matchobj):
     if matchobj.group(0) == '<':
         return '\u003C'
     else:
         return '\u003E'
+
+
+@register.filter
+def sort_orig_attr(attr_list):
+    first = [None for _ in ORIG_ATTR_FIRST]
+    rest = []
+    for attr in attr_list:
+        if attr['name'] in ORIG_ATTR_FIRST:
+            first[ORIG_ATTR_FIRST.index(attr['name'])] = attr
+        else:
+            rest.append(attr)
+
+    list(filter(lambda a: a is not None, first))
+    first.extend(rest)
+
+    return first
 
 
 @register.filter
@@ -135,8 +157,6 @@ def floor(item):
     return math.floor(item)
 
 
-
-
 @register.filter
 def startsWith(item, strtStr):
     if item.startswith(strtStr):
@@ -149,6 +169,7 @@ def startsWith(item, strtStr):
 def get_idc_version(reasons):
     return ImagingDataCommonsVersion.objects.get(active=True)
 
+
 # these attributes are not returned in order right now
 @register.filter
 def order_seg(items,attr):
@@ -156,6 +177,7 @@ def order_seg(items,attr):
         return sorted(items, key=lambda k: str(k['value']) if (k['display_value'] is None) else str(k['display_value']) )
     else:
         return items
+
 
 @register.filter
 def order_quant(items, attr):
@@ -171,12 +193,14 @@ def order_quant(items, attr):
                     sort_order.append(item)
         return(sort_order)
 
+
 @register.filter
 def get_by_name(items,name):
   for item in items:
     if item['name']==name:
       return item
   return None
+
 
 @register.filter
 def check_for_order(items, attr):
@@ -205,22 +229,27 @@ def check_for_order(items, attr):
         # Otherwise, sort them by count, descending
         return sorted(items, key=lambda k: k['value'])
 
+
 @register.filter
 def format_val(this_val):
     return string.capwords(this_val)
 
+
 @register.filter
 def remove_whitespace(str):
     return str.replace(' ', '')
+
 
 @register.filter
 def replace_whitespace(str, chr):
     result = re.sub(re.compile(r'\s+'), chr, str)
     return result
 
+
 @register.filter
 def get_data_attr_id(value, attr):
     return attr + '-' + value
+
 
 @register.filter
 def has_user_data(programs):

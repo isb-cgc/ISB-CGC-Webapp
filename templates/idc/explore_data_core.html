@@ -26,62 +26,15 @@
                                 <h4 class="panel-title">Search Scope</h4>
                             </div>
                             <div class="tab-content">
-                                <div id="access_set" class="tab-pane active" role="tabpanel">
-                                    {% with set_attributes.origin_set.All.attributes|get_by_name:'access' as attr %}
-                                   <ul class="list-group" role="tablist" aria-multiselectable="true">
-                                                <li class="list-group-item">
-                                                    <div id="{{ attr.name }}_heading" class="list-group-item__heading">
-                                                        <a role="button" data-toggle="collapse" href="#{{ attr.name }}"
-                                                           aria-expanded="false" aria-controls="{{ attr.name }}">
-                                                            <i class="fa fa-solid fa-caret-right"></i> <i
-                                                                class="fa fa-solid fa-caret-down"></i> <span
-                                                                class="attDisp">Access
-                                                            {% if attr.units %}({{ attr.units }}){% endif %}</span>
-                                                            <span class="notDisp noCase"> (0 cases)</span>
-                                                        </a>
-
-                                                    </div>
-
-                                                    <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}"
-                                                         class="collapse list-group-item__body">
-
-
-                                                        <ul id="{{ attr.name }}_list" class="search-checkbox-list"
-                                                            style="list-style: none;">
-                                                            {% for val in attr.values|check_for_order:attr.name %}
-                                                                {% with val.display_value|get_display_val:val.value as display_value %}
-                                                                    <li class="checkbox{% if attr.values|length > 1 and forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if val.count == 0 %} zeroed {% endif %}">
-                                                                        <label>
-                                                                            <input type="checkbox"
-                                                                                   value="{{ val.value }}"
-                                                                                   data-filter-attr-id="{{ attr.id }}"
-                                                                                   data-filter-display-attr="{{ attr.display_name }}"
-                                                                                   data-filter-display-val="{{ display_value }}">
-                                                                            <span class="value">{{ display_value }}</span>
-                                                                            <span class="float-right plot_count count plotit">{{ val.count }}</span>
-                                                                            <span class="float-right case_count count">{{ val.count }}</span>
-                                                                        </label>
-                                                                    </li>
-                                                                {% endwith %}
-                                                            {% endfor %}
-                                                        </ul>
-
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                {% endwith %}
-                                </div>
                                 <div id="program_set" class="tab-pane active" role="tabpanel">
-
                                     <ul class="list-group" role="tablist" aria-multiselectable="true">
                                         <li class="list-group-item">
                                             <div id="Program_heading" class="list-group-item__heading">
                                                 <a role="button" data-toggle="collapse" href="#Program"
-                                                   aria-expanded="false" aria-controls="Program">
+                                                   aria-expanded="true" aria-controls="Program">
                                                     <i class="fa fa-solid fa-caret-right"></i> <i
                                                         class="fa fa-solid fa-caret-down"></i>Collection
                                                 </a>
-
                                                 <span class="controls">
                                              <i class="fa-solid fa-circle-minus coll-explain"></i>
                                              <i class="fa-solid fa-cog" title="Settings"></i>
@@ -89,7 +42,7 @@
                                          </span>
                                             </div>
                                             <div id="Program" data-filter-attr-nm="Program"
-                                                 class="collapse filter-panel collection-list">
+                                                 class="filter-panel collection-list collapse in" aria-expanded="true">
                                                 <input id="collection_search"
                                                        class="collection-text-filter notDisp value-search" type="text"
                                                        placeholder="Search..." onkeyup="updateColl(true)">
@@ -117,7 +70,7 @@
                                                     style="list-style: none;">
                                                     {% for progK, progV in programs.items|dictsort:0 %}
                                                         {% if progK != "All" and progK != "None" %}
-                                                            <li class="list-group-item  {% if forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if progV.val == 0 %} zeroed {% endif %}">
+                                                            <li class="{{ progK }} list-group-item{% if forloop.counter >= 6 %} extra-values notDisp{% endif %}{% if progV.val == 0 %} zeroed{% endif %}">
                                                                 {% if progV.projects and progV.projects.items|length == 1 %}
                                                                     {% for proj, projD in progV.projects.items %}
                                                                         <div id="{{ proj }}_heading"
@@ -252,7 +205,6 @@
                                                                           name="Access" checked onclick="resort('analysis_results_id')">Alpha<input
                                                             type="radio" class="sort_val" value="num" name="Access"
                                                             onclick="resort('analysis_results_id')">Num</span>
-
                                                      </div>
 
                                                     <div style="display:block">
@@ -268,8 +220,6 @@
                                                         less</a><span class="checks"><a class="check-all">Check All</a> / <a
                                                             class="uncheck-all">Uncheck All</a></span></p>
                                                 {% endwith %}
-
-
                                                         <ul id="{{ attr.name }}_list" class="search-checkbox-list"
                                                             style="list-style: none;">
                                                             {% for val in attr.values|check_for_order:attr.name %}
@@ -349,8 +299,9 @@
                             </ul>
                             <div class="tab-content">
                                 <div id="search_orig_set" role="tabpanel" class="tab-pane search-set active">
-                                    {% for attr in set_attributes.origin_set.All.attributes %}
-                                        {% if attr.name != "access" and attr.name != "collection_id"  and attr.name != "analysis_results_id" %}
+                                {% with ordered_attr=set_attributes.origin_set.All.attributes|sort_orig_attr %}
+                                    {% for attr in ordered_attr %}
+                                        {% if attr.name != "collection_id"  and attr.name != "analysis_results_id" %}
                                             <ul class="list-group" role="tablist" aria-multiselectable="true">
                                                 <li class="list-group-item">
                                                     <div id="{{ attr.name }}_heading" class="list-group-item__heading">
@@ -369,9 +320,12 @@
                                                     </div>
 
                                                     <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}"
-                                                         class="collapse list-group-item__body"
-
-                                                            {% if attr.min_max %}
+                                                         class="list-group-item__body collapse
+                                                            {% if attr.name in "Modality,BodyPartExamined,tcia_tumorLocation" %} in
+                                                            {% endif %}"
+                                                         aria-expanded="{% if attr.name in "Modality,BodyPartExamined,tcia_tumorLocation" %}true
+                                                         {% else %}false{% endif %}"
+                                                        {% if attr.min_max %}
                                                          data-min="{{ attr.min_max.min|floor }}"
                                                          data-max="{{ attr.min_max.max|ceiling }}"
                                                          data-curmin="{{ attr.min_max.min }}"
@@ -384,17 +338,17 @@
                                                                placeholder="Search..."
                                                                onkeyup="updateFilters( '{{ attr.name }}',{},false, true)">
                                                         {% if attr.name == "Modality" %}
-                                                                Find studies with
-                                                                    <input id="{{ attr.name }}_join_or" type="radio"
-                                                                           class="join_val" name="{{ attr.name }}_join"
-                                                                           value="OR" checked>
-                                                                    <label for="{{ attr.name }}_join_or" class="join">ANY</label>
-                                                                    <input id="{{ attr.name }}_join_and" type="radio"
-                                                                           class="join_val" name="{{ attr.name }}_join"
-                                                                        value="AND">
-                                                                    <label for="{{ attr.name }}_join_and" class="join">ALL</label>
-                                                                selected modalities
-                                                            {% endif %}
+                                                            Find studies with
+                                                                <input id="{{ attr.name }}_join_or" type="radio"
+                                                                       class="join_val" name="{{ attr.name }}_join"
+                                                                       value="OR" checked>
+                                                                <label for="{{ attr.name }}_join_or" class="join">ANY</label>
+                                                                <input id="{{ attr.name }}_join_and" type="radio"
+                                                                       class="join_val" name="{{ attr.name }}_join"
+                                                                    value="AND">
+                                                                <label for="{{ attr.name }}_join_and" class="join">ALL</label>
+                                                            selected modalities
+                                                        {% endif %}
 
                                                         <div class="sorter cntr notDisp">
 
@@ -442,21 +396,17 @@
                                                                 {% endwith %}
                                                             {% endfor %}
                                                         </ul>
-
                                                     </div>
                                                 </li>
                                             </ul>
                                         {% endif %}
                                     {% endfor %}
+                                {% endwith %}
                                 </div>
-
                                 <div id="search_derived_set" role="tabpanel" class="tab-pane search-set">
-
                                     <ul class="list-group" role="tablist" aria-multiselectable="true">
                                         {% for attr_setK, attr_setV in set_attributes.derived_set.items|check_for_order:"derived" %}
-
                                             {% if 'attributes' in attr_setV %}
-
                                                 <li class="list-group-item">
                                                     <div id="{{ attr_setV.name }}_heading"
                                                          class="list-group-item__heading">
@@ -467,10 +417,8 @@
                                                                 class="fa fa-solid fa-caret-down"></i>{{ attr_setV.display_name }}
                                                         </a>
                                                     </div>
-
                                                     <div id="{{ attr_setV.name }}"
                                                          class="collapse list-group-item__body">
-
                                                         <ul class="list-group" role="tablist"
                                                             aria-multiselectable="true">
                                                             {% for attr in attr_setV.attributes|order_quant:attr_setK %}
@@ -592,7 +540,6 @@
                                             </div>
                                             <div id="tcga_clinical" class="collapse list-group-item__body"
                                                  aria-expanded="false">
-
                                                 {% for attr in set_attributes.related_set.All.attributes %}
                                                     <ul class="list-group" role="tablist" aria-multiselectable="true">
                                                         <li class="list-group-item">
@@ -640,12 +587,9 @@
                                                                                name="{{ attr.name }}" value="num"
                                                                                onclick="resort('{{ attr.name }}')">Num
                                                                     </div>
-
                                                                 {% endif %}
-
                                                                 {% if attr.values|length > 5 %}
                                                                     {% with attr.values|length|add:"-5" as more %}
-
                                                                         <p class="more-checks" style="display: block;">
                                                                             <a class="show-more">show {{ more }}
                                                                                 more</a><span class="checks"><a
@@ -659,15 +603,11 @@
                                                                         </p>
                                                                     {% endwith %}
                                                                 {% else %}
-
                                                                     <p class="check-uncheck" style="display: block;">
                                                                         <span class="checks2"> <a class="check-all">Check All</a> / <a
                                                                                 class="uncheck-all">Uncheck All</a></span>
                                                                     </p>
-
                                                                 {% endif %}
-
-
                                                                 <ul id="{{ attr.name }}_list"
                                                                     class="search-checkbox-list"
                                                                     style="list-style: none;">
@@ -693,7 +633,6 @@
                                                         </li>
                                                     </ul>
                                                 {% endfor %}
-
                                             </div>
                                         </li>
                                     </ul>
@@ -702,7 +641,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
             <div id="rh_panel" class="col-lg-9 col-md-9 main_cols">
                 <div id="show_lh" class="filter-panel panel data-tab-content-panel rh hidden">
@@ -722,21 +660,20 @@
                     </div>
                 {% endif %}
                 <div class="tabpanel data-tab-content-panel">
-                    <div class="panel panel-default">
+                    <div class="panel panel-default filter-display-panel">
                         <div class="panel-heading clearfix"><h4 class="panel-title">Filter Definition</h4>
                             {% if not is_cohort %}
-                                <a class="pull-right clear-filters btn btn-primary" role="button" id="5-data-clear-filters">Reset</a>
+                                <a class="pull-left clear-filters btn btn-primary btn-small" role="button"
+                                   id="5-data-clear-filters">
+                                    <i class="fa fa-rotate-left"></i> Reset</a>
                             {% else %}
-                                <a class="pull-right btn btn-primary" role="button" href={% url 'explore_data' %}>Return
-                                    to Data Explorer</a>
+                                <a class="pull-left btn btn-primary btn-small" role="button" href={% url 'explore_data' %}>
+                                    <i class="fa fa-arrow-left"></i> Return to Data Explorer</a>
                             {% endif %}
                         </div>
                         <div class="panel-body">
                             <input id="filt_txt" type="hidden" value="">
                             <div id="search_def"><span class="placeholder">&nbsp;</span></div>
-
-
-
                             <div id="search_def_stats" class="notDisp">No Text</div>
                             <div id="search_def_warn" style="display:none">Note: TCGA.* filters only apply to TCGA
                                 collections
@@ -770,7 +707,6 @@
                                     <div class="tooltip_filter_info" style="float:right"><i
                                             class="fa-solid fa-info-circle"></i></div>
                                 </h4>
-
                                 <div style="display:none">
                                     <label>Chart Type:</label>
                                     <select id="plot_type" onchange="updatePlots(this)">
@@ -859,7 +795,6 @@
                                                                         width="20%" height="20%"> <a class="explainer">Why</a>
                                             do the pie charts sometimes show attribute values that were not selected?
                                         </div>
-
                                     </div>
                                     <div id="results_related_set" role="tabpanel" class="tab-pane panel">
                                         <div class="panel-body related-graphs graph-set">
@@ -876,9 +811,7 @@
                                                         <svg width="240" height="200"></svg>
                                                     </div>
                                                 {% endif %}
-
                                             {% endfor %}
-
                                         </div>
                                         <div class="more-graphs" style="display: block;width:100%">
                                             <button class="btn btn-link" role="button"
@@ -917,7 +850,6 @@
                                             <th class='numeric_data'># of Cases(this cohort)</th>
                                         </tr>
                                         </thead>
-
                                     </table>
                                 </div>
                             </div>
@@ -942,18 +874,13 @@
                                             <th class='text_data'>Collection Name</th>
                                             <th class='text_data'>Case ID <i class="fas fa-info-circle case-info"></i></th>
                                             <th class='numeric_data'>Total # of Studies</th>
-
                                             <th class='numeric_data'>Total # of Series</th>
-
                                         </tr>
                                         </thead>
-
                                     </table>
                                 </div>
                             </div>
                         </div>
-
-
                         <div class="tabpanel data-tab-content-panel table-panel">
                             <div class="panel panel-default">
                                 <div class="panel-heading clearfix"><h4 class="panel-title">Selected Studies</h4></div>
@@ -975,8 +902,6 @@
                                             <th class="ohif text_data open-viewer">View</th>
                                         </tr>
                                         </thead>
-
-
                                     </table>
                                 </div>
                             </div>

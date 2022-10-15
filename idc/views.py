@@ -524,10 +524,7 @@ def explore_data_page(request, filter_path=False, path_filters=None):
                     else:
                         filters_for_load = json.loads(filters_for_load)
                 else:
-                    filters_for_load = [{"filters": [{
-                        "id": Attribute.objects.get(name="access").id,
-                        "values": ["Public"]
-                    }]}]
+                    filters_for_load = None
                 context['filters_for_load'] = filters_for_load
             context['hist'] = ''
             try:
