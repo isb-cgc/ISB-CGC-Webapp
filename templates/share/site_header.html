@@ -48,16 +48,16 @@
                         </a>
                     </li>
                     <li class="navbar-link navbar-item">
-                        <a class="external-link" href="" url="https://learn.canceridc.dev"
-                            data-toggle="modal" data-target="#external-web-warning" title="Documentation">
-                           Docs <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
-                        </a>
-                    </li>
-                    <li class="navbar-link navbar-item">
                         <a class="main-links" href="{% url 'news' %}" title="View news items">News</a>
                     </li>
                     <li class="navbar-link navbar-item">
                         <a class="main-links" href="{% url 'about_page' %}" title="Information about IDC">About</a>
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a class="external-link" href="" url="https://learn.canceridc.dev"
+                           data-toggle="modal" data-target="#external-web-warning" title="Documentation">
+                            Help <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                        </a>
                     </li>
                     {% if user.is_authenticated %}
                     <li class="navbar-link navbar-item">
