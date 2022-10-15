@@ -366,16 +366,16 @@ def add_attributes(attr_set):
         logger.exception(e)
 
 
-def copy_attrs(from_data_sources, to_data_sources):
+def copy_attrs(from_data_sources, to_data_sources, excludes):
     to_sources = DataSource.objects.filter(name__in=to_data_sources)
     from_sources = DataSource.objects.filter(name__in=from_data_sources)
     to_sources_attrs = to_sources.get_source_attrs()
     bulk_add = []
 
     for fds in from_sources:
-        from_source_attrs = fds.attribute_set.exclude(id__in=to_sources_attrs['ids']) if to_sources_attrs['ids'] else fds.attribute_set.all()
+        from_source_attrs = fds.attribute_set.exclude(id__in=to_sources_attrs['ids'] or []).exclude(name__in=excludes)
         logger.info("Copying {} attributes from {} to: {}.".format(
-            len(from_source_attrs.values_list('name',flat=True)),
+            len(from_source_attrs.values_list('name', flat=True)),
             fds.name, "; ".join(to_data_sources)
         ))
 
@@ -444,7 +444,7 @@ def main(config, make_attr=False):
 
         if 'attr_copy' in config:
             for each in config['attr_copy']:
-                copy_attrs(each['src'],each['dest'])
+                copy_attrs(each['src'],each['dest'],config.get("attr_exclude"))
 
         len(ATTR_SET) and make_attr and add_attributes([ATTR_SET[x] for x in ATTR_SET])
 
