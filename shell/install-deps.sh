@@ -95,9 +95,10 @@ else
     echo "Using restored cache for Python Libraries"
 fi
 
-if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
+# Do not install Debug Toolbar on a deployment!
+if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ] && [ -z "$CI" ]; then
     echo "Installing Django Debug Toolbar for local dev..."
-    pip3 install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
+    pip3 install -q django-debug-toolbar==3.2 -t ${HOMEROOT}/lib --only-binary all
 fi
 
 echo "Libraries Installed"
