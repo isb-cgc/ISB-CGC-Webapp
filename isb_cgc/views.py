@@ -299,7 +299,6 @@ def search_cohorts_viz(request):
 
 
 def get_tbl_preview(request, proj_id, dataset_id, table_id):
-    logger.info("[STATUS] In table preview")
     status = 200
     MAX_ROW = 8
     try:
@@ -313,6 +312,7 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
             bq_service = get_bigquery_service()
             dataset = bq_service.datasets().get(projectId=proj_id, datasetId=dataset_id).execute()
             is_public = False
+            logger.info("[STATUS] Got BQ dataset response")
             for access_entry in dataset['access']:
                 # print(access_entry)
                 if access_entry.get('role') == 'READER' and access_entry.get('specialGroup') == 'allAuthenticatedUsers':
@@ -350,6 +350,8 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
                 }
 
     except Exception as e:
+        logger.error("[ERROR] Saw exception:")
+        logger.exception(e)
         if type(e) is HttpError and e.resp.status == 403:
             logger.error(
                 "[ERROR] Access to preview table [{ proj_id }.{ dataset_id }.{ table_id }] was denied.".format(
