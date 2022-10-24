@@ -335,7 +335,6 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
                         'rows': response['rows']
                     }
                 else:
-                    status = 200
                     result = {
                         'message': 'No record has been found for table { proj_id }{ dataset_id }{ table_id }.'.format(
                             proj_id=proj_id,
