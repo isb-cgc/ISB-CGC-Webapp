@@ -314,7 +314,6 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
             is_public = False
             logger.info("[STATUS] Got BQ dataset response")
             for access_entry in dataset['access']:
-                # print(access_entry)
                 if access_entry.get('role') == 'READER' and access_entry.get('specialGroup') == 'allAuthenticatedUsers':
                     is_public = True
                     break
@@ -349,34 +348,35 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
                     'message': "Preview is not available for this table/view."
                 }
 
-    except Exception as e:
-        logger.error("[ERROR] Saw exception:")
+    except HttpError as e:
+        status = e.resp.status
+        result = {
+            'message': "There was an error while processing this request."
+        }
+        logger.error(
+            "[ERROR] While attempting to retrieve preview data for { proj_id }.{ dataset_id }.{ table_id } table:".format(
+                proj_id=proj_id,
+                dataset_id=dataset_id,
+                table_id=table_id))
         logger.exception(e)
-        if type(e) is HttpError and e.resp.status == 403:
-            logger.error(
-                "[ERROR] Access to preview table [{ proj_id }.{ dataset_id }.{ table_id }] was denied.".format(
-                    proj_id=proj_id,
-                    dataset_id=dataset_id,
-                    table_id=table_id))
-            logger.excpetion(e)
+        if e.resp.status == 403:
             result = {
                 'message': "Your attempt to preview this table [{ proj_id }.{ dataset_id }.{ table_id }] was denied.".format(
                     proj_id=proj_id,
                     dataset_id=dataset_id,
                     table_id=table_id)
             }
-            status = 403
-        else:
-            logger.error(
-                "[ERROR] While attempting to retrieve preview data for { proj_id }.{ dataset_id }.{ table_id } table:".format(
-                    proj_id=proj_id,
-                    dataset_id=dataset_id,
-                    table_id=table_id))
-            logger.exception(e)
-            status = 503
-            result = {
-                'message': "There was an error while processing this request."
-            }
+    except Exception as e:
+        status = 503
+        result = {
+            'message': "There was an error while processing this request."
+        }
+        logger.error(
+            "[ERROR] While attempting to retrieve preview data for { proj_id }.{ dataset_id }.{ table_id } table:".format(
+                proj_id=proj_id,
+                dataset_id=dataset_id,
+                table_id=table_id))
+        logger.exception(e)
 
     return JsonResponse(result, status=status)
 
