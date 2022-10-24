@@ -302,6 +302,7 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
     status = 200
     MAX_ROW = 8
     if not proj_id or not dataset_id or not table_id:
+        logger.warning("[WARNING] Required ID missing: {}.{}.{}".format(proj_id,dataset_id,table_id))
         status = 503
         result = {
             'message': "There was an error while processing this request: one or more required parameters (project id, dataset_id or table_id) were not supplied."
@@ -354,6 +355,7 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
                         proj_id=proj_id,
                         dataset_id=dataset_id,
                         table_id=table_id))
+                logger.excpetion(e)
                 result = {
                     'message': "Your access to preview this table [{ proj_id }.{ dataset_id }.{ table_id }] was denied.".format(
                         proj_id=proj_id,
@@ -368,7 +370,7 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
                         dataset_id=dataset_id,
                         table_id=table_id))
                 logger.exception(e)
-                status = '503'
+                status = 503
                 result = {
                     'message': "There was an error while processing this request."
                 }
