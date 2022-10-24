@@ -348,23 +348,30 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
                 }
 
     except HttpError as e:
-        status = e.resp.status
-        result = {
-            'message': "There was an error while processing this request."
-        }
         logger.error(
             "[ERROR] While attempting to retrieve preview data for { proj_id }.{ dataset_id }.{ table_id } table:".format(
                 proj_id=proj_id,
                 dataset_id=dataset_id,
                 table_id=table_id))
         logger.exception(e)
-        if e.resp.status == 403:
+        status = 400
+        result = {
+            'message': "There was an error while processing this request."
+        }
+        try:
+            status = e.resp.status
             result = {
-                'message': "Your attempt to preview this table [{ proj_id }.{ dataset_id }.{ table_id }] was denied.".format(
-                    proj_id=proj_id,
-                    dataset_id=dataset_id,
-                    table_id=table_id)
+                'message': "There was an error while processing this request."
             }
+            if e.resp.status == 403:
+                result = {
+                    'message': "Your attempt to preview this table [{ proj_id }.{ dataset_id }.{ table_id }] was denied.".format(
+                        proj_id=proj_id,
+                        dataset_id=dataset_id,
+                        table_id=table_id)
+                }
+        except Exception as e:
+            logger.exception(e)
     except Exception as e:
         status = 503
         result = {
