@@ -3329,6 +3329,7 @@ require([
                 setSlider(this.id,true,0,0,true, false);
             })
             $('#search_def_warn').hide();
+            window.filterObj= {};
 
             mkFiltText();
             updateFacetsData(true);
