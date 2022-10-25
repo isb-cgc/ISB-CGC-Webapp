@@ -35,11 +35,12 @@ apt-get -y --force-yes install software-properties-common
 if [ -n "$CI" ]; then
     # Use these next 4 lines to update mysql public build key
     echo 'download mysql public build key'
-    gpg --keyserver pgp.mit.edu --recv 467B942D3A79BD29
+    wget --no-check-certificate -qO - 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x859be8d7c586f538430b19c2467b942d3a79bd29' | gpg --dearmor -o /usr/share/keyrings/mysql-keyring.gpg
+    apt-get update
     echo 'mysql build key update done.'
-    wget https://dev.mysql.com/get/mysql-apt-config_0.8.9-1_all.deb
+    echo "deb [signed-by=/usr/share/keyrings/mysql-keyring.gpg] http://repo.mysql.com/apt/ubuntu/ focal mysql-5.7" | sudo tee /etc/apt/sources.list.d/mysql.list
+    apt-get update
     apt-get install -y lsb-release
-    dpkg -i mysql-apt-config_0.8.9-1_all.deb
 fi
 
 apt-get update -qq
