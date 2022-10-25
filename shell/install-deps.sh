@@ -54,7 +54,7 @@ apt-get install ca-certificates
 echo "Installing Dependencies..."
 apt-get install -y --force-yes unzip libffi-dev libssl-dev git ruby g++ curl dos2unix
 add-apt-repository ppa:deadsnakes/ppa
-apt-get update
+apt update
 if [ -z "${CI}" ]; then
     # Update to Python 3.7
     apt-get install -y --force-yes python3.7
