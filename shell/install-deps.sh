@@ -57,12 +57,12 @@ add-apt-repository ppa:deadsnakes/ppa
 apt update
 if [ -z "${CI}" ]; then
     # Update to Python 3.7
-    apt-get install -y --force-yes python3.7
+    apt install -y --force-yes python3.7
     # Set Python 3.7 as the python3 version
     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1
 else
   # Someone thought the MySQL 5.7 image should be Python 3.10 so now we have to force it to 3.8 for Reasons
-  apt-get install -y --force-yes python3.8
+  apt install -y --force-yes python3.8
   # Set Python 3.8 as the python3 version
   update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
 fi
