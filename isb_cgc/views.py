@@ -354,6 +354,7 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
                 dataset_id=dataset_id,
                 table_id=table_id))
         logger.exception(e)
+        logger.error(e)
         status = 400
         result = {
             'message': "There was an error while processing this request."
@@ -363,7 +364,7 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
             result = {
                 'message': "There was an error while processing this request."
             }
-            if e.resp.status == 403:
+            if status == 403:
                 result = {
                     'message': "Your attempt to preview this table [{ proj_id }.{ dataset_id }.{ table_id }] was denied.".format(
                         proj_id=proj_id,
