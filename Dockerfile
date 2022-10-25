@@ -31,11 +31,11 @@ ENV VIRTUAL_ENV /env
 ENV PATH /env/bin:$PATH
 
 RUN echo 'download mysql public build key'
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 467B942D3A79BD29
 
 RUN apt-get update
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get install -y wget
+RUN apt-get install -y wget gpg
+RUN gpg --keyserver pgp.mit.edu --recv 467B942D3A79BD2
 RUN wget "http://repo.mysql.com/mysql-apt-config_0.8.9-1_all.deb" -P /tmp
 
 # install lsb-release (a dependency of mysql-apt-config), since dpkg doesn't
