@@ -38,7 +38,7 @@ if [ -n "$CI" ]; then
     wget --no-check-certificate -qO - 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x859be8d7c586f538430b19c2467b942d3a79bd29' | gpg --dearmor -o /usr/share/keyrings/mysql-keyring.gpg
     apt-get update
     echo 'mysql build key update done.'
-    echo "deb [signed-by=/usr/share/keyrings/mysql-keyring.gpg] http://repo.mysql.com/apt/ubuntu/ focal mysql-5.7" | sudo tee /etc/apt/sources.list.d/mysql.list
+    echo "deb [signed-by=/usr/share/keyrings/mysql-keyring.gpg] http://repo.mysql.com/apt/ubuntu/ bionic mysql-5.7" | sudo tee /etc/apt/sources.list.d/mysql.list
     apt-get update
     apt-get install -y lsb-release
 fi
