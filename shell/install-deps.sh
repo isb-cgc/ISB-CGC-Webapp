@@ -62,8 +62,8 @@ else
   apt-get install -y --force-yes python3-distutils
 fi
 apt-get install -y --force-yes python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
-apt-get install -fy mysql-community-client=5.7.39-1ubuntu18.04
-apt-get install -fy mysql-client=5.7.39-1ubuntu18.04
+apt-get install -fy mysql-community-client=5.7.40-1ubuntu18.04
+apt-get install -fy mysql-client=5.7.40-1ubuntu18.04
 
 if [ -z "${CI}" ]; then
   # Per https://stackoverflow.com/questions/13708180/python-dev-installation-error-importerror-no-module-named-apt-pkg
