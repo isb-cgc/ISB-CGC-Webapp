@@ -1,11 +1,12 @@
 ls -l /usr/bin/python3*
-cat /etc/gai.conf
-
-export DEBIAN_FRONTEND=noninteractive
 
 if [ -n "$CI" ]; then
+    export DEBIAN_FRONTEND=noninteractive
     export HOME=/home/circleci/${CIRCLE_PROJECT_REPONAME}
     export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
+
+    cat /etc/gai.conf > ${HOME}/gai.conf.bak
+    sed -i .bak 's/precedence ::ffff:0:0\/96 100/precedence ::ffff:0:0\/96 100' /etc/gai.conf
 
     # Clone dependencies
     COMMON_BRANCH=master
@@ -38,7 +39,6 @@ find . -type f -name '*.pyc' -delete
 echo "Preparing System..."
 apt-get -y --force-yes install software-properties-common
 if [ -n "$CI" ]; then
-    # Use these next 4 lines to update mysql public build key
     echo 'Obtaining MySQL build key...'
     wget --no-check-certificate -qO - 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x859be8d7c586f538430b19c2467b942d3a79bd29' | sudo gpg --dearmor -o /usr/share/keyrings/mysql-keyring.gpg
     apt-get update
@@ -70,8 +70,12 @@ else
 fi
 
 apt-get install -y --force-yes python3-distutils python3-dev python3-venv python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
-apt-get install -fy mysql-community-client=5.7.40-1ubuntu18.04
-apt-get install -fy mysql-client=5.7.40-1ubuntu18.04
+if [ -n "$CI" ]; then
+  apt-get install -fy mysql-community-client=5.7.40-1ubuntu18.04
+  apt-get install -fy mysql-client=5.7.40-1ubuntu18.04
+else
+  apt-get install -f mysql-client
+fi
 
 if [ -z "${CI}" ]; then
   # Per https://stackoverflow.com/questions/13708180/python-dev-installation-error-importerror-no-module-named-apt-pkg
