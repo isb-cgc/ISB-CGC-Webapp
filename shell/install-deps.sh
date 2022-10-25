@@ -1,4 +1,5 @@
 ls -l /usr/bin/python3*
+cat /etc/gai.conf
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -53,9 +54,7 @@ apt-get install ca-certificates
 # Install apt-get dependencies
 echo "Installing Dependencies..."
 apt-get install -y --force-yes unzip libffi-dev libssl-dev git ruby g++ curl dos2unix
-sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
-sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
-sudo sysctl -w net.ipv6.conf.lo.disable_ipv6=1
+
 add-apt-repository ppa:deadsnakes/ppa
 apt update
 if [ -z "${CI}" ]; then
