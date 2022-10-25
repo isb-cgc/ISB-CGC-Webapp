@@ -1,5 +1,7 @@
 ls -l /usr/bin/python3*
 
+export DEBIAN_FRONTEND=noninteractive
+
 if [ -n "$CI" ]; then
     export HOME=/home/circleci/${CIRCLE_PROJECT_REPONAME}
     export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
@@ -55,17 +57,17 @@ add-apt-repository ppa:deadsnakes/ppa
 apt-get update
 if [ -z "${CI}" ]; then
     # Update to Python 3.7
-    apt install -y --force-yes python3.7
+    apt-get install -y --force-yes python3.7
     # Set Python 3.7 as the python3 version
     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1
-    apt-get install -y --force-yes python3.7-venv python3.7-distutils python3.7-dev
 else
-  apt install -y --force-yes python3.8
+  # Someone thought the MySQL 5.7 image should be Python 3.10 so now we have to force it to 3.8 for Reasons
+  apt-get install -y --force-yes python3.8
   # Set Python 3.8 as the python3 version
   update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
-  apt-get install -y --force-yes python3-distutils
 fi
-apt-get install -y --force-yes python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
+
+apt-get install -y --force-yes python3-distutils python3-dev python3-venv python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
 apt-get install -fy mysql-community-client=5.7.40-1ubuntu18.04
 apt-get install -fy mysql-client=5.7.40-1ubuntu18.04
 
