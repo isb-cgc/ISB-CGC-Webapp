@@ -598,6 +598,19 @@ require([
                     $('#bq-string-display .copy-this').attr('content', formattedSql);
                     $('#bq-string-display .bq-string').html(formattedSql);
                     $('#bq-string-display .unformatted').removeClass('unformatted');
+                    if(data['inactive_attr']) {
+                        $('.inactive-filters').show();
+                        $('.inactive-filters .inactive-attrs').text(data['inactive_attr']);
+                    } else {
+                        $('.inactive-filters').hide();
+                    }
+                    if(!data['filters_found']) {
+                        $('.no-filters-found').show();
+                        $('.some-found').hide();
+                    } else {
+                        $('.no-filters-found').hide();
+                        $('.some-found').show();
+                    }
                 },
                 error: function (xhr) {
                     console.debug(xhr);
