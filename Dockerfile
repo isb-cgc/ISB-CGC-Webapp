@@ -30,22 +30,28 @@ RUN virtualenv /env -p python3
 ENV VIRTUAL_ENV /env
 ENV PATH /env/bin:$PATH
 
+RUN echo 'download mysql public build key'
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 467B942D3A79BD29
+
 RUN apt-get update
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get install -y wget gpg lsb-release
+RUN apt-get install -y wget
+RUN wget "http://repo.mysql.com/mysql-apt-config_0.8.9-1_all.deb" -P /tmp
 
-RUN echo 'Obtaining MySQL build key...'
-RUN wget --no-check-certificate -qO - 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x859be8d7c586f538430b19c2467b942d3a79bd29' | sudo gpg --dearmor -o /usr/share/keyrings/mysql-keyring.gpg
-RUN apt-get update
-RUN echo 'Setting up mysql.list to force 5.7 from Bionic...'
-RUN echo "deb [signed-by=/usr/share/keyrings/mysql-keyring.gpg] http://repo.mysql.com/apt/ubuntu/ bionic mysql-5.7" | sudo tee /etc/apt/sources.list.d/mysql.list
+# install lsb-release (a dependency of mysql-apt-config), since dpkg doesn't
+# do dependency resolution
+RUN apt-get install -y lsb-release
+# add a debconf entry to select mysql-5.7 as the server version when we install
+# the mysql config package
+RUN echo "mysql-apt-config mysql-apt-config/select-server select mysql-5.7" | debconf-set-selections
+# having 'selected' mysql-5.7 for 'server', install the mysql config package
+RUN dpkg --install /tmp/mysql-apt-config_0.8.9-1_all.deb
 
 # fetch the updated package metadata (in particular, mysql-server-5.7)
 RUN apt-get update
 
-# aaaand now let's install mysql client
-RUN apt-get install -fy mysql-community-client=5.7.40-1ubuntu18.04
-RUN apt-get install -fy mysql-client=5.7.40-1ubuntu18.04
+# aaaand now let's install mysql-server
+RUN apt-get install -y mysql-server
 
 # Get pip3 installed
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python3
