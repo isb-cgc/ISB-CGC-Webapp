@@ -216,7 +216,7 @@
                                     data-toggle="modal"
                                     data-target="#bq-string-display"
                                     data-cohort-id="{{ cohort.id }}"
-                                    data-bq-string-uri="{% url 'bq_string' cohort.id %}"
+                                    data-bq-string-uri="{% url 'bq_string' cohort.id %}?update=true"
                                     title="View the BigQuery String for this cohort"
                                 ><img src="{% static 'img/bq_icon.png' %}"></button>
                             </td>
