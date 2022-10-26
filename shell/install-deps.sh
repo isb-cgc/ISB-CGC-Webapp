@@ -1,12 +1,12 @@
-ls -l /usr/bin/python3*
-
 if [ -n "$CI" ]; then
+    echo "Check our Python and Ubuntu versions since they keep getting updated without warning..."
+
+    ls -l /usr/bin/python3*
+    cat /etc/os-release
+
     export DEBIAN_FRONTEND=noninteractive
     export HOME=/home/circleci/${CIRCLE_PROJECT_REPONAME}
     export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
-
-    cat /etc/gai.conf > ${HOME}/gai.conf.bak
-    sed -i .bak 's/precedence ::ffff:0:0\/96 100/precedence ::ffff:0:0\/96 100' /etc/gai.conf
 
     # Clone dependencies
     COMMON_BRANCH=master
@@ -39,13 +39,16 @@ find . -type f -name '*.pyc' -delete
 echo "Preparing System..."
 apt-get -y --force-yes install software-properties-common
 if [ -n "$CI" ]; then
-    echo 'Obtaining MySQL build key...'
-    wget --no-check-certificate -qO - 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x859be8d7c586f538430b19c2467b942d3a79bd29' | sudo gpg --dearmor -o /usr/share/keyrings/mysql-keyring.gpg
-    apt-get update
-    echo 'Setting up mysql.list to force 5.7 from Bionic...'
-    echo "deb [signed-by=/usr/share/keyrings/mysql-keyring.gpg] http://repo.mysql.com/apt/ubuntu/ bionic mysql-5.7" | sudo tee /etc/apt/sources.list.d/mysql.list
-    apt-get update
+    # Use these next 4 lines to update mysql public build key
+    echo 'download mysql public build key'
+    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 5072E1F5
+    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 467B942D3A79BD29
+#    wget -O - -q 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x8C718D3B5072E1F5' | grep -v '>' | grep -v '<' | grep -v '{' > mysql_pubkey.asc
+#    apt-key add mysql_pubkey.asc || exit 1
+    echo 'mysql build key update done.'
+    wget https://dev.mysql.com/get/mysql-apt-config_0.8.9-1_all.deb
     apt-get install -y lsb-release
+    dpkg -i mysql-apt-config_0.8.9-1_all.deb
 fi
 
 apt-get update -qq
@@ -54,28 +57,20 @@ apt-get install ca-certificates
 # Install apt-get dependencies
 echo "Installing Dependencies..."
 apt-get install -y --force-yes unzip libffi-dev libssl-dev git ruby g++ curl dos2unix
-
-add-apt-repository ppa:deadsnakes/ppa
-apt update
+# CircleCI provides a Python 3.8 image, but locally, we use 3.7 to mimic the Dockerfile
 if [ -z "${CI}" ]; then
     # Update to Python 3.7
+    add-apt-repository ppa:deadsnakes/ppa
+    apt update
     apt install -y --force-yes python3.7
     # Set Python 3.7 as the python3 version
     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1
+    apt-get install -y --force-yes python3.7-venv python3.7-distutils python3.7-dev
 else
-  # Someone thought the MySQL 5.7 image should be Python 3.10 so now we have to force it to 3.8 for Reasons
-  apt install -y --force-yes python3.8
-  # Set Python 3.8 as the python3 version
-  update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
+  apt-get install -y --force-yes python3-distutils
 fi
-
-apt-get install -y --force-yes python3-distutils python3-dev python3-venv python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
-if [ -n "$CI" ]; then
-  apt-get install -fy mysql-community-client=5.7.40-1ubuntu18.04
-  apt-get install -fy mysql-client=5.7.40-1ubuntu18.04
-else
-  apt-get install -f mysql-client
-fi
+apt-get install -y --force-yes python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
+apt-get install -y --force-yes mysql-client
 
 if [ -z "${CI}" ]; then
   # Per https://stackoverflow.com/questions/13708180/python-dev-installation-error-importerror-no-module-named-apt-pkg
@@ -108,8 +103,7 @@ fi
 
 if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
     echo "Installing Django Debug Toolbar for local dev..."
-    # Note that Django 2.2 support ended in DDT 3.3.0
-    pip3 install -q django-debug-toolbar==3.2.4 -t ${HOMEROOT}/lib --only-binary all
+    pip3 install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
 fi
 
 echo "Libraries Installed"
