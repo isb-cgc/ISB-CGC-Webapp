@@ -108,11 +108,14 @@ def make_solr_commands(sources):
 def inactivate_data_versions(dv_set):
     for dv in dv_set:
         try:
-            dv_obj = DataVersion.objects.get(version=dv)
-            dv_obj.active = False
-            dv_obj.save()
+            dv_objs = DataVersion.objects.filter(version=dv['ver'], data_type__in=dv['type'])
+            for dv_obj in dv_objs:
+                dv_obj.active = False
+                dv_obj.save()
+        except ObjectDoesNotExist:
+            logger.warning("[WARNING] Could not de-active version {}: it was not found!".format(dv))
         except Exception as e:
-            logger.error("[ERROR] While deactivating version {} :".format(dv_obj))
+            logger.error("[ERROR] While deactivating version {} :".format(dv))
             logger.exceiption(e)
 
 
@@ -123,7 +126,7 @@ def add_data_versions(dv_set):
             logger.warning("[WARNING] Data Version {} already exists! Skipping.".format(dv['name']))
         except ObjectDoesNotExist:
             progs = Program.objects.filter(name__in=dv['programs'], active=True, owner=isb_superuser, is_public=True)
-            obj, created = DataVersion.objects.update_or_create(name=dv['name'], data_type=dv['type'], version=dv['ver'], build=dv["build"])
+            obj, created = DataVersion.objects.update_or_create(name=dv['name'], data_type=dv['type'], version=dv['ver'], build=dv.get("build",None))
             dv_to_prog = []
 
             for prog in progs:
@@ -363,16 +366,16 @@ def add_attributes(attr_set):
         logger.exception(e)
 
 
-def copy_attrs(from_data_sources, to_data_sources):
+def copy_attrs(from_data_sources, to_data_sources, excludes):
     to_sources = DataSource.objects.filter(name__in=to_data_sources)
     from_sources = DataSource.objects.filter(name__in=from_data_sources)
     to_sources_attrs = to_sources.get_source_attrs()
     bulk_add = []
 
     for fds in from_sources:
-        from_source_attrs = fds.attribute_set.exclude(id__in=to_sources_attrs['ids']) if to_sources_attrs['ids'] else fds.attribute_set.all()
+        from_source_attrs = fds.attribute_set.exclude(id__in=to_sources_attrs['ids'] or []).exclude(name__in=excludes)
         logger.info("Copying {} attributes from {} to: {}.".format(
-            len(from_source_attrs.values_list('name',flat=True)),
+            len(from_source_attrs.values_list('name', flat=True)),
             fds.name, "; ".join(to_data_sources)
         ))
 
@@ -441,7 +444,7 @@ def main(config, make_attr=False):
 
         if 'attr_copy' in config:
             for each in config['attr_copy']:
-                copy_attrs(each['src'],each['dest'])
+                copy_attrs(each['src'],each['dest'],config.get("attr_exclude"))
 
         len(ATTR_SET) and make_attr and add_attributes([ATTR_SET[x] for x in ATTR_SET])
 

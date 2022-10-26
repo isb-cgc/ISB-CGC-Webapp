@@ -337,7 +337,7 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
                     }
                 else:
                     result = {
-                        'message': 'No record has been found for table { proj_id }{ dataset_id }{ table_id }.'.format(
+                        'message': 'No record has been found for table {proj_id}.{dataset_id}.{table_id}.'.format(
                             proj_id=proj_id,
                             dataset_id=dataset_id,
                             table_id=table_id)
@@ -350,37 +350,30 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
 
     except HttpError as e:
         logger.error(
-            "[ERROR] While attempting to retrieve preview data for { proj_id }.{ dataset_id }.{ table_id } table:".format(
+            "[ERROR] While attempting to retrieve preview data for {proj_id}.{dataset_id}.{table_id} table:".format(
                 proj_id=proj_id,
                 dataset_id=dataset_id,
                 table_id=table_id))
         logger.exception(e)
-        logger.error(e)
-        status = 400
+        status = e.resp.status
         result = {
             'message': "There was an error while processing this request."
         }
-        try:
-            status = e.resp.status
+        if status == 403:
             result = {
-                'message': "There was an error while processing this request."
+                'message': "Your attempt to preview this table [{proj_id}.{dataset_id}.{table_id}] was denied.".format(
+                    proj_id=proj_id,
+                    dataset_id=dataset_id,
+                    table_id=table_id)
             }
-            if status == 403:
-                result = {
-                    'message': "Your attempt to preview this table [{ proj_id }.{ dataset_id }.{ table_id }] was denied.".format(
-                        proj_id=proj_id,
-                        dataset_id=dataset_id,
-                        table_id=table_id)
-                }
-        except Exception as e:
-            logger.exception(e)
+
     except Exception as e:
         status = 503
         result = {
             'message': "There was an error while processing this request."
         }
         logger.error(
-            "[ERROR] While attempting to retrieve preview data for { proj_id }.{ dataset_id }.{ table_id } table:".format(
+            "[ERROR] While attempting to retrieve preview data for {proj_id}.{dataset_id}.{table_id} table:".format(
                 proj_id=proj_id,
                 dataset_id=dataset_id,
                 table_id=table_id))
