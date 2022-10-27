@@ -1,7 +1,7 @@
     <!-- BigQuery String Modal -->
     <div class="modal fade" id="bq-string-display" tabindex="-1" role="dialog" aria-labelledby="bqStringDisplay"
          aria-hidden="true"
-         cohort_id="{% if bq_string_uri == "True" %}0{% else %}{{ cohort_id }}{% endif %}",
+         cohort_id="{% if bq_string_uri == "True" %}0{% else %}{{ cohort_id }}{% endif %}"
          filter-params=""
     >
         <div class="modal-dialog">
@@ -11,7 +11,25 @@
                     <h4 class="modal-title" id="bqStringDisplay">BigQuery SQL Query String</h4>
                 </div>
                 <div class="modal-body">
-                    <p>Copy and paste this query into the BigQuery Console to select files corresponding to the current filter selection.</p>
+                    <p>
+                        Copy and paste this query into the BigQuery Console to select files corresponding to the
+                        current filter selection.
+                    </p>
+                    <p class="notes inactive-filters">
+                        <i class="fa fa-warning"></i>
+                        The following attributes are no longer available in the current data version:
+                        <span class="inactive-attrs"></span> <br />
+                    </p>
+                    <p class="notes no-filters-found">
+                        <i class="fa fa-warning"></i>
+                        No attributes used in this cohort's filters were found for the current data version.
+                    </p>
+                    <p class="notes none-found">
+                        <i class="fa fa-warning"></i>
+                        This cohort's filters as applied to the new data version do not return any Patients, Studies, or Series.
+                    </p>
+                    <p class="notes no-table-change">This query will not work if the table ID is changed to a newer
+                        data version.</p>
                     <button type="button" class="copy-this btn btn-default"
                             content="{% if bq_string_uri == "True" %}{% else %}{{ bq_string }}{% endif %}"
                             title="Copy query text to clipboard"

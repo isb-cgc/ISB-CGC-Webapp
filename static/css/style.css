@@ -1302,8 +1302,12 @@ a.skip-nav {
   padding-top: 9px;
 }
 
-#version_d .notes .fa {
+#version_d .notes .fa, #bq-string-display .notes .fa {
   color: darkred;
+}
+
+#bq-string-display .notes {
+  display: none;
 }
 
 .inactive-attrs {
