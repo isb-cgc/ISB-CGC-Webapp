@@ -578,6 +578,7 @@ require([
 
     $('#cohort-table').on('click', '.bq-string-display', function() {
         if($('#bq-string-display .bq-string').attr('cohort_id') !== $(this).data('cohort-id')) {
+            let for_update = $(this).data('bq-string-uri').includes("update");
             $('#bq-string-display .notes').hide();
             $('#bq-string-display .bq-string').html("Loading...");
             $('#bq-string-display .bq-string').attr('cohort_id',$(this).data('cohort-id'));
@@ -599,15 +600,17 @@ require([
                     $('#bq-string-display .copy-this').attr('content', formattedSql);
                     $('#bq-string-display .bq-string').html(formattedSql);
                     $('#bq-string-display .unformatted').removeClass('unformatted');
-                    if(data['inactive_attr']) {
-                        $('#bq-string-display .inactive-filters').show();
-                        $('#bq-string-display .inactive-filters .inactive-attrs').text(data['inactive_attr']);
-                    } else {
-                        $('#bq-string-display .inactive-filters').hide();
+                    if(for_update) {
+                        if(data['inactive_attr']) {
+                            $('#bq-string-display .inactive-filters').show();
+                            $('#bq-string-display .inactive-filters .inactive-attrs').text(data['inactive_attr']);
+                        } else {
+                            $('#bq-string-display .inactive-filters').hide();
+                        }
+                        !(data['filters_found']) ? $('#bq-string-display .no-filters-found').show() : $('#bq-string-display .no-filters-found').hide();
+                        (data['PatientID'] <= 0) ? $('#bq-string-display .none-found').show() : $('#bq-string-display .none-found').hide();
+                        (data['inactive_attr'] || data['PatientID'] <= 0 || !(data['filters_found'])) ? $('.no-table-change').show() : $('.no-table-change').hide();
                     }
-                    !(data['filters_found']) ? $('#bq-string-display .no-filters-found').show() : $('#bq-string-display .no-filters-found').hide();
-                    (data['PatientID'] <= 0) ? $('#bq-string-display .none-found').show() : $('#bq-string-display .none-found').hide();
-                    (data['inactive_attr'] || data['PatientID'] <= 0 || !(data['filters_found'])) ? $('.no-table-change').show() : $('.no-table-change').hide();
                 },
                 error: function (xhr) {
                     console.debug(xhr);
