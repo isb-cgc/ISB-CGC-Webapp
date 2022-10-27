@@ -37,90 +37,124 @@ logger = logging.getLogger('main_logger')
 
 COHORT_DEFS_EXAMPLE = [
     {
-        'name': 'Example: V1 collection ID',
-        'desc': "This shouldn't change from V1 to V2",
+            'name': 'Example v11: removed attribute',
+            'desc': "This should trigger missing attribute alerts on the cohort list page for all attributes removed.",
+            'filters': [
+                {
+                    'attribute': 'Glycolysis_Within_First_Quarter_of_Intensity_Range',
+                    'values': [92, 234],
+                }
+            ]
+    },
+    {
+        'name': 'Example v11: removed values',
+        'desc': "This should trigger missing attribute alerts on the cohort list page for all values removed.",
         'filters': [
             {
                 'attribute': 'collection_id',
-                'values': ['nsclc_radiomics'],
+                'values': ['apollo_5_esca'],
             }
         ]
     },
     {
-        'name': 'Example: V1 Derived',
-        'desc': "This shouldn't change from V1 to V2",
+        'name': 'Example v11: some removed attributes',
+        'desc': "This should trigger missing attribute alerts on the cohort list page.",
         'filters': [
             {
-                'attribute': 'AnatomicRegionSequence',
-                'values': ['T-42300:SRT'],
-            }
-        ]
-    },
-    {
-        'name': 'Example: V1 Related, multi-value',
-        'desc': "This shouldn't change from V1 to V2",
-        'filters': [
-            {
-                'attribute': 'disease_code',
-                'values': ['BLCA','BRCA'],
+                'attribute': 'access',
+                'values': ['Public'],
             },
             {
                 'attribute': 'collection_id',
-                'values': ['tcga_blca','tcga_brca','tcga_cesc','tcga_coad','tcga_esca','tcga_gbm',
-                           'tcga_hnsc','tcga_kich','tcga_kirc','tcga_kirp','tcga_lgg','tcga_lihc',
-                           'tcga_luad','tcga_lusc','tcga_ov','tcga_prad','tcga_read','tcga_sarc',
-                           'tcga_stad','tcga_thca','tcga_ucec'],
+                'values': ['4d_lung'],
             }
         ]
     },
-    {
-        'name': 'Example: V1 Comma-in-value',
-        'desc': "This shouldn't change from V1 to V2",
-        'filters': [
-            {
-                'attribute': 'tcia_tumorLocation',
-                'values': ['Esophagus','Chest-abdomen-pelvis, Leg, Tspine'],
-            }
-        ]
-    },
-    {
-        'name': 'Example: BodyPartExamine, Bladder and Brain',
-        'desc': 'V1 Count should differ in V2',
-        'filters': [
-            {
-                'attribute': 'BodyPartExamined',
-                'values': ['BLADDER','BRAIN'],
-            }
-        ]
-    },
-    {
-        'name': 'Example: SOPClassUID and Modality',
-        'desc': 'V1 Count should differ in V2',
-        'filters': [
-            {
-                'attribute': 'SOPClassUID',
-                'values': ['1.2.840.10008.5.1.4.1.1.88.33'],
-            },
-            {
-                'attribute': 'Modality',
-                'values': ['PT'],
-            }
-        ]
-    },
-    {
-        'name': 'Example: TCGA related filter',
-        'desc': 'This shouldn\'t change from V1 to V2',
-        'filters': [
-            {
-                'attribute': 'collection_id',
-                'values': ['tcga_hnsc'],
-            },
-            {
-                'attribute': 'pathologic_stage',
-                'values': ['Stage I'],
-            }
-        ]
-    }
+    # {
+    #     'name': 'Example: V1 collection ID',
+    #     'desc': "This shouldn't change from V1 to V2",
+    #     'filters': [
+    #         {
+    #             'attribute': 'collection_id',
+    #             'values': ['nsclc_radiomics'],
+    #         }
+    #     ]
+    # },
+    # {
+    #     'name': 'Example: V1 Derived',
+    #     'desc': "This shouldn't change from V1 to V2",
+    #     'filters': [
+    #         {
+    #             'attribute': 'AnatomicRegionSequence',
+    #             'values': ['T-42300:SRT'],
+    #         }
+    #     ]
+    # },
+    # {
+    #     'name': 'Example: V1 Related, multi-value',
+    #     'desc': "This shouldn't change from V1 to V2",
+    #     'filters': [
+    #         {
+    #             'attribute': 'disease_code',
+    #             'values': ['BLCA','BRCA'],
+    #         },
+    #         {
+    #             'attribute': 'collection_id',
+    #             'values': ['tcga_blca','tcga_brca','tcga_cesc','tcga_coad','tcga_esca','tcga_gbm',
+    #                        'tcga_hnsc','tcga_kich','tcga_kirc','tcga_kirp','tcga_lgg','tcga_lihc',
+    #                        'tcga_luad','tcga_lusc','tcga_ov','tcga_prad','tcga_read','tcga_sarc',
+    #                        'tcga_stad','tcga_thca','tcga_ucec'],
+    #         }
+    #     ]
+    # },
+    # {
+    #     'name': 'Example: V1 Comma-in-value',
+    #     'desc': "This shouldn't change from V1 to V2",
+    #     'filters': [
+    #         {
+    #             'attribute': 'tcia_tumorLocation',
+    #             'values': ['Esophagus','Chest-abdomen-pelvis, Leg, Tspine'],
+    #         }
+    #     ]
+    # },
+    # {
+    #     'name': 'Example: BodyPartExamine, Bladder and Brain',
+    #     'desc': 'V1 Count should differ in V2',
+    #     'filters': [
+    #         {
+    #             'attribute': 'BodyPartExamined',
+    #             'values': ['BLADDER','BRAIN'],
+    #         }
+    #     ]
+    # },
+    # {
+    #     'name': 'Example: SOPClassUID and Modality',
+    #     'desc': 'V1 Count should differ in V2',
+    #     'filters': [
+    #         {
+    #             'attribute': 'SOPClassUID',
+    #             'values': ['1.2.840.10008.5.1.4.1.1.88.33'],
+    #         },
+    #         {
+    #             'attribute': 'Modality',
+    #             'values': ['PT'],
+    #         }
+    #     ]
+    # },
+    # {
+    #     'name': 'Example: TCGA related filter',
+    #     'desc': 'This shouldn\'t change from V1 to V2',
+    #     'filters': [
+    #         {
+    #             'attribute': 'collection_id',
+    #             'values': ['tcga_hnsc'],
+    #         },
+    #         {
+    #             'attribute': 'pathologic_stage',
+    #             'values': ['Stage I'],
+    #         }
+    #     ]
+    # }
 ]
 
 def load_cohort_defs(filename):
@@ -153,6 +187,7 @@ def parse_args():
     parser.add_argument('-u', '--user-emails', type=str, default='', help='User email(s) for cohort owner - comma separated')
     parser.add_argument('-v', '--versions', type=str, default='2.0', help='Versions for which to create cohorts, comma delimited. Eg.: 2.0, 3.0')
     return parser.parse_args()
+
 
 def main():
     try:
