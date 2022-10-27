@@ -108,8 +108,8 @@ jobs:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
     working_directory: ~/IDC-WebApp
     docker:
-      - image: cimg/python:3.8
-      - image: cimg/mysql:5.7
+      - image: cimg/python:3.8.14
+      - image: cimg/mysql:5.7.36
         environment:
           MYSQL_ROOT_HOST: "%"
           MYSQL_USER: ubuntu
