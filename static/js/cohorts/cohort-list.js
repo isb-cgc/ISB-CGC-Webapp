@@ -605,13 +605,9 @@ require([
                     } else {
                         $('#bq-string-display .inactive-filters').hide();
                     }
-                    if(!data['filters_found']) {
-                        $('#bq-string-display .no-filters-found').show();
-                        $('#bq-string-display .some-found').hide();
-                    } else {
-                        $('#bq-string-display .no-filters-found').hide();
-                        $('#bq-string-display .some-found').show();
-                    }
+                    !(data['filters_found']) ? $('#bq-string-display .no-filters-found').show() : $('#bq-string-display .no-filters-found').hide();
+                    (data['PatientID'] <= 0) ? $('#bq-string-display .none-found').show() : $('#bq-string-display .none-found').hide();
+                    (data['inactive_attr'] || data['PatientID'] <= 0 || !(data['filters_found'])) ? $('.no-table-change').show() : $('.no-table-change').hide();
                 },
                 error: function (xhr) {
                     console.debug(xhr);

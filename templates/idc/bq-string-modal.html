@@ -19,15 +19,17 @@
                         <i class="fa fa-warning"></i>
                         The following attributes are no longer available in the current data version:
                         <span class="inactive-attrs"></span> <br />
-                        <span class="some-found">This query will not work if the table ID is changed to a newer
-                        data version.</span>
                     </p>
                     <p class="notes no-filters-found">
                         <i class="fa fa-warning"></i>
                         No attributes used in this cohort's filters were found for the current data version.
-                        This query will not work if the table ID is changed to a newer
-                        data version.
                     </p>
+                    <p class="notes none-found">
+                        <i class="fa fa-warning"></i>
+                        This cohort's filters as applied to the new data version do not return any Patients, Studies, or Series.
+                    </p>
+                    <p class="notes no-table-change">This query will not work if the table ID is changed to a newer
+                        data version.</p>
                     <button type="button" class="copy-this btn btn-default"
                             content="{% if bq_string_uri == "True" %}{% else %}{{ bq_string }}{% endif %}"
                             title="Copy query text to clipboard"
