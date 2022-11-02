@@ -1792,10 +1792,47 @@ a#user-dropdown:hover {
     border: 1px solid #dddddd; }
     #bq-meta-searcher #bqmeta tr td table.preview-table th table td, #bq-meta-searcher #bqmeta tr td table.preview-table td table td {
       border: 1px solid #efefef; }
+  #bq-meta-searcher #bqmeta tr td table.useful-join-table{
+    margin-left: 2rem;
+  }
   #bq-meta-searcher #bqmeta tr td table.useful-join-table th, #bq-meta-searcher #bqmeta tr td table.useful-join-table td {
     border-bottom: 1px solid lightgrey;
-    padding-bottom: 3px;
-    vertical-align: top; }
+    padding: 2px 5px;
+    vertical-align: top;
+  }
+  #bq-meta-searcher #bqmeta tr td table.useful-join-table th button, #bq-meta-searcher #bqmeta tr td table.useful-join-table td button {
+      font-size: .85em;
+      padding: 0 7px;
+      border: 1px solid #3A79B8;
+      border-radius: 3px;
+      color: #3A79B8;
+      background-color: transparent;
+  }
+
+.bqmeta-outline-badge {
+  border: 1px solid #3A79B8;
+  font-size: 0.9rem;
+  background-color: transparent;
+}
+
+.bqmeta-outline-badge:hover {
+  color: white !important;
+  background-color: #3A79B8;
+}
+#bq-meta-searcher #bqmeta tr.useful-join-shown a.useful-join-detail {
+  color: #F7991B;
+}
+tr.useful-join-shown .bqmeta-outline-badge {
+  color: white !important;
+  background-color: #F7991B;
+  border: 1px solid #F7991B;
+  /*font-size: 0.9rem;*/
+  /*background-color: transparent;*/
+}
+  #bq-meta-searcher #bqmeta tr td table.useful-join-table td button:hover {
+        color: white;
+        background-color: #3A79B8; }
+
   #bq-meta-searcher #bqmeta tr td .tbl-preview:before {
     font-family: FontAwesome;
     content: "\f0ce";
@@ -1819,7 +1856,7 @@ a#user-dropdown:hover {
   content: "\f056";
   color: #993333; }
 
-#bq-meta-searcher #bqmeta tr.preview-shown td > .tbl-preview:before {
+#bq-meta-searcher #bqmeta tr.preview-shown td > .tbl-preview:before  {
   color: #F7991B; }
 
 #bq-meta-searcher .joined-table-link {
