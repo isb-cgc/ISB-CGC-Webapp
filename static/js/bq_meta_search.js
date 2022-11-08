@@ -355,27 +355,26 @@ require([
                 $('.spinner').remove();
                 if (selected_table_full_id !== "") {
                     let parts = selected_table_full_id.split('.');
-                    let project_id = parts[0];
-                    let dataset_id;
-                    if (parts[1])
-                        dataset_id = "\""+parts[1]+"\"";
-                    let table_id;
-                    if (parts[2])
-                        table_id = "\""+parts[2]+"\"";
-                    $('#search-by-dataset-id')[0].value = dataset_id;
-                    $('#search-by-project-id option').each(function() {
-                        if ($(this)[0].innerText === project_id) {
-                            $(this).prop('selected', true);
-                        }
-                    });
-                    $('#search-by-table-id')[0].value = table_id;
-                    if (dataset_id)
-                        columnSearch('datasetId', dataset_id);
-                    if (project_id)
+                    if (parts[0]){
+                        let project_id = parts[0];
+                        $('#search-by-project-id option').each(function () {
+                            if ($(this)[0].innerText === project_id) {
+                                $(this).prop('selected', true);
+                            }
+                        });
                         columnSearch('projectId', project_id);
-                    if (table_id)
+                    }
+                    if (parts[1]){
+                        let dataset_id = parts[1];
+                        dataset_id = "\""+parts[1]+"\"";
+                        $('#search-by-dataset-id')[0].value = dataset_id;
+                        columnSearch('datasetId', dataset_id);
+                    }
+                    if (parts[2]) {
+                        let table_id = "\""+parts[2]+"\"";
+                        $('#search-by-table-id')[0].value = table_id;
                         columnSearch('tableId', table_id);
-
+                    }
                     $('.adv-toggle-btn').click();
                 }
 
