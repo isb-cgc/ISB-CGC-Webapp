@@ -378,12 +378,6 @@ require([
         maxWidth: 800
     });
 
-    tippy('.coll-explain', {
-        allowHTML:true,
-        content: 'For collections denoted by the <i class="fa-solid fa-circle-minus"></i> icon some or all of the image files are not publicly available.',
-        interactive:true
-
-    });
 
     $('.download-link').on('click', function(){
         $('#download-images').modal("hide");
