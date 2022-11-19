@@ -274,7 +274,7 @@ require([
         allowHTML: true,
         interactive: true,
         target: 'td.collex_name',
-        interactiveBorder:10,
+        interactiveBorder: 10,
         maxWidth: 600,
     });
 
