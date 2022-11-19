@@ -104,6 +104,12 @@ ORIG_ATTR_FIRST = [
     "Modality"
 ]
 
+ORIG_ATTR_REMOVE = [
+    "analysis_results_id",
+    "collection_id",
+    "access"
+]
+
 
 def quick_js_bracket_replace(matchobj):
     if matchobj.group(0) == '<':
@@ -116,10 +122,11 @@ def quick_js_bracket_replace(matchobj):
 def sort_orig_attr(attr_list):
     first = [None for _ in ORIG_ATTR_FIRST]
     rest = []
+
     for attr in attr_list:
         if attr['name'] in ORIG_ATTR_FIRST:
             first[ORIG_ATTR_FIRST.index(attr['name'])] = attr
-        else:
+        elif not attr['name'] in ORIG_ATTR_REMOVE:
             rest.append(attr)
 
     list(filter(lambda a: a is not None, first))

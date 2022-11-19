@@ -259,6 +259,25 @@ require([
         interactive: true
     });
 
+    tippy.delegate('table#proj_table', {
+        content: function(reference) {
+            let collection_id=$(reference).parent('tr').data('projectid');
+            let tooltip = collection_tooltips[collection_id];
+            if(tooltip) {
+                return '<div class="collection-tooltip">' + tooltip + '</div>';
+            }
+            return '<span></span>';
+        },
+        theme: 'light',
+        placement: 'right-end',
+        arrow: false,
+        allowHTML: true,
+        interactive: true,
+        target: 'td.collex_name',
+        interactiveBorder: 10,
+        maxWidth: 600,
+    });
+
     const temp='<html><strong>now</strong></html>';
 
     tippy('.case-info', {
@@ -378,12 +397,6 @@ require([
         maxWidth: 800
     });
 
-    tippy('.coll-explain', {
-        allowHTML:true,
-        content: 'For collections denoted by the <i class="fa-solid fa-circle-minus"></i> icon some or all of the image files are not publicly available.',
-        interactive:true
-
-    });
 
     $('.download-link').on('click', function(){
         $('#download-images').modal("hide");
