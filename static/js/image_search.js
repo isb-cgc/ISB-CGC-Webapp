@@ -100,6 +100,20 @@ require([
         }
     };
 
+    window.toggleCharts=function(cntrl){
+        if (cntrl==="hide"){
+            $('.chart-content').addClass('hidden');
+            $('.showchrt').removeClass('hidden');
+            $('.hidechrt').addClass('hidden');
+        }
+        else if (cntrl==="show"){
+            $('.chart-content').removeClass('hidden');
+            $('.hidechrt').removeClass('hidden');
+            $('.showchrt').addClass('hidden');
+        }
+
+    }
+
     window.hidePanel=function(){
         $('#lh_panel').hide();
         $('#show_lh').show();
@@ -699,6 +713,7 @@ require([
                 },
                 "columnDefs": [
                     {className: "ckbx text_data", "targets": [0]},
+                    {className: "collex_name", "targets": [1]},
                     {className: "projects_table_num_cohort", "targets": [3]},
                 ],
                 "columns": [
@@ -1839,7 +1854,6 @@ require([
                     } else {
                         dicofdic['filt'] = data.origin_set.All.attributes;
                     }
-
                     updateFilterSelections('access_set', dicofdic);
                     updateFilterSelections('analysis_set', dicofdic);
                     updateFilterSelections('search_orig_set', dicofdic);
@@ -1984,12 +1998,13 @@ require([
     }
 
     var plotCategoricalData = function (plotId, lbl, plotData, isPie, showLbl) {
-        var width = 300;
-        var height = 260;
-        var shifty = 30;
-        var margin = 50;
+        var width = 150;
+        var height = 150;
+        var shifty = 45;
+        var xshift=width/2+20;
+        var margin = 0;
         var radius = Math.min(width, height) / 2 - margin;
-        var radiusB = 1.2*radius;
+        var radiusB = 1.1*radius;
         var mx =0;
         var mn =0;
 
@@ -2005,14 +2020,17 @@ require([
          .attr("width", width)
          .attr("height", height).style("text-anchor","middle");
 
+      /*  var svg = d3.select("#"+plotId)
+         .select("svg")
+            .attr("viewBox",`0 0 290 340`).style("text-anchor","middle"); */
 
         var Tooltip = $("#"+plotId + " div.chart-tooltip").length > 0
             ? d3.select("#"+plotId + " div.chart-tooltip")
             : d3.select("#"+plotId)
                 .append("div")
                 .attr("class", "chart-tooltip")
-                .style("top", "260px")
-                .style("left", "0px");
+                .style("top", "200px")
+                .style("left", "20px");
 
         svg.selectAll("*").remove();
 
@@ -2042,11 +2060,11 @@ require([
           title2=lbl;
          }
 
-        titlePart.append("tspan").attr("x",140).attr("y",15).attr("dx",0).attr("dy",0).text(title0);
-        titlePart.append("tspan").attr("x", 140).attr("y", 15).attr("dx", 0).attr("dy", 20).text(title1);
-        titlePart.append("tspan").attr("x", 140).attr("y", 15).attr("dx", 0).attr("dy", 40).text(title2);
+         titlePart.append("tspan").attr("x",xshift).attr("y",0).attr("dx",0).attr("dy",0).text(title0);
+         titlePart.append("tspan").attr("x", xshift).attr("y", 0).attr("dx", 0).attr("dy", 20).text(title1);
+        titlePart.append("tspan").attr("x", xshift).attr("y", 0).attr("dx", 0).attr("dy", 40).text(title2);
 
-        var pieg=svg.append("g").attr("transform", "translate(" + width / 2 + "," + (height / 2 + shifty) + ")");
+        var pieg=svg.append("g").attr("transform", "translate(" + (width / 2 +20)  + "," + (height / 2 + shifty) + ")");
         var data = new Object;
         var nonZeroLabels= new Array();
         //spcing = 1.0/parseFloat(plotData.dataCnt.length);
@@ -2366,6 +2384,7 @@ require([
                 if (textFilt && !(val.toLowerCase().includes(textFiltVal.toLowerCase()))) {
                     filtByVal = true;
                     $(elem).parent().parent().addClass('filtByVal');
+
                 } else {
                     $(elem).parent().parent().removeClass('filtByVal');
                     if (srch){
@@ -2476,7 +2495,10 @@ require([
                     parentVal=$('#'+filterCats[j]).siblings().filter('.list-group-item__heading').find('.case_count');
                     parentVal[0].innerHTML=ret[1];
                     if (ret[0]===0){
-                        $('#'+filterCats[j]).addClass('notDisp')
+                         $('#'+filterCats[j]).addClass('notDisp')
+                    }
+                    else{
+                        $('#'+filterCats[j]).removeClass('notDisp')
                     }
                 }
             }

@@ -115,6 +115,20 @@ ul, ol {
   min-height: calc(100vh - 294px);
 }
 
+#about ul {
+  margin-left: 10px;
+  list-style: disc;
+}
+
+#about ul li {
+  margin-left: 10px;
+}
+
+#about h5 {
+  margin-top: 20px;
+}
+
+
 /* The cohorts list page has an additional section (action buttons) which complicates the layout count */
 #cohorts-list .short-inner-content {
   min-height: calc(100vh - 394px);

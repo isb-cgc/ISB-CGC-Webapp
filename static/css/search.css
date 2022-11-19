@@ -160,12 +160,23 @@ bottom: 95%; /* At the top of the tooltip */
     display: flex;
     overflow:visible;
     flex-wrap: wrap;
-    #justify-content: space-around;
+    justify-content: space-around;
     #justify-content: space-between;
-    justify-content: center;
+    #justify-content: center;
     padding-top: 10px !important;
+
 }
 
+.original-graphs, .related-graphs{
+    position:relative;
+    z-index:5 !important;
+}
+.more-graphs, .less-graphs{
+    position:relative;
+    display:block;
+    z-index:10 !important;
+    width:100%;
+}
 
 
 .fa-stack .greyout {
@@ -321,9 +332,10 @@ bottom: 95%; /* At the top of the tooltip */
 .bar-chart {
    display: inline-block;
     position:relative;
-    width: 300px;
-    height: 310px;
+    width: 190px;
+    height: 200px;
     overflow:visible;
+
 }
 
 .bar-chart.hide-chart{
@@ -383,7 +395,7 @@ tr {
 
 
 #projects_table td, #projects_table_head th {
-    width: 31.33%;
+    width: 33.33%;
     word-wrap: break-word; }
 
 
