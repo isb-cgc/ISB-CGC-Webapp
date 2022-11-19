@@ -713,6 +713,7 @@ require([
                 },
                 "columnDefs": [
                     {className: "ckbx text_data", "targets": [0]},
+                    {className: "collex_name", "targets": [1]},
                     {className: "projects_table_num_cohort", "targets": [3]},
                 ],
                 "columns": [
