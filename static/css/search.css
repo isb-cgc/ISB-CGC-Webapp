@@ -518,3 +518,7 @@ svg {
 .ui-slider{
     margin-bottom: 18px;
 }
+
+.more-checks {
+    min-height: 19px;
+}
