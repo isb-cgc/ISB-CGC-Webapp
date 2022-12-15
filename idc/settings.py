@@ -213,11 +213,11 @@ CSRF_COOKIE_SECURE             = bool(os.environ.get('CSRF_COOKIE_SECURE', 'True
 SESSION_COOKIE_SECURE          = bool(os.environ.get('SESSION_COOKIE_SECURE', 'True') == 'True')
 SECURE_SSL_REDIRECT            = bool(os.environ.get('SECURE_SSL_REDIRECT', 'True') == 'True')
 
-SECURE_REDIRECT_EXEMPT = []
+# Exempt the health check so it can go through
+SECURE_REDIRECT_EXEMPT = [r'^_ah/(vm_)?health$', ] if SECURE_SSL_REDIRECT else []
 
-if SECURE_SSL_REDIRECT:
-    # Exempt the health check so it can go through
-    SECURE_REDIRECT_EXEMPT = [r'^_ah/(vm_)?health$', ]
+DOMAIN_REDIRECT_TO = os.environ.get('DOMAIN_REDIRECT_TO', None)
+DOMAIN_REDIRECT_FROM = os.environ.get('DOMAIN_REDIRECT_FROM', None)
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -290,6 +290,7 @@ SECURE_HSTS_SECONDS            = int(os.environ.get('SECURE_HSTS_SECONDS','3600'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'idc.domain_redirect_middleware.DomainRedirectMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'idc.checkreqsize_middleware.CheckReqSize',
