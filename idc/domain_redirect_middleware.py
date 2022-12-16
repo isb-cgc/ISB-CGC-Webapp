@@ -21,15 +21,14 @@ from django.conf import settings
 
 logger = logging.getLogger('main_logger')
 
+
 class DomainRedirectMiddleware(object):
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
         host = request.get_host().partition(":")[0]
-        logger.info("[STATUS] Host seen: {}".format(host))
         if host == settings.DOMAIN_REDIRECT_FROM:
-            logger.info("[STATUS] Redirecting to:{}".format(settings.DOMAIN_REDIRECT_TO))
             return HttpResponsePermanentRedirect(settings.DOMAIN_REDIRECT_TO + request.path)
         else:
             return self.get_response(request)
