@@ -3011,7 +3011,7 @@ require([
                                if($(selEle).find('.join_val').length>0) {
                                    $(selEle).find('.join_val').filter('input[value=' + filter['op'].toUpperCase() + ']').prop("checked", true);
                                } else {
-                                   filter['op'] !== 'OR' && base.showJsMessage(
+                                   (filter['op'] !== 'OR' && filter['attr_name'] !== 'bmi') && base.showJsMessage(
                                        "warning",
                                        "Invalid operator seen for attribute '"+$(selEle).attr('id')+"'; default of OR used instead.",
                                        true
