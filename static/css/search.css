@@ -276,10 +276,8 @@ bottom: 95%; /* At the top of the tooltip */
     position: absolute;
     z-index: 9999;
     opacity: 0;
-    text-align: center;
-    background-color: #fff;
-    font-weight: bold;
-    filter: drop-shadow(gray 2px 4px 6px);
+    width: 100%;
+    background-color: transparent;
 }
 
 .chart-tooltip div {
@@ -288,7 +286,10 @@ bottom: 95%; /* At the top of the tooltip */
     border: 3px solid black;
     border-radius: 2px;
     padding: 3px;
-    max-width: 280px;
+    background-color: #fff;
+    max-width: 260px;
+    filter: drop-shadow(gray 2px 4px 6px);
+    font-weight: bold;
 }
 
 .id-names{
