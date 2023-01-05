@@ -2000,7 +2000,7 @@ require([
     var plotCategoricalData = function (plotId, lbl, plotData, isPie, showLbl) {
         var width = 150;
         var height = 150;
-        var shifty = 45;
+        var shifty = 48;
         var xshift=width/2+20;
         var margin = 0;
         var radius = Math.min(width, height) / 2 - margin;
@@ -2029,8 +2029,8 @@ require([
             : d3.select("#"+plotId)
                 .append("div")
                 .attr("class", "chart-tooltip")
-                .style("top", "200px")
-                .style("left", "20px");
+                .style("top", "180px")
+                .style("left", "0px");
 
         svg.selectAll("*").remove();
 
@@ -3380,7 +3380,7 @@ require([
             $('.filter-url').removeClass("is-hidden");
         });
 
-        $('#js-messages').append(
+        $('.filter-url-container').append(
             $('<div>')
                 .addClass('alert alert-warning alert-dismissible url-too-long')
                 .html(
@@ -3388,7 +3388,7 @@ require([
                     + "You will need to select fewer filters or the URL will not properly load when used."
                 )
                 .prepend(
-                    '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">'
+                    '<button type="button" class="close" data-hide="alert"><span aria-hidden="true">'
                     +'&times;</span><span class="sr-only">Close</span></button>'
                 ).attr("style","display: none;")
         );
