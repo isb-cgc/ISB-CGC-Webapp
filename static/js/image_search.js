@@ -2030,7 +2030,7 @@ require([
                 .append("div")
                 .attr("class", "chart-tooltip")
                 .style("top", "180px")
-                .style("left", "50px");
+                .style("left", "80px");
 
         svg.selectAll("*").remove();
 
