@@ -3388,7 +3388,7 @@ require([
                     + "You will need to select fewer filters or the URL will not properly load when used."
                 )
                 .prepend(
-                    '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">'
+                    '<button type="button" class="close" data-hide="alert"><span aria-hidden="true">'
                     +'&times;</span><span class="sr-only">Close</span></button>'
                 ).attr("style","display: none;")
         );
