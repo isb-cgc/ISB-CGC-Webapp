@@ -163,7 +163,6 @@ bottom: 95%; /* At the top of the tooltip */
     justify-content: space-around;
     #justify-content: space-between;
     #justify-content: center;
-    padding-top: 10px !important;
 
 }
 
@@ -277,17 +276,19 @@ bottom: 95%; /* At the top of the tooltip */
     position: absolute;
     z-index: 9999;
     opacity: 0;
-    width: 100%;
     text-align: center;
     background-color: #fff;
     font-weight: bold;
+    filter: drop-shadow(gray 2px 4px 6px);
 }
 
 .chart-tooltip div {
     display: inline-block;
     text-align: left;
-    border-bottom: 3px solid black;
-    max-width: 250px;
+    border: 3px solid black;
+    border-radius: 2px;
+    padding: 3px;
+    max-width: 280px;
 }
 
 .id-names{
@@ -386,30 +387,23 @@ tr {
 #projects_table td.ckbx, #projects_table_head th.ckbx,
 #cases_table_head th.ckbx, #cases_table td.ckbx,
 #series_table_head th.ckbx, #series_table td.ckbx,
-#studies_table_head th.ckbx, #studies_table td.ckbx
-{
+#studies_table_head th.ckbx, #studies_table td.ckbx {
     width: 5%;
-    word-wrap: break-word;
-}
+    word-wrap: break-word; }
 
-
+#search_def_stats {
+    padding-top: 8px; }
 
 #projects_table td, #projects_table_head th {
     width: 33.33%;
     word-wrap: break-word; }
 
-
-
-
 #cases_table td, #cases_table_head th {
     width: 23.75%;
     word-wrap: break-word; }
 
-
-
 #studies_table_head th, #studies_table td {
     word-break: break-word; }
-
 
 #studies_table_head th.project-name, th.case-id, th.study-id,
 #studies_table td.project-name, td.case-id, td.study-id {
