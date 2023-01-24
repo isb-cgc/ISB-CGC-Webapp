@@ -70,7 +70,7 @@ ranges_needed = {
     'year_of_diagnosis': 'year',
     'days_to_birth': 'by_negative_3k',
     'year_of_initial_pathologic_diagnosis': 'year',
-    'age_at_diagnosis': None,
+    'age_at_diagnosis': 'default',
     'SUVbw': 'SUVbw',
     'Volume': 'Volume',
     'Diameter': 'Diameter',
@@ -85,7 +85,13 @@ ranges_needed = {
     'Glycolysis_Within_First_Quarter_of_Intensity_Range': 'Glycolysis_Within_First_Quarter_of_Intensity_Range',
     'Glycolysis_Within_Third_Quarter_of_Intensity_Range': 'Glycolysis_Within_Third_Quarter_of_Intensity_Range',
     'Glycolysis_Within_Fourth_Quarter_of_Intensity_Range': 'Glycolysis_Within_Fourth_Quarter_of_Intensity_Range',
-    'Glycolysis_Within_Second_Quarter_of_Intensity_Range': 'Glycolysis_Within_Second_Quarter_of_Intensity_Range'
+    'Glycolysis_Within_Second_Quarter_of_Intensity_Range': 'Glycolysis_Within_Second_Quarter_of_Intensity_Range',
+    'Volume_of_Mesh': 'Volume_of_Mesh',
+    'Sphericity_quant': 'Sphericity_quant',
+    'ObjectiveLensPower': 'ObjectiveLensPower',
+    'min_PixelSpacing': 'min_PixelSpacing',
+    'max_TotalPixelMatrixColumns': 'max_TotalPixelMatrixColumns',
+    'max_TotalPixelMatrixRows': 'max_TotalPixelMatrixRows',
 }
 
 ranges = {
@@ -97,21 +103,28 @@ ranges = {
                 "include_upper": True, 'type': 'I'}],
     'year': [{'first': "1976", "last": "2015", "gap": "5", "include_lower": True, "unbounded": False,
               "include_upper": False, 'type': 'I'}],
-    'SUVbw': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '3', 'last': '12', 'gap': '1'}],
-    'Volume': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '10', 'last': '28000', 'gap': '2800'}],
-    'Diameter': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '6', 'last': '55', 'gap': '6'}],
-    'Surface_area_of_mesh': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '150', 'last': '4500', 'gap': '435'}],
-    'Total_Lesion_Glycolysis': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '78', 'last': '698', 'gap': '78'}],
-    'Standardized_Added_Metabolic_Activity': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '56', 'last': '502', 'gap': '56'}],
-    'Percent_Within_First_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '10', 'last': '90', 'gap': '10'}],
-    'Percent_Within_Third_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '10', 'last': '90', 'gap': '10'}],
-    'Percent_Within_Fourth_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '10', 'last': '90', 'gap': '10'}],
-    'Percent_Within_Second_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '10', 'last': '90', 'gap': '10'}],
-    'Standardized_Added_Metabolic_Activity_Background': [{'type': 'F', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '0.5', 'last': '5', 'gap': '0.5'}],
-    'Glycolysis_Within_First_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '28', 'last': '251', 'gap': '28'}],
-    'Glycolysis_Within_Third_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '25', 'last': '225', 'gap': '25'}],
-    'Glycolysis_Within_Fourth_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '19', 'last': '170', 'gap': '19'}],
-    'Glycolysis_Within_Second_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': '1', 'include_upper': '0', 'unbounded': '1', 'first': '25', 'last': '227', 'gap': '25'}]
+    'SUVbw': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '3', 'last': '12', 'gap': '1'}],
+    'Volume_of_Mesh': [{'type': 'F', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '2000', 'last': '1610000', 'gap': '150000'}],
+    'Sphericity_quant': [{'type': 'F', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '0', 'last': '1', 'gap': '0.1'}],
+    'ObjectiveLensPower': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '1', 'last': '40', 'gap': '10'}],
+    'min_PixelSpacing': [{'type': 'F', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '0', 'last': '9', 'gap': '2'}],
+    'max_TotalPixelMatrixColumns': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '1', 'last': '230000', 'gap': '20000'}],
+    'max_TotalPixelMatrixRows': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '1', 'last': '260000', 'gap': '20000'}],
+    'Volume': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '10', 'last': '28000', 'gap': '2800'}],
+    'Diameter': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '6', 'last': '55', 'gap': '6'}],
+    'Surface_area_of_mesh': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '150', 'last': '4500', 'gap': '435'}],
+    'Total_Lesion_Glycolysis': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '78', 'last': '698', 'gap': '78'}],
+    'Standardized_Added_Metabolic_Activity': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '56', 'last': '502', 'gap': '56'}],
+    'Percent_Within_First_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '10', 'last': '90', 'gap': '10'}],
+    'Percent_Within_Third_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '10', 'last': '90', 'gap': '10'}],
+    'Percent_Within_Fourth_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '10', 'last': '90', 'gap': '10'}],
+    'Percent_Within_Second_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '10', 'last': '90', 'gap': '10'}],
+    'Standardized_Added_Metabolic_Activity_Background': [{'type': 'F', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '0.5', 'last': '5', 'gap': '0.5'}],
+    'Glycolysis_Within_First_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '28', 'last': '251', 'gap': '28'}],
+    'Glycolysis_Within_Third_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '25', 'last': '225', 'gap': '25'}],
+    'Glycolysis_Within_Fourth_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '19', 'last': '170', 'gap': '19'}],
+    'Glycolysis_Within_Second_Quarter_of_Intensity_Range': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '25', 'last': '227', 'gap': '25'}],
+    'default': []
 }
 
 
@@ -145,7 +158,7 @@ def new_attribute(name, displ_name, type, display_default, cross_collex=False, u
                 'cross_collex': cross_collex,
                 'solr_collex': [],
                 'bq_tables': [],
-                'set_types': [],
+                'data_set_types': [],
                 'display': display_default,
                 'categories': []
             }
@@ -397,14 +410,15 @@ def create_solr_params(schema_src, solr_src):
     SCHEMA_STRING = "curl -u {solr_user}:{solr_pwd} -X POST -H 'Content-type:application/json' --data-binary '{schema}' https://localhost:8983/solr/{solr_src}/schema --cacert solr-ssl.pem"
     INDEX_STRING = "curl -u {solr_user}:{solr_pwd} -X POST 'https://localhost:8983/solr/{solr_src}/update?commit=yes{params}' --data-binary @{file_name}.csv -H 'Content-type:application/csv' --cacert solr-ssl.pem"
     for field in schema:
-        if not re.search(r'has_',field['name']):
+        # has_ fields do not need to be in the schema, as they are single-value Strings which will parse and be added
+        # automatically
+        if not re.search(r'has_', field['name']):
             field_schema = {
                 "name": field['name'],
                 "type": SOLR_TYPES[field['type']] if field['name'] not in SOLR_TYPE_EXCEPTION else SOLR_TYPE_EXCEPTION[field['name']],
                 "multiValued": False if field['name'] in SOLR_SINGLE_VAL.get(solr_src.aggregate_level, {}) else True,
                 "stored": True
             }
-            solr_schema.append(field_schema)
             if field_schema['multiValued']:
                 solr_index_strings.append("f.{}.split=true&f.{}.separator=|".format(field['name'],field['name']))
 
@@ -447,13 +461,20 @@ def load_attributes(filename, solr_sources, bq_sources):
             attr['solr_collex'].extend(solr_sources)
         attr['bq_tables'].extend(bq_sources)
 
-        attr['set_types'].append({'set': DataSetType.IMAGE_DATA, 'child_record_search': 'StudyInstanceUID'})
+        attr['data_set_types'].append({'data': line[3] or DataSetType.IMAGE_DATA, 'child_record_search': 'StudyInstanceUID'})
+
+        if(line[4]):
+            cat = line[4].split(':')
+            attr['categories'].append({'name': cat[0], 'display_name': cat[1]})
 
         if attr['name'] in DISPLAY_VALS:
             if 'preformatted_values' in DISPLAY_VALS[attr['name']]:
                 attr['preformatted_values'] = True
             else:
                 attr['display_vals'] = DISPLAY_VALS[attr['name']]['vals']
+
+        if attr['name'] in ranges_needed:
+            attr['range'] = ranges.get(ranges_needed[attr['name']], [])
 
     attr_file.close()
 
@@ -472,7 +493,7 @@ def add_attributes(attr_set):
                 units=attr.get('units',None)
             )
             if 'range' in attr:
-                if len(attr['range']):
+                if len(attr.get('range', [])):
                     for attr_range in attr['range']:
                         Attribute_Ranges.objects.update_or_create(
                             **attr_range, attribute=obj
@@ -481,24 +502,24 @@ def add_attributes(attr_set):
                     Attribute_Ranges.objects.update_or_create(
                         attribute=obj
                     )
-            if len(attr.get('display_vals',[])):
+            if len(attr.get('display_vals', [])):
                 for dv in attr['display_vals']:
                     Attribute_Display_Values.objects.update_or_create(
                         raw_value=dv['raw_value'], display_value=dv['display_value'], attribute=obj
                     )
-            if len(attr.get('solr_collex',[])):
+            if len(attr.get('solr_collex', [])):
                 for sc in DataSource.objects.filter(name__in=attr['solr_collex']):
                     obj.data_sources.add(sc)
-            if len(attr.get('bq_tables',[])):
+            if len(attr.get('bq_tables', [])):
                 for bqt in DataSource.objects.filter(name__in=attr['bq_tables']):
                     obj.data_sources.add(bqt)
-            if len(attr.get('set_types',[])):
-                for set_type in attr.get('set_types'):
+            if len(attr.get('data_set_types', [])):
+                for data_set_type in attr.get('data_set_types'):
                     Attribute_Set_Type.objects.update_or_create(
-                        datasettype=DataSetType.objects.get(data_type=set_type['set']), attribute=obj,
-                        child_record_search=set_type['child_record_search']
+                        datasettype=DataSetType.objects.get(data_type=data_set_type['data']), attribute=obj,
+                        child_record_search=data_set_type['child_record_search']
                     )
-            if len(attr.get('categories',[])):
+            if len(attr.get('categories', [])):
                 for cat in attr['categories']:
                     Attribute_Display_Category.objects.update_or_create(
                         category=cat['name'], category_display_name=cat['display_name'], attribute=obj
@@ -716,7 +737,7 @@ def main():
         len(args.version_file) and update_data_versions(args.version_file)
 
         len(args.attributes_file) and load_attributes(args.attributes_file,
-            ["dicom_derived_series_v11", "dicom_derived_study_v11"], ["idc-dev-etl.idc_v11_pub.dicom_pivot_v11"]
+            ["dicom_derived_series_v13", "dicom_derived_study_v13"], ["idc-dev-etl.idc_v11_pub.dicom_pivot_v13"]
         )
 
         len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
@@ -728,8 +749,8 @@ def main():
                 update_display_values(Attribute.objects.get(name=attr), dvals[attr]['vals'])
 
         if args.solr_files.lower() == 'y':
-            for src in [("idc-dev-etl.idc_v12_pub.dicom_derived_all", "dicom_derived_series_v12",),
-                    ("idc-dev-etl.idc_v12_pub.dicom_derived_all", "dicom_derived_study_v12",),]:
+            for src in [("idc-dev-etl.idc_v13_pub.dicom_derived_all", "dicom_derived_series_v13",),
+                    ("idc-dev-etl.idc_v13_pub.dicom_derived_all", "dicom_derived_study_v13",),]:
                 create_solr_params(src[0], src[1])
 
     except Exception as e:
