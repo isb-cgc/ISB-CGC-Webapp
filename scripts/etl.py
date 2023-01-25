@@ -105,7 +105,7 @@ ranges = {
               "include_upper": False, 'type': 'I'}],
     'SUVbw': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '3', 'last': '12', 'gap': '1'}],
     'Volume_of_Mesh': [{'type': 'F', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '2000', 'last': '1610000', 'gap': '150000'}],
-    'Sphericity_quant': [{'type': 'F', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '0', 'last': '1', 'gap': '0.1'}],
+    'Sphericity_quant': [{'type': 'F', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '0.3', 'last': '0.9', 'gap': '0.05'}],
     'ObjectiveLensPower': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '1', 'last': '40', 'gap': '10'}],
     'min_PixelSpacing': [{'type': 'F', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '0', 'last': '9', 'gap': '2'}],
     'max_TotalPixelMatrixColumns': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '1', 'last': '230000', 'gap': '20000'}],

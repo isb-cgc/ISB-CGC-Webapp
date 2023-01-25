@@ -190,8 +190,6 @@ def order_seg(items,attr):
 def order_quant(items, attr):
     item_order = [
         'Diameter',
-        'Sphericity_quant',
-        'Volume_of_Mesh',
         'Glycolysis_Within_First_Quarter_of_Intensity_Range',
         'Glycolysis_Within_Second_Quarter_of_Intensity_Range',
         'Glycolysis_Within_Third_Quarter_of_Intensity_Range',
@@ -214,6 +212,10 @@ def order_quant(items, attr):
             for item in items:
                 if item['name'] == ordinal:
                     sort_order.append(item)
+        # Anything not in the order goes in last
+        for item in items:
+            if item not in sort_order:
+                sort_order.append(item)
         return(sort_order)
 
 
