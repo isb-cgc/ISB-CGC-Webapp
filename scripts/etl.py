@@ -412,6 +412,8 @@ def create_solr_params(schema_src, solr_src):
     for field in schema:
         # has_ fields do not need to be in the schema, as they are single-value Strings which will parse and be added
         # automatically
+        # If you're seeing an error about has_X variable not found in a Solr query, make sure the Attribute_Display_Category
+        # values and settings are correct
         if not re.search(r'has_', field['name']):
             field_schema = {
                 "name": field['name'],
