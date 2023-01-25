@@ -188,7 +188,21 @@ def order_seg(items,attr):
 
 @register.filter
 def order_quant(items, attr):
-    item_order=['Diameter','Glycolysis_Within_First_Quarter_of_Intensity_Range','Glycolysis_Within_Second_Quarter_of_Intensity_Range','Glycolysis_Within_Third_Quarter_of_Intensity_Range','Glycolysis_Within_Fourth_Quarter_of_Intensity_Range', 'Percent_Within_First_Quarter_of_Intensity_Range', 'Percent_Within_Second_Quarter_of_Intensity_Range','Percent_Within_Third_Quarter_of_Intensity_Range', 'Percent_Within_Fourth_Quarter_of_Intensity_Range', 'SUVbw', 'Standardized_Added_Metabolic_Activity', 'Standardized_Added_Metabolic_Activity_Background','Surface_area_of_mesh', 'Total_Lesion_Glycolysis', 'Volume']
+    item_order = [
+        'Diameter',
+        'Glycolysis_Within_First_Quarter_of_Intensity_Range',
+        'Glycolysis_Within_Second_Quarter_of_Intensity_Range',
+        'Glycolysis_Within_Third_Quarter_of_Intensity_Range',
+        'Glycolysis_Within_Fourth_Quarter_of_Intensity_Range',
+        'Percent_Within_First_Quarter_of_Intensity_Range',
+        'Percent_Within_Second_Quarter_of_Intensity_Range',
+        'Percent_Within_Third_Quarter_of_Intensity_Range',
+        'Percent_Within_Fourth_Quarter_of_Intensity_Range',
+        'SUVbw', 'Standardized_Added_Metabolic_Activity',
+        'Standardized_Added_Metabolic_Activity_Background',
+        'Surface_area_of_mesh',
+        'Total_Lesion_Glycolysis',
+        'Volume']
 
     if (len(attr.split(':'))>1) and ((attr.split(':')[1] == 'segmentation') or (attr.split(':')[1] == 'qualitative')):
         return sorted(items, key=lambda k: k['name'])
@@ -198,6 +212,10 @@ def order_quant(items, attr):
             for item in items:
                 if item['name'] == ordinal:
                     sort_order.append(item)
+        # Anything not in the order goes in last
+        for item in items:
+            if item not in sort_order:
+                sort_order.append(item)
         return(sort_order)
 
 

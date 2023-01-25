@@ -49,6 +49,8 @@ require([
     'bootstrap'
 ], function($, _, base) {
 
+    const FLOAT_SLIDERS = ["Sphericity_quant"];
+
     $('.manifest-size-warning').hide();
 
     window.filterObj = {};
@@ -405,10 +407,7 @@ require([
             right: -14-8*max.toString().length,
             });
 
-
-
         var slideName = divName + '_slide';
-
         var inpName = divName + '_input';
         var strtInp = lower + '-' + upper;
         var nm=new Array();
@@ -426,7 +425,6 @@ require([
             $('#' + divName).append('<input id="' + inpName + '" type="text" value="' + strtInp + '" style="display:none">');
         }
 
-
         if (isActive){
             $('#'+divName).find('.reset').removeClass('disabled');
         }
@@ -436,7 +434,6 @@ require([
 
          $('#'+slideName).append(labelMin);
 
-
         $('#' + slideName).slider({
             values: [lower, upper],
             step: step,
@@ -445,15 +442,11 @@ require([
             range: true,
             disabled: is_cohort,
             slide: function (event, ui) {
-                  $('#' + inpName).val(ui.values[0] + "-" + ui.values[1]);
-
-                 $(this).find('.slide_tooltip').each( function(index){
+                $('#' + inpName).val(ui.values[0] + "-" + ui.values[1]);
+                $(this).find('.slide_tooltip').each( function(index){
                     $(this).text( ui.values[index].toString() );
                     $(this).closest('.ui-slider').parent().find('.sliderset').find(':input')[index].value=ui.values[index].toString();
-
-
                 });
-
             },
 
             stop: function (event, ui) {
@@ -2000,7 +1993,7 @@ require([
     var plotCategoricalData = function (plotId, lbl, plotData, isPie, showLbl) {
         var width = 150;
         var height = 150;
-        var shifty = 45;
+        var shifty = 48;
         var xshift=width/2+20;
         var margin = 0;
         var radius = Math.min(width, height) / 2 - margin;
@@ -2029,8 +2022,8 @@ require([
             : d3.select("#"+plotId)
                 .append("div")
                 .attr("class", "chart-tooltip")
-                .style("top", "200px")
-                .style("left", "20px");
+                .style("top", "180px")
+                .style("left", "0px");
 
         svg.selectAll("*").remove();
 
@@ -2857,9 +2850,9 @@ require([
     }
  };
 
-    var addSliders = function(id,initialCreation,hideZeros, parStr){
+    var addSliders = function(id, initialCreation, hideZeros, parStr){
         $('#'+id).find('.list-group-item__body.isQuant').each(function() {
-
+            let attr_id = $(this).attr("id");
             let min = Math.floor(parseInt($(this).attr('data-min')));
             let max = Math.ceil(parseInt($(this).attr('data-max')));
             let lower = parseInt($(this).attr('data-curminrng'));
@@ -2920,7 +2913,9 @@ require([
 
             if (addSlider) {
                 $(this).addClass('hasSlider');
-                mkSlider($(this).prop('id'), min, max, 1, true, wNone, parStr, $(this).data('filter-attr-id'), $(this).data('filter-display-attr'), lower, upper, isActive,checked);
+                let step = max <=1 ? 0.05 : 1;
+                let isInt = !FLOAT_SLIDERS.includes(attr_id);
+                mkSlider($(this).prop('id'), min, max, step, isInt, wNone, parStr, $(this).data('filter-attr-id'), $(this).data('filter-display-attr'), lower, upper, isActive,checked);
                 let cntrlDiv = $('<div class="cntr"></div>');
                 cntrlDiv.append('<div class="sliderset" style="display:block;margin-bottom:8px">Lower: <input type="text" style="display:inline" size="5" class="sl_lower" value="'+ txtLower + '">' +
                     ' Upper: <input class="sl_upper" type="text" style="display:inline" size="5" class="upper" value="' + txtUpper + '">' +
@@ -3380,7 +3375,7 @@ require([
             $('.filter-url').removeClass("is-hidden");
         });
 
-        $('#js-messages').append(
+        $('.filter-url-container').append(
             $('<div>')
                 .addClass('alert alert-warning alert-dismissible url-too-long')
                 .html(
@@ -3388,7 +3383,7 @@ require([
                     + "You will need to select fewer filters or the URL will not properly load when used."
                 )
                 .prepend(
-                    '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">'
+                    '<button type="button" class="close" data-hide="alert"><span aria-hidden="true">'
                     +'&times;</span><span class="sr-only">Close</span></button>'
                 ).attr("style","display: none;")
         );

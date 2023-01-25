@@ -81,7 +81,8 @@ def landing_page(request):
         'Pelvis, Prostate, Anus',
         "Intraocular",
         "Mesothelium",
-        "Chest-Abdomen-Pelvis, Leg, TSpine"
+        "Chest-Abdomen-Pelvis, Leg, TSpine",
+        "Abdomen, Arm, Bladder, Chest, Head-Neck, Kidney, Leg, Retroperitoneum, Stomach, Uterus"
     ]
 
     for collection in collex:
