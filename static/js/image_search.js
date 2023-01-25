@@ -49,6 +49,8 @@ require([
     'bootstrap'
 ], function($, _, base) {
 
+    const FLOAT_SLIDERS = ["Sphericity_quant"];
+
     $('.manifest-size-warning').hide();
 
     window.filterObj = {};
@@ -405,10 +407,7 @@ require([
             right: -14-8*max.toString().length,
             });
 
-
-
         var slideName = divName + '_slide';
-
         var inpName = divName + '_input';
         var strtInp = lower + '-' + upper;
         var nm=new Array();
@@ -426,7 +425,6 @@ require([
             $('#' + divName).append('<input id="' + inpName + '" type="text" value="' + strtInp + '" style="display:none">');
         }
 
-
         if (isActive){
             $('#'+divName).find('.reset').removeClass('disabled');
         }
@@ -436,7 +434,6 @@ require([
 
          $('#'+slideName).append(labelMin);
 
-
         $('#' + slideName).slider({
             values: [lower, upper],
             step: step,
@@ -445,15 +442,11 @@ require([
             range: true,
             disabled: is_cohort,
             slide: function (event, ui) {
-                  $('#' + inpName).val(ui.values[0] + "-" + ui.values[1]);
-
-                 $(this).find('.slide_tooltip').each( function(index){
+                $('#' + inpName).val(ui.values[0] + "-" + ui.values[1]);
+                $(this).find('.slide_tooltip').each( function(index){
                     $(this).text( ui.values[index].toString() );
                     $(this).closest('.ui-slider').parent().find('.sliderset').find(':input')[index].value=ui.values[index].toString();
-
-
                 });
-
             },
 
             stop: function (event, ui) {
@@ -2857,9 +2850,9 @@ require([
     }
  };
 
-    var addSliders = function(id,initialCreation,hideZeros, parStr){
+    var addSliders = function(id, initialCreation, hideZeros, parStr){
         $('#'+id).find('.list-group-item__body.isQuant').each(function() {
-
+            let attr_id = $(this).attr("id");
             let min = Math.floor(parseInt($(this).attr('data-min')));
             let max = Math.ceil(parseInt($(this).attr('data-max')));
             let lower = parseInt($(this).attr('data-curminrng'));
@@ -2920,7 +2913,9 @@ require([
 
             if (addSlider) {
                 $(this).addClass('hasSlider');
-                mkSlider($(this).prop('id'), min, max, 1, true, wNone, parStr, $(this).data('filter-attr-id'), $(this).data('filter-display-attr'), lower, upper, isActive,checked);
+                let step = max <=1 ? 0.05 : 1;
+                let isInt = !FLOAT_SLIDERS.includes(attr_id);
+                mkSlider($(this).prop('id'), min, max, step, isInt, wNone, parStr, $(this).data('filter-attr-id'), $(this).data('filter-display-attr'), lower, upper, isActive,checked);
                 let cntrlDiv = $('<div class="cntr"></div>');
                 cntrlDiv.append('<div class="sliderset" style="display:block;margin-bottom:8px">Lower: <input type="text" style="display:inline" size="5" class="sl_lower" value="'+ txtLower + '">' +
                     ' Upper: <input class="sl_upper" type="text" style="display:inline" size="5" class="upper" value="' + txtUpper + '">' +
