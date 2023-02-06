@@ -2639,8 +2639,14 @@ require([
                 checkBox.indeterminate = false;
             }
             filtArg=filtnm;
+            isNoneCat=false;
             if (isRng){
-                filtArg=filtnm.split(/\s+[Tt]o\s+/).map(Number);
+                if (filtnm.match(/\s+[Tt]o\s+/)) {
+                    filtArg = filtnm.split(/\s+[Tt]o\s+/).map(Number);
+                }
+                else{
+                    isNoneCat=true;
+                }
             }
 
 
@@ -2664,11 +2670,18 @@ require([
                     curCatRng = curCat+"_rng";
                     if (!(filterObj.hasOwnProperty(curCatRng))) {
                         filterObj[curCatRng] = new Object();
-                        filterObj[curCatRng]['rng'] = new Array();
-                        filterObj[curCatRng]['type']='ebtwe'
+                        filterObj[curCatRng]['type']='ebtw'
 
                     }
-                    filterObj[curCatRng]['rng'].push(filtArg)
+                    if (isNoneCat){
+                        filterObj[curCatRng]['none']=true;
+                    }
+                    else {
+                        if (!(filterObj[curCatRng].hasOwnProperty('rng'))){
+                            filterObj[curCatRng]['rng'] = new Array();
+                        }
+                        filterObj[curCatRng]['rng'].push(filtArg)
+                    }
                 }
                 else {
                     if (!(filterObj.hasOwnProperty(curCat))) {
@@ -2682,8 +2695,7 @@ require([
 
             if (!checked && ( (ind===0) || ( (ind===1) && hasCheckBox && noneChecked)) ){
                checkBox.checked = false;
-               //checkBox.indeterminate =  false;
-               if ( filterObj.hasOwnProperty(curCat)) {
+               if ( filterObj.hasOwnProperty(curCat) || (isRng && filterObj.hasOwnProperty(curCat+"_rng"))) {
                    if (operatorInfo) {
                        if (filterObj[curCat]['values'].indexOf(filtnm) > -1) {
                            pos = filterObj[curCat]['values'].indexOf(filtnm);
@@ -2696,12 +2708,19 @@ require([
                    else if(isRng)
                    {
                        curCatRng = curCat+"_rng";
-                       if (filterObj[curCatRng]['rng'].map(String).indexOf(filtArg.toString()) > -1) {
+                       if (isNoneCat && filterObj[curCatRng].hasOwnProperty('none')){
+                           delete filterObj[curCatRng]['none'];
+                       }
+
+                       else if (filterObj[curCatRng]['rng'].map(String).indexOf(filtArg.toString()) > -1) {
                            pos = filterObj[curCatRng]['rng'].map(String).indexOf(filtArg.toString());
                            filterObj[curCatRng]['rng'].splice(pos, 1);
-                           if (Object.keys(filterObj[curCatRng]['rng']).length === 0) {
-                               delete filterObj[curCatRng];
+                           if (filterObj[curCatRng]['rng'].length === 0) {
+                               delete filterObj[curCatRng]['rng'];
                            }
+                       }
+                       if (!filterObj[curCatRng].hasOwnProperty('rng')  && !filterObj[curCatRng].hasOwnProperty('none')){
+                           delete filterObj[curCatRng];
                        }
 
                    }
