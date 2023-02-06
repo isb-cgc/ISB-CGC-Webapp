@@ -2049,7 +2049,13 @@ require([
            var titA = lbl.split('(');
            title1=titA[0];
            title2='('+titA[1];
-         } else {
+         }
+        else if (lbl.includes('Max Total Pixel')){
+            var titA = lbl.split('Pixel')
+            title1=titA[0]+'Pixel'
+            title2=titA[1]
+        }
+        else{
           title2=lbl;
          }
 
@@ -3315,14 +3321,13 @@ require([
 
         max = Math.ceil(parseInt($('#age_at_diagnosis').data('data-max')));
         min = Math.floor(parseInt($('#age_at_diagnosis').data('data-min')));
-
-        $('#SliceThickness').addClass('isQuant');
-        $('#SliceThickness').addClass('wNone');
-        $('#SliceThickness').find('.text-filter').remove();
-
-        $('#age_at_diagnosis').addClass('isQuant');
-        $('#age_at_diagnosis').find('.text-filter').remove();
-        $('#age_at_diagnosis').addClass('wNone');
+        
+        quantElem=['#SliceThickness', '#min_PixelSpacing', '#max_TotalPixelMatrixColumns', '#max_TotalPixelMatrixRows','#age_at_diagnosis']
+        quantElem.forEach(function(elem){
+            $(elem).addClass('isQuant');
+            $(elem).addClass('wNone');
+            $(elem).find('.text-filter').remove();
+        });
 
         $('#quantitative').find('.list-group-item__body').each(function() {
             $(this).addClass('isQuant');
