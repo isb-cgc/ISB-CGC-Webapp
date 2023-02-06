@@ -192,7 +192,7 @@ require([
                 window.filterObj[filtAtt] = new Object();
             }
             window.filterObj[filtAtt]['rng'] = attVal;
-            window.filterObj[filtAtt]['type'] = 'ebtwe';
+            window.filterObj[filtAtt]['type'] = 'ebtw';
         }
         if (updateNow) {
             mkFiltText();
@@ -225,12 +225,22 @@ require([
                 curArr = filterObj[curKey];
                 for (var j = 0; j < curArr.length; j++) {
                     if (!(('Program.' + curArr[j]) in filterObj)) {
-                        var colName=$('#'+curArr[j]).filter('.collection_name')[0].innerText;
+                        var colName = $('#' + curArr[j]).filter('.collection_name')[0].innerText;
                         collection.push(colName);
                     }
                 }
-            } else if (curKey.endsWith('_rng')) {
-                var realKey = curKey.substring(0, curKey.length - 4).split('.').pop();
+            }
+            else
+                {
+                var realKey="";
+                if (curKey.endsWith('_rng')){
+                    realKey = curKey.substring(0, curKey.length - 4).split('.').pop();
+                }
+                else{
+                    realKey = curKey.split('.').pop();
+                }
+                if (curKey.endsWith('_rng') && $('#' + realKey ).hasClass('isQuant')) {
+                //var realKey = curKey.substring(0, curKey.length - 4).split('.').pop();
                 var disp = $('#' + realKey + '_heading').children().children('.attDisp')[0].innerText;
                 if (curKey.startsWith('tcga_clinical') && tcgaColSelected) {
                     disp = 'tcga.' + disp;
@@ -242,7 +252,16 @@ require([
                 if (addKey) {
                     var fStr = '';
                     if ('rng' in filterObj[curKey]) {
-                        fStr += filterObj[curKey]['rng'][0].toString() + '-' + (filterObj[curKey]['rng'][1]).toString();
+                        if (Array.isArray(filterObj[curKey]['rng'][0])) {
+                            pset = new Array()
+                            for (var ind = 0; ind < filterObj[curKey]['rng'].length; ind++) {
+                                pair = filterObj[curKey]['rng'][ind];
+                                pset.push(pair[0].toString() + '-' + pair[1].toString());
+                            }
+                            fStr += pset.join(", ")
+                        } else {
+                            fStr += filterObj[curKey]['rng'][0].toString() + '-' + (filterObj[curKey]['rng'][1]).toString();
+                        }
                     }
                     if (('rng' in filterObj[curKey]) && ('none' in filterObj[curKey])) {
                         fStr += ', ';
@@ -254,8 +273,9 @@ require([
                     var nstr = '<span class="filter-type">' + disp + '</span> IN (<span class="filter-att">' + fStr + '</span>)';
                     oStringA.push(nstr);
                 }
-            } else {
-                var realKey = curKey.split('.').pop();
+            }
+                else {
+                //var realKey = curKey.split('.').pop();
                 var disp = $('#' + realKey + '_heading').children().children('.attDisp')[0].innerText;
                 if (curKey.startsWith('tcga_clinical') && tcgaColSelected) {
                     disp = 'tcga.' + disp;
@@ -273,22 +293,21 @@ require([
 
                     var oArray = oVals.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
                     nstr = '<span class="filter-type">' + disp + '</span>';
-                    var joinElem = $('#'+curKey).find('.join_val').filter(':checked');
-                    if (joinElem.length >0){
-                       var joinstr=joinElem.attr("value");
-                       nstr += 'IN (' + oArray.join(joinstr) + ')';
-                    }
-                    else {
+                    var joinElem = $('#' + curKey).find('.join_val').filter(':checked');
+                    if (joinElem.length > 0) {
+                        var joinstr = joinElem.attr("value");
+                        nstr += 'IN (' + oArray.join(joinstr) + ')';
+                    } else {
                         nstr += 'IN (' + oArray.join("") + ')';
                     }
-                    if (curKey ==='access'){
-                     accessStr=nstr;
-                    }
-                    else {
+                    if (curKey === 'access') {
+                        accessStr = nstr;
+                    } else {
                         oStringA.push(nstr);
                     }
                 }
             }
+          }
         }
         if (hasTcga && tcgaColSelected) {
             $('#search_def_warn').show();
@@ -1744,6 +1763,8 @@ require([
             }
         }
         var url = '/explore/'
+        //window.filterObj['SliceThickness_rng']={'rng':[[0,500]], 'type':'ebtwe'}
+        //window.filterObj['min_PixelSpacing_rng']={'rng':[[0.6,0.8]], 'type':'ebtwe'}
         var parsedFiltObj = parseFilterObj();
         url = encodeURI('/explore/')
 
@@ -2325,8 +2346,13 @@ require([
 
         if (sorter.length>0){
              if (sorter.val()==="alpha"){
+                 const reRng= /^\d*\.?\d+\s+[Tt]o\s+\d*\.?\d+$/;
+
                  filterList.children('li').sort(
                     function (a,b){
+                     var valA=$(a).children().children('.value').text().trim();
+                     var valB=$(b).children().children('.value').text().trim();
+
                      if ( ($(a).children().children('input:checkbox')[0].checked || $(a).children().children('input:checkbox')[0].indeterminate) && !($(b).children().children('input:checkbox')[0].checked || $(b).children().children('input:checkbox')[0].indeterminate)){
                          return -1;
                      }
@@ -2334,7 +2360,16 @@ require([
                          return 1;
                      }
 
-                     else if ($(b).children().children('.value').text().trim() < $(a).children().children('.value').text().trim()){
+                     else if (reRng.test(valB) && reRng.test(valA)){
+                         if ( parseFloat(valB.toLowerCase().split('to')[0].trim()) <  parseFloat(valA.toLowerCase().split('to')[0].trim())){
+                             return 1;
+                         }
+                         else{
+                             return -1;
+                         }
+                     }
+
+                     else if (valB < valA){
                          return 1;
                      } else {
                          return -1;
@@ -2552,6 +2587,7 @@ require([
             operator = opInfoElem.attr('value');
         }
 
+        let isRng = $(filterElem).closest('.list-group-item__body, .list-group-sub-item__body','.colections-list').hasClass('isRng');
         let checked = $(filterElem).prop('checked');
         let neighbours =$(filterElem).parentsUntil('.list-group-item__body, .list-group-sub-item__body','ul').children().children().children('input:checkbox');
         let neighboursCk = $(filterElem).parentsUntil('.list-group-item__body, .list-group-sub-item__body','ul').children().children().children(':checked');
@@ -2586,6 +2622,8 @@ require([
                 if (filtnmSrc.length<1){
                     filtnmSrc = $(filterCat).children().children('.collection_id')
                 }
+
+
                 filtnm = filtnmSrc[0].id;
                 if  ($(filterCat).children('.list-group-item__heading').children('input:checkbox').length>0) {
                    hasCheckBox = true;
@@ -2600,6 +2638,17 @@ require([
             } else if (hasCheckBox){
                 checkBox.indeterminate = false;
             }
+            filtArg=filtnm;
+            isNoneCat=false;
+            if (isRng){
+                if (filtnm.match(/\s+[Tt]o\s+/)) {
+                    filtArg = filtnm.split(/\s+[Tt]o\s+/).map(Number);
+                }
+                else{
+                    isNoneCat=true;
+                }
+            }
+
 
             if ((checked) && (curCat.length>0) && hasCheckBox  ){
                 if (!(checkBox.indeterminate)) {
@@ -2616,7 +2665,25 @@ require([
                         filterObj[curCat]['values'].push(filtnm);
                     }
 
-                } else {
+                }
+                else if(isRng){
+                    curCatRng = curCat+"_rng";
+                    if (!(filterObj.hasOwnProperty(curCatRng))) {
+                        filterObj[curCatRng] = new Object();
+                        filterObj[curCatRng]['type']='ebtw'
+
+                    }
+                    if (isNoneCat){
+                        filterObj[curCatRng]['none']=true;
+                    }
+                    else {
+                        if (!(filterObj[curCatRng].hasOwnProperty('rng'))){
+                            filterObj[curCatRng]['rng'] = new Array();
+                        }
+                        filterObj[curCatRng]['rng'].push(filtArg)
+                    }
+                }
+                else {
                     if (!(filterObj.hasOwnProperty(curCat))) {
                         filterObj[curCat] = new Array();
                     }
@@ -2628,8 +2695,7 @@ require([
 
             if (!checked && ( (ind===0) || ( (ind===1) && hasCheckBox && noneChecked)) ){
                checkBox.checked = false;
-               //checkBox.indeterminate =  false;
-               if ( filterObj.hasOwnProperty(curCat)) {
+               if ( filterObj.hasOwnProperty(curCat) || (isRng && filterObj.hasOwnProperty(curCat+"_rng"))) {
                    if (operatorInfo) {
                        if (filterObj[curCat]['values'].indexOf(filtnm) > -1) {
                            pos = filterObj[curCat]['values'].indexOf(filtnm);
@@ -2638,7 +2704,27 @@ require([
                                delete filterObj[curCat];
                            }
                        }
-                   } else {
+                   }
+                   else if(isRng)
+                   {
+                       curCatRng = curCat+"_rng";
+                       if (isNoneCat && filterObj[curCatRng].hasOwnProperty('none')){
+                           delete filterObj[curCatRng]['none'];
+                       }
+
+                       else if (filterObj[curCatRng]['rng'].map(String).indexOf(filtArg.toString()) > -1) {
+                           pos = filterObj[curCatRng]['rng'].map(String).indexOf(filtArg.toString());
+                           filterObj[curCatRng]['rng'].splice(pos, 1);
+                           if (filterObj[curCatRng]['rng'].length === 0) {
+                               delete filterObj[curCatRng]['rng'];
+                           }
+                       }
+                       if (!filterObj[curCatRng].hasOwnProperty('rng')  && !filterObj[curCatRng].hasOwnProperty('none')){
+                           delete filterObj[curCatRng];
+                       }
+
+                   }
+                   else {
                        if (filterObj[curCat].indexOf(filtnm) > -1) {
                            pos = filterObj[curCat].indexOf(filtnm);
                            filterObj[curCat].splice(pos, 1);
@@ -3308,6 +3394,13 @@ require([
         window.studyTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
         window.seriesTableCache = { "data":[], "recordLimit":-1, "datastrt":0, "dataend":0, "req": {"draw":0, "length":0, "start":0, "order":{"column":0, "dir":"asc"} }};
     }
+    initSort = function(sortVal){
+        var sortdivs=$('body').find('.sorter')
+        for (div in sortdivs){
+            $(div).find(":input[value='" + sortVal + "']").click();
+        }
+    }
+
 
     $(document).ready(function () {
         initializeTableData();
@@ -3322,11 +3415,16 @@ require([
         max = Math.ceil(parseInt($('#age_at_diagnosis').data('data-max')));
         min = Math.floor(parseInt($('#age_at_diagnosis').data('data-min')));
         
-        quantElem=['#SliceThickness', '#min_PixelSpacing', '#max_TotalPixelMatrixColumns', '#max_TotalPixelMatrixRows','#age_at_diagnosis']
+        //quantElem=['#SliceThickness', '#min_PixelSpacing', '#max_TotalPixelMatrixColumns', '#max_TotalPixelMatrixRows','#age_at_diagnosis']
+        quantElem=['#SliceThickness', '#age_at_diagnosis']
         quantElem.forEach(function(elem){
             $(elem).addClass('isQuant');
             $(elem).addClass('wNone');
             $(elem).find('.text-filter').remove();
+        });
+        rngElem=['#min_PixelSpacing', '#max_TotalPixelMatrixColumns', '#max_TotalPixelMatrixRows',]
+        rngElem.forEach(function(elem){
+            $(elem).addClass('isRng');
         });
 
         $('#quantitative').find('.list-group-item__body').each(function() {
@@ -3433,6 +3531,7 @@ require([
                 }
             });
         });
+        initSort('num');
         if (document.contains(document.getElementById('history'))){
             updateViaHistory();
         }

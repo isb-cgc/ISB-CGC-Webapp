@@ -43,6 +43,8 @@ ALPHANUM_SORT = [
 
 ]
 
+
+
 DISPLAY_SORT = ['SOPClassUID', 'sample_type']
 
 simple_number_sort = [
