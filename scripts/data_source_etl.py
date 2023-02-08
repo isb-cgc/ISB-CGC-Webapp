@@ -444,7 +444,7 @@ def main(config, make_attr=False):
 
         if 'attr_copy' in config:
             for each in config['attr_copy']:
-                copy_attrs(each['src'],each['dest'],config.get("attr_exclude"))
+                copy_attrs(each['src'],each['dest'], config.get("attr_exclude", []))
 
         len(ATTR_SET) and make_attr and add_attributes([ATTR_SET[x] for x in ATTR_SET])
 
