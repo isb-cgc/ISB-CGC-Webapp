@@ -456,8 +456,7 @@ def igv(request):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
 
     req = request.GET or request.POST
-    build = req.get('build','hg38')
-    checked_list = json.loads(req.get('checked_list','{}'))
+    checked_list = json.loads(req.get('checked_list', '{}'))
     bam_list = []
 
     # This is a POST request with all the information we already need

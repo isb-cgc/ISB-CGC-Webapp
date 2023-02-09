@@ -28,7 +28,7 @@
                             </div>
                         </div>
                     </li>
-                    {% for attr in vals %}
+                    {% for attr_name, attr in metadata_data_attr.items %}
                         <li class="list-group-item">
                             <div id="heading-dicom-{{ attr.name }}" class="list-group-item__heading">
                                 <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-dicom" href="#collapse-dicom-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-dicom-{{ attr.name }}">

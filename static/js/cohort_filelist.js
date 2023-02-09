@@ -403,8 +403,7 @@ require([
             $(tab_selector).find('.sortable_table th').removeClass('disabled');
             $(tab_selector).find('.dataTables_goto_page').removeClass('disabled');
             $(tab_selector).find('.dataTables_goto_page .goto-page-number').attr('max', total_pages);
-            $(tab_selector).find('.filelist-panel .panel-body .total-file-count').html(total_files.toString().replace(
-                /\B(?=(\d{3})+(?!\d))/g, ","));
+            $(tab_selector).find('.filelist-panel .panel-body .total-file-count').html(total_files.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
             $(tab_selector).find('.filelist-panel .panel-body .paginate_button_space').html(html_page_button);
         }
 
@@ -446,7 +445,7 @@ require([
                                 + files[i]['exp_strat'] + ", "
                                 + happy_name(files[i]['platform']) + ", "
                                 + files[i]['datatype']
-                                + "["+files[i]['build']+"]";
+                                + " ["+files[i]['build']+"]";
                             val = files[i]['cloudstorage_location'] + ';' + files[i]['index_name'] + ',' + files[i]['sample'];
                             dataTypeName = "gcs_bam";
                             label = "IGV";

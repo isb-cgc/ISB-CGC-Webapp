@@ -2,7 +2,7 @@
     <div id="slim-filter-panel" class="col-lg-3 col-md-3 col-sm-3 side-filter-panel">
         <div class="panel panel-default filter-panel">
             <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
-                <div class="panel-body tab-content filter-build-panel" data-filter-build="HG19" id="slim-filter-panel" {% if build != attr_build %}style="display: none;"{% endif %}>
+                <div class="panel-body tab-content filter-build-panel" data-filter-build="HG19" id="slim-filter-panel">
                     <ul class="list-group" id="metadata-data-accordian-slim" role="tablist" aria-multiselectable="true">
                         <li class="list-group-item">
                             <div id="heading-slim-case-id" class="list-group-item__heading">
@@ -28,7 +28,7 @@
                                 </div>
                             </div>
                         </li>
-                        {% for attr in vals %}
+                        {% for attr_name, attr in metadata_data_attr.items %}
                             <li class="list-group-item">
                                 <div id="heading-slim-{{ attr.name }}" class="list-group-item__heading">
                                     <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-slim" href="#collapse-slim-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-slim-{{ attr.name }}">
