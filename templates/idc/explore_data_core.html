@@ -45,11 +45,13 @@
                                                 <input id="collection_search"
                                                        class="collection-text-filter notDisp value-search" type="text"
                                                        placeholder="Search..." onkeyup="updateColl(true)">
-                                                <div class="sorter cntr notDisp">
-                                                    <span>Sort by: <input type="radio" class="sort_val" value="alpha"
-                                                                          name="Program" checked onclick="updateColl()">Alpha<input
+                                                <div class="sorter cntr">
+                                                    <span>Sort by: <input
                                                             type="radio" class="sort_val" value="num" name="Program"
-                                                            onclick="updateColl()">Num</span>
+                                                            checked onclick="updateColl()">Num
+                                                        <input type="radio" class="sort_val" value="alpha"
+                                                                          name="Program" onclick="updateColl()">Alpha
+                                                    </span>
 
                                                 </div>
                                                 <div style="display:block">
@@ -194,11 +196,11 @@
                                                        class="text-filter notDisp value-search" type="text"
                                                        placeholder="Search..." onkeyup="updateFilters('analysis_results_id',{},false,true)">
 
-                                                     <div class="sorter cntr notDisp">
-                                                         <span>Sort by: <input type="radio" class="sort_val" value="alpha"
-                                                                          name="Access" checked onclick="resort('analysis_results_id')">Alpha<input
-                                                            type="radio" class="sort_val" value="num" name="Access"
-                                                            onclick="resort('analysis_results_id')">Num</span>
+                                                     <div class="sorter cntr">
+                                                         <span>Sort by: <input type="radio" class="sort_val" value="num" name="Access" checked onclick="resort('analysis_results_id')">Num
+                                                             <input type="radio" class="sort_val" value="alpha"
+                                                                          name="Access"  onclick="resort('analysis_results_id')">Alpha
+                                                         </span>
                                                      </div>
 
                                                     <div style="display:block">
@@ -349,13 +351,16 @@
                                                             selected modalities
                                                         {% endif %}
 
-                                                        <div class="sorter cntr notDisp">
+                                                        <div class="sorter cntr">
 
-                                                            Sort by: <input type="radio" class="sort_val"
-                                                                            name="{{ attr.name }}" value="alpha" checked
-                                                                            onclick="resort('{{ attr.name }}')">Alpha
+                                                            Sort by:
                                                             <input type="radio" class="sort_val" name="{{ attr.name }}"
-                                                                   value="num" onclick="resort('{{ attr.name }}')">Num
+                                                                   value="num" checked onclick="resort('{{ attr.name }}')">Num
+
+                                                            <input type="radio" class="sort_val"
+                                                                            name="{{ attr.name }}" value="alpha"
+                                                                            onclick="resort('{{ attr.name }}')">Alpha
+
                                                         </div>
                                                         {% if attr.values|length > 5 %}
                                                             {% with attr.values|length|add:"-5" as more %}
@@ -458,15 +463,10 @@
                                                                         <input class="text-filter value-search notDisp"
                                                                                type="text" placeholder="Search..."
                                                                                onkeyup="updateFilters( '{{ attr.name }}',{},false, true)">
-                                                                        <div class="sorter cntr notDisp">
-                                                                            <span>Sort by: <input type="radio"
-                                                                                                  class="sort_val"
-                                                                                                  name="{{ attr.name }}"
-                                                                                                  value="alpha" checked
-                                                                                                  onclick="resort('{{ attr.name }}')">Alpha<input
-                                                                                    type="radio" class="sort_val"
-                                                                                    name="{{ attr.name }}" value="num"
-                                                                                    onclick="resort('{{ attr.name }}')">Num</span>
+                                                                        <div class="sorter cntr">
+                                                                            <span>Sort by:
+                                                                                <input type="radio" class="sort_val" name="{{ attr.name }}" value="num" checked onclick="resort('{{ attr.name }}')">Num</span>
+                                                                               <input type="radio" class="sort_val" name="{{ attr.name }}" value="alpha" onclick="resort('{{ attr.name }}')">Alpha
                                                                         </div>
                                                                         {% if attr.values|length > 5 %}
                                                                             {% with attr.values|length|add:"-5" as more %}
@@ -577,14 +577,15 @@
                                                                     <input class="text-filter value-search notDisp"
                                                                            type="text" placeholder="Search..."
                                                                            onkeyup="updateFilters( '{{ attr.name }}',{},false, true)">
-                                                                    <div class="sorter cntr notDisp">
-                                                                        Sort by: <input type="radio" class="sort_val"
-                                                                                        name="{{ attr.name }}"
-                                                                                        value="alpha" checked
-                                                                                        onclick="resort('{{ attr.name }}')">Alpha
+                                                                    <div class="sorter cntr">
+                                                                        Sort by:
                                                                         <input type="radio" class="sort_val"
-                                                                               name="{{ attr.name }}" value="num"
+                                                                               name="{{ attr.name }}" value="num" checked
                                                                                onclick="resort('{{ attr.name }}')">Num
+                                                                        <input type="radio" class="sort_val"
+                                                                                        name="{{ attr.name }}"
+                                                                                        value="alpha"
+                                                                                        onclick="resort('{{ attr.name }}')">Alpha
                                                                     </div>
                                                                 {% endif %}
                                                                 {% if attr.values|length > 5 %}
@@ -680,7 +681,7 @@
                             <div id="search_def_access" class="notDisp" style="color:red">This cohort includes collections with limited access. The DICOM files of these collections are not publicly available
                             </div>
 
-                            <div class="space-top-10 space-top-10">
+                            <div class="filter-url-container space-top-10 space-top-10">
                                 <button
                                         class="btn btn-special get-filter-uri space-bottom-5"
                                         disabled
