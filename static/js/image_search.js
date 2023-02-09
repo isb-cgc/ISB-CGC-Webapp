@@ -1685,7 +1685,13 @@ require([
                         nm = nm.replace('_rng', '_' + window.filterObj[ckey].type);
                     }
                     if (  ('rng' in window.filterObj[ckey]) && ('none' in window.filterObj[ckey]) ){
-                        filtObj[nm] = [window.filterObj[ckey]['rng'],'None']
+                        if (Array.isArray(window.filterObj[ckey]['rng'][0])){
+                            filtObj[nm] = [...window.filterObj[ckey]['rng']];
+                            filtObj[nm].push('None');
+                        }
+                        else{
+                          filtObj[nm] = [window.filterObj[ckey]['rng'],'None']
+                        }
                     } else if ('rng' in window.filterObj[ckey]){
                         filtObj[nm] = window.filterObj[ckey]['rng']
                     } else if ('none' in window.filterObj[ckey]){
@@ -1763,8 +1769,6 @@ require([
             }
         }
         var url = '/explore/'
-        //window.filterObj['SliceThickness_rng']={'rng':[[0,500]], 'type':'ebtwe'}
-        //window.filterObj['min_PixelSpacing_rng']={'rng':[[0.6,0.8]], 'type':'ebtwe'}
         var parsedFiltObj = parseFilterObj();
         url = encodeURI('/explore/')
 
