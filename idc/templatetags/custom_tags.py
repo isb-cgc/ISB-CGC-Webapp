@@ -43,6 +43,8 @@ ALPHANUM_SORT = [
 
 ]
 
+
+
 DISPLAY_SORT = ['SOPClassUID', 'sample_type']
 
 simple_number_sort = [
@@ -247,17 +249,17 @@ def check_for_order(items, attr):
         return ordered_items
     elif attr in DISPLAY_SORT:
         # If they should be sorted alphanumerically based on the value
-        return sorted(items, key=lambda k: str(k['display_value']) )
+        return sorted(items, key=lambda k: str(k['display_value']))
     elif attr in KEEP_ORDER:
         return items
     else:
         # Otherwise, sort them by count, descending
-        return sorted(items, key=lambda k: k['value'])
+        return sorted(items, key=lambda k: k['count'])
 
 
 @register.filter
 def format_val(this_val):
-    return string.capwords(this_val)
+    return string.capwords(str(this_val))
 
 
 @register.filter
