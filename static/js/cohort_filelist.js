@@ -87,7 +87,12 @@ require([
         },
         count: function() {
             return (Object.keys(this.gcs_bam).length);
-        }
+        },
+        remove: function(key) {
+            delete this.gcs_bam[key];
+            this.build = (this.count() <= 0) ? null : this.build;
+        },
+        build: null
     };
 
     // Set of display controls to update when we check or uncheck
@@ -107,15 +112,20 @@ require([
         // If we've cleared out our tokenfield, re-display the placeholder
         selIgvFiles.count() <= 0 && $('#selected-files-igv-tokenfield').show();
 
+        // Any entries with dissimilar builds are disabled
+        if(selIgvFiles['build'] !== null) {
+            $('input.igv.accessible[type="checkbox"][build!="'+selIgvFiles['build']+'"]').attr('disabled',true);
+            $('input.igv.accessible[type="checkbox"][build="'+selIgvFiles['build']+'"]').removeAttr('disabled');
+        }
+
         if(selIgvFiles.count() >= SEL_IGV_FILE_MAX) {
             $('#file-max-alert-igv').show();
             $('.filelist-panel input.igv.accessible[type="checkbox"]:not(:checked)').attr('disabled',true);
         } else {
             $('#file-max-alert-igv').hide();
-            $('.filelist-panel input.igv.accessible[type="checkbox"]').attr('disabled',false);
+            $('.filelist-panel input.igv.accessible[type="checkbox"]').removeAttr('disabled');
         }
     };
-
 
     function build_igv_widgets() {
         // Build the file tokenizer for IGV
@@ -130,15 +140,13 @@ require([
             e.preventDefault();
             return false;
         }).on('tokenfield:removedtoken',function(e){
-
-            // Uncheck the input checkbox - note this will not fire the event, which
-            // is bound to form click
-            var thisCheck = $('.filelist-panel input[value="'+e.attrs.value+'"');
+            // If the input box is on the displayed table, uncheck it
+            // This will fail silently if that checkbox is not currently available
+            let thisCheck = $('.filelist-panel input[value="'+e.attrs.value+'"');
             thisCheck.prop('checked',false);
-
-            delete selIgvFiles[e.attrs.dataType][e.attrs.value];
-
-            update_on_selex_change();
+            // Run the trigger handler method for the checkbox, which will adjust other relevant
+            // settings
+            igv_checkbox_event(false,e.attrs.value,{});
 
         });
 
@@ -179,7 +187,6 @@ require([
         } else {
             return "N/A";
         }
-
     };
 
     var reject_load = false;
@@ -253,6 +260,44 @@ require([
             e.preventDefault();
             e.stopPropagation();
         }
+    });
+
+    function igv_checkbox_event(checked, val, data) {
+        if(checked) {
+            if(selIgvFiles.build === null) {
+                selIgvFiles.build = data['build'];
+            }
+            selIgvFiles[data['data-type']][val] = {
+                'label': data['label'],
+                'program': data['program'],
+                'build': data['build']
+            };
+            $('#selected-files-igv-tokenfield').hide();
+        } else {
+            selIgvFiles.remove(val);
+        }
+
+        $('input.igv[type="checkbox"]').each(function(){
+            if(selIgvFiles.build === null || selIgvFiles.build === $(this).attr('build')) {
+                $(this).removeAttr('title');
+            }
+        });
+
+        $('#selected-files-igv').tokenfield('setTokens',selIgvFiles.toTokens());
+
+        update_on_selex_change();
+
+    };
+
+    // IGV checkbox event handler
+    $('.data-tab-content').on('click', 'input.igv[type="checkbox"]', function() {
+        let self=$(this);
+        igv_checkbox_event(self.is(':checked'), self.attr('value'), {
+            'label': self.attr('token-label'),
+            'program': self.attr('program'),
+            'build': self.attr('build'),
+            'data-type': self.attr('data-type')
+        });
     });
 
     function update_download_link(active_tab, file_list_total) {
@@ -453,8 +498,11 @@ require([
                                 +'" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program']
                                 + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"'
                                 + '" build="'+files[i]['build']+'"';
-                            if (!accessible) {
+                            if (!accessible || (selIgvFiles.build !== null && files[i]['build'] !== selIgvFiles.build)) {
                                 checkbox_inputs += ' disabled';
+                            }
+                            if(selIgvFiles.build !== null && files[i]['build'] !== selIgvFiles.build) {
+                                checkbox_inputs += ' title="The currently selected files have a different build than this file. IGV can only display files of the same genome build."'
                             }
                             checkbox_inputs += '>';
                         }
@@ -535,27 +583,6 @@ require([
 
         $('#selected-files-igv').tokenfield('setTokens',selIgvFiles.toTokens());
 
-        // Bind event handler to checkboxes
-        $(tab_selector).find('.filelist-panel input[type="checkbox"]').on('click', function() {
-
-            var self=$(this);
-
-            if(self.is(':checked')) {
-                selIgvFiles[self.attr('data-type')][self.attr('value')] = {
-                    'label': self.attr('token-label'),
-                    'program': self.attr('program'),
-                    'build': self.attr('build')
-                };
-                $('#selected-files-igv-tokenfield').hide();
-            } else {
-                delete selIgvFiles[self.attr('data-type')][self.attr('value')];
-            }
-
-            $('#selected-files-igv').tokenfield('setTokens',selIgvFiles.toTokens());
-
-            update_on_selex_change();
-        });
-
         $(tab_selector).find('.prev-page').removeClass('disabled');
         $(tab_selector).find('.next-page').removeClass('disabled');
         if (parseInt(page) == 1) {
@@ -565,7 +592,6 @@ require([
             $(tab_selector).find('.next-page').addClass('disabled');
         }
         $(tab_selector).find('.filelist-panel .spinner i').addClass('hidden');
-
     }
 
     function goto_table_page(tab, page_no){
@@ -692,7 +718,7 @@ require([
         var active_tab = $(type_tab).data('file-type');
         SELECTED_FILTERS[active_tab] = {};
 
-        $(type_tab).find('div input[type="checkbox"]:checked').each(function(){
+        $(type_tab).find('div.filter-panel input[type="checkbox"]:checked').each(function(){
             if(!SELECTED_FILTERS[active_tab][$(this).data('feature-name')]) {
                 SELECTED_FILTERS[active_tab][$(this).data('feature-name')] = [];
             }
