@@ -88,7 +88,6 @@ ranges_needed = {
     'Glycolysis_Within_Second_Quarter_of_Intensity_Range': 'Glycolysis_Within_Second_Quarter_of_Intensity_Range',
     'Volume_of_Mesh': 'Volume_of_Mesh',
     'Sphericity_quant': 'Sphericity_quant',
-    'ObjectiveLensPower': 'ObjectiveLensPower',
     'min_PixelSpacing': 'min_PixelSpacing',
     'max_TotalPixelMatrixColumns': 'max_TotalPixelMatrixColumns',
     'max_TotalPixelMatrixRows': 'max_TotalPixelMatrixRows',
@@ -106,7 +105,6 @@ ranges = {
     'SUVbw': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '3', 'last': '12', 'gap': '1'}],
     'Volume_of_Mesh': [{'type': 'F', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '2000', 'last': '1610000', 'gap': '150000'}],
     'Sphericity_quant': [{'type': 'F', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '0.3', 'last': '0.9', 'gap': '0.05'}],
-    'ObjectiveLensPower': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '1', 'last': '40', 'gap': '10'}],
     'min_PixelSpacing': [{'type': 'F', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '0', 'last': '9', 'gap': '2'}],
     'max_TotalPixelMatrixColumns': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '1', 'last': '230000', 'gap': '20000'}],
     'max_TotalPixelMatrixRows': [{'type': 'I', 'include_lower': 1, 'include_upper': 0, 'unbounded': 1, 'first': '1', 'last': '260000', 'gap': '20000'}],
@@ -454,7 +452,7 @@ def load_attributes(filename, solr_sources, bq_sources):
             ATTR_SET[line[0]] = new_attribute(
                 line[0],
                 line[0].replace("_", " ").title() if re.search(r'_', line[1]) else line[1],
-                Attribute.CATEGORICAL if line[2] == 'CATEGORICAL STRING' else Attribute.STRING if line[2] == "STRING" else Attribute.CONTINUOUS_NUMERIC,
+                line[2],
                 True if line[-1] == 'True' else False,
                 True
             )
@@ -739,7 +737,7 @@ def main():
         len(args.version_file) and update_data_versions(args.version_file)
 
         len(args.attributes_file) and load_attributes(args.attributes_file,
-            ["dicom_derived_series_v13", "dicom_derived_study_v13"], ["idc-dev-etl.idc_v11_pub.dicom_pivot_v13"]
+            ["dicom_derived_series_v13", "dicom_derived_study_v13"], ["idc-dev-etl.idc_v13_pub.dicom_pivot_v13"]
         )
 
         len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
