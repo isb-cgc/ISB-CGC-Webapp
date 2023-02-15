@@ -69,8 +69,6 @@ require([
         genes_track.format = 'gtf';
     }
 
-    console.log(GENCODE_URI + 'gencode.v36.annotation.sorted.gtf.gz.tbi');
-
     tracks.push(genes_track);
 
     let options = {

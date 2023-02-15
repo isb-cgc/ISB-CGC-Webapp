@@ -79,9 +79,9 @@ for dirname in ${BACKUP_DIR}/*/; do
   sudo chown solr $dirname
   sudo -u solr cp -r $dirname $SOLR_DATA/$CORE/data/$SNAPSHOT
   if [[ -f $SOLR_DATA/$CORE/conf/managed-schema ]]; then
-    sudo -u solr mv $SOLR_DATA/$CORE/conf/managed-schema $SOLR_DATA/$CORE/conf/managed-schema.old
+    sudo -u solr mv $SOLR_DATA/$CORE/conf/managed-schema.xml $SOLR_DATA/$CORE/conf/managed-schema.old
   fi
-  sudo -u solr cp $BACKUP_DIR/$CORE.managed-schema $SOLR_DATA/$CORE/conf/managed-schema
+  sudo -u solr cp $BACKUP_DIR/$CORE.managed-schema.xml $SOLR_DATA/$CORE/conf/managed-schema.xml
   echo "Schema copied, restoration command:"
   echo "curl -u $SOLR_USER:$SOLR_PWD -X GET \"https://localhost:8983/solr/$CORE/replication?command=restore&name=$CORE\" --cacert solr-ssl.pem"
   echo "Status check command:"
