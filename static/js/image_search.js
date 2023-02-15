@@ -1950,7 +1950,7 @@ require([
 
                     if ($('.search-configuration').find('#hide-zeros')[0].checked) {
                         addSliders('search_orig_set', false, true, '');
-                        addSliders('quantitative', false, true, '');
+                        addSliders('quantitative', false, true, 'quantitative.');
                         addSliders('tcga_clinical', false, true, 'tcga_clinical.');
                     }
 
@@ -1971,18 +1971,26 @@ require([
     var manageUpdateFromPlot = function(plotId, label) {
         var listId = plotId.replace('_chart','_list');
         var filterId = plotId.replace('_chart','');
-
+        let isInt = !FLOAT_SLIDERS.includes(filterId);
         var isSlider = $('#'+filterId).hasClass('hasSlider') ? true : false;
         if (isSlider) {
-            var maxx = Math.ceil(parseInt(maxx=$('#' + filterId).attr('data-max')));
-            var minx= Math.floor(parseInt($('#' + filterId).attr('data-min')));
+            var maxx =parseFloat($('#' + filterId).attr('data-max'));
+            var minx=parseFloat($('#' + filterId).attr('data-min'));
 
+            if (isInt){
+                maxx=Math.ceil(maxx);
+                minx=Math.floor(minx);
+            }
+            else{
+                maxx=parseFloat(maxx.toFixed(2));
+                minx=parseFloat(minx.toFixed(2));
+            }
             var parStr = $('#'+filterId).find('#'+filterId+'_slide').data('attr-par');
 
             if ((label ==='None') && $('#'+filterId).hasClass('wNone')){
                 butElem = $('#'+filterId).find('.noneBut').children('input')[0];
                 butElem.checked=true
-                setSlider(slideDiv, filterId+"_slide", minx, maxx, true, false);
+                setSlider(filterId+"_slide", true, minx, maxx, isInt, false);
                 window.addNone(butElem,parStr,true);
             } else {
                 if ($('#'+filterId).hasClass('wNone')){
@@ -1992,9 +2000,17 @@ require([
                 }
 
                 var selArr = label.split(' To ');
-                var strt = parseInt((selArr[0] === '*') ? '0' : selArr[0]);
-                var end = parseInt((selArr[1] === '*') ? maxx : selArr[1]);
-                setSlider(filterId+"_slide", false, strt, end, true,true);
+                var strt = parseFloat((selArr[0] === '*') ? '0' : selArr[0]);
+                var end = parseFloat((selArr[1] === '*') ? maxx : selArr[1]);
+                if (isInt){
+                    strt = Math.floor(strt);
+                    end = Math.floor(end);
+                }
+                else{
+                    strt = parseFloat(strt.toFixed(2));
+                    end = parseFloat(end.toFixed(2));
+                }
+                setSlider(filterId+"_slide", false, strt, end, isInt,true);
             }
         } else {
             var inputList = $('#' + listId).find(':input');
@@ -2541,9 +2557,7 @@ require([
                 }
             }
         }
-        /*addSliders('search_orig_set', false, hideEmpty,'');
-        addSliders('quantitative', false, hideEmpty,'');
-        addSliders('tcga_clinical',false, hideEmpty,'tcga_clinical.');*/
+
     }
 
     window.updateColl = function(srch){
@@ -2562,7 +2576,7 @@ require([
         let filtSet = ["search_orig_set","segmentation","quantitative","qualitative","tcga_clinical"];
         setAllFilterElements(hideElem.checked, filtSet);
         addSliders('search_orig_set', false, hideElem.checked,'');
-        addSliders('quantitative', false, hideElem.checked,'');
+        addSliders('quantitative', false, hideElem.checked,'quantitative.');
         addSliders('tcga_clinical',false, hideElem.checked,'tcga_clinical.');
     }
 
@@ -2949,10 +2963,24 @@ require([
     var addSliders = function(id, initialCreation, hideZeros, parStr){
         $('#'+id).find('.list-group-item__body.isQuant').each(function() {
             let attr_id = $(this).attr("id");
-            let min = Math.floor(parseInt($(this).attr('data-min')));
-            let max = Math.ceil(parseInt($(this).attr('data-max')));
-            let lower = parseInt($(this).attr('data-curminrng'));
-            let upper = parseInt($(this).attr('data-curmaxrng'));
+            let isInt = !FLOAT_SLIDERS.includes(attr_id);
+            let min = parseFloat($(this).attr('data-min'));
+            let max = parseFloat($(this).attr('data-max'));
+            let lower = parseFloat($(this).attr('data-curminrng'));
+            let upper = parseFloat($(this).attr('data-curmaxrng'));
+            if (isInt){
+                min=Math.floor(min);
+                max=Math.ceil(max);
+                lower=Math.floor(lower);
+                upper=Math.ceil(upper);
+            }
+            else{
+                min=parseFloat(min.toFixed(2));
+                max=parseFloat(max.toFixed(2));
+                lower=parseFloat(lower.toFixed(2));
+                upper=parseFloat(upper.toFixed(2));
+            }
+
             let addSlider = true;
             let isActive = $(this).hasClass('isActive');
             let wNone = $(this).hasClass('wNone');
@@ -2973,8 +3001,16 @@ require([
                 $('#'+this.id+'_list').addClass('hide');
             } else {
                 let slideDivId = $(this).prop('id') + '_slide';
-                curmin = $(this).attr('data-curmin');
-                curmax = $(this).attr('data-curmax');
+                curmin = parseFloat($(this).attr('data-curmin'));
+                curmax = parseFloat($(this).attr('data-curmax'));
+                if (isInt){
+                    curmin = Math.floor(curmin);
+                    curmax =Math.floor(curmax);
+                }
+                else{
+                    curmin= parseFloat(curmin.toFixed(2));
+                    curmax= parseFloat(curmax.toFixed(2));
+                }
                 $(this).find('#' + slideDivId).remove();
                 $(this).find('.cntr').remove();
                 //$(this).find('.noneBut').remove();
@@ -2988,16 +3024,16 @@ require([
                         if (curmin === 'NA') {
                                 min = lower;
                         } else {
-                            min = Math.min(lower, Math.floor(curmin));
+                            min = Math.min(lower, curmin);
                         }
                         if (curmax === 'NA'){
                                 max = upper;
                         } else {
-                            max = Math.max(upper, Math.ceil(curmax));
+                            max = Math.max(upper, curmax);
                         }
                     } else {
-                            min = Math.floor(curmin);
-                            max = Math.ceil(curmax);
+                            min = curmin;
+                            max = curmax;
                             lower=min;
                             upper=max;
                     }
@@ -3433,12 +3469,13 @@ require([
 
         $('#quantitative').find('.list-group-item__body').each(function() {
             $(this).addClass('isQuant');
+            $(this).addClass('wNone');
             $(this).find('.text-filter').remove();
         });
 
         addSliders('search_orig_set',true, false,'');
         addSliders('tcga_clinical',true, false,'tcga_clinical.');
-        addSliders('quantitative',true, false,'');
+        addSliders('quantitative',true, false,'quantitative.');
 
         createPlots('search_orig_set');
         createPlots('search_derived_set');
