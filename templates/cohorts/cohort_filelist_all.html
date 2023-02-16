@@ -1,31 +1,21 @@
 <div id="all-files" class="tab-pane data-tab" data-file-type="all" role="tabpanel">
     <div id="all-filter-panel" class="col-lg-3 col-md-3 col-sm-3 side-filter-panel">
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <label for="build">Build</label>
-                <select aria-label="Build" id="all-build" class="form-control build">
-                    <option value="HG38" {% if build == 'HG38' %}selected{% endif %}>HG38</option>
-                    <option value="HG19" {% if build == 'HG19' %}selected{% endif %}>HG19</option>
-                </select>
-            </div>
-        </div>
         <div class="panel filter-panel panel-default">
             <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
-            {% for attr_build, vals in metadata_data_attr.items %}
-            <div class="panel-body tab-content filter-build-panel" data-filter-build="{{ attr_build }}" id="all-filter-panel-{{ attr_build }}" {% if build != attr_build %}style="display: none;"{% endif %}>
+            <div class="panel-body tab-content filter-build-panel" id="all-filter-panel">
                 <ul class="list-group" id="metadata-data-accordian-all" role="tablist" aria-multiselectable="true">
                     <li class="list-group-item">
-                        <div id="heading-all-{{ attr_build }}-case-id" class="list-group-item__heading">
+                        <div id="heading-all-case-id" class="list-group-item__heading">
                             <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all"
-                               href="#collapse-all-{{ attr_build }}-case-id" aria-expanded="false"
-                               aria-controls="collapse-all-{{ attr_build }}-case-id">
+                               href="#collapse-all-case-id" aria-expanded="false"
+                               aria-controls="collapse-all-case-id">
                                 <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> CASE
                             </a>
                         </div>
-                        <div id="collapse-all-{{ attr_build }}-case-id"
+                        <div id="collapse-all-case-id"
                              class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
                              data-feature-type="donor"
-                             aria-labelledby="heading-all-{{ attr_build }}-case-id" data-feature-name="case-id"
+                             aria-labelledby="heading-all-case-id" data-feature-name="case-id"
                              data-feature-displ-name="CASE ID">
                             <div class="search_enter">
                                 <div class="search_input">
@@ -38,22 +28,22 @@
                             </div>
                         </div>
                     </li>
-                    {% for attr in vals %}
+                    {% for attr_name, attr in metadata_data_attr.items %}
                         <li class="list-group-item">
-                            <div id="heading-all-{{ attr_build }}-{{attr.name}}" class="list-group-item__heading">
-                                <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all" href="#collapse-all-{{ attr_build }}-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-all-{{ attr_build }}-{{ attr.name }}">
+                            <div id="heading-all-{{attr.name}}" class="list-group-item__heading">
+                                <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all" href="#collapse-all-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-all-{{ attr.name }}">
                                     <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
                                 </a>
                             </div>
-                            <div id="collapse-all-{{ attr_build }}-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
-                                 aria-labelledby="heading-all-{{ attr_build }}-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}">
-                                <ul class="search-checkbox-list" id="all-{{ attr_build }}-{{ attr.name }}">
+                            <div id="collapse-all-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
+                                 aria-labelledby="heading-all-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}">
+                                <ul class="search-checkbox-list" id="all-{{ attr.name }}">
                                     {% with attr.values|how_many_more:6 as num_more %}
                                         {% for v in attr.values|check_for_order:attr.name %}
                                             {% if forloop.counter0 < 6 %}
                                                 <li class="checkbox">
                                                     <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr_build }}-{{ attr.name }}-{{ v.value }}"
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr.name }}-{{ v.value }}"
                                                                data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
                                                         {% if v.value == 'None' %}<em>None</em>{% elif v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
                                                          <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
@@ -62,7 +52,7 @@
                                             {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                 <li class="extra-values checkbox" style="display:none;">
                                                     <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr_build }}-{{ attr.name}}-{{ v.value }}"
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr.name}}-{{ v.value }}"
                                                                data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
                                                         {% if v.value == 'None' %}<em>None</em>{% elif v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
                                                          <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
@@ -71,7 +61,7 @@
                                             {% else %}
                                                 <li class="extra-values checkbox" style="display:none;">
                                                     <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr_build }}-{{ attr.name }}-{{ v.value }}"
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-{{ attr.name }}-{{ v.value }}"
                                                                data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
                                                         {% if v.value == 'None' %}<em>None</em>{% elif v.displ_value %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
                                                          <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
@@ -90,7 +80,6 @@
                     {% endfor %}
                 </ul>
             </div>
-            {% endfor %}
         </div>
     </div>
 
