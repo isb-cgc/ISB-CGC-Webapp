@@ -48,7 +48,7 @@
                                                 <div class="sorter cntr">
                                                     <span>Sort by: <input
                                                             type="radio" class="sort_val" value="num" name="Program"
-                                                            checked onclick="updateColl()">Num
+                                                            checked onclick="updateColl()">Count
                                                         <input type="radio" class="sort_val" value="alpha"
                                                                           name="Program" onclick="updateColl()">Alpha
                                                     </span>
@@ -197,7 +197,7 @@
                                                        placeholder="Search..." onkeyup="updateFilters('analysis_results_id',{},false,true)">
 
                                                      <div class="sorter cntr">
-                                                         <span>Sort by: <input type="radio" class="sort_val" value="num" name="Access" checked onclick="resort('analysis_results_id')">Num
+                                                         <span>Sort by: <input type="radio" class="sort_val" value="num" name="Access" checked onclick="resort('analysis_results_id')">Count
                                                              <input type="radio" class="sort_val" value="alpha"
                                                                           name="Access"  onclick="resort('analysis_results_id')">Alpha
                                                          </span>
@@ -355,7 +355,7 @@
 
                                                             Sort by:
                                                             <input type="radio" class="sort_val" name="{{ attr.name }}"
-                                                                   value="num" checked onclick="resort('{{ attr.name }}')">Num
+                                                                   value="num" checked onclick="resort('{{ attr.name }}')">Count
 
                                                             <input type="radio" class="sort_val"
                                                                             name="{{ attr.name }}" value="alpha"
@@ -465,7 +465,7 @@
                                                                                onkeyup="updateFilters( '{{ attr.name }}',{},false, true)">
                                                                         <div class="sorter cntr">
                                                                             <span>Sort by:
-                                                                                <input type="radio" class="sort_val" name="{{ attr.name }}" value="num" checked onclick="resort('{{ attr.name }}')">Num</span>
+                                                                                <input type="radio" class="sort_val" name="{{ attr.name }}" value="num" checked onclick="resort('{{ attr.name }}')">Count</span>
                                                                                <input type="radio" class="sort_val" name="{{ attr.name }}" value="alpha" onclick="resort('{{ attr.name }}')">Alpha
                                                                         </div>
                                                                         {% if attr.values|length > 5 %}
@@ -581,7 +581,7 @@
                                                                         Sort by:
                                                                         <input type="radio" class="sort_val"
                                                                                name="{{ attr.name }}" value="num" checked
-                                                                               onclick="resort('{{ attr.name }}')">Num
+                                                                               onclick="resort('{{ attr.name }}')">Count
                                                                         <input type="radio" class="sort_val"
                                                                                         name="{{ attr.name }}"
                                                                                         value="alpha"
