@@ -31,8 +31,8 @@ PyCharm Pro can be used to run your Web Application as a native Django applicati
  4. Click Add Remote
  5. Select Vagrant (if it asks to start the machine, say yes)
  6. Set the Python interpreter path to `/home/vagrant/www/shell/python-su.sh` and click Ok
-   * Be sure you are **not** using `/user/bin/python3.X` or similar.
-   * The remote interpreter script brings in the PythonPath when launched.
+    - Be sure you are **not** using `/user/bin/python3.X` or similar.
+    - The remote interpreter script brings in the PythonPath when launched.
  7. Click Ok to save
  10. Go to **Run > Edit Configurations**
  11. If there is not a Django Configuration, add one
@@ -40,15 +40,14 @@ PyCharm Pro can be used to run your Web Application as a native Django applicati
  13. Set the Python Interpreter to the Vagrant Machine (if it is not set to that already)
  14. Set the working directory to `/home/vagrant/www`
  15. Click `...` next to the `Environment variables:`, box and add the following values:
-     `SECURE_LOCAL_PATH = ../parentDir/secure_files/idc/` (you **MUST** have the trailing `/`)
-     `PYTHONPATH = /home/vagrant/www:/home/vagrant/www/lib:/home/vagrant/www/IDC-Common`
-     `VM_PYTHONPATH = /home/vagrant/www:/home/vagrant/www/lib:/home/vagrant/www/IDC-Common`
-     `DJANGO_SETTINGS_MODULE = idc.settings`
-     `PYTHONUNBUFFERED = 1`
+     - `SECURE_LOCAL_PATH = ../parentDir/secure_files/idc/` (you **MUST** have the trailing `/`)
+     - `PYTHONPATH = /home/vagrant/www:/home/vagrant/www/lib:/home/vagrant/www/IDC-Common`
+     - `VM_PYTHONPATH = /home/vagrant/www:/home/vagrant/www/lib:/home/vagrant/www/IDC-Common`
+     - `DJANGO_SETTINGS_MODULE = idc.settings`
+     - `PYTHONUNBUFFERED = 1`
  16. Click ok to save
 
-You will also need to set the *shell/python-su.sh* file to be executable.
-You can do this in the vagrant machines command line with the command `chmod +x /home/vagrant/www/shell/python-su.sh`
+You will need to set the `shell/python-su.sh` file to be executable. You can do this via the vagrant machine's command line with the command `chmod +x /home/vagrant/www/shell/python-su.sh`
 (This step is done for you by `vagrant-set-env.sh` when the VM image is first built.)
 
 ### Running
@@ -56,11 +55,11 @@ You can do this in the vagrant machines command line with the command `chmod +x 
 To run your server in PyCharm:
 
  1. Make sure your Vagrant machine is running by going to **Tools > Vagrant > Up**
-  * If this is the first time you've built the VM, it can be time consuming.
-  * Our VMs are currently running Ubuntu 16.0.4 LTS, which is what the app deploys under as well.
+    - If this is the first time you've built the VM, it can be time consuming.
+    - Our VMs are currently running Ubuntu 16.0.4 LTS, which is what the app deploys under as well.
  2. Once the VM has built, click on the Run or Debug icons in the toolbar (upper-right corner of the PyCharm GUI)
-  * Your server will start and the PyCharm console should show all the logs and output from the system. 
-  * If you are running in debug, you can also use breakpoints to stop the execution and examine variables and code as it runs.
+    - Your server will start and the PyCharm console should show all the logs and output from the system. 
+    - If you are running in debug, you can also use breakpoints to stop the execution and examine variables and code as it runs.
 
 ## Adding Python Dependencies
 
