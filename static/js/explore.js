@@ -141,7 +141,7 @@ require([
             var min = $this.slider("option", "min");
             var max = $this.slider("option", "max");
 
-            if ($this.parent().hasClass('isActive') &&  ($this.parent().hasClass('wNone') && $this.siblings('.noneBut').find('input:checked').length>0) ) {
+            if ($this.parent().hasClass('isActive') &&  ($this.parent().hasClass('wNone') && $this.siblings().find('.noneBut').find('input:checked').length>0) ) {
                 if ($(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).length <= 0) {
                     $(`${modal_filter_block}`).append('<p class="cohort-filter-display ' + $(this).data('filter-attr-id')
                         + '"><span class="attr">' + $(this).data('filter-display-attr') + ':</span></p>');
@@ -161,7 +161,7 @@ require([
                 );
                 filters[$this.data('filter-attr-id')] = [left_val, right_val];
 
-            } else if ($this.parent().hasClass('wNone') && $this.siblings('.noneBut').find('input:checked').length>0){
+            } else if ($this.parent().hasClass('wNone') && $this.siblings().find('.noneBut').find('input:checked').length>0){
                 if ($(`${modal_filter_block} p.` + $(this).data('filter-attr-id')).length <= 0) {
                     $(`${modal_filter_block}`).append('<p class="cohort-filter-display ' + $(this).data('filter-attr-id')
                         + '"><span class="attr">' + $(this).data('filter-display-attr') + ':</span></p>');
