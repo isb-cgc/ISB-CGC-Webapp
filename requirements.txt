@@ -1,4 +1,5 @@
-cryptography==39.0.1
+pyOpenSSL==23.0.0    # This is necessary for the local builds specifically...
+cryptography==39.0.1 # because of this version, which is incompatible with pyOpenSSL < 22
 django==3.2.17
 django-allauth==0.43.0
 django-anymail[mailgun]
