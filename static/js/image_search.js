@@ -3138,7 +3138,7 @@ require([
                                if($(selEle).find('.join_val').length>0) {
                                    $(selEle).find('.join_val').filter('input[value=' + filter['op'].toUpperCase() + ']').prop("checked", true);
                                } else {
-                                   (filter['op'] !== 'OR' && filter['attr_name'] !== 'bmi') && base.showJsMessage(
+                                   (filter['op'] !== 'OR' && filter['op'] !== 'BTW') && base.showJsMessage(
                                        "warning",
                                        "Invalid operator seen for attribute '"+$(selEle).attr('id')+"'; default of OR used instead.",
                                        true
@@ -3174,7 +3174,8 @@ require([
     var load_sliders = function(sliders, do_update) {
         _.each(sliders, function(slider) {
             var slider_id = slider['id'];
-            setSlider(slider_id, false, slider['left_val'], slider['right_val'], true, false);
+            var isInt = !FLOAT_SLIDERS.includes(slider_id.replace('_slide',''));
+            setSlider(slider_id, false, slider['left_val'], slider['right_val'], isInt, false);
             //updatePlotBinsForSliders(slider_id);
         });
 
