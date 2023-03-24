@@ -55,18 +55,18 @@ require([
                 {
                     collectionTitle: '<i class="fa fa-sliders" style="margin-right: 5px;"></i>Toggle Columns',
                     extend: 'colvis',
-                    text: '<i class="fa fa-cog" style="margin-right: 5px;"></i>Columns<span class="caret"></span>',
+                    text: '<i class="fa fa-cog" style="margin-right: 5px;"></i> Columns<span class="caret"></span>',
                     columns: '.colvis-toggle',
                     postfixButtons: [
                         {
                             extend: 'colvisRestore',
-                            text: '<i class="fa fa-undo" style="margin-right: 5px;"></i>Restore'
+                            text: '<i class="fa fa-undo" style="margin-right: 5px;"></i> Restore'
                         }
                     ]
                 },
                 {
                     extend: 'csvHtml5',
-                    text: '<i class="fa fa-download" style="margin-right: 5px;"></i>CSV Download',
+                    text: '<i class="fa fa-download" style="margin-right: 5px;"></i> CSV Download',
                     title: 'bq-metadata',
                     exportOptions: {
                         columns: ':not(".no-export")'
@@ -256,8 +256,9 @@ require([
                     },
                     'render': function(data, type) {
                         let num_joins = data.length;
-                        let display = num_joins > 0 ? num_joins : '';
-                        return '<div class="text-center"><a class="useful-join-detail">' + display + '</a></div>';
+                        let display = num_joins == 0 ? '':
+                            '<div class="text-center"><a title="View List of Examples" class="useful-join-detail badge bqmeta-outline-badge">' + num_joins + '</a></div>';
+                        return display;
                     }
                 },
                 {
@@ -354,20 +355,26 @@ require([
                 $('.spinner').remove();
                 if (selected_table_full_id !== "") {
                     let parts = selected_table_full_id.split('.');
-                    let project_id = parts[0];
-                    let dataset_id = parts[1];
-                    let table_id = parts[2];
-                    $('#search-by-dataset-id')[0].value = dataset_id;
-                    $('#search-by-project-id option').each(function() {
-                        if ($(this)[0].innerText === project_id) {
-                            $(this).prop('selected', true);
-                        }
-                    });
-                    $('#search-by-table-id')[0].value = table_id;
-                    columnSearch('datasetId', dataset_id);
-                    columnSearch('projectId', project_id);
-                    columnSearch('tableId', table_id);
-
+                    if (parts[0]){
+                        let project_id = parts[0];
+                        $('#search-by-project-id option').each(function () {
+                            if ($(this)[0].innerText === project_id) {
+                                $(this).prop('selected', true);
+                            }
+                        });
+                        columnSearch('projectId', project_id);
+                    }
+                    if (parts[1]){
+                        let dataset_id = parts[1];
+                        dataset_id = "\""+parts[1]+"\"";
+                        $('#search-by-dataset-id')[0].value = dataset_id;
+                        columnSearch('datasetId', dataset_id);
+                    }
+                    if (parts[2]) {
+                        let table_id = "\""+parts[2]+"\"";
+                        $('#search-by-table-id')[0].value = table_id;
+                        columnSearch('tableId', table_id);
+                    }
                     $('.adv-toggle-btn').click();
                 }
 
@@ -513,7 +520,7 @@ require([
                         '<h5>Joined Tables</h5><p>' + tables + '</p><br>' +
                         '<h5>SQL Statement</h5>' +
                         '<pre><code class="language-sql query-body">' + sql_query + '</code></pre>' +
-                        '<button class="copy-query-btn" title="Copy to Clipboard">' +
+                        '<button class="copy-query-btn btn" title="Copy to Clipboard">' +
                         '<i class="fa fa-clipboard" aria-hidden="true"></i>'+ 'COPY' + '</button>'+ '<br><br>' +
                         '<h5>Joined Condition</h5><p>' + join_data['condition'] + '</p>';
 
@@ -544,6 +551,13 @@ require([
 
 
         var columnSearch = function(column_name, term, regex_search, smart_search){
+            var exact_match = term.match(/^\".*\"$/);
+
+            if (exact_match != null && exact_match.length > 0){
+                regex_search = true;
+                smart_search = false;
+                term = '^'+term.slice(1,term.length-1)+'$';
+            }
             table
                 .columns(column_name+':name')
                 .search(term, regex_search, smart_search)

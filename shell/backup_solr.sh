@@ -72,13 +72,14 @@ echo "[STATUS] Building backup script: "
 
 for core in "${cores[@]}"; do
     if [[ $core != "" ]]; then
-        echo "-----> Backup for core ${core} <-----"
+        echo "----------------> Backup for core ${core} <-----------------"
         echo "Copying schema for ${core}..."
-        sudo -u solr cp ${SOLR_DATA}/${core}/conf/managed-schema ${BACKUPS_DIR}/$core.managed-schema
+        sudo -u solr cp ${SOLR_DATA}/${core}/conf/managed-schema.xml ${BACKUPS_DIR}/$core.managed-schema.xml
         echo "Backup command for ${core}:"
         echo "curl -u ${SOLR_USER}:${SOLR_PWD} -X GET \"https://localhost:8983/solr/$core/replication?command=backup&location=${BACKUPS_DIR}/&name=${core}\" --cacert solr-ssl.pem"
         echo "Status command for ${core}":
         echo "curl -u ${SOLR_USER}:${SOLR_PWD} -X GET \"https://localhost:8983/solr/${core}/replication?command=details\" --cacert solr-ssl.pem"
+        echo "----------------> /Backup for core ${core} <----------------"
 #        curl -u $SOLR_USER:$SOLR_PWD -X GET "https://localhost:8983/solr/$core/replication?command=backup&location=${BACKUPS_DIR}/&name=$core" --cacert solr-ssl.pem
 #        status=`curl -u $SOLR_USER:${SOLR_PWD} -X GET "https://localhost:8983/solr/${core}/replication?command=details" --cacert solr-ssl.pem | python3 -c "${PARSE_RESPONSE}"`
 #        retries=0

@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2022, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,65 +19,42 @@
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        // jquery: 'libs/jquery-1.11.1.min',
-        // bootstrap: 'libs/bootstrap.min',
-        // jqueryui: 'libs/jquery-ui.min',
-        // session_security: 'session_security/script',
-        // underscore: 'libs/underscore-min',
-        igv_lib: 'libs/igv'
+        jquery: 'libs/jquery-3.5.1.min',
+        jqueryui: 'libs/jquery-ui.min',
+        igv: 'libs/igv'
     },
     shim: {
-        // 'session_security': ['jquery'],
-        // 'bootstrap': ['jquery'],
-        // 'jqueryui': ['jquery'],
-        'igv_lib': ['jquery', 'jqueryui']
+        'igv': ['jquery', 'jqueryui']
     }
 });
 
 require([
     'jquery',
+    'igv',
     'jqueryui',
-    'session_security',
-    'bootstrap',
-    'igv_lib'
-], function($, jqueryui, session_security, bs, igv_lib) {
-    var browser;
-    var tracks = [];
-    var readgroupset_divs = $('.readgroupset-data');
-    var bam_divs = $('.bam-data');
+    'bootstrap'
+], function($, igv) {
+    let tracks = [];
+    let bam_divs = $('.bam-data');
 
-    for (var i = 0; i < readgroupset_divs.length; i++) {
-        var row = $(readgroupset_divs[i]);
-        var readgroupset_id = row.data('readgroupset');
-        var sample_barcode = row.data('sample');
-        tracks.push({
-            sourceType: 'ga4gh',
-            type: 'bam',
-            url: 'https://genomics.googleapis.com/v1',
-            readGroupSetIds: readgroupset_id,
-            name: sample_barcode + ': Google Genomics',
-            referenceName: '1',
-            withCredentials: true
-        });
-    }
-
-    for (var i = 0; i < bam_divs.length; i++) {
-        var row = $(bam_divs[i]);
-        var bam_path = row.data('gcs').split(';')[0];
-        var bai_path = row.data('gcs').split(';')[1];
-        var sample_barcode = row.data('sample');
-        var obj = {
-            sourceType: 'gcs',
-            type: 'bam',
+    for (let i = 0; i < bam_divs.length; i++) {
+        let row = $(bam_divs[i]);
+        let bam_path = row.data('gcs').split(';')[0];
+        let bai_path = row.data('gcs').split(';')[1];
+        let sample_barcode = row.data('sample');
+        let bam_track = {
+            sourceType: 'file',
+            type: 'alignment',
+            format: 'bam',
             url: bam_path, // gs:// url to .bam file
-            name: sample_barcode + ': GCS bam file',
+            name: sample_barcode + ': GCS BAM file',
             withCredentials: true,
             indexURL: bai_path
         };
-        tracks.push(obj);
+        tracks.push(bam_track);
     }
 
-    var genes_obj = {
+    let genes_track = {
         name: "Genes: Gencode v18",
         url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
         indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
@@ -86,27 +63,25 @@ require([
     };
 
     if(genome_build === 'HG38') {
-        genes_obj.url = 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/genes/gencode.v24.annotation.sorted.gtf.gz';
-        genes_obj.indexURL = 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/genes/gencode.v24.annotation.sorted.gtf.gz.tbi';
-        genes_obj.name = 'Genes: Gencode v24';
-        genes_obj.format = 'gtf';
+        genes_track.url = GENCODE_URI + "gencode.v36.annotation.sorted.gtf.gz";
+        genes_track.indexURL = GENCODE_URI + "gencode.v36.annotation.sorted.gtf.gz.tbi";
+        genes_track.name = 'Genes: Gencode v36';
+        genes_track.format = 'gtf';
     }
 
-    tracks.push(genes_obj);
+    tracks.push(genes_track);
 
-    var options = {
+    let options = {
         showNavigation: true,
         genome: genome_build.toLowerCase(),
         locus: "EGFR",
         tracks: tracks,
-        withCredentials: true
+        withCredentials: true,
+        clientId: oauth_client_id
     };
 
     $('#igv-div').empty();
     igv.browser = null;
-    igv.oauth.google.setRedirectUrl(BASE_URL, service_account);
-    igv.oauth.google.login();
-
-    browser = igv.createBrowser($('#igv-div')[0], options);
+    igv.createBrowser($('#igv-div')[0], options);
 
 });

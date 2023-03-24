@@ -1,4 +1,10 @@
 if [ -n "$CI" ]; then
+    echo "Check our Python and Ubuntu versions since they keep getting updated without warning..."
+
+    ls -l /usr/bin/python3*
+    cat /etc/os-release
+
+    export DEBIAN_FRONTEND=noninteractive
     export HOME=/home/circleci/${CIRCLE_PROJECT_REPONAME}
     export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
 

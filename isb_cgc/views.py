@@ -298,92 +298,21 @@ def search_cohorts_viz(request):
     return HttpResponse(json.dumps(result_obj), status=200)
 
 
-# get_image_data which allows for URI arguments, falls through to get_image_data(request, slide_barcode)
-def get_image_data_args(request):
-    file_uuid = None
-    if request.GET:
-        file_uuid = request.GET.get('file_uuid', None)
-    elif request.POST:
-        file_uuid = request.POST.get('file_uuid', None)
-
-    if file_uuid:
-        file_uuid = (None if re.compile(r'[^A-Za-z0-9\-]').search(file_uuid) else file_uuid)
-
-    return get_image_data(request, file_uuid)
-
-
-# Given a slide_barcode, returns image metadata in JSON format
-def get_image_data(request, file_uuid):
-    status = 200
-    result = {}
-
-    if not file_uuid:
-        status = 503
-        result = {
-            'message': "There was an error while processing this request: a valid file UUID was not supplied."
-        }
-    else:
-        try:
-            img_data_query = """
-                SELECT slide_barcode, level_0__width AS width, level_0__height AS height, mpp_x, mpp_y, file_gcs_url, sample_barcode, case_barcode, file_gdc_id
-                FROM [isb-cgc:metadata.TCGA_slide_images]
-                WHERE file_gdc_id = '{}';
-            """
-
-            query_results = BigQuerySupport.execute_query_and_fetch_results(img_data_query.format(file_uuid))
-
-            if query_results and len(query_results) > 0:
-                result = {
-                    'slide-barcode': query_results[0]['f'][0]['v'],
-                    'Width': query_results[0]['f'][1]['v'],
-                    'Height': query_results[0]['f'][2]['v'],
-                    'MPP-X': query_results[0]['f'][3]['v'],
-                    'MPP-Y': query_results[0]['f'][4]['v'],
-                    'FileLocation': query_results[0]['f'][5]['v'],
-                    'TissueID': query_results[0]['f'][0]['v'],
-                    'sample-barcode': query_results[0]['f'][6]['v'],
-                    'case-barcode': query_results[0]['f'][7]['v'],
-                    'file-uuid': query_results[0]['f'][8]['v'],
-                    'img-type': ('Diagnostic Image' if query_results[0]['f'][0]['v'].split("-")[-1].startswith(
-                        "DX") else 'Tissue Slide Image' if query_results[0]['f'][0]['v'].split("-")[-1].startswith(
-                        "TS") else "N/A")
-                }
-
-                sample_metadata = get_sample_metadata(result['sample-barcode'])
-                result['disease-code'] = sample_metadata['disease_code']
-                result['project'] = sample_metadata['project']
-
-            else:
-                result = {
-                    'msg': 'File UUID {} was not found.'.format(file_uuid)
-                }
-
-        except Exception as e:
-            logger.error("[ERROR] While attempting to retrieve image data for {}:".format(file_uuid))
-            logger.exception(e)
-            status = '503'
-            result = {
-                'message': "There was an error while processing this request."
-            }
-
-    return JsonResponse(result, status=status)
-
-
 def get_tbl_preview(request, proj_id, dataset_id, table_id):
     status = 200
     MAX_ROW = 8
-    if not proj_id or not dataset_id or not table_id:
-        status = 503
-        result = {
-            'message': "There was an error while processing this request: one or more required parameters (project id, dataset_id or table_id) were not supplied."
-        }
-    else:
-        try:
+    try:
+        if not proj_id or not dataset_id or not table_id:
+            logger.warning("[WARNING] Required ID missing: {}.{}.{}".format(proj_id,dataset_id,table_id))
+            status = 503
+            result = {
+                'message': "There was an error while processing this request: one or more required parameters (project id, dataset_id or table_id) were not supplied."
+            }
+        else:
             bq_service = get_bigquery_service()
             dataset = bq_service.datasets().get(projectId=proj_id, datasetId=dataset_id).execute()
             is_public = False
             for access_entry in dataset['access']:
-                # print(access_entry)
                 if access_entry.get('role') == 'READER' and access_entry.get('specialGroup') == 'allAuthenticatedUsers':
                     is_public = True
                     break
@@ -405,9 +334,8 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
                         'rows': response['rows']
                     }
                 else:
-                    status = 200
                     result = {
-                        'msg': 'No record has been found for table { proj_id }{ dataset_id }{ table_id }.'.format(
+                        'message': 'No record has been found for table {proj_id}.{dataset_id}.{table_id}.'.format(
                             proj_id=proj_id,
                             dataset_id=dataset_id,
                             table_id=table_id)
@@ -418,31 +346,36 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
                     'message': "Preview is not available for this table/view."
                 }
 
-        except Exception as e:
-            if type(e) is HttpError and e.resp.status == 403:
-                logger.error(
-                    "[ERROR] Access to preview table [{ proj_id }.{ dataset_id }.{ table_id }] was denied.".format(
-                        proj_id=proj_id,
-                        dataset_id=dataset_id,
-                        table_id=table_id))
-                result = {
-                    'message': "Your access to preview this table [{ proj_id }.{ dataset_id }.{ table_id }] was denied.".format(
-                        proj_id=proj_id,
-                        dataset_id=dataset_id,
-                        table_id=table_id)
-                }
-                status = 403
-            else:
-                logger.error(
-                    "[ERROR] While attempting to retrieve preview data for { proj_id }.{ dataset_id }.{ table_id } table.".format(
-                        proj_id=proj_id,
-                        dataset_id=dataset_id,
-                        table_id=table_id))
-                logger.exception(e)
-                status = '503'
-                result = {
-                    'message': "There was an error while processing this request."
-                }
+    except HttpError as e:
+        logger.error(
+            "[ERROR] While attempting to retrieve preview data for {proj_id}.{dataset_id}.{table_id} table:".format(
+                proj_id=proj_id,
+                dataset_id=dataset_id,
+                table_id=table_id))
+        logger.exception(e)
+        status = e.resp.status
+        result = {
+            'message': "There was an error while processing this request."
+        }
+        if status == 403:
+            result = {
+                'message': "Your attempt to preview this table [{proj_id}.{dataset_id}.{table_id}] was denied.".format(
+                    proj_id=proj_id,
+                    dataset_id=dataset_id,
+                    table_id=table_id)
+            }
+
+    except Exception as e:
+        status = 503
+        result = {
+            'message': "There was an error while processing this request."
+        }
+        logger.error(
+            "[ERROR] While attempting to retrieve preview data for {proj_id}.{dataset_id}.{table_id} table:".format(
+                proj_id=proj_id,
+                dataset_id=dataset_id,
+                table_id=table_id))
+        logger.exception(e)
 
     return JsonResponse(result, status=status)
 
@@ -515,46 +448,34 @@ def test_solr_data(request):
 
     return JsonResponse({'result': results}, status=status)
 
-def camic(request, file_uuid=None):
-    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
-    context = {}
-
-    if not file_uuid:
-        messages.error("Error while attempting to display this pathology image: a file UUID was not provided.")
-        return redirect(reverse('cohort_list'))
-
-    images = [{'file_uuid': file_uuid, 'thumb': '', 'type': ''}]
-    template = 'isb_cgc/camic_single.html'
-
-    context['files'] = images
-    context['camic_viewer'] = settings.CAMIC_VIEWER
-    context['img_thumb_url'] = settings.IMG_THUMBS_URL
-
-    return render(request, template, context)
-
 
 @login_required
 def igv(request):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
 
     req = request.GET or request.POST
-    build = req.get('build','hg38')
-    checked_list = json.loads(req.get('checked_list','{}'))
-    readgroupset_list = []
+    checked_list = json.loads(req.get('checked_list', '{}'))
     bam_list = []
+    build = None
 
     # This is a POST request with all the information we already need
     if len(checked_list):
         for item in checked_list['gcs_bam']:
             bam_item = checked_list['gcs_bam'][item]
+            if not build:
+                build = bam_item['build'].lower()
+            elif build != bam_item['build'].lower():
+                logger.warning("[WARNING] Possible build collision in IGV viewer BAMS: {} vs. {}".format(build, bam_item['build'].lower()))
+                logger.warning("Dropping any files with build {}".format(bam_item['build'].lower()))
             id_barcode = item.split(',')
             bam_list.append({
-                'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': build, 'program': bam_item['program']
+                'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': bam_item['build'].lower(), 'program': bam_item['program']
             })
     # This is a single GET request, we need to get the full file info from Solr first
     else:
-        sources = DataSource.objects.filter(source_type=DataSource.SOLR, version=DataVersion.objects.get(data_type=DataVersion.FILE_DATA, active=True, build=build))
-        gdc_ids = list(set(req.get('gdc_ids','').split(',')))
+        sources = DataSource.objects.filter(source_type=DataSource.SOLR, version=DataVersion.objects.get(
+            data_type=DataVersion.FILE_DATA, active=True, build=build))
+        gdc_ids = list(set(req.get('gdc_ids', '').split(',')))
 
         if not len(gdc_ids):
             messages.error(request,"A list of GDC file UUIDs was not provided. Please indicate the files you wish to view.")
@@ -568,32 +489,32 @@ def igv(request):
                 result = query_solr_and_format_result(
                     {
                         'collection': source.name,
-                        'fields': ['sample_barcode','file_gdc_id','file_name_key','index_file_name_key', 'program_name', 'access'],
-                        'query_string': 'file_gdc_id:("{}") AND data_format:("BAM")'.format('" "'.join(gdc_ids)),
+                        'fields': ['sample_barcode','file_node_id','file_name_key','index_file_name_key', 'program_name', 'access'],
+                        'query_string': 'file_node_id:("{}") AND data_format:("BAM")'.format('" "'.join(gdc_ids)),
                         'counts_only': False
                     }
                 )
                 if 'docs' not in result or not len(result['docs']):
                     messages.error(request,"IGV compatible files corresponding to the following UUIDs were not found: {}.".format(" ".join(gdc_ids))
                                    + "Note that the default build is HG38; to view HG19 files, you must indicate the build as HG19: &build=hg19")
-                saw_controlled = False
-                for doc in result['docs']:
-                    if doc['access'] == 'controlled':
-                        saw_controlled = True
-                    bam_list.append({
-                        'sample_barcode': doc['sample_barcode'],
-                        'gcs_path': "{};{}".format(doc['file_name_key'],doc['index_file_name_key']),
-                        'build': build,
-                        'program': doc['program_name']
-                    })
-                if saw_controlled:
-                    messages.info(request,"Some of the requested files require approved access to controlled data - if you receive a 403 error, double-check your current login status with DCF.")
+                else:
+                    saw_controlled = False
+                    for doc in result['docs']:
+                        if doc['access'] == 'controlled':
+                            saw_controlled = True
+                        bam_list.append({
+                            'sample_barcode': doc['sample_barcode'],
+                            'gcs_path': "{};{}".format(doc['file_name_key'],doc['index_file_name_key']),
+                            'build': build,
+                            'program': doc['program_name']
+                        })
+                    if saw_controlled:
+                        messages.info(request,"Some of the requested files require approved access to controlled data - if you receive a 403 error, double-check your current login status with DCF.")
 
     context = {
-        'readgroupset_list': readgroupset_list,
         'bam_list': bam_list,
         'base_url': settings.BASE_URL,
-        'service_account': settings.OAUTH2_CLIENT_ID,
+        'oauth_client_id': settings.OAUTH2_CLIENT_ID,
         'build': build,
     }
 
