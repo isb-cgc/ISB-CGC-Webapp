@@ -71,9 +71,11 @@ BQ_ECOSYS_BUCKET = settings.BQ_ECOSYS_STATIC_URL
 CITATIONS_BUCKET = settings.CITATIONS_STATIC_URL
 IDP = settings.IDP
 
+
 def _needs_redirect(request):
     appspot_host = '^.*{}\.appspot\.com.*$'.format(settings.GCLOUD_PROJECT_ID.lower())
     return re.search(appspot_host, request.META.get('HTTP_HOST', '')) and not re.search(appspot_host, settings.BASE_URL)
+
 
 def convert(data):
     # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
@@ -607,8 +609,10 @@ def bq_meta_data(request):
         bq_meta_data_row['usefulJoins'] = useful_joins
     return JsonResponse(bq_meta_data, safe=False)
 
+
 def programmatic_access_page(request):
     return render(request, 'isb_cgc/programmatic_access.html')
+
 
 def workflow_page(request):
     return render(request, 'isb_cgc/workflow.html')
