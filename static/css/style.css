@@ -4085,6 +4085,15 @@ html {
   display: inline-block;
 }
 
+.manifest-name {
+  padding: 5px 0px 10px 0px;
+}
+
+.bq-table-name p {
+  font-style: italic;
+  color: #1a344c;
+}
+
 .bq-disabled {
   color: darkred;
   font-size: 15px;
