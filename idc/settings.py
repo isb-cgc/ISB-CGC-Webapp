@@ -103,9 +103,10 @@ API_HOST                = os.environ.get('API_HOST', 'api-dot-idc-dev.appspot.co
 PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
 
 # Data Buckets
-GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET')
+GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET', 'FAKE_BUCKET')
+AWS_BUCKET              = os.environ.get('AWS_BUCKET', 'FAKE_BUCKET')
 
-DCF_GUID_SUFFIX           = os.environ.get('DCF_GUID_SUFFIX','')
+DCF_GUID_SUFFIX           = os.environ.get('DCF_GUID_SUFFIX', '')
 
 # BigQuery cohort storage settings
 BIGQUERY_COHORT_DATASET_ID           = os.environ.get('BIGQUERY_COHORT_DATASET_ID', 'cohort_dataset')
