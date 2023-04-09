@@ -295,6 +295,10 @@ require([
         update_download_manifest_buttons();
     });
 
+    $('#export-manifest').on('click',function(){
+        $('.manifest-name').find('input.form-control').val("cohort_"+cohort_id+$('#export-manifest-name').data('name-base'));
+    });
+
     tippy('.bq-disabled', {
         content: 'Exporting to BigQuery requires a linked Google Social Account. You can link your account to a Google ID from the '
             +  '<a target="_blank" rel="noopener noreferrer" href="/users/' + user_id + '/">'
