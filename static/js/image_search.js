@@ -3305,12 +3305,7 @@ require([
                  $('#projects_table').find('input:checkbox').removeAttr("disabled");
                  //$('.check-all').prop("disabled","disabled");
                  // Re-enable checkboxes for export manifest dialog, unless not using social login
-                 if (user_is_social)
-                 {
-                     $('.field-checkbox').removeAttr('disabled');
-                     $('.column-checkbox').removeAttr('disabled');
-                 }
-                 $('#include-header-checkbox').removeAttr('disabled');
+                 $('#export-manifest-modal input').removeAttr('disabled');
 
                  $('input#hide-zeros').prop("disabled", "");
                  $('input#hide-zeros').prop("checked", true);
