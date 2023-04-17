@@ -1,4 +1,10 @@
 if [ -n "$CI" ]; then
+    echo "Check our Python and Ubuntu versions since they keep getting updated without warning..."
+
+    ls -l /usr/bin/python3*
+    cat /etc/os-release
+
+    export DEBIAN_FRONTEND=noninteractive
     export HOME=/home/circleci/${CIRCLE_PROJECT_REPONAME}
     export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
 
@@ -97,7 +103,8 @@ fi
 
 if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
     echo "Installing Django Debug Toolbar for local dev..."
-    pip3 install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
+    # Note that Django 2.2 support ended in DDT 3.3.0
+    pip3 install -q django-debug-toolbar==3.2.4 -t ${HOMEROOT}/lib --only-binary all
 fi
 
 echo "Libraries Installed"
