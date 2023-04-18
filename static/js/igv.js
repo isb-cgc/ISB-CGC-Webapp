@@ -63,8 +63,8 @@ require([
     };
 
     if(genome_build === 'HG38') {
-        genes_track.url = GENCODE_URI + 'gencode.v36.annotation.sorted.gtf.gz';
-        genes_track.indexURL = GENCODE_URI + 'gencode.v36.annotation.sorted.gtf.gz.tbi';
+        genes_track.url = GENCODE_URI + "gencode.v36.annotation.sorted.gtf.gz";
+        genes_track.indexURL = GENCODE_URI + "gencode.v36.annotation.sorted.gtf.gz.tbi";
         genes_track.name = 'Genes: Gencode v36';
         genes_track.format = 'gtf';
     }

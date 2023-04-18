@@ -71,9 +71,11 @@ BQ_ECOSYS_BUCKET = settings.BQ_ECOSYS_STATIC_URL
 CITATIONS_BUCKET = settings.CITATIONS_STATIC_URL
 IDP = settings.IDP
 
+
 def _needs_redirect(request):
     appspot_host = '^.*{}\.appspot\.com.*$'.format(settings.GCLOUD_PROJECT_ID.lower())
     return re.search(appspot_host, request.META.get('HTTP_HOST', '')) and not re.search(appspot_host, settings.BASE_URL)
+
 
 def convert(data):
     # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
@@ -304,18 +306,18 @@ def search_cohorts_viz(request):
 def get_tbl_preview(request, proj_id, dataset_id, table_id):
     status = 200
     MAX_ROW = 8
-    if not proj_id or not dataset_id or not table_id:
-        status = 503
-        result = {
-            'message': "There was an error while processing this request: one or more required parameters (project id, dataset_id or table_id) were not supplied."
-        }
-    else:
-        try:
+    try:
+        if not proj_id or not dataset_id or not table_id:
+            logger.warning("[WARNING] Required ID missing: {}.{}.{}".format(proj_id,dataset_id,table_id))
+            status = 503
+            result = {
+                'message': "There was an error while processing this request: one or more required parameters (project id, dataset_id or table_id) were not supplied."
+            }
+        else:
             bq_service = get_bigquery_service()
             dataset = bq_service.datasets().get(projectId=proj_id, datasetId=dataset_id).execute()
             is_public = False
             for access_entry in dataset['access']:
-                # print(access_entry)
                 if access_entry.get('role') == 'READER' and access_entry.get('specialGroup') == 'allAuthenticatedUsers':
                     is_public = True
                     break
@@ -337,9 +339,8 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
                         'rows': response['rows']
                     }
                 else:
-                    status = 200
                     result = {
-                        'msg': 'No record has been found for table { proj_id }{ dataset_id }{ table_id }.'.format(
+                        'message': 'No record has been found for table {proj_id}.{dataset_id}.{table_id}.'.format(
                             proj_id=proj_id,
                             dataset_id=dataset_id,
                             table_id=table_id)
@@ -350,31 +351,36 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
                     'message': "Preview is not available for this table/view."
                 }
 
-        except Exception as e:
-            if type(e) is HttpError and e.resp.status == 403:
-                logger.error(
-                    "[ERROR] Access to preview table [{ proj_id }.{ dataset_id }.{ table_id }] was denied.".format(
-                        proj_id=proj_id,
-                        dataset_id=dataset_id,
-                        table_id=table_id))
-                result = {
-                    'message': "Your access to preview this table [{ proj_id }.{ dataset_id }.{ table_id }] was denied.".format(
-                        proj_id=proj_id,
-                        dataset_id=dataset_id,
-                        table_id=table_id)
-                }
-                status = 403
-            else:
-                logger.error(
-                    "[ERROR] While attempting to retrieve preview data for { proj_id }.{ dataset_id }.{ table_id } table.".format(
-                        proj_id=proj_id,
-                        dataset_id=dataset_id,
-                        table_id=table_id))
-                logger.exception(e)
-                status = '503'
-                result = {
-                    'message': "There was an error while processing this request."
-                }
+    except HttpError as e:
+        logger.error(
+            "[ERROR] While attempting to retrieve preview data for {proj_id}.{dataset_id}.{table_id} table:".format(
+                proj_id=proj_id,
+                dataset_id=dataset_id,
+                table_id=table_id))
+        logger.exception(e)
+        status = e.resp.status
+        result = {
+            'message': "There was an error while processing this request."
+        }
+        if status == 403:
+            result = {
+                'message': "Your attempt to preview this table [{proj_id}.{dataset_id}.{table_id}] was denied.".format(
+                    proj_id=proj_id,
+                    dataset_id=dataset_id,
+                    table_id=table_id)
+            }
+
+    except Exception as e:
+        status = 503
+        result = {
+            'message': "There was an error while processing this request."
+        }
+        logger.error(
+            "[ERROR] While attempting to retrieve preview data for {proj_id}.{dataset_id}.{table_id} table:".format(
+                proj_id=proj_id,
+                dataset_id=dataset_id,
+                table_id=table_id))
+        logger.exception(e)
 
     return JsonResponse(result, status=status)
 
@@ -453,22 +459,28 @@ def igv(request):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
 
     req = request.GET or request.POST
-    build = req.get('build','hg38')
-    checked_list = json.loads(req.get('checked_list','{}'))
+    checked_list = json.loads(req.get('checked_list', '{}'))
     bam_list = []
+    build = None
 
     # This is a POST request with all the information we already need
     if len(checked_list):
         for item in checked_list['gcs_bam']:
             bam_item = checked_list['gcs_bam'][item]
+            if not build:
+                build = bam_item['build'].lower()
+            elif build != bam_item['build'].lower():
+                logger.warning("[WARNING] Possible build collision in IGV viewer BAMS: {} vs. {}".format(build, bam_item['build'].lower()))
+                logger.warning("Dropping any files with build {}".format(bam_item['build'].lower()))
             id_barcode = item.split(',')
             bam_list.append({
-                'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': build, 'program': bam_item['program']
+                'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': bam_item['build'].lower(), 'program': bam_item['program']
             })
     # This is a single GET request, we need to get the full file info from Solr first
     else:
-        sources = DataSource.objects.filter(source_type=DataSource.SOLR, version=DataVersion.objects.get(data_type=DataVersion.FILE_DATA, active=True, build=build))
-        gdc_ids = list(set(req.get('gdc_ids','').split(',')))
+        sources = DataSource.objects.filter(source_type=DataSource.SOLR, version=DataVersion.objects.get(
+            data_type=DataVersion.FILE_DATA, active=True, build=build))
+        gdc_ids = list(set(req.get('gdc_ids', '').split(',')))
 
         if not len(gdc_ids):
             messages.error(request,"A list of GDC file UUIDs was not provided. Please indicate the files you wish to view.")
@@ -600,8 +612,10 @@ def bq_meta_data(request):
         bq_meta_data_row['usefulJoins'] = useful_joins
     return JsonResponse(bq_meta_data, safe=False)
 
+
 def programmatic_access_page(request):
     return render(request, 'isb_cgc/programmatic_access.html')
+
 
 def workflow_page(request):
     return render(request, 'isb_cgc/workflow.html')
