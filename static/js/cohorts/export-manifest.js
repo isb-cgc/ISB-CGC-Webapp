@@ -151,12 +151,12 @@ require([
         $('input[name="downloadToken"]').val(downloadToken);
         $('input[name="manifest-type"]').val(manifest_type);
 
+        $('input[name="include_header"]').val('false');
+
         if(file_type !== 'bq') {
-            $('input[name="include_header"]').val($('#include-header-'
-                + file_type === 's5cmd' ? 's5cmd' : 'file'
-                + '-checkbox').is(':checked') ? 'true': 'false');
-        } else {
-            $('input[name="include_header"]').val('false');
+            $('input[name="include_header"]').val(($('#include-header-'
+            + (file_type === 's5cmd' ? 's5cmd' : 'file')
+                + '-checkbox').is(':checked')) ? 'true' : 'false');
         }
 
         var select_box_div = $('#file-part-select-box');
