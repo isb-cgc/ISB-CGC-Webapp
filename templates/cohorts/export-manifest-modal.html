@@ -133,22 +133,22 @@
                             </div>
                             <div id="manifest-s5cmd" class="tab-pane manifest active" role="tab-panel">
                                 <div class="s5cmd-file-name manifest-name">
-                                    <label for="export-s5cmd-name">Name</label>
+                                    <label for="export-s5cmd-name">Base File Name</label>
                                     <input class="form-control" type="text" id="export-s5cmd-name" name="file_name" data-name-base="_{% now "Ymd_Gis" %}" value="" required />
                                 </div>
                                 <div class="s5cmd-loc-type">
                                     <p>Cloud Source</p>
                                     <li class="radio"><label for="export-s5cmd-loc-gcp">
                                         <input class="loc_type" id="export-s5cmd-loc-gcp" name="loc_type" type="radio" value="gcs" checked />
-                                        <span class="value">GCP (data storage and egress sponsored by Google Public Data Program)</span>
+                                        <span class="value">GCP - data storage and egress sponsored by Google Public Data Program</span>
                                     </label></li>
                                     <li class="radio"><label for="export-s5cmd-loc-aws">
                                         <input class="loc_type" id="export-s5cmd-loc-aws" name="loc_type" type="radio" value="aws" />
-                                        <span class="value">AWS (data storage and egress sponsored by AWS Open Data Sponsorship Program)</span>
+                                        <span class="value">AWS - data storage and egress sponsored by AWS Open Data Sponsorship Program</span>
                                     </label></li>
                                 </div>
                                 <!-- Header Fields -->
-<!--                                <div id="s5cmd-header-fields-container">
+                                <div id="s5cmd-header-fields-container">
                                     <p><input id="include-header-s5cmd-checkbox" type="checkbox"> Include header fields</p>
                                     <div id="s5cmd-header-fields-heading" class="list-group-item__heading export-manifest-group__heading">
                                         <a role="button" data-toggle="collapse" href="#s5cmd-header-fields" aria-expanded="false"
@@ -183,7 +183,6 @@
                                         </label></li>
                                     </div>
                                 </div>
--->
                                 <a id="download-s5cmd" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in s5cmd format.">
                                     Download s5cmd
                                 </a>
