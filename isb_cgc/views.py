@@ -456,22 +456,28 @@ def igv(request):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
 
     req = request.GET or request.POST
-    build = req.get('build','hg38')
-    checked_list = json.loads(req.get('checked_list','{}'))
+    checked_list = json.loads(req.get('checked_list', '{}'))
     bam_list = []
+    build = None
 
     # This is a POST request with all the information we already need
     if len(checked_list):
         for item in checked_list['gcs_bam']:
             bam_item = checked_list['gcs_bam'][item]
+            if not build:
+                build = bam_item['build'].lower()
+            elif build != bam_item['build'].lower():
+                logger.warning("[WARNING] Possible build collision in IGV viewer BAMS: {} vs. {}".format(build, bam_item['build'].lower()))
+                logger.warning("Dropping any files with build {}".format(bam_item['build'].lower()))
             id_barcode = item.split(',')
             bam_list.append({
-                'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': build, 'program': bam_item['program']
+                'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': bam_item['build'].lower(), 'program': bam_item['program']
             })
     # This is a single GET request, we need to get the full file info from Solr first
     else:
-        sources = DataSource.objects.filter(source_type=DataSource.SOLR, version=DataVersion.objects.get(data_type=DataVersion.FILE_DATA, active=True, build=build))
-        gdc_ids = list(set(req.get('gdc_ids','').split(',')))
+        sources = DataSource.objects.filter(source_type=DataSource.SOLR, version=DataVersion.objects.get(
+            data_type=DataVersion.FILE_DATA, active=True, build=build))
+        gdc_ids = list(set(req.get('gdc_ids', '').split(',')))
 
         if not len(gdc_ids):
             messages.error(request,"A list of GDC file UUIDs was not provided. Please indicate the files you wish to view.")
