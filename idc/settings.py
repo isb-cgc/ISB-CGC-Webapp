@@ -26,6 +26,7 @@ import sys
 import dotenv
 from socket import gethostname, gethostbyname
 
+
 SECURE_LOCAL_PATH = os.environ.get('SECURE_LOCAL_PATH', '')
 
 if not exists(join(dirname(__file__), '../{}.env'.format(SECURE_LOCAL_PATH))):
