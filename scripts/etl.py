@@ -419,6 +419,7 @@ def create_solr_params(schema_src, solr_src):
                 "multiValued": False if field['name'] in SOLR_SINGLE_VAL.get(solr_src.aggregate_level, {}) else True,
                 "stored": True
             }
+            solr_schema.append(field_schema)
             if field_schema['multiValued']:
                 solr_index_strings.append("f.{}.split=true&f.{}.separator=|".format(field['name'],field['name']))
 
@@ -749,8 +750,8 @@ def main():
                 update_display_values(Attribute.objects.get(name=attr), dvals[attr]['vals'])
 
         if args.solr_files.lower() == 'y':
-            for src in [("idc-dev-etl.idc_v13_pub.dicom_derived_all", "dicom_derived_series_v13",),
-                    ("idc-dev-etl.idc_v13_pub.dicom_derived_all", "dicom_derived_study_v13",),]:
+            for src in [("idc-dev-etl.idc_v14_pub.dicom_derived_all", "dicom_derived_series_v14",),
+                    ("idc-dev-etl.idc_v14_pub.dicom_derived_all", "dicom_derived_study_v14",),]:
                 create_solr_params(src[0], src[1])
 
     except Exception as e:

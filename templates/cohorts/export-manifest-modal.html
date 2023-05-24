@@ -33,143 +33,270 @@
             <form id="export-manifest-form" method="GET" data-uri-base="{{ export_uri }}" action="{{ export_uri }}">
                 <div class="modal-body">
                     <div class="form-group list-group">
-                        <!-- Name -->
-                        <div class="file-name">
-                            <label for="export-manifest-name">Name</label>
-                            <input class="form-control" type="text" id="export-manifest-name" name="file_name" data-name-base="_{% now "Ymd_Gis" %}" value="" required />
-                        </div>
-                        <div class="table-name" style="display: none;">
-                            <p>BigQuery table names are automatically generated and will be provided once the manifest has exported.</p>
-                        </div>
+                        {% csrf_token %}
+                        <ul class="nav nav-tabs manifest">
+                            <li class="filter-tab active" role="presentation">
+                                <a href="#manifest-s5cmd" role="tab" data-toggle="tab" title="s5cmd manifest"
+                                   aria-expanded="true"
+                                >
+                                    s5cmd
+                                </a>
+                            </li>
+                            <li class="filter-tab" role="presentation">
+                                <a href="#manifest-file" role="tab" data-toggle="tab" title="CSV/TSV/JSON manifest"
+                                   aria-expanded="false"
+                                >
+                                    CSV/TSV/JSON
+                                </a>
+                            </li>
+                            <li class="filter-tab {% if not is_social %}bq-disabled{% endif %}" role="presentation">
+                                <a href="#manifest-bq"{% if not is_social %} class="disabled" {% endif %}role="tab"
+                                   data-toggle="tab" title="BigQuery manifest export" aria-expanded="false"
+                                >
+                                    BigQuery
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div id="manifest-bq" class="tab-pane manifest" role="tab-panel">
+                                {% if is_social %}
+                                    <div class="bq-table-name manifest-name">
+                                        <label for="export-bq-name">Name</label>
+                                        <p>BigQuery table names are automatically generated and will be provided once the manifest has exported.</p>
+                                    </div>
+                                    <!-- Columns -->
+                                    <div id="bq-columns-container">
+                                        <div id="bq-columns-heading" class="list-group-item__heading export-manifest-group__heading">
+                                            <a role="button" data-toggle="collapse" href="#bq-columns" aria-expanded="true"
+                                               aria-controls="bq-columns">
+                                                <i class="fa fa-solid fa-caret-right"></i> <i class="fa fa-solid fa-caret-down"></i> Columns
+                                            </a>
+                                        </div>
+                                        <div id="bq-columns" class="list-group list-group-item__body collapse in" aria-expanded="true">
+                                            <li class="checkbox"><label>
+                                                <input class="column-checkbox" type="hidden" value="collection_id" checked>
+                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">collection_id (Collection ID)</span>
+                                            </label></li>
+                                            <li class="checkbox"><label>
+                                                <input class="column-checkbox" type="hidden" value="SeriesInstanceUID" checked>
+                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">SeriesInstanceUID (Series Instance UID)</span>
+                                            </label></li>
+                                            <li class="checkbox"><label>
+                                                <input class="column-checkbox" type="hidden" value="source_DOI" checked>
+                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">source_DOI (Source DOI)</span>
+                                            </label></li>
+                                            <li class="checkbox"><label>
+                                                <input class="column-checkbox" type="hidden" value="idc_version" checked>
+                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">idc_version (IDC Data Version)</span>
+                                            </label></li>
+                                            <li class="checkbox"><label>
+                                                <input class="column-checkbox" type="hidden" value="gcs_url" checked>
+                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">gcs_url (Google Cloud Storage Path)</span>
+                                            </label></li>
+                                            <li class="checkbox"><label>
+                                                <input class="column-checkbox" type="hidden" value="aws_url" checked>
+                                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">aws_url (AWS Cloud Storage Path)</span>
+                                            </label></li>
+                                            <li class="checkbox"><label>
+                                                <input class="column-checkbox" type="checkbox" value="PatientID" checked>
+                                                <span class="value">PatientID (Patient ID)</span>
+                                            </label></li>
+                                            <li class="checkbox"><label>
+                                                <input class="column-checkbox" type="checkbox" value="StudyInstanceUID" checked>
+                                                <span class="value">StudyInstanceUID (Study Instance UID)</span>
+                                            </label></li>
+                                            <li class="checkbox bq-only"><label>
+                                                <input class="column-checkbox" type="checkbox" value="SOPInstanceUID" checked>
+                                                <span class="value">SOPInstanceUID (SOP Instance UID)</span>
+                                            </label></li>
+                                            <li class="checkbox"><label>
+                                                <input class="column-checkbox" type="checkbox" value="crdc_study_uuid" checked>
+                                                <span class="value">crdc_study_uuid (CRDC Study UUID)</span>
+                                            </label></li>
 
-                        <!-- Header Fields -->
-                        <div id="fields-container">
-                        <div id="Fields_heading" class="list-group-item__heading export-manifest-group__heading">
-                            <a role="button" data-toggle="collapse" href="#header-fields" aria-expanded="false"
-                               aria-controls="header-fields">
-                                <i class="fa fa-solid fa-caret-right"></i> <i class="fa fa-solid fa-caret-down"></i> Header Fields
-                            </a>
-                        </div>
-                        <div id="header-fields" class="collapse">
-                            <li class="checkbox"><label>
-                                <input class="field-checkbox" type="checkbox" value="cohort_name" checked>
-                                <span class="value">Cohort Name</span>
-                            </label></li>
-
-                            <li class="checkbox"><label>
-                                <input class="field-checkbox" type="checkbox" value="user_email" checked>
-                                <span class="value">User Email</span>
-                            </label></li>
-
-                            <li class="checkbox"><label>
-                                <input class="field-checkbox" type="checkbox" value="cohort_filters" checked>
-                                <span class="value">Cohort Filters</span>
-                            </label></li>
-
-                            <li class="checkbox"><label>
-                                <input class="field-checkbox" type="checkbox" value="timestamp" checked>
-                                <span class="value">Date Generated</span>
-                            </label></li>
-
-                            <li class="checkbox"><label>
-                                <input class="field-checkbox" type="checkbox" value="total_records" checked>
-                                <span class="value">Total Records</span>
-                            </label></li>
-                        </div>
-                        </div>
-
-                        <!-- Columns -->
-                        <div id="columns-container">
-                        <div id="Columns_heading" class="list-group-item__heading export-manifest-group__heading">
-                            <a role="button" data-toggle="collapse" href="#columns" aria-expanded="false"
-                               aria-controls="columns">
-                                <i class="fa fa-solid fa-caret-right"></i> <i class="fa fa-solid fa-caret-down"></i> Columns
-                            </a>
-                        </div>
-                        <div id="columns" class="collapse">
-                            <li class="checkbox"><label>
-                                <input class="column-checkbox" type="hidden" value="collection_id" checked>
-                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">collection_id (Collection ID)</span>
-                            </label></li>
-                            <li class="checkbox"><label>
-                                <input class="column-checkbox" type="hidden" value="SeriesInstanceUID" checked>
-                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">SeriesInstanceUID (Series Instance UID)</span>
-                            </label></li>
-                            <li class="checkbox"><label>
-                                <input class="column-checkbox" type="hidden" value="source_DOI" checked>
-                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">source_DOI (Source DOI)</span>
-                            </label></li>
-                            <li class="checkbox"><label>
-                                <input class="column-checkbox" type="hidden" value="idc_version" checked>
-                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">idc_version (IDC Data Version)</span>
-                            </label></li>
-                            <li class="checkbox bq-only"><label>
-                                <input class="column-checkbox bq-only" type="hidden" value="gcs_url" checked>
-                                <i class="fa fa-check-square" title="This column is required."></i> <span class="value">gcs_url (Cloud Storage Path)</span>
-                            </label></li>
-                            <li class="checkbox"><label>
-                                <input class="column-checkbox" type="checkbox" value="PatientID" checked>
-                                <span class="value">PatientID (Patient ID)</span>
-                            </label></li>
-                            <li class="checkbox"><label>
-                                <input class="column-checkbox" type="checkbox" value="StudyInstanceUID" checked>
-                                <span class="value">StudyInstanceUID (Study Instance UID)</span>
-                            </label></li>
-                            <li class="checkbox bq-only"><label>
-                                <input class="column-checkbox bq-only" type="checkbox" value="SOPInstanceUID" checked>
-                                <span class="value">SOPInstanceUID (SOP Instance UID)</span>
-                            </label></li>
-                            <li class="checkbox"><label>
-                                <input class="column-checkbox" type="checkbox" value="crdc_study_uuid" checked>
-                                <span class="value">crdc_study_uuid (CRDC Study UUID)</span>
-                            </label></li>
-
-                            <li class="checkbox"><label>
-                                <input class="column-checkbox" type="checkbox" value="crdc_series_uuid" checked>
-                                <span class="value">crdc_series_uuid (CRDC Series UUID)</span>
-                            </label></li>
-                            <li class="checkbox bq-only"><label>
-                                <input class="column-checkbox bq-only" type="checkbox" value="crdc_instance_uuid" checked>
-                                <span class="value">crdc_instance_uuid (CRDC SOP Instance UUID)</span>
-                            </label></li>
-                        </div>
-                        </div>
-
-                        <!-- Export Option -->
-                        <div class="export-option">
-                            <span id="file-export-option" title="" class="value">
-                                <input class="file-manifest export-option" type="radio" name="manifest-type" value="file-manifest" checked> Files</span>
-                            <span id="bq-export-option" style="margin-left:10px" class="value">
-                                <input class="bq-manifest export-option" type="radio" name="manifest-type" value="bq-manifest" {% if not is_social %}disabled{% endif %}> BigQuery
-                                {% if not is_social %} <i class="fa-solid fa-exclamation-circle bq-disabled"></i>{% endif %}</span>
-                        </div>
-                        <br>
-                        {% if is_social %}
-                        <div id="bq-manifest">
-                            <a id="get-bq-table" class="btn btn-primary" title="Get BQ Table of this manifest.">
-                               Get BQ Table
-                            </a>
-                        </div>
-                        {% endif %}
-                        <div id="file-manifest">
-                            <div id="file-part-select-box">
-                                <select class="form-control">
-                                </select>
-                                <br />
+                                            <li class="checkbox"><label>
+                                                <input class="column-checkbox" type="checkbox" value="crdc_series_uuid" checked>
+                                                <span class="value">crdc_series_uuid (CRDC Series UUID)</span>
+                                            </label></li>
+                                            <li class="checkbox bq-only"><label>
+                                                <input class="column-checkbox" type="checkbox" value="crdc_instance_uuid" checked>
+                                                <span class="value">crdc_instance_uuid (CRDC SOP Instance UUID)</span>
+                                            </label></li>
+                                        </div>
+                                    </div>
+                                    <div id="bq-manifest">
+                                        <a id="get-bq-table" class="btn btn-primary get-manifest" title="Get BQ Table of this manifest.">
+                                            Get BQ Table
+                                        </a>
+                                    </div>
+                                {% endif %}
                             </div>
-                            <span><input id="include-header-checkbox" type="checkbox" checked> Include header fields (CSV and TSV only)</span>
-                            <br />
-                            <br />
-                            {% csrf_token %}
-                            <a id="download-csv" class="btn btn-primary download-file" title="Download this cohort's manifest in CSV format.">
-                                Download CSV
-                            </a>
-                            <a id="download-tsv" class="btn btn-primary download-file" title="Download this cohort's manifest in TSV format.">
-                                Download TSV
-                            </a>
-                            <a id="download-json" class="btn btn-primary download-file" title="Download this cohort's manifest in JSON format.">
-                                Download JSON
-                            </a>
+                            <div id="manifest-s5cmd" class="tab-pane manifest active" role="tab-panel">
+                                <div class="s5cmd-file-name manifest-name">
+                                    <label for="export-s5cmd-name">Base File Name</label>
+                                    <input class="form-control" type="text" id="export-s5cmd-name" name="file_name" data-name-base="_{% now "Ymd_Gis" %}" value="" required />
+                                </div>
+                                <div class="s5cmd-loc-type">
+                                    <p>Cloud Source</p>
+                                    <li class="radio"><label for="export-s5cmd-loc-gcp">
+                                        <input class="loc_type" id="export-s5cmd-loc-gcp" name="loc_type" type="radio" value="gcs" checked />
+                                        <span class="value">GCP - data storage and egress sponsored by Google Public Data Program</span>
+                                    </label></li>
+                                    <li class="radio"><label for="export-s5cmd-loc-aws">
+                                        <input class="loc_type" id="export-s5cmd-loc-aws" name="loc_type" type="radio" value="aws" />
+                                        <span class="value">AWS - data storage and egress sponsored by AWS Open Data Sponsorship Program</span>
+                                    </label></li>
+                                </div>
+                                <!-- Header Fields -->
+                                <div id="s5cmd-header-fields-container">
+                                    <p><input id="include-header-s5cmd-checkbox" type="checkbox"> Include header fields</p>
+                                    <div id="s5cmd-header-fields-heading" class="list-group-item__heading export-manifest-group__heading">
+                                        <a role="button" data-toggle="collapse" href="#s5cmd-header-fields" aria-expanded="false"
+                                           aria-controls="s5cmd-header-fields">
+                                            <i class="fa fa-solid fa-caret-right"></i> <i class="fa fa-solid fa-caret-down"></i> Header Fields
+                                        </a>
+                                    </div>
+                                    <div id="s5cmd-header-fields" class="collapse list-group list-group-item__body">
+                                        <li class="checkbox"><label>
+                                            <input class="field-checkbox" type="checkbox" value="cohort_name">
+                                            <span class="value">Cohort Name</span>
+                                        </label></li>
+
+                                        <li class="checkbox"><label>
+                                            <input class="field-checkbox" type="checkbox" value="user_email">
+                                            <span class="value">User Email</span>
+                                        </label></li>
+
+                                        <li class="checkbox"><label>
+                                            <input class="field-checkbox" type="checkbox" value="cohort_filters">
+                                            <span class="value">Cohort Filters</span>
+                                        </label></li>
+
+                                        <li class="checkbox"><label>
+                                            <input class="field-checkbox" type="checkbox" value="timestamp">
+                                            <span class="value">Date Generated</span>
+                                        </label></li>
+
+                                        <li class="checkbox"><label>
+                                            <input class="field-checkbox" type="checkbox" value="total_records">
+                                            <span class="value">Total Records</span>
+                                        </label></li>
+                                    </div>
+                                    <p><a class="external-link" href=""
+                                          url="https://learn.canceridc.dev/data/downloading-data"
+                                          data-toggle="modal" data-target="#external-web-warning">Instructions
+                                        <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                                    </a>on downloading images defined by the manifest</p>
+                                </div>
+                                <a id="download-s5cmd" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in s5cmd format.">
+                                    Download s5cmd manifest
+                                </a>
+                            </div>
+                            <div id="manifest-file" class="tab-pane manifest" role="tab-panel">
+                                <div class="manifest-file-name manifest-name">
+                                    <label for="export-manifest-name">Name</label>
+                                    <input class="form-control" type="text" id="export-manifest-name" name="file_name" data-name-base="_{% now "Ymd_Gis" %}" value="" required />
+                                </div>
+                                <!-- Header Fields -->
+                                <p><input id="include-file-header-checkbox" type="checkbox" checked> Include header fields</p>
+                                <div id="file-header-fields-container">
+                                    <div id="file-header-fields-heading" class="list-group-item__heading export-manifest-group__heading">
+                                        <a role="button" data-toggle="collapse" href="#file-header-fields" aria-expanded="false"
+                                           aria-controls="file-header-fields">
+                                            <i class="fa fa-solid fa-caret-right"></i> <i class="fa fa-solid fa-caret-down"></i> Header Fields
+                                        </a>
+                                    </div>
+                                    <div id="file-header-fields" class="list-group list-group-item__body collapse">
+                                        <li class="checkbox"><label>
+                                            <input class="field-checkbox" type="checkbox" value="cohort_name" checked>
+                                            <span class="value">Cohort Name</span>
+                                        </label></li>
+
+                                        <li class="checkbox"><label>
+                                            <input class="field-checkbox" type="checkbox" value="user_email" checked>
+                                            <span class="value">User Email</span>
+                                        </label></li>
+
+                                        <li class="checkbox"><label>
+                                            <input class="field-checkbox" type="checkbox" value="cohort_filters" checked>
+                                            <span class="value">Cohort Filters</span>
+                                        </label></li>
+
+                                        <li class="checkbox"><label>
+                                            <input class="field-checkbox" type="checkbox" value="timestamp" checked>
+                                            <span class="value">Date Generated</span>
+                                        </label></li>
+
+                                        <li class="checkbox"><label>
+                                            <input class="field-checkbox" type="checkbox" value="total_records" checked>
+                                            <span class="value">Total Records</span>
+                                        </label></li>
+                                    </div>
+                                </div>
+                                <!-- Columns -->
+                                <div id="file-columns-container">
+                                    <div id="file-columns-heading" class="list-group-item__heading export-manifest-group__heading">
+                                        <a role="button" data-toggle="collapse" href="#file-columns" aria-expanded="true"
+                                           aria-controls="file-columns">
+                                            <i class="fa fa-solid fa-caret-right"></i> <i class="fa fa-solid fa-caret-down"></i> Columns
+                                        </a>
+                                    </div>
+                                    <div id="file-columns" class="list-group list-group-item__body collapse in" aria-expanded="true">
+                                        <li class="checkbox"><label>
+                                            <input class="column-checkbox" type="hidden" value="collection_id" checked>
+                                            <i class="fa fa-check-square" title="This column is required."></i> <span class="value">collection_id (Collection ID)</span>
+                                        </label></li>
+                                        <li class="checkbox"><label>
+                                            <input class="column-checkbox" type="hidden" value="SeriesInstanceUID" checked>
+                                            <i class="fa fa-check-square" title="This column is required."></i> <span class="value">SeriesInstanceUID (Series Instance UID)</span>
+                                        </label></li>
+                                        <li class="checkbox"><label>
+                                            <input class="column-checkbox" type="hidden" value="source_DOI" checked>
+                                            <i class="fa fa-check-square" title="This column is required."></i> <span class="value">source_DOI (Source DOI)</span>
+                                        </label></li>
+                                        <li class="checkbox"><label>
+                                            <input class="column-checkbox" type="hidden" value="idc_version" checked>
+                                            <i class="fa fa-check-square" title="This column is required."></i> <span class="value">idc_version (IDC Data Version)</span>
+                                        </label></li>
+                                        <li class="checkbox"><label>
+                                            <input class="column-checkbox" type="checkbox" value="PatientID" checked>
+                                            <span class="value">PatientID (Patient ID)</span>
+                                        </label></li>
+                                        <li class="checkbox"><label>
+                                            <input class="column-checkbox" type="checkbox" value="StudyInstanceUID" checked>
+                                            <span class="value">StudyInstanceUID (Study Instance UID)</span>
+                                        </label></li>
+                                        <li class="checkbox"><label>
+                                            <input class="column-checkbox" type="checkbox" value="crdc_study_uuid" checked>
+                                            <span class="value">crdc_study_uuid (CRDC Study UUID)</span>
+                                        </label></li>
+
+                                        <li class="checkbox"><label>
+                                            <input class="column-checkbox" type="checkbox" value="crdc_series_uuid" checked>
+                                            <span class="value">crdc_series_uuid (CRDC Series UUID)</span>
+                                        </label></li>
+                                    </div>
+                                    <p><a class="external-link" href=""
+                                          url="https://learn.canceridc.dev/data/downloading-data"
+                                          data-toggle="modal" data-target="#external-web-warning">Instructions
+                                        <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
+                                    </a>on downloading images defined by the manifest</p>
+                                </div>
+                                <div id="file-part-select-box">
+                                    <select class="form-control">
+                                    </select>
+                                    <br />
+                                </div>
+                                <a id="download-csv" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in CSV format.">
+                                    Download CSV
+                                </a>
+                                <a id="download-tsv" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in TSV format.">
+                                    Download TSV
+                                </a>
+                                <a id="download-json" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in JSON format.">
+                                    Download JSON
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -180,6 +307,7 @@
                 <input type="hidden" name="header_fields">
                 <input type="hidden" name="include_header">
                 <input type="hidden" name="ids">
+                <input type="hidden" name="manifest-type">
             </form>
         </div>
     </div>

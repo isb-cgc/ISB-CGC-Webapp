@@ -76,31 +76,16 @@ require([
         download_manifest("json", $(this), e)
     });
 
-    $('.export-option input').on('click', function(){
-        let export_option = $(this).attr("value")
-        update_export_option(export_option);
-        if(export_option == 'bq-manifest') {
-            $('.file-name').hide();
-            $('.table-name').show();
-            $('.bq-only').show();
-        } else {
-            $('.file-name').show();
-            $('.table-name').hide();
-            $('.bq-only').hide();
-        }
+    $('#download-s5cmd').on('click', function(e) {
+        download_manifest("s5cmd", $(this), e)
     });
 
-    var update_export_option = function(export_option) {
-        $('#bq-manifest').hide();
-        $('#file-manifest').hide();
-        $('#' + export_option).show();
-        export_option !== 'bq-manifest' ? $('.bq-only').hide() : $('.bq-only').show();
-    };
-
-    update_export_option("file-manifest");
+    $('#get-bq-table').on('click',function(e){
+        download_manifest('bq',$(this), e);
+    });
 
     var download_manifest = function(file_type, clicked_button, e) {
-        let manifest_type = $('input[name="manifest-type"]:checked').val();
+        let manifest_type = file_type === 'bq' ? 'bq-manifest' : 'file-manifest';
 
         $('#unallowed-chars-alert').hide();
         $('#name-too-long-alert-modal').hide();
@@ -133,10 +118,7 @@ require([
             return false;
         }
 
-        $('#download-csv').attr('disabled','disabled');
-        $('#download-tsv').attr('disabled','disabled');
-        $('#download-json').attr('disabled','disabled');
-        $('#get-bq-table').attr('disabled','disabled');
+        $('.get-manifest').attr('disabled','disabled');
 
         $('#manifest-in-progress').modal('show');
 
@@ -148,7 +130,7 @@ require([
         }
 
         var checked_fields = [];
-        $('.field-checkbox').each(function() {
+        clicked_button.parents('.tab-pane.manifest').find('.field-checkbox').each(function() {
             var cb = $(this)[0];
             if (cb.checked) {
                 checked_fields.push(cb.value);
@@ -156,9 +138,9 @@ require([
         });
 
         var checked_columns = [];
-        $('.column-checkbox').each(function() {
+        clicked_button.parents('.tab-pane.manifest').find('.column-checkbox').each(function() {
             var cb = $(this)[0];
-            if (cb.checked && (manifest_type !== 'file-manifest' || !   $(this).hasClass('bq-only'))) {
+            if (cb.checked) {
                 checked_columns.push(cb.value);
             }
         });
@@ -167,7 +149,15 @@ require([
         $('input[name="header_fields"]').val(JSON.stringify(checked_fields));
         $('input[name="columns"]').val(JSON.stringify(checked_columns));
         $('input[name="downloadToken"]').val(downloadToken);
-        $('input[name="include_header"]').val($('#include-header-checkbox').is(':checked') ? 'true': 'false');
+        $('input[name="manifest-type"]').val(manifest_type);
+
+        $('input[name="include_header"]').val('false');
+
+        if(file_type !== 'bq') {
+            $('input[name="include_header"]').val(($('#include-header-'
+            + (file_type === 's5cmd' ? 's5cmd' : 'file')
+                + '-checkbox').is(':checked')) ? 'true' : 'false');
+        }
 
         var select_box_div = $('#file-part-select-box');
         var select_box = select_box_div.find('select');
@@ -211,17 +201,11 @@ require([
         }
     };
 
-    // The Cohort Details page button (single export at a time)
-    $('#export-manifest').on('click',function(){
-        $('#export-manifest-name').val(cohort_id + "_" + cohort_name.replaceAll(" ","_")+$('#export-manifest-name').data('name-base'));
-        update_download_manifest_buttons();
-    });
-
     $('.column-checkbox').change(function() {
         update_download_manifest_buttons($(this));
     });
 
-    $("#export-manifest-name").change(function(){
+    $('.manifest-file-name').find('input.form-control').change(function(){
         update_download_manifest_buttons();
     });
 
@@ -233,8 +217,7 @@ require([
         var input_cohort_name_len = $('#export-manifest-name').val().length;
 
         if (input_cohort_name_len == 0 || num_selected_column == 0 || (is_list && checked_cohorts == 0)) {
-            $('.download-file').attr('disabled', 'disabled');
-            $('#get-bq-table').attr('disabled', 'disabled');
+            $('.get-manifest').attr('disabled', 'disabled');
         } else {
             if( is_list && checked_cohorts > 1 ) {
                 $('.download-file,.file-manifest').attr('disabled', 'disabled');
@@ -295,10 +278,6 @@ require([
         }
     };
 
-    $('#get-bq-table').on('click',function(){
-        download_manifest('',$(this));
-    });
-
     // The Cohort list page export button (a set of cohorts)
     $('#export-manifest-set').on('click',function(){
         var cohort_ids = $('input[name="id"]:checked').map(function () {
@@ -312,8 +291,12 @@ require([
 
         $('input[name="ids"]').val(cohort_ids.join(","))
 
-        $('#export-manifest-name').val("cohorts_"+cohort_ids.join("_")+$('#export-manifest-name').data('name-base'));
+        $('.manifest-name').find('input.form-control').val("cohorts_"+cohort_ids.join("_")+$('#export-manifest-name').data('name-base'));
         update_download_manifest_buttons();
+    });
+
+    $('#export-manifest').on('click',function(){
+        $('.manifest-name').find('input.form-control').val("cohort_"+cohort_id+$('#export-manifest-name').data('name-base'));
     });
 
     tippy('.bq-disabled', {

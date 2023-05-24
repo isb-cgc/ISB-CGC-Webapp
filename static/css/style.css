@@ -4084,10 +4084,22 @@ html {
 .manifest-size-warning {
   display: inline-block;
 }
+#export-manifest-modal .nav-tabs li.filter-tab {
+  width: 33.33%;
+  text-align: center;
+}
 
-.bq-disabled {
-  color: darkred;
-  font-size: 15px;
+#export-manifest-modal .nav-tabs.manifest a, #export-manifest-modal .nav-tabs.manifest div {
+  text-transform: none;
+}
+
+.manifest-name {
+  padding: 5px 0px 10px 0px;
+}
+
+.bq-table-name p {
+  font-style: italic;
+  color: #1a344c;
 }
 
 .cohort-manifest i {
