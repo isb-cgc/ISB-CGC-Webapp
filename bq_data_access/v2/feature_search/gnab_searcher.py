@@ -20,7 +20,7 @@ from collections import defaultdict
 from copy import deepcopy
 
 from MySQLdb.cursors import DictCursor
-from _mysql_exceptions import MySQLError
+from MySQLdb._exceptions import MySQLError
 from bq_data_access.v2.feature_search.common import BackendException, InvalidFieldException, EmptyQueryException
 from bq_data_access.v2.feature_search.common import FOUND_FEATURE_LIMIT
 from bq_data_access.v2.gnab_data import GNAB_FEATURE_TYPE
