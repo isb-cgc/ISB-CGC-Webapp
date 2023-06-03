@@ -106,6 +106,7 @@
                         <th class="case-col">Case<br /> Count</th>
                         <th class="study-col">Study<br /> Count</th>
                         <th class="series-col">Series<br /> Count</th>
+                        <th class="disk-size-col">Disk<br /> Size</th>
                         <th class="version-col">Data Version</th>
                         <th class="export-col">Last Export</th>
                         <th class="compare-col">Version Compare</th>
@@ -119,6 +120,7 @@
                         <col style="width: 3%">
                         <col style="width: 3%">
                         <col style="width: 3%">
+                        <col style="width: 5%">
                         <col style="width: 16%">
                         <col style="width: 10%">
                         <col style="width: 3%; min-width: 45px;">
@@ -166,6 +168,7 @@
                             <td class="case-col">{{ cohort.case_count }}</td>
                             <td class="study-col">{{ cohort.study_count }}</td>
                             <td class="series-col">{{ cohort.series_count }}</td>
+                            <td class="disk-size-col">{{ cohort.total_disk_size|convert_disk_size_cohort }}</td>
 {#                            <td class="owner-col">#}
 {#                                {% if cohort.perm == 'Owner' %}#}
 {#                                    You#}

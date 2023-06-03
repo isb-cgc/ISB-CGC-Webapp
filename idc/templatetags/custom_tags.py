@@ -30,6 +30,7 @@ from cohorts.models import Cohort, Cohort_Perms
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from idc_collections.models import Program, ImagingDataCommonsVersion
+from cohorts.views import convert_disk_size
 from django.db.models import Q
 from functools import reduce
 import logging
@@ -112,12 +113,16 @@ ORIG_ATTR_REMOVE = [
     "access"
 ]
 
-
 def quick_js_bracket_replace(matchobj):
     if matchobj.group(0) == '<':
         return '\u003C'
     else:
         return '\u003E'
+
+
+@register.filter
+def convert_disk_size_cohort(size):
+    return convert_disk_size(size)
 
 
 @register.filter

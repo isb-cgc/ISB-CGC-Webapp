@@ -71,6 +71,7 @@ require([
             null,
             null,
             null,
+            null,
             null
         ]
     });
