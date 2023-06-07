@@ -34,8 +34,8 @@ from django.contrib import messages
 
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
-from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute, Attribute_Tooltips
-from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata
+from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute, Attribute_Tooltips, DataSetType
+from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata, create_file_manifest
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, JsonResponse
@@ -114,6 +114,7 @@ def privacy_policy(request):
     return render(request, 'idc/privacy.html', {'request': request, })
 
 
+# Displays the page of collaborators
 def collaborators(request):
     return render(request, 'idc/collaborators.html', {'request': request, })
 
@@ -161,6 +162,7 @@ def user_detail(request, user_id):
         return render(request, '403.html')
 
 
+# Callback method for logs of failed logins
 @receiver(user_login_failed)
 def user_login_failed_callback(sender, credentials, **kwargs):
     try:
@@ -197,13 +199,13 @@ def extended_login_view(request):
 
 # Health check callback
 #
-# Because the match for vm_ is always done regardless of its presense in the URL
+# Because the match for vm_ is always done regardless of its presence in the URL
 # we must always provide an argument slot for it
 def health_check(request, match):
     return HttpResponse('')
 
 
-# Quote page
+# Quota page for the viewer
 def quota_page(request):
     return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
 
@@ -230,6 +232,7 @@ def save_ui_hist(request):
     return JsonResponse({}, status=status)
 
 
+# Method for obtaining the records displayed in the tables on the right-hand side of the explore data page
 @login_required
 def populate_tables(request):
     response = {}
@@ -559,6 +562,12 @@ def explore_data_page(request, filter_path=False, path_filters=None):
     return render(request, 'idc/explore.html', context)
 
 
+def explorer_manifest(request):
+    return create_file_manifest(request)
+
+
+# Given a set of filters in a GET request, parse the filter set out into a filter set recognized
+# by the explore_data_page method and forward it on to that view, returning its response.
 def parse_explore_filters(request):
     try:
         if not request.GET:

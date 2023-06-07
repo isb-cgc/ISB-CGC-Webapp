@@ -60,7 +60,8 @@
             {% if request.user.is_authenticated %}
             <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal"
                 data-target="#save-cohort-modal"
-                title="Select at least one filter." disabled="disabled"> Save As New Cohort
+                title="Select at least one filter." disabled
+            > Save As New Cohort
             </button>
             {% else %}
             <button id="save-cohort-btn" class="btn btn-special pull-right" title="Select at least one filter."
@@ -72,17 +73,18 @@
                     title="Select a filter to enable this feature." disabled
             > View SQL String
             </button>
-            <button class="btn btn-default pull-right download-images-btn" data-toggle="modal"
-                    data-target="#download-images"
-                    title="View instructions for image download"
-            > Download Images
+            <button id="export-manifest" class="btn btn-special pull-right" data-toggle="modal"
+                data-target="#export-manifest-modal"
+                title="Export these search results as a manifest" disabled
+            > Export Manifest
             </button>
         </div>
     </div>
 {% endblock %}
 
 {% block content %}
-
+{% url 'get_explore_manifest' as export_uri %}
+{% include "cohorts/export-manifest-modal.html" with export_uri=export_uri %}
 {% include "idc/explore_data_core.html" %}
 
 {% endblock %}
