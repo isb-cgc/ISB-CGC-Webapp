@@ -30,7 +30,7 @@ from cohorts.models import Cohort, Cohort_Perms
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from idc_collections.models import Program, ImagingDataCommonsVersion
-from cohorts.views import convert_disk_size
+from idc_collections.collex_metadata_utils import convert_disk_size
 from django.db.models import Q
 from functools import reduce
 import logging
@@ -43,8 +43,6 @@ logger = logging.getLogger('main_logger')
 ALPHANUM_SORT = [
 
 ]
-
-
 
 DISPLAY_SORT = ['SOPClassUID', 'sample_type']
 
