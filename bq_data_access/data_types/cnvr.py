@@ -3,7 +3,7 @@ from django.conf import settings
 BIGQUERY_CONFIG = {
     "tables": [
         {
-            "gencode_reference_table_id": "isb-cgc:genome_reference.GENCODE_v19",
+            "gencode_reference_table_id": "isb-cgc:genome_reference.GENCODE_V19",
             "genomic_build": "hg19",
             "value_field": "segment_mean",
             "table_id": "{}:TCGA_hg19_data_v0.Copy_Number_Segment_Masked".format(settings.BIGQUERY_DATA_PROJECT_ID),
@@ -12,7 +12,7 @@ BIGQUERY_CONFIG = {
             "program": "tcga"
         },
         {
-            "gencode_reference_table_id": "isb-cgc:genome_reference.GENCODE_v24",
+            "gencode_reference_table_id": "isb-cgc:genome_reference.GENCODE_V24",
             "genomic_build": "hg38",
             "value_field": "segment_mean",
             "table_id": "{}:TCGA_hg38_data_v0.Copy_Number_Segment_Masked".format(settings.BIGQUERY_DATA_PROJECT_ID),
