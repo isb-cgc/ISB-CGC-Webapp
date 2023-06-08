@@ -16,5 +16,5 @@
 
 
 BIGQUERY_CONFIG = {
-    "interpro_reference_table_id": "isb-cgc:genomic_reference.interpro_filtered_plus"
+    "interpro_reference_table_id": "isb-cgc:genome_reference.interpro_filtered_plus"
 }
