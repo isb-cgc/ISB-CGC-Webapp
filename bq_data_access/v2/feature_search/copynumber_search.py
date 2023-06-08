@@ -19,7 +19,7 @@ from builtins import object
 import logging as logger
 
 from MySQLdb.cursors import DictCursor
-from _mysql_exceptions import MySQLError
+from MySQLdb._exceptions import MySQLError
 
 from copy import deepcopy
 from collections import defaultdict

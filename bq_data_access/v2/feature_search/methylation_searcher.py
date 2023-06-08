@@ -21,7 +21,7 @@ from copy import deepcopy
 import logging as logger
 
 from MySQLdb.cursors import DictCursor
-from _mysql_exceptions import MySQLError
+from MySQLdb._exceptions import MySQLError
 from bq_data_access.v2.feature_search.common import BackendException, InvalidFieldException, EmptyQueryException
 from bq_data_access.v2.feature_search.common import FOUND_FEATURE_LIMIT
 from bq_data_access.v2.methylation_data import METH_FEATURE_TYPE
