@@ -17,7 +17,7 @@
 from builtins import str
 from builtins import object
 from MySQLdb.cursors import DictCursor
-from _mysql_exceptions import MySQLError
+from MySQLdb._exceptions import MySQLError
 
 from copy import deepcopy
 from collections import defaultdict

@@ -16,7 +16,7 @@
 
 from builtins import object
 from MySQLdb.cursors import DictCursor
-from _mysql_exceptions import MySQLError
+from MySQLdb._exceptions import MySQLError
 from bq_data_access.v1.feature_search.common import BackendException, InvalidFieldException
 from bq_data_access.v1.feature_search.common import FOUND_FEATURE_LIMIT
 from bq_data_access.v1.mirna_data import build_feature_label, MIRN_FEATURE_TYPE
