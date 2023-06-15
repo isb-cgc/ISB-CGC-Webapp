@@ -75,8 +75,8 @@
             </button>
             <button id="export-manifest" class="btn btn-special pull-right" data-toggle="modal"
                 data-target="#export-manifest-modal"
-                title="Export these search results as a manifest" disabled
-            > Export Manifest
+                title="Select a filter to enable this feature." disabled
+            > Download Images
             </button>
         </div>
     </div>
@@ -127,9 +127,11 @@
         var is_cohort = false;
         var showWarning = true;
         var user_is_auth = {% if request.user.is_authenticated %} true {% else %} false {% endif %};
+        var user_id = {% if request.user.is_authenticated %}{{ request.user.id|safe }}{% else %}null{% endif %};
     </script>
     <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
     {{ block.super }}
     <script type="text/javascript" src="{% static 'js/explore.js' %}?v={{ APP_VERSION }}"></script>
     <script type="text/javascript" src="{% static 'js/bq-string.js' %}?v={{ APP_VERSION }}"></script>
+    <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}?v={{ APP_VERSION }}"></script>
 {% endblock %}

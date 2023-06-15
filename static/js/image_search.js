@@ -1715,10 +1715,12 @@ require([
             $('.bq-string-display').attr("disabled","disabled");
             $('.bq-string-display').attr("title","Select a filter to enable this feature.");
             $('.bq-string').html("");
+            $('#export-manifest-form input[name="filters"]').val("");
         } else {
             $('.bq-string-display').removeAttr("disabled");
             $('.bq-string-display').attr("title","Click to display this filter as a BQ string.");
             $('.bq-string-display').attr('filter-params', JSON.stringify(filters));
+            $('#export-manifest-form input[name="filters"]').val(JSON.stringify(filters));
         }
     };
 
@@ -1727,6 +1729,7 @@ require([
         if (Object.keys(filters).length <= 0) {
             $('.get-filter-uri').attr("disabled","disabled");
             $('#export-manifest').attr("disabled","disabled");
+            $('#export-manifest').attr("title","Select a filter to enable this feature.");
             $('.get-filter-uri').attr("title","Select a filter to enable this feature.");
             $('.filter-url').html("");
             $('.copy-url').removeAttr("content");
@@ -1742,6 +1745,7 @@ require([
             $('#export-manifest').removeAttr("disabled");
             $('.copy-url').removeAttr("disabled");
             $('.get-filter-uri').attr("title","Click to display this filter set's query URL.");
+            $('#export-manifest').attr("title","Export these search results as a manifest for downloading.");
             let url = BASE_URL+"/explore/filters/?";
             let encoded_filters = []
             for (let i in filters) {
@@ -1761,10 +1765,6 @@ require([
             url.length <= 2048 && $('.url-too-long').hide();
             $('.filter-url').html(url);
             $('.copy-url').attr("content",url);
-            $('#export-manifest-form').attr(
-                'action',
-                $('#export-manifest-form').data('uri-base')+"?"+encoded_filters.join("&")
-            );
         }
     };
 

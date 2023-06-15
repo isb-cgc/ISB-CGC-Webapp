@@ -296,7 +296,9 @@ require([
     });
 
     $('#export-manifest').on('click',function(){
-        $('.manifest-name').find('input.form-control').val("cohort_"+cohort_id+$('#export-manifest-name').data('name-base'));
+        $('.manifest-name').find('input.form-control').val(
+            is_cohort ? "cohort_"+cohort_id+$('#export-manifest-name').data('name-base') : "file_manifest"
+        );
     });
 
     tippy('.bq-disabled', {
