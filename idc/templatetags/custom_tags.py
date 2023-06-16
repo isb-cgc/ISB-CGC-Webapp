@@ -30,6 +30,7 @@ from cohorts.models import Cohort, Cohort_Perms
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from idc_collections.models import Program, ImagingDataCommonsVersion
+from idc_collections.collex_metadata_utils import convert_disk_size
 from django.db.models import Q
 from functools import reduce
 import logging
@@ -42,8 +43,6 @@ logger = logging.getLogger('main_logger')
 ALPHANUM_SORT = [
 
 ]
-
-
 
 DISPLAY_SORT = ['SOPClassUID', 'sample_type']
 
@@ -102,6 +101,7 @@ ATTR_SPECIFIC_ORDERS = [
 
 ORIG_ATTR_FIRST = [
     "tcia_tumorLocation",
+    "CancerType",
     "BodyPartExamined",
     "Modality"
 ]
@@ -112,12 +112,23 @@ ORIG_ATTR_REMOVE = [
     "access"
 ]
 
-
 def quick_js_bracket_replace(matchobj):
     if matchobj.group(0) == '<':
         return '\u003C'
     else:
         return '\u003E'
+
+
+@register.filter
+def has_social(user):
+    if user.is_authenticated:
+        return bool(len(user.socialaccount_set.all()) > 0)
+    return False
+
+
+@register.filter
+def convert_disk_size_cohort(size):
+    return convert_disk_size(size)
 
 
 @register.filter

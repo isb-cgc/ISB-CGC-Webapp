@@ -36,7 +36,7 @@ PyCharm Pro can be used to run your Web Application as a native Django applicati
  7. Click Ok to save
  10. Go to **Run > Edit Configurations**
  11. If there is not a Django Configuration, add one
- 12. Set the host to `0.0.0.0` and the port to `8085`.
+ 12. Set the host to `0.0.0.0` and the port to `8086`.
  13. Set the Python Interpreter to the Vagrant Machine (if it is not set to that already)
  14. Set the working directory to `/home/vagrant/www`
  15. Click `...` next to the `Environment variables:`, box and add the following values:
