@@ -64,6 +64,10 @@ require([
 
     var downloadToken = new Date().getTime();
 
+    $('.modal').on('hide.bs.modal', function() {
+        $('.filename-missing').removeClass('filename-missing');
+    });
+
     $('#download-csv').on('click', function(e) {
         download_manifest("csv", $(this), e)
     });
@@ -201,88 +205,48 @@ require([
         }
     };
 
-    $('.column-checkbox').change(function() {
-        update_download_manifest_buttons($(this));
-    });
-
-    $('.manifest-file-name').find('input.form-control').change(function(){
-        update_download_manifest_buttons();
+    $('input.form-control[name="file_name"]').on('change', function(){
+        $(this).val().length <= 0 ? $(this).addClass('filename-missing') : $(this).removeClass('filename-missing');
     });
 
     var update_download_manifest_buttons = function(clicked){
-        var is_list = ($('tr:not(:first) input.cohort').length > 0);
-
-        var checked_cohorts = $('tr:not(:first) input.cohort:checked').length;
-        var num_selected_column =$('.column-checkbox:checked').length;
-        var input_cohort_name_len = $('#export-manifest-name').val().length;
-
-        if (input_cohort_name_len == 0 || num_selected_column == 0 || (is_list && checked_cohorts == 0)) {
-            $('.get-manifest').attr('disabled', 'disabled');
-        } else {
-            if( is_list && checked_cohorts > 1 ) {
-                $('.download-file,.file-manifest').attr('disabled', 'disabled');
-                $('.download-file,.file-manifest').attr('title', 'Only a single cohort with an active data version can be downloaded as a file.');
-                $('input.bq-manifest').trigger('click');
+        if(clicked) {
+            let cohort_row=clicked.parents('tr');
+            if (cohort_row.data('inactive-versions') === "True") {
+                $('#bq-manifest').trigger('click');
+                $('.download-file,.file-manifest, #manifest-s5cmd, #manifest-file').attr('disabled', 'disabled');
+                $('.download-file,.file-manifest, #manifest-s5cmd, #manifest-file').attr('title', 'Only a cohort with an active data version can be downloaded as a file.');
             } else {
-                $('.download-file,.file-manifest').removeAttr('disabled');
-                $('.download-file,.file-manifest').removeAttr('title');
-                clicked && !clicked.hasClass('column-checkbox') && $('input.file-manifest').trigger('click');
-                if(is_list) {
-                    let cohort_row=$('input.cohort:checked').parents('tr');
-                    if(cohort_row.data('inactive-versions') === "True") {
-                        $('.download-file,.file-manifest').attr('disabled', 'disabled');
-                        $('.download-file,.file-manifest').attr('title', 'Only a single cohort with an active data version can be downloaded as a file.');
-                        clicked && !clicked.hasClass('column-checkbox') && $('input.bq-manifest').trigger('click');
-                    } else {
-                        let file_parts_count = cohort_row.data('file-parts-count');
-                        let display_file_parts_count = cohort_row.data('display-file-parts-count')
-                        if (file_parts_count > display_file_parts_count) {
-                            $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
-                            $('#file-export-option input').prop('disabled', 'disabled');
-                            $('#file-export-option input').prop('checked', false);
-                            $('#file-manifest').hide();
-                            if(!user_is_social) {
-                                $('#need-social-account').show();
-                            } else {
-                                $('#file-manifest-max-exceeded').show();
-                                $('#bq-export-option input').prop('checked', true).trigger("click");
-                            }
-                        } else {
-                            $('#file-manifest-max-exceeded').hide();
-                            clicked && !clicked.hasClass('column-checkbox') && $('#file-manifest').show();
-
-                            var select_box_div = $('#file-part-select-box');
-                            var select_box = select_box_div.find('select');
-                            if (file_parts_count > 1) {
-                                select_box_div.show();
-                                for (let i = 0; i < display_file_parts_count; ++i) {
-                                    select_box.append($('<option/>', {
-                                        value: i,
-                                        text : "File Part " + (i + 1)
-                                    }));
-                                }
-                            } else {
-                                select_box_div.hide();
-                            }
+                $('#manifest-s5cmd').trigger('click');
+                $('.download-file, .file-manifest, #manifest-s5cmd, #manifest-file').removeAttr('disabled');
+                $('.download-file, .file-manifest, #manifest-s5cmd, #manifest-file').removeAttr('title');
+                let file_parts_count = cohort_row.data('file-parts-count');
+                let display_file_parts_count = cohort_row.data('display-file-parts-count')
+                if (file_parts_count > display_file_parts_count) {
+                    $('#manifest-file').attr('title', 'Your cohort\'s size exceeds the limit for file manifest download--please use BQ export or s5cmd manifest.');
+                    $('#manifest-file').attr('disabled', 'disabled');
+                } else {
+                    var select_box_div = $('#file-part-select-box');
+                    var select_box = select_box_div.find('select');
+                    if (file_parts_count > 1) {
+                        select_box_div.show();
+                        for (let i = 0; i < display_file_parts_count; ++i) {
+                            select_box.append($('<option/>', {
+                                value: i,
+                                text : "File Part " + (i + 1)
+                            }));
                         }
+                    } else {
+                        select_box_div.hide();
                     }
                 }
             }
-            $('#get-bq-table').removeAttr('disabled');
-        }
-
-        if (num_selected_column == 0) {
-            $('#no-column-alert-modal').show();
-        } else {
-            $('#no-column-alert-modal').hide();
         }
     };
 
-    // The Cohort list page export button (a set of cohorts)
-    $('#export-manifest-set').on('click',function(){
-        var cohort_ids = $('input[name="id"]:checked').map(function () {
-            return $(this).val();
-        }).get();
+    // The Export button for each cohort on the Cohort List Page
+    $('#saved-cohorts-list').on('click', '.export-cohort-manifest', function(){
+        var cohort_ids = [$(this).data('cohort-id')];
 
         $('#export-manifest-form').attr(
             'action',
@@ -292,17 +256,27 @@ require([
         $('input[name="ids"]').val(cohort_ids.join(","))
 
         $('.manifest-name').find('input.form-control').val("cohorts_"+cohort_ids.join("_")+$('#export-manifest-name').data('name-base'));
-        update_download_manifest_buttons();
+        update_download_manifest_buttons($(this));
     });
 
+    // The Export Manifest button on the cohort details page
     $('#export-manifest').on('click',function(){
-        $('.manifest-name').find('input.form-control').val("cohort_"+cohort_id+$('#export-manifest-name').data('name-base'));
+        $('.manifest-name').find('input.form-control').val(
+            is_cohort ? "cohort_"+cohort_id+$('#export-manifest-name').data('name-base') : "file_manifest"
+        );
     });
+
+    let bq_disabled_message = 'Exporting to BigQuery requires you to be logged in and have a linked Google Social Account.';
+    if(user_is_auth && !user_is_social) {
+        bq_disabled_message += ' You can link your account to a Google ID from the '
+            +  '<a target="_blank" rel="noopener noreferrer" href="/users/' + user_id + '/">'
+            + 'Account Details</a> page.'
+    } else {
+        bq_disabled_message += ' Please log in with a Google Social account to enable this feature.'
+    }
 
     tippy('.bq-disabled', {
-        content: 'Exporting to BigQuery requires a linked Google Social Account. You can link your account to a Google ID from the '
-            +  '<a target="_blank" rel="noopener noreferrer" href="/users/' + user_id + '/">'
-            + 'Account Details</a> page.',
+        content: bq_disabled_message,
         theme: 'dark',
         placement: 'right',
         arrow: true,

@@ -60,7 +60,8 @@
             {% if request.user.is_authenticated %}
             <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal"
                 data-target="#save-cohort-modal"
-                title="Select at least one filter." disabled="disabled"> Save As New Cohort
+                title="Select at least one filter." disabled
+            > Save As New Cohort
             </button>
             {% else %}
             <button id="save-cohort-btn" class="btn btn-special pull-right" title="Select at least one filter."
@@ -72,9 +73,9 @@
                     title="Select a filter to enable this feature." disabled
             > View SQL String
             </button>
-            <button class="btn btn-default pull-right download-images-btn" data-toggle="modal"
-                    data-target="#download-images"
-                    title="View instructions for image download"
+            <button id="export-manifest" class="btn btn-special pull-right" data-toggle="modal"
+                data-target="#export-manifest-modal"
+                title="Select a filter to enable this feature." disabled
             > Download Images
             </button>
         </div>
@@ -82,7 +83,10 @@
 {% endblock %}
 
 {% block content %}
-
+{% url 'get_explore_manifest' as export_uri %}
+{% with  request.user|has_social as user_is_social %}
+    {% include "cohorts/export-manifest-modal.html" with export_uri=export_uri user_is_social=user_is_social %}
+{% endwith %}
 {% include "idc/explore_data_core.html" %}
 
 {% endblock %}
@@ -125,9 +129,11 @@
         var is_cohort = false;
         var showWarning = true;
         var user_is_auth = {% if request.user.is_authenticated %} true {% else %} false {% endif %};
+        var user_id = {% if request.user.is_authenticated %}{{ request.user.id|safe }}{% else %}null{% endif %};
     </script>
     <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
     {{ block.super }}
     <script type="text/javascript" src="{% static 'js/explore.js' %}?v={{ APP_VERSION }}"></script>
     <script type="text/javascript" src="{% static 'js/bq-string.js' %}?v={{ APP_VERSION }}"></script>
+    <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}?v={{ APP_VERSION }}"></script>
 {% endblock %}

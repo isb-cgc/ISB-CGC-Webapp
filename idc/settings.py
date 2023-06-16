@@ -1,5 +1,5 @@
 ###
-# Copyright 2015-2020, Institute for Systems Biology
+# Copyright 2015-2023, Institute for Systems Biology
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ from os.path import join, dirname, exists
 import sys
 import dotenv
 from socket import gethostname, gethostbyname
+
 
 SECURE_LOCAL_PATH = os.environ.get('SECURE_LOCAL_PATH', '')
 

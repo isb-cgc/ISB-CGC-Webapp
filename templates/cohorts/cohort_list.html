@@ -25,7 +25,9 @@
 {% block content %}
 
 {% url 'cohort_manifest_base' as export_uri %}
-{% include "cohorts/export-manifest-modal.html" with export_uri=export_uri %}
+{% with  user_is_social=request.user|has_social user_is_auth=request.user.is_authenticated %}
+    {% include "cohorts/export-manifest-modal.html" with export_uri=export_uri user_is_social=user_is_social user_is_auth=user_is_auth %}
+{% endwith %}
 
 <div id="version_d" tabindex="-1"
      class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-draggable ui-resizable"
@@ -70,18 +72,6 @@
 
 <div class="container-fluid">
     <div class="page-action-group">
-        <li  role="menuitem">
-            <button id="export-manifest-set" class="btn btn-special" data-toggle="modal" data-target="#export-manifest-modal" aria-label="export-manifests" role="button" aria-expanded="true" disabled title="Select one or more cohorts.">
-                <i class="fa-solid fa-clipboard"></i>
-                Export Manifests
-            </button>
-        </li>
-        <li role="menuitem" class="pull-right">
-            <button id="delete-cohorts" type="button" class="btn btn-info" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true" disabled title="Select one or more cohorts.">
-                <i class="fa-solid fa-trash"></i>
-                Delete
-            </button>
-        </li>
 {#            <li role="menuitem">#}
 {#                <button id="cohort-sets" type="button" class="btn btn-info set-ops" data-toggle="modal" data-target="#set-ops-modal" aria-label="set-logic" role="button" aria-expanded="true" disabled title="Select one or more cohorts.">#}
 {#                Set Operations#}
@@ -100,27 +90,31 @@
                 <table id="cohort-table" class="table table-striped tablesorter cohort-table table-hover">
                     <thead>
                         <th></th>
-                        <th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>
                         <th class="id-col">Cohort ID</th>
                         <th class="name-col">Name</th>
                         <th class="case-col">Case<br /> Count</th>
                         <th class="study-col">Study<br /> Count</th>
                         <th class="series-col">Series<br /> Count</th>
+                        <th class="disk-size-col">Disk<br /> Size</th>
                         <th class="version-col">Data Version</th>
-                        <th class="export-col">Last Export</th>
+                        <th class="last-export-col">Last Export</th>
+                        <th class="export-col">Export Manifest</th>
                         <th class="compare-col">Version Compare</th>
                         <th class="query-str-col">Query String</th>
+                        <th class="delete-col">Delete</th>
                     </thead>
                     <colgroup>
                         <col style="width: 2%">
-                        <col style="width: 2%">
                         <col style="width: 5%; min-width: 45px;">
                         <col style="width: 22%">
-                        <col style="width: 3%">
-                        <col style="width: 3%">
-                        <col style="width: 3%">
+                        <col style="width: 3%; min-width: 45px;">
+                        <col style="width: 3%; min-width: 45px;">
+                        <col style="width: 3%; min-width: 45px;">
+                        <col style="width: 5%">
                         <col style="width: 16%">
                         <col style="width: 10%">
+                        <col style="width: 3%; min-width: 45px;">
+                        <col style="width: 3%; min-width: 45px;">
                         <col style="width: 3%; min-width: 45px;">
                         <col style="width: 3%; min-width: 45px;">
                     </colgroup>
@@ -130,14 +124,13 @@
                         <tr data-description='{% if cohort.description %}{{ cohort.description }}{% else %}N/A{% endif %}'
                             data-collex="{{ cohort.collections }}"
                             data-name="{{ cohort.name }}"
+                            data-cohort-id="{{ cohort.id }}"
                             data-filters="{{ cohort.get_filter_display_string }}"
                             data-file-parts-count="{{ cohort.file_parts_count }}"
                             data-display-file-parts-count="{{ cohort.display_file_parts_count }}"
-                            {% if not only_active_versions %}data-inactive-versions="True"{% endif %}
-
+                            data-inactive-versions="{% if not only_active_versions %}True{% else %}False{% endif %}"
                         >
                             <td class = "details-control" title="Click to display cohort description."> <i class="fa-solid fa-plus-circle show-button"> </i><i class="fa-solid fa-circle-minus hide-button"> </i> </td>
-                            <td class="checkbox-col"> <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} class="cohort" type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>
                             </td>
                             <td class="id-col">
                                 {{ cohort.id }}
@@ -166,6 +159,7 @@
                             <td class="case-col">{{ cohort.case_count }}</td>
                             <td class="study-col">{{ cohort.study_count }}</td>
                             <td class="series-col">{{ cohort.series_count }}</td>
+                            <td class="disk-size-col">{{ cohort.total_disk_size|convert_disk_size_cohort }}</td>
 {#                            <td class="owner-col">#}
 {#                                {% if cohort.perm == 'Owner' %}#}
 {#                                    You#}
@@ -203,6 +197,16 @@
                                     {% endwith %}
                                 </p>
                             </td>
+                            <td  role="menuitem">
+                                <button class="btn btn-special export-manifest export-cohort-manifest"
+                                        data-toggle="modal"
+                                        data-cohort-id="{{ cohort.id }}"
+                                        data-target="#export-manifest-modal"
+                                        aria-label="export-manifests" role="button"
+                                        aria-expanded="true">
+                                    <i class="fa-solid fa-clipboard"></i>
+                                </button>
+                            </td>
                             <td>
                                 <button class="btn btn-icon compare-version" role="button"
                                     title="{% if only_active_versions %}Version is active.{% else %}Compare this cohort's counts in the new data version.{% endif %}"
@@ -220,6 +224,17 @@
                                     title="View the BigQuery String for this cohort"
                                 ><img src="{% static 'img/bq_icon.png' %}"></button>
                             </td>
+                            <td>
+                                <button type="button" class="btn btn-info delete-cohort" data-toggle="modal"
+                                        data-cohort-id="{{ cohort.id }}"
+                                        data-target="#delete-cohorts-modal"
+                                        aria-label="delete-cohorts" role="button"
+                                        aria-expanded="true"
+                                        title="Delete cohort ID {{ cohort.id }}"
+                                >
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
                         </tr>
                     {% endwith %}
                     {% endfor %}
@@ -236,70 +251,6 @@
     </div>
 </div>
 
-    <!-- Set Operation Modal -->
-{#    <div class="modal fade" id="set-ops-modal" tabindex="-1" role="dialog" aria-labelledby="union-header" aria-hidden="true">#}
-{#        <div class="modal-dialog">#}
-{#            <div class="modal-content">#}
-{#                <div class="modal-header">#}
-{#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
-{#                    <h4 class="modal-title" id="union-header">New Cohorts</h4>#}
-{#                </div>#}
-{#                <form id="set-op-cohort" method="POST" action="{% url 'set_operation' %}" class="">#}
-{#                    <div class="modal-body">#}
-{#                        <div class="form-group">#}
-{#                            <label for="new-cohort-name">Cohort Name</label>#}
-{#                            <input type="text" class="form-control" id="new-cohort-name" name="name" placeholder="Enter name for new cohort" required>#}
-{#                        </div>#}
-{#                        <div class="form-group">#}
-{#                            <label for="operation">Set Operation</label>#}
-{#                            <div>#}
-{#                                <select name="operation" id="operation" class="form-control">#}
-{#                                    <option value="union">Union</option>#}
-{#                                    <option value="intersect">Intersection</option>#}
-{#                                    <option value="complement">Complement</option>#}
-{#                                </select>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                        <div class="form-group set-control">#}
-{#                            <label for="selected-ids">Selected Cohorts</label>#}
-{#                            <div>#}
-{#                                <div class="form-control-static" id="selected-ids">#}
-{##}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                        <div class="form-group complement-control">#}
-{#                            <label for="base-cohort">Base Cohort</label>#}
-{#                            <div>#}
-{#                                <p class="form-control-static" id="base-id"></p>#}
-{#                                <div class="cohort-search-div">#}
-{#                                    <a class="add-cohort btn btn-link"><i class="fa-solid fa-plus"></i> Choose Cohort</a>#}
-{#                                    <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                        <div class="form-group complement-control">#}
-{#                            <label for="subtract-cohorts">Subtracted Cohorts</label>#}
-{#                            <div>#}
-{#                                <p class="form-control-static" id="subtract-ids"></p>#}
-{#                                <div class="cohort-search-div">#}
-{#                                    <a class="add-cohort btn btn-link"><i class="fa-solid fa-plus"></i> Choose Cohort</a>#}
-{#                                    <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </div>#}
-{##}
-{#                    </div>#}
-{#                    <div class="modal-footer">#}
-{#                        {% csrf_token %}#}
-{#                        <button type="submit" class="btn btn-primary">Okay</button>#}
-{#                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>#}
-{#                    </div>#}
-{#                </form>#}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
-
     <!-- Delete Cohort Modal -->
     <div class="modal fade" id="delete-cohorts-modal" tabindex="-1" role="dialog" aria-labelledby="delete-cohort-header" aria-hidden="true">
         <div class="modal-dialog">
@@ -310,7 +261,7 @@
                 </div>
                 <form id="delete-cohort-form" method="POST" action="{% url 'delete_cohort' %}">
                     <div class="modal-body">
-                        <label>Are you sure you want to delete these cohorts?</label>
+                        <label>Are you sure you want to delete cohort #<span class="del-cohort"></span>?</label>
                         <p class="form-control-static selected-cohorts"></p>
                     </div>
                     <div class="modal-footer">

@@ -712,7 +712,7 @@ def update_data_versions(filename):
         config['bioclin_version']
     )
 
-    add_data_sources(config['data_sources'], config['new_sub_versions'], config['set_types'], config['attr_exclude'])
+    add_data_sources(config['data_sources'], config['new_sub_versions'], config['set_types'], config.get('attr_exclude',[]))
 
     deactivate_data_versions(config['deactivate']['minor'], config['deactivate']['major'])
 
@@ -738,7 +738,7 @@ def main():
         len(args.version_file) and update_data_versions(args.version_file)
 
         len(args.attributes_file) and load_attributes(args.attributes_file,
-            ["dicom_derived_series_v13", "dicom_derived_study_v13"], ["idc-dev-etl.idc_v13_pub.dicom_pivot_v13"]
+            ["dicom_derived_series_v15", "dicom_derived_study_v15"], ["idc-dev-etl.idc_v15_pub.dicom_pivot_v15"]
         )
 
         len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
@@ -750,8 +750,8 @@ def main():
                 update_display_values(Attribute.objects.get(name=attr), dvals[attr]['vals'])
 
         if args.solr_files.lower() == 'y':
-            for src in [("idc-dev-etl.idc_v14_pub.dicom_derived_all", "dicom_derived_series_v14",),
-                    ("idc-dev-etl.idc_v14_pub.dicom_derived_all", "dicom_derived_study_v14",),]:
+            for src in [("idc-dev-etl.idc_v15_pub.dicom_derived_all", "dicom_derived_series_v15",),
+                    ("idc-dev-etl.idc_v15_pub.dicom_derived_all", "dicom_derived_study_v15",),]:
                 create_solr_params(src[0], src[1])
 
     except Exception as e:
