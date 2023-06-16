@@ -120,6 +120,13 @@ def quick_js_bracket_replace(matchobj):
 
 
 @register.filter
+def has_social(user):
+    if user.is_authenticated:
+        return bool(len(user.socialaccount_set.all()) > 0)
+    return False
+
+
+@register.filter
 def convert_disk_size_cohort(size):
     return convert_disk_size(size)
 

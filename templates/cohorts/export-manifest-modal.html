@@ -49,8 +49,8 @@
                                     CSV/TSV/JSON
                                 </a>
                             </li>
-                            <li class="filter-tab {% if not is_social %}bq-disabled{% endif %}" role="presentation">
-                                <a href="#manifest-bq"{% if not is_social %} class="disabled" {% endif %}role="tab"
+                            <li class="filter-tab {% if not user_is_social %}bq-disabled{% endif %}" role="presentation">
+                                <a href="#manifest-bq"{% if not user_is_social %} class="disabled" {% endif %}role="tab"
                                    data-toggle="tab" title="BigQuery manifest export" aria-expanded="false"
                                 >
                                     BigQuery
@@ -59,7 +59,7 @@
                         </ul>
                         <div class="tab-content">
                             <div id="manifest-bq" class="tab-pane manifest" role="tab-panel">
-                                {% if is_social %}
+                                {% if user_is_social %}
                                     <div class="bq-table-name manifest-name">
                                         <label for="export-bq-name">Name</label>
                                         <p>BigQuery table names are automatically generated and will be provided once the manifest has exported.</p>
@@ -189,7 +189,7 @@
                                     </a>on downloading images defined by the manifest</p>
                                 </div>
                                 <a id="download-s5cmd" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in s5cmd format.">
-                                    Download s5cmd manifest
+                                    Download s5cmd Manifest
                                 </a>
                             </div>
                             <div id="manifest-file" class="tab-pane manifest" role="tab-panel">

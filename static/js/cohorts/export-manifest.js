@@ -278,11 +278,9 @@ require([
         }
     };
 
-    // The Cohort list page export button (a set of cohorts)
-    $('#export-manifest-set').on('click',function(){
-        var cohort_ids = $('input[name="id"]:checked').map(function () {
-            return $(this).val();
-        }).get();
+    // The Export button for each cohort on the Cohort List Page
+    $('#saved-cohorts-list').on('click', '.export-cohort-manifest', function(){
+        var cohort_ids = [$(this).data('cohort-id')];
 
         $('#export-manifest-form').attr(
             'action',
@@ -301,10 +299,17 @@ require([
         );
     });
 
-    tippy('.bq-disabled', {
-        content: 'Exporting to BigQuery requires a linked Google Social Account. You can link your account to a Google ID from the '
+    let bq_disabled_message = 'Exporting to BigQuery requires you to be logged in and have a linked Google Social Account.';
+    if(user_is_auth && !user_is_social) {
+        bq_disabled_message += ' You can link your account to a Google ID from the '
             +  '<a target="_blank" rel="noopener noreferrer" href="/users/' + user_id + '/">'
-            + 'Account Details</a> page.',
+            + 'Account Details</a> page.'
+    } else {
+        bq_disabled_message += ' Please log in with a Google Social account to enable this feature.'
+    }
+
+    tippy('.bq-disabled', {
+        content: bq_disabled_message,
         theme: 'dark',
         placement: 'right',
         arrow: true,

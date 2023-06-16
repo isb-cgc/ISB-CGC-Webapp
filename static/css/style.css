@@ -520,7 +520,7 @@ nav {
  * Whole Site Widget Style
  *******************************************/
 .btn {
-  text-transform: capitalize;
+/*  text-transform: capitalize; >>> DO NOT re-enable this, use a subclass to enforce transforms <<< */
   overflow: hidden;
   position: relative; }
   .btn.nocap {
