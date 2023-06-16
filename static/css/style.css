@@ -4350,3 +4350,7 @@ d-topics-list iframe {
   font-size: medium;
   color: #555a8a;
 }
+
+.filename-missing {
+  border: 2px solid red;
+}
