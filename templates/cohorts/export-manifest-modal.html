@@ -14,10 +14,6 @@
                         <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                         Your manifest file's name must be no more than 255 characters long.
                     </div>
-                    <div id="no-column-alert-modal" class="alert alert-warning alert-dismissable" style="display: none;">
-                        <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                        At least one column needs to be selected to export manifest file.
-                    </div>
                     <div id="file-manifest-max-exceeded" class="alert alert-warning alert-dismissable" style="display: none;">
                         <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                         Your manifest is too large to be downloaded. Please use our BigQuery export option. (This requires a Google Account login.)
@@ -49,8 +45,8 @@
                                     CSV/TSV/JSON
                                 </a>
                             </li>
-                            <li class="filter-tab {% if not is_social %}bq-disabled{% endif %}" role="presentation">
-                                <a href="#manifest-bq"{% if not is_social %} class="disabled" {% endif %}role="tab"
+                            <li class="filter-tab {% if not user_is_social %}bq-disabled{% endif %}" role="presentation">
+                                <a href="#manifest-bq"{% if not user_is_social %} class="disabled" {% endif %}role="tab"
                                    data-toggle="tab" title="BigQuery manifest export" aria-expanded="false"
                                 >
                                     BigQuery
@@ -59,7 +55,7 @@
                         </ul>
                         <div class="tab-content">
                             <div id="manifest-bq" class="tab-pane manifest" role="tab-panel">
-                                {% if is_social %}
+                                {% if user_is_social %}
                                     <div class="bq-table-name manifest-name">
                                         <label for="export-bq-name">Name</label>
                                         <p>BigQuery table names are automatically generated and will be provided once the manifest has exported.</p>
@@ -129,12 +125,24 @@
                                             Get BQ Table
                                         </a>
                                     </div>
+                                {% else %}
+                                    <div class="panel-body">
+                                        Exporting to BigQuery requires you to be logged in and have a linked Google Social Account.
+                                        {% if user_is_auth and not user_is_social %}
+                                            You can link your account to a Google ID from the
+                                            <a target="_blank" rel="noopener noreferrer" href="/users/{{ request.user.id }}/">Account Details</a> page.
+                                        {% else %}
+                                            Please log in with a Google Social account to enable this feature.
+                                        {% endif %}
+                                    </div>
                                 {% endif %}
                             </div>
                             <div id="manifest-s5cmd" class="tab-pane manifest active" role="tab-panel">
                                 <div class="s5cmd-file-name manifest-name">
                                     <label for="export-s5cmd-name">Base File Name</label>
-                                    <input class="form-control" type="text" id="export-s5cmd-name" name="file_name" data-name-base="_{% now "Ymd_Gis" %}" value="" required />
+                                    <input class="form-control" type="text" id="export-s5cmd-name"
+                                           name="file_name" data-name-base="_{% now "Ymd_Gis" %}" value=""
+                                           placeholder="Please supply a file name." required />
                                 </div>
                                 <div class="s5cmd-loc-type">
                                     <p>Cloud Source</p>
@@ -189,13 +197,16 @@
                                     </a>on downloading images defined by the manifest</p>
                                 </div>
                                 <a id="download-s5cmd" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in s5cmd format.">
-                                    Download s5cmd manifest
+                                    Download s5cmd Manifest
                                 </a>
                             </div>
                             <div id="manifest-file" class="tab-pane manifest" role="tab-panel">
                                 <div class="manifest-file-name manifest-name">
                                     <label for="export-manifest-name">Name</label>
-                                    <input class="form-control" type="text" id="export-manifest-name" name="file_name" data-name-base="_{% now "Ymd_Gis" %}" value="" required />
+                                    <input class="form-control" type="text" id="export-manifest-name"
+                                           name="file_name" data-name-base="_{% now "Ymd_Gis" %}"
+                                           placeholder="Please supply a file name."
+                                           value="" required />
                                 </div>
                                 <!-- Header Fields -->
                                 <p><input id="include-file-header-checkbox" type="checkbox" checked> Include header fields</p>

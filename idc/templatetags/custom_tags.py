@@ -101,6 +101,7 @@ ATTR_SPECIFIC_ORDERS = [
 
 ORIG_ATTR_FIRST = [
     "tcia_tumorLocation",
+    "CancerType",
     "BodyPartExamined",
     "Modality"
 ]
@@ -116,6 +117,13 @@ def quick_js_bracket_replace(matchobj):
         return '\u003C'
     else:
         return '\u003E'
+
+
+@register.filter
+def has_social(user):
+    if user.is_authenticated:
+        return bool(len(user.socialaccount_set.all()) > 0)
+    return False
 
 
 @register.filter

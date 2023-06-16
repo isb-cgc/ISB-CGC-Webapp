@@ -302,7 +302,7 @@
                                                 <li class="list-group-item">
                                                     <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                         <a role="button" data-toggle="collapse" href="#{{ attr.name }}"
-                                                           aria-expanded="{% if attr.name in "Modality,BodyPartExamined,tcia_tumorLocation" %}true{% else %}false{% endif %}"
+                                                           aria-expanded="{% if attr.name in "Modality,BodyPartExamined,tcia_tumorLocation,CancerType" %}true{% else %}false{% endif %}"
                                                            aria-controls="{{ attr.name }}">
                                                             <i class="fa fa-solid fa-caret-right"></i> <i
                                                                 class="fa fa-solid fa-caret-down"></i> <span
@@ -318,11 +318,11 @@
 
                                                     <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}"
                                                          class="list-group-item__body collapse
-                                                            {% if attr.name in "Modality,BodyPartExamined,tcia_tumorLocation" %} in
+                                                            {% if attr.name in "Modality,BodyPartExamined,tcia_tumorLocation,CancerType" %} in
                                                             {% endif %}
                                                             "
 
-                                                         aria-expanded="{% if attr.name in "Modality,BodyPartExamined,tcia_tumorLocation" %}true
+                                                         aria-expanded="{% if attr.name in "Modality,BodyPartExamined,tcia_tumorLocation,CancerType" %}true
                                                          {% else %}false{% endif %}"
 
                                                         {% if attr.min_max %}
