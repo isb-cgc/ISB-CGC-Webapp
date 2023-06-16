@@ -101,6 +101,7 @@ ATTR_SPECIFIC_ORDERS = [
 
 ORIG_ATTR_FIRST = [
     "tcia_tumorLocation",
+    "CancerType",
     "BodyPartExamined",
     "Modality"
 ]
