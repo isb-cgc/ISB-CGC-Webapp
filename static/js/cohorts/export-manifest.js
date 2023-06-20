@@ -213,13 +213,15 @@ require([
         if(clicked) {
             let cohort_row=clicked.parents('tr');
             if (cohort_row.data('inactive-versions') === "True") {
-                $('#bq-manifest').trigger('click');
-                $('.download-file,.file-manifest, #manifest-s5cmd, #manifest-file').attr('disabled', 'disabled');
-                $('.download-file,.file-manifest, #manifest-s5cmd, #manifest-file').attr('title', 'Only a cohort with an active data version can be downloaded as a file.');
+                $('.manifest-bq a').trigger('click');
+                $('.download-file a,.file-manifest a').attr('disabled', 'disabled');
+                $('.manifest-s5cmd, .manifest-file').addClass('version-disabled');
+                $('.manifest-s5cmd a, .manifest-file a').addClass('disabled');
             } else {
-                $('#manifest-s5cmd').trigger('click');
-                $('.download-file, .file-manifest, #manifest-s5cmd, #manifest-file').removeAttr('disabled');
-                $('.download-file, .file-manifest, #manifest-s5cmd, #manifest-file').removeAttr('title');
+                $('.manifest-s5cmd a').trigger('click');
+                $('.download-file a, .file-manifest a').removeAttr('disabled');
+                $('.manifest-s5cmd a, .manifest-file a').removeClass('disabled');
+                $('.manifest-file, .manifest-s5cmd').removeClass('version-disabled');
                 let file_parts_count = cohort_row.data('file-parts-count');
                 let display_file_parts_count = cohort_row.data('display-file-parts-count')
                 if (file_parts_count > display_file_parts_count) {
@@ -275,13 +277,34 @@ require([
         bq_disabled_message += ' Please log in with a Google Social account to enable this feature.'
     }
 
-    tippy('.bq-disabled', {
+    tippy.delegate('#export-manifest-modal', {
         content: bq_disabled_message,
         theme: 'dark',
         placement: 'right',
         arrow: true,
         interactive: true,
-        allowHTML: true
+        allowHTML: true,
+        target: '.bq-disabled'
+    });
+
+    tippy.delegate('#export-manifest-modal', {
+        content: "Only a cohort with an active data version can be downloaded as a file",
+        theme: 'dark',
+        placement: 'top',
+        arrow: true,
+        interactive: true,
+        onTrigger: (instance, event) => {
+            if($(event.target).hasClass('version-disabled')) {
+                instance.enable();
+            } else {
+                instance.disable();
+            }
+        },
+        onUntrigger: (instance, event) => {
+            instance.enable();
+        },
+        allowHTML: true,
+        target: '.version-disabled'
     });
 
 });
