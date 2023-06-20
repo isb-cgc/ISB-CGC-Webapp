@@ -31,21 +31,21 @@
                     <div class="form-group list-group">
                         {% csrf_token %}
                         <ul class="nav nav-tabs manifest">
-                            <li class="filter-tab active" role="presentation">
+                            <li class="filter-tab active manifest-s5cmd" role="presentation">
                                 <a href="#manifest-s5cmd" role="tab" data-toggle="tab" title="s5cmd manifest"
                                    aria-expanded="true"
                                 >
                                     s5cmd
                                 </a>
                             </li>
-                            <li class="filter-tab" role="presentation">
+                            <li class="filter-tab manifest-file" role="presentation">
                                 <a href="#manifest-file" role="tab" data-toggle="tab" title="CSV/TSV/JSON manifest"
                                    aria-expanded="false"
                                 >
                                     CSV/TSV/JSON
                                 </a>
                             </li>
-                            <li class="filter-tab {% if not user_is_social %}bq-disabled{% endif %}" role="presentation">
+                            <li class="filter-tab manifest-bq {% if not user_is_social %}bq-disabled{% endif %}" role="presentation">
                                 <a href="#manifest-bq"{% if not user_is_social %} class="disabled" {% endif %}role="tab"
                                    data-toggle="tab" title="BigQuery manifest export" aria-expanded="false"
                                 >
@@ -138,6 +138,15 @@
                                 {% endif %}
                             </div>
                             <div id="manifest-s5cmd" class="tab-pane manifest active" role="tab-panel">
+                                <p>
+                                    <br />
+                                    To download the images in this manifest,
+                                    <a class="external-link" url="https://github.com/peak/s5cmd" data-toggle="modal"
+                                       data-target="#external-web-warning">install s5cmd <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i></a>,
+                                    then run the following command:
+                                    <br />
+                                    <span class="code">s5cmd --no-sign-request --endpoint-url https://storage.googleapis.com run <span class="cmd-file-name"></span></span>
+                                </p>
                                 <div class="s5cmd-file-name manifest-name">
                                     <label for="export-s5cmd-name">Base File Name</label>
                                     <input class="form-control" type="text" id="export-s5cmd-name"
@@ -287,11 +296,6 @@
                                             <span class="value">crdc_series_uuid (CRDC Series UUID)</span>
                                         </label></li>
                                     </div>
-                                    <p><a class="external-link" href=""
-                                          url="https://learn.canceridc.dev/data/downloading-data"
-                                          data-toggle="modal" data-target="#external-web-warning">Instructions
-                                        <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
-                                    </a>on downloading images defined by the manifest</p>
                                 </div>
                                 <div id="file-part-select-box">
                                     <select class="form-control">
