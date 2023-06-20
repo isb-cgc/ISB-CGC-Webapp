@@ -31,21 +31,21 @@
                     <div class="form-group list-group">
                         {% csrf_token %}
                         <ul class="nav nav-tabs manifest">
-                            <li class="filter-tab active" role="presentation">
+                            <li class="filter-tab active manifest-s5cmd" role="presentation">
                                 <a href="#manifest-s5cmd" role="tab" data-toggle="tab" title="s5cmd manifest"
                                    aria-expanded="true"
                                 >
                                     s5cmd
                                 </a>
                             </li>
-                            <li class="filter-tab" role="presentation">
+                            <li class="filter-tab manifest-file" role="presentation">
                                 <a href="#manifest-file" role="tab" data-toggle="tab" title="CSV/TSV/JSON manifest"
                                    aria-expanded="false"
                                 >
                                     CSV/TSV/JSON
                                 </a>
                             </li>
-                            <li class="filter-tab {% if not user_is_social %}bq-disabled{% endif %}" role="presentation">
+                            <li class="filter-tab manifest-bq {% if not user_is_social %}bq-disabled{% endif %}" role="presentation">
                                 <a href="#manifest-bq"{% if not user_is_social %} class="disabled" {% endif %}role="tab"
                                    data-toggle="tab" title="BigQuery manifest export" aria-expanded="false"
                                 >

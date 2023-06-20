@@ -36,40 +36,40 @@ from idc_collections.models import ImagingDataCommonsVersion, Attribute
 logger = logging.getLogger('main_logger')
 
 COHORT_DEFS_EXAMPLE = [
-    {
-            'name': 'Example v11: removed attribute',
-            'desc': "This should trigger missing attribute alerts on the cohort list page for all attributes removed.",
-            'filters': [
-                {
-                    'attribute': 'Glycolysis_Within_First_Quarter_of_Intensity_Range',
-                    'values': [92, 234],
-                }
-            ]
-    },
-    {
-        'name': 'Example v11: removed values',
-        'desc': "This should trigger missing attribute alerts on the cohort list page for all values removed.",
-        'filters': [
-            {
-                'attribute': 'collection_id',
-                'values': ['apollo_5_esca'],
-            }
-        ]
-    },
-    {
-        'name': 'Example v11: some removed attributes',
-        'desc': "This should trigger missing attribute alerts on the cohort list page.",
-        'filters': [
-            {
-                'attribute': 'access',
-                'values': ['Public'],
-            },
-            {
-                'attribute': 'collection_id',
-                'values': ['4d_lung'],
-            }
-        ]
-    },
+    # {
+    #         'name': 'Example v11: removed attribute',
+    #         'desc': "This should trigger missing attribute alerts on the cohort list page for all attributes removed.",
+    #         'filters': [
+    #             {
+    #                 'attribute': 'Glycolysis_Within_First_Quarter_of_Intensity_Range',
+    #                 'values': [92, 234],
+    #             }
+    #         ]
+    # },
+    # {
+    #     'name': 'Example v11: removed values',
+    #     'desc': "This should trigger missing attribute alerts on the cohort list page for all values removed.",
+    #     'filters': [
+    #         {
+    #             'attribute': 'collection_id',
+    #             'values': ['apollo_5_esca'],
+    #         }
+    #     ]
+    # },
+    # {
+    #     'name': 'Example v11: some removed attributes',
+    #     'desc': "This should trigger missing attribute alerts on the cohort list page.",
+    #     'filters': [
+    #         {
+    #             'attribute': 'access',
+    #             'values': ['Public'],
+    #         },
+    #         {
+    #             'attribute': 'collection_id',
+    #             'values': ['4d_lung'],
+    #         }
+    #     ]
+    # },
     # {
     #     'name': 'Example: V1 collection ID',
     #     'desc': "This shouldn't change from V1 to V2",
@@ -117,30 +117,30 @@ COHORT_DEFS_EXAMPLE = [
     #         }
     #     ]
     # },
-    # {
-    #     'name': 'Example: BodyPartExamine, Bladder and Brain',
-    #     'desc': 'V1 Count should differ in V2',
-    #     'filters': [
-    #         {
-    #             'attribute': 'BodyPartExamined',
-    #             'values': ['BLADDER','BRAIN'],
-    #         }
-    #     ]
-    # },
-    # {
-    #     'name': 'Example: SOPClassUID and Modality',
-    #     'desc': 'V1 Count should differ in V2',
-    #     'filters': [
-    #         {
-    #             'attribute': 'SOPClassUID',
-    #             'values': ['1.2.840.10008.5.1.4.1.1.88.33'],
-    #         },
-    #         {
-    #             'attribute': 'Modality',
-    #             'values': ['PT'],
-    #         }
-    #     ]
-    # },
+    {
+        'name': 'Example: BodyPartExamine, Bladder and Brain',
+        'desc': 'V14',
+        'filters': [
+            {
+                'attribute': 'BodyPartExamined',
+                'values': ['BLADDER','BRAIN'],
+            }
+        ]
+    },
+    {
+        'name': 'Example: SOPClassUID and Modality',
+        'desc': 'V14',
+        'filters': [
+            {
+                'attribute': 'SOPClassUID',
+                'values': ['1.2.840.10008.5.1.4.1.1.88.33'],
+            },
+            {
+                'attribute': 'Modality',
+                'values': ['PT'],
+            }
+        ]
+    },
     # {
     #     'name': 'Example: TCGA related filter',
     #     'desc': 'This shouldn\'t change from V1 to V2',
@@ -185,7 +185,7 @@ def parse_args():
     parser = ArgumentParser()
     parser.add_argument('-c', '--cohort-defs', type=str, default='', help=cohort_def_help_msg)
     parser.add_argument('-u', '--user-emails', type=str, default='', help='User email(s) for cohort owner - comma separated')
-    parser.add_argument('-v', '--versions', type=str, default='2.0', help='Versions for which to create cohorts, comma delimited. Eg.: 2.0, 3.0')
+    parser.add_argument('-v', '--versions', type=str, default='14.0', help='Versions for which to create cohorts, comma delimited. Eg.: 2.0, 3.0')
     return parser.parse_args()
 
 
