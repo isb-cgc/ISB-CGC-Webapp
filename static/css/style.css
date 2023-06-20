@@ -4084,6 +4084,7 @@ html {
 .manifest-size-warning {
   display: inline-block;
 }
+
 #export-manifest-modal .nav-tabs li.filter-tab {
   width: 33.33%;
   text-align: center;
@@ -4095,6 +4096,10 @@ html {
 
 .manifest-name {
   padding: 5px 0px 10px 0px;
+}
+
+.version-disabled, .bq-disabled {
+  cursor: not-allowed;
 }
 
 .bq-table-name p {
@@ -4353,4 +4358,8 @@ d-topics-list iframe {
 
 .filename-missing {
   border: 2px solid red;
+}
+
+.external-link {
+  cursor: pointer;
 }
