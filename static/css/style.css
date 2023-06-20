@@ -4359,3 +4359,7 @@ d-topics-list iframe {
 .filename-missing {
   border: 2px solid red;
 }
+
+.external-link {
+  cursor: pointer;
+}

@@ -174,6 +174,7 @@ require([
 
     $('#body').on('click', '.external-link', function(){
         let url = $(this).attr('url');
+        $('.external-dest-link').text(url);
         $('#go-to-external-link').attr('href', url);
     });
 
