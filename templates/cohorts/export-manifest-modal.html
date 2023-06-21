@@ -1,5 +1,6 @@
 <!-- Export Manifest Modal -->
-<div class="modal fade" id="export-manifest-modal" tabindex="-1" role="dialog" aria-labelledby="exportManifestModal" aria-hidden="true">
+<div class="modal fade" id="export-manifest-modal" tabindex="-1" role="dialog"
+     aria-labelledby="exportManifestModal" aria-hidden="true" data-file-timestamp="{% now "Ymd_Gis" %}">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -145,14 +146,16 @@
                                        data-target="#external-web-warning">install s5cmd <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i></a>,
                                     then run the following command:
                                     <br />
-                                    <span class="code">s5cmd --no-sign-request --endpoint-url https://storage.googleapis.com run <span class="cmd-file-name"></span></span>
+                                    <span class="code">s5cmd --no-sign-request --endpoint-url https://storage.googleapis.com run <span class="cmd-file-name"></span>.s5cmd</span>
                                 </p>
+<!--
                                 <div class="s5cmd-file-name manifest-name">
-                                    <label for="export-s5cmd-name">Base File Name</label>
-                                    <input class="form-control" type="text" id="export-s5cmd-name"
-                                           name="file_name" data-name-base="_{% now "Ymd_Gis" %}" value=""
+                                    <label for="export-s5cmd-name">File Name</label>
+                                    <input class="form-control file-name" type="text" id="export-s5cmd-name"
+                                           name="s5cmd_file_name" data-name-base="_{% now "Ymd_Gis" %}" value=""
                                            placeholder="Please supply a file name." required />
                                 </div>
+-->
                                 <div class="s5cmd-loc-type">
                                     <p>Cloud Source</p>
                                     <li class="radio"><label for="export-s5cmd-loc-gcp">
@@ -210,13 +213,15 @@
                                 </a>
                             </div>
                             <div id="manifest-file" class="tab-pane manifest" role="tab-panel">
+<!--
                                 <div class="manifest-file-name manifest-name">
                                     <label for="export-manifest-name">Name</label>
-                                    <input class="form-control" type="text" id="export-manifest-name"
-                                           name="file_name" data-name-base="_{% now "Ymd_Gis" %}"
+                                    <input class="form-control file-name" type="text" id="export-manifest-name"
+                                           name="manifest_file_name"
                                            placeholder="Please supply a file name."
                                            value="" required />
                                 </div>
+-->
                                 <!-- Header Fields -->
                                 <p><input id="include-file-header-checkbox" type="checkbox" checked> Include header fields</p>
                                 <div id="file-header-fields-container">
@@ -316,6 +321,7 @@
                     </div>
                 </div>
                 <input type="hidden" name="downloadToken">
+                <input type="hidden" name="file_name">
                 <input type="hidden" name="file_type">
                 <input type="hidden" name="filters">
                 <input type="hidden" name="file_part">
