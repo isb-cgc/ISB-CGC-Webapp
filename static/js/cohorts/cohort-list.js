@@ -123,11 +123,6 @@ require([
         return false;
     });
 
-    // Prevent multiple submissions of any form
-    $('form').on('submit',function(){
-        $(this).find('button[type="submit"]').attr('disabled','disabled');
-    });
-
     $('#cohort-table').on('click', '.compare-version', function(){
         let cohort_row = $(this).closest('tr');
         let id = $(cohort_row).find('.id-col').text().trim();
