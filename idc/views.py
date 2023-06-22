@@ -456,7 +456,7 @@ def populate_tables(request):
 
 
 # Data exploration and cohort creation page
-# @login_required
+@login_required
 def explore_data_page(request, filter_path=False, path_filters=None):
     context = {'request': request}
     is_json = False
