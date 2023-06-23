@@ -84,7 +84,7 @@
 
 {% block content %}
 {% url 'get_explore_manifest' as export_uri %}
-{% with  request.user|has_social as user_is_social %}
+{% with  request.user|has_social=user_is_social %}
     {% include "cohorts/export-manifest-modal.html" with export_uri=export_uri user_is_social=user_is_social %}
 {% endwith %}
 {% include "idc/explore_data_core.html" %}
