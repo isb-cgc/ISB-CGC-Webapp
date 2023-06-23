@@ -501,6 +501,12 @@ def explore_data_page(request, filter_path=False, path_filters=None):
         if wcohort and is_json:
             filters = cohort_filters
 
+        versions = ImagingDataCommonsVersion.objects.filter(
+            version_number__in=versions
+        ).get_data_versions(active=True) if len(versions) else ImagingDataCommonsVersion.objects.filter(
+            active=True
+        ).get_data_versions(active=True)
+
         context = build_explorer_context(
             is_dicofdic, source, versions, filters, fields, order_docs, counts_only, with_related, with_derived,
             collapse_on, is_json, uniques=uniques, totals=totals
