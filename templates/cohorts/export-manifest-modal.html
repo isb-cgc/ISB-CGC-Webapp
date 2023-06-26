@@ -46,8 +46,8 @@
                                     CSV/TSV/JSON
                                 </a>
                             </li>
-                            <li class="filter-tab manifest-bq {% if not user_is_social %}bq-disabled{% endif %}" role="presentation">
-                                <a href="#manifest-bq"{% if not user_is_social %} class="disabled" {% endif %}role="tab"
+                            <li class="filter-tab manifest-bq {% if not user_is_social or not is_cohort %}bq-disabled{% endif %}" role="presentation">
+                                <a href="#manifest-bq"{% if not user_is_social or not is_cohort %} class="disabled" {% endif %}role="tab"
                                    data-toggle="tab" title="BigQuery manifest export" aria-expanded="false"
                                 >
                                     BigQuery
@@ -56,7 +56,7 @@
                         </ul>
                         <div class="tab-content">
                             <div id="manifest-bq" class="tab-pane manifest" role="tab-panel">
-                                {% if user_is_social %}
+                                {% if user_is_social and is_cohort %}
                                     <div class="bq-table-name manifest-name">
                                         <label for="export-bq-name">Name</label>
                                         <p>BigQuery table names are automatically generated and will be provided once the manifest has exported.</p>
@@ -128,12 +128,16 @@
                                     </div>
                                 {% else %}
                                     <div class="panel-body">
-                                        Exporting to BigQuery requires you to be logged in and have a linked Google Social Account.
+                                        Exporting to BigQuery requires you to be logged in with a linked
+                                        Google Social Account, and to save your filters as a cohort.
                                         {% if user_is_auth and not user_is_social %}
                                             You can link your account to a Google ID from the
                                             <a target="_blank" rel="noopener noreferrer" href="/users/{{ request.user.id }}/">Account Details</a> page.
                                         {% else %}
                                             Please log in with a Google Social account to enable this feature.
+                                            {% if not is_cohort %}
+                                                Please save your filters as a cohort to enable this feature.
+                                            {% endif %}
                                         {% endif %}
                                     </div>
                                 {% endif %}
