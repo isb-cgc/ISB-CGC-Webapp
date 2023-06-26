@@ -59,7 +59,7 @@ require([
 
     var cohort_list_table = $('#cohort-table').DataTable({
         "dom": '<"dataTables_controls"ilpf>rt<"bottom"><"clear">',
-        "order": [[ 2, "desc" ]],
+        "order": [[ 1, "desc" ]],
         "columns": [
             { "orderable": false },
             null,
