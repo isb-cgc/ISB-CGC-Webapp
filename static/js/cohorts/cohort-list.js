@@ -59,7 +59,7 @@ require([
 
     var cohort_list_table = $('#cohort-table').DataTable({
         "dom": '<"dataTables_controls"ilpf>rt<"bottom"><"clear">',
-        "order": [[ 2, "desc" ]],
+        "order": [[ 1, "desc" ]],
         "columns": [
             { "orderable": false },
             null,
@@ -236,11 +236,12 @@ require([
         $('#delete-cohort-form').append('<input class="cohort-id" type="hidden" name="id" value="' + cohort_id + '" />');
     });
 
-    tippy('.inactive-attr', {
+    tippy.delegate('#cohort-table', {
         allowHTML:true,
         content: 'This cohort contains one or more attributes which are no longer available in the current version.<br />' +
             'If you bring this cohort into latest IDC data version, the filters for those inactive attributes will be removed.<br />' +
-            'The cases, series, and studies contained in your cohort may change from this version.'
+            'The cases, series, and studies contained in your cohort may change from this version.',
+        target: '.inactive-attr'
     });
 
     $(document).ready(function () {
