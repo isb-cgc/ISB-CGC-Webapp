@@ -569,6 +569,10 @@ def explore_data_page(request, filter_path=False, path_filters=None):
 
 
 def explorer_manifest(request):
+    req = request.GET or request.POST
+    if req.get('manifest-type', 'file-manifest') == 'bq-manifest' :
+        messages.error(request, "BigQuery export requires a cohort! Please save your filters as a cohort.")
+        return JsonResponse({'msg': 'BigQuery export requires a cohort.'}, status=400)
     return create_file_manifest(request)
 
 
