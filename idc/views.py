@@ -31,6 +31,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib import messages
+from django.utils.html import escape
 
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
@@ -597,20 +598,20 @@ def parse_explore_filters(request):
         attrs = Attribute.objects.filter(name__in=attr_names)
         attr_map = {x.name: {"id": x.id, "filter": filter_name_map[x.name]} for x in attrs}
         not_found = [x for x in attr_names if x not in attr_map.keys()]
-        if len(not_found) > 0:
-            not_rec = "{}".format("; ".join(not_found))
-            logger.warning("[WARNING] Saw invalid filters while parsing explore/filters call:")
-            logger.warning(not_rec)
-            messages.warning(request, "The following attribute names are not recognized: {}".format(not_rec))
+        blacklist = re.compile(settings.BLACKLIST_RE, re.UNICODE)
+        if blacklist.search(str(filters)):
+            logger.warning("[WARNING] Saw bad filters in filters_for_load:")
+            logger.warning(filters)
+            messages.error(
+                request,
+                "There was a problem with some of your filters - please ensure they're properly formatted."
+            )
         else:
-            blacklist = re.compile(settings.BLACKLIST_RE, re.UNICODE)
-            if blacklist.search(str(filters)):
-                logger.warning("[WARNING] Saw bad filters in filters_for_load:")
-                logger.warning(filters)
-                messages.error(
-                    request,
-                    "There was a problem with some of your filters - please ensure they're properly formatted."
-                )
+            if len(not_found) > 0:
+                not_rec = "{}".format("; ".join(not_found))
+                logger.warning("[WARNING] Saw invalid filters while parsing explore/filters call:")
+                logger.warning(not_rec)
+                messages.warning(request, "The following attribute names are not recognized: {}".format(escape(not_rec)))
             else:
                 if len(attrs) > 0:
                     filters = [{
