@@ -464,11 +464,12 @@ def explore_data_page(request, filter_path=False, path_filters=None):
     status = 200
 
     try:
-        req = request.GET if request.GET else request.POST
+        req = request.GET or request.POST
         is_dicofdic = (req.get('is_dicofdic', "False").lower() == "true")
         source = req.get('data_source_type', DataSource.SOLR)
         versions = json.loads(req.get('versions', '[]'))
         filters = json.loads(req.get('filters', '{}'))
+        disk_size = (req.get('disk_size', 'False').lower() == "true")
 
         fields = json.loads(req.get('fields', '[]'))
         order_docs = json.loads(req.get('order_docs', '[]'))
@@ -509,7 +510,7 @@ def explore_data_page(request, filter_path=False, path_filters=None):
 
         context = build_explorer_context(
             is_dicofdic, source, versions, filters, fields, order_docs, counts_only, with_related, with_derived,
-            collapse_on, is_json, uniques=uniques, totals=totals
+            collapse_on, is_json, uniques=uniques, totals=totals, disk_size=disk_size
         )
 
         if not is_json:
