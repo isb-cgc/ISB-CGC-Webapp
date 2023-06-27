@@ -1782,7 +1782,15 @@ require([
         var parsedFiltObj = parseFilterObj();
         url = encodeURI('/explore/')
 
-        ndic={'totals':JSON.stringify(["PatientID", "StudyInstanceUID", "SeriesInstanceUID"]),'counts_only':'True', 'is_json':'True', 'is_dicofdic':'True', 'data_source_type':($("#data_source_type option:selected").val() || 'S'), 'filters':JSON.stringify(parsedFiltObj) }
+        ndic = {
+            'totals': JSON.stringify(["PatientID", "StudyInstanceUID", "SeriesInstanceUID"]),
+            'counts_only': 'True',
+            'is_json': 'True',
+            'is_dicofdic': 'True',
+            'data_source_type': ($("#data_source_type option:selected").val() || 'S'),
+            'filters':JSON.stringify(parsedFiltObj),
+            'disk_size': 'True'
+        }
         var csrftoken = $.getCookie('csrftoken');
         let deferred = $.Deferred();
         $.ajax({
@@ -1826,7 +1834,11 @@ require([
                             }
                         }
                         $('#search_def_stats').removeClass('notDisp');
-                        $('#search_def_stats').html(data.totals.PatientID.toString()+" Cases, "+data.totals.StudyInstanceUID.toString()+" Studies, and "+data.totals.SeriesInstanceUID.toString()+" Series in this cohort");
+                        $('#search_def_stats').html(data.totals.PatientID.toString() +
+                            " Cases, " + data.totals.StudyInstanceUID.toString() +
+                            " Studies, and " + data.totals.SeriesInstanceUID.toString() +
+                            " Series in this cohort. " +
+                            "Size on disk: " + data.totals.disk_size);
 
                         if (('filtered_counts' in data) && ('access' in data['filtered_counts']['origin_set']['All']['attributes']) && ('Limited' in data['filtered_counts']['origin_set']['All']['attributes']['access']) && (data['filtered_counts']['origin_set']['All']['attributes']['access']['Limited']['count']>0) ){
                             $('#search_def_access').removeClass('notDisp');
@@ -1843,7 +1855,10 @@ require([
                                 $('#save-cohort-btn').prop('title', '');
                             }
                             $('#search_def_stats').removeClass('notDisp');
-                            $('#search_def_stats').html(data.totals.PatientID.toString()+" Cases, "+data.totals.StudyInstanceUID.toString()+" Studies, and "+data.totals.SeriesInstanceUID.toString()+" Series in this cohort");
+                            $('#search_def_stats').html(data.totals.PatientID.toString() + " Cases, " +
+                                data.totals.StudyInstanceUID.toString()+" Studies, and " +
+                                data.totals.SeriesInstanceUID.toString()+" Series in this cohort. " +
+                                "Size on disk: " + data.totals.disk_size);
                             if (('filtered_counts' in data) && ('access' in data['filtered_counts']['origin_set']['All']['attributes']) && ('Limited' in data['filtered_counts']['origin_set']['All']['attributes']['access']) && (data['filtered_counts']['origin_set']['All']['attributes']['access']['Limited']['count']>0) ){
                                $('#search_def_access').removeClass('notDisp');
                                $('.access_warn').removeClass('notDisp');
