@@ -613,13 +613,13 @@ def parse_explore_filters(request):
                 logger.warning(not_rec)
                 messages.warning(request, "The following attribute names are not recognized: {}".format(escape(not_rec)))
             else:
-                    if len(attrs) > 0:
-                        filters = [{
-                            "id": attr_map[x]['id'],
-                            "values": filters[attr_map[x]['filter']],
-                            "op": filter_ops.get(x, 'OR')
-                        } for x in attr_map]
-                        return explore_data_page(request, filter_path=True, path_filters=[{"filters": filters}])
+                if len(attrs) > 0:
+                    filters = [{
+                        "id": attr_map[x]['id'],
+                        "values": filters[attr_map[x]['filter']],
+                        "op": filter_ops.get(x, 'OR')
+                    } for x in attr_map]
+                    return explore_data_page(request, filter_path=True, path_filters=[{"filters": filters}])
 
     except Exception as e:
         logger.error("[ERROR] While parsing filters for the explorer page:")
