@@ -11,6 +11,7 @@ TMP_VERS=$(mktemp /tmp/vers.XXXXXXXXX)
 TMP_SORT=$(mktemp /tmp/sort.XXXXXXXXX)
 TMP_CURR=$(mktemp /tmp/curr.XXXXXXXXX)
 TMP_LAST=$(mktemp /tmp/last.XXXXXXXXX)
+TMP_DIFF=$(mktemp /tmp/diff.XXXXXXXXX)
 
 cat < /dev/null > ${TMP_VERS}
 VERS=`gsutil ls -a ${CONFIG_PATH}`
@@ -23,7 +24,7 @@ VER_LEN=`cat ${TMP_VERS} | wc -l`
 
 if (( ${VER_LEN} < 2 )); then
   echo "No diff: first version for " ${CONFIG_PATH}
-  rm -f ${TMP_VERS} ${TMP_SORT} ${TMP_CURR} ${TMP_LAST}
+  rm -f ${TMP_VERS} ${TMP_SORT} ${TMP_CURR} ${TMP_LAST} ${TMP_DIFF}
   exit
 fi
 
@@ -46,6 +47,23 @@ gsutil cp ${CONFIG_PATH}"#"${PENULT} ${TMP_LAST} > /dev/null 2>&1
 gsutil cp ${CONFIG_PATH}"#"${CURR} ${TMP_CURR}  > /dev/null 2>&1
 
 echo "Diff of previous (" ${PEN_STR} ") to current (" ${CURR_STR} ") for" ${CONFIG_PATH} ":"
-diff ${TMP_LAST} ${TMP_CURR}
+diff ${TMP_LAST} ${TMP_CURR} > ${TMP_DIFF}
 
-trap 'rm -f ${TMP_VERS} ${TMP_SORT} ${TMP_CURR} ${TMP_LAST}' EXIT
+# The < and > mess up the tests:
+
+while read -r LINE; do
+    if [ ! -z `echo "${LINE}" | sed -e 's/<//' |  sed -e 's/>//' | grep -i "PASSWORD"` ]; then
+        echo "PASSWORD REDACTED"
+    elif [ ! -z `echo "${LINE}" | sed -e 's/<//' |  sed -e 's/>//' | grep -i "SECRET"` ]; then
+        echo "SECRET REDACTED"
+    elif [ ! -z `echo "${LINE}" | sed -e 's/<//' |  sed -e 's/>//' | grep -i "KEY"` ]; then
+        echo "KEY REDACTED"
+    elif [ ! -z `echo "${LINE}" | sed -e 's/<//' |  sed -e 's/>//' | grep -i "TOKEN"` ]; then
+        echo "TOKEN REDACTED"
+    else
+        echo "${LINE}"
+    fi
+done < ${TMP_DIFF}
+
+trap 'rm -f ${TMP_VERS} ${TMP_SORT} ${TMP_CURR} ${TMP_LAST} ${TMP_DIFF}' EXIT
+
