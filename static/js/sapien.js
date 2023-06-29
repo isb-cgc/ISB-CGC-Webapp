@@ -77,9 +77,9 @@ require([
         'Colorectal': ['Colon','Rectum'],
         "Blood": ["Marrow, Blood"],
         "Bile-Duct": ["Bile Duct"],
-        "Adrenal-Gland": ["Adrenal Glands"],
+        "Adrenal-Gland": ["Adrenal Glands", "Adrenal"],
         "Testis": ["Testicles"],
-        "": []
+        "Head-and-Neck": ["Head", "Head-Neck"]
     };
 
     let data = case_counts.sort(function(a,b){
