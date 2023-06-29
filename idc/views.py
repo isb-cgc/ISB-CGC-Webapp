@@ -70,7 +70,8 @@ def landing_page(request):
         'Rectum': 'Colorectal',
         "Marrow, Blood": "Blood",
         "Testicles": "Testis",
-        "Adrenal Glands": "Adrenal Gland"
+        "Adrenal Glands": "Adrenal Gland",
+        "Adrenal": "Adrenal Gland"
     }
 
     skip = [
