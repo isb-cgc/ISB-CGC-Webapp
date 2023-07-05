@@ -209,7 +209,12 @@ require([
                 file_name.attr("name-base", "cohort_" + cohort_ids.join("_") + $('#export-manifest-modal').data('file-timestamp'));
             }
         }
-        $('.cmd-file-name').text(file_name.attr("name-base")+"_"+$('input.loc_type:checked').val());
+        let manifest_filename = file_name.attr("name-base")+"_"+$('input.loc_type:checked').val();
+        let endpoint_url = ($('input.loc_type:checked').val() === "aws" ? "https://s3.amazonaws.com" : "https://storage.googleapis.com");
+        let s5cmd_text = `s5cmd --no-sign-request --endpoint-url ${endpoint_url} run ${manifest_filename}.s5cmd`;
+
+        $('.s5cmd-text').text(s5cmd_text);
+        $('.s5cmd.copy-this').attr("content",s5cmd_text);
     }
 
     var update_download_manifest_buttons = function(clicked){
