@@ -367,12 +367,27 @@ require([
 
 
     tippy.delegate('.series-table', {
-        content: 'Please open at the study level to see this series',
+        content: function(reference) {
+            if($(reference).hasClass('not-viewable')) {
+                return 'No valid viewer is available for this modality.'
+            }
+            return 'Please open at the study level to view this series.';
+        },
         theme: 'dark',
         placement: 'right',
         arrow: false,
         interactive:true,
-        target: '.no-viewer-tooltip',
+        target: ['.no-viewer-tooltip', '.not-viewable'],
+        maxWidth: 130
+    });
+
+    tippy.delegate('.studies-table', {
+        content: 'This study cannot be viewed.',
+        theme: 'dark',
+        placement: 'right',
+        arrow: false,
+        interactive:true,
+        target: ['.no-viewer-tooltip', '.not-viewable'],
         maxWidth: 130
     });
 

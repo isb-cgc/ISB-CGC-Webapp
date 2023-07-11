@@ -1129,7 +1129,7 @@ require([
     }
 
     window.updateStudyTable = function(rowsAdded, rowsRemoved, refreshAfterFilter,updateChildTables,studyID) {
-
+        let nonViewAbleModality= new Set(["XC"]);
         $('#studies_tab').data('rowsremoved',rowsRemoved);
         $('#studies_tab').data('refreshafterfilter',refreshAfterFilter);
         $('#studies_tab').data('updatechildtables',updateChildTables);
@@ -1232,16 +1232,18 @@ require([
                             }
                             else {
                                 var modality = row['Modality'];
-                                if (( Array.isArray(modality) && modality.includes('SM')) || (modality === 'SM')) {
+                                if ( (Array.isArray(row['Modality']) && row['Modality'].some(function(el){
+                                    return nonViewAbleModality.has(el)
+                                }) ) || nonViewAbleModality.has(row['Modality']) )   {
+                                    return '<a href="/" onclick="return false;"><i class="fa-solid fa-eye-slash not-viewable"></i>';
+                                } else if (( Array.isArray(modality) && modality.includes('SM')) || (modality === 'SM')) {
                                     return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                                  } else {
                                     return '<a href="' + DICOM_STORE_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                                 }
-                           }
+                            }
                         }
-
                     },
-
                 ],
                 "processing": true,
                 "serverSide": true,
@@ -1290,13 +1292,11 @@ require([
                                 for (caseId in window.selItems.selStudies){
                                     if (window.selItems.selStudies[caseId].indexOf(studyID)>-1){
                                         window.selItems.selStudies[caseId]=[studyID]
-                                    }
-                                    else {
+                                    } else {
                                         delete window.selItems.selStudies[caseId];
                                     }
                                 }
-                            }
-                            else if (refreshAfterFilter){
+                            } else if (refreshAfterFilter){
                                 for (caseId in window.selItems.selStudies){
                                     checkIds=checkIds.concat(window.selItems.selStudies[caseId])
                                 }
@@ -1369,22 +1369,17 @@ require([
                         }
                     }
                 }
-
             });
-
         }
-
         catch(err){
-                    alert("The following error was reported when processing server data: "+ err +". Please alert the systems administrator")
+            alert("The following error was reported when processing server data: "+ err +". Please alert the systems administrator")
         }
 
         $('#studies_tab').on('draw.dt', function(){
             $('#studies_table_head').children('tr').children().each(function(){
                 this.style.width=null;
                 }
-
             );
-
         })
 
         $('#studies_tab').children('tbody').attr('id','studies_table');
@@ -1394,7 +1389,7 @@ require([
     }
 
     window.updateSeriesTable = function(rowsAdded, rowsRemoved, refreshAfterFilter,seriesID) {
-        var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV"])
+        var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV", "XC"])
         var slimViewAbleModality=new Set(["SM"])
         $('#series_tab').attr('data-rowsremoved', rowsRemoved);
         $('#series_tab').attr('data-refreshafterfilter', refreshAfterFilter);
@@ -1475,23 +1470,28 @@ require([
                         var coll_id="";
                         if (Array.isArray(row['collection_id'])){
                             coll_id=row['collection_id'][0];
-                        }
-                        else {
+                        } else {
                             coll_id=row['collection_id']
                         }
                         if (row['access'].includes('Limited') ) {
                             return '<i class="fa-solid fa-circle-minus coll-explain"></i>';
                         }
-
-                        else if ( (Array.isArray(row['Modality']) && row['Modality'].some(function(el){return nonViewAbleModality.has(el)}) ) || nonViewAbleModality.has(row['Modality']) )   {
-                            return '<a href="/" onclick="return false;"><i class="fa-solid fa-eye-slash no-viewer-tooltip"></i>';
-
-                            } else if (  ( Array.isArray(row['Modality']) && row['Modality'].some(function(el){return slimViewAbleModality.has(el)}) ) || (slimViewAbleModality.has(row['Modality']))) {
-                                return '<a href="' + SLIM_VIEWER_PATH + row['StudyInstanceUID'] + '/series/' + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
-
-                            } else {
-                                return '<a href="' + DICOM_STORE_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
-                            }
+                        else if ( (Array.isArray(row['Modality']) && row['Modality'].some(function(el){
+                            return nonViewAbleModality.has(el)
+                        }) ) || nonViewAbleModality.has(row['Modality']) )   {
+                            let tooltip = (
+                                row['Modality'] === "XC" || (Array.isArray(row['Modality']) && row['Modality'].includes("XC"))
+                            ) ? "not-viewable" : "no-viewer-tooltip";
+                            return `<a href="/" onclick="return false;"><i class="fa-solid fa-eye-slash ${tooltip}"></i>`;
+                        } else if (  ( Array.isArray(row['Modality']) && row['Modality'].some(function(el){
+                            return slimViewAbleModality.has(el)}
+                        ) ) || (slimViewAbleModality.has(row['Modality']))) {
+                            return '<a href="' + SLIM_VIEWER_PATH + row['StudyInstanceUID'] + '/series/' + data +
+                                '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
+                        } else {
+                            return '<a href="' + DICOM_STORE_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' +
+                                data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
+                        }
 
                     }
                 },
@@ -1512,7 +1512,6 @@ require([
                         caseArr.push(window.selItems.selCases[caseid][i]);
                     }
                 }
-
                 var studyArr = new Array();
                 for (caseid in window.selItems.selStudies) {
                     for (var i = 0; i < window.selItems.selStudies[caseid].length; i++) {
@@ -1592,19 +1591,14 @@ require([
                             "recordsTotal": window.seriesCache.recordsTotal,
                             "recordsFiltered": window.seriesCache.recordsTotal
                         })
-
                     }
-                  }
+                }
               }
-
            });
-
         }
         catch(err){
             alert("The following error was reported when processing server data: "+ err +". Please alert the systems administrator");
         }
-
-
 
         $('#series_tab').on('draw.dt', function(){
             $('#series_table_head').children('tr').children().each(function(){
