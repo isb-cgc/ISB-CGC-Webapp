@@ -9,7 +9,7 @@ commands:
             if [[ ${CIRCLE_BRANCH} =~ idc-(prod|uat|test).* ]]; then
               echo "Saw deployment tier branch."
               TIER=$(awk -F- '{print toupper($2)}' \<<< ${CIRCLE_BRANCH})
-            elfi [[ ${CIRCLE_BRANCH} =~ expr.* ]]; then
+            elif [[ ${CIRCLE_BRANCH} =~ expr.* ]]; then
               echo "Saw experimental tier branch."
               TIER=EXPR
             else
