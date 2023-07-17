@@ -77,7 +77,7 @@ commands:
           name: "Set tier-specific configuration file"
           command: |
             sudo -E /bin/bash ./shell/pull_config.sh
-            xargs -a deployment_config.txt -I{} echo "export {}" >> $BASH_ENV
+            xargs -a ${DEPLOYMENT_CONFIG} -I{} echo "export {}" >> $BASH_ENV
             # Set up test/deployment database values
             echo "export MYSQL_ROOT_PASSWORD_BUILD=idc" >> $BASH_ENV
             echo "export DATABASE_NAME_BUILD=build_database" >> $BASH_ENV
