@@ -70,7 +70,6 @@ target/
 *.patch
 .env
 *.env
-*.crt
 !sample.env
 scripts/metadata_featdef_tables.sql
 *secrets.txt
