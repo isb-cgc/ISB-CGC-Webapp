@@ -7,7 +7,13 @@ commands:
           command: |
             TIER=DEV
             if [[ ${CIRCLE_BRANCH} =~ idc-(prod|uat|test).* ]]; then
+              echo "Saw deployment tier branch."
               TIER=$(awk -F- '{print toupper($2)}' \<<< ${CIRCLE_BRANCH})
+            elfi [[ ${CIRCLE_BRANCH} =~ expr.* ]]; then
+              echo "Saw experimental tier branch."
+              TIER=EXPR
+            else
+              echo "Saw dev tier branch."
             fi
             echo "export TIER=${TIER}" >> $BASH_ENV
             echo "Tier was identified as ${TIER} for branch ${CIRCLE_BRANCH}"
@@ -24,6 +30,7 @@ commands:
             CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_IDC_DEV}
             PROJECT_ID=${DEPLOYMENT_PROJECT_ID_IDC_DEV}
             BUCKET=${DEPLOYMENT_BUCKET_IDC_DEV}
+            DEPLOYMENT_CONFIG=deployment_config.txt
             if [[ ${TIER} == "PROD" ]]; then
               KEY=${DEPLOYMENT_KEY_IDC_PROD}
               CLIENT_EMAIL=${DEPLOYMENT_CLIENT_EMAIL_IDC_PROD}
@@ -42,6 +49,9 @@ commands:
               PROJECT_ID=${DEPLOYMENT_PROJECT_ID_IDC_TEST}
               BUCKET=${DEPLOYMENT_BUCKET_IDC_TEST}
               echo "Using test project and related deployment SA and bucket."
+            elif [[ ${TIER} == "EXPR" ]]; then
+              DEPLOYMENT_CONFIG=expr.deployment_config.txt
+              echo "Using experimental project and related deployment SA and bucket."
             elif [[ ${TIER} == "DEV" ]]; then
               echo "Using development/default project and related deployment SA and bucket."
             else
@@ -54,6 +64,7 @@ commands:
             echo "export DEPLOYMENT_CLIENT_EMAIL=${CLIENT_EMAIL}" >> $BASH_ENV
             echo "export DEPLOYMENT_PROJECT_ID=${PROJECT_ID}" >> $BASH_ENV
             echo "export DEPLOYMENT_BUCKET=${BUCKET}" >> $BASH_ENV
+            echo "export DEPLOYMENT_CONFIG=${DEPLOYMENT_CONFIG}" >> $BASH_ENV
 
             echo "Project settings assigned:"
             echo "Deployment client: ${CLIENT_EMAIL}"
@@ -212,3 +223,4 @@ workflows:
                 - idc-test
                 - idc-uat
                 - idc-prod
+                - expr
