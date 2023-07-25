@@ -192,21 +192,6 @@ if BIGQUERY_COHORT_TABLE_ID is None:
     raise Exception("Developer-specific cohort table ID is not set.")
 
 BQ_MAX_ATTEMPTS             = int(os.environ.get('BQ_MAX_ATTEMPTS', '10'))
-
-
-# TODO Remove duplicate class.
-#
-# This class is retained here, as it is required by bq_data_access/v1.
-# bq_data_access/v2 uses the class from the bq_data_access/bigquery_cohorts module.
-class BigQueryCohortStorageSettings(object):
-    def __init__(self, dataset_id, table_id):
-        self.dataset_id = dataset_id
-        self.table_id = table_id
-
-
-def GET_BQ_COHORT_SETTINGS():
-    return BigQueryCohortStorageSettings(BIGQUERY_COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
-
 USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', False)
 
 PROCESSING_ENABLED          = os.environ.get('PROCESSING_ENABLED', False)
@@ -336,10 +321,6 @@ INSTALLED_APPS = (
     'cohorts',
     'projects',
     'genes',
-    'variables',
-    'workbooks',
-    # 'notebooks',
-    'data_upload',
     'analysis',
     'offline',
     'adminrestrict',

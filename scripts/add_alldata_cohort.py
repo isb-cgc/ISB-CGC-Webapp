@@ -50,7 +50,6 @@ MAX_INSERT = 500
 
 logging.basicConfig(level=logging.INFO)
 
-# TODO Use bq_data_access.BigQueryCohortSupport
 class BigQueryCohortSupport(object):
     cohort_schema = [
         {

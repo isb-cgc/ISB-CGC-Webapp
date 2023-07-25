@@ -14,7 +14,7 @@ shopt -s globstar
 
 echo "::::::::::::::::::::: Running Pylint on ISB-CGC-WebApp modules :::::::::::::::::::::"
 
-python3 -m pylint -d C adminrestrict analysis bq_data_access genes isb_cgc offline scripts seqpeek session_security variables visualizations workbooks ./*.py
+python3 -m pylint -d C adminrestrict analysis genes isb_cgc offline scripts session_security ./*.py
 
 echo "::::::::::::::::::::: Running Pylint on ISB-CGC-Common modules :::::::::::::::::::::"
 

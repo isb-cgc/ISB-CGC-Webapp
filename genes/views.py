@@ -14,7 +14,6 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.utils.safestring import mark_safe
 from .models import GeneFavorite, GeneSymbol
-from workbooks.models import Workbook, Worksheet
 
 BLACKLIST_RE = settings.BLACKLIST_RE
 

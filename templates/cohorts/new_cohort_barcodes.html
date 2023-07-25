@@ -29,18 +29,10 @@
     <link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}"/>
 
     <div class="container">
-        {% if workbook %}
-            <ol class="breadcrumb">
-                <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-                <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
-                <li><a href="{% url 'worksheet_display' workbook.id worksheet.id %}">{{ workbook.name }}</a></li>
-            </ol>
-        {% else %}
-            <ol class="breadcrumb">
-                <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-                <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
-            </ol>
-        {% endif %}
+        <ol class="breadcrumb">
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
+        </ol>
         <h1 class="page-header pull-left">Create Cohort - Barcodes</h1>
     </div>
 

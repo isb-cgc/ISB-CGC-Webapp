@@ -16,10 +16,6 @@
 <div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-        {% if workbook %}
-            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
-            <li><a href="{% url 'workbook_detail' workbook_id=workbook.id %}">{{ workbook.name|title }}</a></li>
-        {% endif %}
     </ol>
     <h1 class="page-header pull-left">{% if from_workbook %}Data Source | {% endif %}Cohorts</h1>
     {% if from_workbook %}

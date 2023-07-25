@@ -39,14 +39,9 @@ urlpatterns = [
     url(r'^report/$', views.path_report, name='path_pdf'),
     url(r'^report/(?P<report_file>[A-Za-z0-9._/-]+)/$', views.path_report, name='path_pdf_report'),
 
-    url(r'^analysis/', include('analysis.urls')),
-    url(r'^workbooks/', include('workbooks.urls')),
-    # url(r'^notebooks/', include('notebooks.urls')),
     url(r'^cohorts/', include('cohorts.urls')),
-    url(r'^visualizations/', include('visualizations.urls')),
     path('admin/', admin.site.urls),
     url(r'^accounts/', include('accounts.urls')),
-    url(r'^seqpeek/', include('seqpeek.urls')),
     url(r'^session_security/', include('session_security.urls')),
     url(r'^_ah/(vm_)?health$', views.health_check),
 

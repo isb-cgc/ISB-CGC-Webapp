@@ -29,7 +29,6 @@ from cohorts.models import Cohort, Cohort_Perms
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from projects.models import Program
-from workbooks.models import Workbook
 import logging
 import math
 
@@ -218,15 +217,6 @@ def get_programs_this_user(this_user, is_active=True):
     programs = ownedPrograms | sharedPrograms
     programs = programs.distinct().order_by('-last_date_saved')
     return programs
-
-
-@register.filter
-def get_workbooks_this_user(this_user, is_active=True):
-    userWorkbooks = this_user.workbook_set.filter(active=is_active)
-    sharedWorkbooks = Workbook.objects.filter(shared__matched_user=this_user, shared__active=True, active=is_active)
-    workbooks = userWorkbooks | sharedWorkbooks
-    workbooks = workbooks.distinct().order_by('-last_date_saved')
-    return workbooks
 
 
 @register.filter
