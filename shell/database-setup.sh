@@ -95,15 +95,6 @@ mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NA
 echo "Adding Cohort/Site Data and bootstrapping Django project and program tables..."
 python3 ${HOMEROOT}/scripts/add_site_ids.py
 
-# Add in the 'All TCGA' cohort
-if [ -n "$CI" ]; then
-    # We don't add the prefab cohorts to BQ if we're in CircleCI
-    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py -o cloudsql -p False
-else
-    # ...but we do if we're doing a local build
-    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py -f $GCLOUD_PROJECT_ID -o all -p False
-fi
-
 # We have to use '' around the statement due to the need to use `` around name and key, which are MySQL keywords, so concatenation is needed to
 # preserve expansion of GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET
 echo "Setting Up Social Application Login..."
