@@ -162,7 +162,6 @@ jobs:
             - ./.git
             - ./genes
             - ./shell
-            - ./tasks
             - ./etc
             - ./static
             - ./isb_cgc
