@@ -1156,7 +1156,7 @@ require([
                     $(row).addClass('case_' + data['PatientID']);
                     $(row).on('click', function(event){
                         var elem = event.target;
-                        if (!($(elem).is('a')) && !($(elem).hasClass('fa-eye')) && !($(elem).hasClass('tippy-box'))  && !($(elem).parents().hasClass('tippy-box'))  ) {
+                        if (!($(elem).is('a')) && !($(elem).hasClass('fa-copy')) && !($(elem).hasClass('fa-eye')) && !($(elem).hasClass('tippy-box'))  && !($(elem).parents().hasClass('tippy-box'))  ) {
                             if (!$(elem).parent().hasClass('ckbx')) {
                                 ckbx = $(elem).closest('tr').find('.ckbx').children()
                                 ckbx.prop("checked", !ckbx.prop("checked"));
@@ -1196,14 +1196,14 @@ require([
                     },
                     {
                         "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
-                            return pretty_print_id(data);
+                            return pretty_print_id(data) +
+                            '( <a class="copy-this" role="button" content="' + data +
+                                '" title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a> )';
                         },
                         "createdCell": function (td, data) {
                             $(td).data('study-id', data);
                             return;
                         }
-
-
                     },
                     {
                         "type": "text", "orderable": true, data: 'StudyDate', render: function (data) {
@@ -1422,17 +1422,19 @@ require([
                   "columns": [
                   {
                     "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
-                        return pretty_print_id(data);
+                        return pretty_print_id(data) +
+                            '( <a class="copy-this" role="button" content="' + data +
+                                '" title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a> )';
                     }, "createdCell": function (td, data) {
                         $(td).data('study-id', data);
                         return;
-
                     }
-
                 },
                       {
                     "type": "text", "orderable": true, data: 'SeriesInstanceUID', render: function (data) {
-                        return pretty_print_id(data);
+                        return pretty_print_id(data) +
+                            '( <a class="copy-this" role="button" content="' + data +
+                                '" title="Copy Series ID to the clipboard"><i class="fa-solid fa-copy"></i></a> )';
                     }, "createdCell": function (td, data) {
                         $(td).data('series-id', data);
                         return;
@@ -3548,6 +3550,7 @@ require([
         );
 
         $(window).on("beforeunload",function(){
+            console.log("beforeunload called");
             let hs = new Object();
             hs['hz'] = new Object();
             hs['sorter'] = new Object();

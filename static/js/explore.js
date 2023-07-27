@@ -314,20 +314,6 @@ require([
     });
 
     tippy.delegate('.studies-table', {
-        content: function(reference) {
-            return '<span class="tippy-uid">'+$(reference).data('study-id')+'</span>';
-        },
-        theme: 'dark',
-        placement: 'right',
-        arrow: true,
-        target: 'td.study-id-tltp',
-        interactive:'true',
-        interactiveBorder:10,
-        maxWidth: 600,
-        allowHTML:true
-    });
-
-    tippy.delegate('.studies-table', {
         content: 'Some or all of the images in this collection are not publicly available.',
         theme: 'dark',
         placement: 'right',
@@ -336,35 +322,6 @@ require([
         target: '.coll-explain',
         maxWidth: 130
     });
-
-    tippy.delegate('.series-table', {
-        content: function(reference) {
-            return '<span class="tippy-uid">'+$(reference).data('study-id')+'</span>';
-        },
-        theme: 'dark',
-        placement: 'right',
-        arrow: true,
-        interactive:'true',
-        interactiveBorder:10,
-        target: 'td.study-id-tltp',
-        maxWidth: 600,
-        allowHTML:true
-    });
-
-    tippy.delegate('.series-table', {
-        content: function(reference) {
-            return '<span class="tippy-uid">'+$(reference).data('series-id')+'</span>';
-        },
-        theme: 'dark',
-        placement: 'right',
-        arrow: true,
-        interactive:'true',
-        interactiveBorder:10,
-        target: 'td.series-id-tltp',
-        maxWidth: 600,
-        allowHTML:true
-    });
-
 
     tippy.delegate('.series-table', {
         content: function(reference) {
@@ -412,6 +369,22 @@ require([
         maxWidth: 800
     });
 
+    tippy.delegate('#body', {
+        content: function(reference) {
+            return "Copied!";
+        },
+        theme: 'blue',
+        placement: 'bottom',
+        arrow: true,
+        target: '.copy-this',
+        trigger: 'click',
+        onShow(instance) {
+            setTimeout(function() {
+                instance.hide();
+            }, 1000);
+        },
+        maxWidth: 85
+    });
 
     $('.download-link').on('click', function(){
         $('#download-images').modal("hide");
