@@ -407,9 +407,14 @@ tr {
 #studies_table_head th, #studies_table td {
     word-break: break-word; }
 
-#studies_table_head th.project-name, th.case-id, th.study-id,
-#studies_table td.project-name, td.case-id, td.study-id {
+#studies_table_head th.project-name, th.case-id,
+#studies_table td.project-name, td.case-id {
     width: 14%;
+}
+
+#studies_table_head th.study-id,
+#studies_table td.study-id {
+    width: 18%;
 }
 
 #studies_table_head th.study-date,
@@ -432,19 +437,19 @@ tr {
 }
 #series_table_head th.study-id,
 #series_table td.study-id {
-   width: 15%;
+   width: 18%;
 }
 
 #series_table_head th.series-id,
 #series_table td.series-id
 {
-    width: 15%;
+    width: 18%;
 }
 
 #series_table_head th.series-number,
 #series_table td.series-number
 {
-    width: 11%;
+    width: 8%;
 }
 #series_table_head th.modality,
 #series_table td.modality {

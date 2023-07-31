@@ -349,6 +349,38 @@ require([
     });
 
     tippy.delegate('.series-table', {
+        content: 'Copied!',
+        theme: 'blue',
+        placement: 'right',
+        arrow: true,
+        interactive: true, // This is required for any table tooltip to show at the appropriate spot!
+        target: '.copy-this-table',
+        onShow(instance) {
+            setTimeout(function() {
+                instance.hide();
+            }, 1000);
+        },
+        trigger: "click",
+        maxWidth: 85
+    });
+
+    tippy.delegate('.studies-table', {
+        content: 'Copied!',
+        theme: 'blue',
+        placement: 'right',
+        arrow: true,
+        interactive: true, // This is required for any table tooltip to show at the appropriate spot!
+        target: '.copy-this-table',
+        onShow(instance) {
+            setTimeout(function() {
+                instance.hide();
+            }, 1000);
+        },
+        trigger: "click",
+        maxWidth: 85
+    });
+
+    tippy.delegate('.series-table', {
         content: 'Some or all of the images in this collection are not publicly available.',
         theme: 'dark',
         placement: 'right',
@@ -366,6 +398,7 @@ require([
         placement: 'right',
         arrow: false,
         target: '.description-tip',
+        interactive: true, // This is required for any table tooltip to show at the appropriate spot!
         maxWidth: 800
     });
 
@@ -374,7 +407,7 @@ require([
             return "Copied!";
         },
         theme: 'blue',
-        placement: 'bottom',
+        placement: 'auto',
         arrow: true,
         target: '.copy-this',
         trigger: 'click',

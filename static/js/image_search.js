@@ -1197,8 +1197,8 @@ require([
                     {
                         "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                             return pretty_print_id(data) +
-                            '( <a class="copy-this" role="button" content="' + data +
-                                '" title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a> )';
+                            ' <a class="copy-this-table" role="button" content="' + data +
+                                '" title="Copy Study ID to the clipboard">( <i class="fa-solid fa-copy"></i> )</a>';
                         },
                         "createdCell": function (td, data) {
                             $(td).data('study-id', data);
@@ -1423,8 +1423,8 @@ require([
                   {
                     "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                         return pretty_print_id(data) +
-                            '( <a class="copy-this" role="button" content="' + data +
-                                '" title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a> )';
+                            ' <a class="copy-this-table" role="button" content="' + data +
+                                '"  title="Copy Study ID to the clipboard">( <i class="fa-solid fa-copy copy-this-table"></i> )</a>';
                     }, "createdCell": function (td, data) {
                         $(td).data('study-id', data);
                         return;
@@ -1433,14 +1433,12 @@ require([
                       {
                     "type": "text", "orderable": true, data: 'SeriesInstanceUID', render: function (data) {
                         return pretty_print_id(data) +
-                            '( <a class="copy-this" role="button" content="' + data +
-                                '" title="Copy Series ID to the clipboard"><i class="fa-solid fa-copy"></i></a> )';
+                            ' <a role="button" content="' + data +
+                                '"  title="Copy Series ID to the clipboard">( <i class="fa-solid fa-copy copy-this-table"></i> )</a>';
                     }, "createdCell": function (td, data) {
                         $(td).data('series-id', data);
                         return;
-
                     }
-
                 },
                 {"type": "num", "orderable": true, data: 'SeriesNumber'},
                 {"type": "text", "orderable": true, data: 'Modality'},
@@ -1462,6 +1460,9 @@ require([
                             return;
 
                         }
+                    },
+                    "createdRow": function(tr, data) {
+
                     }
                 },
                 {
