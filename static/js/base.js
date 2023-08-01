@@ -182,7 +182,7 @@ require([
         $('#external-web-warning').modal('hide');
     });
 
-    $('#body').on('click', '.copy-this', function(){
+    $('#body').on('click', '.copy-this, .copy-this-table', function(){
         let content = $(this).attr('content');
         navigator.permissions.query({name: "clipboard-write"}).then(result => {
             if (result.state == "granted" || result.state == "prompt") {

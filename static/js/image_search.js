@@ -1417,24 +1417,24 @@ require([
                     {className: "col1 modality", "targets": [3]},
                     {className: "col1 body-part-examined", "targets": [4]},
                     {className: "series-description", "targets": [5]},
-                    {className: "ohif open-viewer", "targets": [6]},
+                    {className: "manifest-controls", "targets": [6]},
+                    {className: "ohif open-viewer", "targets": [7]},
                  ],
                   "columns": [
                   {
                     "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                         return pretty_print_id(data) +
                             ' <a class="copy-this-table" role="button" content="' + data +
-                                '"  title="Copy Study ID to the clipboard">( <i class="fa-solid fa-copy copy-this-table"></i> )</a>';
+                                '"  title="Copy Study ID to the clipboard">( <i class="fa-solid fa-copy"></i> )</a>';
                     }, "createdCell": function (td, data) {
                         $(td).data('study-id', data);
                         return;
                     }
-                },
-                      {
+                }, {
                     "type": "text", "orderable": true, data: 'SeriesInstanceUID', render: function (data) {
                         return pretty_print_id(data) +
-                            ' <a role="button" content="' + data +
-                                '"  title="Copy Series ID to the clipboard">( <i class="fa-solid fa-copy copy-this-table"></i> )</a>';
+                            ' <a class="copy-this-table" role="button" content="' + data +
+                                '"  title="Copy Series ID to the clipboard">( <i class="fa-solid fa-copy"></i> )</a>';
                     }, "createdCell": function (td, data) {
                         $(td).data('series-id', data);
                         return;
@@ -1461,11 +1461,16 @@ require([
 
                         }
                     },
-                    "createdRow": function(tr, data) {
-
+                }, {
+                    "type": "html", "orderable": false, data: 'SeriesInstanceUID', render: function (data, type, row) {
+                        return '<button id="export-series-manifest" class="btn btn-mini pull-right" data-toggle="modal" ' +
+                            'data-target="#series-manifest-modal" title="Obtain an s5cmd command to download this series."> Download Series\n' +
+                            '</button>'
+                    }, "createdCell": function (td, data) {
+                        $(td).data('series-id', data);
+                        return;
                     }
-                },
-                {
+                }, {
                     "type": "html",
                     "orderable": false,
                     data: 'SeriesInstanceUID',
@@ -1615,7 +1620,7 @@ require([
     }
 
     var pretty_print_id = function (id) {
-        var newId = id.slice(0, 12) + '...' + id.slice(id.length - 12, id.length);
+        var newId = id.slice(0, 8) + '...' + id.slice(id.length - 8, id.length);
         return newId;
     }
 
