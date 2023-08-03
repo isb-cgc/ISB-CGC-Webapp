@@ -184,13 +184,14 @@ require([
 
     $('#body').on('click', '.copy-this, .copy-this-table', function(){
         let content = $(this).attr('content');
-        navigator.permissions.query({name: "clipboard-write"}).then(result => {
-            if (result.state == "granted" || result.state == "prompt") {
-                navigator.clipboard.writeText(content);
-            } else  {
-                console.debug("Failed to access clipboard!");
-            }
-        });
+        navigator.clipboard.writeText(content).then(
+            () => {
+              // Show clicked tooltip
+            },
+            () => {
+              alert("Unable to write to clipboard--please make sure the browser has access!");
+            },
+        );
     });
 
 });
