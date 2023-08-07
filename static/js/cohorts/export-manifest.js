@@ -64,8 +64,59 @@ require([
 
     var downloadToken = new Date().getTime();
 
+    $('#export-manifest-modal').on('shown.bs.modal', function(event) {
+        var button = $(event.relatedTarget)
+        if (button.hasClass('series-export')){
+            $('#export-manifest-form').append('<input type="hidden" name="mini">')
+            $('#export-manifest-form').find('input[name="mini"]').val('series');
+            var filt_str=$('#export-manifest-form').find('input[name="filters"]').val()
+            filters= new Object();
+            if (filt_str.length>0){
+                filters=JSON.parse(filt_str)
+            }
+            filters['SeriesInstanceUID']=[button.data('uid')]
+            $('#export-manifest-form input[name="filters"]').val(JSON.stringify(filters));
+
+            let file_name = $('input[name="file_name"]');
+            file_name.attr("name-base","series-manifest");
+            update_file_names();
+            update_download_manifest_buttons();
+
+        }
+        else if (button.hasClass('study-export')){
+            $('#export-manifest-form').append('<input type="hidden" name="mini">')
+            $('#export-manifest-modal').find('input[name="mini"]').val('study');
+            var filt_str=$('#export-manifest-form').find('input[name="filters"]').val()
+            filters= new Object();
+            if (filt_str.length>0){
+                filters=JSON.parse(filt_str)
+            }
+            filters['StudyInstanceUID']=[button.data('uid')]
+            $('#export-manifest-form input[name="filters"]').val(JSON.stringify(filters));
+
+            let file_name = $('input[name="file_name"]');
+            file_name.attr("name-base","study-manifest");
+            update_file_names();
+            update_download_manifest_buttons();
+        }
+        
+    });
+
     $('#export-manifest-modal').on('hide.bs.modal', function() {
         $('input').removeAttr('name-base');
+        if ($('#export-manifest-modal').find('input[name="mini"]').length>0){
+            $('#export-manifest-modal').find('input[name="mini"]').remove();
+            var filt_str=$('#export-manifest-form').find('input[name="filter"]').val()
+            var filters=JSON.parse(filt_str);
+            if ('StudyInstanceUID' in filters){
+                delete filters['StudyInstanceUID']
+            }
+            if ('SeriesInstanceUID' in filters){
+                delete filters['SeriesInstanceUID']
+            }
+
+        }
+
     });
 
     $('#download-csv').on('click', function(e) {

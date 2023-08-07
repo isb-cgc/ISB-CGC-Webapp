@@ -1173,6 +1173,7 @@ require([
                     {className: "col1 study-description", "targets": [4]},
                     {className: "col1 numrows", "targets": [5]},
                     {className: "ohif open-viewer", "targets": [6]},
+                    {className: "download", "targets": [7]},
 
                 ],
                 "columns": [
@@ -1244,6 +1245,14 @@ require([
                             }
                         }
                     },
+                    {
+                          "type":"html",
+                          "orderable": false,
+                          data: 'StudyInstanceUID', render: function (data){
+                              return '<i class="fa fa-download study-export" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
+                          }
+
+                      }
                 ],
                 "processing": true,
                 "serverSide": true,
@@ -1418,6 +1427,7 @@ require([
                     {className: "col1 body-part-examined", "targets": [4]},
                     {className: "series-description", "targets": [5]},
                     {className: "ohif open-viewer", "targets": [6]},
+                    {className: "download", "targets": [7]},
                  ],
                   "columns": [
                   {
@@ -1498,6 +1508,14 @@ require([
 
                     }
                 },
+                      {
+                          "type":"html",
+                          "orderable": false,
+                          data: 'SeriesInstanceUID', render: function (data){
+                              return '<i class="fa fa-download series-export" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
+                          }
+
+                      }
             ],
             "processing": true,
             "serverSide": true,
@@ -3550,6 +3568,7 @@ require([
                 ).attr("style","display: none;")
         );
 
+        /*
         $(window).on("beforeunload",function(){
             console.log("beforeunload called");
             let hs = new Object();
@@ -3568,6 +3587,8 @@ require([
                 let sort = $(this).find('input:checked').val()
                 hs['sorter'][pid] = sort;
             });
+
+
 
             let url = encodeURI('/uihist/')
             let nhs = {'his':JSON.stringify(hs)}
@@ -3591,9 +3612,12 @@ require([
                 }
             });
         });
+
+
         initSort('num');
         if (document.contains(document.getElementById('history'))){
-            updateViaHistory();
+            //updateViaHistory();
         }
+        */
     });
 });
