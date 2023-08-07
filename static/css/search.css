@@ -478,6 +478,17 @@ tr {
   filter: brightness(100%);
 }
 
+.export-series-manifest.btn {
+    border: 1px solid #1d3954;
+}
+
+.export-series-manifest.btn:hover {
+    background-color: #98b4e9a1;
+    color: black;
+
+}
+
+
 .btn-mini {
     padding: 4px 8px;
 }

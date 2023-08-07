@@ -1198,7 +1198,7 @@ require([
                         "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                             return pretty_print_id(data) +
                             ' <a class="copy-this-table" role="button" content="' + data +
-                                '" title="Copy Study ID to the clipboard">( <i class="fa-solid fa-copy"></i> )</a>';
+                                '" title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                         },
                         "createdCell": function (td, data) {
                             $(td).data('study-id', data);
@@ -1425,7 +1425,7 @@ require([
                     "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                         return pretty_print_id(data) +
                             ' <a class="copy-this-table" role="button" content="' + data +
-                                '"  title="Copy Study ID to the clipboard">( <i class="fa-solid fa-copy"></i> )</a>';
+                                '"  title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                     }, "createdCell": function (td, data) {
                         $(td).data('study-id', data);
                         return;
@@ -1434,7 +1434,7 @@ require([
                     "type": "text", "orderable": true, data: 'SeriesInstanceUID', render: function (data) {
                         return pretty_print_id(data) +
                             ' <a class="copy-this-table" role="button" content="' + data +
-                                '"  title="Copy Series ID to the clipboard">( <i class="fa-solid fa-copy"></i> )</a>';
+                                '"  title="Copy Series ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                     }, "createdCell": function (td, data) {
                         $(td).data('series-id', data);
                         return;
@@ -1463,8 +1463,8 @@ require([
                     },
                 }, {
                     "type": "html", "orderable": false, data: 'SeriesInstanceUID', render: function (data, type, row) {
-                        return '<button id="export-series-manifest" class="btn btn-mini pull-right" data-toggle="modal" ' +
-                            'data-target="#series-manifest-modal" title="Obtain an s5cmd command to download this series."> Download Series\n' +
+                        return '<button class="export-series-manifest btn btn-mini" data-toggle="modal" ' +
+                            'data-target="#series-manifest-modal" title="Obtain an s5cmd command to download this series."> <i class="fa-solid fa-download" aria-hidden="true"></i>' +
                             '</button>'
                     }, "createdCell": function (td, data) {
                         $(td).data('series-id', data);
