@@ -29,89 +29,90 @@
 {% block page_name %}user-details{% endblock %}
 
 {% block content %}
-    <div class="user-detail">
-    {% if not unconnected_local_account %}
-        <img src="{{ user_details.extra_data.picture }}" class="avatar space-top-10" alt="User Avatar"/>
-    {% else %}
-        <i class="fa-solid fa-user space-top-10 basic-avatar" alt="User Avatar"/> </i>
-    {% endif %}
-        <h4>Welcome {% if not unconnected_local_account %}{{ user_details.first_name }} {{ user_details.last_name }}{% else %}{{ user_details.email }}{% endif %}!</h4>
-    </div>
-    <div class="row user-row">
-        <div class="col-lg-4 col-md-4 col-sm-12 short-inner-content-big-header">
-            <div class="panel panel-default user-panel">
-                <div class="panel-heading">
-                    <h5>
-                        Personal Details
-                    </h5>
+    <div class="short-inner-content-no-header container-fluid">
+        <div class="user-detail">
+        {% if not unconnected_local_account %}
+            <img src="{{ user_details.extra_data.picture }}" class="avatar space-top-10" alt="User Avatar"/>
+        {% else %}
+            <i class="fa-solid fa-user space-top-10 basic-avatar" alt="User Avatar"/> </i>
+        {% endif %}
+            <h4>Welcome {% if not unconnected_local_account %}{{ user_details.first_name }} {{ user_details.last_name }}{% else %}{{ user_details.email }}{% endif %}!</h4>
+        </div>
+        <div class="row user-row">
+            <div class="col-lg-4 col-md-4 col-sm-12">
+                <div class="panel panel-default user-panel">
+                    <div class="panel-heading">
+                        <h5>
+                            Personal Details
+                        </h5>
+                    </div>
+                    <div class="panel-body">
+                        <table class="user-info" role="presentation">
+                            <tr>
+                            {% if not unconnected_local_account %}
+                                <td>Name</td>
+                                <td>{{ user_details.first_name }} {{ user_details.last_name }}</td>
+                            {% else %}
+                                <td>User Name</td>
+                                <td>{{ user_details.username }}</td>
+                            {% endif %}
+                            </tr>
+                            <tr>
+                                <td>Email</td>
+                                <td>{{ user_details.email }}</td>
+                            </tr>
+                            <tr>
+                                <td>Last Login</td>
+                                <td id="last_login">{{ user_details.last_login }}</td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
-                <div class="panel-body">
-                    <table class="user-info" role="presentation">
-                        <tr>
-                        {% if not unconnected_local_account %}
-                            <td>Name</td>
-                            <td>{{ user_details.first_name }} {{ user_details.last_name }}</td>
-                        {% else %}
-                            <td>User Name</td>
-                            <td>{{ user_details.username }}</td>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-12">
+                <div class="panel panel-default gcp-panel">
+                    <div class="panel-heading">
+                        <h5>
+                            Google Cloud Platform
+                        </h5>
+                    </div>
+                    <div class="panel-body">
+                        <p>
+                            Apply for "cloud credits" and your own Google Cloud project by submitting a request <a href="https://learn.canceridc.dev/introduction/requesting-gcp-cloud-credits" target="_blank" rel="noopener noreferrer">here</a>.
+                        </p>
+                        <p>Go to the <a href="http://console.cloud.google.com" target="_blank" rel="noopener noreferrer">Google Cloud Console</a>.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-12">
+                <div class="panel panel-default account-management-panel">
+                    <div class="panel-heading">
+                        <h5>
+                            Account Management
+                        </h5>
+                    </div>
+                    <div class="panel-body">
+                        {% if unconnected_local_account %}
+                        <p>
+                            <a href="{% url 'account_change_password' %}" target="_blank" rel="noopener noreferrer">Change Your Password</a>
+                        </p>
+                        <p>
+                            <a href="{% provider_login_url "google" process="connect" %}">Connect a Google Account</a>
+                        </p>
                         {% endif %}
-                        </tr>
-                        <tr>
-                            <td>Email</td>
-                            <td>{{ user_details.email }}</td>
-                        </tr>
-                        <tr>
-                            <td>Last Login</td>
-                            <td id="last_login">{{ user_details.last_login }}</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-4 col-sm-12">
-            <div class="panel panel-default gcp-panel">
-                <div class="panel-heading">
-                    <h5>
-                        Google Cloud Platform
-                    </h5>
-                </div>
-                <div class="panel-body">
-                    <p>
-                        Apply for "cloud credits" and your own Google Cloud project by submitting a request <a href="https://learn.canceridc.dev/introduction/requesting-gcp-cloud-credits" target="_blank" rel="noopener noreferrer">here</a>.
-                    </p>
-                    <p>Go to the <a href="http://console.cloud.google.com" target="_blank" rel="noopener noreferrer">Google Cloud Console</a>.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-4 col-sm-12">
-            <div class="panel panel-default account-management-panel">
-                <div class="panel-heading">
-                    <h5>
-                        Account Management
-                    </h5>
-                </div>
-                <div class="panel-body">
-                    {% if unconnected_local_account %}
-                    <p>
-                        <a href="{% url 'account_change_password' %}" target="_blank" rel="noopener noreferrer">Change Your Password</a>
-                    </p>
-                    <p>
-                        <a href="{% provider_login_url "google" process="connect" %}">Connect a Google Account</a>
-                    </p>
-                    {% endif %}
-                    {% if social_account %}
-                    <p>
-                        <a href="{% url 'socialaccount_connections' %}">Manage Google Account Connections</a>
-                    </p>
-                    {% endif %}
-                    <p>
-                        <a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out">Sign Out <i class="fa-solid fa-sign-out"></i></a>
-                    </p>
+                        {% if social_account %}
+                        <p>
+                            <a href="{% url 'socialaccount_connections' %}">Manage Google Account Connections</a>
+                        </p>
+                        {% endif %}
+                        <p>
+                            <a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out">Sign Out <i class="fa-solid fa-sign-out"></i></a>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
     <script type="text/javascript"> 
         var last_login_client_time = new Date("{{ user_details.last_login|safe }}".replace(" ","T"));
         document.getElementById('last_login').innerHTML = last_login_client_time; 
