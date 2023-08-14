@@ -1156,7 +1156,7 @@ require([
                     $(row).addClass('case_' + data['PatientID']);
                     $(row).on('click', function(event){
                         var elem = event.target;
-                        if (!($(elem).is('a')) && !($(elem).hasClass('fa-copy')) && !($(elem).hasClass('fa-eye')) && !($(elem).hasClass('tippy-box'))  && !($(elem).parents().hasClass('tippy-box'))  ) {
+                        if (!($(elem).is('a')) && !($(elem).hasClass('fa-download')) && !($(elem).hasClass('fa-copy')) && !($(elem).hasClass('fa-eye')) && !($(elem).hasClass('tippy-box'))  && !($(elem).parents().hasClass('tippy-box'))  ) {
                             if (!$(elem).parent().hasClass('ckbx')) {
                                 ckbx = $(elem).closest('tr').find('.ckbx').children()
                                 ckbx.prop("checked", !ckbx.prop("checked"));
@@ -1417,6 +1417,9 @@ require([
                  "order": [[0, "asc"]],
                  "createdRow": function (row, data, dataIndex) {
                     $(row).attr('id', 'series_' + data['SeriesInstanceUID'])
+                    $(row).attr('data-crdc',  data['crdc_series_uuid'])
+                    $(row).attr('data-aws',  data['aws_bucket'])
+                    $(row).attr('data-gcs',  data['gcs_bucket'])
                     $(row).addClass('text_head');
                  },
                 "columnDefs": [
