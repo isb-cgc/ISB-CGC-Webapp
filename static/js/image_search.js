@@ -1861,6 +1861,19 @@ require([
                                 data.totals.StudyInstanceUID.toString()+" Studies, and " +
                                 data.totals.SeriesInstanceUID.toString()+" Series in this cohort. " +
                                 "Size on disk: " + data.totals.disk_size);
+                            let select_box_div = $('#file-part-select-box');
+                            let select_box = select_box_div.find('select');
+                            if (data.totals.file_parts_count > 1) {
+                                select_box_div.show();
+                                for (let i = 0; i < data.totals.display_file_parts_count; ++i) {
+                                    select_box.append($('<option/>', {
+                                        value: i,
+                                        text : "File Part " + (i + 1)
+                                    }));
+                                }
+                            } else {
+                                select_box_div.hide();
+                            }
                             if (('filtered_counts' in data) && ('access' in data['filtered_counts']['origin_set']['All']['attributes']) && ('Limited' in data['filtered_counts']['origin_set']['All']['attributes']['access']) && (data['filtered_counts']['origin_set']['All']['attributes']['access']['Limited']['count']>0) ){
                                $('#search_def_access').removeClass('notDisp');
                                $('.access_warn').removeClass('notDisp');
