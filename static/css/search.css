@@ -478,7 +478,7 @@ tr {
     width:7%;
 }
 
-#series_table td.ohif, #studies_table td.ohif {
+#series_table td.ohif, #studies_table td.ohif, #series_table td.download, #studies_table td.download{
   vertical-align: middle;
   padding: 0 8px 0 8px;
 }

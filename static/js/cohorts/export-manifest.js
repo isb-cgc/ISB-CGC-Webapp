@@ -82,7 +82,7 @@ require([
             title = 'Series Export';
             filterNm = 'Series InstanceUID';
             mini_type = 'series';
-            name_base='series-manifest';
+            name_base='series_manifest';
 
             $('#export-manifest-form').append('<input type="hidden" name="aws">')
             $('#export-manifest-modal').find('input[name="aws"]').val(button.parent().parent().data('aws'));
@@ -96,7 +96,7 @@ require([
             title = 'Study Export';
             filterNm = 'StudyInstanceUID';
             mini_type = 'study';
-            name_base='study-manifest';
+            name_base='study_manifest';
         }
 
         $('.modal-title').text(title);
@@ -120,9 +120,14 @@ require([
         file_name.attr("name-base",name_base);
         $('.manifest-file').hide();
         $('.manifest-bq').hide();
+        $('#manifest-source').text(mini_type);
         if (button.hasClass('series-export')) {
             $('#export-manifest-form').find('#s5cmd-header-fields-container').hide();
             $('#export-manifest-form').find('#download-s5cmd').hide();
+        }
+        else if (button.hasClass('study-export')) {
+            $('#s5cmd-header-fields').find('input[value="cohort_name"]').parent().hide();
+            $('#s5cmd-header-fields').find('input[value="user_email"]').parent().hide();
         }
         update_file_names();
     }
@@ -153,7 +158,10 @@ require([
       $('.manifest-bq').show();
       $('#export-manifest-form').find('#s5cmd-header-fields-container').show();
       $('#export-manifest-form').find('#download-s5cmd').show();
+      $('#s5cmd-header-fields').find('input[value="cohort_name"]').parent().show();
+      $('#s5cmd-header-fields').find('input[value="user_email"]').parent().show();
       $('.modal-title').text('Export Manifest');
+      $('#manifest-source').text('manifest');
     }
 
     $('#download-csv').on('click', function(e) {
@@ -305,7 +313,7 @@ require([
         if ($('#export-manifest-modal').find('input[name="mini"]').val()==='series') {
             let crdc=$('#export-manifest-modal').find('input[name="crdc"]').val()
             let bucket = ($('input.loc_type:checked').val() === "aws" ? $('input[name="aws"]').val() : $('input[name="gcs"]').val());
-            s5cmd_text = `s5cmd --no-sign-request --endpoint-url ${endpoint_url} cp ${bucket}/${crdc}/* .`;
+            s5cmd_text = `s5cmd --no-sign-request --endpoint-url ${endpoint_url} cp 's3://${bucket}/${crdc}/*' .`;
 
         }
 
