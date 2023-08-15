@@ -1156,7 +1156,7 @@ require([
                     $(row).addClass('case_' + data['PatientID']);
                     $(row).on('click', function(event){
                         var elem = event.target;
-                        if (!($(elem).is('a')) && !($(elem).hasClass('fa-eye')) && !($(elem).hasClass('tippy-box'))  && !($(elem).parents().hasClass('tippy-box'))  ) {
+                        if (!($(elem).is('a')) && !($(elem).hasClass('fa-download')) && !($(elem).hasClass('fa-copy')) && !($(elem).hasClass('fa-eye')) && !($(elem).hasClass('tippy-box'))  && !($(elem).parents().hasClass('tippy-box'))  ) {
                             if (!$(elem).parent().hasClass('ckbx')) {
                                 ckbx = $(elem).closest('tr').find('.ckbx').children()
                                 ckbx.prop("checked", !ckbx.prop("checked"));
@@ -1173,6 +1173,7 @@ require([
                     {className: "col1 study-description", "targets": [4]},
                     {className: "col1 numrows", "targets": [5]},
                     {className: "ohif open-viewer", "targets": [6]},
+                    {className: "download", "targets": [7]},
 
                 ],
                 "columns": [
@@ -1196,14 +1197,14 @@ require([
                     },
                     {
                         "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
-                            return pretty_print_id(data);
+                            return pretty_print_id(data) +
+                            ' <a class="copy-this-table" role="button" content="' + data +
+                                '" title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                         },
                         "createdCell": function (td, data) {
                             $(td).data('study-id', data);
                             return;
                         }
-
-
                     },
                     {
                         "type": "text", "orderable": true, data: 'StudyDate', render: function (data) {
@@ -1244,6 +1245,14 @@ require([
                             }
                         }
                     },
+                    {
+                          "type":"html",
+                          "orderable": false,
+                          data: 'StudyInstanceUID', render: function (data){
+                              return '<i class="fa fa-download study-export" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
+                          }
+
+                      }
                 ],
                 "processing": true,
                 "serverSide": true,
@@ -1408,6 +1417,9 @@ require([
                  "order": [[0, "asc"]],
                  "createdRow": function (row, data, dataIndex) {
                     $(row).attr('id', 'series_' + data['SeriesInstanceUID'])
+                    $(row).attr('data-crdc',  data['crdc_series_uuid'])
+                    $(row).attr('data-aws',  data['aws_bucket'])
+                    $(row).attr('data-gcs',  data['gcs_bucket'])
                     $(row).addClass('text_head');
                  },
                 "columnDefs": [
@@ -1418,27 +1430,28 @@ require([
                     {className: "col1 body-part-examined", "targets": [4]},
                     {className: "series-description", "targets": [5]},
                     {className: "ohif open-viewer", "targets": [6]},
+                    {className: "download", "targets": [7]},
+
                  ],
                   "columns": [
                   {
                     "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
-                        return pretty_print_id(data);
+                        return pretty_print_id(data) +
+                            ' <a class="copy-this-table" role="button" content="' + data +
+                                '"  title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                     }, "createdCell": function (td, data) {
                         $(td).data('study-id', data);
                         return;
-
                     }
-
-                },
-                      {
+                }, {
                     "type": "text", "orderable": true, data: 'SeriesInstanceUID', render: function (data) {
-                        return pretty_print_id(data);
+                        return pretty_print_id(data) +
+                            ' <a class="copy-this-table" role="button" content="' + data +
+                                '"  title="Copy Series ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                     }, "createdCell": function (td, data) {
                         $(td).data('series-id', data);
                         return;
-
                     }
-
                 },
                 {"type": "num", "orderable": true, data: 'SeriesNumber'},
                 {"type": "text", "orderable": true, data: 'Modality'},
@@ -1460,9 +1473,8 @@ require([
                             return;
 
                         }
-                    }
-                },
-                {
+                    },
+                },  {
                     "type": "html",
                     "orderable": false,
                     data: 'SeriesInstanceUID',
@@ -1495,6 +1507,14 @@ require([
 
                     }
                 },
+                      {
+                          "type":"html",
+                          "orderable": false,
+                          data: 'SeriesInstanceUID', render: function (data){
+                              return '<i class="fa fa-download series-export" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
+                          }
+
+                      }
             ],
             "processing": true,
             "serverSide": true,
@@ -1612,7 +1632,7 @@ require([
     }
 
     var pretty_print_id = function (id) {
-        var newId = id.slice(0, 12) + '...' + id.slice(id.length - 12, id.length);
+        var newId = id.slice(0, 8) + '...' + id.slice(id.length - 8, id.length);
         return newId;
     }
 
@@ -1853,6 +1873,19 @@ require([
                                 data.totals.StudyInstanceUID.toString()+" Studies, and " +
                                 data.totals.SeriesInstanceUID.toString()+" Series in this cohort. " +
                                 "Size on disk: " + data.totals.disk_size);
+                            let select_box_div = $('#file-part-select-box');
+                            let select_box = select_box_div.find('select');
+                            if (data.totals.file_parts_count > 1) {
+                                select_box_div.show();
+                                for (let i = 0; i < data.totals.display_file_parts_count; ++i) {
+                                    select_box.append($('<option/>', {
+                                        value: i,
+                                        text : "File Part " + (i + 1)
+                                    }));
+                                }
+                            } else {
+                                select_box_div.hide();
+                            }
                             if (('filtered_counts' in data) && ('access' in data['filtered_counts']['origin_set']['All']['attributes']) && ('Limited' in data['filtered_counts']['origin_set']['All']['attributes']['access']) && (data['filtered_counts']['origin_set']['All']['attributes']['access']['Limited']['count']>0) ){
                                $('#search_def_access').removeClass('notDisp');
                                $('.access_warn').removeClass('notDisp');
@@ -3547,7 +3580,9 @@ require([
                 ).attr("style","display: none;")
         );
 
+        /*
         $(window).on("beforeunload",function(){
+            console.log("beforeunload called");
             let hs = new Object();
             hs['hz'] = new Object();
             hs['sorter'] = new Object();
@@ -3564,6 +3599,8 @@ require([
                 let sort = $(this).find('input:checked').val()
                 hs['sorter'][pid] = sort;
             });
+
+
 
             let url = encodeURI('/uihist/')
             let nhs = {'his':JSON.stringify(hs)}
@@ -3587,9 +3624,12 @@ require([
                 }
             });
         });
+
+
         initSort('num');
         if (document.contains(document.getElementById('history'))){
-            updateViaHistory();
+            //updateViaHistory();
         }
+        */
     });
 });

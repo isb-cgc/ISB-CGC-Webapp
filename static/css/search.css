@@ -407,63 +407,76 @@ tr {
 #studies_table_head th, #studies_table td {
     word-break: break-word; }
 
-#studies_table_head th.project-name, th.case-id, th.study-id,
-#studies_table td.project-name, td.case-id, td.study-id {
-    width: 14%;
+#studies_table_head th.project-name, th.case-id,
+#studies_table td.project-name, td.case-id {
+    width: 13%;
+}
+
+#studies_table_head th.study-id,
+#studies_table td.study-id {
+    width: 17%;
 }
 
 #studies_table_head th.study-date,
 #studies_table td.study-date {
-    width: 10%;
+    width: 9%;
 }
 
 #studies_table_head th.study-description,
 #studies_table td.study-description {
-    width:33%;
+    width:32%;
 }
 #studies_table_head th.open-viewer,
 #studies_table td.open-viewer {
-    width:6%;
+    width:5%;
 }
 
+#studies_table_head th.download,
+#studies_table td.download {
+    width:6%;
+}
 
 #series_table_head th, #series_table td {
     word-break: break-word;
 }
-#series_table_head th.study-id,
-#series_table td.study-id {
+
+#series_table_head th.study-id, #series_table_head th.series-id,
+#series_table td.study-id, #series_table td.series-id
+{
    width: 15%;
 }
 
-#series_table_head th.series-id,
-#series_table td.series-id
-{
-    width: 15%;
-}
-
+#series_table_head th.manifest-controls,
+#series_table td.manifest-controls,
 #series_table_head th.series-number,
 #series_table td.series-number
 {
-    width: 11%;
+    width: 7%;
 }
+
 #series_table_head th.modality,
 #series_table td.modality {
-    width:11%;
+    width:10%;
 }
 #series_table_head th.body-part-examined,
 #series_table td.body-part-examined {
-    width:15%;
+    width:14%;
 }
 #series_table_head th.series-description,
 #series_table td.series-description {
-    width:26%;
+    width:22%;
 }
 #series_table_head th.open-viewer,
 #series_table td.open-viewer {
+    width:6%;
+}
+
+#series_table_head th.download,
+#series_table td.download {
     width:7%;
 }
 
-#series_table td.ohif, #studies_table td.ohif {
+#series_table td.ohif, #studies_table td.ohif, #series_table td.download, #studies_table td.download{
   vertical-align: middle;
   padding: 0 8px 0 8px;
 }
@@ -474,6 +487,21 @@ tr {
 
 #series_table tr.selected_grey td.ohif img, #studies_table tr.selected_grey td.ohif img {
   filter: brightness(100%);
+}
+
+.export-series-manifest.btn {
+    border: 1px solid #1d3954;
+}
+
+.export-series-manifest.btn:hover {
+    background-color: #98b4e9a1;
+    color: black;
+
+}
+
+
+.btn-mini {
+    padding: 4px 8px;
 }
 
 table {

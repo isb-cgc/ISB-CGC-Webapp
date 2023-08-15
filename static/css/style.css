@@ -88,15 +88,15 @@ ul, ol {
   -moz-osx-font-smoothing: grayscale; }
 
 .main-content {
-  margin-top: 86px; }
+  margin-top: 56px; }
 
 /*
   Calc the space displayed minus headers and footers to produce a min-height for
   pages that are lacking content to appropriately extend the page
  */
 .short-inner-content {
-  min-height: calc(100vh - 310px);
-  /* 306 = margin-top of main (for site header, 86) + page header (56) + page header padding (20) +
+  min-height: calc(100vh - 280px);
+  /* 280 = margin-top of main (for site header, 56) + page header (56) + page header padding (20) +
   panel bottom margin (20) + footer height (124) */
 }
 
@@ -107,12 +107,12 @@ ul, ol {
 
 /* Pages with no use of a header need more space taken up */
 .short-inner-content-no-header {
-  min-height: calc(100vh - 214px);
+  min-height: calc(100vh - 183px);
 }
 
 /* The landing page has an additional section (summary) which complicates the layout count */
 #landing .short-inner-content {
-  min-height: calc(100vh - 294px);
+  min-height: calc(100vh - 274px);
 }
 
 #about ul {
@@ -126,12 +126,6 @@ ul, ol {
 
 #about h5 {
   margin-top: 20px;
-}
-
-
-/* The cohorts list page has an additional section (action buttons) which complicates the layout count */
-#cohorts-list .short-inner-content {
-  min-height: calc(100vh - 394px);
 }
 
 
@@ -183,7 +177,7 @@ nav {
 
 .navbar {
   margin-bottom: 0px;
-  height: 86px;
+  height: 57px;
 }
 
 .navbar-header {
@@ -2960,7 +2954,7 @@ html {
 }
 
 #landing .landing-content-div {
-  top: 86px;
+  top: 57px;
   left: 0;
   width: 100%;
   background-image: linear-gradient(to bottom right,#6294c9,#83c5d7,#6294c9);
@@ -3308,7 +3302,7 @@ html {
     display: inline-block; }
 
 #user-details {
-  margin-top: 80px; }
+  margin-top: 56px; }
   #user-details .avatar {
     border-radius: 50%;
     display: block;
@@ -4362,4 +4356,39 @@ d-topics-list iframe {
 
 .external-link {
   cursor: pointer;
+}
+
+.external-link-p {
+  word-wrap: break-word;
+}
+
+.tippy-box[data-theme~=blue] {
+  background-color: #98bdde;
+  box-shadow: 0 0 20px 4px rgba(154, 161, 177, .15), 0 4px 80px -8px rgba(36, 40, 47, .25), 0 4px 4px -2px rgba(91, 94, 105, .15);
+  color: #232946;
+  font-weight: bold;
+}
+
+.tippy-box[data-theme~=blue][data-placement^=top]>.tippy-arrow:before {
+    border-top-color: #98bdde;
+}
+
+.tippy-box[data-theme~=blue][data-placement^=bottom]>.tippy-arrow:before {
+    border-bottom-color: #98bdde;
+}
+
+.tippy-box[data-theme~=blue][data-placement^=left]>.tippy-arrow:before {
+    border-left-color: #98bdde;
+}
+
+.tippy-box[data-theme~=blue][data-placement^=right]>.tippy-arrow:before {
+    border-right-color: #98bdde;
+}
+
+.tippy-box[data-theme~=blue]>.tippy-backdrop {
+    background-color: #98bdde;
+}
+
+.tippy-box[data-theme~=blue]>.tippy-svg-arrow {
+    fill: #b0d4f3;
 }
