@@ -1156,7 +1156,7 @@ require([
                     $(row).addClass('case_' + data['PatientID']);
                     $(row).on('click', function(event){
                         var elem = event.target;
-                        if (!($(elem).is('a')) && !($(elem).hasClass('fa-copy')) && !($(elem).hasClass('fa-eye')) && !($(elem).hasClass('tippy-box'))  && !($(elem).parents().hasClass('tippy-box'))  ) {
+                        if (!($(elem).is('a')) && !($(elem).hasClass('fa-download')) && !($(elem).hasClass('fa-copy')) && !($(elem).hasClass('fa-eye')) && !($(elem).hasClass('tippy-box'))  && !($(elem).parents().hasClass('tippy-box'))  ) {
                             if (!$(elem).parent().hasClass('ckbx')) {
                                 ckbx = $(elem).closest('tr').find('.ckbx').children()
                                 ckbx.prop("checked", !ckbx.prop("checked"));
@@ -1173,6 +1173,7 @@ require([
                     {className: "col1 study-description", "targets": [4]},
                     {className: "col1 numrows", "targets": [5]},
                     {className: "ohif open-viewer", "targets": [6]},
+                    {className: "download", "targets": [7]},
 
                 ],
                 "columns": [
@@ -1244,6 +1245,14 @@ require([
                             }
                         }
                     },
+                    {
+                          "type":"html",
+                          "orderable": false,
+                          data: 'StudyInstanceUID', render: function (data){
+                              return '<i class="fa fa-download study-export" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
+                          }
+
+                      }
                 ],
                 "processing": true,
                 "serverSide": true,
@@ -1408,6 +1417,9 @@ require([
                  "order": [[0, "asc"]],
                  "createdRow": function (row, data, dataIndex) {
                     $(row).attr('id', 'series_' + data['SeriesInstanceUID'])
+                    $(row).attr('data-crdc',  data['crdc_series_uuid'])
+                    $(row).attr('data-aws',  data['aws_bucket'])
+                    $(row).attr('data-gcs',  data['gcs_bucket'])
                     $(row).addClass('text_head');
                  },
                 "columnDefs": [
@@ -1417,8 +1429,9 @@ require([
                     {className: "col1 modality", "targets": [3]},
                     {className: "col1 body-part-examined", "targets": [4]},
                     {className: "series-description", "targets": [5]},
-                    {className: "manifest-controls", "targets": [6]},
-                    {className: "ohif open-viewer", "targets": [7]},
+                    {className: "ohif open-viewer", "targets": [6]},
+                    {className: "download", "targets": [7]},
+
                  ],
                   "columns": [
                   {
@@ -1461,16 +1474,7 @@ require([
 
                         }
                     },
-                }, {
-                    "type": "html", "orderable": false, data: 'SeriesInstanceUID', render: function (data, type, row) {
-                        return '<button class="export-series-manifest btn btn-mini" data-toggle="modal" ' +
-                            'data-target="#series-manifest-modal" title="Obtain an s5cmd command to download this series."> <i class="fa-solid fa-download" aria-hidden="true"></i>' +
-                            '</button>'
-                    }, "createdCell": function (td, data) {
-                        $(td).data('series-id', data);
-                        return;
-                    }
-                }, {
+                },  {
                     "type": "html",
                     "orderable": false,
                     data: 'SeriesInstanceUID',
@@ -1503,6 +1507,14 @@ require([
 
                     }
                 },
+                      {
+                          "type":"html",
+                          "orderable": false,
+                          data: 'SeriesInstanceUID', render: function (data){
+                              return '<i class="fa fa-download series-export" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
+                          }
+
+                      }
             ],
             "processing": true,
             "serverSide": true,
@@ -3568,6 +3580,7 @@ require([
                 ).attr("style","display: none;")
         );
 
+        /*
         $(window).on("beforeunload",function(){
             console.log("beforeunload called");
             let hs = new Object();
@@ -3586,6 +3599,8 @@ require([
                 let sort = $(this).find('input:checked').val()
                 hs['sorter'][pid] = sort;
             });
+
+
 
             let url = encodeURI('/uihist/')
             let nhs = {'his':JSON.stringify(hs)}
@@ -3609,9 +3624,12 @@ require([
                 }
             });
         });
+
+
         initSort('num');
         if (document.contains(document.getElementById('history'))){
-            updateViaHistory();
+            //updateViaHistory();
         }
+        */
     });
 });
