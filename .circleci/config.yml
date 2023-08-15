@@ -184,7 +184,7 @@ jobs:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
     working_directory: ~/IDC-WebApp
     docker:
-      - image: cimg/python:3.8
+      - image: cimg/python:3.8.14
     steps:
       - restore_cache:
           keys:

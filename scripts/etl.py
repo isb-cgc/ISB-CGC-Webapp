@@ -738,7 +738,7 @@ def main():
         len(args.version_file) and update_data_versions(args.version_file)
 
         len(args.attributes_file) and load_attributes(args.attributes_file,
-            ["dicom_derived_series_v15", "dicom_derived_study_v15"], ["idc-dev-etl.idc_v15_pub.dicom_pivot_v15"]
+            ["dicom_derived_series_v16", "dicom_derived_study_v16"], ["idc-dev-etl.idc_v16_pub.dicom_pivot_v16"]
         )
 
         len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
@@ -750,8 +750,8 @@ def main():
                 update_display_values(Attribute.objects.get(name=attr), dvals[attr]['vals'])
 
         if args.solr_files.lower() == 'y':
-            for src in [("idc-dev-etl.idc_v15_pub.dicom_derived_all", "dicom_derived_series_v15",),
-                    ("idc-dev-etl.idc_v15_pub.dicom_derived_all", "dicom_derived_study_v15",),]:
+            for src in [("idc-dev-etl.idc_v16_pub.dicom_derived_all", "dicom_derived_series_v16",),
+                    ("idc-dev-etl.idc_v16_pub.dicom_derived_all", "dicom_derived_study_v16",),]:
                 create_solr_params(src[0], src[1])
 
     except Exception as e:

@@ -174,7 +174,7 @@
                                                 <li class="list-group-item">
                                                     <div id="{{ attr.name }}_heading" class="list-group-item__heading">
                                                         <a role="button" data-toggle="collapse" href="#{{ attr.name }}"
-                                                           aria-expanded="false" aria-controls="{{ attr.name }}">
+                                                           aria-expanded="true" aria-controls="{{ attr.name }}">
                                                             <i class="fa fa-solid fa-caret-right"></i> <i
                                                                 class="fa fa-solid fa-caret-down"></i> <span
                                                                 class="attDisp">Analysis Results
@@ -190,7 +190,7 @@
                                                     </div>
 
                                                     <div id="{{ attr.name }}" data-filter-attr-id="{{ attr.id }}"
-                                                         class="collapse list-group-item__body">
+                                                         class="collapse in list-group-item__body">
 
                                                     <input id="analysis_search"
                                                        class="text-filter notDisp value-search" type="text"
@@ -925,6 +925,9 @@
                                             <th class='col1 text_data study-description'>Study Description</th>
                                             <th class='col1 numrows numeric_data'># of Series</th>
                                             <th class="ohif text_data open-viewer">View</th>
+                                            <th class="download"></th>
+
+
                                         </tr>
                                         </thead>
                                     </table>
@@ -946,6 +949,8 @@
                                             <th class="body-part-examined">Body Part Examined</th>
                                             <th class="series-description">Series Description</th>
                                             <th class="open-viewer text_data">View</th>
+                                             <th class="download"></th>
+
                                         </tr>
                                         </thead>
                                     </table>

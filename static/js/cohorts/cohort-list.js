@@ -241,7 +241,8 @@ require([
         content: 'This cohort contains one or more attributes which are no longer available in the current version.<br />' +
             'If you bring this cohort into latest IDC data version, the filters for those inactive attributes will be removed.<br />' +
             'The cases, series, and studies contained in your cohort may change from this version.',
-        target: '.inactive-attr'
+        target: '.inactive-attr',
+        interactive: true
     });
 
     $(document).ready(function () {
