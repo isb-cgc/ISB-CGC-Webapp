@@ -61,7 +61,6 @@
 {% with user_is_social=request.user|has_social is_cohort=True %}
     {% include "cohorts/export-manifest-modal.html" with export_uri=export_uri user_is_social=user_is_social is_cohort=is_cohort %}
     {% include "idc/bq-string-modal.html" with bq_string=bq_string bq_string_uri="False" cohort_id=cohort.id %}
-    {% include "idc/mini-manifest-modal.html" %}
 {% endwith %}
 
 <script>
