@@ -36,7 +36,8 @@
           "to": "case_barcode"
         }
       ],
-      "attr_from": "dicom_derived_series_v15"
+      "attr_from": "dicom_derived_series_v15",
+      "solr_schema_src": "idc-dev-etl.idc_v16_dev.dicom_derived_all"
     },
     {
       "name": "dicom_derived_study_v16",
@@ -54,7 +55,8 @@
           "to": "case_barcode"
         }
       ],
-      "attr_from": "dicom_derived_study_v15"
+      "attr_from": "dicom_derived_study_v15",
+      "solr_schema_src": "idc-dev-etl.idc_v16_dev.dicom_derived_all"
     },
     {
       "name": "idc-dev-etl.idc_v16_pub.dicom_pivot_v16",
