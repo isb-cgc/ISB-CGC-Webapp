@@ -85,7 +85,7 @@ for core in "${cores[@]}"; do
         while [[ "$status" == "INCOMPLETE" && "$retries" -lt  "$MAX_WAIT" ]]; do
           echo "Backup for core ${core} isn't completed, waiting..."
           sleep 2
-          ((retries++))
+          ((retries=retries+1))
           status=`curl -s -u ${SOLR_USER}:${SOLR_PWD} -X GET "https://localhost:8983/solr/${core}/replication?command=details" --cacert solr-ssl.pem | python3 -c "${PARSE_RESPONSE}"`
         done
         if [ "$status" != "INCOMPLETE" ]; then
