@@ -20,8 +20,12 @@
 # single application.
 FROM python:3.9-bullseye
 
-RUN apt-get update
+SHELL ["/bin/bash", "-c"]
+
+ENV PYTHONUNBUFFERED=1
 ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update
 RUN apt-get install -y wget
 RUN wget "http://repo.mysql.com/mysql-apt-config_0.8.26-1_all.deb" -P /tmp
 
@@ -47,15 +51,16 @@ RUN apt-get -y install unzip libffi-dev libssl-dev libmysqlclient-dev python3-my
 
 ADD . /app
 
+WORKDIR /app/
+
 # We need to recompile some of the items because of differences in compiler versions
-RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
+RUN pip install -r requirements.txt -t lib/ --upgrade
 RUN pip install gunicorn==19.6.0
 
-ENV PYTHONPATH=/app:/app/lib:/app/IDC-Common:${PYTHONPATH}
-RUN echo "Pythonpath is now: ${PYTHONPATH}"
+ENV PYTHONPATH="/app:/app/lib:/app/IDC-Common:${PYTHONPATH}"
 
 # Check Axes config
-RUN python /app/lib/manage.py check
+RUN python manage.py check
 
 # Until we figure out a way to do it in CircleCI without whitelisting IPs this has to be done by a dev from
 # ISB
