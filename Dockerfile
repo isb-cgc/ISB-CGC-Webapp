@@ -44,7 +44,6 @@ RUN apt-get -y install libxml2-dev libxmlsec1-dev swig
 RUN pip install pexpect
 
 RUN apt-get -y install unzip libffi-dev libssl-dev libmysqlclient-dev python3-mysqldb python3-dev libpython3-dev git ruby g++ curl
-RUN easy_install -U distribute
 
 ADD . /app
 
