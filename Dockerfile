@@ -18,7 +18,7 @@
 
 # Dockerfile extending the generic Python image with application files for a
 # single application.
-FROM gcr.io/google_appengine/python
+FROM python:3.9-bullseye
 
 # Create a virtualenv for dependencies. This isolates these packages from
 # system-level packages.
