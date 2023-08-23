@@ -54,7 +54,7 @@ RUN pip install gunicorn==19.6.0
 ENV PYTHONPATH=/app:/app/lib:/app/IDC-Common:${PYTHONPATH}
 
 # Check Axes config
-RUN python3 manage.py check
+RUN python manage.py check
 
 # Until we figure out a way to do it in CircleCI without whitelisting IPs this has to be done by a dev from
 # ISB
