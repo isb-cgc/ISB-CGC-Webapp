@@ -50,15 +50,15 @@ apt-get install ca-certificates
 # Install apt-get dependencies
 echo "Installing Dependencies..."
 apt-get install -y --force-yes unzip libffi-dev libssl-dev git ruby g++ curl dos2unix
-# CircleCI provides a Python 3.8 image, but locally, we use 3.7 to mimic the Dockerfile
+# CircleCI provides a Python Image; locally we install it ourselves
 if [ -z "${CI}" ]; then
     # Update to Python 3.7
     add-apt-repository ppa:deadsnakes/ppa
     apt update
-    apt install -y --force-yes python3.7
+    apt install -y --force-yes python3.9
     # Set Python 3.7 as the python3 version
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1
-    apt-get install -y --force-yes python3.7-venv python3.7-distutils python3.7-dev
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+    apt-get install -y --force-yes python3.9-venv python3.9-distutils python3.9-dev
 else
   apt-get install -y --force-yes python3-distutils
 fi
