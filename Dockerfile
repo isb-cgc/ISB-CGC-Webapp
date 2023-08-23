@@ -39,7 +39,7 @@ RUN apt-get update
 RUN apt-get install -y mysql-server
 
 RUN apt-get -y install build-essential
-RUN apt-get -y install --reinstall python-m2crypto python3-crypto
+RUN apt-get -y install --reinstall python3-m2crypto python3-crypto
 RUN apt-get -y install libxml2-dev libxmlsec1-dev swig
 RUN pip install pexpect
 
