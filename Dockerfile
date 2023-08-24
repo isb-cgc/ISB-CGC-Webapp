@@ -51,15 +51,15 @@ RUN apt-get -y install unzip libffi-dev libssl-dev libmysqlclient-dev python3-my
 
 ADD . /app
 
-WORKDIR /app/
-
 # We need to recompile some of the items because of differences in compiler versions
-RUN pip install -r requirements.txt -t lib/ --upgrade
-RUN pip install gunicorn==19.6.0
+RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
+RUN pip install gunicorn==21.2.0
 
 ENV PYTHONPATH="/app:/app/lib:/app/IDC-Common:${PYTHONPATH}"
 
-# Check Axes config
+WORKDIR /app/
+
+# Quick config check
 RUN python manage.py check
 
 # Until we figure out a way to do it in CircleCI without whitelisting IPs this has to be done by a dev from
