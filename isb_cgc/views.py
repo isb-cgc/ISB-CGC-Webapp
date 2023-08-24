@@ -574,11 +574,14 @@ def citations_page(request):
     citations = requests.get(citations_file_path).json()
     return render(request, 'isb_cgc/citations.html', citations)
 
+
 def vid_tutorials_page(request):
     return render(request, 'isb_cgc/video_tutorials.html')
 
+
 def how_to_discover_page(request):
     return render(request, 'how_to_discover_page.html')
+
 
 def contact_us(request):
     return render(request, 'isb_cgc/contact_us.html')
@@ -589,17 +592,117 @@ def bq_meta_search(request, table_id=""):
     bq_filter_file_path = BQ_ECOSYS_BUCKET + bq_filter_file_name
     bq_filters = requests.get(bq_filter_file_path).json()
     bq_filters['selected_table_full_id'] = table_id
+    selected_filters_list=[]
+    if request.method == 'POST':
+        rq_meth = request.POST
+    else:
+        rq_meth = request.GET
+    filter_list = ['projectId', 'datasetId', 'tableId', 'friendlyName', 'description', 'field_name', 'labels', 'access',
+                   'status', 'category', 'experimental_strategy', 'program', 'source', 'data_type',
+                   'reference_genome']
+    for f in filter_list:
+        if rq_meth.get(f):
+            selected_filters_list.append('{filter}={value}'.format(filter=f, value=rq_meth.get(f)))
+    bq_filters['selected_filters'] = '&'.join(selected_filters_list)
     return render(request, 'isb_cgc/bq_meta_search.html', bq_filters)
+
+
+def filter_by_all_labels(rq_meth, rows):
+    f_val = rq_meth.get('labels', '').strip().lower()
+    if f_val:
+        filtered_rows = []
+        for row in rows:
+            label_dict = row.get('labels')
+            if label_dict:
+                for val in label_dict.values():
+                    if val.lower() == f_val:
+                        filtered_rows.append(row)
+                        break
+        rows = filtered_rows
+    return rows
+
+
+def filter_by_field_name(rq_meth, rows):
+    f_val = rq_meth.get('field_name', '').strip().lower()
+    if f_val:
+        filtered_rows = []
+        for row in rows:
+            field_dict = row.get('schema')
+            if field_dict:
+                field_list = field_dict.get('fields')
+                for field in field_list:
+                    if field['name'].lower() == f_val:
+                        filtered_rows.append(row)
+                        break
+        rows = filtered_rows
+    return rows
+
+
+def filter_by_prop(rq_meth, rows, attr_list, sub_category, is_exact_match):
+    for attr in attr_list:
+        f_val = rq_meth.get(attr, '').strip().lower()
+
+        if f_val:
+            print(f_val)
+            filtered_rows = []
+            for row in rows:
+                add_row = False
+                if sub_category:
+                    field_dict = row.get(sub_category)
+                    if field_dict:
+                        if sub_category == 'labels':
+                            for k in field_dict.keys():
+                                if k.startswith(attr) and field_dict.get(k).lower() == f_val:
+                                    add_row = True
+                                    break
+                        else:
+                            if field_dict.get(attr).lower() == f_val:
+                                print('gotit')
+                                add_row = True
+                else:
+                    if is_exact_match:
+                        if row.get(attr).lower() == f_val:
+                            add_row = True
+                    else:
+                        if row.get(attr) and f_val in row.get(attr).lower():
+                            add_row = True
+                if add_row:
+                    filtered_rows.append(row)
+            rows = filtered_rows
+    return rows
+
+
+def filter_rows(rows, request):
+    if request.method == "POST":
+        rq_meth = request.POST
+    else:
+        rq_meth = request.GET
+
+    generic_filters = ['description', 'friendlyName']
+    tbl_ref_filters = ['projectId', 'datasetId', 'tableId']
+    label_filters = ['access', 'status', 'category', 'experimental_strategy', 'data_type', 'source', 'program',
+                     'reference_genome']
+
+    filter_prop_list = [{'attr_list': generic_filters, 'subcategory': None, 'is_exact_match': False},
+                        {'attr_list': tbl_ref_filters, 'subcategory': 'tableReference', 'is_exact_match': True},
+                        {'attr_list': label_filters, 'subcategory': 'labels', 'is_exact_match': True}]
+    for filter_prop in filter_prop_list:
+        rows = filter_by_prop(rq_meth, rows, filter_prop['attr_list'], filter_prop['subcategory'],
+                              filter_prop['is_exact_match'])
+    rows = filter_by_field_name(rq_meth, rows)
+    rows = filter_by_all_labels(rq_meth, rows)
+
+    return rows
 
 
 def bq_meta_data(request):
     bq_meta_data_file_name = 'bq_meta_data.json'
     bq_meta_data_file_path = BQ_ECOSYS_BUCKET + bq_meta_data_file_name
-    bq_meta_data = requests.get(bq_meta_data_file_path).json()
+    bqt_meta_data = filter_rows(requests.get(bq_meta_data_file_path).json(), request)
     bq_useful_join_file_name = 'bq_useful_join.json'
     bq_useful_join_file_path = BQ_ECOSYS_BUCKET + bq_useful_join_file_name
     bq_useful_join = requests.get(bq_useful_join_file_path).json()
-    for bq_meta_data_row in bq_meta_data:
+    for bq_meta_data_row in bqt_meta_data:
         useful_joins = []
         row_id = bq_meta_data_row['id']
         for join in bq_useful_join:
@@ -607,13 +710,16 @@ def bq_meta_data(request):
                 useful_joins = join['joins']
                 break
         bq_meta_data_row['usefulJoins'] = useful_joins
-    return JsonResponse(bq_meta_data, safe=False)
+    return JsonResponse(bqt_meta_data, safe=False)
+
 
 def programmatic_access_page(request):
     return render(request, 'isb_cgc/programmatic_access.html')
 
+
 def workflow_page(request):
     return render(request, 'isb_cgc/workflow.html')
+
 
 @login_required
 def dashboard_page(request):
