@@ -16,7 +16,7 @@
 #
 ###
 
-# Dockerfile extending the generic Python image with application files for a
+# Dockerfile extending the Python Community image from Dockerhub with application files for a
 # single application.
 FROM python:3.9-bullseye
 
@@ -32,7 +32,7 @@ RUN wget "http://repo.mysql.com/mysql-apt-config_0.8.26-1_all.deb" -P /tmp
 # install lsb-release (a dependency of mysql-apt-config), since dpkg doesn't
 # do dependency resolution
 RUN apt-get install -y lsb-release
-RUN echo 'download mysql public build key'
+# TODO: we need to start using the keyring instead
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 467B942D3A79BD29
 RUN dpkg --install /tmp/mysql-apt-config_0.8.26-1_all.deb
 
