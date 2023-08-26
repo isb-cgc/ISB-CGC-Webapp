@@ -223,12 +223,14 @@ def add_programs(program_set):
 
 def add_data_sources(source_set, subversions, set_types, attr_exclude):
     for source in source_set:
-        source.update({
+        src = {x: source[x] for x in source if x != "solr_schema_src"}
+        src.update({
             "versions": subversions,
             "set_types": set_types,
             "attr_exclude": attr_exclude
         })
-        add_data_source(**source)
+
+        add_data_source(**src)
 
 
 def add_data_source(name, count_col, source_type, versions, programs, aggregate_level, set_types, joins, attr_from, attr_exclude):
@@ -748,7 +750,7 @@ def main():
 
         # If there are new attributes, prep them for addition
         # The assumption is new attributes are for inclusion in the data sources found in the ETL_CONFIG doc
-        # Note this poulates ATTR_SET but it does not execute addition--that's the next step
+        # Note this populates ATTR_SET but it does not execute addition--that's the next step
         if len(args.attributes_file) and len(ETL_CONFIG):
             solr_srcs = [x['name'] for x in ETL_CONFIG.get("data_sources",[]) if x['source_type'] == DataSource.SOLR]
             bq_srcs = [x['name'] for x in ETL_CONFIG.get("data_sources", []) if x['source_type'] == DataSource.BIGQUERY]
