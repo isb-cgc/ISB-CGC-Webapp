@@ -106,8 +106,6 @@ require([
         $('#export-manifest-form').append('<input type="hidden" name="uid">')
         $('#export-manifest-modal').find('input[name="uid"]').val(button.data('uid'));
 
-
-
         var filt_str=$('#export-manifest-form').find('input[name="filters"]').val()
         filters= new Object();
         if (filt_str.length>0){
@@ -120,7 +118,7 @@ require([
         file_name.attr("name-base",name_base);
         $('.manifest-file').hide();
         $('.manifest-bq').hide();
-        $('#manifest-source').text(mini_type);
+        $('#manifest-source').text((mini_type === "series" ? "" : "download this study manifest, "));
         if (button.hasClass('series-export')) {
             $('#export-manifest-form').find('#s5cmd-header-fields-container').hide();
             $('#export-manifest-form').find('#download-s5cmd').hide();
