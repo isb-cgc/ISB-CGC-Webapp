@@ -147,12 +147,14 @@
                             <div id="manifest-s5cmd" class="tab-pane manifest active" role="tab-panel">
                                 <p>
                                     <br />
-                                    To download the images in this <span id="manifest-source">manifest</span>,
+                                    To obtain these images, <span id="manifest-source">download this s5cmd manifest, </span>
                                     <a class="external-link" url="https://github.com/peak/s5cmd" data-toggle="modal"
                                        data-target="#external-web-warning">install s5cmd <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i></a>,
                                     then run the following command:
-                                    <br />
+                                </p>
+                                <p>
                                     <span class="code s5cmd-text">s5cmd --no-sign-request --endpoint-url https://endpoint_url run file_name.s5cmd</span>
+                                    <br />
                                     <a role="button" class="s5cmd copy-this" content=""  title="Copy command to clipboard">
                                         ( <i class="fa-solid fa-copy" aria-hidden="true"></i> )
                                     </a>
@@ -178,7 +180,7 @@
                                 </div>
                                 <!-- Header Fields -->
                                 <div id="s5cmd-header-fields-container">
-                                    <p><input id="include-header-s5cmd-checkbox" type="checkbox"> Include header fields</p>
+                                    <input id="include-header-s5cmd-checkbox" type="checkbox"> Include header fields
                                     <div id="s5cmd-header-fields-heading" class="list-group-item__heading export-manifest-group__heading">
                                         <a role="button" data-toggle="collapse" href="#s5cmd-header-fields" aria-expanded="false"
                                            aria-controls="s5cmd-header-fields">
@@ -211,11 +213,6 @@
                                             <span class="value">Total Records</span>
                                         </label></li>
                                     </div>
-                                    <p><a class="external-link" href=""
-                                          url="https://learn.canceridc.dev/data/downloading-data"
-                                          data-toggle="modal" data-target="#external-web-warning">Instructions
-                                        <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
-                                    </a>on downloading images defined by the manifest</p>
                                 </div>
                                 <a id="download-s5cmd" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in s5cmd format.">
                                     Download s5cmd Manifest

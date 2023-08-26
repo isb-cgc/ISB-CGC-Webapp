@@ -1,0 +1,89 @@
+{
+  "new_sub_versions": [
+    "TCIA Image Data Version 16",
+    "TCIA Derived Data Version 16"
+  ],
+  "subversion_number": "16",
+  "set_types": [
+    "IDC Source Data",
+    "Derived Data"
+  ],
+  "bioclin_version": [
+    "GDC Data Release 9"
+  ],
+  "new_major_version": {
+    "name": "IDC Data Release",
+    "version_number": "16.0",
+    "case_count": 63788,
+    "collex_count": 135,
+    "data_volume": 40.96,
+    "series_count": 482344
+  },
+  "data_sources": [
+    {
+      "name": "dicom_derived_series_v16",
+      "source_type": "S",
+      "count_col": "PatientID",
+      "programs": [],
+      "aggregate_level": "SeriesInstanceUID",
+      "joins": [
+        {
+          "sources": [
+            "tcga_bios",
+            "tcga_clin"
+          ],
+          "from": "PatientID",
+          "to": "case_barcode"
+        }
+      ],
+      "attr_from": "dicom_derived_series_v15",
+      "solr_schema_src": "idc-dev-etl.idc_v16_dev.dicom_derived_all"
+    },
+    {
+      "name": "dicom_derived_study_v16",
+      "source_type": "S",
+      "count_col": "PatientID",
+      "programs": [],
+      "aggregate_level": "StudyInstanceUID",
+      "joins": [
+        {
+          "sources": [
+            "tcga_bios",
+            "tcga_clin"
+          ],
+          "from": "PatientID",
+          "to": "case_barcode"
+        }
+      ],
+      "attr_from": "dicom_derived_study_v15",
+      "solr_schema_src": "idc-dev-etl.idc_v16_dev.dicom_derived_all"
+    },
+    {
+      "name": "idc-dev-etl.idc_v16_pub.dicom_pivot_v16",
+      "source_type": "B",
+      "count_col": "PatientID",
+      "programs": [],
+      "aggregate_level": "SOPInstanceUID",
+      "joins": [
+        {
+          "sources": [
+            "idc-dev-etl.idc_v4.tcga_biospecimen_rel9",
+            "idc-dev-etl.idc_v4.tcga_clinical_rel9"
+          ],
+          "from": "PatientID",
+          "to": "case_barcode"
+        }
+      ],
+      "attr_from": "idc-dev-etl.idc_v15_pub.dicom_pivot_v15"
+    }
+  ],
+  "deactivate": {
+    "minor": [
+      "TCIA Image Data Version 15",
+      "TCIA Derived Data Version 15"
+    ],
+    "major": [
+      "15.0"
+    ]
+  }
+}
