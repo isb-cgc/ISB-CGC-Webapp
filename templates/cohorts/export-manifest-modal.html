@@ -168,19 +168,20 @@
                                 </div>
 -->
                                 <div class="s5cmd-loc-type">
-                                    <p>Cloud Source</p>
-                                    <li class="radio"><label for="export-s5cmd-loc-gcp">
-                                        <input class="loc_type" id="export-s5cmd-loc-gcp" name="loc_type" type="radio" value="gcs" checked />
-                                        <span class="value">GCP - data storage and egress sponsored by Google Public Data Program</span>
-                                    </label></li>
+                                    <h5>Cloud Source</h5>
                                     <li class="radio"><label for="export-s5cmd-loc-aws">
-                                        <input class="loc_type" id="export-s5cmd-loc-aws" name="loc_type" type="radio" value="aws" />
+                                        <input class="loc_type" id="export-s5cmd-loc-aws" name="loc_type" type="radio" value="aws" checked />
                                         <span class="value">AWS - data storage and egress sponsored by AWS Open Data Sponsorship Program</span>
+                                    </label></li>
+                                    <li class="radio"><label for="export-s5cmd-loc-gcp">
+                                        <input class="loc_type" id="export-s5cmd-loc-gcp" name="loc_type" type="radio" value="gcs" />
+                                        <span class="value">GCP - data storage and egress sponsored by Google Public Data Program</span>
                                     </label></li>
                                 </div>
                                 <!-- Header Fields -->
                                 <div id="s5cmd-header-fields-container">
-                                    <input id="include-header-s5cmd-checkbox" type="checkbox"> Include header fields
+                                    <h5>Manifest Headers</h5>
+                                    <input id="include-header-s5cmd-checkbox" type="checkbox"> Include Headers
                                     <div id="s5cmd-header-fields-heading" class="list-group-item__heading export-manifest-group__heading">
                                         <a role="button" data-toggle="collapse" href="#s5cmd-header-fields" aria-expanded="false"
                                            aria-controls="s5cmd-header-fields">
@@ -229,7 +230,8 @@
                                 </div>
 -->
                                 <!-- Header Fields -->
-                                <p><input id="include-file-header-checkbox" type="checkbox" checked> Include header fields</p>
+                                <h5>Manfiest Headers</h5>
+                                <input id="include-file-header-checkbox" type="checkbox" checked> Include headers
                                 <div id="file-header-fields-container">
                                     <div id="file-header-fields-heading" class="list-group-item__heading export-manifest-group__heading">
                                         <a role="button" data-toggle="collapse" href="#file-header-fields" aria-expanded="false"
@@ -265,6 +267,7 @@
                                     </div>
                                 </div>
                                 <!-- Columns -->
+                                <h5>Data Columns</h5>
                                 <div id="file-columns-container">
                                     <div id="file-columns-heading" class="list-group-item__heading export-manifest-group__heading">
                                         <a role="button" data-toggle="collapse" href="#file-columns" aria-expanded="true"
