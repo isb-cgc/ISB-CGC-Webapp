@@ -714,7 +714,11 @@ MIDDLEWARE.append('axes.middleware.AxesMiddleware',)
 # default is to add trailing '/' to urls ie /callback becomes /callback/. Ohif does not like /callback/ !
 APPEND_SLASH = False
 
-DICOM_STORE_PATH=os.environ.get('DICOM_STORE_PATH','')
+# If these are both available, the UI will offer the option of 2 different OHIF versions
+# if only one is set, that will be offered as a single link/button
+OHIF_V2_PATH=os.environ.get('OHIF_V2_PATH','')
+OHIF_V3_PATH=os.environ.get('OHIF_V3_PATH','')
+
 SLIM_VIEWER_PATH=os.environ.get('SLIM_VIEWER_PATH','')
 
 # Log the version of our app
