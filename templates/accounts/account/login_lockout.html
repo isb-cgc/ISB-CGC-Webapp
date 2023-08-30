@@ -1,0 +1,21 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}Too Many Attempts{% endblock %}
+
+{% block content %}
+<h1>Too Many Attempts</h1>
+
+<p>
+    You have failed to log in over {{ failure_limit }} attempts.
+    Your account will now be locked for {{ cooloff_time }} hours. Additional attempts to log in will be ignored until
+    this time frame has passed. You can attempt to log in again after this cooloff time has expired.
+</p>
+
+<p>
+    If you feel you have received this message in error, please <a href="mailto:">contact us</a>
+    to have your account re-enabled.
+</p>
+
+{% endblock %}

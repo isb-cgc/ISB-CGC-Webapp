@@ -570,6 +570,7 @@ AXES_META_PRECEDENCE_ORDER = [
 AXES_PROXY_COUNT = 1
 AXES_COOLOFF_TIME = int(os.environ.get('AXES_COOLOFF_TIME', '5'))
 AXES_USERNAME_FORM_FIELD = "email"
+AXES_LOCKOUT_TEMPLATE = os.environ.get('AXES_LOCKOUT_TEMPLATE', 'accounts/account/login_lockout.html')
 
 #########################################
 # Request Logging
