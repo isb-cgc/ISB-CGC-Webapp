@@ -705,7 +705,7 @@ if DEBUG and DEBUG_TOOLBAR:
 # on failed user authentication attempts from login views.
 # If you do not want Axes to override the authentication response
 # you can skip installing the middleware and use your own views.
-# MIDDLEWARE.append('axes.middleware.AxesMiddleware',)
+MIDDLEWARE.append('axes.middleware.AxesMiddleware',)
 
 ##################
 # OHIF_SETTINGS
@@ -714,7 +714,11 @@ if DEBUG and DEBUG_TOOLBAR:
 # default is to add trailing '/' to urls ie /callback becomes /callback/. Ohif does not like /callback/ !
 APPEND_SLASH = False
 
-DICOM_STORE_PATH=os.environ.get('DICOM_STORE_PATH','')
+# If these are both available, the UI will offer the option of 2 different OHIF versions
+# if only one is set, that will be offered as a single link/button
+OHIF_V2_PATH=os.environ.get('OHIF_V2_PATH','')
+OHIF_V3_PATH=os.environ.get('OHIF_V3_PATH','')
+
 SLIM_VIEWER_PATH=os.environ.get('SLIM_VIEWER_PATH','')
 
 # Log the version of our app
