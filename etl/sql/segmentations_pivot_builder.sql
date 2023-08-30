@@ -82,9 +82,9 @@ SELECT
 	spt.SegmentedPropertyType,
 FROM `idc-pdp-staging.{dataset}.segmentations` segs
 LEFT JOIN ars
-ON ars.SOPInstanceUID = segs.SOPInstanceUID AND ars.SegmentNumber = segs.SegmentNumber
+    ON ars.SOPInstanceUID = segs.SOPInstanceUID AND ars.SegmentNumber = segs.SegmentNumber
 LEFT JOIN spc
-ON spc.SOPInstanceUID = segs.SOPInstanceUID AND spc.SegmentNumber = segs.SegmentNumber
+    ON spc.SOPInstanceUID = segs.SOPInstanceUID AND spc.SegmentNumber = segs.SegmentNumber
 LEFT JOIN spt
-ON spt.SOPInstanceUID = segs.SOPInstanceUID AND spt.SegmentNumber = segs.SegmentNumber
+    ON spt.SOPInstanceUID = segs.SOPInstanceUID AND spt.SegmentNumber = segs.SegmentNumber
 ;
