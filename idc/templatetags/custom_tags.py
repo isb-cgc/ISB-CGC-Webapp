@@ -125,6 +125,7 @@ def quick_js_bracket_replace(matchobj):
 def parse_cooloff(timedelta):
     return datetime.utcnow() + timedelta
 
+
 @register.filter
 def has_social(user):
     if user.is_authenticated:
