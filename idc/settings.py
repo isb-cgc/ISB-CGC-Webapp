@@ -722,5 +722,7 @@ OHIF_V3_PATH=os.environ.get('OHIF_V3_PATH','')
 
 SLIM_VIEWER_PATH=os.environ.get('SLIM_VIEWER_PATH','')
 
+SUPPORT_EMAIL=os.environ.get('SUPPORT_EMAIL','')
+
 # Log the version of our app
 print("[STATUS] Application Version is {}".format(APP_VERSION))
