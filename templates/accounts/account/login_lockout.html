@@ -15,13 +15,13 @@
                     <div class="panel-body">
                         <p>
                             You have failed to log in over {{ failure_limit }} attempts. Your account will now be
-                            locked for {{ cooloff_timedelta|parse_cooloff|time: "m/d/Y h:sA O" }}. Additional attempts to log in will be ignored
-                            until this time frame has passed. You can attempt to log in again after this cooloff time
-                            has expired.
+                            locked for {{ cooloff_timedelta }} hour(s) until {{ cooloff_timedelta|parse_cooloff|date: "m/d/Y h:sA O" }}.
+                            Additional attempts to log in will be ignored until this time frame has passed. You can
+                            attempt to log in again after this cooloff time has expired.
                         </p>
                         <p>
                             If you feel you have received this message in error or need help resetting your password,
-                            please <a href="mailto:">contact us</a> to have your account re-enabled.
+                            please <a href="mailto:{{ SUPPORT_EMAIL }}">contact us</a> to have your account re-enabled.
                         </p>
                     </div>
                 </div>
