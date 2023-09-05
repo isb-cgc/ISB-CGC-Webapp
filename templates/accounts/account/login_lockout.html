@@ -25,11 +25,11 @@
                                 hour12: true,
                                 timeZoneName: 'short'
                             });
-                            document.getElementsByClassName('cool-off-date').innerHTML = fmt.format(cooloff_date_local);
+                            document.getElementById('cool-off-date').innerHTML = fmt.format(cooloff_date_local);
                         </script>
                         <p>
                             You have failed to log in over {{ failure_limit }} attempts. Your account will now be
-                            locked for {{ cooloff_timedelta }} hour(s) until <span class="cool-off-date"></span>.
+                            locked for {{ cooloff_timedelta }} hour(s) until <span id="cool-off-date"></span>.
                             Additional attempts to log in will be ignored until this time frame has passed. You can
                             attempt to log in again after this cooloff time has expired.
                         </p>
