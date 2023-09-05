@@ -12,12 +12,10 @@
                 <div class="panel panel-default">
                     <div class="panel-heading"><h3>Too Many Login Attempts</h3></div>
                     <div class="panel-body">
-                        {% with cooloff_date=cooloff_timedelta|parse_cooloff %}
                         <script type="text/javascript">
-                            let cooloff_date_local = new Date("{{ cooloff_date }}".replace(" ", "T")).toLocaleString();
+                            let cooloff_date_local = new Date("{{ cooloff_timedelta|parse_cooloff|safe }}".replace(" ", "T")).toLocaleString();
                             document.getElementById('cool-off-date').innerHTML = cooloff_date_local;
                         </script>
-                        {% endwith %}
                         <p>
                             You have failed to log in over {{ failure_limit }} attempts. Your account will now be
                             locked for {{ cooloff_timedelta }} hour(s) until <span class="cool-off-date"></span>.
