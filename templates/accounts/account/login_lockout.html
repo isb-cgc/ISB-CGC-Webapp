@@ -13,7 +13,7 @@
                     <div class="panel-heading"><h3>Too Many Login Attempts</h3></div>
                     <div class="panel-body">
                         <script type="text/javascript">
-                            let cooloff_date_local = new Date("{{ cooloff_timedelta|parse_cooloff|safe }}" + "+00:00".replace(" ", "T"));
+                            let cooloff_date_local = new Date("{{ cooloff_timedelta|parse_cooloff|safe }}+00:00".replace(" ", "T"));
                             const fmt = new Intl.DateTimeFormat('en', {
                                 year: 'numeric',
                                 month: '2-digit',
