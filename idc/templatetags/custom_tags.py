@@ -123,7 +123,7 @@ def quick_js_bracket_replace(matchobj):
 
 @register.filter
 def parse_cooloff(timedelta):
-    return datetime.utcnow() + timedelta
+    return str(datetime.utcnow() + timedelta)
 
 
 @register.filter
