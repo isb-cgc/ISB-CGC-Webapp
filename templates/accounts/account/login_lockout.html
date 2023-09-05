@@ -13,8 +13,19 @@
                     <div class="panel-heading"><h3>Too Many Login Attempts</h3></div>
                     <div class="panel-body">
                         <script type="text/javascript">
-                            let cooloff_date_local = new Date("{{ cooloff_timedelta|parse_cooloff|safe }}".replace(" ", "T")).toLocaleString();
-                            document.getElementById('cool-off-date').innerHTML = cooloff_date_local;
+                            let cooloff_date_local = new Date("{{ cooloff_timedelta|parse_cooloff|safe }}" + "+00:00".replace(" ", "T"));
+                            const fmt = new Intl.DateTimeFormat('en', {
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: 'numeric',
+                                fractionalSecondDigits: 3,
+                                hour12: true,
+                                timeZoneName: 'short'
+                            });
+                            document.getElementsByClassName('cool-off-date').innerHTML = fmt.format(cooloff_date_local);
                         </script>
                         <p>
                             You have failed to log in over {{ failure_limit }} attempts. Your account will now be
