@@ -107,7 +107,7 @@ ul, ol {
 
 /* Pages with no use of a header need more space taken up */
 .short-inner-content-no-header {
-  min-height: calc(100vh - 183px);
+  min-height: calc(100vh - 184px);
 }
 
 /* The landing page has an additional section (summary) which complicates the layout count */
