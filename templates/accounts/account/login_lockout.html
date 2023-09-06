@@ -12,6 +12,12 @@
                 <div class="panel panel-default">
                     <div class="panel-heading"><h3>Too Many Login Attempts</h3></div>
                     <div class="panel-body">
+                        <p>
+                            You have failed to log in over {{ failure_limit }} attempts. Your account will now be
+                            locked for {{ cooloff_timedelta }} hour(s) until <b><span id="cool-off-date"></span></b>.
+                            Additional attempts to log in will be ignored until this time frame has passed. You can
+                            attempt to log in again after this cooloff time has expired.
+                        </p>
                         <script type="text/javascript">
                             let cooloff_date_local = new Date("{{ cooloff_timedelta|parse_cooloff|safe }}+00:00".replace(" ", "T"));
                             const fmt = new Intl.DateTimeFormat('en', {
@@ -26,12 +32,6 @@
                             });
                             document.getElementById('cool-off-date').innerHTML = fmt.format(cooloff_date_local);
                         </script>
-                        <p>
-                            You have failed to log in over {{ failure_limit }} attempts. Your account will now be
-                            locked for {{ cooloff_timedelta }} hour(s) until <b><span id="cool-off-date"></span></b>.
-                            Additional attempts to log in will be ignored until this time frame has passed. You can
-                            attempt to log in again after this cooloff time has expired.
-                        </p>
                         <p>
                             If you feel you have received this message in error or need help resetting your password,
                             please <b><a href="mailto:{{ SUPPORT_EMAIL }}">contact us</a></b> to have your account re-enabled.
