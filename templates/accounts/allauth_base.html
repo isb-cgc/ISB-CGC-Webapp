@@ -3,5 +3,8 @@
 
 {% block js_file %}
 	{{ block.super }}
-    <script type="text/javascript" src="{% static 'js/landing.js' %}?v={{ APP_VERSION }}"></script>
+    <script type="text/javascript" src="{% static 'js/auth.js' %}?v={{ APP_VERSION }}"></script>
+    <script>
+        var showWarning = false;
+    </script>
 {% endblock %}

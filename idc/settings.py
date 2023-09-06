@@ -570,6 +570,7 @@ AXES_META_PRECEDENCE_ORDER = [
 AXES_PROXY_COUNT = 1
 AXES_COOLOFF_TIME = int(os.environ.get('AXES_COOLOFF_TIME', '5'))
 AXES_USERNAME_FORM_FIELD = "email"
+AXES_LOCKOUT_TEMPLATE = os.environ.get('AXES_LOCKOUT_TEMPLATE', 'accounts/account/login_lockout.html')
 
 #########################################
 # Request Logging
@@ -720,6 +721,8 @@ OHIF_V2_PATH=os.environ.get('OHIF_V2_PATH','')
 OHIF_V3_PATH=os.environ.get('OHIF_V3_PATH','')
 
 SLIM_VIEWER_PATH=os.environ.get('SLIM_VIEWER_PATH','')
+
+SUPPORT_EMAIL=os.environ.get('SUPPORT_EMAIL','')
 
 # Log the version of our app
 print("[STATUS] Application Version is {}".format(APP_VERSION))
