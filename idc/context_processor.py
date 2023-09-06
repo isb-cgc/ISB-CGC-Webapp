@@ -19,5 +19,6 @@ def additional_context(request):
             'DEV_TIER': settings.DEV_TIER,
             'RESEARCH_STUDY': settings.RESEARCH_STUDY,
             'OHIF_V2_PATH': settings.OHIF_V2_PATH,
-            'OHIF_V3_PATH': settings.OHIF_V3_PATH
+            'OHIF_V3_PATH': settings.OHIF_V3_PATH,
+            'SUPPORT_EMAIL': settings.SUPPORT_EMAIL
     }

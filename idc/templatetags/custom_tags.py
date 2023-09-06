@@ -24,6 +24,7 @@ import json
 import re
 import textwrap
 import math
+from datetime import datetime
 
 from django import template
 from cohorts.models import Cohort, Cohort_Perms
@@ -112,11 +113,17 @@ ORIG_ATTR_REMOVE = [
     "access"
 ]
 
+
 def quick_js_bracket_replace(matchobj):
     if matchobj.group(0) == '<':
         return '\u003C'
     else:
         return '\u003E'
+
+
+@register.filter
+def parse_cooloff(timedelta):
+    return str(datetime.utcnow() + timedelta)
 
 
 @register.filter
