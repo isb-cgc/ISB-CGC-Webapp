@@ -15,8 +15,8 @@
                         <p>
                             You have failed to log in over {{ failure_limit }} attempts. Your account will now be
                             locked for {{ cooloff_timedelta }} hour(s) until <b><span id="cool-off-date"></span></b>.
-                            Additional attempts to log in will be ignored until this time frame has passed. You can
-                            attempt to log in again after this cooloff time has expired.
+                            Additional attempts to log in will extend this lockout. You can attempt to log in again
+                            after this cooloff time has expired.
                         </p>
                         <script type="text/javascript">
                             let cooloff_date_local = new Date("{{ cooloff_timedelta|parse_cooloff|safe }}+00:00".replace(" ", "T"));
