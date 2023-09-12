@@ -387,7 +387,7 @@ tr {
     width: 100%; }
 
 #projects_table td.ckbx, #projects_table_head th.ckbx,
-#cases_table_head th.ckbx, #cases_table td.ckbx,
+#cases_table_head th.ckbx, #cases_table_head th.shop, #cases_table td.ckbx, #cases_table td.shop,
 #series_table_head th.ckbx, #series_table td.ckbx,
 #studies_table_head th.ckbx, #studies_table td.ckbx {
     width: 5%;
@@ -513,6 +513,17 @@ svg {
 
 .ui-slider{
     margin-bottom: 18px;
+}
+
+.fa-cart-shopping.selected,.fa-cart-shopping.none{
+    background-color:blue;
+}
+
+.fa-cart-shopping.partselected{
+    background-color:grey;
+}
+.fa-cart-shopping.unselected{
+    background-color:red;
 }
 
 .more-checks {
