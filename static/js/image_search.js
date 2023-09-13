@@ -3591,7 +3591,7 @@ require([
                 ).attr("style","display: none;")
         );
 
-        /*
+        
         $(window).on("beforeunload",function(){
             console.log("beforeunload called");
             let hs = new Object();
@@ -3639,8 +3639,8 @@ require([
 
         initSort('num');
         if (document.contains(document.getElementById('history'))){
-            //updateViaHistory();
+            updateViaHistory();
         }
-        */
+
     });
 });
