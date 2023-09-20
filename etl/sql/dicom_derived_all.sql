@@ -18,7 +18,7 @@ SELECT
 	dicom.crdc_series_uuid AS crdc_series_uuid,
 	dicom.crdc_instance_uuid AS crdc_instance_uuid,
 	dicom.tcia_tumorLocation,
-	collex.CancerType,
+	dicom.collection_cancerType AS CancerType,
 	dicom.source_DOI,
 	dicom.tcia_species,
     dicom.gcs_url,
