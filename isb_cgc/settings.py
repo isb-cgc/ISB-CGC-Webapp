@@ -315,13 +315,10 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'anymail',
     'isb_cgc',
-    'visualizations',
-    'seqpeek',
     'sharing',
     'cohorts',
     'projects',
     'genes',
-    'analysis',
     'offline',
     'adminrestrict',
 )
@@ -405,11 +402,6 @@ LOGGING = {
             'propagate': True,
         },
         'google_helpers': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'data_upload': {
             'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,

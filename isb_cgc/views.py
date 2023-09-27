@@ -43,10 +43,9 @@ from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.metadata_helpers import get_sample_metadata
 from googleapiclient.errors import HttpError
-from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
 from projects.models import Program
-from accounts.models import GoogleProject, UserOptInStatus
+from accounts.models import UserOptInStatus
 from accounts.sa_utils import get_nih_user_details
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
@@ -188,8 +187,6 @@ def user_detail(request, user_id):
             'last_name': user.last_name,
             'user_opt_in_status': user_opt_in_status
         }
-
-        user_details['gcp_list'] = len(GoogleProject.objects.filter(user=user, active=1))
 
         forced_logout = 'dcfForcedLogout' in request.session
         nih_details = get_nih_user_details(user_id, forced_logout)

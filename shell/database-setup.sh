@@ -90,7 +90,7 @@ if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
 fi
 
 echo "Applying SQL Table File... (may take a while)"
-mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+#mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
 
 echo "Adding Cohort/Site Data and bootstrapping Django project and program tables..."
 python3 ${HOMEROOT}/scripts/add_site_ids.py

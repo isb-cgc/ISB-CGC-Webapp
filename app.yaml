@@ -16,7 +16,7 @@
 
 runtime: custom
 env: flex
-service: default
+service: expr
 api_version: 1
 threadsafe: true
 
