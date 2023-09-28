@@ -452,7 +452,7 @@ SOCIALACCOUNT_PROVIDERS = \
 
 # Trying to force allauth to only use https
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
-# ...but not if this is a local dev build
+# ...but not if this is a local dev build.
 if IS_DEV:
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 
