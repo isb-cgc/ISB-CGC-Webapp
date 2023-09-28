@@ -38,7 +38,6 @@ from django.contrib import messages
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
-from google_helpers.directory_service import get_directory_resource
 from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.metadata_helpers import get_sample_metadata
