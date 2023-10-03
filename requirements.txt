@@ -1,6 +1,6 @@
 # If you are seeing an error about django-debug-toolbar not being installed, the problem is almost certainly
-# that your developer .env wasn't found django-debug-toolbar should **only** be installed on local developer
-# builds via install-deps.sh, so DO NOT add it to this file.
+# that your developer .env wasn't found. django-debug-toolbar should **only** be installed on local developer
+# builds via install-deps.sh. DO NOT add it to this file.
 
 django==3.2.20
 django-anymail[mailgun]
