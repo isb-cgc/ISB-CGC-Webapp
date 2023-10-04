@@ -11,6 +11,8 @@ if [ -n "$CI" ]; then
     COMMON_BRANCH=master
     if [[ ${CIRCLE_BRANCH} =~ idc-(prod|uat|test).* ]]; then
         COMMON_BRANCH=$(awk -F- '{print $1"-"$2}' <<< ${CIRCLE_BRANCH})
+    elif [[ ${CIRCLE_BRANCH} == "expr" ]]; then
+        COMMON_BRANCH=expr
     fi
     echo "Cloning IDC-Common branch ${COMMON_BRANCH}..."
     git clone -b ${COMMON_BRANCH} https://github.com/ImagingDataCommons/IDC-Common.git
