@@ -26,7 +26,6 @@ ENV PYTHONUNBUFFERED=1
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update
-ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get install -y wget
 RUN wget "http://repo.mysql.com/mysql-apt-config_0.8.26-1_all.deb" -P /tmp
 
@@ -43,16 +42,12 @@ RUN apt-get update
 # aaaand now let's install mysql-server
 RUN apt-get install -y mysql-server
 
-# Get pip3 installed
-RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python3
-
 RUN apt-get -y install build-essential
 RUN apt-get -y install --reinstall python3-m2crypto python3-cryptography
 RUN apt-get -y install libxml2-dev libxmlsec1-dev swig
 RUN pip install pexpect
 
 RUN apt-get -y install unzip libffi-dev libssl-dev libmysqlclient-dev python3-mysqldb python3-dev libpython3-dev git ruby g++ curl
-RUN easy_install -U distribute
 
 ADD . /app
 
