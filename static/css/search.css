@@ -515,17 +515,29 @@ svg {
     margin-bottom: 18px;
 }
 
-.fa-cart-shopping.selected,.fa-cart-shopping.none{
-    background-color:blue;
+.ckbx:has(.fa-cart-shopping.selected){
+    background-color:lightgreen;
 }
 
-.fa-cart-shopping.partselected{
-    background-color:grey;
+.ckbx:has(.fa-cart-shopping.partselected){
+    background-color:#ff7;
 }
-.fa-cart-shopping.unselected{
-    background-color:red;
+ .ckbx:has(.fa-cart-shopping.unselected,.fa-cart-shopping.none){
+    #background-color:#FF0000;
+    #background-color:#F88379;
+     #background-color:#FF6347;
+     background-color:transparent;
 }
 
+.ckbx:has(.fa-cart-shopping){
+    border-color:grey;
+    border-width:2px;
+    border-style:solid;
+}
 .more-checks {
     min-height: 19px;
+}
+
+.fa-car-shopping{
+    margin:auto;
 }

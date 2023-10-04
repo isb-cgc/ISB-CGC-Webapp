@@ -267,10 +267,33 @@ def populate_tables(request):
         #idsReq=[]
         custom_facets = None
         custom_facets_order = None
+        if table_type =="collections":
+            custom_facets = {"per_id": {"type": "terms", "field": "collection_id", "limit": limit,
+                                        "facet": {"unique_patient":"unique(PatientID)", "unique_study": "unique(StudyInstanceUID)",
+                                                  "unique_series": "unique(SeriesInstanceUID)"}}
+                             }
+            tableIndex = 'PatientID'
+            fields = ['collection_id', 'access']
+            facetfields = ['unique_patient','unique_study', 'unique_series']
+            sort_arg = 'collection_id asc'
+            sortByField= True
+            sort="collection_id"
+            #if sort == 'collection_id':
+            #    sortByField = True
+            #    sort_arg = 'collection_id ' + sortdir
+
+
+
         if table_type == 'cases':
             custom_facets = {"per_id": {"type": "terms", "field": "PatientID", "limit": limit,
                                 "facet": {"unique_study": "unique(StudyInstanceUID)",
-                                          "unique_series": "unique(SeriesInstanceUID)"}}
+                                          "unique_series": "unique(SeriesInstanceUID)",
+                                          "sz":"sum(instance_size)"}},
+                             "per_id2": {"type": "terms", "field": "collection_id", "limit": limit,
+                                        "facet": {"unique_study": "unique(StudyInstanceUID)",
+                                                  "unique_series": "unique(SeriesInstanceUID)",
+                                                  "sz": "sum(instance_size)"}}
+
                             }
             tableIndex = 'PatientID'
             fields = ['collection_id', 'PatientID','access']
