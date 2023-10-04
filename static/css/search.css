@@ -387,7 +387,7 @@ tr {
     width: 100%; }
 
 #projects_table td.ckbx, #projects_table_head th.ckbx,
-#cases_table_head th.ckbx, #cases_table td.ckbx,
+#cases_table_head th.ckbx, #cases_table_head th.shop, #cases_table td.ckbx, #cases_table td.shop,
 #series_table_head th.ckbx, #series_table td.ckbx,
 #studies_table_head th.ckbx, #studies_table td.ckbx {
     width: 5%;
@@ -520,6 +520,29 @@ svg {
     margin-bottom: 18px;
 }
 
+.ckbx:has(.fa-cart-shopping.selected){
+    background-color:lightgreen;
+}
+
+.ckbx:has(.fa-cart-shopping.partselected){
+    background-color:#ff7;
+}
+ .ckbx:has(.fa-cart-shopping.unselected,.fa-cart-shopping.none){
+    #background-color:#FF0000;
+    #background-color:#F88379;
+     #background-color:#FF6347;
+     background-color:transparent;
+}
+
+.ckbx:has(.fa-cart-shopping){
+    border-color:grey;
+    border-width:2px;
+    border-style:solid;
+}
 .more-checks {
     min-height: 19px;
+}
+
+.fa-car-shopping{
+    margin:auto;
 }

@@ -127,7 +127,7 @@ def news_page(request):
 
 
 # User details page
-@login_required
+#@login_required
 def user_detail(request, user_id):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
 
@@ -212,7 +212,7 @@ def quota_page(request):
     return render(request, 'idc/quota.html', {'request': request, 'quota': settings.IMG_QUOTA})
 
 
-@login_required
+#@login_required
 def save_ui_hist(request):
     status = 200
     try:
@@ -235,7 +235,7 @@ def save_ui_hist(request):
 
 
 # Method for obtaining the records displayed in the tables on the right-hand side of the explore data page
-@login_required
+#@login_required
 def populate_tables(request):
     response = {}
     status = 200
@@ -267,10 +267,33 @@ def populate_tables(request):
         #idsReq=[]
         custom_facets = None
         custom_facets_order = None
+        if table_type =="collections":
+            custom_facets = {"per_id": {"type": "terms", "field": "collection_id", "limit": limit,
+                                        "facet": {"unique_patient":"unique(PatientID)", "unique_study": "unique(StudyInstanceUID)",
+                                                  "unique_series": "unique(SeriesInstanceUID)"}}
+                             }
+            tableIndex = 'PatientID'
+            fields = ['collection_id', 'access']
+            facetfields = ['unique_patient','unique_study', 'unique_series']
+            sort_arg = 'collection_id asc'
+            sortByField= True
+            sort="collection_id"
+            #if sort == 'collection_id':
+            #    sortByField = True
+            #    sort_arg = 'collection_id ' + sortdir
+
+
+
         if table_type == 'cases':
             custom_facets = {"per_id": {"type": "terms", "field": "PatientID", "limit": limit,
                                 "facet": {"unique_study": "unique(StudyInstanceUID)",
-                                          "unique_series": "unique(SeriesInstanceUID)"}}
+                                          "unique_series": "unique(SeriesInstanceUID)",
+                                          "sz":"sum(instance_size)"}},
+                             "per_id2": {"type": "terms", "field": "collection_id", "limit": limit,
+                                        "facet": {"unique_study": "unique(StudyInstanceUID)",
+                                                  "unique_series": "unique(SeriesInstanceUID)",
+                                                  "sz": "sum(instance_size)"}}
+
                             }
             tableIndex = 'PatientID'
             fields = ['collection_id', 'PatientID','access']
@@ -458,7 +481,7 @@ def populate_tables(request):
 
 
 # Data exploration and cohort creation page
-@login_required
+#@login_required
 def explore_data_page(request, filter_path=False, path_filters=None):
     context = {'request': request}
     is_json = False
@@ -641,7 +664,7 @@ def about_page(request):
 
 
 # User dashboard, where saved cohorts (and, in the future, uploaded/indexed data) are listed
-@login_required
+#@login_required
 def dashboard_page(request):
     context = {'request': request}
 
