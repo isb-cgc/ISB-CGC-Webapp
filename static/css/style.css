@@ -4363,3 +4363,34 @@ d-topics-list iframe {
 .external-link {
   cursor: pointer;
 }
+
+.tippy-box[data-theme~=blue] {
+  background-color: #98bdde;
+  box-shadow: 0 0 20px 4px rgba(154, 161, 177, .15), 0 4px 80px -8px rgba(36, 40, 47, .25), 0 4px 4px -2px rgba(91, 94, 105, .15);
+  color: #232946;
+  font-weight: bold;
+}
+
+.tippy-box[data-theme~=blue][data-placement^=top]>.tippy-arrow:before {
+    border-top-color: #98bdde;
+}
+
+.tippy-box[data-theme~=blue][data-placement^=bottom]>.tippy-arrow:before {
+    border-bottom-color: #98bdde;
+}
+
+.tippy-box[data-theme~=blue][data-placement^=left]>.tippy-arrow:before {
+    border-left-color: #98bdde;
+}
+
+.tippy-box[data-theme~=blue][data-placement^=right]>.tippy-arrow:before {
+    border-right-color: #98bdde;
+}
+
+.tippy-box[data-theme~=blue]>.tippy-backdrop {
+    background-color: #98bdde;
+}
+
+.tippy-box[data-theme~=blue]>.tippy-svg-arrow {
+    fill: #b0d4f3;
+}

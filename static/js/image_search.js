@@ -2190,6 +2190,7 @@ require([
                         if (rowsAdded){
                             $(row).find('.fa-caret-down').removeClass('notDisp');
                             $(row).find('.fa-caret-right').addClass('notDisp');
+
                         }
                         else{
                             $(row).find('.fa-caret-down').addClass('notDisp');
@@ -2320,14 +2321,14 @@ require([
                     },
                     {
                         "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
-                            return pretty_print_id(data);
+                            return pretty_print_id(data) +
+                            ' <a class="copy-this-table" role="button" content="' + data +
+                                '" title="Copy Study ID to the clipboard">( <i class="fa-solid fa-copy"></i> )</a>';
                         },
                         "createdCell": function (td, data) {
                             $(td).data('study-id', data);
                             return;
                         }
-
-
                     },
                     {
                         "type": "text", "orderable": true, data: 'StudyDate', render: function (data) {
@@ -2535,23 +2536,23 @@ require([
                   "columns": [
                   {
                     "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
-                        return pretty_print_id(data);
+                        return pretty_print_id(data) +
+                            ' <a class="copy-this-table" role="button" content="' + data +
+                                '"  title="Copy Study ID to the clipboard">( <i class="fa-solid fa-copy copy-this-table"></i> )</a>';
                     }, "createdCell": function (td, data) {
                         $(td).data('study-id', data);
                         return;
-
                     }
-
                 },
                       {
                     "type": "text", "orderable": true, data: 'SeriesInstanceUID', render: function (data) {
-                        return pretty_print_id(data);
+                        return pretty_print_id(data) +
+                            ' <a role="button" content="' + data +
+                                '"  title="Copy Series ID to the clipboard">( <i class="fa-solid fa-copy copy-this-table"></i> )</a>';
                     }, "createdCell": function (td, data) {
                         $(td).data('series-id', data);
                         return;
-
                     }
-
                 },
                 {"type": "num", "orderable": true, data: 'SeriesNumber'},
                 {"type": "text", "orderable": true, data: 'Modality'},
@@ -2573,6 +2574,9 @@ require([
                             return;
 
                         }
+                    },
+                    "createdRow": function(tr, data) {
+
                     }
                 },
                 {
@@ -4667,6 +4671,7 @@ require([
         );
 
         $(window).on("beforeunload",function(){
+            console.log("beforeunload called");
             let hs = new Object();
             hs['hz'] = new Object();
             hs['sorter'] = new Object();

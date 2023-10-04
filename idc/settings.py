@@ -182,7 +182,7 @@ SITE_ID = 2
 
 if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
     print("[STATUS] AppEngine Flex detected.", file=sys.stdout)
-    SITE_ID = 3
+    SITE_ID = int(os.environ.get('SITE_ID', '3'))
 
 def get_project_identifier():
     return BIGQUERY_PROJECT_ID

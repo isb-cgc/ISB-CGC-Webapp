@@ -16,63 +16,51 @@
 #
 ###
 
-# Dockerfile extending the generic Python image with application files for a
+# Dockerfile extending the Python Community image from Dockerhub with application files for a
 # single application.
-FROM gcr.io/google_appengine/python
+FROM python:3.9-bullseye
 
-# Create a virtualenv for dependencies. This isolates these packages from
-# system-level packages.
-# Use -p python3 or -p python3.7 to select python version. Default is version 2.
-RUN virtualenv /env -p python3
+SHELL ["/bin/bash", "-c"]
 
-# Setting these environment variables are the same as running
-# source /env/bin/activate.
-ENV VIRTUAL_ENV /env
-ENV PATH /env/bin:$PATH
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update
-ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get install -y wget
-RUN wget "http://repo.mysql.com/mysql-apt-config_0.8.9-1_all.deb" -P /tmp
+RUN wget "http://repo.mysql.com/mysql-apt-config_0.8.26-1_all.deb" -P /tmp
 
 # install lsb-release (a dependency of mysql-apt-config), since dpkg doesn't
 # do dependency resolution
 RUN apt-get install -y lsb-release
-# add a debconf entry to select mysql-5.7 as the server version when we install
-# the mysql config package
-RUN echo "mysql-apt-config mysql-apt-config/select-server select mysql-5.7" | debconf-set-selections
-# having 'selected' mysql-5.7 for 'server', install the mysql config package
-RUN echo 'download mysql public build key'
+# TODO: we need to start using the keyring instead
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 467B942D3A79BD29
-RUN dpkg --install /tmp/mysql-apt-config_0.8.9-1_all.deb
+RUN dpkg --install /tmp/mysql-apt-config_0.8.26-1_all.deb
 
-# fetch the updated package metadata (in particular, mysql-server-5.7)
+# fetch the updated package metadata (in particular, mysql-server)
 RUN apt-get update
 
 # aaaand now let's install mysql-server
 RUN apt-get install -y mysql-server
 
-# Get pip3 installed
-RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python3
-
 RUN apt-get -y install build-essential
-RUN apt-get -y install --reinstall python-m2crypto python3-crypto
+RUN apt-get -y install --reinstall python3-m2crypto python3-cryptography
 RUN apt-get -y install libxml2-dev libxmlsec1-dev swig
-RUN pip3 install pexpect
+RUN pip install pexpect
 
 RUN apt-get -y install unzip libffi-dev libssl-dev libmysqlclient-dev python3-mysqldb python3-dev libpython3-dev git ruby g++ curl
-RUN easy_install -U distribute
 
 ADD . /app
 
 # We need to recompile some of the items because of differences in compiler versions
-RUN pip3 install -r /app/requirements.txt -t /app/lib/ --upgrade
-RUN pip3 install gunicorn==19.6.0
+RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
+RUN pip install gunicorn==21.2.0
 
-ENV PYTHONPATH=/app:/app/lib:/app/IDC-Common:${PYTHONPATH}
+ENV PYTHONPATH="/app:/app/lib:/app/IDC-Common:${PYTHONPATH}"
 
-# Check Axes config
-RUN python3 manage.py check
+WORKDIR /app/
+
+# Quick config check
+RUN python manage.py check
 
 # Until we figure out a way to do it in CircleCI without whitelisting IPs this has to be done by a dev from
 # ISB
