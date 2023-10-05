@@ -11,6 +11,8 @@ if [ -n "$CI" ]; then
     COMMON_BRANCH=master
     if [[ ${CIRCLE_BRANCH} =~ idc-(prod|uat|test).* ]]; then
         COMMON_BRANCH=$(awk -F- '{print $1"-"$2}' <<< ${CIRCLE_BRANCH})
+    elif [[ ${CIRCLE_BRANCH} == "expr" ]]; then
+        COMMON_BRANCH=expr
     fi
     echo "Cloning IDC-Common branch ${COMMON_BRANCH}..."
     git clone -b ${COMMON_BRANCH} https://github.com/ImagingDataCommons/IDC-Common.git
@@ -24,6 +26,8 @@ else
     export HOMEROOT=/home/vagrant/www
 fi
 
+export DEBIAN_FRONTEND=noninteractive
+
 # Remove .pyc files; these can sometimes stick around and if a
 # model has changed names it will cause various load failures
 find . -type f -name '*.pyc' -delete
@@ -32,44 +36,21 @@ apt-get update -qq
 
 # Install and update apt-get info
 echo "Preparing System..."
-apt-get -y --force-yes install software-properties-common
-if [ -n "$CI" ]; then
-    # Use these next 4 lines to update mysql public build key
-    echo 'download mysql public build key'
-    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 5072E1F5
-    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 467B942D3A79BD29
-    echo 'mysql build key update done.'
-    wget https://dev.mysql.com/get/mysql-apt-config_0.8.9-1_all.deb
-    apt-get install -y lsb-release
-    dpkg -i mysql-apt-config_0.8.9-1_all.deb
-fi
+apt-get -y --force-yes install software-properties-common ca-certificates
+
+apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 467B942D3A79BD29
+wget "https://repo.mysql.com/mysql-apt-config_0.8.26-1_all.deb" -P /tmp
+dpkg --install /tmp/mysql-apt-config_0.8.26-1_all.deb
 
 apt-get update -qq
-apt-get install ca-certificates
+
+apt-get install mysql-client
 
 # Install apt-get dependencies
 echo "Installing Dependencies..."
 apt-get install -y --force-yes unzip libffi-dev libssl-dev git ruby g++ curl dos2unix
-# CircleCI provides a Python 3.8 image, but locally, we use 3.7 to mimic the Dockerfile
-if [ -z "${CI}" ]; then
-    # Update to Python 3.7
-    add-apt-repository ppa:deadsnakes/ppa
-    apt update
-    apt install -y --force-yes python3.7
-    # Set Python 3.7 as the python3 version
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1
-    apt-get install -y --force-yes python3.7-venv python3.7-distutils python3.7-dev
-else
-  apt-get install -y --force-yes python3-distutils
-fi
-apt-get install -y --force-yes python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
-apt-get install -y --force-yes mysql-client
-
-if [ -z "${CI}" ]; then
-  # Per https://stackoverflow.com/questions/13708180/python-dev-installation-error-importerror-no-module-named-apt-pkg
-  # there's an issue with Python 3.7 and deadsnakes.
-  cp -v /usr/lib/python3/dist-packages/apt_pkg.cpython-36m-x86_64-linux-gnu.so /usr/lib/python3/dist-packages/apt_pkg.so
-fi
+apt-get install -y --force-yes python3-distutils python3-mysqldb libmysqlclient-dev libpython3-dev build-essential
+apt-get install -y --force-yes python3-pip
 
 echo "Dependencies Installed"
 
@@ -83,32 +64,28 @@ if [ -z "${CI}" ]; then
     ls ${HOMEROOT}/lib/
 fi
 
-# Install PIP + Dependencies
-echo "Installing pip3..."
-curl --silent https://bootstrap.pypa.io/get-pip.py | python3
-
 # Install our primary python libraries
 # If we're not on CircleCI, or we are but the lib directory isn't there (cache miss), install lib
 if [ -z "${CI}" ] || [ ! -d "lib" ]; then
     echo "Installing Python Libraries..."
-    pip3 install -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
+    pip install -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
 else
     echo "Using restored cache for Python Libraries"
 fi
 
 if [ -z "${CI}" ]; then
     echo "Installing responses library for unit tests, but not for deployment..."
-    pip3 install -q responses -t ${HOMEROOT}/lib --only-binary all
+    pip install -q responses -t ${HOMEROOT}/lib --only-binary all
 fi
 
 if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
     echo "Installing Django Debug Toolbar for local dev..."
-    pip3 install -q django-debug-toolbar==3.2.4 -t ${HOMEROOT}/lib --only-binary all
+    pip install -q django-debug-toolbar==3.2.4 -t ${HOMEROOT}/lib --only-binary all
 fi
 
 if [ "$IS_DEV" = "True" ]; then
     echo "Installing GitPython for local dev version display..."
-    pip3 install -q gitpython -t ${HOMEROOT}/lib --only-binary all
+    pip install -q gitpython -t ${HOMEROOT}/lib --only-binary all
 fi
 
 echo "Libraries Installed"
