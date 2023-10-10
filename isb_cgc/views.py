@@ -49,7 +49,6 @@ from accounts.sa_utils import get_nih_user_details
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
-from google_helpers.bigquery.service import get_bigquery_service
 from google_helpers.bigquery.feedback_support import BigQueryFeedbackSupport
 from solr_helpers import query_solr_and_format_result, build_solr_query, build_solr_facets
 from projects.models import Attribute, DataVersion, DataSource
@@ -295,52 +294,9 @@ def search_cohorts_viz(request):
 
 
 def get_tbl_preview(request, proj_id, dataset_id, table_id):
-    status = 200
-    MAX_ROW = 8
     try:
-        if not proj_id or not dataset_id or not table_id:
-            logger.warning("[WARNING] Required ID missing: {}.{}.{}".format(proj_id,dataset_id,table_id))
-            status = 503
-            result = {
-                'message': "There was an error while processing this request: one or more required parameters (project id, dataset_id or table_id) were not supplied."
-            }
-        else:
-            bq_service = get_bigquery_service()
-            dataset = bq_service.datasets().get(projectId=proj_id, datasetId=dataset_id).execute()
-            is_public = False
-            for access_entry in dataset['access']:
-                if access_entry.get('role') == 'READER' and access_entry.get('specialGroup') == 'allAuthenticatedUsers':
-                    is_public = True
-                    break
-            if is_public:
-                tbl_data=bq_service.tables().get(projectId=proj_id, datasetId=dataset_id, tableId=table_id).execute()
-                if tbl_data.get('type') == 'VIEW' and tbl_data.get('view') and tbl_data.get('view').get('query'):
-                    view_query_template = '''#standardSql
-                            {query_stmt}
-                            LIMIT {max}'''
-                    view_query = view_query_template.format(query_stmt=tbl_data['view']['query'], max=MAX_ROW)
-                    response = bq_service.jobs().query(
-                        projectId=settings.BIGQUERY_PROJECT_ID,
-                        body={ 'query': view_query  }).execute()
-                else:
-                    response = bq_service.tabledata().list(projectId=proj_id, datasetId=dataset_id, tableId=table_id,
-                                                       maxResults=MAX_ROW).execute()
-                if response and int(response['totalRows']) > 0:
-                    result = {
-                        'rows': response['rows']
-                    }
-                else:
-                    result = {
-                        'message': 'No record has been found for table {proj_id}.{dataset_id}.{table_id}.'.format(
-                            proj_id=proj_id,
-                            dataset_id=dataset_id,
-                            table_id=table_id)
-                    }
-            else:
-                status = 401
-                result = {
-                    'message': "Preview is not available for this table/view."
-                }
+        result = BigQuerySupport.get_table_preview(proj_id, dataset_id, table_id)
+        status = result['status']
 
     except HttpError as e:
         logger.error(
