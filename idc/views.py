@@ -368,7 +368,7 @@ def populate_tables(request):
             custom_facets = {}
             tableIndex = 'SeriesInstanceUID'
             fields = ['collection_id', 'SeriesInstanceUID', 'StudyInstanceUID', 'SeriesDescription', 'SeriesNumber',
-                      'BodyPartExamined', 'Modality', 'access']
+                      'BodyPartExamined', 'Modality', 'access', 'crdc_series_uuid','gcs_bucket','aws_bucket']
             facetfields = []
             sortByField = True
 
@@ -547,9 +547,13 @@ def explore_data_page(request, filter_path=False, path_filters=None):
             else:
                 filters_for_load = req.get('filters_for_load', None)
                 if filters_for_load:
-                    blacklist = re.compile(settings.BLACKLIST_RE, re.UNICODE)
-                    if blacklist.search(filters_for_load):
-                        logger.warning("[WARNING] Saw bad filters in filters_for_load:")
+                    denylist = re.compile(settings.DENYLIST_RE, re.UNICODE).search(filters_for_load)
+                    attr_disallow = re.compile(settings.ATTRIBUTE_DISALLOW_RE, re.UNICODE).search(filters_for_load)
+                    if denylist or attr_disallow:
+                        if denylist:
+                            logger.error("[ERROR] Saw possible attack in filters_for_load:")
+                        else:
+                            logger.warning("[WARN] Saw bad filter names in filters_for_load:")
                         logger.warning(filters_for_load)
                         filters_for_load = {}
                         messages.error(
@@ -622,10 +626,14 @@ def parse_explore_filters(request):
         attrs = Attribute.objects.filter(name__in=attr_names)
         attr_map = {x.name: {"id": x.id, "filter": filter_name_map[x.name]} for x in attrs}
         not_found = [x for x in attr_names if x not in attr_map.keys()]
-        blacklist = re.compile(settings.BLACKLIST_RE, re.UNICODE)
-        if blacklist.search(str(filters)):
-            logger.warning("[WARNING] Saw bad filters in filters_for_load:")
-            logger.warning(filters)
+        denylist = re.compile(settings.DENYLIST_RE, re.UNICODE).search(str(filters))
+        attr_disallow = re.compile(settings.ATTRIBUTE_DISALLOW_RE, re.UNICODE).search(str(filters))
+        if denylist or attr_disallow:
+            if denylist:
+                logger.error("[ERROR] Saw possible attack attempt!")
+            else: 
+                logger.warning("[WARNING] Saw bad filters in filters_for_load:")
+            logger.warning(str(filters))
             messages.error(
                 request,
                 "There was a problem with some of your filters - please ensure they're properly formatted."

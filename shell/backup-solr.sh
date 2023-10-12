@@ -9,7 +9,7 @@ MAX_WAIT=3
 SOLR_DATA="/opt/bitnami/solr/server/solr"
 RUN=`date +%s`
 BACKUPS_DIR="${SOLR_DATA}/backups_${RUN}"
-PARSE_RESPONSE="import sys, json; print(json.load(sys.stdin)['details']['backup'].get('snapshotCompletedAt',None) or 'INCOMPLETE')"
+PARSE_RESPONSE="import sys, json; print(json.load(sys.stdin)['details'].get('backup',{}).get('snapshotCompletedAt',None) or 'INCOMPLETE')"
 
 while getopts ":c:l:f:d:h" flag
 do
@@ -85,8 +85,9 @@ for core in "${cores[@]}"; do
         while [[ "$status" == "INCOMPLETE" && "$retries" -lt  "$MAX_WAIT" ]]; do
           echo "Backup for core ${core} isn't completed, waiting..."
           sleep 2
-          ((retries++))
+          ((retries=retries+1))
           status=`curl -s -u ${SOLR_USER}:${SOLR_PWD} -X GET "https://localhost:8983/solr/${core}/replication?command=details" --cacert solr-ssl.pem | python3 -c "${PARSE_RESPONSE}"`
+          echo "Status is now ${status}"
         done
         if [ "$status" != "INCOMPLETE" ]; then
           echo "Core ${core} backup completed at ${status}."

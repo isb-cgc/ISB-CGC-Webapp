@@ -1,0 +1,44 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+{% load custom_tags %}
+
+{% block head_title %}Too Many Attempts{% endblock %}
+
+{% block content %}
+        <div class="col-lg-12 col-md-12 col-sm-12 short-inner-content-no-header">
+            <div class="col-lg-4 col-md-4 col-sm-1"></div>
+            <div class="col-lg-4 accounts-col">
+                <div class="panel panel-default">
+                    <div class="panel-heading"><h3>Too Many Login Attempts</h3></div>
+                    <div class="panel-body">
+                        <p>
+                            You have failed to log in over {{ failure_limit }} attempts. Your account will now be
+                            locked for {{ cooloff_timedelta }} hour(s) until <b><span id="cool-off-date"></span></b>.
+                            Additional attempts to log in will extend this lockout. You can attempt to log in again
+                            after this cooloff time has expired.
+                        </p>
+                        <script type="text/javascript">
+                            let cooloff_date_local = new Date("{{ cooloff_timedelta|parse_cooloff|safe }}+00:00".replace(" ", "T"));
+                            const fmt = new Intl.DateTimeFormat('en', {
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: 'numeric',
+                                hour12: true,
+                                timeZoneName: 'short'
+                            });
+                            document.getElementById('cool-off-date').innerHTML = fmt.format(cooloff_date_local);
+                        </script>
+                        <p>
+                            If you feel you have received this message in error or need help resetting your password,
+                            please <b><a href="mailto:{{ SUPPORT_EMAIL }}">contact us</a></b> to have your account re-enabled.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-1"></div>
+        </div>
+{% endblock %}

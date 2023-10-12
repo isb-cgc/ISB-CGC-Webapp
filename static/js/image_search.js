@@ -2323,7 +2323,7 @@ require([
                         "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                             return pretty_print_id(data) +
                             ' <a class="copy-this-table" role="button" content="' + data +
-                                '" title="Copy Study ID to the clipboard">( <i class="fa-solid fa-copy"></i> )</a>';
+                                '" title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                         },
                         "createdCell": function (td, data) {
                             $(td).data('study-id', data);
@@ -2334,7 +2334,7 @@ require([
                         "type": "text", "orderable": true, data: 'StudyDate', render: function (data) {
                             // fix when StudyData is an array of values
                             var dt = new Date(Date.parse(data));
-                            var dtStr = (dt.getMonth() + 1).toLocaleString('en-US', {minimumIntegerDigits: 2}) + "-" + dt.getDate().toLocaleString('en-US', {minimumIntegerDigits: 2}) + "-" + dt.getFullYear().toString();
+                            var dtStr = (dt.getUTCMonth() + 1).toLocaleString('en-US', {minimumIntegerDigits: 2}) + "-" + dt.getUTCDate().toLocaleString('en-US', {minimumIntegerDigits: 2}) + "-" + dt.getUTCFullYear().toString();
                             return dtStr;
                         }
                     },
@@ -2364,11 +2364,24 @@ require([
                                 } else if (( Array.isArray(modality) && modality.includes('SM')) || (modality === 'SM')) {
                                     return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                                  } else {
-                                    return '<a href="' + DICOM_STORE_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
+                                    let v3_link = '';
+                                    if(OHIF_V3_PATH) {
+                                        v3_link = ' | <a href="' + OHIF_V3_PATH + data + '" target="_blank" rel="noopener noreferrer">v3'
+                                    }
+                                    return '<a href="' + OHIF_V2_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
+                                        v3_link
                                 }
                             }
                         }
                     },
+                    {
+                          "type":"html",
+                          "orderable": false,
+                          data: 'StudyInstanceUID', render: function (data){
+                              return '<i class="fa fa-download study-export" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
+                          }
+
+                      }
                 ],
                 "processing": true,
                 "serverSide": true,
@@ -2522,6 +2535,9 @@ require([
                  "order": [[0, "asc"]],
                  "createdRow": function (row, data, dataIndex) {
                     $(row).attr('id', 'series_' + data['SeriesInstanceUID'])
+                    $(row).attr('data-crdc',  data['crdc_series_uuid'])
+                    $(row).attr('data-aws',  data['aws_bucket'])
+                    $(row).attr('data-gcs',  data['gcs_bucket'])
                     $(row).addClass('text_head');
                  },
                 "columnDefs": [
@@ -2532,23 +2548,24 @@ require([
                     {className: "col1 body-part-examined", "targets": [4]},
                     {className: "series-description", "targets": [5]},
                     {className: "ohif open-viewer", "targets": [6]},
+                    {className: "download", "targets": [7]},
+
                  ],
                   "columns": [
                   {
                     "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                         return pretty_print_id(data) +
                             ' <a class="copy-this-table" role="button" content="' + data +
-                                '"  title="Copy Study ID to the clipboard">( <i class="fa-solid fa-copy copy-this-table"></i> )</a>';
+                                '"  title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                     }, "createdCell": function (td, data) {
                         $(td).data('study-id', data);
                         return;
                     }
-                },
-                      {
+                }, {
                     "type": "text", "orderable": true, data: 'SeriesInstanceUID', render: function (data) {
                         return pretty_print_id(data) +
-                            ' <a role="button" content="' + data +
-                                '"  title="Copy Series ID to the clipboard">( <i class="fa-solid fa-copy copy-this-table"></i> )</a>';
+                            ' <a class="copy-this-table" role="button" content="' + data +
+                                '"  title="Copy Series ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                     }, "createdCell": function (td, data) {
                         $(td).data('series-id', data);
                         return;
@@ -2575,11 +2592,7 @@ require([
 
                         }
                     },
-                    "createdRow": function(tr, data) {
-
-                    }
-                },
-                {
+                },  {
                     "type": "html",
                     "orderable": false,
                     data: 'SeriesInstanceUID',
@@ -2606,12 +2619,26 @@ require([
                             return '<a href="' + SLIM_VIEWER_PATH + row['StudyInstanceUID'] + '/series/' + data +
                                 '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                         } else {
-                            return '<a href="' + DICOM_STORE_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' +
-                                data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
+                            let v3_link = '';
+                            if(OHIF_V3_PATH) {
+                                v3_link = ' | <a href="' + OHIF_V3_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' +
+                                data + '" target="_blank" rel="noopener noreferrer">v3'
+                            }
+                            return '<a href="' + OHIF_V2_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' +
+                                data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
+                                v3_link
                         }
 
                     }
                 },
+                      {
+                          "type":"html",
+                          "orderable": false,
+                          data: 'SeriesInstanceUID', render: function (data){
+                              return '<i class="fa fa-download series-export" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
+                          }
+
+                      }
             ],
             "processing": true,
             "serverSide": true,
@@ -2729,7 +2756,7 @@ require([
     }
 
     var pretty_print_id = function (id) {
-        var newId = id.slice(0, 12) + '...' + id.slice(id.length - 12, id.length);
+        var newId = id.slice(0, 8) + '...' + id.slice(id.length - 8, id.length);
         return newId;
     }
 
@@ -2974,6 +3001,7 @@ require([
                                 data.totals.StudyInstanceUID.toString()+" Studies, and " +
                                 data.totals.SeriesInstanceUID.toString()+" Series in this manifest. " +
                                 "Size on disk: " + data.totals.disk_size); */
+
                             if (('filtered_counts' in data) && ('access' in data['filtered_counts']['origin_set']['All']['attributes']) && ('Limited' in data['filtered_counts']['origin_set']['All']['attributes']['access']) && (data['filtered_counts']['origin_set']['All']['attributes']['access']['Limited']['count']>0) ){
                                $('#search_def_access').removeClass('notDisp');
                                $('.access_warn').removeClass('notDisp');
@@ -4670,6 +4698,7 @@ require([
                 ).attr("style","display: none;")
         );
 
+        
         $(window).on("beforeunload",function(){
             console.log("beforeunload called");
             let hs = new Object();
@@ -4688,6 +4717,8 @@ require([
                 let sort = $(this).find('input:checked').val()
                 hs['sorter'][pid] = sort;
             });
+
+
 
             let url = encodeURI('/uihist/')
             let nhs = {'his':JSON.stringify(hs)}
@@ -4711,9 +4742,12 @@ require([
                 }
             });
         });
+
+
         initSort('num');
         if (document.contains(document.getElementById('history'))){
             updateViaHistory();
         }
+
     });
 });

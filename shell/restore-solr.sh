@@ -37,7 +37,7 @@ else
   fi
 fi
 
-if [[ -z $SOLR_PWD ]]; then
+if [ -z $SOLR_PWD ]; then
   echo "[ERROR] SOLR_PWD not set - exiting!"
   exit 1
 fi
@@ -68,7 +68,7 @@ for dirname in ${BACKUP_DIR}/*/; do
   fi
   if [ "$MAKE_CORE" = true ]; then
     echo "[STATUS] Core creation enabled - attempting creation of core \"${CORE}\"..."
-    sudo -u solr /opt/bitnami/solr/bin/solr create -c $CORE -s 2 -rf 2
+    sudo -u solr solr create -c $CORE
   else
     echo "[STATUS] Core creation disabled - this assumes core \"${CORE}\" exists already!"
     echo "  You'll see an error if it doesn't."

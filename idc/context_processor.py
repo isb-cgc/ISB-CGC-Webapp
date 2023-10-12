@@ -14,9 +14,11 @@ def additional_context(request):
             'FILE_SIZE_UPLOAD_MAX': settings.FILE_SIZE_UPLOAD_MAX,
             'RESTRICTED_ACCESS': settings.RESTRICT_ACCESS,
             'RESTRICTED_ACCESS_GROUPS': settings.RESTRICTED_ACCESS_GROUPS,
-            'DICOM_STORE_PATH': settings.DICOM_STORE_PATH,
             'SLIM_VIEWER_PATH': settings.SLIM_VIEWER_PATH,
             'APP_VERSION': settings.APP_VERSION,
             'DEV_TIER': settings.DEV_TIER,
-            'RESEARCH_STUDY': settings.RESEARCH_STUDY
+            'RESEARCH_STUDY': settings.RESEARCH_STUDY,
+            'OHIF_V2_PATH': settings.OHIF_V2_PATH,
+            'OHIF_V3_PATH': settings.OHIF_V3_PATH,
+            'SUPPORT_EMAIL': settings.SUPPORT_EMAIL
     }
