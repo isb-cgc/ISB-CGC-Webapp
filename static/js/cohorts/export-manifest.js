@@ -64,9 +64,103 @@ require([
 
     var downloadToken = new Date().getTime();
 
+    $('#export-manifest-modal').on('show.bs.modal', function(event) {
+        var button = $(event.relatedTarget)
+        if (button.hasClass('series-export') || button.hasClass('study-export')){
+            update_export_modal_for_mini(button);
+        }
+    });
+
+    var update_export_modal_for_mini= function(button){
+
+        var title='';
+        var filterNm='';
+        var mini_type='';
+        var name_base='';
+
+        if (button.hasClass('series-export')) {
+            title = 'Series Export';
+            filterNm = 'Series InstanceUID';
+            mini_type = 'series';
+            name_base='series_manifest';
+
+            $('#export-manifest-form').append('<input type="hidden" name="aws">')
+            $('#export-manifest-modal').find('input[name="aws"]').val(button.parent().parent().data('aws'));
+            $('#export-manifest-form').append('<input type="hidden" name="gcs">')
+            $('#export-manifest-modal').find('input[name="gcs"]').val(button.parent().parent().data('gcs'));
+            $('#export-manifest-form').append('<input type="hidden" name="crdc">')
+            $('#export-manifest-modal').find('input[name="crdc"]').val(button.parent().parent().data('crdc'));
+
+        }
+        else if (button.hasClass('study-export')) {
+            title = 'Study Export';
+            filterNm = 'StudyInstanceUID';
+            mini_type = 'study';
+            name_base='study_manifest';
+        }
+
+        $('.modal-title').text(title);
+        $('#export-manifest-form').append('<input type="hidden" name="mini">')
+        $('#export-manifest-form').find('input[name="mini"]').val(mini_type);
+
+        $('#export-manifest-form').append('<input type="hidden" name="uid">')
+        $('#export-manifest-modal').find('input[name="uid"]').val(button.data('uid'));
+
+        var filt_str=$('#export-manifest-form').find('input[name="filters"]').val()
+        filters= new Object();
+        if (filt_str.length>0){
+            filters=JSON.parse(filt_str)
+        }
+
+        filters[filterNm]=[button.data('uid')]
+        $('#export-manifest-form input[name="filters"]').val(JSON.stringify(filters));
+        let file_name = $('input[name="file_name"]');
+        file_name.attr("name-base",name_base);
+        $('.manifest-file').hide();
+        $('.manifest-bq').hide();
+        $('#manifest-source').text((mini_type === "series" ? "" : "download this study manifest, "));
+        if (button.hasClass('series-export')) {
+            $('#export-manifest-form').find('#s5cmd-header-fields-container').hide();
+            $('#export-manifest-form').find('#download-s5cmd').hide();
+        }
+        else if (button.hasClass('study-export')) {
+            $('#s5cmd-header-fields').find('input[value="cohort_name"]').parent().hide();
+            $('#s5cmd-header-fields').find('input[value="user_email"]').parent().hide();
+        }
+        update_file_names();
+    }
+
     $('#export-manifest-modal').on('hide.bs.modal', function() {
         $('input').removeAttr('name-base');
+        if ($('#export-manifest-modal').find('input[name="mini"]').length>0){
+            reset_after_mini()
+        }
     });
+
+    var reset_after_mini = function(){
+      $('#export-manifest-modal').find('input[name="mini"]').remove();
+      $('#export-manifest-modal').find('input[name="uid"]').remove();
+      $('#export-manifest-modal').find('input[name="crdc_uid"]').remove();
+      $('#export-manifest-modal').find('input[name="aws"]').remove();
+      $('#export-manifest-modal').find('input[name="gcs"]').remove();
+
+      var filt_str=$('#export-manifest-form').find('input[name="filters"]').val()
+        var filters=JSON.parse(filt_str);
+      if ('StudyInstanceUID' in filters){
+          delete filters['StudyInstanceUID']
+      }
+      if ('SeriesInstanceUID' in filters){
+          delete filters['SeriesInstanceUID']
+      }
+      $('.manifest-file').show();
+      $('.manifest-bq').show();
+      $('#export-manifest-form').find('#s5cmd-header-fields-container').show();
+      $('#export-manifest-form').find('#download-s5cmd').show();
+      $('#s5cmd-header-fields').find('input[value="cohort_name"]').parent().show();
+      $('#s5cmd-header-fields').find('input[value="user_email"]').parent().show();
+      $('.modal-title').text('Export Manifest');
+      $('#manifest-source').text('manifest');
+    }
 
     $('#download-csv').on('click', function(e) {
         download_manifest("csv", $(this), e)
@@ -212,6 +306,15 @@ require([
         let manifest_filename = file_name.attr("name-base")+"_"+$('input.loc_type:checked').val();
         let endpoint_url = ($('input.loc_type:checked').val() === "aws" ? "https://s3.amazonaws.com" : "https://storage.googleapis.com");
         let s5cmd_text = `s5cmd --no-sign-request --endpoint-url ${endpoint_url} run ${manifest_filename}.s5cmd`;
+
+
+        if ($('#export-manifest-modal').find('input[name="mini"]').val()==='series') {
+            let crdc=$('#export-manifest-modal').find('input[name="crdc"]').val()
+            let bucket = ($('input.loc_type:checked').val() === "aws" ? $('input[name="aws"]').val() : $('input[name="gcs"]').val());
+            s5cmd_text = `s5cmd --no-sign-request --endpoint-url ${endpoint_url} cp 's3://${bucket}/${crdc}/*' .`;
+
+        }
+
 
         $('.s5cmd-text').text(s5cmd_text);
         $('.s5cmd.copy-this').attr("content",s5cmd_text);

@@ -39,6 +39,7 @@
                                     s5cmd
                                 </a>
                             </li>
+
                             <li class="filter-tab manifest-file" role="presentation">
                                 <a href="#manifest-file" role="tab" data-toggle="tab" title="CSV/TSV/JSON manifest"
                                    aria-expanded="false"
@@ -53,6 +54,7 @@
                                     BigQuery
                                 </a>
                             </li>
+
                         </ul>
                         <div class="tab-content">
                             <div id="manifest-bq" class="tab-pane manifest" role="tab-panel">
@@ -145,12 +147,14 @@
                             <div id="manifest-s5cmd" class="tab-pane manifest active" role="tab-panel">
                                 <p>
                                     <br />
-                                    To download the images in this manifest,
+                                    To obtain these images, <span id="manifest-source">download this s5cmd manifest, </span>
                                     <a class="external-link" url="https://github.com/peak/s5cmd" data-toggle="modal"
                                        data-target="#external-web-warning">install s5cmd <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i></a>,
                                     then run the following command:
-                                    <br />
+                                </p>
+                                <p>
                                     <span class="code s5cmd-text">s5cmd --no-sign-request --endpoint-url https://endpoint_url run file_name.s5cmd</span>
+                                    <br />
                                     <a role="button" class="s5cmd copy-this" content=""  title="Copy command to clipboard">
                                         ( <i class="fa-solid fa-copy" aria-hidden="true"></i> )
                                     </a>
@@ -164,19 +168,20 @@
                                 </div>
 -->
                                 <div class="s5cmd-loc-type">
-                                    <p>Cloud Source</p>
-                                    <li class="radio"><label for="export-s5cmd-loc-gcp">
-                                        <input class="loc_type" id="export-s5cmd-loc-gcp" name="loc_type" type="radio" value="gcs" checked />
-                                        <span class="value">GCP - data storage and egress sponsored by Google Public Data Program</span>
-                                    </label></li>
+                                    <h5>Cloud Source</h5>
                                     <li class="radio"><label for="export-s5cmd-loc-aws">
-                                        <input class="loc_type" id="export-s5cmd-loc-aws" name="loc_type" type="radio" value="aws" />
+                                        <input class="loc_type" id="export-s5cmd-loc-aws" name="loc_type" type="radio" value="aws" checked />
                                         <span class="value">AWS - data storage and egress sponsored by AWS Open Data Sponsorship Program</span>
+                                    </label></li>
+                                    <li class="radio"><label for="export-s5cmd-loc-gcp">
+                                        <input class="loc_type" id="export-s5cmd-loc-gcp" name="loc_type" type="radio" value="gcs" />
+                                        <span class="value">GCP - data storage and egress sponsored by Google Public Data Program</span>
                                     </label></li>
                                 </div>
                                 <!-- Header Fields -->
                                 <div id="s5cmd-header-fields-container">
-                                    <p><input id="include-header-s5cmd-checkbox" type="checkbox"> Include header fields</p>
+                                    <h5>Manifest Headers</h5>
+                                    <input id="include-header-s5cmd-checkbox" type="checkbox"> Include Headers
                                     <div id="s5cmd-header-fields-heading" class="list-group-item__heading export-manifest-group__heading">
                                         <a role="button" data-toggle="collapse" href="#s5cmd-header-fields" aria-expanded="false"
                                            aria-controls="s5cmd-header-fields">
@@ -209,11 +214,6 @@
                                             <span class="value">Total Records</span>
                                         </label></li>
                                     </div>
-                                    <p><a class="external-link" href=""
-                                          url="https://learn.canceridc.dev/data/downloading-data"
-                                          data-toggle="modal" data-target="#external-web-warning">Instructions
-                                        <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i>
-                                    </a>on downloading images defined by the manifest</p>
                                 </div>
                                 <a id="download-s5cmd" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in s5cmd format.">
                                     Download s5cmd Manifest
@@ -230,7 +230,8 @@
                                 </div>
 -->
                                 <!-- Header Fields -->
-                                <p><input id="include-file-header-checkbox" type="checkbox" checked> Include header fields</p>
+                                <h5>Manifest Headers</h5>
+                                <input id="include-header-file-checkbox" type="checkbox" checked> Include headers
                                 <div id="file-header-fields-container">
                                     <div id="file-header-fields-heading" class="list-group-item__heading export-manifest-group__heading">
                                         <a role="button" data-toggle="collapse" href="#file-header-fields" aria-expanded="false"
@@ -266,6 +267,7 @@
                                     </div>
                                 </div>
                                 <!-- Columns -->
+                                <h5>Data Columns</h5>
                                 <div id="file-columns-container">
                                     <div id="file-columns-heading" class="list-group-item__heading export-manifest-group__heading">
                                         <a role="button" data-toggle="collapse" href="#file-columns" aria-expanded="true"
@@ -337,6 +339,7 @@
                 <input type="hidden" name="include_header">
                 <input type="hidden" name="ids">
                 <input type="hidden" name="manifest-type">
+
             </form>
         </div>
     </div>

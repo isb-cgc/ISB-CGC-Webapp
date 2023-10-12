@@ -29,61 +29,7 @@
     {% include "cohorts/export-manifest-modal.html" with export_uri=export_uri user_is_social=user_is_social user_is_auth=user_is_auth is_cohort=is_cohort %}
 {% endwith %}
 
-<div id="version_d" tabindex="-1"
-     class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-draggable ui-resizable"
-     style="display: none;"
-     aria-describedby="dialog-1"
-     aria-labelledby="ui-id-1">
-        <div class="ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix ui-draggable-handle">
-             <span id="ui-id-1" class="ui-dialog-title">Comparing Versions of Cohort -1</span>
-             <button onclick="$('#version_d').hide()"><i class="fa-solid fa-times"></i></button>
-        </div>
-    <div id="dialog-1" style="display: inline-block; width: auto; min-height: 90px; max-height: none; height: auto;" class="ui-dialog-content ui-widget-content">
-             <table class="table"><tbody>
-                 <tr><th></th><th>Original Version</th><th>Current Version</th></tr>
-             <tr><td># Cases</td> <td class="case_o">XXXX</td> <td class="case_c">XXXX</td> </tr>
-                 <tr><td># Studies</td> <td class="study_o">XXXX</td> <td class="study_c">XXXX</td> </tr>
-                 <tr><td># Series</td> <td class="series_o">XXXX</td> <td class="series_c">XXXX</td> </tr>
-             </tbody></table>
-        <p class="notes none-found">
-            <i class="fa fa-warning"></i>
-            This cohort's filters as applied to the new data version do not return any Patients, Studies, or Series.
-            It cannot be loaded into the new version.
-        </p>
-        <p class="notes inactive-filters">
-            <i class="fa fa-warning"></i>
-            The following attributes are no longer available in the current data version: <span class="inactive-attrs"></span> <br />
-            <span class="some-found">Filters using these attributes will be removed if the cohort is brought forward into the new data version.</span>
-        </p>
-        <p class="notes no-filters-found">
-            <i class="fa fa-warning"></i>
-            No attributes used in this cohort's filters were found for the current data version. It cannot be loaded into the new version.
-        </p>
-        <button class="load-new">Load New Version</button>
-     </div>
-    <div class="ui-resizable-handle ui-resizable-n" style="z-index: 90;"></div>
-</div>
-
-
-</div>
-
-</div>
-<div class="spinner" style="display: none;"><i class="fa-solid fa-spinner fa-spin spin"></i></div>
-
 <div class="container-fluid">
-    <div class="page-action-group">
-{#            <li role="menuitem">#}
-{#                <button id="cohort-sets" type="button" class="btn btn-info set-ops" data-toggle="modal" data-target="#set-ops-modal" aria-label="set-logic" role="button" aria-expanded="true" disabled title="Select one or more cohorts.">#}
-{#                Set Operations#}
-{#                </button>#}
-{#            </li>#}
-{#        <li role="menuitem">#}
-{#            <button class="btn btn-info owner-only" id="share-cohorts-btn" type="button" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true" disabled title="Select one or more cohorts.">#}
-{#                <i class="fa-solid fa-share-alt"></i>#}
-{#                Share#}
-{#            </button>#}
-{#        </li>#}
-    </div>
     <div class="panel panel-default short-inner-content cohorts-panel hidden">
         <div class="panel-body" id="saved-cohorts-list">
             {% if cohorts.has_private_cohorts %}
@@ -140,13 +86,6 @@
                                     <i class="fa fa-exclamation-circle inactive-attr"></i>
                                 {% endif %}
                                 {% if only_active_versions %}
-                               {% comment %}  <form name="getCohort" method="POST" action="{% url 'cohort_details' cohort.id %}">
-                                    {% csrf_token %}
-                                     <a href="#" onclick="$(this).parent().submit()"
-                                       title="View Cohort Details in the Data Explorer">{{ cohort.name }}</a>
-                                 </form>
-                                {% endcomment %}
-
                                   <a href="{% url 'cohort_details' cohort.id %}"
                                      title="View Cohort Details in the Data Explorer">
                                        {{ cohort.name }}
@@ -160,20 +99,6 @@
                             <td class="study-col">{{ cohort.study_count }}</td>
                             <td class="series-col">{{ cohort.series_count }}</td>
                             <td class="disk-size-col">{{ cohort.total_disk_size|convert_disk_size_cohort }}</td>
-{#                            <td class="owner-col">#}
-{#                                {% if cohort.perm == 'Owner' %}#}
-{#                                    You#}
-{#                                {% else %}#}
-{#                                    {{cohort.owner.first_name}} {{cohort.owner.last_name}}#}
-{#                                {% endif %}#}
-{#                            </td>#}
-{#                            <td class="share-col">#}
-{#                                {% if request.user.id == cohort.owner.id %}#}
-{#                                    ( {% if cohort.shared_with_users|length %}<a data-toggle="modal" data-target="#share-cohorts-modal" data-cohort-id="{{ cohort.id }}" class="shared">{{cohort.shared_with_users|length}}</a>{% else %}0{% endif %} )#}
-{#                                {% else %}#}
-{#                                    You#}
-{#                                {% endif %}#}
-{#                            </td>#}
                             <td class="version-col{% if not only_active_versions %} inactive-data-version{% endif %}">
                                 <p>
                                 {% with cohort_versions=cohort.get_data_versions %}
@@ -274,44 +199,45 @@
         </div>
     </div>
 
-    <!-- Share Cohort Modal -->
-{#    <div class="modal fade" id="share-cohorts-modal" tabindex="-1" role="dialog" aria-labelledby="share-cohort-header" aria-hidden="true">#}
-{#        <div class="modal-dialog">#}
-{#            <div class="modal-content">#}
-{#                <div class="modal-header">#}
-{#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
-{#                    <h4 class="modal-title">Cohort Sharing</h4>#}
-{#                    <div class="modal-js-messages" id="share-cohort-js-messages"></div>#}
-{#                    <ul class="nav nav-tabs">#}
-{#                        <li role="presentation" class="active"><a data-target="#share-pane" data-toggle="tab" id="share-cohort-header">Share Cohort</a></li>#}
-{#                        <li role="presentation"><a data-target="#shared-with-pane" data-toggle="tab">Shared With</a></li>#}
-{#                    </ul>#}
-{#                </div>#}
-{#                <div class="tab-content">#}
-{#                    <div class="tab-pane active" id="share-pane">#}
-{#                        <form id="share-cohort-form">#}
-{#                            <div class="modal-body">#}
-{#                                <label>Selected Cohorts</label>#}
-{#                                <p class="form-control-static selected-cohorts"></p>#}
-{#                                <label for="share-share_users">Enter email addresses separated by a comma</label>#}
-{#                                <textarea id="share-share_users" class="form-control" name="share_users"></textarea>#}
-{#                            </div>#}
-{#                            <div class="modal-footer">#}
-{#                                {% csrf_token %}#}
-{#                                <input type="submit" value="Share Cohort" class="btn btn-primary owner-only" />#}
-{#                                <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>#}
-{#                            </div>#}
-{#                        </form>#}
-{#                    </div>#}
-{#                    <div class="tab-pane" id="shared-with-pane">#}
-{#                        <div class="modal-body">#}
-{#                            <table class="table table-striped"></table>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
+<!-- Version Comparison Modal -->
+<div id="version_d" tabindex="-1"
+     class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-draggable ui-resizable"
+     style="display: none;"
+     aria-describedby="dialog-1"
+     aria-labelledby="ui-id-1">
+        <div class="ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix ui-draggable-handle">
+             <span id="ui-id-1" class="ui-dialog-title">Comparing Versions of Cohort -1</span>
+             <button onclick="$('#version_d').hide()"><i class="fa-solid fa-times"></i></button>
+        </div>
+    <div id="dialog-1" style="display: inline-block; width: auto; min-height: 90px; max-height: none; height: auto;" class="ui-dialog-content ui-widget-content">
+             <table class="table"><tbody>
+                 <tr><th></th><th>Original Version</th><th>Current Version</th></tr>
+             <tr><td># Cases</td> <td class="case_o">XXXX</td> <td class="case_c">XXXX</td> </tr>
+                 <tr><td># Studies</td> <td class="study_o">XXXX</td> <td class="study_c">XXXX</td> </tr>
+                 <tr><td># Series</td> <td class="series_o">XXXX</td> <td class="series_c">XXXX</td> </tr>
+             </tbody></table>
+        <p class="notes none-found">
+            <i class="fa fa-warning"></i>
+            This cohort's filters as applied to the new data version do not return any Patients, Studies, or Series.
+            It cannot be loaded into the new version.
+        </p>
+        <p class="notes inactive-filters">
+            <i class="fa fa-warning"></i>
+            The following attributes are no longer available in the current data version: <span class="inactive-attrs"></span> <br />
+            <span class="some-found">Filters using these attributes will be removed if the cohort is brought forward into the new data version.</span>
+        </p>
+        <p class="notes no-filters-found">
+            <i class="fa fa-warning"></i>
+            No attributes used in this cohort's filters were found for the current data version. It cannot be loaded into the new version.
+        </p>
+        <button class="load-new">Load New Version</button>
+     </div>
+    <div class="ui-resizable-handle ui-resizable-n" style="z-index: 90;"></div>
+</div>
+
+<!-- Spinner -->
+<div class="spinner" style="display: none;"><i class="fa-solid fa-spinner fa-spin spin"></i></div>
+
 {% include "idc/bq-string-modal.html" with bq_string_uri="True" %}
 
 <!-- Include footer here instead of base.html so it can be hidden by default -->

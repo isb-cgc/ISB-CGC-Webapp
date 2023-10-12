@@ -52,7 +52,7 @@ logger = logging.getLogger('main_logger')
 
 ATTR_SET = {}
 DISPLAY_VALS = {}
-SEPERATOR = "[]"
+SEPARATOR = "[]"
 
 COLLECTION_HEADER_CHK = "collection_uuid"
 
@@ -125,7 +125,6 @@ ranges = {
     'default': []
 }
 
-
 SOLR_TYPES = {
     'STRING': "string",
     "FLOAT64": "pfloat",
@@ -145,6 +144,8 @@ SOLR_SINGLE_VAL = {
     "StudyInstanceUID": ["PatientID", "StudyInstanceUID", "crdc_study_uuid"],
     "SeriesInstanceUID": ["PatientID", "StudyInstanceUID", "SeriesInstanceUID", "crdc_study_uuid", "crdc_series_uuid"]
 }
+
+ETL_CONFIG = {}
 
 
 def new_attribute(name, displ_name, type, display_default, cross_collex=False, units=None):
@@ -222,12 +223,14 @@ def add_programs(program_set):
 
 def add_data_sources(source_set, subversions, set_types, attr_exclude):
     for source in source_set:
-        source.update({
+        src = {x: source[x] for x in source if x != "solr_schema_src"}
+        src.update({
             "versions": subversions,
             "set_types": set_types,
             "attr_exclude": attr_exclude
         })
-        add_data_source(**source)
+
+        add_data_source(**src)
 
 
 def add_data_source(name, count_col, source_type, versions, programs, aggregate_level, set_types, joins, attr_from, attr_exclude):
@@ -704,54 +707,83 @@ def load_display_vals(filename):
 
 def update_data_versions(filename):
     f = open(join(dirname(__file__),filename), "r")
-    config = json.load(f)
+    ETL_CONFIG.update(json.load(f))
 
     add_data_versions(
-        config['new_major_version'],
-        [{'name': x, 'ver': config['subversion_number']} for x in config['new_sub_versions']],
-        config['bioclin_version']
+        ETL_CONFIG['new_major_version'],
+        [{'name': x, 'ver': ETL_CONFIG['subversion_number']} for x in ETL_CONFIG['new_sub_versions']],
+        ETL_CONFIG['bioclin_version']
     )
 
-    add_data_sources(config['data_sources'], config['new_sub_versions'], config['set_types'], config.get('attr_exclude',[]))
+    add_data_sources(ETL_CONFIG['data_sources'], ETL_CONFIG['new_sub_versions'], ETL_CONFIG['set_types'], ETL_CONFIG.get('attr_exclude',[]))
 
-    deactivate_data_versions(config['deactivate']['minor'], config['deactivate']['major'])
+    deactivate_data_versions(ETL_CONFIG['deactivate']['minor'], ETL_CONFIG['deactivate']['major'])
 
     return
 
 
 def parse_args():
+    solr_msg = "Produce commands for Solr indexing. This is intended for use outside a standard ETL run. Format: \"[[\"<schema src BQ table>\", \"<solr core>\"],[...],...]\""
+
     parser = ArgumentParser()
-    parser.add_argument('-v', '--version-file', type=str, default='', help='JSON file of version data to update')
+    parser.add_argument('-j', '--config-file', type=str, default='', help='JSON file of version data to update')
     parser.add_argument('-c', '--collex-file', type=str, default='', help='CSV data of collections to update/create')
     parser.add_argument('-d', '--display-vals', type=str, default='', help='CSV data of display values to add/update')
     parser.add_argument('-p', '--programs-file', type=str, default='', help='CSV data of programs to add/update')
     parser.add_argument('-a', '--attributes-file', type=str, default='', help='CSV data of attributes to add/update')
-    parser.add_argument('-s', '--solr-files', type=str, default='n', help='Should Solr parameter and JSON schema files be made? (Yy/Nn)')
+    parser.add_argument('-s', '--solr-files-only', type=str, default='', help=solr_msg)
     return parser.parse_args()
 
 
 def main():
 
     try:
+        if len(sys.argv) <= 1:
+            print("Use -h to access the help description.")
+            exit(0)
+
         args = parse_args()
 
-        len(args.version_file) and update_data_versions(args.version_file)
+        # Load the configuration file into ETL_CONFIG and run data version and data source creation
+        # This will copy over any attributes from prior versions indicated in the JSON config
+        len(args.config_file) and update_data_versions(args.config_file)
 
-        len(args.attributes_file) and load_attributes(args.attributes_file,
-            ["dicom_derived_series_v15", "dicom_derived_study_v15"], ["idc-dev-etl.idc_v15_pub.dicom_pivot_v15"]
+        # If there are new attributes, prep them for addition
+        # The assumption is new attributes are for inclusion in the data sources found in the ETL_CONFIG doc
+        # Note this populates ATTR_SET but it does not execute addition--that's the next step
+        if len(args.attributes_file) and len(ETL_CONFIG):
+            solr_srcs = [x['name'] for x in ETL_CONFIG.get("data_sources",[]) if x['source_type'] == DataSource.SOLR]
+            bq_srcs = [x['name'] for x in ETL_CONFIG.get("data_sources", []) if x['source_type'] == DataSource.BIGQUERY]
+            load_attributes(args.attributes_file,
+            solr_srcs, bq_srcs
         )
 
+        # Add any attributes found to be new in the prior step to the database, including linkage to the new data sources
         len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
+        # Add any new programs - this must be done BEFORE collection ingestion
         len(args.programs_file) and load_programs(args.programs_file)
+        # Add/update collections - any new programs must be added first
         len(args.collex_file) and load_collections(args.collex_file)
+        # Add/update display values for attributes
         if len(args.display_vals):
             dvals = load_display_vals(args.display_vals)
             for attr in dvals:
                 update_display_values(Attribute.objects.get(name=attr), dvals[attr]['vals'])
 
-        if args.solr_files.lower() == 'y':
-            for src in [("idc-dev-etl.idc_v15_pub.dicom_derived_all", "dicom_derived_series_v15",),
-                    ("idc-dev-etl.idc_v15_pub.dicom_derived_all", "dicom_derived_study_v15",),]:
+        # Solr commands are automatically output for full ETL; the step below is for outside-of-ETL executions
+        if len(ETL_CONFIG):
+            for src in ETL_CONFIG.get("data_sources",[]):
+                solr_schema_src = src.get("solr_schema_src",None)
+                solr_schema_src and create_solr_params(solr_schema_src, src['name'])
+
+        # Use the solr-files-only option to generate a set of Solr commands for a provided series of src/dst pairs
+        # This can be run alongside an unrelated ETL ingestion, but note that Solr command file creation is PART
+        # of ingestion so it would be unnecessary to specify this command in that case.
+        # The cores are provided as a JSON string of the format:
+        # [["<BQ Table Schema Source>", "<Desitation Solr Core>"],[...],...]
+        if len(args.solr_files_only):
+            make_solr = json.loads(args.solr_files)
+            for src in make_solr:
                 create_solr_params(src[0], src[1])
 
     except Exception as e:
