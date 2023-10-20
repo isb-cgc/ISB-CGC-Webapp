@@ -23,6 +23,7 @@ import traceback
 import requests
 import os
 import re
+from csv import reader as csv_reader
 from os.path import join, dirname, exists
 from argparse import ArgumentParser
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
@@ -86,13 +87,124 @@ SOLR_SINGLE_VAL = {
     "sample_barcode": ["case_barcode", "case_node_id", "sample_barcode", "sample_node_id"]
 }
 
+FIXED_TYPES = {
+
+}
+
 ATTR_SET = {}
 DISPLAY_VALS = {}
+ATTR_TIPS = {}
 
 SOLR_URI = settings.SOLR_URI
 SOLR_LOGIN = settings.SOLR_LOGIN
 SOLR_PASSWORD = settings.SOLR_PASSWORD
 SOLR_CERT = settings.SOLR_CERT
+
+def new_attribute(name, displ_name, type, display_default, units=None, programs=None):
+    return {
+        'name': name,
+        "display_name": displ_name,
+        "type": type,
+        'units': units,
+        'data_sources': [],
+        'data_set_types': [],
+        'display': display_default,
+        'categories': [],
+        'programs': programs
+    }
+
+
+def load_attributes(ds_attr_files, program_attr_file):
+
+    program_attrs = {}
+    progs_attr_file = open(program_attr_file, "r")
+    for line in csv_reader(progs_attr_file):
+        if not program_attrs[line[0]]:
+            program_attrs[line[0]] = []
+        program_attrs[line[0]].append(line[1])
+
+    for ds in ds_attr_files:
+        filename = ds_attr_files[ds]
+        attr_file = open(filename, "r")
+        for line in csv_reader(attr_file):
+            if line[0] not in ATTR_SET:
+                ATTR_SET[line[0]] = new_attribute(
+                    line[0],
+                    line[0].replace("_", " ").title() if re.search(r'_', line[1]) else line[1],
+                    line[2],
+                    True if line[3] == 'True' else False,
+                    programs=program_attrs[line[0]]
+                )
+            attr = ATTR_SET[line[0]]
+
+            attr['data_sources'].append(ds)
+
+            if attr['name'] in DISPLAY_VALS:
+                attr['display_vals'] = DISPLAY_VALS[attr['name']]['vals']
+
+            if attr['name'] in ranges_needed:
+                attr['range'] = ranges.get(ranges_needed[attr['name']], [])
+
+        attr_file.close()
+
+
+def add_attributes(attr_set):
+    for attr_name, attr in attr_set.items():
+        try:
+            obj = Attribute.objects.get(name=attr['name'])
+            logger.info("[STATUS] Attribute {} already found - skipping!".format(attr['name']))
+        except ObjectDoesNotExist as e:
+            obj, created = Attribute.objects.update_or_create(
+                name=attr['name'], display_name=attr['display_name'], data_type=attr['type'],
+                preformatted_values=True if 'preformatted_values' in attr else False,
+                default_ui_display=attr['display'],
+                units=attr.get('units',None)
+            )
+            if 'range' in attr:
+                if len(attr.get('range', [])):
+                    for attr_range in attr['range']:
+                        Attribute_Ranges.objects.update_or_create(
+                            **attr_range, attribute=obj
+                        )
+                else:
+                    Attribute_Ranges.objects.update_or_create(
+                        attribute=obj
+                    )
+            if len(attr.get('display_vals', [])):
+                for dv in attr['display_vals']:
+                    Attribute_Display_Values.objects.update_or_create(
+                        raw_value=dv['raw_value'], display_value=dv['display_value'], attribute=obj
+                    )
+
+            if len(attr.get('data_sources', [])):
+                attr_sources = obj.get_data_sources(all=True)
+                missing_sources = [x for x in attr['data_sources'] if x not in attr_sources]
+                if len(missing_sources):
+                    sources = DataSource.objects.filter(name__in=missing_sources)
+                    attr_to_src = []
+
+                    for src in sources:
+                        attr_to_src.append(Attribute.data_sources.through(datasource_id=src.id, attribute_id=obj.id))
+
+                    Attribute.data_sources.through.objects.bulk_create(attr_to_src)
+
+            if len(attr.get('programs', [])):
+                programs = obj.get_programs()
+                missing_progs = [x for x in attr['programs'] if x not in programs]
+                if len(missing_progs):
+                    progs = Program.objects.filter(name__in=missing_progs)
+                    attr_to_prog = []
+
+                    for prog in progs:
+                        attr_to_prog.append(Attribute.data_sources.through(program_id=prog.id, attribute_id=obj.id))
+
+                    Attribute.data_sources.through.objects.bulk_create(attr_to_prog)
+
+
+        except Exception as e:
+            logger.error("[ERROR] Attribute {} may not have been added!".format(attr['name']))
+            logger.exception(e)
+
 
 
 def make_solr_commands(sources):
@@ -191,7 +303,7 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
         for src in sources:
             try:
                 obj = DataSource.objects.get(name=src['name'])
-                logger.warning("[WARNING] Source with the name {} already exists - updating ONLY.".format(src['name']))
+                logger.warning("[WARNING] Source with the name {} already exists - updating ONLY!".format(src['name']))
             except ObjectDoesNotExist as e:
                 obj, created = DataSource.objects.update_or_create(
                     name=src['name'], version=DataVersion.objects.get(version=src['version'], data_type=src['version_type']),
@@ -217,60 +329,51 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
                 logger.info("Data Source created: {}".format(obj.name))
 
             source_attrs = list(obj.get_source_attr(all=True).values_list('name',flat=True))
-            if src['source_type'] == DataSource.SOLR:
-                schema_src = src['schema_source'].split('.')
-                schema = BigQuerySupport.get_table_schema(schema_src[0],schema_src[1],schema_src[2])
-                link_attrs = []
-                for field in schema:
-                    if build_attrs:
-                        if field['name'] not in ATTR_SET:
-                            attr_type = Attribute.CATEGORICAL if (not re.search(r'(_id|_barcode|UID)', field['name']) and field['type'] == "STRING") else Attribute.STRING if field['type'] == "STRING" else Attribute.CONTINUOUS_NUMERIC
-                            ATTR_SET[field['name']] = {
-                                'name': field['name'],
-                                "display_name": field['name'].replace("_", " ").title() if re.search(r'_', field['name']) else
-                                field['name'],
-                                "type": attr_type,
-                                'solr_collex': [],
-                                'bq_tables': [],
-                                'display': (
-                                        (attr_type == Attribute.STRING and not re.search('_id|_barcode|UID',field['name'].lower())) or attr_type == Attribute.CATEGORICAL or field['name'].lower() in ranges_needed)
-                            }
-                        attr = ATTR_SET[field['name']]
-                        attr['solr_collex'].append(src['name'])
+            schema_src = src['schema_source'].split('.') if src['source_type'] == DataSource.SOLR else src['name']
+            schema = BigQuerySupport.get_table_schema(schema_src[0],schema_src[1],schema_src[2])
+            link_attrs = []
+            for field in schema:
+                if build_attrs:
+                    if field['name'] not in ATTR_SET:
+                        attr_type = FIXED_TYPES.get(field['name'], Attribute.CATEGORICAL if (not re.search(r'(_id|_barcode|UID|uuid)', field['name']) and field['type'] == "STRING") else Attribute.STRING if field['type'] == "STRING" else Attribute.CONTINUOUS_NUMERIC)
+                        ATTR_SET[field['name']] = {
+                            'name': field['name'],
+                            "display_name": field['name'].replace("_", " ").title() if re.search(r'_', field['name']) else
+                            field['name'],
+                            "type": attr_type,
+                            'solr_collex': [],
+                            'bq_tables': [],
+                            'display': (
+                                    (attr_type == Attribute.STRING and not re.search('_id|_barcode|UID',field['name'].lower())) or attr_type == Attribute.CATEGORICAL or field['name'].lower() in ranges_needed)
+                        }
+                    attr = ATTR_SET[field['name']]
+                    attr['solr_collex'].append(src['name'])
 
-                        if attr['name'] in DISPLAY_VALS:
-                            if 'preformatted_values' in DISPLAY_VALS[attr['name']]:
-                                attr['preformatted_values'] = True
-                            else:
-                                if 'display_vals' not in attr:
-                                    attr['display_vals'] = []
-                                attr['display_vals'].extend(DISPLAY_VALS[attr['name']]['vals'])
+                    if attr['name'] in DISPLAY_VALS:
+                        if 'display_vals' not in attr:
+                            attr['display_vals'] = {}
+                        attr['display_vals'].update(DISPLAY_VALS[attr['name']])
 
-                        if attr['name'] in DISPLAY_VALS:
-                            if 'preformatted_values' in DISPLAY_VALS[attr['name']]:
-                                attr['preformatted_values'] = True
-                            else:
-                                attr['display_vals'] = DISPLAY_VALS[attr['name']]['vals']
 
-                        if 'range' not in attr:
-                            if attr['name'].lower() in ranges_needed:
-                                attr['range'] = ranges.get(ranges_needed.get(attr['name'], ''), [])
-                    elif link_attr and field['name'] not in source_attrs:
-                        link_attrs.append(field['name'])
+                    if 'range' not in attr:
+                        if attr['name'].lower() in ranges_needed:
+                            attr['range'] = ranges.get(ranges_needed.get(attr['name'], ''), [])
+                elif link_attr and field['name'] not in source_attrs:
+                    link_attrs.append(field['name'])
 
-                for la in link_attrs:
-                    try:
-                        a = Attribute.objects.get(name=la)
+            for la in link_attrs:
+                try:
+                    a = Attribute.objects.get(name=la)
+                    attrs_to_srcs.append(Attribute.data_sources.through(attribute_id=a.id,datasource_id=obj.id))
+                except Exception as e:
+                    if isinstance(e,MultipleObjectsReturned):
+                        logger.info("More than one attribute with the name {} was found!".format(la))
+                        a = Attribute.objects.filter(name=la).first()
                         attrs_to_srcs.append(Attribute.data_sources.through(attribute_id=a.id,datasource_id=obj.id))
-                    except Exception as e:
-                        if isinstance(e,MultipleObjectsReturned):
-                            logger.info("More than one attribute with the name {} was found!".format(la))
-                            a = Attribute.objects.filter(name=la).first()
-                            attrs_to_srcs.append(Attribute.data_sources.through(attribute_id=a.id,datasource_id=obj.id))
-                        elif isinstance(e,ObjectDoesNotExist):
-                            logger.info("Attribute {} doesn't exist--can't add, skipping!".format(la))
+                    elif isinstance(e,ObjectDoesNotExist):
+                        logger.info("Attribute {} doesn't exist--can't add, skipping!".format(la))
 
-                create_solr_params(src['schema_source'], src['name'])
+            create_solr_params(src['schema_source'], src['name'])
 
             #     # add core to Solr
             #     # sudo -u solr /opt/bitnami/solr/bin/solr create -c <solr_name>  -s 2 -rf 2
@@ -297,72 +400,6 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
         Attribute.data_sources.through.objects.bulk_create(attrs_to_srcs)
     except Exception as e:
         logger.error("[ERROR] Data Source {} may not have been added!".format(obj.name))
-        logger.exception(e)
-
-
-def add_attributes(attr_set):
-
-    try:
-        for attr in attr_set:
-            try:
-                obj = Attribute.objects.get(name=attr['name'], data_type=attr['type'])
-                logger.info("Attribute {} already located in the database - just updating...".format(attr['name']))
-            except ObjectDoesNotExist:
-                logger.info("Attribute {} not found - creating".format(attr['name']))
-                obj, created = Attribute.objects.update_or_create(
-                    name=attr['name'], display_name=attr['display_name'], data_type=attr['type'],
-                    preformatted_values=True if 'preformatted_values' in attr else False,
-                    is_cross_collex=True if 'cross_collex' in attr else False,
-                    default_ui_display=attr['display']
-                )
-            except Exception as e:
-                if isinstance(e,MultipleObjectsReturned):
-                    logger.info("More than one attribute with the name {} was found!".format(attr['name']))
-                    obj = Attribute.objects.filter(name=attr['name'], data_type=attr['type']).first()
-
-            if 'range' in attr and not len(Attribute_Ranges.objects.select_related('attribute').filter(attribute=obj)):
-                if len(attr['range']):
-                    for attr_range in attr['range']:
-                        Attribute_Ranges.objects.update_or_create(
-                            attribute=obj, **attr_range
-                        )
-                else:
-                    Attribute_Ranges.objects.update_or_create(
-                        attribute=obj
-                    )
-
-            if 'display_vals' in attr and not len(Attribute_Display_Values.objects.select_related('attribute').filter(attribute=obj)):
-                for dv in attr['display_vals']:
-                    Attribute_Display_Values.objects.update_or_create(
-                        raw_value=dv['raw_value'], display_value=dv['display_value'], attribute=obj
-                    )
-
-            if 'solr_collex' in attr:
-                attr_sources = obj.get_data_sources(DataSource.SOLR, all=True)
-                missing_sources = [x for x in attr['solr_collex'] if x not in attr_sources]
-                if len(missing_sources):
-                    sources = DataSource.objects.filter(name__in=missing_sources)
-                    attr_to_src = []
-
-                    for src in sources:
-                        attr_to_src.append(Attribute.data_sources.through(datasource_id=src.id, attribute_id=obj.id))
-
-                    Attribute.data_sources.through.objects.bulk_create(attr_to_src)
-
-            if 'bq_tables' in attr:
-                attr_sources = obj.get_data_sources(DataSource.BIGQUERY, all=True)
-                missing_sources = [x for x in attr['bq_tables'] if x not in attr_sources]
-                if len(missing_sources):
-                    sources = DataSource.objects.filter(name__in=missing_sources)
-                    attr_to_src = []
-
-                    for src in sources:
-                        attr_to_src.append(Attribute.data_sources.through(datasource_id=src.id, attribute_id=obj.id))
-
-                    Attribute.data_sources.through.objects.bulk_create(attr_to_src)
-
-    except Exception as e:
-        logger.error("[ERROR] Attribute {} may not have been added!".format(attr['name']))
         logger.exception(e)
 
 
@@ -395,24 +432,47 @@ def copy_attrs(from_data_sources, to_data_sources, excludes):
 def main(config, make_attr=False):
 
     try:
+        if 'data_nodes' in config:
+            for node in config['data_nodes']:
+                try:
+                    DataNode.objects.get(short_name=node['short_name'])
+                    logger.info("[STATUS] Data Node {} found - updating only!".format(node))
+                except ObjectDoesNotExist:
+                    logger.info("[STATUS] Data Node {} not found - creating.".format(node))
+                DataNode.objects.update_or_create(active=True, **node)
+
         if 'programs' in config:
             for prog in config['programs']:
                 try:
                     Program.objects.get(name=prog['name'], owner=isb_superuser, active=True, is_public=True)
-                    logger.info("[STATUS] Program {} found - skipping creation.".format(prog))
+                    logger.info("[STATUS] Program {} found - updating only!".format(prog))
                 except ObjectDoesNotExist:
                     logger.info("[STATUS] Program {} not found - creating.".format(prog))
-                    Program.objects.update_or_create(owner=isb_superuser, active=True, is_public=True, **prog)
+                Program.objects.update_or_create(owner=isb_superuser, active=True, is_public=True, **prog)
 
         if 'projects' in config:
-            for proj in config['projects']:
-                program = Program.objects.get(name=proj['program'], owner=isb_superuser, active=True)
+            projects = []
+            if config['projects'].get("from_file", None):
+                proj_file = open(config['projects'].get("from_file"), "r")
+                for line in csv_reader(proj_file):
+                    proj = {
+                        "name": line[0],
+                        "program": line[2]
+                    }
+                    if len(line[1]):
+                        proj['description'] = line[1]
+                    projects.append(proj)
+            else:
+                projects = config['projects']
+            for proj in projects:
+                progs = {x.name: x for x in Program.objects.filter(active=True)}
+                proj['program'] = progs[proj['program']]
                 try:
-                    Project.objects.get(name=proj['name'], owner=isb_superuser, active=True, program=program)
-                    logger.info("[STATUS] Project {} found - skipping.".format(proj['name']))
+                    Project.objects.get(name=proj['name'], active=True)
+                    logger.info("[STATUS] Project {} found - updating!".format(proj['name']))
                 except ObjectDoesNotExist:
                     logger.info("[STATUS] Project {} not found - creating.".format(proj['name']))
-                    Project.objects.update_or_create(name=proj['name'], owner=isb_superuser, active=True, program=program)
+                Project.objects.update_or_create(**proj)
 
         if 'versions' in config:
             if 'create' in config['versions']:
@@ -422,25 +482,34 @@ def main(config, make_attr=False):
 
         # Preload all display value information, as we'll want to load it into the attributes while we build that set
         if 'display_values' in config and exists(join(dirname(__file__), config['display_values'])):
-            attr_vals_file = open(join(dirname(__file__), config['display_values']), "r")
-            line_reader = attr_vals_file.readlines()
+            displ_vals_file = open(join(dirname(__file__), config['display_values']), "r")
 
-            for line in line_reader:
-                line = line.strip()
-                line_split = line.split(",")
-                if line_split[0] not in DISPLAY_VALS:
-                    DISPLAY_VALS[line_split[0]] = {}
-                    if line_split[1] == 'NULL':
-                        DISPLAY_VALS[line_split[0]]['preformatted_values'] = True
-                    else:
-                        DISPLAY_VALS[line_split[0]]['vals'] = [{'raw_value': line_split[1], 'display_value': line_split[2]}]
-                else:
-                    DISPLAY_VALS[line_split[0]]['vals'].append({'raw_value': line_split[1], 'display_value': line_split[2]})
+            for line in csv_reader(displ_vals_file):
+                if line[2] not in DISPLAY_VALS:
+                    DISPLAY_VALS[line[2]] = {}
+                DISPLAY_VALS[line[2]][line[0]]=line[1]
 
-            attr_vals_file.close()
+            displ_vals_file.close()
+
+        # Preload all tooltip information, as we'll want to load it into the attributes while we build that set
+        if 'tooltips' in config and exists(join(dirname(__file__), config['attr_tooltips'])):
+            attr_tips_file = open(join(dirname(__file__), config['attr_tooltips']), "r")
+
+            for line in csv_reader(attr_tips_file):
+                if line[2] not in ATTR_TIPS:
+                    ATTR_TIPS[line[2]] = {}
+                ATTR_TIPS[line[2]][line[0]]=line[1]
+            attr_tips_file.close()
 
         if 'data_sources' in config:
             add_data_sources(config['data_sources'])
+
+        if 'attributes' in config:
+            ds_attr_files = {x['name']: x['attributes'] for x in config['data_sources'] if x['']}
+            load_attributes(ds_attr_files, config['attributes']['program_file'])
+
+        # Add any attributes found to be new in the prior step to the database, including linkage to the new data sources
+        len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
 
         if 'attr_copy' in config:
             for each in config['attr_copy']:
