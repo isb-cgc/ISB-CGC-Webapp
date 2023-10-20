@@ -82,6 +82,8 @@ if [ -z "${CI}" ]; then
     # and prep for local install
     echo "Emptying out ${HOMEROOT}/lib/ ..."
     rm -rf "${HOMEROOT}/lib/"
+    echo "Confirming clearance of lib:"
+    ls ${HOMEROOT}/lib/
 fi
 
 # Install PIP + Dependencies
@@ -113,9 +115,28 @@ if [ -z "${CI}" ] || [ ! -d "/usr/lib/google-cloud-sdk" ]; then
     echo "Installing Google Cloud SDK..."
     export CLOUDSDK_CORE_DISABLE_PROMPTS=1
     echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-    apt-get install apt-transport-https ca-certificates
+    apt-get -y install apt-transport-https ca-certificates
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
     apt-get update && apt-get -y install google-cloud-sdk
     apt-get -y install google-cloud-sdk-app-engine-python
     echo "Google Cloud SDK Installed"
+fi
+
+# Run dos2unix on the files in shell/ because of line terminator shenanigans with Windows
+echo "Running dos2unix on shell/*.sh..."
+dos2unix ${HOMEROOT}/shell/*.sh
+
+if [ -z "${CI}" ] && [ -d "${HOMEROOT}/git-hooks/" ]; then
+  echo "Loading Git Hooks"
+  cp -r ${HOMEROOT}/git-hooks/* ${HOMEROOT}/.git/hooks/
+fi
+
+# Create the application deployment version
+if [ -n "${CI}" ]; then
+    if [ "$DEPLOYMENT_TIER" = "PROD" ]; then
+        TIER="cgc"
+    else
+        TIER=${DEPLOYMENT_TIER,,}
+    fi
+    echo "APP_VERSION=${TIER}.$(date '+%Y%m%d%H%M').${APP_SHA}" > ${HOMEROOT}/version.env
 fi
