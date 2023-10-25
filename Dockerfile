@@ -66,4 +66,4 @@ RUN python manage.py check
 # ISB
 # RUN python /app/manage.py migrate --noinput
 
-CMD gunicorn -c gunicorn.conf.py -b :$PORT idc.wsgi -w 5 -t 70
+CMD gunicorn -c gunicorn.conf.py -b :$PORT isb_cgc.wsgi -w 5 -t 70
