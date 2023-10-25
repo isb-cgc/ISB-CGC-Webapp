@@ -166,16 +166,7 @@
                             </div>
                         </div>
                     </div>
-                    {% if workbook and worksheet %}
-                        <form id="create-cohort-form" method="POST"
-                              action="{% url 'save_cohort_for_existing_workbook' %}">
-                        <input type="hidden" value="{{ worksheet.id }}" name="worksheet_id"/>
-                        <input type="hidden" value="{{ workbook.id }}" name="workbook_id"/>
-                    {% elif create_workbook %}
-                        <form id="create-cohort-form" method="POST" action="{% url 'save_cohort_for_new_workbook' %}">
-                    {% else %}
-                        <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
-                    {% endif %}
+                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="create-cohort-name">Name:</label>

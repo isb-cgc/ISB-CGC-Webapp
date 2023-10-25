@@ -48,14 +48,6 @@
                     </li>
                     <li class="separator"></li>
                 {% endif %}
-                <li class="menu-item">
-                    <form action="{% url 'worksheet_create_with_cohort' %}" method="POST">
-                        {% csrf_token %}
-                        <input type="hidden" name="cohort_id" value="{{ cohort.id }}">
-                        <button class="btn btn-primary" type="submit">New Workbook</button>
-                    </form>
-                </li>
-                <li class="separator"></li>
                 {% if cohort.perm.perm == 'OWNER' %}
                     <li class="menu-item">
                         <button class="btn btn-info" id="edit-cohort-btn">Edit</button>
