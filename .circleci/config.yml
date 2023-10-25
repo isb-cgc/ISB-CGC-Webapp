@@ -73,7 +73,7 @@ commands:
   auth:
     steps:
       - run:
-          name: "Service Account Auth and Project Settings"
+          name: "Service Account Auth and Project Settings "
           command: |
             sudo -E /bin/bash ./shell/gcloud_authenticate.sh
 
