@@ -92,6 +92,7 @@ FIXED_TYPES = {
 ATTR_SET = {}
 DISPLAY_VALS = {}
 ATTR_TIPS = {}
+PROGRAM_NODES = {}
 
 SOLR_URI = settings.SOLR_URI
 SOLR_LOGIN = settings.SOLR_LOGIN
@@ -121,9 +122,9 @@ def load_attributes(ds_attr_files, program_attr_file_name):
     if program_attr_file_name:
         progs_attr_file = open(program_attr_file_name, "r")
         for line in csv_reader(progs_attr_file):
-            if not program_attrs.get(line[0],None):
-                program_attrs[line[0]] = []
-            program_attrs[line[0]].append(line[1])
+            if not program_attrs.get(line[1],None):
+                program_attrs[line[1]] = []
+            program_attrs[line[1]].append(line[0])
 
     for ds in ds_attr_files:
         filename = ds_attr_files[ds]
@@ -376,7 +377,7 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
                         elif isinstance(e,ObjectDoesNotExist):
                             logger.info("Attribute {} doesn't exist--can't add, skipping!".format(la))
 
-            (src['source_type'] == DataSource.SOLR) and create_solr_params(src['schema_source'], src['name'])
+            (src['source_type'] == DataSource.SOLR) and create_solr_params(src['schema_source'], src['name'], src['aggregated'])
 
             #     # add core to Solr
             #     # sudo -u solr /opt/bitnami/solr/bin/solr create -c <solr_name>  -s 2 -rf 2
@@ -435,27 +436,21 @@ def copy_attrs(from_data_sources, to_data_sources, excludes):
 def add_programs(progs):
     node_progs = []
     for prog in progs:
-        nodes = []
         try:
             Program.objects.get(name=prog['name'], active=True, is_public=True)
             logger.info("[STATUS] Program {} found - updating only!".format(prog))
         except ObjectDoesNotExist:
             logger.info("[STATUS] Program {} not found - creating.".format(prog))
 
-        if 'nodes' in prog:
-            nodes = prog['nodes']
-            del prog['nodes']
-
-        obj = Program.objects.update_or_create(active=True, **prog)
-        if len(nodes):
-            node_progs = []
-            for node in DataNode.object.filter(name__in=nodes):
+        obj, created = Program.objects.update_or_create(active=True, **prog)
+        if len(PROGRAM_NODES):
+            for node in DataNode.objects.filter(short_name__in=PROGRAM_NODES[obj.name]):
                 node_progs.append(DataNode.programs.through(datanode_id=node.id, program_id=obj.id))
 
     len(node_progs) and DataNode.programs.through.objects.bulk_create(node_progs)
 
-def main(config, make_attr=False):
 
+def main(config, make_attr=False):
     try:
         if 'data_nodes' in config:
             for node in config['data_nodes']:
@@ -464,7 +459,12 @@ def main(config, make_attr=False):
                     logger.info("[STATUS] Data Node {} found - updating only!".format(node))
                 except ObjectDoesNotExist:
                     logger.info("[STATUS] Data Node {} not found - creating.".format(node))
-                DataNode.objects.update_or_create(active=True, **node)
+                obj, created = DataNode.objects.update_or_create(active=True, **{x: node[x] for x in node if x != 'programs'})
+                if node.get('programs', None):
+                    for prog in node['programs']:
+                        if not PROGRAM_NODES.get(prog, None):
+                            PROGRAM_NODES[prog] = []
+                        PROGRAM_NODES[prog].append(obj.short_name)
 
         if 'programs' in config:
             add_programs(config['programs'])
