@@ -29,7 +29,7 @@ else
 fi
 
 export PYTHONPATH=${HOMEROOT}:${HOMEROOT}/lib:${HOMEROOT}/ISB-CGC-Common
-echo $PYTHONPATH
+echo "PYTHONPATH is ${PYTHONPATH}"
 
 echo "Increase group_concat max, for longer data type names"
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "SET GLOBAL group_concat_max_len=18446744073709547520;"
@@ -111,3 +111,6 @@ mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NA
 
 # Setting up Cron token
 python3 ${HOMEROOT}/scripts/create_api_token.py
+
+# Check system config
+python3 ${HOMEROOT}/manage.py check
