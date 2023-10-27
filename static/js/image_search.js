@@ -1186,13 +1186,11 @@ require([
                                 return '<input type="checkbox" class="tbl-sel">';
                             }
                         }
-                    },
-                    {
+                    },{
                         "type": "text", "orderable": true, data: 'PatientID', render: function (data) {
                             return data;
                         }
-                    },
-                    {
+                    },{
                         "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                             return pretty_print_id(data) +
                             ' <a class="copy-this-table" role="button" content="' + data +
@@ -1202,8 +1200,7 @@ require([
                             $(td).data('study-id', data);
                             return;
                         }
-                    },
-                    {
+                    },{
                         "type": "text", "orderable": true, data: 'StudyDate', render: function (data) {
                             // fix when StudyData is an array of values
                             var dt = new Date(Date.parse(data));
@@ -1253,8 +1250,7 @@ require([
                                 }
                             }
                         }
-                    },
-                    {
+                    }, {
                           "type":"html",
                           "orderable": false,
                           data: 'StudyInstanceUID', render: function (data){
@@ -1482,7 +1478,7 @@ require([
 
                         }
                     },
-                },  {
+                }, {
                     "type": "html",
                     "orderable": false,
                     data: 'SeriesInstanceUID',
@@ -1523,8 +1519,7 @@ require([
                                 '</div>';
                         }
                     }
-                },
-                  {
+                }, {
                       "type":"html",
                       "orderable": false,
                       data: 'SeriesInstanceUID', render: function (data){
