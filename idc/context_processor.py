@@ -20,5 +20,6 @@ def additional_context(request):
             'RESEARCH_STUDY': settings.RESEARCH_STUDY,
             'OHIF_V2_PATH': settings.OHIF_V2_PATH,
             'OHIF_V3_PATH': settings.OHIF_V3_PATH,
+            'VOLVIEW_PATH': settings.VOLVIEW_PATH,
             'SUPPORT_EMAIL': settings.SUPPORT_EMAIL
     }
