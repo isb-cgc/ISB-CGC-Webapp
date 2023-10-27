@@ -319,7 +319,7 @@ def populate_tables(request):
                                         "facet": {"unique_series": "unique(SeriesInstanceUID)"}}
                              }
             tableIndex = 'StudyInstanceUID'
-            fields = ['collection_id','PatientID','StudyInstanceUID','StudyDescription','Modality','StudyDate','access','SeriesInstanceUID','gcs_bucket','aws_bucket']
+            fields = ['collection_id','PatientID','StudyInstanceUID','StudyDescription','Modality','StudyDate','access','crdc_series_uuid','gcs_bucket','aws_bucket']
             facetfields = ['unique_series']
             sort_arg = 'PatientID asc, StudyDate asc'
 
