@@ -27,6 +27,7 @@ SELECT
     pivot.instance_size,
     pivot.analysis_results_id,
     pivot.SamplesPerPixel,
+    pivot.CancerType,
     Apparent_Diffusion_Coefficient,
     Internal_structure,
     Sphericity,
