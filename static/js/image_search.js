@@ -1523,7 +1523,7 @@ require([
                                 '</div>';
 
                             if(OHIF_V3_PATH) {
-                                v3_link = ' | <a href="' + OHIF_V3_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' +
+                                v3_link = ' | <a href="' + OHIF_V3_PATH + row['StudyInstanceUID'] + '&SeriesInstanceUID=' +
                                 data + '" target="_blank" rel="noopener noreferrer">v3'
                             }
                             return '<a href="' + OHIF_V2_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' +
