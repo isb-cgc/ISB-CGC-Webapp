@@ -429,6 +429,7 @@ tr {
 #studies_table_head th.open-viewer,
 #studies_table td.open-viewer {
     width:5%;
+    min-width: 70px;
 }
 
 #studies_table_head th.download,
