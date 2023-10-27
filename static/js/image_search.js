@@ -1509,7 +1509,7 @@ require([
                             return '<a href="' + SLIM_VIEWER_PATH + row['StudyInstanceUID'] + '/series/' + data +
                                 '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                         } else {
-                            let v2_link = '<a href="' + OHIF_V2_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' +
+                            let v2_link = '<a href="' + OHIF_V2_PATH + row['StudyInstanceUID'] + '&SeriesInstanceUID=' +
                                 data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>';
                             let v3_link = OHIF_V3_PATH + "=" + row['StudyInstanceUID'] + '?SeriesInstanceUID=' + data;
                             let volView_link = VOLVIEW_PATH + "=[s3://" + row['aws_bucket'] + '/'+row['crdc_series_uuid']+']"';
@@ -1521,14 +1521,6 @@ require([
                                 '<li><a href="'+volView_link+'" target="_blank" rel="noopener noreferrer">VolView</a></li>' +
                                 '</ul>' +
                                 '</div>';
-
-                            if(OHIF_V3_PATH) {
-                                v3_link = ' | <a href="' + OHIF_V3_PATH + row['StudyInstanceUID'] + '&SeriesInstanceUID=' +
-                                data + '" target="_blank" rel="noopener noreferrer">v3'
-                            }
-                            return '<a href="' + OHIF_V2_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' +
-                                data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
-                                v3_link
                         }
                     }
                 },
