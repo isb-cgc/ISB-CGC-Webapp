@@ -18,6 +18,7 @@ class GeneSymbol(models.Model):
     id = models.AutoField(primary_key=True)
     symbol = models.CharField(max_length=255, null=False, blank=False, db_index=True)
     type = models.CharField(max_length=16, null=True, blank=False)
+    date_created = models.DateTimeField(auto_now_add=True)
     objects = GeneSymbol_Manager()
 
      #returns a boolean on whether the string is valid

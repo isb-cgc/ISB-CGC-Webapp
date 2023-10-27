@@ -158,58 +158,6 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="union-header">New Cohorts</h4>
                 </div>
-                <form id="set-op-cohort" method="POST" action="{% url 'set_operation' %}" class="">
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label for="new-cohort-name">Cohort Name</label>
-                            <input type="text" class="form-control" id="new-cohort-name" name="name" placeholder="Enter name for new cohort" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="operation">Set Operation</label>
-                            <div>
-                                <select name="operation" id="operation" class="form-control">
-                                    <option value="union">Union</option>
-                                    <option value="intersect">Intersection</option>
-                                    <option value="complement">Complement</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group set-control">
-                            <label for="selected-ids">Selected Cohorts</label>
-                            <div>
-                                <div class="form-control-static" id="selected-ids">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group complement-control">
-                            <label for="base-cohort">Base Cohort</label>
-                            <div>
-                                <p class="form-control-static" id="base-id"></p>
-                                <div class="cohort-search-div">
-                                    <a class="add-cohort btn btn-link"><i class="fa fa-plus"></i> Choose Cohort</a>
-                                    <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group complement-control">
-                            <label for="subtract-cohorts">Subtracted Cohorts</label>
-                            <div>
-                                <p class="form-control-static" id="subtract-ids"></p>
-                                <div class="cohort-search-div">
-                                    <a class="add-cohort btn btn-link"><i class="fa fa-plus"></i> Choose Cohort</a>
-                                    <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-primary">Okay</button>
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>

@@ -572,34 +572,18 @@ def dashboard_page(request):
     try:
         # Cohort List
         isb_superuser = User.objects.get(is_staff=True, is_superuser=True, is_active=True)
-        public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser, perm=Cohort_Perms.OWNER).values_list('cohort',
-                                                                                                              flat=True)
+        public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser, perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
 
         cohort_perms = Cohort_Perms.objects.select_related('cohort').filter(user=request.user, cohort__active=True).exclude(
             cohort__id__in=public_cohorts)
         cohorts_count = cohort_perms.count()
-        cohorts = Cohort.objects.filter(id__in=cohort_perms.values_list('cohort__id',flat=True), active=True).order_by('-last_date_saved')[:display_count]
-
-        # Program List
-        ownedPrograms = request.user.program_set.filter(active=True)
-        sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-        programs = ownedPrograms | sharedPrograms
-        programs_count = programs.distinct().count()
-        programs = programs.distinct().order_by('-last_date_saved')[:display_count]
-
-        # Gene & miRNA Favorites
-        genefaves = request.user.genefavorite_set.filter(active=True).order_by('-last_date_saved')[:display_count]
-        genefaves_count = request.user.genefavorite_set.filter(active=True).count()
+        cohorts = Cohort.objects.filter(id__in=cohort_perms.values_list('cohort__id',flat=True), active=True).order_by('-date_created')[:display_count]
 
 
         context = {
             'request': request,
             'cohorts': cohorts,
-            'cohorts_count': cohorts_count,
-            'programs': programs,
-            'programs_count': programs_count,
-            'genefaves': genefaves,
-            'genefaves_count': genefaves_count,
+            'cohorts_count': cohorts_count
         }
 
     except Exception as e:
