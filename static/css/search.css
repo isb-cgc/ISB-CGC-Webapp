@@ -429,6 +429,7 @@ tr {
 #studies_table_head th.open-viewer,
 #studies_table td.open-viewer {
     width:5%;
+    /* This is necessary to make sure the 2 icons remain together, lined up. */
     min-width: 70px;
 }
 
