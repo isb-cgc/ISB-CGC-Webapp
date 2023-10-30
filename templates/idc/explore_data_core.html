@@ -650,7 +650,7 @@
                 {% if is_cohort %}
                     <div class="tabpanel data-tab-content-panel">
                         <div class="panel panel-default">
-                            <div class="panel-heading clearfix"><h4 class="panel-title"><i class="fa-solid fa-cart-shopping none"></i>Cohort Ddescription</h4></div>
+                            <div class="panel-heading clearfix"><h4 class="panel-title">Cohort Description</h4></div>
                             <div class="panel-body">
                                 <p>
                                     {{ cohort.description }}
@@ -861,7 +861,11 @@
 
 
 
-                        <div class="panel-heading clearfix"><h4 class="panel-title"><span id ="select_all" class="ckbx" onclick="selectAllData(this)"><i class="fa-solid fa-cart-shopping none"></i></span>Cohort Description</h4></div>
+                        <div class="panel-heading clearfix"><h4 class="panel-title">Cart Summary</h4><button id="export-manifest" class="btn btn-special pull-right" data-toggle="modal"
+                data-target="#export-manifest-modal"
+                title="Add to cart to enable this feature." disabled
+            > Download Cart
+            </button></div>
                         <div class ="panel-body">
                             <div id="search_def_stats" class="notDisp">No Text</div>
 
@@ -889,7 +893,7 @@
                                             <th class="ckbx shop"><i class="fa-solid "></i></th>
                                             <th class='text_data'>Collection Name</th>
                                             <th class='numeric_data'>Total # of Cases</th>
-                                            <th class='numeric_data'># of Cases(this cohort)</th>
+                                            <th class='numeric_data'># of Cases(this filter set)</th>
                                         </tr>
                                         </thead>
                                     </table>
@@ -910,7 +914,7 @@
                                                    </i>
                                                 <i class="fa-solid fa-circle-minus fa-lg"></i>
                                             </th>
-                                            <th class="ckbx"><i class="fa-solid fa-cart-shopping unselected"></i></th>
+                                            <th class="ckbx" onclick="selectAllVisCases(this)"><i class="fa-solid fa-cart-shopping unselected"></i></th>
                                             <th class='text_data'>Collection Name</th>
                                             <th class='text_data'>Case ID <i class="fas fa-info-circle case-info"></i></th>
                                             <th class='numeric_data'>Total # of Studies</th>

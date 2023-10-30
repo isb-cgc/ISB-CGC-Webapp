@@ -234,6 +234,15 @@ def save_ui_hist(request):
     return JsonResponse({}, status=status)
 
 
+@login_required
+def getCartData(request):
+    response = {}
+    status = 200
+    sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
+        active=True, source_type=DataSource.SOLR,
+        aggregate_level="StudyInstanceUID"
+    )
+
 # Method for obtaining the records displayed in the tables on the right-hand side of the explore data page
 #@login_required
 def populate_tables(request):

@@ -547,7 +547,15 @@ svg {
     background-color:lightgreen;
 }
 
+.ckbx:has(.fa-cart-shopping.selected) + .cart2{
+    background-color:lightgreen;
+}
+
 .ckbx:has(.fa-cart-shopping.partselected){
+    background-color:#ff7;
+}
+
+.ckbx:has(.fa-cart-shopping.partselected) + .cart2{
     background-color:#ff7;
 }
  .ckbx:has(.fa-cart-shopping.unselected,.fa-cart-shopping.none){
@@ -557,7 +565,14 @@ svg {
      background-color:transparent;
 }
 
-.ckbx:has(.fa-cart-shopping){
+ .ckbx:has(.fa-cart-shopping.unselected,.fa-cart-shopping.none) + .cart2{
+    #background-color:#FF0000;
+    #background-color:#F88379;
+     #background-color:#FF6347;
+     background-color:transparent;
+}
+
+.ckbx:has(.fa-cart-shopping) {
     border-color:grey;
     border-width:2px;
     border-style:solid;
