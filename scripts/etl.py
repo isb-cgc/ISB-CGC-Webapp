@@ -36,7 +36,7 @@ import django
 django.setup()
 
 from google_helpers.bigquery.bq_support import BigQuerySupport
-from projects.models import Program, Project, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataVersion, DataNode
+from projects.models import Program, Project, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataVersion, DataNode, DataSetType, Attribute_Set_Type
 from django.contrib.auth.models import User
 
 logger = logging.getLogger('main_logger')
@@ -85,9 +85,15 @@ SOLR_SINGLE_VAL = {
     "sample_barcode": ["case_barcode", "case_node_id", "sample_barcode", "sample_node_id"]
 }
 
-FIXED_TYPES = {
-
-}
+PREFORMATTED_ATTRS = ["disease_type","primary_diagnosis","primary_site","progression_or_recurrence","disease_code",
+                      "program_name","project_short_name","ethnicity","morphology","tumor_grade",
+                      "last_known_disease_status","site_of_resection_or_biopsy","tissue_or_organ_of_origin","node",
+                      "bmi","country","hist_subtype","histological_type","histology","neoplasm_histologic_grade",
+                      "pathologic_stage","residual_tumor","site_primary","tumor_tissue_site","tumor_type","platform",
+                      "SeriesInstanceUID","StudyInstanceUID","StudyDescription","SeriesDescription",
+                      "tcia_tumorLocation","Modality","BodyPartExamined","primaryAnatomicStructure","CancerType",
+                      "collection_id"]
+FIXED_TYPES = {}
 
 ATTR_SET = {}
 DISPLAY_VALS = {}
@@ -99,21 +105,22 @@ SOLR_LOGIN = settings.SOLR_LOGIN
 SOLR_PASSWORD = settings.SOLR_PASSWORD
 SOLR_CERT = settings.SOLR_CERT
 
-def new_attribute(name, displ_name, type, display_default, units=None, programs=None):
+def new_attribute(name, displ_name, type, display_default, preformatted_values=False, units=None, programs=None):
     return {
         'name': name,
         "display_name": displ_name,
         "type": type,
         'units': units,
+        'preformatted_values': preformatted_values,
         'data_sources': [],
-        'data_set_types': [],
+        'attr_set_types': [],
         'display': display_default,
         'categories': [],
         'programs': programs
     }
 
 
-def load_attributes(ds_attr_files, program_attr_file_name):
+def load_attributes(ds_attr_files, program_attr_file_name, attr_set_types):
 
     if not (ds_attr_files or program_attr_file_name):
         raise Exception("No attribute files provided! You must provide at least one type of attribute file!")
@@ -126,29 +133,32 @@ def load_attributes(ds_attr_files, program_attr_file_name):
                 program_attrs[line[1]] = []
             program_attrs[line[1]].append(line[0])
 
-    for ds in ds_attr_files:
-        filename = ds_attr_files[ds]
-        attr_file = open(filename, "r")
-        for line in csv_reader(attr_file):
-            if line[0] not in ATTR_SET:
-                ATTR_SET[line[0]] = new_attribute(
-                    line[0],
-                    line[0].replace("_", " ").title() if (not line[1] or re.search(r'_', line[1])) else line[1],
-                    line[2],
-                    True if line[3] == 'True' else False,
-                    programs=program_attrs.get(line[0],None)
-                )
-            attr = ATTR_SET[line[0]]
+    for ds, files in ds_attr_files.items():
+        files = [files] if not type(files) is list else files
+        for filename in files:
+            attr_file = open(filename, "r")
+            for line in csv_reader(attr_file):
+                if line[0] not in ATTR_SET:
+                    ATTR_SET[line[0]] = new_attribute(
+                        line[0],
+                        line[0].replace("_", " ").title() if (not line[1] or re.search(r'_', line[1])) else line[1],
+                        line[2],
+                        True if line[3] == 'True' else False,
+                        True if line[0] in PREFORMATTED_ATTRS else False,
+                        programs=program_attrs.get(line[0],None)
+                    )
+                attr = ATTR_SET[line[0]]
 
-            attr['data_sources'].append(ds)
+                attr['data_sources'].append(ds)
+                if attr_set_types[filename] not in attr['attr_set_types']:
+                    attr['attr_set_types'].append(attr_set_types[filename])
 
-            if attr['name'] in DISPLAY_VALS:
-                attr['display_vals'] = DISPLAY_VALS[attr['name']]
+                if attr['name'] in DISPLAY_VALS:
+                    attr['display_vals'] = DISPLAY_VALS[attr['name']]
 
-            if attr['name'] in ranges_needed:
-                attr['range'] = ranges.get(ranges_needed[attr['name']], [])
-
-        attr_file.close()
+                if attr['name'] in ranges_needed:
+                    attr['range'] = ranges.get(ranges_needed[attr['name']], [])
+            attr_file.close()
 
 
 def add_attributes(attr_set):
@@ -160,7 +170,7 @@ def add_attributes(attr_set):
             logger.info("[STATUS] Attribute {} not found - creating!".format(attr['name']))
             obj, created = Attribute.objects.update_or_create(
                 name=attr['name'], display_name=attr['display_name'], data_type=attr['type'],
-                preformatted_values=True if 'preformatted_values' in attr else False,
+                preformatted_values=attr.get('preformatted_values',False),
                 default_ui_display=attr['display'],
                 units=attr.get('units',None)
             )
@@ -174,6 +184,7 @@ def add_attributes(attr_set):
                     Attribute_Ranges.objects.update_or_create(
                         attribute=obj
                     )
+
             if len(attr.get('display_vals', {})):
                 for rv, dv in attr['display_vals'].items():
                     Attribute_Display_Values.objects.update_or_create(
@@ -204,11 +215,19 @@ def add_attributes(attr_set):
 
                     Attribute.programs.through.objects.bulk_create(attr_to_prog)
 
+            if len(attr.get('attr_set_types',[])):
+                set_types = Attribute_Set_Type.objects.select_related('datasettype').filter(attribute=obj).values_list('datasettype__name',flat=True)
+                missing_types = [x for x in attr['attr_set_types'] if x not in set_types]
+                if len(missing_types):
+                    types = DataSetType.objects.filter(name__in=missing_types)
+                    attr_to_type = []
+                    for type in types:
+                        attr_to_type.append(Attribute_Set_Type(attribute=obj,datasettype=type))
+                    Attribute_Set_Type.objects.bulk_create(attr_to_type)
 
         except Exception as e:
             logger.error("[ERROR] Attribute {} may not have been added!".format(attr['name']))
             logger.exception(e)
-
 
 
 def make_solr_commands(sources):
@@ -242,7 +261,7 @@ def add_data_versions(dv_set):
             logger.warning("[WARNING] Data Version {} already exists! Skipping.".format(dv['name']))
         except ObjectDoesNotExist:
             progs = Program.objects.filter(name__in=dv['programs'], active=True, is_public=True)
-            obj, created = DataVersion.objects.update_or_create(name=dv['name'], data_type=dv['type'], version=dv['ver'], build=dv.get("build",None))
+            obj, created = DataVersion.objects.update_or_create(name=dv['name'], version=dv['ver'], build=dv.get("build",None))
             dv_to_prog = []
 
             for prog in progs:
@@ -310,7 +329,7 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
                 logger.warning("[WARNING] Source with the name {} already exists - updating ONLY!".format(src['name']))
             except ObjectDoesNotExist as e:
                 obj, created = DataSource.objects.update_or_create(
-                    name=src['name'], version=DataVersion.objects.get(version=src['version'], data_type=src['version_type']),
+                    name=src['name'], version=DataVersion.objects.get(version=src['version']),
                     source_type=src['source_type'],
                 )
 
@@ -330,7 +349,15 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
 
                 DataNode.data_sources.through.objects.bulk_create(node_to_src)
 
-                logger.info("Data Source created: {}".format(src['name']))
+                sets = DataSetType.objects.filter(name__in=src['data_set_types'])
+                set_to_src = []
+
+                for dset in sets:
+                    set_to_src.append(DataSource.datasettypes.through(datasource_id=obj.id, datasettype_id=dset.id))
+
+                DataSource.datasettypes.through.objects.bulk_create(set_to_src)
+
+                logger.info("Data Source created: {}".format(obj))
 
             source_attrs = list(obj.get_source_attr(all=True).values_list('name',flat=True))
             schema_src = src['schema_source'].split('.') if src['source_type'] == DataSource.SOLR else src['name'].split('.')
@@ -469,6 +496,15 @@ def main(config, make_attr=False):
         if 'programs' in config:
             add_programs(config['programs'])
 
+        if 'set_types' in config:
+            for settype in config['set_types'].get("create",[]):
+                try:
+                    DataSetType.objects.get(name=settype['name'])
+                    logger.info("[STATUS] Data Set Type {} found - updating only!".format(settype['name']))
+                except ObjectDoesNotExist:
+                    logger.info("[STATUS] Data Set Type {} not found - creating.".format(settype['name']))
+                obj, created = DataSetType.objects.update_or_create(**settype)
+
         if 'projects' in config:
             projects = []
             if config['projects'].get("from_file", None):
@@ -526,7 +562,7 @@ def main(config, make_attr=False):
 
         if 'attributes' in config:
             ds_attr_files = {x['name']: x['attributes'] for x in config['data_sources'] if 'attributes' in x}
-            load_attributes(ds_attr_files, config['attributes'].get('program_file',None))
+            load_attributes(ds_attr_files, config['attributes'].get('program_file',None), config['attributes'].get('attr_set_types',None))
 
         # Add any attributes found to be new in the prior step to the database, including linkage to the new data sources
         len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
