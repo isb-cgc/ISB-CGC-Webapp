@@ -1234,17 +1234,21 @@ require([
                                 } else if (( Array.isArray(modality) && modality.includes('SM')) || (modality === 'SM')) {
                                     return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                                  } else {
-                                    let v2_link = '<a href="' + OHIF_V2_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>';
+                                    let v2_link = OHIF_V2_PATH + data;
                                     let v3_link = OHIF_V3_PATH + "=" + data;
                                     let volView_link = VOLVIEW_PATH + "=[" + row['crdc_series_uuid'].map(function(i){
                                         return "s3://"+row['aws_bucket']+"/"+i;
                                     }).join(",") + ']"';
-                                    return v2_link +
+                                    return '<a href="' + v2_link + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
                                         '<div class="dropdown viewer-toggle">' +
                                         '<a id="btnGroupDropViewers" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
                                         '<ul class="dropdown-menu viewer-menu" aria-labelledby="btnGroupDropViewers">' +
+                                        '<li><a href="'+v2_link+'" target="_blank" rel="noopener noreferrer">OHIF v2</a></li>' +
                                         '<li><a href="'+v3_link+'" target="_blank" rel="noopener noreferrer">OHIF v3</a></li>' +
-                                        '<li><a href="'+volView_link+'" target="_blank" rel="noopener noreferrer">VolView</a></li>' +
+                                        '<li><a class="external-link" href="" url="'+volView_link+'" ' +
+                                        'data-toggle="modal" data-target="#external-web-warning">VolView ' +
+                                        '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
+                                        '</a></li>' +
                                         '</ul>' +
                                         '</div>';
                                 }
