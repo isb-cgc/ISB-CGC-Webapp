@@ -222,58 +222,13 @@ require([
         $('#save-cohort-modal').prop("saving", "saving");
     });
 
-    $('#ss').on("mouseenter", function(e){
-        el=e.target;
-        let collection_id=$(el)[0].id;
-        alert('collecton_id');
-    });
-    $('.collection_name').on("mouseenter", function(e){
-        var=e.target;
-        //vr posy
-
-        let collection_id=$(reference)[0].id;
-        let tooltip = collection_tooltips[$(reference).siblings('input.collection_value').attr('value')];
-
-        $('#collection-modal').find('.modal-body').html(tooltip);
-
-        $('#collection-modal').addClass('fade');
-        $('#collection-modal').addClass('in');
-        $('#collection-modal').css("display","block");
-        var width=$('#collection-modal').find('.modal-content').outerWidth();
-        var height =$('#collection-modal').find('.modal-content').outerHeight();
-        $('#collection-modal').height(height);
-            $('#collection-modal').width(width);
-        //$('#collection-modal').css("width","350px");
-        //$('#collection-modal').css("display","block");
 
 
-        //alert(collection_id);
-    });
     $('#collection_modal_button').on("click", function(){
         $('#collection-modal').removeClass('in');
         $('#collection-modal').css("display","none");
     });
-    /*tippy('.collection_name', {
-        content: function(reference) {
-            let warning='<p style="color:red">Some or all of the image files in this collection are not publicly available.</p>'
-            let tooltip = collection_tooltips[$(reference).siblings('input.collection_value').attr('value')];
-            let collection_id=$(reference)[0].id
-            if(tooltip) {
-                if ((collection_id in window.collection) && (window.collection[collection_id].access==='Public')) {
-                    return '<div class="collection-tooltip">' + tooltip + '</div>';
-                } else {
-                    return '<div class="collection-tooltip">' + tooltip + warning + '</div>';
-                }
-            }
-            return '<span></span>';
-        },
-        theme: 'light',
-        placement: 'right-end',
-        arrow: false,
-        allowHTML: true,
-        interactive: true
-    });
-  */
+
     tippy.delegate('div#analysis_results_id', {
         content: function(reference) {
             let tooltip = analysis_results_tooltips[$(reference).siblings('input').attr('value')];

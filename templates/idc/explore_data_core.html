@@ -23,7 +23,7 @@
                     <div class="search-scope filter-panel panel data-tab-content-panel">
                         <div class="tab-panel panel-default">
                             <div class="panel-heading clearfix">
-                                <h4 class="panel-title" id="ss">Search Scope</h4>
+                                <h4 class="panel-title">Search Scope</h4>
                             </div>
                             <div class="tab-content">
                                 <div id="program_set" class="tab-pane active" role="tabpanel">
@@ -76,18 +76,19 @@
                                                                     {% for proj, projD in progV.projects.items %}
                                                                         <div id="{{ proj }}_heading"
                                                                              class="list-group-item__heading">
+
                                                                             <input data-filter-attr-id="{{ progV.collex_attr_id }}"
                                                                                    data-filter-display-attr="Collection"
                                                                                    data-filter-display-val="{{ proj|upper }}"
                                                                                    class="collection_value"
-                                                                                   type="checkbox" value="{{ proj }}">
+                                                                                   type="checkbox" value="{{ proj }}" onclick="alert('here')">
                                                                             {% if projD.access == "Public" %}
                                                                                 <span id="{{ proj }}"
-                                                                                      class="collection_name value collection_id">{{ projD.display }} </span>
+                                                                                      class="collection_name value collection_id">{{ projD.display }}</span><span> <i class="collection_info2 fa-solid fa-info-circle "></i> </span>
                                                                                 <span class="float-right case_count count">{{ projD.val }}</span>
                                                                             {% else %}
                                                                                 <span id="{{ proj }}"
-                                                                                      class="collection_name value collection_id">{{ projD.display }}<i
+                                                                                      class="collection_name value collection_id">{{ projD.display }}</span><span> <i class="collection_info2 fa-solid fa-info-circle "></i> <i
                                                                                         class="fa-solid fa-circle-minus"></i></span>
                                                                                 <span class="float-right case_count count">{{ projD.val }}</span>
                                                                             {% endif %}
@@ -142,19 +143,23 @@
                                                                             style="list-style: none;">
                                                                             {% for proj, projD in progV.projects.items|dictsort:0 %}
                                                                                 <li class="checkbox {% if forloop.counter >= 6 %} extra-values notDisp{% endif %} {% if projD.val == 0 %} zeroed {% endif %}">
-                                                                                    <label>
+                                                                                    <label class="lbl" data-click-for-info="false">
+
                                                                                         <input data-filter-attr-id="{{ progV.collex_attr_id }}"
                                                                                                data-filter-display-attr="Collection"
                                                                                                data-filter-display-val="{{ projD.display }}"
                                                                                                class="collection_value"
                                                                                                type="checkbox"
                                                                                                value="{{ proj }}">
-
-                                                                                            <span id="{{ proj }}"
-                                                                                                  class="collection_name value">{{ projD.display }} </span>
-                                                                                            <span class="float-right case_count count plotit">{{ projD.val }}</span>
+                                                                                                  <span id="{{ proj }}"class="collection_name value">{{ projD.display }} </span>
+                                                                                                  <span><i class="collection_info fa-solid fa-info-circle"></i></span>
+                                                                                                   <span class="float-right case_count count plotit">{{ projD.val }}</span>
 
                                                                                     </label>
+
+
+
+
                                                                                 </li>
                                                                             {% endfor %}
                                                                         </ul>
