@@ -174,7 +174,11 @@ require([
 
     $('#body').on('click', '.external-link', function(){
         let url = $(this).attr('url');
-        $('.external-dest-link').text(url);
+        let url_display = url;
+        if(url_display.length > 100) {
+            url_display = url_display.slice(0,80) + "..." + url_display.slice(url_display.length-17);
+        }
+        $('.external-dest-link').text(url_display);
         $('#go-to-external-link').attr('href', url);
     });
 
