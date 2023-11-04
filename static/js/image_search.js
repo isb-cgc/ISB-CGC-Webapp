@@ -1658,7 +1658,7 @@ require([
         reformDic[listId] = new Object();
         for (item in progDic){
             if ((item !=='All') && (item !=='None') && (item in window.programs) && (Object.keys(progDic[item]['projects']).length>0)){
-                if ( Object.keys(window.programs[item]['projects']).length===1) {
+                if ( Object.keys(window.programs[item]['projects']).length===-1) {
                     nitem=Object.keys(progDic[item]['projects'])[0];
                     reformDic[listId][nitem]=new Object();
                     reformDic[listId][nitem]['count'] = progDic[item]['val'];
@@ -2940,8 +2940,8 @@ require([
         var height =$('#collection-modal').find('.modal-content').outerHeight();
         $('#collection-modal').height(height);
             $('#collection-modal').width(width);
-
-        $('#collection-modal').css({position:"absolute", top: (pos.top-height), left: pos.left })
+            
+        $('#collection-modal').css({position:"absolute", top: Math.max((pos.top-height),0), left: pos.left })
     }
 
 
@@ -3492,7 +3492,6 @@ require([
      });
 
     $('.fa-search').on("click",function(){
-         //alert('hi');
          srch=$(this).parent().parent().parent().find('.text-filter, .collection-text-filter, .analysis-text-filter');
 
          if (srch.hasClass('notDisp')) {
