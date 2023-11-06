@@ -561,8 +561,13 @@ require([
         */
         for (projid in window.selProjects) {
             delete(window.selProjects[projid]['state']['view'])
+            for (caseid in window.selProjects[projid].selCases){
+                if (('state' in window.selProjects[projid].selCases[caseid]) && ('view' in window.selProjects[projid].selCases[caseid]['state'])){
+                    delete(window.selProjects[projid].selCases[caseid]['state']['view']);
+                }
+            }
         }
-
+        
         updateProjectTable(usedCollectionData,collectionStats);
         initializeTableData();
         $('#cases_tab').DataTable().destroy();
@@ -1454,7 +1459,7 @@ require([
                 },
                 "columnDefs": [
                     {className: "ckbx text_data viewbx", "targets": [0]},
-                    {className: "ckbx", "targets": [1]},
+                    {className: "ckbx notDisp", "targets": [1]},
 
                     {className: "collex_name cart2", "targets": [2]},
                     {className: "projects_table_num_cohort", "targets": [4]},
