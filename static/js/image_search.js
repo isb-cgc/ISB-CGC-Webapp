@@ -2109,14 +2109,9 @@ require([
                                 "recordsFiltered": window.casesCache.recordsTotal
                             })
                         }
-
                     }
-
                 }
-
-
             });
-
         }
         catch(err){
             alert("The following error occurred trying to update the case table:" +err+". Please alert the systems administrator");
@@ -2127,6 +2122,7 @@ require([
                 this.style.width=null;
                 }
             );
+
             if ( ($('#cases_table').find('tr').length===0) ||  ($('#cases_table').find('.fa-cart-shopping').filter('.unselected, .partselected').length>0)){
                 $('#cases_table_head').find('.fa-cart-shopping').removeClass('selected');
                 $('#cases_table_head').find('.fa-cart-shopping').addClass('unselected');
@@ -2142,7 +2138,6 @@ require([
         $('#cases_tab').find('tbody').attr('id','cases_table');
         $('#cases_panel').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'cases_tab_wrapper\')">Go</button></div>');
         $('#cases_panel').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Case ID:</strong><input class="caseID_inp" type="text-box" value="'+caseID+'"><button onclick="filterTable(\'cases_panel\',\'caseID\')">Go</button></div>');
-
     }
 
     propagateSelection = function(ids, rowsAdded){
@@ -2407,11 +2402,17 @@ require([
                     $(row).addClass('case_' + data['PatientID']);
                     $(row).find('.seriesview').on('click', function(event){
                         var elem = event.target;
-                        var rowsAdded= ($(row).find('.fa-caret-down.notDisp').length>0 )?true:false
-                        if (rowsAdded){
-                            $(row).find('.fa-caret-down').removeClass('notDisp');
-                            $(row).find('.fa-caret-right').addClass('notDisp');
 
+                        if (!($(elem).is('a')) && !($(elem).hasClass('fa-download'))
+                            && !($(elem).hasClass('fa-copy')) && !($(elem).hasClass('fa-eye'))
+                            && !($(elem).hasClass('tippy-box'))  && !($(elem).parents().hasClass('tippy-box'))
+                            && !($(elem).hasClass('viewer-toggle')) && !($(elem).parents().hasClass('viewer-toggle'))
+                        ) {
+                            if (!$(elem).parent().hasClass('ckbx')) {
+                                ckbx = $(elem).closest('tr').find('.ckbx').children()
+                                ckbx.prop("checked", !ckbx.prop("checked"));
+                            }
+                            updateCasesOrStudiesSelection([$(this)], 'studies')
                         }
                         else{
                             $(row).find('.fa-caret-down').addClass('notDisp');
@@ -2520,17 +2521,12 @@ require([
                             return '<i class="fa-solid fa-cart-shopping '+selection+'"></i>';
 
                         }
-                    },
 
-
-
-
-                    {
+                    },{
                         "type": "text", "orderable": true, data: 'PatientID', render: function (data) {
                             return data;
                         }
-                    },
-                    {
+                    },{
                         "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                             return pretty_print_id(data) +
                             ' <a class="copy-this-table" role="button" content="' + data +
@@ -2540,8 +2536,7 @@ require([
                             $(td).data('study-id', data);
                             return;
                         }
-                    },
-                    {
+                    },{
                         "type": "text", "orderable": true, data: 'StudyDate', render: function (data) {
                             // fix when StudyData is an array of values
                             var dt = new Date(Date.parse(data));
@@ -2575,17 +2570,27 @@ require([
                                 } else if (( Array.isArray(modality) && modality.includes('SM')) || (modality === 'SM')) {
                                     return '<a href="' + SLIM_VIEWER_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                                  } else {
-                                    let v3_link = '';
-                                    if(OHIF_V3_PATH) {
-                                        v3_link = ' | <a href="' + OHIF_V3_PATH + data + '" target="_blank" rel="noopener noreferrer">v3'
-                                    }
-                                    return '<a href="' + OHIF_V2_PATH + data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
-                                        v3_link
+                                    let v2_link = OHIF_V2_PATH + data;
+                                    let v3_link = OHIF_V3_PATH + "=" + data;
+                                    let volView_link = VOLVIEW_PATH + "=[" + row['crdc_series_uuid'].map(function(i){
+                                        return "s3://"+row['aws_bucket']+"/"+i;
+                                    }).join(",") + ']"';
+                                    return '<a href="' + v2_link + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
+                                        '<div class="dropdown viewer-toggle">' +
+                                        '<a id="btnGroupDropViewers" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
+                                        '<ul class="dropdown-menu viewer-menu" aria-labelledby="btnGroupDropViewers">' +
+                                        '<li><a href="'+v2_link+'" target="_blank" rel="noopener noreferrer">OHIF v2</a></li>' +
+                                        '<li><a href="'+v3_link+'" target="_blank" rel="noopener noreferrer">OHIF v3</a></li>' +
+                                        '<li><a class="external-link" href="" url="'+volView_link+'" ' +
+                                        'data-toggle="modal" data-target="#external-web-warning">VolView ' +
+                                        '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
+                                        '</a></li>' +
+                                        '</ul>' +
+                                        '</div>';
                                 }
                             }
                         }
-                    },
-                    {
+                    }, {
                           "type":"html",
                           "orderable": false,
                           data: 'StudyInstanceUID', render: function (data){
@@ -2723,7 +2728,6 @@ require([
         $('#studies_tab').children('tbody').attr('id','studies_table');
         $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_length').after('<div class="dataTables_goto_page"><label>Page </label><input class="goto-page-number" type="number"><button onclick="changePage(\'studies_tab_wrapper\')">Go</button></div>');
         $('#studies_tab_wrapper').find('.dataTables_controls').find('.dataTables_paginate').after('<div class="dataTables_filter"><strong>Find by Study Instance UID:</strong><input class="studyID_inp" type="text-box" value="'+studyID+'"><button onclick="filterTable(\'studies_tab_wrapper\',\'studyID\')">Go</button></div>');
-
     }
 
     window.updateSeriesTable = function(rowsAdded, rowsRemoved, refreshAfterFilter,seriesID) {
@@ -2803,7 +2807,7 @@ require([
 
                         }
                     },
-                },  {
+                }, {
                     "type": "html",
                     "orderable": false,
                     data: 'SeriesInstanceUID',
@@ -2830,26 +2834,27 @@ require([
                             return '<a href="' + SLIM_VIEWER_PATH + row['StudyInstanceUID'] + '/series/' + data +
                                 '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                         } else {
-                            let v3_link = '';
-                            if(OHIF_V3_PATH) {
-                                v3_link = ' | <a href="' + OHIF_V3_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' +
-                                data + '" target="_blank" rel="noopener noreferrer">v3'
-                            }
-                            return '<a href="' + OHIF_V2_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' +
-                                data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
-                                v3_link
+                            let v2_link = '<a href="' + OHIF_V2_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' +
+                                data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>';
+                            let v3_link = OHIF_V3_PATH + "=" + row['StudyInstanceUID'] + '&SeriesInstanceUID=' + data;
+                            let volView_link = VOLVIEW_PATH + "=[s3://" + row['aws_bucket'] + '/'+row['crdc_series_uuid']+']"';
+                            return v2_link +
+                                '<div class="dropdown viewer-toggle">' +
+                                '<a id="btnGroupDropViewers" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
+                                '<ul class="dropdown-menu viewer-menu" aria-labelledby="btnGroupDropViewers">' +
+                                '<li><a href="'+v3_link+'" target="_blank" rel="noopener noreferrer">OHIF v3</a></li>' +
+                                '<li><a href="'+volView_link+'" target="_blank" rel="noopener noreferrer">VolView</a></li>' +
+                                '</ul>' +
+                                '</div>';
                         }
-
                     }
-                },
-                      {
-                          "type":"html",
-                          "orderable": false,
-                          data: 'SeriesInstanceUID', render: function (data){
-                              return '<i class="fa fa-download series-export" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
-                          }
-
+                }, {
+                      "type":"html",
+                      "orderable": false,
+                      data: 'SeriesInstanceUID', render: function (data){
+                          return '<i class="fa fa-download series-export" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
                       }
+                  }
             ],
             "processing": true,
             "serverSide": true,
