@@ -2413,6 +2413,7 @@ require([
                                 ckbx.prop("checked", !ckbx.prop("checked"));
                             }
                             updateCasesOrStudiesSelection([$(this)], 'studies')
+
                         }
                         else{
                             $(row).find('.fa-caret-down').addClass('notDisp');
@@ -3217,7 +3218,6 @@ require([
                                 data.totals.StudyInstanceUID.toString()+" Studies, and " +
                                 data.totals.SeriesInstanceUID.toString()+" Series in this manifest. " +
                                 "Size on disk: " + data.totals.disk_size); */
-
                             if (('filtered_counts' in data) && ('access' in data['filtered_counts']['origin_set']['All']['attributes']) && ('Limited' in data['filtered_counts']['origin_set']['All']['attributes']['access']) && (data['filtered_counts']['origin_set']['All']['attributes']['access']['Limited']['count']>0) ){
                                $('#search_def_access').removeClass('notDisp');
                                $('.access_warn').removeClass('notDisp');
@@ -4914,7 +4914,7 @@ require([
                 ).attr("style","display: none;")
         );
 
-        
+
         $(window).on("beforeunload",function(){
             console.log("beforeunload called");
             let hs = new Object();
