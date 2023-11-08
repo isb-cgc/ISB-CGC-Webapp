@@ -1236,10 +1236,11 @@ require([
                                  } else {
                                     let v2_link = OHIF_V2_PATH + data;
                                     let v3_link = OHIF_V3_PATH + "=" + data;
-                                    let volView_item = '<li><a class="disabled" title="VolView is disabled for this Study.">VolView ' +
+                                    let volView_item = '<li title="VolView is disabled for this Study."><a class="disabled">VolView ' +
                                         '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
-                                        '</a></li>'                                    ;
-                                    if(row['aws_bucket'].indexOf(",") < 0) {
+                                        '</a></li>';
+                                    let bucket = Array.isArray(row['aws_bucket']) ? row['aws_bucket'][0] : row['aws_bucket'];
+                                    if(bucket.indexOf(",") < 0) {
                                         let volView_link = VOLVIEW_PATH + "=[" + row['crdc_series_uuid'].map(function (i) {
                                             return "s3://" + row['aws_bucket'] + "/" + i;
                                         }).join(",") + ']"';
