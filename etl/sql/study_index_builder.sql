@@ -55,6 +55,7 @@ SELECT
     STRING_AGG(DISTINCT(illuminationType), "|") AS illuminationType,
     STRING_AGG(DISTINCT(primaryAnatomicStructure), "|") AS primaryAnatomicStructure,
     STRING_AGG(DISTINCT(CAST(ObjectiveLensPower AS STRING)),"|") AS ObjectiveLensPower,
+    STRING_AGG(DISTINCT(CONCAT(aws_bucket,'/',crdc_series_uuid)),"|") AS aws_url,
     STRING_AGG(DISTINCT(gcs_bucket)) gcs_bucket,
     STRING_AGG(DISTINCT(aws_bucket)) aws_bucket,
     CASE WHEN STRING_AGG(DISTINCT(has_qualitative), "|") LIKE '%True%' THEN "True" ELSE "False" END AS has_qualitative,
