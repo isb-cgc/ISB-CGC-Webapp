@@ -1239,7 +1239,7 @@ require([
                                     let volView_item = '<li><a class="disabled" title="VolView is disabled for this Study.">VolView ' +
                                         '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
                                         '</a></li>'                                    ;
-                                    if(row['aws_bucket'].indexOf(",") >= 0) {
+                                    if(row['aws_bucket'].indexOf(",") < 0) {
                                         let volView_link = VOLVIEW_PATH + "=[" + row['crdc_series_uuid'].map(function (i) {
                                             return "s3://" + row['aws_bucket'] + "/" + i;
                                         }).join(",") + ']"';
