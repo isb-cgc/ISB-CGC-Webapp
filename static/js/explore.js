@@ -222,25 +222,11 @@ require([
         $('#save-cohort-modal').prop("saving", "saving");
     });
 
-    tippy('.collection_name', {
-        content: function(reference) {
-            let warning='<p style="color:red">Some or all of the image files in this collection are not publicly available.</p>'
-            let tooltip = collection_tooltips[$(reference).siblings('input.collection_value').attr('value')];
-            let collection_id=$(reference)[0].id
-            if(tooltip) {
-                if ((collection_id in window.collection) && (window.collection[collection_id].access==='Public')) {
-                    return '<div class="collection-tooltip">' + tooltip + '</div>';
-                } else {
-                    return '<div class="collection-tooltip">' + tooltip + warning + '</div>';
-                }
-            }
-            return '<span></span>';
-        },
-        theme: 'light',
-        placement: 'right-end',
-        arrow: false,
-        allowHTML: true,
-        interactive: true
+
+
+    $('#collection_modal_button').on("click", function(){
+        $('#collection-modal').removeClass('in');
+        $('#collection-modal').css("display","none");
     });
 
     tippy.delegate('div#analysis_results_id', {

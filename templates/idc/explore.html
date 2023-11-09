@@ -87,6 +87,7 @@
 {% with user_is_social=request.user|has_social is_cohort=False %}
     {% include "cohorts/export-manifest-modal.html" with export_uri=export_uri user_is_social=user_is_social is_cohort=is_cohort %}
 {% endwith %}
+
 {% include "idc/explore_data_core.html" %}
 
 {% endblock %}
@@ -95,7 +96,8 @@
 
 {% include "cohorts/save-cohort-modal.html" %}
 {% include "idc/download-modal.html" %}
-{% include "idc/bq-string-modal.html" with bq_string_uri="True" %}
+    {% include "idc/collection-modal.html" %}
+    {% include "idc/bq-string-modal.html" with bq_string_uri="True" %}
 
 {% endblock %}
 
