@@ -524,22 +524,22 @@ def explore_data_page(request, filter_path=False, path_filters=None):
             else:
                 filters_for_load = req.get('filters_for_load', None)
                 if filters_for_load:
-                    denylist = re.compile(settings.DENYLIST_RE, re.UNICODE).search(filters_for_load)
-                    attr_disallow = re.compile(settings.ATTRIBUTE_DISALLOW_RE, re.UNICODE).search(filters_for_load)
+                    raw_filters_for_load = filters_for_load
+                    filters_for_load = json.loads(filters_for_load)
+                    denylist = re.compile(settings.DENYLIST_RE, re.UNICODE).search(raw_filters_for_load)
+                    attr_disallow = re.compile(settings.ATTRIBUTE_DISALLOW_RE, re.UNICODE).search("_".join(filters_for_load.keys()))
                     if denylist or attr_disallow:
                         if denylist:
                             logger.error("[ERROR] Saw possible attack in filters_for_load:")
                         else:
-                            logger.warning("[WARN] Saw bad filter names in filters_for_load:")
-                        logger.warning(filters_for_load)
+                            logger.warning("[WARNING] Saw bad filter names in filters_for_load:")
+                        logger.warning(raw_filters_for_load)
                         filters_for_load = {}
                         messages.error(
                             request,
                             "There was a problem with some of your filters - please ensure they're properly formatted."
                         )
                         status = 400
-                    else:
-                        filters_for_load = json.loads(filters_for_load)
                 else:
                     filters_for_load = None
                 context['filters_for_load'] = filters_for_load
@@ -604,7 +604,7 @@ def parse_explore_filters(request):
         attr_map = {x.name: {"id": x.id, "filter": filter_name_map[x.name]} for x in attrs}
         not_found = [x for x in attr_names if x not in attr_map.keys()]
         denylist = re.compile(settings.DENYLIST_RE, re.UNICODE).search(str(filters))
-        attr_disallow = re.compile(settings.ATTRIBUTE_DISALLOW_RE, re.UNICODE).search(str(filters))
+        attr_disallow = re.compile(settings.ATTRIBUTE_DISALLOW_RE, re.UNICODE).search("_".join(filters.keys()))
         if denylist or attr_disallow:
             if denylist:
                 logger.error("[ERROR] Saw possible attack attempt!")
