@@ -534,6 +534,14 @@ svg {
     clear: both;
 }
 
+#collection-modal{
+    overflow:visible !important;
+}
+
+#collection-modal-content{
+    border:solid !important;
+    border-width:thin !important;
+}
 
 .list-group-item__heading:after {
     content: "";

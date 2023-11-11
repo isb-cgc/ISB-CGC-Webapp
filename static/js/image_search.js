@@ -2934,14 +2934,13 @@ require([
     var displayInfo = function(targ) {
 
         let collection_id=$(targ).attr('value');
+        let collectionDisp=$(targ).data('filterDisplayVal')
+
         let pos =$(targ).parent().find('.collection_info').offset();
 
-        if ($(targ).hasClass('collection_info2')){
-            collection_id=$(targ).parent().parent().find('input').attr('value');
-            pos=$(targ).offset();
-        }
 
         let tooltip = collection_tooltips[collection_id];
+        $('#collection-modal').find('#collecton-modal-title').text(collectionDisp);
         $('#collection-modal').find('.modal-body').html(tooltip);
 
         $('#collection-modal').addClass('fade');
