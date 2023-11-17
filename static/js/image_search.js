@@ -1414,6 +1414,7 @@ require([
 
     window.updateSeriesTable = function(rowsAdded, rowsRemoved, refreshAfterFilter,seriesID) {
         var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV", "XC"])
+        var nonViewAbleSOPClassUID= new Set(["1.2.840.10008.5.1.4.1.1.66"])
         var slimViewAbleModality=new Set(["SM"])
         $('#series_tab').attr('data-rowsremoved', rowsRemoved);
         $('#series_tab').attr('data-refreshafterfilter', refreshAfterFilter);
@@ -1505,7 +1506,10 @@ require([
                         }
                         else if ( (Array.isArray(row['Modality']) && row['Modality'].some(function(el){
                             return nonViewAbleModality.has(el)
-                        }) ) || nonViewAbleModality.has(row['Modality']) )   {
+                        }) ) || nonViewAbleModality.has(row['Modality'])
+                            || (Array.isArray(row['SOPClassUID']) && row['SOPClassUID'].some(function(el){
+                            return nonViewAbleSOPClassUID.has(el)
+                        }) ) ||  nonViewAbleSOPClassUID.has(row['SOPClassUID'])) {
                             let tooltip = (
                                 row['Modality'] === "XC" || (Array.isArray(row['Modality']) && row['Modality'].includes("XC"))
                             ) ? "not-viewable" : "no-viewer-tooltip";
@@ -3287,8 +3291,12 @@ require([
                            if ($(selEle).find('input[data-filter-attr-id="' + filter['id'] + '"][value="' + val + '"]').length>0) {
                                attValueFoundInside = true;
                            }
-                           $('input[data-filter-attr-id="' + filter['id'] + '"][value="' + val + '"]').prop("checked", true);
-                           checkFilters($('input[data-filter-attr-id="' + filter['id'] + '"][value="' + val + '"]'));
+                           let value=val;
+                           if ($(selEle).hasClass('isRng')){
+                              value= val.split(',').join(' to ');
+                           }
+                           $('input[data-filter-attr-id="' + filter['id'] + '"][value="' + value + '"]').prop("checked", true);
+                           checkFilters($('input[data-filter-attr-id="' + filter['id'] + '"][value="' + value + '"]'));
                       });
                   }
                 if (attValueFoundInside){
