@@ -2921,11 +2921,11 @@ require([
     };
 
 
-    $('.collection_info').on("mouseenter", function(e){
+    $('.collection_info, analysis_info').on("mouseenter", function(e){
         $(e.target).addClass('fa-lg');
         $(e.target).parent().parent().data("clickForInfo",false);;
     });
-    $('.collection_info').on("mouseleave", function(e){
+    $('.collection_info, analysis_info').on("mouseleave", function(e){
            $(e.target).parent().parent().data("clickForInfo",false);
            $(e.target).removeClass('fa-lg');
            //$(e.target).css('style','background:transparent')
@@ -2944,10 +2944,16 @@ require([
         let collection_id=$(targ).attr('value');
         let collectionDisp=$(targ).data('filterDisplayVal')
 
-        let pos =$(targ).parent().find('.collection_info').offset();
+        let pos =$(targ).parent().find('.collection_info, .analysis_info').offset();
+        let info_icon = $(targ).parent().find('.collection_info, analysis_info');
+        let tooltip='';
+        if ($(info_icon).hasClass('collection_info')){
+            tooltip = collection_tooltips[collection_id];
+        }
+        else {
+            tooltip = analysis_results_tooltips[collection_id];
+        }
 
-
-        let tooltip = collection_tooltips[collection_id];
         $('#collection-modal').find('#collecton-modal-title').text(collectionDisp);
         $('#collection-modal').find('.modal-body').html(tooltip);
 
@@ -2974,24 +2980,20 @@ require([
             }
         });
 
-        $('#' + filterId).find('.collection_info, .collection_info2').on("mouseenter", function(e){
+        $('#' + filterId).find('.collection_info, .analysis_info').on("mouseenter", function(e){
         $(e.target).addClass('fa-lg');
          });
 
-       $('#' + filterId).find('.collection_info, .collection_info2').on("mouseleave", function(e){
+       $('#' + filterId).find('.collection_info, .analysis_info').on("mouseleave", function(e){
            $(e.target).removeClass('fa-lg');
        });
 
-       $('#' + filterId).find('.collection_info2').on("click", function(e){
-           var targ = e.target;
-           displayInfo(targ);
-       });
 
 
          $('#' + filterId).find('input:checkbox').not('#hide-zeros').on('click', function (e) {
             var targ=e.target;
 
-            if ($(e.target).parent().find('.collection_info.fa-lg').length>0){
+            if ($(e.target).parent().find('.collection_info.fa-lg, .analysis_info.fa-lg').length>0){
                 $(targ).prop("checked",!$(targ).prop("checked"));
                 displayInfo(targ);
             }
