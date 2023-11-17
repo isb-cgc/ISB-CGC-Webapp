@@ -1520,16 +1520,20 @@ require([
                             return '<a href="' + SLIM_VIEWER_PATH + row['StudyInstanceUID'] + '/series/' + data +
                                 '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>'
                         } else {
-                            let v2_link = '<a href="' + OHIF_V2_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' +
-                                data + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>';
+                            let v2_link = OHIF_V2_PATH + row['StudyInstanceUID'] + '?SeriesInstanceUID=' + data;
                             let v3_link = OHIF_V3_PATH + "=" + row['StudyInstanceUID'] + '&SeriesInstanceUID=' + data;
                             let volView_link = VOLVIEW_PATH + "=[s3://" + row['aws_bucket'] + '/'+row['crdc_series_uuid']+']"';
-                            return v2_link +
+                            let volView_item = '<li><a class="external-link" href="" url="'+volView_link+'" ' +
+                                'data-toggle="modal" data-target="#external-web-warning">VolView ' +
+                                '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
+                                '</a></li>';
+                            return '<a href="' + v2_link + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
                                 '<div class="dropdown viewer-toggle">' +
                                 '<a id="btnGroupDropViewers" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
                                 '<ul class="dropdown-menu viewer-menu" aria-labelledby="btnGroupDropViewers">' +
+                                '<li><a href="'+v2_link+'" target="_blank" rel="noopener noreferrer">OHIF v2</a></li>' +
                                 '<li><a href="'+v3_link+'" target="_blank" rel="noopener noreferrer">OHIF v3</a></li>' +
-                                '<li><a href="'+volView_link+'" target="_blank" rel="noopener noreferrer">VolView</a></li>' +
+                                volView_item +
                                 '</ul>' +
                                 '</div>';
                         }
