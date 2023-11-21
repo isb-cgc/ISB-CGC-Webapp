@@ -72,30 +72,6 @@
                                                     {% for progK, progV in programs.items|dictsort:0 %}
                                                         {% if progK != "All" and progK != "None" %}
                                                             <li class="{{ progK }} list-group-item{% if forloop.counter >= 6 %} extra-values notDisp{% endif %}{% if progV.val == 0 %} zeroed{% endif %}">
-                                                                {% if progV.projects and progV.projects.items|length == -1 %}
-                                                                    {% for proj, projD in progV.projects.items %}
-                                                                        <div id="{{ proj }}_heading"
-                                                                             class="list-group-item__heading">
-
-                                                                            <input data-filter-attr-id="{{ progV.collex_attr_id }}"
-                                                                                   data-filter-display-attr="Collection"
-                                                                                   data-filter-display-val="{{ proj|upper }}"
-                                                                                   class="collection_value"
-                                                                                   type="checkbox" value="{{ proj }}">
-                                                                            {% if projD.access == "Public" %}
-                                                                                <span id="{{ proj }}"
-                                                                                      class="collection_name value collection_id">{{ projD.display }}</span><span> <i class="collection_info2 fa-solid fa-info-circle "></i> </span>
-                                                                                <span class="float-right case_count count">{{ projD.val }}</span>
-                                                                            {% else %}
-                                                                                <span id="{{ proj }}"
-                                                                                      class="collection_name value collection_id">{{ projD.display }}</span><span> <i class="collection_info2 fa-solid fa-info-circle "></i> <i
-                                                                                        class="fa-solid fa-circle-minus"></i></span>
-                                                                                <span class="float-right case_count count">{{ projD.val }}</span>
-                                                                            {% endif %}
-                                                                        </div>
-                                                                    {% endfor %}
-                                                                {% elif progV.projects and progV.projects.items|length > -1 %}
-
                                                                     <div id="{{ progK }}_heading"
                                                                          class="list-group-item__heading">
                                                                         <input data-filter-attr-id="{{ progV.prog_attr_id }}"
@@ -164,7 +140,7 @@
                                                                             {% endfor %}
                                                                         </ul>
                                                                     </div>
-                                                                {% endif %}
+
                                                             </li>
                                                         {% endif %}
                                                     {% endfor %}
@@ -233,6 +209,7 @@
                                                                                    data-filter-display-attr="{{ attr.display_name }}"
                                                                                    data-filter-display-val="{{ display_value }}">
                                                                             <span class="value">{{ display_value }}</span>
+                                                                            <span><i class="analysis_info fa-solid fa-info-circle"></i></span>
                                                                             <span class="float-right plot_count count plotit">{{ val.count }}</span>
                                                                             <span class="float-right case_count count">{{ val.count }}</span>
                                                                         </label>
