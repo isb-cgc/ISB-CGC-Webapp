@@ -2921,11 +2921,11 @@ require([
     };
 
 
-    $('.collection_info, analysis_info').on("mouseenter", function(e){
+    $('.collection_info, .analysis_info').on("mouseenter", function(e){
         $(e.target).addClass('fa-lg');
         $(e.target).parent().parent().data("clickForInfo",false);;
     });
-    $('.collection_info, analysis_info').on("mouseleave", function(e){
+    $('.collection_info, .analysis_info').on("mouseleave", function(e){
            $(e.target).parent().parent().data("clickForInfo",false);
            $(e.target).removeClass('fa-lg');
            //$(e.target).css('style','background:transparent')
@@ -2945,7 +2945,7 @@ require([
         let collectionDisp=$(targ).data('filterDisplayVal')
 
         let pos =$(targ).parent().find('.collection_info, .analysis_info').offset();
-        let info_icon = $(targ).parent().find('.collection_info, analysis_info');
+        let info_icon = $(targ).parent().find('.collection_info, .analysis_info');
         let tooltip='';
         if ($(info_icon).hasClass('collection_info')){
             tooltip = collection_tooltips[collection_id];
