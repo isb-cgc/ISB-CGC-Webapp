@@ -94,20 +94,27 @@ curl --silent https://bootstrap.pypa.io/get-pip.py | python3
 # If we're not on CircleCI, or we are but the lib directory isn't there (cache miss), install lib
 if [ -z "${CI}" ] || [ ! -d "lib" ]; then
     echo "Installing Python Libraries..."
-    pip3 install -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
+    pip install -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
 else
     echo "Using restored cache for Python Libraries"
 fi
 
+if [ -z "${CI}" ]; then
+    echo "Installing responses library for unit tests, but not for deployment..."
+    pip install -q responses -t ${HOMEROOT}/lib --only-binary all
+fi
+
 if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
     echo "Installing Django Debug Toolbar for local dev..."
-    pip3 install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
+    pip install -q django-debug-toolbar==3.2.4 -t ${HOMEROOT}/lib --only-binary all
+fi
+
+if [ "$IS_DEV" = "True" ]; then
+    echo "Installing GitPython for local dev version display..."
+    pip install -q gitpython -t ${HOMEROOT}/lib --only-binary all
 fi
 
 echo "Libraries Installed"
-
-# Install SASS
-gem install sass
 
 # Install Google Cloud SDK
 # If we're not on CircleCI or we are but google-cloud-sdk isn't there, install it
@@ -117,7 +124,8 @@ if [ -z "${CI}" ] || [ ! -d "/usr/lib/google-cloud-sdk" ]; then
     echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
     apt-get -y install apt-transport-https ca-certificates
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-    apt-get update && apt-get -y install google-cloud-sdk
+    apt-get update -qq
+    apt-get -y install google-cloud-sdk
     apt-get -y install google-cloud-sdk-app-engine-python
     echo "Google Cloud SDK Installed"
 fi
@@ -126,15 +134,15 @@ fi
 echo "Running dos2unix on shell/*.sh..."
 dos2unix ${HOMEROOT}/shell/*.sh
 
+echo "Loading Git Hooks"
 if [ -z "${CI}" ] && [ -d "${HOMEROOT}/git-hooks/" ]; then
-  echo "Loading Git Hooks"
-  cp -r ${HOMEROOT}/git-hooks/* ${HOMEROOT}/.git/hooks/
+    cp -r ${HOMEROOT}/git-hooks/* ${HOMEROOT}/.git/hooks/
 fi
 
 # Create the application deployment version
 if [ -n "${CI}" ]; then
     if [ "$DEPLOYMENT_TIER" = "PROD" ]; then
-        TIER="cgc"
+        TIER=canceridc
     else
         TIER=${DEPLOYMENT_TIER,,}
     fi

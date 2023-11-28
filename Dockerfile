@@ -59,9 +59,6 @@ ENV PYTHONPATH="/app:/app/lib:/app/ISB-CGC-Common:${PYTHONPATH}"
 
 WORKDIR /app/
 
-# Quick config check
-RUN python manage.py check
-
 # Until we figure out a way to do it in CircleCI without whitelisting IPs this has to be done by a dev from
 # ISB
 # RUN python /app/manage.py migrate --noinput
