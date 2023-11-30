@@ -64,6 +64,10 @@ require([
 ], function ($, tippy, base) {
     var saving_cohort = false;
 
+    $('#external-web-warning').on('show.bs.modal', function(){
+        $('#collection-modal').hide();
+    })
+
     $('#save-cohort-modal').on('show.bs.modal', function() {
 
         var modality_join = $('.join_val').filter(':checked').prop('value');
@@ -221,8 +225,6 @@ require([
         saving_cohort = true;
         $('#save-cohort-modal').prop("saving", "saving");
     });
-
-
 
     $('#collection_modal_button').on("click", function(){
         $('#collection-modal').removeClass('in');
