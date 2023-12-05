@@ -26,6 +26,7 @@ import re
 from csv import reader as csv_reader
 from os.path import join, dirname, exists
 from argparse import ArgumentParser
+from itertools import combinations, product
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "isb_cgc.settings")
@@ -36,7 +37,7 @@ import django
 django.setup()
 
 from google_helpers.bigquery.bq_support import BigQuerySupport
-from projects.models import Program, Project, Attribute, Attribute_Ranges, Attribute_Display_Values, DataSource, DataVersion, DataNode, DataSetType, Attribute_Set_Type
+from projects.models import Program, Project, Attribute, Attribute_Ranges, DataSourceJoin, Attribute_Display_Values, DataSource, DataVersion, DataNode, DataSetType, Attribute_Set_Type
 from django.contrib.auth.models import User
 
 logger = logging.getLogger('main_logger')
@@ -81,8 +82,8 @@ SOLR_TYPE_EXCEPTION = {
 }
 
 SOLR_SINGLE_VAL = {
-    "case_barcode": ["case_barcode", "case_node_id"],
-    "sample_barcode": ["case_barcode", "case_node_id", "sample_barcode", "sample_node_id"]
+    "case_barcode": ["case_barcode"],
+    "sample_barcode": ["case_barcode", "sample_barcode"]
 }
 
 PREFORMATTED_ATTRS = ["disease_type","primary_diagnosis","primary_site","progression_or_recurrence","disease_code",
@@ -92,7 +93,7 @@ PREFORMATTED_ATTRS = ["disease_type","primary_diagnosis","primary_site","progres
                       "pathologic_stage","residual_tumor","site_primary","tumor_tissue_site","tumor_type","platform",
                       "SeriesInstanceUID","StudyInstanceUID","StudyDescription","SeriesDescription",
                       "tcia_tumorLocation","Modality","BodyPartExamined","primaryAnatomicStructure","CancerType",
-                      "collection_id"]
+                      "collection_id","experimental_strategy","platform","data_format","data_category","data_type"]
 FIXED_TYPES = {}
 
 ATTR_SET = {}
@@ -320,9 +321,40 @@ def create_solr_params(schema_src, solr_src, aggregated=False):
     cmd_outfile.close()
 
 
+def add_source_joins(froms, from_col, tos=None, to_col=None):
+    src_joins = []
+
+    if not tos and not to_col:
+        joins = combinations(froms, 2)
+        for join in joins:
+            for from_join in DataSource.objects.filter(name=join[0]):
+                for to_join in DataSource.objects.filter(name=join[1]):
+                    src_joins.append(DataSourceJoin(
+                        from_src=from_join,
+                        to_src=to_join,
+                        from_src_col=from_col,
+                        to_src_col=from_col)
+                    )
+    else:
+        joins = product(froms,tos)
+        for join in joins:
+            for from_join in DataSource.objects.filter(name=join[0]):
+                for to_join in DataSource.objects.filter(name=join[1]):
+                    src_joins.append(DataSourceJoin(
+                        from_src=from_join,
+                        to_src=to_join,
+                        from_src_col=from_col,
+                        to_src_col=to_col)
+                    )
+
+    if len(src_joins):
+        DataSourceJoin.objects.bulk_create(src_joins)
+
+
 def add_data_sources(sources, build_attrs=True, link_attr=True):
     try:
         attrs_to_srcs = []
+        source_joins = {}
         for src in sources:
             try:
                 obj = DataSource.objects.get(name=src['name'])
@@ -356,6 +388,9 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
                     set_to_src.append(DataSource.datasettypes.through(datasource_id=obj.id, datasettype_id=dset.id))
 
                 DataSource.datasettypes.through.objects.bulk_create(set_to_src)
+
+                if len(src.get("joins",[])):
+                    source_joins[src['name']] = src.get("joins")
 
                 logger.info("Data Source created: {}".format(obj))
 
@@ -427,6 +462,16 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
             #     index_uri = "{}/solr/{}/update?commit=yes{}".format(settings.SOLR_URI,solr_name,"&".join(solr_index_vars))
             #     index_load = requests.post(index_uri, files={'file': open('export.csv', 'rb')},
             #       headers={'Content-type': 'application/csv'}, auth=(SOLR_LOGIN, SOLR_PASSWORD), verify=SOLR_CERT)
+
+        if len(source_joins):
+            for src_name, joins in source_joins.items():
+                for jn in joins:
+                    add_source_joins(
+                        [src_name],
+                        jn['from'],
+                        jn['sources'],
+                        jn['to']
+                    )
 
         Attribute.data_sources.through.objects.bulk_create(attrs_to_srcs)
     except Exception as e:

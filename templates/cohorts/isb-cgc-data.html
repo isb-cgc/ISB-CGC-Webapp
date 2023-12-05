@@ -10,9 +10,9 @@
                 </div>
                 <div class="panel-body">
                     <div>
-                        <span>Sort by:
-                            <input type="radio" class="sort-radio" value="node" checked>Node
-                            <input type="radio" class="sort-radio" value="program">Program
+                        <span>Group by:
+                            <input type="radio" class="sort-radio" value="node" checked> Node
+                            <input type="radio" class="sort-radio" value="program"> Program
                         </span>
                     </div>
                     <br>
@@ -26,7 +26,7 @@
                                     {% if cohort.id and not program.id|program_is_in_cohort:programs_this_cohort %}
                                     {% else %}
                                         <option value="{{ node.short_name }}-{{ program.name }}" node-id="{{ node.id }}" program-id="{{ program.id }}">
-                                            {{ program.name }}-{{ node.short_name }}
+                                            {{ program.name }} ({{ node.short_name }})
                                         </option>
                                     {% endif %}
                                 {% endfor %}
@@ -37,12 +37,9 @@
                             {% for program in all_programs %}
                                 {% if cohort.id and not program.id|program_is_in_cohort:programs_this_cohort %}
                                 {% else %}
-                                    <optgroup label="{{ program.name }}"></optgroup>
-                                    {% for node in program.nodes %}
-                                        <option value="{{ node.short_name }}-{{ program.name }}" node-id="{{ node.id }}" program-id="{{ program.id }}">
-                                            {{ program.name }}-{{ node.short_name }}
-                                        </option>
-                                    {% endfor %}
+                                    <option value="{{ node.short_name }}-{{ program.name }}" node-id="0" program-id="{{ program.id }}">
+                                        {{ program.name }} ({{ program.node_list }})
+                                    </option>
                                 {% endif %}
                             {% endfor %}
                         </select>

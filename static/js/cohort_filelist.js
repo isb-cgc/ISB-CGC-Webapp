@@ -158,37 +158,6 @@ require([
         $('input.igv[type="submit"]').prop('disabled', true);
     }
 
-    var happy_name = function(input) {
-        var dictionary = {
-            'DNAseq_data': 'DNAseq',
-            'Yes': 'GA',
-            'No': 'N/A',
-            'mirnPlatform': 'microRNA',
-            'None': 'N/A',
-            'IlluminaHiSeq_miRNASeq': 'HiSeq',
-            'IlluminaGA_miRNASeq': 'GA',
-            'cnvrPlatform': 'SNP/CN',
-            'Genome_Wide_SNP_6': 'SNP6',
-            'methPlatform': 'DNAmeth',
-            'HumanMethylation27': '27k',
-            'HumanMethylation450': '450k',
-            'gexpPlatform': 'mRNA',
-            'IlluminaHiSeq_RNASeq': 'HiSeq/BCGSC',
-            'IlluminaHiSeq_RNASeqV2': 'HiSeq/UNC V2',
-            'IlluminaGA_RNASeq': 'GA/BCGSC',
-            'IlluminaGA_RNASeqV2': 'GA/UNC V2',
-            'rppaPlatform': 'Protein',
-            'MDA_RPPA_Core': 'RPPA'
-        };
-        if (input in dictionary) {
-            return dictionary[input];
-        } else if(input !== null && input !== undefined) {
-            return input.replace(/_/g, ' ');
-        } else {
-            return "N/A";
-        }
-    };
-
     var reject_load = false;
 
     var browser_tab_load = function(cohort) {
@@ -488,7 +457,7 @@ require([
                         if(active_tab === 'igv' && files[i]['dataformat'] == 'BAM') {
                             var tokenLabel = files[i]['sample'] + ", "
                                 + files[i]['exp_strat'] + ", "
-                                + happy_name(files[i]['platform']) + ", "
+                                + files[i]['platform'] + ", "
                                 + files[i]['datatype']
                                 + " ["+files[i]['build']+"]";
                             val = files[i]['cloudstorage_location'] + ';' + files[i]['index_name'] + ',' + files[i]['sample'];
@@ -545,7 +514,7 @@ require([
                                     '</div></td>';
                             break;
                         case 'platform':
-                            table_row_data += '<td>' + happy_name(files[i][column_name]) + '</td>';
+                            table_row_data += '<td>' + files[i][column_name] + '</td>';
                             break;
                         case 'filesize':
                             table_row_data += '<td class="col-filesize">' + (files[i]['filesize'] != null && files[i]['filesize'] != 'N/A'? formatFileSize(files[i]['filesize']) : 'N/A')  + '</td>';
