@@ -37,7 +37,7 @@ import django
 django.setup()
 
 from google_helpers.bigquery.bq_support import BigQuerySupport
-from projects.models import Program, Project, Attribute, Attribute_Ranges, DataSourceJoin, Attribute_Display_Values, DataSource, DataVersion, DataNode, DataSetType, Attribute_Set_Type
+from projects.models import CgcDataVersion, Program, Project, Attribute, Attribute_Ranges, DataSourceJoin, Attribute_Display_Values, DataSource, DataVersion, DataNode, DataSetType, Attribute_Set_Type
 from django.contrib.auth.models import User
 
 logger = logging.getLogger('main_logger')
@@ -241,8 +241,20 @@ def make_solr_commands(sources):
         logger.exception(e)
 
 
-def inactivate_data_versions(dv_set):
-    for dv in dv_set:
+def inactivate_data_versions(major, subv):
+    for mv in major:
+        try:
+            dv_objs = DataVersion.objects.filter(version_number=mv['ver'])
+            for dv_obj in dv_objs:
+                dv_obj.active = False
+                dv_obj.save()
+        except ObjectDoesNotExist:
+            logger.warning("[WARNING] Could not de-active major version {}: it was not found!".format(mv))
+        except Exception as e:
+            logger.error("[ERROR] While deactivating major version {} :".format(mv))
+            logger.exceiption(e)
+
+    for dv in subv:
         try:
             dv_objs = DataVersion.objects.filter(version=dv['ver'], data_type__in=dv['type'])
             for dv_obj in dv_objs:
@@ -253,27 +265,47 @@ def inactivate_data_versions(dv_set):
         except Exception as e:
             logger.error("[ERROR] While deactivating version {} :".format(dv))
             logger.exceiption(e)
+    return
 
 
-def add_data_versions(dv_set):
-    for dv in dv_set:
-        try:
-            DataVersion.objects.get(name=dv['name'])
-            logger.warning("[WARNING] Data Version {} already exists! Skipping.".format(dv['name']))
-        except ObjectDoesNotExist:
-            progs = Program.objects.filter(name__in=dv['programs'], active=True, is_public=True)
-            obj, created = DataVersion.objects.update_or_create(name=dv['name'], version=dv['ver'], build=dv.get("build",None))
-            dv_to_prog = []
+def add_data_versions(versions):
+    try:
+        cgc_dev = None
+        cgc_version = versions.get('major_version', {}).get('active', None)
+        if not cgc_version:
+            cgc_dev = CgcDataVersion.objects.get(active=True)
+            logger.info("[STATUS] Active major version located: {}".format(cgc_dev))
+        else:
+            cgc_dev, created = CgcDataVersion.objects.update_or_create(**cgc_version)
+            logger.info("[STATUS] Created major version {}".format(cgc_dev))
 
-            for prog in progs:
-                dv_to_prog.append(DataVersion.programs.through(dataversion_id=obj.id, program_id=prog.id))
+        ver_to_cgc = []
+        ver_to_prog = []
+        for dv in versions['subversions'].get('create', []):
+            obj, created = DataVersion.objects.update_or_create(name=dv['name'], version=dv['ver'], build=dv.get('build', None))
+            major_ver = CgcDataVersion.objects.get(version_number=dv['major_ver'])
+            if len(dv.get('programs',[])):
+                progs = Program.objects.filter(name__in=dv['programs'])
+                for prog in progs:
+                    ver_to_prog.append(DataVersion.programs.through(dataversion_id=obj.id, program_id=prog.id))
 
-            DataVersion.programs.through.objects.bulk_create(dv_to_prog)
+            ver_to_cgc.append(DataVersion.cgc_versions.through(dataversion_id=obj.id, cgcdataversion_id=major_ver.id))
 
-            logger.info("Data Version created: {}".format(obj))
-        except Exception as e:
-            logger.error("[ERROR] Data Version {} may not have been added!".format(dv['name']))
-            logger.exception(e)
+        if versions['subversions'].get('associate', None):
+            dvs = DataVersion.objects.filter(version__in=[x for x in versions['subversions']['associate']])
+            mvs = {x.version_number: x for x in CgcDataVersion.objects.filter(version_number__in=[y for x, y in versions['subversions']['associate'].items()])}
+            dv_to_mv = { x: mvs[x['major']] for x in versions['subversions']['associate']}
+            for dv in dvs:
+                ver_to_cgc.append(DataVersion.cgc_versions.through(dataversion=dv, cgcdataversion=dv_to_mv[dv.version]))
+
+        len(ver_to_prog) and DataVersion.programs.through.objects.bulk_create(ver_to_prog)
+        len(ver_to_cgc) and DataVersion.cgc_versions.through.objects.bulk_create(ver_to_cgc)
+
+        logger.info("[STATUS] Current Active data versions:")
+        logger.info("{}".format(DataVersion.objects.filter(active=True)))
+    except Exception as e:
+        logger.error("[ERROR] Data Versions may not have been added!")
+        logger.exception(e)
 
 
 def create_solr_params(schema_src, solr_src, aggregated=False):
@@ -575,10 +607,7 @@ def main(config, make_attr=False):
                 Project.objects.update_or_create(**proj)
 
         if 'versions' in config:
-            if 'create' in config['versions']:
-                add_data_versions(config['versions']['create'])
-            if 'deprecate' in config['versions']:
-                inactivate_data_versions(config['versions']['deprecate'])
+            add_data_versions(config['versions'])
 
         # Preload all display value information, as we'll want to load it into the attributes while we build that set
         if 'display_values' in config and exists(join(dirname(__file__), config['display_values'])):

@@ -1276,15 +1276,13 @@ require([
             $(dataset_selector + ' .sort-by-program').hide();
             $(dataset_selector + " .sort-radio[value='node']").prop('checked', true);
             $(dataset_selector + " .sort-radio[value='program']").prop('checked', false);
-            $(dataset_selector + " .sort-by-node option[node-id='" + ACTIVE_NODE_ID
-                + "'][program-id='" + ACTIVE_PROGRAM_ID + "']").prop('selected', true);
+            $(dataset_selector + " .sort-by-node option[program-id='" + ACTIVE_PROGRAM_ID + "']").prop('selected', true);
         } else if (SORT_DATASET_BY === "program") {
             $(dataset_selector + ' .sort-by-node').hide();
             $(dataset_selector + ' .sort-by-program').show();
             $(dataset_selector + " .sort-radio[value='node']").prop('checked', false);
             $(dataset_selector + " .sort-radio[value='program']").prop('checked', true);
-            $(dataset_selector + " .sort-by-program option[node-id='" + ACTIVE_NODE_ID
-                + "'][program-id='" + ACTIVE_PROGRAM_ID + "']").prop('selected', true);
+            $(dataset_selector + " .sort-by-program option[node-id='0'][program-id='" + ACTIVE_PROGRAM_ID + "']").prop('selected', true);
         }
     };
 

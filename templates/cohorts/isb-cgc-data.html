@@ -25,8 +25,8 @@
                                     <!-- Do not show it in dropdown if it is in cohort detail and the program is not in this cohort -->
                                     {% if cohort.id and not program.id|program_is_in_cohort:programs_this_cohort %}
                                     {% else %}
-                                        <option value="{{ node.short_name }}-{{ program.name }}" node-id="{{ node.id }}" program-id="{{ program.id }}">
-                                            {{ program.name }} ({{ node.short_name }})
+                                        <option value="{{ program.name }}" node-id="0" program-id="{{ program.id }}">
+                                            {{ program.name }}
                                         </option>
                                     {% endif %}
                                 {% endfor %}
@@ -37,7 +37,7 @@
                             {% for program in all_programs %}
                                 {% if cohort.id and not program.id|program_is_in_cohort:programs_this_cohort %}
                                 {% else %}
-                                    <option value="{{ node.short_name }}-{{ program.name }}" node-id="0" program-id="{{ program.id }}">
+                                    <option value="{{ program.name }}" node-id="0" program-id="{{ program.id }}">
                                         {{ program.name }} ({{ program.node_list }})
                                     </option>
                                 {% endif %}

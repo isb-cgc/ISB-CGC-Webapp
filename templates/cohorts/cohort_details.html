@@ -77,16 +77,7 @@
                     <li class="separator"></li>
                     <li class="menu-item"><a href="{% url 'download_ids' cohort.id %}"
                                              class="btn btn-info download-ids-btn"
-                                             title="Download this cohort's records as a CSV">CSV</a></li>
-                    <li class="menu-item">
-                        <button class="btn btn-info" data-toggle="modal" data-target="#export-to-bq-modal"
-                                {% if has_user_data %}disabled {% endif %}title="{% if has_user_data %}Cohorts with User data cannot be exported at this time.{% else %}Export this cohort's records to a BigQuery table{% endif %}">
-                            BigQuery
-                        </button>
-                        <button class="btn btn-info" data-toggle="modal" data-target="#export-to-gcs-modal"
-                                {% if has_user_data %}disabled {% endif %}title="{% if has_user_data %}Cohorts with User data cannot be exported at this time.{% else %}Export this cohort's records to a GCS bucket{% endif %}">
-                            GCS
-                        </button>
+                                             title="Download this cohort's records as a CSV">CSV</a>
                     </li>
                     <li class="separator"></li>
                     <li class="menu-item">
@@ -136,14 +127,16 @@
                 <div class="col-sm-12 col-md-12 col-lg-12">
                     <div class="cohort-selected-filters panel panel-default">
                         <div class="panel-heading">
-                            <h4 class="panel-title">Current Filters</h4>
+                            <h4 class="panel-title">Filters</h4>
                         </div>
                         <div class="panel-body curr-filter-panel gradient-overlay">
                             {% for prog, filters in current_filters.items %}
                                 <div class="col-sm-{{ current_filters.keys|get_prog_col_size }} prog-filter-set">
                                     <h5>{{ prog }}</h5>
                                     {% for filter in filters %}
-                                        <span class="filter-label label label-default space-right-5">{{ filter.displ_name }}: {{ filter.displ_val }}</span>
+                                        {% for val in filter.values %}
+                                            <span class="filter-label label label-default space-right-5">{{ filter.display_name }}: {{ val.display_val }}</span>
+                                            {% endfor %}
                                     {% endfor %}
                                 </div>
                             {% empty %}
@@ -181,42 +174,6 @@
                             </div>
                             <div class="row col-md-12 space-bottom-10">
                                 <span>Your Permissions: {{ cohort.perm.perm }}</span>
-                            </div>
-                            <div class="row col-md-12 space-bottom-10">
-                                <span class="rev-history">Revision History:</span>
-                                <ul class="rev-history">
-                                    {% for item in revision_history %}
-                                        {% if 'type' in item and item.type == 'filter' %}
-                                            <div class="panel-body revision-filter-panel">
-                                                {% for prog, filters in item.vals.items %}
-                                                    <div class="col-sm-{{ item.vals.keys|get_prog_col_size }} revision-prog-filter-set">
-                                                        <h6>{{ prog }}</h6>
-                                                        {% for filter in filters %}
-                                                            <span class="filter-label label label-default space-right-5">{{ filter.displ_name }}: {{ filter.displ_val }}</span>
-                                                        {% endfor %}
-                                                    </div>
-                                                {% endfor %}
-                                            </div>
-                                        {% else %}
-                                            <li>{{ item }}</li>
-                                        {% endif %}
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                            <div class="row col-md-12 space-bottom-10">
-                                <span>Creation Filters:</span>
-                                <div class="panel-body creation-filter-panel">
-                                    {% for prog, filters in creation_filters.items %}
-                                        <div class="col-sm-{{ creation_filters.keys|get_prog_col_size }} creation-prog-filter-set">
-                                            <h6>{{ prog }}</h6>
-                                            {% for filter in filters %}
-                                                <span class="filter-label label label-default space-right-5">{{ filter.displ_name }}: {{ filter.displ_val }}</span>
-                                            {% endfor %}
-                                        </div>
-                                    {% empty %}
-                                        <p>There were no filters used to create this cohort.</p>
-                                    {% endfor %}
-                                </div>
                             </div>
                         </div>
                         <div class="more-details">
