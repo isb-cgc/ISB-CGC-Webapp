@@ -24,7 +24,7 @@ require.config({
         search_helpers: 'helpers/search_helpers',
         vis_helpers: 'helpers/vis_helpers',
         tree_graph: 'visualizations/createTreeGraph',
-        stack_bar_chart: 'visualizations/createStackedBarchart',
+        stack_bar_chart: 'visualizations/createStackedBarChart',
         bloodhound: 'libs/bloodhound',
         typeahead : 'libs/typeahead',
         tokenfield: 'libs/bootstrap-tokenfield.min',
