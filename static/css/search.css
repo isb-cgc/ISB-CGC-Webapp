@@ -409,26 +409,31 @@ tr {
 
 #studies_table_head th.project-name, th.case-id,
 #studies_table td.project-name, td.case-id {
-    width: 13%;
+    width: 12%;
 }
 
 #studies_table_head th.study-id,
 #studies_table td.study-id {
-    width: 17%;
+    width: 16%;
 }
 
 #studies_table_head th.study-date,
 #studies_table td.study-date {
-    width: 9%;
+    width: 7%;
 }
 
 #studies_table_head th.study-description,
 #studies_table td.study-description {
-    width:32%;
+    width:29%;
+}
+
+#studies_table_head th.numrows,
+#studies_table td.numrows {
+    width:10%;
 }
 #studies_table_head th.open-viewer,
 #studies_table td.open-viewer {
-    width:5%;
+    width:4%;
     /* This is necessary to make sure the 2 icons remain together, lined up. */
     min-width: 70px;
 }
@@ -605,3 +610,32 @@ svg {
 .viewer-toggle .viewer-menu a:hover {
     background-color: #d5d5d5;
 }
+
+td.cartnum.incart{
+    background-color:grey;
+    color:white;
+}
+.ckbx:has(.fa-cart-shopping.green) + .cart2{
+background-color:lightgreen
+}
+
+.ckbx:has(.fa-cart-shopping.yellow) + .cart2{
+    background-color:#ff7;
+}
+
+.ckbx:has(.fa-cart-shopping.green) {
+background-color:lightgreen
+}
+.ckbx:has(.fa-cart-shopping.yellow) {
+    background-color:#ff7;
+}
+
+.ckbx:has(.fa-cart-shopping.transparent) {
+background-color:transparent
+}
+
+
+.ckbx:has(.fa-cart-shopping.transparent) + .cart2{
+background-color:transparent
+}
+

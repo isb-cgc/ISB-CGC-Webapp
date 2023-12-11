@@ -52,6 +52,8 @@ BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 
 
+
+
 # The site's homepage
 @never_cache
 def landing_page(request):
@@ -678,6 +680,13 @@ def warn_page(request):
 # About page
 def about_page(request):
     return render(request, 'idc/about.html', {'request': request})
+
+def cart_page(request):
+    return render(request, 'idc/cart.html', {'request': request})
+
+def test_page(request, mtch):
+    pg=request.path[:-1]+'.html'
+    return render(request, 'idc'+pg)
 
 
 # User dashboard, where saved cohorts (and, in the future, uploaded/indexed data) are listed

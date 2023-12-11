@@ -52,10 +52,12 @@ urlpatterns = [
 
     url(r'^warning/', views.warn_page, name='warn'),
     url(r'^about/', views.about_page, name='about_page'),
+   url(r'^test(.*)/', views.test_page, name='test_page'),
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
     url(r'^extended_login/$', views.extended_login_view, name='extended_login'),
     url(r'^privacy/', views.privacy_policy, name='privacy'),
     url(r'^news/', views.news_page, name='news'),
+    url(r'^cart/', views.cart_page, name='cart'),
     url(r'^collaborators/', views.collaborators, name='collaborators'),
     url(r'^collections/', include('idc_collections.urls')),
     # url(r'^share/', include('sharing.urls')),

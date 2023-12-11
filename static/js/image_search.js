@@ -102,6 +102,29 @@ require([
         }
     };
 
+    window.fetchscript = function(){
+
+        var url="/testscript/"
+        var csrftoken = $.getCookie('csrftoken');
+        var fstr="alert('sorry did not work')";
+        $.ajax({
+            url: url,
+            type: 'post',
+            dataType: 'text',
+            beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success: function (data) {
+                fstr=data;
+                $('.spinner').hide();
+                window.testfunc= Function(fstr);
+            },
+            error: function(data){
+                alert("There was an error fetching server data. Please alert the systems administrator")
+                console.log('error loading data');
+            }
+        });
+        //window.testfunc= Function(fstr);
+    }
+
     window.toggleCharts=function(cntrl){
         if (cntrl==="hide"){
             $('.chart-content').addClass('hidden');
@@ -1831,7 +1854,7 @@ require([
                 "iDisplayLength": pageRows,
                 "autoWidth": false,
                 "dom": '<"dataTables_controls"ilp>rt<"bottom"><"clear">',
-                "order": [[2, "asc"]],
+                "order": [[3, "asc"]],
                 "createdRow": function (row, data, dataIndex) {
                     $(row).attr('id', 'case_' + data['PatientID'])
                     $(row).attr('data-projectid', data['collection_id'][0]);
@@ -1913,10 +1936,11 @@ require([
                 },
                 "columnDefs": [
                     {className: "ckbx", "targets": [0,1]},
-                    {className: "col1 project-name", "targets": [2]},
-                    {className: "col1 case-id", "targets": [3]},
-                    {className: "col1 numrows", "targets": [4]},
-                    {className: "col1", "targets": [5]},
+                    {className: "cartnum ckbx", "targets":[2]},
+                    {className: "col1 project-name", "targets": [3]},
+                    {className: "col1 case-id", "targets": [4]},
+                    {className: "col1 numrows", "targets": [5]},
+                    {className: "col1", "targets": [6]},
                 ],
                 "columns": [
                     {
@@ -1962,6 +1986,11 @@ require([
 
                         }
                     },
+                    {
+                        "type": "html", "orderable": false, "data": "PatientID", render: function (data) {
+                          return '<i class="fa-solid fa-text"></i>';
+                        }
+                    },
 
                     {"type": "text", "orderable": true, data: 'collection_id', render: function (data) {
                             var projectNm = $('#' + data).filter('.collection_name')[0].innerText;
@@ -1985,7 +2014,7 @@ require([
                     var refreshAfterFilter = $('#cases_tab').data('refreshafterfilter');
                     var updateChildTables = $('#cases_tab').data('updatechildtables');
                     var checkIds = new Array();
-                    var cols = ['', '','collection_id', 'PatientID', 'StudyInstanceUID', 'SeriesInstanceUID'];
+                    var cols = ['', '','','collection_id', 'PatientID', 'StudyInstanceUID', 'SeriesInstanceUID'];
                     var ssCallNeeded = true;
                     if (viewProjects.length === 0) {
                         ssCallNeeded = false;
@@ -2040,7 +2069,7 @@ require([
                             beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                             success: function (data) {
                                 window.casesCache = new Object();
-                                colSort = ["", "", "collection_id", "PatientID", "unique_study", "unique_series"];
+                                colSort = ["", "", "","collection_id", "PatientID", "unique_study", "unique_series"];
                                 updateCache(window.casesCache, request, backendReqStrt, backendReqLength, data, colSort);
                                 dataset = data['res'].slice(request.start - backendReqStrt, request.start - backendReqStrt + request.length);
 
@@ -2390,7 +2419,7 @@ require([
                 "iDisplayLength": pageRows,
                 "autoWidth": false,
                 "dom": '<"dataTables_controls"ilp>rt<"bottom"><"clear">',
-                "order": [[1, "asc"]],
+                "order": [[3, "asc"]],
                 "createdRow": function (row, data, dataIndex) {
                     $(row).attr('id', 'study_' + data['StudyInstanceUID'])
                     $(row).attr('data-studyid', data['StudyInstanceUID']);
@@ -2483,12 +2512,13 @@ require([
                 },
                 "columnDefs": [
                     {className: "ckbx", "targets": [0,1]},
-                    {className: "col1 case-id", "targets": [2]},
-                    {className: "col2 study-id study-id-col study-id-tltp", "targets": [3]},
-                    {className: "col1 study-date", "targets": [4]},
-                    {className: "col1 study-description", "targets": [5]},
-                    {className: "col1 numrows", "targets": [6]},
-                    {className: "ohif open-viewer", "targets": [7]},
+                    {className: "ckbx, cartnum", "targets": [2]},
+                    {className: "col1 case-id", "targets": [3]},
+                    {className: "col2 study-id study-id-col study-id-tltp", "targets": [4]},
+                    {className: "col1 study-date", "targets": [5]},
+                    {className: "col1 study-description", "targets": [6]},
+                    {className: "col1 numrows", "targets": [7]},
+                    {className: "ohif open-viewer", "targets": [8]},
 
                 ],
                 "columns": [
@@ -2523,7 +2553,14 @@ require([
 
                         }
 
-                    },{
+                    },
+                    {
+                        "type": "html", "orderable": false, "data": "PatientID", render: function (data) {
+                          return '<i class="fa-solid fa-text"></i>';
+                        }
+                    },
+
+                    {
                         "type": "text", "orderable": true, data: 'PatientID', render: function (data) {
                             return data;
                         }

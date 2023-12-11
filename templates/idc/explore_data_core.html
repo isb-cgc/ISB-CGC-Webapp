@@ -24,6 +24,8 @@
                         <div class="tab-panel panel-default">
                             <div class="panel-heading clearfix">
                                 <h4 class="panel-title">Search Scope</h4>
+                                <button onclick="fetchscript()">press me</button>
+                                <button onclick="testfunc()">press me</button>
                             </div>
                             <div class="tab-content">
                                 <div id="program_set" class="tab-pane active" role="tabpanel">
@@ -915,6 +917,7 @@
                                                 <i class="fa-solid fa-circle-minus fa-lg"></i>
                                             </th>
                                             <th class="ckbx" onclick="selectAllVisCases(this)"><i class="fa-solid fa-cart-shopping unselected"></i></th>
+                                            <th class="ckbx"></th>
                                             <th class='text_data'>Collection Name</th>
                                             <th class='text_data'>Case ID <i class="fas fa-info-circle case-info"></i></th>
                                             <th class='numeric_data'>Total # of Studies</th>
@@ -938,6 +941,7 @@
                                                 <i class="fa-solid fa-circle-minus fa-lg"></i>
                                             </th>
                                             <th class="shop"><i class="fa-solid "></i></th>
+                                            <th class="ckbx"></th>
                                             <th class='col1 text_data case-id has_aux' data-auxid='3'>Case ID <i class="fas fa-info-circle case-info"></i></th>
                                             <th class='col2 text_data study-id study-id-col'>Study Instance UID</th>
                                             <th class='col1 text_data study-date'>Study Date</th>
