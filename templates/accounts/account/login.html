@@ -1,44 +1,64 @@
-{% extends "account/base.html" %}
+{% extends 'base.html' %}
 
 {% load i18n %}
-{% load account %}
+{% load socialaccount %}
+{% load static %}
 
 {% block head_title %}{% trans "Sign In" %}{% endblock %}
 
+{% block page_header %}{% endblock %}
+
+{% block page_name %}sign-in{% endblock %}
+
 {% block content %}
 
-<h1>{% trans "Sign In" %}</h1>
-
-{% if socialaccount.providers  %}
-<p>{% blocktrans with site.name as site_name %}Please sign in with one
-of your existing third party accounts. Or, <a href="{{ signup_url }}">sign up</a>
-for a {{site_name}} account and sign in below:{% endblocktrans %}</p>
-
-<div class="socialaccount_ballot">
-
-  <ul class="socialaccount_providers">
-    {% include "socialaccount/snippets/provider_list.html" with process="login" %}
-  </ul>
-
-  <div class="login-or">{% trans 'or' %}</div>
-
-</div>
-
-{% include "socialaccount/snippets/login_extra.html" %}
-
-{% else %}
-<p>{% blocktrans %}If you have not created an account yet, then please
-<a href="{{ signup_url }}">sign up</a> first.{% endblocktrans %}</p>
-{% endif %}
-
-<form class="login" method="POST" action="{% url 'account_login' %}">
-  {% csrf_token %}
-  {{ form.as_p }}
-  {% if redirect_field_value %}
-  <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-  {% endif %}
-  <a class="button secondaryAction" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a>
-  <button class="primaryAction" type="submit">{% trans "Sign In" %}</button>
-</form>
+    <div class="col-lg-12 short-inner-content-no-header">
+        <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2"></div>
+        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-8 accounts-col">
+        <form class="login" method="POST" action="{% url 'account_login' %}" autocomplete="off">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <a class="btn btn-primary" href="{% provider_login_url 'google' %}">
+                        <img class="icon-small" alt="G" src="{%  static 'img/google_icon_sm.png' %}" />
+                        <span>Sign in with Google</span>
+                    </a>
+                </div>
+                <div class="panel-body panel-or">
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5"><hr /></div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 text-center"><h4> OR </h4></div>
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5"><hr /></div>
+                </div>
+                <div class="panel-body idc-login">
+                    <h3>Sign in with Cancer Genomic Cloud</h3>
+                      {% csrf_token %}
+                      {{ form.as_p }}
+                      {% if redirect_field_value %}
+                      <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                      {% endif %}
+                      <button class="primaryAction btn btn-primary" type="submit">{% trans "Sign In" %}</button>
+                </div>
+            </div>
+        <div class="panel panel-default">
+            <div class="panel-body sign-up">
+                <p>
+                Forgot your password?
+                </p>
+                <p><a class="btn btn-default secondaryAction" href="{% url 'account_reset_password' %}">{% trans "Password Reset" %}</a></p>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-body sign-up">
+                <p>
+                Don't have an account with CGC?
+                </p>
+                <p>
+                    <a class="btn btn-special" href="{{ signup_url }}">{% trans "Sign Up" %}</a>
+                </p>
+            </div>
+        </div>
+        </form>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2"></div>
+    </div>
 
 {% endblock %}
