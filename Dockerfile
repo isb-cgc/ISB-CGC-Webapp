@@ -27,13 +27,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update
 RUN apt-get install -y wget
+# TODO: we need to start using the keyring instead
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 3A79BD29
 RUN wget "http://repo.mysql.com/mysql-apt-config_0.8.26-1_all.deb" -P /tmp
 
 # install lsb-release (a dependency of mysql-apt-config), since dpkg doesn't
 # do dependency resolution
 RUN apt-get install -y lsb-release
-# TODO: we need to start using the keyring instead
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 5072E1F5
 RUN dpkg --install /tmp/mysql-apt-config_0.8.26-1_all.deb
 
 # fetch the updated package metadata (in particular, mysql-server)
