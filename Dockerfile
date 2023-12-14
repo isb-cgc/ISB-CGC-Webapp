@@ -33,7 +33,7 @@ RUN wget "http://repo.mysql.com/mysql-apt-config_0.8.26-1_all.deb" -P /tmp
 # do dependency resolution
 RUN apt-get install -y lsb-release
 # TODO: we need to start using the keyring instead
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 467B942D3A79BD29
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv A8D3785C
 RUN dpkg --install /tmp/mysql-apt-config_0.8.26-1_all.deb
 
 # fetch the updated package metadata (in particular, mysql-server)
