@@ -29,7 +29,7 @@ RUN apt-get update
 RUN apt-get install -y wget
 # TODO: we need to start using the keyring instead
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv A8D3785C
-RUN wget "http://repo.mysql.com/mysql-apt-config_0.8.26-1_all.deb" -P /tmp
+RUN wget "http://repo.mysql.com/mysql-apt-config_0.8.29-1_all.deb" -P /tmp
 
 # install lsb-release (a dependency of mysql-apt-config), since dpkg doesn't
 # do dependency resolution
