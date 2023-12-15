@@ -61,8 +61,8 @@ echo "Preparing System..."
 apt-get -y --force-yes install software-properties-common ca-certificates
 
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv A8D3785C
-wget "https://repo.mysql.com/mysql-apt-config_0.8.26-1_all.deb" -P /tmp
-dpkg --install /tmp/mysql-apt-config_0.8.26-1_all.deb
+wget "https://repo.mysql.com/mysql-apt-config_0.8.29-1_all.deb" -P /tmp
+dpkg --install /tmp/mysql-apt-config_0.8.29-1_all.deb
 
 apt-get update -qq
 
