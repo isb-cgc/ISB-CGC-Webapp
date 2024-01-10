@@ -639,3 +639,27 @@ background-color:transparent
 background-color:transparent
 }
 
+.curfilt {
+  background-color: lightgrey;
+}
+
+.filts:not(.curfilt):hover{
+    text-decoration:underline;
+                    }
+
+td.cartnum{
+    background-color:lightgrey;
+    /* color: white; */
+
+}
+
+.filtermoddisp{
+    display:block !important;
+    visibility: visible;
+    z-index:1050;
+}
+
+.filternotdisp{
+
+    z-index:-1;
+}
