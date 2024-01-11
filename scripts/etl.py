@@ -614,9 +614,9 @@ def main(config, make_attr=False):
             displ_vals_file = open(join(dirname(__file__), config['display_values']), "r")
 
             for line in csv_reader(displ_vals_file):
-                if line[2] not in DISPLAY_VALS:
-                    DISPLAY_VALS[line[2]] = {}
-                DISPLAY_VALS[line[2]][line[0]]=line[1]
+                if line[0] not in DISPLAY_VALS:
+                    DISPLAY_VALS[line[0]] = {}
+                DISPLAY_VALS[line[0]][line[1]]=line[2]
             displ_vals_file.close()
         else:
             print("[STATUS] Display values file not listed - skipping!")
