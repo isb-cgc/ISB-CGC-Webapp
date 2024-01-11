@@ -416,40 +416,14 @@ require([
 
             var feature_id = feature.data('feature-id'), value_id =  value.data('value-id');
 
-            if (feature.data('feature-type') === 'datatype') { // Datatype filter
-
-                token = $('<span>').data({
-                    'feature-id': 'data_type_availability',
-                    'feature-name': 'data_type_availability',
-                    'value-id': value_id,
-                    'value-name': value.data('value-name'),
-                    'prog-id': tokenProgId,
-                    'node-id': tokenNodeId,
-                    'prog-name': tokenProgDisplName,
-                }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
-
-            } else if (feature.data('feature-type') === 'donor') { // Case filter
-                token = $('<span>').data({
-                    'feature-id': feature_id,
-                    'feature-name': feature.data('feature-name'),
-                    'value-id': value_id,
-                    'value-name': value.data('value-name'),
-                    'prog-id': tokenProgId,
-                    'prog-name': tokenProgDisplName
-                }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
-
-            } else if (feature.data('feature-type') === 'user-data') { // User data filter
-                token = $('<span>').data({
-                    'feature-id': feature_id,
-                    'feature-name': feature.data('feature-name'),
-                    'value-id': value_id,
-                    'value-name': value.data('value-name'),
-                    'prog-id': tokenProgId,
-                    'node-id': tokenNodeId,
-                    'prog-name': tokenProgDisplName,
-                    'user-program-id': tokenUserProgId,
-                }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
-            }
+            token = $('<span>').data({
+                'feature-id': feature_id,
+                'feature-name': feature.data('feature-name'),
+                'value-id': value_id,
+                'value-name': value.data('value-name'),
+                'prog-id': tokenProgId,
+                'prog-name': tokenProgDisplName
+            }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
 
             // Don't re-add the token and filter if it already exists
             if($(selFilterPanel+' .panel-body span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').length <= 0) {
@@ -1210,24 +1184,13 @@ require([
 
     var apply_anonymous_checkbox_filter = function(programId, featureId, valueId) {
         var checkbox = null;
-        if (featureId === "data_type_availability") {
-            // data type filters...
-            $("input[data-value-id ='"+valueId+"']").each(function() {
-                if($(this).closest("[data-feature-id=\"data_type_availability\"]").length !== 0) {
-                    checkbox = $(this);
-                    return;
-                }
-            });
-        } else {
-            // case filters...
-            var checkboxId = programId + "-" + featureId + "-" + valueId;
-            checkboxId = checkboxId.replace(/ /g, "_");
-            checkboxId = checkboxId.toUpperCase();
+        var checkboxId = programId + "-" + featureId + "-" + valueId;
+        checkboxId = checkboxId.replace(/ /g, "_");
+        checkboxId = checkboxId.toUpperCase();
 
-            // Escape special chars
-            checkboxId = checkboxId.replace(/([$%&()*+,./:;<=>?@\[\\\]^\{|}~])/g, '\\$1');
-            checkbox = $('#'+checkboxId);
-        }
+        // Escape special chars
+        checkboxId = checkboxId.replace(/([$%&()*+,./:;<=>?@\[\\\]^\{|}~])/g, '\\$1');
+        checkbox = $('#'+checkboxId);
 
         if (checkbox !== null) {
             // Set checked and trigger change to update other related data
