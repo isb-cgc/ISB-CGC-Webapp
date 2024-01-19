@@ -27,8 +27,8 @@ require.config({
         assetsresponsive: 'libs/assets.responsive',
         jquerydt: 'libs/jquery.dataTables.min',
         base: 'base',
-        tables: './tables',
-        imagesearch: './image_search',
+        tables: 'tables',
+        image_search: 'image_search',
         tippy: 'libs/tippy-bundle.umd.min',
         '@popperjs/core': 'libs/popper.min',
         session_security: 'session_security/script'
@@ -49,22 +49,22 @@ require.config({
         'tablesorter': ['jquery'],
         'underscore': {exports: '_'},
         'session_security': ['jquery'],
-        'imagesearch': ['jquery', 'underscore', 'base', 'jquerydt', 'jqueryui', 'bootstrap'],
-        'tables': ['jquery', 'base', 'jquerydt', 'jqueryui', 'bootstrap']
+        'image_search': ['jquery', 'underscore', 'base', 'jquerydt', 'jqueryui', 'bootstrap']
     }
 });
 
 require([
+    'image_search',
+    'tables',
     'jquery',
     'tippy',
     'base', // This must always be loaded
-    'imagesearch',
     'jqueryui',
     'jquerydt',
     'bootstrap',
     'tablesorter',
-    'tables'
-], function ($, tippy, base) {
+
+], function (image_search, tables,$, tippy, base) {
     var saving_cohort = false;
 
     $('#save-cohort-modal').on('show.bs.modal', function() {
@@ -425,7 +425,6 @@ require([
     $('.download-link').on('click', function(){
         $('#download-images').modal("hide");
     });
-
 
 
 });
