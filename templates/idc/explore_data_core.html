@@ -663,11 +663,7 @@
                 {% endif %}
                 <div class="tabpanel data-tab-content-panel">
                 <div class="panel panel-default filter-display-panel">
-                    <div class="panel-heading clearfix"><h4 class="panel-title">Cart Summary</h4>
-                    <div class ="panel-body">
-                            <div id="search_def_stats" class="notDisp">No Text</div>
-                            <div id="filtersetdiv"><span id="filt0" class="curfilt filts" onclick="changeFilterSet(0, true)">Filterset 1</span></div>
-                    </div>
+
                         <div class="panel-heading clearfix"><h3 class="panel-title">Filter Definition (this set)</h3>
                             {% if not is_cohort %}
                                 <a class="pull-left clear-filters btn btn-primary btn-small" role="button"
@@ -708,11 +704,39 @@
                         </div>
 
                     </div>
+                <div class="panel-heading clearfix notDisp"><h4 class="panel-title">Cart Summary</h4>
+                    <div class ="panel-body">
+                            <div id="search_def_stats" class="notDisp">No Text</div>
+                            <div id="filtersetdiv"><span id="filt0" class="curfilt filts" onclick="changeFilterSet(0, true)">Filterset 1</span></div>
+                    </div>
                 </div>
-                <div class="vert">
 
-                    <div class="filter-panel panel" role="tabpanel">
+                 <div id="res" class=" filter-panel" role="tabpanel">
                         <div class="tabpanel panel-default" role="tabpanel">
+                            <div class="panel-heading clearfix">
+                                <h4 class="panel-title">stuff
+                                </h4>
+
+                            </div>
+                            <div>
+                            <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
+                                <li id="res_orig" role="presentation" class="filter-tab active"><a
+                                        href="#search_orig_set" role="tab" data-toggle="tab" title="orig"
+                                        aria-expanded="true">Original</a></li>
+
+                                    <li id="search_derived" role="presentation" class="filter-tab disabled"><a
+                                            href="#search_derived_set" role="tab" data-toggle="tab" title="derived"
+                                            aria-expanded="false">Derived</a></li>
+
+
+
+                                    <li id="search_related" role="presentation" class="filter-tab"><a
+                                            href="#search_related_set" role="tab" data-toggle="tab" title="related"
+                                            aria-expanded="false">Related</a></li>
+                            </ul>
+                            </div>
+                            <div class="tab-content">
+                                <div class="tabpanel panel-default" role="tabpanel">
                             <div class="panel-heading clearfix">
 
                                 <h4 class="panel-title">
@@ -863,10 +887,14 @@
                             </div>
                             </div>
                         </div>
-                    <div class="tabpanel data-tab-content-panel">
+                                <div class="tabpanel data-tab-content-panel">
 
                 </div>
+                            </div>
+                        </div></div>
+                <div class="vert">
 
+                    
 
                         <div class="tabpanel data-tab-content-panel table-panel">
                             <div id="projects_panel_container" class="panel panel-default">
