@@ -29,6 +29,8 @@ require.config({
         jquerydt: 'libs/jquery.dataTables.min',
         session_security: 'session_security/script',
         tables: 'tables',
+        filterutils: 'filterutils',
+        plotutils: 'plotutils'
 
     },
     shim: {
@@ -37,12 +39,16 @@ require.config({
         'jquerydt': ['jquery'],
         'tablesorter': ['jquery'],
         'underscore': {exports: '_'},
-        'session_security': ['jquery']
+        'session_security': ['jquery'],
+        'filterutils': ['jquery'],
+        'plotutils': ['jquery']
     }
 });
 
 
 require([
+    'plotutils',
+    'filterutils',
     'tables',
     'jquery',
     'underscore',
@@ -50,9 +56,9 @@ require([
     'jquerydt',
     'jqueryui',
     'bootstrap'
-], function(tables,$, _, base) {
+], function(plotutils,filterutils, tables,$, _, base) {
 
-    const FLOAT_SLIDERS = ["Sphericity_quant"];
+    const FLOAT_SLIDERS = filterutils.FLOAT_SLIDERS;
 
     $('.manifest-size-warning').hide();
 
@@ -66,44 +72,6 @@ require([
     window.projSets['qin'] = ["qin_headneck","qin_lung_ct","qin_pet_phantom","qin_breast_dce_mri"];
     var first_filter_load = true;
 
-    var plotLayout = {
-        title: '',
-        autosize: true,
-        margin: {
-            l: 30,
-            r: 30,
-            b: 60,
-            t: 30,
-            pad: 0
-        },
-        xaxis: {type: 'category', dtick: 1}
-    };
-
-    var pieLayout = {
-        title: '',
-        autosize: true,
-        margin: {
-            l: 30,
-            r: 30,
-            b: 60,
-            t: 30,
-            pad: 0
-        },
-        showlegend: false,
-        legend: {
-            x: 2,
-            y: 0,
-            traceorder: 'normal',
-            font: {
-                family: 'sans-serif',
-                size: 4,
-                color: '#000'
-            },
-            bgcolor: '#E2E2E2',
-            bordercolor: '#FFFFFF',
-            borderwidth: 2
-        }
-    };
 
     window.fetchscript = function(){
 
@@ -221,144 +189,11 @@ require([
             window.filterObj[filtAtt]['type'] = 'ebtw';
         }
         if (updateNow) {
-            mkFiltText();
+            filterutils.mkFiltText();
             updateFacetsData(true);
         }
      };
 
-    var mkFiltText = function () {
-        var hasTcga = false;
-        var tcgaColSelected = false;
-        if ((window.filterObj.hasOwnProperty('Program')) && (window.filterObj.Program.indexOf('TCGA')>-1)){
-            tcgaColSelected = true;
-            $('#tcga_clinical_heading').children('a').removeClass('disabled');
-        }  else {
-            $('#tcga_clinical_heading').children('a').addClass('disabled');
-            if (!($('#tcga_clinical_heading').children('a')).hasClass('collapsed')){
-                $('#tcga_clinical_heading').children('a').click();
-            }
-        }
-
-        var curKeys = Object.keys(filterObj).sort();
-        oStringA = new Array();
-        accessStr = ''
-        var collection = new Array();
-        var accessStr=''
-        for (i = 0; i < curKeys.length; i++) {
-            var addKey = true;
-            var curKey = curKeys[i];
-            if (curKey.startsWith('Program')) {
-                curArr = filterObj[curKey];
-                for (var j = 0; j < curArr.length; j++) {
-                    if (!(('Program.' + curArr[j]) in filterObj)) {
-                        var colName = $('#' + curArr[j]).filter('.collection_name')[0].innerText;
-                        collection.push(colName);
-                    }
-                }
-            }
-            else
-                {
-                var realKey="";
-                if (curKey.endsWith('_rng')){
-                    realKey = curKey.substring(0, curKey.length - 4).split('.').pop();
-                }
-                else{
-                    realKey = curKey.split('.').pop();
-                }
-                if (curKey.endsWith('_rng') && $('#' + realKey ).hasClass('isQuant')) {
-                //var realKey = curKey.substring(0, curKey.length - 4).split('.').pop();
-                var disp = $('#' + realKey + '_heading').children().children('.attDisp')[0].innerText;
-                if (curKey.startsWith('tcga_clinical') && tcgaColSelected) {
-                    disp = 'tcga.' + disp;
-                    hasTcga = true;
-                } else if (curKey.startsWith('tcga_clinical') && !tcgaColSelected) {
-                    addKey = false;
-                    break;
-                }
-                if (addKey) {
-                    var fStr = '';
-                    if ('rng' in filterObj[curKey]) {
-                        if (Array.isArray(filterObj[curKey]['rng'][0])) {
-                            pset = new Array()
-                            for (var ind = 0; ind < filterObj[curKey]['rng'].length; ind++) {
-                                pair = filterObj[curKey]['rng'][ind];
-                                pset.push(pair[0].toString() + '-' + pair[1].toString());
-                            }
-                            fStr += pset.join(", ")
-                        } else {
-                            fStr += filterObj[curKey]['rng'][0].toString() + '-' + (filterObj[curKey]['rng'][1]).toString();
-                        }
-                    }
-                    if (('rng' in filterObj[curKey]) && ('none' in filterObj[curKey])) {
-                        fStr += ', ';
-                    }
-                    if ('none' in filterObj[curKey]) {
-                        fStr += 'None';
-                    }
-
-                    var nstr = '<span class="filter-type">' + disp + '</span> IN (<span class="filter-att">' + fStr + '</span>)';
-                    oStringA.push(nstr);
-                }
-            }
-                else {
-                //var realKey = curKey.split('.').pop();
-                var disp = $('#' + realKey + '_heading').children().children('.attDisp')[0].innerText;
-                if (curKey.startsWith('tcga_clinical') && tcgaColSelected) {
-                    disp = 'tcga.' + disp;
-                    hasTcga = true;
-                } else if (curKey.startsWith('tcga_clinical') && !tcgaColSelected) {
-                    addKey = false;
-                    break;
-                }
-                if (addKey) {
-                    var valueSpans = $('#' + realKey + '_list').children().children().children('input:checked').siblings('.value');
-                    oVals = new Array();
-                    valueSpans.each(function () {
-                        oVals.push($(this).text())
-                    });
-
-                    var oArray = oVals.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
-                    nstr = '<span class="filter-type">' + disp + '</span>';
-                    var joinElem = $('#' + curKey).find('.join_val').filter(':checked');
-                    if (joinElem.length > 0) {
-                        var joinstr = joinElem.attr("value");
-                        nstr += 'IN (' + oArray.join(joinstr) + ')';
-                    } else {
-                        nstr += 'IN (' + oArray.join("") + ')';
-                    }
-                    if (curKey === 'access') {
-                        accessStr = nstr;
-                    } else {
-                        oStringA.push(nstr);
-                    }
-                }
-            }
-          }
-        }
-        if (hasTcga && tcgaColSelected) {
-            $('#search_def_warn').show();
-        } else {
-            $('#search_def_warn').hide();
-        }
-
-        if (collection.length>0){
-            var oArray = collection.sort().map(item => '<span class="filter-att">' + item.toString() + '</span>');
-            nstr = '<span class="filter-type">Collection</span>';
-            nstr += 'IN (' + oArray.join("") + ')';
-            oStringA.unshift(nstr);
-        }
-        if (accessStr.length>0){
-            oStringA.unshift(accessStr);
-        }
-        if (oStringA.length > 0) {
-            var oString = oStringA.join(" AND");
-            document.getElementById("search_def").innerHTML = '<p>' + oString + '</p>';
-            document.getElementById('filt_txt').value=oString;
-        } else {
-            document.getElementById("search_def").innerHTML = '<span class="placeholder">&nbsp;</span>';
-            document.getElementById('filt_txt').value="";
-        }
-    };
 
     window.showGraphs = function(selectElem){
         $(selectElem).parent().siblings('.graph-set').show();
@@ -407,7 +242,7 @@ require([
             }
 
             var slideNm = $(elem).parent()[0].id+"_slide";
-            mkFiltText();
+            filterutils.mkFiltText();
 
             if (updateNow) {
                 updateFacetsData(true);
@@ -545,131 +380,15 @@ require([
 
     window.updateSearchScope = function (searchElem) {
         var project_scope = searchElem.selectedOptions[0].value;
-        mkFiltText();
+        filterutils.mkFiltText();
         updateFacetsData(true);
     }
 
 
 
-    window.parseFilterObj = function (){
-        var hasTcgaCol=false;
-        if ((window.filterObj.hasOwnProperty('Program')) && (window.filterObj.Program.indexOf('TCGA')>-1)){
-            hasTcgaCol=true;
-        }
-        collObj=new Array();
-        filtObj = new Object();
-        for (ckey in window.filterObj){
-            if (ckey ==='Program'){
-                for (ind=0;ind<window.filterObj[ckey].length;ind++){
-                    program = window.filterObj[ckey][ind];
-                    if (program in window.projSets){
-                        if (!('Program.'+program in window.filterObj)){
-                           collObj= collObj.concat(window.projSets[program]);
-                        }
-                    } else {
-                        collObj.push(program);
-                    }
-                }
-            } else if (ckey.startsWith('Program.')){
-                 for (ind=0;ind<window.filterObj[ckey].length;ind++){
-                     collObj.push(window.filterObj[ckey][ind]);
-                 }
-            } else if (!(ckey).startsWith('tcga_clinical') || hasTcgaCol){
-                nmA = ckey.split('.');
-                nm=nmA[nmA.length-1];
-                if (nm.endsWith('_rng')){
-                    if (window.filterObj[ckey].type==='none'){
-                        nm=nm.replace('_rng','');
-                    } else {
-                        nm = nm.replace('_rng', '_' + window.filterObj[ckey].type);
-                    }
-                    if (  ('rng' in window.filterObj[ckey]) && ('none' in window.filterObj[ckey]) ){
-                        if (Array.isArray(window.filterObj[ckey]['rng'][0])){
-                            filtObj[nm] = [...window.filterObj[ckey]['rng']];
-                            filtObj[nm].push('None');
-                        }
-                        else{
-                          filtObj[nm] = [window.filterObj[ckey]['rng'],'None']
-                        }
-                    } else if ('rng' in window.filterObj[ckey]){
-                        filtObj[nm] = window.filterObj[ckey]['rng']
-                    } else if ('none' in window.filterObj[ckey]){
-                        noneKey=nm.replace('_rng','');
-                        filtObj[noneKey]=['None'];
-                    }
-                } else {
-                    filtObj[nm] = window.filterObj[ckey];
-                }
-            }
-        }
-        if (collObj.length>0){
-            filtObj['collection_id']= collObj.sort();
-        }
-        return filtObj;
-    };
-
-    var update_bq_filters = function() {
-        let filters = parseFilterObj();
-        if (Object.keys(filters).length <= 0) {
-            $('.bq-string-display').attr("disabled","disabled");
-            $('.bq-string-display').attr("title","Select a filter to enable this feature.");
-            $('.bq-string').html("");
-            $('#export-manifest-form input[name="filters"]').val("");
-        } else {
-            $('.bq-string-display').removeAttr("disabled");
-            $('.bq-string-display').attr("title","Click to display this filter as a BQ string.");
-            $('.bq-string-display').attr('filter-params', JSON.stringify(filters));
-            $('#export-manifest-form input[name="filters"]').val(JSON.stringify(filters));
-        }
-    };
-
-    var update_filter_url = function() {
-        let filters = parseFilterObj();
-        if (Object.keys(filters).length <= 0) {
-            $('.get-filter-uri').attr("disabled","disabled");
-            $('#export-manifest').attr("disabled","disabled");
-            $('#export-manifest').attr("title","Select a filter to enable this feature.");
-            $('.get-filter-uri').attr("title","Select a filter to enable this feature.");
-            $('.filter-url').html("");
-            $('.copy-url').removeAttr("content");
-            $('.copy-url').attr("disabled","disabled");
-            $('.hide-filter-uri').triggerHandler('click');
-            $('.url-too-long').hide();
-            $('#export-manifest-form').attr(
-                'action',
-                $('#export-manifest-form').data('uri-base')
-            );
-        } else {
-            $('.get-filter-uri').removeAttr("disabled");
-            $('#export-manifest').removeAttr("disabled");
-            $('.copy-url').removeAttr("disabled");
-            $('.get-filter-uri').attr("title","Click to display this filter set's query URL.");
-            $('#export-manifest').attr("title","Export these search results as a manifest for downloading.");
-            let url = BASE_URL+"/explore/filters/?";
-            let encoded_filters = []
-            for (let i in filters) {
-                if (filters.hasOwnProperty(i)) {
-                    let vals = filters[i];
-                    if(!Array.isArray(filters[i])) {
-                        vals = filters[i]['values'];
-                        encoded_filters.push(i+"_op="+encodeURI(filters[i]['op']));
-                    }
-                    _.each(vals, function (val) {
-                        encoded_filters.push(i+"="+encodeURI(val));
-                    });
-                }
-            }
-            url += encoded_filters.join("&");
-            url.length > 2048 && $('.url-too-long').show();
-            url.length <= 2048 && $('.url-too-long').hide();
-            $('.filter-url').html(url);
-            $('.copy-url').attr("content",url);
-        }
-    };
-
-    var updateFacetsData = function (newFilt) {
-        update_filter_url();
-        update_bq_filters();
+    window.updateFacetsData = function (newFilt) {
+        filterutils.update_filter_url();
+        filterutils.update_bq_filters();
         if (window.location.href.search(/\/filters\//g) >= 0) {
             if (!first_filter_load) {
                 window.history.pushState({}, '', window.location.origin + "/explore/")
@@ -678,7 +397,7 @@ require([
             }
         }
         var url = '/explore/'
-        var parsedFiltObj = parseFilterObj();
+        var parsedFiltObj = filterutils.parseFilterObj();
         url = encodeURI('/explore/')
 
         ndic = {
@@ -803,7 +522,7 @@ require([
                     updateFilterSelections('access_set', dicofdic);
                     updateFilterSelections('analysis_set', dicofdic);
                     updateFilterSelections('search_orig_set', dicofdic);
-                    createPlots('search_orig_set');
+                    plotutils.createPlots('search_orig_set');
 
                     var derivedAttrs = Array.from($('#search_derived_set').children('.list-group').children('.list-group-item').children('.list-group-item__body').map(function () {
                         return this.id;
@@ -841,7 +560,7 @@ require([
                         updateFilterSelections(derivedAttrs[i], {});
                     }
 
-                    createPlots('search_derived_set');
+                    plotutils.createPlots('search_derived_set');
 
                     if (data.hasOwnProperty('related_set')) {
                         $('#search_related_set').removeClass('disabled');
@@ -857,7 +576,7 @@ require([
                         $('#search_related_set').addClass('disabled');
                         updateFilterSelections('search_related_set', {});
                     }
-                    createPlots('search_related_set');
+                    plotutils.createPlots('search_related_set');
                     var collFilt = new Array();
                     if ('collection_id' in parsedFiltObj) {
                         collFilt = parsedFiltObj['collection_id'];
@@ -899,306 +618,8 @@ require([
         return deferred.promise();
     };
 
-    var manageUpdateFromPlot = function(plotId, label) {
-        var listId = plotId.replace('_chart','_list');
-        var filterId = plotId.replace('_chart','');
-        let isInt = !FLOAT_SLIDERS.includes(filterId);
-        var isSlider = $('#'+filterId).hasClass('hasSlider') ? true : false;
-        if (isSlider) {
-            var maxx =parseFloat($('#' + filterId).attr('data-max'));
-            var minx=parseFloat($('#' + filterId).attr('data-min'));
 
-            if (isInt){
-                maxx=Math.ceil(maxx);
-                minx=Math.floor(minx);
-            }
-            else{
-                maxx=parseFloat(maxx.toFixed(2));
-                minx=parseFloat(minx.toFixed(2));
-            }
-            var parStr = $('#'+filterId).find('#'+filterId+'_slide').data('attr-par');
 
-            if ((label ==='None') && $('#'+filterId).hasClass('wNone')){
-                butElem = $('#'+filterId).find('.noneBut').children('input')[0];
-                butElem.checked=true
-                setSlider(filterId+"_slide", true, minx, maxx, isInt, false);
-                window.addNone(butElem,parStr,true);
-            } else {
-                if ($('#'+filterId).hasClass('wNone')){
-                    butElem = $('#'+filterId).find('.noneBut').children('input')[0];
-                    butElem.checked=false;
-                    window.addNone(butElem,parStr,false);
-                }
-
-                var selArr = label.split(' To ');
-                var strt = parseFloat((selArr[0] === '*') ? '0' : selArr[0]);
-                var end = parseFloat((selArr[1] === '*') ? maxx : selArr[1]);
-                if (isInt){
-                    strt = Math.floor(strt);
-                    end = Math.floor(end);
-                }
-                else{
-                    strt = parseFloat(strt.toFixed(2));
-                    end = parseFloat(end.toFixed(2));
-                }
-                setSlider(filterId+"_slide", false, strt, end, isInt,true);
-            }
-        } else {
-            var inputList = $('#' + listId).find(':input');
-            for (var i = 0; i < inputList.length; i++) {
-                var curLabel = $(inputList[i]).parent().children()[1].innerHTML;
-                if (label === curLabel) {
-                    inputList[i].checked = true;
-                } else {
-                    inputList[i].checked = false;
-                }
-
-                if (i < inputList.length - 1) {
-                    handleFilterSelectionUpdate(inputList[i], false, false);
-                } else {
-                    handleFilterSelectionUpdate(inputList[i], true, true);
-                }
-            }
-        }
-    }
-
-    var plotCategoricalData = function (plotId, lbl, plotData, isPie, showLbl) {
-        var width = 150;
-        var height = 150;
-        var shifty = 48;
-        var xshift=width/2+20;
-        var margin = 0;
-        var radius = Math.min(width, height) / 2 - margin;
-        var radiusB = 1.1*radius;
-        var mx =0;
-        var mn =0;
-
-        var filterId=plotId.replace("_chart","");
-        if ( $('#'+filterId).attr('max') ) {
-            //var mn = $('#' + slideId).data('min');
-            var mx = $('#' + filterId).attr('max');
-        }
-
-        // append the svg object to the div called 'my_dataviz'
-        var svg = d3.select("#"+plotId)
-         .select("svg")
-         .attr("width", width)
-         .attr("height", height).style("text-anchor","middle");
-
-      /*  var svg = d3.select("#"+plotId)
-         .select("svg")
-            .attr("viewBox",`0 0 290 340`).style("text-anchor","middle"); */
-
-        var Tooltip = $("#"+plotId + " div.chart-tooltip").length > 0
-            ? d3.select("#"+plotId + " div.chart-tooltip")
-            : d3.select("#"+plotId)
-                .append("div")
-                .attr("class", "chart-tooltip")
-                .style("top", "180px")
-                .style("left", "0px");
-
-        svg.selectAll("*").remove();
-
-        titlePart = svg.append("text")
-            .attr("text-anchor","middle")
-            .attr("font-size", "16px")
-            .attr("fill","#2A537A");
-        var title0="";
-        var title1="";
-        var title2="";
-
-        if (lbl.includes('Quarter')){
-            var titA = lbl.split('Quarter');
-            title1=titA[0]+' Quarter';
-            title2=titA[1];
-        } else if (lbl.includes('Background')){
-            var titA = lbl.split('Activity');
-            var titB = titA[1].split('(');
-            title0 = titA[0];
-            title1= 'Activity '+titB[0];
-            title2= '('+titB[1];
-        } else if (lbl.includes('(')){
-           var titA = lbl.split('(');
-           title1=titA[0];
-           title2='('+titA[1];
-         }
-        else if (lbl.includes('Max Total Pixel')){
-            var titA = lbl.split('Pixel')
-            title1=titA[0]+'Pixel'
-            title2=titA[1]
-        }
-        else{
-          title2=lbl;
-         }
-
-         titlePart.append("tspan").attr("x",xshift).attr("y",0).attr("dx",0).attr("dy",0).text(title0);
-         titlePart.append("tspan").attr("x", xshift).attr("y", 0).attr("dx", 0).attr("dy", 20).text(title1);
-        titlePart.append("tspan").attr("x", xshift).attr("y", 0).attr("dx", 0).attr("dy", 40).text(title2);
-
-        var pieg=svg.append("g").attr("transform", "translate(" + (width / 2 +20)  + "," + (height / 2 + shifty) + ")");
-        var data = new Object;
-        var nonZeroLabels= new Array();
-        //spcing = 1.0/parseFloat(plotData.dataCnt.length);
-        var tot=0;
-
-        for (i=0;i<plotData.dataCnt.length;i++) {
-           var pkey = plotData.dataLabel[i];
-           var cnt = plotData.dataCnt[i];
-           data[pkey]=cnt;
-           tot+=cnt;
-           if (cnt>0){
-               nonZeroLabels.push(pkey);
-           }
-           //rng.push(parseFloat(i)*parseFloat(spcing));
-        }
-        $('#'+plotId).data('total',tot.toString());
-
-       // set the color scale
-       var color = d3.scaleOrdinal()
-        .domain(nonZeroLabels)
-        .range(d3.schemeCategory10);
-
-       // don't color last pie slice the same as first
-       var colorPie = function(lbl){
-         var col="";
-           if ( (nonZeroLabels.length>1) & (lbl === nonZeroLabels[nonZeroLabels.length-1]) && (color(nonZeroLabels[0])===color(lbl))  ){
-                    col=color(nonZeroLabels[5]);
-           } else {
-               col=color(lbl);
-           }
-           return col;
-       }
-
-       // Compute the position of each group on the pie:
-      var pie = d3.pie().value(function(d) {return d.value; }).sort(null);
-      var data_ready = pie(d3.entries(data));
-
-     // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
-      pieg
-      .selectAll('whatever')
-      .data(data_ready)
-      .enter()
-      .append('path')
-      .attr('d', d3.arc()
-      .innerRadius(0)
-      .outerRadius(radius)
-      )
-      .attr('fill', function(d){ return(
-        colorPie(d.data.key)  )
-       })
-      .attr("stroke", "black")
-      .attr("data-tooltip", function(d){
-          let perc = (parseInt((parseFloat(d.data.value)/parseFloat($('#'+plotId).data('total')))*100)).toString()+"%";
-          let val = d.data.key.replace('* To',mn.toString()+' To').replace('To *', 'To '+mx.toString());
-          let count = d.data.value;
-
-          return '<div>' + val + '<br />' + count + ' (' + perc + ')</div>';
-      })
-      .attr('data-tooltip-color', function(d){
-          return colorPie(d.data.key);
-      })
-      .style("stroke-width", "0px")
-      .style("opacity", 0.7)
-          .on("mouseover", function(d){
-              Tooltip.style("opacity", 1);
-          })
-          .on("mousemove",function(d){
-              let node = $(d3.select(this).node());
-            Tooltip
-                .html(node.data('tooltip'));
-            $(Tooltip.node()).children("div").css("border-color", node.data('tooltip-color'))
-            d3.select(this).attr('d', d3.arc()
-           .innerRadius(0)
-           .outerRadius(radiusB)
-           );
-
-        })
-         .on("mouseleave",function(d){
-             Tooltip.style("opacity", 0);
-            d3.select(this).attr('d', d3.arc()
-           .innerRadius(0)
-           .outerRadius(radius)
-           );
-         })
-        .on("click",function(d){
-            if (!is_cohort) {
-                manageUpdateFromPlot(plotId, d.data.key);
-            }
-        });
-
-        var txtbx=pieg.append("text").attr("x","0px").attr("y","10px").attr('text-anchor','start');
-        txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",0);
-        txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",20);
-        txtbx.append("tspan").attr("x","0px").attr("y","0px").attr("dy",40);
-        txtbx.attr("opacity",0);
-
-        if (tot===0) {
-            txtbx.attr('text-anchor','middle');
-            tspans=txtbx.node().childNodes;
-            tspans[0].textContent = "No Data Available";
-            txtbx.attr("opacity",1);
-        }
-    }
-
-    var findFilterCats = function (id, wCheckBox) {
-        filterCats = new Array();
-        listElems = $('#' + id).find('.list-group-item__body, .collection-list, .list-group-sub-item__body');
-        if (wCheckBox){
-            listElems = listElems.children('.search-checkbox-list').parent()
-        }
-        for (i = 0; i < listElems.length; i++) {
-            elem = listElems.get(i);
-            nm = elem.id;
-            filterCats.push(nm);
-        }
-        return filterCats
-    };
-
-    var parseFilterForCounts = function (id) {
-        var dataLabel = new Array();
-        var dataCnt = new Array();
-
-        listElems = $('#' + id).find('.checkbox')
-        for (var i = 0; i < listElems.length; i++) {
-            elem = listElems.get(i);
-            spans = $(elem).find('span')
-            lbl = spans.get(0).innerHTML;
-            cnt = parseInt(spans.get(1).innerHTML);
-            dataLabel.push(lbl);
-            if ($(spans.get(1)).hasClass("plotit")) {
-                dataCnt.push(cnt);
-            } else {
-                dataCnt.push(0);
-            }
-        }
-        return {'dataLabel': dataLabel, 'dataCnt': dataCnt}
-    }
-
-    window.updatePlots = function (selectElem) {
-        createPlots('search_orig_set');
-        createPlots('search_derived_set');
-        createPlots('search_related_set');
-    }
-
-    var createPlots = function (id) {
-
-        var isPie = true;
-        var ptIndx = document.getElementById("plot_type").selectedIndex;
-        if (ptIndx === 1) {
-            isPie = false;
-        }
-        var showLbl = document.getElementById("plot_label").checked
-
-        var filterCats = findFilterCats(id,true);
-        for (var i = 0; i < filterCats.length; i++) {
-            filterCat = filterCats[i];
-            filterData = parseFilterForCounts(filterCat);
-            plotId = filterCat + "_chart";
-            var lbl='';
-            lbl = $('#' + filterCat + '_heading').children('a').children('.attDisp')[0].innerText;
-            plotCategoricalData(plotId, lbl, filterData, isPie, showLbl);
-        }
-    }
 
     window.resort = function(filterCat){
         updateFilters(filterCat,{},false, false);
@@ -1465,7 +886,7 @@ require([
     setAllFilterElements = function(hideEmpty,filtSet, srch=false){
         //var filtSet = ["search_orig_set","segmentation","quantitative","qualitative","tcga_clinical"];
         for (var i=0;i<filtSet.length;i++) {
-            filterCats = findFilterCats(filtSet[i], false);
+            filterCats = filterutils.findFilterCats(filtSet[i], false);
             let resetParentVal=false;
             progInd = filterCats.indexOf('Program');
             if (progInd>-1){
@@ -1512,7 +933,7 @@ require([
     }
 
     var updateFilterSelections = function (id, dicofdic) {
-        let filterCats = findFilterCats(id,false);
+        let filterCats = filterutils.findFilterCats(id,false);
         for (let i = 0; i < filterCats.length; i++) {
             let cat = filterCats[i]
             let filtDic = {'unfilt':'', 'filt':''}
@@ -1527,254 +948,11 @@ require([
         }
     };
 
-    var checkFilters = function(filterElem) {
-        let operatorInfo = false;
-        let operator = ""
-        let opInfoElem = $(filterElem).closest('.list-group-item__body, .list-group-sub-item__body','.colections-list').find('.join_val').filter('input:checked')
-        if (opInfoElem.length>0){
-            operatorInfo = true;
-            operator = opInfoElem.attr('value');
-        }
-
-        let isRng = $(filterElem).closest('.list-group-item__body, .list-group-sub-item__body','.colections-list').hasClass('isRng');
-        let checked = $(filterElem).prop('checked');
-        let neighbours =$(filterElem).parentsUntil('.list-group-item__body, .list-group-sub-item__body','ul').children().children().children('input:checkbox');
-        let neighboursCk = $(filterElem).parentsUntil('.list-group-item__body, .list-group-sub-item__body','ul').children().children().children(':checked');
-        let allChecked= false;
-        let noneChecked = false;
-        if (neighboursCk.length===0){
-            noneChecked = true;
-        }
-
-        if (neighbours.length === neighboursCk.length){
-            allChecked = true;
-        }
-
-        let filterCats= $(filterElem).parentsUntil('.tab-pane','.list-group-item, .checkbox');
-        let j = 1;
-
-        let curCat = '';
-        let lastCat = '';
-        numCheckBoxes = 0;
-        for (var i=0;i<filterCats.length;i++){
-            let filtnm = '';
-            ind = filterCats.length-1-i;
-            filterCat = filterCats[ind];
-            hasCheckBox = false;
-            if (filterCat.classList.contains('checkbox')){
-                 checkBox = $(filterCat).find('input:checkbox')[0];
-                 filtnm = checkBox.value;
-                 hasCheckBox = true;
-                 numCheckBoxes++;
-            } else {
-                let filtnmSrc = $(filterCat).children('.list-group-sub-item__body, .list-group-item__body, .collection-list')
-                if (filtnmSrc.length<1){
-                    filtnmSrc = $(filterCat).children().children('.collection_id')
-                }
-
-
-                filtnm = filtnmSrc[0].id;
-                if  ($(filterCat).children('.list-group-item__heading').children('input:checkbox').length>0) {
-                   hasCheckBox = true;
-                   numCheckBoxes++;
-                }
-               checkBox = $(filterCat).children('.list-group-item__heading').children('input:checkbox')[0];
-            }
-
-            if ( hasCheckBox && (ind ===1) && !(allChecked) && !(noneChecked)){
-                checkBox.indeterminate = true;
-                checkBox.checked = false;
-            } else if (hasCheckBox){
-                checkBox.indeterminate = false;
-            }
-            filtArg=filtnm;
-            isNoneCat=false;
-            if (isRng){
-                if (filtnm.match(/\s+[Tt]o\s+/)) {
-                    filtArg = filtnm.split(/\s+[Tt]o\s+/).map(Number);
-                }
-                else{
-                    isNoneCat=true;
-                }
-            }
-
-
-            if ((checked) && (curCat.length>0) && hasCheckBox  ){
-                if (!(checkBox.indeterminate)) {
-                    checkBox.checked = true;
-                }
-
-                if (operatorInfo){
-                    if (!(filterObj.hasOwnProperty(curCat))) {
-                        filterObj[curCat] = new Object();
-                        filterObj[curCat]['values'] = new Array();
-                    }
-                    filterObj[curCat]['op'] = operator
-                    if (filterObj[curCat]['values'].indexOf(filtnm) < 0) {
-                        filterObj[curCat]['values'].push(filtnm);
-                    }
-
-                }
-                else if(isRng){
-                    curCatRng = curCat+"_rng";
-                    if (!(filterObj.hasOwnProperty(curCatRng))) {
-                        filterObj[curCatRng] = new Object();
-                        filterObj[curCatRng]['type']='ebtw'
-
-                    }
-                    if (isNoneCat){
-                        filterObj[curCatRng]['none']=true;
-                    }
-                    else {
-                        if (!(filterObj[curCatRng].hasOwnProperty('rng'))){
-                            filterObj[curCatRng]['rng'] = new Array();
-                        }
-                        filterObj[curCatRng]['rng'].push(filtArg)
-                    }
-                }
-                else {
-                    if (!(filterObj.hasOwnProperty(curCat))) {
-                        filterObj[curCat] = new Array();
-                    }
-                    if (filterObj[curCat].indexOf(filtnm) < 0) {
-                        filterObj[curCat].push(filtnm);
-                    }
-                }
-            }
-
-            if (!checked && ( (ind===0) || ( (ind===1) && hasCheckBox && noneChecked)) ){
-               checkBox.checked = false;
-               if ( filterObj.hasOwnProperty(curCat) || (isRng && filterObj.hasOwnProperty(curCat+"_rng"))) {
-                   if (operatorInfo) {
-                       if (filterObj[curCat]['values'].indexOf(filtnm) > -1) {
-                           pos = filterObj[curCat]['values'].indexOf(filtnm);
-                           filterObj[curCat]['values'].splice(pos, 1);
-                           if (Object.keys(filterObj[curCat]['values']).length === 0) {
-                               delete filterObj[curCat];
-                           }
-                       }
-                   }
-                   else if(isRng)
-                   {
-                       curCatRng = curCat+"_rng";
-                       if (isNoneCat && filterObj[curCatRng].hasOwnProperty('none')){
-                           delete filterObj[curCatRng]['none'];
-                       }
-
-                       else if (filterObj[curCatRng]['rng'].map(String).indexOf(filtArg.toString()) > -1) {
-                           pos = filterObj[curCatRng]['rng'].map(String).indexOf(filtArg.toString());
-                           filterObj[curCatRng]['rng'].splice(pos, 1);
-                           if (filterObj[curCatRng]['rng'].length === 0) {
-                               delete filterObj[curCatRng]['rng'];
-                           }
-                       }
-                       if (!filterObj[curCatRng].hasOwnProperty('rng')  && !filterObj[curCatRng].hasOwnProperty('none')){
-                           delete filterObj[curCatRng];
-                       }
-
-                   }
-                   else {
-                       if (filterObj[curCat].indexOf(filtnm) > -1) {
-                           pos = filterObj[curCat].indexOf(filtnm);
-                           filterObj[curCat].splice(pos, 1);
-                           if (Object.keys(filterObj[curCat]).length === 0) {
-                               delete filterObj[curCat];
-                           }
-                       }
-                   }
-               }
-               if (curCat.length>0){
-                   curCat+="."
-               }
-                lastCat = curCat;
-                curCat += filtnm;
-                if ($(filterElem).parent().hasClass('list-group-item__heading')){
-                      chkList=$(filterElem).parent().siblings().filter('.list-group-item__body').find('input:checkbox');
-                      for (var ind=0; ind<chkList.length;ind++){
-                          chkList[ind].checked=false;
-                      }
-                }
-                for (var ckey in filterObj){
-                    if (ckey.startsWith(curCat)){
-                       delete filterObj[curCat];
-                   }
-               }
-            }
-            if (curCat.length>0){
-                curCat+="."
-            }
-            curCat+=filtnm;
-        }
-
-        var childBoxes=$(filterElem).parent().siblings().find('input:checkbox');
-        if (checked && (childBoxes.length>0)) {
-            filterObj[curCat] = new Array();
-            childBoxes.each(function(){
-               this.checked=true;
-               filterObj[curCat].push(this.value);
-            });
-        } else {
-            delete filterObj[curCat];
-            $(childBoxes).prop('checked',false);
-        }
-    };
 
     var applyFilters = function(){
-        mkFiltText();
+        filterutils.mkFiltText();
         updateFacetsData(true);
     }
-    var handleFilterSelectionUpdate = function(filterElem, mkFilt, doUpdate) {
-        var updateDone= false;
-        var updateWait = false;
-        checkFilters(filterElem);
-        if (mkFilt) {
-            mkFiltText();
-        }
-
-        if (doUpdate){
-            if ((window.filterSet.length>1)){
-               checkOtherSets(window.filterSetNum)
-                if (selnm>-1){
-                    window.filterSet[window.filterSetNum].filterObj=JSON.parse(JSON.stringify(filterObjOld));
-                    updateDone=true;
-                    //window.filterSetNum=selnm;
-                    changeFilterSet(selnm, true);
-                }
-                else if (window.currentSet>0) {
-                    updateWait=true;
-                    if (window.choiceMade) {
-                        processUserChoice();
-                    }
-                    else {
-
-                    $('#filter-option-modal').addClass('filtermoddisp');
-                    $('#filter-option-modal').removeClass('filternotmoddisp');
-                    }
-                   //window.filterSet[window.filterSetNum].filterObj=JSON.parse(JSON.stringify(filterObjOld));
-                    //createNewFilterSet(filterObj, true);
-                }
-            }
-            else if (window.currentSet>0) {
-                updateWait = true;
-                if (window.choiceMade) {
-                   processUserChoice();
-                } else {
-
-                $('#filter-option-modal').addClass('filtermoddisp');
-                $('#filter-option-modal').removeClass('filternotmoddisp');
-                 }
-                    //window.filterSet[window.filterSetNum].filterObj=JSON.parse(JSON.stringify(filterObjOld));
-                    //createNewFilterSet(filterObj,true);
-                }
-            if (!updateWait) {
-                filterObjOld = JSON.parse(JSON.stringify(filterObj));
-            }
-            if (!updateDone && !updateWait) {
-                updateFacetsData(true);
-            }
-
-        }
-    };
 
     window.processUserChoice = function(){
         //alert('here');
@@ -1798,7 +976,7 @@ require([
             filterObj=JSON.parse(JSON.stringify(filterObjOld));
             window.filterSet[window.filterSetNum].filterObj = filterObj;
             updateFiltControls();
-            mkFiltText();
+            filterutils.mkFiltText();
             mksearchtwo();
 
 
@@ -1839,14 +1017,14 @@ require([
         $('#' + filterId).find('.join_val').on('click', function () {
             var attribute = $(this).closest('.list-group-item__body, .list-group-sub-item__body','.colections-list')[0].id;
             if (filterObj.hasOwnProperty(attribute) && (window.filterObj[attribute]['values'].length>1)){
-                mkFiltText();
+                filterutils.mkFiltText();
                 filterObj[attribute]['op']=$(this).attr('value');
                 updateFacetsData(true);
             }
         });
 
         $('#' + filterId).find('input:checkbox').not('#hide-zeros').on('click', function () {
-            handleFilterSelectionUpdate(this, true, true);
+            filterutils.handleFilterSelectionUpdate(this, true, true);
         });
 
         $('#' + filterId).find('.show-more').on('click', function () {
@@ -1910,9 +1088,9 @@ require([
                                     subCkElem = $(subFilterElem).find('input:checkbox')[0];
                                     subCkElem.checked = isCheck;
                                     if ((subInd < subFilterElems.length - 1) || (ind < filterElems.length - 1)) {
-                                        handleFilterSelectionUpdate(subCkElem, false, false);
+                                        filterutils.handleFilterSelectionUpdate(subCkElem, false, false);
                                     } else {
-                                        handleFilterSelectionUpdate(subCkElem, true, true);
+                                        filterutils.handleFilterSelectionUpdate(subCkElem, true, true);
                                     }
                                 }
 
@@ -1927,9 +1105,9 @@ require([
 
                     //$(filterElem).prop('checked') = true;
                     if ((ind < filterElems.length - 1) && (!subListUsed)){
-                        handleFilterSelectionUpdate(ckElem, false, false);
+                        filterutils.handleFilterSelectionUpdate(ckElem, false, false);
                     } else if (!subListUsed) {
-                        handleFilterSelectionUpdate(ckElem, true, true);
+                        filterutils.handleFilterSelectionUpdate(ckElem, true, true);
                     }
 
                 }
@@ -1949,7 +1127,7 @@ require([
     };
 
     var addFilterBindings = function(id){
-     var filterCats = findFilterCats(id,false);
+     var filterCats = filterutils.findFilterCats(id,false);
      for (var i=0;i<filterCats.length;i++){
          filterItemBindings(filterCats[i]);
     }
@@ -2162,7 +1340,7 @@ require([
         if (sliders.length > 0) {
             load_sliders(sliders, false);
         }
-        mkFiltText();
+        filterutils.mkFiltText();
         return updateFacetsData(true).promise();
      };
 
@@ -2175,7 +1353,7 @@ require([
         });
 
         if (do_update) {
-            mkFiltText();
+            filterutils.mkFiltText();
             updateFacetsData(true).promise();
         }
      };
@@ -3716,7 +2894,7 @@ require([
             updateFacetsData(true);
         }
          updateFiltControls();
-         mkFiltText();
+         filterutils.mkFiltText();
          mksearchtwo();
 
     }
@@ -3763,14 +2941,14 @@ require([
         addSliders('tcga_clinical',true, false,'tcga_clinical.');
         addSliders('quantitative',true, false,'quantitative.');
 
-        createPlots('search_orig_set');
-        createPlots('search_derived_set');
-        createPlots('tcga_clinical');
+        plotutils.createPlots('search_orig_set');
+        plotutils.createPlots('search_derived_set');
+        plotutils.createPlots('tcga_clinical');
 
         for (project in window.selProjects) {
             initProjectData(project);
         }
-        updateProjectTable(window.collectionData,stats);
+        tables.updateProjectTable(window.collectionData,stats);
         updateFilterSetData();
 
 
@@ -3784,7 +2962,7 @@ require([
             $('#search_def_warn').hide();
             window.filterObj= {};
 
-            mkFiltText();
+            filterutils.mkFiltText();
             updateFacetsData(true);
             tables.initializeTableData();
              updateProjectTable(window.collectionData,stats);
