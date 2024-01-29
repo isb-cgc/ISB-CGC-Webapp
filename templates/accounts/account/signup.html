@@ -16,20 +16,21 @@
             <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2"></div>
             <div class="col-lg-4 col-md-4 col-sm-6 col-xs-8 accounts-col">
             <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
-            <div class="panel panel-default">
-                <div class="panel-heading"><h3>Sign Up</h3></div>
-                <div class="panel-body">
-                    <p>{% blocktrans %}Already have an account? Please <a href="{{ login_url }}"><b>sign in</b></a> instead.{% endblocktrans %}</p>
+                <div class="panel panel-default"></div>
+                <div class="panel panel-default">
+                    <div class="panel-heading"><h3>Sign Up</h3></div>
+                    <div class="panel-body">
+                        <p>{% blocktrans %}Already have an account? Please <a href="{{ login_url }}"><b>sign in</b></a> instead.{% endblocktrans %}</p>
+                    </div>
+                    <div class="panel-body">
+                          {% csrf_token %}
+                          {{ form.as_p }}
+                          {% if redirect_field_value %}
+                          <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                          {% endif %}
+                          <button class="btn btn-special" type="submit">{% trans "Sign Up" %} &raquo;</button>
+                    </div>
                 </div>
-                <div class="panel-body">
-                      {% csrf_token %}
-                      {{ form.as_p }}
-                      {% if redirect_field_value %}
-                      <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-                      {% endif %}
-                      <button class="btn btn-special" type="submit">{% trans "Sign Up" %} &raquo;</button>
-                </div>
-            </div>
             </form>
             </div>
         <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2"></div>

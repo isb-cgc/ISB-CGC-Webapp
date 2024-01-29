@@ -16,11 +16,13 @@
         <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2"></div>
         <div class="col-lg-4 col-md-4 col-sm-6 col-xs-8 accounts-col">
         <form class="login" method="POST" action="{% url 'account_login' %}" autocomplete="off">
+            <div class="panel panel-default"></div>
             <div class="panel panel-default">
                 <div class="panel-body">
-                    <a class="btn btn-primary" href="{% provider_login_url 'google' %}">
-                        <img class="icon-small" alt="G" src="{%  static 'img/google_icon_sm.png' %}" />
-                        <span>Sign in with Google</span>
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5"><p></p></div>
+                    <a class="btn btn-primary google-sign-in" href="{% provider_login_url 'google' %}">
+                        <img class="icon-small" style="padding: 0px 10px 0px 0px" alt="G" src="{%  static 'img/google_icon_sm.png' %}" />
+                        <span><b>Sign in with Google</b></span>
                     </a>
                 </div>
                 <div class="panel-body panel-or">
