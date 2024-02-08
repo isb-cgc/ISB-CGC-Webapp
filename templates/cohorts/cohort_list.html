@@ -14,9 +14,6 @@
 
 {% block page_header %}
 <div class="container">
-    <ol class="breadcrumb">
-        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-    </ol>
     <h1 class="page-header pull-left">{% if from_workbook %}Data Source | {% endif %}Cohorts</h1>
     <div class="pull-right new-cohort"><a href="{% url 'cohort' %}" class="btn btn-primary"><i class="fa fa-plus"></i> New Cohort</a> </div>
 

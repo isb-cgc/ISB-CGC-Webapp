@@ -32,7 +32,6 @@
 
         {% if cohort %}
             <ol class="breadcrumb">
-                <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
                 <li><a href="{% url 'cohort_list' %}">Saved Cohorts</a></li>
                 <li><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></li>
             </ol>

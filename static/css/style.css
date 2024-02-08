@@ -708,14 +708,14 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 500;
   margin-bottom: 3px; }
 
-#search #tree-graph-clinical {
+#search #tree-graph-case {
   display: block; }
-  #search #tree-graph-clinical .tree-graph {
+  #search #tree-graph-case .tree-graph {
     display: inline-block;
     margin-bottom: 10px;
     width: 150px;
     padding: 5px; }
-    #search #tree-graph-clinical .tree-graph .graph-title {
+    #search #tree-graph-case .tree-graph .graph-title {
       text-align: center; }
 
 #search #file-access a {
@@ -2506,12 +2506,12 @@ section .min-max {
   max-height: 100px;
   overflow-y: scroll; }
 
-#cohort-details .clinical-trees .panel-body, #cohort-details .user-data-trees .panel-body, #cohort-filelist .clinical-trees .panel-body, #cohort-filelist .user-data-trees .panel-body {
+#cohort-details .case-trees .panel-body, #cohort-details .user-data-trees .panel-body, #cohort-filelist .case-trees .panel-body, #cohort-filelist .user-data-trees .panel-body {
   position: relative;
   overflow: hidden;
   height: 210px; }
 
-#cohort-details .clinical-trees .spinner, #cohort-details .user-data-trees .spinner, #cohort-filelist .clinical-trees .spinner, #cohort-filelist .user-data-trees .spinner {
+#cohort-details .case-trees .spinner, #cohort-details .user-data-trees .spinner, #cohort-filelist .case-trees .spinner, #cohort-filelist .user-data-trees .spinner {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -2519,26 +2519,26 @@ section .min-max {
   left: 0px;
   background: rgba(0, 0, 0, 0.5);
   z-index: 10; }
-  #cohort-details .clinical-trees .spinner i, #cohort-details .user-data-trees .spinner i, #cohort-filelist .clinical-trees .spinner i, #cohort-filelist .user-data-trees .spinner i {
+  #cohort-details .case-trees .spinner i, #cohort-details .user-data-trees .spinner i, #cohort-filelist .case-trees .spinner i, #cohort-filelist .user-data-trees .spinner i {
     position: absolute;
     left: 45%;
     top: 40%;
     margin: auto;
     font-size: 100px; }
 
-#cohort-details .clinical-trees .tree-graph-clinical .tree-graph, #cohort-details .user-data-trees .tree-graph-clinical .tree-graph, #cohort-filelist .clinical-trees .tree-graph-clinical .tree-graph, #cohort-filelist .user-data-trees .tree-graph-clinical .tree-graph {
+#cohort-details .case-trees .tree-graph-case .tree-graph, #cohort-details .user-data-trees .tree-graph-case .tree-graph, #cohort-filelist .case-trees .tree-graph-case .tree-graph, #cohort-filelist .user-data-trees .tree-graph-case .tree-graph {
   display: inline-block;
   margin: 0px 14px 10px 14px;
   width: 151px;
   padding: 5px; }
-  #cohort-details .clinical-trees .tree-graph-clinical .tree-graph .graph-title, #cohort-details .user-data-trees .tree-graph-clinical .tree-graph .graph-title, #cohort-filelist .clinical-trees .tree-graph-clinical .tree-graph .graph-title, #cohort-filelist .user-data-trees .tree-graph-clinical .tree-graph .graph-title {
+  #cohort-details .case-trees .tree-graph-case .tree-graph .graph-title, #cohort-details .user-data-trees .tree-graph-case .tree-graph .graph-title, #cohort-filelist .case-trees .tree-graph-case .tree-graph .graph-title, #cohort-filelist .user-data-trees .tree-graph-case .tree-graph .graph-title {
     text-align: center; }
 
-#cohort-details .clinical-trees .more-graphs, #cohort-details .clinical-trees .less-graphs, #cohort-details .user-data-trees .more-graphs, #cohort-details .user-data-trees .less-graphs, #cohort-filelist .clinical-trees .more-graphs, #cohort-filelist .clinical-trees .less-graphs, #cohort-filelist .user-data-trees .more-graphs, #cohort-filelist .user-data-trees .less-graphs {
+#cohort-details .case-trees .more-graphs, #cohort-details .case-trees .less-graphs, #cohort-details .user-data-trees .more-graphs, #cohort-details .user-data-trees .less-graphs, #cohort-filelist .case-trees .more-graphs, #cohort-filelist .case-trees .less-graphs, #cohort-filelist .user-data-trees .more-graphs, #cohort-filelist .user-data-trees .less-graphs {
   width: 100%;
   height: 36px;
   position: relative; }
-  #cohort-details .clinical-trees .more-graphs button, #cohort-details .clinical-trees .less-graphs button, #cohort-details .user-data-trees .more-graphs button, #cohort-details .user-data-trees .less-graphs button, #cohort-filelist .clinical-trees .more-graphs button, #cohort-filelist .clinical-trees .less-graphs button, #cohort-filelist .user-data-trees .more-graphs button, #cohort-filelist .user-data-trees .less-graphs button {
+  #cohort-details .case-trees .more-graphs button, #cohort-details .case-trees .less-graphs button, #cohort-details .user-data-trees .more-graphs button, #cohort-details .user-data-trees .less-graphs button, #cohort-filelist .case-trees .more-graphs button, #cohort-filelist .case-trees .less-graphs button, #cohort-filelist .user-data-trees .more-graphs button, #cohort-filelist .user-data-trees .less-graphs button {
     left: 50%;
     -webkit-transform: translateX(-50%);
             transform: translateX(-50%);

@@ -218,7 +218,7 @@ def bucket_object_list(request):
 
 # Extended login view so we can track user logins
 def extended_login_view(request):
-    redirect_to = 'dashboard'
+    redirect_to = 'cohort'
     if request.COOKIES and request.COOKIES.get('login_from', '') == 'new_cohort':
         redirect_to = 'cohort'
     try:

@@ -31,14 +31,9 @@
 
     <div class="container">
         <ol class="breadcrumb">
-            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
             <li><a href="{% url 'cohort_list' %}">Saved Cohorts</a></li>
         </ol>
         <h1 class="page-header">{{ cohort.name }}</h1>
-
-        <label id="cohort-name-label" for="edit-cohort-name" class="hidden-label">Cohort Name:</label>
-        <input id="edit-cohort-name" type="text" name="cohort-name" value="{{ cohort.name }}"
-               class="form-control input-lg space-top-15" style="display: none" aria-labelledby="cohort-name-label"/>
 
         <div class="page-action-group">
             <ul id="default-cohort-menu">
@@ -48,17 +43,9 @@
                     </li>
                     <li class="separator"></li>
                 {% endif %}
-                {% if cohort.perm.perm == 'OWNER' %}
-                    <li class="menu-item">
-                        <button class="btn btn-info" id="edit-cohort-btn">Edit</button>
-                    </li>
-                    <input id="cohort-mode" type="hidden" value="VIEW">
-                {% endif %}
                 <li class="menu-item">
                     <button class="show-flyout btn btn-info" title="Show Comments">Comments</button>
                 </li>
-                <li class="menu-item"><a href="{% url 'clone_cohort' cohort.id %}" class="btn btn-info clone-cohort-btn"
-                                         title="Duplicate this cohort">Duplicate</a></li>
                 <li class="menu-item">
                     <button class="btn btn-info" data-toggle="modal"
                             data-target="{% if cohort.perm.perm == 'OWNER' %}#delete-cohort-modal{% else %}#remove-cohort-modal{% endif %}">
@@ -72,7 +59,7 @@
                 <li class="separator"></li>
                 <li class="menu-item"><a href="{% url 'cohort_filelist' cohort.id %}"
                                          class="btn btn-info view-files-btn"
-                                         {% if only_user_data %}disabled {% endif %}title="{% if only_user_data %}The file browser is not available at this time for cohorts containing only user data.{% else %}View this cohort's file list{% endif %}">View Files</a></li>
+                                         title="View this cohort's file list">View Files</a></li>
                 {% if cohort.perm.perm == 'OWNER' %}
                     <li class="separator"></li>
                     <li class="menu-item"><a href="{% url 'download_ids' cohort.id %}"
@@ -89,18 +76,6 @@
                     <li class="separator"></li>
                     <li class="menu-item"><a data-target="#share-cohort-modal" data-toggle="modal" class="btn btn-link">Shared
                         with (<span class="share-count">{{ shared_with_users|length }}</span>)</a></li>
-                {% endif %}
-            </ul>
-            <ul id="edit-cohort-menu" style="display: none">
-                {% if cohort.perm.perm == 'OWNER' %}
-                    <li class="menu-item">
-                        <button class="btn btn-primary" data-toggle="modal" data-target="#apply-edits-modal">Save
-                            Changes
-                        </button>
-                    </li>
-                    <li class="menu-item">
-                        <button class="btn btn-link" id="cancel-edit-cohort-btn">Cancel</button>
-                    </li>
                 {% endif %}
             </ul>
         </div>
@@ -194,10 +169,6 @@
                                 <a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data"
                                    data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
                         {% endfor %}
-                        <li role="presentation"
-                            class="program-tab {% if only_user_data %}active{% endif %} {% if not has_user_data %}disabled{% endif %}">
-                            <a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User
-                                Data</a></li>
                     </ul>
                 </div>
             </div>
@@ -246,42 +217,6 @@
                     <input type="hidden" name="cohort_id" value="{{ cohort.id }}"/>
                     <button class="btn btn-primary save-comment-btn" type="submit">Comment</button>
                 </form>
-            </div>
-        </div>
-
-        <!-- Apply Edits Modal -->
-        <div class="modal fade" id="apply-edits-modal" tabindex="-1" role="dialog" aria-labelledby="applyFiltersModal"
-             aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title" id="applyFiltersModal">Save Changes</h4>
-                    </div>
-                    <form id="apply-edits-form" method="POST" action="{% url 'save_cohort' %}">
-                        <div class="modal-body">
-                            <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable"
-                                 style="display: none;">
-                                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span
-                                        class="sr-only">Close</span></button>
-                                Your cohort's name contains invalid characters (<span class="unallowed-chars"></span>).
-                                Please choose another name.
-                            </div>
-                            <label for="apply-edit-cohort-name">Saving changes will permanently modify the existing
-                                cohort.</label>
-                            <input type="hidden" id="apply-edit-cohort-name" name="name" value="{{ cohort.name }}"/>
-                        </div>
-                        <div class="modal-footer">
-                            {% csrf_token %}
-                            <input type="submit" value="Save Changes" class="btn btn-primary"/>
-                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
-                            <div id="saving-cohort" class="collapse" style="display: none;">
-                                <i class="fa fa-circle-o-notch fa-spin"></i> Saving Cohort...
-                            </div>
-                        </div>
-                    </form>
-                </div>
             </div>
         </div>
 

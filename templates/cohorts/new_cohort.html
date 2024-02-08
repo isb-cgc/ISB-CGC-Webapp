@@ -31,7 +31,6 @@
     <div class="container">
         <ol class="breadcrumb">
             {% if user.is_authenticated %}
-                <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
                 <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
             {% else %}
                 <br>

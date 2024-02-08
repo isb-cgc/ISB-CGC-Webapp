@@ -185,7 +185,7 @@ function($, tree_graph, stack_bar_chart) {
             var active_program_id = program_id || $('ul.nav-tabs-data li.active a').data('program-id');
             var active_panel = '' + active_program_id+'-data';
 
-            $('.clinical-trees .spinner').show();
+            $('.case-trees .spinner').show();
             $('.user-data-trees .spinner').show();
             $('.parallel-sets .spinner').show();
 
@@ -195,9 +195,9 @@ function($, tree_graph, stack_bar_chart) {
 
             if(filter_panel_load) {
                 var clin_tree_attr_counts = filters_found ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
-                Object.keys(clin_tree_attr_counts).length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
+                Object.keys(clin_tree_attr_counts).length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-case-'+active_program_id);
 
-                $('.clinical-trees .spinner').hide();
+                $('.case-trees .spinner').hide();
                 $('.user-data-trees .spinner').hide();
                 $('.parallel-sets .spinner').hide();
 
@@ -244,7 +244,7 @@ function($, tree_graph, stack_bar_chart) {
 
                         context.update_zero_case_filters_all();
                         var clin_tree_attr_counts = filters_found ? context.filter_data_for_clin_trees(results['filtered_counts']['Case'], clin_tree_attr) : case_counts;
-                        Object.keys(clin_tree_attr_counts).length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
+                        Object.keys(clin_tree_attr_counts).length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-case-'+active_program_id);
 
                         if (metadata_counts.hasOwnProperty('data_avail')) {
                             var features = [
@@ -280,7 +280,7 @@ function($, tree_graph, stack_bar_chart) {
                         $('#' + active_program_id + '-data-total-participants').html("Error");
                     },
                     complete: function(xhr,status) {
-                        $('.clinical-trees .spinner').hide();
+                        $('.case-trees .spinner').hide();
                         $('.user-data-trees .spinner').hide();
                         $('.parallel-sets .spinner').hide();
                         $('.cohort-info .spinner').hide();

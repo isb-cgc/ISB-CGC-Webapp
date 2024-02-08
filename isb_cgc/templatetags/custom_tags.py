@@ -40,6 +40,10 @@ ALPHANUM_SORT = [
 
 ]
 
+NODE_SORT = {
+    'GDC': 0, 'PDC':1, 'IDC':2
+}
+
 simple_number_sort = [
     '0 to 200', '200.01 to 400', '400.01 to 600', '600.01 to 800', '800.01 to 1000', '1000.01 to 1200', '1200.01 to 1400', '1400.01+',
     '0 to 4', '5 to 9', '10 to 14', '15 to 19', '20 to 24', '25 to 29', '30 to 34', '35 to 39', 'Over 40',
@@ -107,6 +111,12 @@ def get_item(dictionary, key):
 
 
 @register.filter
+def sort_nodes(nodes):
+    return sorted(nodes.items(), key=lambda element: NODE_SORT[element[0]])
+
+
+
+@register.filter
 def check_for_order(items, attr):
     if attr in VALUE_SPECIFIC_ORDERS:
         # If they have a specific order defined in the dict
@@ -133,7 +143,6 @@ def get_feat_displ_name(name):
 
 @register.filter
 def get_readable_name(csv_name, attr=None):
-
     is_mutation = False
     is_data_type = False
 

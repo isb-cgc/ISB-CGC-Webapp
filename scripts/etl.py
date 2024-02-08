@@ -74,7 +74,8 @@ SOLR_TYPES = {
     "INT64": "plong",
     "INTEGER": "plong",
     "DATE": "pdate",
-    "DATETIME": "pdate"
+    "DATETIME": "pdate",
+    "BOOLEAN": "string"
 }
 
 SOLR_TYPE_EXCEPTION = {
@@ -86,14 +87,19 @@ SOLR_SINGLE_VAL = {
     "sample_barcode": ["case_barcode", "sample_barcode"]
 }
 
-PREFORMATTED_ATTRS = ["disease_type","primary_diagnosis","primary_site","progression_or_recurrence","disease_code",
+PREFORMATTED_ATTRS = ["disease_type_gdc","disease_type_pdc", "primary_diagnosis_gdc","primary_site_gdc",
+                      "primary_diagnosis_pdc","primary_site_pdc", "progression_or_recurrence","disease_code",
                       "program_name","project_short_name","ethnicity","morphology","tumor_grade",
-                      "last_known_disease_status","site_of_resection_or_biopsy","tissue_or_organ_of_origin","node",
-                      "bmi","country","hist_subtype","histological_type","histology","neoplasm_histologic_grade",
-                      "pathologic_stage","residual_tumor","site_primary","tumor_tissue_site","tumor_type","platform",
+                      "last_known_disease_status","site_of_resection_or_biopsy","tissue_or_organ_of_origin_gdc",
+                      "tissue_or_organ_of_origin_pdc", "node", "bmi","country","hist_subtype","histological_type",
+                      "histology","neoplasm_histologic_grade", "pathologic_stage","residual_tumor","site_primary",
+                      "tumor_tissue_site","tumor_type","platform",
                       "SeriesInstanceUID","StudyInstanceUID","StudyDescription","SeriesDescription",
                       "tcia_tumorLocation","Modality","BodyPartExamined","primaryAnatomicStructure","CancerType",
                       "collection_id","experimental_strategy","platform","data_format","data_category","data_type"]
+
+BQ_SCHEMA_SKIP = ['id']
+
 FIXED_TYPES = {}
 
 ATTR_SET = {}
@@ -106,7 +112,7 @@ SOLR_LOGIN = settings.SOLR_LOGIN
 SOLR_PASSWORD = settings.SOLR_PASSWORD
 SOLR_CERT = settings.SOLR_CERT
 
-def new_attribute(name, displ_name, type, display_default, preformatted_values=False, units=None, programs=None):
+def new_attribute(name, displ_name, type, display_default, preformatted_values=False, units=None, programs=None, nodes=None):
     return {
         'name': name,
         "display_name": displ_name,
@@ -117,11 +123,12 @@ def new_attribute(name, displ_name, type, display_default, preformatted_values=F
         'attr_set_types': [],
         'display': display_default,
         'categories': [],
-        'programs': programs
+        'programs': programs,
+        'nodes': nodes
     }
 
 
-def load_attributes(ds_attr_files, program_attr_file_name, attr_set_types):
+def load_attributes(ds_attr_files, program_attr_file_name, node_attr_file_name, attr_set_types):
 
     if not (ds_attr_files or program_attr_file_name):
         raise Exception("No attribute files provided! You must provide at least one type of attribute file!")
@@ -133,6 +140,14 @@ def load_attributes(ds_attr_files, program_attr_file_name, attr_set_types):
             if not program_attrs.get(line[1],None):
                 program_attrs[line[1]] = []
             program_attrs[line[1]].append(line[0])
+
+    node_attrs = {}
+    if node_attr_file_name:
+        node_attr_file = open(node_attr_file_name, "r")
+        for line in csv_reader(node_attr_file):
+            if not node_attrs.get(line[1],None):
+                node_attrs[line[1]] = []
+            node_attrs[line[1]].append(line[0])
 
     for ds, files in ds_attr_files.items():
         files = [files] if not type(files) is list else files
@@ -146,7 +161,8 @@ def load_attributes(ds_attr_files, program_attr_file_name, attr_set_types):
                         line[2],
                         True if line[3] == 'True' else False,
                         True if line[0] in PREFORMATTED_ATTRS else False,
-                        programs=program_attrs.get(line[0],None)
+                        programs=program_attrs.get(line[0],None),
+                        nodes=node_attrs.get(line[0], None)
                     )
                 attr = ATTR_SET[line[0]]
 
@@ -215,6 +231,18 @@ def add_attributes(attr_set):
                         attr_to_prog.append(Attribute.programs.through(program_id=prog.id, attribute_id=obj.id))
 
                     Attribute.programs.through.objects.bulk_create(attr_to_prog)
+
+            if len(attr.get('nodes', []) or []):
+                nodes = obj.get_nodes()
+                missing_nodes = [x for x in attr['nodes'] if x not in nodes]
+                if len(missing_nodes):
+                    nodes = DataNode.objects.filter(short_name__in=missing_nodes)
+                    attr_to_node = []
+
+                    for node in nodes:
+                        attr_to_node.append(Attribute.nodes.through(datanode_id=node.id, attribute_id=obj.id))
+
+                    Attribute.nodes.through.objects.bulk_create(attr_to_node)
 
             if len(attr.get('attr_set_types',[])):
                 set_types = Attribute_Set_Type.objects.select_related('datasettype').filter(attribute=obj).values_list('datasettype__name',flat=True)
@@ -319,7 +347,7 @@ def create_solr_params(schema_src, solr_src, aggregated=False):
     SCHEMA_STRING = "curl -u {solr_user}:{solr_pwd} -X POST -H 'Content-type:application/json' --data-binary '{schema}' https://localhost:8983/solr/{solr_src}/schema --cacert solr-ssl.pem"
     INDEX_STRING = "curl -u {solr_user}:{solr_pwd} -X POST 'https://localhost:8983/solr/{solr_src}/update?commit=yes{params}' --data-binary @{file_name}.csv -H 'Content-type:application/csv' --cacert solr-ssl.pem"
     for field in schema:
-        if not re.search(r'has_',field['name']):
+        if not re.search(r'has_',field['name']) and field['name'] not in BQ_SCHEMA_SKIP:
             field_schema = {
                 "name": field['name'],
                 "type": SOLR_TYPES[field['type']] if field['name'] not in SOLR_TYPE_EXCEPTION else SOLR_TYPE_EXCEPTION[field['name']],
@@ -432,7 +460,7 @@ def add_data_sources(sources, build_attrs=True, link_attr=True):
             link_attrs = []
             for field in schema:
                 if build_attrs:
-                    if field['name'] not in ATTR_SET:
+                    if field['name'] not in ATTR_SET and field['name'] not in BQ_SCHEMA_SKIP:
                         attr_type = FIXED_TYPES.get(field['name'], Attribute.CATEGORICAL if (not re.search(r'(_id|_barcode|UID|uuid)', field['name']) and field['type'] == "STRING") else Attribute.STRING if field['type'] == "STRING" else Attribute.CONTINUOUS_NUMERIC)
                         ATTR_SET[field['name']] = {
                             'name': field['name'],
@@ -636,7 +664,7 @@ def main(config, make_attr=False):
 
         if 'attributes' in config:
             ds_attr_files = {x['name']: x['attributes'] for x in config['data_sources'] if 'attributes' in x}
-            load_attributes(ds_attr_files, config['attributes'].get('program_file',None), config['attributes'].get('attr_set_types',None))
+            load_attributes(ds_attr_files, config['attributes'].get('program_file',None), config['attributes'].get('node_file',None), config['attributes'].get('attr_set_types',None))
 
         # Add any attributes found to be new in the prior step to the database, including linkage to the new data sources
         len(ATTR_SET.keys()) and add_attributes(ATTR_SET)
