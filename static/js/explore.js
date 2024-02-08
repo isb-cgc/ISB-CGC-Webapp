@@ -309,6 +309,13 @@ require([
         arrow: false
     });
 
+    tippy('.filterset_info',{
+        content: 'Go ask Bill',
+        theme: 'light',
+        placement: 'right-end',
+        arrow: false
+    });
+
     tippy('.checkbox-none',{
         content: 'Filtering on the \'None\' attribute is not currently supported within derived data.',
         theme: 'light',

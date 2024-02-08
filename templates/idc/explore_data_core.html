@@ -1,5 +1,12 @@
 {% load custom_tags %}
 {% load static %}
+
+<div class="notDisp">
+<form method="post" id="theForm" action="/cart/">{% csrf_token %}
+ <input name="glblcart" id="glblcart" value="" />
+    <input name="seriesmp" id="seriesmp" value="" />
+   </form>
+</div>
 <div class="container-fluid">
     <div class="row">
         <div class="tab-content data-tab-content">
@@ -664,7 +671,9 @@
                 <div class="tabpanel data-tab-content-panel">
                 <div class="panel panel-default filter-display-panel">
 
-                        <div class="panel-heading clearfix"><h3 class="panel-title">Filter Definition</h3>
+                    <div class="panel-heading clearfix"><h3 class="panel-title">Filter Definition</h3> <span><select id="filtersetdrop" name="filterset" onchange="changeFilterSetViaButton()"><option value="1">Filter Set 1</option>
+                        <option id= "filtersetnew" value="-1">New Filter Set</option></select> </span><span class="notDisp delfilt"><input type="checkbox" onclick="deleteFilterSet()">Delete current filter set</span>
+                          <div class="filterset_info" style="float:right"><i class="fa-solid fa-info-circle"></i></div>
                             {% if not is_cohort %}
                                 <a class="pull-left clear-filters btn btn-primary btn-small" role="button"
                                    id="5-data-clear-filters">
@@ -677,8 +686,9 @@
 
                         <div class="panel-body">
                             <input id="filt_txt" type="hidden" value="">
-                            <div id="search_def"><span class="placeholder">&nbsp;</span></div>
+                            <div id="search_def"><span class="placeholder"></span></div>
 
+                            <div id="search_numbers"><span class="placeholder"</span></div>
 
                             <div id="search_def_warn" style="display:none">Note: TCGA.* filters only apply to TCGA
                                 collections
@@ -699,51 +709,25 @@
                                         disabled title="Copy Filter URL to clipboard" style="display:none;">
                                     <i class="fa-solid fa-copy" aria-hidden="true"></i>
                                 </button>
+                                <button class="btn btn-default  bq-string-display" data-toggle="modal"
+                                  data-target="#bq-string-display"
+                                   title= "Select a filter to enable this feature." > View Filter SQL String
+                             </button>
                                 <pre class="filter-url code is-hidden" style="display:none;"></pre>
+
                             </div>
                         </div>
 
                     </div>
                 <div class="panel-heading clearfix notDisp"><h4 class="panel-title">Cart Summary</h4>
                     <div class ="panel-body">
-                            <div id="search_def_stats" class="notDisp">No Text</div>
+                            <div id="search_def_stats_hidden" class="notDisp">No Text</div>
                             <div id="filtersetdiv"><span id="filt0" class="curfilt filts" onclick="changeFilterSet(0, true)">Filterset 1</span></div>
                     </div>
                 </div>
 
                  <div id="res" class=" filter-panel" role="tabpanel">
-                        <div class="tabpanel panel-default" role="tabpanel">
-                            <div class="panel-heading clearfix">
-                                <h4 class="panel-title">stuff
-                                </h4>
 
-                            </div>
-                            <div>
-                            <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
-                                <li id="chart_open" role="presentation" class="filter-tab active"><a
-                                        href="#chart" role="tab" data-toggle="tab" title="orig"
-                                        aria-expanded="true">Charts</a></li>
-
-                                    <li id="search_derived" role="presentation" class="filter-tab"><a
-                                            href="#collections" role="tab" data-toggle="tab" title="derived"
-                                            aria-expanded="false">Collections</a></li>
-
-                                    <li id="search_related" role="presentation" class="filter-tab"><a
-                                            href="#cases" role="tab" data-toggle="tab" title="related"
-                                            aria-expanded="false">Cases</a></li>
-
-                                    <li id="search_related" role="presentation" class="filter-tab"><a
-                                            href="#study" role="tab" data-toggle="tab" title="related"
-                                            aria-expanded="false">Study</a></li>
-
-                                    <li id="search_related" role="presentation" class="filter-tab"><a
-                                            href="#series" role="tab" data-toggle="tab" title="related"
-                                            aria-expanded="false">Series</a></li>
-                            </ul>
-                            </div>
-
-
-                        </div>
                           <div class=" filter-panel" role="tabpanel">
 
                             <div class="tab-content">

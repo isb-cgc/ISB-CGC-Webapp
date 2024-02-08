@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block header %}
+
+<link type="text/css" rel="stylesheet" href="{% static 'css/chart.css' %}">
+
+{% endblock %}
+
+
+
+{% block title %}
+    Cart
+{% endblock %}
+
+{% block description %}
+    Cart
+{% endblock %}
+
+{% block page_name %}cart{% endblock %}
+
+
+{% block page_header %}
+    <div class="container-fluid">
+        <h3 class="pull-left">Cart</h3>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class ="row">
+            <div class="col-lg-12 col-md-12">
+                <div class="panel panel-default short-inner-content" role="panel panel-default">
+                    <div class="panel-heading"><h4>Cart</h4>
+                    </div>
+                    <div class="tabpanel data-tab-content-panel table-panel">
+                            <div class="panel panel-default">
+                                <div class="panel-heading clearfix"><h4 class="panel-title">Collections</h4></div>
+                                <div id="projects_panel" class="panel-body">
+
+                                    <table id="cart_table" class="table table-striped">
+                                        <thead id="cart_table_head">
+                                        <tr>
+                                            <th class="ckbx cart">
+
+                                            </th>
+                                            <th class='text_data'>Filter ID</th>
+                                            <th class='text_data'>Filter Def</th>
+
+                                        </tr>
+
+                                        </thead>
+                                        <tbody id="cartbody">
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js_file %}
+	{{ block.super }}
+	<script type="text/javascript" src="{% static 'js/cart.js' %}?v={{ APP_VERSION }}"></script>
+
+{% endblock %}
+

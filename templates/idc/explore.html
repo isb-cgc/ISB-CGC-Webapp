@@ -60,6 +60,7 @@
                 </div>
             </div>
             <h3 class="pull-left" role="heading" aria-level="1">Explore Image Data</h3>
+
             {% if request.user.is_authenticated %}
             <button id="save-cohort-btn" class="btn btn-special pull-right" data-toggle="modal"
                 data-target="#save-cohort-modal"
@@ -71,16 +72,15 @@
                 disabled="disabled" data-uri="{% url 'account_login' %}"> Log in to Save
             </button>
             {% endif %}
-            <button class="btn btn-default pull-right bq-string-display" data-toggle="modal"
-                    data-target="#bq-string-display"
-                    title="Select a filter to enable this feature." disabled
-            > View SQL String
-            </button>
+
+
             <button id="export-manifest" class="btn btn-special pull-right" data-toggle="modal"
                 data-target="#export-manifest-modal"
                 title="Select a filter to enable this feature." disabled
-            > Download Cohort Images
+            > Download Cart Images
             </button>
+
+            <button id="view-cart" class="btn btn-special pull-right" onclick="window.viewcart()">View Cart</button>
         </div>
     </div>
 {% endblock %}
@@ -119,8 +119,13 @@
         //window.selItems = new Object();
         //window.selItems.selProjects = new Array();
         //window.selItems.selStudies = new Object();
-        window.choiceMade = false;
+        window.choiceMade = true;
         window.selProjects= new Object();
+        window.cart= new Object();
+        window.glblcart = new Object();
+        window.seriesmp=new Object();
+        window.projstudymp = new Object();
+        window.casestudymp = new Object();
         window.collection = JSON.parse(document.getElementById('collections').textContent);
         var lst = Object.keys(window.collection).sort();
         window.collectionData = new Array();
@@ -146,9 +151,13 @@
         window.filterSet.push(new Object());
         window.filterSet[0]['selProjects'] = window.selProjects;
         window.filterSet[0].filterObj = {};
-        window.filterSet[0].setcnt=0;
+        //window.filterSet[0].currentFiltnum=0;
+        window.filterSet[0].cartSize=window.cartSize;
         window.filterSetNum=0;
         window.filterObjOld={};
+        window.filterSet[0]['enabled']=true;
+        window.cart={};
+        window.filterSet[0].cart = window.cart
 
         /*
         window.filterSet.push(new Object());
@@ -156,9 +165,7 @@
         window.filterSet[1].filterObj = {};
         */
 
-        window.cart = new Object();
-        window.currentSet=0;
-        window.currentCart=0;
+        //window.currentSet=0;
 
         var is_cohort = false;
         var showWarning = true;

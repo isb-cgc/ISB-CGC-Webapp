@@ -49,7 +49,8 @@ urlpatterns = [
     url(r'^explore/bq_string/$', get_query_str_response, name='explore_bq_string'),
     url(r'^explore/manifest/$', views.explorer_manifest, name='get_explore_manifest'),
     url(r'^tables/', views.populate_tables, name='populate_tables'),
-
+    url(r'^studymp/', views.studymp, name='studymp'),
+   url(r'^cart/', views.cart, name='cart'),
     url(r'^warning/', views.warn_page, name='warn'),
     url(r'^about/', views.about_page, name='about_page'),
    url(r'^test(.*)/', views.test_page, name='test_page'),
