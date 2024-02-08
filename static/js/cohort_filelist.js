@@ -687,7 +687,7 @@ require([
         var active_tab = $(type_tab).data('file-type');
         SELECTED_FILTERS[active_tab] = {};
 
-        $(type_tab).find('div.filter-panel input[type="checkbox"]:checked').each(function(){
+        $(type_tab).find('div.filter-panel input:not(.hide-zeros)[type="checkbox"]:checked').each(function(){
             if(!SELECTED_FILTERS[active_tab][$(this).data('feature-name')]) {
                 SELECTED_FILTERS[active_tab][$(this).data('feature-name')] = [];
             }
@@ -873,7 +873,7 @@ require([
         });
     };
 
-    $('.data-tab-content').on('change','.filter-panel input[type="checkbox"]',function(){
+    $('.data-tab-content').on('change','.filter-panel input:not(.hide-zeros)[type="checkbox"]',function(){
         update_filters($(this));
         update_displays($('ul.nav-tabs-files li.active a').data('file-type'));
     });
@@ -973,5 +973,9 @@ require([
             i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     }
+
+    $('.filelist-container').on('click', '.hide-zeros input', function() {
+        update_zero_case_filters($(this));
+    });
 
 });
