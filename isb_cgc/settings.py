@@ -515,6 +515,31 @@ ACCOUNTS_ALLOWANCES = list(set(os.environ.get('ACCOUNTS_ALLOWANCES','').split(',
 #   End django-allauth   #
 ##########################
 
+##########################
+# Django local auth      #
+##########################
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 16,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'isb_cgc.validators.PasswordComplexityValidator',
+        'OPTIONS': {
+            'min_length': 16,
+            'special_char_list': '!@#$%^&*+:;?'
+        }
+    },
+    {
+        'NAME': 'isb_cgc.validators.PasswordReuseValidator'
+    }
+]
+
 # Path to application runtime JSON key
 GOOGLE_APPLICATION_CREDENTIALS        = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
 
