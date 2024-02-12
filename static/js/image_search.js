@@ -974,7 +974,7 @@ require([
         else if (val=='cancel'){
             filterObj=JSON.parse(JSON.stringify(filterObjOld));
             window.filterSet[window.filterSetNum].filterObj = filterObj;
-            updateFiltControls();
+            //filters_for_load=tables.mapFiltObj
             filterutils.mkFiltText();
             mksearchtwo();
 
@@ -1251,7 +1251,15 @@ require([
      };
 
     var showFilters = [];
-    var load_filters = function(filters) {
+
+    window.clear_filters = function(){
+      $('#program_set').find('.search-checkbox-list').find('input:checkbox').prop('checked', false);
+      $('#program_set').find('.search-checkbox-list').find('input:checkbox').prop('indeterminate', false);
+      $('#analysis_set').find('.search-checkbox-list').find('input:checkbox').prop('checked', false);
+        $('#search_orig_set').find('.search-checkbox-list').find('input:checkbox').prop('checked', false);
+
+    }
+    window.load_filters = function(filters) {
          var sliders = [];
         _.each(filters, function(group){
             _.each(group['filters'], function(filter) {
@@ -1309,7 +1317,7 @@ require([
                                attValueFoundInside = true;
                            }
                            $('input[data-filter-attr-id="' + filter['id'] + '"][value="' + val + '"]').prop("checked", true);
-                           checkFilters($('input[data-filter-attr-id="' + filter['id'] + '"][value="' + val + '"]'));
+                           filterutils.checkFilters($('input[data-filter-attr-id="' + filter['id'] + '"][value="' + val + '"]'));
                       });
                   }
                 if (attValueFoundInside){
@@ -1327,8 +1335,10 @@ require([
         if (sliders.length > 0) {
             load_sliders(sliders, false);
         }
+
         filterutils.mkFiltText();
         return updateFacetsData(true).promise();
+
      };
 
     var load_sliders = function(sliders, do_update) {
@@ -1483,7 +1493,7 @@ require([
              if (!(has_filters || has_sliders)) {
                  // No anonymous filters seen--check for filter URI
                 if (filters_for_load && Object.keys(filters_for_load).length > 0) {
-                     loadPending = load_filters(filters_for_load);
+                     loadPending = load_filters(filters_for_load, );
                      loadPending.done(function () {
                          //console.debug("External filter load done.");
                      });
@@ -1498,7 +1508,7 @@ require([
                      }
                  }
                  if (has_filters) {
-                     loadPending = load_filters(ANONYMOUS_FILTERS);
+                     loadPending = load_filters(ANONYMOUS_FILTERS, );
                      loadPending.done(function () {
                          //console.debug("Filters loaded from anonymous login.");
                      });
@@ -1598,7 +1608,7 @@ require([
 
 
 
-
+/*
 
     updateFiltControls = function(){
      var filtVal={};
@@ -1621,7 +1631,7 @@ require([
          }
      });
 
-    }
+    } */
 
 
     initSort = function(sortVal){
@@ -1686,6 +1696,52 @@ require([
             })
             $('#search_def_warn').hide();
             window.filterObj= {};
+            filterutils.mkFiltText();
+            var updateDone = false;
+           var updateWait = false;
+            if ((window.filterSet.length>1)){
+               var selnm=checkOtherSets(window.filterSetNum)
+                if (selnm>-1){
+                    window.filterSet[window.filterSetNum].filterObj=JSON.parse(JSON.stringify(filterObjOld));
+                    updateDone=true;
+                    //window.filterSetNum=selnm;
+                    changeFilterSet(selnm, true);
+                }
+                else if (window.cartSize>0) {
+                    updateWait=true;
+                    if (window.choiceMade) {
+                        processUserChoice();
+                    }
+                    else {
+
+                    $('#filter-option-modal').addClass('filtermoddisp');
+                    $('#filter-option-modal').removeClass('filternotmoddisp');
+                    }
+                   //window.filterSet[window.filterSetNum].filterObj=JSON.parse(JSON.stringify(filterObjOld));
+                    //createNewFilterSet(filterObj, true);
+                }
+            }
+            else if (window.cartSize>0) {
+                updateWait = true;
+                if (window.choiceMade) {
+                   window.processUserChoice();
+                } else {
+
+                $('#filter-option-modal').addClass('filtermoddisp');
+                $('#filter-option-modal').removeClass('filternotmoddisp');
+                 }
+                    //window.filterSet[window.filterSetNum].filterObj=JSON.parse(JSON.stringify(filterObjOld));
+                    //createNewFilterSet(filterObj,true);
+                }
+           else{
+               updateFacetsData(true);
+               tables.initializeTableData();
+            }
+
+
+            /*
+
+            window.filterObj= {};
 
             filterutils.mkFiltText();
             updateFacetsData(true);
@@ -1694,6 +1750,9 @@ require([
             $('#cases_tab').DataTable().destroy();
             $('#studies_tab').DataTable().destroy();
             $('#series_tab').DataTable().destroy();
+
+            */
+
         });
 
         load_preset_filters();

@@ -325,14 +325,26 @@ def studymp(request):
        filters = json.loads(req.get('filters', '{}'))
        totSeries = int(req.get('totseries'))
        totStudies = int(req.get('totstudies'))
+       mxSeries = int(req.get('mxseries'))
+       mxStudies=int(req.get('mxstudies'))
 
        custom_facets['per_id']['limit'] = totStudies
        idsEx = get_collex_metadata(
-                    filters, ['collection_id', 'PatientID','StudyInstanceUID','SeriesInstanceUID'], record_limit=totSeries, sources=sources, offset=0,
+                    filters, ['collection_id', 'PatientID','StudyInstanceUID'], record_limit=totSeries, sources=sources, offset=0,
                     records_only=False, custom_facets=custom_facets,
-                    collapse_on='SeriesInstanceUID', counts_only=False, filtered_needed=False,
+                    collapse_on='StudyInstanceUID', counts_only=False, filtered_needed=False,
                     raw_format=True, default_facets=False
                 )
+
+
+       sfilters = {"collection_id": filters["collection_id"]}
+       idsSer = get_collex_metadata(
+           sfilters, ['collection_id', 'PatientID', 'StudyInstanceUID', 'SeriesInstanceUID'], record_limit=mxSeries,
+           sources=sources, offset=0,
+           records_only=False, custom_facets=custom_facets,
+           collapse_on='SeriesInstanceUID', counts_only=False, filtered_needed=False,
+           raw_format=True, default_facets=False
+       )
 
        studymp={}
        seriesmp={}
@@ -342,7 +354,7 @@ def studymp(request):
           proj=doc['collection_id'][0]
           patientid=doc['PatientID']
           studyid= doc['StudyInstanceUID']
-          seriesid=doc['SeriesInstanceUID']
+          #seriesid=doc['SeriesInstanceUID']
           if not patientid in casestudymp:
               casestudymp[patientid]={}
           if not studyid in seriesmp:
@@ -351,7 +363,7 @@ def studymp(request):
               seriesmp[studyid]['proj']=proj
               seriesmp[studyid]['PatientID'] = patientid
 
-          seriesmp[studyid]['val'].append(seriesid)
+          #seriesmp[studyid]['val'].append(seriesid)
 #          if not (patientid in studymp):
 #              studymp[patientid]={}
           if not  (studyid in study_patient):
@@ -363,7 +375,11 @@ def studymp(request):
               patientid=study_patient[studyid]
               studymp[studyid]=cnt
               casestudymp[patientid][studyid]=cnt
-
+       for doc in idsSer['docs']:
+         studyid=doc['StudyInstanceUID']
+         seriesid=doc['SeriesInstanceUID']
+         if studyid in seriesmp:
+           seriesmp[studyid]['val'].append(seriesid)
        response["studymp"] = studymp
        response["seriesmp"] = seriesmp
        response['casestudymp'] = casestudymp
@@ -589,10 +605,11 @@ def populate_tables(request):
                     active=True, source_type=DataSource.SOLR,
                     aggregate_level="SeriesInstanceUID"
                 )
+                sfilters= {}
                 clist = [x['PatientID'] for x in tableRes]
-                filters['PatientID'] = clist
+                sfilters['PatientID'] = clist
                 idsEx = get_collex_metadata(
-                    filters, ['collection_id','PatientID', 'StudyInstanceUID','SeriesInstanceUID'], record_limit=serieslimit, sources=osources, offset=offset,
+                    sfilters, ['collection_id','PatientID', 'StudyInstanceUID','SeriesInstanceUID'], record_limit=serieslimit, sources=osources, offset=offset,
                     records_only=True,
                     collapse_on='SeriesInstanceUID', counts_only=False, filtered_needed=False,
                     raw_format=True, default_facets=False

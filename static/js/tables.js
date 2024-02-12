@@ -152,11 +152,17 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                         var rowsAdded = false;
                         var projid=data[0]
 
-                        window.selProjects[projid]['totalChild']=parseInt($(row).data('totalcases'));
-                        window.selProjects[projid]['totalCases']=parseInt($(row).data('totalcases'));
+                        window.selProjects[projid]['totalChild']=parseInt($(row).attr('totalcases'));
+                        window.selProjects[projid]['totalCases']=parseInt($(row).attr('totalcases'));
                         window.selProjects[projid]['totalStudies']=parseInt($(row).attr('totalstudy'));
                         window.selProjects[projid]['totalSeries']=parseInt($(row).attr('totalseries'));
-
+                        /*
+                        if (!('mxseries' in window.selProjects[projid]) || (window.selProjects[projid]['mxseries']<window.selProjects[projid]['totalSeries'])){
+                            window.selProjects[projid]['mxseries']=window.selProjects[projid]['totalSeries'];
+                        }
+                        if (!('mxstudies' in window.selProjects[projid]) || (window.selProjects[projid]['mxstudies']<window.selProjects[projid]['totalStudies'])){
+                            window.selProjects[projid]['mxstudies']=window.selProjects[projid]['totalStudies'];
+                        }*/
 
                         if (  ($(elem).hasClass('selected'))  ){
                             rowsAdded = false;
@@ -176,7 +182,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                         }
                         clearChildStates([data[0]],rowsAdded,'project');
                         clearChildSelections([data[0]]);
-                        updateProjStudyMp(projid,window.selProjects[projid]['totalStudies'], window.selProjects[projid]['totalSeries']);
+                        updateProjStudyMp(projid,window.selProjects[projid]['totalStudies'], window.selProjects[projid]['totalSeries'], window.filterSet[0].selProjects[projid]['mxstudies'], window.filterSet[0].selProjects[projid]['mxseries']);
                         //mksearchtwo();
 
                     });
@@ -235,14 +241,14 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         $('#proj_table')[0].style.width=null;
     }
 
-    const updateProjStudyMp = function(projid, totStudies, totSeries){
+    const updateProjStudyMp = function(projid, totStudies, totSeries, mxStudies, mxSeries){
 
         var curFilterObj = JSON.parse(JSON.stringify(filterutils.parseFilterObj()));
         curFilterObj.collection_id = projid;
         var filterStr = JSON.stringify(curFilterObj);
         let url = '/studymp/';
         url = encodeURI(url);
-        let ndic = {'filters': filterStr, 'totstudies': totStudies, 'totseries': totSeries}
+        let ndic = {'filters': filterStr, 'totstudies': totStudies, 'totseries': totSeries, 'mxstudies': mxStudies, 'mxseries':mxSeries}
         if (!('studymp' in window.selProjects[projid])){
             window.selProjects[projid]['studymp']={};
         }
@@ -516,15 +522,23 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                         var ret = checkClientCache(request, 'cases');
                         var ssCallNeeded = ret[0];
                         var reorderNeeded = ret[1];
-
+                        var checkIds=[]
                         if (ssCallNeeded) {
                             if (refreshAfterFilter) {
-                                for (projid in viewProjects) {
-                                    checkIds = checkIds.concat(Object.keys(window.selProjects[projid].selCases))
+                                for (var id in viewProjects) {
+                                    var projid=viewProjects[id]
+                                     checkIds = checkIds.concat(Object.keys(window.selProjects[projid].selCases))
                                 }
                             }
                             var curFilterObj = JSON.parse(JSON.stringify(filterutils.parseFilterObj()));
                             curFilterObj.collection_id = viewProjects;
+
+                            if (caseID.trim().length>0){
+                                curFilterObj.PatientID = caseID;
+                                if (checkIds.indexOf(caseID) > -1) {
+                                    checkIds = [caseID];
+                                }
+                            }
 
                             var filterStr = JSON.stringify(curFilterObj);
                             let url = '/tables/cases/';
@@ -1418,9 +1432,12 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
 
         if (project in stats['study_per_collec']){
             window.selProjects[project]['totalStudies']=stats['study_per_collec'][project];
+            window.selProjects[project]['mxstudies']=stats['study_per_collec'][project];
         }
+
         if (project in stats['series_per_collec']){
             window.selProjects[project]['totalSeries']=stats['series_per_collec'][project];
+            window.selProjects[project]['mxseries']=stats['series_per_collec'][project];
         }
 
     }
@@ -2486,6 +2503,17 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
            if (parDic['numChildNoCheck']<parDic['totalChild']){
                parsel='partselected';
            }
+           else {
+               var clicks = cntClicksInPath([...nids].reverse())
+               var clicksEven = (clicks % 2 == 0) ? true : false;
+               if (clicksEven){
+                   parsel='unselected';
+               }
+               else{
+                   parsel='selected';
+               }
+           }
+           /*
            else if ('state' in parDic){
                if (parDic['state']['checked']){
                    parsel='selected';
@@ -2496,7 +2524,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
            }
            else{
                parsel='selected';
-           }
+           } */
 
            $('#'+tableid).find('['+dataid+'="'+id+'"]').find('.fa-cart-shopping').removeClass('partselected');
            $('#'+tableid).find('['+dataid+'="'+id+'"]').find('.fa-cart-shopping').removeClass('unselected');
@@ -2591,20 +2619,9 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         var pg='filtstate'+nm1;
         $('#filtersetdiv').append(' <span id="filt'+nm1+'" class="filts" onclick="changeFilterSet('+nm1+', true)">Filterset '+nm2+'</span>')
         $('#filtersetnew').before('<option value="'+nm2+'">Filter Set '+nm2+'</option>');
-        if ($('#filtersetdrop').children().length>2){
+        if ($('#filtersetdrop').children().length>2) {
             $('.delfilt').removeClass('notDisp');
-            /*$('#filtersetdrop').children().each(function(){
-                if (!(this.id==='filtersetnew'))
-                {
-                    var val = $(this).val();
-                    $(this).html('Filter Set '+nm2+'<i class="fa-solid fa-trash"></i>');
-                }
-            });*/
         }
-
-        /* localStorage.setItem(pg, document.body.innerHTML);
-        localStorage.setItem('divset',document.getElementById('#filtersetdiv').innerHTML); */
-
         if (csel){
             changeFilterSet(window.filterSet.length-1, true);
 
@@ -2613,14 +2630,19 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
     }
 
     const updateFiltControls = function(){
-     var filtVal={};
-     for (var nkey in window.filterObj){
-         var filtSet= window.filterObj[nkey];
+      var filters_for_load = tables.mapFiltObj(window.filterObj);
+      var i=0;
+
+      }
+
+
+    /*
+
+     var filtSet= window.filterObj[nkey];
          for (var i=0;i<filtSet.length;i++){
              var filt= filtSet[i];
              filtVal[filt]=1;
          }
-      }
      $('input:checkbox').each(function(){
          if (this.hasAttribute('data-filter-display-val')){
             var val= this.getAttribute('data-filter-display-val') ;
@@ -2632,8 +2654,8 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
             }
          }
      });
+        */
 
-    }
     window.changeFilterSetViaButton= function(){
         var num=parseInt($('#filtersetdrop').find(':selected').val());
         if (num==-1){
@@ -2659,30 +2681,20 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         window.cartSize =window.filterSet[num].cartSize
         window.cart=window.filterSet[num].cart
 
-        /*
-        $('#projects_panel').remove();
-        //$('#projects_panel_container').append(window.filterSet[num]['projects_panel']);
-        document.getElementById('projects_panel_container').appendChild(window.filterSet[num]['projects_panel']);
 
-        $('#cases_panel').remove();
-        */
-        /* pg='filtstate'+num.toString();
-        document.body.innerHTML=localStorage.getItem(pg);
-        $('#filtersetdiv')[0].innerHTML==localStorage.getItem('divset'); */
 
         $('#filtersetdiv').find('.filts').removeClass('curfilt');
         $('#filtersetdiv').find('#filt'+num.toString()).addClass('curfilt');
         $('#filtersetdrop').find('option').prop('selected', false)
         $('#filtersetdrop').find('option[value="'+(num+1).toString()+'"]').prop('selected', true);
         //$('#cases_panel_container').append(window.filterSet[num]['cases_panel']);
-        updateFiltControls();
-        filterutils.mkFiltText();
-        mksearchtwo();
-        if (doUpdate){
-            updateFacetsData(true);
-        }
-        var rr=1;
-
+        //updateFiltControls();
+        var filters_for_load = filterutils.mapFiltObj(window.filterObj);
+        clear_filters();
+        filters_loaded=load_filters(filters_for_load);
+        filters_loaded.done(function () {
+           mksearchtwo();
+        });
 
 
     }
@@ -2733,7 +2745,8 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         updateTablesAfterFilter:updateTablesAfterFilter,
         initProjectData:initProjectData,
         createNewFilterSet:createNewFilterSet,
-        updateFilterSetData:updateFilterSetData
+        updateFilterSetData:updateFilterSetData,
+        updateFiltControls:updateFiltControls
 
 
     };

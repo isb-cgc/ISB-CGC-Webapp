@@ -396,19 +396,96 @@ define(['jquery', 'utils'], function($, utils) {
             $(childBoxes).prop('checked',false);
         }
     };
-    var checkOtherSets = function(nm){
-       selnm=-1;
-       for (i=0;i<window.filterSet.length;i++){
-           if ((i!=nm) && (window.filterSet[i]['enabled'])){
+
+    const checkOtherSets = function(nm){
+       var found = false;
+       var selnm=-1;
+       var filtArr = mapFiltObj(window.filterObj)[0]['filters']
+
+       for (var i=0;i<window.filterSet.length;i++){
+           diff = true;
+           if ((i!=nm) && (window.filterSet[i]['enabled'])) {
                cset = window.filterSet[i].filterObj
-               if (JSON.stringify(filterObj)==JSON.stringify(cset)){
-                   selnm=i;
-                   break;
+               csetArr = mapFiltObj(cset)[0]['filters'];
+
+               if (filtArr.length==csetArr.length){
+                   diff=false;
+                   for (var j=0; j<filtArr.length;j++){
+                       var filt1=filtArr[j];
+                       var filt2 = csetArr[j];
+                       if ((filt1['id'] != filt2['id']) || (filt1['op'] != filt2['op'])){
+                           diff = true;
+                           break;
+                       }
+                       else{
+                           for (var k=0; k<filt1['values'].length;k++){
+                               if (filt1['values'][k]!=filt2['values'][k]){
+                                   diff = true;
+                                   break;
+                               }
+                           }
+                       }
+                       if (diff){
+                           break;
+                       }
+                   }
                }
+
            }
+           if (!(diff)){
+               selnm=i
+               break;
+              }
        }
        return selnm;
    }
+
+
+
+
+    const mapFiltObj = function(filterObj){
+        var filtmp=[]
+        filtmp[0]={}
+        filtmp[0]['filters'] = new Array();
+
+        var pfiltdic={'id':120, 'op':"OR", 'values':[]}
+        for (var nkey in filterObj){
+            if (nkey.startsWith('Program')){
+              pfiltdic['values']=[...pfiltdic['values'],...filterObj[nkey]]
+
+            }
+            else{
+              var filtdic={}
+              var attSet = attMap[nkey];
+              var id= attSet['id'];
+              var filt = filterObj[nkey]
+              if (Array.isArray(filt)){
+                filtdic['values']=[...filt].sort();
+                filtdic['id']=id;
+                filtdic['op']="OR";
+              }
+              else{
+                filtdic['values']=[...filt['values']].sort();
+                filtdic['id']=id;
+                filtdic['op']=filt['op'];
+              }
+              filtmp[0]['filters'].push(filtdic);
+        }
+        }
+
+        if (pfiltdic['values'].length>0){
+            pfiltdic['values'].sort();
+           filtmp[0]['filters'].push(pfiltdic)
+        }
+
+        filtmp[0]['filters'].sort(function(a,b){
+            return a['id']-b['id'];
+        })
+
+        return filtmp
+    }
+
+
 
     var handleFilterSelectionUpdate = function(filterElem, mkFilt, doUpdate) {
         var updateDone = false;
@@ -420,7 +497,7 @@ define(['jquery', 'utils'], function($, utils) {
 
         if (doUpdate){
             if ((window.filterSet.length>1)){
-               checkOtherSets(window.filterSetNum)
+               var selnm=checkOtherSets(window.filterSetNum)
                 if (selnm>-1){
                     window.filterSet[window.filterSetNum].filterObj=JSON.parse(JSON.stringify(filterObjOld));
                     updateDone=true;
@@ -622,7 +699,10 @@ define(['jquery', 'utils'], function($, utils) {
         handleFilterSelectionUpdate:handleFilterSelectionUpdate,
         mkFiltText:mkFiltText,
         FLOAT_SLIDERS:FLOAT_SLIDERS,
-        updateFilterSelections:updateFilterSelections
+        updateFilterSelections:updateFilterSelections,
+        checkFilters:checkFilters,
+        checkOthersets: checkOtherSets,
+        mapFiltObj:mapFiltObj
     }
 
 });
