@@ -701,7 +701,7 @@ define(['jquery', 'utils'], function($, utils) {
         FLOAT_SLIDERS:FLOAT_SLIDERS,
         updateFilterSelections:updateFilterSelections,
         checkFilters:checkFilters,
-        checkOthersets: checkOtherSets,
+        checkOtherSets: checkOtherSets,
         mapFiltObj:mapFiltObj
     }
 
