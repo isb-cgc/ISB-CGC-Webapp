@@ -630,10 +630,10 @@ def populate_tables(request):
                         seriesmp[studyid]['proj'] = collection_id
                         seriesmp[studyid]['PatientID']=patientid
                       seriesmp[studyid]['val'].append(seriesid)
-                      cnt = studyvals[studyid]
+                      study_cnt = studyvals[studyid]
                       if not patientid in idic:
                         idic[patientid] ={}
-                      idic[patientid][studyid]=cnt
+                      idic[patientid][studyid]=study_cnt
 
 
                 for row in tableRes:

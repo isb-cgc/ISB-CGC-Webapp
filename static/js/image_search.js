@@ -1700,7 +1700,7 @@ require([
             var updateDone = false;
            var updateWait = false;
             if ((window.filterSet.length>1)){
-               var selnm=checkOtherSets(window.filterSetNum)
+               var selnm=filterutils.checkOtherSets(window.filterSetNum)
                 if (selnm>-1){
                     window.filterSet[window.filterSetNum].filterObj=JSON.parse(JSON.stringify(filterObjOld));
                     updateDone=true;
