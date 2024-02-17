@@ -75,7 +75,7 @@ mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL
 mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'dev-user'@'localhost';"
 
 # If we have migrations for older, pre-migrations apps which haven't yet been or will never be added to the database dump, make them here eg.:
-# python3 ${HOMEROOT}/manage.py makemigrations <appname>
+# python3 ${HOMEROOT}/manage.py makemigrations
 
 # Now run migrations
 echo "Running Migrations..."
@@ -85,9 +85,9 @@ echo "Adding in default Django admin IP allowances for local development"
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e "INSERT INTO adminrestrict_allowedip (ip_address) VALUES('127.0.0.1'),('10.0.*.*');"
 
 # Load your SQL table file
-# Looks for metadata_featdef_tables.sql, if this isn't found, it downloads a file from GCS and saves it as
-# metadata_featdef_tables.sql for future use
-if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
+# Looks for cgc_metadata.sql, if this isn't found, it downloads a file from GCS and saves it as
+# cgc_metadata.sql for future use
+if [ ! -f ${HOMEROOT}/scripts/cgc_metadata.sql ]; then
     # Sometimes CircleCI loses its authentication, re-auth with the dev key if we're on circleCI...
     if [ -n "$CI" ]; then
         sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/deployment.key.json
@@ -97,16 +97,16 @@ if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
         sudo gcloud config set project "${GCLOUD_PROJECT_ID}"
     fi
     echo "Downloading SQL Table File..."
-    sudo gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/dev_table_and_routines_file.sql" ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+    sudo gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/dev_table_and_routines_file.sql" ${HOMEROOT}/scripts/cgc_metadata.sql
 fi
 
-if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
+if [ ! -f ${HOMEROOT}/scripts/cgc_metadata.sql ]; then
     echo "[ERROR] Unable to download database seed file -halting build."
     exit 1
 fi
 
 echo "Applying SQL Table File... (may take a while)"
-#mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/cgc_metadata.sql
 
 echo "Adding Cohort/Site Data and bootstrapping Django project and program tables..."
 python3 ${HOMEROOT}/scripts/add_site_ids.py

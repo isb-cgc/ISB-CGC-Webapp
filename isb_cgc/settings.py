@@ -452,24 +452,48 @@ SOCIALACCOUNT_PROVIDERS = \
 
 # Trying to force allauth to only use https
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
-# ...but not if this is a local dev build.
+# ...but not if this is a local dev build
 if IS_DEV:
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = bool(os.environ.get('ACCOUNT_USERNAME_REQUIRED', 'False') == 'True')
+ACCOUNT_EMAIL_VERIFICATION = os.environ.get('ACCOUNT_EMAIL_VERIFICATION', 'mandatory').lower()
+
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Cancer Genomic Cloud] "
+ACCOUNTS_PASSWORD_EXPIRATION = os.environ.get('ACCOUNTS_PASSWORD_EXPIRATION', 120) # Max password age in days
+ACCOUNTS_PASSWORD_HISTORY = os.environ.get('ACCOUNTS_PASSWORD_HISTORY', 5) # Max password history kept
+ACCOUNTS_ALLOWANCES = list(set(os.environ.get('ACCOUNTS_ALLOWANCES','').split(',')))
 
 ##########################
 #   End django-allauth   #
 ##########################
 
-# Deployed systems have app credentials on the VM, but a local system will need a JSON key present to
-# download anything necessary, like the SQL table file.
-GOOGLE_APPLICATION_CREDENTIALS = None
-if IS_DEV and CONNECTION_IS_LOCAL:
-    GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')
-
-    if not exists(GOOGLE_APPLICATION_CREDENTIALS):
-        print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
-        exit(1)
+##########################
+# Django local auth      #
+##########################
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 16,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'isb_cgc.validators.PasswordComplexityValidator',
+        'OPTIONS': {
+            'min_length': 16,
+            'special_char_list': '!@#$%^&*+:;?'
+        }
+    },
+    {
+        'NAME': 'isb_cgc.validators.PasswordReuseValidator'
+    }
+]
 
 # Client ID used for OAuth2 - this is for IGV and the test database
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
