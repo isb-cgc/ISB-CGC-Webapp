@@ -428,7 +428,7 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-        'data_upload': {
+        'accounts': {
             'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
