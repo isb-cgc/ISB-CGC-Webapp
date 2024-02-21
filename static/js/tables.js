@@ -685,7 +685,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                     $(row).attr('id', 'study_' + data['StudyInstanceUID'])
                     $(row).attr('data-studyid', data['StudyInstanceUID']);
                     $(row).attr('data-caseid', data['PatientID']);
-                    $(row).attr('data-projectid', data['collection_id']);
+                    $(row).attr('data-projectid', data['collection_id'][0]);
                     $(row).attr('data-totalseries', parseInt(data['unique_series']));
                     $(row).addClass('text_head');
                     $(row).addClass('project_' + data['collection_id']);
@@ -748,7 +748,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                 },
                 "columnDefs": [
                     {className: "ckbx", "targets": [0,1]},
-                    {className: "ckbx, cartnum", "targets": [2]},
+                    {className: "ckbx cartnum", "targets": [2]},
                     {className: "col1 case-id", "targets": [3]},
                     {className: "col2 study-id study-id-col study-id-tltp", "targets": [4]},
                     {className: "col1 study-date", "targets": [5]},
@@ -1039,23 +1039,126 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                  "order": [[0, "asc"]],
                  "createdRow": function (row, data, dataIndex) {
                     $(row).attr('id', 'series_' + data['SeriesInstanceUID'])
+                     $(row).attr('data-studyid', data['StudyInstanceUID']);
+                    $(row).attr('data-caseid', data['PatientID']);
+                    $(row).attr('data-projectid', data['collection_id'][0]);
                     $(row).attr('data-crdc',  data['crdc_series_uuid'])
                     $(row).attr('data-aws',  data['aws_bucket'])
                     $(row).attr('data-gcs',  data['gcs_bucket'])
                     $(row).addClass('text_head');
+
+                    var collection_id=data['collection_id'][0];
+                    var PatientID=data['PatientID'];
+                    var studyid= data['StudyInstanceUID'];
+                    var seriesid = data['SeriesInstanceUID'];
+
+                    if (!(seriesid in window.selProjects[collection_id].selCases[PatientID].selStudies[studyid].selSeries)) {
+                        initSeriesData(collection_id, PatientID, studyid, seriesid);
+                     }
+
+                     $(row).find('.fa-cart-shopping').parent().on('click', function(event){
+                        var elem = event.target;
+                        if ($(elem).hasClass('ckbx')){
+                            elem=$(elem).find('.fa-cart-shopping')[0];
+                        }
+
+                        var rowsAdded = true;
+
+                        var collection_id=data['collection_id'][0];
+                        var PatientID=data['PatientID'];
+                        var StudyInstanceUID = data['StudyInstanceUID'];
+                        var SeriesInstanceUID = data['SeriesInstanceUID'];
+
+                        window.selProjects[collection_id].selCases[PatientID].selStudies[StudyInstanceUID].selSeries[SeriesInstanceUID]['state']['checked']=window.selProjects[collection_id].selCases[PatientID].selStudies[StudyInstanceUID].selSeries[SeriesInstanceUID]['state']['checked']? false: true;
+                        var isClicked = window.selProjects[collection_id].selCases[PatientID].selStudies[StudyInstanceUID].selSeries[SeriesInstanceUID]['state']['checked'];
+                        if ($(elem).hasClass('selected') ){
+                            $(elem).addClass('unselected');
+                            $(elem).removeClass('selected');
+
+
+                        }
+                        else{
+                          $(elem).addClass('selected');
+                          $(elem).removeClass('unselected');
+                        }
+
+                        //clearProjectChildSelections(data[0]);
+                        //var ischecked=updateCasesOrStudiesSelection([$(row)], 'studies', false, rowsAdded);
+
+
+                        var clicks =cntClicksInPath([collection_id, PatientID,StudyInstanceUID, SeriesInstanceUID])
+                        var isAdded = (clicks%2==0) ? false : true;
+
+
+
+                        chnglvl= propagateSelection([data['collection_id'][0],data['PatientID'], data['StudyInstanceUID'], data['SeriesInstanceUID']], isClicked);
+                        if (chnglvl=='project'){
+                            clearChildStates(data['collection_id'][0],isAdded,'project');
+                            clearChildSelections([data['collection_id'][0]]);
+                        }
+                        else if (chnglvl=='case' ){
+                          clearChildStates(data['PatientID'],isAdded,'case');
+                          clearChildSelections([data['collection_id'][0],data['PatientID']]);
+                        }
+                        else if (chnglvl=='study' ){
+                          clearChildStates(data['StudyInstanceUID'],isAdded,'study');
+                          clearChildSelections([data['collection_id'][0],data['PatientID'], data['StudyInstanceUID']]);
+                        }
+
+
+                        mksearchtwo();
+                    });
+
                  },
                 "columnDefs": [
-                    {className: "col1 study-id study-id-col study-id-tltp", "targets": [0]},
-                    {className: "series-id series-id-tltp", "targets": [1]},
-                    {className: "series-number", "targets": [2]},
-                    {className: "col1 modality", "targets": [3]},
-                    {className: "col1 body-part-examined", "targets": [4]},
-                    {className: "series-description", "targets": [5]},
-                    {className: "ohif open-viewer", "targets": [6]},
-                    {className: "download", "targets": [7]},
+                    {className: "ckbx", "targets": [0]},
+                    {className: "ckbx cartnum", "targets": [1]},
+                    {className: "col1 study-id study-id-col study-id-tltp", "targets": [2]},
+                    {className: "series-id series-id-tltp", "targets": [3]},
+                    {className: "series-number", "targets": [4]},
+                    {className: "col1 modality", "targets": [5]},
+                    {className: "col1 body-part-examined", "targets": [6]},
+                    {className: "series-description", "targets": [7]},
+                    {className: "ohif open-viewer", "targets": [8]},
+                    {className: "download", "targets": [9]},
 
                  ],
                   "columns": [
+
+                   {
+                        "type": "html",
+                        "orderable": false,
+                        data: 'StudyInstanceUID',
+                        render: function (data, type, row) {
+
+                            var collection_id=row['collection_id'][0];
+                            var PatientID=row['PatientID'];
+                            var StudyInstanceUID = row['StudyInstanceUID'];
+                            var SeriesInstanceUID = row['SeriesInstanceUID'];
+                            var selState = checkSelectionState([collection_id, PatientID, StudyInstanceUID, SeriesInstanceUID]);
+                            return '<i class="fa-solid fa-cart-shopping '+selState+'"></i>';
+
+
+                        }
+
+                    },
+                    {
+                        "type": "html", "orderable": false, "data": "StudyInstanceUID", render: function (data,type, row) {
+                            var cnt =0;
+                            var studyid = row['StudyInstanceUID'];
+                            var seriesid = row['SeriesInstanceUID'];
+                            if (studyid in window.glblcart) {
+                                 if ((window.glblcart[studyid]['all']) || (seriesid in window.glblcart[studyid]['sel'])){
+                                     cnt =1;
+                                 }
+                             }
+                            return cnt.toString();
+                        }
+                    },
+
+
+
+
                   {
                     "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                         return pretty_print_id(data) +
@@ -1477,6 +1580,13 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
 
     }
 
+    const initSeriesData =function(projid, caseid, studyid, seriesid){
+        window.selProjects[projid].selCases[caseid].selStudies[studyid].selSeries[seriesid] = new Object();
+        window.selProjects[projid].selCases[caseid].selStudies[studyid].selSeries[seriesid]['state'] = new Object();
+        window.selProjects[projid].selCases[caseid].selStudies[studyid].selSeries[seriesid]['state']['checked']=false;
+
+    }
+
 
     const checkSelectionState = function(inp){
         var selState = 'unselected';
@@ -1555,7 +1665,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
             datatype='data-studyid';
         }
 
-        if ( ($('#'+table).find('['+datatype+'="'+id+'"]').find('.fa-cart-shopping').hasClass('partselected')) || ('selection' in curDic['state']) ){
+        if ( ($('#'+table).find('['+datatype+'="'+id+'"]').find('.fa-cart-shopping').hasClass('partselected')) || (('checked' in curDic['state']) && curDic['state'])){
             curDic['state']['view']=false;
             if (!(type=='study')){
                   for (item in childDic){
@@ -1639,12 +1749,12 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
             tbls=['cases_table','studies_table','series_table'];
             dataid='data-projectid';
         }
-        else if (ptype='case'){
+        else if (ptype=='case'){
             tbls=['studies_table','series_table'];
             dataid='data-caseid';
         }
-        else if (ptype='study'){
-            tbl=['series_table'];
+        else if (ptype=='study'){
+            tbls=['series_table'];
             dataid='data-studyid';
         }
 
@@ -1696,13 +1806,13 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
             parDic.numChildMixCheck=0;
             parDic.numChildNoCheck=parDic.totalChild;
           parDic.parselDescNum=0;
-          if (curDic[nxtid]['state']['view'] || ('studymp' in curDic[nxtid])){
-              /*if ('checked' in curDic[nxtid]['state']) {
+          if (  ( ('view' in curDic[nxtid]['state']) && curDic[nxtid]['state']['view']) || ('studymp' in curDic[nxtid]) || ( (ids.length==3))){
 
-              }*/
               delete curDic[nxtid]['state']['checked'];
-              nids=[...ids,nxtid]
-              clearChildSelections(nids);
+              if (ids.length<3) {
+                  nids = [...ids, nxtid]
+                  clearChildSelections(nids);
+              }
           }
           else{
               delete curDic[nxtid]
@@ -2085,7 +2195,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                             selseries= window.selProjects[projid].selCases[caseid].selStudies[studyid].seriesmp['val'];
                             window.cart[studyid]['sel']= new Set(selseries);
                         }
-                        window.cart[studyid]['sel'].remove(seriesid);
+                        window.cart[studyid]['sel'].delete(seriesid);
                     }
                 }
 
@@ -2131,7 +2241,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                         window.cart[studyid]['sel'] = new Set();
                     }
                     window.cart[studyid]['sel'].add(seriesid);
-                    if ((studyid in window.seriesmp) && (window.seriesmp['val'].length == window.cart[studyid]['sel'])) {
+                    if ((studyid in window.seriesmp) && (window.seriesmp[studyid]['val'].length == window.cart[studyid]['sel'])) {
                          window.cart[studyid]['all'] = true;
                         window.cart[studyid]['sel'] = new Set();
                     }
@@ -2173,7 +2283,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                         } else {
                             finalCart[studyid]['all'] = false;
                             finalCart[studyid]['sel'] = new Set([...finalCart[studyid]['sel'], ...curCart[studyid]['sel']])
-                            if ((studyid in window.seriesmp) && (window.seriesmp[studyid]['val'].length == finalCart[studyid]['sel'].length)) {
+                            if ((studyid in window.seriesmp) && (window.seriesmp[studyid]['val'].length == finalCart[studyid]['sel'].size)) {
                                 finalCart[studyid]['all'] = true;
                                 finalCart[studyid]['sel'] = new Set();
                             }
@@ -2182,7 +2292,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                     } else {
                         finalCart[studyid] = new Object();
                         finalCart[studyid]['all'] = curCart[studyid]['all'];
-                        finalCart[studyid]['sel'] = new Set(...curCart[studyid]['sel']);
+                        finalCart[studyid]['sel'] = new Set([...curCart[studyid]['sel']]);
                     }
                 }
             }
@@ -2258,12 +2368,34 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                        if (window.glblcart[studyid]['all']) {
                            cnt = window.seriesmp[studyid]['val'].length
                        } else {
-                           cnt = window.glblcart[studyid]['sel'].length
+                           cnt = window.glblcart[studyid]['sel'].size
                        }
                        $(row).find('.cartnum').text(cnt.toString());
                    }
                }
     }
+
+
+    const updateSeriesRowCount = function(row){
+        if ($(row).find('.cartnum').length > 0) {
+                   var cnt='';
+                   $(row).find('.cartnum').text('0');
+
+                   var studyid = $(row).attr('data-studyid');
+                   var seriesid = $(row).attr('id');
+
+                   if (studyid in window.glblcart) {
+                       if ((window.glblcart[studyid]['all']) || (seriesid in window.glblcart[studyid]['sel'])) {
+                           cnt = '1';
+                       } else {
+                           cnt = '0'
+                       }
+                       $(row).find('.cartnum').text(cnt);
+                   }
+               }
+    }
+
+
 
     const updateTableCounts = function() {
 
@@ -2278,7 +2410,11 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
            );
 
            $('#studies_table').find('tr').each(function () {
-               updateStudyRowCount(this)
+               updateStudyRowCount(this);
+           });
+
+           $('#series_table').find('tr').each(function () {
+               updateSeriesRowCount(this);
            });
 
 
@@ -2422,9 +2558,9 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
 
         var lvl = ['project', 'case', 'study','series']
         var chnglvl =lvl[ids.length-1];
-        var dicSet=['selProjects', 'selCases', 'selStudies'];
-        var tableSet=['projects_table', 'cases_table', 'studies_table'];
-        var dataSet=['data-projectid','data-caseid','data-studyid']
+        var dicSet=['selProjects', 'selCases', 'selStudies', 'selSeries'];
+        var tableSet=['projects_table', 'cases_table', 'studies_table', 'series_table'];
+        var dataSet=['data-projectid','data-caseid','data-studyid', 'data-seriesid']
         var parDicA=new Array();
         var parDic=window;
         var nclked = 0;

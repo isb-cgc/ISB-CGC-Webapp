@@ -455,8 +455,18 @@ define(['jquery', 'utils'], function($, utils) {
 
             }
             else{
-              var filtdic={}
-              var attSet = attMap[nkey];
+
+                var realKey="";
+                if (nkey.endsWith('_rng')){
+                    realKey = nkey.substring(0, nkey.length - 4).split('.').pop();
+                }
+                else{
+                    realKey = nkey.split('.').pop();
+                }
+
+
+                var filtdic={}
+              var attSet = attMap[realKey];
               var id= attSet['id'];
               var filt = filterObj[nkey]
               if (Array.isArray(filt)){

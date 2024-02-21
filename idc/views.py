@@ -537,7 +537,7 @@ def populate_tables(request):
         if table_type == 'series':
             custom_facets = {}
             tableIndex = 'SeriesInstanceUID'
-            fields = ['collection_id', 'SeriesInstanceUID', 'StudyInstanceUID', 'SeriesDescription', 'SeriesNumber',
+            fields = ['collection_id', 'PatientID','SeriesInstanceUID', 'StudyInstanceUID', 'SeriesDescription', 'SeriesNumber',
                       'BodyPartExamined', 'Modality', 'access', 'crdc_series_uuid','gcs_bucket','aws_bucket']
             facetfields = []
             sortByField = True
