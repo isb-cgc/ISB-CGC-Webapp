@@ -48,7 +48,9 @@
         <div class="col-lg-4">
             <div class="panel panel-default user-panel">
                 <div class="panel-heading">
-                    <img src="{{ user_details.extra_data.picture }}" class="avatar" alt="User Avatar"/>
+                    {% if not unconnected_local_account %}
+                        <img src="{{ user_details.extra_data.picture }}" class="avatar" alt="User Avatar"/>
+                    {% endif %}
                     <h5>
                         <i class="fa fa-user" aria-hidden="true"></i>
                         Personal Details
@@ -57,8 +59,13 @@
                 <div class="panel-body">
                     <table class="user-info" role="presentation">
                         <tr>
-                            <td>Name</td>
-                            <td>{{ user_details.first_name }} {{ user_details.last_name }}</td>
+                            {% if not unconnected_local_account %}
+                                <td>Name</td>
+                                <td>{{ user_details.first_name }} {{ user_details.last_name }}</td>
+                            {% else %}
+                                <td>User Name</td>
+                                <td>{{ user_details.username }}</td>
+                            {% endif %}
                         </tr>
                         <tr>
                             <td>Email</td>

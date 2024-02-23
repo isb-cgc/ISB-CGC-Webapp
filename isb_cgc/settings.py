@@ -540,6 +540,19 @@ AUTH_PASSWORD_VALIDATORS = [
     }
 ]
 
+#########################################
+# Axes Settings
+#########################################
+AXES_HANDLER = 'axes.handlers.cache.AxesCacheHandler' if not IS_DEV else 'axes.handlers.dummy.AxesDummyHandler'
+AXES_META_PRECEDENCE_ORDER = [
+    'HTTP_X_FORWARDED_FOR',
+    'REMOTE_ADDR',
+]
+AXES_PROXY_COUNT = 1
+AXES_COOLOFF_TIME = int(os.environ.get('AXES_COOLOFF_TIME', '5'))
+AXES_USERNAME_FORM_FIELD = "email"
+AXES_LOCKOUT_TEMPLATE = os.environ.get('AXES_LOCKOUT_TEMPLATE', 'accounts/account/login_lockout.html')
+
 # Path to application runtime JSON key
 GOOGLE_APPLICATION_CREDENTIALS        = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
 
@@ -738,3 +751,5 @@ IDP        = os.environ.get('IDP', 'fence')
 # RAS TOKEN MAX LIFE 25 DAYS
 DCF_UPSTREAM_EXPIRES_IN_SEC = os.environ.get('DCF_UPSTREAM_EXPIRES_IN_SEC', '1296000')
 DCF_REFRESH_TOKEN_EXPIRES_IN_SEC = os.environ.get('DCF_REFRESH_TOKEN_EXPIRES_IN_SEC', '2592000')
+
+SUPPORT_EMAIL=os.environ.get('SUPPORT_EMAIL','')
