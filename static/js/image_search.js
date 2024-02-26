@@ -714,14 +714,30 @@ require([
                 "createdRow": function (row, data, dataIndex) {
                     $(row).data('projectid', data[0]);
                     $(row).attr('id', 'project_row_' + data[0]);
-                    $(row).on('click', function(event){
+                    $(row).on('click', function(event) {
                         var elem = event.target;
-                        if (!$(elem).parent().hasClass('ckbx')) {
-                            ckbx=$(elem).closest('tr').find('.ckbx').children()
-                            ckbx.prop("checked", !ckbx.prop("checked"));
-                        }
-                        updateProjectSelection([$(this)])
-                    })
+                        if ((!$(elem).hasClass('collection_info')) && (!$(elem).hasClass('copy-this-table')) && (!$(elem).hasClass('fa-copy'))){
+                            if (!$(elem).parent().hasClass('ckbx')) {
+                                ckbx = $(elem).closest('tr').find('.ckbx').children()
+                                ckbx.prop("checked", !ckbx.prop("checked"));
+                             }
+                        updateProjectSelection([$(this)]);
+                       }
+                       if ($(elem).hasClass('collection_info')){
+                           displayInfo($(elem));
+                       }
+                    });
+                    $(row).find('.collection_info').on("mouseenter", function(e){
+                        $(e.target).addClass('fa-lg');
+                        $(e.target).parent().parent().data("clickForInfo",false);;
+                      });
+                $(row).find('.collection_info').on("mouseleave", function(e){
+                      $(e.target).parent().parent().data("clickForInfo",false);
+                      $(e.target).removeClass('fa-lg');
+                  //$(e.target).css('style','background:transparent')
+                  });
+
+
                 },
                 "columnDefs": [
                     {className: "ckbx text_data", "targets": [0]},
@@ -739,7 +755,13 @@ require([
                             }
                         }
                     },
-                    {"type": "text", "orderable": true},
+                    {"type": "html", "orderable": true, render: function (td, data, row){
+                        return '<span id="'+row[0]+'"class="collection_name value">'+row[1]+'</span>\n' +
+                            '<span><i class="collection_info fa-solid fa-info-circle"></i></span>'+
+                            ' <a class="copy-this-table" role="button" content="' + row[0] +
+                                '" title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>'
+
+                        }},
                     {"type": "num", orderable: true},
                     {
                         "type": "num", orderable: true, "createdCell": function (td, data, row) {
@@ -911,11 +933,15 @@ require([
                     $(row).addClass('project_' + data['collection_id']);
                     $(row).on('click', function(event){
                         var elem = event.target;
-                        if (!$(elem).parent().hasClass('ckbx')) {
-                            ckbx = $(elem).closest('tr').find('.ckbx').children()
-                            ckbx.prop("checked", !ckbx.prop("checked"));
+
+                        if (!($(elem).is('a')) && !($(elem).hasClass('fa-copy'))){
+                            if (!$(elem).parent().hasClass('ckbx')) {
+                                ckbx = $(elem).closest('tr').find('.ckbx').children()
+                                ckbx.prop("checked", !ckbx.prop("checked"));
+                            }
+                            updateCasesOrStudiesSelection([$(this)], 'cases');
                         }
-                        updateCasesOrStudiesSelection([$(this)], 'cases')
+
                     })
                 },
                 "columnDefs": [
@@ -943,7 +969,9 @@ require([
                         }
                     },
                     {"type": "text", "orderable": true, data: 'PatientID', render: function (data) {
-                            return data;
+                            return data +
+                            ' <a class="copy-this-table" role="button" content="' + data +
+                                '" title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                         }
                     },
                     {"type": "num", "orderable": true, data: 'unique_study'},
