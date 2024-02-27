@@ -93,7 +93,16 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                 if (('state' in window.selProjects[projid].selCases[caseid]) && ('view' in window.selProjects[projid].selCases[caseid]['state'])){
                     delete(window.selProjects[projid].selCases[caseid]['state']['view']);
                 }
+                for (studyid in window.selProjects[projid].selCases[caseid].selStudies){
+
+                    if (('state' in window.selProjects[projid].selCases[caseid].selStudies[studyid]) && ('view' in window.selProjects[projid].selCases[caseid].selStudies[studyid]['state'])){
+                    delete(window.selProjects[projid].selCases[caseid].selStudies[studyid]['state']['view']);
+                    }
+                }
+
+
             }
+
         }
 
         updateProjectTable(usedCollectionData,collectionStats);
@@ -102,7 +111,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         $('#studies_tab').DataTable().destroy();
         $('#series_tab').DataTable().destroy();
 
-        updateCaseTable(false, false, true, [false,false], rmSelCases,'',-1, -1);
+        updateCaseTable(false, false, true, [true,true], rmSelCases,'',-1, -1);
 
     }
 
@@ -238,7 +247,10 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         );
         //"createdCell":function(td,data,row){$(td).attr("id","patient_col_"+row[1]);}
         $('#proj_table').children('tbody').attr('id', 'projects_table');
-        $('#proj_table')[0].style.width=null;
+        $('#projects_table_head').find('th').each(function() {
+            this.style.width = null;
+        });
+
     }
 
     const updateProjStudyMp = function(projid, totStudies, totSeries, mxStudies, mxSeries){
@@ -797,10 +809,10 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                         "type": "html", "orderable": false, "data": "StudyInstanceUID", render: function (data) {
                             var cnt =0;
                             if (data in window.glblcart) {
-                                 if (window.glblcart[studyid]['all']) {
-                                     cnt += window.seriesmp[studyid]['val'].length
+                                 if (window.glblcart[data]['all']) {
+                                     cnt += window.seriesmp[data]['val'].length;
                                  } else {
-                                     cnt += window.glblcart[studyid]['sel'].length
+                                     cnt += window.glblcart[data]['sel'].size;
                                  }
                              }
                             return cnt.toString();
@@ -912,7 +924,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                             if ($('.series_tab').find('#series_id').length > 0) {
                                 seriesID = $('#series_tab').find('.seriesID-inp').val();
                             }
-                            //updateSeriesTable(false, true, false,seriesID)
+                            updateSeriesTable(false, true, false,seriesID)
                         }
                         callback({"data": [], "recordsTotal": "0", "recordsFiltered": "0"});
                     } else {
@@ -971,7 +983,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                                         if ($('.series_tab').find('#series_id').length > 0) {
                                             seriesID = $('#series_tab').find('.seriesID-inp').val();
                                         }
-                                        //updateSeriesTable(false, true, false,seriesID)
+                                        updateSeriesTable(false, true, false,seriesID)
                                     }
                                     callback({
                                         "data": dataset,
@@ -1024,6 +1036,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         var slimViewAbleModality=new Set(["SM"])
         $('#series_tab').attr('data-rowsremoved', rowsRemoved);
         $('#series_tab').attr('data-refreshafterfilter', refreshAfterFilter);
+        var viewStudies = getStudiesByState('view');
         if ($('#series_tab_wrapper').find('.dataTables_controls').length>0){
             pageRows = parseInt($('#series_tab_wrapper').find('.dataTables_length select').val());
         }
@@ -1144,12 +1157,12 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                     },
                     {
                         "type": "html", "orderable": false, "data": "StudyInstanceUID", render: function (data,type, row) {
-                            var cnt =0;
+                            var cnt ='n';
                             var studyid = row['StudyInstanceUID'];
                             var seriesid = row['SeriesInstanceUID'];
                             if (studyid in window.glblcart) {
                                  if ((window.glblcart[studyid]['all']) || (seriesid in window.glblcart[studyid]['sel'])){
-                                     cnt =1;
+                                     cnt ='y';
                                  }
                              }
                             return cnt.toString();
@@ -1259,21 +1272,21 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                 var cols = ['StudyInstanceUID', 'SeriesInstanceUID','SeriesNumber', 'Modality', 'BodyPartExamined', 'SeriesDescription']
                 var ssCallNeeded = true;
                 var caseArr = new Array();
-                var studyArr = new Array();
+                var studyArr = viewStudies
 
+                /*
                 for (projid in window.selProjects) {
 
                     for (caseid in window.selProjects[projid].selCases){
-                        /* if (('state' in window.selProjects[projid].selCases[caseid]) && window.selProjects[projid].selCases[caseid]['state']['view']){
-                                caseArr.push(caseid);
-                            } */
+
                         for (studyid in window.selProjects[projid].selCases[caseid].selStudies){
                             if (('state' in window.selProjects[projid].selCases[caseid].selStudies[studyid]) && window.selProjects[projid].selCases[caseid].selStudies[studyid]['state']['view']){
                                 studyArr.push(studyid);
                             }
                         }
                     }
-                }
+                } */
+
 
                 if (studyArr.length == 0) {
                     ssCallNeeded = false;
@@ -1369,7 +1382,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
     }
 
     window.updateProjectSelection = function(rowA){
-    var purgeChildSelections=[false,false]
+    var purgeChildSelections=[true,true]
     var rowsAdded=false;
     var rowsRemoved=false;
     var projid='';
@@ -1423,7 +1436,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
 
     window.updateCasesOrStudiesSelection = function(rowA, type, viewUpdate, rowsAdded) {
         var updateret= new Object();
-        var purgeChildTables = [false];
+        var purgeChildTables = [true];
         $(rowA).each(function () {
             if (type === 'cases') {
                 var projid = $(this).data('projectid');
@@ -1437,6 +1450,9 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                 if (viewUpdate) {
                     window.selProjects[projid].selCases[caseid]['state']['view'] = rowsAdded;
                     updateret = rowsAdded;
+                    if (!(rowsAdded)){
+                        removeFromView("case", [projid, caseid]);
+                    }
                 }
                 else {
                     if (rowsAdded){
@@ -1598,7 +1614,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
             ckey=inp[i]
             if (ckey in pdic ){
                 var curDic = pdic[ckey];
-                if ((inp.length == (i+1)) && ((curDic.numChildFullCheck>0) || ((curDic.numChildFullCheck>0))) ){
+                if ((inp.length == (i+1)) && ((curDic.numChildFullCheck>0) || ((curDic.numChildMixCheck>0))) ){
                    selState = 'partselected';
                 }
                 else if ('state' in curDic){
@@ -1665,7 +1681,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
             datatype='data-studyid';
         }
 
-        if ( ($('#'+table).find('['+datatype+'="'+id+'"]').find('.fa-cart-shopping').hasClass('partselected')) || (('checked' in curDic['state']) && curDic['state'])){
+        if ( ($('#'+table).find('['+datatype+'="'+id+'"]').find('.fa-cart-shopping').hasClass('partselected')) || (('checked' in curDic['state']) && curDic['state']['checked'] ) || (type=='project')){
             curDic['state']['view']=false;
             if (!(type=='study')){
                   for (item in childDic){
@@ -2146,11 +2162,12 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
     const getStudiesByState = function(state){
         ret=[];
         for (projid in window.selProjects){
-            nkeys=getKeysByState(window.selProjects[projid].selCases,state);
-            ret=ret.concat(nkeys);
+            for (caseid in window.selProjects[projid].selCases) {
+                nkeys = getKeysByState(window.selProjects[projid].selCases[caseid].selStudies, state);
+                ret = [...ret,...nkeys];
+            }
         }
         return ret;
-
     }
 
     const addTotals = function(totals, lvl, curDic, alreadyAdded, isSelected,ids) {
@@ -2200,7 +2217,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                 }
 
 
-                if ((curDic['numChildMixCheck'] == 0) || (curDic['numChildFullCheck'] == 0)) {
+                if ((curDic['numChildMixCheck'] == 0) || (curDic['numChildFullCheck'] == 0) || (lvl==3)) {
                     totals[lvl] = totals[lvl] - 1;
                 }
             }
@@ -2251,7 +2268,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                 }
 
 
-            } else if ((curDic['numChildMixCheck'] > 0) || (curDic['numChildFullCheck'] > 0)) {
+            } else if ((curDic['numChildMixCheck'] > 0) || (curDic['numChildFullCheck'] > 0) || (lvl==3)) {
                 totals[lvl] = totals[lvl] + 1;
             }
 
@@ -2324,10 +2341,10 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         tots[2] = Object.keys(window.glblcart).length;
         for (studyid in window.glblcart){
             if (window.glblcart[studyid]['all']){
-                tots[3]=tots[3]+window.seriesmp[studyid]['val'].length
+                tots[3]=tots[3]+window.seriesmp[studyid]['val'].length;
             }
             else{
-                tots[3]=tots[3]+window.glblcart[studyid]['sel'].length
+                tots[3]=tots[3]+window.glblcart[studyid]['sel'].size;
             }
         }
         return tots;
@@ -2349,7 +2366,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                   cnt += window.seriesmp[studyid]['val'].length
                }
               else{
-                  cnt += window.glblcart[studyid]['sel'].length
+                  cnt += window.glblcart[studyid]['sel'].size
               }
             }
         }
@@ -2378,17 +2395,17 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
 
     const updateSeriesRowCount = function(row){
         if ($(row).find('.cartnum').length > 0) {
-                   var cnt='';
-                   $(row).find('.cartnum').text('0');
+                   var cnt='n';
+                   $(row).find('.cartnum').text('n');
 
                    var studyid = $(row).attr('data-studyid');
-                   var seriesid = $(row).attr('id');
+                   var seriesid = $(row).attr('id').toString().substring(7);
 
                    if (studyid in window.glblcart) {
-                       if ((window.glblcart[studyid]['all']) || (seriesid in window.glblcart[studyid]['sel'])) {
-                           cnt = '1';
+                       if ((window.glblcart[studyid]['all']) || (window.glblcart[studyid]['sel'].has(seriesid))) {
+                           cnt = 'y';
                        } else {
-                           cnt = '0'
+                           cnt = 'n'
                        }
                        $(row).find('.cartnum').text(cnt);
                    }
@@ -2428,7 +2445,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                   cnt = window.seriesmp[studyid]['val'].length
               }
               else{
-                  cnt =window.glblcart[studyid]['sel'].length
+                  cnt =window.glblcart[studyid]['sel'].size
               }
                $('#projects_table').find('[data-projectid='+projid+']').each(function(){
                    var curval=parseInt($(this).find('.cartnum').text());

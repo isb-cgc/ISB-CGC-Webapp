@@ -906,20 +906,14 @@
                                     <table id="proj_table" class="table table-striped">
                                         <thead id="projects_table_head">
                                         <tr>
-                                            <th class="ckbx text_data">
-                                                <i class="fa-solid fa-plus-circle fa-lg"
-                                                   onclick="(updateMultipleRows($($(this).parentsUntil('table')[2]).parent(),true,'projects'))"
-                                                   style="font-family :'Font Awesome 6 Free' !important"></i>
-                                                <i class="fa-solid fa-circle-minus fa-lg"
-                                                   onclick="(updateMultipleRows($($(this).parentsUntil('table')[2]).parent(),false,'projects'))"
-                                                   style="font-family :'Font Awesome 6 Free' !important"></i>
+                                            <th class="ckbx text_data viewbx">
+
                                             </th>
-                                            <th class="ckbx shop"><i class="fa-solid "></i></th>
                                             <th class="ckbx"></th>
-                                            <th class="ckbx"></th>
-                                            <th class='text_data'>Collection Name</th>
+                                            <th class="ckbx cartnum"># of Series in Cart</th>
+                                            <th class='collex_name sorting_1'>Collection Name</th>
                                             <th class='numeric_data'>Total # of Cases</th>
-                                            <th class='numeric_data'># of Cases(this filter set)</th>
+                                            <th class='numeric_data'># of Cases(this filter definition)</th>
                                         </tr>
                                         </thead>
                                     </table>
@@ -936,12 +930,10 @@
                                         <thead id="cases_table_head">
                                         <tr>
                                             <th class="ckbx text_data">
-                                                <i class="fa-solid fa-plus-circle fa-lg">
-                                                   </i>
-                                                <i class="fa-solid fa-circle-minus fa-lg"></i>
+
                                             </th>
                                             <th class="shop"><i class="fa-solid "></i></th>
-                                            <th class="ckbx"></th>
+                                            <th class="ckbx"># of Series in Cart</th>
                                             <th class='text_data'>Collection Name</th>
                                             <th class='text_data'>Case ID <i class="fas fa-info-circle case-info"></i></th>
                                             <th class='numeric_data'>Total # of Studies</th>
@@ -960,12 +952,10 @@
                                         <thead id="studies_table_head">
                                         <tr>
                                             <th class="ckbx text_data">
-                                                <i class="fa-solid fa-plus-circle fa-lg">
-                                                   </i>
-                                                <i class="fa-solid fa-circle-minus fa-lg"></i>
+
                                             </th>
                                             <th class="shop"><i class="fa-solid "></i></th>
-                                            <th class="ckbx"></th>
+                                            <th class="ckbx"># of Series in Cart</th>
                                             <th class='col1 text_data case-id has_aux' data-auxid='3'>Case ID <i class="fas fa-info-circle case-info"></i></th>
                                             <th class='col2 text_data study-id study-id-col'>Study Instance UID</th>
                                             <th class='col1 text_data study-date'>Study Date</th>
@@ -990,6 +980,7 @@
                                         <thead id="series_table_head">
                                         <tr>
                                             <th class="shop"><i class="fa-solid "></i></th>
+                                            <th class="ckbx">In Cart?</th>
                                             <th class="study-id">Study Instance UID</th>
                                             <th class="series-id ">Series Instance UID</th>
                                             <th class="series-number numeric_data">Series Number</th>
