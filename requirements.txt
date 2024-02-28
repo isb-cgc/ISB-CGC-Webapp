@@ -21,7 +21,7 @@ pexpect==4.0.1
 jsonschema==2.6.0
 oauth2client==3.0.0
 pyjwt==2.4.0
-pyOpenSSL==23.2.0    # This is necessary for the local builds specifically...
+pyOpenSSL==24.0.0    # This is necessary for the local builds specifically...
 cryptography==42.0.4 # because of this version, which is incompatible with pyOpenSSL < 22
 future==0.18.3
 google-cloud-storage==1.18.0
