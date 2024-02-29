@@ -309,6 +309,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'adminrestrict.middleware.AdminPagesRestrictMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'isb_cgc.password_expiration.PasswordExpireMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'offline.middleware.OfflineMiddleware',
@@ -433,6 +434,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'finalware': {
+            'handlers': ['console_dev', 'console_prod'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
     },
 }
 
@@ -508,6 +514,7 @@ ACCOUNT_EMAIL_VERIFICATION = os.environ.get('ACCOUNT_EMAIL_VERIFICATION', 'manda
 
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Cancer Genomic Cloud] "
 ACCOUNTS_PASSWORD_EXPIRATION = os.environ.get('ACCOUNTS_PASSWORD_EXPIRATION', 120) # Max password age in days
+ACCOUNTS_PASSWORD_EXPIRATION_WARN = os.environ.get('ACCOUNTS_PASSWORD_EXPIRATION_WARN', (14 * 24 * 60 * 60)) # Time to warn for password expiration in seconds
 ACCOUNTS_PASSWORD_HISTORY = os.environ.get('ACCOUNTS_PASSWORD_HISTORY', 5) # Max password history kept
 ACCOUNTS_ALLOWANCES = list(set(os.environ.get('ACCOUNTS_ALLOWANCES','').split(',')))
 
