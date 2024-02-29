@@ -103,7 +103,7 @@ ul, ol {
   -moz-osx-font-smoothing: grayscale; }
 
 .main-content {
-  margin-top: 20px; }
+  margin-top: 25px; }
 
 .table-list li:after, .table-list_warning li:after, .worksheet-header:after, .worksheet-body:after {
   visibility: hidden;
@@ -1581,7 +1581,7 @@ a#user-dropdown:hover {
     color: #2d81c4;
     background-color: #F8F8F8;
     border-color: #1976D2; }
-  .alert.alert-warning {
+  .alert.alert-warning, .alert.alert-password-expire {
     background-color: #F8F8F8;
     border-color: #FFA000; }
   .alert.alert-error {
