@@ -80,12 +80,6 @@
         </div>
     </div>
 
-    {% if not user.is_anonymous and not has_user_data %}
-        <!-- Export File Manifest Modals -->
-        {% include "cohorts/bq_export_modal.html" with export_type="File Manifest" export_url=export_url %}
-        {% include "cohorts/gcs_export_modal.html" with export_type="File Manifest" export_url=export_url %}
-    {% endif %}
-
     <script type="text/javascript">
     var cohort_id = {% if cohort %} {{ cohort.id }} {% else %} null {% endif %};
     var tab_page ={

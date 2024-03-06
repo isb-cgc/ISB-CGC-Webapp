@@ -64,8 +64,7 @@
                     <li class="separator"></li>
                     <li class="menu-item"><a href="{% url 'download_ids' cohort.id %}"
                                              class="btn btn-info download-ids-btn"
-                                             title="Download this cohort's records as a CSV">CSV</a>
-                    </li>
+                                             title="Download this cohort's records as a CSV">CSV</a></li>
                     <li class="separator"></li>
                     <li class="menu-item">
                         <button class="btn btn-info" data-toggle="modal" data-target="#share-cohort-modal">Share
@@ -269,11 +268,6 @@
         </div>
     </div>
 
-    {% if not has_user_data %}
-        <!-- Export Modals -->
-        {% include "cohorts/bq_export_modal.html" with export_type="Cohort" export_url=export_url %}
-        {% include "cohorts/gcs_export_modal.html" with export_type="Cohort" export_url=export_url %}
-    {% endif %}
     {% if cohort.perm.perm == 'OWNER' %}
         {% include "cohorts/share_cohort_modal.html" %}
     {% endif %}

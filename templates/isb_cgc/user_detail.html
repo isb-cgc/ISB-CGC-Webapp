@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load custom_tags %}
+{% load socialaccount %}
 {% load tz %}
 {% comment %}
 
@@ -45,10 +46,12 @@
 
 {% block content %}
     <div class="row">
-        <div class="col-lg-4">
+        <div class="col-lg-3 col-md-3 col-sm-12">
             <div class="panel panel-default user-panel">
                 <div class="panel-heading">
-                    <img src="{{ user_details.extra_data.picture }}" class="avatar" alt="User Avatar"/>
+                    {% if not unconnected_local_account %}
+                        <img src="{{ user_details.extra_data.picture }}" class="avatar" alt="User Avatar"/>
+                    {% endif %}
                     <h5>
                         <i class="fa fa-user" aria-hidden="true"></i>
                         Personal Details
@@ -57,8 +60,13 @@
                 <div class="panel-body">
                     <table class="user-info" role="presentation">
                         <tr>
-                            <td>Name</td>
-                            <td>{{ user_details.first_name }} {{ user_details.last_name }}</td>
+                            {% if not unconnected_local_account %}
+                                <td>Name</td>
+                                <td>{{ user_details.first_name }} {{ user_details.last_name }}</td>
+                            {% else %}
+                                <td>User Name</td>
+                                <td>{{ user_details.username }}</td>
+                            {% endif %}
                         </tr>
                         <tr>
                             <td>Email</td>
@@ -79,7 +87,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-4">
+        <div class="col-lg-3 col-md-3 col-sm-12">
             <div class="panel panel-default data-panel">
                 <div class="panel-heading">
                     <h5><i class="fa fa-unlock-alt" aria-hidden="true"></i>
@@ -100,7 +108,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-4">
+        <div class="col-lg-3 col-md-3 col-sm-12">
             <div class="panel panel-default gcp-panel">
                 <div class="panel-heading">
                     <h5>
@@ -146,6 +154,33 @@
                         <a href="#">Run a Custom Pipeline</a>
                         {#                    <a href="#">Upload Your Own Datasets</a>#}
                     {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-12">
+            <div class="panel panel-default account-management-panel">
+                <div class="panel-heading">
+                        <h5>
+                            Account Management
+                        </h5>
+                </div>
+                <div class="panel-body">
+                        {% if unconnected_local_account %}
+                        <p>
+                            <a href="{% url 'account_change_password' %}" target="_blank" rel="noopener noreferrer">Change Your Password</a>
+                        </p>
+                        <p>
+                            <a href="{% provider_login_url "google" process="connect" %}">Connect a Google Account</a>
+                        </p>
+                        {% endif %}
+                        {% if social_account %}
+                        <p>
+                            <a href="{% url 'socialaccount_connections' %}">Manage Google Account Connections</a>
+                        </p>
+                        {% endif %}
+                        <p>
+                            <a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out">Sign Out <i class="fa-solid fa-sign-out"></i></a>
+                        </p>
                 </div>
             </div>
         </div>

@@ -25,9 +25,7 @@ require.config({
         // session_security: 'session_security/script',
         // underscore: 'libs/underscore-min',
         tokenfield: 'libs/bootstrap-tokenfield.min',
-        // base: 'base',
-        bq_export: 'export_to_bq',
-        gcs_export: 'export_to_gcs'
+        // base: 'base'
     },
     shim: {
         'tokenfield': ['jquery', 'jqueryui'],
@@ -41,9 +39,7 @@ require([
     'jqueryui',
     'bootstrap',
     'session_security',
-    'tokenfield',
-    'bq_export',
-    'gcs_export'
+    'tokenfield'
 ], function ($, base, _) {
 
     // For manaaging filter changes
@@ -918,51 +914,6 @@ require([
 
     $('.data-tab-content').on('leave mouseout mouseleave','.study-uid, .col-filename',function(e){
         $(this).find('.osmisis').hide();
-    });
-
-    // When an export button is clicked, add the filters to that modal's form
-    // Note that the export modals will always clear any 'filters' inputs applied to them when hidden/closed
-    $('.container').on('click', 'button[data-target="#export-to-bq-modal"], button[data-target="#export-to-gcs-modal"]', function (e) {
-        var target_form = $($($(this).data('target')).find('form')[0]);
-        var this_tab = $(this).parents('.data-tab');
-        var tab_type = this_tab.data('file-type');
-
-        // Clear the previous parameter settings from the export form
-        target_form.find('input[name="filters"]').remove();
-        target_form.append(
-            '<input class="param" type="hidden" name="filters" value="" />'
-        );
-
-        var filter_param = {};
-        switch(tab_type) {
-            case "igv":
-                filter_param = {"data_format": ["BAM"]};
-                break;
-            case "dicom":
-                filter_param = {"data_type": ["Radiology image"]};
-                break;
-            case "slim":
-                filter_param = {"data_type": ["Slide Image"]};
-                break;
-            case "pdf":
-                filter_param = {"data_format": ["PDF"]};
-        }
-
-        if(Object.keys(SELECTED_FILTERS[tab_type]).length > 0) {
-            Object.assign(filter_param, SELECTED_FILTERS[tab_type]);
-        }
-        if(tab_case_barcode[tab_type] && Object.keys(tab_case_barcode[tab_type]).length > 0) {
-            filter_param['case_barcode'] = tab_case_barcode[tab_type];
-        }
-
-        if(Object.keys(filter_param).length>0){
-            target_form.find('input[name="filters"]').attr(
-                'value',JSON.stringify(filter_param)
-            );
-        }
-        else{
-            target_form.find('input[name="filters"]').remove();
-        }
     });
 
     function formatFileSize(bytes) {
