@@ -52,7 +52,7 @@ class PasswordExpireMiddleware:
                             set_password_expiration(None, request, request.user)
                             password_expr = PasswordExpiration.objects.get(user=request.user)
                         if password_expr.expired():
-                            if self.is_page_for_redirect():
+                            if self.is_page_for_redirect(request):
                                 # Require password change before continuing
                                 request.redirect_to_password_change = True
                             msg = f'Before you proceed you must change your password. It has expired.'
