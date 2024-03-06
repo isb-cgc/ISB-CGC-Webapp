@@ -85,7 +85,6 @@ class PasswordExpireMiddleware:
         return False
 
 
-
     def is_page_for_warning(self, request):
         """
         Only warn on pages that are GET requests and not ajax. Also ignore logouts.
