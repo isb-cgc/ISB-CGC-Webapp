@@ -757,7 +757,7 @@ require([
                     },
                     {"type": "html", "orderable": true, render: function (td, data, row){
                         return '<span id="'+row[0]+'"class="collection_name value">'+row[1]+'</span>\n' +
-                            '<span><i class="collection_info fa-solid fa-info-circle"></i></span>'+
+                            '<span><i class="collection_info fa-solid fa-info-circle" value="'+row[0]+'"></i></span>'+
                             ' <a class="copy-this-table" role="button" content="' + row[0] +
                                 '" title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>'
 
