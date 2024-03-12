@@ -203,7 +203,7 @@ jobs:
       - deployment_setup
       - auth
       - deployment_config
-      - deploy:
+      - run:
           command: |
             sudo -E rm -rf ./lib
             sudo -E /bin/bash ./shell/unpack_for_deployment.sh
