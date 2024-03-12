@@ -81,7 +81,7 @@ for dirname in ${BACKUP_DIR}/*/; do
   if [[ -f $SOLR_DATA/$CORE/conf/managed-schema ]]; then
     sudo -u solr mv $SOLR_DATA/$CORE/conf/managed-schema $SOLR_DATA/$CORE/conf/managed-schema.old
   fi
-  sudo -u solr cp $BACKUP_DIR/$CORE.managed-schema $SOLR_DATA/$CORE/conf/managed-schema
+  sudo -u solr cp $BACKUP_DIR/$CORE.managed-schema.xml $SOLR_DATA/$CORE/conf/managed-schema.xml
   curl -u $SOLR_USER:$SOLR_PWD -X GET "https://localhost:8983/solr/$CORE/replication?command=restore&name=$CORE" --cacert solr-ssl.pem
   echo "Restoration started, status check:"
   curl -u $SOLR_USER:$SOLR_PWD -X GET "https://localhost:8983/solr/$CORE/replication?command=details&name=$CORE" --cacert solr-ssl.pem

@@ -164,7 +164,9 @@ else:
 
 APP_VERSION = os.environ.get("APP_VERSION", VERSION)
 
-DEV_TIER = bool(DEBUG or re.search(r'^dev\.', APP_VERSION))
+DEV_TIER = bool(DEBUG or re.search(r'^local-dev\.', APP_VERSION))
+
+print("[STATUS] DEV_TIER setting is {}".format(DEV_TIER))
 
 # If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
@@ -296,6 +298,7 @@ SECURE_HSTS_SECONDS            = int(os.environ.get('SECURE_HSTS_SECONDS','3600'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'idc.domain_redirect_middleware.DomainRedirectMiddleware',
+    'django.middleware.gzip.GZipMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'idc.checkreqsize_middleware.CheckReqSize',
