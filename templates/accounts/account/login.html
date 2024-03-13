@@ -33,7 +33,7 @@
                 </div>
                 <div class="panel-body idc-login">
                     <h4><i>If you have a local CGC account:</i></h4>
-                    <h3>Sign in with Cancer Genomics Cloud</h3>
+                    <h3>Sign in with ISB-CGC</h3>
                       {% csrf_token %}
                       {{ form.as_p }}
                       {% if redirect_field_value %}
@@ -52,9 +52,7 @@
         </div>
         <div class="panel panel-default">
             <div class="panel-body sign-up">
-                <p>
-                Don't have an account with CGC?
-                </p>
+                <p><h4>Create a local account with ISB-CGC</h4></p>
                 <p>
                     <a class="btn btn-special" href="{{ signup_url }}">{% trans "Sign Up" %}</a>
                 </p>
