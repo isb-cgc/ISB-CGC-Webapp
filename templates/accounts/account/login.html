@@ -20,9 +20,10 @@
             <div class="panel panel-default">
                 <div class="panel-body">
                     <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5"><p></p></div>
+                    <h4><i>If you have a Google ID:</i></h4>
                     <a class="btn btn-primary google-sign-in" href="{% provider_login_url 'google' %}">
                         <img class="icon-small" style="padding: 0px 10px 0px 0px" alt="G" src="{%  static 'img/google_icon_sm.png' %}" />
-                        <span><b>Sign in with Google</b></span>
+                        <span><b>Continue with Google</b></span>
                     </a>
                 </div>
                 <div class="panel-body panel-or">
@@ -31,7 +32,8 @@
                     <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5"><hr /></div>
                 </div>
                 <div class="panel-body idc-login">
-                    <h3>Sign in with Cancer Genomic Cloud</h3>
+                    <h4><i>If you have a local CGC account:</i></h4>
+                    <h3>Sign in with Cancer Genomics Cloud</h3>
                       {% csrf_token %}
                       {{ form.as_p }}
                       {% if redirect_field_value %}
