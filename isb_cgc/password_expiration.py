@@ -52,8 +52,9 @@ class PasswordExpireMiddleware:
                             set_password_expiration(None, request, request.user)
                             password_expr = PasswordExpiration.objects.get(user=request.user)
                         if password_expr.expired():
-                            # Require password change before continuing
-                            request.redirect_to_password_change = True
+                            if self.is_page_for_redirect(request):
+                                # Require password change before continuing
+                                request.redirect_to_password_change = True
                             msg = f'Before you proceed you must change your password. It has expired.'
                             self.add_warning(request, msg)
                         else:
@@ -73,12 +74,24 @@ class PasswordExpireMiddleware:
         return response
 
 
-    def is_page_for_warning(self, request):
+    def is_page_for_redirect(self, request):
         """
         Only warn on pages that are GET requests and not ajax. Also ignore logouts.
         """
         match = resolve(request.path)
         if match and match.url_name not in ["account_reset_password","logout", "account_reset_password_done", "account_reset_password_from_key"]:
+            if request.method == "GET" and request.headers.get('x-requested-with') != 'XMLHttpRequest':
+                return True
+            return False
+        return False
+
+
+    def is_page_for_warning(self, request):
+        """
+        Only warn on pages that are GET requests and not ajax. Also ignore logouts.
+        """
+        match = resolve(request.path)
+        if match and match.url_name not in ["logout"]:
             if request.method == "GET" and request.headers.get('x-requested-with') != 'XMLHttpRequest':
                 return True
             return False
