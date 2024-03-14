@@ -51,7 +51,7 @@ simple_number_sort = [
     '* to 500','501 to 1000','1001 to 1500','1501 to 2000','2001 to 2500','2501 to 3000', '3001 to 3500',
     '3501 to 4000', '4001 to 4500', '4501 to 5000', '5001 to 5500', '5501 to 6000', '* to -15001', '-15000 to -12001',
     '-12000 to -9001', '-9000 to -6001', '-6000 to -3001', '-5000 to *',
-    '-30001 to -35000', 'None', 'NA',]
+    '-30001 to -35000', 'None', 'NA',"* to 3652","3653 to 7305","7306 to 10958","10959 to 14611","14612 to 18264","18265 to 21917","21918 to *"]
 
 # If an attribute has a specific order, list it here; these should be the *values* not the display strings
 VALUE_SPECIFIC_ORDERS = {

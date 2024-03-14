@@ -56,7 +56,7 @@
                                             <li class="list-group-item">
                                     <div id="{{ program.id }}-heading-{{attr.name}}" class="list-group-item__heading">
                                         <a role="button" data-toggle="collapse" data-parent="#case-accordion-{{ program.id }}" href="#{{ program.id }}-collapse-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-{{ attr.name }}">
-                                            <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
+                                            <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }} {% if attr.units is not None %}({{ attr.units }}){% endif %}
                                         </a>
                                     </div>
                                     <div id="{{ program.id }}-collapse-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
