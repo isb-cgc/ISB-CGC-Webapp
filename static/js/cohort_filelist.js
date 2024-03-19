@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2017-2020, Institute for Systems Biology
+ * Copyright 2017-2024, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,6 +122,117 @@ require([
             $('.filelist-panel input.igv.accessible[type="checkbox"]').removeAttr('disabled');
         }
     };
+
+    var filter_change_callback = function(e, withoutDisplayUpdates) {
+
+        var activeDataTab = $('.data-tab.active').attr('id');
+        var nodeId = $('.data-tab.active').attr('node-id');
+        var selFilterPanel = '.' + activeDataTab + '-selected-filters';
+        var createFormFilterSet = $('p#'+activeDataTab + '-filters');
+
+        var $this = $(this);
+
+        var token = null;
+
+        var feature = $this.closest('.cohort-feature-select-block'),
+            prog = $this.closest('.filter-panel'),
+            value = $this;
+
+        if(createFormFilterSet.length <= 0) {
+            $('#selected-filters').append('<p id="'+activeDataTab+'-filters" node-id="'+nodeId+'"</p>');
+            createFormFilterSet = $('p#'+activeDataTab+'-filters');
+            createFormFilterSet.append('<h5>'+(prog.data('prog-displ-name'))+'</h5>');
+        } else {
+            createFormFilterSet.show();
+        }
+
+        var tokenProgDisplName = prog.data('prog-displ-name'),
+            tokenProgId = prog.data('prog-id'),
+            tokenNodeId = prog.data('node-id');
+
+        if ($this.is(':checked')) { // Checkbox checked
+            var tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
+                    value.data('value-displ-name') : (value.data('value-name') === 'None' ? 'NA' : value.data('value-name')),
+                tokenFeatDisplName = (feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
+                 feature.data('feature-displ-name') : feature.data('feature-name');
+
+            var tokenUserProgId = null;
+
+            if(tokenProgId <= 0){
+                tokenUserProgId = value.data('user-program-id');
+            }
+
+            var feature_id = feature.data('feature-id'), value_id =  value.data('value-id');
+
+            token = $('<span>').data({
+                'feature-id': feature_id,
+                'feature-name': feature.data('feature-name'),
+                'value-id': value_id,
+                'value-name': value.data('value-name'),
+                'prog-id': tokenProgId,
+                'prog-name': tokenProgDisplName
+            }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
+
+            // Don't re-add the token and filter if it already exists
+            if($(selFilterPanel+' .panel-body span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').length <= 0) {
+                token.append(
+                    $('<a>').addClass('delete-x filter-label label label-default')
+                        .text(tokenFeatDisplName + ': ' + tokenValDisplName)
+                        .append('<i class="fa fa-times">')
+                        .attr("title",tokenFeatDisplName + ': ' + tokenValDisplName)
+                );
+
+                // if (feature.data('feature-type') === 'molecular') {
+                //     token.find('a.delete-x').addClass('mol-spec-filter-x');
+                // }
+
+                $this.data({
+                    'select-filters-item': token.clone(true),
+                    'create-cohort-form-item': token.clone(true)
+                });
+
+                $(selFilterPanel +' .panel-body').append($this.data('select-filters-item'));
+                createFormFilterSet.append($this.data('create-cohort-form-item'));
+            }
+        } else { // Checkbox unchecked
+            // Remove create cohort form pill if it exists
+            if($this.data('create-cohort-form-item')) {
+                createFormFilterSet.find('span').each(function () {
+                    if ($(this).data('feature-id') === $this.data('create-cohort-form-item').data('feature-id') &&
+                        $(this).data('value-name') === $this.data('create-cohort-form-item').data('value-name')) {
+                        $(this).remove();
+                    }
+                });
+                $this.data('select-filters-item').remove();
+                $this.data('create-cohort-form-item').remove();
+            }
+        }
+
+        update_all_selected_filters_ui('#' + activeDataTab);
+
+        !withoutDisplayUpdates && update_displays();
+
+        if(!cohort_id && $('.selected-filters .panel-body span').length > 0) {
+            $('#at-least-one-filter-alert-modal').hide();
+            $('#at-least-one-filter-alert').hide();
+            $('#create-cohort-modal input[type="submit"]').removeAttr('disabled');
+        }
+    };
+
+    $('.clear-filters').on('click', function() {
+        var activeDataTab = $('.data-tab.active').data('tab-id');
+
+        $(this).parents('.selected-filters').find('.panel-body').empty();
+        $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
+            $(this).prop('checked', false);
+        });
+
+        delete SELECTED_FILTERS[activeDataTab];
+
+        $('#selected-filters span').remove();
+        update_selected_filters_ui(activeDataTab);
+        update_displays();
+    });
 
     function build_igv_widgets() {
         // Build the file tokenizer for IGV

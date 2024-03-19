@@ -50,7 +50,7 @@
                                 </a>
                             </div>
                             <div id="{{ node }}-{{ program.id }}-case" class="list-group-item__body collapse in" aria-expanded="true">
-                                <ul class="list-group" id="{{ node }}-case-accordion-{{ program.id }}" role="tablist" aria-multiselectable="true">
+                                <ul class="list-group values" id="{{ node }}-case-accordion-{{ program.id }}" role="tablist" aria-multiselectable="true">
                                     {% for attr in case_attr|get_sorted_items %}
                                         {% if attr_counts|list_contains_name:attr.name %}
                                             <li class="list-group-item">
