@@ -592,7 +592,13 @@ def explore_data_page(request, filter_path=False, path_filters=None):
         # In the case of is_json=True, the 'context' is simply attr_by_source
         return JsonResponse(context, status=status)
 
-    return render(request, 'idc/explore.html', context)
+    try:
+        return render(request, 'idc/explore.html', context)
+    except Exception as e:
+        logger.error("[ERROR] While attempting to render the search page:")
+        logger.exception(e)
+
+    return redirect(reverse('landing_page'))
 
 
 def explorer_manifest(request):
