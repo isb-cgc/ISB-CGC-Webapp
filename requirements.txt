@@ -1,5 +1,5 @@
 requests==2.31.0
-django==3.2.20
+django==3.2.24
 PyYAML==5.4
 mysqlclient==2.0.1
 WebOb==1.5.0
@@ -21,8 +21,7 @@ pexpect==4.0.1
 jsonschema==2.6.0
 oauth2client==3.0.0
 pyjwt==2.4.0
-pyOpenSSL==23.2.0    # This is necessary for the local builds specifically...
-cryptography==41.0.3 # because of this version, which is incompatible with pyOpenSSL < 22
+cryptography==42.0.4
 future==0.18.3
 google-cloud-storage==1.18.0
 django-session-security==2.6.5
