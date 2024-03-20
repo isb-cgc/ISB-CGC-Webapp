@@ -352,6 +352,22 @@ require([
         maxWidth: 85
     });
 
+    tippy.delegate('.projects-table', {
+        content: 'Copied!',
+        theme: 'blue',
+        placement: 'right',
+        arrow: true,
+        interactive: true, // This is required for any table tooltip to show at the appropriate spot!
+        target: '.copy-this-table',
+        onShow(instance) {
+            setTimeout(function() {
+                instance.hide();
+            }, 1000);
+        },
+        trigger: "click",
+        maxWidth: 85
+    });
+
     tippy.delegate('.cases-table', {
         content: 'Copied!',
         theme: 'blue',
