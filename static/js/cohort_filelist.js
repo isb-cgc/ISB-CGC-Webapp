@@ -145,22 +145,12 @@ require([
         } else {
             createFormFilterSet.show();
         }
-
-        var tokenProgDisplName = prog.data('prog-displ-name'),
-            tokenProgId = prog.data('prog-id'),
-            tokenNodeId = prog.data('node-id');
-
+        
         if ($this.is(':checked')) { // Checkbox checked
             var tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
                     value.data('value-displ-name') : (value.data('value-name') === 'None' ? 'NA' : value.data('value-name')),
                 tokenFeatDisplName = (feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
-                 feature.data('feature-displ-name') : feature.data('feature-name');
-
-            var tokenUserProgId = null;
-
-            if(tokenProgId <= 0){
-                tokenUserProgId = value.data('user-program-id');
-            }
+                    feature.data('feature-displ-name') : feature.data('feature-name');
 
             var feature_id = feature.data('feature-id'), value_id =  value.data('value-id');
 
@@ -168,9 +158,7 @@ require([
                 'feature-id': feature_id,
                 'feature-name': feature.data('feature-name'),
                 'value-id': value_id,
-                'value-name': value.data('value-name'),
-                'prog-id': tokenProgId,
-                'prog-name': tokenProgDisplName
+                'value-name': value.data('value-name')
             }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
 
             // Don't re-add the token and filter if it already exists
@@ -182,10 +170,6 @@ require([
                         .attr("title",tokenFeatDisplName + ': ' + tokenValDisplName)
                 );
 
-                // if (feature.data('feature-type') === 'molecular') {
-                //     token.find('a.delete-x').addClass('mol-spec-filter-x');
-                // }
-
                 $this.data({
                     'select-filters-item': token.clone(true),
                     'create-cohort-form-item': token.clone(true)
@@ -193,18 +177,6 @@ require([
 
                 $(selFilterPanel +' .panel-body').append($this.data('select-filters-item'));
                 createFormFilterSet.append($this.data('create-cohort-form-item'));
-            }
-        } else { // Checkbox unchecked
-            // Remove create cohort form pill if it exists
-            if($this.data('create-cohort-form-item')) {
-                createFormFilterSet.find('span').each(function () {
-                    if ($(this).data('feature-id') === $this.data('create-cohort-form-item').data('feature-id') &&
-                        $(this).data('value-name') === $this.data('create-cohort-form-item').data('value-name')) {
-                        $(this).remove();
-                    }
-                });
-                $this.data('select-filters-item').remove();
-                $this.data('create-cohort-form-item').remove();
             }
         }
 
