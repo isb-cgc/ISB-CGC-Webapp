@@ -98,13 +98,16 @@
                         </a>
                     </h5>
                 </div>
-            {% if not unconnected_local_account %}
                 <div class="panel-body">
+                {% if not unconnected_local_account %}
                     {% include 'isb_cgc/user_detail_dcf.html' %}
                     {% block dcf_content %}
                     {% endblock %}
+                {% else %}
+                    <p>To gain access to controlled data and use BigQuery export functions you must be signed in using Google.</p>
+                    <p>To do this, sign out and choose 'Sign in With Google' from the Sign In page.</p>
+                {% endif %}
                 </div>
-            {% endif %}
             </div>
         </div>
         <div class="col-lg-3 col-md-3 col-sm-12">
