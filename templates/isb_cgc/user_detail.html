@@ -46,7 +46,7 @@
 
 {% block content %}
     <div class="row">
-        <div class="col-lg-3 col-md-3 col-sm-12">
+        <div class="col-lg-3 col-md-6 col-sm-12">
             <div class="panel panel-default user-panel">
                 <div class="panel-heading">
                     {% if not unconnected_local_account %}
@@ -87,7 +87,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-3 col-sm-12">
+        <div class="col-lg-3 col-md-4 col-sm-12">
             <div class="panel panel-default data-panel">
                 <div class="panel-heading">
                     <h5><i class="fa fa-unlock-alt" aria-hidden="true"></i>
@@ -105,12 +105,12 @@
                     {% endblock %}
                 {% else %}
                     <p>To gain access to controlled data and use BigQuery export functions you must be signed in using Google.</p>
-                    <p>To do this, sign out and choose 'Sign in With Google' from the Sign In page.</p>
+                    <p>To do this, sign out and choose 'Continue With Google' from the Sign In page.</p>
                 {% endif %}
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-3 col-sm-12">
+        <div class="col-lg-3 col-md-4 col-sm-12">
             <div class="panel panel-default gcp-panel">
                 <div class="panel-heading">
                     <h5>
@@ -159,7 +159,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-3 col-sm-12">
+        <div class="col-lg-3 col-md-4 col-sm-12">
             <div class="panel panel-default account-management-panel">
                 <div class="panel-heading">
                         <h5>
@@ -173,7 +173,7 @@
                         </p>
                         {% endif %}
                         <p>
-                            <a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out">Sign Out <i class="fa-solid fa-sign-out"></i></a>
+                            <a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out">Sign Out <i class="fa fa-sign-out"></i></a>
                         </p>
                 </div>
             </div>
