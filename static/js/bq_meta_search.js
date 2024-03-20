@@ -48,7 +48,7 @@ require([
         var table = $('#bqmeta').DataTable({
             dom: 'lfBrtip',
             ajax: {
-                url: BASE_URL+'/bq_meta_data' + (selected_filters ? ('?'+selected_filters):''),
+                url: BASE_URL+'/bq_meta_data',
                 dataSrc: ''
             },
             buttons: [
@@ -419,7 +419,7 @@ require([
 
             $(".autocomplete_select_box").val('').trigger("chosen:updated");
             $('.bq-filter, .bq-select').val('');
-            $('#status').val(selected_filters?'':'current');
+            $('#status').val('current');
             $('.bq-checkbox').prop('checked', false);
             $('.bq-select, .bq-checkbox').trigger('change');
             $('.bq-filter').trigger('keyup');
@@ -586,7 +586,7 @@ require([
             }
         });
         $('#bq-meta-form').find('i.fa-info-circle').tooltip();
-        $('#status').val(selected_filters?'':'current');
+        $('#status').val('current');
         $('#status').trigger('change');
         $(".autocomplete_select_box").chosen({
             // disable_search_threshold: 10,
