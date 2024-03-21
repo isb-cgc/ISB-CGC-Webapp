@@ -230,7 +230,7 @@ require([
         $('#collection-modal').removeClass('in');
         $('#collection-modal').css("display","none");
     });
-
+/*
     tippy.delegate('table#proj_table', {
         content: function(reference) {
             let collection_id=$(reference).parent('tr').data('projectid');
@@ -249,7 +249,7 @@ require([
         interactiveBorder: 10,
         maxWidth: 600,
     });
-
+*/
     const temp='<html><strong>now</strong></html>';
 
     tippy('.case-info', {
@@ -337,6 +337,38 @@ require([
     });
 
     tippy.delegate('.studies-table', {
+        content: 'Copied!',
+        theme: 'blue',
+        placement: 'right',
+        arrow: true,
+        interactive: true, // This is required for any table tooltip to show at the appropriate spot!
+        target: '.copy-this-table',
+        onShow(instance) {
+            setTimeout(function() {
+                instance.hide();
+            }, 1000);
+        },
+        trigger: "click",
+        maxWidth: 85
+    });
+
+    tippy.delegate('.projects-table', {
+        content: 'Copied!',
+        theme: 'blue',
+        placement: 'right',
+        arrow: true,
+        interactive: true, // This is required for any table tooltip to show at the appropriate spot!
+        target: '.copy-this-table',
+        onShow(instance) {
+            setTimeout(function() {
+                instance.hide();
+            }, 1000);
+        },
+        trigger: "click",
+        maxWidth: 85
+    });
+
+    tippy.delegate('.cases-table', {
         content: 'Copied!',
         theme: 'blue',
         placement: 'right',
