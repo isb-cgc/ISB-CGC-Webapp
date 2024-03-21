@@ -625,7 +625,11 @@ def bq_meta_search(request, full_table_id=""):
     if full_table_id:
         full_table_id_list = full_table_id.split(".")
         for i in range(len(full_table_id_list)):
-            bq_filter_list.append(parameter_list[i] + '=' + full_table_id_list[i])
+            if i:
+                field_val = '"'+ full_table_id_list[i]+'"'
+            else:
+                field_val = full_table_id_list[i]
+            bq_filter_list.append('{parameter}={field_val}'.format(parameter=parameter_list[i], field_val=field_val))
 
         bq_filter = 'search?' + ('&'.join(bq_filter_list))
     return redirect(settings.BQ_SEARCH_URL + bq_filter)
