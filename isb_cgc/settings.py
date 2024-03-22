@@ -1,5 +1,5 @@
 ###
-# Copyright 2015-2019, Institute for Systems Biology
+# Copyright 2015-2024, Institute for Systems Biology
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -309,6 +309,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'adminrestrict.middleware.AdminPagesRestrictMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'isb_cgc.password_expiration.PasswordExpireMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'offline.middleware.OfflineMiddleware',
@@ -428,7 +429,12 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-        'data_upload': {
+        'accounts': {
+            'handlers': ['console_dev', 'console_prod'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'finalware': {
             'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
@@ -501,10 +507,59 @@ ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 if IS_DEV:
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = bool(os.environ.get('ACCOUNT_USERNAME_REQUIRED', 'False') == 'True')
+ACCOUNT_EMAIL_VERIFICATION = os.environ.get('ACCOUNT_EMAIL_VERIFICATION', 'mandatory').lower()
+ACCOUNT_USER_DISPLAY = lambda user: user.email
+
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Cancer Genomic Cloud] "
+ACCOUNTS_PASSWORD_EXPIRATION = os.environ.get('ACCOUNTS_PASSWORD_EXPIRATION', 120) # Max password age in days
+ACCOUNTS_PASSWORD_EXPIRATION_WARN = os.environ.get('ACCOUNTS_PASSWORD_EXPIRATION_WARN', (14 * 24 * 60 * 60)) # Time to warn for password expiration in seconds
+ACCOUNTS_PASSWORD_HISTORY = os.environ.get('ACCOUNTS_PASSWORD_HISTORY', 5) # Max password history kept
+ACCOUNTS_ALLOWANCES = list(set(os.environ.get('ACCOUNTS_ALLOWANCES','').split(',')))
 
 ##########################
 #   End django-allauth   #
 ##########################
+
+##########################
+# Django local auth      #
+##########################
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 16,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'isb_cgc.validators.PasswordComplexityValidator',
+        'OPTIONS': {
+            'min_length': 16,
+            'special_char_list': '!@#$%^&*+:;?'
+        }
+    },
+    {
+        'NAME': 'isb_cgc.validators.PasswordReuseValidator'
+    }
+]
+
+#########################################
+# Axes Settings
+#########################################
+AXES_HANDLER = 'axes.handlers.cache.AxesCacheHandler' if not IS_DEV else 'axes.handlers.dummy.AxesDummyHandler'
+AXES_META_PRECEDENCE_ORDER = [
+    'HTTP_X_FORWARDED_FOR',
+    'REMOTE_ADDR',
+]
+AXES_PROXY_COUNT = 1
+AXES_COOLOFF_TIME = int(os.environ.get('AXES_COOLOFF_TIME', '5'))
+AXES_USERNAME_FORM_FIELD = "email"
+AXES_LOCKOUT_TEMPLATE = os.environ.get('AXES_LOCKOUT_TEMPLATE', 'accounts/account/login_lockout.html')
 
 # Path to application runtime JSON key
 GOOGLE_APPLICATION_CREDENTIALS        = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
@@ -532,10 +587,6 @@ OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET', '')
 #################################
 #   For NIH/eRA Commons login   #
 #################################
-
-OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP', '')
-GOOGLE_GROUP_ADMIN                      = os.environ.get('GOOGLE_GROUP_ADMIN', '')
-SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS', '')
 
 # Log name for ERA login views
 LOG_NAME_ERA_LOGIN_VIEW                  = os.environ.get('LOG_NAME_ERA_LOGIN_VIEW', '')
@@ -708,3 +759,5 @@ IDP        = os.environ.get('IDP', 'fence')
 # RAS TOKEN MAX LIFE 25 DAYS
 DCF_UPSTREAM_EXPIRES_IN_SEC = os.environ.get('DCF_UPSTREAM_EXPIRES_IN_SEC', '1296000')
 DCF_REFRESH_TOKEN_EXPIRES_IN_SEC = os.environ.get('DCF_REFRESH_TOKEN_EXPIRES_IN_SEC', '2592000')
+
+SUPPORT_EMAIL=os.environ.get('SUPPORT_EMAIL','')
