@@ -131,9 +131,14 @@
                 <ul class="nav navbar-nav navbar-right">
                     {% if user.is_authenticated %}
                         <li id="user-login" class="navbar-item">
-                            <a class="avatar-link" href="{% url 'user_detail' user.id %}">
-                                <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="32" height="32"
-                                     alt="Avatar Link to User Details">
+                             <a class="avatar-link" href="{% url 'user_detail' user.id %}">
+                                {% with avatar_url=user.socialaccount_set.all.0.get_avatar_url %}
+                                    {% if avatar_url %}
+                                        <img src="{{ avatar_url }}" width="32" height="32" alt="Avatar">
+                                    {% else %}
+                                        <i class="fa fa-user basic-avatar"> </i>
+                                    {% endif %}
+                                {% endwith %}
                             </a>
 
                             <div class="dropdown">

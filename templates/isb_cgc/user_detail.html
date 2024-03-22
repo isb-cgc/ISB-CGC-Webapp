@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load custom_tags %}
+{% load socialaccount %}
 {% load tz %}
 {% comment %}
 
@@ -45,10 +46,12 @@
 
 {% block content %}
     <div class="row">
-        <div class="col-lg-4">
+        <div class="col-lg-3 col-md-6 col-sm-12">
             <div class="panel panel-default user-panel">
                 <div class="panel-heading">
-                    <img src="{{ user_details.extra_data.picture }}" class="avatar" alt="User Avatar"/>
+                    {% if not unconnected_local_account %}
+                        <img src="{{ user_details.extra_data.picture }}" class="avatar" alt="User Avatar"/>
+                    {% endif %}
                     <h5>
                         <i class="fa fa-user" aria-hidden="true"></i>
                         Personal Details
@@ -57,8 +60,13 @@
                 <div class="panel-body">
                     <table class="user-info" role="presentation">
                         <tr>
-                            <td>Name</td>
-                            <td>{{ user_details.first_name }} {{ user_details.last_name }}</td>
+                            {% if not unconnected_local_account %}
+                                <td>Name</td>
+                                <td>{{ user_details.first_name }} {{ user_details.last_name }}</td>
+                            {% else %}
+                                <td>User Name</td>
+                                <td>{{ user_details.username }}</td>
+                            {% endif %}
                         </tr>
                         <tr>
                             <td>Email</td>
@@ -79,28 +87,30 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-4">
+        <div class="col-lg-3 col-md-4 col-sm-12">
             <div class="panel panel-default data-panel">
                 <div class="panel-heading">
                     <h5><i class="fa fa-unlock-alt" aria-hidden="true"></i>
                         Data Access
-
                         <a class="float-right" href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/Gaining-Access-To-Controlled-Access-Data.html#accessing-controlled-data"
                             target="_blank" rel="noreferrer">
                             <i class="fa fa-info-circle" aria-hidden="true"></i>
                         </a>
                     </h5>
-
-
                 </div>
                 <div class="panel-body">
+                {% if not unconnected_local_account %}
                     {% include 'isb_cgc/user_detail_dcf.html' %}
                     {% block dcf_content %}
                     {% endblock %}
+                {% else %}
+                    <p>To gain access to controlled data and use BigQuery export functions you must be signed in using Google.</p>
+                    <p>To do this, sign out and choose 'Continue With Google' from the Sign In page.</p>
+                {% endif %}
                 </div>
             </div>
         </div>
-        <div class="col-lg-4">
+        <div class="col-lg-3 col-md-4 col-sm-12">
             <div class="panel panel-default gcp-panel">
                 <div class="panel-heading">
                     <h5>
@@ -161,6 +171,25 @@
                         <a href="#">Run a Custom Pipeline</a>
                         {#                    <a href="#">Upload Your Own Datasets</a>#}
                     {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-4 col-sm-12">
+            <div class="panel panel-default account-management-panel">
+                <div class="panel-heading">
+                        <h5>
+                            Account Management
+                        </h5>
+                </div>
+                <div class="panel-body">
+                        {% if unconnected_local_account %}
+                        <p>
+                            <a href="{% url 'account_change_password' %}" target="_blank" rel="noopener noreferrer">Change Your Password</a>
+                        </p>
+                        {% endif %}
+                        <p>
+                            <a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out">Sign Out <i class="fa fa-sign-out"></i></a>
+                        </p>
                 </div>
             </div>
         </div>

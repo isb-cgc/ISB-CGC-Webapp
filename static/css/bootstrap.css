@@ -4475,15 +4475,15 @@ a.thumbnail.active {
 .alert-info .alert-link {
   color: #245269;
 }
-.alert-warning {
+.alert-warning, .alert-password-expire {
   color: #8a6d3b;
   background-color: #fcf8e3;
   border-color: #faebcc;
 }
-.alert-warning hr {
+.alert-warning hr, .alert-password-expire hr {
   border-top-color: #f7e1b5;
 }
-.alert-warning .alert-link {
+.alert-warning .alert-link, .alert-password-expire .alert-link {
   color: #66512c;
 }
 .alert-danger {
