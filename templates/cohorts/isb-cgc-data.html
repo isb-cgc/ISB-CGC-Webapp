@@ -44,18 +44,22 @@
                     <ul class="list-group" id="case-accordion-{{ program.id }}" role="tablist" aria-multiselectable="true">
                         {% for node, case_attr in node_case_attr|sort_nodes %}
                         <li class="list-group-item">
-                            <div id="{{ node }}-{{ program.id }}-case-heading" class="list-group-item__heading">
-                                <a role="button" data-toggle="collapse" href="#{{ node }}-{{ program.id }}-case" aria-expanded="true" aria-controls="{{ node }}-{{ program.id }}-case">
+                            <div id="{{ node }}-{{ program.id }}-case-heading" class="list-group-item__heading collapse in node-filter-heading">
+                                <a role="button" data-toggle="collapse" href="#{{ node }}-{{ program.id }}-case" aria-expanded="false"
+                                   aria-controls="{{ node }}-{{ program.id }}-case"
+                                >
                                     <i class="fa fa-solid fa-caret-right"></i><i class="fa fa-solid fa-caret-down"></i>{{ node }}
                                 </a>
                             </div>
-                            <div id="{{ node }}-{{ program.id }}-case" class="list-group-item__body collapse in" aria-expanded="true">
+                            <div id="{{ node }}-{{ program.id }}-case" class="list-group-item__body collapse" aria-expanded="false">
                                 <ul class="list-group values" id="{{ node }}-case-accordion-{{ program.id }}" role="tablist" aria-multiselectable="true">
                                     {% for attr in case_attr|get_sorted_items %}
                                         {% if attr_counts|list_contains_name:attr.name %}
                                             <li class="list-group-item">
                                     <div id="{{ program.id }}-heading-{{attr.name}}" class="list-group-item__heading">
-                                        <a role="button" data-toggle="collapse" data-parent="#case-accordion-{{ program.id }}" href="#{{ program.id }}-collapse-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-{{ attr.name }}">
+                                        <a role="button" data-toggle="collapse" data-parent="#case-accordion-{{ program.id }}" href="#{{ program.id }}-collapse-{{ attr.name }}"
+                                           aria-expanded="false" aria-controls="collapse-{{ attr.name }}"
+                                        >
                                             <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }} {% if attr.units is not None %}({{ attr.units }}){% endif %}
                                         </a>
                                     </div>

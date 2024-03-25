@@ -2283,6 +2283,10 @@ section .min-max {
 #cohort-details .filter-label, #cohort-filelist .filter-label {
   display: inline-flex; }
 
+#cohort-details .node-filter-heading a {
+  font-weight: bold;
+}
+
 #cohort-details .pending-left, #cohort-filelist .pending-left {
   margin-right: 5px; }
   #cohort-details .pending-left i, #cohort-filelist .pending-left i {
