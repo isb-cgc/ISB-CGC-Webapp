@@ -399,6 +399,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'anymail': {
+            'handlers': ['console_dev', 'console_prod'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
     },
 }
 
