@@ -108,6 +108,11 @@ def get_item(dictionary, key):
 
 
 @register.filter
+def get_account_email(account):
+    return account.account.extra_data.get('email','None')
+
+
+@register.filter
 def check_for_order(items, attr):
     if attr in VALUE_SPECIFIC_ORDERS:
         # If they have a specific order defined in the dict

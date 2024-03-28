@@ -4397,13 +4397,13 @@ a.thumbnail.active {
   .alert-info .alert-link {
     color: #1c5a8c; }
 
-.alert-warning {
+.alert-warning, .alert-password-expire {
   background-color: #fcf8e3;
   border-color: #faebcc;
   color: #8a6d3b; }
-  .alert-warning hr {
+  .alert-warning hr, .alert-password-expire hr {
     border-top-color: #f7e1b5; }
-  .alert-warning .alert-link {
+  .alert-warning .alert-link, .alert-password-expire .alert-link {
     color: #66512c; }
 
 .alert-danger {

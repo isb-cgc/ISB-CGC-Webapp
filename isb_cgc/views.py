@@ -38,7 +38,6 @@ from django.contrib import messages
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
-from google_helpers.directory_service import get_directory_resource
 from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.metadata_helpers import get_sample_metadata
@@ -64,7 +63,6 @@ import requests
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
 
-OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
 BQ_ECOSYS_BUCKET = settings.BQ_ECOSYS_STATIC_URL
@@ -172,9 +170,11 @@ def user_detail(request, user_id):
     if int(request.user.id) == int(user_id):
 
         user = User.objects.get(id=user_id)
+
         try:
             social_account = SocialAccount.objects.get(user_id=user_id, provider='google')
-        except ObjectDoesNotExist as e:
+        except Exception as e:
+            # This is a local account
             social_account = None
 
         user_status_obj = UserOptInStatus.objects.filter(user=user).first()
@@ -188,11 +188,8 @@ def user_detail(request, user_id):
         user_details = {
             'date_joined': user.date_joined,
             'email': user.email,
-            'extra_data': social_account.extra_data if social_account else None,
-            'first_name': user.first_name,
             'id': user.id,
             'last_login': user.last_login,
-            'last_name': user.last_name,
             'user_opt_in_status': user_opt_in_status
         }
 
@@ -203,11 +200,20 @@ def user_detail(request, user_id):
         for key in list(nih_details.keys()):
             user_details[key] = nih_details[key]
 
+        if social_account:
+            user_details['extra_data'] = social_account.extra_data if social_account else None
+            user_details['first_name'] = user.first_name
+            user_details['last_name'] = user.last_name
+        else:
+            user_details['username'] = user.username
+
         return render(request, 'isb_cgc/user_detail.html',
                       {'request': request,
                        'idp': IDP,
                        'user': user,
-                       'user_details': user_details
+                       'user_details': user_details,
+                       'unconnected_local_account': bool(social_account is None),
+                       'social_account': bool(social_account is not None)
                        })
     else:
         return render(request, '403.html')
@@ -629,10 +635,11 @@ def dashboard_page(request):
         isb_superuser = User.objects.get(is_staff=True, is_superuser=True, is_active=True)
         public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser, perm=Cohort_Perms.OWNER).values_list('cohort',
                                                                                                               flat=True)
-        cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(
-            cohort__id__in=public_cohorts)))
-        cohorts_count = Cohort.objects.filter(id__in=cohort_perms, active=True).count()
-        cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')[:display_count]
+
+        cohort_perms = Cohort_Perms.objects.select_related('cohort').filter(user=request.user, cohort__active=True).exclude(
+            cohort__id__in=public_cohorts)
+        cohorts_count = cohort_perms.count()
+        cohorts = Cohort.objects.filter(id__in=cohort_perms.values_list('cohort__id',flat=True), active=True).order_by('-last_date_saved')[:display_count]
 
         # Program List
         ownedPrograms = request.user.program_set.filter(active=True)
