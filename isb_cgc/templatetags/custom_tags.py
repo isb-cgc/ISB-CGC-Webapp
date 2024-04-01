@@ -76,14 +76,15 @@ VALUE_SPECIFIC_ORDERS = {
 
 ATTR_SPECIFIC_ORDERS = [
     'program_name',
-    'project_short_name',
-    'user_program',
-    'user_project',
+    'project_short_name_gdc',
+    'project_short_name_pdc',
     'disease_code',
     'vital_status',
-    'gender',
+    'gender_gdc',
+    'gender_pdc',
     'age_at_diagnosis',
     'sample_type',
+    'sample_type_name',
     'tumor_tissue_site',
     'histological_type',
     'pathologic_stage',
@@ -95,6 +96,11 @@ ATTR_SPECIFIC_ORDERS = [
     'tobacco_smoking_history',
     'race',
     'ethnicity',
+]
+
+
+HIDE_ATTR = [
+    'program_name'
 ]
 
 
@@ -115,10 +121,14 @@ def sort_nodes(nodes):
     return sorted(nodes.items(), key=lambda element: NODE_SORT[element[0]])
 
 
-
 @register.filter
 def get_account_email(account):
     return account.account.extra_data.get('email','None')
+
+
+@register.filter
+def attr_is_hidden(attr):
+    return attr in HIDE_ATTR
 
 
 @register.filter
