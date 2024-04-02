@@ -339,10 +339,13 @@ def load_collections(filename, data_version="8.0"):
                 try:
                     prog = Program.objects.get(short_name=line[field_map['program']])
                     collex['data']['program'] = prog
-                except Exception as e:
-                    logger.info("[STATUS] Program {} not found for collection {} - it will not be added!".format(
+                except ObjectDoesNotExist as e:
+                    logger.info("[STATUS] Program {} not found for collection {} - no program can be associated with this collection!".format(
                         line[field_map['program']], line[field_map['name']]
                     ))
+                except Exception as e:
+                    logger.error("[ERROR] While attempting to look up program {}:".format(line[field_map['program']]))
+                    logger.exception(e)
             try:
                 Collection.objects.get(collection_uuid=line[field_map['collection_uuid']])
                 logger.info("[STATUS] Collection {} already exists - it will be updated.".format(line[field_map['name']]))
