@@ -28,6 +28,7 @@ from django.template.defaulttags import register
 from cohorts.models import Cohort, Cohort_Perms
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
+from allauth.socialaccount.models import SocialAccount
 from projects.models import Program
 from workbooks.models import Workbook
 import logging
@@ -110,6 +111,15 @@ def get_item(dictionary, key):
 @register.filter
 def get_account_email(account):
     return account.account.extra_data.get('email','None')
+
+
+@register.filter
+def account_is_social(user):
+    try:
+        SocialAccount.objects.get(user=user)
+    except ObjectDoesNotExist as e:
+        return False
+    return True
 
 
 @register.filter
