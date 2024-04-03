@@ -26,6 +26,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('main_logger')
 
+
 class PasswordExpireMiddleware:
     """
     Adds Django message if password expires soon.
