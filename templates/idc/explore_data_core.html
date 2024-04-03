@@ -671,17 +671,39 @@
                 <div class="tabpanel data-tab-content-panel">
                 <div class="panel panel-default filter-display-panel">
 
-                    <div class="panel-heading clearfix"><h3 class="panel-title">Filter Definition</h3> <span><select id="filtersetdrop" name="filterset" onchange="changeFilterSetViaButton()"><option value="1">Filter Set 1</option>
+                    <div class="panel-heading clearfix"><h3 class="panel-title">Filter Definition</h3>
+                        <div class="notDisp">
+                        <span><select id="filtersetdrop" name="filterset" onchange="changeFilterSetViaButton()"><option value="1">Filter Set 1</option>
                         <option id= "filtersetnew" value="-1">New Filter Set</option></select> </span><span class="notDisp delfilt"><input type="checkbox" onclick="deleteFilterSet()">Delete current filter set</span>
+
+                        </div>
                           <div class="filterset_info" style="float:right"><i class="fa-solid fa-info-circle"></i></div>
-                            {% if not is_cohort %}
-                                <a class="pull-left clear-filters btn btn-primary btn-small" role="button"
-                                   id="5-data-clear-filters">
-                                    <i class="fa fa-rotate-left"></i> Reset</a>
+
+                    <div class="filter-url-container space-top-10 space-top-10">
+                        {% if not is_cohort %}
+
+                            <button
+                                        class="btn btn-small btn-default  clear-filters space-bottom-5"
+                                        role="button"
+                                        title="Select a filter to enable this feature."><i class="fa fa-rotate-left"></i>Reset</a>
+                            </button>
+
+                            <button
+                                        class="btn btn-small btn-default undo-filter space-bottom-5"
+
+                                        role="button"
+                                        title="Select a filter to enable this feature."><i class="fa fa-rotate-left"></i>Undo</a>
+                            </button>
+
+
                             {% else %}
                                 <a class="pull-left btn btn-primary btn-small" role="button" href={% url 'explore_data' %}>
                                     <i class="fa fa-arrow-left"></i> Return to Data Explorer</a>
                             {% endif %}
+
+                    </div>
+
+
                         </div>
 
                         <div class="panel-body">

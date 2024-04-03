@@ -2479,10 +2479,13 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         var gtotals=getGlobalCounts();
 
           $('#search_numbers').removeClass('notDisp');
-          $('#search_numbers').html(totals[0].toString() + " Collections, " +
+          /* $('#search_numbers').html(totals[0].toString() + " Collections, " +
                                  totals[1].toString() + " Cases, " +
                                 totals[2].toString()+" Studies, and " +
                                 totals[3].toString()+" Series currently in the filterset<br>" +
+              gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart") ; */
+
+          $('#search_numbers').html(
               gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart") ;
 
           //window.currentCart=totals[0];
