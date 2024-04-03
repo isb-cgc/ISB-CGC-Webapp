@@ -519,6 +519,12 @@ ACCOUNTS_PASSWORD_EXPIRATION_WARN = os.environ.get('ACCOUNTS_PASSWORD_EXPIRATION
 ACCOUNTS_PASSWORD_HISTORY = os.environ.get('ACCOUNTS_PASSWORD_HISTORY', 5) # Max password history kept
 ACCOUNTS_ALLOWANCES = list(set(os.environ.get('ACCOUNTS_ALLOWANCES','').split(',')))
 
+ACCOUNT_FORMS = {
+    'reset_password': 'isb_cgc.forms.CgcResetPassword',
+    'signup': 'isb_cgc.forms.CgcSignUp',
+    'login': 'isb_cgc.forms.CgcLogin'
+}
+
 ##########################
 #   End django-allauth   #
 ##########################
