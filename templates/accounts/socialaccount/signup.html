@@ -19,14 +19,11 @@
                         <div class="panel-body">
                             <p>
                                 The account <b>{{ form.init_email }}</b> is already registered as a local ISB-CGC account.
-                            </p>
-                            <p>
-                                If you want to sign in to ISB-CGC with Google, you will first need to sign out from
-                                <b>{{ form.init_email }}</b> via Google and sign in with a Google Account that is not currently in use as a local ISB-CGC Account,
-                                or, use an incognito window/different browser.
-                            </p>
-                            <p>
                                 Please return to the <a href="{% url 'account_login' %}">Sign In page</a> and choose 'Sign in with ISB-CGC'.
+                            </p>
+                            <p>
+                                If you want to sign in to ISB-CGC with Google, you will need to sign in with a Google
+                                Account that is not currently in use as a local ISB-CGC Account.
                             </p>
                         </div>
                         {% else %}
