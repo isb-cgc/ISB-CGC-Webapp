@@ -525,6 +525,10 @@ ACCOUNT_FORMS = {
     'login': 'isb_cgc.forms.CgcLogin'
 }
 
+SOCIALACCOUNT_FORMS = {
+    'signup': 'isb_cgc.forms.CgcSocialSignUp'
+}
+
 ##########################
 #   End django-allauth   #
 ##########################

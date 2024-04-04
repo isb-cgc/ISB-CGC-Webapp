@@ -21,7 +21,7 @@
                 <div class="panel-body">
                     <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5"><p></p></div>
                     <h4><i>If you have a Google ID:</i></h4>
-                    <a class="btn btn-primary google-sign-in" href="{% provider_login_url 'google' %}">
+                    <a class="btn btn-primary google-sign-in" href="{% provider_login_url 'google' action="reauthenticate" %}">
                         <img class="icon-small" style="padding: 0px 10px 0px 0px" alt="G" src="{%  static 'img/google_icon_sm.png' %}" />
                         <span><b>Continue with Google</b></span>
                     </a>
