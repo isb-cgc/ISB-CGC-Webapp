@@ -58,16 +58,17 @@ class CgcResetPassword(ResetPasswordForm):
 
 class CgcLogin(LoginForm):
     def clean(self):
-        email = self.user_credentials().get("email")
-        print(email)
-        try:
-            user = User.objects.get(email=email)
-            SocialAccount.objects.get(user=user)
-            raise ValidationError("Please log into this account using Google (above).")
-        except ObjectDoesNotExist as e:
-            logger.info("[STATUS] User with local account email address {} logging in.".format(email))
-            pass
-        return super(CgcLogin, self).clean()
+        cleaned_data = super(CgcLogin, self).clean()
+        if cleaned_data:
+            email = self.user_credentials().get("email")
+            try:
+                user = User.objects.get(email=email)
+                SocialAccount.objects.get(user=user)
+                raise ValidationError("Please log into this account using Google (above).")
+            except ObjectDoesNotExist as e:
+                logger.info("[STATUS] User with local account email address {} logging in.".format(email))
+                pass
+        return cleaned_data
 
 
 class CgcSocialSignUp(SocialSignupForm):
