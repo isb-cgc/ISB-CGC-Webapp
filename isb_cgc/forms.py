@@ -17,8 +17,10 @@
 import logging
 
 from allauth.account.forms import SignupForm, ChangePasswordForm, SetPasswordForm, ResetPasswordForm, LoginForm
+from allauth.socialaccount.forms import SignupForm as SocialSignupForm
 from allauth.socialaccount.models import SocialAccount
 from allauth.account.adapter import get_adapter
+from allauth.socialaccount.adapter import get_adapter as get_adapter_social
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms import ValidationError
@@ -66,3 +68,22 @@ class CgcLogin(LoginForm):
             logger.info("[STATUS] User with local account email address {} logging in.".format(email))
             pass
         return super(CgcLogin, self).clean()
+
+
+class CgcSocialSignUp(SocialSignupForm):
+    def __init__(self, *args, **kwargs):
+        self.is_already_local = False
+        self.sociallogin = kwargs.get("sociallogin")
+        initial = get_adapter_social().get_signup_form_initial_data(self.sociallogin)
+        email = initial['email']
+        try:
+            user = User.objects.get(email=email)
+            social = SocialAccount.objects.filter(user=user)
+            if len(social) <= 0:
+                self.is_already_local = True
+                self.init_email = email
+        except ObjectDoesNotExist as e:
+            # new user signup - we can proceed
+            pass
+        super(CgcSocialSignUp, self).__init__(*args, **kwargs)
+
