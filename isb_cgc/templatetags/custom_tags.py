@@ -31,6 +31,7 @@ from django.db.models.query import QuerySet
 from allauth.socialaccount.models import SocialAccount
 from projects.models import Program
 from workbooks.models import Workbook
+from django.core.exceptions import ObjectDoesNotExist
 import logging
 import math
 
