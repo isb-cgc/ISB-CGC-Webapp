@@ -20,23 +20,24 @@ service: default
 api_version: 1
 
 resources:
-  cpu: 4
-  memory_gb: 20
-  disk_size_gb: 40
+  cpu: 2
+  memory_gb: 8
+  disk_size_gb: 20
 
 builtins:
 - appstats: on
 - deferred: on
 
 beta_settings:
-    cloud_sql_instances: isb-cgc:us-central1:prod-v2
+    cloud_sql_instances: isb-cgc-uat:us-central1:uat-main
 
 env_variables:
   DJANGO_SETTINGS_MODULE: 'isb_cgc.settings'
 
 network:
-  name: solr
   instance_tag: isb-cgc-webapp
+  name: solr-uat
+  networkSubnetworkName: uat-subnet
 
 skip_files:
 - python-su.sh
