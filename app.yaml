@@ -37,6 +37,7 @@ env_variables:
 network:
   instance_tag: isb-cgc-webapp
   name: solr-uat
+  subnetwork_name: uat-subnet
 
 skip_files:
 - python-su.sh
