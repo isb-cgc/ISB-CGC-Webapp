@@ -1948,6 +1948,7 @@ require([
                                 data.totals.StudyInstanceUID.toString()+" Studies, and " +
                                 data.totals.SeriesInstanceUID.toString()+" Series in this cohort. " +
                                 "Size on disk: " + data.totals.disk_size);
+                            data.totals.SeriesInstanceUID > 65000 ? $('#s5cmd-max-exceeded').show() : $('#s5cmd-max-exceeded').hide();
                             let select_box_div = $('#file-part-select-box');
                             let select_box = select_box_div.find('select');
                             if (data.totals.file_parts_count > 1) {

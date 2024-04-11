@@ -19,6 +19,11 @@
                         <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                         Your manifest is too large to be downloaded. Please use our BigQuery export option. (This requires a Google Account login.)
                     </div>
+                    <div id="s5cmd-max-exceeded" class="alert alert-warning alert-dismissable" style="display: none;">
+                        <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        s5cmd manifests have a maximum length of 65,000 entries. Your manifest is larger than that, and will be cut off at this point,
+                        resulting in an incomplete manifest. Please consider using BigQuery table export for this series manifest.
+                    </div>
                     <div id="need-social-account" class="alert alert-warning alert-dismissable" style="display: none;">
                         <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                         Your cohort exceeds the maximum size allowed for download, but your account doesn't appear to be a linked Google account.
