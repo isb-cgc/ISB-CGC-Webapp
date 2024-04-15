@@ -42,7 +42,8 @@
                                     </div>
                                     <div id="{{ program.id }}-collapse-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
                                          aria-labelledby="{{ program.id }}-heading-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}"
-                                         data-feature-id="{% if attr_counts|get_named_item:attr.name|get_item:'id' %}{{ attr_counts|get_named_item:attr.name|get_item:'id' }}{% endif %}">
+                                         data-feature-id="{% if attr_counts|get_named_item:attr.name|get_item:'id' %}{{ attr_counts|get_named_item:attr.name|get_item:'id' }}{% endif %}"
+                                        data-node-name="{{ node }}">
                                         <ul class="search-checkbox-list" id="{{ program.id }}-{{ attr.name }}">
                                             {% with attr_counts|get_named_item:attr.name|get_item:'values'|how_many_more:6 as num_more %}
                                                 {% for v in attr_counts|get_named_item:attr.name|get_item:'values'|check_for_order:attr.name %}
