@@ -2280,6 +2280,15 @@ section .min-max {
   .workbook-build-display span, .workbook-ver-display span {
     font-weight: 600; }
 
+.current-data-set {
+  border-left: 5px solid #336893FF;
+  padding: 5px 0px 5px 10px;
+}
+
+.other-data-set {
+  padding: 5px 0px 5px 10px;
+}
+
 #cohort-details .filter-label, #cohort-filelist .filter-label {
   display: inline-flex; }
 

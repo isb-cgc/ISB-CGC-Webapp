@@ -105,10 +105,10 @@ if [ ! -f ${HOMEROOT}/scripts/cgc_metadata.sql ]; then
     exit 1
 fi
 
-echo "Applying SQL Table File... (may take a while)"
+echo "Applying CGC Metadata SQL Table File..."
 # mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/cgc_metadata.sql
 
-echo "Adding Cohort/Site Data and bootstrapping Django project and program tables..."
+echo "Adding Site Data..."
 python3 ${HOMEROOT}/scripts/add_site_ids.py
 
 # We have to use '' around the statement due to the need to use `` around name and key, which are MySQL keywords, so concatenation is needed to

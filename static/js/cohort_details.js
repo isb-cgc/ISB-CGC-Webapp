@@ -1,6 +1,7 @@
 /**
  *
- * Copyright 2017, Institute for Systems Biology
+ * Copyright 2017-2024
+ * , Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -403,12 +404,6 @@ require([
                     value.data('value-displ-name') : (value.data('value-name') === 'None' ? 'NA' : value.data('value-name')),
                 tokenFeatDisplName = (feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
                  feature.data('feature-displ-name') : feature.data('feature-name');
-
-            var tokenUserProgId = null;
-
-            if(tokenProgId <= 0){
-                tokenUserProgId = value.data('user-program-id');
-            }
 
             var feature_id = feature.data('feature-id'), value_id =  value.data('value-id');
 
@@ -1225,7 +1220,7 @@ require([
                 let node_id =$(this).attr('node-id');
                 let dataset_name = $(this).find('h5').text();
                 let link = "#" + program_id + "-data";
-                let div = $('<div>');
+                let div = $('<div class="'+(link === dataset_selector ? 'current-data-set' : 'other-data-set')+'">');
                 let current = (link === dataset_selector) ? " (Current Data Set)" : "";
                 div.append("<h5><a class=\"dataset-select-btn\" program-id=\"" + program_id
                     + "\" node-id=\"" + node_id + "\">" + dataset_name + "</a>" + current + "</h5>");
