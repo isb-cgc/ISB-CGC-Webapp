@@ -847,6 +847,19 @@ require([
         $(this).html($(this).text().replace(/\[/g,"<span>").replace(/\]/g,"</span>"));
     });
 
+    $('.dataset-select-box').change(function() {
+        let selected = $(this).find('option:selected');
+        ACTIVE_NODE_ID = selected.attr('node-id');
+        ACTIVE_PROGRAM_ID = selected.attr('program-id');
+        let new_dataset_selector = '#'+ACTIVE_PROGRAM_ID+'-data';
+        if ($(new_dataset_selector).length != 0) {
+            $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
+            $(new_dataset_selector).addClass('active');
+            update_all_selected_filters_ui(new_dataset_selector);
+        } else {
+            filter_panel_load(cohort_id, ACTIVE_PROGRAM_ID, ACTIVE_NODE_ID);
+        }
+    });
 
     $('#clear-all-yes-btn').on('click', function() {
         let creationForm = $('#create-cohort-form');
@@ -1301,20 +1314,6 @@ require([
 
                     $(".sort-by-program option[node-id='0'][program-id='" + ACTIVE_PROGRAM_ID + "']").prop('selected', true);
                     update_all_selected_filters_ui(program_data_selector);
-
-                    $(program_data_selector + ' .dataset-select-box').change(function() {
-                        let selected = $(this).find('option:selected');
-                        ACTIVE_NODE_ID = selected.attr('node-id');
-                        ACTIVE_PROGRAM_ID = selected.attr('program-id');
-                        let new_dataset_selector = '#'+ACTIVE_PROGRAM_ID+'-data';
-                        if ($(new_dataset_selector).length != 0) {
-                            $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
-                            $(new_dataset_selector).addClass('active');
-                            update_all_selected_filters_ui(new_dataset_selector);
-                        } else {
-                            filter_panel_load(cohort_id, ACTIVE_PROGRAM_ID, ACTIVE_NODE_ID);
-                        }
-                    });
                 },
 
                 error: function () {
