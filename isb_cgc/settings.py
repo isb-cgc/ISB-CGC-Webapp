@@ -536,18 +536,13 @@ AXES_COOLOFF_TIME = int(os.environ.get('AXES_COOLOFF_TIME', '5'))
 AXES_USERNAME_FORM_FIELD = "email"
 AXES_LOCKOUT_TEMPLATE = os.environ.get('AXES_LOCKOUT_TEMPLATE', 'accounts/account/login_lockout.html')
 
-# Path to application runtime JSON key
-GOOGLE_APPLICATION_CREDENTIALS        = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
-
 # Deployed systems have app credentials on the VM, but a local system will need a JSON key present to
 # download anything necessary, like the SQL table file.
-GOOGLE_APPLICATION_CREDENTIALS = None
-if IS_DEV and CONNECTION_IS_LOCAL:
-    GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')
+GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')
 
-    if not exists(GOOGLE_APPLICATION_CREDENTIALS):
-        print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
-        exit(1)
+if not exists(GOOGLE_APPLICATION_CREDENTIALS):
+    print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
+    exit(1)
 
 # Client ID used for OAuth2 - this is for IGV and the test database
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
