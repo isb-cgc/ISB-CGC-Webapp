@@ -52,6 +52,7 @@ diff ${TMP_LAST} ${TMP_CURR} > ${TMP_DIFF}
 # The < and > mess up the tests:
 
 while read -r LINE; do
+    LINE=`echo "${LINE}" | sed -e s/\'//g`
     if [ ! -z `echo "${LINE}" | sed -e 's/<//' |  sed -e 's/>//' | grep -i "PASSWORD"` ]; then
         echo "PASSWORD REDACTED"
     elif [ ! -z `echo "${LINE}" | sed -e 's/<//' |  sed -e 's/>//' | grep -i "SECRET"` ]; then

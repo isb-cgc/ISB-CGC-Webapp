@@ -28,7 +28,9 @@ from django.template.defaulttags import register
 from cohorts.models import Cohort, Cohort_Perms
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
+from allauth.socialaccount.models import SocialAccount
 from projects.models import Program
+from django.core.exceptions import ObjectDoesNotExist
 import logging
 import math
 
@@ -129,6 +131,15 @@ def get_account_email(account):
 @register.filter
 def attr_is_hidden(attr):
     return attr in HIDE_ATTR
+
+
+@register.filter
+def account_is_social(user):
+    try:
+        SocialAccount.objects.get(user=user)
+    except ObjectDoesNotExist as e:
+        return False
+    return True
 
 
 @register.filter

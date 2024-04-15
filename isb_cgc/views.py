@@ -161,54 +161,61 @@ def user_detail_login(request):
 def user_detail(request, user_id):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
 
-    if int(request.user.id) == int(user_id):
+    try:
 
-        user = User.objects.get(id=user_id)
+        if int(request.user.id) == int(user_id):
 
-        try:
-            social_account = SocialAccount.objects.get(user_id=user_id, provider='google')
-        except Exception as e:
-            # This is a local account
-            social_account = None
+            user = User.objects.get(id=user_id)
 
-        user_status_obj = UserOptInStatus.objects.filter(user=user).first()
-        if user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.YES:
-            user_opt_in_status = "Opted-In"
-        elif user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.NO:
-            user_opt_in_status = "Opted-Out"
-        else:
-            user_opt_in_status = "N/A"
+            try:
+                social_account = SocialAccount.objects.get(user_id=user_id, provider='google')
+            except Exception as e:
+                # This is a local account
+                social_account = None
 
-        user_details = {
-            'date_joined': user.date_joined,
-            'email': user.email,
-            'id': user.id,
-            'last_login': user.last_login,
-            'user_opt_in_status': user_opt_in_status
-        }
+            user_status_obj = UserOptInStatus.objects.filter(user=user).first()
+            if user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.YES:
+                user_opt_in_status = "Opted-In"
+            elif user_status_obj and user_status_obj.opt_in_status == UserOptInStatus.NO:
+                user_opt_in_status = "Opted-Out"
+            else:
+                user_opt_in_status = "N/A"
+
+            user_details = {
+                'date_joined': user.date_joined,
+                'email': user.email,
+                'id': user.id,
+                'last_login': user.last_login,
+                'user_opt_in_status': user_opt_in_status
+            }
 
         forced_logout = 'dcfForcedLogout' in request.session
         nih_details = get_nih_user_details(user_id, forced_logout)
         for key in list(nih_details.keys()):
             user_details[key] = nih_details[key]
 
-        if social_account:
-            user_details['extra_data'] = social_account.extra_data if social_account else None
-            user_details['first_name'] = user.first_name
-            user_details['last_name'] = user.last_name
-        else:
-            user_details['username'] = user.username
+            if social_account:
+                user_details['extra_data'] = social_account.extra_data if social_account else None
+                user_details['first_name'] = user.first_name
+                user_details['last_name'] = user.last_name
+            else:
+                user_details['username'] = user.username
 
-        return render(request, 'isb_cgc/user_detail.html',
-                      {'request': request,
-                       'idp': IDP,
-                       'user': user,
-                       'user_details': user_details,
-                       'unconnected_local_account': bool(social_account is None),
-                       'social_account': bool(social_account is not None)
-                       })
-    else:
-        return render(request, '403.html')
+            return render(request, 'isb_cgc/user_detail.html',
+                          {'request': request,
+                           'idp': IDP,
+                           'user': user,
+                           'user_details': user_details,
+                           'unconnected_local_account': bool(social_account is None),
+                           'social_account': bool(social_account is not None)
+                           })
+        else:
+            return render(request, '403.html')
+
+    except Exception as e:
+        logger.error("[ERROR] While attempting to view the user details page:")
+        logger.exception(e)
+        return redirect(reverse("landing_page"))
 
 
 @login_required
