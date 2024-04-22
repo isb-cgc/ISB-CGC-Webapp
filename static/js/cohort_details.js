@@ -969,14 +969,14 @@ require([
             $('.more-graphs').hide();
             $('.less-graphs').show();
             $('.case-trees .panel-body').animate({
-                height: '430px'
+                height: '730px'
             }, 800);
         });
         $(program_data_selector + ' .less-graphs button').on('click', function() {
             $('.less-graphs').hide();
             $('.more-graphs').show();
             $('.case-trees .panel-body').animate({
-                height: '210px'
+                height: '220px'
             }, 800);
         });
         

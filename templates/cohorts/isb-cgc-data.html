@@ -1,5 +1,8 @@
 {# Public Data Set Filter Template #}
-<div id="{{ program.id }}-data" node-id="{{ node_id }}" class="tab-pane data-tab" role="tabpanel">
+{% with prog_nodes=node_case_attr|get_nodes_string %}
+<div id="{{ program.id }}-data" node-id="{{ node_id }}" class="tab-pane data-tab" role="tabpanel"
+    data-prog-nodes="{{ prog_nodes }}">
+{% endwith %}
     <div class="col-lg-3 " role="tabpanel">
         <div>
             <!-- Filter Panel -->

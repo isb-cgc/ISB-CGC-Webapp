@@ -134,6 +134,11 @@ def attr_is_hidden(attr):
 
 
 @register.filter
+def get_nodes_string(attr_dict):
+    return ",".join(attr_dict.keys())
+
+
+@register.filter
 def account_is_social(user):
     try:
         SocialAccount.objects.get(user=user)
