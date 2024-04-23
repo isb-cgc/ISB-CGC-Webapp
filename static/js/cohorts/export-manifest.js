@@ -340,7 +340,7 @@ require([
                 let file_parts_count = cohort_row.data('file-parts-count');
                 let display_file_parts_count = cohort_row.data('display-file-parts-count')
                 if (file_parts_count > display_file_parts_count) {
-                    $('#manifest-file').attr('title', 'Your cohort\'s size exceeds the limit for file manifest download--please use BQ export or s5cmd manifest.');
+                    $('#manifest-file').attr('title', 'Your cohort\'s size exceeds the limit for file manifest download--please use BQ export (requires Google login).');
                     $('#manifest-file').attr('disabled', 'disabled');
                 } else {
                     var select_box_div = $('#file-part-select-box');
@@ -383,13 +383,13 @@ require([
         update_download_manifest_buttons();
     });
 
-    let bq_disabled_message = 'Exporting to BigQuery requires you to be logged in with a linked Google Social Account, and to save your filters as a cohort.';
-    if(!user_is_social) {
+    let bq_disabled_message = 'Exporting to BigQuery requires logging in via Google, and to save your filters as a cohort.';
+    if(user_is_auth && !user_is_social) {
         bq_disabled_message += ' You can link your account to a Google ID from the '
             +  '<a target="_blank" rel="noopener noreferrer" href="/users/' + user_id + '/">'
             + 'Account Details</a> page.'
     } else if(!user_is_auth) {
-        bq_disabled_message += ' Please log in with a Google Social account to enable this feature.'
+        bq_disabled_message += ' Please log in with a Google account to enable this feature.'
     } else if(!is_cohort) {
         bq_disabled_message += ' Please save these filters as a cohort to enable this feature.'
     }
