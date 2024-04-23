@@ -389,9 +389,7 @@ require([
             +  '<a target="_blank" rel="noopener noreferrer" href="/users/' + user_id + '/">'
             + 'Account Details</a> page.'
     } else if(!user_is_auth) {
-        bq_disabled_message += ' Please log in with a Google account to enable this feature.'
-    } else if(!is_cohort) {
-        bq_disabled_message += ' Please save these filters as a cohort to enable this feature.'
+        bq_disabled_message += ' Please log in with a Google account and save these filters as a cohort to enable this feature.'
     }
 
     tippy.delegate('#export-manifest-modal', {
