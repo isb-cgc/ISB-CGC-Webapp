@@ -237,7 +237,7 @@ def save_ui_hist(request):
 
 
 # Method for obtaining the records displayed in the tables on the right-hand side of the explore data page
-@login_required
+# @login_required
 def populate_tables(request):
     response = {}
     status = 200
@@ -478,7 +478,7 @@ def populate_tables(request):
     return JsonResponse(response, status=status)
 
 # Data exploration and cohort creation page
-@login_required
+# @login_required
 def explore_data_page(request, filter_path=False, path_filters=None):
     context = {'request': request}
     is_json = False
