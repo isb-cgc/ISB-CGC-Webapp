@@ -97,6 +97,18 @@
                 </div>
             </div>
             </div>
+            <!-- Selected Filters Panel -->
+            {% if not cohort.id %}
+            <div class="col-lg-9 col-md-9 col-sm-12">
+            <div class="selected-filters {{ program.id }}-data-selected-filters panel panel-default">
+                <div class="panel-heading clearfix">
+                    <h4 class="panel-title pull-left">Selected Filters</h4>
+                    <a class="pull-right clear-filters" role="button">Clear All</a>
+                </div>
+                <div class="panel-body"></div>
+            </div>
+            </div>
+            {% endif %}
         </div>
 
         <div class="row">
