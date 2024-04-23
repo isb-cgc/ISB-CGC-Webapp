@@ -1948,7 +1948,15 @@ require([
                                 data.totals.StudyInstanceUID.toString()+" Studies, and " +
                                 data.totals.SeriesInstanceUID.toString()+" Series in this cohort. " +
                                 "Size on disk: " + data.totals.disk_size);
-                            data.totals.SeriesInstanceUID > 65000 ? $('#s5cmd-max-exceeded').show() : $('#s5cmd-max-exceeded').hide();
+                            if(data.totals.SeriesInstanceUID > 65000) {
+                                $('#s5cmd-max-exceeded').show();
+                                $('#download-s5cmd').attr('disabled','disabled');
+                                $('#download-s5cmd').title('s5cmd manifests are limited to a maximum download size of 65k entries.');
+                            } else {
+                                $('#s5cmd-max-exceeded').hide();
+                                $('#download-s5cmd').title('');
+                                $('#download-s5cmd').removeAttr('disabled');
+                            }
                             let select_box_div = $('#file-part-select-box');
                             let select_box = select_box_div.find('select');
                             if (data.totals.file_parts_count > 1) {
