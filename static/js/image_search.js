@@ -1908,10 +1908,10 @@ require([
                             if(data.totals.SeriesInstanceUID > 65000) {
                                 $('#s5cmd-max-exceeded').show();
                                 $('#download-s5cmd').attr('disabled','disabled');
-                                $('#download-s5cmd').attr('title', 's5cmd manifests are limited to a maximum download size of 65k entries.');
+                                $('#s5cmd-button-wrapper').addClass('s5cmd-disabled');
                             } else {
                                 $('#s5cmd-max-exceeded').hide();
-                                $('#download-s5cmd').attr('title', '');
+                                $('#s5cmd-button-wrapper').removeClass('s5cmd-disabled');
                                 $('#download-s5cmd').removeAttr('disabled');
                             }
                             $('#file-manifest-max-exceeded').hide();
@@ -1960,10 +1960,10 @@ require([
                             if(data.totals.SeriesInstanceUID > 65000) {
                                 $('#s5cmd-max-exceeded').show();
                                 $('#download-s5cmd').attr('disabled','disabled');
-                                $('#download-s5cmd').attr('title', 's5cmd manifests are limited to a maximum download size of 65k entries.');
+                                $('#s5cmd-button-wrapper').addClass('s5cmd-disabled');
                             } else {
                                 $('#s5cmd-max-exceeded').hide();
-                                $('#download-s5cmd').attr('title', '');
+                                $('#s5cmd-button-wrapper').removeClass('s5cmd-disabled');
                                 $('#download-s5cmd').removeAttr('disabled');
                             }
                             let select_box_div = $('#file-part-select-box');
