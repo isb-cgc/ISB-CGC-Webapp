@@ -21,8 +21,10 @@
                     </div>
                     <div id="s5cmd-max-exceeded" class="alert alert-warning alert-dismissable" style="display: none;">
                         <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                        s5cmd manifests have a maximum length of 65,000 entries. Your manifest is larger than that, and will be cut off at this point,
-                        resulting in an incomplete manifest. Please consider using BigQuery table export for this series manifest.
+                        Your manifest's size exceeds the limit for file manifest download (65k entries). Please use
+                        <a class="external-link" url="https://learn.canceridc.dev/portal/cohort-manifests#bigquery-cohort-manifest" data-toggle="modal"
+                           data-target="#external-web-warning">BQ export <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">
+                            </i></a> instead (requires Google login).
                     </div>
                     <div id="need-social-account" class="alert alert-warning alert-dismissable" style="display: none;">
                         <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -220,9 +222,11 @@
                                         </label></li>
                                     </div>
                                 </div>
-                                <a id="download-s5cmd" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in s5cmd format.">
+                                <div id="s5cmd-button-wrapper">
+                                <a id="download-s5cmd" class="btn btn-primary download-file get-manifest">
                                     Download s5cmd Manifest
                                 </a>
+                                </div>
                             </div>
                             <div id="manifest-file" class="tab-pane manifest" role="tab-panel">
 <!--
