@@ -315,74 +315,73 @@ def studymp(request):
     status = 200
     sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
             active=True, source_type=DataSource.SOLR,
-            aggregate_level="SeriesInstanceUID"
+            aggregate_level="StudyInstanceUID"
         )
     custom_facets = {"per_id": {"type": "terms", "field":"StudyInstanceUID", "limit": 0,
                                         "facet": {"unique_series": "unique(SeriesInstanceUID)"}}}
 
+    custom_facets={'per_id': {'type': 'terms', 'field': 'StudyInstanceUID', 'limit': 2000,
+                'facet': {'unique_series': 'unique(SeriesInstanceUID)'}}}
+
     try:
        req = request.GET if request.GET else request.POST
        filters = json.loads(req.get('filters', '{}'))
-       totSeries = int(req.get('totseries'))
-       totStudies = int(req.get('totstudies'))
+
        mxSeries = int(req.get('mxseries'))
        mxStudies=int(req.get('mxstudies'))
 
-       custom_facets['per_id']['limit'] = totStudies
+       #custom_facets['per_id']['limit'] = mxStudies
        idsEx = get_collex_metadata(
-                    filters, ['collection_id', 'PatientID','StudyInstanceUID'], record_limit=totSeries, sources=sources, offset=0,
+                    filters, ['collection_id', 'PatientID','StudyInstanceUID'], record_limit=mxStudies, sources=sources, offset=0,
                     records_only=False, custom_facets=custom_facets,
                     collapse_on='StudyInstanceUID', counts_only=False, filtered_needed=False,
                     raw_format=True, default_facets=False
                 )
 
 
-       sfilters = {"collection_id": filters["collection_id"]}
-       idsSer = get_collex_metadata(
-           sfilters, ['collection_id', 'PatientID', 'StudyInstanceUID', 'SeriesInstanceUID'], record_limit=mxSeries,
-           sources=sources, offset=0,
-           records_only=False, custom_facets=custom_facets,
-           collapse_on='SeriesInstanceUID', counts_only=False, filtered_needed=False,
-           raw_format=True, default_facets=False
-       )
-
        studymp={}
        seriesmp={}
        study_patient={}
+       study_proj={}
        casestudymp ={}
+       projstudymp = {}
        for doc in idsEx['docs']:
           proj=doc['collection_id'][0]
           patientid=doc['PatientID']
           studyid= doc['StudyInstanceUID']
-          #seriesid=doc['SeriesInstanceUID']
+
           if not patientid in casestudymp:
               casestudymp[patientid]={}
+          if not proj in projstudymp:
+              projstudymp[proj] = {}
           if not studyid in seriesmp:
               seriesmp[studyid] = {}
               seriesmp[studyid]['val'] = []
               seriesmp[studyid]['proj']=proj
               seriesmp[studyid]['PatientID'] = patientid
-
-          #seriesmp[studyid]['val'].append(seriesid)
-#          if not (patientid in studymp):
-#              studymp[patientid]={}
           if not  (studyid in study_patient):
               study_patient[studyid]=patientid
+          if not (studyid in study_proj):
+            study_proj[studyid] = proj
+
        for studyrow in idsEx['facets']['per_id']['buckets']:
           studyid=studyrow['val']
           cnt=studyrow['unique_series']
+          if (studyid in seriesmp):
+            seriesmp[studyid]['cnt']=cnt
           if (studyid in study_patient):
               patientid=study_patient[studyid]
               studymp[studyid]=cnt
               casestudymp[patientid][studyid]=cnt
-       for doc in idsSer['docs']:
-         studyid=doc['StudyInstanceUID']
-         seriesid=doc['SeriesInstanceUID']
-         if studyid in seriesmp:
-           seriesmp[studyid]['val'].append(seriesid)
+          if (studyid in study_proj):
+              proj = study_proj[studyid]
+              projstudymp[proj][studyid]=cnt
+
+
        response["studymp"] = studymp
        response["seriesmp"] = seriesmp
        response['casestudymp'] = casestudymp
+       response['projstudymp'] = projstudymp
 
 
 
@@ -634,7 +633,8 @@ def populate_tables(request):
                       if not patientid in idic:
                         idic[patientid] ={}
                       idic[patientid][studyid]=study_cnt
-
+                #for (studyid in seriesmp):
+                #  seriesmp[studyid]['cnt']=len(seriesmp[studyid]['val'])
 
                 for row in tableRes:
                     id=row['PatientID']
@@ -670,6 +670,8 @@ def populate_tables(request):
                       seriesmp[studyid]['proj']=collection_id[0]
                       seriesmp[studyid]['PatientID'] = patientid
                     seriesmp[studyid]['val'].append(seriesid)
+                #for (studyid in seriesmp):
+                #  seriesmp[studyid]['cnt'] = len(seriesmp[studyid]['val'])
 
                 for row in tableRes:
                     id=row['StudyInstanceUID']

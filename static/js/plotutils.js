@@ -104,6 +104,19 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
     };
 
 
+    window.toggleCharts=function(cntrl){
+        if (cntrl==="hide"){
+            $('.chart-content').addClass('hidden');
+            $('.showchrt').removeClass('hidden');
+            $('.hidechrt').addClass('hidden');
+        }
+        else if (cntrl==="show"){
+            $('.chart-content').removeClass('hidden');
+            $('.hidechrt').removeClass('hidden');
+            $('.showchrt').addClass('hidden');
+        }
+
+    }
     window.showGraphs = function(selectElem){
         $(selectElem).parent().siblings('.graph-set').show();
         $(selectElem).parent().siblings('.less-graphs').show();
@@ -136,7 +149,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         createPlots('search_related_set');
     }
 
-    var createPlots = function (id) {
+    window.createPlots = function (id) {
 
         var isPie = true;
         var ptIndx = document.getElementById("plot_type").selectedIndex;
@@ -399,7 +412,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
 
 
     return {
-          createPlots: createPlots,
+
 
     };
 });

@@ -672,12 +672,7 @@
                 <div class="panel panel-default filter-display-panel">
 
                     <div class="panel-heading clearfix"><h3 class="panel-title">Filter Definition</h3>
-                        <div class="notDisp">
-                        <span><select id="filtersetdrop" name="filterset" onchange="changeFilterSetViaButton()"><option value="1">Filter Set 1</option>
-                        <option id= "filtersetnew" value="-1">New Filter Set</option></select> </span><span class="notDisp delfilt"><input type="checkbox" onclick="deleteFilterSet()">Delete current filter set</span>
 
-                        </div>
-                          <div class="filterset_info" style="float:right"><i class="fa-solid fa-info-circle"></i></div>
 
                     <div class="filter-url-container space-top-10 space-top-10">
                         {% if not is_cohort %}
@@ -688,12 +683,6 @@
                                         title="Select a filter to enable this feature."><i class="fa fa-rotate-left"></i>Reset</a>
                             </button>
 
-                            <button
-                                        class="btn btn-small btn-default undo-filter space-bottom-5"
-
-                                        role="button"
-                                        title="Select a filter to enable this feature."><i class="fa fa-rotate-left"></i>Undo</a>
-                            </button>
 
 
                             {% else %}
@@ -710,7 +699,7 @@
                             <input id="filt_txt" type="hidden" value="">
                             <div id="search_def"><span class="placeholder"></span></div>
 
-                            <div id="search_numbers"><span class="placeholder"</span></div>
+                             <div id="search_def_stats" class="notDisp">No Text</div>
 
                             <div id="search_def_warn" style="display:none">Note: TCGA.* filters only apply to TCGA
                                 collections
@@ -740,13 +729,13 @@
                             </div>
                         </div>
 
+                <div class="panel-heading clearfix"><h3 class="panel-title">Cart Summary</h3></div>
+                    <div class="panel-body">
+                        <div id="cart_stats" class="notDisp">No Text</div>
                     </div>
-                <div class="panel-heading clearfix notDisp"><h4 class="panel-title">Cart Summary</h4>
-                    <div class ="panel-body">
-                            <div id="search_def_stats_hidden" class="notDisp">No Text</div>
-                            <div id="filtersetdiv"><span id="filt0" class="curfilt filts" onclick="changeFilterSet(0, true)">Filterset 1</span></div>
+
                     </div>
-                </div>
+
 
                  <div id="res" class=" filter-panel" role="tabpanel">
 

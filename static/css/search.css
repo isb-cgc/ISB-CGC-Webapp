@@ -550,6 +550,7 @@ svg {
     margin-bottom: 18px;
 }
 
+/*
 .ckbx:has(.fa-cart-shopping.selected){
     background-color:lightgreen;
 }
@@ -579,11 +580,17 @@ svg {
      background-color:transparent;
 }
 
+
+ */
 .ckbx:has(.fa-cart-shopping) {
     border-color:grey;
     border-width:2px;
     border-style:solid;
 }
+
+
+ */
+ */
 .more-checks {
     min-height: 19px;
 }
@@ -615,28 +622,48 @@ td.cartnum.incart{
     background-color:grey;
     color:white;
 }
+
+tr:not(.someInCart) .ckbx:has(.fa-cart-shopping){
+    background-color:transparent
+}
+
+
+tr.someInCart:not(.extraInFilt) .ckbx:has(.fa-cart-shopping){
+    background-color:green;
+}
+
+tr.someInCart.extraInFilt .ckbx:has(.fa-cart-shopping){
+    background-color:yellow;
+}
+
+tr:not(.extraInCart) .fa-plus{
+   display: none !important;
+}
+
+
+
 .ckbx:has(.fa-cart-shopping.green) + .cart2{
-background-color:lightgreen
+#background-color:lightgreen
 }
 
 .ckbx:has(.fa-cart-shopping.yellow) + .cart2{
-    background-color:#ff7;
+ #background-color:#ff7;
 }
 
 .ckbx:has(.fa-cart-shopping.green) {
-background-color:lightgreen
+#background-color:lightgreen
 }
 .ckbx:has(.fa-cart-shopping.yellow) {
-    background-color:#ff7;
+    #background-color:#ff7;
 }
 
 .ckbx:has(.fa-cart-shopping.transparent) {
-background-color:transparent
+#background-color:transparent
 }
 
 
 .ckbx:has(.fa-cart-shopping.transparent) + .cart2{
-background-color:transparent
+#background-color:transparent
 }
 
 .curfilt {
