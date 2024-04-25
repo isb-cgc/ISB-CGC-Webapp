@@ -340,7 +340,6 @@ require([
                 let file_parts_count = cohort_row.data('file-parts-count');
                 let display_file_parts_count = cohort_row.data('display-file-parts-count')
                 if (file_parts_count > display_file_parts_count) {
-                    $('#manifest-file').attr('title', 'Your cohort\'s size exceeds the limit for file manifest download--please use BQ export (requires Google login).');
                     $('#manifest-file').attr('disabled', 'disabled');
                 } else {
                     var select_box_div = $('#file-part-select-box');
@@ -392,6 +391,10 @@ require([
         bq_disabled_message += ' Please log in with a Google account and save these filters as a cohort to enable this feature.'
     }
 
+    let s5cmd_disabled_message = 'Your manifest\'s size exceeds the limit for file manifest download (65k entries). Please use'
+        + ' <a class="external-link" url="https://learn.canceridc.dev/portal/cohort-manifests#bigquery-cohort-manifest" data-toggle="modal"'
+        + ' data-target="#external-web-warning">BQ export <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true"></i> </a> (requires Google login).';
+
     tippy.delegate('#export-manifest-modal', {
         content: bq_disabled_message,
         theme: 'dark',
@@ -400,6 +403,26 @@ require([
         interactive: true,
         allowHTML: true,
         target: '.bq-disabled'
+    });
+
+    tippy.delegate('#export-manifest-modal', {
+        content: s5cmd_disabled_message,
+        theme: 'dark',
+        placement: 'right',
+        arrow: true,
+        interactive: true,
+        onTrigger: (instance, event) => {
+            if($(event.target).hasClass('s5cmd-disabled')) {
+                instance.enable();
+            } else {
+                instance.disable();
+            }
+        },
+        onUntrigger: (instance, event) => {
+            instance.enable();
+        },
+        allowHTML: true,
+        target: '.s5cmd-disabled'
     });
 
     tippy.delegate('#export-manifest-modal', {
