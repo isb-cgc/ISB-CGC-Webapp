@@ -4092,8 +4092,12 @@ html {
   padding: 5px 0px 10px 0px;
 }
 
-.version-disabled, .bq-disabled {
+.version-disabled, .bq-disabled, .s5cmd-disabled {
   cursor: not-allowed;
+}
+
+#s5cmd-button-wrapper {
+  display: inline-block;
 }
 
 .bq-table-name p {
