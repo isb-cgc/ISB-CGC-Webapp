@@ -759,7 +759,7 @@ require([
                         return '<span id="'+row[0]+'"class="collection_name value">'+row[1]+'</span>\n' +
                             '<span><i class="collection_info fa-solid fa-info-circle" value="'+row[0]+'" data-filter-display-val="'+row[1]+'"></i></span>'+
                             ' <a class="copy-this-table" role="button" content="' + row[0] +
-                                '" title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>'
+                                '" title="Copy the IDC collection_id to the clipboard"><i class="fa-solid fa-copy"></i></a>'
 
                         }},
                     {"type": "num", orderable: true},
@@ -971,7 +971,7 @@ require([
                     {"type": "text", "orderable": true, data: 'PatientID', render: function (data) {
                             return data +
                             ' <a class="copy-this-table" role="button" content="' + data +
-                                '" title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
+                                '" title="Copy Case ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                         }
                     },
                     {"type": "num", "orderable": true, data: 'unique_study'},
@@ -1222,7 +1222,7 @@ require([
                         "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                             return pretty_print_id(data) +
                             ' <a class="copy-this-table" role="button" content="' + data +
-                                '" title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
+                                '" title="Copy StudyInstanceUID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                         },
                         "createdCell": function (td, data) {
                             $(td).data('study-id', data);
@@ -1489,7 +1489,7 @@ require([
                     "type": "text", "orderable": true, data: 'StudyInstanceUID', render: function (data) {
                         return pretty_print_id(data) +
                             ' <a class="copy-this-table" role="button" content="' + data +
-                                '"  title="Copy Study ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
+                                '"  title="Copy StudyInstanceUID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                     }, "createdCell": function (td, data) {
                         $(td).data('study-id', data);
                         return;
@@ -1498,7 +1498,7 @@ require([
                     "type": "text", "orderable": true, data: 'SeriesInstanceUID', render: function (data) {
                         return pretty_print_id(data) +
                             ' <a class="copy-this-table" role="button" content="' + data +
-                                '"  title="Copy Series ID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
+                                '"  title="Copy SeriesInstanceUID to the clipboard"><i class="fa-solid fa-copy"></i></a>';
                     }, "createdCell": function (td, data) {
                         $(td).data('series-id', data);
                         return;
@@ -1893,6 +1893,15 @@ require([
                 try {
                     var isFiltered = Boolean($('#search_def p').length > 0);
                     if (is_cohort) {
+                        if(data.totals.SeriesInstanceUID > 65000) {
+                            $('#s5cmd-max-exceeded').show();
+                            $('#download-s5cmd').attr('disabled','disabled');
+                            $('#s5cmd-button-wrapper').addClass('s5cmd-disabled');
+                        } else {
+                            $('#s5cmd-max-exceeded').hide();
+                            $('#s5cmd-button-wrapper').removeClass('s5cmd-disabled');
+                            $('#download-s5cmd').removeAttr('disabled');
+                        }
                         if (file_parts_count > display_file_parts_count) {
                             $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
                             $('#file-export-option input').prop('disabled', 'disabled');
@@ -1905,15 +1914,6 @@ require([
                                 $('#bq-export-option input').prop('checked', true).trigger("click");
                             }
                         } else {
-                            if(data.totals.SeriesInstanceUID > 65000) {
-                                $('#s5cmd-max-exceeded').show();
-                                $('#download-s5cmd').attr('disabled','disabled');
-                                $('#s5cmd-button-wrapper').addClass('s5cmd-disabled');
-                            } else {
-                                $('#s5cmd-max-exceeded').hide();
-                                $('#s5cmd-button-wrapper').removeClass('s5cmd-disabled');
-                                $('#download-s5cmd').removeAttr('disabled');
-                            }
                             $('#file-manifest-max-exceeded').hide();
                             $('#file-manifest').show();
 
