@@ -4092,11 +4092,11 @@ html {
   padding: 5px 0px 10px 0px;
 }
 
-.version-disabled, .bq-disabled, .s5cmd-disabled {
+.version-disabled, .bq-disabled, .manifest-disabled {
   cursor: not-allowed;
 }
 
-#s5cmd-button-wrapper {
+.manifest-button-wrapper {
   display: inline-block;
 }
 

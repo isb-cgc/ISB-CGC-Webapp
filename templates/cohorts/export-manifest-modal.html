@@ -15,17 +15,6 @@
                         <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                         Your manifest file's name must be no more than 255 characters long.
                     </div>
-                    <div id="file-manifest-max-exceeded" class="alert alert-warning alert-dismissable" style="display: none;">
-                        <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                        Your manifest is too large to be downloaded. Please use our BigQuery export option. (This requires a Google Account login.)
-                    </div>
-                    <div id="s5cmd-max-exceeded" class="alert alert-warning alert-dismissable" style="display: none;">
-                        <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                        Your manifest's size exceeds the limit for file manifest download (65k entries). Please use
-                        <a class="external-link" url="https://learn.canceridc.dev/portal/cohort-manifests#bigquery-cohort-manifest" data-toggle="modal"
-                           data-target="#external-web-warning">BQ export <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">
-                            </i></a> instead (requires Google login).
-                    </div>
                     <div id="need-social-account" class="alert alert-warning alert-dismissable" style="display: none;">
                         <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                         Your cohort exceeds the maximum size allowed for download, but your account doesn't appear to be a linked Google account.
@@ -153,6 +142,15 @@
                             </div>
                             <div id="manifest-s5cmd" class="tab-pane manifest active" role="tab-panel">
                                 <p>
+                                <div id="s5cmd-max-exceeded" class="alert alert-warning alert-dismissable" style="display: none;">
+                                    <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                    Your manifest's size exceeds the limit for file manifest download. Please {% if not is_cohort %}save your filters as a cohort and {% endif %}use
+                                    <a class="external-link" url="https://learn.canceridc.dev/portal/cohort-manifests#bigquery-cohort-manifest" data-toggle="modal"
+                                       data-target="#external-web-warning">BQ export <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">
+                                        </i></a> instead (requires Google login).
+                                </div>
+                                </p>
+                                <p>
                                     <br />
                                     To obtain these images, <span id="manifest-source">download this s5cmd manifest, </span>
                                     <a class="external-link" url="https://github.com/peak/s5cmd#installation" data-toggle="modal"
@@ -222,13 +220,22 @@
                                         </label></li>
                                     </div>
                                 </div>
-                                <div id="s5cmd-button-wrapper">
+                                <div id="s5cmd-button-wrapper" class="manifest-button-wrapper">
                                 <a id="download-s5cmd" class="btn btn-primary download-file get-manifest">
                                     Download s5cmd Manifest
                                 </a>
                                 </div>
                             </div>
                             <div id="manifest-file" class="tab-pane manifest" role="tab-panel">
+                                <p>
+                            <div id="file-manifest-max-exceeded" class="alert alert-warning alert-dismissable" style="display: none;">
+                                <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                Your manifest is too large to be downloaded in its entirety. Please {% if not is_cohort %}save your filters as a cohort and {% endif %}use
+                                <a class="external-link" url="https://learn.canceridc.dev/portal/cohort-manifests#bigquery-cohort-manifest" data-toggle="modal"
+                                   data-target="#external-web-warning">BQ export <i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">
+                                    </i></a> instead (requires Google login).
+                            </div>
+                                </p>
 <!--
                                 <div class="manifest-file-name manifest-name">
                                     <label for="export-manifest-name">Name</label>
@@ -325,15 +332,21 @@
                                     </select>
                                     <br />
                                 </div>
-                                <a id="download-csv" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in CSV format.">
-                                    Download CSV
-                                </a>
-                                <a id="download-tsv" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in TSV format.">
-                                    Download TSV
-                                </a>
-                                <a id="download-json" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in JSON format.">
-                                    Download JSON
-                                </a>
+                                <div class="manifest-button-wrapper file-manifest-button-wrapper">
+                                    <a id="download-csv" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in CSV format.">
+                                        Download CSV
+                                    </a>
+                                </div>
+                                <div class="manifest-button-wrapper file-manifest-button-wrapper">
+                                    <a id="download-tsv" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in TSV format.">
+                                        Download TSV
+                                    </a>
+                                </div>
+                                <div class="manifest-button-wrapper file-manifest-button-wrapper">
+                                    <a id="download-json" class="btn btn-primary download-file get-manifest" title="Download this cohort's manifest in JSON format.">
+                                        Download JSON
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

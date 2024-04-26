@@ -412,7 +412,7 @@ require([
         arrow: true,
         interactive: true,
         onTrigger: (instance, event) => {
-            if($(event.target).hasClass('s5cmd-disabled')) {
+            if($(event.target).hasClass('manifest-disabled')) {
                 instance.enable();
             } else {
                 instance.disable();
@@ -422,7 +422,7 @@ require([
             instance.enable();
         },
         allowHTML: true,
-        target: '.s5cmd-disabled'
+        target: '.manifest-disabled'
     });
 
     tippy.delegate('#export-manifest-modal', {

@@ -1891,118 +1891,77 @@ require([
             beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success: function (data) {
                 try {
-                    var isFiltered = Boolean($('#search_def p').length > 0);
-                    if (is_cohort) {
-                        if(data.totals.SeriesInstanceUID > 65000) {
-                            $('#s5cmd-max-exceeded').show();
-                            $('#download-s5cmd').attr('disabled','disabled');
-                            $('#s5cmd-button-wrapper').addClass('s5cmd-disabled');
-                        } else {
-                            $('#s5cmd-max-exceeded').hide();
-                            $('#s5cmd-button-wrapper').removeClass('s5cmd-disabled');
-                            $('#download-s5cmd').removeAttr('disabled');
-                        }
-                        if (file_parts_count > display_file_parts_count) {
-                            $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
-                            $('#file-export-option input').prop('disabled', 'disabled');
-                            $('#file-export-option input').prop('checked', false);
-                            $('#file-manifest').hide();
-                            if (!user_is_social) {
-                                $('#need-social-account').show();
-                            } else {
-                                $('#file-manifest-max-exceeded').show();
-                                $('#bq-export-option input').prop('checked', true).trigger("click");
-                            }
-                        } else {
-                            $('#file-manifest-max-exceeded').hide();
-                            $('#file-manifest').show();
-
-                            var select_box_div = $('#file-part-select-box');
-                            var select_box = select_box_div.find('select');
-                            if (file_parts_count > 1) {
-                                select_box_div.show();
-                                for (let i = 0; i < display_file_parts_count; ++i) {
-                                    select_box.append($('<option/>', {
-                                        value: i,
-                                        text: "File Part " + (i + 1)
-                                    }));
-                                }
-                            } else {
-                                select_box_div.hide();
-                            }
-                        }
-                        $('#search_def_stats').removeClass('notDisp');
-                        $('#search_def_stats').html(data.totals.PatientID.toString() +
-                            " Cases, " + data.totals.StudyInstanceUID.toString() +
-                            " Studies, and " + data.totals.SeriesInstanceUID.toString() +
-                            " Series in this cohort. " +
-                            "Size on disk: " + data.totals.disk_size);
-
-                        if (('filtered_counts' in data) && ('access' in data['filtered_counts']['origin_set']['All']['attributes']) && ('Limited' in data['filtered_counts']['origin_set']['All']['attributes']['access']) && (data['filtered_counts']['origin_set']['All']['attributes']['access']['Limited']['count']>0) ){
-                            $('#search_def_access').removeClass('notDisp');
-                            $('.access_warn').removeClass('notDisp');
-                        }
-                        else {
-                            $('#search_def_access').addClass('notDisp');
-                            $('.access_warn').addClass('notDisp');
-                        }
+                    let file_parts_count = (is_cohort ? cohort_file_parts_count : data.totals.file_parts_count);
+                    let display_file_parts_count = (is_cohort ? cohort_display_file_parts_count : data.totals.display_file_parts_count);
+                    let isFiltered = Boolean($('#search_def p').length > 0);
+                    if(data.totals.SeriesInstanceUID > 65000) {
+                        $('#s5cmd-max-exceeded').show();
+                        $('#download-s5cmd').attr('disabled','disabled');
+                        $('#s5cmd-button-wrapper').addClass('manifest-disabled');
                     } else {
-                        if (isFiltered && data.total > 0) {
-                            $('#save-cohort-btn').prop('disabled', '');
-                            if (user_is_auth) {
-                                $('#save-cohort-btn').prop('title', '');
-                            }
-                            $('#search_def_stats').removeClass('notDisp');
-                            $('#search_def_stats').html(data.totals.PatientID.toString() + " Cases, " +
-                                data.totals.StudyInstanceUID.toString()+" Studies, and " +
-                                data.totals.SeriesInstanceUID.toString()+" Series in this cohort. " +
-                                "Size on disk: " + data.totals.disk_size);
-                            if(data.totals.SeriesInstanceUID > 65000) {
-                                $('#s5cmd-max-exceeded').show();
-                                $('#download-s5cmd').attr('disabled','disabled');
-                                $('#s5cmd-button-wrapper').addClass('s5cmd-disabled');
-                            } else {
-                                $('#s5cmd-max-exceeded').hide();
-                                $('#s5cmd-button-wrapper').removeClass('s5cmd-disabled');
-                                $('#download-s5cmd').removeAttr('disabled');
-                            }
-                            let select_box_div = $('#file-part-select-box');
-                            let select_box = select_box_div.find('select');
-                            if (data.totals.file_parts_count > 1) {
-                                select_box_div.show();
-                                for (let i = 0; i < data.totals.display_file_parts_count; ++i) {
-                                    select_box.append($('<option/>', {
-                                        value: i,
-                                        text : "File Part " + (i + 1)
-                                    }));
-                                }
-                            } else {
-                                select_box_div.hide();
-                            }
-                            if (('filtered_counts' in data) && ('access' in data['filtered_counts']['origin_set']['All']['attributes']) && ('Limited' in data['filtered_counts']['origin_set']['All']['attributes']['access']) && (data['filtered_counts']['origin_set']['All']['attributes']['access']['Limited']['count']>0) ){
-                               $('#search_def_access').removeClass('notDisp');
-                               $('.access_warn').removeClass('notDisp');
-                            } else {
-                                $('#search_def_access').addClass('notDisp');
-                                $('.access_warn').addClass('notDisp');
+                        $('#s5cmd-max-exceeded').hide();
+                        $('#s5cmd-button-wrapper').removeClass('manifest-disabled');
+                        $('#download-s5cmd').removeAttr('disabled');
+                    }
+                    if (file_parts_count > display_file_parts_count) {
+                        $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
+                        $('#file-export-option input').prop('disabled', 'disabled');
+                        $('#file-export-option input').prop('checked', false);
+                        $('#file-manifest').hide();
+                        $('#file-part-select-box select').attr('disabled','disabled');
+                        $('.file-manifest-button-wrapper a').attr('disabled','disabled');
+                        $('.file-manifest-button-wrapper').addClass('manifest-disabled');
+                    } else {
+                        $('#file-manifest-max-exceeded').hide();
+                        $('#file-manifest').show();
+                        $('#file-part-select-box select').removeAttr('disabled');
+                        $('.file-manifest-button-wrapper a').removeAttr('disabled');
+                        $('.file-manifest-button-wrapper').removeClass('manifest-disabled');
+                        var select_box_div = $('#file-part-select-box');
+                        var select_box = select_box_div.find('select');
+                        if (file_parts_count > 1) {
+                            select_box_div.show();
+                            for (let i = 0; i < display_file_parts_count; ++i) {
+                                select_box.append($('<option/>', {
+                                    value: i,
+                                    text: "File Part " + (i + 1)
+                                }));
                             }
                         } else {
-                            $('#search_def_access').addClass('notDisp');
-                            $('.access_warn').addClass('notDisp');
-                            $('#save-cohort-btn').prop('disabled', 'disabled');
-                            if (data.total <= 0) {
-                                $('#search_def_stats').removeClass('notDisp');
-                                $('#search_def_stats').html('<span style="color:red">There are no cases matching the selected set of filters</span>');
-                                //window.alert('There are no cases matching the selected set of filters.')
-                            } else {
-                                $('#search_def_stats').addClass('notDisp');
-                                $('#search_def_stats').html("Don't show this!");
-                            }
-                            if (user_is_auth) {
-                                $('#save-cohort-btn').prop('title', data.total > 0 ? 'Please select at least one filter.' : 'There are no cases in this cohort.');
-                            } else {
-                                $('#save-cohort-btn').prop('title', 'Log in to save.');
-                            }
+                            select_box_div.hide();
+                        }
+                    }
+                    if (('filtered_counts' in data) &&
+                        ('access' in data['filtered_counts']['origin_set']['All']['attributes']) &&
+                        ('Limited' in data['filtered_counts']['origin_set']['All']['attributes']['access']) &&
+                        (data['filtered_counts']['origin_set']['All']['attributes']['access']['Limited']['count']>0) ){
+                        $('#search_def_access').removeClass('notDisp');
+                        $('.access_warn').removeClass('notDisp');
+                    }
+                    else {
+                        $('#search_def_access').addClass('notDisp');
+                        $('.access_warn').addClass('notDisp');
+                    }
+                    if(is_cohort || (isFiltered && data.total > 0)) {
+                        $('#search_def_stats').removeClass('notDisp');
+                        $('#search_def_stats').html(data.totals.PatientID.toString() + " Cases, " +
+                            data.totals.StudyInstanceUID.toString() + " Studies, and " +
+                            data.totals.SeriesInstanceUID.toString() + " Series in this cohort. " +
+                            "Size on disk: " + data.totals.disk_size);
+                    } else if(isFiltered && data.total <= 0) {
+                        $('#search_def_stats').removeClass('notDisp');
+                        $('#search_def_stats').html('<span style="color:red">There are no cases matching the selected set of filters</span>');
+                    } else {
+                        $('#search_def_stats').addClass('notDisp');
+                    }
+                    if (is_cohort) {
+                        ((file_parts_count > display_file_parts_count) && !user_is_social)  && $('#need-social-account').show();
+                    } else {
+                        data.total > 0 && $('#save-cohort-btn').removeAttr('disabled');
+                        if (user_is_auth) {
+                            $('#save-cohort-btn').prop('title', data.total > 0 ? 'Please select at least one filter.' : 'There are no cases in this cohort.');
+                        } else {
+                            $('#save-cohort-btn').prop('title', 'Log in to save.');
                         }
                     }
                     //updateCollectionTotals(data.total, data.origin_set.attributes.collection_id);
