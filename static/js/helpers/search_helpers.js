@@ -55,7 +55,9 @@ function($, tree_graph, stack_bar_chart) {
             disease_type_gdc: 'Disease Type',
             vital_status: 'Vital Status',
             gender_gdc: 'Gender',
-            race: 'Race'
+            race: 'Race',
+            age_at_diagnosis: 'Age at Diagnosis',
+            ethnicity: 'Ethnicity'
         },
         'PDC':{
             disease_type_pdc: 'Disease Type',

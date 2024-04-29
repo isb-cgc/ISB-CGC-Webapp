@@ -20,6 +20,7 @@ define(['jquery', 'd3', 'd3tip', 'vis_helpers'],
 function($, d3, d3tip, vis_helpers) {
 
     var CURSOR_TOOLTIP_PAD = 20;
+    var MAX_NODE_TREES = 5;
 
     // If you want to override the tip coming in from the create call,
     // do it here
@@ -150,24 +151,28 @@ function($, d3, d3tip, vis_helpers) {
                         .attr('class', 'tree-graph-node-container');
                 node_div.append('p')
                     .html(node);
+                let nodeTreeCount = 0;
                 Object.keys(clin_attr[node]).map(function(attr) {
-                    let tree_div = node_div
-                        .append('div')
-                        .attr('class', 'tree-graph');
-                    tree_div.append('p')
-                        .attr('class', 'graph-title')
-                        .html(clin_attr[node][attr]);
-                    let graph_svg = tree_div.append('svg')
-                        .attr("class", "chart")
-                        .style("width", w + "px")
-                        .style("height", h + "px")
-                        .append("svg:g")
-                        .attr("transform", "translate(.5,.5)");
-                    draw_single_tree(
-                        tree_data[attr],
-                        graph_svg, prog_id,
-                        attr,
-                        clin_attr[node][attr], w, h, false, treeTip, pcount);
+                    if(tree_data[attr] && nodeTreeCount < MAX_NODE_TREES) {
+                        nodeTreeCount++;
+                        let tree_div = node_div
+                            .append('div')
+                            .attr('class', 'tree-graph');
+                        tree_div.append('p')
+                            .attr('class', 'graph-title')
+                            .html(clin_attr[node][attr]);
+                        let graph_svg = tree_div.append('svg')
+                            .attr("class", "chart")
+                            .style("width", w + "px")
+                            .style("height", h + "px")
+                            .append("svg:g")
+                            .attr("transform", "translate(.5,.5)");
+                        draw_single_tree(
+                            tree_data[attr],
+                            graph_svg, prog_id,
+                            attr,
+                            clin_attr[node][attr], w, h, false, treeTip, pcount);
+                    }
                 });
             });
 
