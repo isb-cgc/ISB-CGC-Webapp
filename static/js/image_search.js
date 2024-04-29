@@ -1267,6 +1267,7 @@ require([
                                     let v3_link = OHIF_V3_PATH + "=" + data;
                                     let v2_element = '<li title="Not available for this modality."><a class="disabled" href="'
                                         + v2_link + '" target="_blank" rel="noopener noreferrer">OHIF v2</a></li>';
+                                    let default_viewer = (modality === "XC" || (Array.isArray(modality) && modality.includes("XC"))) ? v3_link : v2_link;
                                     let volView_element = '<li title="VolView is disabled for this Study."><a class="disabled">VolView ' +
                                         '<i class="fa-solid fa-external-link external-link-icon" aria-hidden="true">' +
                                         '</a></li>';
@@ -1284,7 +1285,7 @@ require([
                                         v2_element = '<li><a href="'+v2_link+'" target="_blank" rel="noopener noreferrer">OHIF v2</a></li>';
                                     }
 
-                                    return '<a href="' + v2_link + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
+                                    return '<a href="' + default_viewer + '" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-eye"></i>' +
                                         '<div class="dropdown viewer-toggle">' +
                                         '<a id="btnGroupDropViewers" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa-solid fa-caret-down"></i></a>' +
                                         '<ul class="dropdown-menu viewer-menu" aria-labelledby="btnGroupDropViewers">' +
