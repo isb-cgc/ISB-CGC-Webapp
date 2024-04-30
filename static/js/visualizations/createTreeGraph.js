@@ -145,7 +145,9 @@ function($, d3, d3tip, vis_helpers) {
             // Calculate our pseudocount:
             var pcount = (total * 0.008) > 1 ? (total * 0.008) : 0;
 
-            Object.keys(clin_attr).map(function(node){
+            let node_order = ["GDC", "PDC", "IDC"];
+
+            node_order.map(function(node){
                 let node_div = d3.select(these_trees)
                         .append('div')
                         .attr('class', 'tree-graph-node-container');
@@ -175,8 +177,6 @@ function($, d3, d3tip, vis_helpers) {
                     }
                 });
             });
-
-
 
             var stopPlot = new Date().getTime();
 

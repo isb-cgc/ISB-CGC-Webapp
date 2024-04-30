@@ -53,24 +53,26 @@ function($, tree_graph, stack_bar_chart) {
         'GDC': {
             project_short_name_gdc: 'Project Short Name',
             disease_type_gdc: 'Disease Type',
-            vital_status: 'Vital Status',
             gender_gdc: 'Gender',
+            tissue_or_organ_of_origin_gdc: 'Tissue/Organ of Origin',
+            vital_status: 'Vital Status',
             race: 'Race',
-            age_at_diagnosis: 'Age at Diagnosis',
+            age_at_diagnosis_cgc: 'Age at Diagnosis',
             ethnicity: 'Ethnicity'
         },
         'PDC':{
+            project_short_name_pdc: 'Project Short Name',
             disease_type_pdc: 'Disease Type',
             gender_pdc: 'Gender',
+            tissue_or_organ_of_origin_pdc: 'Tissue/Organ of Origin',
             primary_diagnosis_pdc: 'Primary Diagnosis',
-            primary_site_pdc: 'Primary Site',
-            tissue_or_organ_of_origin_pdc: 'Tissue/Organ of Origin'
+            primary_site_pdc: 'Primary Site'
         },
         'IDC':{
+            collection_id: 'Collection ID',
             Modality: 'Image Modality',
             BodyPartExamined: 'Body Part',
             CancerType: 'Cancer Type',
-            collection_id: 'Collection ID',
             tcia_tumorLocation: 'Primary Site'
         }
     };
@@ -102,7 +104,6 @@ function($, tree_graph, stack_bar_chart) {
                     tree_attr_map[attr] = 1;
                 });
             });
-
 
             for(var i in filters) {
                 if(filters.hasOwnProperty(i)) {
