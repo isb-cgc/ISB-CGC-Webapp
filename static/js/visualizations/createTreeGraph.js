@@ -148,34 +148,38 @@ function($, d3, d3tip, vis_helpers) {
             let node_order = ["GDC", "PDC", "IDC"];
 
             node_order.map(function(node){
-                let node_div = d3.select(these_trees)
+                if(clin_attr[node] !== null && clin_attr[node] !== undefined)
+                {
+                    let node_div = d3.select(these_trees)
                         .append('div')
                         .attr('class', 'tree-graph-node-container');
-                node_div.append('p')
-                    .html(node);
-                let nodeTreeCount = 0;
-                Object.keys(clin_attr[node]).map(function(attr) {
-                    if(tree_data[attr] && nodeTreeCount < MAX_NODE_TREES) {
-                        nodeTreeCount++;
-                        let tree_div = node_div
-                            .append('div')
-                            .attr('class', 'tree-graph');
-                        tree_div.append('p')
-                            .attr('class', 'graph-title')
-                            .html(clin_attr[node][attr]);
-                        let graph_svg = tree_div.append('svg')
-                            .attr("class", "chart")
-                            .style("width", w + "px")
-                            .style("height", h + "px")
-                            .append("svg:g")
-                            .attr("transform", "translate(.5,.5)");
-                        draw_single_tree(
-                            tree_data[attr],
-                            graph_svg, prog_id,
-                            attr,
-                            clin_attr[node][attr], w, h, false, treeTip, pcount);
-                    }
-                });
+                    node_div.append('p')
+                        .attr('class', 'node-title')
+                        .html(node);
+                    let nodeTreeCount = 0;
+                    Object.keys(clin_attr[node]).map(function (attr) {
+                        if (tree_data[attr] && nodeTreeCount < MAX_NODE_TREES) {
+                            nodeTreeCount++;
+                            let tree_div = node_div
+                                .append('div')
+                                .attr('class', 'tree-graph');
+                            tree_div.append('p')
+                                .attr('class', 'graph-title')
+                                .html(clin_attr[node][attr]);
+                            let graph_svg = tree_div.append('svg')
+                                .attr("class", "chart")
+                                .style("width", w + "px")
+                                .style("height", h + "px")
+                                .append("svg:g")
+                                .attr("transform", "translate(.5,.5)");
+                            draw_single_tree(
+                                tree_data[attr],
+                                graph_svg, prog_id,
+                                attr,
+                                clin_attr[node][attr], w, h, false, treeTip, pcount);
+                        }
+                    });
+                }
             });
 
             var stopPlot = new Date().getTime();

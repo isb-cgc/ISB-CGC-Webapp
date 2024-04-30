@@ -2289,6 +2289,11 @@ section .min-max {
   padding: 5px 0px 5px 10px;
 }
 
+.tree-graph-node-container .node-title {
+  font-weight: bold;
+  font-size: larger;
+}
+
 #cohort-details .filter-label, #cohort-filelist .filter-label {
   display: inline-flex; }
 
