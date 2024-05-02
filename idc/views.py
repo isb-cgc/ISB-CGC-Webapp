@@ -332,7 +332,7 @@ def studymp(request):
 
        #custom_facets['per_id']['limit'] = mxStudies
        idsEx = get_collex_metadata(
-                    filters, ['collection_id', 'PatientID','StudyInstanceUID'], record_limit=mxStudies, sources=sources, offset=0,
+                    filters, ['collection_id', 'PatientID','StudyInstanceUID', 'crdc_study_uuid','gcs_bucket','aws_bucket'], record_limit=mxStudies, sources=sources, offset=0,
                     records_only=False, custom_facets=custom_facets,
                     collapse_on='StudyInstanceUID', counts_only=False, filtered_needed=False,
                     raw_format=True, default_facets=False
@@ -349,6 +349,9 @@ def studymp(request):
           proj=doc['collection_id'][0]
           patientid=doc['PatientID']
           studyid= doc['StudyInstanceUID']
+          study_uuid = doc['crdc_study_uuid']
+          gcs_bucket= doc['gcs_bucket']
+          aws_bucket = doc['aws_bucket']
 
           if not patientid in casestudymp:
               casestudymp[patientid]={}
@@ -359,6 +362,9 @@ def studymp(request):
               seriesmp[studyid]['val'] = []
               seriesmp[studyid]['proj']=proj
               seriesmp[studyid]['PatientID'] = patientid
+              seriesmp[studyid]['study_uuid']= study_uuid
+              seriesmp[studyid]['aws_bucket'] = aws_bucket
+              seriesmp[studyid]['gcs_bucket'] = gcs_bucket
           if not  (studyid in study_patient):
               study_patient[studyid]=patientid
           if not (studyid in study_proj):

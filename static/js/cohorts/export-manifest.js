@@ -60,6 +60,9 @@ require([
     'assetscore',
     'assetsresponsive',
 ], function($, jqueryui, tippy, base) {
+
+
+
     A11y.Core();
 
     var downloadToken = new Date().getTime();
@@ -182,7 +185,32 @@ require([
         download_manifest('bq',$(this), e);
     });
 
+    var download_file_clientside =function(manifest_filenm, download_arr){
+         var content = new Array()
+         content[0] = "# To download the files in this manifest, first install s5cmd (https://github.com/peak/s5cmd),";
+         content[1] = "# then run the following command:"
+
+        let endpoint_url = ($('input.loc_type:checked').val() === "aws" ? "https://s3.amazonaws.com" : "https://storage.googleapis.com");
+        content[2] = `s5cmd --no-sign-request --endpoint-url ${endpoint_url} run ${manifest_filename}.s5cmd`;
+
+
+        for (var i=0;i<download_arr.length;i++){
+              content[i+3] = 'cp s3'
+        }
+        var file = new File(['foo'], 'new-note.txt', {type: 'text/json',});
+        const link = document.createElement('a')
+        const url = URL.createObjectURL(file)
+
+      link.href = url
+      link.download = file.name
+      document.body.appendChild(link)
+      link.click()
+     document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    }
+
     var download_manifest = function(file_type, clicked_button, e) {
+        download_file_clientside();
         let manifest_type = file_type === 'bq' ? 'bq-manifest' : 'file-manifest';
 
         $('#unallowed-chars-alert').hide();

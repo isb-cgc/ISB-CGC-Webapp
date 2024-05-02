@@ -69,14 +69,14 @@
             </button>
             {% else %}
             <button id="save-cohort-btn" class="btn btn-special pull-right" title="Select at least one filter."
-                disabled="disabled" data-uri="{% url 'account_login' %}"> Log in to Save
+                disabled="disabled" data-uri="{% url 'account_login' %}"> Log in to Save Cohort
             </button>
             {% endif %}
 
-            <button id="export-manifest" class="btn btn-special pull-right" data-toggle="modal"
+            <button id="export-manifest" class="btn btn-special pull-right" disabled="disabled" data-toggle="modal"
                 data-target="#export-manifest-modal"
                 title="Select a filter to enable this feature."
-            > Download Filtered Images
+            > Download Cohort Images
             </button>
 
 
@@ -132,6 +132,7 @@
         window.selProjects= new Object();
         window.cart= new Object();
         window.glblcart = new Object();
+        window.crdcmp= new Object()
         window.seriesmp=new Object();
         window.projstudymp = new Object();
         window.casestudymp = new Object();
