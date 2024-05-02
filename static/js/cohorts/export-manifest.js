@@ -277,7 +277,6 @@ require([
                     }
                 },
                 complete: function(xhr, status) {
-                    $('.get-manifest').removeAttr('disabled');
                     $('#manifest-in-progress').modal('hide');
                     $('#export-manifest-modal').modal('hide');
                     $('#export-manifest-form')[0].reset();
@@ -314,51 +313,68 @@ require([
             s5cmd_text = `s5cmd --no-sign-request --endpoint-url ${endpoint_url} cp 's3://${bucket}/${crdc}/*' .`;
 
         }
-
-
         $('.s5cmd-text').text(s5cmd_text);
         $('.s5cmd.copy-this').attr("content",s5cmd_text);
     }
 
     var update_download_manifest_buttons = function(clicked){
-        let cohort_row = null, inactives = false;
+
         if(clicked) {
+            let cohort_row = null, inactives = false;
             cohort_row = clicked.parents('tr');
             inactives = (cohort_row.data('inactive-versions') === "True");
-        }
-        if(inactives) {
-            $('.manifest-bq a').trigger('click');
-            $('.download-file a,.file-manifest a').attr('disabled', 'disabled');
-            $('.manifest-s5cmd, .manifest-file').addClass('version-disabled');
-            $('.manifest-s5cmd a, .manifest-file a').addClass('disabled');
-        } else {
-            $('.manifest-s5cmd a').trigger('click');
-            $('.download-file a, .file-manifest a').removeAttr('disabled');
-            $('.manifest-s5cmd a, .manifest-file a').removeClass('disabled');
-            $('.manifest-file, .manifest-s5cmd').removeClass('version-disabled');
-            if(cohort_row) {
-                let file_parts_count = cohort_row.data('file-parts-count');
-                let display_file_parts_count = cohort_row.data('display-file-parts-count')
-                if (file_parts_count > display_file_parts_count) {
-                    $('#manifest-file').attr('disabled', 'disabled');
-                } else {
-                    var select_box_div = $('#file-part-select-box');
-                    var select_box = select_box_div.find('select');
-                    if (file_parts_count > 1) {
-                        select_box_div.show();
-                        for (let i = 0; i < display_file_parts_count; ++i) {
-                            select_box.append($('<option/>', {
-                                value: i,
-                                text : "File Part " + (i + 1)
-                            }));
-                        }
+            if(inactives) {
+                $('.manifest-bq a').trigger('click');
+                $('.manifest-button-wrapper a, .file-manifest-button-wrapper a').attr('disabled', 'disabled');
+                $('.manifest-button-wrapper, .file-manifest-button-wrapper').addClass('version-disabled');
+            } else {
+                $('#s5cmd-max-exceeded, #file-manifest-max-exceeded').hide();
+                $('.manifest-s5cmd a').trigger('click');
+                $('.manifest-button-wrapper a, .file-manifest-button-wrapper a').removeAttr('disabled');
+                $('.manifest-button-wrapper, .file-manifest-button-wrapper').removeClass('version-disabled');
+                if(cohort_row) {
+                    let file_parts_count = cohort_row.data('file-parts-count');
+                    let display_file_parts_count = cohort_row.data('display-file-parts-count');
+                    let total_series = cohort_row.data('series-count');
+                    let select_box_div = $('#file-part-select-box');
+                    let select_box = select_box_div.find('select');
+                    select_box.empty();
+                    if(total_series > 65000) {
+                        $('#s5cmd-max-exceeded').show();
+                        $('.manifest-button-wrapper a').attr('disabled', 'disabled');
+                        $('.manifest-button-wrapper').addClass('manifest-disabled');
                     } else {
-                        select_box_div.hide();
+                        $('#s5cmd-max-exceeded').hide();
+                        $('.manifest-button-wrapper a').removeAttr('disabled');
+                        $('.manifest-button-wrapper').removeClass('manifest-disabled');
+                    }
+                    if (file_parts_count > display_file_parts_count) {
+                        $('#file-manifest-max-exceeded').show();
+                        $('.file-manifest-button-wrapper a').attr('disabled', 'disabled');
+                        $('#file-part-select-box select').attr('disabled', 'disabled');
+                        $('.file-manifest-button-wrapper').addClass('manifest-disabled');
+                    } else {
+                        $('#file-manifest-max-exceeded').hide();
+                        $('.file-manifest-button-wrapper a').removeAttr('disabled');
+                        $('#file-part-select-box select').removeAttr('disabled');
+                        $('.file-manifest-button-wrapper').removeClass('manifest-disabled');
+                        $('#file-part-select-box select').removeAttr('disabled');
+                        if (file_parts_count > 1) {
+                            select_box_div.show();
+                            for (let i = 0; i < display_file_parts_count; ++i) {
+                                select_box.append($('<option/>', {
+                                    value: i,
+                                    text : "File Part " + (i + 1)
+                                }));
+                            }
+                        } else {
+                            select_box_div.hide();
+                        }
                     }
                 }
             }
-            $('.cmd-file-name').text($('#export-s5cmd-name').val());
         }
+        $('.cmd-file-name').text($('#export-s5cmd-name').val());
     };
 
     // The Export button for each cohort on the Cohort List Page

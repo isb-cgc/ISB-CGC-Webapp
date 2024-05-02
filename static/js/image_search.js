@@ -1906,6 +1906,7 @@ require([
                     }
                     if (file_parts_count > display_file_parts_count) {
                         $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
+                        $('#file-manifest-max-exceeded').show();
                         $('#file-export-option input').prop('disabled', 'disabled');
                         $('#file-export-option input').prop('checked', false);
                         $('#file-manifest').hide();
