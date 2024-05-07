@@ -1933,7 +1933,7 @@ require([
                             select_box_div.hide();
                         }
                     }
-                    if (('filtered_counts' in data) &&
+                    if (('filtered_counts' in data) && ('origin_set' in data['filtered_counts']) &&
                         ('access' in data['filtered_counts']['origin_set']['All']['attributes']) &&
                         ('Limited' in data['filtered_counts']['origin_set']['All']['attributes']['access']) &&
                         (data['filtered_counts']['origin_set']['All']['attributes']['access']['Limited']['count']>0) ){
