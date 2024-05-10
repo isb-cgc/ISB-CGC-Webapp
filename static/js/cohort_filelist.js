@@ -184,7 +184,7 @@ require([
 
         !withoutDisplayUpdates && update_displays();
 
-        if(!cohort_id && $('.selected-filters .panel-body span').length > 0) {
+        if(!cohort_id && $('.all-selected-filters .panel-body span').length > 0) {
             $('#at-least-one-filter-alert-modal').hide();
             $('#at-least-one-filter-alert').hide();
             $('#create-cohort-modal input[type="submit"]').removeAttr('disabled');
@@ -194,7 +194,7 @@ require([
     $('.clear-filters').on('click', function() {
         var activeDataTab = $('.data-tab.active').data('tab-id');
 
-        $(this).parents('.selected-filters').find('.panel-body').empty();
+        $(this).parents('all-selected-filters').find('.panel-body').empty();
         $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
             $(this).prop('checked', false);
         });

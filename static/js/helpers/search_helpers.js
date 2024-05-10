@@ -220,7 +220,6 @@ function($, tree_graph, stack_bar_chart) {
                         console.debug("[BENCHMARKING] Time for response in update_counts_parsets: "+(stopReq-startReq)+ "ms");
                         case_counts = results['counts'];
 
-
                         $('#p-'+program_id+'-data-total-samples').html(format_num_with_commas(metadata_counts['samples']));
                         $('#p-'+program_id+'-data-total-participants').html(format_num_with_commas(metadata_counts['cases']));
 
@@ -235,34 +234,6 @@ function($, tree_graph, stack_bar_chart) {
                         var clin_tree_attr_counts = filters_found ? context.filter_data_for_clin_trees(results['filtered_counts']['Case'], clin_tree_attr) : case_counts;
                         Object.keys(clin_tree_attr_counts).length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-case-'+active_program_id);
 
-                        if (metadata_counts.hasOwnProperty('data_avail')) {
-                            var features = [
-                                'cnvrPlatform',
-                                'DNAseq_data',
-                                'methPlatform',
-                                'gexpPlatform',
-                                'mirnPlatform',
-                                'rppaPlatform'
-                            ];
-                            var plot_features = [
-                                context.get_readable_name(features[0]),
-                                context.get_readable_name(features[1]),
-                                context.get_readable_name(features[2]),
-                                context.get_readable_name(features[3]),
-                                context.get_readable_name(features[4]),
-                                context.get_readable_name(features[5])
-                            ];
-                            for (var i = 0; i < metadata_counts['data_avail'].length; i++) {
-                                var new_item = {};
-                                for (var j = 0; j < features.length; j++) {
-                                    var item = metadata_counts['data_avail'][i];
-                                    new_item[plot_features[j]] = context.get_readable_name(item[features[j]]);
-                                }
-                                metadata_counts['data_avail'][i] = new_item;
-                            }
-                        } else {
-                            console.debug("Data Availability counts not found!");
-                        }
                     },
                     error: function(req,status,err){
                         $('#' + active_program_id + '-data-total-samples').html("Error");
@@ -285,7 +256,7 @@ function($, tree_graph, stack_bar_chart) {
             if (program_id != '0') {
                 program_selector = '#' + program_id + '-data ';
             }
-            $(program_selector + '.selected-filters .panel-body span.filter-token').each(function() {
+            $('.all-selected-filters .panel-body span[data-prog-id="'+program_id+'"].filter-token').each(function() {
                 var $this = $(this),
                     key = $this.data('feature-name'),
                     val = $this.data('value-name');
@@ -406,7 +377,6 @@ function($, tree_graph, stack_bar_chart) {
                     attr = $this.data('feature-name');
                 if(attr && attr.length > 0 && attr !== 'specific-mutation' ) {
                     $('#'+program_id+'-data-filter-panel ul#'+program_id+'-'+attr+' input').each(function () {
-
                         var $that = $(this),
                             value = $that.data('value-name'),
                             id = $that.data('value-id'),

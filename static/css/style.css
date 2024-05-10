@@ -2572,7 +2572,7 @@ section .min-max {
 #cohort-details .case-trees .panel-body, #cohort-details .user-data-trees .panel-body, #cohort-filelist .case-trees .panel-body, #cohort-filelist .user-data-trees .panel-body {
   position: relative;
   overflow: hidden;
-  height: 210px; }
+  height: 750px; }
 
 #cohort-details .case-trees .spinner, #cohort-details .user-data-trees .spinner, #cohort-filelist .case-trees .spinner, #cohort-filelist .user-data-trees .spinner {
   position: absolute;
