@@ -914,8 +914,7 @@ require([
         $('#cases_tab').data('updatechildtables',updateChildTables);
         if ($('#cases_tab_wrapper').find('.dataTables_controls').length>0){
             pageRows = parseInt($('#cases_tab_wrapper').find('.dataTables_length select').val());
-        }
-        else {
+        } else {
             pageRows = 10;
         }
         $('#cases_tab').DataTable().destroy();
@@ -948,7 +947,7 @@ require([
                     {className: "ckbx", "targets": [0]},
                     {className: "col1 project-name", "targets": [1]},
                     {className: "col1 case-id", "targets": [2]},
-                    {className: "col1 numrows", "targets": [3]},
+                    {className: "col1 numrows study-count", "targets": [3]},
                     {className: "col1", "targets": [4]},
                 ],
                 "columns": [
@@ -1196,7 +1195,7 @@ require([
                     {className: "col2 study-id study-id-col study-id-tltp", "targets": [2]},
                     {className: "col1 study-date", "targets": [3]},
                     {className: "col1 study-description", "targets": [4]},
-                    {className: "col1 numrows", "targets": [5]},
+                    {className: "col1 numrows series-count", "targets": [5]},
                     {className: "ohif open-viewer", "targets": [6]},
                     {className: "download", "targets": [7]},
 
@@ -1300,8 +1299,9 @@ require([
                     }, {
                           "type":"html",
                           "orderable": false,
-                          data: 'StudyInstanceUID', render: function (data){
-                              return '<i class="fa fa-download study-export" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
+                          data: 'StudyInstanceUID', render: function (data, type, row){
+                              return '<i class="fa fa-download study-export" data-series-count="'+row['unique_series']
+                                  +'" data-uid="'+data+'"data-toggle="modal" data-target="#export-manifest-modal"></i>'
                           }
 
                       }
@@ -1895,6 +1895,7 @@ require([
                     let file_parts_count = (is_cohort ? cohort_file_parts_count : data.totals.file_parts_count);
                     let display_file_parts_count = (is_cohort ? cohort_display_file_parts_count : data.totals.display_file_parts_count);
                     let isFiltered = Boolean($('#search_def p').length > 0);
+                    $('#search_def_stats').attr('filter-series-count',data.totals.SeriesInstanceUID);
                     if(data.totals.SeriesInstanceUID > 65000) {
                         $('#s5cmd-max-exceeded').show();
                         $('#download-s5cmd').attr('disabled','disabled');

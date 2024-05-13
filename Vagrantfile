@@ -33,6 +33,7 @@ Vagrant.configure(2) do |config|
   # WebApp ports
   config.vm.network "forwarded_port", guest: 8086, host: 8086
   config.vm.network "forwarded_port", guest: 8006, host: 8006
+  config.vm.network "forwarded_port", guest: 22, host: 2200, id: "ssh"
 
   config.vm.synced_folder ".", "/home/vagrant/www"
   config.vm.synced_folder "../", "/home/vagrant/parentDir"

@@ -71,28 +71,37 @@ require([
         }
     });
 
-    var update_export_modal_for_mini= function(button){
+    var update_export_modal_for_mini = function(button){
 
         var title='';
         var filterNm='';
         var mini_type='';
         var name_base='';
 
+        $('.manifest-s5cmd a').trigger('click');
+
+        if (button.hasClass('series-export') || parseInt(button.data('series-count')) < 65000) {
+            $('#s5cmd-max-exceeded').hide();
+            $('#s5cmd-button-wrapper').removeClass('manifest-disabled');
+            $('#download-s5cmd').removeAttr('disabled');
+        } else {
+            $('#s5cmd-max-exceeded').show();
+            $('#download-s5cmd').attr('disabled','disabled');
+            $('#s5cmd-button-wrapper').addClass('manifest-disabled');
+        }
+
         if (button.hasClass('series-export')) {
             title = 'Series Export';
             filterNm = 'Series InstanceUID';
             mini_type = 'series';
             name_base='series_manifest';
-
             $('#export-manifest-form').append('<input type="hidden" name="aws">')
             $('#export-manifest-modal').find('input[name="aws"]').val(button.parent().parent().data('aws'));
             $('#export-manifest-form').append('<input type="hidden" name="gcs">')
             $('#export-manifest-modal').find('input[name="gcs"]').val(button.parent().parent().data('gcs'));
             $('#export-manifest-form').append('<input type="hidden" name="crdc">')
             $('#export-manifest-modal').find('input[name="crdc"]').val(button.parent().parent().data('crdc'));
-
-        }
-        else if (button.hasClass('study-export')) {
+        } else if (button.hasClass('study-export')) {
             title = 'Study Export';
             filterNm = 'StudyInstanceUID';
             mini_type = 'study';
@@ -122,8 +131,7 @@ require([
         if (button.hasClass('series-export')) {
             $('#export-manifest-form').find('#s5cmd-header-fields-container').hide();
             $('#export-manifest-form').find('#download-s5cmd').hide();
-        }
-        else if (button.hasClass('study-export')) {
+        } else if (button.hasClass('study-export')) {
             $('#s5cmd-header-fields').find('input[value="cohort_name"]').parent().hide();
             $('#s5cmd-header-fields').find('input[value="user_email"]').parent().hide();
         }
@@ -133,7 +141,7 @@ require([
     $('#export-manifest-modal').on('hide.bs.modal', function() {
         $('input').removeAttr('name-base');
         if ($('#export-manifest-modal').find('input[name="mini"]').length>0){
-            reset_after_mini()
+            reset_after_mini();
         }
     });
 
@@ -144,7 +152,7 @@ require([
       $('#export-manifest-modal').find('input[name="aws"]').remove();
       $('#export-manifest-modal').find('input[name="gcs"]').remove();
 
-      var filt_str=$('#export-manifest-form').find('input[name="filters"]').val()
+      var filt_str = $('#export-manifest-form').find('input[name="filters"]').val()
         var filters=JSON.parse(filt_str);
       if ('StudyInstanceUID' in filters){
           delete filters['StudyInstanceUID']
@@ -160,6 +168,16 @@ require([
       $('#s5cmd-header-fields').find('input[value="user_email"]').parent().show();
       $('.modal-title').text('Export Manifest');
       $('#manifest-source').text('manifest');
+
+      if ($('#search_def_stats').attr('filter-series-count') > 65000) {
+            $('#s5cmd-max-exceeded').show();
+            $('#download-s5cmd').attr('disabled','disabled');
+            $('#s5cmd-button-wrapper').addClass('manifest-disabled');
+      } else {
+            $('#s5cmd-max-exceeded').hide();
+            $('#s5cmd-button-wrapper').removeClass('manifest-disabled');
+            $('#download-s5cmd').removeAttr('disabled');
+        }
     }
 
     $('#download-csv').on('click', function(e) {
@@ -320,9 +338,8 @@ require([
     var update_download_manifest_buttons = function(clicked){
 
         if(clicked) {
-            let cohort_row = null, inactives = false;
-            cohort_row = clicked.parents('tr');
-            inactives = (cohort_row.data('inactive-versions') === "True");
+            let cohort_row = clicked.parents('tr'),
+                inactives = (cohort_row.data('inactive-versions') === "True");
             if(inactives) {
                 $('.manifest-bq a').trigger('click');
                 $('.manifest-button-wrapper a, .file-manifest-button-wrapper a').attr('disabled', 'disabled');
