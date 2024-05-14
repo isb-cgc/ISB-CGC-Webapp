@@ -24,7 +24,7 @@ gsutil cp "gs://${DEPLOYMENT_BUCKET}/${SOLR_PEM_FILE}" ./solr-ssl.pem
 gsutil cp "gs://${DEPLOYMENT_BUCKET}/${DISPATCH_YAML}" ./dispatch.yaml
 
 gsutil cp "gs://${DEPLOYMENT_BUCKET}/${STATIC_COMMIT_CHECK_FILE}" ./
-
+ 
 # Pack staged files for caching
 echo "Packing JSON and text files for caching into deployment..."
 cp --verbose *.json ./json
