@@ -28,5 +28,6 @@ def additional_context(request):
             'STORAGE_URI': settings.GCS_STORAGE_URI,
             'DCF_MONITORING_SA': settings.DCF_MONITORING_SA,
             'DCF_TEST': settings.DCF_TEST,
-            'FILE_SIZE_UPLOAD_MAX': settings.FILE_SIZE_UPLOAD_MAX
+            'FILE_SIZE_UPLOAD_MAX': settings.FILE_SIZE_UPLOAD_MAX,
+            'CONTACT_EMAIL': settings.SERVER_EMAIL
     }
