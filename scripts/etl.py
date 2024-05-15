@@ -89,7 +89,7 @@ SOLR_SINGLE_VAL = {
 
 PREFORMATTED_ATTRS = ["disease_type_gdc","disease_type_pdc", "primary_diagnosis_gdc","primary_site_gdc",
                       "primary_diagnosis_pdc","primary_site_pdc", "progression_or_recurrence","disease_code",
-                      "program_name","project_short_name","ethnicity","morphology","tumor_grade",
+                      "program_name","project_short_name_pdc","project_short_name_gdc","ethnicity","morphology","tumor_grade",
                       "last_known_disease_status","site_of_resection_or_biopsy","tissue_or_organ_of_origin_gdc",
                       "tissue_or_organ_of_origin_pdc", "node", "bmi","country","hist_subtype","histological_type",
                       "histology","neoplasm_histologic_grade", "pathologic_stage","residual_tumor","site_primary",
