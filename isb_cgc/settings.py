@@ -419,6 +419,7 @@ INSTALLED_APPS += (
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'allauth.mfa',
     'rest_framework.authtoken')
 
 # Template Engine Settings
