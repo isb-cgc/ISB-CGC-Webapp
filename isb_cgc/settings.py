@@ -86,43 +86,13 @@ DCF_REFRESH_LOG_NAME = os.environ.get('DCF_REFRESH_LOG_NAME', 'local_dev_logging
 DCF_SA_REG_LOG_NAME = os.environ.get('DCF_SA_REG_LOG_NAME', 'local_dev_logging')
 
 BASE_URL                = os.environ.get('BASE_URL', 'https://dev.isb-cgc.org')
-BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-dev.isb-cgc.org/v4')
+BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dev.isb-cgc.org/v4')
 
 # Data Buckets
 OPEN_DATA_BUCKET        = os.environ.get('OPEN_DATA_BUCKET', '')
 GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET')
 
-# BigQuery cohort storage settings
-BIGQUERY_CGC_TABLE_ID    = os.environ.get('BIGQUERY_CGC_TABLE_ID', '')
-BQ_FILE_MANIFEST_TABLE_ID_HG19 = os.environ.get('BQ_FILE_MANIFEST_TABLE_ID_HG19', '')
-BQ_FILE_MANIFEST_TABLE_ID_HG38 = os.environ.get('BQ_FILE_MANIFEST_TABLE_ID_HG38', '')
-
-BQ_TCGA_BIOCLIN_TABLE_ID = os.environ.get('BQ_TCGA_BIOCLIN_TABLE_ID', '')
-BQ_TARGET_BIOCLIN_TABLE_ID = os.environ.get('BQ_TARGET_BIOCLIN_TABLE_ID', '')
-BQ_CCLE_BIOCLIN_TABLE_ID = os.environ.get('BQ_CCLE_BIOCLIN_TABLE_ID', '')
-BQ_BEATAML_BIOCLIN_TABLE_ID = os.environ.get('BQ_BEATAML_BIOCLIN_TABLE_ID', '')
-BQ_FM_BIOCLIN_TABLE_ID = os.environ.get('BQ_FM_BIOCLIN_TABLE_ID', '')
-BQ_OHSU_BIOCLIN_TABLE_ID = os.environ.get('BQ_OHSU_BIOCLIN_TABLE_ID', '')
-BQ_MMRF_BIOCLIN_TABLE_ID = os.environ.get('BQ_MMRF_BIOCLIN_TABLE_ID', '')
-BQ_GPRP_BIOCLIN_TABLE_ID = os.environ.get('BQ_GPRP_BIOCLIN_TABLE_ID', '')
-
 MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
-
-BQ_FILE_MANIFEST_TABLE_ID = {
-    'HG19': BQ_FILE_MANIFEST_TABLE_ID_HG19,
-    'HG38': BQ_FILE_MANIFEST_TABLE_ID_HG38
-}
-
-BQ_PROG_BIOCLIN_TABLE_ID = {
-    'TCGA': BQ_TCGA_BIOCLIN_TABLE_ID,
-    'TARGET': BQ_TARGET_BIOCLIN_TABLE_ID,
-    'CCLE': BQ_CCLE_BIOCLIN_TABLE_ID,
-    'BEATAML1.0': BQ_BEATAML_BIOCLIN_TABLE_ID,
-    'FM': BQ_FM_BIOCLIN_TABLE_ID,
-    'OHSU': BQ_OHSU_BIOCLIN_TABLE_ID,
-    'MMRF': BQ_MMRF_BIOCLIN_TABLE_ID,
-    'GPRP': BQ_GPRP_BIOCLIN_TABLE_ID
-}
 
 database_config = {
     'default': {
@@ -263,9 +233,9 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 
-SECURE_HSTS_INCLUDE_SUBDOMAINS = (os.environ.get('SECURE_HSTS_INCLUDE_SUBDOMAINS','True') == 'True')
-SECURE_HSTS_PRELOAD = (os.environ.get('SECURE_HSTS_PRELOAD','True') == 'True')
-SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS','3600'))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = (os.environ.get('SECURE_HSTS_INCLUDE_SUBDOMAINS', 'True') == 'True')
+SECURE_HSTS_PRELOAD = (os.environ.get('SECURE_HSTS_PRELOAD', 'True') == 'True')
+SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '3600'))
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -276,6 +246,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'adminrestrict.middleware.AdminPagesRestrictMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'isb_cgc.password_expiration.PasswordExpireMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -311,8 +282,8 @@ INSTALLED_APPS = (
 #############################
 
 INSTALLED_APPS += ('session_security',)
-SESSION_SECURITY_WARN_AFTER = int(os.environ.get('SESSION_SECURITY_WARN_AFTER','540'))
-SESSION_SECURITY_EXPIRE_AFTER = int(os.environ.get('SESSION_SECURITY_EXPIRE_AFTER','600'))
+SESSION_SECURITY_WARN_AFTER = int(os.environ.get('SESSION_SECURITY_WARN_AFTER', '540'))
+SESSION_SECURITY_EXPIRE_AFTER = int(os.environ.get('SESSION_SECURITY_EXPIRE_AFTER', '600'))
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 MIDDLEWARE.append(
     # for django-session-security -- must go *after* AuthenticationMiddleware
@@ -419,6 +390,7 @@ INSTALLED_APPS += (
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'allauth.mfa',
     'rest_framework.authtoken')
 
 # Template Engine Settings
@@ -478,11 +450,15 @@ ACCOUNT_USERNAME_REQUIRED = bool(os.environ.get('ACCOUNT_USERNAME_REQUIRED', 'Fa
 ACCOUNT_EMAIL_VERIFICATION = os.environ.get('ACCOUNT_EMAIL_VERIFICATION', 'mandatory').lower()
 ACCOUNT_USER_DISPLAY = lambda user: user.email
 
-ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Cancer Genomic Cloud] "
-ACCOUNTS_PASSWORD_EXPIRATION = os.environ.get('ACCOUNTS_PASSWORD_EXPIRATION', 120) # Max password age in days
-ACCOUNTS_PASSWORD_EXPIRATION_WARN = os.environ.get('ACCOUNTS_PASSWORD_EXPIRATION_WARN', (14 * 24 * 60 * 60)) # Time to warn for password expiration in seconds
-ACCOUNTS_PASSWORD_HISTORY = os.environ.get('ACCOUNTS_PASSWORD_HISTORY', 5) # Max password history kept
-ACCOUNTS_ALLOWANCES = list(set(os.environ.get('ACCOUNTS_ALLOWANCES','').split(',')))
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[ISB Cancer Genomic Cloud] "
+# Max password age in days
+ACCOUNTS_PASSWORD_EXPIRATION = os.environ.get('ACCOUNTS_PASSWORD_EXPIRATION', 120)
+# Time to warn for password expiration in seconds
+ACCOUNTS_PASSWORD_EXPIRATION_WARN = os.environ.get('ACCOUNTS_PASSWORD_EXPIRATION_WARN', (14 * 24 * 60 * 60))
+# Max password history kept
+ACCOUNTS_PASSWORD_HISTORY = os.environ.get('ACCOUNTS_PASSWORD_HISTORY', 5)
+# Special system accounts which bypass various requirements
+ACCOUNTS_ALLOWANCES = list(set(os.environ.get('ACCOUNTS_ALLOWANCES', '').split(',')))
 
 ACCOUNT_FORMS = {
     'reset_password': 'isb_cgc.forms.CgcResetPassword',
@@ -703,9 +679,9 @@ TP53_URL = os.environ.get('TP53_URL', 'https://tp53.isb-cgc.org/')
 ##########################
 # OAUTH PLATFORM         #
 ##########################
-IDP        = os.environ.get('IDP', 'fence')
+IDP = os.environ.get('IDP', 'fence')
 # RAS TOKEN MAX LIFE 25 DAYS
 DCF_UPSTREAM_EXPIRES_IN_SEC = os.environ.get('DCF_UPSTREAM_EXPIRES_IN_SEC', '1296000')
 DCF_REFRESH_TOKEN_EXPIRES_IN_SEC = os.environ.get('DCF_REFRESH_TOKEN_EXPIRES_IN_SEC', '2592000')
 
-SUPPORT_EMAIL=os.environ.get('SUPPORT_EMAIL','')
+SUPPORT_EMAIL = os.environ.get('SUPPORT_EMAIL', '')

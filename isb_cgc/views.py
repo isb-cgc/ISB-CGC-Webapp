@@ -20,13 +20,14 @@ import logging
 import time
 import sys
 import re
-import datetime
+from datetime import datetime, timezone, timedelta
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
+from allauth.mfa.models import Authenticator
 from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -65,9 +66,11 @@ BQ_ECOSYS_BUCKET = settings.BQ_ECOSYS_STATIC_URL
 CITATIONS_BUCKET = settings.CITATIONS_STATIC_URL
 IDP = settings.IDP
 
+
 def _needs_redirect(request):
     appspot_host = '^.*{}\.appspot\.com.*$'.format(settings.GCLOUD_PROJECT_ID.lower())
     return re.search(appspot_host, request.META.get('HTTP_HOST', '')) and not re.search(appspot_host, settings.BASE_URL)
+
 
 def convert(data):
     # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
@@ -114,7 +117,7 @@ def _decode_dict(data):
 @never_cache
 def landing_page(request):
 
-    logger.info("[STATUS] Received landing page view request at {}".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+    logger.info("[STATUS] Received landing page view request at {}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
     return render(request, 'isb_cgc/landing.html', {'mitelman_url': settings.MITELMAN_URL, 'tp53_url': settings.TP53_URL })
 
 
@@ -246,8 +249,21 @@ def extended_login_view(request):
         st_logger.write_text_log_entry(
             log_name,
             "[WEBAPP LOGIN] User {} logged in to the web application at {}".format(user.email,
-                                                                                   datetime.datetime.utcnow())
+                                                                                   datetime.utcnow())
         )
+
+        # If a user does not have MFA set up, prompt them to do so
+        try:
+            auth = Authenticator.objects.get(user=request.user, type="totp")
+            # If they do, make sure they've re-authed in the last 30 days
+            if auth.last_used_at is None:
+                logger.info("[STATUS] Redirecting user {} for MFA authentication".format(request.user.email))
+                return redirect(reverse('mfa_authenticate'))
+            elif (datetime.now(timezone.utc)).date() > (auth.last_used_at.date()+timedelta(days=30)):
+                logger.info("[STATUS] Redirecting user {} for MFA re-authentication".format(request.user.email))
+                return redirect(reverse('mfa_reauthenticate'))
+        except ObjectDoesNotExist as e:
+            return redirect(reverse('mfa_activate_totp'))
 
         # If user logs in for the second time, or user has not completed the survey, opt-in status changes to NOT_SEEN
         user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=user).first()
@@ -757,7 +773,7 @@ def opt_in_form_submitted(request):
                     "affiliation": affiliation,
                     "subscribed": subscribed,
                     "feedback": feedback,
-                    "submitted_time": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                    "submitted_time": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
                 }
                 BigQueryFeedbackSupport.add_rows_to_table([feedback_row])
                 # send a notification to feedback@isb-cgc.org about the entry

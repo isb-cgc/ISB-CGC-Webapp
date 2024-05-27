@@ -112,6 +112,7 @@ SOLR_LOGIN = settings.SOLR_LOGIN
 SOLR_PASSWORD = settings.SOLR_PASSWORD
 SOLR_CERT = settings.SOLR_CERT
 
+
 def new_attribute(name, displ_name, type, display_default, preformatted_values=False, units=None, programs=None, nodes=None):
     return {
         'name': name,
@@ -280,7 +281,7 @@ def inactivate_data_versions(major, subv):
             logger.warning("[WARNING] Could not de-active major version {}: it was not found!".format(mv))
         except Exception as e:
             logger.error("[ERROR] While deactivating major version {} :".format(mv))
-            logger.exceiption(e)
+            logger.exception(e)
 
     for dv in subv:
         try:
