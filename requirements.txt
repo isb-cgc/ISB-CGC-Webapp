@@ -7,6 +7,7 @@ django-anymail[mailgun]
 django-dotenv==1.4.2
 django-finalware==1.0.0
 djangorestframework==3.11.2
+django-otp
 django-session-security==2.6.5
 ecdsa==0.13.3
 future==0.18.3
