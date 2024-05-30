@@ -27,7 +27,6 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
-from allauth.mfa.models import Authenticator
 from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -48,6 +47,7 @@ from projects.models import Program
 from accounts.models import UserOptInStatus
 from accounts.sa_utils import get_nih_user_details
 from allauth.socialaccount.models import SocialAccount
+from django_otp.plugins.otp_email.models import EmailDevice
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
 from google_helpers.bigquery.feedback_support import BigQueryFeedbackSupport
@@ -251,19 +251,6 @@ def extended_login_view(request):
             "[WEBAPP LOGIN] User {} logged in to the web application at {}".format(user.email,
                                                                                    datetime.utcnow())
         )
-
-        # If a user does not have MFA set up, prompt them to do so
-        try:
-            auth = Authenticator.objects.get(user=request.user, type="totp")
-            # If they do, make sure they've re-authed in the last 30 days
-            if auth.last_used_at is None:
-                logger.info("[STATUS] Redirecting user {} for MFA authentication".format(request.user.email))
-                return redirect(reverse('mfa_authenticate'))
-            elif (datetime.now(timezone.utc)).date() > (auth.last_used_at.date()+timedelta(days=30)):
-                logger.info("[STATUS] Redirecting user {} for MFA re-authentication".format(request.user.email))
-                return redirect(reverse('mfa_reauthenticate'))
-        except ObjectDoesNotExist as e:
-            return redirect(reverse('mfa_activate_totp'))
 
         # If user logs in for the second time, or user has not completed the survey, opt-in status changes to NOT_SEEN
         user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=user).first()

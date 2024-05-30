@@ -1,7 +1,6 @@
 cryptography==42.0.4
 django==3.2.25
 django-allauth==0.63.1
-django-allauth[mfa]
 django-allauth[socialaccount]
 django-anymail[mailgun]
 django-dotenv==1.4.2

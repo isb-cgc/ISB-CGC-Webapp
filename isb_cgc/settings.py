@@ -243,6 +243,7 @@ SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '3600'))
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'isb_cgc.domain_redirect_middleware.DomainRedirectMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'isb_cgc.checkreqsize_middleware.CheckReqSize',
@@ -251,7 +252,8 @@ MIDDLEWARE = [
     'django_otp.middleware.OTPMiddleware',
     'adminrestrict.middleware.AdminPagesRestrictMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
+    'django_otp.middleware.OTPMiddleware',
     'isb_cgc.password_expiration.PasswordExpireMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -272,11 +274,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
-    'django_otp',
-    'django_otp.plugins.otp_static',
-    'django_otp.plugins.otp_totp',
-    'django_otp.plugins.otp_hotp',
-    'django_otp.plugins.otp_email',
     'anymail',
     'isb_cgc',
     'sharing',
@@ -400,9 +397,11 @@ INSTALLED_APPS += (
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
-    'allauth.mfa',
-    'rest_framework.authtoken'
-)
+    'django_otp',
+    'django_otp.plugins.otp_static',
+    'django_otp.plugins.otp_totp',
+    'django_otp.plugins.otp_email',
+    'rest_framework.authtoken')
 
 # Template Engine Settings
 TEMPLATES = [
