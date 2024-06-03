@@ -386,7 +386,12 @@ tr {
     display: table;
     width: 100%; }
 
-#projects_table td.ckbx, #projects_table_head th.ckbx,
+#projects_table td.cartnum, #projects_table_head th.cartnum{
+    width: 7%;
+    word-wrap: break-word;
+}
+
+#projects_table td.ckbx:not(.cartnum), #projects_table_head th.ckbx:not(.cartnum),
 #cases_table_head th.ckbx, #cases_table_head th.shop, #cases_table td.ckbx, #cases_table td.shop,
 #series_table_head th.ckbx, #series_table td.ckbx,
 #studies_table_head th.ckbx, #studies_table td.ckbx {
@@ -583,14 +588,20 @@ svg {
 
  */
 .ckbx:has(.fa-cart-shopping) {
-    border-color:grey;
-    border-width:2px;
-    border-style:solid;
+    #border: solid 1px #000;
+    border-radius: 15px;
+    padding: 10px;
+    box-shadow: inset 0 0 0 0.5px grey;
+
+}
+
+.ckbx:has(.fa-caret-right){
+  font-size:25px;
 }
 
 
- */
- */
+
+
 .more-checks {
     min-height: 19px;
 }
@@ -624,20 +635,27 @@ td.cartnum.incart{
 }
 
 tr:not(.someInCart) .ckbx:has(.fa-cart-shopping){
-    background-color:transparent
+    background-color:transparent;
+
 }
 
 
 tr.someInCart:not(.extraInFilt) .ckbx:has(.fa-cart-shopping){
     background-color:green;
+
 }
 
 tr.someInCart.extraInFilt .ckbx:has(.fa-cart-shopping){
     background-color:yellow;
+
 }
 
 tr:not(.extraInCart) .fa-plus{
    display: none !important;
+}
+
+tr:(.extraInCart) .fa-plus{
+   display: inline-block !important;
 }
 
 
@@ -676,6 +694,7 @@ tr:not(.extraInCart) .fa-plus{
 
 td.cartnum{
     background-color:lightgrey;
+    border-radius: 15px;
     /* color: white; */
 
 }

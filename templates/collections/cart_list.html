@@ -40,14 +40,14 @@
 
                     </colgroup>
                     <tbody>
-                        {% for item in series_list %}
+                        {% for item in docs %}
 
                             <tr>
                                 <td><input type="checkbox"></td>
-                                <td>{{ item.0 }}</td>
-                                <td>{{ item.1 }}</td>
-                                <td>{{ item.2 }}</td>
-                                <td>{{ item.3 }}</td>
+                                <td>{{ item.collection_id }}</td>
+                                <td>{{ item.PatientID }}</td>
+                                <td>{{ item.StudyInstanceUID }}</td>
+                                <td>{{ item.SeriesInstanceUID }}</td>
                             </tr>
 
                         {% endfor %}
@@ -62,3 +62,7 @@
 {% include 'share/site_footer.html' with hide="False" %}
 {% endblock %}
 
+{% block js_file %}
+    {{ docs|json_script:"docs" }}
+<script type="text/javascript" src="{% static 'js/cart_page.js' %}?v={{ APP_VERSION }}"></script>
+{% endblock %}

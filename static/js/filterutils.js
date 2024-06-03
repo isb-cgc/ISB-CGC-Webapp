@@ -676,14 +676,17 @@ define(['jquery', 'utils'], function($, utils) {
             var mxstudies = 0;
             var mxseries = 0;
 
-            for (projId in window.selProjects){
-                if (('someInCart' in window.selProjects[projId]) && (window.selProjects[projId]['someInCart'])){
-                    projArr.push(projId);
-                    mxstudies +=window.selProjects[projId]['mxstudies'];
-                    mxseries +=window.selProjects[projId]['mxseries'];
-
+            for (var projid in window.projstudymp) {
+                for (var studyid in window.projstudymp[projid]) {
+                    if ( studyid in window.glblcart) {
+                    projArr.push(projid);
+                    mxstudies += window.selProjects[projid]['mxstudies'];
+                    mxseries += window.selProjects[projid]['mxseries'];
+                    break;
+                   }
                 }
             }
+
             var serverdata = [updateFacetsData(true)];
             if (projArr.length>0)
             {

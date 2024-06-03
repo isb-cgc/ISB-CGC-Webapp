@@ -127,6 +127,23 @@ require([
             success: function (data) {
                 try {
 
+                     let curInd = window.cartHist.length-1;
+                    if (cartHist[curInd].selections.length>0){
+                        //updateGlobalPartitions(window.cartHist[curInd]);
+                        let cartSel = new Object();
+                        cartSel['filter']= parsedFiltObj;
+                        cartSel['selections']= new Array();
+                        cartSel['partitions']= new Array();
+                        window.cartHist.push(cartSel);
+                    }
+                    else{
+                        window.cartHist[curInd]['filter'] = parsedFiltObj;
+                    }
+                    window.cartDetails = cartDetails+'Step '+window.cartStep.toString()+'. Changed filter definition to '+JSON.stringify(parsedFiltObj)+'\n\n'
+                    window.cartStep++;
+
+
+
                     tables.updateCollectionTotals('Program', data.programs);
                     dicofdic = {'unfilt': data.origin_set.All.attributes, 'filt': ''}
                     var isFiltered = Boolean($('#search_def p').length > 0);
@@ -597,7 +614,7 @@ require([
             let nhs = {'his':JSON.stringify(hs)}
             let csrftoken = $.getCookie('csrftoken');
             let deferred = $.Deferred();
-
+           /*
             $.ajax({
                 url: url,
                 data: nhs,
@@ -614,7 +631,9 @@ require([
                     deferred.resolve();
                 }
             });
+        */
         });
+
 
 
         initSort('num');

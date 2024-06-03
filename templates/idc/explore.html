@@ -80,13 +80,13 @@
             </button>
 
 
-            <button id="export-manifest" class="btn btn-special pull-right" data-toggle="modal"
+
+        <button id="export-manifest-cart" class="btn btn-special pull-right cart-export"  disabled="disabled" data-toggle="modal"
                 data-target="#export-manifest-modal"
-                title="Select a filter to enable this feature."
-            > Download Cart Images
+                title="Make a cart selection to enable this feature."> Download Cart Images
             </button>
 
-            <button id="view-cart" class="btn btn-special pull-right" onclick="window.viewcart()">View Cart</button>
+            <button id="view-cart" class="btn btn-special pull-right"  onclick="window.viewcart()">View Cart</button>
         </div>
     </div>
 {% endblock %}
@@ -132,6 +132,22 @@
         window.selProjects= new Object();
         window.cart= new Object();
         window.glblcart = new Object();
+
+        window.cartHist = new Array();
+        window.cartDetails = 'Cart Selection History \n\nStep 0. Initial filter definition is {}\n\n';
+        window.cartStep=1;
+
+        window.partitions= new Array();
+
+        let cartSel = new Object();
+        cartSel['filter']=new Object();
+        cartSel['selections']= new Array();
+        cartSel['partitions']= new Array();
+        window.cartHist.push(cartSel);
+        window,partitions = new Array();
+
+
+
         window.crdcmp= new Object()
         window.seriesmp=new Object();
         window.projstudymp = new Object();
@@ -207,4 +223,5 @@
     <script type="text/javascript" src="{% static 'js/explore.js' %}?v={{ APP_VERSION }}"></script>
     <script type="text/javascript" src="{% static 'js/bq-string.js' %}?v={{ APP_VERSION }}"></script>
     <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}?v={{ APP_VERSION }}"></script>
+
 {% endblock %}

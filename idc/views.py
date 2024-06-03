@@ -36,7 +36,7 @@ from django.utils.html import escape
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
 from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute, Attribute_Tooltips, DataSetType
-from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata, create_file_manifest
+from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata, create_file_manifest, get_cart_data
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, JsonResponse
@@ -192,7 +192,7 @@ def extended_login_view(request):
         st_logger.write_text_log_entry(
             log_name,
             "[WEBAPP LOGIN] User {} logged in to the web application at {}".format(user.email,
-                                                                                   datetime.datetime.utcnow())
+                                                                             datetime.datetime.utcnow())
         )
 
     except Exception as e:
@@ -245,68 +245,52 @@ def getCartData(request):
         aggregate_level="StudyInstanceUID"
     )
 
+
+#def compcartsets(carthist, sel):
+  
+
+def cartsets(carthist):
+    cartsets = []
+
+    for cartfiltset in carhist:
+        for selection in cartfiltset:
+            sel = selection['sel']
+
+
+
 def cart(request):
     response={}
-    context = {'request': request}
-    series_list=[]
-    projMp={};
-    caseid={};
     status=200
+    field_list=['collection_id', 'PatientID', 'StudyInstanceUID', 'SeriesInstanceUID']
     try:
        req = request.GET if request.GET else request.POST
-       glblcart = json.loads(req.get('glblcart', '{}'))
-       seriesmp = json.loads(req.get('seriesmp', '{}'))
-       for studyid in seriesmp:
-           if studyid in glblcart:
-               mp=seriesmp[studyid]
-               projid = mp['proj']
-               caseid = mp['PatientID']
-               if not projid in projMp:
-                   projMp[projid]={}
-               if not caseid in projMp[projid]:
-                   projMp[projid][caseid]={}
-               if glblcart[studyid]['all']:
-                   projMp[projid][caseid][studyid]=seriesmp[studyid]['val']
-               else:
-                   projMp[projid][caseid][studyid] = glblcart[studyid]['sel']
+       partitions = json.loads(req.get('partitions', '{}'))
+       filtlist = json.loads(req.get('filtlist', '{}'))
+       limit = json.loads(req.get(limit, 1000))
+       offset = json.loads(req.get(offset, 0))
 
-       num= 0
-       cont = True
-       for projid in sorted(list(projMp.keys())):
-           prow = projMp[projid]
-           for caseid in sorted(list(prow.keys())):
-               crow = projMp[projid][caseid]
-               for studyid in sorted(list(crow.keys())):
-                   serList = sorted(projMp[projid][caseid][studyid])
-                   for ser in serList:
-                       series_list.append([projid, caseid, studyid, ser])
-                       num=num+1
-                       if num > 300:
-                          cont = False
-                          break
-                   if not cont:
-                       break
-               if not cont:
-                   break
-           if not cont:
-               break
+       get_cart_data(filtlist,partitions, field_list,limit, offset)
 
 
 
 
+
+
+       i=1
 
 
     except Exception as e:
-        logger.error("[ERROR] While attempting to populate the cart:")
+        logger.error("[ERROR] While attempting to populate the table:")
         logger.exception(e)
         messages.error(
            request,
-           "Encountered an error when attempting to populate the cart - please contact the administrator."
+           "Encountered an error when attempting to populate the page - please contact the administrator."
         )
         status = 400
 
-    context['series_list'] = series_list
-    return render(request, 'collections/cart_list.html', context)
+    return JsonResponse(response, status=status)
+
+
 
 # Method for obtaining the records displayed in the tables on the right-hand side of the explore data page
 #@login_required
@@ -370,18 +354,19 @@ def studymp(request):
           if not (studyid in study_proj):
             study_proj[studyid] = proj
 
-       for studyrow in idsEx['facets']['per_id']['buckets']:
-          studyid=studyrow['val']
-          cnt=studyrow['unique_series']
-          if (studyid in seriesmp):
-            seriesmp[studyid]['cnt']=cnt
-          if (studyid in study_patient):
-              patientid=study_patient[studyid]
-              studymp[studyid]=cnt
-              casestudymp[patientid][studyid]=cnt
-          if (studyid in study_proj):
-              proj = study_proj[studyid]
-              projstudymp[proj][studyid]=cnt
+       if (idsEx['facets']['count']>0):
+          for studyrow in idsEx['facets']['per_id']['buckets']:
+             studyid=studyrow['val']
+             cnt=studyrow['unique_series']
+             if (studyid in seriesmp):
+                seriesmp[studyid]['cnt']=cnt
+             if (studyid in study_patient):
+                 patientid=study_patient[studyid]
+                 studymp[studyid]=cnt
+                 casestudymp[patientid][studyid]=cnt
+             if (studyid in study_proj):
+                 proj = study_proj[studyid]
+                 projstudymp[proj][studyid]=cnt
 
 
        response["studymp"] = studymp
@@ -930,7 +915,22 @@ def about_page(request):
     return render(request, 'idc/about.html', {'request': request})
 
 def cart_page(request):
-    return render(request, 'idc/cart.html', {'request': request})
+    context = {'request': request}
+    field_list=["collection_id", "PatientID", "StudyInstanceUID","SeriesInstanceUID"]
+    try:
+        req = request.GET if request.GET else request.POST
+        filtergrp_list = json.loads(req.get('filtergrp_list', '{}'))
+        partitions = json.loads(req.get('partitions', '{}'))
+        limit = req.get('limit', 1000)
+        offset = req.get('offset', 0)
+        resp = get_cart_data(filtergrp_list, partitions, field_list, limit, offset)
+        context['resp'] = resp
+        context['docs'] = resp['docs']
+    except Exception as e:
+        logger.error("[ERROR] While loading cart:")
+        logger.exception(e)
+
+    return render(request, 'collections/cart_list.html', context)
 
 def test_page(request, mtch):
     pg=request.path[:-1]+'.html'

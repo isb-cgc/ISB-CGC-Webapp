@@ -131,27 +131,35 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         window.selProjects[projid]['totalSeries']=parseInt($(row).attr('totalseries'));
 
         var addingToCart;
-        if (('someInCart' in window.selProjects[data[0]]) && !('extraInFilt' in window.selProjects[data[0]]))
-        {
+        if (('someInCart' in window.selProjects[data[0]]) && !('extraInFilt' in window.selProjects[data[0]])) {
             //cart is green. pressing deletes
-            addingToCart= false;
+            addingToCart = false;
+            window.cartDetails = window.cartDetails+'Step '+window.cartStep+'. Removed any series from the cart for which the collection_id ="'+projid.toString()+'" and the respective study matches the current filter\n\n';
+            window.cartStep++;
+
             updateGlobalCart(addingToCart, window.selProjects[projid].studymp, 'project');
             updateTableCounts(1);
             var gtotals =getGlobalCounts();
-
             $('#cart_stats').html(
                 gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart") ;
             if (gtotals[0]>0){
-                $('#cart_stats').removeClass('notDisp');
-            }
-            else{
-                $('#cart_stats').addClass('notDisp');
-            }
-
+                    $('#cart_stats').removeClass('notDisp');
+                    $('#export-manifest-cart').removeAttr('disabled');
+                    $('#view-cart').removeAttr('disabled');
+                }
+                else{
+                    $('#cart_stats').addClass('notDisp');
+                    $('#export-manifest-cart').attr('disabled','disabled');
+                    $('#view-cart').attr('disabled','disabled');
+                }
         }
         else{
             // cart is clear or yellow
             addingToCart = true;
+            window.cartDetails = window.cartDetails+'Step '+window.cartStep+'. Added all series to the cart for which the collection_id ="'+projid.toString()+'" and the respective study matches the current filter\n\n';
+            window.cartStep++;
+
+
             updateProjStudyMp([projid], window.selProjects[projid]['mxstudies'], window.selProjects[projid]['mxseries']).then(function(){
                 updateGlobalCart(addingToCart, window.selProjects[projid].studymp, 'project');
                 updateTableCounts(1);
@@ -161,13 +169,23 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
 
                 if (gtotals[0]>0){
                     $('#cart_stats').removeClass('notDisp');
+                    $('#export-manifest-cart').removeAttr('disabled');
+                    $('#view-cart').removeAttr('disabled');
                 }
                 else{
                     $('#cart_stats').addClass('notDisp');
+                    $('#export-manifest-cart').attr('disabled','disabled');
+                    $('#view-cart').attr('disabled','disabled');
                 }
 
             })
         }
+        //var curInd = window.cartHist.length - 1;
+        var newSel = new Object();
+        newSel['added'] = addingToCart;
+        newSel['sel'] = [projid]
+        //window.cartHist[curInd]['selections'].push(newSel)
+        updateCartSelections(newSel);
 
     }
 
@@ -289,10 +307,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         }
         for (var i = 0; i < projidA.length; i++) {
             projid=projidA[i];
-            if (!('studymp' in window.selProjects[projid])) {
-
-                window.selProjects[projid]['studymp'] = {};
-            }
+            window.selProjects[projid]['studymp'] = {};
         }
         var csrftoken = $.getCookie('csrftoken');
         let deferred = $.Deferred();
@@ -443,17 +458,24 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                         window.casestudymp[caseid]={}
                     }
 
+
+                    /*
                     if (!(projid in window.projstudymp)){
                         window.projstudymp[projid]={}
                     }
+
                     if (!('studymp'  in window.selProjects[projid])){
                         window.selProjects[projid]['studymp'] ={};
                     }
+
+                     */
                     for (id in data['studyid']){
-                        window.selProjects[projid]['studymp'][id]=data['studyid'][id];
-                        window.projstudymp[projid][id]=data['studyid'][id];
+                        //window.selProjects[projid]['studymp'][id]=data['studyid'][id];
+                        //window.projstudymp[projid][id]=data['studyid'][id];
                         window.casestudymp[caseid][id]=data['studyid'][id];
                     }
+
+
 
 
                     var caseCount = updateProjectOrCaseRowCount([projid,caseid]);
@@ -505,10 +527,16 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                         {
                             //cart is green. pressing deletes
                             addingToCart= false;
+                            window.cartDetails = window.cartDetails+'Step '+window.cartStep+'. Removed any series from the cart for which the PatientID = "'+caseid.toString()+'" and the respective study matches the current filter\n\n';
+                            window.cartStep++;
+
                         }
                         else{
                             // cart is clear or yellow
                             addingToCart = true;
+                            window.cartDetails = window.cartDetails+'Step '+window.cartStep+'. Added all series to the cart for which the PatientID = "'+caseid.toString()+'" and the respective study matches the current filter\n\n';
+                            window.cartStep++;
+
                         }
                         updateGlobalCart(addingToCart, window.selProjects[projid].selCases[caseid].studymp, 'case');
                         updateTableCounts(1);
@@ -518,11 +546,24 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                         $('#cart_stats').html(
                         gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart") ;
                        if (gtotals[0]>0){
-                          $('#cart_stats').removeClass('notDisp');
-                       }
-                       else{
-                         $('#cart_stats').addClass('notDisp');
+                         $('#cart_stats').removeClass('notDisp');
+                         $('#export-manifest-cart').removeAttr('disabled');
+                         $('#view-cart').removeAttr('disabled');
                         }
+                       else{
+                        $('#cart_stats').addClass('notDisp');
+                        $('#export-manifest-cart').attr('disabled','disabled');
+                        $('#view-cart').attr('disabled','disabled');
+                       }
+
+                       //var curInd = window.cartHist.length - 1;
+                       var newSel = new Object();
+                       newSel['added'] = addingToCart;
+                       newSel['sel'] = [projid, caseid];
+                       updateCartSelections(newSel);
+                       //window.cartHist[curInd]['selections'].push(newSel);
+
+
                        });
 
                 },
@@ -727,15 +768,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                 }
             );
 
-            if ( ($('#cases_table').find('tr').length===0) ||  ($('#cases_table').find('.shopping-cart').filter('.unselected, .partselected').length>0)){
-                $('#cases_table_head').find('.shopping-cart').removeClass('selected');
-                $('#cases_table_head').find('.shopping-cart').addClass('unselected');
-            }
-            else{
-                $('#cases_table_head').find('.shopping-cart').addClass('selected');
-                $('#cases_table_head').find('.shopping-cart').removeClass('unselected');
 
-            }
 
         })
 
@@ -791,7 +824,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                             $(row).removeClass('extraInFilt');
 
                         } else {
-                            cnt += window.glblcart[data]['sel'].size;
+                            cnt += window.glblcart[studyid]['sel'].size;
                             $(row).addClass('extraInFilt');
                         }
                     }
@@ -825,10 +858,16 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                         {
                             //cart is green. pressing deletes
                             addingToCart= false;
+                            window.cartDetails = window.cartDetails+'Step '+window.cartStep+'. Removed any series from the cart for which the StudyInstanceUID ="'+studyid.toString()+'"\n\n';
+                            window.cartStep++;
+
                         }
                         else{
                             // cart is clear or yellow
                             addingToCart = true;
+                            window.cartDetails = window.cartDetails+'Step '+window.cartStep+'. Added all series to the cart for which the StudyInstanceUID = "'+studyid.toString()+'"\n\n';
+                            window.cartStep++;
+
                         }
                         var numSeries = window.selProjects[projid].selCases[caseid].selStudies[studyid].seriesmp['val'].length;
                         var mp=new Object();
@@ -840,11 +879,22 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                         $('#cart_stats').html(
                         gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart") ;
                        if (gtotals[0]>0){
-                          $('#cart_stats').removeClass('notDisp');
+                         $('#cart_stats').removeClass('notDisp');
+                         $('#export-manifest-cart').removeAttr('disabled');
+                         $('#view-cart').removeAttr('disabled');
                        }
-                       else{
+                      else{
                          $('#cart_stats').addClass('notDisp');
-                        }
+                         $('#export-manifest-cart').attr('disabled','disabled');
+                         $('#view-cart').attr('disabled','disabled');
+                      }
+
+                       //var curInd = window.cartHist.length - 1;
+                       var newSel = new Object();
+                       newSel['added'] = addingToCart;
+                       newSel['sel'] = [projid, caseid, studyid];
+                       updateCartSelections(newSel);
+                       //window.cartHist[curInd]['selections'].push(newSel);
 
                     });
 
@@ -1162,6 +1212,14 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                         if ($(elem).parentsUntil('tr').parent().hasClass('someInCart'))
                         {
                             addingToCart = false;
+                            window.cartDetails = window.cartDetails+'Step '+window.cartStep+'. Removed SeriesInstanceUID = "'+seriesid.toString()+'" from the cart\n\n';
+                            window.cartStep++;
+
+                        }
+                        else{
+                            window.cartDetails = window.cartDetails+'Step '+window.cartStep+'. Added SeriesInstanceUID = "'+seriesid.toString()+'" to the cart\n\n';
+                            window.cartStep++;
+
                         }
                         mp = new Object();
                         mp[studyid]=seriesid;
@@ -1173,12 +1231,22 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                         $('#cart_stats').html(
                         gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart") ;
                        if (gtotals[0]>0){
-                          $('#cart_stats').removeClass('notDisp');
-                       }
+                         $('#cart_stats').removeClass('notDisp');
+                         $('#export-manifest-cart').removeAttr('disabled');
+                         $('#view-cart').removeAttr('disabled');
+                         }
                        else{
                          $('#cart_stats').addClass('notDisp');
-                        }
+                         $('#export-manifest-cart').attr('disabled','disabled');
+                         $('#view-cart').attr('disabled','disabled');
+                     }
 
+                       //var curInd = window.cartHist.length - 1;
+                       var newSel = new Object();
+                       newSel['added'] = addingToCart;
+                       newSel['sel'] = [collection_id, PatientID, studyid, seriesid];
+                       //window.cartHist[curInd]['selections'].push(newSel);
+                       updateCartSelections(newSel);
 
                     });
 
@@ -1400,6 +1468,307 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
 
     }
 
+    updateCartSelections = function(newSel){
+        var curInd = window.cartHist.length - 1;
+        var selections = window.cartHist[curInd]['selections'];
+        var adding = newSel['added'];
+        var selection = newSel['sel'];
+        var selectionCancelled = false;
+        var redundant = false;
+        var newHistSel = new Array();
+        for (var i=0;i<selections.length;i++) {
+            var curselection = selections[i]['sel'];
+            var curAdded = selections[i]['added'];
+
+            if (curselection.length >= selection.length) {
+                var differenceFound = false;
+                for (var j = 0; j < selection.length; j++) {
+                    if (!(curselection[j] == selection[j])) {
+                        differenceFound = true;
+                        break;
+                    }
+                }
+                if (differenceFound){
+                    newHistSel.push(selections[i]);
+                }
+
+            }
+            else{
+                newHistSel.push(selections[i]);
+            }
+
+        }
+
+        newHistSel.push(newSel);
+
+        window.cartHist[curInd]['selections'] =  newHistSel;
+        window.cartHist[curInd]['partitions'] = mkOrderedPartitions(window.cartHist[curInd]['selections']);
+        //updateGlobalPartitions(window.cartHist[curInd]);
+    }
+
+    window.updateParitionsFromScratch =function(){
+        window.partitions = new Array();
+
+        for (var i=0;i<window.cartHist.length;i++){
+           var cartHist=window.cartHist[i];
+           updateGlobalPartitions(cartHist,i);
+        }
+        for (var i=0;i<window.cartHist.length;i++){
+           var cartHist=window.cartHist[i];
+           refilterGlobalPartitions(cartHist,i);
+        }
+        var filtStrings = createFiltStrings();
+        var solrStr = createSolrString(filtStrings);
+        window.solrStr = solrStr;
+        var ii=1;
+    }
+    updateGlobalPartitions= function(cartHist,cartnum){
+        var newparts = cartHist.partitions;
+        for (var i=0;i<newparts.length;i++){
+            var inserted = false;
+            var nxtpart=newparts[i];
+            var nxtlen = nxtpart.length;
+            var basefilt = new Array();
+            for (var j=0;j<window.partitions.length;j++){
+                var eql = true;
+                var lt = false;
+                curpart = window.partitions[j]['id'];
+                curpartlen = curpart.length;
+
+                var numcmp = Math.min(nxtpart.length, curpart.length);
+                for (k=0;k<numcmp;k++){
+                   if (nxtpart[k]<curpart[k]){
+                       lt = true;
+                       eql = false
+                       break;
+                   }
+                   else if (nxtpart[k]>curpart[k]){
+                       eql = false;
+                   }
+               }
+                if (lt || (eql && (nxtpart.length<curpart.length))){
+                   var insertInd=j;
+                   inserted = true;
+                   addNewPartition(nxtpart, insertInd, basefilt)
+                   break;
+               }
+                else if (eql && (nxtpart.length==curpart.length)){
+                 inserted = true;
+                 break;
+               }
+
+                else if (eql && (nxtpart.length==curpart.length+1)){
+                 window.partitions[j]['not'].push(nxtpart[nxtpart.length-1]);
+                 window.partitions[j]['not'].sort();
+                 for (var filtprt=0;filtprt<window.partitions[j]['filt'].length;filtprt++){
+                     var tmp = window.partitions[j]['filt'][filtprt];
+                     basefilt.push([...tmp])
+                 }
+               }
+
+            }
+            if (!inserted){
+               addNewPartition(nxtpart, -1, basefilt);
+           }
+        }
+
+    }
+    refilterGlobalPartitions= function(cartHist,cartnum){
+
+        var selections = cartHist['selections'];
+        var checkedA = new Array()
+        for (var i=0;i<selections.length;i++){
+            var ind = selections.length-(1+i);
+            var cursel = selections[ind];
+            var curid = cursel['sel'];
+            var added = cursel['added'];
+            for (var j=0;j<window.partitions.length;j++){
+                var part = window.partitions[j];
+                var partid = part['id'];
+                if ((checkedA.indexOf(j)<0) && (curid.length<=partid.length)) {
+                    var filt = part['filt'];
+                    //var nll = part['null'];
+                    var eq = true;
+                    for (var k=0; k<curid.length;k++){
+                        if (!(curid[k]==partid[k])){
+                            eq = false;
+                            break;
+                        }
+                    }
+                    if (eq){
+                        checkedA.push(j);
+                        if (added){
+                            part['filt'].push([cartnum]);
+                            part['null'] = false;
+                        }
+                        else if (!part['null']){
+                            for (var k=0;k<part['filt'].length;k++){
+                                part['filt'][k].push(cartnum);
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
+    }
+
+    createSolrString = function(filtStringA){
+        var solrStr=''
+        var solrA=[]
+        for (var i=0;i< window.partitions.length;i++){
+            var curPart = window.partitions[i];
+            if (!curPart['null']) {
+                var curPartAttStrA = parsePartitionAttStrings(filtStringA, curPart);
+                var curPartStr = parsePartitionStrings(curPart);
+                for (var j = 0; j < curPartAttStrA.length; j++) {
+                    if (curPartAttStrA[j].length > 0) {
+
+                    solrA.push('(' + curPartStr + ')(' + curPartAttStrA[j] + ')')
+                    }
+                    else{
+                        solrA.push(curPartStr);
+                    }
+                }
+            }
+        }
+        solrA = solrA.map(x => '('+x+')');
+       var solrStr = solrA.join(' OR ')
+        return solrStr
+    }
+
+    parsePartitionAttStrings = function(filtStringA, partition){
+        var attStrA =[];
+        var filt2D = partition['filt'];
+        for (var i=0; i<filt2D.length;i++){
+            filtL=filt2D[i];
+            var tmpA=[]
+            for (var j=0;j<filtL.length;j++){
+                var filtindex= filtL[j]
+                filtStr=filtStringA[filtindex];
+                if (filtStr.length>0){
+                    if (j==0){
+                        tmpA.push('('+filtStr+')')
+                    }
+                    else{
+                        tmpA.push('NOT ('+filtStr+')')
+                    }
+                }
+
+            }
+            attStrA.push(tmpA.join(' AND '))
+        }
+        return attStrA;
+    }
+
+    parsePartitionStrings = function(partition){
+        var filts = ['collection_id', 'PatientID', 'StudyInstanceUID','SeriesInstanceUID']
+        var id = partition['id']
+        var partStr='';
+        for (var i=0;i<id.length;i++){
+            partStr+='(+'+filts[i]+':("'+id[i]+'"))';
+        }
+        var not= partition['not'];
+        if (not.length>0){
+            not= not.map(x => '"'+x+'"');
+            var notStr= not.join(' OR ');
+            partStr=partStr+' AND NOT ('+filts[id.length]+':('+notStr+'))';
+        }
+        return partStr
+    }
+    createFiltStrings = function(){
+        var filtStrings = new Array();
+        var attA = [];
+        for (var i=0;i<window.cartHist.length;i++){
+            var filt= window.cartHist[i]['filter'];
+            filtkeys = Object.keys(filt);
+            var fstr=''
+            for (var j=0;j<filtkeys.length;j++) {
+                fkey = filtkeys[j];
+                //if (!(fkey == "collection_id")){
+                if (true){
+                    var nstr = '(+' + fkey + ':(';
+                   var attA = ('values' in filt[fkey] && (Array.isArray(filt[fkey]['values']))) ? filt[fkey]['values'] : filt[fkey];
+                   var op = ('op' in filt[fkey]) ? filt[fkey]['op'] : 'OR';
+                   attA = attA.map(x => '"' + x + '"')
+                   nstr = nstr + attA.join(' ' + op + ' ') + '))';
+                  fstr = fstr + nstr;
+               }
+            }
+            filtStrings.push(fstr);
+        }
+        return(filtStrings);
+    }
+
+    addNewPartition= function(part, pos, basefilt) {
+        newPart = new Object();
+        newPart['not'] = new Array();
+        newPart['id'] = [...part]
+        newPart['filt'] = basefilt;
+        newPart['null'] = true;
+        if (pos > -1) {
+           window.partitions.splice(pos, 0, newPart);
+         }
+        else{
+            window.partitions.push(newPart);
+        }
+    }
+
+
+    mkOrderedPartitions = function(selections){
+        parts=new Array();
+
+        possibleParts = new Array();
+        for (var i=0;i<selections.length;i++){
+            cursel = selections[i]['sel'];
+            nxt = new Array();
+            for (j=0; j< cursel.length;j++){
+                nxt = [...nxt]
+                nxt.push(cursel[j])
+                possibleParts.push(nxt);
+
+            }
+        }
+
+        for (var i=0;i<possibleParts.length;i++){
+            nxtpart = possibleParts[i];
+            var inserted = false;
+
+           for (j =0; j< parts.length;j++){
+               var eql = true;
+               var lt = false;
+               var curpart = parts[j];
+               var numcmp = Math.min(nxtpart.length, curpart.length);
+               for (k=0;k<numcmp;k++){
+                   if (nxtpart[k]<curpart[k]){
+                       lt = true;
+                       eql = false
+                       break;
+                   }
+                   else if (nxtpart[k]>curpart[k]){
+                       eql = false;
+                   }
+               }
+               if (lt || (eql && (nxtpart.length<curpart.length))){
+                   insertInd=j
+                   inserted = true;
+                   parts.splice(insertInd, 0, nxtpart)
+                   break;
+               }
+               else if (eql && (nxtpart.length==curpart.length)){
+                 inserted = true;
+                 break;
+               }
+           }
+           if (!inserted){
+               parts.push(nxtpart);
+           }
+
+        }
+        return parts;
+    }
+
     window.updateProjectSelection = function(rowA){
     var purgeChildSelections=[true,true]
     var rowsAdded=false;
@@ -1408,11 +1777,15 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         var totalCases =0;
         var totalStudies=0;
         var totalSeries=0;
+    var mxseries=0;
+    var mxstudies =0;
+    var projUpdate = new Array();
     rowA.forEach(function(row) {
     var projid = $(row).data('projectid');
     totalCases= $(row).data('totalcases');
     totalStudies =$(row).attr('totalstudy');
     totalSeries =$(row).attr('totalseries');
+
     if ($(row).find('.fa-caret-down.notDisp').length>0){
         $(row).find('.fa-caret-right').addClass('notDisp');
         $(row).find('.fa-caret-down').removeClass('notDisp');
@@ -1434,6 +1807,11 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
             window.selProjects[projid]['state']['view'] = true;
             rowsAdded = true;
         }
+        if (!('studymp' in window.selProjects[projid]) || (Object.keys(window.selProjects[projid].studymp)==0)){
+         projUpdate.push(projid);
+         mxseries+=window.selProjects[projid]['mxseries'];
+         mxstudies+=window.selProjects[projid]['mxstudies'];
+        }
 
     } else {
         $(row).find('.fa-caret-right').removeClass('notDisp');
@@ -1445,6 +1823,10 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
             }
         }
     });
+
+    if (projUpdate.length>0){
+        updateProjStudyMp(projUpdate, mxstudies, mxseries);
+    }
 
     var caseID='';
     if ($('#cases_panel').find('.caseID_inp').length>0){
@@ -2511,6 +2893,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
 
                 if ('someInCart' in window.selProjects[projid]){
                   delete(window.selProjects[projid]['someInCart']);
+                  delete(window.selProjects[projid]['someInCart']);
                 }
                 if ('extraInCart' in window.selProjects[projid]){
                   delete(window.selProjects[projid]['extraInCart']);
@@ -2597,8 +2980,8 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
               }
 
                $('#projects_table').find('[data-projectid='+projid+']').each(function(){
-                   $(this).addClass('someInCart');
-                   window.selProjects[projid]['someInCart']=true;
+                   //$(this).addClass('someInCart');
+                   //window.selProjects[projid]['someInCart']=true;
                    var curval=parseInt($(this).find('.cartnum').text());
                    nval= cnt+curval;
                    $(this).find('.cartnum').text(nval.toString());
@@ -2606,17 +2989,25 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                        $(this).addClass('extraInCart');
                        window.selProjects[projid]['extraInCart']=true;
                    }
+                   else if ((mode ==1) && (('studymp' in window.selProjects[projid]) && (studyid in window.selProjects[projid].studymp))){
+                       $(this).addClass('someInCart');
+                       window.selProjects[projid]['someInCart']=true;
+                   }
                });
 
               $('#cases_table').find('[data-caseid='+caseid+']').each(function(){
-                  $(this).addClass('someInCart');
-                  window.selProjects[projid].selCases[caseid]['someInCart']=true;
+                  //$(this).addClass('someInCart');
+                  //window.selProjects[projid].selCases[caseid]['someInCart']=true;
                    var curval=parseInt($(this).find('.cartnum').text());
                    nval= cnt+curval
                    $(this).find('.cartnum').text(nval.toString());
                    if ((mode==1) && (!('studymp' in window.selProjects[projid].selCases[caseid]) || !(studyid in window.selProjects[projid].selCases[caseid].studymp))){
                        $(this).addClass('extraInCart');
                        window.selProjects[projid].selCases[caseid]['extraInCart']=true;
+                   }
+                   else if ((mode==1) && (('studymp' in window.selProjects[projid].selCases[caseid]) && (studyid in window.selProjects[projid].selCases[caseid].studymp))){
+                       $(this).addClass('someInCart');
+                       window.selProjects[projid].selCases[caseid]['someInCart']=true;
                    }
                });
 
@@ -2680,8 +3071,6 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
             }
         }
     }
-
-
 
 
     const determineDicState = function(curDic){
@@ -2891,7 +3280,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         filterutils.updateFilterSelections('program_set', {'unfilt':reformDic});
         updateColl(false);
     }
-
+/*
     window.viewcart = function(){
         var csrftoken = $.getCookie('csrftoken');
 
@@ -2899,6 +3288,85 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         document.getElementById('seriesmp').value=JSON.stringify(window.seriesmp);
         document.getElementById( 'theForm').submit();
     }
+*/
+
+
+    window.viewcart = function(){
+        updateParitionsFromScratch();
+        var partitions = new Array();
+            for (var i=0; i< window.partitions.length;i++) {
+                if (!('null'in window.partitions[i]) || !(window.partitions[i]['null'])){
+                    partitions.push(window.partitions[i])
+                }
+            }
+            var filterSets = new Array();
+            for (var i=0; i< window.cartHist.length;i++) {
+               filterSets.push(window.cartHist[i]['filter'])
+            }
+
+            if ($('#cart-view-elem').length>0) {
+                document.getElementById("cart-view-elem").remove();
+            }
+
+            var csrftoken = $.getCookie('csrftoken');
+            var form = document.createElement('form');
+            form.id = "cart-view-elem";
+            form.style.visibility = 'hidden'; // no user interaction is necessary
+            form.method = 'POST'; // forms by default use GET query strings
+            //form.action = '/explore/cart/';
+            form.action = '/cart/';
+            //form.append(csrftoken);
+            var input = document.createElement('input');
+            input.name = "csrfmiddlewaretoken";
+            input.value =csrftoken;
+            form.appendChild(input);
+            var input = document.createElement('input');
+            input.name = "filtergrp_list";
+            input.value = JSON.stringify(filterSets);
+            form.appendChild(input);
+            var input = document.createElement('input');
+            input.name = "partitions";
+            input.value = JSON.stringify(partitions);
+            form.appendChild(input);
+            document.body.appendChild(form)
+            form.submit();
+
+        /* var url = '/cart/';
+        url = encodeURI('/cart/');
+
+
+
+        ndic = {
+            'filtlist': JSON.stringify(filterSets),
+            'partitions': JSON.stringify(window.partitions)
+
+
+        }
+
+        var csrftoken = $.getCookie('csrftoken');
+        let deferred = $.Deferred();
+        $.ajax({
+            url: url,
+            data: ndic,
+            dataType: 'json',
+            type: 'post',
+            contentType: 'application/x-www-form-urlencoded',
+            beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success: function (data) {
+                try {
+                     var k =1;
+                }
+                finally {
+                    deferred.resolve([]);
+                }
+            },
+            error: function(data){
+                alert("There was an error fetching server data. Please alert the systems administrator")
+                console.log('error loading data');
+            }
+        });
+        return deferred.promise(); */
+    };
 
     return {
         updateCollectionTotals: updateCollectionTotals,
