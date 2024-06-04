@@ -389,7 +389,7 @@ LOGGING = {
 #  Start django-allauth  #
 ##########################
 
-LOGIN_REDIRECT_URL = '/extended_login/'
+LOGIN_REDIRECT_URL = '/otp_request/'
 
 INSTALLED_APPS += (
     'accounts',
@@ -515,7 +515,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 OTP_EMAIL_SENDER = os.environ.get('OTP_EMAIL_SENDER', SUPPORT_EMAIL)
 OTP_EMAIL_SUBJECT = os.environ.get('OTP_EMAIL_SUBJECT', "[ISB-CGC] Email Login Token")
-OTP_EMAIL_BODY_TEMPLATE_PATH = os.environ.get('OTP_EMAIL_BODY_TEMPLATE_PATH', 'otp/email/token_email.txt')
+OTP_EMAIL_BODY_TEMPLATE_PATH = os.environ.get('OTP_EMAIL_BODY_TEMPLATE_PATH', 'isb_cgc/token.txt')
 
 #########################################
 # Axes Settings

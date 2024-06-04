@@ -21,6 +21,7 @@ from allauth.socialaccount.forms import SignupForm as SocialSignupForm
 from allauth.socialaccount.models import SocialAccount
 from allauth.account.adapter import get_adapter
 from allauth.socialaccount.adapter import get_adapter as get_adapter_social
+from django_otp.forms import OTPTokenForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms import ValidationError
@@ -88,3 +89,11 @@ class CgcSocialSignUp(SocialSignupForm):
             pass
         super(CgcSocialSignUp, self).__init__(*args, **kwargs)
 
+
+class CgcOtpTokenForm(OTPTokenForm):
+    token_sent = False
+    handling_token = False
+
+    def _handle_challenge(self, device):
+        super(CgcOtpTokenForm, self)._handle_challenge(device)
+        self.token_sent = True

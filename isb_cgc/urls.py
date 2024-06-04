@@ -54,6 +54,7 @@ urlpatterns = [
     url(r'^citations/', views.citations_page, name='citations_page'),
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
     url(r'^extended_login/$', views.extended_login_view, name='extended_login'),
+    url(r'^otp_request/$', views.CgcOtpView.as_view(), name='otp_request'),
     url(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),
     url(r'^how_to_discover/', views.how_to_discover_page, name='how_to_discover'),
     url(r'^contact_us/', views.contact_us, name='contact_us'),

@@ -21,9 +21,11 @@ import time
 import sys
 import re
 from datetime import datetime, timezone, timedelta
+from functools import partial
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
@@ -48,12 +50,15 @@ from accounts.models import UserOptInStatus
 from accounts.sa_utils import get_nih_user_details
 from allauth.socialaccount.models import SocialAccount
 from django_otp.plugins.otp_email.models import EmailDevice
+from django_otp.forms import OTPTokenForm
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
+from django.views.generic.edit import FormView
 from google_helpers.bigquery.feedback_support import BigQueryFeedbackSupport
 from solr_helpers import query_solr_and_format_result, build_solr_query, build_solr_facets
 from projects.models import Attribute, DataVersion, DataSource
 from solr_helpers import query_solr_and_format_result
+from .forms import CgcOtpTokenForm
 
 import requests
 
@@ -236,11 +241,36 @@ def bucket_object_list(request):
         return HttpResponse(object_list)
 
 
+@method_decorator(login_required, name="get")
+@method_decorator(login_required, name="post")
+@method_decorator(login_required, name="dispatch")
+class CgcOtpView(FormView):
+    token_form_class = CgcOtpTokenForm
+    form_class = None
+    template_name = 'isb_cgc/otp_request.html'
+    success_url = '/extended_login/'
+
+    def get(self, request):
+        try:
+            EmailDevice.objects.get(user=self.request.user)
+        except ObjectDoesNotExist as e:
+            EmailDevice.objects.update_or_create(user=self.request.user, name='default', email=self.request.user.email)
+        return super().get(request)
+
+    def get_form_class(self):
+        self.form_class = partial(self.token_form_class, self.request.user)
+        return self.form_class
+
+    def form_valid(self, form):
+        return super().form_valid(form)
+
+
 # Extended login view so we can track user logins
+@login_required
 def extended_login_view(request):
     redirect_to = 'cohort'
-    if request.COOKIES and request.COOKIES.get('login_from', '') == 'new_cohort':
-        redirect_to = 'cohort'
+    if request.COOKIES:
+        redirect_to = request.COOKIES.get('login_from', 'cohort')
     try:
         # Write log entry
         st_logger = StackDriverLogger.build_from_django_settings()
