@@ -95,5 +95,11 @@ class CgcOtpTokenForm(OTPTokenForm):
     handling_token = False
 
     def _handle_challenge(self, device):
-        super(CgcOtpTokenForm, self)._handle_challenge(device)
-        self.token_sent = True
+        token_error = None
+        try:
+            super()._handle_challenge(device)
+        except ValidationError as e:
+            self.token_sent = True
+            token_error = e
+        if token_error:
+            raise token_error
