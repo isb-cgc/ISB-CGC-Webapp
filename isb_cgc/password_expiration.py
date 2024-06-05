@@ -79,7 +79,7 @@ class PasswordExpireMiddleware:
         Only warn on pages that are GET requests and not ajax. Also ignore logouts.
         """
         match = resolve(request.path)
-        if match and match.url_name not in ["account_reset_password","logout", "account_reset_password_done", "account_reset_password_from_key"]:
+        if match and match.url_name not in ["account_reset_password", "logout", "account_logout", "account_reset_password_done", "account_reset_password_from_key"]:
             if request.method == "GET" and request.headers.get('x-requested-with') != 'XMLHttpRequest':
                 return True
             return False
@@ -90,7 +90,7 @@ class PasswordExpireMiddleware:
         Only warn on pages that are GET requests and not ajax. Also ignore logouts.
         """
         match = resolve(request.path)
-        if match and match.url_name not in ["logout"]:
+        if match and match.url_name not in ["logout", "account_logout"]:
             if request.method == "GET" and request.headers.get('x-requested-with') != 'XMLHttpRequest':
                 return True
             return False

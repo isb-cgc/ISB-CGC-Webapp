@@ -162,12 +162,14 @@ def css_test(request):
 Returns page that has user details
 '''
 @login_required
+@otp_required
 def user_detail_login(request):
     user_id = request.user.id
     return user_detail(request, user_id)
 
 
 @login_required
+@otp_required
 def user_detail(request, user_id):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
 
@@ -228,21 +230,6 @@ def user_detail(request, user_id):
         return redirect(reverse("landing_page"))
 
 
-@login_required
-def bucket_object_list(request):
-    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
-    credentials = GoogleCredentials.get_application_default()
-    service = discovery.build('storage', 'v1', credentials=credentials, cache_discovery=False)
-
-    req = service.objects().list(bucket='isb-cgc-dev')
-    resp = req.execute()
-    object_list = None
-    if 'items' in resp:
-        object_list = json.dumps(resp['items'])
-
-        return HttpResponse(object_list)
-
-
 otp_verification_signal = Signal()
 
 
@@ -300,6 +287,7 @@ class CgcOtpView(FormView):
 
 # Extended login view so we can track user logins
 @login_required
+@otp_required
 def extended_login_view(request):
     redirect_to = 'cohort'
     redirect_url = None
@@ -351,6 +339,7 @@ DEPRECATED - Returns Results from text search
 
 
 @login_required
+@otp_required
 def search_cohorts_viz(request):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     q = request.GET.get('q', None)
@@ -423,6 +412,7 @@ def get_tbl_preview(request, proj_id, dataset_id, table_id):
 
 
 @login_required
+@otp_required
 def test_solr_data(request):
     status=200
 
@@ -492,6 +482,7 @@ def test_solr_data(request):
 
 
 @login_required
+@otp_required
 def igv(request):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
 
@@ -649,11 +640,14 @@ def bq_meta_data(request):
         bq_meta_data_row['usefulJoins'] = useful_joins
     return JsonResponse(bq_meta_data, safe=False)
 
+
 def programmatic_access_page(request):
     return render(request, 'isb_cgc/programmatic_access.html')
 
+
 def workflow_page(request):
     return render(request, 'isb_cgc/workflow.html')
+
 
 @login_required
 @otp_required
@@ -686,6 +680,7 @@ def dashboard_page(request):
 
 
 @login_required
+@otp_required
 def opt_in_check_show(request):
     try:
         obj, created = UserOptInStatus.objects.get_or_create(user=request.user)
@@ -699,6 +694,7 @@ def opt_in_check_show(request):
 
 
 @login_required
+@otp_required
 def opt_in_update(request):
     # If user logs in for the second time, opt-in status changes to NOT_SEEN
     error_msg = ''
@@ -765,9 +761,12 @@ def send_feedback_form(user_email, firstName, lastName, formLink):
         'message': message
         }
 
+
 @login_required
+@otp_required
 def form_reg_user(request):
     return opt_in_form(request);
+
 
 def opt_in_form(request):
     template = 'isb_cgc/opt_in_form.html'

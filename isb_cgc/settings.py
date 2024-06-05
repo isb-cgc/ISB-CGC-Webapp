@@ -248,10 +248,11 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'isb_cgc.checkreqsize_middleware.CheckReqSize',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_otp.middleware.OTPMiddleware',
+    'isb_cgc.otp_verification_middleware.CgcOtpVerificationMiddleware',
     'adminrestrict.middleware.AdminPagesRestrictMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
     "allauth.account.middleware.AccountMiddleware",
     'isb_cgc.password_expiration.PasswordExpireMiddleware',
     # Uncomment the next line for simple clickjacking protection:
