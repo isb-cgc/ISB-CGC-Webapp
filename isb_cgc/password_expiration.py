@@ -74,7 +74,6 @@ class PasswordExpireMiddleware:
 
         return response
 
-
     def is_page_for_redirect(self, request):
         """
         Only warn on pages that are GET requests and not ajax. Also ignore logouts.
@@ -86,7 +85,6 @@ class PasswordExpireMiddleware:
             return False
         return False
 
-
     def is_page_for_warning(self, request):
         """
         Only warn on pages that are GET requests and not ajax. Also ignore logouts.
@@ -97,7 +95,6 @@ class PasswordExpireMiddleware:
                 return True
             return False
         return False
-
 
     def add_warning(self, request, text):
         storage = messages.get_messages(request)

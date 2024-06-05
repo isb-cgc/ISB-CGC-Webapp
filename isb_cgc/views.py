@@ -29,6 +29,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
+from django.dispatch import Signal
 from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -50,7 +51,8 @@ from accounts.models import UserOptInStatus
 from accounts.sa_utils import get_nih_user_details
 from allauth.socialaccount.models import SocialAccount
 from django_otp.plugins.otp_email.models import EmailDevice
-from django_otp.forms import OTPTokenForm
+from django_otp.decorators import otp_required
+from django_otp import login
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
 from django.views.generic.edit import FormView
@@ -241,6 +243,21 @@ def bucket_object_list(request):
         return HttpResponse(object_list)
 
 
+otp_verification_signal = Signal()
+
+
+def _handle_otp_verify(sender, request, user, **kwargs):
+    """
+    Automatically persists an OTP device that was set by an OTP-aware
+    AuthenticationForm.
+    """
+    if hasattr(user, 'otp_device'):
+        login(request, user.otp_device)
+
+
+otp_verification_signal.connect(_handle_otp_verify)
+
+
 @method_decorator(login_required, name="get")
 @method_decorator(login_required, name="post")
 @method_decorator(login_required, name="dispatch")
@@ -249,28 +266,51 @@ class CgcOtpView(FormView):
     form_class = None
     template_name = 'isb_cgc/otp_request.html'
     success_url = '/extended_login/'
+    next_field = None
+    post_request = None
+
+    def _set_next(self, request):
+        req = request.GET or request.POST
+        self.next_field = req.get("next", None)
+        self.success_url = self.success_url + (
+            "?next={}".format(self.next_field) if self.next_field else "")
 
     def get(self, request):
         try:
             EmailDevice.objects.get(user=self.request.user)
         except ObjectDoesNotExist as e:
             EmailDevice.objects.update_or_create(user=self.request.user, name='default', email=self.request.user.email)
+        self._set_next(request)
         return super().get(request)
 
+    def post(self, request):
+        self._set_next(request)
+        self.post_request = request
+        return super().post(request)
+
     def get_form_class(self):
-        self.form_class = partial(self.token_form_class, self.request.user)
+        self.form_class = partial(self.token_form_class, self.request.user, next_field=self.next_field)
         return self.form_class
 
     def form_valid(self, form):
-        return super().form_valid(form)
+        result = super().form_valid(form)
+        otp_verification_signal.send(sender=self.__class__, request=self.post_request, user=self.post_request.user)
+        return result
 
 
 # Extended login view so we can track user logins
 @login_required
 def extended_login_view(request):
     redirect_to = 'cohort'
-    if request.COOKIES:
-        redirect_to = request.COOKIES.get('login_from', 'cohort')
+    redirect_url = None
+    req = request.GET or request.POST
+    print("OTP device: {}".format(request.user.otp_device))
+    print(request.session.keys())
+    if request.COOKIES and request.COOKIES.get('login_from', None):
+        redirect_to = request.COOKIES.get('login_from')
+    elif req.get("next", None):
+        redirect_to = None
+        redirect_url = req.get("next")
     try:
         # Write log entry
         st_logger = StackDriverLogger.build_from_django_settings()
@@ -297,7 +337,7 @@ def extended_login_view(request):
     except Exception as e:
         logger.exception(e)
 
-    return redirect(reverse(redirect_to))
+    return redirect(redirect_url or reverse(redirect_to))
 
 
 # Callback for recording the user's agreement to the warning popup
@@ -616,6 +656,7 @@ def workflow_page(request):
     return render(request, 'isb_cgc/workflow.html')
 
 @login_required
+@otp_required
 def dashboard_page(request):
     context = {}
     display_count = 6

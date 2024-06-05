@@ -1405,7 +1405,7 @@ require([
 
     $('#log-in-to-save-btn').on('click', function()
     {
-        $.setCookie('login_from','new_cohort','/');
+        $.setCookie('login_from','cohort','/');
         save_anonymous_filters();
         location.href = '/accounts/login/';
     });
