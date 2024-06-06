@@ -33,6 +33,7 @@ require.config({
         plotutils: 'plotutils',
         sliderutils: 'sliderutils'
 
+
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -43,7 +44,9 @@ require.config({
         'session_security': ['jquery'],
         'filterutils': ['jquery'],
         'plotutils': ['jquery'],
-        'sliderutils': ['jquery']
+        'sliderutils': ['jquery'],
+        'tables':['jquery']
+
     }
 });
 
@@ -139,7 +142,7 @@ require([
                     else{
                         window.cartHist[curInd]['filter'] = parsedFiltObj;
                     }
-                    window.cartDetails = cartDetails+'Step '+window.cartStep.toString()+'. Changed filter definition to '+JSON.stringify(parsedFiltObj)+'\n\n'
+                    window.cartDetails = cartDetails+'Changed filter definition to '+JSON.stringify(parsedFiltObj)+'\n\n'
                     window.cartStep++;
 
 
@@ -495,7 +498,76 @@ require([
         }
     }
 
+    updatecartedits = function(){
+
+        if (("cartedits" in sessionStorage) && (sessionStorage.getItem("cartedits") == "true")) {
+
+            window.cartHist = JSON.parse(sessionStorage.getItem("cartHist"));
+            var edits = window.cartHist[window.cartHist.length - 1]['selections'];
+
+            var filt = Object();
+            filt['StudyInstanceUID'] = new Array();
+            var studymp = {};
+            for (var i = 0; i < edits.length; i++) {
+                var sel = edits[i]['sel'];
+                var studyid = sel[2];
+                filt['StudyInstanceUID'].push(studyid);
+                var seriesid = sel[3];
+                if (!(studyid in studymp)) {
+                    studymp[studyid] = []
+                }
+                studymp[studyid].push(seriesid)
+
+            }
+            if ("seriesmp" in sessionStorage) {
+                var seriesmp = JSON.parse(sessionStorage.getItem("seriesmp"));
+                for (studyid in seriesmp) {
+                    window.seriesmp[studyid]['val'] = seriesmp[studyid]
+                }
+            }
+            if ("seriesdel" in sessionStorage) {
+                window.seriesdel = JSON.parse(sessionStorage.getItem("seriesdel"));
+
+            }
+
+
+
+            tables.updateGlobalCart(false, studymp, 'series')
+            window.updateTableCounts(1);
+            var gtotals =tables.getGlobalCounts();
+            $('#cart_stats').html(
+                gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart") ;
+            if (gtotals[0]>0){
+                $('#cart_stats').removeClass('notDisp');
+                $('#export-manifest-cart').removeAttr('disabled');
+                $('#view-cart').removeAttr('disabled');
+            }
+            else{
+                $('#cart_stats').addClass('notDisp');
+                $('#export-manifest-cart').attr('disabled','disabled');
+                $('#view-cart').attr('disabled','disabled');
+            }
+
+
+        }
+        else if ("cartHist" in sessionStorage){
+            sessionStorage.removeItem("cartHist");
+        }
+        if ("cartedits" in sessionStorage){
+            sessionStorage.removeItem("cartedits");
+        }
+        if ("seriesmp" in sessionStorage){
+            sessionStorage.removeItem("seriesmp");
+        }
+        if ("seriesdel" in sessionStorage) {
+                sessionStorage.removeItem("seriesdel");
+            }
+
+        //alert('cart edits');
+    }
+
      $(document).ready(function () {
+
         tables.initializeTableData();
         filterItemBindings('access_set');
         filterItemBindings('program_set');
@@ -641,7 +713,25 @@ require([
             updateViaHistory();
         }
 
+        //updatecartedits();
+
     });
+
+    window.onbeforeunload = function(){
+        sessionStorage.setItem("cartHist", JSON.stringify(window.cartHist));
+        //sessionStorage.setItem("glblcart", JSON.stringify(window.glblcart));
+        sessionStorage.setItem("src", "explore_page");
+        //sessionStorage.setItem("cartDetails", windowcartDetails);
+
+    }
+    window.onpageshow = function (){
+        //alert('show');
+        updatecartedits();
+
+    }
+
+
+
 
 
 });

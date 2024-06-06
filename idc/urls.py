@@ -59,6 +59,7 @@ urlpatterns = [
     url(r'^news/', views.news_page, name='news'),
     url(r'^cart/$', views.cart_page, name='cart'),
    url(r'^explore/cart/$', views.cart_page, name='get_explore_cart'),
+   url(r'^cart_data/$', views.cart_data, name='get_cart_data'),
     url(r'^collaborators/', views.collaborators, name='collaborators'),
     url(r'^collections/', include('idc_collections.urls')),
     # url(r'^share/', include('sharing.urls')),

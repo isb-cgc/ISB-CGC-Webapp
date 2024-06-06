@@ -24,13 +24,11 @@
     <link type="text/css" rel="stylesheet" href="{% static 'css/search.css' %}">
     <link type="text/css" rel="stylesheet" href="{% static 'css/spinner.css' %}">
     <link type="text/css" rel="stylesheet" href="{% static 'css/jquery-ui.min.css' %}">
-    <script id="test_script">
 
-    </script>
 {% endblock %}
 
 
-<div id="secondary-nav" class="navbar-fixed-top">
+<div id="secondary-nav" class="navbar-fixed-top" onpageshow="alert('here')">
 
 </div>
 {% block link_page_name %}help{% endblock %}
@@ -105,7 +103,7 @@
 {% include "cohorts/filter-alert.html" %}
 {% include "idc/download-modal.html" %}
 {% include "idc/bq-string-modal.html" with bq_string_uri="True" %}
-
+{% include "idc/cart-details-modal.html" %}
 
 {% endblock %}
 
@@ -134,7 +132,7 @@
         window.glblcart = new Object();
 
         window.cartHist = new Array();
-        window.cartDetails = 'Cart Selection History \n\nStep 0. Initial filter definition is {}\n\n';
+        window.cartDetails = 'Initial filter definition is {}\n\n';
         window.cartStep=1;
 
         window.partitions= new Array();
@@ -144,7 +142,8 @@
         cartSel['selections']= new Array();
         cartSel['partitions']= new Array();
         window.cartHist.push(cartSel);
-        window,partitions = new Array();
+        //sesssionStorage.setItem("cartHist",JSON.stringify(window.cartHist));
+        window.partitions = new Array();
 
 
 
@@ -217,11 +216,13 @@
         var showWarning = true;
         var user_is_auth = {% if request.user.is_authenticated %} true {% else %} false {% endif %};
         var user_id = {% if request.user.is_authenticated %}{{ request.user.id|safe }}{% else %}null{% endif %};
+
     </script>
     <script type="text/javascript" src="{% static 'js/libs/d3.v5.min.js' %}"></script>
     {{ block.super }}
     <script type="text/javascript" src="{% static 'js/explore.js' %}?v={{ APP_VERSION }}"></script>
     <script type="text/javascript" src="{% static 'js/bq-string.js' %}?v={{ APP_VERSION }}"></script>
     <script type="text/javascript" src="{% static 'js/cohorts/export-manifest.js' %}?v={{ APP_VERSION }}"></script>
+
 
 {% endblock %}

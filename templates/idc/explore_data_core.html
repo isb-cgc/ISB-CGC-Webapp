@@ -704,12 +704,12 @@
 
                             <div class="filter-url-container space-top-10 space-top-10">
                                 <button
-                                        class="btn btn-special get-filter-uri space-bottom-5"
+                                        class="btn btn-special get-filter-uri"
                                         disabled
                                         role="button"
                                         title="Select a filter to enable this feature.">Display Filter URL</button>
                                 <button
-                                        class="btn btn-special hide-filter-uri space-bottom-5"
+                                        class="btn btn-special hide-filter-uri"
                                         role="button" style="display: none;" title="Hide the filter query URL.">Hide Filter URL</button>
                                 <button role="button" class="btn btn-primary copy-this copy-url space-bottom-5"
                                         disabled title="Copy Filter URL to clipboard" style="display:none;">
@@ -725,6 +725,21 @@
                         </div>
 
                 <div class="panel-heading clearfix"><h3 class="panel-title">Cart Summary</h3></div>
+                <div class="panel-body">
+                    <div class="cart-button-container space-top-10 space-top-10">
+                                <button
+                                        class="btn btn-special cart-modal-button"
+                                        data-toggle="modal"
+
+
+                                        role="button"
+                                        title="Get cart details.">Display Cart Details</button>
+                                <button class="btn btn-default  cart-reset"
+                                   title= "Reset Cart."  onclick="window.resetCart()"> Clear Cart
+                             </button>
+
+                </div>
+                    </div>
                     <div class="panel-body">
                         <div id="cart_stats" class="notDisp">No Text</div>
                     </div>

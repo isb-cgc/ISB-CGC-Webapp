@@ -73,7 +73,7 @@ require([
             update_export_modal_for_mini(button);
         }
         else if (button.hasClass('cart-export')){
-            updateParitionsFromScratch();
+            updatePartitionsFromScratch();
             var partitions = new Array();
             for (var i=0; i< window.partitions.length;i++) {
                 if (!('null'in window.partitions[i]) || !(window.partitions[i]['null'])){
@@ -86,13 +86,16 @@ require([
             }
             update_export_modal_for_cart(partitions, filterSets);
         }
+        else if (button.hasClass('cart-export-from-cp')){
+            update_export_modal_for_cart(window.partitions, window.filtergrp_lst);
+        }
     });
 
 
 
 
     var update_export_modal_for_cart= function(partitions, filtergrp_list){
-
+        is_cohort = false;
         var name_base='';
         $('.modal-title').text("Export Cart Manifest");
         $('#export-manifest-form').append('<input type="hidden" name="from_cart">')

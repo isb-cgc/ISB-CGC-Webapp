@@ -103,6 +103,9 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         }
     };
 
+    window.loadit = function(){
+        alert('load plot');
+    }
 
     window.toggleCharts=function(cntrl){
         if (cntrl==="hide"){

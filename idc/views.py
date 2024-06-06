@@ -312,7 +312,8 @@ def studymp(request):
        filters = json.loads(req.get('filters', '{}'))
 
        mxSeries = int(req.get('mxseries'))
-       mxStudies=int(req.get('mxstudies'))
+       mxStudies= int(req.get('mxstudies'))
+       custom_facets['per_id']['limit']=mxStudies;
 
        #custom_facets['per_id']['limit'] = mxStudies
        idsEx = get_collex_metadata(
@@ -915,22 +916,66 @@ def about_page(request):
     return render(request, 'idc/about.html', {'request': request})
 
 def cart_page(request):
-    context = {'request': request}
-    field_list=["collection_id", "PatientID", "StudyInstanceUID","SeriesInstanceUID"]
+  status = 200
+  context = {'request': request}
+  field_list = ["collection_id", "PatientID", "StudyInstanceUID", "SeriesInstanceUID"]
+  try:
+    req = request.GET if request.GET else request.POST
+    context['filtergrp_list'] = json.loads(req.get('filtergrp_list', '{}'))
+    context['partitions'] = json.loads(req.get('partitions', '{}'))
+
+  except Exception as e:
+    status=400
+    logger.error("[ERROR] While loading cart:")
+    logger.exception(e)
+
+  return render(request, 'collections/cart_list.html', context)
+
+
+def cart_data(request):
+    status=200
+    response={}
+    field_list=["collection_id", "PatientID", "StudyInstanceUID","SeriesInstanceUID", "Modality"]
     try:
         req = request.GET if request.GET else request.POST
         filtergrp_list = json.loads(req.get('filtergrp_list', '{}'))
+
         partitions = json.loads(req.get('partitions', '{}'))
+        studyidarr = json.loads(req.get('studyidarr','[]'))
         limit = req.get('limit', 1000)
         offset = req.get('offset', 0)
-        resp = get_cart_data(filtergrp_list, partitions, field_list, limit, offset)
-        context['resp'] = resp
-        context['docs'] = resp['docs']
+        response = get_cart_data(filtergrp_list, partitions, field_list, limit, offset)
+
+        if (len(studyidarr)>0):
+          seriesmp ={}
+          filters = {}
+          filters['StudyInstanceUID'] = studyidarr
+          sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
+            active=True, source_type=DataSource.SOLR,
+            aggregate_level="SeriesInstanceUID"
+          )
+
+          idsEx = get_collex_metadata(
+            filters, ['SeriesInstanceUID', 'StudyInstanceUID'], record_limit=500,
+            sources=sources, offset=0,
+            records_only=True,
+            collapse_on='SeriesInstanceUID', counts_only=False, filtered_needed=False,
+            raw_format=True, default_facets=False, sort='StudyInstanceUID asc, SeriesInstanceUID asc',
+          )
+          for doc in idsEx['docs']:
+            studyid =  doc['StudyInstanceUID']
+            seriesid =  doc['SeriesInstanceUID']
+            if not(studyid in seriesmp):
+              seriesmp[studyid] =[]
+            seriesmp[studyid].append(seriesid)
+          response['seriesmp'] = seriesmp
+
     except Exception as e:
         logger.error("[ERROR] While loading cart:")
         logger.exception(e)
+        status=400
 
-    return render(request, 'collections/cart_list.html', context)
+    return JsonResponse(response, status=status)
 
 def test_page(request, mtch):
     pg=request.path[:-1]+'.html'

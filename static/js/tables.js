@@ -27,7 +27,8 @@ require.config({
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
         tablesorter:'libs/jquery.tablesorter.min',
-        filterutils:'filterutils'
+        filterutils:'filterutils',
+        cartutils:'cartutils'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -37,12 +38,14 @@ require.config({
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'tablesorter': ['jquery'],
         'underscore': {exports: '_'},
-        'filterutils':['jquery']
+        'filterutils':['jquery'],
+        'cartutils':['jquery']
     }
 });
 
 // Set up common JS UI actions which span most views
 require([
+    'cartutils',
     'filterutils',
     'jquery',
     'jqueryui',
@@ -53,14 +56,14 @@ require([
     'assetscore',
     'assetsresponsive',
     'tablesorter'
-], function(filterutils,$, jqueryui, bootstrap, session_security, _, utils) {
+], function(cartutils,filterutils,$, jqueryui, bootstrap, session_security, _, utils) {
     'use strict';
 
 
 });
 
 // Return an object for consts/methods used by most views
-define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
+define(['cartutils','filterutils','jquery', 'utils'], function(cartutils, filterutils, $, utils) {
 
 
     window.updateTablesAfterFilter = function (collFilt, collectionsData, collectionStats){
@@ -134,7 +137,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         if (('someInCart' in window.selProjects[data[0]]) && !('extraInFilt' in window.selProjects[data[0]])) {
             //cart is green. pressing deletes
             addingToCart = false;
-            window.cartDetails = window.cartDetails+'Step '+window.cartStep+'. Removed any series from the cart for which the collection_id ="'+projid.toString()+'" and the respective study matches the current filter\n\n';
+            window.cartDetails = window.cartDetails+'Removed any series from the cart for which the collection_id ="'+projid.toString()+'" and the respective study matches the current filter\n\n';
             window.cartStep++;
 
             updateGlobalCart(addingToCart, window.selProjects[projid].studymp, 'project');
@@ -156,7 +159,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         else{
             // cart is clear or yellow
             addingToCart = true;
-            window.cartDetails = window.cartDetails+'Step '+window.cartStep+'. Added all series to the cart for which the collection_id ="'+projid.toString()+'" and the respective study matches the current filter\n\n';
+            window.cartDetails = window.cartDetails+'Added all series to the cart for which the collection_id ="'+projid.toString()+'" and the respective study matches the current filter\n\n';
             window.cartStep++;
 
 
@@ -185,7 +188,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         newSel['added'] = addingToCart;
         newSel['sel'] = [projid]
         //window.cartHist[curInd]['selections'].push(newSel)
-        updateCartSelections(newSel);
+        cartutils.updateCartSelections(newSel);
 
     }
 
@@ -527,14 +530,14 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                         {
                             //cart is green. pressing deletes
                             addingToCart= false;
-                            window.cartDetails = window.cartDetails+'Step '+window.cartStep+'. Removed any series from the cart for which the PatientID = "'+caseid.toString()+'" and the respective study matches the current filter\n\n';
+                            window.cartDetails = window.cartDetails+ 'Removed any series from the cart for which the PatientID = "'+caseid.toString()+'" and the respective study matches the current filter\n\n';
                             window.cartStep++;
 
                         }
                         else{
                             // cart is clear or yellow
                             addingToCart = true;
-                            window.cartDetails = window.cartDetails+'Step '+window.cartStep+'. Added all series to the cart for which the PatientID = "'+caseid.toString()+'" and the respective study matches the current filter\n\n';
+                            window.cartDetails = window.cartDetails+'Added all series to the cart for which the PatientID = "'+caseid.toString()+'" and the respective study matches the current filter\n\n';
                             window.cartStep++;
 
                         }
@@ -556,12 +559,10 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                         $('#view-cart').attr('disabled','disabled');
                        }
 
-                       //var curInd = window.cartHist.length - 1;
                        var newSel = new Object();
                        newSel['added'] = addingToCart;
                        newSel['sel'] = [projid, caseid];
-                       updateCartSelections(newSel);
-                       //window.cartHist[curInd]['selections'].push(newSel);
+                       cartutils.updateCartSelections(newSel);
 
 
                        });
@@ -858,14 +859,14 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                         {
                             //cart is green. pressing deletes
                             addingToCart= false;
-                            window.cartDetails = window.cartDetails+'Step '+window.cartStep+'. Removed any series from the cart for which the StudyInstanceUID ="'+studyid.toString()+'"\n\n';
+                            window.cartDetails = window.cartDetails+'Removed any series from the cart for which the StudyInstanceUID ="'+studyid.toString()+'"\n\n';
                             window.cartStep++;
 
                         }
                         else{
                             // cart is clear or yellow
                             addingToCart = true;
-                            window.cartDetails = window.cartDetails+'Step '+window.cartStep+'. Added all series to the cart for which the StudyInstanceUID = "'+studyid.toString()+'"\n\n';
+                            window.cartDetails = window.cartDetails+'Added all series to the cart for which the StudyInstanceUID = "'+studyid.toString()+'"\n\n';
                             window.cartStep++;
 
                         }
@@ -893,7 +894,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                        var newSel = new Object();
                        newSel['added'] = addingToCart;
                        newSel['sel'] = [projid, caseid, studyid];
-                       updateCartSelections(newSel);
+                       cartutils.updateCartSelections(newSel);
                        //window.cartHist[curInd]['selections'].push(newSel);
 
                     });
@@ -1212,17 +1213,17 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                         if ($(elem).parentsUntil('tr').parent().hasClass('someInCart'))
                         {
                             addingToCart = false;
-                            window.cartDetails = window.cartDetails+'Step '+window.cartStep+'. Removed SeriesInstanceUID = "'+seriesid.toString()+'" from the cart\n\n';
+                            window.cartDetails = window.cartDetails+'Removed SeriesInstanceUID = "'+seriesid.toString()+'" from the cart\n\n';
                             window.cartStep++;
 
                         }
                         else{
-                            window.cartDetails = window.cartDetails+'Step '+window.cartStep+'. Added SeriesInstanceUID = "'+seriesid.toString()+'" to the cart\n\n';
+                            window.cartDetails = window.cartDetails+'Added SeriesInstanceUID = "'+seriesid.toString()+'" to the cart\n\n';
                             window.cartStep++;
 
                         }
                         mp = new Object();
-                        mp[studyid]=seriesid;
+                        mp[studyid]=[seriesid];
 
                         updateGlobalCart(addingToCart, mp, 'series');
                         updateTableCounts(1);
@@ -1246,7 +1247,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                        newSel['added'] = addingToCart;
                        newSel['sel'] = [collection_id, PatientID, studyid, seriesid];
                        //window.cartHist[curInd]['selections'].push(newSel);
-                       updateCartSelections(newSel);
+                       cartutils.updateCartSelections(newSel);
 
                     });
 
@@ -1468,306 +1469,6 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
 
     }
 
-    updateCartSelections = function(newSel){
-        var curInd = window.cartHist.length - 1;
-        var selections = window.cartHist[curInd]['selections'];
-        var adding = newSel['added'];
-        var selection = newSel['sel'];
-        var selectionCancelled = false;
-        var redundant = false;
-        var newHistSel = new Array();
-        for (var i=0;i<selections.length;i++) {
-            var curselection = selections[i]['sel'];
-            var curAdded = selections[i]['added'];
-
-            if (curselection.length >= selection.length) {
-                var differenceFound = false;
-                for (var j = 0; j < selection.length; j++) {
-                    if (!(curselection[j] == selection[j])) {
-                        differenceFound = true;
-                        break;
-                    }
-                }
-                if (differenceFound){
-                    newHistSel.push(selections[i]);
-                }
-
-            }
-            else{
-                newHistSel.push(selections[i]);
-            }
-
-        }
-
-        newHistSel.push(newSel);
-
-        window.cartHist[curInd]['selections'] =  newHistSel;
-        window.cartHist[curInd]['partitions'] = mkOrderedPartitions(window.cartHist[curInd]['selections']);
-        //updateGlobalPartitions(window.cartHist[curInd]);
-    }
-
-    window.updateParitionsFromScratch =function(){
-        window.partitions = new Array();
-
-        for (var i=0;i<window.cartHist.length;i++){
-           var cartHist=window.cartHist[i];
-           updateGlobalPartitions(cartHist,i);
-        }
-        for (var i=0;i<window.cartHist.length;i++){
-           var cartHist=window.cartHist[i];
-           refilterGlobalPartitions(cartHist,i);
-        }
-        var filtStrings = createFiltStrings();
-        var solrStr = createSolrString(filtStrings);
-        window.solrStr = solrStr;
-        var ii=1;
-    }
-    updateGlobalPartitions= function(cartHist,cartnum){
-        var newparts = cartHist.partitions;
-        for (var i=0;i<newparts.length;i++){
-            var inserted = false;
-            var nxtpart=newparts[i];
-            var nxtlen = nxtpart.length;
-            var basefilt = new Array();
-            for (var j=0;j<window.partitions.length;j++){
-                var eql = true;
-                var lt = false;
-                curpart = window.partitions[j]['id'];
-                curpartlen = curpart.length;
-
-                var numcmp = Math.min(nxtpart.length, curpart.length);
-                for (k=0;k<numcmp;k++){
-                   if (nxtpart[k]<curpart[k]){
-                       lt = true;
-                       eql = false
-                       break;
-                   }
-                   else if (nxtpart[k]>curpart[k]){
-                       eql = false;
-                   }
-               }
-                if (lt || (eql && (nxtpart.length<curpart.length))){
-                   var insertInd=j;
-                   inserted = true;
-                   addNewPartition(nxtpart, insertInd, basefilt)
-                   break;
-               }
-                else if (eql && (nxtpart.length==curpart.length)){
-                 inserted = true;
-                 break;
-               }
-
-                else if (eql && (nxtpart.length==curpart.length+1)){
-                 window.partitions[j]['not'].push(nxtpart[nxtpart.length-1]);
-                 window.partitions[j]['not'].sort();
-                 for (var filtprt=0;filtprt<window.partitions[j]['filt'].length;filtprt++){
-                     var tmp = window.partitions[j]['filt'][filtprt];
-                     basefilt.push([...tmp])
-                 }
-               }
-
-            }
-            if (!inserted){
-               addNewPartition(nxtpart, -1, basefilt);
-           }
-        }
-
-    }
-    refilterGlobalPartitions= function(cartHist,cartnum){
-
-        var selections = cartHist['selections'];
-        var checkedA = new Array()
-        for (var i=0;i<selections.length;i++){
-            var ind = selections.length-(1+i);
-            var cursel = selections[ind];
-            var curid = cursel['sel'];
-            var added = cursel['added'];
-            for (var j=0;j<window.partitions.length;j++){
-                var part = window.partitions[j];
-                var partid = part['id'];
-                if ((checkedA.indexOf(j)<0) && (curid.length<=partid.length)) {
-                    var filt = part['filt'];
-                    //var nll = part['null'];
-                    var eq = true;
-                    for (var k=0; k<curid.length;k++){
-                        if (!(curid[k]==partid[k])){
-                            eq = false;
-                            break;
-                        }
-                    }
-                    if (eq){
-                        checkedA.push(j);
-                        if (added){
-                            part['filt'].push([cartnum]);
-                            part['null'] = false;
-                        }
-                        else if (!part['null']){
-                            for (var k=0;k<part['filt'].length;k++){
-                                part['filt'][k].push(cartnum);
-                            }
-                        }
-                    }
-
-                }
-            }
-        }
-
-    }
-
-    createSolrString = function(filtStringA){
-        var solrStr=''
-        var solrA=[]
-        for (var i=0;i< window.partitions.length;i++){
-            var curPart = window.partitions[i];
-            if (!curPart['null']) {
-                var curPartAttStrA = parsePartitionAttStrings(filtStringA, curPart);
-                var curPartStr = parsePartitionStrings(curPart);
-                for (var j = 0; j < curPartAttStrA.length; j++) {
-                    if (curPartAttStrA[j].length > 0) {
-
-                    solrA.push('(' + curPartStr + ')(' + curPartAttStrA[j] + ')')
-                    }
-                    else{
-                        solrA.push(curPartStr);
-                    }
-                }
-            }
-        }
-        solrA = solrA.map(x => '('+x+')');
-       var solrStr = solrA.join(' OR ')
-        return solrStr
-    }
-
-    parsePartitionAttStrings = function(filtStringA, partition){
-        var attStrA =[];
-        var filt2D = partition['filt'];
-        for (var i=0; i<filt2D.length;i++){
-            filtL=filt2D[i];
-            var tmpA=[]
-            for (var j=0;j<filtL.length;j++){
-                var filtindex= filtL[j]
-                filtStr=filtStringA[filtindex];
-                if (filtStr.length>0){
-                    if (j==0){
-                        tmpA.push('('+filtStr+')')
-                    }
-                    else{
-                        tmpA.push('NOT ('+filtStr+')')
-                    }
-                }
-
-            }
-            attStrA.push(tmpA.join(' AND '))
-        }
-        return attStrA;
-    }
-
-    parsePartitionStrings = function(partition){
-        var filts = ['collection_id', 'PatientID', 'StudyInstanceUID','SeriesInstanceUID']
-        var id = partition['id']
-        var partStr='';
-        for (var i=0;i<id.length;i++){
-            partStr+='(+'+filts[i]+':("'+id[i]+'"))';
-        }
-        var not= partition['not'];
-        if (not.length>0){
-            not= not.map(x => '"'+x+'"');
-            var notStr= not.join(' OR ');
-            partStr=partStr+' AND NOT ('+filts[id.length]+':('+notStr+'))';
-        }
-        return partStr
-    }
-    createFiltStrings = function(){
-        var filtStrings = new Array();
-        var attA = [];
-        for (var i=0;i<window.cartHist.length;i++){
-            var filt= window.cartHist[i]['filter'];
-            filtkeys = Object.keys(filt);
-            var fstr=''
-            for (var j=0;j<filtkeys.length;j++) {
-                fkey = filtkeys[j];
-                //if (!(fkey == "collection_id")){
-                if (true){
-                    var nstr = '(+' + fkey + ':(';
-                   var attA = ('values' in filt[fkey] && (Array.isArray(filt[fkey]['values']))) ? filt[fkey]['values'] : filt[fkey];
-                   var op = ('op' in filt[fkey]) ? filt[fkey]['op'] : 'OR';
-                   attA = attA.map(x => '"' + x + '"')
-                   nstr = nstr + attA.join(' ' + op + ' ') + '))';
-                  fstr = fstr + nstr;
-               }
-            }
-            filtStrings.push(fstr);
-        }
-        return(filtStrings);
-    }
-
-    addNewPartition= function(part, pos, basefilt) {
-        newPart = new Object();
-        newPart['not'] = new Array();
-        newPart['id'] = [...part]
-        newPart['filt'] = basefilt;
-        newPart['null'] = true;
-        if (pos > -1) {
-           window.partitions.splice(pos, 0, newPart);
-         }
-        else{
-            window.partitions.push(newPart);
-        }
-    }
-
-
-    mkOrderedPartitions = function(selections){
-        parts=new Array();
-
-        possibleParts = new Array();
-        for (var i=0;i<selections.length;i++){
-            cursel = selections[i]['sel'];
-            nxt = new Array();
-            for (j=0; j< cursel.length;j++){
-                nxt = [...nxt]
-                nxt.push(cursel[j])
-                possibleParts.push(nxt);
-
-            }
-        }
-
-        for (var i=0;i<possibleParts.length;i++){
-            nxtpart = possibleParts[i];
-            var inserted = false;
-
-           for (j =0; j< parts.length;j++){
-               var eql = true;
-               var lt = false;
-               var curpart = parts[j];
-               var numcmp = Math.min(nxtpart.length, curpart.length);
-               for (k=0;k<numcmp;k++){
-                   if (nxtpart[k]<curpart[k]){
-                       lt = true;
-                       eql = false
-                       break;
-                   }
-                   else if (nxtpart[k]>curpart[k]){
-                       eql = false;
-                   }
-               }
-               if (lt || (eql && (nxtpart.length<curpart.length))){
-                   insertInd=j
-                   inserted = true;
-                   parts.splice(insertInd, 0, nxtpart)
-                   break;
-               }
-               else if (eql && (nxtpart.length==curpart.length)){
-                 inserted = true;
-                 break;
-               }
-           }
-           if (!inserted){
-               parts.push(nxtpart);
-           }
-
-        }
-        return parts;
-    }
 
     window.updateProjectSelection = function(rowA){
     var purgeChildSelections=[true,true]
@@ -2637,31 +2338,36 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
     const updateGlobalCart = function(cartAdded, studymp, lvl){
 
         for (studyid in studymp){
-           if (lvl=="series"){
-               var seriesid= studymp[studyid];
-               if (cartAdded){
-                   if (!(studyid in window.glblcart)){
-                       window.glblcart[studyid] = new Object();
-                       window.glblcart[studyid]['all'] = false;
-                       window.glblcart[studyid]['sel'] = new Set();
-                   }
-                   window.glblcart[studyid]['sel'].add(seriesid);
-                   if (window.seriesmp[studyid]['val'].length == window.glblcart[studyid]['sel'].size){
-                       window.glblcart[studyid]['all'] = true;
-                       window.glblcart[studyid]['sel'] = new Set();
-                   }
-               }
-               else{
-                   if (window.glblcart[studyid]['all']){
-                       window.glblcart[studyid]['all'] = false;
-                       window.glblcart[studyid]['sel'] = new Set([...window.seriesmp[studyid]['val']]);
-                   }
-                   window.glblcart[studyid]['sel'].delete(seriesid);
-                   if (window.glblcart[studyid]['sel'].size==0){
-                       delete window.glblcart[studyid];
-                   }
-               }
+           if (lvl=="series") {
+               var seriesArr = studymp[studyid];
+               for (var i=0; i<seriesArr.length;i++) {
+                   var seriesid = seriesArr[i];
+                   if (cartAdded) {
+                       if (!(studyid in window.glblcart)) {
+                           window.glblcart[studyid] = new Object();
+                           window.glblcart[studyid]['all'] = false;
+                           window.glblcart[studyid]['sel'] = new Set();
+                       }
+                       window.glblcart[studyid]['sel'].add(seriesid);
+                       if (window.seriesmp[studyid]['val'].length == window.glblcart[studyid]['sel'].size) {
+                           window.glblcart[studyid]['all'] = true;
+                           window.glblcart[studyid]['sel'] = new Set();
+                       }
+                   } else {
 
+                       if (studyid in window.glblcart)
+                       {
+                           if (window.glblcart[studyid]['all']) {
+                               window.glblcart[studyid]['all'] = false;
+                               window.glblcart[studyid]['sel'] = new Set([...window.seriesmp[studyid]['val']]);
+                           }
+                         window.glblcart[studyid]['sel'].delete(seriesid);
+                         if (window.glblcart[studyid]['sel'].size == 0) {
+                             delete window.glblcart[studyid];
+                         }
+                   }
+                  }
+               }
            }
          else{
              if (cartAdded){
@@ -3291,86 +2997,13 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
 */
 
 
-    window.viewcart = function(){
-        updateParitionsFromScratch();
-        var partitions = new Array();
-            for (var i=0; i< window.partitions.length;i++) {
-                if (!('null'in window.partitions[i]) || !(window.partitions[i]['null'])){
-                    partitions.push(window.partitions[i])
-                }
-            }
-            var filterSets = new Array();
-            for (var i=0; i< window.cartHist.length;i++) {
-               filterSets.push(window.cartHist[i]['filter'])
-            }
 
-            if ($('#cart-view-elem').length>0) {
-                document.getElementById("cart-view-elem").remove();
-            }
-
-            var csrftoken = $.getCookie('csrftoken');
-            var form = document.createElement('form');
-            form.id = "cart-view-elem";
-            form.style.visibility = 'hidden'; // no user interaction is necessary
-            form.method = 'POST'; // forms by default use GET query strings
-            //form.action = '/explore/cart/';
-            form.action = '/cart/';
-            //form.append(csrftoken);
-            var input = document.createElement('input');
-            input.name = "csrfmiddlewaretoken";
-            input.value =csrftoken;
-            form.appendChild(input);
-            var input = document.createElement('input');
-            input.name = "filtergrp_list";
-            input.value = JSON.stringify(filterSets);
-            form.appendChild(input);
-            var input = document.createElement('input');
-            input.name = "partitions";
-            input.value = JSON.stringify(partitions);
-            form.appendChild(input);
-            document.body.appendChild(form)
-            form.submit();
-
-        /* var url = '/cart/';
-        url = encodeURI('/cart/');
-
-
-
-        ndic = {
-            'filtlist': JSON.stringify(filterSets),
-            'partitions': JSON.stringify(window.partitions)
-
-
-        }
-
-        var csrftoken = $.getCookie('csrftoken');
-        let deferred = $.Deferred();
-        $.ajax({
-            url: url,
-            data: ndic,
-            dataType: 'json',
-            type: 'post',
-            contentType: 'application/x-www-form-urlencoded',
-            beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
-            success: function (data) {
-                try {
-                     var k =1;
-                }
-                finally {
-                    deferred.resolve([]);
-                }
-            },
-            error: function(data){
-                alert("There was an error fetching server data. Please alert the systems administrator")
-                console.log('error loading data');
-            }
-        });
-        return deferred.promise(); */
-    };
 
     return {
         updateCollectionTotals: updateCollectionTotals,
         initializeTableData: initializeTableData,
-        initProjectData:initProjectData
+        initProjectData:initProjectData,
+        updateGlobalCart: updateGlobalCart,
+        getGlobalCounts: getGlobalCounts
     };
 });

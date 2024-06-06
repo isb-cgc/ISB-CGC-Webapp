@@ -67,6 +67,12 @@ require([
 ], function (image_search, tables,$, tippy, base) {
     var saving_cohort = false;
 
+    /* addEventListener("pageshow", (event) => {alert('pg')});
+    window.handlepageshow= function(){
+        alert('handle page');
+    } */
+
+
     $('#save-cohort-modal').on('show.bs.modal', function() {
 
         var modality_join = $('.join_val').filter(':checked').prop('value');
