@@ -715,4 +715,8 @@ li.cartlist{
   list-style-position: inside !important;
 }
 
+.modal-dialog {
+  height: fit-content;
+  max-width: 960px; // Optional, maximum width
+}
 

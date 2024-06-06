@@ -107,10 +107,25 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         }
         str=str+'</ol>'
         $('#cart_details').html(str);
-        $('#cart-details-modal').modal('show');
+        /*$('#cart-details-modal').modal('show');
         var height =$('#cart-details-modal').find('.modal-content').outerHeight();
         $('#cart-details-modal').find('.modal-body').height(height);
-        $('#cart-details-modal').find('.modal-body').css('overflow-y:auto');
+        $('#cart-details-modal').find('.modal-body').css('overflow-y:auto');*/
+
+        //$('#cart-details-modal').modal('show');
+        /* $('#cart-details-modal').addClass('fade');
+        $('#cart-details-modal').addClass('in');
+        $('#cart-details-modal').css("display","block");*/
+        //$('#cart-details-modal').modal('show');
+        //$('#cart-details-modal').css("display","block");
+        //var width=$('#cart-details-modal').find('.modal-content').outerWidth();
+        //var height =$('#cart-details-modal').find('.modal-content').outerHeight();
+        //$('#cart-details-modal').css("display","none");
+
+            $('#cart-details-modal').modal('show');
+            /*$('#cart-details-modal').height(height);
+            $('#cart-details-modal').width(width); */
+
 
     })
     /*
