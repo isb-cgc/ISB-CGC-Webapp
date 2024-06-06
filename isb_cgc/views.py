@@ -30,21 +30,14 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
 from django.dispatch import Signal
-from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import formats
 from django.core.exceptions import ObjectDoesNotExist
-# from django.core.mail import send_mail
 from sharing.service import send_email_message
 from django.contrib import messages
-from googleapiclient import discovery
-from oauth2client.client import GoogleCredentials
 
-from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
-from cohorts.metadata_helpers import get_sample_metadata
-from googleapiclient.errors import HttpError
 from cohorts.models import Cohort, Cohort_Perms
 from projects.models import Program
 from accounts.models import UserOptInStatus
@@ -57,8 +50,8 @@ from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
 from django.views.generic.edit import FormView
 from google_helpers.bigquery.feedback_support import BigQueryFeedbackSupport
-from solr_helpers import query_solr_and_format_result, build_solr_query, build_solr_facets
-from projects.models import Attribute, DataVersion, DataSource
+from solr_helpers import build_solr_query, build_solr_facets
+from projects.models import DataVersion, DataSource
 from solr_helpers import query_solr_and_format_result
 from .forms import CgcOtpTokenForm
 
@@ -123,9 +116,11 @@ def _decode_dict(data):
 
 @never_cache
 def landing_page(request):
-
-    logger.info("[STATUS] Received landing page view request at {}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-    return render(request, 'isb_cgc/landing.html', {'mitelman_url': settings.MITELMAN_URL, 'tp53_url': settings.TP53_URL })
+    logger.info("[STATUS] Received landing page view request at {}".format(
+        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+    return render(request, 'isb_cgc/landing.html',
+                  {'bq_search_url': settings.BQ_SEARCH_URL, 'mitelman_url': settings.MITELMAN_URL,
+                   'tp53_url': settings.TP53_URL})
 
 
 # Redirect all requests for the old landing page location to isb-cgc.org
@@ -372,43 +367,86 @@ def search_cohorts_viz(request):
     return HttpResponse(json.dumps(result_obj), status=200)
 
 
-def get_tbl_preview(request, proj_id, dataset_id, table_id):
-    try:
-        result = BigQuerySupport.get_table_preview(proj_id, dataset_id, table_id)
-        status = result['status']
-
-    except HttpError as e:
-        logger.error(
-            "[ERROR] While attempting to retrieve preview data for {proj_id}.{dataset_id}.{table_id} table:".format(
-                proj_id=proj_id,
-                dataset_id=dataset_id,
-                table_id=table_id))
-        logger.exception(e)
-        status = e.resp.status
-        result = {
-            'message': "There was an error while processing this request."
-        }
-        if status == 403:
-            result = {
-                'message': "Your attempt to preview this table [{proj_id}.{dataset_id}.{table_id}] was denied.".format(
-                    proj_id=proj_id,
-                    dataset_id=dataset_id,
-                    table_id=table_id)
-            }
-
-    except Exception as e:
-        status = 503
-        result = {
-            'message': "There was an error while processing this request."
-        }
-        logger.error(
-            "[ERROR] While attempting to retrieve preview data for {proj_id}.{dataset_id}.{table_id} table:".format(
-                proj_id=proj_id,
-                dataset_id=dataset_id,
-                table_id=table_id))
-        logger.exception(e)
-
-    return JsonResponse(result, status=status)
+# def get_tbl_preview(request, proj_id, dataset_id, table_id):
+#     status = 200
+#     MAX_ROW = 8
+#     try:
+#         if not proj_id or not dataset_id or not table_id:
+#             logger.warning("[WARNING] Required ID missing: {}.{}.{}".format(proj_id,dataset_id,table_id))
+#             status = 503
+#             result = {
+#                 'message': "There was an error while processing this request: one or more required parameters (project id, dataset_id or table_id) were not supplied."
+#             }
+#         else:
+#             bq_service = get_bigquery_service()
+#             dataset = bq_service.datasets().get(projectId=proj_id, datasetId=dataset_id).execute()
+#             is_public = False
+#             for access_entry in dataset['access']:
+#                 if access_entry.get('role') == 'READER' and access_entry.get('specialGroup') == 'allAuthenticatedUsers':
+#                     is_public = True
+#                     break
+#             if is_public:
+#                 tbl_data=bq_service.tables().get(projectId=proj_id, datasetId=dataset_id, tableId=table_id).execute()
+#                 if tbl_data.get('type') == 'VIEW' and tbl_data.get('view') and tbl_data.get('view').get('query'):
+#                     view_query_template = '''#standardSql
+#                             {query_stmt}
+#                             LIMIT {max}'''
+#                     view_query = view_query_template.format(query_stmt=tbl_data['view']['query'], max=MAX_ROW)
+#                     response = bq_service.jobs().query(
+#                         projectId=settings.BIGQUERY_PROJECT_ID,
+#                         body={ 'query': view_query  }).execute()
+#                 else:
+#                     response = bq_service.tabledata().list(projectId=proj_id, datasetId=dataset_id, tableId=table_id,
+#                                                        maxResults=MAX_ROW).execute()
+#                 if response and int(response['totalRows']) > 0:
+#                     result = {
+#                         'rows': response['rows']
+#                     }
+#                 else:
+#                     result = {
+#                         'message': 'No record has been found for table {proj_id}.{dataset_id}.{table_id}.'.format(
+#                             proj_id=proj_id,
+#                             dataset_id=dataset_id,
+#                             table_id=table_id)
+#                     }
+#             else:
+#                 status = 401
+#                 result = {
+#                     'message': "Preview is not available for this table/view."
+#                 }
+#
+#     except HttpError as e:
+#         logger.error(
+#             "[ERROR] While attempting to retrieve preview data for {proj_id}.{dataset_id}.{table_id} table:".format(
+#                 proj_id=proj_id,
+#                 dataset_id=dataset_id,
+#                 table_id=table_id))
+#         logger.exception(e)
+#         status = e.resp.status
+#         result = {
+#             'message': "There was an error while processing this request."
+#         }
+#         if status == 403:
+#             result = {
+#                 'message': "Your attempt to preview this table [{proj_id}.{dataset_id}.{table_id}] was denied.".format(
+#                     proj_id=proj_id,
+#                     dataset_id=dataset_id,
+#                     table_id=table_id)
+#             }
+#
+#     except Exception as e:
+#         status = 503
+#         result = {
+#             'message': "There was an error while processing this request."
+#         }
+#         logger.error(
+#             "[ERROR] While attempting to retrieve preview data for {proj_id}.{dataset_id}.{table_id} table:".format(
+#                 proj_id=proj_id,
+#                 dataset_id=dataset_id,
+#                 table_id=table_id))
+#         logger.exception(e)
+#
+#     return JsonResponse(result, status=status)
 
 
 @login_required
@@ -615,30 +653,21 @@ def contact_us(request):
     return render(request, 'isb_cgc/contact_us.html')
 
 
-def bq_meta_search(request, table_id=""):
-    bq_filter_file_name = 'bq_meta_filters.json'
-    bq_filter_file_path = BQ_ECOSYS_BUCKET + bq_filter_file_name
-    bq_filters = requests.get(bq_filter_file_path).json()
-    bq_filters['selected_table_full_id'] = table_id
-    return render(request, 'isb_cgc/bq_meta_search.html', bq_filters)
+def bq_meta_search(request, full_table_id=""):
+    bq_filter_list = ["status=current"]
+    parameter_list = ["projectId", "datasetId", "tableId"]
+    bq_filter = ''
+    if full_table_id:
+        full_table_id_list = full_table_id.split(".")
+        for i in range(len(full_table_id_list)):
+            if i:
+                field_val = '"'+ full_table_id_list[i]+'"'
+            else:
+                field_val = full_table_id_list[i]
+            bq_filter_list.append('{parameter}={field_val}'.format(parameter=parameter_list[i], field_val=field_val))
 
-
-def bq_meta_data(request):
-    bq_meta_data_file_name = 'bq_meta_data.json'
-    bq_meta_data_file_path = BQ_ECOSYS_BUCKET + bq_meta_data_file_name
-    bq_meta_data = requests.get(bq_meta_data_file_path).json()
-    bq_useful_join_file_name = 'bq_useful_join.json'
-    bq_useful_join_file_path = BQ_ECOSYS_BUCKET + bq_useful_join_file_name
-    bq_useful_join = requests.get(bq_useful_join_file_path).json()
-    for bq_meta_data_row in bq_meta_data:
-        useful_joins = []
-        row_id = bq_meta_data_row['id']
-        for join in bq_useful_join:
-            if join['id'] == row_id:
-                useful_joins = join['joins']
-                break
-        bq_meta_data_row['usefulJoins'] = useful_joins
-    return JsonResponse(bq_meta_data, safe=False)
+        bq_filter = 'search?' + ('&'.join(bq_filter_list))
+    return redirect(settings.BQ_SEARCH_URL + bq_filter)
 
 
 def programmatic_access_page(request):
