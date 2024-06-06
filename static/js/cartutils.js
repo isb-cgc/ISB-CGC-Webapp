@@ -108,6 +108,10 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
         str=str+'</ol>'
         $('#cart_details').html(str);
         $('#cart-details-modal').modal('show');
+        var height =$('#cart-details-modal').find('.modal-content').outerHeight();
+        $('#cart-details-modal').find('.modal-body').height(height);
+        $('#cart-details-modal').find('.modal-body').css('overflow-y:auto');
+
     })
     /*
     $('#cart-details-modal').on('show.bs.modal', function(){
