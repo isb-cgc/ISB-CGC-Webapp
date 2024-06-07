@@ -68,22 +68,26 @@ require([
 
      var ajaxtriggered = false;
 
-     const updateCartTable = function(studyidarr, seriesidarr) {
+     const updateCartTable = function(studyidarr, seriesidarr, offset) {
          var nonViewAbleModality= new Set(["PR","SEG","RTSTRUCT","RTPLAN","RWV", "XC"])
         var slimViewAbleModality=new Set(["SM"])
         if ($('.cart-wrapper').find('.dataTables_controls').length>0){
             var pageRows = parseInt($('.cart-wrapper').find('.dataTables_length select').val());
+            var pageCur = parseInt($('.cart-wrapper').find('.dataTables_paginate').find('.current').text());
         }
         else {
             var pageRows = 10;
+            var pageCur=1;
         }
         $('#cart-table').DataTable().destroy();
         try {
             $('#cart-table').DataTable({
                 "iDisplayLength": pageRows,
+                "displayStart":(pageCur-1)*pageRows,
                 "autoWidth": false,
                 "dom": '<"dataTables_controls"ilp>rt<"bottom"><"clear">',
                 "order": [[1, "asc"]],
+
                 "createdRow": function (row, data, dataIndex) {
                     $(row).attr('id', 'series_' + data['SeriesInstanceUID'])
                     $(row).attr('data-studyid', data['StudyInstanceUID']);
@@ -286,7 +290,7 @@ require([
 
     window.onpageshow = function (){
 
-        alert('show');
+        //alert('show');
         if (!ajaxtriggered) {
             window.cartedits = false;
             window.cartHist = new Array();

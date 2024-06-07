@@ -371,14 +371,17 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                }
 
                 else if (eql && (nxtpart.length==curpart.length+1)){
-                 window.partitions[j]['not'].push(nxtpart[nxtpart.length-1]);
-                 window.partitions[j]['not'].sort();
+
+                 if (window.partitions[j]['not'].indexOf(nxtpart[nxtpart.length-1])<0){
+                    window.partitions[j]['not'].push(nxtpart[nxtpart.length-1]);
+                 }
+
                  for (var filtprt=0;filtprt<window.partitions[j]['filt'].length;filtprt++){
                      var tmp = window.partitions[j]['filt'][filtprt];
                      basefilt.push([...tmp])
                  }
                }
-
+              window.partitions[j]['not'].sort();
             }
             if (!inserted){
                addNewPartition(nxtpart, -1, basefilt);

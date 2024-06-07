@@ -214,6 +214,30 @@ define(['cartutils','filterutils','jquery', 'utils'], function(cartutils, filter
                     $(row).data('totalcases', data[5]);
                     $(row).attr('totalcases', data[5]);
                     $(row).attr('id', 'project_row_' + data[0]);
+
+                    if (data[0] in window.selProjects){
+                        if (('someInCart' in window.selProjects[data[0]]) && (window.selProjects[data[0]]['someInCart'])){
+                            $(row).addClass('someInCart');
+                        }
+                        else{
+                            $(row).removeClass('someInCart');
+                        }
+                        if (('extraInCart' in window.selProjects[data[0]]) && (window.selProjects[data[0]]['extraInCart'])){
+                            $(row).addClass('extraInCart');
+                        }
+                        else{
+                            $(row).removeClass('extraInCart');
+                        }
+
+                        if (('extraInFilt' in window.selProjects[data[0]]) && (window.selProjects[data[0]]['extraInFilt'])){
+                            $(row).addClass('extraInFilt');
+                        }
+                        else{
+                            $(row).removeClass('extraInFilt');
+                        }
+
+                    }
+
                     if (Object.keys(collectionStats).length>0){
                         if (('study_per_collec' in collectionStats) && (data[0] in collectionStats['study_per_collec'])){
                             $(row).attr('totalstudy', collectionStats['study_per_collec'][data[0]]);
@@ -234,6 +258,17 @@ define(['cartutils','filterutils','jquery', 'utils'], function(cartutils, filter
                         clickProjectTableShopping(event, row, data)
 
                     });
+                   /*
+                    $(row).removeClass('extraInFilt');
+                  $(row).removeClass('someInCart');
+                  $(row).removeClass('extraInCart');
+
+
+                    $(row).removeClass('extraInFilt');
+                  $(row).removeClass('someInCart');
+                  $(row).removeClass('extraInCart');
+
+                   */
 
                 },
                 "columnDefs": [
@@ -440,7 +475,7 @@ define(['cartutils','filterutils','jquery', 'utils'], function(cartutils, filter
                 "iDisplayLength": pageRows,
                 "autoWidth": false,
                 "dom": '<"dataTables_controls"ilp>rt<"bottom"><"clear">',
-                "order": [[3, "asc"]],
+                "order": [[4, 'asc'],[3, 'asc']],
                 "createdRow": function (row, data, dataIndex) {
                     $(row).attr('id', 'case_' + data['PatientID'])
                     $(row).attr('data-projectid', data['collection_id'][0]);

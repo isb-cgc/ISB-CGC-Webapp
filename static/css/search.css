@@ -387,7 +387,7 @@ tr {
     width: 100%; }
 
 #projects_table td.cartnum, #projects_table_head th.cartnum{
-    width: 7%;
+    width: 5%;
     word-wrap: break-word;
 }
 
