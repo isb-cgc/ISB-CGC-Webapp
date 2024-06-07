@@ -357,6 +357,7 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                    }
                    else if (nxtpart[k]>curpart[k]){
                        eql = false;
+                       break;
                    }
                }
                 if (lt || (eql && (nxtpart.length<curpart.length))){
@@ -564,17 +565,21 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
                    }
                    else if (nxtpart[k]>curpart[k]){
                        eql = false;
+                       break;
                    }
                }
                if (lt || (eql && (nxtpart.length<curpart.length))){
                    insertInd=j
-                   inserted = true;
                    parts.splice(insertInd, 0, nxtpart)
+                   inserted = true;
                    break;
                }
                else if (eql && (nxtpart.length==curpart.length)){
                  inserted = true;
                  break;
+               }
+               if(inserted){
+                   break;
                }
            }
            if (!inserted){
