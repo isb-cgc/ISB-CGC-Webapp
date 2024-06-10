@@ -330,6 +330,19 @@ h1, h2, h3, h4, h5, h6 {
   width: 100%;
   border: 2px solid #1f77b4 !important; }
 
+/* Hide the 'forgot your password' link on the password field (we have a button) */
+#sign-in .helptext {
+  display: none;
+}
+
+.alert-mfa {
+  margin-top: 10px;
+}
+
+input[name="otp_challenge"] {
+  margin-bottom: 10px;
+}
+
 .signup input, .login input, .password_reset input, #password-change input, .password_set input, .email-verify input {
   width: 100%;
   border-radius: 3px;
