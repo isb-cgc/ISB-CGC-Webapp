@@ -454,7 +454,7 @@ def search_cohorts_viz(request):
 @login_required
 @otp_required
 def test_solr_data(request):
-    status=200
+    status = 200
 
     try:
         start = time.time()
@@ -464,7 +464,8 @@ def test_solr_data(request):
         versions = DataVersion.objects.filter(data_type__in=versions) if len(versions) else DataVersion.objects.filter(
             active=True)
 
-        programs = Program.objects.filter(active=1,is_public=1,owner=User.objects.get(is_superuser=1,is_active=1,is_staff=1))
+        programs = Program.objects.filter(active=1, is_public=1,
+                                          owner=User.objects.get(is_superuser=1, is_active=1, is_staff=1))
 
         if len(filters):
             programs = programs.filter(id__in=[int(x) for x in filters.keys()])
@@ -479,7 +480,9 @@ def test_solr_data(request):
             attrs = sources.get_source_attrs(for_ui=True)
             for source in sources:
                 solr_query = build_solr_query(prog_filters, with_tags_for_ex=True) if prog_filters else None
-                solr_facets = build_solr_facets(attrs['sources'][source.id]['attrs'], filter_tags=solr_query['filter_tags'] if solr_query else None, unique='case_barcode')
+                solr_facets = build_solr_facets(attrs['sources'][source.id]['attrs'],
+                                                filter_tags=solr_query['filter_tags'] if solr_query else None,
+                                                unique='case_barcode')
                 query_set = []
 
                 if solr_query:
@@ -498,7 +501,8 @@ def test_solr_data(request):
                                             ds.shared_id_col, ds.name, source.shared_id_col
                                         )) + solr_query['queries'][attr])
                         else:
-                            logger.warning("[WARNING] Attribute {} not found in program {}".format(attr_name,prog.name))
+                            logger.warning(
+                                "[WARNING] Attribute {} not found in program {}".format(attr_name, prog.name))
 
                 solr_result = query_solr_and_format_result({
                     'collection': source.name,
@@ -510,13 +514,13 @@ def test_solr_data(request):
 
         stop = time.time()
 
-        results['elapsed_time'] = "{}s".format(str(stop-start))
+        results['elapsed_time'] = "{}s".format(str(stop - start))
 
     except Exception as e:
         logger.error("[ERROR] While trying to fetch Solr metadata:")
         logger.exception(e)
         results = {'msg': 'Encountered an error'}
-        status=500
+        status = 500
 
     return JsonResponse({'result': results}, status=status)
 
@@ -538,11 +542,14 @@ def igv(request):
             if not build:
                 build = bam_item['build'].lower()
             elif build != bam_item['build'].lower():
-                logger.warning("[WARNING] Possible build collision in IGV viewer BAMS: {} vs. {}".format(build, bam_item['build'].lower()))
+                logger.warning("[WARNING] Possible build collision in IGV viewer BAMS: {} vs. {}".format(build,
+                                                                                                         bam_item[
+                                                                                                             'build'].lower()))
                 logger.warning("Dropping any files with build {}".format(bam_item['build'].lower()))
             id_barcode = item.split(',')
             bam_list.append({
-                'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': bam_item['build'].lower(), 'program': bam_item['program']
+                'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': bam_item['build'].lower(),
+                'program': bam_item['program']
             })
     # This is a single GET request, we need to get the full file info from Solr first
     else:
@@ -551,10 +558,13 @@ def igv(request):
         gdc_ids = list(set(req.get('gdc_ids', '').split(',')))
 
         if not len(gdc_ids):
-            messages.error(request,"A list of GDC file UUIDs was not provided. Please indicate the files you wish to view.")
+            messages.error(request,
+                           "A list of GDC file UUIDs was not provided. Please indicate the files you wish to view.")
         else:
             if len(gdc_ids) > settings.MAX_FILES_IGV:
-                messages.warning(request,"The maximum number of files which can be viewed in IGV at one time is {}.".format(settings.MAX_FILES_IGV) +
+                messages.warning(request,
+                                 "The maximum number of files which can be viewed in IGV at one time is {}.".format(
+                                     settings.MAX_FILES_IGV) +
                                  " Only the first {} will be displayed.".format(settings.MAX_FILES_IGV))
                 gdc_ids = gdc_ids[:settings.MAX_FILES_IGV]
 
@@ -562,13 +572,16 @@ def igv(request):
                 result = query_solr_and_format_result(
                     {
                         'collection': source.name,
-                        'fields': ['sample_barcode','file_node_id','file_name_key','index_file_name_key', 'program_name', 'access'],
+                        'fields': ['sample_barcode', 'file_node_id', 'file_name_key', 'index_file_name_key',
+                                   'program_name', 'access'],
                         'query_string': 'file_node_id:("{}") AND data_format:("BAM")'.format('" "'.join(gdc_ids)),
                         'counts_only': False
                     }
                 )
                 if 'docs' not in result or not len(result['docs']):
-                    messages.error(request,"IGV compatible files corresponding to the following UUIDs were not found: {}.".format(" ".join(gdc_ids))
+                    messages.error(request,
+                                   "IGV compatible files corresponding to the following UUIDs were not found: {}.".format(
+                                       " ".join(gdc_ids))
                                    + "Note that the default build is HG38; to view HG19 files, you must indicate the build as HG19: &build=hg19")
                 else:
                     saw_controlled = False
@@ -577,12 +590,13 @@ def igv(request):
                             saw_controlled = True
                         bam_list.append({
                             'sample_barcode': doc['sample_barcode'],
-                            'gcs_path': "{};{}".format(doc['file_name_key'],doc['index_file_name_key']),
+                            'gcs_path': "{};{}".format(doc['file_name_key'], doc['index_file_name_key']),
                             'build': build,
                             'program': doc['program_name']
                         })
                     if saw_controlled:
-                        messages.info(request,"Some of the requested files require approved access to controlled data - if you receive a 403 error, double-check your current login status with DCF.")
+                        messages.info(request,
+                                      "Some of the requested files require approved access to controlled data - if you receive a 403 error, double-check your current login status with DCF.")
 
     context = {
         'bam_list': bam_list,
@@ -645,11 +659,14 @@ def citations_page(request):
     citations = requests.get(citations_file_path).json()
     return render(request, 'isb_cgc/citations.html', citations)
 
+
 def vid_tutorials_page(request):
     return render(request, 'isb_cgc/video_tutorials.html')
 
+
 def how_to_discover_page(request):
     return render(request, 'how_to_discover_page.html')
+
 
 def contact_us(request):
     return render(request, 'isb_cgc/contact_us.html')
@@ -690,7 +707,8 @@ def dashboard_page(request):
         isb_superuser = User.objects.get(is_staff=True, is_superuser=True, is_active=True)
         public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser, perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
 
-        cohort_perms = Cohort_Perms.objects.select_related('cohort').filter(user=request.user, cohort__active=True).exclude(
+        cohort_perms = Cohort_Perms.objects.select_related('cohort').filter(user=request.user,
+                                                                            cohort__active=True).exclude(
             cohort__id__in=public_cohorts)
         cohorts_count = cohort_perms.count()
         cohorts = Cohort.objects.filter(id__in=cohort_perms.values_list('cohort__id',flat=True), active=True).order_by('-date_created')[:display_count]
@@ -751,7 +769,6 @@ def opt_in_update(request):
         logger.exception(e)
         logger.error(error_msg)
 
-
     return JsonResponse({
         'redirect-url': redirect_url,
         'error_msg': error_msg
@@ -790,7 +807,7 @@ def send_feedback_form(user_email, firstName, lastName, formLink):
     return {
         'status': status,
         'message': message
-        }
+    }
 
 
 @login_required
@@ -822,7 +839,6 @@ def opt_in_form(request):
         first_name = request.GET.get('first_name') if request.GET.get('first_name') else ''
         last_name = request.GET.get('last_name') if request.GET.get('last_name') else ''
 
-
     form = {'first_name': first_name,
             'last_name': last_name,
             'email': email,
@@ -831,6 +847,7 @@ def opt_in_form(request):
 
     return render(request, template, form)
 
+
 @csrf_protect
 def opt_in_form_submitted(request):
     msg = ''
@@ -838,11 +855,11 @@ def opt_in_form_submitted(request):
     template = 'isb_cgc/opt_in_form_submitted.html'
 
     # get values and update optin status
-    first_name= request.POST.get('first-name')
-    last_name= request.POST.get('last-name')
-    email= request.POST.get('email')
-    affiliation= request.POST.get('affiliation')
-    feedback= request.POST.get('feedback')
+    first_name = request.POST.get('first-name')
+    last_name = request.POST.get('last-name')
+    email = request.POST.get('email')
+    affiliation = request.POST.get('affiliation')
+    feedback = request.POST.get('feedback')
     subscribed = (request.POST.get('subscribed') == 'opt-in')
 
     try:
@@ -885,6 +902,7 @@ def opt_in_form_submitted(request):
     }
     return render(request, template, message)
 
+
 def send_feedback_notification(feedback_dict):
     try:
         message_data = {
@@ -903,13 +921,14 @@ def send_feedback_notification(feedback_dict):
                  'Thank you.\n\n' +
                  'ISB-CGC team').format(
                     timestamp=feedback_dict['submitted_time'],
-                                        firstName=feedback_dict['first_name'],
-                                        lastName=feedback_dict['last_name'],
-                                        email=feedback_dict['email'],
-                                        affiliation=feedback_dict['affiliation'],
-                                        subscribed=('Yes' if feedback_dict['subscribed'] else 'No'),
-                                        feedback=feedback_dict['feedback'])}
+                    firstName=feedback_dict['first_name'],
+                    lastName=feedback_dict['last_name'],
+                    email=feedback_dict['email'],
+                    affiliation=feedback_dict['affiliation'],
+                    subscribed=('Yes' if feedback_dict['subscribed'] else 'No'),
+                    feedback=feedback_dict['feedback'])}
         send_email_message(message_data)
     except Exception as e:
-        logger.error('[Error] Error has occured while sending out feedback notifications to {}.'.format(settings.NOTIFICATION_EMAIL_TO_ADDRESS))
+        logger.error('[Error] Error has occured while sending out feedback notifications to {}.'.format(
+            settings.NOTIFICATION_EMAIL_TO_ADDRESS))
         logger.exception(e)
