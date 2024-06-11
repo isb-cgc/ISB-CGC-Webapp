@@ -90,7 +90,6 @@ MANAGERS                = ADMINS
 GCLOUD_PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
 GCLOUD_PROJECT_NUMBER          = os.environ.get('GCLOUD_PROJECT_NUMBER', '')
 BIGQUERY_PROJECT_ID           = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PROJECT_ID)
-BIGQUERY_DATASET_V1         = os.environ.get('BIGQUERY_DATASET_V1', '')
 BIGQUERY_DATA_PROJECT_ID  = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
 
 # Deployment module
@@ -115,10 +114,8 @@ GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET')
 BIGQUERY_COHORT_DATASET_ID           = os.environ.get('BIGQUERY_COHORT_DATASET_ID', 'cohort_dataset')
 BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
 BIGQUERY_COSMIC_DATASET_ID    = os.environ.get('BIGQUERY_COSMIC_DATASET_ID', '')
-BIGQUERY_CGC_TABLE_ID    = os.environ.get('BIGQUERY_CGC_TABLE_ID', '')
-MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
-USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
+MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
 DATABASES = {
     'default': {
@@ -165,20 +162,6 @@ if BIGQUERY_COHORT_TABLE_ID is None:
     raise Exception("Developer-specific cohort table ID is not set.")
 
 BQ_MAX_ATTEMPTS             = int(os.environ.get('BQ_MAX_ATTEMPTS', '10'))
-
-
-# TODO Remove duplicate class.
-#
-# This class is retained here, as it is required by bq_data_access/v1.
-# bq_data_access/v2 uses the class from the bq_data_access/bigquery_cohorts module.
-class BigQueryCohortStorageSettings(object):
-    def __init__(self, dataset_id, table_id):
-        self.dataset_id = dataset_id
-        self.table_id = table_id
-
-
-def GET_BQ_COHORT_SETTINGS():
-    return BigQueryCohortStorageSettings(BIGQUERY_COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
 
 USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', False)
 
@@ -308,10 +291,6 @@ INSTALLED_APPS = (
     'sharing',
     'projects',
     'genes',
-    'variables',
-    'workbooks',
-    # 'notebooks',
-    'data_upload',
     'analysis',
     'offline',
     'adminrestrict',
@@ -480,11 +459,6 @@ if IS_DEV:
 
 # Path to application runtime JSON key
 GOOGLE_APPLICATION_CREDENTIALS        = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
-
-# GCP monitoring Service Account
-MONITORING_SA_CLIENT_EMAIL            = os.environ.get('MONITORING_SA_CLIENT_EMAIL','')
-
-MONITORING_SA_ACCESS_CREDENTIALS      = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('MONITORING_SA_ACCESS_CREDENTIALS', '')))
 
 #################################
 #   For NIH/eRA Commons login   #

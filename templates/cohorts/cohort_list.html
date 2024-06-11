@@ -14,30 +14,9 @@
 
 {% block page_header %}
 <div class="container">
-    <ol class="breadcrumb">
-        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-        {% if workbook %}
-            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
-            <li><a href="{% url 'workbook_detail' workbook_id=workbook.id %}">{{ workbook.name|title }}</a></li>
-        {% endif %}
-    </ol>
     <h1 class="page-header pull-left">{% if from_workbook %}Data Source | {% endif %}Cohorts</h1>
-    {% if from_workbook %}
-        <div class="pull-right new-cohort">
-            <li class="separator"></li>
-            <h5>New Cohort:</h5>
-            <a href="{% if workbook %}{% url 'cohort_create_for_existing_workbook' workbook_id=workbook.id worksheet_id=worksheet.id %}{% else %}{% url 'cohort_create_for_new_workbook' %}{% endif %}" class="btn btn-primary"><i class="fa fa-plus"></i> Filters</a>
-            <a href="{% if workbook %}{% url 'cohort_create_for_existing_workbook_barcodes' workbook_id=workbook.id worksheet_id=worksheet.id %}{% else %}{% url 'cohort_create_for_new_workbook_barcodes' %}{% endif %}" class="btn btn-primary"><i class="fa fa-plus"></i> Barcodes</a>
-        </div>
-        <div class="pull-right">
-            <form id="cohort-apply-to-workbook" action="{% url 'add_cohorts_to_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id %}" method="POST">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary" disabled="disabled">{% if create_workbook %}Create Workbook{% else %}Apply to Worksheet{% endif %}</button>
-            </form>
-        </div>
-    {% else %}
-        <div class="pull-right new-cohort"><h5>New Cohort:</h5> <a href="{% url 'cohort' %}" class="btn btn-primary"><i class="fa fa-plus"></i> Filters</a> <a href="{% url 'cohort_barcodes' %}" class="btn btn-primary"><i class="fa fa-plus"></i> Barcodes</a></div>
-    {% endif %}
+    <div class="pull-right new-cohort"><a href="{% url 'cohort' %}" class="btn btn-primary"><i class="fa fa-plus"></i> New Cohort</a> </div>
+
 </div>
 {% endblock %}
 {% block content %}
@@ -47,9 +26,6 @@
             <li role="presentation" {% if not is_public %} class="active" {% endif %} >
                 <a href="#saved-cohorts-list" aria-controls="saved-cohorts-list" role="tab" data-toggle="tab">Saved Cohorts</a>
             </li>
-            <li role="presentation" {% if is_public %} class="active" {% endif %} >
-                <a href="#public-cohorts-list" aria-controls="public-cohorts-list" role="tab" data-toggle="tab">Public Cohorts</a>
-            </li>
         </ul>
         <div class="tab-content panel-body ">
             <div role="tabpanel" class="tab-pane {% if not is_public %} active {% endif %} " id="saved-cohorts-list">
@@ -57,18 +33,9 @@
                     {% if not from_workbook %}
                         <div class="page-action-group">
                             <li role="menuitem">
-                                <button class="btn btn-primary createWorkbookWithCohort" disabled title="Select one or more cohorts.">New Workbook</button>
-                            </li>
-                            <li class="separator"></li>
-                            <li role="menuitem">
                                 <button id="delete-cohorts" type="button" class="btn btn-info owner-only" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true" disabled title="Select one or more cohorts.">
                                     <i class="fa fa-trash"></i>
                                     Delete
-                                </button>
-                            </li>
-                            <li role="menuitem">
-                                <button id="cohort-sets" type="button" class="btn btn-info set-ops" data-toggle="modal" data-target="#set-ops-modal" aria-label="set-logic" role="button" aria-expanded="true" disabled title="Select one or more cohorts.">
-                                Set Operations
                                 </button>
                             </li>
                             <li role="menuitem">
@@ -101,8 +68,8 @@
                                     <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} class="cohort" type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>
                                 </td>
                                 <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</a></td>
-                                <td class="case-col">{{ cohort.case_size }}</td>
-                                <td class="sample-col"> {{ cohort.sample_size }} </td>
+                                <td class="case-col">{{ cohort.case_count }}</td>
+                                <td class="sample-col"> {% if cohort.sample_count <= 0 %} N/A {% else %}{{ cohort.sample_count }}{% endif %} </td>
                                 <td class="owner-col">
                                     {% if cohort.perm == 'Owner' %}
                                         You
@@ -120,7 +87,7 @@
                                 <td class="id-col">
                                     {{ cohort.id }}
                                 </td>
-                                <td class="date-col">{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</td>
+                                <td class="date-col">{{ cohort.date_created|date:'M d, Y, g:i a' }}</td>
                             </tr>
                         {% endif %}
                         {% endfor %}
@@ -137,8 +104,6 @@
             <div role="tabpanel" class="tab-pane {% if is_public %} active {% endif %} " id="public-cohorts-list">
                 {% if not from_workbook %}
                 <div class="page-action-group">
-                    <li role="menuitem"><button class="btn btn-primary createWorkbookWithCohort">New Workbook</button></li>
-                    <li class="separator"></li>
                     <li role="menuitem"><button class="btn btn-info set-ops" data-toggle="modal" data-target="#set-ops-modal" aria-label="set-logic" role="button" title="Select two or more cohorts." aria-expanded="true">Set Operations</button></li>
                 </div>
                 {% endif %}
@@ -182,58 +147,6 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="union-header">New Cohorts</h4>
                 </div>
-                <form id="set-op-cohort" method="POST" action="{% url 'set_operation' %}" class="">
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label for="new-cohort-name">Cohort Name</label>
-                            <input type="text" class="form-control" id="new-cohort-name" name="name" placeholder="Enter name for new cohort" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="operation">Set Operation</label>
-                            <div>
-                                <select name="operation" id="operation" class="form-control">
-                                    <option value="union">Union</option>
-                                    <option value="intersect">Intersection</option>
-                                    <option value="complement">Complement</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group set-control">
-                            <label for="selected-ids">Selected Cohorts</label>
-                            <div>
-                                <div class="form-control-static" id="selected-ids">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group complement-control">
-                            <label for="base-cohort">Base Cohort</label>
-                            <div>
-                                <p class="form-control-static" id="base-id"></p>
-                                <div class="cohort-search-div">
-                                    <a class="add-cohort btn btn-link"><i class="fa fa-plus"></i> Choose Cohort</a>
-                                    <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group complement-control">
-                            <label for="subtract-cohorts">Subtracted Cohorts</label>
-                            <div>
-                                <p class="form-control-static" id="subtract-ids"></p>
-                                <div class="cohort-search-div">
-                                    <a class="add-cohort btn btn-link"><i class="fa fa-plus"></i> Choose Cohort</a>
-                                    <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-primary">Okay</button>
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
@@ -303,7 +216,6 @@
     <script type="text/javascript">
     var cohort_list = {{ cohorts_listing|safe }};
     var shared_users = {{ shared_users|safe }};
-    var from_workbook = {{ from_workbook|lower }};
     </script>
 {% endblock %}
 

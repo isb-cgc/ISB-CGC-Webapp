@@ -1,3 +1,19 @@
+###
+# Copyright 2015-2024, Institute for Systems Biology
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
+
 if [ -n "$CI" ]; then
     export HOME=/home/circleci/${CIRCLE_PROJECT_REPONAME}
     export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
@@ -59,7 +75,7 @@ mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL
 mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'dev-user'@'localhost';"
 
 # If we have migrations for older, pre-migrations apps which haven't yet been or will never be added to the database dump, make them here eg.:
-# python3 ${HOMEROOT}/manage.py makemigrations <appname>
+# python3 ${HOMEROOT}/manage.py makemigrations
 
 # Now run migrations
 echo "Running Migrations..."
@@ -69,9 +85,9 @@ echo "Adding in default Django admin IP allowances for local development"
 mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e "INSERT INTO adminrestrict_allowedip (ip_address) VALUES('127.0.0.1'),('10.0.*.*');"
 
 # Load your SQL table file
-# Looks for metadata_featdef_tables.sql, if this isn't found, it downloads a file from GCS and saves it as
-# metadata_featdef_tables.sql for future use
-if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
+# Looks for cgc_metadata.sql, if this isn't found, it downloads a file from GCS and saves it as
+# cgc_metadata.sql for future use
+if [ ! -f ${HOMEROOT}/scripts/cgc_metadata.sql ]; then
     # Sometimes CircleCI loses its authentication, re-auth with the dev key if we're on circleCI...
     if [ -n "$CI" ]; then
         sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/deployment.key.json
@@ -81,33 +97,24 @@ if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
         sudo gcloud config set project "${GCLOUD_PROJECT_ID}"
     fi
     echo "Downloading SQL Table File..."
-    sudo gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/dev_table_and_routines_file.sql" ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+    sudo gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/dev_table_and_routines_file.sql" ${HOMEROOT}/scripts/cgc_metadata.sql
 fi
 
-if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
+if [ ! -f ${HOMEROOT}/scripts/cgc_metadata.sql ]; then
     echo "[ERROR] Unable to download database seed file -halting build."
     exit 1
 fi
 
-echo "Applying SQL Table File... (may take a while)"
-mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+echo "Applying CGC Metadata SQL Table File..."
+# mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/cgc_metadata.sql
 
-echo "Adding Cohort/Site Data and bootstrapping Django project and program tables..."
+echo "Adding Site Data..."
 python3 ${HOMEROOT}/scripts/add_site_ids.py
-
-# Add in the 'All TCGA' cohort
-if [ -n "$CI" ]; then
-    # We don't add the prefab cohorts to BQ if we're in CircleCI
-    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py -o cloudsql -p False
-else
-    # ...but we do if we're doing a local build
-    python3 ${HOMEROOT}/scripts/add_alldata_cohort.py -f $GCLOUD_PROJECT_ID -o all -p False
-fi
 
 # We have to use '' around the statement due to the need to use `` around name and key, which are MySQL keywords, so concatenation is needed to
 # preserve expansion of GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET
 echo "Setting Up Social Application Login..."
-mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e 'BEGIN; INSERT INTO socialaccount_socialapp (provider, `name`, client_id, secret, `key`) VALUES("google", "Google", "'$OAUTH2_CLIENT_ID'", "'$OAUTH2_CLIENT_SECRET'", " "); INSERT INTO socialaccount_socialapp_sites (socialapp_id, site_id) VALUES(1, 2), (1, 3), (1, 4); COMMIT;'
+mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e 'BEGIN; INSERT INTO socialaccount_socialapp (provider, provider_id, `name`, client_id, secret, `key`) VALUES("google", "google", "Google", "'$OAUTH2_CLIENT_ID'", "'$OAUTH2_CLIENT_SECRET'", " "); INSERT INTO socialaccount_socialapp_sites (socialapp_id, site_id) VALUES(1, 2), (1, 3), (1, 4); COMMIT;'
 
 # Setting up Cron token
 python3 ${HOMEROOT}/scripts/create_api_token.py

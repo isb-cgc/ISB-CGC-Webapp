@@ -14,11 +14,7 @@
 
 {% block page_header %}
     {% if request.user.is_authenticated %}
-        <div class="container">
-            <ol class="breadcrumb">
-                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-            </ol>
-        </div>
+
     {% endif %}
 {% endblock %}
 {% block content %}

@@ -445,39 +445,6 @@ require([
         return false;
     });
 
-    $(".createWorkbookWithCohort").on("click", function(){
-        //get the selected cohort
-        var cohorts = [];
-        $('#saved-cohorts-list input[type="checkbox"], #public-cohorts-list input[type="checkbox"]').each(function() {
-            if ($(this).is(':checked') && $(this).val() != 'on') {
-                cohorts.push($(this).val());
-            }
-        });
-
-        if(cohorts.length > 0){
-            var csrftoken = $.getCookie('csrftoken');
-            $.ajax({
-                type: 'POST',
-                dataType :'json',
-                url : BASE_URL + '/workbooks/create_with_cohort_list',
-                data: JSON.stringify({cohorts : cohorts}),
-                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
-                success: function (data) {
-                    if(!data.error) {
-                        window.location = BASE_URL + '/workbooks/' + data.workbook_id + '/worksheets/' + data.worksheet_id + '/';
-                    } else {
-                        base.setReloadMsg('error','Failed to create a workbook with cohort(s): '+ cohorts.join(", "));
-                    }
-                },
-                error: function () {
-                    base.setReloadMsg('error','Failed to create a workbook with cohort(s): '+ cohorts.join(", "));
-                }
-            }).always(function () {
-                $this.find('button[type="submit"]').removeClass('btn-disabled').removeAttr('disabled');
-            });
-        }
-    });
-
     $('.selected-cohorts, #selected-ids, #base-id, #subtract-ids').on('click', '.delete-x', delete_x_callback);
 
     // Initiate buttons states on load
