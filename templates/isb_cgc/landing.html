@@ -3,7 +3,7 @@
 
 {% comment %}
 
-   Copyright 2021, Institute for Systems Biology
+   Copyright 2024, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -79,13 +79,13 @@
                             <div class="panel-heading row">
                                 <div class="col-xs-9">
                                     <a target="_blank" rel="noreferrer"
-                                       href="{% url 'bq_meta_search' %}">
+                                       href="{{ bq_search_url }}">
                                         <h4>BigQuery Table Search</h4>
                                     </a>
                                 </div>
                                 <div class="col-xs-3 padding-left-0">
                                     <a target="_blank" rel="noreferrer"
-                                       href="{% url 'bq_meta_search' %}">
+                                       href="{{ bq_search_url }}">
                                         <img src="{% static 'img/bq-icon.png' %}" class="img-fluid"
                                              alt="bq table icon"></a>
                                 </div>
@@ -109,7 +109,7 @@
                                     </div>
                                     <div class="col-xs-4 text-center">
                                         <a target="_blank" rel="noreferrer"
-                                           href="{% url 'bq_meta_search' %}">
+                                           href="{{ bq_search_url }}">
                                             <div class="launch-icon landing-icon"></div>
                                             <div class="icon-caption">Launch</div>
                                         </a>
