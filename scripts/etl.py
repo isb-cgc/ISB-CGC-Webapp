@@ -138,7 +138,7 @@ def load_attributes(ds_attr_files, program_attr_file_name, node_attr_file_name, 
     if program_attr_file_name:
         progs_attr_file = open(program_attr_file_name, "r")
         for line in csv_reader(progs_attr_file):
-            if not program_attrs.get(line[1],None):
+            if not program_attrs.get(line[1], None):
                 program_attrs[line[1]] = []
             program_attrs[line[1]].append(line[0])
 
@@ -146,7 +146,7 @@ def load_attributes(ds_attr_files, program_attr_file_name, node_attr_file_name, 
     if node_attr_file_name:
         node_attr_file = open(node_attr_file_name, "r")
         for line in csv_reader(node_attr_file):
-            if not node_attrs.get(line[1],None):
+            if not node_attrs.get(line[1], None):
                 node_attrs[line[1]] = []
             node_attrs[line[1]].append(line[0])
 
@@ -162,11 +162,12 @@ def load_attributes(ds_attr_files, program_attr_file_name, node_attr_file_name, 
                         line[2],
                         True if line[3] == 'True' else False,
                         True if line[0] in PREFORMATTED_ATTRS else False,
-                        programs=program_attrs.get(line[0],None),
+                        programs=program_attrs.get(line[0], None),
                         nodes=node_attrs.get(line[0], None)
                     )
                 attr = ATTR_SET[line[0]]
-
+                if not attr['programs']:
+                    print("[WARNING] Attribute {} has no programs listed! Is this intentional?".format(attr['name']))
                 attr['data_sources'].append(ds)
                 if attr_set_types[filename] not in attr['attr_set_types']:
                     attr['attr_set_types'].append(attr_set_types[filename])

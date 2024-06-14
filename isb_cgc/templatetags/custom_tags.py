@@ -90,6 +90,8 @@ ATTR_SPECIFIC_ORDERS = [
     'tumor_tissue_site',
     'histological_type',
     'pathologic_stage',
+    'study_group_pdc',
+    'study_id_pdc',
     'person_neoplasm_cancer_status',
     'neoplasm_histologic_grade',
     'bmi',
