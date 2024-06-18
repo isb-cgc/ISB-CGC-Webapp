@@ -8,7 +8,6 @@ django-finalware==1.0.0
 django-redis==5.2.0
 djangorestframework==3.11.2
 django-session-security==2.6.5
-ecdsa==0.13.3
 future==0.18.3
 google-api-python-client==1.12.8
 google-cloud-storage==1.18.0
