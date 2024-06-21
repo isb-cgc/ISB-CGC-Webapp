@@ -97,7 +97,7 @@ if [ ! -f ${HOMEROOT}/scripts/cgc_metadata.sql ]; then
         sudo gcloud config set project "${GCLOUD_PROJECT_ID}"
     fi
     echo "Downloading SQL Table File..."
-    sudo gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/dev_table_and_routines_file.sql" ${HOMEROOT}/scripts/cgc_metadata.sql
+    sudo gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/cgc_metadata.sql" ${HOMEROOT}/scripts/cgc_metadata.sql
 fi
 
 if [ ! -f ${HOMEROOT}/scripts/cgc_metadata.sql ]; then
@@ -106,7 +106,7 @@ if [ ! -f ${HOMEROOT}/scripts/cgc_metadata.sql ]; then
 fi
 
 echo "Applying CGC Metadata SQL Table File..."
-# mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/cgc_metadata.sql
+mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/cgc_metadata.sql
 
 echo "Adding Site Data..."
 python3 ${HOMEROOT}/scripts/add_site_ids.py
