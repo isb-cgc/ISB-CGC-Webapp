@@ -44,7 +44,7 @@ if [[ -z $SOLR_PWD ]]; then
   echo "[ERROR] SOLR_PWD not set - exiting!"
   exit 1
 fi
-if [ -z $SOLR_USER ]; then
+if [[ -z $SOLR_USER ]]; then
     echo "[ERROR] Solr API user not supplied - exiting."
     exit 1
 fi
