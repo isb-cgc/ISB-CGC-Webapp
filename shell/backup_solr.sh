@@ -9,7 +9,7 @@ MAX_WAIT=3
 SOLR_DATA="/opt/bitnami/solr/server/solr"
 RUN=`date +%s`
 BACKUPS_DIR="${SOLR_DATA}/backups_${RUN}"
-PARSE_RESPONSE="import sys, json; print(json.load(sys.stdin)['details']['backup'].get('snapshotCompletedAt',None) or 'INCOMPLETE')"
+PARSE_RESPONSE="import sys, json; print(json.load(sys.stdin)['details'].get('backup',{}).get('snapshotCompletedAt',None) or 'INCOMPLETE')"
 
 while getopts ":c:l:f:d:h" flag
 do
@@ -114,7 +114,7 @@ echo ".done."
 echo "Taring contents of ${BACKUPS_DIR}..."
 tar -cvzf ${FILE_NAME} -C ${BACKUPS_DIR} .
 
-#
+
 if [[ ! -z ${DEST_BUCKET} ]]; then
         gsutil cp ${FILE_NAME} gs://${DEST_BUCKET}/
 else
