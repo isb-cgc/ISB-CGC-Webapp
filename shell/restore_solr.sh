@@ -109,8 +109,8 @@ fi
 
 echo ""
 echo -n "Solr restart in "
-for k in `seq 1 3`; do
-  echo -n "$k, "
+for k in `seq 1 4`; do
+  echo -n "$k..."
   sleep 1
 done
 echo "restarting."
