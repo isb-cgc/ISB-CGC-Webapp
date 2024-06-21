@@ -16,7 +16,7 @@
 
 runtime: custom
 env: flex
-service: expr
+service: default
 api_version: 1
 threadsafe: true
 
@@ -36,7 +36,7 @@ network:
 
 automatic_scaling:
   min_num_instances: 1
-  max_num_instances: 6
+  max_num_instances: 2
   cool_down_period_sec: 180
   cpu_utilization:
     target_utilization: 0.6
