@@ -29,6 +29,7 @@ beta_settings:
 
 env_variables:
   DJANGO_SETTINGS_MODULE: 'isb_cgc.settings'
+  IS_APP_ENGINE: 1
 
 network:
   name: solr
