@@ -125,12 +125,12 @@ DB_SOCKET = database_config['default']['HOST'] if 'cloudsql' in database_config[
 
 IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_UAT = (os.environ.get('IS_UAT', 'False') == 'True')
-IS_APP_ENGINE = bool(os.getenv('IS_APP_ENGINE', 0) == 1)
+IS_APP_ENGINE = bool(os.getenv('IS_APP_ENGINE', 'False') == 'True')
 IS_CI = bool(os.getenv('CI', None) is not None)
 
 # If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
-if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE_FLEX:
+if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE:
     DATABASES['default']['OPTIONS'] = {
         'ssl': {
             'ca': os.environ.get('DB_SSL_CA'),
