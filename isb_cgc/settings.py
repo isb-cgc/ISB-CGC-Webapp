@@ -125,8 +125,7 @@ DB_SOCKET = database_config['default']['HOST'] if 'cloudsql' in database_config[
 
 IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_UAT = (os.environ.get('IS_UAT', 'False') == 'True')
-IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
-IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
+IS_APP_ENGINE = bool(os.getenv('IS_APP_ENGINE', 0) == 1)
 IS_CI = bool(os.getenv('CI', None) is not None)
 
 # If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
@@ -143,14 +142,12 @@ if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE_FLEX:
 # Default to localhost for the site ID
 SITE_ID = 3
 
-if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
+if IS_APP_ENGINE:
     print("[STATUS] AppEngine Flex detected.", file=sys.stdout)
     SITE_ID = 4
 
-
 def get_project_identifier():
     return BIGQUERY_PROJECT_ID
-
 
 BQ_MAX_ATTEMPTS             = int(os.environ.get('BQ_MAX_ATTEMPTS', '10'))
 USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', False)
@@ -530,18 +527,22 @@ AXES_COOLOFF_TIME = int(os.environ.get('AXES_COOLOFF_TIME', '5'))
 AXES_USERNAME_FORM_FIELD = "email"
 AXES_LOCKOUT_TEMPLATE = os.environ.get('AXES_LOCKOUT_TEMPLATE', 'accounts/account/login_lockout.html')
 
-# Deployed systems have app credentials on the VM, but a local VM build must provide a credentials file for some
-# actions. CircleCI doesn't need the file, as it can use the deployment key
-GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')
+# Deployed systems retrieve credentials from the metadata server, but a local VM build must provide a credentials file
+# for some actions. CircleCI needs SA access but can make use of the deployment SA's key.
+GOOGLE_APPLICATION_CREDENTIALS = None
 
-if not exists(GOOGLE_APPLICATION_CREDENTIALS):
-    if IS_CI:
-        GOOGLE_APPLICATION_CREDENTIALS = "deployment.key.json"
-    else:
+if IS_DEV:
+    GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')
+elif IS_CI:
+    GOOGLE_APPLICATION_CREDENTIALS = "deployment.key.json"
+
+if not IS_APP_ENGINE:
+    if not exists(GOOGLE_APPLICATION_CREDENTIALS):
         print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
         exit(1)
-        
-print("[STATUS] GOOGLE_APPLICATION_CREDENTIALS: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
+    print("[STATUS] GOOGLE_APPLICATION_CREDENTIALS: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
+else:
+    print("[STATUS] AppEngine Flex detected--default credentials will be used.")
 
 # Client ID used for OAuth2 - this is for IGV and the test database
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
