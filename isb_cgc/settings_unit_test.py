@@ -90,14 +90,12 @@ MANAGERS                = ADMINS
 GCLOUD_PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
 GCLOUD_PROJECT_NUMBER          = os.environ.get('GCLOUD_PROJECT_NUMBER', '')
 BIGQUERY_PROJECT_ID           = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PROJECT_ID)
-BIGQUERY_DATASET_V1         = os.environ.get('BIGQUERY_DATASET_V1', '')
 BIGQUERY_DATA_PROJECT_ID  = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
 
 # Deployment module
 CRON_MODULE             = os.environ.get('CRON_MODULE')
 
 # Log Names
-SERVICE_ACCOUNT_LOG_NAME = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev_logging')
 WEBAPP_LOGIN_LOG_NAME = os.environ.get('WEBAPP_LOGIN_LOG_NAME', 'local_dev_logging')
 GCP_ACTIVITY_LOG_NAME = os.environ.get('GCP_ACTIVITY_LOG_NAME', 'local_dev_logging')
 
@@ -109,16 +107,13 @@ PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
 
 # Data Buckets
 OPEN_DATA_BUCKET        = os.environ.get('OPEN_DATA_BUCKET', '')
-GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET')
 
 # BigQuery cohort storage settings
 BIGQUERY_COHORT_DATASET_ID           = os.environ.get('BIGQUERY_COHORT_DATASET_ID', 'cohort_dataset')
 BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
 BIGQUERY_COSMIC_DATASET_ID    = os.environ.get('BIGQUERY_COSMIC_DATASET_ID', '')
-BIGQUERY_CGC_TABLE_ID    = os.environ.get('BIGQUERY_CGC_TABLE_ID', '')
-MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
-USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
+MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
 DATABASES = {
     'default': {
@@ -165,20 +160,6 @@ if BIGQUERY_COHORT_TABLE_ID is None:
     raise Exception("Developer-specific cohort table ID is not set.")
 
 BQ_MAX_ATTEMPTS             = int(os.environ.get('BQ_MAX_ATTEMPTS', '10'))
-
-
-# TODO Remove duplicate class.
-#
-# This class is retained here, as it is required by bq_data_access/v1.
-# bq_data_access/v2 uses the class from the bq_data_access/bigquery_cohorts module.
-class BigQueryCohortStorageSettings(object):
-    def __init__(self, dataset_id, table_id):
-        self.dataset_id = dataset_id
-        self.table_id = table_id
-
-
-def GET_BQ_COHORT_SETTINGS():
-    return BigQueryCohortStorageSettings(BIGQUERY_COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
 
 USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', False)
 
@@ -308,10 +289,6 @@ INSTALLED_APPS = (
     'sharing',
     'projects',
     'genes',
-    'variables',
-    'workbooks',
-    # 'notebooks',
-    'data_upload',
     'analysis',
     'offline',
     'adminrestrict',
@@ -481,11 +458,6 @@ if IS_DEV:
 # Path to application runtime JSON key
 GOOGLE_APPLICATION_CREDENTIALS        = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
 
-# GCP monitoring Service Account
-MONITORING_SA_CLIENT_EMAIL            = os.environ.get('MONITORING_SA_CLIENT_EMAIL','')
-
-MONITORING_SA_ACCESS_CREDENTIALS      = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('MONITORING_SA_ACCESS_CREDENTIALS', '')))
-
 #################################
 #   For NIH/eRA Commons login   #
 #################################
@@ -493,23 +465,8 @@ MONITORING_SA_ACCESS_CREDENTIALS      = join(dirname(__file__), '../{}{}'.format
 # Log name for ERA login views
 LOG_NAME_ERA_LOGIN_VIEW                  = os.environ.get('LOG_NAME_ERA_LOGIN_VIEW', '')
 
-# Service account blacklist file path
-SERVICE_ACCOUNT_BLACKLIST_PATH           = os.environ.get('SERVICE_ACCOUNT_BLACKLIST_PATH', '')
-
-# Google Org whitelist file path
-GOOGLE_ORG_WHITELIST_PATH                = os.environ.get('GOOGLE_ORG_WHITELIST_PATH', '')
-
-# Managed Service Account file path
-MANAGED_SERVICE_ACCOUNTS_PATH            = os.environ.get('MANAGED_SERVICE_ACCOUNTS_PATH', '')
-
 # DCF Phase I enable flag
 DCF_TEST                                 = bool(os.environ.get('DCF_TEST', 'False') == 'True')
-
-# SA via DCF
-SA_VIA_DCF                               = bool(os.environ.get('SA_VIA_DCF', 'False') == 'True')
-
-# DCF Monitoring SA
-DCF_MONITORING_SA                        = os.environ.get('DCF_MONITORING_SA', '')
 
 #################################
 #   For DCF login               #
@@ -524,10 +481,7 @@ DCF_REVOKE_URL                           = os.environ.get('DCF_REVOKE_URL', '')
 DCF_LOGOUT_URL                           = os.environ.get('DCF_LOGOUT_URL', '')
 DCF_URL_URL                              = os.environ.get('DCF_URL_URL', '')
 DCF_CLIENT_SECRETS                       = os.environ.get('DCF_CLIENT_SECRETS', '')
-DCF_GOOGLE_SA_REGISTER_URL               = os.environ.get('DCF_GOOGLE_SA_REGISTER_URL', '')
 DCF_GOOGLE_SA_VERIFY_URL                 = os.environ.get('DCF_GOOGLE_SA_VERIFY_URL', '')
-DCF_GOOGLE_SA_MONITOR_URL                = os.environ.get('DCF_GOOGLE_SA_MONITOR_URL', '')
-DCF_GOOGLE_SA_URL                        = os.environ.get('DCF_GOOGLE_SA_URL', '')
 DCF_TOKEN_REFRESH_WINDOW_SECONDS         = int(os.environ.get('DCF_TOKEN_REFRESH_WINDOW_SECONDS', 86400))
 DCF_LOGIN_EXPIRATION_SECONDS             = int(os.environ.get('DCF_LOGIN_EXPIRATION_SECONDS', 86400))
 

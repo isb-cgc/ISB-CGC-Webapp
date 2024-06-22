@@ -34,19 +34,13 @@ urlpatterns = [
     url(r'^users/$', views.user_detail_login, name='user_detail_login'),
     url(r'^users/(?P<user_id>\d+)/$', views.user_detail, name='user_detail'),
 
-    url(r'^bucket_object_list/$', views.bucket_object_list, name='bucket_object_list'),
     url(r'^igv/$', views.igv, name='igv'),
     url(r'^report/$', views.path_report, name='path_pdf'),
     url(r'^report/(?P<report_file>[A-Za-z0-9._/-]+)/$', views.path_report, name='path_pdf_report'),
 
-    url(r'^analysis/', include('analysis.urls')),
-    url(r'^workbooks/', include('workbooks.urls')),
-    # url(r'^notebooks/', include('notebooks.urls')),
     url(r'^cohorts/', include('cohorts.urls')),
-    url(r'^visualizations/', include('visualizations.urls')),
     path('admin/', admin.site.urls),
     url(r'^accounts/', include('accounts.urls')),
-    url(r'^seqpeek/', include('seqpeek.urls')),
     url(r'^session_security/', include('session_security.urls')),
     url(r'^_ah/(vm_)?health$', views.health_check),
 
@@ -59,6 +53,7 @@ urlpatterns = [
     url(r'^citations/', views.citations_page, name='citations_page'),
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
     url(r'^extended_login/$', views.extended_login_view, name='extended_login'),
+    url(r'^otp_request/$', views.CgcOtpView.as_view(), name='otp_request'),
     url(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),
     url(r'^how_to_discover/', views.how_to_discover_page, name='how_to_discover'),
     url(r'^contact_us/', views.contact_us, name='contact_us'),
@@ -74,7 +69,6 @@ urlpatterns = [
 
     url(r'^programs/', include('projects.urls')),
     url(r'^genes/', include('genes.urls')),
-    url(r'^variables/', include('variables.urls')),
     url(r'^share/', include('sharing.urls')),
     url(r'^opt_in/check_show', views.opt_in_check_show, name='opt_in'),
     url(r'^opt_in/update', views.opt_in_update, name='opt_in_update'),

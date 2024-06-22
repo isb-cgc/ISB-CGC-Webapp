@@ -30,20 +30,11 @@
 {% block page_header %}
 <div class="container">
     <ol class="breadcrumb">
-        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
         <li><a href="{% url 'programs' %}">Programs</a></li>
     </ol>
     <h1 class="page-header">{{ program.name }}</h1>
     <p class="program-description">{{ program.description }}</p>
     <ul class="page-action-group">
-{#        <li role="menuitem">#}
-{#            <form action="{% url 'worksheet_create_with_programs' %}" method="POST">#}
-{#                {% csrf_token %}#}
-{#                <input type="hidden" name="program_id" value="{{ program.id }}">#}
-{#                <button type="submit" class="btn btn-primary" >New Workbook</button>#}
-{#            </form>#}
-{#        </li>#}
-{#        <li class="separator"></li>#}
         {% if program.owner.id != request.user.id %}
             {% if program.is_public %}
             <li><h4>Public Program</h4></li>
@@ -98,8 +89,6 @@
 {#    var base_api_url            = '{{ BASE_API_URL|safe }}';#}
     var base_url                = '{{ BASE_URL|safe }}';
     var program_id              = {{ program.id }};
-{#    var display_worksheet_id    = '{{ display_worksheet.id|safe }}';#}
-{#    var workbook_id             = '{{ workbook.id }}';#}
 </script>
 {% endblock %}
 

@@ -44,7 +44,7 @@ if [[ -z $SOLR_PWD ]]; then
   echo "[ERROR] SOLR_PWD not set - exiting!"
   exit 1
 fi
-if [ -z $SOLR_USER ]; then
+if [[ -z $SOLR_USER ]]; then
     echo "[ERROR] Solr API user not supplied - exiting."
     exit 1
 fi
@@ -109,8 +109,8 @@ fi
 
 echo ""
 echo -n "Solr restart in "
-for k in `seq 1 3`; do
-  echo -n "$k, "
+for k in `seq 1 4`; do
+  echo -n "$k..."
   sleep 1
 done
 echo "restarting."
