@@ -18,7 +18,6 @@ mkdir ./json
 mkdir ./txt
 
 gsutil cp "gs://${DEPLOYMENT_BUCKET}/${ENV_FILE}" ./.env
-gsutil cp "gs://${DEPLOYMENT_BUCKET}/${WEBAPP_RUNTIME_SA_KEY}" ./privatekey.json
 gsutil cp "gs://${DEPLOYMENT_BUCKET}/${DCF_SECRETS_FILE}" ./dcf_secrets.txt
 gsutil cp "gs://${DEPLOYMENT_BUCKET}/${SOLR_PEM_FILE}" ./solr-ssl.pem
 gsutil cp "gs://${DEPLOYMENT_BUCKET}/${DISPATCH_YAML}" ./dispatch.yaml
