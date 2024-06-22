@@ -127,6 +127,7 @@ IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_UAT = (os.environ.get('IS_UAT', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
 IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
+IS_CI = bool(os.getenv('CI', None) is not None)
 
 # If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
@@ -529,13 +530,16 @@ AXES_COOLOFF_TIME = int(os.environ.get('AXES_COOLOFF_TIME', '5'))
 AXES_USERNAME_FORM_FIELD = "email"
 AXES_LOCKOUT_TEMPLATE = os.environ.get('AXES_LOCKOUT_TEMPLATE', 'accounts/account/login_lockout.html')
 
-# Deployed systems have app credentials on the VM, but a local system will need a JSON key present to
-# download anything necessary, like the SQL table file.
+# Deployed systems have app credentials on the VM, but a local VM build must provide a credentials file for some
+# actions. CircleCI doesn't need the file, as it can use the deployment key
 GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')
 
 if not exists(GOOGLE_APPLICATION_CREDENTIALS):
-    print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
-    exit(1)
+    if IS_CI:
+        GOOGLE_APPLICATION_CREDENTIALS = "deployment.key.json"
+    else:
+        print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
+        exit(1)
 
 # Client ID used for OAuth2 - this is for IGV and the test database
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
