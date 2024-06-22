@@ -26,7 +26,9 @@ if [ -n "$CI" ]; then
     export DATABASE_NAME=${DATABASE_NAME_BUILD}
     export DATABASE_HOST=${DATABASE_HOST_BUILD}
     # Give the 'ubuntu' test user access
-    mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'ubuntu'@'%' IDENTIFIED BY 'isb';"
+    mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "CREATE USER IF NOT EXISTS 'ubuntu'@'%' IDENTIFIED BY 'ubuntu';"
+    mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'ubuntu'@'%';"
+    mysql -u $MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'ubuntu'@'localhost';"
 else
     if ( "/home/vagrant/www/shell/get_env.sh" ) ; then
         export $(cat ${ENV_FILE_PATH} | grep -v ^# | xargs) 2> /dev/null
@@ -93,7 +95,7 @@ if [ ! -f ${HOMEROOT}/scripts/cgc_metadata.sql ]; then
         sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/deployment.key.json
     # otherwise just use privatekey.json
     else
-        sudo gcloud auth activate-service-account --key-file ${HOMEROOT}/${SECURE_LOCAL_PATH}${GOOGLE_APPLICATION_CREDENTIALS}
+        sudo gcloud auth activate-service-account --key-file ${GOOGLE_APPLICATION_CREDENTIALS}
         sudo gcloud config set project "${GCLOUD_PROJECT_ID}"
     fi
     echo "Downloading SQL Table File..."
