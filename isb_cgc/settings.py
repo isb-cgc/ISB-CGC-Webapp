@@ -540,6 +540,8 @@ if not exists(GOOGLE_APPLICATION_CREDENTIALS):
     else:
         print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
         exit(1)
+        
+print("[STATUS] GOOGLE_APPLICATION_CREDENTIALS: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
 
 # Client ID used for OAuth2 - this is for IGV and the test database
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
