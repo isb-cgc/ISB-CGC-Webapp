@@ -544,11 +544,11 @@ if not IS_APP_ENGINE:
     print("[STATUS] GOOGLE_APPLICATION_CREDENTIALS: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
 else:
     print("[STATUS] AppEngine Flex detected--default credentials will be used.")
+    # We need to hook up Python logging to Google Cloud Logging for AppEngine (or nothing will be logged)
+    client = google.cloud.logging.Client()
+    client.get_default_handler()
+    client.setup_logging()
 
-# We need to hook up Python logging to Google Cloud Logging
-client = google.cloud.logging.Client()
-client.get_default_handler()
-client.setup_logging()
 
 # Client ID used for OAuth2 - this is for IGV and the test database
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
