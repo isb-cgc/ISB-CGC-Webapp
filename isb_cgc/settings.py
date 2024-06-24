@@ -23,6 +23,7 @@ from os.path import join, dirname, exists
 import sys
 import dotenv
 from socket import gethostname, gethostbyname
+import google.cloud.logging
 
 
 SECURE_LOCAL_PATH = os.environ.get('SECURE_LOCAL_PATH', '')
@@ -543,6 +544,11 @@ if not IS_APP_ENGINE:
     print("[STATUS] GOOGLE_APPLICATION_CREDENTIALS: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
 else:
     print("[STATUS] AppEngine Flex detected--default credentials will be used.")
+
+# We need to hook up Python logging to Google Cloud Logging
+client = google.cloud.logging.Client()
+client.get_default_handler()
+client.setup_logging()
 
 # Client ID used for OAuth2 - this is for IGV and the test database
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
