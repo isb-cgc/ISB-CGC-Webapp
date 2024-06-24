@@ -545,7 +545,7 @@ if not IS_APP_ENGINE:
 else:
     print("[STATUS] AppEngine Flex detected--default credentials will be used.")
 
-# We need to hook up Python logging to Google Cloud Loggin
+# We need to hook up Python logging to Google Cloud Logging
 client = google.cloud.logging.Client()
 client.get_default_handler()
 client.setup_logging()
