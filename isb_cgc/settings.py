@@ -23,6 +23,12 @@ from os.path import join, dirname, exists
 import sys
 import dotenv
 from socket import gethostname, gethostbyname
+import google.cloud.logging
+
+# We need to hook up Python logging to Google Cloud Loggin
+client = google.cloud.logging.Client()
+client.get_default_handler()
+client.setup_logging()
 
 
 SECURE_LOCAL_PATH = os.environ.get('SECURE_LOCAL_PATH', '')

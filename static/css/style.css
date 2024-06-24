@@ -341,7 +341,7 @@ h1, h2, h3, h4, h5, h6 {
 
 input[name="otp_challenge"] {
   margin-bottom: 10px;
-} 
+}
 
 .signup input, .login input, .password_reset input, #password-change input, .password_set input, .email-verify input {
   width: 100%;
