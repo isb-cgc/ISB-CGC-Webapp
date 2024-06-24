@@ -537,7 +537,7 @@ elif IS_CI:
     GOOGLE_APPLICATION_CREDENTIALS = "deployment.key.json"
 
 if not IS_APP_ENGINE:
-    if not exists(GOOGLE_APPLICATION_CREDENTIALS):
+    if GOOGLE_APPLICATION_CREDENTIALS is not None and not exists(GOOGLE_APPLICATION_CREDENTIALS):
         print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
         exit(1)
     print("[STATUS] GOOGLE_APPLICATION_CREDENTIALS: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
