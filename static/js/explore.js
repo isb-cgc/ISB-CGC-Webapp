@@ -27,7 +27,7 @@ require.config({
         assetsresponsive: 'libs/assets.responsive',
         jquerydt: 'libs/jquery.dataTables.min',
         base: 'base',
-        imagesearch: 'image_search',
+        image_search: 'image_search',
         tippy: 'libs/tippy-bundle.umd.min',
         '@popperjs/core': 'libs/popper.min',
         session_security: 'session_security/script'
@@ -48,21 +48,24 @@ require.config({
         'tablesorter': ['jquery'],
         'underscore': {exports: '_'},
         'session_security': ['jquery'],
-        'imagesearch': ['jquery', 'underscore', 'base', 'jquerydt', 'jqueryui', 'bootstrap']
+        'image_search': ['jquery', 'underscore', 'base', 'jquerydt', 'jqueryui', 'bootstrap']
     }
 });
 
 require([
+    'image_search',
+    'tables',
     'jquery',
     'tippy',
     'base', // This must always be loaded
-    'imagesearch',
     'jqueryui',
     'jquerydt',
     'bootstrap',
-    'tablesorter'
-], function ($, tippy, base) {
+    'tablesorter',
+
+], function (image_search, tables,$, tippy, base) {
     var saving_cohort = false;
+
 
     $('#external-web-warning').on('show.bs.modal', function(){
         $('#collection-modal').hide();
@@ -230,6 +233,7 @@ require([
         $('#collection-modal').removeClass('in');
         $('#collection-modal').css("display","none");
     });
+
 /*
     tippy.delegate('table#proj_table', {
         content: function(reference) {
@@ -273,6 +277,13 @@ require([
     tippy('.tooltip_chart_info',{
         content: 'Counts shown below are the number of cases (or patients) for each attribute value. Counts for each attribute (e.g. Modality) '+
             'are unchanged by the values (e.g. PET) selected (checked) for that attribute. They only change based on the values selected for all other attributes.',
+        theme: 'light',
+        placement: 'right-end',
+        arrow: false
+    });
+
+    tippy('.filterset_info',{
+        content: 'Go ask Bill',
         theme: 'light',
         placement: 'right-end',
         arrow: false
@@ -426,4 +437,6 @@ require([
     $('.download-link').on('click', function(){
         $('#download-images').modal("hide");
     });
+
+
 });

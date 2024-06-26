@@ -286,6 +286,20 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'static_precompiler.finders.StaticPrecompilerFinder',
+
+)
+
+STATIC_PRECOMPILER_COMPILERS = (
+    (
+        "static_precompiler.compilers.Babel",
+        {
+            "executable": "/home/vagrant/babel/node_modules/.bin/babel",
+            "sourcemap_enabled": True,
+            "plugins": None,
+            "presets": "react-app",
+        },
+    ),
 )
 
 # Make this unique, and don't share it with anybody.
@@ -336,7 +350,8 @@ INSTALLED_APPS = (
     'idc_collections',
     'offline',
     'adminrestrict',
-    'axes'
+    'axes',
+    'static_precompiler'
 )
 
 #############################
