@@ -134,14 +134,19 @@ def domain_redirect(request):
 
     return landing_page(request)
 
-'''
-Displays the privacy policy
-'''
-
-
+####
+# Displays the privacy policy
+#####
 @never_cache
 def privacy_policy(request):
     return render(request, 'isb_cgc/privacy.html', {'request': request, })
+
+
+###
+# Displays the new version info page
+###
+def new_version(request):
+    return render(request, 'isb_cgc/new_version.html', {'request': request, })
 
 
 '''
