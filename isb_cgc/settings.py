@@ -75,7 +75,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 GCLOUD_PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
 GCLOUD_PROJECT_NUMBER          = os.environ.get('GCLOUD_PROJECT_NUMBER', '')
 BIGQUERY_PROJECT_ID            = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PROJECT_ID)
-BIGQUERY_DATASET_V1            = os.environ.get('BIGQUERY_DATASET_V1', '')
 BIGQUERY_DATA_PROJECT_ID       = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
 BIGQUERY_FEEDBACK_DATASET      = os.environ.get('BIGQUERY_FEEDBACK_DATASET', '')
 BIGQUERY_FEEDBACK_TABLE        = os.environ.get('BIGQUERY_FEEDBACK_TABLE', '')
@@ -602,10 +601,6 @@ if (IS_DEV and CONNECTION_IS_LOCAL) or IS_CIRCLE:
 ############################
 
 CONN_MAX_AGE = 60
-
-############################
-#   CUSTOM TEMPLATE CONTEXT
-############################
 
 ############################
 #   METRICS SETTINGS
