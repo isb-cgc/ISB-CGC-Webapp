@@ -38,10 +38,10 @@ from django.contrib import messages
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
-from google_helpers.bigquery.bq_support import BigQuerySupport
+# from google_helpers.bigquery.bq_support import BigQuerySupport
 from google_helpers.stackdriver import StackDriverLogger
-from cohorts.metadata_helpers import get_sample_metadata
-from googleapiclient.errors import HttpError
+# from cohorts.metadata_helpers import get_sample_metadata
+# from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
 from projects.models import Program
@@ -52,7 +52,7 @@ from accounts.sa_utils import get_nih_user_details
 from allauth.socialaccount.models import SocialAccount
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
-from google_helpers.bigquery.service import get_bigquery_service
+# from google_helpers.bigquery.service import get_bigquery_service
 from google_helpers.bigquery.feedback_support import BigQueryFeedbackSupport
 from solr_helpers import query_solr_and_format_result, build_solr_query, build_solr_facets
 from projects.models import Attribute, DataVersion, DataSource
@@ -119,9 +119,11 @@ def _decode_dict(data):
 
 @never_cache
 def landing_page(request):
-
-    logger.info("[STATUS] Received landing page view request at {}".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-    return render(request, 'isb_cgc/landing.html', {'mitelman_url': settings.MITELMAN_URL, 'tp53_url': settings.TP53_URL })
+    logger.info("[STATUS] Received landing page view request at {}".format(
+        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+    return render(request, 'isb_cgc/landing.html',
+                  {'bq_search_url': settings.BQ_SEARCH_URL, 'mitelman_url': settings.MITELMAN_URL,
+                   'tp53_url': settings.TP53_URL})
 
 
 # Redirect all requests for the old landing page location to isb-cgc.org
@@ -162,6 +164,8 @@ def css_test(request):
 '''
 Returns page that has user details
 '''
+
+
 @login_required
 def user_detail_login(request):
     user_id = request.user.id
@@ -283,6 +287,7 @@ def warn_page(request):
     request.session['seenWarning'] = True
     return JsonResponse({'warning_status': 'SEEN'}, status=200)
 
+
 '''
 DEPRECATED - Returns Results from text search
 '''
@@ -321,91 +326,91 @@ def search_cohorts_viz(request):
     return HttpResponse(json.dumps(result_obj), status=200)
 
 
-def get_tbl_preview(request, proj_id, dataset_id, table_id):
-    status = 200
-    MAX_ROW = 8
-    try:
-        if not proj_id or not dataset_id or not table_id:
-            logger.warning("[WARNING] Required ID missing: {}.{}.{}".format(proj_id,dataset_id,table_id))
-            status = 503
-            result = {
-                'message': "There was an error while processing this request: one or more required parameters (project id, dataset_id or table_id) were not supplied."
-            }
-        else:
-            bq_service = get_bigquery_service()
-            dataset = bq_service.datasets().get(projectId=proj_id, datasetId=dataset_id).execute()
-            is_public = False
-            for access_entry in dataset['access']:
-                if access_entry.get('role') == 'READER' and access_entry.get('specialGroup') == 'allAuthenticatedUsers':
-                    is_public = True
-                    break
-            if is_public:
-                tbl_data=bq_service.tables().get(projectId=proj_id, datasetId=dataset_id, tableId=table_id).execute()
-                if tbl_data.get('type') == 'VIEW' and tbl_data.get('view') and tbl_data.get('view').get('query'):
-                    view_query_template = '''#standardSql
-                            {query_stmt}
-                            LIMIT {max}'''
-                    view_query = view_query_template.format(query_stmt=tbl_data['view']['query'], max=MAX_ROW)
-                    response = bq_service.jobs().query(
-                        projectId=settings.BIGQUERY_PROJECT_ID,
-                        body={ 'query': view_query  }).execute()
-                else:
-                    response = bq_service.tabledata().list(projectId=proj_id, datasetId=dataset_id, tableId=table_id,
-                                                       maxResults=MAX_ROW).execute()
-                if response and int(response['totalRows']) > 0:
-                    result = {
-                        'rows': response['rows']
-                    }
-                else:
-                    result = {
-                        'message': 'No record has been found for table {proj_id}.{dataset_id}.{table_id}.'.format(
-                            proj_id=proj_id,
-                            dataset_id=dataset_id,
-                            table_id=table_id)
-                    }
-            else:
-                status = 401
-                result = {
-                    'message': "Preview is not available for this table/view."
-                }
-
-    except HttpError as e:
-        logger.error(
-            "[ERROR] While attempting to retrieve preview data for {proj_id}.{dataset_id}.{table_id} table:".format(
-                proj_id=proj_id,
-                dataset_id=dataset_id,
-                table_id=table_id))
-        logger.exception(e)
-        status = e.resp.status
-        result = {
-            'message': "There was an error while processing this request."
-        }
-        if status == 403:
-            result = {
-                'message': "Your attempt to preview this table [{proj_id}.{dataset_id}.{table_id}] was denied.".format(
-                    proj_id=proj_id,
-                    dataset_id=dataset_id,
-                    table_id=table_id)
-            }
-
-    except Exception as e:
-        status = 503
-        result = {
-            'message': "There was an error while processing this request."
-        }
-        logger.error(
-            "[ERROR] While attempting to retrieve preview data for {proj_id}.{dataset_id}.{table_id} table:".format(
-                proj_id=proj_id,
-                dataset_id=dataset_id,
-                table_id=table_id))
-        logger.exception(e)
-
-    return JsonResponse(result, status=status)
+# def get_tbl_preview(request, proj_id, dataset_id, table_id):
+#     status = 200
+#     MAX_ROW = 8
+#     try:
+#         if not proj_id or not dataset_id or not table_id:
+#             logger.warning("[WARNING] Required ID missing: {}.{}.{}".format(proj_id,dataset_id,table_id))
+#             status = 503
+#             result = {
+#                 'message': "There was an error while processing this request: one or more required parameters (project id, dataset_id or table_id) were not supplied."
+#             }
+#         else:
+#             bq_service = get_bigquery_service()
+#             dataset = bq_service.datasets().get(projectId=proj_id, datasetId=dataset_id).execute()
+#             is_public = False
+#             for access_entry in dataset['access']:
+#                 if access_entry.get('role') == 'READER' and access_entry.get('specialGroup') == 'allAuthenticatedUsers':
+#                     is_public = True
+#                     break
+#             if is_public:
+#                 tbl_data=bq_service.tables().get(projectId=proj_id, datasetId=dataset_id, tableId=table_id).execute()
+#                 if tbl_data.get('type') == 'VIEW' and tbl_data.get('view') and tbl_data.get('view').get('query'):
+#                     view_query_template = '''#standardSql
+#                             {query_stmt}
+#                             LIMIT {max}'''
+#                     view_query = view_query_template.format(query_stmt=tbl_data['view']['query'], max=MAX_ROW)
+#                     response = bq_service.jobs().query(
+#                         projectId=settings.BIGQUERY_PROJECT_ID,
+#                         body={ 'query': view_query  }).execute()
+#                 else:
+#                     response = bq_service.tabledata().list(projectId=proj_id, datasetId=dataset_id, tableId=table_id,
+#                                                        maxResults=MAX_ROW).execute()
+#                 if response and int(response['totalRows']) > 0:
+#                     result = {
+#                         'rows': response['rows']
+#                     }
+#                 else:
+#                     result = {
+#                         'message': 'No record has been found for table {proj_id}.{dataset_id}.{table_id}.'.format(
+#                             proj_id=proj_id,
+#                             dataset_id=dataset_id,
+#                             table_id=table_id)
+#                     }
+#             else:
+#                 status = 401
+#                 result = {
+#                     'message': "Preview is not available for this table/view."
+#                 }
+#
+#     except HttpError as e:
+#         logger.error(
+#             "[ERROR] While attempting to retrieve preview data for {proj_id}.{dataset_id}.{table_id} table:".format(
+#                 proj_id=proj_id,
+#                 dataset_id=dataset_id,
+#                 table_id=table_id))
+#         logger.exception(e)
+#         status = e.resp.status
+#         result = {
+#             'message': "There was an error while processing this request."
+#         }
+#         if status == 403:
+#             result = {
+#                 'message': "Your attempt to preview this table [{proj_id}.{dataset_id}.{table_id}] was denied.".format(
+#                     proj_id=proj_id,
+#                     dataset_id=dataset_id,
+#                     table_id=table_id)
+#             }
+#
+#     except Exception as e:
+#         status = 503
+#         result = {
+#             'message': "There was an error while processing this request."
+#         }
+#         logger.error(
+#             "[ERROR] While attempting to retrieve preview data for {proj_id}.{dataset_id}.{table_id} table:".format(
+#                 proj_id=proj_id,
+#                 dataset_id=dataset_id,
+#                 table_id=table_id))
+#         logger.exception(e)
+#
+#     return JsonResponse(result, status=status)
 
 
 @login_required
 def test_solr_data(request):
-    status=200
+    status = 200
 
     try:
         start = time.time()
@@ -415,7 +420,8 @@ def test_solr_data(request):
         versions = DataVersion.objects.filter(data_type__in=versions) if len(versions) else DataVersion.objects.filter(
             active=True)
 
-        programs = Program.objects.filter(active=1,is_public=1,owner=User.objects.get(is_superuser=1,is_active=1,is_staff=1))
+        programs = Program.objects.filter(active=1, is_public=1,
+                                          owner=User.objects.get(is_superuser=1, is_active=1, is_staff=1))
 
         if len(filters):
             programs = programs.filter(id__in=[int(x) for x in filters.keys()])
@@ -430,7 +436,9 @@ def test_solr_data(request):
             attrs = sources.get_source_attrs(for_ui=True)
             for source in sources:
                 solr_query = build_solr_query(prog_filters, with_tags_for_ex=True) if prog_filters else None
-                solr_facets = build_solr_facets(attrs['sources'][source.id]['attrs'], filter_tags=solr_query['filter_tags'] if solr_query else None, unique='case_barcode')
+                solr_facets = build_solr_facets(attrs['sources'][source.id]['attrs'],
+                                                filter_tags=solr_query['filter_tags'] if solr_query else None,
+                                                unique='case_barcode')
                 query_set = []
 
                 if solr_query:
@@ -449,7 +457,8 @@ def test_solr_data(request):
                                             ds.shared_id_col, ds.name, source.shared_id_col
                                         )) + solr_query['queries'][attr])
                         else:
-                            logger.warning("[WARNING] Attribute {} not found in program {}".format(attr_name,prog.name))
+                            logger.warning(
+                                "[WARNING] Attribute {} not found in program {}".format(attr_name, prog.name))
 
                 solr_result = query_solr_and_format_result({
                     'collection': source.name,
@@ -461,13 +470,13 @@ def test_solr_data(request):
 
         stop = time.time()
 
-        results['elapsed_time'] = "{}s".format(str(stop-start))
+        results['elapsed_time'] = "{}s".format(str(stop - start))
 
     except Exception as e:
         logger.error("[ERROR] While trying to fetch Solr metadata:")
         logger.exception(e)
         results = {'msg': 'Encountered an error'}
-        status=500
+        status = 500
 
     return JsonResponse({'result': results}, status=status)
 
@@ -488,11 +497,14 @@ def igv(request):
             if not build:
                 build = bam_item['build'].lower()
             elif build != bam_item['build'].lower():
-                logger.warning("[WARNING] Possible build collision in IGV viewer BAMS: {} vs. {}".format(build, bam_item['build'].lower()))
+                logger.warning("[WARNING] Possible build collision in IGV viewer BAMS: {} vs. {}".format(build,
+                                                                                                         bam_item[
+                                                                                                             'build'].lower()))
                 logger.warning("Dropping any files with build {}".format(bam_item['build'].lower()))
             id_barcode = item.split(',')
             bam_list.append({
-                'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': bam_item['build'].lower(), 'program': bam_item['program']
+                'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': bam_item['build'].lower(),
+                'program': bam_item['program']
             })
     # This is a single GET request, we need to get the full file info from Solr first
     else:
@@ -501,10 +513,13 @@ def igv(request):
         gdc_ids = list(set(req.get('gdc_ids', '').split(',')))
 
         if not len(gdc_ids):
-            messages.error(request,"A list of GDC file UUIDs was not provided. Please indicate the files you wish to view.")
+            messages.error(request,
+                           "A list of GDC file UUIDs was not provided. Please indicate the files you wish to view.")
         else:
             if len(gdc_ids) > settings.MAX_FILES_IGV:
-                messages.warning(request,"The maximum number of files which can be viewed in IGV at one time is {}.".format(settings.MAX_FILES_IGV) +
+                messages.warning(request,
+                                 "The maximum number of files which can be viewed in IGV at one time is {}.".format(
+                                     settings.MAX_FILES_IGV) +
                                  " Only the first {} will be displayed.".format(settings.MAX_FILES_IGV))
                 gdc_ids = gdc_ids[:settings.MAX_FILES_IGV]
 
@@ -512,13 +527,16 @@ def igv(request):
                 result = query_solr_and_format_result(
                     {
                         'collection': source.name,
-                        'fields': ['sample_barcode','file_node_id','file_name_key','index_file_name_key', 'program_name', 'access'],
+                        'fields': ['sample_barcode', 'file_node_id', 'file_name_key', 'index_file_name_key',
+                                   'program_name', 'access'],
                         'query_string': 'file_node_id:("{}") AND data_format:("BAM")'.format('" "'.join(gdc_ids)),
                         'counts_only': False
                     }
                 )
                 if 'docs' not in result or not len(result['docs']):
-                    messages.error(request,"IGV compatible files corresponding to the following UUIDs were not found: {}.".format(" ".join(gdc_ids))
+                    messages.error(request,
+                                   "IGV compatible files corresponding to the following UUIDs were not found: {}.".format(
+                                       " ".join(gdc_ids))
                                    + "Note that the default build is HG38; to view HG19 files, you must indicate the build as HG19: &build=hg19")
                 else:
                     saw_controlled = False
@@ -527,12 +545,13 @@ def igv(request):
                             saw_controlled = True
                         bam_list.append({
                             'sample_barcode': doc['sample_barcode'],
-                            'gcs_path': "{};{}".format(doc['file_name_key'],doc['index_file_name_key']),
+                            'gcs_path': "{};{}".format(doc['file_name_key'], doc['index_file_name_key']),
                             'build': build,
                             'program': doc['program_name']
                         })
                     if saw_controlled:
-                        messages.info(request,"Some of the requested files require approved access to controlled data - if you receive a 403 error, double-check your current login status with DCF.")
+                        messages.info(request,
+                                      "Some of the requested files require approved access to controlled data - if you receive a 403 error, double-check your current login status with DCF.")
 
     context = {
         'bam_list': bam_list,
@@ -595,40 +614,35 @@ def citations_page(request):
     citations = requests.get(citations_file_path).json()
     return render(request, 'isb_cgc/citations.html', citations)
 
+
 def vid_tutorials_page(request):
     return render(request, 'isb_cgc/video_tutorials.html')
 
+
 def how_to_discover_page(request):
     return render(request, 'how_to_discover_page.html')
+
 
 def contact_us(request):
     return render(request, 'isb_cgc/contact_us.html')
 
 
-def bq_meta_search(request, table_id=""):
-    bq_filter_file_name = 'bq_meta_filters.json'
-    bq_filter_file_path = BQ_ECOSYS_BUCKET + bq_filter_file_name
-    bq_filters = requests.get(bq_filter_file_path).json()
-    bq_filters['selected_table_full_id'] = table_id
-    return render(request, 'isb_cgc/bq_meta_search.html', bq_filters)
+def bq_meta_search(request, full_table_id=""):
+    bq_filter_list = ["status=current"]
+    parameter_list = ["projectId", "datasetId", "tableId"]
+    bq_filter = ''
+    if full_table_id:
+        full_table_id_list = full_table_id.split(".")
+        for i in range(len(full_table_id_list)):
+            if i:
+                field_val = '"'+ full_table_id_list[i]+'"'
+            else:
+                field_val = full_table_id_list[i]
+            bq_filter_list.append('{parameter}={field_val}'.format(parameter=parameter_list[i], field_val=field_val))
 
+        bq_filter = 'search?' + ('&'.join(bq_filter_list))
+    return redirect(settings.BQ_SEARCH_URL + bq_filter)
 
-def bq_meta_data(request):
-    bq_meta_data_file_name = 'bq_meta_data.json'
-    bq_meta_data_file_path = BQ_ECOSYS_BUCKET + bq_meta_data_file_name
-    bq_meta_data = requests.get(bq_meta_data_file_path).json()
-    bq_useful_join_file_name = 'bq_useful_join.json'
-    bq_useful_join_file_path = BQ_ECOSYS_BUCKET + bq_useful_join_file_name
-    bq_useful_join = requests.get(bq_useful_join_file_path).json()
-    for bq_meta_data_row in bq_meta_data:
-        useful_joins = []
-        row_id = bq_meta_data_row['id']
-        for join in bq_useful_join:
-            if join['id'] == row_id:
-                useful_joins = join['joins']
-                break
-        bq_meta_data_row['usefulJoins'] = useful_joins
-    return JsonResponse(bq_meta_data, safe=False)
 
 
 def programmatic_access_page(request):
@@ -637,6 +651,7 @@ def programmatic_access_page(request):
 
 def workflow_page(request):
     return render(request, 'isb_cgc/workflow.html')
+
 
 @login_required
 def dashboard_page(request):
@@ -648,10 +663,12 @@ def dashboard_page(request):
         public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser, perm=Cohort_Perms.OWNER).values_list('cohort',
                                                                                                               flat=True)
 
-        cohort_perms = Cohort_Perms.objects.select_related('cohort').filter(user=request.user, cohort__active=True).exclude(
+        cohort_perms = Cohort_Perms.objects.select_related('cohort').filter(user=request.user,
+                                                                            cohort__active=True).exclude(
             cohort__id__in=public_cohorts)
         cohorts_count = cohort_perms.count()
-        cohorts = Cohort.objects.filter(id__in=cohort_perms.values_list('cohort__id',flat=True), active=True).order_by('-last_date_saved')[:display_count]
+        cohorts = Cohort.objects.filter(id__in=cohort_perms.values_list('cohort__id', flat=True), active=True).order_by(
+            '-last_date_saved')[:display_count]
 
         # Program List
         ownedPrograms = request.user.program_set.filter(active=True)
@@ -773,7 +790,6 @@ def opt_in_update(request):
         logger.exception(e)
         logger.error(error_msg)
 
-
     return JsonResponse({
         'redirect-url': redirect_url,
         'error_msg': error_msg
@@ -812,11 +828,13 @@ def send_feedback_form(user_email, firstName, lastName, formLink):
     return {
         'status': status,
         'message': message
-        }
+    }
+
 
 @login_required
 def form_reg_user(request):
     return opt_in_form(request);
+
 
 def opt_in_form(request):
     template = 'isb_cgc/opt_in_form.html'
@@ -841,7 +859,6 @@ def opt_in_form(request):
         first_name = request.GET.get('first_name') if request.GET.get('first_name') else ''
         last_name = request.GET.get('last_name') if request.GET.get('last_name') else ''
 
-
     form = {'first_name': first_name,
             'last_name': last_name,
             'email': email,
@@ -850,6 +867,7 @@ def opt_in_form(request):
 
     return render(request, template, form)
 
+
 @csrf_protect
 def opt_in_form_submitted(request):
     msg = ''
@@ -857,11 +875,11 @@ def opt_in_form_submitted(request):
     template = 'isb_cgc/opt_in_form_submitted.html'
 
     # get values and update optin status
-    first_name= request.POST.get('first-name')
-    last_name= request.POST.get('last-name')
-    email= request.POST.get('email')
-    affiliation= request.POST.get('affiliation')
-    feedback= request.POST.get('feedback')
+    first_name = request.POST.get('first-name')
+    last_name = request.POST.get('last-name')
+    email = request.POST.get('email')
+    affiliation = request.POST.get('affiliation')
+    feedback = request.POST.get('feedback')
     subscribed = (request.POST.get('subscribed') == 'opt-in')
 
     try:
@@ -904,6 +922,7 @@ def opt_in_form_submitted(request):
     }
     return render(request, template, message)
 
+
 def send_feedback_notification(feedback_dict):
     try:
         message_data = {
@@ -922,13 +941,14 @@ def send_feedback_notification(feedback_dict):
                  'Thank you.\n\n' +
                  'ISB-CGC team').format(
                     timestamp=feedback_dict['submitted_time'],
-                                        firstName=feedback_dict['first_name'],
-                                        lastName=feedback_dict['last_name'],
-                                        email=feedback_dict['email'],
-                                        affiliation=feedback_dict['affiliation'],
-                                        subscribed=('Yes' if feedback_dict['subscribed'] else 'No'),
-                                        feedback=feedback_dict['feedback'])}
+                    firstName=feedback_dict['first_name'],
+                    lastName=feedback_dict['last_name'],
+                    email=feedback_dict['email'],
+                    affiliation=feedback_dict['affiliation'],
+                    subscribed=('Yes' if feedback_dict['subscribed'] else 'No'),
+                    feedback=feedback_dict['feedback'])}
         send_email_message(message_data)
     except Exception as e:
-        logger.error('[Error] Error has occured while sending out feedback notifications to {}.'.format(settings.NOTIFICATION_EMAIL_TO_ADDRESS))
+        logger.error('[Error] Error has occured while sending out feedback notifications to {}.'.format(
+            settings.NOTIFICATION_EMAIL_TO_ADDRESS))
         logger.exception(e)
