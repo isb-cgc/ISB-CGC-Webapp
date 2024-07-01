@@ -544,6 +544,14 @@ svg {
     clear: both;
 }
 
+#collection-modal{
+    overflow:visible !important;
+}
+
+#collection-modal-content{
+    border:solid !important;
+    border-width:thin !important;
+}
 
 .list-group-item__heading:after {
     content: "";
@@ -554,52 +562,6 @@ svg {
 .ui-slider{
     margin-bottom: 18px;
 }
-
-/*
-.ckbx:has(.fa-cart-shopping.selected){
-    background-color:lightgreen;
-}
-
-.ckbx:has(.fa-cart-shopping.selected) + .cart2{
-    background-color:lightgreen;
-}
-
-.ckbx:has(.fa-cart-shopping.partselected){
-    background-color:#ff7;
-}
-
-.ckbx:has(.fa-cart-shopping.partselected) + .cart2{
-    background-color:#ff7;
-}
- .ckbx:has(.fa-cart-shopping.unselected,.fa-cart-shopping.none){
-    #background-color:#FF0000;
-    #background-color:#F88379;
-     #background-color:#FF6347;
-     background-color:transparent;
-}
-
- .ckbx:has(.fa-cart-shopping.unselected,.fa-cart-shopping.none) + .cart2{
-    #background-color:#FF0000;
-    #background-color:#F88379;
-     #background-color:#FF6347;
-     background-color:transparent;
-}
-
-
- */
-.ckbx:has(.fa-cart-shopping) {
-    #border: solid 1px #000;
-    border-radius: 15px;
-    padding: 10px;
-    box-shadow: inset 0 0 0 0.5px grey;
-
-}
-
-.ckbx:has(.fa-caret-right){
-  font-size:25px;
-}
-
-
 
 
 .more-checks {
@@ -634,54 +596,48 @@ td.cartnum.incart{
     color:white;
 }
 
-tr:not(.someInCart) .ckbx:has(.fa-cart-shopping){
+
+
+tr:not(.someInCart).ckbx:has(.fa-cart-shopping){
     background-color:transparent;
-
 }
 
-
-tr.someInCart:not(.extraInFilt) .ckbx:has(.fa-cart-shopping){
+#projects_table tr.someInCart:not(.extraInItem) .ckbx:has(.fa-cart-shopping)
+{
     background-color:green;
-
 }
 
-tr.someInCart.extraInFilt .ckbx:has(.fa-cart-shopping){
+#projects_table tr.someInCart.extraInItem .ckbx:has(.fa-cart-shopping)
+{
     background-color:yellow;
-
-}
-
-tr:not(.extraInCart) .fa-plus{
-   display: none !important;
-}
-
-tr:(.extraInCart) .fa-plus{
-   display: inline-block !important;
 }
 
 
-
-.ckbx:has(.fa-cart-shopping.green) + .cart2{
-#background-color:lightgreen
+#cases_table tr.someInCart:not(.extraInItem) .ckbx:has(.fa-cart-shopping)
+{
+    background-color:green;
 }
 
-.ckbx:has(.fa-cart-shopping.yellow) + .cart2{
- #background-color:#ff7;
+#cases_table tr.someInCart.extraInItem .ckbx:has(.fa-cart-shopping)
+{
+    background-color:yellow;
 }
 
-.ckbx:has(.fa-cart-shopping.green) {
-#background-color:lightgreen
-}
-.ckbx:has(.fa-cart-shopping.yellow) {
-    #background-color:#ff7;
+#studies_table tr.someInCart:not(.extraInFilt) .ckbx:has(.fa-cart-shopping)
+{
+    background-color:green;
 }
 
-.ckbx:has(.fa-cart-shopping.transparent) {
-#background-color:transparent
+#studies_table tr.someInCart.extraInFilt .ckbx:has(.fa-cart-shopping)
+{
+    background-color:yellow;
 }
 
 
-.ckbx:has(.fa-cart-shopping.transparent) + .cart2{
-#background-color:transparent
+#series_table tr.someInCart .ckbx:has(.fa-cart-shopping)
+{
+    background-color:green;
+>>>>>>> 352e5768069e2e70011fcef256006d43f5e47384
 }
 
 .curfilt {
@@ -719,4 +675,45 @@ li.cartlist{
   height: fit-content;
   max-width: 960px; // Optional, maximum width
 }
+
+
+
+.ckbx:has(.fa-caret-right){
+  font-size:18px;
+    text-align:center;
+    vertical-align: middle !important;
+}
+
+
+
+ .ckbx:has(.fa-cart-shopping) {
+    #border: solid 1px #000;
+    border-radius: 12px;
+    #padding: 5px;
+     font-size: 18px;
+     text-align:center;
+    box-shadow: inset 0 0 0 0.5px grey;
+     vertical-align: middle !important;
+
+}
+
+ tbody .cartnum {
+     font-size: 1.0em;
+     text-align: right;
+     padding: 2px 5px !important;
+     border-radius: 12px !important;
+     color:white;
+     background-color: #818181 !important;
+     padding-top: 20px;
+     vertical-align: middle !important;
+
+ }
+
+ .cohort-summary{
+     font-size: 16px !important;
+     color: #2A537A !important;
+     padding-left: 2px !important;
+
+
+ }
 

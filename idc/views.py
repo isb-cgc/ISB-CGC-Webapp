@@ -35,6 +35,7 @@ from django.utils.html import escape
 
 from google_helpers.stackdriver import StackDriverLogger
 from cohorts.models import Cohort, Cohort_Perms
+
 from idc_collections.models import Program, DataSource, Collection, ImagingDataCommonsVersion, Attribute, Attribute_Tooltips, DataSetType
 from idc_collections.collex_metadata_utils import build_explorer_context, get_collex_metadata, create_file_manifest, get_cart_data
 from allauth.socialaccount.models import SocialAccount
@@ -86,7 +87,8 @@ def landing_page(request):
         "Intraocular",
         "Mesothelium",
         "Chest-Abdomen-Pelvis, Leg, TSpine",
-        "Abdomen, Arm, Bladder, Chest, Head-Neck, Kidney, Leg, Retroperitoneum, Stomach, Uterus"
+        "Abdomen, Arm, Bladder, Chest, Head-Neck, Kidney, Leg, Retroperitoneum, Stomach, Uterus",
+        "Blood, Bone"
     ]
 
     for collection in collex:
@@ -236,6 +238,7 @@ def save_ui_hist(request):
     return JsonResponse({}, status=status)
 
 
+
 @login_required
 def getCartData(request):
     response = {}
@@ -305,7 +308,12 @@ def studymp(request):
                                         "facet": {"unique_series": "unique(SeriesInstanceUID)"}}}
 
     custom_facets={'per_id': {'type': 'terms', 'field': 'StudyInstanceUID', 'limit': 2000,
-                'facet': {'unique_series': 'unique(SeriesInstanceUID)'}}}
+                'facet': {'unique_series': 'unique(SeriesInstanceUID)'}},
+                   "tot_series": {"type": "terms", "field": "collection_id", "limit": 200,
+                                  "facet": {"unique_series": "unique(SeriesInstanceUID)"},
+                                  "domain": {"query": "*.*"}}
+                   }
+
 
     try:
        req = request.GET if request.GET else request.POST
@@ -330,6 +338,7 @@ def studymp(request):
        study_proj={}
        casestudymp ={}
        projstudymp = {}
+
        for doc in idsEx['docs']:
           proj=doc['collection_id'][0]
           patientid=doc['PatientID']
@@ -393,7 +402,12 @@ def populate_tables(request):
     response = {}
     status = 200
     tableRes = []
+
+    studymp={}
     seriesmp={}
+    docsrc={}
+    filtsrc={}
+
     try:
         req = request.GET if request.GET else request.POST
         path_arr = [nstr for nstr in request.path.split('/') if nstr]
@@ -401,6 +415,7 @@ def populate_tables(request):
         fields = None
         collapse_on = None
         filters = json.loads(req.get('filters', '{}'))
+
         offset = int(req.get('offset', '0'))
         limit = int(req.get('limit', '500'))
         serieslimit = int(req.get('serieslimit', '500'))
@@ -413,22 +428,45 @@ def populate_tables(request):
         checkIds = json.loads(req.get('checkids', '[]'))
         #table_data = get_table_data(filters, table_type)
         diffA = []
+        versions=[]
+        versions = ImagingDataCommonsVersion.objects.filter(
+            version_number__in=versions
+        ).get_data_versions(active=True) if len(versions) else ImagingDataCommonsVersion.objects.filter(
+            active=True
+        ).get_data_versions(active=True)
+
+        aggregate_level = "SeriesInstanceUID" if table_type == 'series' else "StudyInstanceUID"
+
+        data_types = [DataSetType.IMAGE_DATA,DataSetType.ANCILLARY_DATA,DataSetType.DERIVED_DATA]
+        data_sets = DataSetType.objects.filter(data_type__in=data_types)
+        aux_sources = data_sets.get_data_sources().filter(
+            source_type=DataSource.SOLR,
+            aggregate_level__in=["case_barcode", "sample_barcode", aggregate_level],
+            id__in=versions.get_data_sources().filter(source_type=DataSource.SOLR).values_list("id", flat=True)
+        ).distinct()
+
 
         sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
             active=True, source_type=DataSource.SOLR,
-            aggregate_level="SeriesInstanceUID" if table_type == 'series' else "StudyInstanceUID"
+            aggregate_level=aggregate_level
         )
+
 
         sortByField = True
         #idsReq=[]
         custom_facets = None
         custom_facets_order = None
 
+        custom_facets_ex = {"tot_series": {"type": "terms", "field": "PatientID", "limit": limit,
+                                        "facet": {"unique_series": "unique(SeriesInstanceUID)"}, "domain": {"query": "*.*"}}}
+
 
         if table_type =="collections":
             custom_facets = {"per_id": {"type": "terms", "field": "collection_id", "limit": limit,
                                         "facet": {"unique_patient":"unique(PatientID)", "unique_study": "unique(StudyInstanceUID)",
-                                                  "unique_series": "unique(SeriesInstanceUID)"}}
+                                                  "unique_series": "unique(SeriesInstanceUID)"}},
+                             "tot_series":{"type": "terms", "field": "collection_id", "limit": limit,
+                                        "facet": {"unique_series": "unique(SeriesInstanceUID)"}, "domain": {"query": "*.*"} }
                              }
             tableIndex = 'PatientID'
             fields = ['collection_id', 'access']
@@ -454,8 +492,23 @@ def populate_tables(request):
                              "per_study": {"type": "terms", "field": "StudyInstanceUID", "limit": studylimit,
                                          "facet": {
                                                    "unique_series": "unique(SeriesInstanceUID)",
-                                                   "sz": "sum(instance_size)"}},
+                                                   "sz": "sum(instance_size)", "id": {"type":"terms", "field":"PatientID", "limit":4}}
+                                           },
+
+                             "tot_series": {"type": "terms", "field": "PatientID", "limit": limit,
+                                        "facet": {"unique_series": "unique(SeriesInstanceUID)"}, "domain": {"query": "*.*"}}
+
                             }
+            custom_facets_ex = {
+                "per_study": {"type": "terms", "field": "StudyInstanceUID", "limit": studylimit,
+                              "facet": {
+                                  "unique_series": "unique(SeriesInstanceUID)",
+                                  "sz": "sum(instance_size)", "id": {"type": "terms", "field": "PatientID", "limit": 4}}
+                              },
+                "tot_series": {"type": "terms", "field": "PatientID", "limit": limit,
+                               "facet": {"unique_series": "unique(SeriesInstanceUID)"}, "domain": {"query": "*.*"}}
+            }
+
             tableIndex = 'PatientID'
             fields = ['collection_id', 'PatientID','access']
             facetfields=['unique_study', 'unique_series']
@@ -500,8 +553,16 @@ def populate_tables(request):
 
         if table_type == 'studies':
             custom_facets = {"per_id": {"type": "terms", "field": "StudyInstanceUID", "limit": limit,
-                                        "facet": {"unique_series": "unique(SeriesInstanceUID)"}}
+                                        "facet": {"unique_series": "unique(SeriesInstanceUID)"}},
+                             "tot_series": {"type": "terms", "field": "PatientID", "limit": limit,
+                                            "facet": {"unique_series": "unique(SeriesInstanceUID)"},
+                                            "domain": {"query": "*.*"}}
                              }
+            custom_facets_ex = {
+                "tot_series": {"type": "terms", "field": "PatientID", "limit": limit,
+                               "facet": {"unique_series": "unique(SeriesInstanceUID)"}, "domain": {"query": "*.*"}}
+            }
+
             tableIndex = 'StudyInstanceUID'
             fields = ['collection_id','PatientID','StudyInstanceUID','StudyDescription','Modality','StudyDate','access','crdc_series_uuid','gcs_bucket','aws_bucket']
             facetfields = ['unique_series']
@@ -528,8 +589,11 @@ def populate_tables(request):
         if table_type == 'series':
             custom_facets = {}
             tableIndex = 'SeriesInstanceUID'
-            fields = ['collection_id', 'PatientID','SeriesInstanceUID', 'StudyInstanceUID', 'SeriesDescription', 'SeriesNumber',
-                      'BodyPartExamined', 'Modality', 'access', 'crdc_series_uuid','gcs_bucket','aws_bucket']
+
+            fields = ['collection_id', 'PatientID', 'SeriesInstanceUID', 'StudyInstanceUID', 'SeriesDescription', 'SeriesNumber',
+                      'BodyPartExamined', 'Modality', 'access', 'crdc_series_uuid','gcs_bucket','aws_bucket', 'SOPClassUID']
+
+
             facetfields = []
             sortByField = True
 
@@ -551,7 +615,8 @@ def populate_tables(request):
             selFilters[tableIndex] = checkIds
             newCheckIds = get_collex_metadata(
                 selFilters, [tableIndex], record_limit=len(checkIds)+1,sources=sources, records_only=True,
-                collapse_on=tableIndex, counts_only=False, filtered_needed=False, sort=tableIndex+' asc', default_facets=False
+                collapse_on=tableIndex, counts_only=False, filtered_needed=False, aux_sources=aux_sources, sort=tableIndex+' asc', default_facets=False
+
             )
 
             nset = set([x[tableIndex] for x in newCheckIds['docs']])
@@ -559,11 +624,12 @@ def populate_tables(request):
 
         if sortByField:
             idsReq = get_collex_metadata(
-                filters, fields, record_limit=limit, sources=sources, offset=offset, records_only=True,
-                collapse_on=tableIndex, counts_only=False, filtered_needed=False, sort=sort_arg, default_facets=False
+                filters, fields, record_limit=limit, sources=sources, offset=offset, records_only=True, raw_format = True,
+                collapse_on=tableIndex, counts_only=False, filtered_needed=False, aux_sources=aux_sources, sort=sort_arg, default_facets=False
+
             )
 
-            cnt = idsReq['total']
+            cntTotal = idsReq['total']
             for rec in idsReq['docs']:
                 id = rec[tableIndex]
                 idsFilt.append(id)
@@ -577,11 +643,22 @@ def populate_tables(request):
                 tableRes.append(newRow)
                 curInd = curInd + 1
             filters[tableIndex]=idsFilt
+
             if not table_type == 'series':
+                custom_facets["tot_series"]["domain"]["query"] = tableIndex + ": (" + " ".join(idsFilt) + ")"
                 cntRecs = get_collex_metadata(
                     filters, fields, record_limit=limit, sources=sources, collapse_on=tableIndex, counts_only=True,
-                    records_only=False, filtered_needed=False, custom_facets=custom_facets, raw_format=True, default_facets=False
+                    records_only=False, filtered_needed=False, custom_facets=custom_facets, raw_format=True, aux_sources=aux_sources, default_facets = False
+
                 )
+
+                if table_type =='cases':
+                    for rec in cntRecs['facets']['tot_series']['buckets']:
+                        id = rec['val']
+                        tableRow = tableRes[order[id]]
+                        totser = rec['unique_series']
+                        tableRow['maxseries'] = totser
+
 
                 for rec in cntRecs['facets']['per_id']['buckets']:
                     id = rec['val']
@@ -591,7 +668,8 @@ def populate_tables(request):
                             tableRow[facet] = rec[facet]
                         else:
                             tableRow[facet] = 0
-            if (table_type == 'cases'):
+
+            '''if (table_type == 'cases'):
                 osources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
                     active=True, source_type=DataSource.SOLR,
                     aggregate_level="SeriesInstanceUID"
@@ -631,52 +709,18 @@ def populate_tables(request):
                 for row in tableRes:
                     id=row['PatientID']
                     if id in idic:
-                        row['studyid'] = idic[id]
+                        row['studyid'] = idic[id] '''
 
 
-
-            elif (table_type=='studies'):
-
-                osources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
-                    active=True, source_type=DataSource.SOLR,
-                    aggregate_level="SeriesInstanceUID"
-                )
-
-                clist = [x['StudyInstanceUID'] for x in tableRes]
-                filters['StudyInstanceUID'] = clist
-                idsEx = get_collex_metadata(
-                    filters, ['collection_id','PatientID','SeriesInstanceUID', 'StudyInstanceUID'], record_limit=serieslimit, sources=osources, offset=0,
-                    records_only=True,
-                    collapse_on='SeriesInstanceUID', counts_only=False, filtered_needed=False,
-                    raw_format=True, default_facets=False
-                )
-
-                for res in idsEx['docs']:
-                    collection_id = res['collection_id']
-                    patientid = res['PatientID']
-                    studyid = res['StudyInstanceUID']
-                    seriesid = res['SeriesInstanceUID']
-                    if not (studyid in seriesmp):
-                      seriesmp[studyid]={}
-                      seriesmp[studyid]['val'] = []
-                      seriesmp[studyid]['proj']=collection_id[0]
-                      seriesmp[studyid]['PatientID'] = patientid
-                    seriesmp[studyid]['val'].append(seriesid)
-                #for (studyid in seriesmp):
-                #  seriesmp[studyid]['cnt'] = len(seriesmp[studyid]['val'])
-
-                for row in tableRes:
-                    id=row['StudyInstanceUID']
-                    if id in seriesmp:
-                        row['seriesmp'] = seriesmp[id]
 
         else:
             idsReq = get_collex_metadata(
                 filters, fields, record_limit=limit, sources=sources, offset=offset, records_only=False,
                 collapse_on=tableIndex, counts_only=True, filtered_needed=False, custom_facets=custom_facets_order,
-                raw_format=True, default_facets=False
+                raw_format=True, aux_sources=aux_sources, default_facets=False
+
             )
-            cnt = idsReq['facets']['tot']
+            cntTotal = idsReq['facets']['tot']
             for rec in idsReq['facets']['per_id']['buckets']:
                 id = rec['val']
                 idsFilt.append(id)
@@ -690,10 +734,20 @@ def populate_tables(request):
                 tableRes.append(newRow)
                 curInd = curInd + 1
             filters[tableIndex] = idsFilt
+            custom_facets_ex["tot_series"]["domain"]["query"] = tableIndex + ": (" + " ".join(idsFilt) + ")"
+
             fieldRecs = get_collex_metadata(
-                filters, fields, record_limit=limit, sources=sources, records_only=True, collapse_on=tableIndex,
-                counts_only=False, filtered_needed=False, default_facets=False
+                filters, fields, record_limit=limit, sources=sources, records_only=False, collapse_on=tableIndex, raw_format = True,
+                counts_only=False, custom_facets=custom_facets_ex, filtered_needed=False, aux_sources=aux_sources, default_facets=False
             )
+
+            if table_type == 'cases':
+                for rec in fieldRecs['facets']['tot_series']['buckets']:
+                    id = rec['val']
+                    tableRow = tableRes[order[id]]
+                    totser = rec['unique_series']
+                    tableRow['maxseries'] = totser
+
             for rec in fieldRecs['docs']:
                 id = rec[tableIndex]
                 tableRow = tableRes[order[id]]
@@ -706,11 +760,73 @@ def populate_tables(request):
 
 
 
+        if (table_type == 'cases'):
+            if sortByField:
+                extbl = cntRecs
+            else:
+                extbl = fieldRecs
+            for rec in extbl['facets']['per_study']['buckets']:
+                PatientID = rec['id']['buckets'][0]['val']
+                tableRow = tableRes[order[PatientID]]
+                collection_id = tableRow['collection_id'][0]
+                studyid = rec['val']
+                cnt = rec['unique_series']
+                studymp[studyid] = {}
+                studymp[studyid]['val'] = []
+                studymp[studyid]['proj'] = collection_id
+                studymp[studyid]['PatientID'] = PatientID
+                studymp[studyid]['cnt'] = cnt
+                if not 'studymp' in tableRow:
+                    tableRow['studymp'] = {}
+                tableRow['studymp'][studyid] = cnt
+
+        elif (table_type == 'studies'):
+            osources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
+                active=True, source_type=DataSource.SOLR,
+                aggregate_level="SeriesInstanceUID"
+            )
+
+            clist = [x['StudyInstanceUID'] for x in tableRes]
+            sfilters={}
+            sfilters['StudyInstanceUID'] = clist
+            idsEx = get_collex_metadata(
+                sfilters, ['collection_id', 'PatientID', 'SeriesInstanceUID', 'StudyInstanceUID'],
+                record_limit=serieslimit, sources=osources, offset=0,
+                records_only=True,
+                collapse_on='SeriesInstanceUID', counts_only=False, filtered_needed=False,
+                raw_format=True, default_facets=False
+            )
+
+            for res in idsEx['docs']:
+                collection_id = res['collection_id']
+                patientid = res['PatientID']
+                studyid = res['StudyInstanceUID']
+                seriesid = res['SeriesInstanceUID']
+                if not (studyid in seriesmp):
+                    seriesmp[studyid] = {}
+                    seriesmp[studyid]['val'] = []
+                    seriesmp[studyid]['proj'] = collection_id[0]
+                    seriesmp[studyid]['PatientID'] = patientid
+                seriesmp[studyid]['val'].append(seriesid)
+            # for (studyid in seriesmp):
+            #  seriesmp[studyid]['cnt'] = len(seriesmp[studyid]['val'])
+
+            for row in tableRes:
+                id = row['StudyInstanceUID']
+                if id in seriesmp:
+                    row['seriesmp'] = {}
+                    row['seriesmp'][id]=seriesmp[id]
+
 
         response["res"] = tableRes
-        response["cnt"] = cnt
+        response["cnt"] = cntTotal
         response["diff"] = diffA
-        response["seriesmp"]=seriesmp
+
+        if table_type == 'cases':
+            response["studymp"]=studymp
+        elif table_type == 'studies':
+            response["seriesmp"] = seriesmp
+
 
 
     except Exception as e:
@@ -724,7 +840,6 @@ def populate_tables(request):
 
     return JsonResponse(response, status=status)
 
-
 # Data exploration and cohort creation page
 #@login_required
 def explore_data_page(request, filter_path=False, path_filters=None):
@@ -735,6 +850,8 @@ def explore_data_page(request, filter_path=False, path_filters=None):
 
     try:
         req = request.GET or request.POST
+        mode=req.get('mode','1')
+
         is_dicofdic = (req.get('is_dicofdic', "False").lower() == "true")
         source = req.get('data_source_type', DataSource.SOLR)
         versions = json.loads(req.get('versions', '[]'))
@@ -783,8 +900,25 @@ def explore_data_page(request, filter_path=False, path_filters=None):
             collapse_on, is_json, uniques=uniques, totals=totals, disk_size=disk_size
         )
 
+        if not('totals' in context):
+          context['totals']={}
+        if not('PatientID' in context['totals']):
+          context['totals']['PatientID']=0
+        if not ('StudyInstanceUID' in context['totals']):
+          context['totals']['StudyInstanceUID'] = 0
+        if not ('SeriesInstanceUID' in context['totals']):
+          context['totals']['SeriesInstanceUID'] = 0
+        if not ('file_parts_count' in context['totals']):
+          context['totals']['file_parts_count'] = 1
+        if not ('display_file_parts_count' in context['totals']):
+          context['totals']['display_file_parts_count'] = 1
+        if not ('disk_size' in context['totals']):
+          context['totals']['disk_size'] = '0.0 GB'
+
+
         if not is_json:
             # These are filters to be loaded *after* a page render
+            context['mode']=mode
             if wcohort:
                 context['filters_for_load'] = cohort_filters_dict
             elif filter_path:
@@ -792,22 +926,22 @@ def explore_data_page(request, filter_path=False, path_filters=None):
             else:
                 filters_for_load = req.get('filters_for_load', None)
                 if filters_for_load:
-                    denylist = re.compile(settings.DENYLIST_RE, re.UNICODE).search(filters_for_load)
-                    attr_disallow = re.compile(settings.ATTRIBUTE_DISALLOW_RE, re.UNICODE).search(filters_for_load)
+                    raw_filters_for_load = filters_for_load
+                    filters_for_load = json.loads(filters_for_load)
+                    denylist = re.compile(settings.DENYLIST_RE, re.UNICODE).search(raw_filters_for_load)
+                    attr_disallow = re.compile(settings.ATTRIBUTE_DISALLOW_RE, re.UNICODE).search("_".join(filters_for_load.keys()))
                     if denylist or attr_disallow:
                         if denylist:
                             logger.error("[ERROR] Saw possible attack in filters_for_load:")
                         else:
-                            logger.warning("[WARN] Saw bad filter names in filters_for_load:")
-                        logger.warning(filters_for_load)
+                            logger.warning("[WARNING] Saw bad filter names in filters_for_load:")
+                        logger.warning(raw_filters_for_load)
                         filters_for_load = {}
                         messages.error(
                             request,
                             "There was a problem with some of your filters - please ensure they're properly formatted."
                         )
                         status = 400
-                    else:
-                        filters_for_load = json.loads(filters_for_load)
                 else:
                     filters_for_load = None
                 context['filters_for_load'] = filters_for_load
@@ -840,7 +974,13 @@ def explore_data_page(request, filter_path=False, path_filters=None):
         # In the case of is_json=True, the 'context' is simply attr_by_source
         return JsonResponse(context, status=status)
 
-    return render(request, 'idc/explore.html', context)
+    try:
+        return render(request, 'idc/explore.html', context)
+    except Exception as e:
+        logger.error("[ERROR] While attempting to render the search page:")
+        logger.exception(e)
+
+    return redirect(reverse('landing_page'))
 
 
 def explorer_manifest(request):
@@ -872,7 +1012,7 @@ def parse_explore_filters(request):
         attr_map = {x.name: {"id": x.id, "filter": filter_name_map[x.name]} for x in attrs}
         not_found = [x for x in attr_names if x not in attr_map.keys()]
         denylist = re.compile(settings.DENYLIST_RE, re.UNICODE).search(str(filters))
-        attr_disallow = re.compile(settings.ATTRIBUTE_DISALLOW_RE, re.UNICODE).search(str(filters))
+        attr_disallow = re.compile(settings.ATTRIBUTE_DISALLOW_RE, re.UNICODE).search("_".join(filters.keys()))
         if denylist or attr_disallow:
             if denylist:
                 logger.error("[ERROR] Saw possible attack attempt!")
@@ -923,6 +1063,7 @@ def cart_page(request):
     req = request.GET if request.GET else request.POST
     context['filtergrp_list'] = json.loads(req.get('filtergrp_list', '{}'))
     context['partitions'] = json.loads(req.get('partitions', '{}'))
+
 
   except Exception as e:
     status=400

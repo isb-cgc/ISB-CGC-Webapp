@@ -615,6 +615,18 @@ define(['jquery', 'utils'], function($, utils) {
     };
 
 
+    window.resetFilters = function(){
+        $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('checked',false);
+            $('input:checkbox').not('#hide-zeros').not('.tbl-sel').prop('indeterminate',false);
+            $('.ui-slider').each(function(){
+                setSlider(this.id,true,0,0,true, false);
+            })
+            $('#search_def_warn').hide();
+            window.filterObj= {};
+            window.handleFilterSelectionUpdate(null, true, true);
+    }
+
+
     window.handleFilterSelectionUpdate = function(filterElem, mkFilt, doUpdate) {
 
         if (!(filterElem ===null))
@@ -622,8 +634,10 @@ define(['jquery', 'utils'], function($, utils) {
             checkFilters(filterElem);
         }
 
-        var isFiltered = Boolean($('#search_def p').length > 0);
+        var isFiltered = false;
+        //var isFiltered = Boolean($('#search_def p').length > 0);
         if (is_cohort) {
+            isFiltered = true;
             if (file_parts_count > display_file_parts_count) {
                 $('#file-export-option').prop('title', 'Your cohort exceeds the maximum for download.');
                 $('#file-export-option input').prop('disabled', 'disabled');
@@ -652,12 +666,12 @@ define(['jquery', 'utils'], function($, utils) {
                     select_box_div.hide();
                 }
             }
-            $('#search_def_stats').removeClass('notDisp');
 
         }
 
         if (mkFilt) {
-            mkFiltText();
+
+            isFilterediltered = mkFiltText();
             update_filter_url();
             update_bq_filters();
           if (window.location.href.search(/\/filters\//g) >= 0) {
@@ -702,7 +716,7 @@ define(['jquery', 'utils'], function($, utils) {
                 var collectionStats = ret[0][2];
                 var totals = ret[0][3];
                 var numStudiesRet = totals.StudyInstanceUID;
-                 $('#search_def_stats').removeClass('notDisp');
+
                 $('#search_def_stats').html(totals.PatientID.toString() +
                             " Cases, " + totals.StudyInstanceUID.toString() +
                             " Studies, and " + totals.SeriesInstanceUID.toString() +
@@ -745,6 +759,10 @@ define(['jquery', 'utils'], function($, utils) {
     };
 
     const mkFiltText = function () {
+
+        var isfiltered = true;
+        var buttxt = '<button class="btn filter-type clear-filters" role="button" title="Select a filter to enable this feature."><i class="fa fa-rotate-left"></i></a> </button>';
+        var infotxt = '<i class="fa-solid fa-info-circle cohort-summary"></i>';
         var hasTcga = false;
         var tcgaColSelected = false;
         if ((window.filterObj.hasOwnProperty('Program')) && (window.filterObj.Program.indexOf('TCGA')>-1)){
@@ -870,12 +888,23 @@ define(['jquery', 'utils'], function($, utils) {
         }
         if (oStringA.length > 0) {
             var oString = oStringA.join(" AND");
-            document.getElementById("search_def").innerHTML = '<p>' + oString + '</p>';
+            document.getElementById("search_def").innerHTML = '<p>' + buttxt + oString + infotxt +'</p>';
             document.getElementById('filt_txt').value=oString;
+            $('#search_def').removeClass('notDisp');
+
+            $('.clear-filters').on('click', function () {
+                window.resetFilters();
+           });
+            isfiltered = true;
+
         } else {
             document.getElementById("search_def").innerHTML = '<span class="placeholder">&nbsp;</span>';
+            $('#search_def').addClass('notDisp');
             document.getElementById('filt_txt').value="";
+            isfiltered = false;
         }
+        return(isfiltered)
+
     };
 
     const checkUncheckAll = function(aelem, isCheck, checkSrch){
