@@ -35,6 +35,11 @@ network:
   name: solr
   instance_tag: isb-cgc-webapp
 
+resources:
+  cpu: 2
+  memory_gb: 8
+  disk_size_gb: 10
+
 automatic_scaling:
   min_num_instances: 1
   max_num_instances: 2

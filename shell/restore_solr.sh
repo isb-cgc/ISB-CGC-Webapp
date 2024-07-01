@@ -88,7 +88,7 @@ for dirname in ${BACKUP_DIR}/*/; do
   fi
   sudo -u solr cp $BACKUP_DIR/$CORE.managed-schema.xml $SOLR_DATA/$CORE/conf/managed-schema.xml
   echo "Schema copied, initiating core restoration..."
-  curl -u $SOLR_USER:$SOLR_PWD -X GET "https://localhost:8983/solr/${CORE}/replication?command=restore&name=${CORE}" --cacert solr-ssl.pem
+  curl -u $SOLR_USER:$SOLR_PWD -X GET "https://localhost:8983/solr/${CORE}/replication?command=restore&name=${SNAPSHOT}" --cacert solr-ssl.pem
   status=`curl -s -u ${SOLR_USER}:${SOLR_PWD} -X GET "https://localhost:8983/solr/${CORE}/replication?command=details" --cacert solr-ssl.pem | python3 -c "${PARSE_RESPONSE}"`
   if [[ "${status}" != "OK" ]]; then
     echo "Restoration is ${status} for core ${CORE}--continuing with the rest, but don't restart until these are done!"
