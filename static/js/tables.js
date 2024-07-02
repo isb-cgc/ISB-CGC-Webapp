@@ -131,6 +131,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
 
 
     const clickProjectTableShopping = function(event, row, data){
+        var oldCount = parseInt($(row).find('.cartnum').text());
         var elem = event.target;
         if ($(elem).hasClass('ckbx')){
             elem=$(elem).find('.shopping-cart')[0];
@@ -202,7 +203,9 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                 }
         }
 
-        //var curInd = window.cartHist.length - 1;
+         var curCount = parseInt($(row).find('.cartnum').text());
+
+
         var newSel = new Object();
         newSel['added'] = addingToCart;
         newSel['sel'] = [projid]
@@ -235,7 +238,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
         var ret = []
         var caret_col= { "type": "html", "orderable": false, render: function (data) {
                     if (('state' in window.selProjects[data]) && ('view' in window.selProjects[data]['state']) && (window.selProjects[data]['state']['view'] )) {
-                        return '<a role="button" class="caseview">'+
+                        return '<a role="button">'+
                             '<i class="fa fa-solid fa-caret-right notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
                             '<i class="fa fa-solid fa-caret-down" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
 
@@ -306,7 +309,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                     $(row).data('totalcases', data[5]);
                     $(row).attr('totalcases', data[5]);
                     $(row).attr('id', 'project_row_' + data[0]);
-
+                    var content = "add series to the cart";
                     if (data[0] in window.selProjects){
                         if (('someInCart' in window.selProjects[data[0]]) && (window.selProjects[data[0]]['someInCart'])){
                             $(row).addClass('someInCart');
@@ -323,9 +326,12 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
 
                         if (('extraInFilt' in window.selProjects[data[0]]) && (window.selProjects[data[0]]['extraInFilt'])){
                             $(row).addClass('extraInFilt');
+                            var content = "remove series from the cart";
+
                         }
                         else{
                             $(row).removeClass('extraInFilt');
+                            var content = "add series to the cart";
                         }
 
                         if (('extraInItem' in window.selProjects[data[0]]) && (window.selProjects[data[0]]['extraInItem'])){
@@ -336,6 +342,13 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                         }
 
                     }
+                    var target = $(row).find('.shopping-cart').parent()[0];
+                    tippy(target, {
+                           interactive: true,
+                           allowHTML:true,
+                           placement:'right',
+                          content: content
+                        });
 
                     if (Object.keys(collectionStats).length>0){
                         if (('study_per_collec' in collectionStats) && (data[0] in collectionStats['study_per_collec'])){
@@ -563,7 +576,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
 
                             }
                             else {
-                                return '<a role="button" class="studyview">'+
+                                return '<a role="button">'+
                                     '<i class="fa fa-solid fa-caret-right " style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
                                     '<i class="fa fa-solid fa-caret-down notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
 
@@ -660,10 +673,13 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                     $(row).find('.cartnum').html(caseCount[0]);
 
                     //[cnt.toString(), moreInFilterSetThanCart, moreInCartThanFilterSet, someInCart ]
+                    var content="";
                     if (caseCount[1]) {
                         $(row).addClass('extraInFilt');
+                        content = "add series to the cart";
                     } else {
                         $(row).removeClass('extraInFilt');
+                        content = "remove series from the cart";
                     }
 
                     if (caseCount[2]) {
@@ -684,14 +700,22 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                         $(row).removeClass('extraInItem');
                     }
 
+                    var target = $(row).find('.shopping-cart').parent()[0];
+                    tippy(target, {
+                           interactive: true,
+                           allowHTML:true,
+                           placement:'right',
+                          content: content
+                        });
+
                     $(row).find('.studyview').on('click', function(event){
                         var elem = event.target;
-                        var rowsAdded= ($(row).find('.fa-caret-down.notDisp').length>0 )?true:false
+                        var rowsAdded= ($(row).find('.fa-caret-down.notDisp').length>0 )?true:false;
                         if (rowsAdded){
                             $(row).find('.fa-caret-down').removeClass('notDisp');
                             $(row).find('.fa-caret-right').addClass('notDisp');
                         }
-                        else{
+                        if (!rowsAdded){
                             $(row).find('.fa-caret-down').addClass('notDisp');
                             $(row).find('.fa-caret-right').removeClass('notDisp');
                         }
@@ -960,19 +984,21 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                     window.selProjects[projid].selCases[caseid].selStudies[studyid]['seriesmp']=data['seriesmp'];
 
                     var cnt =0;
-
+                    var content=""
                     if (studyid in window.glblcart) {
                         $(row).addClass('someInCart');
                         window.selProjects[projid].selCases[caseid].selStudies[studyid]['someInCart']=true;
                         if (window.glblcart[studyid]['all']) {
                             cnt += window.seriesmp[studyid]['cnt'];
                             $(row).removeClass('extraInFilt');
-                            delete(window.selProjects[projid].selCases[caseid].selStudies[studyid]['extraInFilt'])
+                            delete(window.selProjects[projid].selCases[caseid].selStudies[studyid]['extraInFilt']);
+                            content = 'remove series from the cart';
 
                         } else {
                             cnt += window.glblcart[studyid]['sel'].size;
                             $(row).addClass('extraInFilt');
                             window.selProjects[projid].selCases[caseid].selStudies[studyid]['extraInFilt']=true;
+                            content  = 'add series to the cart';
                         }
                     }
                     else{
@@ -982,7 +1008,18 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                         }
                         $(row).addClass('extraInFilt');
                         window.selProjects[projid].selCases[caseid].selStudies[studyid]['extraInFilt']=true;
+                        content  = 'add series to the cart';
                     }
+                    var target = $(row).find('.shopping-cart').parent()[0];
+                    tippy(target, {
+                           interactive: true,
+                           allowHTML:true,
+                           placement:'right',
+                          content: content
+                        });
+
+
+
                     $(row).find('.cartnum').html(cnt)
 
 
@@ -1076,7 +1113,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                             var collection_id=row['collection_id']
                             if ( (StudyInstanceUID in window.selProjects[collection_id].selCases[PatientID].selStudies) && ('view' in window.selProjects[collection_id].selCases[PatientID].selStudies[StudyInstanceUID]['state']) && window.selProjects[collection_id].selCases[PatientID].selStudies[StudyInstanceUID]['state']['view']) {
                                 //return '<input type="checkbox" checked>'
-                               return '<a role="button" class="seriesview">'+
+                               return '<a role="button">'+
                                     '<i class="fa fa-solid fa-caret-right notDisp" style="font-family :\'Font Awesome 6 Free\' !important"></i>' +
                                     '<i class="fa fa-solid fa-caret-down" style="font-family :\'Font Awesome 6 Free\' !important"></i></a>'
 
@@ -1365,6 +1402,13 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                     if (!(seriesid in window.selProjects[collection_id].selCases[PatientID].selStudies[studyid].selSeries)) {
                         initSeriesData(collection_id, PatientID, studyid, seriesid);
                      }
+                    var target = $(row).find('.shopping-cart').parent()[0];
+                         tippy(target, {
+                           interactive: true,
+                           allowHTML:true,
+                           placement:'right',
+                          content: ''
+                        });
 
                     updateSeriesRowCount(row);
 
@@ -1374,6 +1418,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                             elem=$(elem).find('.shopping-cart')[0];
                         }
                         var addingToCart = true;
+
                         if ($(elem).parentsUntil('tr').parent().hasClass('someInCart'))
                         {
                             addingToCart = false;
@@ -1386,8 +1431,12 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                             window.cartStep++;
 
                         }
+
+
+
                         mp = new Object();
                         mp[studyid]=[seriesid];
+
 
                         updateGlobalCart(addingToCart, mp, 'series');
                         updateTableCounts(1);
@@ -2568,6 +2617,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
           } */
           $(row).addClass('extraInFilt');
           window.selProjects[projid].selCases[caseid].selStudies[studyid]['extraInFilt']=true;
+          $(row).find('.shopping-cart').parent()[0]._tippy.setContent("add series to the cart");
 
           if (studyid in window.glblcart) {
               $(row).addClass('someInCart');
@@ -2578,6 +2628,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                   if ('extraInFilt' in window.selProjects[projid].selCases[caseid].selStudies[studyid]){
                       delete (window.selProjects[projid].selCases[caseid].selStudies[studyid]['extraInFilt']);
                   }
+                  $(row).find('.shopping-cart').parent()[0]._tippy.setContent("remove series from the cart");
 
               } else {
                   $(row).addClass('extraInFilt');
@@ -2601,12 +2652,15 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                    if (studyid in window.glblcart) {
                        if ((window.glblcart[studyid]['all']) || (window.glblcart[studyid]['sel'].has(seriesid))) {
                            $(row).addClass('someInCart');
+                           $(row).find('.shopping-cart').parent()[0]._tippy.setContent("remove series from the cart");
                        } else {
                            $(row).removeClass('someInCart');
+                           $(row).find('.shopping-cart').parent()[0]._tippy.setContent("add series to the cart");
                        }
                    }
                    else{
                        $(row).removeClass('someInCart');
+                       $(row).find('.shopping-cart').parent()[0]._tippy.setContent("add series to the cart");
                    }
                }
     }
@@ -2621,6 +2675,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
               $(this).removeClass('someInCart');
               $(this).removeClass('extraInCart');
               $(this).addClass('extraInItem');
+              $(this).find('.shopping-cart').parent()[0]._tippy.setContent("add series to the cart");
 
               if ('someInCart' in window.selProjects[projid]) {
 
@@ -2638,10 +2693,12 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
               if ('studymp' in window.selProjects[projid]){
                   delete (window.selProjects[projid]['extraInFilt']);
                  $(this).removeClass('extraInFilt');
+                 $(this).find('.shopping-cart').parent()[0]._tippy.setContent("remove series from the cart");
                   for (studyid in window.selProjects[projid].studymp) {
                       if (!(studyid in window.glblcart) || !(window.glblcart[studyid]['all'])) {
                           $(this).addClass('extraInFilt');
                           window.selProjects[projid]['extraInFilt'] = true;
+                          $(this).find('.shopping-cart').parent()[0]._tippy.setContent("add series to the cart");
                           break;
                       }
                   }
@@ -2670,12 +2727,14 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                 }
                 if ('extraInFilt' in window.selProjects[projid].selCases[caseid]){
                   delete(window.selProjects[projid].selCases[caseid]['extraInFilt']);
+                  $(this).find('.shopping-cart').parent()[0]._tippy.setContent("remove series from the cart");
                 }
 
                 for (studyid in window.selProjects[projid].selCases[caseid].studymp) {
                     if (!(studyid in window.glblcart) || !(window.glblcart[studyid]['all'])) {
                         $(this).addClass('extraInFilt');
                         window.selProjects[projid].selCases[caseid]['extraInFilt']=true;
+                        $(this).find('.shopping-cart').parent()[0]._tippy.setContent("add series to the cart");
                         break;
                          }
                 }

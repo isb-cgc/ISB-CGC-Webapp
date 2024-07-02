@@ -254,6 +254,17 @@ require([
         return newId;
     }
 
+    window.resetCartPageView = function(){
+        window.cartHist = new Array();
+        window.updatePartitionsFromScratch();
+        var ret =cartutils.formcartdata();
+        window.partitions = ret[0];
+        window.filtergrp_lst = ret[1];
+        updateCartTable([],[]);
+        sessionStorage.setItem("cartcleared", "true")
+        history.back();
+    }
+
     tippy.delegate('#cart-table', {
         content: 'Copied!',
         theme: 'blue',
@@ -280,6 +291,9 @@ require([
         if ("cartHist" in sessionStorage){
             window.cartHist= JSON.parse(sessionStorage.getItem("cartHist"));
            }
+        if ("cartDetails" in sessionStorage) {
+                window.cartDetails = JSON.parse(sessionStorage.getItem("cartDetails"));
+            }
         window.updatePartitionsFromScratch();
         var ret =cartutils.formcartdata();
         window.partitions = ret[0];
@@ -296,6 +310,9 @@ require([
             window.cartHist = new Array();
             if ("cartHist" in sessionStorage) {
                 window.cartHist = JSON.parse(sessionStorage.getItem("cartHist"));
+            }
+            if ("cartDetails" in sessionStorage) {
+                window.cartDetails = JSON.parse(sessionStorage.getItem("cartDetails"));
             }
             window.updatePartitionsFromScratch();
             var ret = cartutils.formcartdata();

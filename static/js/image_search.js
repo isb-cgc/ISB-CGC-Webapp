@@ -876,6 +876,7 @@ require([
 
     window.onbeforeunload = function(){
         sessionStorage.setItem("cartHist", JSON.stringify(window.cartHist));
+        sessionStorage.setItem("cartDetails", JSON.stringify(window.cartDetails));
         //sessionStorage.setItem("glblcart", JSON.stringify(window.glblcart));
         sessionStorage.setItem("src", "explore_page");
         //sessionStorage.setItem("cartDetails", windowcartDetails);
@@ -883,7 +884,13 @@ require([
     }
     window.onpageshow = function (){
         //alert('show');
-        updatecartedits();
+        if ("cartcleared" in sessionStorage){
+            sessionStorage.removeItem("cartcleared");
+            window.resetCart();
+        }
+        else {
+            updatecartedits();
+        }
 
     }
 

@@ -601,6 +601,18 @@ td.cartnum.incart{
 tr:not(.someInCart).ckbx:has(.fa-cart-shopping){
     background-color:transparent;
 }
+.cart-info-tip.case1{
+    background-color:green;
+}
+
+
+.cart-info-tip.case2{
+    background-color:yellow;
+}
+
+.cart-info-tip.case3{
+    background-color:transparent;
+}
 
 #projects_table tr.someInCart:not(.extraInItem) .ckbx:has(.fa-cart-shopping)
 {
@@ -637,7 +649,7 @@ tr:not(.someInCart).ckbx:has(.fa-cart-shopping){
 #series_table tr.someInCart .ckbx:has(.fa-cart-shopping)
 {
     background-color:green;
->>>>>>> 352e5768069e2e70011fcef256006d43f5e47384
+
 }
 
 .curfilt {
@@ -697,6 +709,22 @@ li.cartlist{
 
 }
 
+ .cart-info-tip {
+ #border: solid 1px #000;
+    border-radius: 8px;
+    padding: 7px;
+     font-size: 14px;
+     text-align:center;
+    box-shadow: inset 0 0 0 0.5px grey;
+     vertical-align: middle !important;
+
+ }
+
+ .cart-info-div{
+ margin-bottom:10px !important;
+ }
+
+
  tbody .cartnum {
      font-size: 1.0em;
      text-align: right;
@@ -714,6 +742,12 @@ li.cartlist{
      color: #2A537A !important;
      padding-left: 2px !important;
 
+
+ }
+
+ thead .cart-info {
+     text-align: center !important;
+     font-size: 18px;
 
  }
 

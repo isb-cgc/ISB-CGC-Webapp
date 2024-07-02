@@ -66,6 +66,7 @@ require([
 // Return an object for consts/methods used by most views
 define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
 
+
     window.resetCart = function(){
         window.cart= new Object();
         window.glblcart = new Object();

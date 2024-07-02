@@ -21,6 +21,9 @@
                 data-target="#export-manifest-modal"
                 title="Make a cart selection to enable this feature."> Download Cart Images
             </button>
+<button class="btn btn-special pull-right cart-modal-button" data-toggle="modal" role="button" title="Get cart details.">Display Cart Details</button>
+<button class="btn btn-default  pull-right cart-reset" title="Reset Cart." onclick="window.resetCartPageView()"> Clear Cart
+                             </button>
 </div>
 {% endblock %}
 {% block content %}
@@ -70,6 +73,7 @@
 </div>
 <!-- Include footer here instead of base.html so it can be hidden by default -->
 {% include 'share/site_footer.html' with hide="False" %}
+    {% include "idc/cart-details-modal.html" %}
 
 {% url 'get_explore_manifest' as export_uri %}
 {% with user_is_social=request.user|has_social is_cohort=False %}

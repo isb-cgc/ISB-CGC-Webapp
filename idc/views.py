@@ -1085,32 +1085,37 @@ def cart_data(request):
         studyidarr = json.loads(req.get('studyidarr','[]'))
         limit = req.get('limit', 1000)
         offset = req.get('offset', 0)
-        response = get_cart_data(filtergrp_list, partitions, field_list, limit, offset)
 
-        if (len(studyidarr)>0):
-          seriesmp ={}
-          filters = {}
-          filters['StudyInstanceUID'] = studyidarr
-          sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
-            active=True, source_type=DataSource.SOLR,
-            aggregate_level="SeriesInstanceUID"
-          )
+        if (len(partitions)>0):
+            response = get_cart_data(filtergrp_list, partitions, field_list, limit, offset)
 
-          idsEx = get_collex_metadata(
-            filters, ['SeriesInstanceUID', 'StudyInstanceUID'], record_limit=500,
-            sources=sources, offset=0,
-            records_only=True,
-            collapse_on='SeriesInstanceUID', counts_only=False, filtered_needed=False,
-            raw_format=True, default_facets=False, sort='StudyInstanceUID asc, SeriesInstanceUID asc',
-          )
-          for doc in idsEx['docs']:
-            studyid =  doc['StudyInstanceUID']
-            seriesid =  doc['SeriesInstanceUID']
-            if not(studyid in seriesmp):
-              seriesmp[studyid] =[]
-            seriesmp[studyid].append(seriesid)
-          response['seriesmp'] = seriesmp
+            if (len(studyidarr)>0):
+              seriesmp ={}
+              filters = {}
+              filters['StudyInstanceUID'] = studyidarr
+              sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
+              active=True, source_type=DataSource.SOLR,
+              aggregate_level="SeriesInstanceUID"
+              )
 
+              idsEx = get_collex_metadata(
+                filters, ['SeriesInstanceUID', 'StudyInstanceUID'], record_limit=500,
+                sources=sources, offset=0,
+                records_only=True,
+                collapse_on='SeriesInstanceUID', counts_only=False, filtered_needed=False,
+                raw_format=True, default_facets=False, sort='StudyInstanceUID asc, SeriesInstanceUID asc',
+              )
+              for doc in idsEx['docs']:
+                studyid =  doc['StudyInstanceUID']
+                seriesid =  doc['SeriesInstanceUID']
+                if not(studyid in seriesmp):
+                  seriesmp[studyid] =[]
+                seriesmp[studyid].append(seriesid)
+              response['seriesmp'] = seriesmp
+
+        else:
+            response['numFound'] = 0
+            response['docs'] = []
     except Exception as e:
         logger.error("[ERROR] While loading cart:")
         logger.exception(e)
