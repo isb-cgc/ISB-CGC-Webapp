@@ -338,8 +338,7 @@ INSTALLED_APPS = (
     'idc_collections',
     'offline',
     'adminrestrict',
-    'axes',
-    'static_precompiler'
+    'axes'
 )
 
 #############################
