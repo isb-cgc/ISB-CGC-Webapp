@@ -326,12 +326,12 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
 
                         if (('extraInFilt' in window.selProjects[data[0]]) && (window.selProjects[data[0]]['extraInFilt'])){
                             $(row).addClass('extraInFilt');
-                            var content = "remove series from the cart";
+                            var content = "add series to the cart";
 
                         }
                         else{
                             $(row).removeClass('extraInFilt');
-                            var content = "add series to the cart";
+                            var content = "remove series from the cart";
                         }
 
                         if (('extraInItem' in window.selProjects[data[0]]) && (window.selProjects[data[0]]['extraInItem'])){
@@ -1724,6 +1724,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
             window.selProjects[projid]['totalCases']=totalCases;
             window.selProjects[projid]['totalStudies']=$(row).attr('totalstudy');
             window.selProjects[projid]['totalSeries']=$(row).attr('totalseries');
+            window.selProjects[projid]['extraInFilt'] = true;
 
             rowsAdded = true;
         }
@@ -1825,6 +1826,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
         window.selProjects[project]['numChildMixCheck'] = 0;
         window.selProjects[project]['numChildNoCheck']=stats['patient_per_collec'][project];
         window.selProjects[project]['numChecksAbove']=0;
+        window.selProjects[project]['extraInFilt'] = true;
 
         if (project in stats['patient_per_collec']){
             window.selProjects[project]['totalCases']=stats['patient_per_collec'][project];

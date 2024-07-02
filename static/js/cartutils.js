@@ -27,12 +27,21 @@ require.config({
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
         tablesorter:'libs/jquery.tablesorter.min',
-        filterutils:'filterutils'
+        filterutils:'filterutils',
+        tippy: 'libs/tippy-bundle.umd.min',
+        '@popperjs/core': 'libs/popper.min',
 
 
 
     },
     shim: {
+        '@popperjs/core': {
+          exports: "@popperjs/core"
+        },
+        'tippy': {
+          exports: 'tippy',
+            deps: ['@popperjs/core']
+        },
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
@@ -51,6 +60,7 @@ require([
     'filterutils',
     'jquery',
     'jqueryui',
+    'tippy',
     'bootstrap',
     'session_security',
     'underscore',
@@ -58,13 +68,13 @@ require([
     'assetscore',
     'assetsresponsive',
     'tablesorter'
-], function(filterutils, $, jqueryui, bootstrap, session_security, _, utils) {
+], function(filterutils, $, jqueryui, tippy, bootstrap, session_security, _, utils) {
 
 
 });
 
 // Return an object for consts/methods used by most views
-define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
+define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tippy, utils) {
 
 
     window.resetCart = function(){
@@ -90,6 +100,14 @@ define(['filterutils','jquery', 'utils'], function(filterutils, $, utils) {
 
          window.updateTableCounts(1);
          var gtotals = [0,0,0,0];
+            var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
+            tippy('.cart-view', {
+                           interactive: true,
+                           allowHTML:true,
+                          content: content
+                        });
+            $('#cart_stats').html(content) ;
+
           $('#cart_stats').addClass('notDisp');
           $('#export-manifest-cart').attr('disabled','disabled');
           $('#view-cart').attr('disabled','disabled');
