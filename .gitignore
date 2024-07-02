@@ -72,7 +72,7 @@ target/
 *.env
 !sample.env
 
-.sql
+^.sql
 
 *secrets.txt
 
