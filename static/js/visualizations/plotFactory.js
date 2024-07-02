@@ -31,15 +31,13 @@ define([
     'histogram_plot',
     'bar_plot',
     'seqpeek_view/seqpeek_view',
-    'oncoprint_plot',
-    'oncogrid_plot',
     'select2',
     'fileSaver',
     'cbio_util',
     'download_util',
 
 ], function($, jqueryui, bootstrap, session_security, d3, d3tip, d3textwrap, vizhelpers, scatter_plot, cubby_plot,
-            violin_plot, histogram, bar_graph, seqpeek_view, oncoprint_plot,  oncogrid_plot, mock_histogram_data ) {
+            violin_plot, histogram, bar_graph, seqpeek_view, mock_histogram_data ) {
 
     var VERSION = $('#workbook-build :selected').data('plot-version')
                         || $('.workbook-build-display').data('plot-version');
@@ -49,8 +47,6 @@ define([
     var violin_plot_obj  = Object.create(violin_plot, {});
     var histogram_obj    = Object.create(histogram, {});
     var bar_graph_obj    = Object.create(bar_graph, {});
-    var oncoprint_obj    = Object.create(oncoprint_plot, {});
-    var oncogrid_obj     = Object.create(oncogrid_plot, {});
     var helpers          = Object.create(vizhelpers, {});
     var fullscreen = false;
     function generate_axis_label(attr, isLogTransform, units) {
@@ -273,42 +269,6 @@ define([
         return  {plot : plot, svg: svg};
     }
 
-    function generate_oncoprint_plot(plot_selector, view_data) {
-        var plot_data = view_data['plot_data'];
-        var gene_list = view_data['gene_list'];
-        var plot_message = view_data['plot_message'];
-        if (plot_message){
-            $('#plot-message-alert').show();
-            $('#plot-message-alert p').text(plot_message);
-        }
-        var plot;
-        if (plot_data && oncoprint_obj.isInputValid(plot_data)) {
-            plot = oncoprint_obj.createOncoprintPlot(plot_selector, plot_data);
-        }
-        else {
-            display_no_gene_mut_mssg(plot_selector, gene_list);
-        }
-        return  {plot : plot};
-    }
-
-    function generate_oncogrid_plot(plot_selector, view_data) {
-
-        var donor_data_list = view_data['donor_data_list'];
-        var gene_data_list = view_data['gene_data_list'];
-        var observation_data_list = view_data['observation_data_list'];
-        var donor_track_count_max = view_data['donor_track_count_max'];
-        var plot;
-        if (donor_data_list.length === 0){
-            display_low_mem_mssg(plot_selector);
-        }
-        else if (donor_data_list && gene_data_list && observation_data_list) {
-            plot = oncogrid_obj.createOncogridPlot(donor_data_list, gene_data_list, observation_data_list, donor_track_count_max);
-        }
-        else {
-            display_no_gene_mut_mssg(plot_selector, gene_list);
-        }
-        return  {plot : plot};
-    }
     /*
         Generate url for gathering data
      */
@@ -353,23 +313,6 @@ define([
 
 
         return seqpeek_url;
-    }
-
-    // Generate url for gathering data for a OncoPrint and OncoGrid plot
-    function get_onco_data_url(base_url, plot_type, cohorts, gene_list){
-        var cohort_str = '';
-        for (var i = 0; i < cohorts.length; i++) {
-            if (i == 0) {
-                cohort_str += 'cohort_id=' + cohorts[i];
-            } else {
-                cohort_str += '&cohort_id=' + cohorts[i];
-            }
-        }
-        var url = base_url + '/visualizations/'
-            + (plot_type === 'OncoPrint' ? 'oncoprint_data_plot/': 'oncogrid_data_plot/')
-            + VERSION + '?' + cohort_str + '&gene_list=' + gene_list.join(",")
-            + (VERSION === 'v2' ? "&genomic_build=" + $('.workbook-build-display').data('build') : '');
-        return url;
     }
 
     function configure_pairwise_display(element, data){
@@ -519,10 +462,6 @@ define([
 
         } else if (args.type === "SeqPeek" && !data.message) {
             visualization = generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
-        } else if (args.type === "OncoPrint" && !data.message) {
-            visualization =  generate_oncoprint_plot(args.plot_selector, data);
-        } else if (args.type === "OncoGrid" && !data.message) {
-            visualization = generate_oncogrid_plot(args.plot_selector, data);
         } else {
             // No data returned
             d3.select(args.plot_selector)
@@ -606,9 +545,6 @@ define([
         if (args.type == "SeqPeek") {
             plot_data_url = get_seqpeek_data_url(BASE_URL, args.cohorts, args.gene_label, VERSION);
         }
-        else if(args.type == "OncoPrint" || args.type == "OncoGrid"){
-            plot_data_url = get_onco_data_url(BASE_URL, args.type, args.cohorts, args.gene_list, VERSION);
-        }
         else {
             plot_data_url = get_data_url(BASE_URL, args.cohorts, args.x, args.y, color_by_url_code, args.logTransform, VERSION);
         }
@@ -671,12 +607,7 @@ define([
         var plot_args = $('.worksheet.active .plot-args').data('plot-args');
         var plot_svg = $('.worksheet.active .plot-args').data('plot-svg');
         var img_svg;
-        if (plot_args.type === 'OncoGrid' || plot_args.type === 'OncoPrint') {
-            img_svg = plot_svg();
-        }
-        else {
-            img_svg = getPlotSvgNode(plot_svg, $(plot_args.legend_selector).find('svg'));
-        }
+        img_svg = getPlotSvgNode(plot_svg, $(plot_args.legend_selector).find('svg'));
         var xmlSerializer = new XMLSerializer();
         var content = xmlSerializer.serializeToString(img_svg);
         var blob = new Blob([content], {type: 'application/svg+xml'});
@@ -687,12 +618,7 @@ define([
         var plot_args = $('.worksheet.active .plot-args').data('plot-args');
         var plot_svg = $('.worksheet.active .plot-args').data('plot-svg');
         var img_svg;
-        if (plot_args.type === 'OncoGrid' || plot_args.type === 'OncoPrint') {
-            img_svg = plot_svg();
-        }
-        else {
-            img_svg = getPlotSvgNode(plot_svg, $(plot_args.legend_selector).find('svg'));
-        }
+        img_svg = getPlotSvgNode(plot_svg, $(plot_args.legend_selector).find('svg'));
         var xmlSerializer = new XMLSerializer();
         var content = xmlSerializer.serializeToString(img_svg);
         var width = img_svg.getAttribute('width') || 1495;
