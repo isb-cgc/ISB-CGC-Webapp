@@ -33,9 +33,6 @@ require.config({
         stats: 'libs/science.stats.min',
         vizhelpers: 'helpers/vis_helpers',
         select2: 'libs/select2.min',
-        oncoprintjs: 'libs/oncoprint.bundle',
-        // oncogridjs: 'libs/oncogrid-debug',
-        oncogridjs: 'libs/oncogrid.min',
         geneticrules: 'libs/geneticrules',
         canvas_toBlob: 'libs/canvas-toBlob',
         zlibs: 'libs/zlibs',
@@ -45,7 +42,6 @@ require.config({
         jspdf_plugin_png_support: 'libs/jspdf.plugin.png_support',
         jqueryqtip: 'libs/jquery.qtip.min',
         fileSaver: 'libs/FileSaver.min',
-        oncoprint_setup: 'visualizations/oncoprint-setup',
         cbio_util: 'visualizations/cbio-util',
         download_util: 'visualizations/download-util',
         // base: 'base',
@@ -55,8 +51,6 @@ require.config({
         cubby_plot : 'visualizations/createCubbyPlot',
         violin_plot : 'visualizations/createViolinPlot',
         bar_plot : 'visualizations/createBarGraph',
-        oncoprint_plot: 'visualizations/createOncoprintPlot',
-        oncogrid_plot: 'visualizations/createOncogridPlot',
         seqpeek_view: 'seqpeek_view',
         seqpeek: 'seqpeek_view/seqpeek'
     },
@@ -966,18 +960,6 @@ require([
                 yLogCheck.hide();
                 swap.hide();
                 break;
-            case 'OncoPrint':
-            case 'OncoGrid':
-                onco_genes.show();
-                and_or_variables_label.hide();
-                x_widgets.hide();
-                y_widgets.hide();
-                pb_widgets.hide();
-                c_widgets.hide();
-                xLogCheck.hide();
-                yLogCheck.hide();
-                swap.hide();
-                break;
             default :
                 break;
         }
@@ -1141,18 +1123,6 @@ require([
                     axisRdy = false;
                 }
             }
-            else if(plot_val == 'OncoPrint' || plot_val == 'OncoGrid'){
-                axisRdy = false;
-                $('.worksheet.active').find('.gene-selex').each(function(){
-                    if($(this).is(':checked')) {
-                        axisRdy = true;
-                    }
-                    else{
-                        $(this).parents('.group-list').find('.select-all-genes-checkbox').prop('checked', false);
-                    }
-
-                });
-            }
             else{
                 $('.worksheet.active').find('.axis-select').each(function(){
                     if($(this).parent().css('display')!=='none'){
@@ -1246,9 +1216,6 @@ require([
         if(plot_type === 'SeqPeek'){
             return (data.attrs.gene_label !== undefined && data.attrs.gene_label !== null && data.attrs.gene_label !== "");
         }
-        else if(plot_type === 'OncoPrint' || plot_type === 'OncoGrid'){
-            return (data.attrs.gene_list !== undefined && data.gene_list !== null && data.attrs.gene_list.length>0);
-        }
         else{
             if (data.attrs.x_axis.url_code === undefined || data.attrs.x_axis.url_code === null || data.attrs.x_axis.url_code.length <= 0) {
                 return false;
@@ -1322,18 +1289,13 @@ require([
         plot_element.find('.resubmit-button').hide();
 
         //hide 'Enable Sample Selection for Oncoprint and SeqPeek'
-        if (args.type === 'SeqPeek' || args.type === 'OncoPrint' || args.type === 'OncoGrid') {
+        if (args.type === 'SeqPeek') {
             $(toggle_selection_selector).hide();
             $(csv_download_selector).hide();
         }
         else {
             $(toggle_selection_selector).show();
             $(csv_download_selector).show();
-        }
-
-        if (args.type === 'OncoGrid') {
-            var oncogrid_template = plot_element.find('#oncogrid_div').html();
-            plot_area.html(oncogrid_template);
         }
         plotFactory.generate_plot(
             {

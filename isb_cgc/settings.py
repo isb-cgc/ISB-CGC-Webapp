@@ -87,11 +87,10 @@ GCP_ACTIVITY_LOG_NAME = os.environ.get('GCP_ACTIVITY_LOG_NAME', 'local_dev_loggi
 DCF_REFRESH_LOG_NAME = os.environ.get('DCF_REFRESH_LOG_NAME', 'local_dev_logging')
 DCF_SA_REG_LOG_NAME = os.environ.get('DCF_SA_REG_LOG_NAME', 'local_dev_logging')
 
-BASE_URL                = os.environ.get('BASE_URL', 'https://dev.isb-cgc.org')
-BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-dev.isb-cgc.org/v4')
-
-# Compute services - Should not be necessary in webapp
-PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
+BASE_URL                = os.environ.get('BASE_URL', 'https://portal.isb-cgc.org')
+BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api.isb-cgc.org/v4')
+DOMAIN_REDIRECT_FROM    = os.environ.get('DOMAIN_REDIRECT_FROM', 'isb-cgc.appspot.com').split(',')
+DOMAIN_REDIRECT_TO      = os.environ.get('DOMAIN_REDIRECT_TO', 'https://portal.isb-cgc.org/')
 
 # Data Buckets
 OPEN_DATA_BUCKET        = os.environ.get('OPEN_DATA_BUCKET', '')
@@ -302,6 +301,7 @@ SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS','3600'))
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'isb_cgc.domain_redirect_middleware.DomainRedirectMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'isb_cgc.checkreqsize_middleware.CheckReqSize',
@@ -597,6 +597,10 @@ OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET', '')
 #################################
 #   For NIH/eRA Commons login   #
 #################################
+
+OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP', '')
+GOOGLE_GROUP_ADMIN                      = os.environ.get('GOOGLE_GROUP_ADMIN', '')
+SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS', '')
 
 # Log name for ERA login views
 LOG_NAME_ERA_LOGIN_VIEW                  = os.environ.get('LOG_NAME_ERA_LOGIN_VIEW', '')
