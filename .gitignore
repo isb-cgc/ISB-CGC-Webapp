@@ -100,7 +100,6 @@ certs/*
 saml/*
 *.key
 *.crt
-*.pem
 tmp*
 *.b64
 
