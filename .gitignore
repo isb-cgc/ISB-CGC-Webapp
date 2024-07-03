@@ -64,9 +64,10 @@ target/
 # Project ignorable files
 .DS_Store
 *.p12
+*.jks
 *.pem
+*.asc
 .sass-cache
-#*
 *.json
 *.patch
 .env
@@ -102,7 +103,6 @@ certs/*
 saml/*
 *.key
 *.crt
-*.pem
 tmp*
 *.b64
 
