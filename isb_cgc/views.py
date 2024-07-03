@@ -308,7 +308,13 @@ def extended_login_view(request):
         )
 
         # If user logs in for the second time, or user has not completed the survey, opt-in status changes to NOT_SEEN
-        user_opt_in_stat_obj = UserOptInStatus.objects.filter(user=user).first()
+        try:
+            user_opt_in_stat_obj = UserOptInStatus.objects.get(user=user)
+        except ObjectDoesNotExist as e:
+            user_opt_in_stat_obj = UserOptInStatus.objects.update_or_create(
+                user=user,
+                opt_in_status=UserOptInStatus.NEW
+            )
         if user_opt_in_stat_obj:
             if user_opt_in_stat_obj.opt_in_status == UserOptInStatus.NEW or \
                     user_opt_in_stat_obj.opt_in_status == UserOptInStatus.SKIP_ONCE:
@@ -317,6 +323,7 @@ def extended_login_view(request):
             elif user_opt_in_stat_obj.opt_in_status == UserOptInStatus.SEEN:
                 user_opt_in_stat_obj.opt_in_status = UserOptInStatus.SKIP_ONCE
                 user_opt_in_stat_obj.save()
+
     except User.DoesNotExist as e:
         logger.error("[ERROR] User not found! User provided: {}".format(request.user))
     except Exception as e:
@@ -870,7 +877,6 @@ def opt_in_form_submitted(request):
             if user_opt_in_stat_obj:
                 user_opt_in_stat_obj.opt_in_status = UserOptInStatus.YES if subscribed else UserOptInStatus.NO
                 user_opt_in_stat_obj.save()
-                # record to store in bq table
                 feedback_row = {
                     "email": email,
                     "first_name": first_name,
@@ -882,8 +888,8 @@ def opt_in_form_submitted(request):
                 }
                 BigQueryFeedbackSupport.add_rows_to_table([feedback_row])
                 # send a notification to feedback@isb-cgc.org about the entry
-                if settings.IS_UAT:
-                    logger.info("[STATUS] UAT: sent email for feedback")
+                if settings.IS_UAT or settings.IS_DEV:
+                    logger.info("[STATUS] UAT/DEV: sent email for feedback")
                 else:
                     # send a notification to feedback@isb-cgc.org about the entry
                     send_feedback_notification(feedback_row)
