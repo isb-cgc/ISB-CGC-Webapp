@@ -218,50 +218,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-12 cards-col">
-                        <div class="panel">
-                            <div class="panel-heading row">
-                                <div class="col-xs-9">
-                                    <a target="_blank" rel="noreferrer"
-                                       href="{{ tp53_url }}">
-                                        <h4>The <em>TP53</em> Database</h4>
-                                    </a>
-                                </div>
-
-                                <div class="col-xs-3 padding-left-0">
-                                    <a target="_blank" rel="noreferrer"
-                                       href="{{ tp53_url }}">
-                                        <img src="{% static 'img/tp53-icon.png' %}" class="img-fluid img-rounded"
-                                             alt="TP53 Database Icon">
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="panel-body">
-                                Explore the <em>TP53</em> Database that compiles various types of data and information from the literature and
-                                generalist databases on human <em>TP53</em> gene variations related to cancer.
-                            </div>
-                            <div class="panel-footer">
-                                <div class="row">
-                                    <div class="col-xs-2"></div>
-                                    <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel="noreferrer"
-                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/the_TP53_database.html">
-                                            <div class="learn-icon landing-icon"></div>
-                                            <div class="icon-caption">Learn</div>
-                                        </a>
-                                    </div>
-                                    <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel="noreferrer"
-                                           href="{{ tp53_url }}">
-                                            <div class="launch-icon landing-icon"></div>
-                                            <div class="icon-caption">Launch</div>
-                                        </a>
-                                    </div>
-                                    <div class="col-xs-2"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -295,8 +251,8 @@
                             </div>
                             <div class="panel-body">
                                 A web interface to build cohorts based on clinical demographics and molecular filters.
-                                Compare patient cohorts with various exploration tools including IGV viewer, image
-                                viewers, and analytical visualization.
+                                Compare patient cohorts with various exploration tools including image
+                                viewers and the Cancer Data File Browser.
                             </div>
                             <div class="panel-footer">
                                 <div class="row">
@@ -412,64 +368,6 @@
                                             <div class="icon-caption">GitHub</div>
                                         </a>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-12 cards-col">
-                        <div class="panel">
-                            <div class="panel-heading row">
-                                <div class="col-xs-9">
-                                    <a target="_blank" rel="noreferrer"
-                                            {% if user.is_authenticated %}
-                                       href="{% url 'user_detail' user.id %}"
-                                            {% else %}
-                                       href="{% url 'user_detail_login' %}"
-                                            {% endif %}
-                                    >
-                                        <h4>Controlled Access Data</h4>
-                                    </a>
-                                </div>
-                                <div class="col-xs-3 padding-left-0">
-                                    <a target="_blank" rel="noreferrer"
-                                            {% if user.is_authenticated %}
-                                       href="{% url 'user_detail' user.id %}"
-                                            {% else %}
-                                       href="{% url 'user_detail_login' %}"
-                                            {% endif %}
-                                    >
-                                        <img src="{% static 'img/cad-icon.png' %}" class="img-fluid"
-                                             alt="bq table icon">
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="panel-body">
-                                Sign in to access controlled-access data on the Google Cloud. Authenticated users with
-                                proper dbGaP authorization only.
-                            </div>
-                            <div class="panel-footer">
-                                <div class="row">
-                                    <div class="col-xs-2"></div>
-                                    <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel="noreferrer"
-                                           href="https://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/Gaining-Access-To-Controlled-Access-Data.html">
-                                            <div class="learn-icon landing-icon"></div>
-                                            <div class="icon-caption">Learn</div>
-                                        </a>
-                                    </div>
-                                    <div class="col-xs-4 text-center">
-                                        <a target="_blank" rel="noreferrer"
-                                                {% if user.is_authenticated %}
-                                           href="{% url 'user_detail' user.id %}"
-                                                {% else %}
-                                           href="{% url 'user_detail_login' %}"
-                                                {% endif %}
-                                        >
-                                            <div class="launch-icon landing-icon"></div>
-                                            <div class="icon-caption">Launch</div>
-                                        </a>
-                                    </div>
-                                    <div class="col-xs-2"></div>
                                 </div>
                             </div>
                         </div>
