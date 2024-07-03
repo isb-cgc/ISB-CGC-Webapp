@@ -3343,6 +3343,14 @@ span.code {
     #landing .footer-div .row > div, #landing .footer-div a .row > div {
       padding: 0; }
 
+.alert-warning.new-version {
+  text-align: center;
+}
+
+#new-version .alert-warning.new-version {
+  display: none;
+}
+
 #privacy h2, #about h2 {
   font-size: 20px;
   margin-top: 20px; }

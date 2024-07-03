@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    ISB-CGC|Privacy Policy
+{% endblock %}
+
+{% block description %}
+    ISB-CGC New Version - Coming Soon!
+{% endblock %}
+
+{% block link_page_name %}new-version{% endblock %}
+{% block page_name %}new-version{% endblock %}
+
+{% block page_header %}
+    {% if request.user.is_authenticated %}
+        <div class="container">
+            <ol class="breadcrumb">
+                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            </ol>
+        </div>
+    {% endif %}
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <h1 class="page-header">New Version - Transition Information</h1>
+        <p>
+            ISB-CGC is doing some re-engineering, and will release a new version of the Web Application in the coming weeks.
+        </p>
+        <p>
+            <b>Existing accounts and saved cohorts will not be migrated to the new version of the system,</b> however the current
+            version will remain available for some time to assist you in re-creating your data in the new version. We
+            recommend you look at your currently saved cohorts in preparation for manually recreating them on the new system.
+        </p>
+        <p>
+            Workbooks and visualizations are slated for retirement and will not be on the new system. If you would like
+            to see these features continued, please reach out to us at <a href="mailto:feedback@isb-cgc.org">feedback@isb-cgc.org</a>.
+            We would love to hear about your feedback about our systems.
+        </p>
+    </div>
+{% endblock %}
