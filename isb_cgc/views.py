@@ -64,7 +64,6 @@ logger = logging.getLogger('main_logger')
 
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
-BQ_ECOSYS_BUCKET = settings.BQ_ECOSYS_STATIC_URL
 CITATIONS_BUCKET = settings.CITATIONS_STATIC_URL
 IDP = settings.IDP
 

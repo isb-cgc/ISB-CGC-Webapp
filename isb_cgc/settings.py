@@ -54,7 +54,6 @@ SUPPORT_EMAIL = os.environ.get('SUPPORT_EMAIL', 'info@isb-cgc.org')
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 CONNECTION_IS_LOCAL     = (os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost')
-IS_CIRCLE               = (os.environ.get('CI', None) is not None)
 DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') and CONNECTION_IS_LOCAL)
 
 print("[STATUS] DEBUG mode is "+str(DEBUG), file=sys.stdout)
@@ -72,10 +71,15 @@ MANAGERS                = ADMINS
 # For Django 3.2, we need to specify our default auto-increment type for PKs
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
+# GCP where this application is running (dev project for local developer instances)
 GCLOUD_PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
+# GCP number for the project where this application is running (dev project for local developer instances)
 GCLOUD_PROJECT_NUMBER          = os.environ.get('GCLOUD_PROJECT_NUMBER', '')
+# GCP where BQ jobs are run
 BIGQUERY_PROJECT_ID            = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PROJECT_ID)
+# GCP where BQ case metadata resides
 BIGQUERY_DATA_PROJECT_ID       = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
+# User feedback tables
 BIGQUERY_FEEDBACK_DATASET      = os.environ.get('BIGQUERY_FEEDBACK_DATASET', '')
 BIGQUERY_FEEDBACK_TABLE        = os.environ.get('BIGQUERY_FEEDBACK_TABLE', '')
 
@@ -123,13 +127,16 @@ if os.environ.get('CI', None) is not None:
 DATABASES = database_config
 DB_SOCKET = database_config['default']['HOST'] if 'cloudsql' in database_config['default']['HOST'] else None
 
+# Tier ID vars are set in .envs for that tier so these should only be true on those tiers
 IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_UAT = (os.environ.get('IS_UAT', 'False') == 'True')
+# AppEngine var is set in the app.yaml so this should be false for CI and local dev apps
 IS_APP_ENGINE = bool(os.getenv('IS_APP_ENGINE', 'False') == 'True')
+# $CI is set only on CircleCI run VMs so this should not have a value outside of a deployment build
 IS_CI = bool(os.getenv('CI', None) is not None)
 
-# If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
-# care of that for us
+# SSL Certs are used by non-appengine deployments to talk to a CloudSQL database
+# AppEngine deployments use the proxy and do not need these variables to be set
 if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE:
     DATABASES['default']['OPTIONS'] = {
         'ssl': {
@@ -139,15 +146,14 @@ if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE:
         }
     }
 
-# Default to localhost for the site ID
+# Site ID setting for AllAuth
+# Default to localhost (set in build scripts for local VMs to entry ID 3)
 SITE_ID = 3
 
+# ...and only switch to the deployed system, which should always be ID 4, if we are on AppEngine
 if IS_APP_ENGINE:
     print("[STATUS] AppEngine Flex detected.", file=sys.stdout)
     SITE_ID = 4
-
-def get_project_identifier():
-    return BIGQUERY_PROJECT_ID
 
 BQ_MAX_ATTEMPTS             = int(os.environ.get('BQ_MAX_ATTEMPTS', '10'))
 USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', False)
@@ -208,8 +214,6 @@ STATIC_ROOT = ''
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = os.environ.get('STATIC_URL', '/static/')
-
-BQ_ECOSYS_STATIC_URL = os.environ.get('BQ_ECOSYS_STATIC_URL', 'https://storage.googleapis.com/webapp-static-files-isb-cgc-dev/bq_ecosys/')
 
 CITATIONS_STATIC_URL = os.environ.get('CITATIONS_STATIC_URL', 'https://storage.googleapis.com/webapp-static-files-isb-cgc-dev/static/citations/')
 
@@ -588,7 +592,7 @@ DCF_LOGIN_EXPIRATION_SECONDS             = int(os.environ.get('DCF_LOGIN_EXPIRAT
 #
 # This should only be done on a local system which is running against its own VM. Deployed systems will already have
 # a site superuser so this would simply overwrite that user. Don't enable this in production!
-if (IS_DEV and CONNECTION_IS_LOCAL) or IS_CIRCLE:
+if (IS_DEV and CONNECTION_IS_LOCAL) or IS_CI:
     INSTALLED_APPS += (
         'finalware',)
 
