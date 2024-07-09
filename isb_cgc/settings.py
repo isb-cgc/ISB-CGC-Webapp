@@ -79,6 +79,9 @@ GCLOUD_PROJECT_NUMBER          = os.environ.get('GCLOUD_PROJECT_NUMBER', '')
 BIGQUERY_PROJECT_ID            = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PROJECT_ID)
 # GCP where BQ case metadata resides
 BIGQUERY_DATA_PROJECT_ID       = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
+# Project and BQ dataset which house the exported BQ tables made available to users
+BIGQUERY_EXPORT_PROJECT_ID     = os.environ.get('BIGQUERY_EXPORT_PROJECT_ID', GCLOUD_PROJECT_ID)
+BIGQUERY_EXPORT_DATASET_ID     = os.environ.get('BIGQUERY_EXPORT_DATASET_ID', 'user_exports')
 # User feedback tables
 BIGQUERY_FEEDBACK_DATASET      = os.environ.get('BIGQUERY_FEEDBACK_DATASET', '')
 BIGQUERY_FEEDBACK_TABLE        = os.environ.get('BIGQUERY_FEEDBACK_TABLE', '')
