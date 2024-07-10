@@ -265,7 +265,7 @@ require([
                 success : function (data) {
                     data_tab_content_div.append(data);
 
-                    update_download_link(active_tab, total_files);
+                    update_links(active_tab, total_files);
                     update_table_display(active_tab, {'total_file_count': total_files, 'file_list': file_listing});
 
                     build_total_files = total_files;
@@ -348,7 +348,7 @@ require([
         });
     });
 
-    function update_download_link(active_tab, file_list_total) {
+    function update_links(active_tab, file_list_total) {
         var tab_selector = '#'+active_tab+'-files';
 
         if(file_list_total <= 0) {
@@ -367,7 +367,7 @@ require([
         }
 
         var downloadToken = new Date().getTime();
-        $('.filelist-obtain .download-token').val(downloadToken);
+        $('.filelist-obtain .download-token, .filelist-obtain .export-token').val(downloadToken);
 
         var filter_args = null;
 
@@ -408,11 +408,17 @@ require([
                 break;
         }
 
+        let export_link = $(tab_selector).find('.export-link').attr('base-url');
         $(tab_selector).find('.download-link').attr('href', download_url + '?'
             + (filter_args ? filter_args + '&' : '')
             + (tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab]).length > 0 ?
                     'case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]) + '&' : '')
             + 'downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
+        $(tab_selector).find('.export-link').attr('href', export_link + '?'
+            + (filter_args ? filter_args + '&' : '')
+            + (tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab]).length > 0 ?
+                    'case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]) + '&' : '')
+            + 'downloadToken='+downloadToken);
         if(active_tab !== 'slim' && active_tab !== 'dicom') {
             $(tab_selector).find('.download-link').attr('href',$(tab_selector).find('.download-link').attr('href'));
         }
@@ -447,7 +453,7 @@ require([
             url: url,
             success: function (data) {
                 if(do_filter_count) {
-                    update_download_link(active_tab, data.total_file_count);
+                    update_links(active_tab, data.total_file_count);
                 }
                 update_table_display(active_tab,data,do_filter_count);
             },
@@ -875,7 +881,7 @@ require([
                             }
                         }
                     }
-                    update_download_link(active_tab, data.total_file_count);
+                    update_links(active_tab, data.total_file_count);
                     update_table_display(active_tab, data);
 
                     update_zero_case_filters_all();

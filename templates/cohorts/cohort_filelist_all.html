@@ -107,11 +107,21 @@
                     <h4>File Listing</h4>
                     <div class="page-action-group pull-right">
                         <ul>
+                            <li class="menu-item"><span class="pending-left" id="download-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Downloading...</span></li>
+                            <li class="menu-item"><span class="pending-left" id="export-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Exporting...</span></li>
                             <li class="menu-item">
                                 <div class="filelist-obtain">
-                                    <span class="pending-left" id="download-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Downloading...</span>
-                                    <a class="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info download-btn">CSV</button></a>{# <a id="download-link" href="{{ download_url }}" title="Download file manifest as JSON"><button class="btn btn-info">JSON</button></a>#}
+                                    <a class="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info download-btn">CSV</button></a>
                                     <input type="hidden" class="download-token" value="" />
+                                </div>
+                            </li>
+                            <li class="menu-item">
+                                <div class="filelist-obtain">
+                                    <a class="export-link"
+                                       base-url="{% if cohort %}{% url 'export_file_manifest' cohort.id %}{% else %}{% url 'export_file_manifest' %}{% endif %}"
+                                       href="{% if cohort %}{% url 'export_file_manifest' cohort.id %}{% else %}{% url 'export_file_manifest' %}{% endif %}"
+                                       title="Export file manifest to BQ"><button class="btn btn-info export-btn">BQ</button></a>
+                                    <input type="hidden" class="export-token" value="" />
                                 </div>
                             </li>
                         </ul>
