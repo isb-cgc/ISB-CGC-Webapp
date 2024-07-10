@@ -219,7 +219,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
         if (mode == 1){
           ret = [{className: "ckbx text_data viewbx caseview", "targets": [0]},
                     {className: "ckbx shopping-cart-holder", "targets": [1]},
-                    {className: "ckbx cartnum", "targets": [2]},
+                    {className: "ckbx", "targets": [2]},
 
                     {className: "collex_name", "targets": [3]},
                     {className: "projects_table_num_cohort", "targets": [5]}]
@@ -259,7 +259,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
 
                   }
                };
-        var cartnum_col={"type": "html", "orderable": false, render: function(){return ('0');}};
+        var cartnum_col={"type": "html", "orderable": false, render: function(){return ('<span class="cartnum cartnum_style">0</span>');}};
         var collection_col = {"type": "html", "orderable": true, render: function (td, data, row){
                  return '<span id="'+row[0]+'"class="collection_name value">'+row[3]+'</span>\n' +
                      '<span><i class="collection_info fa-solid fa-info-circle" value="'+row[0]+'" data-filter-display-val="'+row[3]+'"></i></span>'+
@@ -546,7 +546,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
         if (mode == 1){
           ret = [    {className: "ckbx studyview", "targets": [0]},
                     {className: "ckbx", "targets": [1]},
-                    {className: "cartnum ckbx", "targets":[2]},
+                    {className: "ckbx", "targets":[2]},
                     {className: "col1 project-name", "targets": [3]},
                     {className: "col1 case-id", "targets": [4]},
                     {className: "col1 numrows", "targets": [5]},
@@ -595,7 +595,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                   }
                };
 
-      const cartnum_col=  {"type": "html", "orderable": false, "data": "PatientID", render: function(PatientID, type, row){return '0';}};
+      const cartnum_col={"type": "html", "orderable": false, "data": "PatientID", render: function(){return ('<span class="cartnum cartnum_style">0</span>');}};
 
       const collection_col =  {"type": "text", "orderable": true, data: 'collection_id', render: function (data) {var projectNm = $('#' + data).filter('.collection_name')[0].innerText; return projectNm;}};
 
@@ -1097,7 +1097,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                 "columnDefs": [
                     {className: "ckbx seriesview", "targets": [0]},
                     {className: "ckbx", "targets": [1]},
-                    {className: "ckbx cartnum", "targets": [2]},
+                    {className: "ckbx", "targets": [2]},
                     {className: "col1 case-id", "targets": [3]},
                     {className: "col2 study-id study-id-col study-id-tltp", "targets": [4]},
                     {className: "col1 study-date", "targets": [5]},
@@ -1141,7 +1141,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                                      cnt += window.glblcart[data]['sel'].size;
                                  }
                              }
-                            return cnt.toString();
+                            return '<span class="cartnum cartnum_style">'+cnt.toString()+'</span>'
                         }
                     },
 
@@ -2512,14 +2512,14 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
         var moreInFilterSetThanCart = false;
         var moreInCartThanFilterSet = false;
         var someInCart = false;
-        var studymp={};
-        var studympFilt={};
-        var selItem={};
+        var studymp= new Object();
+        var studympFilt=new Object();
+        var selItem=new Object();
         var maxSeries = 0;
 
         var numSeriesInItem = 0;
         if (ids.length ==1 && (ids[0] in stats)){
-            numSeriesInItem = stats[ids[0]];
+            var numSeriesInItem = stats[ids[0]];
         }
         if ((ids.length==1) && (ids[0] in window.projstudymp)){
             studymp=window.projstudymp[ids[0]];
@@ -2527,7 +2527,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
         if ((ids.length==1) && (ids[0] in window.selProjects)){
             maxSeries = stats['series_per_collec'][ids[0]];
             selItem = window.selProjects[ids[0]]
-            if ('studymp' in window.selProjects[ids[0]])
+            if (('studymp' in window.selProjects[ids[0]]) && !typeof(window.selProjects[ids[0]].studymp =="undefined"))
             {
                 studympFilt = window.selProjects[ids[0]].studymp;
             }
@@ -2540,7 +2540,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
          if ((ids.length==2) && (ids[0] in window.selProjects) && (ids[1] in window.selProjects[ids[0]].selCases)) {
              maxSeries = window.selProjects[ids[0]].selCases[ids[1]].maxseries;
              selItem = window.selProjects[ids[0]].selCases[ids[1]];
-             if ('studymp' in window.selProjects[ids[0]].selCases[ids[1]])
+             if (('studymp' in window.selProjects[ids[0]].selCases[ids[1]]) && !typeof(window.selProjects[ids[0]].selCases[ids[1]].studymp =="undefined"))
             {
               studympFilt = window.selProjects[ids[0]].selCases[ids[1]].studymp;
             }

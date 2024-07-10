@@ -660,12 +660,7 @@ tr:not(.someInCart).ckbx:has(.fa-cart-shopping){
     text-decoration:underline;
                     }
 
-td.cartnum{
-    background-color:lightgrey;
-    border-radius: 15px;
-    /* color: white; */
 
-}
 
 .filtermoddisp{
     display:block !important;
@@ -726,17 +721,35 @@ li.cartlist{
 
 
  tbody .cartnum {
-     font-size: 1.0em;
-     text-align: right;
-     padding: 2px 5px !important;
-     border-radius: 12px !important;
-     color:white;
-     background-color: #818181 !important;
-     padding-top: 20px;
-     vertical-align: middle !important;
+     #font-size: 11.2px !important;
+     #font-weight: 500 !important;
+     #border-radius: 7px !important;
+     #line-height: 16px !important;
+     #text-align: right !important;
+     #padding-botton: 2px !important;
+     #padding-left: 5px !important;
+     #padding-right: 5px !important;
+     #padding-top: 2px !important;
+     #text-size-adjust: 100% !important;
+     #padding: 2px 5px !important;
+
+     #color:white;
+     #background-color: #818181 !important;
+     #padding-top: 20px;
+     #vertical-align: middle !important;
 
  }
 
+ .cartnum_style {
+    background-color: #818181;
+    color: white;
+    color: white;
+    border-radius: 7px;
+    font-size: 12px;
+    padding: 3px 6px;
+    text-align: right;
+     vertical-align: middle;
+}
  .cohort-summary{
      font-size: 16px !important;
      color: #2A537A !important;
