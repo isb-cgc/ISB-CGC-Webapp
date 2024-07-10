@@ -295,7 +295,7 @@ def cart(request):
 
 
 
-# Method for obtaining the records displayed in the tables on the right-hand side of the explore data page
+# returns various metadata mappings for selected projects used in calculating cart selection counts 'on the fly' client side
 #@login_required
 def studymp(request):
     response = {}
@@ -333,7 +333,6 @@ def studymp(request):
 
 
        studymp={}
-       seriesmp={}
        study_patient={}
        study_proj={}
        casestudymp ={}
@@ -351,14 +350,14 @@ def studymp(request):
               casestudymp[patientid]={}
           if not proj in projstudymp:
               projstudymp[proj] = {}
-          if not studyid in seriesmp:
-              seriesmp[studyid] = {}
-              seriesmp[studyid]['val'] = []
-              seriesmp[studyid]['proj']=proj
-              seriesmp[studyid]['PatientID'] = patientid
-              seriesmp[studyid]['study_uuid']= study_uuid
-              seriesmp[studyid]['aws_bucket'] = aws_bucket
-              seriesmp[studyid]['gcs_bucket'] = gcs_bucket
+          if not studyid in studymp:
+              studymp[studyid] = {}
+              studymp[studyid]['val'] = []
+              studymp[studyid]['proj']=proj
+              studymp[studyid]['PatientID'] = patientid
+              studymp[studyid]['study_uuid']= study_uuid
+              studymp[studyid]['aws_bucket'] = aws_bucket
+              studymp[studyid]['gcs_bucket'] = gcs_bucket
           if not  (studyid in study_patient):
               study_patient[studyid]=patientid
           if not (studyid in study_proj):
@@ -368,11 +367,11 @@ def studymp(request):
           for studyrow in idsEx['facets']['per_id']['buckets']:
              studyid=studyrow['val']
              cnt=studyrow['unique_series']
-             if (studyid in seriesmp):
-                seriesmp[studyid]['cnt']=cnt
+             if (studyid in studymp):
+                studymp[studyid]['cnt']=cnt
              if (studyid in study_patient):
                  patientid=study_patient[studyid]
-                 studymp[studyid]=cnt
+                 #studymp[studyid]=cnt
                  casestudymp[patientid][studyid]=cnt
              if (studyid in study_proj):
                  proj = study_proj[studyid]
@@ -380,7 +379,6 @@ def studymp(request):
 
 
        response["studymp"] = studymp
-       response["seriesmp"] = seriesmp
        response['casestudymp'] = casestudymp
        response['projstudymp'] = projstudymp
 
@@ -402,11 +400,7 @@ def populate_tables(request):
     response = {}
     status = 200
     tableRes = []
-
     studymp={}
-    seriesmp={}
-    docsrc={}
-    filtsrc={}
 
     try:
         req = request.GET if request.GET else request.POST
@@ -474,10 +468,6 @@ def populate_tables(request):
             sort_arg = 'collection_id asc'
             sortByField= True
             sort="collection_id"
-            #if sort == 'collection_id':
-            #    sortByField = True
-            #    sort_arg = 'collection_id ' + sortdir
-
 
 
         if table_type == 'cases':
@@ -669,50 +659,6 @@ def populate_tables(request):
                         else:
                             tableRow[facet] = 0
 
-            '''if (table_type == 'cases'):
-                osources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
-                    active=True, source_type=DataSource.SOLR,
-                    aggregate_level="SeriesInstanceUID"
-                )
-                sfilters= {}
-                clist = [x['PatientID'] for x in tableRes]
-                sfilters['PatientID'] = clist
-                idsEx = get_collex_metadata(
-                    sfilters, ['collection_id','PatientID', 'StudyInstanceUID','SeriesInstanceUID'], record_limit=serieslimit, sources=osources, offset=offset,
-                    records_only=True,
-                    collapse_on='SeriesInstanceUID', counts_only=False, filtered_needed=False,
-                    raw_format=True, default_facets=False
-                )
-                idic={}
-                studyvals={}
-                for stats in cntRecs['facets']['per_study']['buckets']:
-                    studyvals[stats['val']]=stats['unique_series']
-                for res in idsEx['docs']:
-                    collection_id = res['collection_id'][0]
-                    patientid= res['PatientID']
-                    studyid = res['StudyInstanceUID']
-                    seriesid = res['SeriesInstanceUID']
-                    if (studyid in studyvals):
-                      if not studyid in seriesmp:
-                        seriesmp[studyid]={}
-                        seriesmp[studyid]['val']=[]
-                        seriesmp[studyid]['proj'] = collection_id
-                        seriesmp[studyid]['PatientID']=patientid
-                      seriesmp[studyid]['val'].append(seriesid)
-                      study_cnt = studyvals[studyid]
-                      if not patientid in idic:
-                        idic[patientid] ={}
-                      idic[patientid][studyid]=study_cnt
-                #for (studyid in seriesmp):
-                #  seriesmp[studyid]['cnt']=len(seriesmp[studyid]['val'])
-
-                for row in tableRes:
-                    id=row['PatientID']
-                    if id in idic:
-                        row['studyid'] = idic[id] '''
-
-
-
         else:
             idsReq = get_collex_metadata(
                 filters, fields, record_limit=limit, sources=sources, offset=offset, records_only=False,
@@ -802,31 +748,26 @@ def populate_tables(request):
                 patientid = res['PatientID']
                 studyid = res['StudyInstanceUID']
                 seriesid = res['SeriesInstanceUID']
-                if not (studyid in seriesmp):
-                    seriesmp[studyid] = {}
-                    seriesmp[studyid]['val'] = []
-                    seriesmp[studyid]['proj'] = collection_id[0]
-                    seriesmp[studyid]['PatientID'] = patientid
-                seriesmp[studyid]['val'].append(seriesid)
-            # for (studyid in seriesmp):
-            #  seriesmp[studyid]['cnt'] = len(seriesmp[studyid]['val'])
+                if not (studyid in studymp):
+                    studymp[studyid] = {}
+                    studymp[studyid]['val'] = []
+                    studymp[studyid]['proj'] = collection_id[0]
+                    studymp[studyid]['PatientID'] = patientid
+                studymp[studyid]['val'].append(seriesid)
 
             for row in tableRes:
                 id = row['StudyInstanceUID']
-                if id in seriesmp:
-                    row['seriesmp'] = {}
-                    row['seriesmp'][id]=seriesmp[id]
+                if id in studymp:
+                    row['studymp'] = {}
+                    row['studymp'][id] =studymp[id]
 
 
         response["res"] = tableRes
         response["cnt"] = cntTotal
         response["diff"] = diffA
 
-        if table_type == 'cases':
+        if (table_type == 'cases') or (table_type == 'studies'):
             response["studymp"]=studymp
-        elif table_type == 'studies':
-            response["seriesmp"] = seriesmp
-
 
 
     except Exception as e:
@@ -1090,7 +1031,7 @@ def cart_data(request):
             response = get_cart_data(filtergrp_list, partitions, field_list, limit, offset)
 
             if (len(studyidarr)>0):
-              seriesmp ={}
+              studymp ={}
               filters = {}
               filters['StudyInstanceUID'] = studyidarr
               sources = ImagingDataCommonsVersion.objects.get(active=True).get_data_sources(
@@ -1108,10 +1049,10 @@ def cart_data(request):
               for doc in idsEx['docs']:
                 studyid =  doc['StudyInstanceUID']
                 seriesid =  doc['SeriesInstanceUID']
-                if not(studyid in seriesmp):
-                  seriesmp[studyid] =[]
-                seriesmp[studyid].append(seriesid)
-              response['seriesmp'] = seriesmp
+                if not(studyid in studymp):
+                  studymp[studyid] =[]
+                studymp[studyid].append(seriesid)
+              response['studymp'] = studymp
 
         else:
             response['numFound'] = 0

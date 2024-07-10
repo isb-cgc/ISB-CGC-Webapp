@@ -670,10 +670,10 @@ require([
                 studymp[studyid].push(seriesid)
 
             }
-            if ("seriesmp" in sessionStorage) {
-                var seriesmp = JSON.parse(sessionStorage.getItem("seriesmp"));
-                for (studyid in seriesmp) {
-                    window.seriesmp[studyid]['val'] = seriesmp[studyid]
+            if ("studymp" in sessionStorage) {
+                var studymp = JSON.parse(sessionStorage.getItem("studymp"));
+                for (studyid in studymp) {
+                    window.studymp[studyid]['val'] = studymp[studyid]
                 }
             }
             if ("seriesdel" in sessionStorage) {
@@ -713,8 +713,8 @@ require([
         if ("cartedits" in sessionStorage){
             sessionStorage.removeItem("cartedits");
         }
-        if ("seriesmp" in sessionStorage){
-            sessionStorage.removeItem("seriesmp");
+        if ("studymp" in sessionStorage){
+            sessionStorage.removeItem("studymp");
         }
         if ("seriesdel" in sessionStorage) {
                 sessionStorage.removeItem("seriesdel");

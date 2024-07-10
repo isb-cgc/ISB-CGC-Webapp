@@ -221,11 +221,11 @@ require([
                         success: function (data) {
                             console.log(" data received");
                             var dataset = data["docs"];
-                            if ("seriesmp" in data){
-                                var mp = data["seriesmp"]
+                            if ("studymp" in data){
+                                var mp = data["studymp"]
 
-                                for (var studyid in data["seriesmp"]) {
-                                   window.seriesmp[studyid] = data["seriesmp"][studyid];
+                                for (var studyid in data["studymp"]) {
+                                   window.studymp[studyid] = data["studymp"][studyid];
                                 }
                             }
                              callback({
@@ -286,7 +286,7 @@ require([
         ajaxtriggered= true;
         window.cartedits=false;
         window.cartHist = new Array();
-        window.seriesmp = new Object();
+        window.studymp = new Object();
         window.seriesdel = new Array();
         if ("cartHist" in sessionStorage){
             window.cartHist= JSON.parse(sessionStorage.getItem("cartHist"));
@@ -335,7 +335,7 @@ require([
         //sessionStorage.setItem("glblcart", JSON.stringify(window.glblcart));
         sessionStorage.setItem("src", "cart_page");
         sessionStorage.setItem("cartedits", window.cartedits.toString());
-        sessionStorage.setItem("seriesmp", JSON.stringify(window.seriesmp));
+        sessionStorage.setItem("studymp", JSON.stringify(window.studymp));
         sessionStorage.setItem("seriesdel", JSON.stringify(window.seriesdel));
 
         //sessionStorage.setItem("cartDetails", windowcartDetails);
