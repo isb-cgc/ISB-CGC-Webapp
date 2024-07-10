@@ -984,7 +984,7 @@ require([
 
     browser_tab_load(cohort_id);
 
-    $('.data-tab-content').on('click', '.download-btn', function() {
+    $('.data-tab-content').on('click', '.download-btn, .export-btn  ', function() {
         var self=$(this);
         var msg = $('#download-in-prog');
 

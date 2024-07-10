@@ -120,7 +120,13 @@
                                     <a class="export-link"
                                        base-url="{% if cohort %}{% url 'export_file_manifest' cohort.id %}{% else %}{% url 'export_file_manifest' %}{% endif %}"
                                        href="{% if cohort %}{% url 'export_file_manifest' cohort.id %}{% else %}{% url 'export_file_manifest' %}{% endif %}"
-                                       title="Export file manifest to BQ"><button class="btn btn-info export-btn">BQ</button></a>
+                                       {% if user.is_anonymous %}
+                                            title="Log in with a Google Account to enable this feature." disabled
+                                       {% else %}
+                                            title="Export file manifest to BQ"
+                                       {% endif %}
+                                    >
+                                        <button class="btn btn-info export-btn"{% if user.is_anonymous %} disabled{% endif %}>BQ</button></a>
                                     <input type="hidden" class="export-token" value="" />
                                 </div>
                             </li>
