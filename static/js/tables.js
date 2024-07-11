@@ -123,8 +123,8 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
         $('#cases_tab').DataTable().destroy();
         $('#studies_tab').DataTable().destroy();
         $('#series_tab').DataTable().destroy();
-
-        //updateCaseTable(false, false, true, [true,true], rmSelCases,'',-1, -1);
+        var rmSelCases=[];
+        updateCaseTable(false, false, true, [true,true], rmSelCases,'',-1, -1);
 
     }
 
