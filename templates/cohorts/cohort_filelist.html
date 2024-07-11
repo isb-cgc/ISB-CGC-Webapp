@@ -211,7 +211,6 @@
 
     var SEL_IGV_FILE_MAX = '{{  sel_file_max }}';
     var FILE_LIST_MAX = '{{  file_list_max }}';
-    var HAS_USER_DATA = {% if has_user_data %}true{% else %}false{% endif %};
     var request_user_id = {% if user.is_anonymous %} null {% else %} {{ user.id }} {% endif %};
     var programs_this_cohort = {{ programs_this_cohort|tojson|safe }};
     </script>

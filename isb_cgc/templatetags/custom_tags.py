@@ -108,6 +108,13 @@ HIDE_ATTR = [
 ]
 
 
+@register.filter
+def has_social(user):
+    if user.is_authenticated:
+        return bool(len(user.socialaccount_set.all()) > 0)
+    return False
+
+
 def quick_js_bracket_replace(matchobj):
     if matchobj.group(0) == '<':
         return '\u003C'

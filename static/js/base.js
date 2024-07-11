@@ -176,17 +176,9 @@ require([
         .tablesorter({
         headers: {
             0: {sorter:false},
-            7: {sorter: 'fullDate'}
+            8: {sorter: 'fullDate'}
         },
-        sortList: [[7,1]]
-    });
-
-    $('#public-cohort-table').tablesorter({
-        headers: {
-            0: {sorter:false},
-            4: {sorter: 'fullDate'}
-        },
-        sortList: [[4,1]]
+        sortList: [[8,1]]
     });
 
     $("#share-share_users").on("keypress", function(e) {

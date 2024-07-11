@@ -1403,13 +1403,60 @@ require([
         }
     });
 
-    $('#log-in-to-save-btn').on('click', function()
-    {
+    $('#log-in-to-save-btn').on('click', function() {
         $.setCookie('login_from','cohort','/');
         save_anonymous_filters();
         location.href = '/accounts/login/';
     });
+
+    $('.export-btn, .download-ids-btn').on('click', function() {
+        let self=$(this);
+        if(self.hasClass('export-btn') && !user_is_social) {
+            e.preventDefault();
+            return false;
+        }
+        let msg = self.hasClass('download-ids-btn') ? $('#download-in-prog') : $('#export-in-prog');
+        let token = self.hasClass('download-ids-btn') ? $('.download-token').val() : $('.export-token').val();
+
+        self.attr('disabled','disabled');
+        msg.show();
+
+        base.blockResubmit(function() {
+            self.removeAttr('disabled');
+            msg.hide();
+        },token,"downloadToken");
+
+        if(self.hasClass('export-btn')) {
+            $.ajax({
+                type: 'GET',
+                url: $('.export-btn').attr('url') + '?downloadToken=' + token,
+                success: function (data) {
+                    let msg_box = $('#export-result');
+                    msg_box.hide();
+                    msg_box.empty();
+                    msg_box.html(data['message']);
+                    msg_box.show();
+                },
+                error: function (xhr) {
+                    var responseJSON = $.parseJSON(xhr.responseText);
+                    // If we received a redirect, honor that
+                    if (responseJSON.redirect) {
+                        base.setReloadMsg(responseJSON.level || "error", responseJSON.message);
+                        window.location = responseJSON.redirect;
+                    } else {
+                        base.showJsMessage(responseJSON.level || "error", responseJSON.message, true);
+                    }
+                },
+            });
+        }
+    });
+
     set_mode();
     filter_panel_load(cohort_id);
+
+    let token = new Date().getTime();
+    $('.export-token, .download-token').val(token);
+    $('.download-ids-btn').attr('href',$('.download-ids-btn').attr('href')+'?downloadToken='+token);
+
 });
 

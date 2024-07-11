@@ -62,19 +62,33 @@
                                          title="View this cohort's file list">View Files</a></li>
                 {% if cohort.perm.perm == 'OWNER' %}
                     <li class="separator"></li>
-                    <li class="menu-item"><a href="{% url 'download_ids' cohort.id %}"
-                                             class="btn btn-info download-ids-btn"
-                                             title="Download this cohort's records as a CSV">CSV</a></li>
-                    <li class="separator"></li>
                     <li class="menu-item">
                         <button class="btn btn-info" data-toggle="modal" data-target="#share-cohort-modal">Share
                         </button>
                     </li>
-                {% endif %}
-                {% if not cohort.is_public and cohort.perm.perm == 'OWNER' %}
                     <li class="separator"></li>
                     <li class="menu-item"><a data-target="#share-cohort-modal" data-toggle="modal" class="btn btn-link">Shared
                         with (<span class="share-count">{{ shared_with_users|length }}</span>)</a></li>
+                    <li class="separator"></li>
+                    <li class="menu-item">
+                        <a href="{% url 'download_ids' cohort.id %}"
+                                             class="btn btn-info download-ids-btn"
+                                             title="Download this cohort's records as a CSV">CSV</a>
+                        <input type="hidden" class="download-token" value="" />
+                    </li>
+                    <li class="menu-item">
+                        <a url="{% if is_social %}{{ export_url }}{% endif %}"
+                            class="btn btn-info export-btn"
+                           {% if is_social %}
+                            title="Export this cohort to BigQuery"
+                           {% else %}
+                            title="A Google Account is required to export to BigQuery" disabled
+                           {% endif %}
+                           >BQ</a>
+                        <input type="hidden" class="export-token" value="" />
+                    <li class="menu-item"><span class="pending-left" id="export-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Exporting...</span></li>
+                    <li class="menu-item"><span class="pending-left" id="download-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Downloading...</span></li>
+                    </li>
                 {% endif %}
             </ul>
         </div>
@@ -91,6 +105,10 @@
                                 class="sr-only">Close</span></button>
                         You have selected too many filters. The current counts shown will not be accurate until one or
                         more filter options are removed.
+                    </div>
+                    <div id="export-result" class="alert alert-info alert-dismissable" style="display: none;">
+                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span
+                                class="sr-only">Close</span></button>
                     </div>
                 </div>
             </div>
@@ -306,6 +324,7 @@
         var request_user_id = {{ user.id }};
         var all_nodes = {{ all_nodes|tojson|safe }};
         var all_programs = {{ all_programs|tojson|safe }};
+        var user_is_social = {% if request.user.is_authenticated and request.user|has_social %}true{% else %}false{% endif %};
     </script>
 {% endblock %}
 
