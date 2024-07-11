@@ -121,15 +121,15 @@
                             <li class="menu-item">
                                 <div class="filelist-obtain">
                                     <a class="export-link"
-                                       base-url="{{ export_url }}"
-                                       url="{{ export_url }}"
-                                       {% if user.is_anonymous %}
+                                       base-url="{% if not user.is_anonymous and is_social %}{{ export_url }}{% endif %}"
+                                       url="{% if not user.is_anonymous and is_social %}{{ export_url }}{% endif %}"
+                                       {% if user.is_anonymous or not is_social %}
                                             title="Log in with a Google Account to enable this feature." disabled
                                        {% else %}
                                             title="Export file manifest to BQ"
                                        {% endif %}
                                     >
-                                        <button class="btn btn-info export-btn"{% if user.is_anonymous %} disabled{% endif %}>BQ</button></a>
+                                        <button class="btn btn-info export-btn"{% if user.is_anonymous or not is_social %} disabled{% endif %}>BQ</button></a>
                                     <input type="hidden" class="export-token" value="" />
                                 </div>
                             </li>
@@ -214,5 +214,6 @@
 <script type="text/javascript">
     var total_files = {{ total_file_count|safe }};
     var file_listing = {{ file_list|tojson|safe }};
+    var user_is_social = {% if request.user.is_authenticated and request.user|has_social %}true{% else %}false{% endif %};
     var build_total_files = { 'HG19': undefined, 'HG38': undefined };
 </script>

@@ -1411,6 +1411,10 @@ require([
 
     $('.export-btn, .download-ids-btn').on('click', function() {
         let self=$(this);
+        if(self.hasClass('export-btn') && !user_is_social) {
+            e.preventDefault();
+            return false;
+        }
         let msg = self.hasClass('download-ids-btn') ? $('#download-in-prog') : $('#export-in-prog');
         let token = self.hasClass('download-ids-btn') ? $('.download-token').val() : $('.export-token').val();
 

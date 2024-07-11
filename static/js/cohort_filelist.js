@@ -354,7 +354,7 @@ require([
         if(file_list_total <= 0) {
             // Can't download/export something that isn't there
             $(tab_selector).find('.download-link .btn, .export-btn').attr('disabled','disabled');
-        } else if(!HAS_USER_DATA &&  request_user_id) {
+        } else if(user_is_social) {
             $(tab_selector).find('.download-link .btn, .export-btn').removeAttr('disabled');
         }
 
@@ -414,11 +414,13 @@ require([
             + (tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab]).length > 0 ?
                     'case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]) + '&' : '')
             + 'downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
-        $(tab_selector).find('.export-link').attr('url', export_link + '?'
-            + (filter_args ? filter_args + '&' : '')
-            + (tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab]).length > 0 ?
-                    'case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]) + '&' : '')
-            + 'downloadToken='+downloadToken);
+        if(user_is_social) {
+            $(tab_selector).find('.export-link').attr('url', export_link + '?'
+                + (filter_args ? filter_args + '&' : '')
+                + (tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab]).length > 0 ?
+                    'case_barcode=' + encodeURIComponent(tab_case_barcode[active_tab]) + '&' : '')
+                + 'downloadToken=' + downloadToken);
+        }
         if(active_tab !== 'slim' && active_tab !== 'dicom') {
             $(tab_selector).find('.download-link').attr('href',$(tab_selector).find('.download-link').attr('href'));
         }

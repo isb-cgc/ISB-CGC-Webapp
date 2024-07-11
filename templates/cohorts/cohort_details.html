@@ -77,9 +77,14 @@
                         <input type="hidden" class="download-token" value="" />
                     </li>
                     <li class="menu-item">
-                        <a url="{{ export_url }}"
+                        <a url="{% if is_social %}{{ export_url }}{% endif %}"
                             class="btn btn-info export-btn"
-                            title="Export this cohort to BigQuery">BQ</a>
+                           {% if is_social %}
+                            title="Export this cohort to BigQuery"
+                           {% else %}
+                            title="A Google Account is required to export to BigQuery" disabled
+                           {% endif %}
+                           >BQ</a>
                         <input type="hidden" class="export-token" value="" />
                     <li class="menu-item"><span class="pending-left" id="export-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Exporting...</span></li>
                     <li class="menu-item"><span class="pending-left" id="download-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Downloading...</span></li>
@@ -319,6 +324,7 @@
         var request_user_id = {{ user.id }};
         var all_nodes = {{ all_nodes|tojson|safe }};
         var all_programs = {{ all_programs|tojson|safe }};
+        var user_is_social = {% if request.user.is_authenticated and request.user|has_social %}true{% else %}false{% endif %};
     </script>
 {% endblock %}
 
