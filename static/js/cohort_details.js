@@ -1427,7 +1427,11 @@ require([
                 type: 'GET',
                 url: $('.export-btn').attr('url') + '?downloadToken=' + token,
                 success: function (data) {
-                    base.showJsMessage("info", data['message'], true);
+                    let msg_box = $('#export-result');
+                    msg_box.hide();
+                    msg_box.empty();
+                    msg_box.html(data['message']);
+                    msg_box.show();
                 },
                 error: function (xhr) {
                     var responseJSON = $.parseJSON(xhr.responseText);
