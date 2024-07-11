@@ -499,11 +499,11 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
             window.selProjects[projid]['state']['view'] = true;
             rowsAdded = true;
         }
-        if (!('studymp' in window.selProjects[projid]) || (Object.keys(window.selProjects[projid].studymp)==0)){
-         projUpdate.push(projid);
-         mxseries+=window.selProjects[projid]['mxseries'];
-         mxstudies+=window.selProjects[projid]['mxstudies'];
+        if (!('studymp' in window.selProjects[projid]) || (Object.keys(window.selProjects[projid].studymp)==0)) {
+            projUpdate.push(projid);
         }
+         //mxseries=mxseries+window.selProjects[projid]['mxseries'];
+         //mxstudies=mxstudies+window.selProjects[projid]['mxstudies'];
 
     } else {
         $(row).find('.fa-caret-right').removeClass('notDisp');
@@ -524,7 +524,16 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
     if ($('#cases_panel').find('.caseID_inp').length>0){
     caseID = $('#cases_panel').find('.caseID_inp').val().trim();
     }
-    updateCaseTable(rowsAdded, rowsRemoved, false, purgeChildSelections,[],caseID, parseInt(totalStudies), parseInt(totalSeries));
+
+
+    var viewProjects = getKeysByState(window.selProjects,'view');
+    for (var i=0;i<viewProjects.length;i++){
+        projid=viewProjects[i];
+        mxseries=mxseries+window.selProjects[projid]['mxseries'];
+        mxstudies=mxstudies+window.selProjects[projid]['mxstudies'];
+    }
+
+    updateCaseTable(rowsAdded, rowsRemoved, false, purgeChildSelections,[],caseID, parseInt(mxstudies), parseInt(mxseries));
     }
 
      //process a click of a project(collection) table cart button row. Calls updateProjStudyMp to update relevant studymps.
@@ -1128,7 +1137,7 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
          if ((ids.length==2) && (ids[0] in window.selProjects) && (ids[1] in window.selProjects[ids[0]].selCases)) {
              maxSeries = window.selProjects[ids[0]].selCases[ids[1]].maxseries;
              selItem = window.selProjects[ids[0]].selCases[ids[1]];
-             if (('studymp' in window.selProjects[ids[0]].selCases[ids[1]]) && !typeof(window.selProjects[ids[0]].selCases[ids[1]].studymp =="undefined"))
+             if (('studymp' in window.selProjects[ids[0]].selCases[ids[1]]) && !typeof(window.selProjects[ids[0]].selCases[ids[1]].studymp) =="undefined")
             {
               studympFilt = window.selProjects[ids[0]].selCases[ids[1]].studymp;
             }
