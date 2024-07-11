@@ -77,6 +77,7 @@ VALUE_SPECIFIC_ORDERS = {
 }
 
 ATTR_SPECIFIC_ORDERS = [
+    'build',
     'program_name',
     'project_short_name_gdc',
     'project_short_name_pdc',
