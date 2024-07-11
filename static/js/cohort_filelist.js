@@ -414,7 +414,7 @@ require([
             + (tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab]).length > 0 ?
                     'case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]) + '&' : '')
             + 'downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
-        $(tab_selector).find('.export-link').attr('href', export_link + '?'
+        $(tab_selector).find('.export-link').attr('url', export_link + '?'
             + (filter_args ? filter_args + '&' : '')
             + (tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab]).length > 0 ?
                     'case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]) + '&' : '')
@@ -985,8 +985,9 @@ require([
     browser_tab_load(cohort_id);
 
     $('.data-tab-content').on('click', '.download-btn, .export-btn  ', function() {
-        var self=$(this);
-        var msg = $('#download-in-prog');
+        let self=$(this);
+        let msg = self.hasClass('download-btn') ? $('#download-in-prog') : $('#export-in-prog');
+        let token = self.hasClass('download-btn') ? $('.filelist-obtain .download-token').val() : $('.filelist-obtain .export-token').val();
 
         self.attr('disabled','disabled');
         msg.show();
@@ -994,7 +995,31 @@ require([
         base.blockResubmit(function() {
             self.removeAttr('disabled');
             msg.hide();
-        },$('.filelist-obtain .download-token').val(),"downloadToken");
+        },token,"downloadToken");
+
+        if(self.hasClass('export-btn')) {
+            $.ajax({
+                type        :'GET',
+                url         : $('.export-link').attr('url'),
+                success : function (data) {
+                    let msg_box = $('.export-result');
+                    msg_box.hide();
+                    msg_box.empty();
+                    msg_box.html(data['message']);
+                    msg_box.show();
+                },
+                error: function () {
+                     var responseJSON = $.parseJSON(xhr.responseText);
+                    // If we received a redirect, honor that
+                    if(responseJSON.redirect) {
+                        base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                        window.location = responseJSON.redirect;
+                    } else {
+                        base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
+                    }
+                },
+            })
+        }
     });
 
     $('.data-tab-content').on('hover enter mouseover','.study-uid, .col-filename',function(e){
