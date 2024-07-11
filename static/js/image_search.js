@@ -244,7 +244,7 @@ require([
                     }
 
 
-                    tables.updateCollectionTotals('Program', data.programs);
+                    filterutils.updateCollectionTotals('Program', data.programs);
                     dicofdic = {'unfilt': data.origin_set.All.attributes, 'filt': ''}
                     isFiltered = Boolean($('#search_def p').length > 0);
                     if (isFiltered) {
@@ -683,9 +683,9 @@ require([
 
 
 
-            tables.updateGlobalCart(false, studymp, 'series')
+            cartutils.updateGlobalCart(false, studymp, 'series')
             window.updateTableCounts(1);
-            var gtotals =tables.getGlobalCounts();
+            var gtotals = cartutils.getGlobalCounts();
             var content = gtotals[0].toString()+" Collections, "+gtotals[1]+" Cases, "+gtotals[2]+" Studies, and "+gtotals[3]+" Series in the cart"
             tippy('.cart-view', {
                            interactive: true,
