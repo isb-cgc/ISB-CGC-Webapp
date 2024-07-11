@@ -4,7 +4,7 @@
 
 {% comment %}
 
-   Copyright 2022, Institute for Systems Biology
+   Copyright 2024, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@
 
         {% if cohort %}
             <ol class="breadcrumb">
-                <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
                 <li><a href="{% url 'cohort_list' %}">Saved Cohorts</a></li>
                 <li><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></li>
             </ol>
@@ -66,7 +65,7 @@
             </div>
         </div>
 
-        <div class="row">
+        <div class="filelist-container row">
             <div class="tab-content data-tab-content">
                 <div id="placeholder" class="tab-pane active file-browser-tab" role="tabpanel">
                     <div class="col-md-12 data-tab-content-panel spinner-panel">
@@ -155,8 +154,8 @@
         'dicom': [
             ['Program', 1],
             ['Case Barcode', 1],
-            ['Disease Code', 1],
-            ['Project Short Name', 1],
+            ['Collection', 1],
+            ['Modality', 1],
             ['Study Description', 1],
             ['Study Instance UID', 1]
         ],
@@ -188,7 +187,7 @@
         'all': ['program', 'case', 'filename', 'disease_code', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize'],
         'igv': ['program', 'case', 'sample', 'filename', 'disease_code', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize', 'file_viewer'],
         'slim': ['program', 'case', 'slide_filename', 'disease_code', 'datatype', 'dataformat', 'filesize'],
-        'dicom': ['program', 'case', 'disease_code', 'project_short_name', 'study_desc', 'study_uid'],
+        'dicom': ['program', 'case', 'collection_id', 'modality', 'study_desc', 'study_uid'],
         'pdf': ['program', 'case', 'pdf_filename', 'disease_code', 'datacat', 'datatype', 'dataformat', 'filesize']
     };
 
@@ -218,7 +217,6 @@
 
     var SEL_IGV_FILE_MAX = '{{  sel_file_max }}';
     var FILE_LIST_MAX = '{{  file_list_max }}';
-    var HAS_USER_DATA = {% if has_user_data %}true{% else %}false{% endif %};
     var request_user_id = {% if user.is_anonymous %} null {% else %} {{ user.id }} {% endif %};
     var programs_this_cohort = {{ programs_this_cohort|tojson|safe }};
     </script>

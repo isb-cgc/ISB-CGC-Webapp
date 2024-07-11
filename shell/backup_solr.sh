@@ -9,7 +9,7 @@ MAX_WAIT=3
 SOLR_DATA="/opt/bitnami/solr/server/solr"
 RUN=`date +%s`
 BACKUPS_DIR="${SOLR_DATA}/backups_${RUN}"
-PARSE_RESPONSE="import sys, json; print(json.load(sys.stdin)['details']['backup'].get('snapshotCompletedAt',None) or 'INCOMPLETE')"
+PARSE_RESPONSE="import sys, json; print(json.load(sys.stdin)['details'].get('backup',{}).get('snapshotCompletedAt',None) or 'INCOMPLETE')"
 
 while getopts ":c:l:f:d:h" flag
 do
@@ -78,14 +78,14 @@ for core in "${cores[@]}"; do
         echo "Copying schema for ${core}..."
         sudo -u solr cp ${SOLR_DATA}/${core}/conf/managed-schema.xml ${BACKUPS_DIR}/$core.managed-schema.xml
         echo "Executing backup command for ${core}:"
-        curl -u ${SOLR_USER}:${SOLR_PWD} -X GET "https://localhost:8983/solr/$core/replication?command=backup&location=${BACKUPS_DIR}/&name=${core}" --cacert solr-ssl.pem
+        curl -u ${SOLR_USER}:${SOLR_PWD} -X GET "http://localhost:8983/solr/admin/collections?action=BACKUP&name=${core}_backup_${RUN}&collection=${core}&location=${BACKUPS_DIR}/" --cacert solr-ssl.pem
         curl -s -u ${SOLR_USER}:${SOLR_PWD} -X GET "https://localhost:8983/solr/${core}/replication?command=details" --cacert solr-ssl.pem
         status=`curl -s -u ${SOLR_USER}:${SOLR_PWD} -X GET "https://localhost:8983/solr/${core}/replication?command=details" --cacert solr-ssl.pem | python3 -c "${PARSE_RESPONSE}"`
         retries=0
         while [[ "$status" == "INCOMPLETE" && "$retries" -lt  "$MAX_WAIT" ]]; do
           echo "Backup for core ${core} isn't completed, waiting..."
           sleep 2
-          ((retries++))
+          ((retries=retries+1))
           status=`curl -s -u ${SOLR_USER}:${SOLR_PWD} -X GET "https://localhost:8983/solr/${core}/replication?command=details" --cacert solr-ssl.pem | python3 -c "${PARSE_RESPONSE}"`
         done
         if [ "$status" != "INCOMPLETE" ]; then
@@ -114,7 +114,7 @@ echo ".done."
 echo "Taring contents of ${BACKUPS_DIR}..."
 tar -cvzf ${FILE_NAME} -C ${BACKUPS_DIR} .
 
-#
+
 if [[ ! -z ${DEST_BUCKET} ]]; then
         gsutil cp ${FILE_NAME} gs://${DEST_BUCKET}/
 else

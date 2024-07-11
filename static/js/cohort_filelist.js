@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2017-2020, Institute for Systems Biology
+ * Copyright 2017-2024, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,6 +127,89 @@ require([
         }
     };
 
+    var filter_change_callback = function(e, withoutDisplayUpdates) {
+
+        var activeDataTab = $('.data-tab.active').attr('id');
+        var nodeId = $('.data-tab.active').attr('node-id');
+        var selFilterPanel = '.' + activeDataTab + '-selected-filters';
+        var createFormFilterSet = $('p#'+activeDataTab + '-filters');
+
+        var $this = $(this);
+
+        var token = null;
+
+        var feature = $this.closest('.cohort-feature-select-block'),
+            prog = $this.closest('.filter-panel'),
+            value = $this;
+
+        if(createFormFilterSet.length <= 0) {
+            $('#selected-filters').append('<p id="'+activeDataTab+'-filters" node-id="'+nodeId+'"</p>');
+            createFormFilterSet = $('p#'+activeDataTab+'-filters');
+            createFormFilterSet.append('<h5>'+(prog.data('prog-displ-name'))+'</h5>');
+        } else {
+            createFormFilterSet.show();
+        }
+        
+        if ($this.is(':checked')) { // Checkbox checked
+            var tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
+                    value.data('value-displ-name') : (value.data('value-name') === 'None' ? 'NA' : value.data('value-name')),
+                tokenFeatDisplName = (feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
+                    feature.data('feature-displ-name') : feature.data('feature-name');
+
+            var feature_id = feature.data('feature-id'), value_id =  value.data('value-id');
+
+            token = $('<span>').data({
+                'feature-id': feature_id,
+                'feature-name': feature.data('feature-name'),
+                'value-id': value_id,
+                'value-name': value.data('value-name')
+            }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
+
+            // Don't re-add the token and filter if it already exists
+            if($(selFilterPanel+' .panel-body span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').length <= 0) {
+                token.append(
+                    $('<a>').addClass('delete-x filter-label label label-default')
+                        .text(tokenFeatDisplName + ': ' + tokenValDisplName)
+                        .append('<i class="fa fa-times">')
+                        .attr("title",tokenFeatDisplName + ': ' + tokenValDisplName)
+                );
+
+                $this.data({
+                    'select-filters-item': token.clone(true),
+                    'create-cohort-form-item': token.clone(true)
+                });
+
+                $(selFilterPanel +' .panel-body').append($this.data('select-filters-item'));
+                createFormFilterSet.append($this.data('create-cohort-form-item'));
+            }
+        }
+
+        update_all_selected_filters_ui('#' + activeDataTab);
+
+        !withoutDisplayUpdates && update_displays();
+
+        if(!cohort_id && $('.all-selected-filters .panel-body span').length > 0) {
+            $('#at-least-one-filter-alert-modal').hide();
+            $('#at-least-one-filter-alert').hide();
+            $('#create-cohort-modal input[type="submit"]').removeAttr('disabled');
+        }
+    };
+
+    $('.clear-filters').on('click', function() {
+        var activeDataTab = $('.data-tab.active').data('tab-id');
+
+        $(this).parents('all-selected-filters').find('.panel-body').empty();
+        $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
+            $(this).prop('checked', false);
+        });
+
+        delete SELECTED_FILTERS[activeDataTab];
+
+        $('#selected-filters span').remove();
+        update_selected_filters_ui(activeDataTab);
+        update_displays();
+    });
+
     function build_igv_widgets() {
         // Build the file tokenizer for IGV
         // Bootstrap tokenfield requires 'value' as the datem attribute field
@@ -158,37 +241,6 @@ require([
         $('input.igv[type="submit"]').prop('disabled', true);
     }
 
-    var happy_name = function(input) {
-        var dictionary = {
-            'DNAseq_data': 'DNAseq',
-            'Yes': 'GA',
-            'No': 'N/A',
-            'mirnPlatform': 'microRNA',
-            'None': 'N/A',
-            'IlluminaHiSeq_miRNASeq': 'HiSeq',
-            'IlluminaGA_miRNASeq': 'GA',
-            'cnvrPlatform': 'SNP/CN',
-            'Genome_Wide_SNP_6': 'SNP6',
-            'methPlatform': 'DNAmeth',
-            'HumanMethylation27': '27k',
-            'HumanMethylation450': '450k',
-            'gexpPlatform': 'mRNA',
-            'IlluminaHiSeq_RNASeq': 'HiSeq/BCGSC',
-            'IlluminaHiSeq_RNASeqV2': 'HiSeq/UNC V2',
-            'IlluminaGA_RNASeq': 'GA/BCGSC',
-            'IlluminaGA_RNASeqV2': 'GA/UNC V2',
-            'rppaPlatform': 'Protein',
-            'MDA_RPPA_Core': 'RPPA'
-        };
-        if (input in dictionary) {
-            return dictionary[input];
-        } else if(input !== null && input !== undefined) {
-            return input.replace(/_/g, ' ');
-        } else {
-            return "N/A";
-        }
-    };
-
     var reject_load = false;
 
     var browser_tab_load = function(cohort) {
@@ -217,7 +269,7 @@ require([
                 success : function (data) {
                     data_tab_content_div.append(data);
 
-                    update_download_link(active_tab, total_files);
+                    update_links(active_tab, total_files);
                     update_table_display(active_tab, {'total_file_count': total_files, 'file_list': file_listing});
 
                     build_total_files = total_files;
@@ -300,13 +352,13 @@ require([
         });
     });
 
-    function update_download_link(active_tab, file_list_total) {
+    function update_links(active_tab, file_list_total) {
         var tab_selector = '#'+active_tab+'-files';
 
         if(file_list_total <= 0) {
             // Can't download/export something that isn't there
             $(tab_selector).find('.download-link .btn, .export-btn').attr('disabled','disabled');
-        } else if(!HAS_USER_DATA &&  request_user_id) {
+        } else if(user_is_social) {
             $(tab_selector).find('.download-link .btn, .export-btn').removeAttr('disabled');
         }
 
@@ -319,7 +371,7 @@ require([
         }
 
         var downloadToken = new Date().getTime();
-        $('.filelist-obtain .download-token').val(downloadToken);
+        $('.filelist-obtain .download-token, .filelist-obtain .export-token').val(downloadToken);
 
         var filter_args = null;
 
@@ -360,11 +412,19 @@ require([
                 break;
         }
 
+        let export_link = $(tab_selector).find('.export-link').attr('base-url');
         $(tab_selector).find('.download-link').attr('href', download_url + '?'
             + (filter_args ? filter_args + '&' : '')
             + (tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab]).length > 0 ?
                     'case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]) + '&' : '')
             + 'downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
+        if(user_is_social) {
+            $(tab_selector).find('.export-link').attr('url', export_link + '?'
+                + (filter_args ? filter_args + '&' : '')
+                + (tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab]).length > 0 ?
+                    'case_barcode=' + encodeURIComponent(tab_case_barcode[active_tab]) + '&' : '')
+                + 'downloadToken=' + downloadToken);
+        }
         if(active_tab !== 'slim' && active_tab !== 'dicom') {
             $(tab_selector).find('.download-link').attr('href',$(tab_selector).find('.download-link').attr('href'));
         }
@@ -399,7 +459,7 @@ require([
             url: url,
             success: function (data) {
                 if(do_filter_count) {
-                    update_download_link(active_tab, data.total_file_count);
+                    update_links(active_tab, data.total_file_count);
                 }
                 update_table_display(active_tab,data,do_filter_count);
             },
@@ -488,7 +548,7 @@ require([
                         if(active_tab === 'igv' && files[i]['dataformat'] == 'BAM') {
                             var tokenLabel = files[i]['sample'] + ", "
                                 + files[i]['exp_strat'] + ", "
-                                + happy_name(files[i]['platform']) + ", "
+                                + files[i]['platform'] + ", "
                                 + files[i]['datatype']
                                 + " ["+files[i]['build']+"]";
                             val = files[i]['cloudstorage_location'] + ';' + files[i]['index_name'] + ',' + files[i]['sample'];
@@ -545,7 +605,7 @@ require([
                                     '</div></td>';
                             break;
                         case 'platform':
-                            table_row_data += '<td>' + happy_name(files[i][column_name]) + '</td>';
+                            table_row_data += '<td>' + files[i][column_name] + '</td>';
                             break;
                         case 'filesize':
                             table_row_data += '<td class="col-filesize">' + (files[i]['filesize'] != null && files[i]['filesize'] != 'N/A'? formatFileSize(files[i]['filesize']) : 'N/A')  + '</td>';
@@ -718,7 +778,7 @@ require([
         var active_tab = $(type_tab).data('file-type');
         SELECTED_FILTERS[active_tab] = {};
 
-        $(type_tab).find('div.filter-panel input[type="checkbox"]:checked').each(function(){
+        $(type_tab).find('div.filter-panel input:not(.hide-zeros)[type="checkbox"]:checked').each(function(){
             if(!SELECTED_FILTERS[active_tab][$(this).data('feature-name')]) {
                 SELECTED_FILTERS[active_tab][$(this).data('feature-name')] = [];
             }
@@ -827,7 +887,7 @@ require([
                             }
                         }
                     }
-                    update_download_link(active_tab, data.total_file_count);
+                    update_links(active_tab, data.total_file_count);
                     update_table_display(active_tab, data);
 
                     update_zero_case_filters_all();
@@ -904,7 +964,7 @@ require([
         });
     };
 
-    $('.data-tab-content').on('change','.filter-panel input[type="checkbox"]',function(){
+    $('.data-tab-content').on('change','.filter-panel input:not(.hide-zeros)[type="checkbox"]',function(){
         update_filters($(this));
         update_displays($('ul.nav-tabs-files li.active a').data('file-type'));
     });
@@ -930,9 +990,10 @@ require([
 
     browser_tab_load(cohort_id);
 
-    $('.data-tab-content').on('click', '.download-btn', function() {
-        var self=$(this);
-        var msg = $('#download-in-prog');
+    $('.data-tab-content').on('click', '.download-btn, .export-btn  ', function() {
+        let self=$(this);
+        let msg = self.hasClass('download-btn') ? $('#download-in-prog') : $('#export-in-prog');
+        let token = self.hasClass('download-btn') ? $('.filelist-obtain .download-token').val() : $('.filelist-obtain .export-token').val();
 
         self.attr('disabled','disabled');
         msg.show();
@@ -940,7 +1001,31 @@ require([
         base.blockResubmit(function() {
             self.removeAttr('disabled');
             msg.hide();
-        },$('.filelist-obtain .download-token').val(),"downloadToken");
+        },token,"downloadToken");
+
+        if(self.hasClass('export-btn')) {
+            $.ajax({
+                type        :'GET',
+                url         : $('.export-link').attr('url'),
+                success : function (data) {
+                    let msg_box = $('.export-result');
+                    msg_box.hide();
+                    msg_box.empty();
+                    msg_box.html(data['message']);
+                    msg_box.show();
+                },
+                error: function () {
+                     var responseJSON = $.parseJSON(xhr.responseText);
+                    // If we received a redirect, honor that
+                    if(responseJSON.redirect) {
+                        base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                        window.location = responseJSON.redirect;
+                    } else {
+                        base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
+                    }
+                },
+            })
+        }
     });
 
     $('.data-tab-content').on('hover enter mouseover','.study-uid, .col-filename',function(e){
@@ -1004,5 +1089,9 @@ require([
             i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     }
+
+    $('.filelist-container').on('click', '.hide-zeros input', function() {
+        update_zero_case_filters($(this));
+    });
 
 });

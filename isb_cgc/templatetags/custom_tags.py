@@ -30,7 +30,6 @@ from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from allauth.socialaccount.models import SocialAccount
 from projects.models import Program
-from workbooks.models import Workbook
 from django.core.exceptions import ObjectDoesNotExist
 import logging
 import math
@@ -43,6 +42,10 @@ ALPHANUM_SORT = [
 
 ]
 
+NODE_SORT = {
+    'GDC': 0, 'PDC':1, 'IDC':2
+}
+
 simple_number_sort = [
     '0 to 200', '200.01 to 400', '400.01 to 600', '600.01 to 800', '800.01 to 1000', '1000.01 to 1200', '1200.01 to 1400', '1400.01+',
     '0 to 4', '5 to 9', '10 to 14', '15 to 19', '20 to 24', '25 to 29', '30 to 34', '35 to 39', 'Over 40',
@@ -50,7 +53,7 @@ simple_number_sort = [
     '* to 500','501 to 1000','1001 to 1500','1501 to 2000','2001 to 2500','2501 to 3000', '3001 to 3500',
     '3501 to 4000', '4001 to 4500', '4501 to 5000', '5001 to 5500', '5501 to 6000', '* to -15001', '-15000 to -12001',
     '-12000 to -9001', '-9000 to -6001', '-6000 to -3001', '-5000 to *',
-    '-30001 to -35000', 'None', 'NA',]
+    '-30001 to -35000', 'None', 'NA',"* to 3652","3653 to 7305","7306 to 10958","10959 to 14611","14612 to 18264","18265 to 21917","21918 to *"]
 
 # If an attribute has a specific order, list it here; these should be the *values* not the display strings
 VALUE_SPECIFIC_ORDERS = {
@@ -75,17 +78,20 @@ VALUE_SPECIFIC_ORDERS = {
 
 ATTR_SPECIFIC_ORDERS = [
     'program_name',
-    'project_short_name',
-    'user_program',
-    'user_project',
+    'project_short_name_gdc',
+    'project_short_name_pdc',
     'disease_code',
     'vital_status',
-    'gender',
+    'gender_gdc',
+    'gender_pdc',
     'age_at_diagnosis',
     'sample_type',
+    'sample_type_name',
     'tumor_tissue_site',
     'histological_type',
     'pathologic_stage',
+    'study_group_pdc',
+    'study_id_pdc',
     'person_neoplasm_cancer_status',
     'neoplasm_histologic_grade',
     'bmi',
@@ -95,6 +101,18 @@ ATTR_SPECIFIC_ORDERS = [
     'race',
     'ethnicity',
 ]
+
+
+HIDE_ATTR = [
+    'program_name'
+]
+
+
+@register.filter
+def has_social(user):
+    if user.is_authenticated:
+        return bool(len(user.socialaccount_set.all()) > 0)
+    return False
 
 
 def quick_js_bracket_replace(matchobj):
@@ -110,8 +128,23 @@ def get_item(dictionary, key):
 
 
 @register.filter
+def sort_nodes(nodes):
+    return sorted(nodes.items(), key=lambda element: NODE_SORT[element[0]])
+
+
+@register.filter
 def get_account_email(account):
     return account.account.extra_data.get('email','None')
+
+
+@register.filter
+def attr_is_hidden(attr):
+    return attr in HIDE_ATTR
+
+
+@register.filter
+def get_nodes_string(attr_dict):
+    return ",".join(attr_dict.keys())
 
 
 @register.filter
@@ -150,7 +183,6 @@ def get_feat_displ_name(name):
 
 @register.filter
 def get_readable_name(csv_name, attr=None):
-
     is_mutation = False
     is_data_type = False
 
@@ -237,15 +269,6 @@ def get_programs_this_user(this_user, is_active=True):
 
 
 @register.filter
-def get_workbooks_this_user(this_user, is_active=True):
-    userWorkbooks = this_user.workbook_set.filter(active=is_active)
-    sharedWorkbooks = Workbook.objects.filter(shared__matched_user=this_user, shared__active=True, active=is_active)
-    workbooks = userWorkbooks | sharedWorkbooks
-    workbooks = workbooks.distinct().order_by('-last_date_saved')
-    return workbooks
-
-
-@register.filter
 def get_cohort_perm(cohort, request):
     return cohort.get_perm(request)
 
@@ -304,12 +327,6 @@ def active_and_v2(list, key=None):
     if not key:
         return list.filter(active=True, version='v2')
     return list.filter(**{key + '__active':True, key+'__version':'v2'})
-
-
-@register.filter
-def workbook_matches_varfave(workbook, var_fave):
-    return (((workbook.build is None or workbook.build == 'Legacy') and var_fave.version == 'v1')
-        or ((workbook.build is not None and workbook.build != 'Legacy') and var_fave.version == 'v2'))
 
 
 @register.filter

@@ -1,7 +1,7 @@
 <div id="dicom-files" class="tab-pane data-tab" data-file-type="dicom" role="tabpanel">
     <div id="dicom-filter-panel" class="col-lg-3 col-md-3 col-sm-3 side-filter-panel">
         <div class="panel panel-default filter-panel">
-            <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
+            <div class="hide-zeros"><input type="checkbox" class="hide-zeros" value="hide-zeros"> Hide attributes with 0 cases</div>
             <div class="panel-body tab-content filter-build-panel" id="dicom-filter-panel">
                 <ul class="list-group" id="metadata-data-accordian-dicom" role="tablist" aria-multiselectable="true">
                     <li class="list-group-item">
@@ -149,8 +149,8 @@
                         <tr>
                             <th class="col-program" columnId="col-program">Program</th>
                             <th class="col-barcode" columnId="col-barcode">Case Barcode</th>
-                            <th class="col-diseasecode" columnId="col-diseasecode">Disease Code</th>
-                            <th class="col-projectname"  columnId="col-projectname">Project Short Name</th>
+                            <th class="col-collection" columnId="col-collection">Collection</th>
+                            <th class="col-modality"  columnId="col-modality">Modality</th>
                             <th class="col-studydesc" columnId="col-studydesc">Study Description</th>
                             <th class="col-studyuid" columnId="col-studyuid">Study Instance UID</th>
                         </tr>

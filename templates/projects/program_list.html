@@ -10,9 +10,6 @@
 
 {% block page_header %}
 <div class="container">
-    <ol class="breadcrumb">
-        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-    </ol>
     <h1 class="page-header pull-left">Programs</h1>
 </div>
 {% endblock %}
@@ -86,16 +83,6 @@
                                         <ul class="dropdown-menu">
                                             <li><a href="{% url 'program_detail' program.id %}">Edit</a> </li>
                                             <li><a role="button" data-toggle="modal" data-target="#delete-program-modal-{{ program.id }}">Delete</a></li>
-                                            {#                                        <li>#}
-                                            {#                                            <a>#}
-                                            {#                                                <form action="{% url 'worksheet_create_with_programs' %}" method="POST">#}
-                                            {#                                                    {% csrf_token %}#}
-                                            {#                                                    <input type="hidden" name="program_id" value="{{ program.id }}">#}
-                                            {#                                                    <button type="submit">New Workbook</button>#}
-                                            {#                                                </form>#}
-                                            {#                                            </a>#}
-                                            {#                                            <a href="{% url 'create_with_program' program.id %}">New Workbook</a>#}
-                                            {#                                        </li>#}
                                         </ul>
                                         <span class="row-expand-button"></span>
                                     </div>

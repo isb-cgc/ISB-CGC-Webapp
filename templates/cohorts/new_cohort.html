@@ -29,43 +29,24 @@
     <link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}"/>
 
     <div class="container">
-        {% if workbook %}
-            <ol class="breadcrumb">
-                <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-                <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
-                <li><a href="{% url 'worksheet_display' workbook.id worksheet.id %}">{{ workbook.name }}</a></li>
-            </ol>
-        {% else %}
-            <ol class="breadcrumb">
-                {% if user.is_authenticated %}
-                    <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-                    <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
-                {% else %}
-                    <br>
-                {% endif %}
-            </ol>
-        {% endif %}
-        <h1 class="page-header pull-left">Create Cohort - Filters</h1>
-        {% if workbook %}
-            <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal"
-                    title="Please select at least one filter." disabled>Apply to Worksheet
-            </button>
-        {% elif create_workbook %}
-            <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal"
-                    title="Please select at least one filter." disabled>Apply to new Worksheet
-            </button>
-        {% else %}
+        <ol class="breadcrumb">
             {% if user.is_authenticated %}
-                <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal"
-                        title="Please select at least one filter." disabled> Save As New Cohort
-                </button>
+                <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
             {% else %}
-                <button class="btn btn-primary pull-right" id="log-in-to-save-btn"
-                        title="Please select at least one filter."
-{#                        onclick="location.href='{% url 'account_login' %}'"#}
-                        disabled>Log In to Save New Cohort
-                </button>
+                <br>
             {% endif %}
+        </ol>
+        <h1 class="page-header pull-left">Create Cohort</h1>
+        {% if user.is_authenticated %}
+            <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal"
+                    title="Please select at least one filter." disabled> Save As New Cohort
+            </button>
+        {% else %}
+            <button class="btn btn-primary pull-right" id="log-in-to-save-btn"
+                    title="Please select at least one filter."
+{#                        onclick="location.href='{% url 'account_login' %}'"#}
+                    disabled>Log In to Save New Cohort
+            </button>
         {% endif %}
     </div>
 
@@ -92,33 +73,46 @@
             </div>
         </div>
 
-        <div class="row cgc-user-data-type-tabs" style="display: none">
-            <div class="col-sm-12 col-md-12 col-lg-12">
-                <div class="panel panel-default">
-                    <ul class="nav nav-tabs nav-tabs-data" role="tablist">
-                        {% for program in programs %}
-                            <li role="presentation" class="{% if forloop.first %}active{% endif %} program-tab"><a
-                                    href="#{{ program.id }}-data" class="program-tab-btn" role="tab" data-toggle="tab"
-                                    title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a>
-                            </li>
-                        {% endfor %}
-                        {% if user.is_authenticated %}
-                            <li role="presentation" class="program-tab"><a href="#0-data" role="tab" data-toggle="tab"
-                                                                           title="User Data" data-program-id="0">User
-                                Data</a></li>
-                        {% else %}
-                            <li role="presentation" class="program-tab disabled"><a href="#0-data" role="tab"
-                                                                                    data-toggle="tab" title="User Data"
-                                                                                    data-program-id="0" disabled>User
-                                Data</a></li>
-                        {% endif %}
-                    </ul>
+        <div class="row">
+            <!-- Select Program Panel -->
+            <div class="col-lg-3 col-md-3 col-sm-12">
+            <div class="panel panel-default" role="tabpanel">
+                <div class="panel-heading clearfix">
+                    <h4 class="panel-title pull-left">Select Program</h4>
+                </div>
+                <div class="panel-body">
+                    <div>
+                        <!-- Grouped by program -->
+                        <select class="sort-by-program dataset-select-box form-control">
+                            {% for program in all_programs %}
+                                {% if cohort.id and not program.id|program_is_in_cohort:programs_this_cohort %}
+                                {% else %}
+                                    <option value="{{ program.name }}" node-id="0" program-id="{{ program.id }}">
+                                        {{ program.name }} ({{ program.node_list }})
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
             </div>
+            </div>
+            <!-- Selected Filters Panel -->
+            {% if not cohort.id %}
+            <div class="col-lg-9 col-md-9 col-sm-12">
+            <div class="all-selected-filters panel panel-default">
+                <div class="panel-heading clearfix">
+                    <h4 class="panel-title pull-left">Selected Filters</h4>
+                    <a class="pull-right clear-filters" role="button">Clear All</a>
+                </div>
+                <div class="panel-body"></div>
+            </div>
+            </div>
+            {% endif %}
         </div>
 
         <div class="row">
-            <div class="tab-content data-tab-content">
+            <div class="tab-content data-tab-content program-tabs">
                 <div id="placeholder" class="tab-pane active data-tab" role="tabpanel">
                     <div class="col-md-12 data-tab-content-panel spinner-panel">
                         <div class="panel panel-default">
@@ -164,9 +158,9 @@
                                  style="display: none;">
                                 <button type="button" class="close" data-hide="alert"><span
                                         aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                Your cohort contains samples from multiple programs. Please note that filters will only
-                                apply to samples from the program indicated
-                                by the tab they were chosen on - they will not apply to samples from other programs in
+                                Your cohort contains cases from multiple programs. Please note that filters will only
+                                apply to cases from the program indicated by the tab they were chosen on - they will
+                                not apply to cases from other programs in
                                 this cohort.
                             </div>
                             <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable"
@@ -184,16 +178,7 @@
                             </div>
                         </div>
                     </div>
-                    {% if workbook and worksheet %}
-                        <form id="create-cohort-form" method="POST"
-                              action="{% url 'save_cohort_for_existing_workbook' %}">
-                        <input type="hidden" value="{{ worksheet.id }}" name="worksheet_id"/>
-                        <input type="hidden" value="{{ workbook.id }}" name="workbook_id"/>
-                    {% elif create_workbook %}
-                        <form id="create-cohort-form" method="POST" action="{% url 'save_cohort_for_new_workbook' %}">
-                    {% else %}
-                        <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
-                    {% endif %}
+                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="create-cohort-name">Name:</label>
