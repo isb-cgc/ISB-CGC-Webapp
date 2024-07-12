@@ -334,71 +334,36 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                     $(row).data('totalcases', data[5]);
                     $(row).attr('totalcases', data[5]);
                     $(row).attr('id', 'project_row_' + data[0]);
-                    var content = "add series to the cart";
                     var projid = data[0]
-                    var caseCount = calcProjectOrCaseRowCount([projid]);
-                    $(row).find('.cartnum').html(caseCount[0].toString());
+                    var caseCounts = calcProjectOrCaseRowCounts([projid]);
+                    var cntSeriesInCart = caseCounts[0];
+                    var cntSeriesInFilt = caseCounts[1];
+                    var cntSeriesInItem = caseCounts[2];
+                    $(row).find('.cartnum').html(cntSeriesInCart.toString());
                     var content="";
-                    if (caseCount[1]) {
+                    if (cntSeriesInCart>0){
+                        $(row).addClass('someInCart');
+                    }
+                    else{
+                        $(row).removeClass('someInCart');
+                    }
+                    // a study map for the filtered project may not be defined if we have not clicked on it yet. (cntSeriesInCart ==0) covers that possibility
+                    if ((cntSeriesInFilt>cntSeriesInCart) || (cntSeriesInCart ==0)){
                         $(row).addClass('extraInFilt');
                         content = "add series to the cart";
-                    } else {
+                    }
+                    else{
                         $(row).removeClass('extraInFilt');
                         content = "remove series from the cart";
                     }
 
-                    if (caseCount[2]) {
-                        $(row).addClass('extraInCart');
-                    } else {
-                        $(row).removeClass('extraInCart');
-                    }
-
-                    if (caseCount[3]) {
-                        $(row).addClass('someInCart');
-                    } else {
-                        $(row).removeClass('someInCart');
-                    }
-                    if (caseCount[4]>caseCount[0]){
+                    if (cntSeriesInItem>cntSeriesInCart){
                         $(row).addClass('extraInItem');
                     }
                     else{
                         $(row).removeClass('extraInItem');
                     }
-                    /*
-                    if (data[0] in window.selProjects){
-                        if (('someInCart' in window.selProjects[data[0]]) && (window.selProjects[data[0]]['someInCart'])){
-                            $(row).addClass('someInCart');
-                        }
-                        else{
-                            $(row).removeClass('someInCart');
-                        }
-                        if (('extraInCart' in window.selProjects[data[0]]) && (window.selProjects[data[0]]['extraInCart'])){
-                            $(row).addClass('extraInCart');
-                        }
-                        else{
-                            $(row).removeClass('extraInCart');
-                        }
 
-                        if (('extraInFilt' in window.selProjects[data[0]]) && (window.selProjects[data[0]]['extraInFilt'])){
-                            $(row).addClass('extraInFilt');
-                            var content = "add series to the cart";
-
-                        }
-                        else{
-                            $(row).removeClass('extraInFilt');
-                            var content = "remove series from the cart";
-                        }
-
-                        if (('extraInItem' in window.selProjects[data[0]]) && (window.selProjects[data[0]]['extraInItem'])){
-                            $(row).addClass('extraInItem');
-                        }
-                        else{
-                            $(row).removeClass('extraInItem');
-                        }
-
-                    }
-
-                     */
                     var target = $(row).find('.shopping-cart').parent()[0];
                     tippy(target, {
                            interactive: true,
@@ -833,37 +798,28 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
                     window.selProjects[projid].selCases[caseid]['maxseries'] = data['maxseries'];
 
                     for (id in data['studymp']) {
-                        //window.selProjects[projid]['studymp'][id]=data['studyid'][id];
-                        //window.projstudymp[projid][id]=data['studyid'][id];
                         window.casestudymp[caseid][id] = data['studymp'][id];
                     }
 
-
-                    var caseCount = calcProjectOrCaseRowCount([projid, caseid]);
-                    $(row).find('.cartnum').html(caseCount[0].toString());
-
-                    //[cnt.toString(), moreInFilterSetThanCart, moreInCartThanFilterSet, someInCart ]
+                    var caseCounts = calcProjectOrCaseRowCounts([projid, caseid]);
+                    var cntSeriesInCart = caseCounts[0];
+                    var cntSeriesInFilt = caseCounts[1];
+                    var cntSeriesInItem = caseCounts[2]
+                    $(row).find('.cartnum').html(cntSeriesInCart.toString());
                     var content="";
-                    if (caseCount[1]) {
+                    if (cntSeriesInCart>0){
+                        $(row).addClass('someInCart');
+                    }
+                    if ((cntSeriesInFilt>cntSeriesInCart) || (cntSeriesInCart==0)){
                         $(row).addClass('extraInFilt');
                         content = "add series to the cart";
-                    } else {
+                    }
+                    else{
                         $(row).removeClass('extraInFilt');
                         content = "remove series from the cart";
                     }
 
-                    if (caseCount[2]) {
-                        $(row).addClass('extraInCart');
-                    } else {
-                        $(row).removeClass('extraInCart');
-                    }
-
-                    if (caseCount[3]) {
-                        $(row).addClass('someInCart');
-                    } else {
-                        $(row).removeClass('someInCart');
-                    }
-                    if (caseCount[4]>caseCount[0]){
+                    if (cntSeriesInItem>cntSeriesInCart){
                         $(row).addClass('extraInItem');
                     }
                     else{
@@ -1138,17 +1094,15 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
 
      // calculate the cartnum value and 'state' of the cart selection for a project(collection) table row or case table row.
     //  Currently only used for the cases table
-    const calcProjectOrCaseRowCount = function(ids){
+    const calcProjectOrCaseRowCounts = function(ids){
         //return [0,false,false,false]
-        var cnt = 0;
-        var moreInItemThanCart = false
-        var moreInFilterSetThanCart = true;
-        var moreInCartThanFilterSet = false;
-        var someInCart = false;
+        var cntSeriesInCart = 0;
+        var cntSeriesInFilt=0;
         var studymp= new Object();
         var studympFilt=new Object();
         var selItem=new Object();
         var maxSeries = 0;
+        var studyMpFiltDefined = false;
 
         var numSeriesInItem = 0;
         if (ids.length ==1 && (ids[0] in stats)){
@@ -1160,9 +1114,10 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
         if ((ids.length==1) && (ids[0] in window.selProjects)){
             maxSeries = stats['series_per_collec'][ids[0]];
             selItem = window.selProjects[ids[0]]
-            if (('studymp' in window.selProjects[ids[0]]) && !typeof(window.selProjects[ids[0]].studymp =="undefined"))
+            if (('studymp' in window.selProjects[ids[0]]) && !(typeof(window.selProjects[ids[0]].studymp) =="undefined"))
             {
                 studympFilt = window.selProjects[ids[0]].studymp;
+                studympFiltDefined = true;
             }
         }
         if ( (ids.length==2) && (ids[1] in window.casestudymp)){
@@ -1173,60 +1128,33 @@ define(['cartutils','filterutils','tippy','jquery', 'utils'], function(cartutils
          if ((ids.length==2) && (ids[0] in window.selProjects) && (ids[1] in window.selProjects[ids[0]].selCases)) {
              maxSeries = window.selProjects[ids[0]].selCases[ids[1]].maxseries;
              selItem = window.selProjects[ids[0]].selCases[ids[1]];
-             if (('studymp' in window.selProjects[ids[0]].selCases[ids[1]]) && !typeof(window.selProjects[ids[0]].selCases[ids[1]].studymp) =="undefined")
+             if (('studymp' in window.selProjects[ids[0]].selCases[ids[1]]) && !(typeof(window.selProjects[ids[0]].selCases[ids[1]].studymp) =="undefined"))
             {
               studympFilt = window.selProjects[ids[0]].selCases[ids[1]].studymp;
+              studympFiltDefined = true;
             }
         }
 
 
         for (var studyid in studymp){
             if (studyid in window.glblcart){
-                someInCart = true;
-
-                if (!(studyid in studympFilt)){
-                    moreInCartThanFilterSet= true;
-                }
                 if (window.glblcart[studyid]['all']){
 
-                  cnt += window.studymp[studyid]['cnt']
+                  cntSeriesInCart += window.studymp[studyid]['cnt']
                }
               else{
-                  cnt += window.glblcart[studyid]['sel'].size
-                    if ((studyid in studympFilt)){
-                    moreInFilterSetThanCart= true;
-                   }
-
+                  cntSeriesInCart += window.glblcart[studyid]['sel'].size
               }
             }
-            else if (studyid in studympFilt){
-                moreInFilterSetThanCart= true;
+            if (studyid in studympFilt){
+                cntSeriesInFilt += studympFilt[studyid]
             }
 
         }
-        if (moreInCartThanFilterSet){
-            selItem['extraInCart']=true;
-        }
-        else if ('extraInCart' in selItem){
-            delete(selItem['extraInCart'])
-        }
 
-        if (moreInFilterSetThanCart){
-            selItem['extraInFilt']=true;
-        }
-        else if ('extraInFilt' in selItem){
-            delete(selItem['extraInFilt'])
-        }
-
-        if (someInCart){
-            selItem['someInCart']=true;
-        }
-        else if ('someInCart' in selItem){
-            delete(selItem['someInCart'])
-        }
 
         //return cnt.toString();
-        return [cnt.toString(), moreInFilterSetThanCart, moreInCartThanFilterSet, someInCart, maxSeries ];
+        return [cntSeriesInCart, cntSeriesInFilt, maxSeries, studyMpFiltDefined ];
     }
 
     // update the Study table if a case is clicked in the Cases table, or update the Series table if a study is clicked in the Studies table
