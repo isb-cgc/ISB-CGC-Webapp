@@ -77,6 +77,94 @@ require([
 define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tippy, utils) {
 
 
+    // given a dic with studyid as keys, add or subtract series from the cart
+    const updateGlobalCart = function(cartAdded, studymp, lvl){
+
+        for (studyid in studymp){
+           if (lvl=="series") {
+               var seriesArr = studymp[studyid];
+               for (var i=0; i<seriesArr.length;i++) {
+                   var seriesid = seriesArr[i];
+                   if (cartAdded) {
+                       if (!(studyid in window.glblcart)) {
+                           window.glblcart[studyid] = new Object();
+                           window.glblcart[studyid]['all'] = false;
+                           window.glblcart[studyid]['sel'] = new Set();
+                       }
+                       window.glblcart[studyid]['sel'].add(seriesid);
+                       if (window.studymp[studyid]['val'].length == window.glblcart[studyid]['sel'].size) {
+                           window.glblcart[studyid]['all'] = true;
+                           window.glblcart[studyid]['sel'] = new Set();
+                       }
+                   } else {
+
+                       if (studyid in window.glblcart)
+                       {
+                           if (window.glblcart[studyid]['all']) {
+                               window.glblcart[studyid]['all'] = false;
+                               window.glblcart[studyid]['sel'] = new Set([...window.studymp[studyid]['val']]);
+                           }
+                         window.glblcart[studyid]['sel'].delete(seriesid);
+                         if (window.glblcart[studyid]['sel'].size == 0) {
+                             delete window.glblcart[studyid];
+                         }
+                   }
+                  }
+               }
+           }
+         else{
+             if (cartAdded){
+
+                 window.glblcart[studyid]=new Object();
+                 window.glblcart[studyid]['all'] = true;
+                 window.glblcart[studyid]['sel'] = new Set();
+
+             }
+             else{
+                 if (studyid in window.glblcart){
+                     delete(window.glblcart[studyid]);
+                 }
+             }
+
+        }
+       }
+    }
+
+    //calculate the tot # of projects, cases, studies, and series in the cart
+    const getGlobalCounts= function(){
+        tots=[0,0,0,0]
+        for (projid in window.projstudymp){
+            for (studyid in window.projstudymp[projid]){
+                if (studyid in window.glblcart){
+                    tots[0]++;
+                    break;;
+
+                }
+            }
+        }
+            for (caseid in window.casestudymp){
+                for (studyid in window.casestudymp[caseid]) {
+                    if (studyid in window.glblcart) {
+                        tots[1]++;
+                        break;
+                    }
+                }
+            }
+
+        tots[2] = Object.keys(window.glblcart).length;
+        for (studyid in window.glblcart){
+            if (window.glblcart[studyid]['all']){
+                tots[3]=tots[3]+window.studymp[studyid]['cnt'];
+            }
+            else{
+                tots[3]=tots[3]+window.glblcart[studyid]['sel'].size;
+            }
+        }
+        return tots;
+    }
+
+
+// remove all items from the cart. clear the glblcart, carHist, cartDetails
     window.resetCart = function(){
         window.cart= new Object();
         window.glblcart = new Object();
@@ -114,6 +202,7 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
 
     }
 
+    // show the history of cart related selections (filters and cart buttons)
     $('.cart-modal-button').on('click', function(){
         detsArr = window.cartDetails.split('\n\n');
         var str='<ol type="1" class="nav navbar-nav navbar-left">';
@@ -126,49 +215,12 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
         }
         str=str+'</ol>'
         $('#cart_details').html(str);
-        /*$('#cart-details-modal').modal('show');
-        var height =$('#cart-details-modal').find('.modal-content').outerHeight();
-        $('#cart-details-modal').find('.modal-body').height(height);
-        $('#cart-details-modal').find('.modal-body').css('overflow-y:auto');*/
-
-        //$('#cart-details-modal').modal('show');
-        /* $('#cart-details-modal').addClass('fade');
-        $('#cart-details-modal').addClass('in');
-        $('#cart-details-modal').css("display","block");*/
-        //$('#cart-details-modal').modal('show');
-        //$('#cart-details-modal').css("display","block");
-        //var width=$('#cart-details-modal').find('.modal-content').outerWidth();
-        //var height =$('#cart-details-modal').find('.modal-content').outerHeight();
-        //$('#cart-details-modal').css("display","none");
 
             $('#cart-details-modal').modal('show');
-            /*$('#cart-details-modal').height(height);
-            $('#cart-details-modal').width(width); */
-
 
     })
-    /*
-    $('#cart-details-modal').on('show.bs.modal', function(){
-        detsArr = window.cartDetails.split('\n\n');
-        var str='<ul class="nav navbar-nav navbar-left">';
-        for (var i=0;i<detsArr.length;i++){
-            str =str+'<li class="navbar-link navbar-item">'+detsArr[i]
-        }
-        str=str+'<ul>'
-        $('#cart_details').html(str);
-         var width=$('#cart-details-modal').find('.modal-content').outerWidth();
-        var height =$('#cart-details-modal').find('.modal-content').outerHeight();
-        $('#cart-details-modal').height(height);
-            $('#cart-details-modal').width(width);
-    });
-    $('#cart-details-modal').on('shown.bs.modal', function(){
-         $('#collection-modal').css("display","block");
-        //var width=$('#cart-details-modal').find('.modal-content').outerWidth();
-        var height =$('#cart-details-modal').find('.modal-content').outerHeight();
-        $('#cart-details-modal').height(height);
-            //$('#cart-details-modal').width(width);
-    });
-    */
+
+    //as user makes selections in the tables, record the selections in the cartHist object. Make new partitions from the selections
     const updateCartSelections = function(newSel){
         var curInd = window.cartHist.length - 1;
         var selections = window.cartHist[curInd]['selections'];
@@ -206,352 +258,7 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
         window.cartHist[curInd]['partitions'] = mkOrderedPartitions(window.cartHist[curInd]['selections']);
     }
 
-
-    const formcartdata = function(){
-        var partitions = new Array();
-            for (var i=0; i< window.partitions.length;i++) {
-                if (!('null'in window.partitions[i]) || !(window.partitions[i]['null'])){
-                    partitions.push(window.partitions[i])
-                }
-            }
-            var filterSets = new Array();
-            for (var i=0; i< window.cartHist.length;i++) {
-               filterSets.push(window.cartHist[i]['filter'])
-            }
-        return [partitions, filterSets];
-    }
-
-     window.viewcart = function(){
-        window.updatePartitionsFromScratch();
-        var ret = formcartdata();
-        var partitions = ret[0];
-        var filterSets = ret[1];
-        /*
-        var partitions = new Array();
-            for (var i=0; i< window.partitions.length;i++) {
-                if (!('null'in window.partitions[i]) || !(window.partitions[i]['null'])){
-                    partitions.push(window.partitions[i])
-                }
-            }
-            var filterSets = new Array();
-            for (var i=0; i< window.cartHist.length;i++) {
-               filterSets.push(window.cartHist[i]['filter'])
-            }
-         */
-            if ($('#cart-view-elem').length>0) {
-                document.getElementById("cart-view-elem").remove();
-            }
-
-            var csrftoken = $.getCookie('csrftoken');
-            var form = document.createElement('form');
-            form.id = "cart-view-elem";
-            form.style.visibility = 'hidden'; // no user interaction is necessary
-            form.method = 'POST'; // forms by default use GET query strings
-            //form.action = '/explore/cart/';
-            form.action = '/cart/';
-            //form.append(csrftoken);
-            var input = document.createElement('input');
-            input.name = "csrfmiddlewaretoken";
-            input.value =csrftoken;
-            form.appendChild(input);
-            var input = document.createElement('input');
-            input.name = "filtergrp_list";
-            input.value = JSON.stringify(filterSets);
-            form.appendChild(input);
-            var input = document.createElement('input');
-            input.name = "partitions";
-            input.value = JSON.stringify(partitions);
-            form.appendChild(input);
-            document.body.appendChild(form)
-            form.submit();
-
-        /* var url = '/cart/';
-        url = encodeURI('/cart/');
-
-
-
-        ndic = {
-            'filtlist': JSON.stringify(filterSets),
-            'partitions': JSON.stringify(window.partitions)
-
-
-        }
-
-        var csrftoken = $.getCookie('csrftoken');
-        let deferred = $.Deferred();
-        $.ajax({
-            url: url,
-            data: ndic,
-            dataType: 'json',
-            type: 'post',
-            contentType: 'application/x-www-form-urlencoded',
-            beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
-            success: function (data) {
-                try {
-                     var k =1;
-                }
-                finally {
-                    deferred.resolve([]);
-                }
-            },
-            error: function(data){
-                alert("There was an error fetching server data. Please alert the systems administrator")
-                console.log('error loading data');
-            }
-        });
-        return deferred.promise(); */
-    };
-
-      window.updatePartitionsFromScratch =function(){
-        window.partitions = new Array();
-
-        for (var i=0;i<window.cartHist.length;i++){
-           var cartHist=window.cartHist[i];
-           updateGlobalPartitions(cartHist.partitions);
-        }
-        for (var i=0;i<window.cartHist.length;i++){
-           var cartHist=window.cartHist[i];
-           refilterGlobalPartitions(cartHist,i);
-        }
-        fixpartitions();
-        var filtStrings = createFiltStrings();
-        var solrStr = createSolrString(filtStrings);
-        window.solrStr = solrStr;
-        var ii=1;
-    }
-
-    fixpartitions = function(){
-      var isempty = new Array();
-      for (var i=0;i<window.cartHist.length;i++){
-          if (Object.keys(window.cartHist[i].filter).length==0){
-              isempty.push(true);
-          }
-          else{
-              isempty.push(false);
-          }
-      }
-
-      for (var i=0;i<window.partitions.length;i++){
-          var nfilts = new Array();
-          for (var j=0; j<window.partitions[i].filt.length;j++){
-              var remv = false;
-              for (var k=1;k<window.partitions[i].filt[j].length;k++){
-                  filt= window.partitions[i].filt[j][k]
-                  if (isempty[filt]){
-                      remv = true;
-                      break;
-                  }
-              }
-              if (!remv){
-                  nfilts.push(window.partitions[i].filt[j])
-              }
-          }
-          window.partitions[i].filt=nfilts;
-          if (nfilts.length ==0){
-              window.partitions[i].null = true;
-          }
-      }
-
-    }
-
-    updateGlobalPartitions= function(newparts){
-        //var newparts = cartHist.partitions;
-        for (var i=0;i<newparts.length;i++){
-            var inserted = false;
-            var nxtpart=newparts[i];
-            var nxtlen = nxtpart.length;
-            var basefilt = new Array();
-            for (var j=0;j<window.partitions.length;j++){
-                var eql = true;
-                var lt = false;
-                curpart = window.partitions[j]['id'];
-                curpartlen = curpart.length;
-
-                var numcmp = Math.min(nxtpart.length, curpart.length);
-                for (k=0;k<numcmp;k++){
-                   if (nxtpart[k]<curpart[k]){
-                       lt = true;
-                       eql = false
-                       break;
-                   }
-                   else if (nxtpart[k]>curpart[k]){
-                       eql = false;
-                       break;
-                   }
-               }
-                if (lt || (eql && (nxtpart.length<curpart.length))){
-                   var insertInd=j;
-                   inserted = true;
-                   addNewPartition(nxtpart, insertInd, basefilt)
-                   break;
-               }
-                else if (eql && (nxtpart.length==curpart.length)){
-                 inserted = true;
-                 break;
-               }
-
-                else if (eql && (nxtpart.length==curpart.length+1)){
-
-                 if (window.partitions[j]['not'].indexOf(nxtpart[nxtpart.length-1])<0){
-                    window.partitions[j]['not'].push(nxtpart[nxtpart.length-1]);
-                 }
-
-                 for (var filtprt=0;filtprt<window.partitions[j]['filt'].length;filtprt++){
-                     var tmp = window.partitions[j]['filt'][filtprt];
-                     basefilt.push([...tmp])
-                 }
-               }
-              window.partitions[j]['not'].sort();
-            }
-            if (!inserted){
-               addNewPartition(nxtpart, -1, basefilt);
-           }
-        }
-
-    }
-    refilterGlobalPartitions= function(cartHist,cartnum){
-
-        var selections = cartHist['selections'];
-        var checkedA = new Array()
-        for (var i=0;i<selections.length;i++){
-            var ind = selections.length-(1+i);
-            var cursel = selections[ind];
-            var curid = cursel['sel'];
-            var added = cursel['added'];
-            for (var j=0;j<window.partitions.length;j++){
-                var part = window.partitions[j];
-                var partid = part['id'];
-                if ((checkedA.indexOf(j)<0) && (curid.length<=partid.length)) {
-                    var filt = part['filt'];
-                    //var nll = part['null'];
-                    var eq = true;
-                    for (var k=0; k<curid.length;k++){
-                        if (!(curid[k]==partid[k])){
-                            eq = false;
-                            break;
-                        }
-                    }
-                    if (eq){
-                        checkedA.push(j);
-                        if (added){
-                            part['filt'].push([cartnum]);
-                            part['null'] = false;
-                        }
-                        else if (!part['null']){
-                            for (var k=0;k<part['filt'].length;k++){
-                                part['filt'][k].push(cartnum);
-                            }
-                        }
-                    }
-
-                }
-            }
-        }
-
-    }
-
-    createSolrString = function(filtStringA){
-        var solrStr=''
-        var solrA=[]
-        for (var i=0;i< window.partitions.length;i++){
-            var curPart = window.partitions[i];
-            if (!curPart['null']) {
-                var curPartAttStrA = parsePartitionAttStrings(filtStringA, curPart);
-                var curPartStr = parsePartitionStrings(curPart);
-                for (var j = 0; j < curPartAttStrA.length; j++) {
-                    if (curPartAttStrA[j].length > 0) {
-
-                    solrA.push('(' + curPartStr + ')(' + curPartAttStrA[j] + ')')
-                    }
-                    else{
-                        solrA.push(curPartStr);
-                    }
-                }
-            }
-        }
-        solrA = solrA.map(x => '('+x+')');
-       var solrStr = solrA.join(' OR ')
-        return solrStr
-    }
-
-    parsePartitionAttStrings = function(filtStringA, partition){
-        var attStrA =[];
-        var filt2D = partition['filt'];
-        for (var i=0; i<filt2D.length;i++){
-            filtL=filt2D[i];
-            var tmpA=[]
-            for (var j=0;j<filtL.length;j++){
-                var filtindex= filtL[j]
-                filtStr=filtStringA[filtindex];
-                if (filtStr.length>0){
-                    if (j==0){
-                        tmpA.push('('+filtStr+')')
-                    }
-                    else{
-                        tmpA.push('NOT ('+filtStr+')')
-                    }
-                }
-
-            }
-            attStrA.push(tmpA.join(' AND '))
-        }
-        return attStrA;
-    }
-
-    parsePartitionStrings = function(partition){
-        var filts = ['collection_id', 'PatientID', 'StudyInstanceUID','SeriesInstanceUID']
-        var id = partition['id']
-        var partStr='';
-        for (var i=0;i<id.length;i++){
-            partStr+='(+'+filts[i]+':("'+id[i]+'"))';
-        }
-        var not= partition['not'];
-        if (not.length>0){
-            not= not.map(x => '"'+x+'"');
-            var notStr= not.join(' OR ');
-            partStr=partStr+' AND NOT ('+filts[id.length]+':('+notStr+'))';
-        }
-        return partStr
-    }
-    createFiltStrings = function(){
-        var filtStrings = new Array();
-        var attA = [];
-        for (var i=0;i<window.cartHist.length;i++){
-            var filt= window.cartHist[i]['filter'];
-            filtkeys = Object.keys(filt);
-            var fstr=''
-            for (var j=0;j<filtkeys.length;j++) {
-                fkey = filtkeys[j];
-                //if (!(fkey == "collection_id")){
-                if (true){
-                    var nstr = '(+' + fkey + ':(';
-                   var attA = ('values' in filt[fkey] && (Array.isArray(filt[fkey]['values']))) ? filt[fkey]['values'] : filt[fkey];
-                   var op = ('op' in filt[fkey]) ? filt[fkey]['op'] : 'OR';
-                   attA = attA.map(x => '"' + x + '"')
-                   nstr = nstr + attA.join(' ' + op + ' ') + '))';
-                  fstr = fstr + nstr;
-               }
-            }
-            filtStrings.push(fstr);
-        }
-        return(filtStrings);
-    }
-
-    addNewPartition= function(part, pos, basefilt) {
-        newPart = new Object();
-        newPart['not'] = new Array();
-        newPart['id'] = [...part]
-        newPart['filt'] = basefilt;
-        newPart['null'] = true;
-        if (pos > -1) {
-           window.partitions.splice(pos, 0, newPart);
-         }
-        else{
-            window.partitions.push(newPart);
-        }
-    }
-
-
+    // make partitions from table selections
     mkOrderedPartitions = function(selections){
         parts=new Array();
 
@@ -609,88 +316,313 @@ define(['filterutils','jquery', 'tippy', 'utils' ], function(filterutils, $, tip
         return parts;
     }
 
-    const updateGlobalCart = function(cartAdded, studymp, lvl){
 
-        for (studyid in studymp){
-           if (lvl=="series") {
-               var seriesArr = studymp[studyid];
-               for (var i=0; i<seriesArr.length;i++) {
-                   var seriesid = seriesArr[i];
-                   if (cartAdded) {
-                       if (!(studyid in window.glblcart)) {
-                           window.glblcart[studyid] = new Object();
-                           window.glblcart[studyid]['all'] = false;
-                           window.glblcart[studyid]['sel'] = new Set();
-                       }
-                       window.glblcart[studyid]['sel'].add(seriesid);
-                       if (window.studymp[studyid]['val'].length == window.glblcart[studyid]['sel'].size) {
-                           window.glblcart[studyid]['all'] = true;
-                           window.glblcart[studyid]['sel'] = new Set();
-                       }
-                   } else {
 
-                       if (studyid in window.glblcart)
-                       {
-                           if (window.glblcart[studyid]['all']) {
-                               window.glblcart[studyid]['all'] = false;
-                               window.glblcart[studyid]['sel'] = new Set([...window.studymp[studyid]['val']]);
-                           }
-                         window.glblcart[studyid]['sel'].delete(seriesid);
-                         if (window.glblcart[studyid]['sel'].size == 0) {
-                             delete window.glblcart[studyid];
-                         }
-                   }
-                  }
-               }
-           }
-         else{
-             if (cartAdded){
+    // go from the explorer to the cart page with datastructure to be used in creating a series level view of the cart
+     window.viewcart = function(){
+        window.updatePartitionsFromScratch();
+        var ret = formcartdata();
+        var partitions = ret[0];
+        var filterSets = ret[1];
 
-                 window.glblcart[studyid]=new Object();
-                 window.glblcart[studyid]['all'] = true;
-                 window.glblcart[studyid]['sel'] = new Set();
+            if ($('#cart-view-elem').length>0) {
+                document.getElementById("cart-view-elem").remove();
+            }
 
-             }
-             else{
-                 if (studyid in window.glblcart){
-                     delete(window.glblcart[studyid]);
-                 }
-             }
+            var csrftoken = $.getCookie('csrftoken');
+            var form = document.createElement('form');
+            form.id = "cart-view-elem";
+            form.style.visibility = 'hidden'; // no user interaction is necessary
+            form.method = 'POST'; // forms by default use GET query strings
+            //form.action = '/explore/cart/';
+            form.action = '/cart/';
+            //form.append(csrftoken);
+            var input = document.createElement('input');
+            input.name = "csrfmiddlewaretoken";
+            input.value =csrftoken;
+            form.appendChild(input);
+            var input = document.createElement('input');
+            input.name = "filtergrp_list";
+            input.value = JSON.stringify(filterSets);
+            form.appendChild(input);
+            var input = document.createElement('input');
+            input.name = "partitions";
+            input.value = JSON.stringify(partitions);
+            form.appendChild(input);
+            document.body.appendChild(form)
+            form.submit();
 
+    };
+
+     window.updatePartitionsFromScratch =function(){
+        window.partitions = new Array();
+
+        for (var i=0;i<window.cartHist.length;i++){
+           var cartHist=window.cartHist[i];
+           updateGlobalPartitions(cartHist.partitions);
         }
-       }
+        for (var i=0;i<window.cartHist.length;i++){
+           var cartHist=window.cartHist[i];
+           refilterGlobalPartitions(cartHist,i);
+        }
+        fixpartitions();
+        var filtStrings = createFiltStrings();
+        var solrStr = createSolrString(filtStrings);
+        window.solrStr = solrStr;
+        var ii=1;
     }
-    const getGlobalCounts= function(){
-        tots=[0,0,0,0]
-        for (projid in window.projstudymp){
-            for (studyid in window.projstudymp[projid]){
-                if (studyid in window.glblcart){
-                    tots[0]++;
-                    break;;
+
+    //looking across the history of cart selections, create one set of exclusive partitions of the imaging data
+    updateGlobalPartitions= function(newparts){
+        //var newparts = cartHist.partitions;
+        for (var i=0;i<newparts.length;i++){
+            var inserted = false;
+            var nxtpart=newparts[i];
+            var nxtlen = nxtpart.length;
+            var basefilt = new Array();
+            for (var j=0;j<window.partitions.length;j++){
+                var eql = true;
+                var lt = false;
+                curpart = window.partitions[j]['id'];
+                curpartlen = curpart.length;
+
+                var numcmp = Math.min(nxtpart.length, curpart.length);
+                for (k=0;k<numcmp;k++){
+                   if (nxtpart[k]<curpart[k]){
+                       lt = true;
+                       eql = false
+                       break;
+                   }
+                   else if (nxtpart[k]>curpart[k]){
+                       eql = false;
+                       break;
+                   }
+               }
+                if (lt || (eql && (nxtpart.length<curpart.length))){
+                   var insertInd=j;
+                   inserted = true;
+                   addNewPartition(nxtpart, insertInd, basefilt)
+                   break;
+               }
+                else if (eql && (nxtpart.length==curpart.length)){
+                 inserted = true;
+                 break;
+               }
+
+                else if (eql && (nxtpart.length==curpart.length+1)){
+
+                 if (window.partitions[j]['not'].indexOf(nxtpart[nxtpart.length-1])<0){
+                    window.partitions[j]['not'].push(nxtpart[nxtpart.length-1]);
+                 }
+
+                 for (var filtprt=0;filtprt<window.partitions[j]['filt'].length;filtprt++){
+                     var tmp = window.partitions[j]['filt'][filtprt];
+                     basefilt.push([...tmp])
+                 }
+               }
+              window.partitions[j]['not'].sort();
+            }
+            if (!inserted){
+               addNewPartition(nxtpart, -1, basefilt);
+           }
+        }
+
+    }
+
+    // add a new partition. basefilt is the active filter when this partition is first encountered
+    addNewPartition= function(part, pos, basefilt) {
+        newPart = new Object();
+        newPart['not'] = new Array();
+        newPart['id'] = [...part]
+        newPart['filt'] = basefilt;
+        newPart['null'] = true;
+        if (pos > -1) {
+           window.partitions.splice(pos, 0, newPart);
+         }
+        else{
+            window.partitions.push(newPart);
+        }
+    }
+
+
+    // update the filter array for each partition
+    refilterGlobalPartitions= function(cartHist,cartnum){
+
+        var selections = cartHist['selections'];
+        var checkedA = new Array()
+        for (var i=0;i<selections.length;i++){
+            var ind = selections.length-(1+i);
+            var cursel = selections[ind];
+            var curid = cursel['sel'];
+            var added = cursel['added'];
+            for (var j=0;j<window.partitions.length;j++){
+                var part = window.partitions[j];
+                var partid = part['id'];
+                if ((checkedA.indexOf(j)<0) && (curid.length<=partid.length)) {
+                    var filt = part['filt'];
+                    //var nll = part['null'];
+                    var eq = true;
+                    for (var k=0; k<curid.length;k++){
+                        if (!(curid[k]==partid[k])){
+                            eq = false;
+                            break;
+                        }
+                    }
+                    if (eq){
+                        checkedA.push(j);
+                        if (added){
+                            part['filt'].push([cartnum]);
+                            part['null'] = false;
+                        }
+                        else if (!part['null']){
+                            for (var k=0;k<part['filt'].length;k++){
+                                part['filt'][k].push(cartnum);
+                            }
+                        }
+                    }
 
                 }
             }
         }
 
-            for (caseid in window.casestudymp){
-                for (studyid in window.casestudymp[caseid]) {
-                    if (studyid in window.glblcart) {
-                        tots[1]++;
-                        break;
+    }
+
+    const fixpartitions = function(){
+      var isempty = new Array();
+      for (var i=0;i<window.cartHist.length;i++){
+          if (Object.keys(window.cartHist[i].filter).length==0){
+              isempty.push(true);
+          }
+          else{
+              isempty.push(false);
+          }
+      }
+
+      for (var i=0;i<window.partitions.length;i++){
+          var nfilts = new Array();
+          for (var j=0; j<window.partitions[i].filt.length;j++){
+              var remv = false;
+              for (var k=1;k<window.partitions[i].filt[j].length;k++){
+                  var filt= window.partitions[i].filt[j][k]
+                  if (isempty[filt]){
+                      remv = true;
+                      break;
+                  }
+              }
+              if (!remv){
+                  nfilts.push(window.partitions[i].filt[j])
+              }
+          }
+          window.partitions[i].filt=nfilts;
+          if (nfilts.length ==0){
+              window.partitions[i].null = true;
+          }
+      }
+
+    }
+    const formcartdata = function(){
+        var partitions = new Array();
+            for (var i=0; i< window.partitions.length;i++) {
+                if (!('null'in window.partitions[i]) || !(window.partitions[i]['null'])){
+                    partitions.push(window.partitions[i])
+                }
+            }
+            var filterSets = new Array();
+            for (var i=0; i< window.cartHist.length;i++) {
+               filterSets.push(window.cartHist[i]['filter'])
+            }
+        return [partitions, filterSets];
+    }
+
+    // creates an array of all used filter sets
+    const createFiltStrings = function(){
+        var filtStrings = new Array();
+        var attA = [];
+        for (var i=0;i<window.cartHist.length;i++){
+            var filt= window.cartHist[i]['filter'];
+            filtkeys = Object.keys(filt);
+            var fstr=''
+            for (var j=0;j<filtkeys.length;j++) {
+                fkey = filtkeys[j];
+                //if (!(fkey == "collection_id")){
+                if (true){
+                    var nstr = '(+' + fkey + ':(';
+                   var attA = ('values' in filt[fkey] && (Array.isArray(filt[fkey]['values']))) ? filt[fkey]['values'] : filt[fkey];
+                   var op = ('op' in filt[fkey]) ? filt[fkey]['op'] : 'OR';
+                   attA = attA.map(x => '"' + x + '"')
+                   nstr = nstr + attA.join(' ' + op + ' ') + '))';
+                  fstr = fstr + nstr;
+               }
+            }
+            filtStrings.push(fstr);
+        }
+        return(filtStrings);
+    }
+
+
+
+
+    // not really needed, but used to creating the solr string in on the client side
+    createSolrString = function(filtStringA){
+        var solrStr=''
+        var solrA=[]
+        for (var i=0;i< window.partitions.length;i++){
+            var curPart = window.partitions[i];
+            if (!curPart['null']) {
+                var curPartAttStrA = parsePartitionAttStrings(filtStringA, curPart);
+                var curPartStr = parsePartitionStrings(curPart);
+                for (var j = 0; j < curPartAttStrA.length; j++) {
+                    if (curPartAttStrA[j].length > 0) {
+
+                    solrA.push('(' + curPartStr + ')(' + curPartAttStrA[j] + ')')
+                    }
+                    else{
+                        solrA.push(curPartStr);
                     }
                 }
             }
-
-        tots[2] = Object.keys(window.glblcart).length;
-        for (studyid in window.glblcart){
-            if (window.glblcart[studyid]['all']){
-                tots[3]=tots[3]+window.studymp[studyid]['cnt'];
-            }
-            else{
-                tots[3]=tots[3]+window.glblcart[studyid]['sel'].size;
-            }
         }
-        return tots;
+        solrA = solrA.map(x => '('+x+')');
+       var solrStr = solrA.join(' OR ')
+        return solrStr
+    }
+    parsePartitionAttStrings = function(filtStringA, partition){
+        var attStrA =[];
+        var filt2D = partition['filt'];
+        for (var i=0; i<filt2D.length;i++){
+            filtL=filt2D[i];
+            var tmpA=[]
+            for (var j=0;j<filtL.length;j++){
+                var filtindex= filtL[j]
+                filtStr=filtStringA[filtindex];
+                if (filtStr.length>0){
+                    if (j==0){
+                        tmpA.push('('+filtStr+')')
+                    }
+                    else{
+                        tmpA.push('NOT ('+filtStr+')')
+                    }
+                }
+
+            }
+            attStrA.push(tmpA.join(' AND '))
+        }
+        return attStrA;
+    }
+    parsePartitionStrings = function(partition){
+        var filts = ['collection_id', 'PatientID', 'StudyInstanceUID','SeriesInstanceUID']
+        var id = partition['id']
+        var partStr='';
+        for (var i=0;i<id.length;i++){
+            partStr+='(+'+filts[i]+':("'+id[i]+'"))';
+        }
+        var not= partition['not'];
+        if (not.length>0){
+            not= not.map(x => '"'+x+'"');
+            var notStr= not.join(' OR ');
+            partStr=partStr+' AND NOT ('+filts[id.length]+':('+notStr+'))';
+        }
+        return partStr
     }
 
 
