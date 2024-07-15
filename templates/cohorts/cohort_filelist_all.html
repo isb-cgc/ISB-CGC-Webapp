@@ -37,7 +37,7 @@
                                 </div>
                             </div>
                         </li>
-                        {% for attr_name, attr in metadata_data_attr.items %}
+                        {% for attr in metadata_data_attr|get_sorted_items %}
                             <li class="list-group-item">
                                 <div id="heading-all-{{attr.name}}" class="list-group-item__heading">
                                     <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all" href="#collapse-all-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-all-{{ attr.name }}">
