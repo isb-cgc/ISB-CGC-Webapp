@@ -77,7 +77,9 @@ VALUE_SPECIFIC_ORDERS = {
 }
 
 ATTR_SPECIFIC_ORDERS = [
+    'case-id',
     'program_name',
+    'build',
     'project_short_name_gdc',
     'project_short_name_pdc',
     'disease_code',
