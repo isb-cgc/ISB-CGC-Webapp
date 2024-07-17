@@ -1,5 +1,5 @@
 ###
-# Copyright 2015-2023, Institute for Systems Biology
+# Copyright 2015-2024, Institute for Systems Biology
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ builtins:
 - deferred: on
 
 beta_settings:
-    cloud_sql_instances: isb-cgc-test:us-central1:test
+    cloud_sql_instances: isb-cgc-test:us-central1:test-v2
 
 env_variables:
   DJANGO_SETTINGS_MODULE: 'isb_cgc.settings'
