@@ -1,7 +1,6 @@
 /**
  *
- * Copyright 2017-2024
- * , Institute for Systems Biology
+ * Copyright 2017-2024, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -515,7 +514,6 @@ require([
     });
 
     var set_mode = function(from_click) {
-
         switch(mode){
             case 'EDITING':
                 // $('.data-tab-content-panel:not(.spinner-panel)').removeClass('col-md-12').addClass('col-md-9');
@@ -908,51 +906,6 @@ require([
         });
     };
 
-    // Handler for the 'x' of the mutation 'category' filter tokens
-    // $('.tab-content, #selected-filters').on('click', 'a.mol-cat-filter-x', function (e) {
-    //     var prog_id = $(this).parents('span').data('prog-id');
-    //     var activeDataTab = prog_id+'-data';
-    //     var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
-    //     var createFormFilterSet = $('p#'+activeDataTab+'-filters');
-    //     var filter = $(this).parents('span').data('filter');
-    //     if(filter && SELECTED_FILTERS[prog_id][filter]) {
-    //         delete SELECTED_FILTERS[prog_id][filter];
-    //     }
-    //
-    //     // When the 'Selected Filters' token is removed, remove this filter from other
-    //     // locations in which it's stored
-    //
-    //     $(this).parent('span').remove();
-    //     if($(selFilterPanel+' .panel-body .mol-filter').length <= 0) {
-    //         $(selFilterPanel+' .panel-body .mol-filter-container').hide();
-    //     }
-    //
-    //     createFormFilterSet.find('span[data-filter="'+filter+'"]').remove();
-    //
-    //     if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
-    //         $('#at-least-one-filter-alert-modal').show();
-    //         $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
-    //     }
-    //
-    //     // If this has emptied out a program's filter set, hide the modal's subsection for that program
-    //     // if a new value isn't replacing it
-    //     if(createFormFilterSet.find('span').length <= 0) {
-    //         createFormFilterSet.hide();
-    //     }
-    //
-    //     // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
-    //     var progCount = 0;
-    //     $('.selected-filters .panel-body').each(function(){
-    //         if($(this).find('span').length > 0) {
-    //             progCount++;
-    //         }
-    //     });
-    //     (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
-    //
-    //     update_displays(false,false,prog_id);
-    //     return false;
-    // });
-
     // Event: Filter clear warning
     if(!cohort_id) {
         $('.clear-filters').on('click', function() {
@@ -1096,8 +1049,7 @@ require([
     var ANONYMOUS_FILTERS = {};
     var MUTATION_FILTER_COMBINE = "and";
 
-    var save_anonymous_filters = function()
-    {
+    var save_anonymous_filters = function() {
         // Collect all selected filters and save to session storage
         var filters = [];
         $('#selected-filters span.filter-token').each(function() {
@@ -1118,8 +1070,7 @@ require([
     };
 
     var load_tabs_queue = [];
-    var load_anonymous_filters = function()
-    {
+    var load_anonymous_filters = function() {
         // Load anonymous filters from session storage and clear it, so it is not always there
         var str = sessionStorage.getItem('anonymous_filters');
         ANONYMOUS_FILTERS = JSON.parse(str);
@@ -1139,8 +1090,7 @@ require([
         }
     };
 
-    var apply_anonymous_filters = function(active_program_id)
-    {
+    var apply_anonymous_filters = function(active_program_id) {
         // Check if anonymous filter exist, then find all checkbox and check them
         if (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS.length > 0) {
             var has_mut_filter = false;
@@ -1223,8 +1173,6 @@ require([
 
     var reject_load = false;
 
-    var SORT_DATASET_BY = "node";
-
     var update_all_selected_filters_ui = function(dataset_selector) {
         let all_selected_panel = $('.all-selected-filters' + ' .panel-body');
         all_selected_panel.empty();
@@ -1242,8 +1190,8 @@ require([
                 let link = "#" + program_id + "-data";
                 let div = $('<div class="'+(link === dataset_selector ? 'current-data-set' : 'other-data-set')+'">');
                 let current = (link === dataset_selector) ? " (Current Data Set)" : "";
-                div.append("<h5><a class=\"dataset-select-btn\" program-id=\"" + program_id
-                    + "\" node-id=\"" + node_id + "\">" + dataset_name + "</a>" + current + "</h5>");
+                div.append('<h5><a class="dataset-select-btn" program-id="' + program_id + '" program-name="'+ dataset_name +'"'
+                    + ' node-id="' + node_id + '">' + dataset_name + '</a>' + current + '</h5>');
 
                 $(this).find('span').each(function() {
                     var new_token = $(this).clone(true);
@@ -1261,10 +1209,12 @@ require([
 
         $('.dataset-select-btn').click(function(e) {
             ACTIVE_PROGRAM_ID = $(e.target).attr('program-id');
+            let active_program_name = $(e.target).attr('program-name');
             ACTIVE_NODE_ID = $(e.target).attr('node-id');
             let new_dataset_selector = '#'+ACTIVE_PROGRAM_ID+'-data';
             $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
             $(new_dataset_selector).addClass('active');
+            $('.sort-by-program').val(active_program_name);
             update_all_selected_filters_ui(new_dataset_selector);
         });
     };
