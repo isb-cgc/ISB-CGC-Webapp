@@ -1,7 +1,6 @@
 /**
  *
- * Copyright 2017-2024
- * , Institute for Systems Biology
+ * Copyright 2017-2024, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -903,51 +902,6 @@ require([
         });
     };
 
-    // Handler for the 'x' of the mutation 'category' filter tokens
-    // $('.tab-content, #selected-filters').on('click', 'a.mol-cat-filter-x', function (e) {
-    //     var prog_id = $(this).parents('span').data('prog-id');
-    //     var activeDataTab = prog_id+'-data';
-    //     var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
-    //     var createFormFilterSet = $('p#'+activeDataTab+'-filters');
-    //     var filter = $(this).parents('span').data('filter');
-    //     if(filter && SELECTED_FILTERS[prog_id][filter]) {
-    //         delete SELECTED_FILTERS[prog_id][filter];
-    //     }
-    //
-    //     // When the 'Selected Filters' token is removed, remove this filter from other
-    //     // locations in which it's stored
-    //
-    //     $(this).parent('span').remove();
-    //     if($(selFilterPanel+' .panel-body .mol-filter').length <= 0) {
-    //         $(selFilterPanel+' .panel-body .mol-filter-container').hide();
-    //     }
-    //
-    //     createFormFilterSet.find('span[data-filter="'+filter+'"]').remove();
-    //
-    //     if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
-    //         $('#at-least-one-filter-alert-modal').show();
-    //         $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
-    //     }
-    //
-    //     // If this has emptied out a program's filter set, hide the modal's subsection for that program
-    //     // if a new value isn't replacing it
-    //     if(createFormFilterSet.find('span').length <= 0) {
-    //         createFormFilterSet.hide();
-    //     }
-    //
-    //     // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
-    //     var progCount = 0;
-    //     $('.selected-filters .panel-body').each(function(){
-    //         if($(this).find('span').length > 0) {
-    //             progCount++;
-    //         }
-    //     });
-    //     (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
-    //
-    //     update_displays(false,false,prog_id);
-    //     return false;
-    // });
-
     // Event: Filter clear warning
     if(!cohort_id) {
         $('.clear-filters').on('click', function() {
@@ -1214,8 +1168,6 @@ require([
     // another tab and starting another request.
 
     var reject_load = false;
-
-    var SORT_DATASET_BY = "node";
 
     var update_all_selected_filters_ui = function(dataset_selector) {
         let all_selected_panel = $('.all-selected-filters' + ' .panel-body');
