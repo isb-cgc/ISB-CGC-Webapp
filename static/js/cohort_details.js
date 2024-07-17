@@ -511,7 +511,6 @@ require([
     });
 
     var set_mode = function(from_click) {
-
         switch(mode){
             case 'EDITING':
                 // $('.data-tab-content-panel:not(.spinner-panel)').removeClass('col-md-12').addClass('col-md-9');
@@ -1092,8 +1091,7 @@ require([
     var ANONYMOUS_FILTERS = {};
     var MUTATION_FILTER_COMBINE = "and";
 
-    var save_anonymous_filters = function()
-    {
+    var save_anonymous_filters = function() {
         // Collect all selected filters and save to session storage
         var filters = [];
         $('#selected-filters span.filter-token').each(function() {
@@ -1114,8 +1112,7 @@ require([
     };
 
     var load_tabs_queue = [];
-    var load_anonymous_filters = function()
-    {
+    var load_anonymous_filters = function() {
         // Load anonymous filters from session storage and clear it, so it is not always there
         var str = sessionStorage.getItem('anonymous_filters');
         ANONYMOUS_FILTERS = JSON.parse(str);
@@ -1135,8 +1132,7 @@ require([
         }
     };
 
-    var apply_anonymous_filters = function(active_program_id)
-    {
+    var apply_anonymous_filters = function(active_program_id) {
         // Check if anonymous filter exist, then find all checkbox and check them
         if (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS.length > 0) {
             var has_mut_filter = false;
