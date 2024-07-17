@@ -511,7 +511,6 @@ require([
     });
 
     var set_mode = function(from_click) {
-
         switch(mode){
             case 'EDITING':
                 // $('.data-tab-content-panel:not(.spinner-panel)').removeClass('col-md-12').addClass('col-md-9');
@@ -1092,8 +1091,7 @@ require([
     var ANONYMOUS_FILTERS = {};
     var MUTATION_FILTER_COMBINE = "and";
 
-    var save_anonymous_filters = function()
-    {
+    var save_anonymous_filters = function() {
         // Collect all selected filters and save to session storage
         var filters = [];
         $('#selected-filters span.filter-token').each(function() {
@@ -1114,8 +1112,7 @@ require([
     };
 
     var load_tabs_queue = [];
-    var load_anonymous_filters = function()
-    {
+    var load_anonymous_filters = function() {
         // Load anonymous filters from session storage and clear it, so it is not always there
         var str = sessionStorage.getItem('anonymous_filters');
         ANONYMOUS_FILTERS = JSON.parse(str);
@@ -1135,8 +1132,7 @@ require([
         }
     };
 
-    var apply_anonymous_filters = function(active_program_id)
-    {
+    var apply_anonymous_filters = function(active_program_id) {
         // Check if anonymous filter exist, then find all checkbox and check them
         if (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS.length > 0) {
             var has_mut_filter = false;
@@ -1238,8 +1234,8 @@ require([
                 let link = "#" + program_id + "-data";
                 let div = $('<div class="'+(link === dataset_selector ? 'current-data-set' : 'other-data-set')+'">');
                 let current = (link === dataset_selector) ? " (Current Data Set)" : "";
-                div.append("<h5><a class=\"dataset-select-btn\" program-id=\"" + program_id
-                    + "\" node-id=\"" + node_id + "\">" + dataset_name + "</a>" + current + "</h5>");
+                div.append('<h5><a class="dataset-select-btn" program-id="' + program_id + '" program-name="'+ dataset_name +'"'
+                    + ' node-id="' + node_id + '">' + dataset_name + '</a>' + current + '</h5>');
 
                 $(this).find('span').each(function() {
                     var new_token = $(this).clone(true);
@@ -1257,10 +1253,12 @@ require([
 
         $('.dataset-select-btn').click(function(e) {
             ACTIVE_PROGRAM_ID = $(e.target).attr('program-id');
+            let active_program_name = $(e.target).attr('program-name');
             ACTIVE_NODE_ID = $(e.target).attr('node-id');
             let new_dataset_selector = '#'+ACTIVE_PROGRAM_ID+'-data';
             $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
             $(new_dataset_selector).addClass('active');
+            $('.sort-by-program').val(active_program_name);
             update_all_selected_filters_ui(new_dataset_selector);
         });
     };

@@ -123,72 +123,59 @@ require([
         }
     };
 
-    var filter_change_callback = function(e, withoutDisplayUpdates) {
+    var update_filter_display = function(e, withoutDisplayUpdates) {
+        let activeDataTab = $('.data-tab.active').attr('id');
+        let dataTabType = $('.data-tab.active').attr('data-file-type');
+        let selFilterPanel = '.selected-filters-' + dataTabType;
+        let $this = $(this);
+        let feature_id = null, value_id = null;
 
-        var activeDataTab = $('.data-tab.active').attr('id');
-        var nodeId = $('.data-tab.active').attr('node-id');
-        var selFilterPanel = '.' + activeDataTab + '-selected-filters';
-        var createFormFilterSet = $('p#'+activeDataTab + '-filters');
+        if($this.attr('type') == 'checkbox') {
+            let feature = $this.closest('.file-feature-select-block'),
+                value = $this;
 
-        var $this = $(this);
-
-        var token = null;
-
-        var feature = $this.closest('.cohort-feature-select-block'),
-            prog = $this.closest('.filter-panel'),
-            value = $this;
-
-        if(createFormFilterSet.length <= 0) {
-            $('#selected-filters').append('<p id="'+activeDataTab+'-filters" node-id="'+nodeId+'"</p>');
-            createFormFilterSet = $('p#'+activeDataTab+'-filters');
-            createFormFilterSet.append('<h5>'+(prog.data('prog-displ-name'))+'</h5>');
-        } else {
-            createFormFilterSet.show();
-        }
-        
-        if ($this.is(':checked')) { // Checkbox checked
-            var tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
+            let tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
                     value.data('value-displ-name') : (value.data('value-name') === 'None' ? 'NA' : value.data('value-name')),
                 tokenFeatDisplName = (feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
                     feature.data('feature-displ-name') : feature.data('feature-name');
 
-            var feature_id = feature.data('feature-id'), value_id =  value.data('value-id');
+            feature_id = feature.data('feature-id'), value_id = value.data('value-id');
 
-            token = $('<span>').data({
-                'feature-id': feature_id,
-                'feature-name': feature.data('feature-name'),
-                'value-id': value_id,
-                'value-name': value.data('value-name')
-            }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
+            if($this.is(':checked')) {
+                let token = $('<span>').data({
+                    'feature-id': feature_id,
+                    'feature-name': feature.data('feature-name'),
+                    'value-id': value_id,
+                    'value-name': value.data('value-name')
+                }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
 
-            // Don't re-add the token and filter if it already exists
-            if($(selFilterPanel+' .panel-body span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').length <= 0) {
-                token.append(
-                    $('<a>').addClass('delete-x filter-label label label-default')
-                        .text(tokenFeatDisplName + ': ' + tokenValDisplName)
-                        .append('<i class="fa fa-times">')
-                        .attr("title",tokenFeatDisplName + ': ' + tokenValDisplName)
-                );
+                // Don't re-add the token and filter if it already exists
+                if($(selFilterPanel+' .panel-body span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').length <= 0) {
+                    token.append(
+                        $('<a>').addClass('delete-x filter-label label label-default')
+                            .text(tokenFeatDisplName + ': ' + tokenValDisplName)
+                            .append('<i class="fa fa-times">')
+                            .attr("title", tokenFeatDisplName + ': ' + tokenValDisplName)
+                    );
 
-                $this.data({
-                    'select-filters-item': token.clone(true),
-                    'create-cohort-form-item': token.clone(true)
-                });
+                    $this.data({
+                        'select-filters-item': token.clone(true)
+                    });
 
-                $(selFilterPanel +' .panel-body').append($this.data('select-filters-item'));
-                createFormFilterSet.append($this.data('create-cohort-form-item'));
+                    $(selFilterPanel + ' .panel-body').append($this.data('select-filters-item'));
+                }
+            } else {
+                $(selFilterPanel+' span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').remove();
             }
+        } else {
+            let filter_token = $this.closest('span.filter-token');
+            feature_id = filter_token.attr('data-feature-id'), value_id = filter_token.attr('data-value-id');
+            let checkbox = $('.data-tab.active .filter-panel input[type="checkbox"][data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]');
+            filter_token.remove();
+            checkbox.prop('checked', false);
+            update_filters(checkbox);
         }
-
-        update_all_selected_filters_ui('#' + activeDataTab);
-
         !withoutDisplayUpdates && update_displays();
-
-        if(!cohort_id && $('.all-selected-filters .panel-body span').length > 0) {
-            $('#at-least-one-filter-alert-modal').hide();
-            $('#at-least-one-filter-alert').hide();
-            $('#create-cohort-modal input[type="submit"]').removeAttr('disabled');
-        }
     };
 
     $('.clear-filters').on('click', function() {
@@ -823,7 +810,14 @@ require([
         return rangeWithDots;
     }
 
+    // Delegated event: filter panel checkbox
+    $('.filelist-container').on('click', '.search-checkbox-list input[type="checkbox"]', update_filter_display);
+    $('.filelist-container').on('click', '.delete-x', update_filter_display);
+
     var update_displays = function(active_tab) {
+        if(!active_tab) {
+            active_tab = $('.data-tab.active').attr('data-file-type');
+        }
         // If a user has clicked more filters while an update was going out, queue up a future update and return
         if(UPDATE_PENDING) {
             // We only need to queue one update because our updates don't pull the filter set until they run
