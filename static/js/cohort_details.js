@@ -1234,8 +1234,8 @@ require([
                 let link = "#" + program_id + "-data";
                 let div = $('<div class="'+(link === dataset_selector ? 'current-data-set' : 'other-data-set')+'">');
                 let current = (link === dataset_selector) ? " (Current Data Set)" : "";
-                div.append("<h5><a class=\"dataset-select-btn\" program-id=\"" + program_id
-                    + "\" node-id=\"" + node_id + "\">" + dataset_name + "</a>" + current + "</h5>");
+                div.append('<h5><a class="dataset-select-btn" program-id="' + program_id + '" program-name="'+ dataset_name +'"'
+                    + ' node-id="' + node_id + '">' + dataset_name + '</a>' + current + '</h5>');
 
                 $(this).find('span').each(function() {
                     var new_token = $(this).clone(true);
@@ -1253,10 +1253,12 @@ require([
 
         $('.dataset-select-btn').click(function(e) {
             ACTIVE_PROGRAM_ID = $(e.target).attr('program-id');
+            let active_program_name = $(e.target).attr('program-name');
             ACTIVE_NODE_ID = $(e.target).attr('node-id');
             let new_dataset_selector = '#'+ACTIVE_PROGRAM_ID+'-data';
             $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
             $(new_dataset_selector).addClass('active');
+            $('.sort-by-program').val(active_program_name);
             update_all_selected_filters_ui(new_dataset_selector);
         });
     };
