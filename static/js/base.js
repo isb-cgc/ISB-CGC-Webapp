@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2017, Institute for Systems Biology
+ * Copyright 2017-2024, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,17 +176,9 @@ require([
         .tablesorter({
         headers: {
             0: {sorter:false},
-            7: {sorter: 'fullDate'}
+            8: {sorter: 'fullDate'}
         },
-        sortList: [[7,1]]
-    });
-
-    $('#public-cohort-table').tablesorter({
-        headers: {
-            0: {sorter:false},
-            4: {sorter: 'fullDate'}
-        },
-        sortList: [[4,1]]
+        sortList: [[8,1]]
     });
 
     $("#share-share_users").on("keypress", function(e) {

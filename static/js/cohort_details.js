@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2017, Institute for Systems Biology
+ * Copyright 2017-2024, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ require.config({
         search_helpers: 'helpers/search_helpers',
         vis_helpers: 'helpers/vis_helpers',
         tree_graph: 'visualizations/createTreeGraph',
-        stack_bar_chart: 'visualizations/createStackedBarchart',
+        stack_bar_chart: 'visualizations/createStackedBarChart',
         bloodhound: 'libs/bloodhound',
         typeahead : 'libs/typeahead',
         tokenfield: 'libs/bootstrap-tokenfield.min',
@@ -76,7 +76,7 @@ require([
 
     var savingComment = false;
     var savingChanges = false;
-    var mode = (cohort_id ? 'VIEWING' : 'EDITING');
+    var mode = 'EDITING';
     var SUBSEQUENT_DELAY = 600;
     var update_displays_thread = null;
 
@@ -284,7 +284,7 @@ require([
     $('.tab-content').on('click', '.build-mol-filter', function(){
         var activeDataTab = $('.data-tab.active').attr('id');
         var nodeId = $('.data-tab.active').attr('node-id');
-        var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
+        var selFilterPanel = '.all-selected-filters';
         var createFormFilterSet = $('p#'+activeDataTab+'-filters');
 
         var token = null, value = null, feature = null;
@@ -376,83 +376,53 @@ require([
     });
 
     var filter_change_callback = function(e, withoutDisplayUpdates) {
-
-        var activeDataTab = $('.data-tab.active').attr('id');
-        var nodeId = $('.data-tab.active').attr('node-id');
-        var selFilterPanel = '.' + activeDataTab + '-selected-filters';
-        var createFormFilterSet = $('p#'+activeDataTab + '-filters');
-
-        var $this = $(this);
-
-        var token = null;
-
-        var feature = $this.closest('.cohort-feature-select-block'),
+        let $this = $(this);
+        let token = null;
+        let feature = $this.closest('.cohort-feature-select-block'),
             prog = $this.closest('.filter-panel'),
             value = $this;
+        let nodeId = prog.data("node-id"), progDisplName = prog.data('prog-displ-name'), progId = prog.data("prog-id");
+        let nodeName = feature.data("node-name");
+
+        let progDataTab = progId+'-data';
+        let selFilterPanel = '.all-selected-filters';
+        let createFormFilterSet = $('p#'+progDataTab+'-filters');
 
         if(createFormFilterSet.length <= 0) {
-            $('#selected-filters').append('<p id="'+activeDataTab+'-filters" node-id="'+nodeId+'"</p>');
-            createFormFilterSet = $('p#'+activeDataTab+'-filters');
+            $('#selected-filters').append('<p id="'+progDataTab+'-filters" node-id="'+nodeId+'"</p>');
+            createFormFilterSet = $('p#'+progDataTab+'-filters');
             createFormFilterSet.append('<h5>'+(prog.data('prog-displ-name'))+'</h5>');
         } else {
             createFormFilterSet.show();
         }
 
-        var tokenProgDisplName = prog.data('prog-displ-name'),
-            tokenProgId = prog.data('prog-id'),
-            tokenNodeId = prog.data('node-id');
-
         if ($this.is(':checked')) { // Checkbox checked
-            var tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
+            let tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
                     value.data('value-displ-name') : (value.data('value-name') === 'None' ? 'NA' : value.data('value-name')),
-                tokenFeatDisplName = (feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
-                 feature.data('feature-displ-name') : feature.data('feature-name');
+                tokenFeatDisplName = '['+feature.data('node-name')+'] ' + ((feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
+                 feature.data('feature-displ-name') : feature.data('feature-name'));
 
-            var tokenUserProgId = null;
+            let feature_id = feature.data('feature-id'), value_id =  value.data('value-id');
 
-            if(tokenProgId <= 0){
-                tokenUserProgId = value.data('user-program-id');
-            }
-
-            var feature_id = feature.data('feature-id'), value_id =  value.data('value-id');
-
-            if (feature.data('feature-type') === 'datatype') { // Datatype filter
-
-                token = $('<span>').data({
-                    'feature-id': 'data_type_availability',
-                    'feature-name': 'data_type_availability',
-                    'value-id': value_id,
-                    'value-name': value.data('value-name'),
-                    'prog-id': tokenProgId,
-                    'node-id': tokenNodeId,
-                    'prog-name': tokenProgDisplName,
-                }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
-
-            } else if (feature.data('feature-type') === 'donor') { // Case filter
-                token = $('<span>').data({
+            token = $('<span>')
+                .data({
                     'feature-id': feature_id,
                     'feature-name': feature.data('feature-name'),
                     'value-id': value_id,
                     'value-name': value.data('value-name'),
-                    'prog-id': tokenProgId,
-                    'prog-name': tokenProgDisplName
-                }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
-
-            } else if (feature.data('feature-type') === 'user-data') { // User data filter
-                token = $('<span>').data({
-                    'feature-id': feature_id,
-                    'feature-name': feature.data('feature-name'),
-                    'value-id': value_id,
-                    'value-name': value.data('value-name'),
-                    'prog-id': tokenProgId,
-                    'node-id': tokenNodeId,
-                    'prog-name': tokenProgDisplName,
-                    'user-program-id': tokenUserProgId,
-                }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
-            }
+                    'prog-id': progId,
+                    'prog-name': progDisplName,
+                    'node-id': nodeId
+                })
+                .attr('data-feature-id',feature_id)
+                .attr('data-value-id',value_id)
+                .attr('data-prog-id', progId)
+                .attr('data-node-id', nodeId)
+                .addClass(progDataTab+'-token filter-token');
 
             // Don't re-add the token and filter if it already exists
-            if($(selFilterPanel+' .panel-body span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').length <= 0) {
+            if($(selFilterPanel+' .panel-body span[data-feature-id="'+feature_id+'"]'
+                + '[data-value-id="'+value_id+'"][data-prog-id="'+progId+'"][data-node-id="'+nodeName+'"]').length <= 0) {
                 token.append(
                     $('<a>').addClass('delete-x filter-label label label-default')
                         .text(tokenFeatDisplName + ': ' + tokenValDisplName)
@@ -486,22 +456,23 @@ require([
             }
         }
 
-        update_all_selected_filters_ui('#' + activeDataTab);
+        update_all_selected_filters_ui('#' + progDataTab);
 
         !withoutDisplayUpdates && update_displays();
 
-        if(!cohort_id && $('.selected-filters .panel-body span').length > 0) {
+        if(!cohort_id && $('.all-selected-filters .panel-body span').length > 0) {
             $('#at-least-one-filter-alert-modal').hide();
             $('#at-least-one-filter-alert').hide();
             $('#create-cohort-modal input[type="submit"]').removeAttr('disabled');
         }
     };
 
+    // Event: Clear Filters click
     $('.clear-filters').on('click', function() {
         var activeDataTab = $('.data-tab.active').attr('id');
         var prog_id = $('.data-tab.active .filter-panel').data('prog-id');
 
-        $(this).parents('.selected-filters').find('.panel-body').empty();
+        $(this).parents('.all-selected-filters').find('.panel-body').empty();
         $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
             $(this).prop('checked', false);
         });
@@ -518,15 +489,15 @@ require([
         $('#unallowed-chars-alert').hide();
     });
 
+    // Event: Save Cohort button click
     $('button[data-target="#create-cohort-modal"]').on('click',function(e){
-
         // Clear previous alerts
         $('#unallowed-chars-alert').hide();
         $('#at-least-one-filter-alert').hide();
 
         // There must be at least one filter for one program if this is a
         // new cohort
-        if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
+        if(!cohort_id && $('.all-selected-filters .panel-body span').length <= 0) {
             $('#at-least-one-filter-alert').show();
             e.preventDefault();
             return false;
@@ -534,7 +505,7 @@ require([
 
         var activeDataTab = $('.data-tab.active').attr('id');
         var progCount = 0;
-        $('.selected-filters .panel-body').each(function(){
+        $('.all-selected-filters .panel-body').each(function(){
             if($(this).find('span').length > 0) {
                 progCount++;
             }
@@ -543,7 +514,6 @@ require([
     });
 
     var set_mode = function(from_click) {
-
         switch(mode){
             case 'EDITING':
                 // $('.data-tab-content-panel:not(.spinner-panel)').removeClass('col-md-12').addClass('col-md-9');
@@ -556,10 +526,6 @@ require([
                     $('.selected-filters').hide();
                     $('.all-selected-filters').show();
                 }
-                cohort_id && $('.page-header').hide();
-                $('input[name="cohort-name"]').show();
-                $('#default-cohort-menu').hide();
-                $('#edit-cohort-menu').show();
                 if(from_click) {
                     //showHideMoreGraphButton();
                     $('#multi-categorical').prop('scrollLeft',150);
@@ -578,23 +544,8 @@ require([
         }
     };
 
-    // cohort_details: show and hide the filter panel for editing an extant cohort
-    $('#edit-cohort-btn').on('click', function() {
-        mode = "EDITING";
-        $('#cohort-mode').val('EDIT');
-        set_mode(true);
-    });
-
-    $('#cancel-edit-cohort-btn').on('click', function() {
-        mode = "VIEWING";
-        $('#edit-cohort-name').val() !== original_title && $('#edit-cohort-name').val(original_title);
-        $('#cohort-mode').val('VIEW');
-        $('.selected-filters .delete-x').trigger('click');
-        set_mode(true);
-    });
-
+    // Form Submisson: Create Cohort
     $('#create-cohort-form, #apply-edits-form').on('submit', function(e) {
-
         $('#unallowed-chars-alert').hide();
 
         if(savingChanges) {
@@ -705,20 +656,23 @@ require([
         return false;
     });
 
-    // Disable save changes if no change to title or no added filters
     var save_changes_btn_modal = $('#apply-edits-form input[type="submit"]');
     var save_changes_btn = $('button[data-target="#apply-filters-modal"]');
-    var save_new_cohort_btn = $('button[data-target="#create-cohort-modal"]');
-    var log_in_to_save_btn = $('#log-in-to-save-btn');
+
     var check_for_changes = function() {
-        var totalCases = 0;
+        let save_changes_btn_modal = $('#apply-edits-form input[type="submit"]');
+        let save_changes_btn = $('button[data-target="#apply-filters-modal"]');
+        let save_new_cohort_btn = $('button[data-target="#create-cohort-modal"]');
+        let log_in_to_save_btn = $('#log-in-to-save-btn');
+        let totalCases = 0;
+
         $('.total-cases').each(function(){
-            if($(this).parents('.data-tab').find('.selected-filters .filter-token').length > 0) {
+            if($('.all-selected-filters span[data-prog-id="'+$(this).data('prog-id')+'"]').length > 0) {
                 totalCases += parseInt($(this).text());
             }
         });
-        if ($('#edit-cohort-name').val() !== original_title
-            || $('.selected-filters span').length > 0) {
+
+        if ($('#edit-cohort-name').val() !== original_title || $('.all-selected-filters span').length > 0) {
             save_changes_btn.prop('disabled', false)
             save_changes_btn_modal.prop('disabled',false);
             if(save_new_cohort_btn.length > 0) {
@@ -752,7 +706,7 @@ require([
 
     // Generic form submission used by default
     $('.ajax-form-modal').find('form').on('submit', function (e) {
-        $this.find('.btn').addClass('btn-disabled').attr('disabled', true);
+        $(this).find('.btn').addClass('btn-disabled').attr('disabled', true);
     });
 
     $('#create-cohort-modal form').on('submit', function() {
@@ -773,19 +727,19 @@ require([
         e.preventDefault();
         e.stopPropagation();
 
-        var invalid_emails = [];
+        let invalid_emails = [];
 
-        var $this=$(this);
+        let $this=$(this);
 
-        var escaped_email_input = $("<div>").text($('#share-share_users').val()).html();
-        var emails = escaped_email_input.split(/\s*,\s*/);
+        let escaped_email_input = $("<div>").text($('#share-share_users').val()).html();
+        let emails = escaped_email_input.split(/\s*,\s*/);
         for(var i=0; i < emails.length; i++) {
             if(!emails[i].match(base.email)) {
                 invalid_emails.push(emails[i]);
             }
         }
         if(invalid_emails.length > 0) {
-            var msg = "The following email addresses appear to be invalid: "+(invalid_emails.join("; "));
+            let msg = "The following email addresses appear to be invalid: "+(invalid_emails.join("; "));
             base.showJsMessage('danger',
                 msg,
                 true,'#share-cohort-js-messages');
@@ -794,13 +748,13 @@ require([
             $('#share-cohort-js-messages').empty();
         }
 
-        var cohort_id = $(this).data('cohort-id');
+        let cohort_id = $(this).data('cohort-id');
 
-        var url = base_url + '/cohorts/share_cohort/' + cohort_id + "/";
+        let url = base_url + '/cohorts/share_cohort/' + cohort_id + "/";
 
         $(this).find('.btn-primary').addClass('btn-disabled').attr('disabled', true);
 
-        var csrftoken = $.getCookie('csrftoken');
+        let csrftoken = $.getCookie('csrftoken');
         $.ajax({
             type        :'POST',
             url         : url,
@@ -901,6 +855,19 @@ require([
         $(this).html($(this).text().replace(/\[/g,"<span>").replace(/\]/g,"</span>"));
     });
 
+    $('.dataset-select-box').change(function() {
+        let selected = $(this).find('option:selected');
+        ACTIVE_NODE_ID = selected.attr('node-id');
+        ACTIVE_PROGRAM_ID = selected.attr('program-id');
+        let new_dataset_selector = '#'+ACTIVE_PROGRAM_ID+'-data';
+        if ($(new_dataset_selector).length != 0) {
+            $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
+            $(new_dataset_selector).addClass('active');
+            update_all_selected_filters_ui(new_dataset_selector);
+        } else {
+            filter_panel_load(cohort_id, ACTIVE_PROGRAM_ID, ACTIVE_NODE_ID);
+        }
+    });
 
     $('#clear-all-yes-btn').on('click', function() {
         let creationForm = $('#create-cohort-form');
@@ -923,104 +890,6 @@ require([
     });
 
     var bind_widgets = function(program_data_selector,activeDataTab) {
-
-        $(program_data_selector + ' .search-checkbox-list input[type="checkbox"]').on('change', filter_change_callback);
-
-        $(program_data_selector + ' .clear-filters').on('click', function() {
-             $('#clear-all-warning-modal').modal('show');
-        });
-
-        // Show more/less links on categories with >6 fiilters
-        $(program_data_selector + ' .show-more').on('click', function() {
-            $(this).parent().siblings('li.extra-values').show();
-            $(this).parent().siblings('.less-checks').show();
-            $(this).parent().siblings('.less-checks').addClass('more-expanded');
-            $(this).parent().hide();
-        });
-        $(program_data_selector + ' .show-less').on('click', function() {
-            $(this).parent().siblings('li.extra-values').hide();
-            $(this).parent().siblings('.more-checks').show();
-            $(this).parent().removeClass('more-expanded');
-            $(this).parent().hide();
-        });
-
-        // Click events for 'Check All/Uncheck All' in filter categories
-        $(program_data_selector + ' .check-all').on('click',function(){
-            $(this).parent().parent().siblings('.checkbox').each(function(){
-                var filter = $(this);
-                if (filter.hasClass("visible-filter")) {
-                    var checkbox = filter.find('input');
-                    checkbox.prop('checked', true);
-                    checkbox.triggerHandler('change');
-                }
-            });
-        });
-        $(program_data_selector + ' .uncheck-all').on('click',function(){
-            $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',false);
-            $(this).parent().parent().siblings('.checkbox').find('input').each(function(){
-                $(this).triggerHandler('change');
-            });
-        });
-
-        $('.more-filters button').on('click', function() {
-            $('.more-filters').hide();
-            $('.less-filters').show();
-
-            $('.curr-filter-panel').animate({
-                height: Program_Filter_AllRows_Height + 'px'
-            }, 800).toggleClass('gradient-overlay', false);
-
-            var height_percentage = 100 / Program_Filter_Rows;
-            set_prog_filter_height(height_percentage);
-        });
-
-        $('.less-filters button').on('click', function() {
-            $('.less-filters').hide();
-            $('.more-filters').show();
-            $('.curr-filter-panel').animate({
-                height: '95px'
-            }, 800).toggleClass('gradient-overlay', true);
-
-            set_prog_filter_height(100);
-        });
-
-        $('.more-details button').on('click', function() {
-            $('.more-details').hide();
-            $('.less-details').show();
-
-            $('.details-panel').animate({
-                height: ($('.cohort-info').outerHeight() +
-                    (Program_Filter_Max_Height+$('ul.rev-history').outerHeight()) * Program_Filter_Rows + 15) + 'px'
-            }, 800);
-
-            $('.creation-prog-filter-set').each(function(){
-                $(this).css('height', Program_Filter_Max_Height);
-            });
-        });
-        $('.less-details button').on('click', function() {
-            $('.less-details').hide();
-            $('.more-details').show();
-            $('.details-panel').animate({
-                height: '110px'
-            }, 800);
-        });
-
-
-        $(program_data_selector + ' .more-graphs button').on('click', function() {
-            $('.more-graphs').hide();
-            $('.less-graphs').show();
-            $('.clinical-trees .panel-body').animate({
-                height: '430px'
-            }, 800);
-        });
-        $(program_data_selector + ' .less-graphs button').on('click', function() {
-            $('.less-graphs').hide();
-            $('.more-graphs').show();
-            $('.clinical-trees .panel-body').animate({
-                height: '210px'
-            }, 800);
-        });
-        
         var firstSelect = true;
         $(program_data_selector + ' a.molecular-filters').on('click',function(e){
             firstSelect && $(program_data_selector + ' a.collapse-gene-mutation-status').trigger('click');
@@ -1037,101 +906,150 @@ require([
         });
     };
 
-    // Handler for the 'x' of the mutation 'category' filter tokens
-    // $('.tab-content, #selected-filters').on('click', 'a.mol-cat-filter-x', function (e) {
-    //     var prog_id = $(this).parents('span').data('prog-id');
-    //     var activeDataTab = prog_id+'-data';
-    //     var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
-    //     var createFormFilterSet = $('p#'+activeDataTab+'-filters');
-    //     var filter = $(this).parents('span').data('filter');
-    //     if(filter && SELECTED_FILTERS[prog_id][filter]) {
-    //         delete SELECTED_FILTERS[prog_id][filter];
-    //     }
-    //
-    //     // When the 'Selected Filters' token is removed, remove this filter from other
-    //     // locations in which it's stored
-    //
-    //     $(this).parent('span').remove();
-    //     if($(selFilterPanel+' .panel-body .mol-filter').length <= 0) {
-    //         $(selFilterPanel+' .panel-body .mol-filter-container').hide();
-    //     }
-    //
-    //     createFormFilterSet.find('span[data-filter="'+filter+'"]').remove();
-    //
-    //     if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
-    //         $('#at-least-one-filter-alert-modal').show();
-    //         $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
-    //     }
-    //
-    //     // If this has emptied out a program's filter set, hide the modal's subsection for that program
-    //     // if a new value isn't replacing it
-    //     if(createFormFilterSet.find('span').length <= 0) {
-    //         createFormFilterSet.hide();
-    //     }
-    //
-    //     // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
-    //     var progCount = 0;
-    //     $('.selected-filters .panel-body').each(function(){
-    //         if($(this).find('span').length > 0) {
-    //             progCount++;
-    //         }
-    //     });
-    //     (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
-    //
-    //     update_displays(false,false,prog_id);
-    //     return false;
-    // });
-
-
-    $('.tab-content, #selected-filters').on('click', 'a.delete-x', function(e,data) {
-        var activeDataTab = $(this).parents('span').data('prog-id')+'-data';
-        var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
-        var createFormFilterSet = $('p#'+activeDataTab+'-filters');
-
-        var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id')
-            + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
-
-        if($(this).parent('span').data('feature-type') === 'molecular') {
-            checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id').split(":")[3]
-                + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
-        }
-        checked_box.prop('checked', false);
-        var span_data = $(this).parent('span').data();
-
-
-        // Remove the filter tokens from their respective containers
-        createFormFilterSet.find('span[data-feature-id="'+span_data['featureId']+'"][data-value-id="'+span_data['valueId']+'"]').remove();
-        $(selFilterPanel+' .panel-body span[data-feature-id="'+span_data['featureId']+'"][data-value-id="'+span_data['valueId']+'"]').remove();
-
-        if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
-            $('#at-least-one-filter-alert-modal').show();
-            $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
-        }
-
-        // If this has emptied out a program's filter set, hide the modal's subsection for that program
-        if(createFormFilterSet.find('span').length <= 0) {
-            createFormFilterSet.hide();
-        }
-
-        // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
-        var progCount = 0;
-        $('.selected-filters .panel-body').each(function(){
-            if($(this).find('span').length > 0) {
-                progCount++;
-            }
+    // Event: Filter clear warning
+    if(!cohort_id) {
+        $('.clear-filters').on('click', function() {
+             $('#clear-all-warning-modal').modal('show');
         });
-        (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
 
-        update_displays(false,false,span_data['progId']);
-        update_all_selected_filters_ui('#' + ACTIVE_PROGRAM_ID + '-data');
-        return false;
+        // Delegated event: filter panel checkbox
+        $('.program-tabs').on('change', '.search-checkbox-list input[type="checkbox"]', filter_change_callback);
+
+        // Delegated event: X button on filters
+        $('.all-selected-filters, #selected-filters').on('click', 'a.delete-x', function(e,data) {
+            let activeDataTab = $(this).parents('span').data('prog-id')+'-data';
+            let selFilterPanel = '.all-selected-filters';
+            let createFormFilterSet = $('p#'+activeDataTab+'-filters');
+            let featureId = $(this).parent('span').data('feature-id');
+            let progId = $(this).parent('span').data('prog-id');
+            let valName = $(this).parent('span').data('value-name');
+            let valId = $(this).parent('span').data('value-id');
+
+            let checked_box = $('div[data-feature-id="' + featureId + '"]'
+                + '[data-prog-id="' + progId + '"] '
+                + ' input[type="checkbox"][data-value-name="' + valName + '"]');
+
+            if($(this).parent('span').data('feature-type') === 'molecular') {
+                checked_box = $('div[data-feature-id="' + featureId.split(":")[3]
+                    + '"]' + '[data-prog-id="' + progId + '"] '
+                    + ' input[type="checkbox"][data-value-name="' + valName + '"]');
+            }
+            checked_box.prop('checked', false);
+            var span_data = $(this).parent('span').data();
+
+            // Remove the filter tokens from their respective containers
+            createFormFilterSet.find('span[data-feature-id="'+featureId+'"][data-value-id="'+valId+'"]').remove();
+            $(selFilterPanel+' .panel-body span[data-feature-id="'+featureId+'"][data-value-id="'+valId+'"]').remove();
+
+            if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
+                $('#at-least-one-filter-alert-modal').show();
+                $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
+            }
+
+            // If this has emptied out a program's filter set, hide the modal's subsection for that program
+            if(createFormFilterSet.find('span').length <= 0) {
+                createFormFilterSet.hide();
+            }
+
+            // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
+            var progCount = 0;
+            $('.selected-filters .panel-body').each(function(){
+                if($(this).find('span').length > 0) {
+                    progCount++;
+                }
+            });
+            (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
+
+            update_displays(false,false,progId);
+            update_all_selected_filters_ui('#' + ACTIVE_PROGRAM_ID + '-data');
+            return false;
+        });
+    }
+
+    // Event: Cohort display show/hide
+    if(cohort_id) {
+        $('.more-filters button').on('click', function () {
+            $('.more-filters').hide();
+            $('.less-filters').show();
+
+            $('.curr-filter-panel').animate({
+                height: Program_Filter_AllRows_Height + 'px'
+            }, 800).toggleClass('gradient-overlay', false);
+
+            var height_percentage = 100 / Program_Filter_Rows;
+            set_prog_filter_height(height_percentage);
+        });
+
+        $('.less-filters button').on('click', function () {
+            $('.less-filters').hide();
+            $('.more-filters').show();
+            $('.curr-filter-panel').animate({
+                height: '95px'
+            }, 800).toggleClass('gradient-overlay', true);
+
+            set_prog_filter_height(100);
+        });
+
+        $('.more-details button').on('click', function () {
+            $('.more-details').hide();
+            $('.less-details').show();
+
+            $('.details-panel').animate({
+                height: ($('.cohort-info').outerHeight() +
+                    (Program_Filter_Max_Height + $('ul.rev-history').outerHeight()) * Program_Filter_Rows + 15) + 'px'
+            }, 800);
+
+            $('.creation-prog-filter-set').each(function () {
+                $(this).css('height', Program_Filter_Max_Height);
+            });
+        });
+        $('.less-details button').on('click', function () {
+            $('.less-details').hide();
+            $('.more-details').show();
+            $('.details-panel').animate({
+                height: '110px'
+            }, 800);
+        });
+    }
+
+    // Delegated event: Check All and Uncheck All buttons
+    $('.program-tabs').on('click', '.check-all, .uncheck-all', function(){
+        if($(this).hasClass('check-all')) {
+            $(this).parent().parent().siblings('.checkbox').each(function () {
+                var filter = $(this);
+                if (filter.hasClass("visible-filter")) {
+                    let checkbox = filter.find('input');
+                    checkbox.prop('checked', true);
+                    checkbox.trigger('change');
+                }
+            });
+        } else {
+            $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',false);
+            $(this).parent().parent().siblings('.checkbox').find('input').each(function(){
+                $(this).trigger('change');
+            });
+        }
+    });
+
+    // Delegated event: Show More and Show Less buttons
+    $('.program-tabs').on('click', '.show-more, .show-less', function() {
+        if($(this).hasClass('show-less')) {
+            $(this).parent().siblings('li.extra-values').hide();
+            $(this).parent().siblings('.more-checks').show();
+            $(this).parent().removeClass('more-expanded');
+            $(this).parent().hide();
+        } else {
+            $(this).parent().siblings('li.extra-values').show();
+            $(this).parent().siblings('.less-checks').show();
+            $(this).parent().siblings('.less-checks').addClass('more-expanded');
+            $(this).parent().hide();
+        }
     });
 
     var ANONYMOUS_FILTERS = {};
     var MUTATION_FILTER_COMBINE = "and";
 
-    var save_anonymous_filters = function()
-    {
+    var save_anonymous_filters = function() {
         // Collect all selected filters and save to session storage
         var filters = [];
         $('#selected-filters span.filter-token').each(function() {
@@ -1152,8 +1070,7 @@ require([
     };
 
     var load_tabs_queue = [];
-    var load_anonymous_filters = function()
-    {
+    var load_anonymous_filters = function() {
         // Load anonymous filters from session storage and clear it, so it is not always there
         var str = sessionStorage.getItem('anonymous_filters');
         ANONYMOUS_FILTERS = JSON.parse(str);
@@ -1173,8 +1090,7 @@ require([
         }
     };
 
-    var apply_anonymous_filters = function(active_program_id)
-    {
+    var apply_anonymous_filters = function(active_program_id) {
         // Check if anonymous filter exist, then find all checkbox and check them
         if (ANONYMOUS_FILTERS !== null && ANONYMOUS_FILTERS.length > 0) {
             var has_mut_filter = false;
@@ -1210,24 +1126,13 @@ require([
 
     var apply_anonymous_checkbox_filter = function(programId, featureId, valueId) {
         var checkbox = null;
-        if (featureId === "data_type_availability") {
-            // data type filters...
-            $("input[data-value-id ='"+valueId+"']").each(function() {
-                if($(this).closest("[data-feature-id=\"data_type_availability\"]").length !== 0) {
-                    checkbox = $(this);
-                    return;
-                }
-            });
-        } else {
-            // case filters...
-            var checkboxId = programId + "-" + featureId + "-" + valueId;
-            checkboxId = checkboxId.replace(/ /g, "_");
-            checkboxId = checkboxId.toUpperCase();
+        var checkboxId = programId + "-" + featureId + "-" + valueId;
+        checkboxId = checkboxId.replace(/ /g, "_");
+        checkboxId = checkboxId.toUpperCase();
 
-            // Escape special chars
-            checkboxId = checkboxId.replace(/([$%&()*+,./:;<=>?@\[\\\]^\{|}~])/g, '\\$1');
-            checkbox = $('#'+checkboxId);
-        }
+        // Escape special chars
+        checkboxId = checkboxId.replace(/([$%&()*+,./:;<=>?@\[\\\]^\{|}~])/g, '\\$1');
+        checkbox = $('#'+checkboxId);
 
         if (checkbox !== null) {
             // Set checked and trigger change to update other related data
@@ -1268,28 +1173,8 @@ require([
 
     var reject_load = false;
 
-    var SORT_DATASET_BY = "node";
-
-    var update_select_dataset_ui = function(dataset_selector) {
-        if (SORT_DATASET_BY === "node") {
-            $(dataset_selector + ' .sort-by-node').show();
-            $(dataset_selector + ' .sort-by-program').hide();
-            $(dataset_selector + " .sort-radio[value='node']").prop('checked', true);
-            $(dataset_selector + " .sort-radio[value='program']").prop('checked', false);
-            $(dataset_selector + " .sort-by-node option[node-id='" + ACTIVE_NODE_ID
-                + "'][program-id='" + ACTIVE_PROGRAM_ID + "']").prop('selected', true);
-        } else if (SORT_DATASET_BY === "program") {
-            $(dataset_selector + ' .sort-by-node').hide();
-            $(dataset_selector + ' .sort-by-program').show();
-            $(dataset_selector + " .sort-radio[value='node']").prop('checked', false);
-            $(dataset_selector + " .sort-radio[value='program']").prop('checked', true);
-            $(dataset_selector + " .sort-by-program option[node-id='" + ACTIVE_NODE_ID
-                + "'][program-id='" + ACTIVE_PROGRAM_ID + "']").prop('selected', true);
-        }
-    };
-
     var update_all_selected_filters_ui = function(dataset_selector) {
-        let all_selected_panel = $(dataset_selector + ' .all-selected-filters' + ' .panel-body');
+        let all_selected_panel = $('.all-selected-filters' + ' .panel-body');
         all_selected_panel.empty();
 
         let create_form_filters = $('#selected-filters');
@@ -1303,10 +1188,10 @@ require([
                 let node_id =$(this).attr('node-id');
                 let dataset_name = $(this).find('h5').text();
                 let link = "#" + program_id + "-data";
-                let div = $('<div>');
+                let div = $('<div class="'+(link === dataset_selector ? 'current-data-set' : 'other-data-set')+'">');
                 let current = (link === dataset_selector) ? " (Current Data Set)" : "";
-                div.append("<h5><a class=\"dataset-select-btn\" program-id=\"" + program_id
-                    + "\" node-id=\"" + node_id + "\">" + dataset_name + "</a>" + current + "</h5>");
+                div.append('<h5><a class="dataset-select-btn" program-id="' + program_id + '" program-name="'+ dataset_name +'"'
+                    + ' node-id="' + node_id + '">' + dataset_name + '</a>' + current + '</h5>');
 
                 $(this).find('span').each(function() {
                     var new_token = $(this).clone(true);
@@ -1324,11 +1209,12 @@ require([
 
         $('.dataset-select-btn').click(function(e) {
             ACTIVE_PROGRAM_ID = $(e.target).attr('program-id');
+            let active_program_name = $(e.target).attr('program-name');
             ACTIVE_NODE_ID = $(e.target).attr('node-id');
             let new_dataset_selector = '#'+ACTIVE_PROGRAM_ID+'-data';
             $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
             $(new_dataset_selector).addClass('active');
-            update_select_dataset_ui(new_dataset_selector);
+            $('.sort-by-program').val(active_program_name);
             update_all_selected_filters_ui(new_dataset_selector);
         });
     };
@@ -1358,7 +1244,7 @@ require([
         var program_data_selector ='#'+load_program_id+'-data';
 
         if ($(program_data_selector).length != 0) {
-            update_select_dataset_ui(program_data_selector);
+            $(".sort-by-program option[node-id='0'][program-id='" + ACTIVE_PROGRAM_ID + "']").prop('selected', true);
             update_all_selected_filters_ui(program_data_selector);
         } else {
             reject_load = true;
@@ -1383,28 +1269,8 @@ require([
 
                     apply_anonymous_filters(load_program_id);
 
-                    update_select_dataset_ui(program_data_selector);
+                    $(".sort-by-program option[node-id='0'][program-id='" + ACTIVE_PROGRAM_ID + "']").prop('selected', true);
                     update_all_selected_filters_ui(program_data_selector);
-
-                    $('.sort-radio').click(function () {
-                        SORT_DATASET_BY = $(this).val();
-                        update_select_dataset_ui(program_data_selector);
-                    });
-
-                    $(program_data_selector + ' .dataset-select-box').change(function() {
-                        let selected = $(this).find('option:selected');
-                        ACTIVE_NODE_ID = selected.attr('node-id');
-                        ACTIVE_PROGRAM_ID = selected.attr('program-id');
-                        let new_dataset_selector = '#'+ACTIVE_PROGRAM_ID+'-data';
-                        if ($(new_dataset_selector).length != 0) {
-                            $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
-                            $(new_dataset_selector).addClass('active');
-                            update_select_dataset_ui(new_dataset_selector);
-                            update_all_selected_filters_ui(new_dataset_selector);
-                        } else {
-                            filter_panel_load(cohort_id, ACTIVE_PROGRAM_ID, ACTIVE_NODE_ID);
-                        }
-                    });
                 },
 
                 error: function () {
@@ -1491,13 +1357,60 @@ require([
         }
     });
 
-    $('#log-in-to-save-btn').on('click', function()
-    {
-        $.setCookie('login_from','new_cohort','/');
+    $('#log-in-to-save-btn').on('click', function() {
+        $.setCookie('login_from','cohort','/');
         save_anonymous_filters();
         location.href = '/accounts/login/';
     });
 
+    $('.export-btn, .download-ids-btn').on('click', function() {
+        let self=$(this);
+        if(self.hasClass('export-btn') && !user_is_social) {
+            e.preventDefault();
+            return false;
+        }
+        let msg = self.hasClass('download-ids-btn') ? $('#download-in-prog') : $('#export-in-prog');
+        let token = self.hasClass('download-ids-btn') ? $('.download-token').val() : $('.export-token').val();
+
+        self.attr('disabled','disabled');
+        msg.show();
+
+        base.blockResubmit(function() {
+            self.removeAttr('disabled');
+            msg.hide();
+        },token,"downloadToken");
+
+        if(self.hasClass('export-btn')) {
+            $.ajax({
+                type: 'GET',
+                url: $('.export-btn').attr('url') + '?downloadToken=' + token,
+                success: function (data) {
+                    let msg_box = $('#export-result');
+                    msg_box.hide();
+                    msg_box.empty();
+                    msg_box.html(data['message']);
+                    msg_box.show();
+                },
+                error: function (xhr) {
+                    var responseJSON = $.parseJSON(xhr.responseText);
+                    // If we received a redirect, honor that
+                    if (responseJSON.redirect) {
+                        base.setReloadMsg(responseJSON.level || "error", responseJSON.message);
+                        window.location = responseJSON.redirect;
+                    } else {
+                        base.showJsMessage(responseJSON.level || "error", responseJSON.message, true);
+                    }
+                },
+            });
+        }
+    });
+
+    set_mode();
     filter_panel_load(cohort_id);
+
+    let token = new Date().getTime();
+    $('.export-token, .download-token').val(token);
+    $('.download-ids-btn').attr('href',$('.download-ids-btn').attr('href')+'?downloadToken='+token);
+
 });
 

@@ -1,5 +1,5 @@
 ###
-# Copyright 2017, Institute for Systems Biology
+# Copyright 2015-2024, Institute for Systems Biology
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,25 +18,34 @@ runtime: custom
 env: flex
 service: default
 api_version: 1
-
-resources:
-  cpu: 2
-  memory_gb: 8
-  disk_size_gb: 20
+threadsafe: true
 
 builtins:
 - appstats: on
 - deferred: on
 
 beta_settings:
-    cloud_sql_instances: isb-cgc-test:us-central1:test
+    cloud_sql_instances: isb-cgc-test:us-central1:test-v2
 
 env_variables:
   DJANGO_SETTINGS_MODULE: 'isb_cgc.settings'
+  IS_APP_ENGINE: 'True'
 
 network:
   name: solr
   instance_tag: isb-cgc-webapp
+
+resources:
+  cpu: 2
+  memory_gb: 8
+  disk_size_gb: 10
+
+automatic_scaling:
+  min_num_instances: 1
+  max_num_instances: 2
+  cool_down_period_sec: 180
+  cpu_utilization:
+    target_utilization: 0.6
 
 skip_files:
 - python-su.sh

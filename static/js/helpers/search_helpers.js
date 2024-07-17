@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2016, Institute for Systems Biology
+ * Copyright 2016-2024, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,51 +49,31 @@ function($, tree_graph, stack_bar_chart) {
     
     var tree_graph_obj = Object.create(tree_graph, {});
 
-    var PROG_CLIN_TREES = {
-        'TCGA': {
-            disease_code: 'Disease Code',
+    var NODE_CLIN_TREES = {
+        'GDC': {
+            project_short_name_gdc: 'Project Short Name',
+            disease_type_gdc: 'Disease Type',
+            gender_gdc: 'Gender',
+            tissue_or_organ_of_origin_gdc: 'Tissue/Organ of Origin',
             vital_status: 'Vital Status',
-            sample_type: 'Sample Type',
-            tumor_tissue_site: 'Tumor Tissue Site',
-            gender: 'Gender',
-            age_at_diagnosis: 'Age at Diagnosis'
+            race: 'Race',
+            age_at_diagnosis_cgc: 'Age at Diagnosis',
+            ethnicity: 'Ethnicity'
         },
-        'CCLE':{
-            disease_code: 'Disease Code',
-            gender: 'Gender',
-            site_primary: 'Site Primary',
-            histology: 'Histology',
-            hist_subtype: 'Histological Subtype'
+        'PDC':{
+            project_short_name_pdc: 'Project Short Name',
+            disease_type_pdc: 'Disease Type',
+            gender_pdc: 'Gender',
+            tissue_or_organ_of_origin_pdc: 'Tissue/Organ of Origin',
+            primary_diagnosis_pdc: 'Primary Diagnosis',
+            primary_site_pdc: 'Primary Site'
         },
-        'TARGET':{
-            disease_code: 'Disease Code',
-            vital_status: 'Vital Status',
-            gender: 'Gender',
-            sample_type: 'Sample Type',
-            age_at_diagnosis: 'Age at Diagnosis'
-        },
-        'BEATAML1.0':{
-            project_short_name: 'Project',
-            disease_type: 'Disease Type',
-            vital_status: 'Vital Status',
-            gender: 'Gender',
-            ethnicity: 'Race',
-            age_at_diagnosis: 'Age at Diagnosis'
-        },
-        'FM': {
-            morphology: 'Morphology',
-            vital_status: 'Vital Status',
-            tissue_or_organ_of_origin: 'Tissue or Organ of Origin',
-            primary_site: 'Primary Site',
-            site_of_resection_or_biopsy: 'Site of Resection or Biopsy'
-        },
-        'ANY':{
-            project_short_name: 'Project',
-            morphology: 'Morphology',
-            vital_status: 'Vital Status',
-            gender: 'Gender',
-            ethnicity: 'Race',
-            age_at_diagnosis: 'Age at Diagnosis'
+        'IDC':{
+            collection_id: 'Collection ID',
+            Modality: 'Image Modality',
+            BodyPartExamined: 'Body Part',
+            CancerType: 'Cancer Type',
+            tcia_tumorLocation: 'Primary Site'
         }
     };
 
@@ -110,7 +90,7 @@ function($, tree_graph, stack_bar_chart) {
 
     return  {
 
-        filter_data_for_clin_trees: function(attr_counts, these_attr, program_id) {
+        filter_data_for_clin_trees: function(attr_counts, these_nodes, program_id) {
             if(program_id == null || program_id == undefined) {
                 program_id = $('ul.nav-tabs-data li.active a').data('program-id');
             }
@@ -119,9 +99,12 @@ function($, tree_graph, stack_bar_chart) {
             var filters = this.format_filters(program_id);
             var tree_attr_map = {};
 
-            Object.keys(these_attr).map(function(attr){
-                tree_attr_map[attr] = 1;
+            Object.keys(these_nodes).map(function(node){
+                Object.keys(these_nodes[node]).map(function(attr){
+                    tree_attr_map[attr] = 1;
+                });
             });
+
             for(var i in filters) {
                 if(filters.hasOwnProperty(i)) {
                     var fname = (i.indexOf(":") >= 0) ? i.split(/:/)[1] : i;
@@ -160,10 +143,11 @@ function($, tree_graph, stack_bar_chart) {
                 program_id = $('ul.nav-tabs-data li.active a').data('program-id');
             }
 
-            var clin_tree_attr = program_id <= 0 ? user_data_attr : PROG_CLIN_TREES[$('#'+program_id+'-data-filter-panel').data('prog-displ-name')];
-            if(!clin_tree_attr) {
-                clin_tree_attr = PROG_CLIN_TREES['ANY']
-            }
+            var clin_tree_attr = {};
+            var prog_nodes = $('#'+program_id+'-data').data('prog-nodes').split(",");
+            prog_nodes.forEach(function(el) {
+                clin_tree_attr[el] = NODE_CLIN_TREES[el];
+            });
 
             var context = this;
             var filters = {};
@@ -185,7 +169,7 @@ function($, tree_graph, stack_bar_chart) {
             var active_program_id = program_id || $('ul.nav-tabs-data li.active a').data('program-id');
             var active_panel = '' + active_program_id+'-data';
 
-            $('.clinical-trees .spinner').show();
+            $('.case-trees .spinner').show();
             $('.user-data-trees .spinner').show();
             $('.parallel-sets .spinner').show();
 
@@ -195,9 +179,14 @@ function($, tree_graph, stack_bar_chart) {
 
             if(filter_panel_load) {
                 var clin_tree_attr_counts = filters_found ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
-                Object.keys(clin_tree_attr_counts).length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
+                Object.keys(clin_tree_attr_counts).length > 0 && tree_graph_obj.draw_trees(
+                    clin_tree_attr_counts,
+                    clin_tree_attr,
+                    active_program_id,
+                    '#tree-graph-case-'+active_program_id
+                );
 
-                $('.clinical-trees .spinner').hide();
+                $('.case-trees .spinner').hide();
                 $('.user-data-trees .spinner').hide();
                 $('.parallel-sets .spinner').hide();
 
@@ -231,7 +220,6 @@ function($, tree_graph, stack_bar_chart) {
                         console.debug("[BENCHMARKING] Time for response in update_counts_parsets: "+(stopReq-startReq)+ "ms");
                         case_counts = results['counts'];
 
-
                         $('#p-'+program_id+'-data-total-samples').html(format_num_with_commas(metadata_counts['samples']));
                         $('#p-'+program_id+'-data-total-participants').html(format_num_with_commas(metadata_counts['cases']));
 
@@ -243,44 +231,16 @@ function($, tree_graph, stack_bar_chart) {
                         context.update_filter_counts(case_counts, null, program_id);
 
                         context.update_zero_case_filters_all();
-                        var clin_tree_attr_counts = filters_found ? context.filter_data_for_clin_trees(results['filtered_counts']['case_data'], clin_tree_attr) : case_counts;
-                        Object.keys(clin_tree_attr_counts).length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
+                        var clin_tree_attr_counts = filters_found ? context.filter_data_for_clin_trees(results['filtered_counts']['Case'], clin_tree_attr) : case_counts;
+                        Object.keys(clin_tree_attr_counts).length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-case-'+active_program_id);
 
-                        if (metadata_counts.hasOwnProperty('data_avail')) {
-                            var features = [
-                                'cnvrPlatform',
-                                'DNAseq_data',
-                                'methPlatform',
-                                'gexpPlatform',
-                                'mirnPlatform',
-                                'rppaPlatform'
-                            ];
-                            var plot_features = [
-                                context.get_readable_name(features[0]),
-                                context.get_readable_name(features[1]),
-                                context.get_readable_name(features[2]),
-                                context.get_readable_name(features[3]),
-                                context.get_readable_name(features[4]),
-                                context.get_readable_name(features[5])
-                            ];
-                            for (var i = 0; i < metadata_counts['data_avail'].length; i++) {
-                                var new_item = {};
-                                for (var j = 0; j < features.length; j++) {
-                                    var item = metadata_counts['data_avail'][i];
-                                    new_item[plot_features[j]] = context.get_readable_name(item[features[j]]);
-                                }
-                                metadata_counts['data_avail'][i] = new_item;
-                            }
-                        } else {
-                            console.debug("Data Availability counts not found!");
-                        }
                     },
                     error: function(req,status,err){
                         $('#' + active_program_id + '-data-total-samples').html("Error");
                         $('#' + active_program_id + '-data-total-participants').html("Error");
                     },
                     complete: function(xhr,status) {
-                        $('.clinical-trees .spinner').hide();
+                        $('.case-trees .spinner').hide();
                         $('.user-data-trees .spinner').hide();
                         $('.parallel-sets .spinner').hide();
                         $('.cohort-info .spinner').hide();
@@ -296,7 +256,7 @@ function($, tree_graph, stack_bar_chart) {
             if (program_id != '0') {
                 program_selector = '#' + program_id + '-data ';
             }
-            $(program_selector + '.selected-filters .panel-body span.filter-token').each(function() {
+            $('.all-selected-filters .panel-body span[data-prog-id="'+program_id+'"].filter-token').each(function() {
                 var $this = $(this),
                     key = $this.data('feature-name'),
                     val = $this.data('value-name');
@@ -417,7 +377,6 @@ function($, tree_graph, stack_bar_chart) {
                     attr = $this.data('feature-name');
                 if(attr && attr.length > 0 && attr !== 'specific-mutation' ) {
                     $('#'+program_id+'-data-filter-panel ul#'+program_id+'-'+attr+' input').each(function () {
-
                         var $that = $(this),
                             value = $that.data('value-name'),
                             id = $that.data('value-id'),
