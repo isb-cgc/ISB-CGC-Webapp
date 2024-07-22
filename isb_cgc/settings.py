@@ -354,39 +354,33 @@ LOGGING = {
     },
     'formatters': {
         'verbose': {
-            'format': '[%(levelname)s] @%(asctime)s in %(module)s/%(process)d/%(thread)d - %(message)s'
+            'format': '[%(name)s] [%(levelname)s] @%(asctime)s in %(module)s/%(process)d/%(thread)d - %(message)s'
         },
         'simple': {
-            'format': '[%(levelname)s] @%(asctime)s in %(module)s: %(message)s'
+            'format': '[%(name)s] [%(levelname)s] @%(asctime)s in %(module)s: %(message)s'
         },
     },
     'handlers': handlers,
+    'root': {
+        'level': 'INFO',
+        'handlers': handler_set
+    },
     'loggers': {
         '': {
             'level': 'INFO',
             'handlers': handler_set,
             'propagate': True
         },
-        'root': {
+        'django': {
             'level': 'INFO',
             'handlers': handler_set,
-            'propagate': True
-        },
-        'django': {
-            'handlers': handler_set,
-            'propagate': True,
-            'level': 'INFO'
+            'propagate': False
         },
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
-        },
-        'main_logger': {
-            'handlers': handler_set,
-            'level': 'DEBUG',
-            'propagate': True,
-        },
+        }
     },
 }
 
