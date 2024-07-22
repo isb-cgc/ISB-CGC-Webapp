@@ -552,8 +552,11 @@ if not IS_APP_ENGINE:
 else:
     print("[STATUS] AppEngine Flex detected--default credentials will be used.")
     # We need to hook up Python logging to Google Cloud Logging for AppEngine (or nothing will be logged)
+    import logging
+    logger = logging.getLogger('main_logger')
     client = google.cloud.logging.Client()
-    client.get_default_handler()
+    handler = client.get_default_handler()
+    logger.add_handler(handler)
     client.setup_logging()
 
 
@@ -671,7 +674,7 @@ EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 DEFAULT_FROM_EMAIL = NOTIFICATION_EMAIL_FROM_ADDRESS
 
 # Cron user settings
-CRON_USER = os.environ.get('CRON_USER', 'cron_user')
+CRON_USER = os.environ.get('CRON_USER', 'cron-user')
 CRON_AUTH_KEY = os.environ.get('CRON_AUTH_KEY', 'Token')
 
 # Explicitly check for known items
