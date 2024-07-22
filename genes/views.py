@@ -17,7 +17,7 @@ from .models import GeneSymbol
 
 BLACKLIST_RE = settings.BLACKLIST_RE
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 # validates whether each gene is a list of gene symbols are known gene symbols
 # returns a json object keyed on each gene symbol with values of whether or not they are valid

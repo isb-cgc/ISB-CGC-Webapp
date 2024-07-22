@@ -34,7 +34,7 @@ from django.core.exceptions import ObjectDoesNotExist
 import logging
 import math
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 
 # If an attribute's values should be alphanumerically sorted, list them here

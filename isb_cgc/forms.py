@@ -26,7 +26,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms import ValidationError, CharField, TextInput
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 
 class CgcSignUp(SignupForm):
