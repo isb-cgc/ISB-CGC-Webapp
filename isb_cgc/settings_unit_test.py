@@ -347,7 +347,7 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-        'main_logger': {
+        __name__: {
             'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,

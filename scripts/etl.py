@@ -40,7 +40,7 @@ from google_helpers.bigquery.bq_support import BigQuerySupport
 from projects.models import CgcDataVersion, Program, Project, Attribute, Attribute_Ranges, DataSourceJoin, Attribute_Display_Values, DataSource, DataVersion, DataNode, DataSetType, Attribute_Set_Type
 from django.contrib.auth.models import User
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 ranges_needed = {
     'wbc_at_diagnosis': 'by_200',

@@ -61,7 +61,7 @@ from .forms import CgcOtpTokenForm
 import requests
 
 debug = settings.DEBUG
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 BQ_ATTEMPT_MAX = 10
 WEBAPP_LOGIN_LOG_NAME = settings.WEBAPP_LOGIN_LOG_NAME
