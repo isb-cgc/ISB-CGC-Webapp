@@ -307,11 +307,40 @@ MIDDLEWARE.append(
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
+handler_set = ['console_dev', 'console_prod']
+handlers = {
+    'mail_admins': {
+        'level': 'ERROR',
+        'filters': ['require_debug_false'],
+        'class': 'django.utils.log.AdminEmailHandler'
+    },
+    'console_dev': {
+        'level': 'DEBUG',
+        'filters': ['require_debug_true'],
+        'class': 'logging.StreamHandler',
+        'formatter': 'verbose',
+    },
+    'console_prod': {
+        'level': 'DEBUG',
+        'filters': ['require_debug_false'],
+        'class': 'logging.StreamHandler',
+        'formatter': 'simple',
+    },
+}
+
+if IS_APP_ENGINE:
+    # We need to hook up Python logging to Google Cloud Logging for AppEngine (or nothing will be logged)
+    client = google.cloud.logging_v2.Client()
+    client.setup_logging()
+    handler_set.append('stackdriver')
+    handlers['stackdriver'] = {
+        'level': 'DEBUG',
+        'filters': ['require_debug_false'],
+        'class': 'google.cloud.logging_v2.handlers.CloudLoggingHandler',
+        'client': client,
+        'formatter': 'verbose'
+    }
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -331,61 +360,33 @@ LOGGING = {
             'format': '[%(levelname)s] @%(asctime)s in %(module)s: %(message)s'
         },
     },
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        },
-        'console_dev': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-        'console_prod': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_false'],
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-        },
-    },
+    'handlers': handlers,
     'loggers': {
+        '': {
+            'level': 'INFO',
+            'handlers': handler_set,
+            'propagate': True
+        },
+        'root': {
+            'level': 'INFO',
+            'handlers': handler_set,
+            'propagate': True
+        },
+        'django': {
+            'handlers': handler_set,
+            'propagate': True,
+            'level': 'INFO'
+        },
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
         },
         'main_logger': {
-            'handlers': ['console_dev', 'console_prod'],
+            'handlers': handler_set,
             'level': 'DEBUG',
             'propagate': True,
         },
-        'allauth': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'google_helpers': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'accounts': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'finalware': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'anymail': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        }
     },
 }
 
@@ -551,14 +552,6 @@ if not IS_APP_ENGINE:
     print("[STATUS] GOOGLE_APPLICATION_CREDENTIALS: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
 else:
     print("[STATUS] AppEngine Flex detected--default credentials will be used.")
-    # We need to hook up Python logging to Google Cloud Logging for AppEngine (or nothing will be logged)
-    import logging
-    logger = logging.getLogger('main_logger')
-    client = google.cloud.logging.Client()
-    handler = client.get_default_handler()
-    logger.add_handler(handler)
-    client.setup_logging()
-
 
 # Client ID used for OAuth2 - this is for IGV and the test database
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
