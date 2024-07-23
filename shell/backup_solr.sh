@@ -78,7 +78,7 @@ for core in "${cores[@]}"; do
         echo "Copying schema for ${core}..."
         sudo -u solr cp ${SOLR_DATA}/${core}/conf/managed-schema.xml ${BACKUPS_DIR}/$core.managed-schema.xml
         echo "Executing backup command for ${core}:"
-        curl -u ${SOLR_USER}:${SOLR_PWD} -X GET "http://localhost:8983/solr/admin/collections?action=BACKUP&name=${core}_backup_${RUN}&collection=${core}&location=${BACKUPS_DIR}/" --cacert solr-ssl.pem
+        curl -u ${SOLR_USER}:${SOLR_PWD} -X GET "https://localhost:8983/solr/$core/replication?command=backup&location=${BACKUPS_DIR}/&name=${core}" --cacert solr-ssl.pem
         curl -s -u ${SOLR_USER}:${SOLR_PWD} -X GET "https://localhost:8983/solr/${core}/replication?command=details" --cacert solr-ssl.pem
         status=`curl -s -u ${SOLR_USER}:${SOLR_PWD} -X GET "https://localhost:8983/solr/${core}/replication?command=details" --cacert solr-ssl.pem | python3 -c "${PARSE_RESPONSE}"`
         retries=0
