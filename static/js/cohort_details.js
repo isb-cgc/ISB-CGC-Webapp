@@ -399,7 +399,8 @@ require([
         if ($this.is(':checked')) { // Checkbox checked
             let tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
                     value.data('value-displ-name') : (value.data('value-name') === 'None' ? 'NA' : value.data('value-name')),
-                tokenFeatDisplName = '['+feature.data('node-name')+'] ' + ((feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
+                tokenFeatDisplName = (feature.data('node-name') ? '['+feature.data('node-name')+'] ' : '')
+                    + ((feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
                  feature.data('feature-displ-name') : feature.data('feature-name'));
 
             let feature_id = feature.data('feature-id'), value_id =  value.data('value-id');

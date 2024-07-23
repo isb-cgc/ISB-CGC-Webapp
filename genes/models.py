@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 import logging
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 
 class GeneSymbol_Manager(models.Manager):

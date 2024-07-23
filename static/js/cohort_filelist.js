@@ -172,18 +172,16 @@ require([
         !withoutDisplayUpdates && update_displays();
     };
 
-    $('.clear-filters').on('click', function() {
-        var activeDataTab = $('.data-tab.active').data('tab-id');
+    $('.data-tab-content').on('click', '.clear-filters', function() {
+        let activeDataTab = $('.data-tab.active').data('file-type');
 
-        $(this).parents('all-selected-filters').find('.panel-body').empty();
+        $(this).parents('.selected-filters-'+activeDataTab).find('.panel-body').empty();
         $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
             $(this).prop('checked', false);
         });
 
-        delete SELECTED_FILTERS[activeDataTab];
+        SELECTED_FILTERS[activeDataTab] = {};
 
-        $('#selected-filters span').remove();
-        update_selected_filters_ui(activeDataTab);
         update_displays();
     });
 
