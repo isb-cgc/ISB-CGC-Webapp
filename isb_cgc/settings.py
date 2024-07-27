@@ -266,10 +266,10 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "https://www.isb-cgc.org/",
-    "https://portal.isb-cgc.org/",
-    "https://isb-cgc.org/",
-    "https://api.isb-cgc.org/"
+    "https://www.isb-cgc.org",
+    "https://portal.isb-cgc.org",
+    "https://isb-cgc.org",
+    "https://api.isb-cgc.org"
 ]
 
 ROOT_URLCONF = 'isb_cgc.urls'
