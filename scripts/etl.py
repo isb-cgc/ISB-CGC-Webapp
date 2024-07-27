@@ -88,7 +88,7 @@ SOLR_SINGLE_VAL = {
 }
 
 PREFORMATTED_ATTRS = ["disease_type_gdc","disease_type_pdc", "primary_diagnosis_gdc","primary_site_gdc",
-                      "primary_diagnosis_pdc","primary_site_pdc", "progression_or_recurrence","disease_code",
+                      "primary_diagnosis_pdc","primary_site_pdc", "progression_or_recurrence",
                       "program_name","project_short_name_pdc","project_short_name_gdc","ethnicity","morphology","tumor_grade",
                       "last_known_disease_status","site_of_resection_or_biopsy","tissue_or_organ_of_origin_gdc",
                       "tissue_or_organ_of_origin_pdc", "node", "bmi","country","hist_subtype","histological_type",
@@ -96,7 +96,8 @@ PREFORMATTED_ATTRS = ["disease_type_gdc","disease_type_pdc", "primary_diagnosis_
                       "tumor_tissue_site","tumor_type","platform",
                       "SeriesInstanceUID","StudyInstanceUID","StudyDescription","SeriesDescription",
                       "tcia_tumorLocation","Modality","BodyPartExamined","primaryAnatomicStructure","CancerType",
-                      "collection_id","experimental_strategy","platform","data_format","data_category","data_type"]
+                      "collection_id","experimental_strategy","platform","data_format","data_category","data_type",
+                      'study_group_pdc', 'study_id_pdc']
 
 BQ_SCHEMA_SKIP = ['id']
 
