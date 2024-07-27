@@ -855,8 +855,14 @@ require([
 
     $('#clear-all-yes-btn').on('click', function() {
         let activeDataTab = $('.data-tab.active');
-        let prog_id = activeDataTab.children('.filter-panel').data('prog-id');
+        let active_prog_id = activeDataTab.find('.filter-panel').attr('data-prog-id');
         let creationForm = $('#create-cohort-form');
+
+        $('.all-selected-filters span').each(function(){
+            if($(this).attr('data-prog-id') !== active_prog_id) {
+                $('#' + $(this).attr('data-prog-id') + '-data').remove();
+            }
+        });
 
         $('.all-selected-filters').find('.panel-body').empty();
         // bug fix #2722
@@ -867,6 +873,8 @@ require([
         });
 
         initialize_sel_filters();
+
+
 
         update_all_selected_filters_ui('#' + activeDataTab.attr('id'));
         update_displays();

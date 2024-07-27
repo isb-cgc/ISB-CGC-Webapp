@@ -57,8 +57,11 @@ function($, tree_graph, stack_bar_chart) {
             tissue_or_organ_of_origin_gdc: 'Tissue/Organ of Origin',
             vital_status: 'Vital Status',
             race: 'Race',
-            age_at_diagnosis_cgc: 'Age at Diagnosis',
-            ethnicity: 'Ethnicity'
+            age_at_diagnosis: 'Age at Diagnosis',
+            ethnicity: 'Ethnicity',
+            sample_type: 'Sample Type',
+            histology: 'Histology',
+            site_primary: 'Site Primary'
         },
         'PDC':{
             project_short_name_pdc: 'Project Short Name',
