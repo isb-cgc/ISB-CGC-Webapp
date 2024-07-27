@@ -117,7 +117,6 @@ function($, d3, d3tip, vis_helpers) {
                         }
                     }
                 });
-
             svg.call(tip);
         };
 
