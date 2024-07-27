@@ -248,6 +248,7 @@ SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '3600'))
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'isb_cgc.domain_redirect_middleware.DomainRedirectMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'isb_cgc.checkreqsize_middleware.CheckReqSize',
@@ -262,6 +263,13 @@ MIDDLEWARE = [
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'offline.middleware.OfflineMiddleware',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://www.isb-cgc.org",
+    "https://portal.isb-cgc.org",
+    "https://isb-cgc.org",
+    "https://api.isb-cgc.org"
 ]
 
 ROOT_URLCONF = 'isb_cgc.urls'
@@ -396,6 +404,7 @@ INSTALLED_APPS += (
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'corsheaders',
     'django_otp',
     'django_otp.plugins.otp_static',
     'django_otp.plugins.otp_totp',
