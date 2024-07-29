@@ -3064,10 +3064,10 @@ span.code {
 
 
 
-#export-to-bq-modal .modal-header, #export-to-gcs-modal .modal-header {
+#export-to-bq-modal .modal-header {
   padding-bottom: 10px; }
 
-#export-to-bq-modal .spinner, #export-to-gcs-modal .spinner {
+#export-to-bq-modal .spinner {
   position: absolute;
   width: 100%;
   height: 65%;
@@ -3075,7 +3075,7 @@ span.code {
   left: 0px;
   background: rgba(255, 255, 255, 0.5);
   z-index: 10; }
-  #export-to-bq-modal .spinner div, #export-to-gcs-modal .spinner div {
+  #export-to-bq-modal .spinner div {
     position: absolute;
     text-align: center;
     height: 50px;
@@ -3085,7 +3085,7 @@ span.code {
     font-size: 18px;
     width: 100%;
     background: white; }
-  #export-to-bq-modal .spinner i, #export-to-gcs-modal .spinner i {
+  #export-to-bq-modal .spinner i {
     font-size: 20px; }
 
 #data-upload-group .checkbox .sub-checkbox {

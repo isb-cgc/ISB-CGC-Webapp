@@ -28,8 +28,7 @@ require.config({
         bloodhound: 'libs/bloodhound',
         typeahead : 'libs/typeahead',
         tokenfield: 'libs/bootstrap-tokenfield.min',
-        bq_export: 'export_to_bq',
-        gcs_export: 'export_to_gcs'
+        bq_export: 'export_to_bq'
     },
     shim: {
         'tokenfield': ['jquery', 'jqueryui'],
@@ -62,8 +61,7 @@ require([
     'vis_helpers',
     'tree_graph',
     'stack_bar_chart',
-    'bq_export',
-    'gcs_export'
+    'bq_export'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, _, base) {
 
     var SELECTED_FILTERS = {};
