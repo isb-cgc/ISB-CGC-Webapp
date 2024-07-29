@@ -46,6 +46,12 @@ var TRANSLATION_DICT = {
 
 define(['jquery', 'tree_graph', 'stack_bar_chart'],
 function($, tree_graph, stack_bar_chart) {
+
+    var disable_spinners = function() {
+        $('.case-trees .spinner').hide();
+        $('.cohort-info .spinner').hide();
+        $('.cohort-info .total-values').show();
+    };
     
     var tree_graph_obj = Object.create(tree_graph, {});
 
@@ -173,8 +179,6 @@ function($, tree_graph, stack_bar_chart) {
             var active_panel = '' + active_program_id+'-data';
 
             $('.case-trees .spinner').show();
-            $('.user-data-trees .spinner').show();
-            $('.parallel-sets .spinner').show();
 
             $('button[data-target="#apply-filters-modal"]').prop('disabled',true);
             $('#apply-filters-form input[type="submit"]').prop('disabled',true);
@@ -190,8 +194,6 @@ function($, tree_graph, stack_bar_chart) {
                 );
 
                 $('.case-trees .spinner').hide();
-                $('.user-data-trees .spinner').hide();
-                $('.parallel-sets .spinner').hide();
 
                 context.update_zero_case_filters_all();
                 $('.hide-zeros input').on('change', function()
@@ -207,6 +209,7 @@ function($, tree_graph, stack_bar_chart) {
                 if(metadata_url.length > MAX_URL_LEN) {
                     $('#url-len-max-alert').show();
                     // This method is expected to return a promise, so send back a pre-rejected one
+                    disable_spinners();
                     return $.Deferred().reject();
                 } else {
                     $('#url-len-max-alert').hide();
@@ -243,11 +246,7 @@ function($, tree_graph, stack_bar_chart) {
                         $('#' + active_program_id + '-data-total-participants').html("Error");
                     },
                     complete: function(xhr,status) {
-                        $('.case-trees .spinner').hide();
-                        $('.user-data-trees .spinner').hide();
-                        $('.parallel-sets .spinner').hide();
-                        $('.cohort-info .spinner').hide();
-                        $('.cohort-info .total-values').show();
+                        disable_spinners();
                     }
                 });
             }

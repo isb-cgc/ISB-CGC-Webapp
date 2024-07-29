@@ -214,13 +214,17 @@ require([
 
         update_displays_thread = setTimeout(function(){
             UPDATE_PENDING = true;
-            search_helper_obj.update_counts_parsets(BASE_URL, 'metadata_counts_platform_list', cohort_id, 'v2', prog_id, for_panel_load).then(
-                function(){
+            search_helper_obj.update_counts_parsets(BASE_URL, 'metadata_counts_platform_list', cohort_id, 'v2', prog_id, for_panel_load)
+                .then(function(){
                     !withoutCheckChanges && check_for_changes();
                     UPDATE_PENDING = false;
                     dequeueUpdate();
-                }
-            );
+                })
+                .fail(function(){
+                    !withoutCheckChanges && check_for_changes();
+                    UPDATE_PENDING = false;
+                    dequeueUpdate();
+                });
         },SUBSEQUENT_DELAY);
     };
 
