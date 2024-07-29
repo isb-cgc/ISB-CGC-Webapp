@@ -2775,7 +2775,9 @@ section .min-max {
   background-color: #9bd4ff; }
 
 #cohort-details .search-checkbox-list label, #cohort-filelist .search-checkbox-list label {
-  width: 100%; }
+  width: 100%;
+  overflow-wrap: break-word;
+}
 
 #cohort-details .sample_count, #cohort-details .case_count, #cohort-details .file_count, #cohort-filelist .sample_count, #cohort-filelist .case_count, #cohort-filelist .file_count {
   background-color: #bababa;
