@@ -47,8 +47,6 @@ require([
         },
         'igv': {
         },
-        'slim': {
-        },
         'dicom': {
         },
         'pdf': {
@@ -357,6 +355,7 @@ require([
                 }
                 SELECTED_FILTERS[active_tab]["data_format"].indexOf("BAM") < 0 && SELECTED_FILTERS[active_tab]["data_format"].push("BAM");
             case "all":
+            case "dicom":
                 if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab]).length >0) {
                     filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab]));
                 }
@@ -365,25 +364,14 @@ require([
                 if(!SELECTED_FILTERS[active_tab]["data_format"]) {
                     SELECTED_FILTERS[active_tab]["data_format"] = [];
                 }
-                SELECTED_FILTERS[active_tab]["data_format"].indexOf("PDF") < 0 && SELECTED_FILTERS[active_tab]["data_format"].push("PDF");
-                if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab]).length >0) {
-                    filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab]));
-                }
-                break;
-            case "slim":
                 if(!SELECTED_FILTERS[active_tab]["data_type"]) {
-                    SELECTED_FILTERS[active_tab]["data_type"] = [ "Slide Image" ];
+                    SELECTED_FILTERS[active_tab]["data_type"] = [];
                 }
+                SELECTED_FILTERS[active_tab]["data_format"].indexOf("PDF") < 0 && SELECTED_FILTERS[active_tab]["data_format"].push("PDF");
+                SELECTED_FILTERS[active_tab]["data_type"].indexOf("Pathology report") < 0 && SELECTED_FILTERS[active_tab]["data_type"].push("Pathology report");
                 if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab]).length >0) {
                     filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab]));
                 }
-                break;
-            case "dicom":
-                var filters = {"data_type": ["Radiology image"]};
-                if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab]).length >0) {
-                    filters = Object.assign(filters, SELECTED_FILTERS[active_tab]);
-                }
-                filter_args = 'filters=' + encodeURIComponent(JSON.stringify(filters));
                 break;
         }
 
@@ -400,7 +388,7 @@ require([
                     'case_barcode=' + encodeURIComponent(tab_case_barcode[active_tab]) + '&' : '')
                 + 'downloadToken=' + downloadToken);
         }
-        if(active_tab !== 'slim' && active_tab !== 'dicom') {
+        if(active_tab !== 'dicom') {
             $(tab_selector).find('.download-link').attr('href',$(tab_selector).find('.download-link').attr('href'));
         }
     }
@@ -557,27 +545,27 @@ require([
                                     '</div></td>';
                             break;
                         case 'pdf_filename':
-                            var file_loc = PATH_PDF_URL+files[i]['file_node_id'];
+                            let file_loc = PATH_PDF_URL+files[i]['file_node_id'];
                             table_row_data += '<td><div class ="col-filename accessible-filename">' +
-                                    '<div><a href="'+file_loc+'/" target="_blank" rel="noreferrer">' + files[i]['filename'] +
+                                    '<div><a role="button" class="pdf-download" url="'+file_loc+'/" data-filename="'
+                                    +files[i]['filename']+'">' + files[i]['filename'] +
                                     '<div>[' + files[i]['node'] + ' ID: ' + files[i]['file_node_id'] + ']</div>' +
-                                    '<div class="osmisis" style="display: none;"><i>Click to View File in a New Tab</i></div></a></div>' +
+                                    '<div class="osmisis" style="display: none;"><i>Click to download PDF</i></div></a></div>' +
                                     '</div></td>';
-                            break;
-                        case 'slide_filename':
-                             table_row_data += '<td><div class="col-filename accessible-filename">' +
-                                '<div><a href="https://'+ SLIM_URL+files[i]['study_uid'] + '/series/'
-                                    + files[i]['series_uid'] + '/" target="_blank" rel="noreferrer">'
-                                 + files[i]['filename'] + '<div>[' + files[i]['node'] + ' ID: '
-                                 + files[i]['file_node_id'] + ']</div>'
-                                 + '<div class="osmisis" style="display: none;"><i>Open in IDC SliM</i></div></a></div>' +
-                                '</div></td>';
                             break;
                         case 'study_uid':
-                            table_row_data += '<td><div class="study-uid">' +
-                                    '<a href="https://'+DICOM_VIEWER_URL+files[i]['study_uid']+'/" target="_blank" rel="nofollow noreferrer">'+files[i]['study_uid']+
-                                    '<div class="osmisis" style="display:thu none;"><i>Open in OHIF Viewer</i></div></a>'+
+                            if(files[i]['modality'] == 'SM') {
+                                table_row_data += '<td><div class="col-filename accessible-filename">' +
+                                    '<div><a href="https://'+ SLIM_URL+files[i]['study_uid'] + '/" target="_blank" rel="nofollow noreferrer">'
+                                     + files[i]['study_uid']
+                                     + '<div class="osmisis" style="display: none;"><i>Open in IDC SliM</i></div></a></div>' +
                                     '</div></td>';
+                            } else {
+                                table_row_data += '<td><div class="study-uid">' +
+                                    '<a href="https://'+DICOM_VIEWER_URL+files[i]['study_uid']+'/" target="_blank" rel="nofollow noreferrer">'+files[i]['study_uid']+
+                                    '<div class="osmisis" style="display:none;"><i>Open in IDC OHIF</i></div></a>'+
+                                    '</div></td>';
+                            }
                             break;
                         case 'platform':
                             table_row_data += '<td>' + files[i][column_name] + '</td>';
@@ -996,7 +984,7 @@ require([
                     msg_box.html(data['message']);
                     msg_box.show();
                 },
-                error: function () {
+                error: function (xhr) {
                      var responseJSON = $.parseJSON(xhr.responseText);
                     // If we received a redirect, honor that
                     if(responseJSON.redirect) {
@@ -1006,7 +994,7 @@ require([
                         base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
                     }
                 },
-            })
+            });
         }
     });
 
@@ -1029,6 +1017,34 @@ require([
 
     $('.filelist-container').on('click', '.hide-zeros input', function() {
         update_zero_case_filters($(this));
+    });
+
+    $('.data-tab-content').on('click', '.pdf-download', function(){
+        $.ajax({
+                type        :'GET',
+                url         : $(this).attr('url'),
+                success : function (data) {
+                    let signed_uri = data['signed_uri'];
+                    let a = document.createElement('a');
+                    a.href = signed_uri;
+                    a.download = $(this).attr('data-filename');
+                    a.target="_blank"
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(a.href);
+                },
+                error: function (xhr) {
+                     let responseJSON = $.parseJSON(xhr.responseText);
+                    // If we received a redirect, honor that
+                    if(responseJSON.redirect) {
+                        base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                        window.location = responseJSON.redirect;
+                    } else {
+                        base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
+                    }
+                },
+            })
     });
 
 });
