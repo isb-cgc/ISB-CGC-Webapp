@@ -178,11 +178,11 @@
     };
 
     var tab_columns = {
-        'all': ['program', 'case', 'filename', 'disease_code', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize'],
-        'igv': ['program', 'case', 'sample', 'filename', 'disease_code', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize', 'file_viewer'],
-        'slim': ['program', 'case', 'slide_filename', 'disease_code', 'datatype', 'dataformat', 'filesize'],
+        'all': ['program', 'case', 'filename', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize'],
+        'igv': ['program', 'case', 'sample', 'filename', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize', 'file_viewer'],
+        'slim': ['program', 'case', 'slide_filename', 'datatype', 'dataformat', 'filesize'],
         'dicom': ['program', 'case', 'collection_id', 'modality', 'study_desc', 'study_uid'],
-        'pdf': ['program', 'case', 'pdf_filename', 'disease_code', 'datacat', 'datatype', 'dataformat', 'filesize']
+        'pdf': ['program', 'case', 'pdf_filename', 'datacat', 'datatype', 'dataformat', 'filesize']
     };
 
     var download_url = '{{ download_url }}';
