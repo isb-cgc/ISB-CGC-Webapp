@@ -421,8 +421,6 @@ def igv(request):
 
 def path_report(request, report_file=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
-    context = {}
-
     try:
         if not path_report:
             messages.error(
@@ -436,17 +434,15 @@ def path_report(request, report_file=None):
             raise Exception("Received a status code of {} from IndexD.".format(str(response.status_code)))
 
         anon_signed_uri = response.json()['url']
-
-        template = 'isb_cgc/path-pdf.html'
-
-        context['path_report_file'] = anon_signed_uri
+        response = {'signed_uri': anon_signed_uri}
+        status = 200
     except Exception as e:
         logger.error("[ERROR] While trying to load Pathology report:")
         logger.exception(e)
         logger.error("Attempted URI: {}".format(uri))
-        return render(request, '500.html')
-
-    return render(request, template, context)
+        response = {'message': 'Could not obtain pathology report.'}
+        status = 500
+    return JsonResponse(response, status=status)
 
 
 # Because the match for vm_ is always done regardless of its presense in the URL
