@@ -25,6 +25,7 @@ from django_otp.forms import OTPTokenForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms import ValidationError, CharField, TextInput
+from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger(__name__)
 
@@ -99,13 +100,19 @@ class CgcOtpTokenForm(OTPTokenForm):
         if next_field:
             self.next_field = next_field
         super().__init__(user, request, *args, **kwargs)
+        # Customize some of the error messages
+        self.otp_error_messages['invalid_token'] = _(
+            'Invalid login code. Please make sure you have entered it correctly.'
+        )
+        self.otp_error_messages['token_required'] = _('Please enter your login code below.')
+        self.otp_error_messages['challenge_message'] = _('Multifactor Authentication: {0}')
 
     def _handle_challenge(self, device):
         token_error = None
         try:
             super()._handle_challenge(device)
         except ValidationError as e:
-            self.token_sent = True
+            self.token_sent = bool(e.code == 'challenge_message' and e.message.find('sent by email') >= 0)
             token_error = e
         if token_error:
             raise token_error
