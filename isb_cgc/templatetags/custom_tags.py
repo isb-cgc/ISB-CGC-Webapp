@@ -82,7 +82,6 @@ ATTR_SPECIFIC_ORDERS = [
     'build',
     'project_short_name_gdc',
     'project_short_name_pdc',
-    'disease_code',
     'vital_status',
     'gender_gdc',
     'gender_pdc',
