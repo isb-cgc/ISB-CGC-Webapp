@@ -115,20 +115,19 @@
             ['Program', 1],
             ['Case Barcode', 1],
             ['File Name', 1],
-            ['Disease Code', 1],
             ['Exp. Strategy', 1],
             ['Platform', 1],
             ['Data Category', 1],
             ['Data Type', 1],
             ['Data Format', 1],
-            ['File Size', 1]
+            ['File Size', 1],
+            ['Access', 1]
         ],
         'igv': [
             ['Program', 1],
             ['Case Barcode', 1],
             ['Sample Barcode', 1],
             ['File Name', 1],
-            ['Disease Code', 1],
             ['Exp. Strategy', 1],
             ['Platform', 1],
             ['Data Category', 1],
@@ -140,7 +139,6 @@
             ['Program', 1],
             ['Case Barcode', 1],
             ['File Name', 1],
-            ['Disease Code', 1],
             ['Data Type', 1],
             ['Data Format', 1],
             ['File Size', 1]
@@ -157,7 +155,6 @@
             ['Program', 1],
             ['Case Barcode', 1],
             ['File Name', 1],
-            ['Disease Code', 1],
             ['Data Category', 1],
             ['Data Type', 1],
             ['Data Format', 1],
@@ -178,11 +175,11 @@
     };
 
     var tab_columns = {
-        'all': ['program', 'case', 'filename', 'disease_code', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize'],
-        'igv': ['program', 'case', 'sample', 'filename', 'disease_code', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize', 'file_viewer'],
-        'slim': ['program', 'case', 'slide_filename', 'disease_code', 'datatype', 'dataformat', 'filesize'],
+        'all': ['program', 'case', 'filename', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'access', 'filesize'],
+        'igv': ['program', 'case', 'sample', 'filename', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize', 'file_viewer'],
+        'slim': ['program', 'case', 'slide_filename', 'datatype', 'dataformat', 'filesize'],
         'dicom': ['program', 'case', 'collection_id', 'modality', 'study_desc', 'study_uid'],
-        'pdf': ['program', 'case', 'pdf_filename', 'disease_code', 'datacat', 'datatype', 'dataformat', 'filesize']
+        'pdf': ['program', 'case', 'pdf_filename', 'datacat', 'datatype', 'dataformat', 'filesize']
     };
 
     var download_url = '{{ download_url }}';
