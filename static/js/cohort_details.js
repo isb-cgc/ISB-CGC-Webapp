@@ -27,8 +27,7 @@ require.config({
         stack_bar_chart: 'visualizations/createStackedBarChart',
         bloodhound: 'libs/bloodhound',
         typeahead : 'libs/typeahead',
-        tokenfield: 'libs/bootstrap-tokenfield.min',
-        bq_export: 'export_to_bq'
+        tokenfield: 'libs/bootstrap-tokenfield.min'
     },
     shim: {
         'tokenfield': ['jquery', 'jqueryui'],
@@ -60,8 +59,7 @@ require([
     'tokenfield',
     'vis_helpers',
     'tree_graph',
-    'stack_bar_chart',
-    'bq_export'
+    'stack_bar_chart'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, _, base) {
 
     var SELECTED_FILTERS = {};
