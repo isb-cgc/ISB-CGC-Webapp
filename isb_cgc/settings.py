@@ -94,10 +94,10 @@ CRON_MODULE             = os.environ.get('CRON_MODULE')
 WEBAPP_LOGIN_LOG_NAME = os.environ.get('WEBAPP_LOGIN_LOG_NAME', 'local_dev_logging')
 DCF_REFRESH_LOG_NAME = os.environ.get('DCF_REFRESH_LOG_NAME', 'local_dev_logging')
 
-BASE_URL                = os.environ.get('BASE_URL', 'https://test.isb-cgc.org')
-BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://test-api.isb-cgc.org/v4')
-DOMAIN_REDIRECT_FROM    = os.environ.get('DOMAIN_REDIRECT_FROM', 'isb-cgc-test.appspot.com').split(',')
-DOMAIN_REDIRECT_TO      = os.environ.get('DOMAIN_REDIRECT_TO', 'https://test.isb-cgc.org/')
+BASE_URL                = os.environ.get('BASE_URL', 'https://portal.isb-cgc.org')
+BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api.isb-cgc.org/v4')
+DOMAIN_REDIRECT_FROM    = os.environ.get('DOMAIN_REDIRECT_FROM', 'isb-cgc.appspot.com').split(',')
+DOMAIN_REDIRECT_TO      = os.environ.get('DOMAIN_REDIRECT_TO', 'https://portal.isb-cgc.org/')
 
 # Data Buckets
 OPEN_DATA_BUCKET        = os.environ.get('OPEN_DATA_BUCKET', '')
