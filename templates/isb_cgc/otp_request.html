@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load tz %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-4 col-md-3">
+        </div>
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        Multi-factor Authentication Required
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
+                    <div class="form-row" style="display: none;">
+                        {{ form.otp_device.errors }}
+                        <label for="id_otp_device">Code From:</label> {{ form.otp_device }}
+                    </div>
+                    <div class="submit-row">
+                    <label>&nbsp;</label><input class="btn btn-special" type="submit" name="otp_challenge" value="Get Login Code" />
+                        {% if form.token_sent %}
+                        <div class="alert alert-info alert-mfa">
+                            <p>A login code has been sent! Please check your email. To continue logging in, enter the numeric code into the box below, then click 'Validate Code'.</p>
+                            <p>If it doesn't arrive within a minute, check your spam folder.</p></div>
+                        {% endif %}
+                    </div>
+                    {% for key, errors in form.errors.items %}
+                        {% if not form.token_sent %}
+                            {{ errors }}
+                        {% endif %}
+                    {% endfor %}
+                    <div class="form-row">
+                        <p><label for="id_otp_token" class="required">Login Code:</label> {{ form.otp_token }}</p>
+                        <p><label>&nbsp;</label><input type="submit" class="btn btn-primary" value="Validate Code" /></p>
+                    </div>
+                    {% if form.next_field is not None %}
+                        <input name="next" type="hidden" value="{{ form.next_field }}">
+                    {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-3">
+        </div>
+    </div>
+{% endblock %}
+
+{% block js_file %}
+    {{ block.super }}
+{% endblock %}

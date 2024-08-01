@@ -4,7 +4,7 @@
 
 {% comment %}
 
-   Copyright 2022, Institute for Systems Biology
+   Copyright 2024, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@
 
         {% if cohort %}
             <ol class="breadcrumb">
-                <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
                 <li><a href="{% url 'cohort_list' %}">Saved Cohorts</a></li>
                 <li><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></li>
             </ol>
@@ -57,16 +56,15 @@
                 <div class="panel panel-default">
                     <ul class="nav nav-tabs nav-tabs-files" role="tablist">
                         <li role="presentation" class="file-browser-tab active"><a href="#all-files" role="tab" data-toggle="tab" title="Browse All Files" data-file-type="all">All Files</a></li>
-                        <li role="presentation" class="file-browser-tab"><a href="#slim-files" role="tab" data-toggle="tab" title="Browse Pathology Image Files" data-file-type="slim">Pathology Images</a></li>
                         <li role="presentation" class="file-browser-tab"><a href="#pdf-files" role="tab" data-toggle="tab" title="Browse Pathology Report Files" data-file-type="pdf">Pathology Reports</a></li>
-                        <li role="presentation" class="file-browser-tab"><a href="#dicom-files" role="tab" data-toggle="tab" title="Browse Radiology Image Files" data-file-type="dicom">Radiology Images</a></li>
+                        <li role="presentation" class="file-browser-tab"><a href="#dicom-files" role="tab" data-toggle="tab" title="Browse Viewable Image Files" data-file-type="dicom">Viewable Images</a></li>
                         <li role="presentation" class="file-browser-tab {% if user.is_anonymous %} disabled {% endif %}"><a href="#igv-files" role="tab" data-toggle="tab" title="Browse IGV Files" data-file-type="igv">IGV</a></li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <div class="row">
+        <div class="filelist-container row">
             <div class="tab-content data-tab-content">
                 <div id="placeholder" class="tab-pane active file-browser-tab" role="tabpanel">
                     <div class="col-md-12 data-tab-content-panel spinner-panel">
@@ -80,12 +78,6 @@
             </div>
         </div>
     </div>
-
-    {% if not user.is_anonymous and not has_user_data %}
-        <!-- Export File Manifest Modals -->
-        {% include "cohorts/bq_export_modal.html" with export_type="File Manifest" export_url=export_url %}
-        {% include "cohorts/gcs_export_modal.html" with export_type="File Manifest" export_url=export_url %}
-    {% endif %}
 
     <script type="text/javascript">
     var cohort_id = {% if cohort %} {{ cohort.id }} {% else %} null {% endif %};
@@ -122,20 +114,19 @@
             ['Program', 1],
             ['Case Barcode', 1],
             ['File Name', 1],
-            ['Disease Code', 1],
             ['Exp. Strategy', 1],
             ['Platform', 1],
             ['Data Category', 1],
             ['Data Type', 1],
             ['Data Format', 1],
-            ['File Size', 1]
+            ['File Size', 1],
+            ['Access', 1]
         ],
         'igv': [
             ['Program', 1],
             ['Case Barcode', 1],
             ['Sample Barcode', 1],
             ['File Name', 1],
-            ['Disease Code', 1],
             ['Exp. Strategy', 1],
             ['Platform', 1],
             ['Data Category', 1],
@@ -147,7 +138,6 @@
             ['Program', 1],
             ['Case Barcode', 1],
             ['File Name', 1],
-            ['Disease Code', 1],
             ['Data Type', 1],
             ['Data Format', 1],
             ['File Size', 1]
@@ -155,8 +145,8 @@
         'dicom': [
             ['Program', 1],
             ['Case Barcode', 1],
-            ['Disease Code', 1],
-            ['Project Short Name', 1],
+            ['Collection', 1],
+            ['Modality', 1],
             ['Study Description', 1],
             ['Study Instance UID', 1]
         ],
@@ -164,7 +154,6 @@
             ['Program', 1],
             ['Case Barcode', 1],
             ['File Name', 1],
-            ['Disease Code', 1],
             ['Data Category', 1],
             ['Data Type', 1],
             ['Data Format', 1],
@@ -185,11 +174,11 @@
     };
 
     var tab_columns = {
-        'all': ['program', 'case', 'filename', 'disease_code', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize'],
-        'igv': ['program', 'case', 'sample', 'filename', 'disease_code', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize', 'file_viewer'],
-        'slim': ['program', 'case', 'slide_filename', 'disease_code', 'datatype', 'dataformat', 'filesize'],
-        'dicom': ['program', 'case', 'disease_code', 'project_short_name', 'study_desc', 'study_uid'],
-        'pdf': ['program', 'case', 'pdf_filename', 'disease_code', 'datacat', 'datatype', 'dataformat', 'filesize']
+        'all': ['program', 'case', 'filename', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'access', 'filesize'],
+        'igv': ['program', 'case', 'sample', 'filename', 'exp_strat', 'platform', 'datacat', 'datatype', 'dataformat', 'filesize', 'file_viewer'],
+        'slim': ['program', 'case', 'slide_filename', 'datatype', 'dataformat', 'filesize'],
+        'dicom': ['program', 'case', 'collection_id', 'modality', 'study_desc', 'study_uid'],
+        'pdf': ['program', 'case', 'pdf_filename', 'datacat', 'datatype', 'dataformat', 'filesize']
     };
 
     var download_url = '{{ download_url }}';
@@ -218,7 +207,6 @@
 
     var SEL_IGV_FILE_MAX = '{{  sel_file_max }}';
     var FILE_LIST_MAX = '{{  file_list_max }}';
-    var HAS_USER_DATA = {% if has_user_data %}true{% else %}false{% endif %};
     var request_user_id = {% if user.is_anonymous %} null {% else %} {{ user.id }} {% endif %};
     var programs_this_cohort = {{ programs_this_cohort|tojson|safe }};
     </script>

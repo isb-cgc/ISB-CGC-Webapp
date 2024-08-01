@@ -19,7 +19,7 @@ import logging
 from django.http import HttpResponsePermanentRedirect
 from django.conf import settings
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 
 class DomainRedirectMiddleware(object):

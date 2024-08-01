@@ -23,6 +23,7 @@ from os.path import join, dirname, exists
 import sys
 import dotenv
 from socket import gethostname, gethostbyname
+import google.cloud.logging
 
 
 SECURE_LOCAL_PATH = os.environ.get('SECURE_LOCAL_PATH', '')
@@ -49,9 +50,10 @@ SHARED_SOURCE_DIRECTORIES = [
 for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
+SUPPORT_EMAIL = os.environ.get('SUPPORT_EMAIL', 'info@isb-cgc.org')
+
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 CONNECTION_IS_LOCAL     = (os.environ.get('DATABASE_HOST', '127.0.0.1') == 'localhost')
-IS_CIRCLE               = (os.environ.get('CI', None) is not None)
 DEBUG_TOOLBAR           = ((os.environ.get('DEBUG_TOOLBAR', 'False') == 'True') and CONNECTION_IS_LOCAL)
 
 print("[STATUS] DEBUG mode is "+str(DEBUG), file=sys.stdout)
@@ -69,11 +71,19 @@ MANAGERS                = ADMINS
 # For Django 3.2, we need to specify our default auto-increment type for PKs
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
+# GCP where this application is running (dev project for local developer instances)
 GCLOUD_PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
+# GCP number for the project where this application is running (dev project for local developer instances)
 GCLOUD_PROJECT_NUMBER          = os.environ.get('GCLOUD_PROJECT_NUMBER', '')
+# GCP where BQ jobs are run
 BIGQUERY_PROJECT_ID            = os.environ.get('BIGQUERY_PROJECT_ID', GCLOUD_PROJECT_ID)
-BIGQUERY_DATASET_V1            = os.environ.get('BIGQUERY_DATASET_V1', '')
+# GCP where BQ case metadata resides
 BIGQUERY_DATA_PROJECT_ID       = os.environ.get('BIGQUERY_DATA_PROJECT_ID', GCLOUD_PROJECT_ID)
+# Project and BQ dataset which house the exported BQ tables made available to users
+BIGQUERY_EXPORT_PROJECT_ID     = os.environ.get('BIGQUERY_EXPORT_PROJECT_ID', GCLOUD_PROJECT_ID)
+BIGQUERY_EXPORT_DATASET_ID     = os.environ.get('BIGQUERY_EXPORT_DATASET_ID', 'user_exports')
+BIGQUERY_USER_MANIFEST_TIMEOUT = int(os.environ.get('BIGQUERY_USER_MANIFEST_TIMEOUT', '7'))
+# User feedback tables
 BIGQUERY_FEEDBACK_DATASET      = os.environ.get('BIGQUERY_FEEDBACK_DATASET', '')
 BIGQUERY_FEEDBACK_TABLE        = os.environ.get('BIGQUERY_FEEDBACK_TABLE', '')
 
@@ -81,11 +91,8 @@ BIGQUERY_FEEDBACK_TABLE        = os.environ.get('BIGQUERY_FEEDBACK_TABLE', '')
 CRON_MODULE             = os.environ.get('CRON_MODULE')
 
 # Log Names
-SERVICE_ACCOUNT_LOG_NAME = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev_logging')
 WEBAPP_LOGIN_LOG_NAME = os.environ.get('WEBAPP_LOGIN_LOG_NAME', 'local_dev_logging')
-GCP_ACTIVITY_LOG_NAME = os.environ.get('GCP_ACTIVITY_LOG_NAME', 'local_dev_logging')
 DCF_REFRESH_LOG_NAME = os.environ.get('DCF_REFRESH_LOG_NAME', 'local_dev_logging')
-DCF_SA_REG_LOG_NAME = os.environ.get('DCF_SA_REG_LOG_NAME', 'local_dev_logging')
 
 BASE_URL                = os.environ.get('BASE_URL', 'https://portal.isb-cgc.org')
 BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api.isb-cgc.org/v4')
@@ -94,43 +101,9 @@ DOMAIN_REDIRECT_TO      = os.environ.get('DOMAIN_REDIRECT_TO', 'https://portal.i
 
 # Data Buckets
 OPEN_DATA_BUCKET        = os.environ.get('OPEN_DATA_BUCKET', '')
-GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET')
-
-# BigQuery cohort storage settings
-BIGQUERY_COHORT_DATASET_ID           = os.environ.get('BIGQUERY_COHORT_DATASET_ID', 'cohort_dataset')
-BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
-BIGQUERY_COSMIC_DATASET_ID    = os.environ.get('BIGQUERY_COSMIC_DATASET_ID', '')
-BIGQUERY_CGC_TABLE_ID    = os.environ.get('BIGQUERY_CGC_TABLE_ID', '')
-BQ_FILE_MANIFEST_TABLE_ID_HG19 = os.environ.get('BQ_FILE_MANIFEST_TABLE_ID_HG19', '')
-BQ_FILE_MANIFEST_TABLE_ID_HG38 = os.environ.get('BQ_FILE_MANIFEST_TABLE_ID_HG38', '')
-
-BQ_TCGA_BIOCLIN_TABLE_ID = os.environ.get('BQ_TCGA_BIOCLIN_TABLE_ID', '')
-BQ_TARGET_BIOCLIN_TABLE_ID = os.environ.get('BQ_TARGET_BIOCLIN_TABLE_ID', '')
-BQ_CCLE_BIOCLIN_TABLE_ID = os.environ.get('BQ_CCLE_BIOCLIN_TABLE_ID', '')
-BQ_BEATAML_BIOCLIN_TABLE_ID = os.environ.get('BQ_BEATAML_BIOCLIN_TABLE_ID', '')
-BQ_FM_BIOCLIN_TABLE_ID = os.environ.get('BQ_FM_BIOCLIN_TABLE_ID', '')
-BQ_OHSU_BIOCLIN_TABLE_ID = os.environ.get('BQ_OHSU_BIOCLIN_TABLE_ID', '')
-BQ_MMRF_BIOCLIN_TABLE_ID = os.environ.get('BQ_MMRF_BIOCLIN_TABLE_ID', '')
-BQ_GPRP_BIOCLIN_TABLE_ID = os.environ.get('BQ_GPRP_BIOCLIN_TABLE_ID', '')
 
 MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
-USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
-
-BQ_FILE_MANIFEST_TABLE_ID = {
-    'HG19': BQ_FILE_MANIFEST_TABLE_ID_HG19,
-    'HG38': BQ_FILE_MANIFEST_TABLE_ID_HG38
-}
-BQ_PROG_BIOCLIN_TABLE_ID = {
-    'TCGA': BQ_TCGA_BIOCLIN_TABLE_ID,
-    'TARGET': BQ_TARGET_BIOCLIN_TABLE_ID,
-    'CCLE': BQ_CCLE_BIOCLIN_TABLE_ID,
-    'BEATAML1.0': BQ_BEATAML_BIOCLIN_TABLE_ID,
-    'FM': BQ_FM_BIOCLIN_TABLE_ID,
-    'OHSU': BQ_OHSU_BIOCLIN_TABLE_ID,
-    'MMRF': BQ_MMRF_BIOCLIN_TABLE_ID,
-    'GPRP': BQ_GPRP_BIOCLIN_TABLE_ID
-}
 database_config = {
     'default': {
         'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
@@ -158,14 +131,17 @@ if os.environ.get('CI', None) is not None:
 DATABASES = database_config
 DB_SOCKET = database_config['default']['HOST'] if 'cloudsql' in database_config['default']['HOST'] else None
 
+# Tier ID vars are set in .envs for that tier so these should only be true on those tiers
 IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_UAT = (os.environ.get('IS_UAT', 'False') == 'True')
-IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
-IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
+# AppEngine var is set in the app.yaml so this should be false for CI and local dev apps
+IS_APP_ENGINE = bool(os.getenv('IS_APP_ENGINE', 'False') == 'True')
+# $CI is set only on CircleCI run VMs so this should not have a value outside of a deployment build
+IS_CI = bool(os.getenv('CI', None) is not None)
 
-# If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
-# care of that for us
-if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE_FLEX:
+# SSL Certs are used by non-appengine deployments to talk to a CloudSQL database
+# AppEngine deployments use the proxy and do not need these variables to be set
+if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE:
     DATABASES['default']['OPTIONS'] = {
         'ssl': {
             'ca': os.environ.get('DB_SSL_CA'),
@@ -174,45 +150,17 @@ if 'DB_SSL_CERT' in os.environ and not IS_APP_ENGINE_FLEX:
         }
     }
 
-# Default to localhost for the site ID
+# Site ID setting for AllAuth
+# Default to localhost (set in build scripts for local VMs to entry ID 3)
 SITE_ID = 3
 
-if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
+# ...and only switch to the deployed system, which should always be ID 4, if we are on AppEngine
+if IS_APP_ENGINE:
     print("[STATUS] AppEngine Flex detected.", file=sys.stdout)
     SITE_ID = 4
 
-
-def get_project_identifier():
-    return BIGQUERY_PROJECT_ID
-
-
-# Set cohort table here
-if BIGQUERY_COHORT_TABLE_ID is None:
-    raise Exception("Developer-specific cohort table ID is not set.")
-
 BQ_MAX_ATTEMPTS             = int(os.environ.get('BQ_MAX_ATTEMPTS', '10'))
-
-
-# TODO Remove duplicate class.
-#
-# This class is retained here, as it is required by bq_data_access/v1.
-# bq_data_access/v2 uses the class from the bq_data_access/bigquery_cohorts module.
-class BigQueryCohortStorageSettings(object):
-    def __init__(self, dataset_id, table_id):
-        self.dataset_id = dataset_id
-        self.table_id = table_id
-
-
-def GET_BQ_COHORT_SETTINGS():
-    return BigQueryCohortStorageSettings(BIGQUERY_COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
-
 USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', False)
-
-PROCESSING_ENABLED          = os.environ.get('PROCESSING_ENABLED', False)
-PROCESSING_JENKINS_URL      = os.environ.get('PROCESSING_JENKINS_URL', 'http://localhost/jenkins')
-PROCESSING_JENKINS_PROJECT  = os.environ.get('PROCESSING_JENKINS_PROJECT', 'cgc-processing')
-PROCESSING_JENKINS_USER     = os.environ.get('PROCESSING_JENKINS_USER', 'user')
-PROCESSING_JENKINS_PASSWORD = os.environ.get('PROCESSING_JENKINS_PASSWORD', '')
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -271,8 +219,6 @@ STATIC_ROOT = ''
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = os.environ.get('STATIC_URL', '/static/')
 
-BQ_ECOSYS_STATIC_URL = os.environ.get('BQ_ECOSYS_STATIC_URL', 'https://storage.googleapis.com/webapp-static-files-isb-cgc-dev/bq_ecosys/')
-
 CITATIONS_STATIC_URL = os.environ.get('CITATIONS_STATIC_URL', 'https://storage.googleapis.com/webapp-static-files-isb-cgc-dev/static/citations/')
 
 GCS_STORAGE_URI = os.environ.get('GCS_STORAGE_URI', 'https://storage.googleapis.com/')
@@ -295,24 +241,35 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 
-SECURE_HSTS_INCLUDE_SUBDOMAINS = (os.environ.get('SECURE_HSTS_INCLUDE_SUBDOMAINS','True') == 'True')
-SECURE_HSTS_PRELOAD = (os.environ.get('SECURE_HSTS_PRELOAD','True') == 'True')
-SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS','3600'))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = (os.environ.get('SECURE_HSTS_INCLUDE_SUBDOMAINS', 'True') == 'True')
+SECURE_HSTS_PRELOAD = (os.environ.get('SECURE_HSTS_PRELOAD', 'True') == 'True')
+SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '3600'))
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'isb_cgc.domain_redirect_middleware.DomainRedirectMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'isb_cgc.checkreqsize_middleware.CheckReqSize',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'adminrestrict.middleware.AdminPagesRestrictMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django_otp.middleware.OTPMiddleware',
+    'isb_cgc.otp_verification_middleware.CgcOtpVerificationMiddleware',
+    'adminrestrict.middleware.AdminPagesRestrictMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
     'isb_cgc.password_expiration.PasswordExpireMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'offline.middleware.OfflineMiddleware',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://www.isb-cgc.org",
+    "https://portal.isb-cgc.org",
+    "https://isb-cgc.org",
+    "https://api.isb-cgc.org"
 ]
 
 ROOT_URLCONF = 'isb_cgc.urls'
@@ -331,17 +288,10 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'anymail',
     'isb_cgc',
-    'visualizations',
-    'seqpeek',
     'sharing',
     'cohorts',
     'projects',
     'genes',
-    'variables',
-    'workbooks',
-    # 'notebooks',
-    'data_upload',
-    'analysis',
     'offline',
     'adminrestrict',
 )
@@ -351,8 +301,8 @@ INSTALLED_APPS = (
 #############################
 
 INSTALLED_APPS += ('session_security',)
-SESSION_SECURITY_WARN_AFTER = int(os.environ.get('SESSION_SECURITY_WARN_AFTER','540'))
-SESSION_SECURITY_EXPIRE_AFTER = int(os.environ.get('SESSION_SECURITY_EXPIRE_AFTER','600'))
+SESSION_SECURITY_WARN_AFTER = int(os.environ.get('SESSION_SECURITY_WARN_AFTER', '540'))
+SESSION_SECURITY_EXPIRE_AFTER = int(os.environ.get('SESSION_SECURITY_EXPIRE_AFTER', '600'))
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 MIDDLEWARE.append(
     # for django-session-security -- must go *after* AuthenticationMiddleware
@@ -365,11 +315,40 @@ MIDDLEWARE.append(
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
+handler_set = ['console_dev', 'console_prod']
+handlers = {
+    'mail_admins': {
+        'level': 'ERROR',
+        'filters': ['require_debug_false'],
+        'class': 'django.utils.log.AdminEmailHandler'
+    },
+    'console_dev': {
+        'level': 'DEBUG',
+        'filters': ['require_debug_true'],
+        'class': 'logging.StreamHandler',
+        'formatter': 'verbose',
+    },
+    'console_prod': {
+        'level': 'DEBUG',
+        'filters': ['require_debug_false'],
+        'class': 'logging.StreamHandler',
+        'formatter': 'simple',
+    },
+}
+
+if IS_APP_ENGINE:
+    # We need to hook up Python logging to Google Cloud Logging for AppEngine (or nothing will be logged)
+    client = google.cloud.logging_v2.Client()
+    client.setup_logging()
+    handler_set.append('stackdriver')
+    handlers['stackdriver'] = {
+        'level': 'DEBUG',
+        'filters': ['require_debug_false'],
+        'class': 'google.cloud.logging_v2.handlers.CloudLoggingHandler',
+        'client': client,
+        'formatter': 'verbose'
+    }
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -383,62 +362,33 @@ LOGGING = {
     },
     'formatters': {
         'verbose': {
-            'format': '[%(levelname)s] @%(asctime)s in %(module)s/%(process)d/%(thread)d - %(message)s'
+            'format': '[%(name)s] [%(levelname)s] @%(asctime)s in %(module)s/%(process)d/%(thread)d - %(message)s'
         },
         'simple': {
-            'format': '[%(levelname)s] @%(asctime)s in %(module)s: %(message)s'
+            'format': '[%(name)s] [%(levelname)s] @%(asctime)s in %(module)s: %(message)s'
         },
     },
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        },
-        'console_dev': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-        'console_prod': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_false'],
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-        },
+    'handlers': handlers,
+    'root': {
+        'level': 'INFO',
+        'handlers': handler_set
     },
     'loggers': {
+        '': {
+            'level': 'INFO',
+            'handlers': handler_set,
+            'propagate': True
+        },
+        'django': {
+            'level': 'INFO',
+            'handlers': handler_set,
+            'propagate': False
+        },
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
-        },
-        'main_logger': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'allauth': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'google_helpers': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'accounts': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'finalware': {
-            'handlers': ['console_dev', 'console_prod'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
+        }
     },
 }
 
@@ -446,7 +396,7 @@ LOGGING = {
 #  Start django-allauth  #
 ##########################
 
-LOGIN_REDIRECT_URL = '/extended_login/'
+LOGIN_REDIRECT_URL = '/otp_request/'
 
 INSTALLED_APPS += (
     'accounts',
@@ -454,6 +404,11 @@ INSTALLED_APPS += (
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'corsheaders',
+    'django_otp',
+    'django_otp.plugins.otp_static',
+    'django_otp.plugins.otp_totp',
+    'django_otp.plugins.otp_email',
     'rest_framework.authtoken')
 
 # Template Engine Settings
@@ -513,11 +468,15 @@ ACCOUNT_USERNAME_REQUIRED = bool(os.environ.get('ACCOUNT_USERNAME_REQUIRED', 'Fa
 ACCOUNT_EMAIL_VERIFICATION = os.environ.get('ACCOUNT_EMAIL_VERIFICATION', 'mandatory').lower()
 ACCOUNT_USER_DISPLAY = lambda user: user.email
 
-ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Cancer Genomic Cloud] "
-ACCOUNTS_PASSWORD_EXPIRATION = os.environ.get('ACCOUNTS_PASSWORD_EXPIRATION', 120) # Max password age in days
-ACCOUNTS_PASSWORD_EXPIRATION_WARN = os.environ.get('ACCOUNTS_PASSWORD_EXPIRATION_WARN', (14 * 24 * 60 * 60)) # Time to warn for password expiration in seconds
-ACCOUNTS_PASSWORD_HISTORY = os.environ.get('ACCOUNTS_PASSWORD_HISTORY', 5) # Max password history kept
-ACCOUNTS_ALLOWANCES = list(set(os.environ.get('ACCOUNTS_ALLOWANCES','').split(',')))
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[ISB Cancer Genomic Cloud] "
+# Max password age in days
+ACCOUNTS_PASSWORD_EXPIRATION = os.environ.get('ACCOUNTS_PASSWORD_EXPIRATION', 120)
+# Time to warn for password expiration in seconds
+ACCOUNTS_PASSWORD_EXPIRATION_WARN = os.environ.get('ACCOUNTS_PASSWORD_EXPIRATION_WARN', (14 * 24 * 60 * 60))
+# Max password history kept
+ACCOUNTS_PASSWORD_HISTORY = os.environ.get('ACCOUNTS_PASSWORD_HISTORY', 5)
+# Special system accounts which bypass various requirements
+ACCOUNTS_ALLOWANCES = list(set(os.environ.get('ACCOUNTS_ALLOWANCES', '').split(',')))
 
 ACCOUNT_FORMS = {
     'reset_password': 'isb_cgc.forms.CgcResetPassword',
@@ -558,6 +517,15 @@ AUTH_PASSWORD_VALIDATORS = [
     }
 ]
 
+################
+## django-otp
+################
+
+OTP_EMAIL_SENDER = os.environ.get('OTP_EMAIL_SENDER', SUPPORT_EMAIL)
+OTP_EMAIL_SUBJECT = os.environ.get('OTP_EMAIL_SUBJECT', "[ISB-CGC] Email Login Token")
+OTP_EMAIL_BODY_TEMPLATE_PATH = os.environ.get('OTP_EMAIL_BODY_TEMPLATE_PATH', 'isb_cgc/token.html')
+OTP_LOGIN_URL = os.environ.get('OTP_LOGIN_URL', '/otp_request/')
+
 #########################################
 # Axes Settings
 #########################################
@@ -571,22 +539,22 @@ AXES_COOLOFF_TIME = int(os.environ.get('AXES_COOLOFF_TIME', '5'))
 AXES_USERNAME_FORM_FIELD = "email"
 AXES_LOCKOUT_TEMPLATE = os.environ.get('AXES_LOCKOUT_TEMPLATE', 'accounts/account/login_lockout.html')
 
-# Path to application runtime JSON key
-GOOGLE_APPLICATION_CREDENTIALS        = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')))
+# Deployed systems retrieve credentials from the metadata server, but a local VM build must provide a credentials file
+# for some actions. CircleCI needs SA access but can make use of the deployment SA's key.
+GOOGLE_APPLICATION_CREDENTIALS = None
 
-if not exists(GOOGLE_APPLICATION_CREDENTIALS):
-    print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
-    exit(1)
+if IS_DEV:
+    GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')
+elif IS_CI:
+    GOOGLE_APPLICATION_CREDENTIALS = "deployment.key.json"
 
-# GCP monitoring Service Account, needed for template display
-MONITORING_SA_CLIENT_EMAIL            = os.environ.get('MONITORING_SA_CLIENT_EMAIL', '')
-
-# GCP monitoring Service Account key
-MONITORING_SA_ACCESS_CREDENTIALS      = join(dirname(__file__), '../{}{}'.format(SECURE_LOCAL_PATH,os.environ.get('MONITORING_SA_ACCESS_CREDENTIALS', '')))
-
-if not exists(MONITORING_SA_ACCESS_CREDENTIALS):
-    print("[ERROR] Monitoring service account credentials file wasn't found! Provided path: {}".format(MONITORING_SA_ACCESS_CREDENTIALS))
-    exit(1)
+if not IS_APP_ENGINE:
+    if GOOGLE_APPLICATION_CREDENTIALS is not None and not exists(GOOGLE_APPLICATION_CREDENTIALS):
+        print("[ERROR] Google application credentials file wasn't found! Provided path: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
+        exit(1)
+    print("[STATUS] GOOGLE_APPLICATION_CREDENTIALS: {}".format(GOOGLE_APPLICATION_CREDENTIALS))
+else:
+    print("[STATUS] AppEngine Flex detected--default credentials will be used.")
 
 # Client ID used for OAuth2 - this is for IGV and the test database
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID', '')
@@ -598,30 +566,11 @@ OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET', '')
 #   For NIH/eRA Commons login   #
 #################################
 
-OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP', '')
-GOOGLE_GROUP_ADMIN                      = os.environ.get('GOOGLE_GROUP_ADMIN', '')
-SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS', '')
-
 # Log name for ERA login views
 LOG_NAME_ERA_LOGIN_VIEW                  = os.environ.get('LOG_NAME_ERA_LOGIN_VIEW', '')
 
-# Service account blacklist file path
-SERVICE_ACCOUNT_BLACKLIST_PATH           = os.environ.get('SERVICE_ACCOUNT_BLACKLIST_PATH', '')
-
-# Google Org whitelist file path
-GOOGLE_ORG_WHITELIST_PATH                = os.environ.get('GOOGLE_ORG_WHITELIST_PATH', '')
-
-# Managed Service Account file path
-MANAGED_SERVICE_ACCOUNTS_PATH            = os.environ.get('MANAGED_SERVICE_ACCOUNTS_PATH', '')
-
 # DCF Phase I enable flag
 DCF_TEST                                 = bool(os.environ.get('DCF_TEST', 'False') == 'True')
-
-# SA via DCF
-SA_VIA_DCF                               = bool(os.environ.get('SA_VIA_DCF', 'False') == 'True')
-
-# DCF Monitoring SA
-DCF_MONITORING_SA                        = os.environ.get('DCF_MONITORING_SA', '')
 
 #################################
 #   For DCF login               #
@@ -636,10 +585,7 @@ DCF_REVOKE_URL                           = os.environ.get('DCF_REVOKE_URL', '')
 DCF_LOGOUT_URL                           = os.environ.get('DCF_LOGOUT_URL', '')
 DCF_URL_URL                              = os.environ.get('DCF_URL_URL', '')
 DCF_CLIENT_SECRETS                       = os.environ.get('DCF_CLIENT_SECRETS', '')
-DCF_GOOGLE_SA_REGISTER_URL               = os.environ.get('DCF_GOOGLE_SA_REGISTER_URL', '')
 DCF_GOOGLE_SA_VERIFY_URL                 = os.environ.get('DCF_GOOGLE_SA_VERIFY_URL', '')
-DCF_GOOGLE_SA_MONITOR_URL                = os.environ.get('DCF_GOOGLE_SA_MONITOR_URL', '')
-DCF_GOOGLE_SA_URL                        = os.environ.get('DCF_GOOGLE_SA_URL', '')
 DCF_TOKEN_REFRESH_WINDOW_SECONDS         = int(os.environ.get('DCF_TOKEN_REFRESH_WINDOW_SECONDS', 86400))
 DCF_LOGIN_EXPIRATION_SECONDS             = int(os.environ.get('DCF_LOGIN_EXPIRATION_SECONDS', 86400))
 
@@ -649,7 +595,7 @@ DCF_LOGIN_EXPIRATION_SECONDS             = int(os.environ.get('DCF_LOGIN_EXPIRAT
 #
 # This should only be done on a local system which is running against its own VM. Deployed systems will already have
 # a site superuser so this would simply overwrite that user. Don't enable this in production!
-if (IS_DEV and CONNECTION_IS_LOCAL) or IS_CIRCLE:
+if (IS_DEV and CONNECTION_IS_LOCAL) or IS_CI:
     INSTALLED_APPS += (
         'finalware',)
 
@@ -662,10 +608,6 @@ if (IS_DEV and CONNECTION_IS_LOCAL) or IS_CIRCLE:
 ############################
 
 CONN_MAX_AGE = 60
-
-############################
-#   CUSTOM TEMPLATE CONTEXT
-############################
 
 ############################
 #   METRICS SETTINGS
@@ -699,14 +641,6 @@ DICOM_VIEWER = os.environ.get('DICOM_VIEWER', None)
 SLIM_VIEWER = os.environ.get('SLIM_VIEWER', None)
 
 #################################
-# NOTEBOOK settings
-#################################
-# NOTEBOOK_VIEWER = os.environ.get('NOTEBOOK_VIEWER', None)
-NOTEBOOK_VIEWER = ''
-# NOTEBOOK_ENV_LOC = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_ENV_PATH', None))
-# NOTEBOOK_SL_PATH = os.path.join(BASE_DIR, os.environ.get('NOTEBOOK_SL_PATH', None))
-
-#################################
 # SOLR settings
 #################################
 SOLR_URI = os.environ.get('SOLR_URI', '')
@@ -717,10 +651,10 @@ SOLR_CERT = join(dirname(dirname(__file__)), "{}{}".format(SECURE_LOCAL_PATH, os
 ##############################################################
 #   MailGun Email Settings
 ##############################################################
-
 EMAIL_SERVICE_API_URL = os.environ.get('EMAIL_SERVICE_API_URL', '')
 EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
-NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')
+SERVER_EMAIL = "info@isb-cgc.org"
+NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATION_EMAIL_FROM_ADDRESS', SERVER_EMAIL)
 NOTIFICATION_EMAIL_TO_ADDRESS = os.environ.get('NOTIFICATION_EMAIL_TO_ADDRESS', '')
 
 #########################
@@ -734,10 +668,9 @@ ANYMAIL = {
 }
 EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 DEFAULT_FROM_EMAIL = NOTIFICATION_EMAIL_FROM_ADDRESS
-SERVER_EMAIL = "info@isb-cgc.org"
 
 # Cron user settings
-CRON_USER = os.environ.get('CRON_USER', 'cron_user')
+CRON_USER = os.environ.get('CRON_USER', 'cron-user')
 CRON_AUTH_KEY = os.environ.get('CRON_AUTH_KEY', 'Token')
 
 # Explicitly check for known items
@@ -771,9 +704,7 @@ BQ_SEARCH_URL = os.environ.get('BQ_SEARCH_URL', 'https://bq-search.isb-cgc.org/'
 ##########################
 # OAUTH PLATFORM         #
 ##########################
-IDP        = os.environ.get('IDP', 'fence')
+IDP = os.environ.get('IDP', 'fence')
 # RAS TOKEN MAX LIFE 25 DAYS
 DCF_UPSTREAM_EXPIRES_IN_SEC = os.environ.get('DCF_UPSTREAM_EXPIRES_IN_SEC', '1296000')
 DCF_REFRESH_TOKEN_EXPIRES_IN_SEC = os.environ.get('DCF_REFRESH_TOKEN_EXPIRES_IN_SEC', '2592000')
-
-SUPPORT_EMAIL=os.environ.get('SUPPORT_EMAIL','')

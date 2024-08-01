@@ -43,7 +43,7 @@ from projects.models import Program, Project, Attribute, Attribute_Tooltips, Dat
 from django.contrib.auth.models import User
 isb_superuser = User.objects.get(username="isb")
 
-logger = logging.getLogger('main_logger')
+logger = logging.getLogger(__name__)
 
 
 def main():

@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2015-2024, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ define(['jquery', 'd3', 'd3tip', 'vis_helpers'],
 function($, d3, d3tip, vis_helpers) {
 
     var CURSOR_TOOLTIP_PAD = 20;
+    var MAX_NODE_TREES = 5;
 
     // If you want to override the tip coming in from the create call,
     // do it here
@@ -34,12 +35,13 @@ function($, d3, d3tip, vis_helpers) {
             } else {
                 treeTip.offset([CURSOR_TOOLTIP_PAD, 0]);
             }
-
-            return '<span>' + d.name + ': ' + d.count + '</span>';
+            if(d.count !== undefined) {
+                return '<span>' + d.name + ': ' + d.count + '</span>';
+            }
+            return '<span>' + d.name + ': N/A</span>';
         });
 
-    return {
-        get_treemap_ready: function(data, clin_attr_key, attribute, prog_id) {
+     var  get_tree_ready = function(data, clin_attr_key, attribute, prog_id) {
             var children = [];
             for (var i in data) {
                 // For Issue 2018 we build a standardized tag that identifies check boxes:
@@ -48,14 +50,15 @@ function($, d3, d3tip, vis_helpers) {
                 children.push({name:(data[i]['displ_name'] || data[i]['value'].toString().replace(/_/g, ' ')), count: data[i]['count'], click_targ: click_targ});
             }
             return {children: children, name: attribute};
-        },
-        draw_tree: function(data, svg, prog_id, clin_attr_key, attribute, w, h, showtext, tip, pcount) {
+        };
+
+     var draw_single_tree = function(data, svg, prog_id, clin_attr_key, attribute, w, h, showtext, tip, pcount) {
 
             pcount = pcount || 0;
 
             tip = treeTip || tip;
 
-            var node = this.get_treemap_ready(data, clin_attr_key, attribute, prog_id);
+            var node = get_tree_ready(data, clin_attr_key, attribute, prog_id);
             var treemap = d3.layout.treemap()
                 .round(false)
                 .size([w, h])
@@ -74,9 +77,14 @@ function($, d3, d3tip, vis_helpers) {
                 return d.name;
             });
             var helpers = Object.create(vis_helpers, {});
-            var color = d3.scale.ordinal()
+            let color = d3.scale.ordinal()
                 .domain(name_domain)
                 .range(helpers.color_map(name_domain.length));
+            if(Object.keys(data).length <= 0) {
+                color = d3.scale.ordinal()
+                .domain(name_domain)
+                .range(["#818181FF"]);
+            }
 
             var cell = svg.selectAll("g")
                 .data(nodes)
@@ -101,17 +109,28 @@ function($, d3, d3tip, vis_helpers) {
                     // This function predated the Issue 2018 fix, but the target element was being missed because no id
                     // was provided, and the tag generation here was faulty. Use a prebuilt click targ here that matches the
                     // pattern established in Common/cohorts/metadata_counting.py:
-                    var item = $('#' + d.click_targ);
-                    var viewOnly = ($('#cohort-mode').length) && ($('#cohort-mode').val() == 'VIEW');
-                    if ((item.length > 0) && !viewOnly) {
-                        item[0].checked = 'checked';
-                        $(item[0]).trigger('change');
+                    if(d.count > 0) {
+                        var item = $('#' + d.click_targ);
+                        var viewOnly = ($('#cohort-mode').length) && ($('#cohort-mode').val() == 'VIEW');
+                        if ((item.length > 0) && !viewOnly) {
+                            $(item[0]).click();
+                        }
                     }
                 });
-
             svg.call(tip);
-        },
-        draw_trees: function(data, clin_attr, prog_id, this_tree) {
+        };
+
+    return {
+        get_treemap_ready: get_tree_ready,
+        draw_tree: draw_single_tree,
+        draw_trees: function(data, clin_attr, prog_id, these_trees) {
+
+            let attrs = {};
+            Object.keys(clin_attr).map(function(node){
+                Object.keys(clin_attr[node]).map(function(attr) {
+                    attrs[attr] = clin_attr[node][attr];
+                });
+            });
 
             var startPlot = new Date().getTime();
 
@@ -120,12 +139,12 @@ function($, d3, d3tip, vis_helpers) {
             var w = 140,
                 h = 140;
 
-            $(this_tree).empty();
+            $(these_trees).empty();
 
             // Munge Data
             var tree_data = {};
             for (var i in data) {
-                if(data.hasOwnProperty(i) && clin_attr[data[i]['name']]) {
+                if(data.hasOwnProperty(i) && attrs[data[i]['name']]) {
                     total = data[i].total;
                     tree_data[data[i]['name']] = data[i]['values']
                 }
@@ -133,23 +152,42 @@ function($, d3, d3tip, vis_helpers) {
             // Calculate our pseudocount:
             var pcount = (total * 0.008) > 1 ? (total * 0.008) : 0;
 
-            var clin_attr_keys = Object.keys(clin_attr);
+            let node_order = ["GDC", "PDC", "IDC"];
 
-            for (var i = 0; i < clin_attr_keys.length; i++) {
-                var tree_div = d3.select(this_tree)
-                    .append('div')
-                    .attr('class', 'tree-graph');
-                var title_div = tree_div.append('p')
-                    .attr('class', 'graph-title')
-                    .html(clin_attr[clin_attr_keys[i]]);
-                var graph_svg = tree_div.append('svg')
-                    .attr("class", "chart")
-                    .style("width", w + "px")
-                    .style("height", h + "px")
-                    .append("svg:g")
-                    .attr("transform", "translate(.5,.5)");
-                this.draw_tree(tree_data[clin_attr_keys[i]], graph_svg, prog_id, clin_attr_keys[i], clin_attr[clin_attr_keys[i]], w, h, false, treeTip, pcount);
-            }
+            node_order.map(function(node){
+                if(clin_attr[node] !== null && clin_attr[node] !== undefined)
+                {
+                    let node_div = d3.select(these_trees)
+                        .append('div')
+                        .attr('class', 'tree-graph-node-container');
+                    node_div.append('p')
+                        .attr('class', 'node-title')
+                        .html(node);
+                    let nodeTreeCount = 0;
+                    Object.keys(clin_attr[node]).map(function (attr) {
+                        if (tree_data[attr] && nodeTreeCount < MAX_NODE_TREES) {
+                            nodeTreeCount++;
+                            let tree_div = node_div
+                                .append('div')
+                                .attr('class', 'tree-graph');
+                            tree_div.append('p')
+                                .attr('class', 'graph-title')
+                                .html(clin_attr[node][attr]);
+                            let graph_svg = tree_div.append('svg')
+                                .attr("class", "chart")
+                                .style("width", w + "px")
+                                .style("height", h + "px")
+                                .append("svg:g")
+                                .attr("transform", "translate(.5,.5)");
+                            draw_single_tree(
+                                tree_data[attr],
+                                graph_svg, prog_id,
+                                attr,
+                                clin_attr[node][attr], w, h, false, treeTip, pcount);
+                        }
+                    });
+                }
+            });
 
             var stopPlot = new Date().getTime();
 

@@ -1,0 +1,9 @@
+{% extends "allauth_base.html" %}
+{% load i18n allauth %}
+{% block header %}
+    {% block head_title %}{% translate "Sign In" %} | {{ provider }}{% endblock %}
+    <meta http-equiv="refresh" content="0;URL='{{ redirect_to }}'" />
+{% endblock %}
+{% element p %}
+    <a href="{{ redirect_to }}">{% translate "Continue" %}</a>
+{% endelement %}

@@ -1,7 +1,17 @@
 <div id="dicom-files" class="tab-pane data-tab" data-file-type="dicom" role="tabpanel">
+    <div class="col-lg-3 col-md-3 col-sm-pull-0"></div>
+    <div class="col-lg-9 col-md-9 col-sm-12 right">
+        <div class="selected-filters-dicom panel panel-default">
+            <div class="panel-heading clearfix">
+                <h4 class="panel-title pull-left">Selected Filters</h4>
+                <a class="pull-right clear-filters" role="button">Clear All</a>
+            </div>
+            <div class="panel-body"></div>
+        </div>
+    </div>
     <div id="dicom-filter-panel" class="col-lg-3 col-md-3 col-sm-3 side-filter-panel">
         <div class="panel panel-default filter-panel">
-            <div class="hide-zeros"><input type="checkbox" value="hide-zeros"> Hide attributes with 0 cases</div>
+            <div class="hide-zeros"><input type="checkbox" class="hide-zeros" value="hide-zeros"> Hide attributes with 0 cases</div>
             <div class="panel-body tab-content filter-build-panel" id="dicom-filter-panel">
                 <ul class="list-group" id="metadata-data-accordian-dicom" role="tablist" aria-multiselectable="true">
                     <li class="list-group-item">
@@ -13,7 +23,7 @@
                             </a>
                         </div>
                         <div id="collapse-dicom-case-id"
-                             class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
+                             class="list-group-item__body collapse file-feature-select-block" role="tabpanel"
                              data-feature-type="donor"
                              aria-labelledby="heading-dicom-case-id" data-feature-name="case-id"
                              data-feature-displ-name="CASE ID">
@@ -35,16 +45,19 @@
                                     <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
                                 </a>
                             </div>
-                            <div id="collapse-dicom-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
-                                 aria-labelledby="heading-dicom-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}">
+                            <div id="collapse-dicom-{{ attr.name }}" class="list-group-item__body collapse file-feature-select-block"
+                                 role="tabpanel" data-feature-type="donor" aria-labelledby="heading-dicom-{{ attr.name }}"
+                                 data-feature-name="{{ attr.name }}" data-feature-id="{{ attr.id }}" data-feature-displ-name="{{ attr.displ_name }}">
                                 <ul class="search-checkbox-list" id="dicom-{{ attr.name }}">
                                     {% with attr.values|how_many_more:6 as num_more %}
                                         {% for v in attr.values|check_for_order:attr.name %}
                                             {% if forloop.counter0 < 6 %}
                                                 <li class="checkbox">
                                                     <label {% if v.tooltip %} title="{{ v.tooltip }}" {% endif %}>
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="dicom-{{ attr.name }}-{{ v.value }}"
-                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}"
+                                                               id="dicom-{{ attr.name }}-{{ v.value }}" data-feature-id="{{ attr.id }}"
+                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}"
+                                                               data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
                                                         {% if v.value == 'None' %}<em>None</em>{% elif v.displ_name %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
                                                          <span class="float-right file_count count">{{ v.count|format_num_with_commmas }}</span>
                                                     </label>
@@ -89,24 +102,7 @@
                     <a class="fa fa-angle-double-left" title="Click to hide the filters"></a>
                     <a class="fa fa-angle-double-right" title="Click to see the filters"></a>
                 </div>
-                <h4>File Listing</h4>
-                <div class="page-action-group pull-right">
-                    <ul>
-                        <li class="menu-item">
-                            <div class="filelist-obtain">
-                                <span class="pending-left" id="download-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Downloading...</span>
-                                <a class="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info download-btn">CSV</button></a>{# <a id="download-link" href="{{ download_url }}" title="Download file manifest as JSON"><button class="btn btn-info">JSON</button></a>#}
-                                <input type="hidden" class="download-token" value="" />
-                            </div>
-                        </li>
-                        <li class="menu-item">
-                            <div class="filelist-obtain">
-                                <button class="btn btn-info export-btn" data-toggle="modal" {% if has_user_data or user.is_anonymous %} disabled {% endif %} data-target="#export-to-bq-modal" title="{% if user.is_anonymous %} Log-in to export this file manifest to a BigQuery table {% elif has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a BigQuery table{% endif %}">BigQuery</button>
-                                <button class="btn btn-info export-btn" data-toggle="modal" {% if has_user_data or user.is_anonymous %} disabled {% endif %} data-target="#export-to-gcs-modal" title="{% if user.is_anonymous %} Log-in to export this file manifest to a GCS bucket {% elif has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a GCS bucket{% endif %}">GCS</button>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
+                <h4>Image Studies</h4>
             </div>
             <div class="panel-body">
                 <div class="dataTables_info">
@@ -149,8 +145,8 @@
                         <tr>
                             <th class="col-program" columnId="col-program">Program</th>
                             <th class="col-barcode" columnId="col-barcode">Case Barcode</th>
-                            <th class="col-diseasecode" columnId="col-diseasecode">Disease Code</th>
-                            <th class="col-projectname"  columnId="col-projectname">Project Short Name</th>
+                            <th class="col-collection" columnId="col-collection">Collection</th>
+                            <th class="col-modality"  columnId="col-modality">Modality</th>
                             <th class="col-studydesc" columnId="col-studydesc">Study Description</th>
                             <th class="col-studyuid" columnId="col-studyuid">Study Instance UID</th>
                         </tr>

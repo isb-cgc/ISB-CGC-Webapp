@@ -7,7 +7,7 @@ Vagrant.configure(2) do |config|
      # vb.gui = true
 
      # Customize the amount of memory on the VM:
-     vb.memory = "2048"
+     vb.memory = "4096"
 
      vb.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
      vb.customize ["modifyvm", :id, "--uartmode1", "file", File::NULL]
@@ -34,10 +34,6 @@ Vagrant.configure(2) do |config|
   # WebApp ports
   config.vm.network "forwarded_port", guest: 8080, host: 8080
   config.vm.network "forwarded_port", guest: 8000, host: 8000
-
-  # API ports
-  config.vm.network "forwarded_port", guest: 8090, host: 8090
-  config.vm.network "forwarded_port", guest: 9000, host: 9000
 
   config.vm.synced_folder ".", "/home/vagrant/www"
   config.vm.synced_folder "../", "/home/vagrant/parentDir"
